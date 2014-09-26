@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Set of prompting functions
+# Needs lib/print
+
+# Prompt the user with a yes/no question
+ask () {
+	local question=$1 default=$2 yesno
+
+	case "$default" in
+		Y) yesno="Y/n" ;;
+		N|*) yesno="y/N" ;;
+	esac
+
+	user "$question" "($yesno)"
+
+	if [ "$force" != true ] && [ "$f_default" != true ]; then
+		read -s -n 1 key
+		# Make enter reflect default
+		[ "$key" = '' ] && key=$default
+	elif [ "$f_default" = true ]; then
+		# Use default without asking
+		key=$default
+	else
+		# Just do it
+		key=Y
+	fi
+
+	# Return answer
+	case "$key" in
+		Y|y) echo "   >  Yes"; return 0 ;;
+		N|n|*) echo "   >  No"; return 1 ;;
+	esac
+}
