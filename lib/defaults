@@ -9,8 +9,6 @@ source $lib/ask
 
 UNAME=$( uname )
 
-
-
 if ask "Set defaults ?" Y true; then
 
 	if [ "$(whoami)" != "root" ]; then
