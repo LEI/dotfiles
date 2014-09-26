@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+# Create a symbolic link
+# TODO prompt
+# Uses lib/print
+
+# Check destination and do symlink
+link () {
+	local src=$1
+	local dst=$2
+
+	local skip
+
+	# If it is a broken symlink
+	if [ -h ${dst} ] && [ ! -e ${dst} ]; then
+		fail "${dst#$TARGET_DIR/}" "Removing broken link"
+		rm ${dst}
+	fi
+
+	# If it is a symbolic link
+	if [ -h ${dst} ]; then
+		current_src="$(readlink $dst)"
+		if [ ${current_src} = ${src} ]; then
+			# Already linked to this file
+			success "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"
+			skip=true
+		else
+			# Linked to another file
+			warn "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"
+			skip=true
+			#rm ${dst}
+		fi
+	# If it is a file
+	elif [ -f ${dst} ]; then
+		warn "${dst#$TARGET_DIR/}" "File already exists ~${dst#$HOME}"
+		skip=true
+	# If it is a directory
+	elif [ -d ${dst} ]; then
+		warn "${dst#$TARGET_DIR/}" "Directory already exists ~${dst#$HOME}"
+		skip=true
+	fi
+
+	# Check if the symbolic link can be created
+	if [ "$skip" != true ]; then
+
+		if [ "$debug" != true ]; then
+			ln -s ${src} ${dst}
+		fi
+
+		success "${dst#$TARGET_DIR/}" "Linked ~${src#$HOME} to ~${dst#$HOME}"
+	fi
+}
+
+link_file () {
+	local src=$1
+	local name=${src#$DOTFILES_DIR/}
+
+	link $src $TARGET_DIR/$name
+}
+
+link_dotfile () {
+	local src=$1
+	local name
+
+	if [ ${src: -1} = "." ]; then
+		name=.$(basename ${src%?})
+		link $src $TARGET_DIR/$name
+	fi
+}

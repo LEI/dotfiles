@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# Setup some defaults
+
+# Import prompt functions
+lib=$DOTFILES/lib
+source $lib/print
+source $lib/ask
+
+UNAME=$( uname )
+
+
+
+if ask "Set defaults ?" Y true; then
+
+	if [ "$(whoami)" != "root" ]; then
+		warn "Administrator access is required" && sudo -v
+	fi
+
+	info "Using $UNAME specific defaults" " " true
+
+	case $UNAME in
+
+		Darwin) # Mac OS X
+
+			# TERMINAL
+
+			# Custom version of the Solarized Dark theme
+			TERM_PROFILE='LEI'
+			CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
+
+
+			if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
+				if ask "Add Terminal settings ? (current: $CURRENT_PROFILE)" Y; then
+					open "$DOTFILES/init/$TERM_PROFILE.terminal"
+					sleep 1 # Wait a bit to make sure the theme is loaded
+					defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
+					defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
+
+					success "Window settings" "Default now set to $TERM_PROFILE.terminal"
+				fi
+			else
+				warn "Window settings" "Already set to $TERM_PROFILE.terminal"
+			fi
+
+			# SUBLIME TEXT
+
+			if ask "Link Sublime Text prefereces ?" Y; then
+
+				st_prefix=~/Library/Application\ Support/Sublime\ Text
+				st_suffix=/Packages/User/Preferences.sublime-settings
+
+				for f in "$st_prefix"*"$st_suffix"; do
+
+					rm "$f" # -f ?
+					ln -s "$DOTFILES/init/Preferences.sublime-settings" "$f"
+
+					st_success=true
+					st_version=${f#$st_prefix}
+					success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
+				done
+
+				[ ! -n "$st_success" ] && warn "No application found" "$st_prefix*$st_suffix"
+			fi
+
+			# SYSTEM
+
+			if ask "Set OS defaults ?" N; then
+				ask "SSD ?" N && SSD=true
+				info "Executing commands ..." " " true
+				if source $DOTFILES/init/.osx; then
+					info "Some changes may require a logout/restart to take effect"
+				else
+					fail "$DOTFILES/init/.osx"
+				fi
+			fi
+
+			;;
+
+		Linux)
+
+			echo $UNAME
+
+			;;
+
+	esac
+
+else
+	skipped
+fi

@@ -1,0 +1,208 @@
+#!/bin/bash
+#
+# Bootstrap dotfiles
+
+# Set working directory
+cd "$(dirname "$0")"
+
+DOTFILES_DIR=$(pwd)
+TARGET_DIR=$HOME
+
+export DOTFILES=$DOTFILES_DIR
+
+# if [ -e "$DOTFILES_DIR/config" ]
+# then
+# 	source $DOTFILES_DIR/config
+# else
+# 	echo "$cfg file needed. See config.sample for directions and copy it to config.sample."
+# 	exit 1
+# fi
+
+set -e
+
+# Import functions
+lib=$DOTFILES_DIR/lib
+source $lib/print
+source $lib/ask
+source $lib/dir
+source $lib/link
+source $lib/gitconfig
+
+# Print command line usage
+echo_usage () {
+	$lib/usage
+	exit 0
+}
+
+# Parse arguments and unset recognized ones
+parse_flags () {
+	local args=$1
+
+	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
+		case ${args[i]} in
+			-d|--default)
+				force_default=true
+				unset args[i] ;;
+			-f|--force)
+				force=true
+				unset args[i] ;;
+			-m|--mute)
+				mute=true
+				unset args[i] ;;
+			-s|--sandbox)
+				sandbox
+				unset args[i] ;;
+			-t|--test)
+				debug=true
+				unset args[i] ;;
+			-h|--help)
+				echo_usage
+				unset args[i] ;;
+			-*) echo "Unrecognized option: ${args[i]}"
+				echo_usage
+				unset args[i] ;;
+		esac
+	done
+
+	# Print echo_usage if > 1 argument left
+	[ ${#args[@]} -gt 1 ] && echo_usage
+
+	echo ${args[0]}
+}
+
+check_file () {
+	local file=$1
+
+	if [ -f $file ]; then
+		warn "Already exists" "$file"
+		return 1
+	else
+		return 0
+	fi
+}
+
+source_file () {
+	local file=$1
+
+	if [ -f $file ] && source "$file"; then
+		success "Operation successfull !"
+	else
+		fail "Command failed !"
+	fi
+}
+
+sandbox () {
+	TARGET_DIR=$TARGET_DIR/sandbox
+	info "$TARGET_DIR" "Using sandbox folder"
+
+	if [ ! -d $TARGET_DIR ]; then
+		mkdir $TARGET_DIR
+	fi
+}
+
+brew_bundle () {
+	local opts=--appdir=/Applications
+
+	if [ -n $HOMEBREW_CASK_OPTS ]; then
+		opts=HOMEBREW_CASK_OPTS
+	fi
+
+	local file=setup/$1file
+
+	info "brew bundle $file" "..."
+
+	if [ -f "$file" ] && brew bundle $opts "$file"; then # 2> /dev/null
+		success "$1 successfully bundled !"
+	else
+		fail "$1 failed to bundle !"
+	fi
+}
+
+uninstall () {
+	# Does not undo bundles & defaults
+
+	# Remove bin/* and */*.symlink
+	# ask "Remove symbolic links ?" Y && \
+	# 	info "Unlinking bin files" "..." && \
+	# 	dir "/bin" "" unlink && \
+	# 	info "Unlinking dotfiles" "..." && \
+	# 	dir "/" "*.symlink" unsymlink && \
+	# 	success 'Symlinks unchained.' || \
+	# 	skip
+
+	# Remove .vim
+	# TODO Symlink
+	# ask "Remove .vim directory ?" Y && \
+	# 	remove ".vim" || \
+	# 	skip
+
+	echo ''
+	echo 'Bootstrap uninstalled things.'
+}
+
+install () {
+	echo ''
+
+	# Create git/.gitconfig if needed
+	check_file "git/gitconfig." Y && \
+		ask "Configure git credentials ?" Y true && \
+		gitconfig || \
+		skipped
+
+	echo ''
+
+	# Ignore lists
+	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.tpl")
+	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
+	# Symbolic links
+	if ask "Create symbolic links ?" Y true; then
+		[ "$debug" = true ] && info "Symbolic dry run" "Changes are not applied while debugging" true
+		dir "" link_dotfile ${global_ignore[@]} || skipped
+		dir "bin" link_file || skipped
+		dir ".vim" link_file ${vim_ignore[@]} || skipped
+	else
+		skipped
+	fi
+
+	echo ''
+
+	# Install dependencies then programs
+	ask "Bundle ?" N true && \
+		brew_bundle "Brew" && \
+		brew_bundle "Cask" || \
+		skipped
+
+	echo ''
+
+	# Set OS defaults
+	source_file $DOTFILES_DIR/lib/defaults || skipped
+
+
+		#cfg "git/destination" && \
+		#cfg "git/exception" || \
+
+	# Install Homebrew.
+	# if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
+	# 	heading "Installing Homebrew"
+
+	# 	#Skip the "Press enter to continue…" prompt.
+	# 	true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+	# fi
+
+	echo ''
+	success "Things were bootstrapped !" " "
+}
+
+# Get command
+args=("$@")
+cmd=$(parse_flags $args)
+
+# Execute command
+case $cmd in
+	'')          install ;;
+	'install')   install ;;
+	'uninstall') uninstall ;;
+	'brew')      brew_bundle "Brew" ;;
+	'cask')      brew_bundle "Cask" ;;
+	*)           install;; #echo_usage ;;
+esac
