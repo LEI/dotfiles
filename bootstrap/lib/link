@@ -1,0 +1,105 @@
+#!/bin/bash
+#
+# Utilities to link files
+
+# Call the function on each file
+symlink () {
+	# info "Symlinking $1" "..."
+	local dir=$1
+	local callback=$2
+	shift; shift
+	local src=$SOURCE_DIR/$dir
+	local dst=$TARGET_DIR/$dir
+	local exclude=( "$@" )
+	local ignore
+
+	# Check destination only for regular files
+	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
+		mkdir $dst && \
+		success "Destination directoy was created"
+	fi
+	# Check directory
+	if [ -d ${src} ]; then
+		# Loop on each file and check ignore list
+		for file in `find $src`; do
+
+			# Stop this iteration if it's the directory
+			# if [ ${file#$SOURCE_DIR/} = ${dir} ]; then
+			# 	continue
+			# fi
+
+			ignore=false
+
+					echo ">>>>>>" $file
+			for (( index = 0; index < ${#exclude[@]}; index++ )); do
+				end=$((${#file}-1))
+				if [ "${file:$end:1}" != "/" ]; then
+					# Check if the file is ignored
+					[ ${file##*/} = ${exclude[${index}]} ] && ignore=true && break
+				else
+					file=${file%/}
+				fi
+			done
+
+			if [ ${ignore} = true ]; then
+				continue
+			fi
+
+			#Do link
+			eval $callback $file
+
+		done
+	else
+		fail "Failed, source doesn't exists" ~${src#$HOME}
+	fi
+}
+
+link () {
+	local src=$1
+	local dst=$2
+
+	local skip
+
+	if [ -h ${dst} ] && [ ! -e ${dst} ]; then # is a broken symbolic link
+		fail "${dst#$TARGET_DIR/}" "Removing broken link"
+		rm ${dst}
+	fi
+
+	if [ -h ${dst} ]; then # is a symbolic link
+		current_src="$(readlink $dst)"
+		if [ ${current_src} = ${src} ]; then
+			success "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"
+			skip=true
+		else
+			fail "${dst#$TARGET_DIR/}" "Removing wrong link ~${current_src#$HOME}"
+			rm ${dst}
+		fi
+	elif [ -f ${dst} ] || [ -d ${dst} ]; then # is a real dst or directory
+		fail "${dst#$TARGET_DIR/}" "File already exists ~${dst#$HOME}"
+		skip=true
+	fi
+
+	if [ "$skip" != true ]; then # safe to create symbolic link
+		ln -s ${src} ${dst}
+		success "${dst#$TARGET_DIR/}" "Linked ~${src#$HOME} to ~${dst#$HOME}"
+	fi
+}
+
+link_file () {
+	local src=$1
+	local name=${src#$SOURCE_DIR/}
+
+	echo "Do link $src $TARGET_DIR/$name"
+	#link $src $TARGET_DIR/$name
+}
+
+link_dotfile () {
+	local src=$1
+	local name
+
+	if [ ${src: -1} = "." ]; then
+		name=.$(basename ${src%?})
+		echo "Do link $src $TARGET_DIR$name"
+		#link $src $TARGET_DIR/$name
+	fi
+}
