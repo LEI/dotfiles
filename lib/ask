@@ -1,18 +1,18 @@
 #!/bin/bash
 #
-# Set of prompting functions
+# Prompt the user with a yes/no question
 # Needs lib/print
 
-# Prompt the user with a yes/no question
 ask () {
-	local question=$1 default=$2 yesno
+	local question=$1 default=$2 highlight=$3
+	local yesno
 
 	case "$default" in
 		Y) yesno="Y/n" ;;
 		N|*) yesno="y/N" ;;
 	esac
 
-	user "$question" "($yesno)"
+	user "$question" "($yesno)" $highlight
 
 	if [ "$force" != true ] && [ "$f_default" != true ]; then
 		read -s -n 1 key

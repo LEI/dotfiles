@@ -8,8 +8,7 @@
 # 	DOTFILES="$HOME/.dotfiles"
 # fi
 
-Utils=$DOTFILES/script/utils
-source $Utils/colors
+source $DOTFILES/lib/colors
 
 prompt_git() {
 	local s='';

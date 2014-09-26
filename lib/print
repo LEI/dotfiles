@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Set of printing functions
+
+# Import colors
+lib=$DOTFILES/lib
+source $lib/colors
+
+print () {
+	# Don't print if mute is on
+	[ -n "$mute" ] && return
+
+	local icon_color=$1 icon=$2 label=$3 message=$4
+	local text_color=$white column="%-42s"
+	local highlight=$5 downlight=$6
+
+	if [ "$message" = "" ]; then
+		# Change style if label only
+		text_color=""
+	fi
+
+	if [ "$highlight" = true ]; then
+		if [ "$downlight" = true ]; then
+			icon_color=$reset
+		fi
+		text_color=$icon_color
+	fi
+
+	# \r\033[2K
+	printf "   ${icon_color}$icon  ${text_color}${column}${reset}  $message${reset}\n" "$label"
+}
+
+user () {
+	print $blue ? "$1" "$2" "$3"
+}
+
+info () {
+	print $white → "$1" "$2" "$3" true
+}
+
+warn () {
+	print $yellow ! "$1" "$2"
+}
+
+success () {
+	print $green ✓ "$1" "$2"
+}
+
+fail () {
+	print $red × "$1" "$2"
+}
+
+die () {
+	print $red × "$1" "$2"
+	exit
+}
+
+skipped () {
+	success "Skipped"
+}

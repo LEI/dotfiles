@@ -42,8 +42,8 @@ cask install vagrant
 cask install virtualbox
 #cask install vmware-fusion
 
-cask install filezilla
-#cask install transmit # https://github.com/caskroom/homebrew-cask/issues/6328
+#cask install filezilla
+cask install transmit
 
 cask install sequel-pro
 cask install robomongo
@@ -55,13 +55,14 @@ cask install reggy
 # Utilities                                                                   #
 ###############################################################################
 
+cask install alfred
 #cask install atext
 cask install bartender
 cask install caffeine
 cask install flux
 cask install imagealpha
 cask install imageoptim
-cask install miro-video-converter
+#cask install miro-video-converter
 cask install the-unarchiver
 cask install vlc
 
@@ -73,7 +74,6 @@ cask install seil
 # Programs                                                                    #
 ###############################################################################
 
-cask install alfred
 cask install cakebrew
 cask install dropbox
 cask install evernote

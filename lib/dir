@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# TODOCS Create a symbolic link for each file in the directory
+# $1 Path absolutely relative
+# $3 Function executed for each file
+# $2 Pattern to match file name
+
+function join { perl -e '$s = shift @ARGV; print join($s, @ARGV);' "$@"; }
+
+# Call the function on each file
+dir () {
+
+	local dir=$1
+	local callback=$2
+	shift; shift
+	# Take the rest of the arguments as an array
+	local ignore_array=("$@")
+	local ignore_files=""
+	local ignore_cmd=""
+
+	[ -n "$dir" ] && dir=/$dir
+	local src=$DOTFILES_DIR$dir
+	local dst=$TARGET_DIR$dir
+	local skip
+
+	# Confirm action
+	ask "~${dst#$HOME} ?" Y || return
+
+	# Check destination only for regular files
+	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
+		mkdir $dst && \
+		success "Destination directoy was created"
+	fi
+
+	# Check directory
+	if [ -d ${src} ]; then
+
+		# Construct exclude command
+		if [ "${#ignore_array[@]}" != "0" ]; then
+			ignore_files=`join " -o -name " ${ignore_array[@]}`
+			ignore_cmd=" ( -path lib -o -name $ignore_files ) -prune -o"
+		fi
+
+		# Loop on each file and check ignore list
+		paths=`find $src* -maxdepth 2$ignore_cmd -print`
+
+		for file in $paths; do
+
+			# Stop this iteration if it's the same directory
+			if [ "${file#$DOTFILES_DIR/}" = "${dir}" ]; then
+				continue
+			fi
+
+			# Other way to ignore
+			# skip=false
+			# for (( index = 0; index < ${#exclude[@]}; index++ )); do
+			# 	# Check if the file is excluded
+			# 	[ "${file##*/}" = "${exclude[${index}]}" ] && skip=true && break
+			# done
+			# [ ${skip} = true ] && continue
+
+			#Do link
+			eval $callback $file
+
+		done
+
+		success "Done."
+
+	else
+		fail "Failed, source doesn't exists" ~${src#$HOME}
+	fi
+}
