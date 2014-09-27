@@ -1,6 +1,6 @@
 # bootfiles dotstrap
 
-Configuration files and bootstrap manager build thanks to the Internet.
+Configuration files and setup manager build thanks to the Internet.
 
 ## Usage
 
@@ -23,20 +23,15 @@ Configuration files and bootstrap manager build thanks to the Internet.
 - https://github.com/nicck/dotfiles
 - https://github.com/paulirish/dotfiles
 - https://github.com/travi/dotfiles
-
 - https://github.com/sitaktif/dotfiles
-
 - https://github.com/zenorocha/dotfiles
 - https://gist.github.com/zenorocha/7159780
 - https://github.com/thoughtbot/rcm
 - http://dev.svetlyak.ru/dotfiler-en/
-
-[HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
+- [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
 
 ## TODO
 
-- :/ rb / py / ?? https://www.npmjs.org/package/dotfiles
+- Ruby, compass.. https://www.npmjs.org/package/dotfiles
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
-- Redo & refactor shit, callback & argument mysteries
-- Ruby, Compass
-- redo uninstall
+- Opts, undot

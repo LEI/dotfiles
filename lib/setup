@@ -20,9 +20,7 @@ if ask "Download dependencies ?" Y true; then
 
 			# HOMEBREW
 
-			if ask "Install Homebrew ?" N; then
-				install_homebrew
-				success "Homebrew"
+			if install_homebrew; then
 
 				# BREW LIBS
 
@@ -80,8 +78,6 @@ if ask "Download dependencies ?" Y true; then
 	esac
 
 	indent_level=1
-
-	info "'set-up' is an alias to this step" " " true
 
 else
 	skipped

@@ -102,8 +102,6 @@ if ask "Set defaults ?" Y true; then
 
 	indent_level=2
 
-	info "'set-defaults' is an alias to this step" " " true
-
 else
-	skipped
+	skipped "defaults"
 fi
