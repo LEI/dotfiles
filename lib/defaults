@@ -11,13 +11,13 @@ UNAME=$( uname )
 
 if ask "Set defaults ?" Y true; then
 
-	whitespaces=6
+	indent_level=2
+
+	info "Using $UNAME specific defaults" " " true
 
 	if [ "$(whoami)" != "root" ]; then
 		warn "Administrator access is required" && sudo -v
 	fi
-
-	info "Using $UNAME specific defaults" " " true
 
 	case $UNAME in
 
@@ -25,14 +25,20 @@ if ask "Set defaults ?" Y true; then
 
 			# TERMINAL
 
+			# Search for the terminal configuration
+			TERM_FILE=`find $DOTFILES -name *.terminal`
+			base_name=$(basename $TERM_FILE)
+			TERM_PROFILE=${base_name%%.*}
 			# Custom version of the Solarized Dark theme
-			TERM_PROFILE='LEI'
+			[ -n "$TERM_PROFILE" ] || TERM_PROFILE='LEI'
+
 			CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
 
 
 			if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
-				if ask "Add Terminal settings ? (current: $CURRENT_PROFILE)" Y; then
-					open "$DOTFILES/init/$TERM_PROFILE.terminal"
+				if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
+					indent_level=3
+					open "$TERM_FILE"
 					sleep 1 # Wait a bit to make sure the theme is loaded
 					defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
 					defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
@@ -43,9 +49,13 @@ if ask "Set defaults ?" Y true; then
 				warn "Window settings" "Already set to $TERM_PROFILE.terminal"
 			fi
 
+			indent_level=2
+
 			# SUBLIME TEXT
 
 			if ask "Link Sublime Text prefereces ?" Y; then
+
+				indent_level=3
 
 				st_prefix=~/Library/Application\ Support/Sublime\ Text
 				st_suffix=/Packages/User/Preferences.sublime-settings
@@ -63,11 +73,16 @@ if ask "Set defaults ?" Y true; then
 				[ ! -n "$st_success" ] && warn "No application found" "$st_prefix*$st_suffix"
 			fi
 
+			indent_level=2
+
 			# SYSTEM
 
 			if ask "Set OS defaults ?" N; then
+
+				indent_level=3
+
 				ask "SSD ?" N && SSD=true
-				info "Executing commands ..." " " true
+				info "Executing commands" "..." true
 				if source $DOTFILES/init/.osx; then
 					info "Some changes may require a logout/restart to take effect"
 				else
@@ -75,17 +90,25 @@ if ask "Set defaults ?" Y true; then
 				fi
 			fi
 
+			indent_level=2
+
 			;;
 
 		Linux)
 
+			indent_level=3
+
 			echo $UNAME
+
+			indent_level=2
 
 			;;
 
 	esac
 
-	whitespaces=3
+	indent_level=1
+
+	success "Defaults settled" " " true
 
 else
 	skipped

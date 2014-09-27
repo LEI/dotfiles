@@ -23,10 +23,15 @@ dir () {
 	local dst=$TARGET_DIR$dir
 	local skip
 
-	whitespaces=6
+	indent_level=2
 
 	# Confirm action
-	ask "Symlink ~${dst#$HOME} ?" Y || return
+	if ask "Symlink ~${dst#$HOME} ?" Y; then
+		indent_level=3
+	else
+		indent_level=1
+		return
+	fi
 
 	# Check destination only for regular files
 	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
@@ -66,11 +71,16 @@ dir () {
 
 		done
 
+		indent_level=2
+
 		success "Done."
 
 	else
+
+		indent_level=2
+
 		fail "Failed, source doesn't exists" ~${src#$HOME}
 	fi
 
-	whitespaces=3
+	indent_level=1
 }

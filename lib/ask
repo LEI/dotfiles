@@ -26,8 +26,10 @@ ask () {
 		key=Y
 	fi
 
+	# Set indentation
+	local whitespaces=$(((indent_level + 1) * indent_size))
 	local indent=""
-	for ((i=1; i<=$whitespaces; i++)); do
+	for ((i=1; i<=$((whitespaces)); i++)); do
 		indent+=" "
 	done
 
@@ -35,7 +37,7 @@ ask () {
 	case "$key" in
 		Y|y) echo "$indent>  Yes"
 			return 0 ;;
-		N|n|*) echo "   $indent>  No"
+		N|n|*) echo "$indent>  No"
 			return 1 ;;
 	esac
 }

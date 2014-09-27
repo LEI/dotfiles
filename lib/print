@@ -27,6 +27,7 @@ print () {
 	fi
 
 	# Set indentation
+	local whitespaces=$((indent_level * indent_size))
 	local column="%-$((column_size - whitespaces))s"
 	local indent=""
 	for ((i=1; i<=$whitespaces; i++)); do
