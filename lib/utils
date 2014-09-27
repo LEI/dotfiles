@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Utility functions
+
+silent () {
+	if [ "$verbose" = true ] ; then
+		"$@"
+	else
+		"$@" >/dev/null # (2|&)>/dev/null
+	fi
+}

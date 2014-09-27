@@ -26,6 +26,11 @@ print () {
 		text_color=$icon_color
 	fi
 
+	# Reset color if --ugly
+	if [ "$reset_colors" = true ]; then
+		text_color=$reset
+	fi
+
 	# Set indentation
 	[ -n "$indent_level" ] || indent_level=1
 	[ -n "$indent_size" ] || indent_size=3

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Homebrew utils
-# Uses lib/print, ask
+# Uses files: utils, print, ask
 
 install_homebrew () {
 	# If OS X and brew not already installed
@@ -30,7 +30,7 @@ brew_bundle () {
 
 	info "brew bundle $file" "..."
 
-	if [ -f "$file" ] && brew bundle "$file" $opts 2> /dev/null; then
+	if [ -f "$file" ] && silent brew bundle "$file" $opts 2; then #
 		success "$1 successfully bundled !"
 	else
 		fail "$1 failed to bundle !"
