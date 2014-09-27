@@ -13,6 +13,7 @@ indent_size=3
 
 export DOTFILES=$DOTFILES_DIR
 export lib=$DOTFILES_DIR/lib
+source $lib/print # Get colors asap
 
 # Get command
 args=("$@")
@@ -35,7 +36,6 @@ do_setup () {
 	#git pull origin master
 
 	# Import functions
-	source $lib/print
 	source $lib/ask
 	source $lib/dir
 	source $lib/link
