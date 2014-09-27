@@ -9,11 +9,14 @@ source $lib/ask
 
 UNAME=$( uname )
 
-indent_level=2
-
 info "'set-defaults' is an alias to execute this step" " " true
-
 echo ''
+
+if [ -n "$indent_level" ]; then
+	original_level=$indent_level
+else
+	indent_level=2
+fi
 
 case $UNAME in
 
@@ -37,7 +40,7 @@ case $UNAME in
 
 		if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
 			if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
-				indent_level=3
+				((indent_level++))
 				open "$TERM_FILE"
 				sleep 1 # Wait a bit to make sure the theme is loaded
 				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
@@ -47,15 +50,16 @@ case $UNAME in
 			fi
 		else
 			warn "Window settings" "Already set to $TERM_PROFILE.terminal"
+			((indent_level++))
 		fi
 
-		indent_level=2
+		((indent_level--))
 
 		# SYSTEM
 
 		if ask "Set OS defaults ?" N; then
 
-			indent_level=3
+			((indent_level++))
 
 			ask "SSD specific commands ?" N && SSD=true
 			info "Executing init/.osx" "..." true
@@ -65,13 +69,15 @@ case $UNAME in
 				fail "$DOTFILES/init/.osx"
 			fi
 		else
-			step_skipped=true
+			# step_skipped=true
+			((indent_level++))
 		fi
+
+		((indent_level--))
 
 		# Install deps & utils with homebrew
 		if ask "Download dependencies ?" Y true; then
-
-			indent_level=3
+			((indent_level++))
 
 			local setup=$DOTFILES_DIR/lib/setup
 			source_file $setup || \
@@ -79,9 +85,10 @@ case $UNAME in
 			# success "Dependencies were sourced" "lib/setup"
 		else
 			skipped "Brew & Cask"
+			((indent_level++))
 		fi
 
-		indent_level=2
+		((indent_level--))
 
 		# SUBLIME TEXT
 
@@ -101,15 +108,15 @@ case $UNAME in
 			done
 
 			[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
-		else
-			step_skipped=true
+		# else
+		# 	step_skipped=true
 		fi
 
 		;;
 
 	Linux)
 
-		indent_level=3
+		((indent_level++))
 
 		echo $UNAME
 
@@ -118,6 +125,6 @@ case $UNAME in
 esac
 
 echo ''
-indent_level=2
+indent_level=$original_level
 
 [ "$step_skipped" != true ] && return 1

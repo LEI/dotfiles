@@ -12,6 +12,7 @@ indent_level=1
 indent_size=3
 
 export DOTFILES=$DOTFILES_DIR
+export lib=$DOTFILES_DIR/lib
 
 # Get command
 args=("$@")
@@ -34,7 +35,6 @@ do_setup () {
 	#git pull origin master
 
 	# Import functions
-	lib=$DOTFILES_DIR/lib
 	source $lib/print
 	source $lib/ask
 	source $lib/dir
@@ -186,11 +186,6 @@ install () {
 	else
 		skipped "defaults"
 	fi
-
-	echo ''
-	indent_level=0
-
-	success "Things were bootstrapped !" " "
 }
 
 # Parse arguments and unset recognized ones
@@ -237,11 +232,19 @@ bootstrap () {
 		'')          install ;;
 		'install')   install ;;
 		'uninstall') uninstall ;;
-		'brew')      brew_bundle "Brew" ;;
-		'cask')      brew_bundle "Cask" ;;
+		'bundle')    source $DOTFILES/lib/setup ;;
+		'defaults')  source $DOTFILES/lib/defaults ;;
 		*)           echo_usage ;;
 	esac
 }
 
 do_setup
 bootstrap ${args[@]}
+
+echo ''
+indent_level=0
+
+success "Things were bootstrapped !" " "
+
+# source ~/.bash_profile || \
+# 	fail "~/.bash_profile"

@@ -16,7 +16,7 @@ Dotfiles setup being build thanks to the Internet.
 - Apply Terminal window settings
 - Set defaults (init/.osx)
 - Install dependencies via Homebrew
-- Download application via Caskroom
+- Download applications via Caskroom
 - Link Preferences.sublime-settings
 
 ### Add a dotfile to your home
