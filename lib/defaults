@@ -9,99 +9,115 @@ source $lib/ask
 
 UNAME=$( uname )
 
-if ask "Set defaults ?" Y true; then
+indent_level=2
 
-	indent_level=2
+info "'set-defaults' is an alias to execute this step" " " true
 
-	info "Using $UNAME specific defaults" " " true
+echo ''
 
-	case $UNAME in
+case $UNAME in
 
-		Darwin)
+	Darwin)
 
-			if [ "$(whoami)" != "root" ]; then
-				warn "Administrator access is required for $(whoami)" && sudo -v
-			fi
+		if [ "$(whoami)" != "root" ]; then
+			warn "Administrator access is required for $(whoami)" && sudo -v
+		fi
 
-			# TERMINAL
+		# TERMINAL
 
-			# Search for the terminal configuration
-			TERM_FILE=`find $DOTFILES -name *.terminal`
-			base_name=$(basename $TERM_FILE)
-			TERM_PROFILE=${base_name%%.*}
-			# Custom version of the Solarized Dark theme
-			[ -n "$TERM_PROFILE" ] || TERM_PROFILE='LEI'
+		# Search for the terminal configuration
+		TERM_FILE=`find $DOTFILES -name *.terminal`
+		base_name=$(basename $TERM_FILE)
+		TERM_PROFILE=${base_name%%.*}
+		# Custom version of the Solarized Dark theme
+		[ -n "$TERM_PROFILE" ] || TERM_PROFILE='LEI'
 
-			CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
+		CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
 
 
-			if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
-				if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
-					indent_level=3
-					open "$TERM_FILE"
-					sleep 1 # Wait a bit to make sure the theme is loaded
-					defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
-					defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
-
-					success "Window settings" "Default now set to $TERM_PROFILE.terminal"
-				fi
-			else
-				warn "Window settings" "Already set to $TERM_PROFILE.terminal"
-			fi
-
-			indent_level=2
-
-			# SUBLIME TEXT
-
-			if ask "Link Sublime Text preferences ?" Y; then
-
-				st_prefix=~/Library/Application\ Support/Sublime\ Text
-				st_suffix=/Packages/User/Preferences.sublime-settings
-
-				for f in "$st_prefix"*"$st_suffix"; do
-
-					rm "$f" # -f ?
-					ln -s "$DOTFILES/init/Preferences.sublime-settings" "$f"
-
-					st_success=true
-					st_version=${f#$st_prefix}
-					success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
-				done
-
-				[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
-			fi
-
-			indent_level=2
-
-			# SYSTEM
-
-			if ask "Set OS defaults ?" N; then
-
+		if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
+			if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
 				indent_level=3
+				open "$TERM_FILE"
+				sleep 1 # Wait a bit to make sure the theme is loaded
+				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
+				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
 
-				ask "SSD specific commands ? ?" N && SSD=true
-				info "Executing .osx" "..." true
-				if source $DOTFILES/init/.osx; then
-					info "Some changes may require a logout/restart to take effect"
-				else
-					fail "$DOTFILES/init/.osx"
-				fi
+				success "Window settings" "Default now set to $TERM_PROFILE.terminal"
 			fi
+		else
+			warn "Window settings" "Already set to $TERM_PROFILE.terminal"
+		fi
 
-			;;
+		indent_level=2
 
-		Linux)
+		# SYSTEM
+
+		if ask "Set OS defaults ?" N; then
 
 			indent_level=3
 
-			echo $UNAME
+			ask "SSD specific commands ?" N && SSD=true
+			info "Executing init/.osx" "..." true
+			if source $DOTFILES/init/.osx; then
+				info "Some changes may require a logout/restart to take effect"
+			else
+				fail "$DOTFILES/init/.osx"
+			fi
+		else
+			step_skipped=true
+		fi
 
-			;;
+		# Install deps & utils with homebrew
+		if ask "Download dependencies ?" Y true; then
 
-	esac
+			indent_level=3
 
-	indent_level=2
+			local setup=$DOTFILES_DIR/lib/setup
+			source_file $setup || \
+				warn "Dependencies didn't fully installed" "lib/setup"
+			# success "Dependencies were sourced" "lib/setup"
+		else
+			skipped "Brew & Cask"
+		fi
 
-else
-	skipped "defaults"
-fi
+		indent_level=2
+
+		# SUBLIME TEXT
+
+		if ask "Link Sublime Text preferences ?" Y; then
+
+			st_prefix=~/Library/Application\ Support/Sublime\ Text
+			st_suffix=/Packages/User/Preferences.sublime-settings
+
+			for f in "$st_prefix"*"$st_suffix"; do
+
+				rm "$f" # -f ?
+				ln -s "$DOTFILES/init/Preferences.sublime-settings" "$f"
+
+				st_success=true
+				st_version=${f#$st_prefix}
+				success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
+			done
+
+			[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
+		else
+			step_skipped=true
+		fi
+
+		;;
+
+	Linux)
+
+		indent_level=3
+
+		echo $UNAME
+
+		;;
+
+esac
+
+echo ''
+indent_level=2
+
+[ "$step_skipped" != true ] && return 1

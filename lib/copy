@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Copy with rsync
+
+if [ "$1" = '' -o "$2" = '' ]
+then
+	echo "Argument error" > /dev/stderr
+	exit 1
+fi
+
+rsync --exclude-from "script/exclude" -avh --no-perms $1 $2 > /dev/null;

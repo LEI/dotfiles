@@ -39,6 +39,9 @@ print () {
 	printf "\r\033[2K$indent${icon_color}$icon  ${text_color}${column}${reset}  $message${reset}\n" "$label"
 }
 
+# Highlight if the custom function third arg is true
+# Downlight if the print() fifth arg is true
+
 user () {
 	print $blue ? "$1" "$2" "$3"
 }
@@ -48,22 +51,23 @@ info () {
 }
 
 warn () {
-	print $yellow ! "$1" "$2"
+	print $yellow ! "$1" "$2" "$3" true
 }
 
 success () {
-	print $green ✓ "$1" "$2"
+	print $green ✓ "$1" "$2" "$3" true
 }
 
 fail () {
-	print $red × "$1" "$2"
+	print $red × "$1" "$2" "$3"
 }
 
 die () {
-	print $red × "$1" "$2"
+	print $red × "$1" "$2" "$3"
 	exit
 }
 
 skipped () {
 	success "Skipped $1"
+	return 0
 }

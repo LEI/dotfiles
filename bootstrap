@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Bootstrap dotfiles
+# Mainly forked from mathiasbynens/dotfiles
 
 # Set working directory
 cd "$(dirname "$0")"
@@ -30,7 +31,7 @@ do_setup () {
 
 	echo 'bootfiles dotstrap'
 
-	git pull origin master
+	#git pull origin master
 
 	# Import functions
 	lib=$DOTFILES_DIR/lib
@@ -40,6 +41,29 @@ do_setup () {
 	source $lib/link
 	source $lib/git
 	source $lib/brew
+}
+
+copy () {
+	local src=$1
+	echo $src
+	if [ -f "$src" -o -d "$src" ] && \
+		. $lib/copy $src $TARGET_DIR/$src; then
+		success "$src" "Copied to ~/$src"
+	else
+		fail "$src failed to be copied"
+	fi
+}
+
+remove () {
+	local src=$1
+	echo $src
+	# 2> /dev/null
+	if [ -f "$src" -o -d "$src" -o -L "$src" ] && \
+		rm -r $TARGET_DIR/$src; then
+		success "Removed" "$src"
+	else
+		fail "$src can't be removed"
+	fi
 }
 
 # Print command line usage
@@ -104,57 +128,68 @@ uninstall () {
 install () {
 	echo ''
 
+	# Git
+	#####
+
 	# Create git/.gitconfig if needed
-	if check_file "git/gitconfig." Y; then
+	local gitconfig_file="git/gitconfig."
+	if check_file "$gitconfig_file" Y; then
 		if ask "Configure git credentials ?" Y; then
 			gitconfig
 		else
 			skipped
 		fi
 	else
-		warn "Git configuration already file exists" " "
+		warn "Git configuration already file exists" "$gitconfg_file"
 	fi
 
 	echo ''
 	indent_level=1
+
+	# Symbolic links
+	################
 
 	# Ignore lists
 	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
 	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
-	# Symbolic links
+
 	if ask "Create symbolic links ?" Y true; then
-		[ "$debug" = true ] && info "Symbolic dry run" "Changes are not applied while debugging" true
+		[ "$debug" = true ] && \
+			info "Symbolic dry run" "Changes are not applied while debugging" true
+		echo ''
 		dir "" link_dotfile ${global_ignore[@]} || skipped
 		dir "bin" link_file || skipped
 		dir ".vim" link_file ${vim_ignore[@]} || skipped
-		success "Stuff linked"
+		echo ''
+		success "Stuff linked."
 	else
-		skipped
+		skipped "symlinks"
 	fi
 
 	echo ''
 	indent_level=1
 
-	# Set OS defaults
-	local defaults=$DOTFILES_DIR/lib/defaults
-	source_file $defaults && \
-		success "Configuration loaded" "lib/defaults" || \
-		warn "Configuration didn't fully complete" "lib/defaults"
-	info "'set-defaults' is an alias to this step" " " true
+	info "Using $(uname) specific defaults" " " true
 
 	echo ''
-	indent_level=1
 
-	# Install deps & utils
-	local setup=$DOTFILES_DIR/lib/setup
-	source_file $setup && \
-		success "Dependencies were sourced" "lib/setup" || \
-		warn "Dependencies didn't fully installed" "lib/setup"
-	info "'set-up' is an alias to this step" " " true
+	# Set OS defaults
+	#################
 
+	if ask "Set defaults ?" Y true; then
+		local defaults=$DOTFILES_DIR/lib/defaults
+		source_file $defaults || \
+			warn "Configuration didn't fully complete" "lib/defaults"
+		# success "Defaults loaded" "lib/defaults"
+		indent_level=1
+		success "OS configuration done."
+	else
+		skipped "defaults"
+	fi
+
+	echo ''
 	indent_level=0
 
-	echo ''
 	success "Things were bootstrapped !" " "
 }
 
