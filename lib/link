@@ -22,11 +22,11 @@ link () {
 		current_src="$(readlink $dst)"
 		if [ ${current_src} = ${src} ]; then
 			# Already linked to this file
-			success "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"
+			success "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}" true
 			skip=true
 		else
 			# Linked to another file
-			warn "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"
+			warn "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"  true
 			skip=true
 			#rm ${dst}
 		fi
@@ -48,6 +48,16 @@ link () {
 		fi
 
 		success "${dst#$TARGET_DIR/}" "Linked ~${src#$HOME} to ~${dst#$HOME}"
+	fi
+}
+
+unlink () {
+	# 2> /dev/null
+	if [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
+		rm $dst; then
+		success "Unlinked" "${dst#$TARGET_DIR/}"
+	else
+		fail "$dst can't be removed" "${dst#$TARGET_DIR/}"
 	fi
 }
 

@@ -34,4 +34,4 @@ Configuration files and setup manager build thanks to the Internet.
 
 - Ruby, compass.. https://www.npmjs.org/package/dotfiles
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
-- Opts, undot
+- Opts.. -m, undot

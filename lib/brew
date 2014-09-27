@@ -30,7 +30,7 @@ brew_bundle () {
 
 	info "brew bundle $file" "..."
 
-	if [ -f "$file" ] && brew bundle "$file" $opts; then # 2> /dev/null
+	if [ -f "$file" ] && brew bundle "$file" $opts 2> /dev/null; then
 		success "$1 successfully bundled !"
 	else
 		fail "$1 failed to bundle !"

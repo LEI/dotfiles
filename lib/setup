@@ -10,75 +10,82 @@ source $lib/brew
 
 UNAME=$( uname )
 
-if ask "Download dependencies ?" Y true; then
+info "'set-up' is an alias to execute Brew and Cask files" " " true
+echo ''
 
+if [ -n "$indent_level" ]; then
+	original_level=$indent_level
+else
 	indent_level=2
+fi
 
-	case $UNAME in
+case $UNAME in
 
-		Darwin)
+	Darwin)
 
-			# HOMEBREW
+		# HOMEBREW
 
-			if install_homebrew; then
+		if install_homebrew; then
 
-				# BREW LIBS
+			# BREW LIBS
 
-				# Install dependencies
-				if ask "Bundle brew ?" Y; then
-					#indent_level=3
-					brew_bundle "Brew"
-				else
-					skipped "Brew"
-				fi
-
-				indent_level=2
-
-				# CASK APPS
-
-				# Install programs
-				if ask "Bundle cask ?" Y; then
-					#indent_level=3
-					brew_bundle "Cask"
-				else
-					skipped "Cask"
-				fi
-
-				#indent_level=2
-
+			# Install dependencies
+			if ask "Bundle brew ?" Y; then
+				((indent_level++))
+				brew_bundle "Brew"
 			else
-				skipped "Homebrew"
+				skipped "Brew"
+				((indent_level++))
 			fi
 
+			((indent_level--))
 
-			# indent_level=2
-			# if ask "Set OS defaults ?" N; then
+			# CASK APPS
 
-			# 	indent_level=3
+			# Install programs
+			if ask "Bundle cask ?" Y; then
+				((indent_level++))
+				brew_bundle "Cask"
+			else
+				skipped "Cask"
+				((indent_level++))
+			fi
 
-			# 	ask "SSD ?" N && SSD=true
-			# 	info "Executing commands" "..." true
-			# 	if source $DOTFILES/init/.osx; then
-			# 		info "Some changes may require a logout/restart to take effect"
-			# 	else
-			# 		fail "$DOTFILES/init/.osx"
-			# 	fi
-			# fi
+			((indent_level--))
+
+		else
+			skipped "Homebrew"
+		fi
 
 
-			;;
+		# indent_level=2
+		# if ask "Set OS defaults ?" N; then
 
-		Linux)
+		# 	indent_level=3
 
-			# apt-get stuff ?
-			# https://github.com/Homebrew/linuxbrew ?
+		# 	ask "SSD ?" N && SSD=true
+		# 	info "Executing commands" "..." true
+		# 	if source $DOTFILES/init/.osx; then
+		# 		info "Some changes may require a logout/restart to take effect"
+		# 	else
+		# 		fail "$DOTFILES/init/.osx"
+		# 	fi
+		# fi
 
-			;;
 
-	esac
+		;;
 
-	indent_level=1
+	Linux)
 
-else
-	skipped
-fi
+		# apt-get stuff ?
+		# https://github.com/Homebrew/linuxbrew ?
+
+		;;
+
+esac
+
+echo ''
+indent_level=$original_level
+
+return 1
+
