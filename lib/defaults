@@ -15,13 +15,13 @@ if ask "Set defaults ?" Y true; then
 
 	info "Using $UNAME specific defaults" " " true
 
-	if [ "$(whoami)" != "root" ]; then
-		warn "Administrator access is required" && sudo -v
-	fi
-
 	case $UNAME in
 
 		Darwin)
+
+			if [ "$(whoami)" != "root" ]; then
+				warn "Administrator access is required for $(whoami)" && sudo -v
+			fi
 
 			# TERMINAL
 
@@ -102,12 +102,7 @@ if ask "Set defaults ?" Y true; then
 
 	indent_level=2
 
-	info "'set-defaults' is an alias to this step" "bin/set-defaults" true
-
-	#success "Defaults settled" " " true
-
-
-	return
+	info "'set-defaults' is an alias to this step" " " true
 
 else
 	skipped

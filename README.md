@@ -4,7 +4,7 @@ Configuration files and bootstrap manager build thanks to the Internet.
 
 ## Usage
 
-	git clone git@github.com:LEI/dotfiles.git ~/.dotfiles && cd ~/.dotfiles
+	git clone git@github.com:LEI/dotfiles.git ~/.dotfiles
 	~/.dotfiles/bootstrap install
 
 	dot --help

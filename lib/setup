@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# Setup some defaults
+
+# Import prompt functions
+lib=$DOTFILES/lib
+source $lib/print
+source $lib/ask
+source $lib/brew
+
+UNAME=$( uname )
+
+if ask "Download dependencies ?" Y true; then
+
+	indent_level=2
+
+	case $UNAME in
+
+		Darwin)
+
+			# HOMEBREW
+
+			if ask "Install Homebrew ?" N; then
+				install_homebrew
+				success "Homebrew"
+
+				# BREW LIBS
+
+				# Install dependencies
+				if ask "Bundle brew ?" Y; then
+					#indent_level=3
+					brew_bundle "Brew"
+				else
+					skipped "Brew"
+				fi
+
+				indent_level=2
+
+				# CASK APPS
+
+				# Install programs
+				if ask "Bundle cask ?" Y; then
+					#indent_level=3
+					brew_bundle "Cask"
+				else
+					skipped "Cask"
+				fi
+
+				#indent_level=2
+
+			else
+				skipped "Homebrew"
+			fi
+
+
+			# indent_level=2
+			# if ask "Set OS defaults ?" N; then
+
+			# 	indent_level=3
+
+			# 	ask "SSD ?" N && SSD=true
+			# 	info "Executing commands" "..." true
+			# 	if source $DOTFILES/init/.osx; then
+			# 		info "Some changes may require a logout/restart to take effect"
+			# 	else
+			# 		fail "$DOTFILES/init/.osx"
+			# 	fi
+			# fi
+
+
+			;;
+
+		Linux)
+
+			# apt-get stuff ?
+			# https://github.com/Homebrew/linuxbrew ?
+
+			;;
+
+	esac
+
+	indent_level=1
+
+	info "'set-up' is an alias to this step" " " true
+
+else
+	skipped
+fi

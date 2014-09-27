@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# Homebrew utils
+# Needs lib/print
+
+install_homebrew () {
+	# If OS X and brew not already installed
+	if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
+		info "Installing Homebrew" "..." true
+
+		#Skip the "Press enter to continue…" prompt.
+		true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+	fi
+}
+
+brew_bundle () {
+	local opts="--appdir=/Applications"
+
+	if [ -n $HOMEBREW_CASK_OPTS ]; then
+		opts=$HOMEBREW_CASK_OPTS
+	fi
+
+	local file=init/$1file
+
+	info "brew bundle $file" "..."
+
+	if [ -f "$file" ] && brew bundle "$file" $opts; then # 2> /dev/null
+		success "$1 successfully bundled !"
+	else
+		fail "$1 failed to bundle !"
+	fi
+}
