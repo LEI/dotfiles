@@ -33,6 +33,7 @@ dir () {
 		return
 	fi
 
+	# TODO : Automatic ignore <file>. pattern
 	# Check destination only for regular files
 	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
 		mkdir $dst && \

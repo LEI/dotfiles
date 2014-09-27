@@ -57,22 +57,6 @@ case $UNAME in
 			skipped "Homebrew"
 		fi
 
-
-		# indent_level=2
-		# if ask "Set OS defaults ?" N; then
-
-		# 	indent_level=3
-
-		# 	ask "SSD ?" N && SSD=true
-		# 	info "Executing commands" "..." true
-		# 	if source $DOTFILES/init/.osx; then
-		# 		info "Some changes may require a logout/restart to take effect"
-		# 	else
-		# 		fail "$DOTFILES/init/.osx"
-		# 	fi
-		# fi
-
-
 		;;
 
 	Linux)
@@ -87,5 +71,4 @@ esac
 echo ''
 indent_level=$original_level
 
-return 1
-
+[ "$step_skipped" != true ] && return 1
