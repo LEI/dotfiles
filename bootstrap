@@ -141,7 +141,6 @@ uninstall () {
 }
 
 install () {
-	echo ''
 
 	# Create git/.gitconfig if needed
 	check_file "git/gitconfig." Y && \
@@ -196,6 +195,7 @@ install () {
 # Get command
 args=("$@")
 cmd=$(parse_flags $args)
+whitespaces=3
 
 # Execute command
 case $cmd in

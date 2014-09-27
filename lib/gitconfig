@@ -8,9 +8,9 @@ gitconfig () {
 
 	[ "$(uname -s)" == "Darwin" ] && git_credential="osxkeychain"
 
-	user "What is your github author name ?"
+	user "What is your github author name ?" " "
 	read -e GIT_AUTHOR_NAME
-	user "What is your github author email ?"
+	user "What is your github author email ?" " "
 	read -e GIT_AUTHOR_EMAIL
 
 	sed -e "s/AUTHORNAME/$GIT_AUTHOR_NAME/g" \

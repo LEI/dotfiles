@@ -11,7 +11,7 @@ print () {
 	[ -n "$mute" ] && return
 
 	local icon_color=$1 icon=$2 label=$3 message=$4
-	local text_color=$white column="%-42s"
+	local text_color=$white column_size=42
 	local highlight=$5 downlight=$6
 
 	if [ "$message" = "" ]; then
@@ -26,8 +26,14 @@ print () {
 		text_color=$icon_color
 	fi
 
-	# \r\033[2K
-	printf "   ${icon_color}$icon  ${text_color}${column}${reset}  $message${reset}\n" "$label"
+	# Set indentation
+	local column="%-$((column_size - whitespaces))s"
+	local indent=""
+	for ((i=1; i<=$whitespaces; i++)); do
+		indent+=" "
+	done
+
+	printf "\r\033[2K$indent${icon_color}$icon  ${text_color}${column}${reset}  $message${reset}\n" "$label"
 }
 
 user () {

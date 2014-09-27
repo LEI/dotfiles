@@ -26,9 +26,16 @@ ask () {
 		key=Y
 	fi
 
+	local indent=""
+	for ((i=1; i<=$whitespaces; i++)); do
+		indent+=" "
+	done
+
 	# Return answer
 	case "$key" in
-		Y|y) echo "   >  Yes"; return 0 ;;
-		N|n|*) echo "   >  No"; return 1 ;;
+		Y|y) echo "$indent>  Yes"
+			return 0 ;;
+		N|n|*) echo "   $indent>  No"
+			return 1 ;;
 	esac
 }
