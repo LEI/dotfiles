@@ -21,7 +21,7 @@ if ask "Set defaults ?" Y true; then
 
 	case $UNAME in
 
-		Darwin) # Mac OS X
+		Darwin)
 
 			# TERMINAL
 
@@ -53,9 +53,7 @@ if ask "Set defaults ?" Y true; then
 
 			# SUBLIME TEXT
 
-			if ask "Link Sublime Text prefereces ?" Y; then
-
-				indent_level=3
+			if ask "Link Sublime Text preferences ?" Y; then
 
 				st_prefix=~/Library/Application\ Support/Sublime\ Text
 				st_suffix=/Packages/User/Preferences.sublime-settings
@@ -70,7 +68,7 @@ if ask "Set defaults ?" Y true; then
 					success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
 				done
 
-				[ ! -n "$st_success" ] && warn "No application found" "$st_prefix*$st_suffix"
+				[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
 			fi
 
 			indent_level=2
@@ -81,16 +79,14 @@ if ask "Set defaults ?" Y true; then
 
 				indent_level=3
 
-				ask "SSD ?" N && SSD=true
-				info "Executing commands" "..." true
+				ask "SSD specific commands ? ?" N && SSD=true
+				info "Executing .osx" "..." true
 				if source $DOTFILES/init/.osx; then
 					info "Some changes may require a logout/restart to take effect"
 				else
 					fail "$DOTFILES/init/.osx"
 				fi
 			fi
-
-			indent_level=2
 
 			;;
 
@@ -100,15 +96,18 @@ if ask "Set defaults ?" Y true; then
 
 			echo $UNAME
 
-			indent_level=2
-
 			;;
 
 	esac
 
-	indent_level=1
+	indent_level=2
 
-	success "Defaults settled" " " true
+	info "'set-defaults' is an alias to this step" "bin/set-defaults" true
+
+	#success "Defaults settled" " " true
+
+
+	return
 
 else
 	skipped

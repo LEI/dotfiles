@@ -27,6 +27,8 @@ print () {
 	fi
 
 	# Set indentation
+	[ -n "$indent_level" ] || indent_level=1
+	[ -n "$indent_size" ] || indent_size=3
 	local whitespaces=$((indent_level * indent_size))
 	local column="%-$((column_size - whitespaces))s"
 	local indent=""

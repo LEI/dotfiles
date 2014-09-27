@@ -1,4 +1,4 @@
-# dotfiles bootstrap
+# bootfiles dotstrap
 
 Configuration files and bootstrap manager build thanks to the Internet.
 
@@ -28,7 +28,7 @@ Configuration files and bootstrap manager build thanks to the Internet.
 
 - https://github.com/zenorocha/dotfiles
 - https://gist.github.com/zenorocha/7159780
-
+- https://github.com/thoughtbot/rcm
 - http://dev.svetlyak.ru/dotfiler-en/
 
 [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
@@ -40,4 +40,3 @@ Configuration files and bootstrap manager build thanks to the Internet.
 - Redo & refactor shit, callback & argument mysteries
 - Ruby, Compass
 - redo uninstall
-- whitespaces -> multiplier

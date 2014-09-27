@@ -10,6 +10,9 @@ TARGET_DIR=$HOME
 
 export DOTFILES=$DOTFILES_DIR
 
+# Get command
+args=("$@")
+
 # if [ -e "$DOTFILES_DIR/config" ]
 # then
 # 	source $DOTFILES_DIR/config
@@ -27,6 +30,38 @@ source $lib/ask
 source $lib/dir
 source $lib/link
 source $lib/gitconfig
+source $lib/brew
+
+check_file () {
+	local file=$1
+
+	if [ -f $file ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+source_file () {
+	local file=$1
+
+	if [ -f $file ] && source "$file"; then
+		#success "Operation successfull !"
+		return 1
+	else
+		#fail "Command failed !"
+		return 0
+	fi
+}
+
+sandbox () {
+	TARGET_DIR=$TARGET_DIR/sandbox
+	info "$TARGET_DIR" "Using sandbox folder"
+
+	if [ ! -d $TARGET_DIR ]; then
+		mkdir $TARGET_DIR
+	fi
+}
 
 # Print command line usage
 echo_usage () {
@@ -70,54 +105,6 @@ parse_flags () {
 	echo ${args[0]}
 }
 
-check_file () {
-	local file=$1
-
-	if [ -f $file ]; then
-		return 1
-	else
-		return 0
-	fi
-}
-
-source_file () {
-	local file=$1
-
-	if [ -f $file ] && source "$file"; then
-		#success "Operation successfull !"
-		return 1
-	else
-		#fail "Command failed !"
-		return 0
-	fi
-}
-
-sandbox () {
-	TARGET_DIR=$TARGET_DIR/sandbox
-	info "$TARGET_DIR" "Using sandbox folder"
-
-	if [ ! -d $TARGET_DIR ]; then
-		mkdir $TARGET_DIR
-	fi
-}
-
-brew_bundle () {
-	local opts=--appdir=/Applications
-
-	if [ -n $HOMEBREW_CASK_OPTS ]; then
-		opts=HOMEBREW_CASK_OPTS
-	fi
-
-	local file=setup/$1file
-
-	info "brew bundle $file" "..."
-
-	if [ -f "$file" ] && brew bundle $opts "$file"; then # 2> /dev/null
-		success "$1 successfully bundled !"
-	else
-		fail "$1 failed to bundle !"
-	fi
-}
 
 uninstall () {
 	# Does not undo bundles & defaults
@@ -143,21 +130,24 @@ uninstall () {
 
 install () {
 	# All started here
+	echo 'dotfiles bootrapper'
+	echo ''
 
 	# Create git/.gitconfig if needed
 	if check_file "git/gitconfig." Y; then
-		if ask "Configure git credentials ?" Y true; then
+		if ask "Configure git credentials ?" Y; then
 			gitconfig
 		else
 			skipped
 		fi
 	else
-		warn "Git configuration file exists" "$file"
+		warn "Git configuration already file exists" " "
 	fi
+
 	echo ''
 
 	# Ignore lists
-	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.tpl")
+	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
 	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
 	# Symbolic links
 	if ask "Create symbolic links ?" Y true; then
@@ -171,47 +161,42 @@ install () {
 
 	echo ''
 
-	# Install dependencies then programs
-	ask "Bundle ?" N true && \
-		brew_bundle "Brew" && \
-		brew_bundle "Cask" || \
-		skipped
+	# Set OS defaults
+	local defaults=$DOTFILES_DIR/lib/defaults
+	source_file $defaults || success "Defaults sourced" "lib/defaults"
 
 	echo ''
 
-	# Set OS defaults
-	source_file $DOTFILES_DIR/lib/defaults || skipped
+	# Install deps & utils
+	local setup=$DOTFILES_DIR/lib/setup
+	source_file $setup || success "Deps sourced" "lib/setup"
+	info "'set-up' is an alias to this step" "bin/set-up" true
 
 
 		#cfg "git/destination" && \
 		#cfg "git/exception" || \
 
-	# Install Homebrew.
-	# if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
-	# 	heading "Installing Homebrew"
-
-	# 	#Skip the "Press enter to continue…" prompt.
-	# 	true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
-	# fi
+	indent_level=0
 
 	echo ''
 	success "Things were bootstrapped !" " "
 }
 
-# Get command
-args=("$@")
-cmd=$(parse_flags $args)
-indent_level=1
-indent_size=3
+bootstrap () {
+	cmd=$(parse_flags $args)
+	echo "cmd $cmd"
+	indent_level=1
+	indent_size=3
 
-parse_flags
+	# Execute command
+	case $cmd in
+		'')          install ;;
+		'install')   install ;;
+		'uninstall') uninstall ;;
+		'brew')      brew_bundle "Brew" ;;
+		'cask')      brew_bundle "Cask" ;;
+		*)           install ;;
+	esac
+}
 
-# Execute command
-case $cmd in
-	'')          install ;;
-	'install')   install ;;
-	'uninstall') uninstall ;;
-	'brew')      brew_bundle "Brew" ;;
-	'cask')      brew_bundle "Cask" ;;
-	*)           install ;;
-esac
+bootstrap

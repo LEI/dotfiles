@@ -16,7 +16,7 @@ gitconfig () {
 	sed -e "s/AUTHORNAME/$GIT_AUTHOR_NAME/g" \
 		-e "s/AUTHOREMAIL/$GIT_AUTHOR_EMAIL/g" \
 		-e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
-		git/gitconfig.tpl > git/gitconfig.
+		git/gitconfig.sample > git/gitconfig.
 
 	success "Git credentials generated."
 }
