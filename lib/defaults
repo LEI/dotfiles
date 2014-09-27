@@ -11,6 +11,8 @@ UNAME=$( uname )
 
 if ask "Set defaults ?" Y true; then
 
+	whitespaces=6
+
 	if [ "$(whoami)" != "root" ]; then
 		warn "Administrator access is required" && sudo -v
 	fi
@@ -82,6 +84,8 @@ if ask "Set defaults ?" Y true; then
 			;;
 
 	esac
+
+	whitespaces=3
 
 else
 	skipped
