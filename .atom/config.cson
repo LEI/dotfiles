@@ -1,0 +1,39 @@
+# https://github.com/holman/dotfiles/blob/master/atom.symlink/config.cson
+# TODO .atom/packages/emmet
+'editor':
+	'showIndentGuide': true
+	'fontFamily': 'Consolas'
+	'fontSize': 14
+'core':
+	'excludeVcsIgnoredPaths': true
+	'ignoredNames': [
+		'.bundle'
+		'.git'
+		'log'
+		'repositories'
+		'tmp'
+		'vendor'
+	]
+	'themes': [
+		# 'unity-ui'
+		# 'glacier-syntax'
+		'atom-dark-ui'
+		'atom-dark-syntax'
+	]
+	'hideGitIgnoredFiles': true
+	'disabledPackages': [
+		'background-tips'
+		'exception-reporting'
+		'metrics'
+	]
+'spell-check':
+	'grammars': [
+		'text.plain'
+		'source.gfm'
+		'text.git-commit'
+	]
+'welcome':
+	'showOnStartup': false
+'release-notes':
+	'viewedVersion': '0.94.0'
+'tree-view': {}

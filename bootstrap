@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Bootstrap dotfiles
-# Mainly inspired from mathiasbynens/dotfiles
+# Mainly inspired from mathiasbynens/dotfiles and holman/dotfiles
 
 # Set working directory
 cd "$(dirname "$0")"
@@ -13,13 +13,23 @@ indent_size=3
 
 export DOTFILES=$DOTFILES_DIR
 export lib=$DOTFILES_DIR/lib
-source $lib/print # Get colors asap
 
 # Get command
 args=("$@")
 
 set -e
 
+# Print command line usage
+echo_usage () {
+	$lib/usage
+	exit 0
+}
+
+echo_debug () {
+	if [ "$debug" = true ]; then
+		info "Symbolic dry run" "Changes are not applied while debugging" true
+	fi
+}
 
 do_setup () {
 	# TODO Configuration file
@@ -30,12 +40,16 @@ do_setup () {
 	# 	echo "$cfg file needed. See config.sample for directions and copy it to config."
 	# 	exit 1
 	# fi
+	# Ignore lists
+	global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
+	vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
 
 	echo 'bootfiles dotstrap'
 
 	#git pull origin master
 
 	# Import functions
+	source $lib/print
 	source $lib/ask
 	source $lib/dir
 	source $lib/link
@@ -58,21 +72,68 @@ do_gitconfig () {
 }
 
 do_link () {
-	# Ignore lists
-	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
-	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
-
 	if ask "Create symbolic links ?" Y true; then
-		[ "$debug" = true ] && \
-			info "Symbolic dry run" "Changes are not applied while debugging" true
-		echo ''
+		echo_debug
 		dir "" link_dotfile ${global_ignore[@]} || skipped
 		dir "bin" link_file || skipped
-		dir ".vim" link_file ${vim_ignore[@]} || skipped
+		# COPY dir ".vim" link_file ${vim_ignore[@]} || skipped
 		echo ''
 		success "Stuff linked."
 	else
 		skipped "symlinks"
+	fi
+}
+
+undo_link () {
+	if ask "Erase symbolic links ?" Y true; then
+		echo_debug
+		dir "" unlink_dotfile ${global_ignore[@]} || skipped
+		echo ''
+		success "Symlinks unchained."
+	else
+		skipped "symlinks"
+	fi
+
+
+	# Remove bin/* and */*.symlink
+	# ask "Remove symbolic links ?" Y && \
+	# 	info "Unlinking bin files" "..." && \
+	# 	dir "/bin" "" unlink && \
+	# 	info "Unlinking dotfiles" "..." && \
+	# 	dir "/" "*.symlink" unsymlink && \
+	# 	success 'Symlinks unchained.' || \
+	# 	skip
+
+	# Remove .vim
+	# TODO Symlink
+	# ask "Remove .vim directory ?" Y && \
+	# 	remove ".vim" || \
+	# 	skip
+}
+
+do_copy () {
+	if ask "Copy directoriz ?" Y true; then
+		echo_debug
+		# TODO ${vim_ignore[@]} || lib/exclude
+		copy ".vim" || skipped
+		copy ".atom" || skipped
+		echo ''
+		success "Stuff copied."
+	else
+		skipped "directoriz"
+	fi
+}
+
+undo_copy () {
+	if ask "Remove directoriz ?" Y true; then
+		echo_debug
+		# TODO ${vim_ignore[@]} || lib/exclude
+		remove ".vim" || skipped
+		remove ".atom" || skipped
+		echo ''
+		success "Stuff removed."
+	else
+		skipped "directoriz"
 	fi
 }
 
@@ -91,31 +152,28 @@ do_defaults () {
 
 copy () {
 	local src=$1
-	echo $src
+
+	((indent_level++))
 	if [ -f "$src" -o -d "$src" ] && \
-		. $lib/copy $src $TARGET_DIR/$src; then
+		. $lib/copy $src $TARGET_DIR > /dev/null; then
 		success "$src" "Copied to ~/$src"
 	else
-		fail "$src failed to be copied"
+		fail "$src" "Failed to be copied"
 	fi
+	((indent_level--))
 }
 
 remove () {
 	local src=$1
-	echo $src
-	# 2> /dev/null
+
+	((indent_level++))
 	if [ -f "$src" -o -d "$src" -o -L "$src" ] && \
-		rm -r $TARGET_DIR/$src; then
+		rm -r $TARGET_DIR/$src 2> /dev/null; then
 		success "Removed" "$src"
 	else
-		fail "$src can't be removed"
+		fail "$src" "Can't be removed"
 	fi
-}
-
-# Print command line usage
-echo_usage () {
-	$lib/usage
-	exit 0
+	((indent_level--))
 }
 
 check_file () {
@@ -149,28 +207,6 @@ sandbox () {
 	fi
 }
 
-uninstall () {
-	# Does not undo bundles & defaults
-
-	# Remove bin/* and */*.symlink
-	# ask "Remove symbolic links ?" Y && \
-	# 	info "Unlinking bin files" "..." && \
-	# 	dir "/bin" "" unlink && \
-	# 	info "Unlinking dotfiles" "..." && \
-	# 	dir "/" "*.symlink" unsymlink && \
-	# 	success 'Symlinks unchained.' || \
-	# 	skip
-
-	# Remove .vim
-	# TODO Symlink
-	# ask "Remove .vim directory ?" Y && \
-	# 	remove ".vim" || \
-	# 	skip
-
-	echo ''
-	echo 'Bootstrap uninstalled things.'
-}
-
 install () {
 	echo ''
 
@@ -179,21 +215,38 @@ install () {
 
 	do_gitconfig
 
-	echo ''
-	indent_level=1
+	echo ''; indent_level=1
 
 	# Symbolic links
 	################
 
 	do_link
 
-	echo ''
-	indent_level=1
+	echo ''; indent_level=1
+
+	# Directories
+	################
+
+	do_copy
+
+	echo ''; indent_level=1
 
 	# Set OS defaults
 	#################
 
 	do_defaults
+}
+
+uninstall () {
+	echo ''
+
+	# Does not undo bundles & defaults
+
+	# undo_link
+
+	undo_copy
+
+	end_message="Bootstrap uninstalled things."
 }
 
 # Parse arguments and unset recognized ones
@@ -202,25 +255,25 @@ parse_flags () {
 
 	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 		case ${args[i]} in
-			-d|--default)
-				force_default=true
+			-d|--debug)
+				debug=true
 				unset args[i] ;;
-			-f|--force)
-				force=true
-				unset args[i] ;;
+			# -?|--default)
+			# 	force_default=true
+			# 	unset args[i] ;;
+			# -f|--force)
+			# 	force=true
+			# 	unset args[i] ;;
 			-m|--mute)
 				mute=true
 				unset args[i] ;;
 			-s|--sandbox)
 				sandbox
 				unset args[i] ;;
-			-t|--test)
-				debug=true
-				unset args[i] ;;
 			-h|--help)
 				echo_usage
 				unset args[i] ;;
-			-*) echo "Unrecognized option: ${args[i]}"
+			-*) echo "Unknown option: ${args[i]}"
 				echo_usage
 				unset args[i] ;;
 		esac
@@ -240,8 +293,10 @@ bootstrap () {
 		'')          install ;;
 		'install')   install ;;
 		'uninstall') uninstall ;;
-		'bundle')    source $DOTFILES/lib/setup ;;
-		'defaults')  source $DOTFILES/lib/defaults ;;
+		'link')      do_link ;;
+		'copy')      do_copy ;;
+		'defaults')  do_defaults ;;
+		'bundle')    exec "set-up" ;;
 		*)           echo_usage ;;
 	esac
 }
@@ -252,7 +307,8 @@ bootstrap ${args[@]}
 echo ''
 indent_level=0
 
-success "Things were bootstrapped !" " "
+[ -n "$end_message" ] || end_message="Things were bootstrapped !"
+success "$end_message" " "
 
 # source ~/.bash_profile || \
 # 	fail "~/.bash_profile"
