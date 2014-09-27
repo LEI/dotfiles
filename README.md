@@ -25,27 +25,27 @@ Just move the dot at the end of the name and place it in a directory before boot
 
 ## Inspiration
 
-- Mathias Bynens [@mathiasbynens](//github.com/mathiasbynens) [dotfiles](//github.com/mathiasbynens/dotfiles)
-- Zach Holman [@holman](//github.com/holman) [dotfiles](//github.com/mathiasbynens/dotfiles)
-- Nicolas Gallagher [@necolas](//github.com/necolas/dotfiles) [dotfiles](//github.com/mathiasbynens/dotfiles)
-- Ben Alman [@cowboy](//github.com/cowboy/dotfiles) [OS X / Ubuntu dotfiles](//github.com/cowboy/dotfiles)
-- [+](//github.com/ryanb/dotfiles)
-- [+](//github.com/tejr/dotfiles)
-- [+](//github.com/gf3/dotfiles)
-- [+](//github.com/rtomayko/dotfiles)
-- [+](//github.com/mikemcquaid/dotfiles)
-- [+](//github.com/nicck/dotfiles)
-- [+](//github.com/paulirish/dotfiles)
-- [+](//github.com/travi/dotfiles)
-- [+](//github.com/sitaktif/dotfiles)
-- [+](//github.com/zenorocha/dotfiles)
-- [+](//gist.github.com/zenorocha/7159780)
-- https://github.com/thoughtbot/rcm
-- http://dev.svetlyak.ru/dotfiler-en/
-- [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
+- Mathias Bynens [@mathiasbynens](//github.com/mathiasbynens) [OS X dotfiles](//github.com/mathiasbynens/dotfiles)
+- Zach Holman [@holman](//github.com/holman) [OS X dotfiles](//github.com/holman/dotfiles)
+- Nicolas Gallagher [@necolas](//github.com/necolas) [OS X dotfiles](//github.com/necolas/dotfiles)
+- Ben Alman [@cowboy](//github.com/cowboy) [OS X / Linux dotfiles](//github.com/cowboy/dotfiles)
+- Ben Alman [@ryanb](//github.com/ryanb) [OS X / Linux dotfiles](//github.com/ryanb/dotfiles)
+- [tejr](//github.com/tejr/dotfiles)
+- [gf3](//github.com/gf3/dotfiles)
+- [rtomayko](//github.com/rtomayko/dotfiles)
+- [mikemcquaid](//github.com/mikemcquaid/dotfiles)
+- [nicck](//github.com/nicck/dotfiles)
+- [paulirish](//github.com/paulirish/dotfiles)
+- [travi](//github.com/travi/dotfiles)
+- [sitaktif](//github.com/sitaktif/dotfiles)
+- [zenorocha](//github.com/zenorocha/dotfiles)
+- [gist/zenorocha/7159780](//gist.github.com/zenorocha/7159780)
 
 ## TODO
 
-- Ruby, compass.. http://www.npmjs.org/package/dotfiles
+- opts undot silent
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
-- Opts.. -m, undot
+- Ruby, compass.. http://www.npmjs.org/package/dotfiles
+- https://github.com/thoughtbot/rcm
+- http://dev.svetlyak.ru/dotfiler-en/
+- [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
