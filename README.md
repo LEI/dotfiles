@@ -1,6 +1,6 @@
 # bootfiles dotstrap
 
-Configuration files and setup manager build thanks to the Internet.
+Dotfiles files and setup manager build thanks to the Internet.
 
 ## Usage
 
@@ -9,29 +9,43 @@ Configuration files and setup manager build thanks to the Internet.
 
 	dot --help
 
+### Installer
+
+- Prompt for git credentials
+- Link repository dotfiles, .vim & bin folders to home.
+- Apply Terminal window settings
+- Set defaults (only OS X: init/.osx)
+- Install dependencies via Homebrew
+- Download application via Caskroom
+- Link Preferences.sublime-settings
+
+### Add a dotfile to your home
+
+Just move the dot at the end of the name and place it in a directory before bootstraping
+
 ## Inspiration
 
 - Mathias Bynens [@mathiasbynens](//github.com/mathiasbynens) [dotfiles](//github.com/mathiasbynens/dotfiles)
 - Zach Holman [@holman](//github.com/holman) [dotfiles](//github.com/mathiasbynens/dotfiles)
 - Nicolas Gallagher [@necolas](//github.com/necolas/dotfiles) [dotfiles](//github.com/mathiasbynens/dotfiles)
-- https://github.com/cowboy/dotfiles
-- https://github.com/ryanb/dotfiles
-- https://github.com/tejr/dotfiles
-- https://github.com/gf3/dotfiles
-- https://github.com/rtomayko/dotfiles
-- https://github.com/mikemcquaid/dotfiles
-- https://github.com/nicck/dotfiles
-- https://github.com/paulirish/dotfiles
-- https://github.com/travi/dotfiles
-- https://github.com/sitaktif/dotfiles
-- https://github.com/zenorocha/dotfiles
-- https://gist.github.com/zenorocha/7159780
+- Ben Alman [@cowboy](//github.com/cowboy/dotfiles) [OS X / Ubuntu dotfiles](//github.com/cowboy/dotfiles)
+- [+](//github.com/ryanb/dotfiles)
+- [+](//github.com/tejr/dotfiles)
+- [+](//github.com/gf3/dotfiles)
+- [+](//github.com/rtomayko/dotfiles)
+- [+](//github.com/mikemcquaid/dotfiles)
+- [+](//github.com/nicck/dotfiles)
+- [+](//github.com/paulirish/dotfiles)
+- [+](//github.com/travi/dotfiles)
+- [+](//github.com/sitaktif/dotfiles)
+- [+](//github.com/zenorocha/dotfiles)
+- [+](//gist.github.com/zenorocha/7159780)
 - https://github.com/thoughtbot/rcm
 - http://dev.svetlyak.ru/dotfiler-en/
 - [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
 
 ## TODO
 
-- Ruby, compass.. https://www.npmjs.org/package/dotfiles
+- Ruby, compass.. http://www.npmjs.org/package/dotfiles
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
 - Opts.. -m, undot
