@@ -46,13 +46,16 @@ copy () {
 
 remove () {
 	local src=$1
+	# Find target
+	local dst=$TARGET_DIR/${src#$DOTFILES_DIR/}
 
 	((indent_level++))
-	if [ -f "$src" -o -d "$src" -o -L "$src" ] && \
-		rm -r $TARGET_DIR/$src 2> /dev/null; then
-		success "Removed" "$src"
+	if [ -d "$dst" ]; then
+		info "${dst#$HOME/}" "Ignored (directory)" true
+	elif [ -f "$dst" -o -L "$dst" ] && rm $dst 2> /dev/null; then
+		success "${dst#$HOME/}" "Removed"
 	else
-		fail "${src}" "Cannot be removed"
+		fail "${dst#$HOME/}" "Cannot be removed"
 	fi
 	((indent_level--))
 }
@@ -161,8 +164,10 @@ undo_copy () {
 	if ask "Remove directoriz ?" Y true; then
 		echo_debug
 		# TODO ${vim_ignore[@]} || lib/exclude
-		remove ".vim/" || skipped
-		remove ".atom/" || skipped
+		# remove ".vim/*" || skipped
+		# remove ".atom/*" || skipped
+		dir ".vim" remove ${vim_ignore[@]} || skipped
+		dir ".atom" remove || skipped
 		echo ''
 		success "Stuff removed."
 	else
@@ -228,6 +233,8 @@ uninstall () {
 	# Does not undo bundles & defaults
 
 	undo_link
+
+	echo ''; indent_level=1
 
 	undo_copy
 

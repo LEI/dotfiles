@@ -4,6 +4,9 @@
 # https://mths.be/osx
 # https://github.com/kevinSuttle/OSXDefaults
 
+lib=$DOTFILES/lib
+source $lib/ask
+
 # Ask for the administrator password upfront
 sudo -v
 
@@ -708,12 +711,14 @@ defaults write com.apple.dock wvous-tr-modifier -int 0
 # # Hide the app in the background if it’s not the front-most window
 # defaults write com.twitter.twitter-mac HideInBackground -bool true
 
-# ###############################################################################
-# # Kill affected applications                                                  #
-# ###############################################################################
+###############################################################################
+# Kill affected applications                                                  #
+###############################################################################
 
-# for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
-# 	"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
-# 	"Terminal" "Transmission" "Twitter" "iCal"; do
-# 	killall "${app}" > /dev/null 2>&1
-# done
+if ask "Do you want to kill affected applications (terminal included) ?" N; then
+	for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
+		"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
+		"Terminal" "Transmission" "Twitter" "iCal"; do
+		killall "${app}" > /dev/null 2>&1
+	done
+fi
