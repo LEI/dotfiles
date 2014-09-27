@@ -74,7 +74,6 @@ check_file () {
 	local file=$1
 
 	if [ -f $file ]; then
-		warn "Already exists" "$file"
 		return 1
 	else
 		return 0
@@ -85,9 +84,11 @@ source_file () {
 	local file=$1
 
 	if [ -f $file ] && source "$file"; then
-		success "Operation successfull !"
+		#success "Operation successfull !"
+		return 1
 	else
-		fail "Command failed !"
+		#fail "Command failed !"
+		return 0
 	fi
 }
 
@@ -141,13 +142,18 @@ uninstall () {
 }
 
 install () {
+	# All started here
 
 	# Create git/.gitconfig if needed
-	check_file "git/gitconfig." Y && \
-		ask "Configure git credentials ?" Y true && \
-		gitconfig || \
-		skipped
-
+	if check_file "git/gitconfig." Y; then
+		if ask "Configure git credentials ?" Y true; then
+			gitconfig
+		else
+			skipped
+		fi
+	else
+		warn "Git configuration file exists" "$file"
+	fi
 	echo ''
 
 	# Ignore lists
@@ -195,7 +201,10 @@ install () {
 # Get command
 args=("$@")
 cmd=$(parse_flags $args)
-whitespaces=3
+indent_level=1
+indent_size=3
+
+parse_flags
 
 # Execute command
 case $cmd in
@@ -204,5 +213,5 @@ case $cmd in
 	'uninstall') uninstall ;;
 	'brew')      brew_bundle "Brew" ;;
 	'cask')      brew_bundle "Cask" ;;
-	*)           install;; #echo_usage ;;
+	*)           install ;;
 esac

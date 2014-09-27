@@ -40,3 +40,4 @@ Configuration files and bootstrap manager build thanks to the Internet.
 - Redo & refactor shit, callback & argument mysteries
 - Ruby, Compass
 - redo uninstall
+- whitespaces -> multiplier
