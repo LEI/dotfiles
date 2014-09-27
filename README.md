@@ -12,9 +12,9 @@ Dotfiles setup being build thanks to the Internet.
 ### Installer
 
 - Prompt for git credentials
-- Link repository dotfiles, .vim & bin folders to home.
+- Link repository dotfiles, .vim & bin folders to home
 - Apply Terminal window settings
-- Set defaults (only OS X: init/.osx)
+- Set defaults (init/.osx)
 - Install dependencies via Homebrew
 - Download application via Caskroom
 - Link Preferences.sublime-settings
