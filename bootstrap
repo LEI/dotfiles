@@ -31,6 +31,54 @@ echo_debug () {
 	fi
 }
 
+copy () {
+	local src=$1
+
+	((indent_level++))
+	if [ -f "$src" -o -d "$src" ] && \
+		. $lib/copy $src $TARGET_DIR > /dev/null; then
+		success "$src" "Copied to ~/$src"
+	else
+		fail "$src" "Failed to be copied"
+	fi
+	((indent_level--))
+}
+
+remove () {
+	local src=$1
+
+	((indent_level++))
+	if [ -f "$src" -o -d "$src" -o -L "$src" ] && \
+		rm -r $TARGET_DIR/$src 2> /dev/null; then
+		success "Removed" "$src"
+	else
+		fail "${src}" "Cannot be removed"
+	fi
+	((indent_level--))
+}
+
+check_file () {
+	local file=$1
+
+	if [ -f $file ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+source_file () {
+	local file=$1
+
+	if [ -f $file ] && source "$file"; then
+		#success "Operation successfull !"
+		return 1
+	else
+		#fail "Command failed !"
+		return 0
+	fi
+}
+
 do_setup () {
 	# TODO Configuration file
 	# if [ -e "$DOTFILES_DIR/config" ]
@@ -88,27 +136,12 @@ undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
 		dir "" unlink_dotfile ${global_ignore[@]} || skipped
+		dir "bin" unlink_file ${global_ignore[@]} || skipped
 		echo ''
 		success "Symlinks unchained."
 	else
 		skipped "symlinks"
 	fi
-
-
-	# Remove bin/* and */*.symlink
-	# ask "Remove symbolic links ?" Y && \
-	# 	info "Unlinking bin files" "..." && \
-	# 	dir "/bin" "" unlink && \
-	# 	info "Unlinking dotfiles" "..." && \
-	# 	dir "/" "*.symlink" unsymlink && \
-	# 	success 'Symlinks unchained.' || \
-	# 	skip
-
-	# Remove .vim
-	# TODO Symlink
-	# ask "Remove .vim directory ?" Y && \
-	# 	remove ".vim" || \
-	# 	skip
 }
 
 do_copy () {
@@ -128,8 +161,8 @@ undo_copy () {
 	if ask "Remove directoriz ?" Y true; then
 		echo_debug
 		# TODO ${vim_ignore[@]} || lib/exclude
-		remove ".vim" || skipped
-		remove ".atom" || skipped
+		remove ".vim/" || skipped
+		remove ".atom/" || skipped
 		echo ''
 		success "Stuff removed."
 	else
@@ -139,62 +172,14 @@ undo_copy () {
 
 do_defaults () {
 	if ask "Set defaults ?" Y true; then
-		local defaults=$DOTFILES_DIR/lib/defaults
+		local defaults=$DOTFILES_DIR/defaults
 		source_file $defaults || \
-			warn "Configuration didn't fully complete" "lib/defaults"
-		# success "Defaults loaded" "lib/defaults"
+			warn "Configuration didn't fully complete" "$DOTFILES_DIR/defaults"
+		# success "Defaults loaded" "$DOTFILES_DIR/defaults"
 		indent_level=1
 		success "OS configuration done."
 	else
 		skipped "defaults"
-	fi
-}
-
-copy () {
-	local src=$1
-
-	((indent_level++))
-	if [ -f "$src" -o -d "$src" ] && \
-		. $lib/copy $src $TARGET_DIR > /dev/null; then
-		success "$src" "Copied to ~/$src"
-	else
-		fail "$src" "Failed to be copied"
-	fi
-	((indent_level--))
-}
-
-remove () {
-	local src=$1
-
-	((indent_level++))
-	if [ -f "$src" -o -d "$src" -o -L "$src" ] && \
-		rm -r $TARGET_DIR/$src 2> /dev/null; then
-		success "Removed" "$src"
-	else
-		fail "$src" "Can't be removed"
-	fi
-	((indent_level--))
-}
-
-check_file () {
-	local file=$1
-
-	if [ -f $file ]; then
-		return 1
-	else
-		return 0
-	fi
-}
-
-source_file () {
-	local file=$1
-
-	if [ -f $file ] && source "$file"; then
-		#success "Operation successfull !"
-		return 1
-	else
-		#fail "Command failed !"
-		return 0
 	fi
 }
 
@@ -242,7 +227,7 @@ uninstall () {
 
 	# Does not undo bundles & defaults
 
-	# undo_link
+	undo_link
 
 	undo_copy
 
