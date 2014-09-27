@@ -29,7 +29,7 @@ Just move the dot at the end of the name and place it in a directory before boot
 - Zach Holman [@holman](//github.com/holman) [OS X dotfiles](//github.com/holman/dotfiles)
 - Nicolas Gallagher [@necolas](//github.com/necolas) [OS X dotfiles](//github.com/necolas/dotfiles)
 - Ben Alman [@cowboy](//github.com/cowboy) [OS X / Linux dotfiles](//github.com/cowboy/dotfiles)
-- Ben Alman [@ryanb](//github.com/ryanb) [OS X / Linux dotfiles](//github.com/ryanb/dotfiles)
+- Ryan Bates [@ryanb](//github.com/ryanb) [OS X / Linux dotfiles](//github.com/ryanb/dotfiles)
 - [tejr](//github.com/tejr/dotfiles)
 - [gf3](//github.com/gf3/dotfiles)
 - [rtomayko](//github.com/rtomayko/dotfiles)
