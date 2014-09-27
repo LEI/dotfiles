@@ -43,6 +43,52 @@ do_setup () {
 	source $lib/brew
 }
 
+do_gitconfig () {
+	# Create git/.gitconfig if needed
+	local gitconfig_file="git/gitconfig."
+	if check_file "$gitconfig_file" Y; then
+		if ask "Configure git credentials ?" Y; then
+			gitconfig
+		else
+			skipped
+		fi
+	else
+		warn "Git configuration already file exists" "$gitconfg_file"
+	fi
+}
+
+do_link () {
+	# Ignore lists
+	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
+	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
+
+	if ask "Create symbolic links ?" Y true; then
+		[ "$debug" = true ] && \
+			info "Symbolic dry run" "Changes are not applied while debugging" true
+		echo ''
+		dir "" link_dotfile ${global_ignore[@]} || skipped
+		dir "bin" link_file || skipped
+		dir ".vim" link_file ${vim_ignore[@]} || skipped
+		echo ''
+		success "Stuff linked."
+	else
+		skipped "symlinks"
+	fi
+}
+
+do_defaults () {
+	if ask "Set defaults ?" Y true; then
+		local defaults=$DOTFILES_DIR/lib/defaults
+		source_file $defaults || \
+			warn "Configuration didn't fully complete" "lib/defaults"
+		# success "Defaults loaded" "lib/defaults"
+		indent_level=1
+		success "OS configuration done."
+	else
+		skipped "defaults"
+	fi
+}
+
 copy () {
 	local src=$1
 	echo $src
@@ -131,17 +177,7 @@ install () {
 	# Git
 	#####
 
-	# Create git/.gitconfig if needed
-	local gitconfig_file="git/gitconfig."
-	if check_file "$gitconfig_file" Y; then
-		if ask "Configure git credentials ?" Y; then
-			gitconfig
-		else
-			skipped
-		fi
-	else
-		warn "Git configuration already file exists" "$gitconfg_file"
-	fi
+	do_gitconfig
 
 	echo ''
 	indent_level=1
@@ -149,43 +185,15 @@ install () {
 	# Symbolic links
 	################
 
-	# Ignore lists
-	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
-	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
-
-	if ask "Create symbolic links ?" Y true; then
-		[ "$debug" = true ] && \
-			info "Symbolic dry run" "Changes are not applied while debugging" true
-		echo ''
-		dir "" link_dotfile ${global_ignore[@]} || skipped
-		dir "bin" link_file || skipped
-		dir ".vim" link_file ${vim_ignore[@]} || skipped
-		echo ''
-		success "Stuff linked."
-	else
-		skipped "symlinks"
-	fi
+	do_link
 
 	echo ''
 	indent_level=1
 
-	info "Using $(uname) specific defaults" " " true
-
-	echo ''
-
 	# Set OS defaults
 	#################
 
-	if ask "Set defaults ?" Y true; then
-		local defaults=$DOTFILES_DIR/lib/defaults
-		source_file $defaults || \
-			warn "Configuration didn't fully complete" "lib/defaults"
-		# success "Defaults loaded" "lib/defaults"
-		indent_level=1
-		success "OS configuration done."
-	else
-		skipped "defaults"
-	fi
+	do_defaults
 }
 
 # Parse arguments and unset recognized ones
