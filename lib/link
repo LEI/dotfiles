@@ -4,17 +4,20 @@
 # TODO prompt
 # Uses lib/print
 
+lib=$DOTFILES/lib
+source $lib/ask
+
 # Check destination and do symlink
 link () {
 	local src=$1
 	local dst=$2
 
-	local skip
+	local skip remove
 
 	# If it is a broken symlink
 	if [ -h ${dst} ] && [ ! -e ${dst} ]; then
 		fail "${dst#$TARGET_DIR/}" "Removing broken link"
-		rm ${dst}
+		remove=true
 	fi
 
 	# If it is a symbolic link
@@ -27,17 +30,33 @@ link () {
 		else
 			# Linked to another file
 			warn "${dst#$TARGET_DIR/}" "Already linked to ~${current_src#$HOME}"  true
-			skip=true
-			#rm ${dst}
+			if ask "Remove ${dst#$TARGET_DIR/} current symlink ?" Y; then
+				remove=true
+			else
+				skip=true
+			fi
 		fi
 	# If it is a file
 	elif [ -f ${dst} ]; then
 		warn "${dst#$TARGET_DIR/}" "File already exists ~${dst#$HOME}"
-		skip=true
+		if ask "Remove actual ${dst#$TARGET_DIR/} file ?" Y; then
+			remove=true
+		else
+			skip=true
+		fi
 	# If it is a directory
 	elif [ -d ${dst} ]; then
 		warn "${dst#$TARGET_DIR/}" "Directory already exists ~${dst#$HOME}"
-		skip=true
+		if ask "Remove actual ${dst#$TARGET_DIR/} directory ?" Y; then
+			remove=true
+		else
+			skip=true
+		fi
+	fi
+
+	# Check if the file has to be removed
+	if [ "$remove" = true ]; then
+		rm ${dst}
 	fi
 
 	# Check if the symbolic link can be created

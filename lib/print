@@ -36,7 +36,7 @@ print () {
 		indent+=" "
 	done
 
-	printf "\r\033[2K$indent${icon_color}$icon  ${text_color}${column}${reset}  $message${reset}\n" "$label"
+	printf "\r\033[2K$indent${icon_color}$icon  ${text_color}${column}${reset} $message${reset}\n" "$label"
 }
 
 # Highlight if the custom function third arg is true

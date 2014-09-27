@@ -1,0 +1,132 @@
+#!/bin/bash
+#
+# Setup some defaults
+# Steps specific to init folder & depending on OS type
+
+# Import prompt functions
+lib=$DOTFILES/lib
+source $lib/print
+source $lib/ask
+
+UNAME=$( uname )
+
+info "'set-defaults' is an alias to execute this step" " " true
+info "Using $(uname) specific defaults" " " true
+echo ''
+
+if [ -n "$indent_level" ]; then
+	original_level=$indent_level
+else
+	indent_level=2
+fi
+
+case $UNAME in
+
+	Darwin)
+
+		if [ "$(whoami)" != "root" ]; then
+			warn "Administrator access is required for $(whoami)" && sudo -v
+		fi
+
+		# TERMINAL
+
+		# Search for the terminal configuration
+		TERM_FILE=`find $DOTFILES -name *.terminal`
+		base_name=$(basename $TERM_FILE)
+		TERM_PROFILE=${base_name%%.*}
+		# Custom version of the Solarized Dark theme
+		[ -n "$TERM_PROFILE" ] || TERM_PROFILE='LEI'
+
+		CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
+
+
+		if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
+			if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
+				((indent_level++))
+				open "$TERM_FILE"
+				sleep 1 # Wait a bit to make sure the theme is loaded
+				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
+				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
+
+				success "Window settings" "Default now set to $TERM_PROFILE.terminal"
+			fi
+		else
+			warn "Window settings" "Already set to $TERM_PROFILE.terminal"
+			((indent_level++))
+		fi
+
+		((indent_level--))
+
+		# SYSTEM
+
+		if ask "Set OS defaults ?" N; then
+
+			((indent_level++))
+
+			ask "SSD specific commands ?" N && SSD=true
+			info "Executing init/.osx" "..." true
+			if source $DOTFILES/init/.osx; then
+				info "Some changes may require a logout/restart to take effect"
+			else
+				fail "$DOTFILES/init/.osx"
+			fi
+		else
+			# step_skipped=true
+			((indent_level++))
+		fi
+
+		((indent_level--))
+
+		# Install deps & utils with homebrew
+		if ask "Download dependencies ?" Y true; then
+			((indent_level++))
+
+			local setup=$DOTFILES_DIR/setup
+			source_file $setup || \
+				warn "Dependencies did not fully installed" "$DOTFILES_DIR/setup"
+			# success "Dependencies were sourced" "$DOTFILES_DIR/setup"
+		else
+			skipped "Brew & Cask"
+			((indent_level++))
+		fi
+
+		((indent_level--))
+
+		# SUBLIME TEXT
+
+		if ask "Link Sublime Text preferences ?" Y; then
+
+			st_prefix=~/Library/Application\ Support/Sublime\ Text
+			st_suffix=/Packages/User/Preferences.sublime-settings
+
+			for f in "$st_prefix"*"$st_suffix"; do
+
+				rm "$f" # -f ?
+				ln -s "$DOTFILES/init/Preferences.sublime-settings" "$f"
+
+				st_success=true
+				st_version=${f#$st_prefix}
+				success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
+			done
+
+			[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
+		# else
+		# 	step_skipped=true
+		fi
+
+		;;
+
+	Linux)
+
+		((indent_level++))
+
+		echo $UNAME
+
+		;;
+
+esac
+
+echo ''
+indent_level=$original_level
+
+[ "$step_skipped" != true ] && return 1

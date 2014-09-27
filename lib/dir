@@ -26,7 +26,7 @@ dir () {
 	indent_level=2
 
 	# Confirm action
-	if ask "Symlink ~${dst#$HOME} ?" Y; then
+	if ask "~${dst#$HOME}" Y; then
 		indent_level=3
 	else
 		indent_level=1
@@ -54,6 +54,11 @@ dir () {
 
 		for file in $paths; do
 
+			# Pass if this is the root dir
+			if [ "${file##*/}" = "${dir#/}" ]; then
+				continue
+			fi
+
 			# Stop this iteration if it's the same directory
 			if [ "${file#$DOTFILES_DIR/}" = "${dir}" ]; then
 				continue
@@ -80,7 +85,7 @@ dir () {
 
 		indent_level=2
 
-		fail "Failed, source doesn't exists" ~${src#$HOME}
+		fail "Failed, path not found" ~${src#$HOME}
 	fi
 
 	indent_level=1
