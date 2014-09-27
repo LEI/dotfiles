@@ -11,4 +11,4 @@ then
 	exit 1
 fi
 
-rsync --exclude-from "lib/exclude" -avh --no-perms $src $dst;
+rsync --exclude-from "lib/exclude" -avh --no-perms $src $dst # > /dev/null;

@@ -118,7 +118,7 @@ PS1+="\[${white}\]\w";
 PS1+="\$(prompt_git \"${reset} on ${yellow}\")";
 
 PS1+="\n";
-PS1+="\[${red}\]→ \[${reset}\]"; # $
+PS1+="\[${white}\]→ \[${reset}\]"; # $
 export PS1;
 
 PS2="\[${yellow}\]→ \[${reset}\]";
