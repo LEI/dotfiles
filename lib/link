@@ -52,6 +52,7 @@ link () {
 }
 
 unlink () {
+	local dst=$1
 	# 2> /dev/null
 	if [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
 		rm $dst; then
@@ -68,6 +69,13 @@ link_file () {
 	link $src $TARGET_DIR/$name
 }
 
+unlink_file () {
+	local src=$1
+	local name=${src#$DOTFILES_DIR/}
+
+	unlink $TARGET_DIR/$name
+}
+
 link_dotfile () {
 	local src=$1
 	local name
@@ -75,5 +83,15 @@ link_dotfile () {
 	if [ ${src: -1} = "." ]; then
 		name=.$(basename ${src%?})
 		link $src $TARGET_DIR/$name
+	fi
+}
+
+unlink_dotfile () {
+	local src=$1
+	local name
+
+	if [ ${src: -1} = "." ]; then
+		name=.$(basename ${src%?})
+		unlink $TARGET_DIR/$name
 	fi
 }
