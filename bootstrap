@@ -7,6 +7,8 @@ cd "$(dirname "$0")"
 
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
+indent_level=1
+indent_size=3
 
 export DOTFILES=$DOTFILES_DIR
 
@@ -29,7 +31,7 @@ source $lib/print
 source $lib/ask
 source $lib/dir
 source $lib/link
-source $lib/gitconfig
+source $lib/git
 source $lib/brew
 
 check_file () {
@@ -69,9 +71,91 @@ echo_usage () {
 	exit 0
 }
 
+uninstall () {
+	# Does not undo bundles & defaults
+
+	# Remove bin/* and */*.symlink
+	# ask "Remove symbolic links ?" Y && \
+	# 	info "Unlinking bin files" "..." && \
+	# 	dir "/bin" "" unlink && \
+	# 	info "Unlinking dotfiles" "..." && \
+	# 	dir "/" "*.symlink" unsymlink && \
+	# 	success 'Symlinks unchained.' || \
+	# 	skip
+
+	# Remove .vim
+	# TODO Symlink
+	# ask "Remove .vim directory ?" Y && \
+	# 	remove ".vim" || \
+	# 	skip
+
+	echo ''
+	echo 'Bootstrap uninstalled things.'
+}
+
+install () {
+	# All started here
+	echo 'bootfiles dotstrap'
+	echo ''
+
+	# Create git/.gitconfig if needed
+	if check_file "git/gitconfig." Y; then
+		if ask "Configure git credentials ?" Y; then
+			gitconfig
+		else
+			skipped
+		fi
+	else
+		warn "Git configuration already file exists" " "
+	fi
+
+	echo ''
+	indent_level=1
+
+	# Ignore lists
+	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
+	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
+	# Symbolic links
+	if ask "Create symbolic links ?" Y true; then
+		[ "$debug" = true ] && info "Symbolic dry run" "Changes are not applied while debugging" true
+		dir "" link_dotfile ${global_ignore[@]} || skipped
+		dir "bin" link_file || skipped
+		dir ".vim" link_file ${vim_ignore[@]} || skipped
+	else
+		skipped
+	fi
+
+	echo ''
+	indent_level=1
+
+	# Set OS defaults
+	local defaults=$DOTFILES_DIR/lib/defaults
+	source_file $defaults && \
+		success "Configuration loaded" "lib/defaults" || \
+		fail "Configuration didn't fully complete" "lib/defaults"
+
+	echo ''
+	indent_level=1
+
+	# Install deps & utils
+	local setup=$DOTFILES_DIR/lib/setup
+	source_file $setup && \
+		success "Dependencies were sourced" "lib/setup" || \
+		fail "Dependencies didn't fully installed" "lib/setup"
+
+
+		#cfg "git/destination" && \
+		#cfg "git/exception" || \
+
+	indent_level=0
+
+	echo ''
+	success "Things were bootstrapped !" " "
+}
+
 # Parse arguments and unset recognized ones
 parse_flags () {
-	local args=$1
+	local args=("$@")
 
 	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 		case ${args[i]} in
@@ -102,101 +186,21 @@ parse_flags () {
 	# Print echo_usage if > 1 argument left
 	[ ${#args[@]} -gt 1 ] && echo_usage
 
-	echo ${args[0]}
+	echo ${args[@]}
 }
 
-
-uninstall () {
-	# Does not undo bundles & defaults
-
-	# Remove bin/* and */*.symlink
-	# ask "Remove symbolic links ?" Y && \
-	# 	info "Unlinking bin files" "..." && \
-	# 	dir "/bin" "" unlink && \
-	# 	info "Unlinking dotfiles" "..." && \
-	# 	dir "/" "*.symlink" unsymlink && \
-	# 	success 'Symlinks unchained.' || \
-	# 	skip
-
-	# Remove .vim
-	# TODO Symlink
-	# ask "Remove .vim directory ?" Y && \
-	# 	remove ".vim" || \
-	# 	skip
-
-	echo ''
-	echo 'Bootstrap uninstalled things.'
-}
-
-install () {
-	# All started here
-	echo 'dotfiles bootrapper'
-	echo ''
-
-	# Create git/.gitconfig if needed
-	if check_file "git/gitconfig." Y; then
-		if ask "Configure git credentials ?" Y; then
-			gitconfig
-		else
-			skipped
-		fi
-	else
-		warn "Git configuration already file exists" " "
-	fi
-
-	echo ''
-
-	# Ignore lists
-	local global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
-	local vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
-	# Symbolic links
-	if ask "Create symbolic links ?" Y true; then
-		[ "$debug" = true ] && info "Symbolic dry run" "Changes are not applied while debugging" true
-		dir "" link_dotfile ${global_ignore[@]} || skipped
-		dir "bin" link_file || skipped
-		dir ".vim" link_file ${vim_ignore[@]} || skipped
-	else
-		skipped
-	fi
-
-	echo ''
-
-	# Set OS defaults
-	local defaults=$DOTFILES_DIR/lib/defaults
-	source_file $defaults || success "Defaults sourced" "lib/defaults"
-
-	echo ''
-
-	# Install deps & utils
-	local setup=$DOTFILES_DIR/lib/setup
-	source_file $setup || success "Deps sourced" "lib/setup"
-	info "'set-up' is an alias to this step" "bin/set-up" true
-
-
-		#cfg "git/destination" && \
-		#cfg "git/exception" || \
-
-	indent_level=0
-
-	echo ''
-	success "Things were bootstrapped !" " "
-}
-
+# Execute command
 bootstrap () {
-	cmd=$(parse_flags $args)
-	echo "cmd $cmd"
-	indent_level=1
-	indent_size=3
+	cmd=$(parse_flags $@)
 
-	# Execute command
 	case $cmd in
 		'')          install ;;
 		'install')   install ;;
 		'uninstall') uninstall ;;
 		'brew')      brew_bundle "Brew" ;;
 		'cask')      brew_bundle "Cask" ;;
-		*)           install ;;
+		*)           echo_usage ;;
 	esac
 }
 
-bootstrap
+bootstrap ${args[@]}
