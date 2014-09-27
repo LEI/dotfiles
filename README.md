@@ -1,6 +1,6 @@
 # bootfiles dotstrap
 
-Dotfiles files and setup manager build thanks to the Internet.
+Dotfiles setup being build thanks to the Internet.
 
 ## Usage
 
