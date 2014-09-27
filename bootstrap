@@ -15,24 +15,38 @@ export DOTFILES=$DOTFILES_DIR
 # Get command
 args=("$@")
 
-# if [ -e "$DOTFILES_DIR/config" ]
-# then
-# 	source $DOTFILES_DIR/config
-# else
-# 	echo "$cfg file needed. See config.sample for directions and copy it to config.sample."
-# 	exit 1
-# fi
-
 set -e
 
-# Import functions
-lib=$DOTFILES_DIR/lib
-source $lib/print
-source $lib/ask
-source $lib/dir
-source $lib/link
-source $lib/git
-source $lib/brew
+
+do_setup () {
+	# TODO Configuration file
+	# if [ -e "$DOTFILES_DIR/config" ]
+	# then
+	# 	source $DOTFILES_DIR/config
+	# else
+	# 	echo "$cfg file needed. See config.sample for directions and copy it to config."
+	# 	exit 1
+	# fi
+
+	echo 'bootfiles dotstrap'
+
+	git pull origin master
+
+	# Import functions
+	lib=$DOTFILES_DIR/lib
+	source $lib/print
+	source $lib/ask
+	source $lib/dir
+	source $lib/link
+	source $lib/git
+	source $lib/brew
+}
+
+# Print command line usage
+echo_usage () {
+	$lib/usage
+	exit 0
+}
 
 check_file () {
 	local file=$1
@@ -65,12 +79,6 @@ sandbox () {
 	fi
 }
 
-# Print command line usage
-echo_usage () {
-	$lib/usage
-	exit 0
-}
-
 uninstall () {
 	# Does not undo bundles & defaults
 
@@ -94,8 +102,6 @@ uninstall () {
 }
 
 install () {
-	# All started here
-	echo 'bootfiles dotstrap'
 	echo ''
 
 	# Create git/.gitconfig if needed
@@ -121,6 +127,7 @@ install () {
 		dir "" link_dotfile ${global_ignore[@]} || skipped
 		dir "bin" link_file || skipped
 		dir ".vim" link_file ${vim_ignore[@]} || skipped
+		success "Stuff linked"
 	else
 		skipped
 	fi
@@ -132,7 +139,8 @@ install () {
 	local defaults=$DOTFILES_DIR/lib/defaults
 	source_file $defaults && \
 		success "Configuration loaded" "lib/defaults" || \
-		fail "Configuration didn't fully complete" "lib/defaults"
+		warn "Configuration didn't fully complete" "lib/defaults"
+	info "'set-defaults' is an alias to this step" " " true
 
 	echo ''
 	indent_level=1
@@ -141,11 +149,8 @@ install () {
 	local setup=$DOTFILES_DIR/lib/setup
 	source_file $setup && \
 		success "Dependencies were sourced" "lib/setup" || \
-		fail "Dependencies didn't fully installed" "lib/setup"
-
-
-		#cfg "git/destination" && \
-		#cfg "git/exception" || \
+		warn "Dependencies didn't fully installed" "lib/setup"
+	info "'set-up' is an alias to this step" " " true
 
 	indent_level=0
 
@@ -203,4 +208,5 @@ bootstrap () {
 	esac
 }
 
+do_setup
 bootstrap ${args[@]}

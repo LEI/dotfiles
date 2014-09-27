@@ -1,15 +1,21 @@
 #!/bin/bash
 #
 # Homebrew utils
-# Needs lib/print
+# Uses lib/print, ask
 
 install_homebrew () {
 	# If OS X and brew not already installed
 	if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
-		info "Installing Homebrew" "..." true
 
-		#Skip the "Press enter to continue…" prompt.
-		true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+		if ask "Install Homebrew ?" N; then
+			info "Installing Homebrew" "..." true
+
+			#Skip the "Press enter to continue…" prompt.
+			true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+		fi
+
+	else
+		success "Homebrew already present"
 	fi
 }
 
