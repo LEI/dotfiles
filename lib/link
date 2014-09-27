@@ -56,9 +56,9 @@ unlink () {
 	# 2> /dev/null
 	if [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
 		rm $dst; then
-		success "Unlinked" "${dst#$TARGET_DIR/}"
+		success "${dst#$TARGET_DIR/}" "Unlinked"
 	else
-		fail "$dst can't be removed" "${dst#$TARGET_DIR/}"
+		fail "${dst#$TARGET_DIR/}" "Cannot be removed"
 	fi
 }
 
