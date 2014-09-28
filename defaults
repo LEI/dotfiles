@@ -10,7 +10,7 @@ source $lib/ask
 
 UNAME=$( uname )
 
-info "'dot defaults' is an alias to execute this step" " " true
+info "'dot defaults' is an alias to this step" " " true
 
 if [ -n "$indent_level" ]; then
 	original_level=$indent_level
@@ -21,10 +21,6 @@ fi
 case $UNAME in
 
 	Darwin)
-
-		if [ "$(whoami)" != "root" ]; then
-			warn "Administrator access is required for $(whoami)" && sudo -v
-		fi
 
 		# TERMINAL
 
@@ -39,17 +35,17 @@ case $UNAME in
 
 
 		if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
-			if ask "Change Terminal settings ? Currently $CURRENT_PROFILE)" Y; then
+			if ask "Change Terminal profile ? Currently $CURRENT_PROFILE)" Y; then
 				((indent_level++))
 				open "$TERM_FILE"
 				sleep 1 # Wait a bit to make sure the theme is loaded
 				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
 				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
 
-				success "Terminal window" "Default settings changed to $TERM_PROFILE.terminal"
+				success "Terminal window" "Profile now uses $TERM_PROFILE.terminal"
 			fi
 		else
-			success "Terminal window" "Settings already set to $TERM_PROFILE.terminal"
+			success "Terminal window" "Current profile already uses $TERM_PROFILE.terminal" true
 			((indent_level++))
 		fi
 
@@ -61,10 +57,24 @@ case $UNAME in
 
 			((indent_level++))
 
+			if [ "$(whoami)" != "root" ]; then
+				warn "Administrator access is required" " " && sudo -v
+			fi
+
 			ask "SSD specific commands ?" N && SSD=true
 			info "Executing init/.osx" "..." true
 			if source $DOTFILES/init/.osx; then
-				info "Some changes may require a logout/restart to take effect"
+				info "Some changes may require a logout/restart to take effect" " " true
+
+				# Kill affected applications
+
+				if ask "Kill affected applications (except Terminal) ?" N; then
+					for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
+						"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
+						"Transmission" "Twitter" "iCal"; do # "Terminal"
+						killall "${app}" > /dev/null 2>&1
+					done
+				fi
 			else
 				fail "$DOTFILES/init/.osx"
 				step_failed=true
@@ -100,11 +110,9 @@ case $UNAME in
 
 		;;
 
-	Linux)
+	*)
 
-		((indent_level++))
-
-		echo $UNAME
+		echo "No configuration for $UNAME"
 
 		;;
 

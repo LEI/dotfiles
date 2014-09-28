@@ -10,7 +10,7 @@ source $lib/brew
 
 UNAME=$( uname )
 
-info "'dot setup' is an alias to execute Brew and Cask files" " " true
+info "'dot setup' is an alias to this step" " " true
 
 if [ -n "$indent_level" ]; then
 	original_level=$indent_level
@@ -31,9 +31,7 @@ case $UNAME in
 			# Install dependencies
 			if ask "Bundle brew ?" Y; then
 				((indent_level++))
-				if ! brew_bundle "Brew"; then
-					setp_failed=true
-				fi
+				brew_bundle "Brew" || setp_failed=true
 			else
 				skipped "Brew"
 				((indent_level++))
@@ -46,9 +44,7 @@ case $UNAME in
 			# Install programs
 			if ask "Bundle cask ?" Y; then
 				((indent_level++))
-				if ! brew_bundle "Cask"; then
-					setp_failed=true
-				fi
+				brew_bundle "Cask" || setp_failed=true
 			else
 				skipped "Cask"
 				((indent_level++))
@@ -62,8 +58,9 @@ case $UNAME in
 
 		;;
 
-	Linux)
+	*)
 
+		echo "No setup for $UNAME"
 		# apt-get stuff ?
 		# https://github.com/Homebrew/linuxbrew ?
 

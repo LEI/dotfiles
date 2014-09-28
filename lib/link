@@ -65,19 +65,25 @@ link () {
 		if [ "$debug" != true ]; then
 			ln -s ${src} ${dst}
 		fi
-
-		success "${dst#$TARGET_DIR/}" "Linked ~${src#$HOME} to ~${dst#$HOME}"
+		# ~${src#$HOME}
+		success "${dst#$TARGET_DIR/}" "Linked to ~${dst#$HOME}"
 	fi
 }
 
 unlink () {
 	local dst=$1
-	# 2> /dev/null
-	if [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
+
+	if [ ! -e "$dst" ]; then
+		success "${dst#$TARGET_DIR/}" "Not found" true
+	elif [ -L "$dst" ] && \
 		rm $dst; then
 		success "${dst#$TARGET_DIR/}" "Unlinked"
+	elif [ -f "$dst" ]; then
+		warn "${dst#$TARGET_DIR/}" "Is a file"
+	elif [ -d "$dst" ]; then
+		warn "${dst#$TARGET_DIR/}" "Is a directory"
 	else
-		fail "${dst#$TARGET_DIR/}" "Cannot be removed"
+		fail "${dst#$TARGET_DIR/}" "Cannot be unlinked"
 	fi
 }
 
