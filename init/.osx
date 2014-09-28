@@ -160,7 +160,9 @@ defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
 # Disable “natural” (Lion-style) scrolling
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+if ask "Disable 'natural' scrolling ?" N; then
+	defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+fi
 
 # Increase sound quality for Bluetooth headphones/headsets
 defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
@@ -715,7 +717,7 @@ defaults write com.apple.dock wvous-tr-modifier -int 0
 # Kill affected applications                                                  #
 ###############################################################################
 
-if ask "Do you want to kill affected applications (terminal included) ?" N; then
+if ask "Kill affected applications (terminal included) ?" N; then
 	for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
 		"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
 		"Terminal" "Transmission" "Twitter" "iCal"; do

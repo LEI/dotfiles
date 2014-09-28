@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Construct find opts
+
+function join { perl -e '$s = shift @ARGV; print join($s, @ARGV);' "$@"; }
+
+find_cmd () {
+	local src=$1;
+	shift
+	#local pattern=$2;
+	local ignore_list=("$@")
+	local ignore_cmd=$(find_ignore ${ignore_array[@]})
+
+	local depth_cmd=" -maxdepth 2 "
+
+	[ -n "$pattern" ] && local pattern_cmd=" -name '$pattern' "
+
+	echo "find $src $pattern_cmd $depth_cmd $ignore_cmd -print"
+}
+
+find_ignore () {
+	local ignore_array=("$@")
+	local ignore_files=""
+	local ignore_cmd=""
+
+	# Construct exclude command
+	if [ "${#ignore_array[@]}" != "0" ]; then
+		ignore_files=`join " -o -name " ${ignore_array[@]}`
+		ignore_cmd="( -path lib -o -name $ignore_files ) -prune -o"
+	fi
+
+	echo " $ignore_cmd "
+}
