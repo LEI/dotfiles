@@ -24,7 +24,7 @@ do_rsync () {
 		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
 	fi
 
-	silent_et rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst
+	silent rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst "&"
 }
 
 copy () {
