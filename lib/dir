@@ -71,7 +71,7 @@ dir () {
 
 		indent_level=2
 
-		success "$dst"
+		success "~${dst#$HOME}"
 
 	else
 

@@ -2,8 +2,9 @@
 #
 # Usage
 
-echo "$DOTFILES/bootstrap"
-echo ""
+cat << EOF
+	Yooo
+EOF
 echo "   Usage: dot [command] [options]"
 echo ""
 echo "   Where <command> is:  alias:"

@@ -7,15 +7,15 @@ install_homebrew () {
 	# If OS X and brew not already installed
 	if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
 
-		if ask "Install Homebrew ?" Y; then
-			info "Installing Homebrew" "..." true
+		if ask "Download Homebrew ?" Y; then
 
 			#Skip the "Press enter to continue…" prompt.
 			true | ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+			info "Homebrew installed"
 		fi
 
 	else
-		success "Homebrew already present"
+		success "Homebrew already here" " " true
 	fi
 }
 
@@ -30,7 +30,9 @@ brew_bundle () {
 
 	info "brew bundle $file" "..."
 
-	if [ -f "$file" ] && silent_et brew bundle "$file" $opts; then
+	[ -f "$file" ] || warn "$file does not exists"
+
+	if [ -f "$file" ] && silent brew bundle "$file" "$opts"; then
 		success "$1 successfully bundled !"
 		return 0
 	else
