@@ -77,9 +77,9 @@ do_gitconfig () {
 do_link () {
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
+		# find $DOTFILES -name *.
 		dir "" link_dotfile ${ignore_global[@]} || skipped
 		dir "bin" link_file || skipped
-		# COPY dir ".vim" link_file ${ignore_vim[@]} || skipped
 		echo ''
 		success "Stuff linked."
 	else
@@ -91,7 +91,7 @@ undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
 		dir "" unlink_dotfile ${ignore_global[@]} || skipped
-		dir "bin" unlink_file ${ignore_global[@]} || skipped
+		dir "bin" "" unlink_file ${ignore_global[@]} || skipped
 		echo ''
 		success "Symlinks unchained."
 	else
@@ -102,8 +102,7 @@ undo_link () {
 do_copy () {
 	if ask "Copy directoriz ?" Y true; then
 		echo_debug
-		# $.* ?
-		# for (( i = ${#copy_list[@]} - 1; i >= 0; i-- )); do
+		# find $DOTFILES -name ".*" -maxdepth 1
 		copy ".vim" || skipped
 		copy ".atom" || skipped
 		echo ''
