@@ -56,15 +56,7 @@ dir () {
 				continue
 			fi
 
-			# Other way to ignore
-			# skip=false
-			# for (( index = 0; index < ${#exclude[@]}; index++ )); do
-			# 	# Check if the file is excluded
-			# 	[ "${file##*/}" = "${exclude[${index}]}" ] && skip=true && break
-			# done
-			# [ ${skip} = true ] && continue
-
-			#Do link
+			# Do action
 			eval $callback $file
 
 		done
