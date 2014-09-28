@@ -12,7 +12,7 @@ find_cmd () {
 	local ignore_list=("$@")
 	local ignore_cmd=$(find_ignore ${ignore_list[@]})
 
-	local depth_cmd=" -maxdepth 2 "
+	local depth_cmd=" -maxdepth 2 " # MAX_DEPTH
 
 	[ -n "$pattern" ] && local pattern_cmd=" -name '$pattern' "
 

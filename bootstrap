@@ -35,8 +35,7 @@ init_bootstrap () {
 	DOTFILES=$DIRECTORY
 	echo "bootfiles dotstrap $VERSION"
 	echo "$DOTFILES/bootstrap"
-
-	#git pull origin master
+	echo ''
 
 	# Import functions
 	source $lib/utils
@@ -47,6 +46,13 @@ init_bootstrap () {
 	source $lib/link
 	source $lib/git
 	source $lib/brew
+
+	# Pull last changes
+	if ask "Pull last version from GitHub ?" Y true; then
+		source $DOTFILES_DIR/bin/git-pup
+	else
+		skipped
+	fi
 }
 
 # Print command line usage

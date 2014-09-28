@@ -1,5 +1,18 @@
-# bootfiles dotstrap
+#!/bin/bash
 #
-# Configuration
+# bootfiles dotstrap configuration
 
+# GLOBAL
+VERSION=0.1
+# Path also defined in ~/.bash_profile
+DIRECTORY=~/.dotfiles
+
+# Copy
 directories=(".atom" ".vim")
+
+# IGNORE
+global_ignore=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "README" "LICENSE" "CONTRIBUTING")
+symlink_ignore=(${global_ignore[@]})
+# Directories
+atom_ignore=(${global_ignore[@]})
+vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")

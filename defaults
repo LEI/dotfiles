@@ -60,7 +60,7 @@ case $UNAME in
 				warn "Administrator access is required" " " && sudo -v
 			fi
 
-			ask "Execute SSD specific commands ?" Y && SSD=true
+			ask "Execute SSD specific commands ?" N && SSD=true
 			info "Executing init/.osx" "..." true
 			if source $DOTFILES_DIR/init/.osx; then
 				warn "Some changes may require a logout/restart to take effect" " "

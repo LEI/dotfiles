@@ -1,7 +1,17 @@
+" Autoload plugins
+execute pathogen#infect()
+
 " Use the Solarized Dark theme
 set background=dark
 colorscheme solarized
 let g:solarized_termcolors=256
+
+" Open NERDTree automatically if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" Show hidden files by default
+let NERDTreeShowHidden=1
 
 " Make Vim more useful
 set nocompatible

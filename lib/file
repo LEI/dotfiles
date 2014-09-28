@@ -51,10 +51,10 @@ remove () {
 	((indent_level++))
 	if [ ! -e "$dst" ]; then
 		success "${dst#$HOME/}" "Not found" true
-	elif [ -d "$dst" ]; then
-		info "${dst#$HOME/}" "Directory ignored" true
-	elif [ -f "$dst" -o -L "$dst" ] && \
-		rm $dst; then
+	# elif [ -d "$dst" ]; then
+	# 	info "${dst#$HOME/}" "Directory ignored" true
+	elif [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
+		rm -r $dst; then
 		#      ^ 2> /dev/null ?
 		success "${dst#$HOME/}" "Removed"
 	else
