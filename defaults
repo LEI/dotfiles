@@ -4,8 +4,7 @@
 # Steps specific to init folder & depending on OS type
 
 # Import prompt functions
-lib=$DOTFILES/lib
-source $lib/print
+lib=$DOTFILES_DIR/lib
 source $lib/ask
 
 UNAME=$( uname )
@@ -25,7 +24,7 @@ case $UNAME in
 		# TERMINAL
 
 		# Search for the terminal configuration
-		TERM_FILE=`find $DOTFILES -name *.terminal`
+		TERM_FILE=`find $DOTFILES_DIR -name *.terminal`
 		base_name=$(basename $TERM_FILE)
 		TERM_PROFILE=${base_name%%.*}
 		# Custom version of the Solarized Dark theme
@@ -63,7 +62,7 @@ case $UNAME in
 
 			ask "SSD specific commands ?" N && SSD=true
 			info "Executing init/.osx" "..." true
-			if source $DOTFILES/init/.osx; then
+			if source $DOTFILES_DIR/init/.osx; then
 				info "Some changes may require a logout/restart to take effect" " " true
 
 				# Kill affected applications
@@ -76,7 +75,7 @@ case $UNAME in
 					done
 				fi
 			else
-				fail "$DOTFILES/init/.osx"
+				fail "$DOTFILES/init/.osx" "Failed"
 				step_failed=true
 			fi
 		else
@@ -95,7 +94,7 @@ case $UNAME in
 			for f in "$st_prefix"*"$st_suffix"; do
 
 				rm "$f" # -f ?
-				ln -s "$DOTFILES/init/Preferences.sublime-settings" "$f"
+				ln -s "$DOTFILES_DIR/init/Preferences.sublime-settings" "$f"
 
 				st_success=true
 				st_version=${f#$st_prefix}
