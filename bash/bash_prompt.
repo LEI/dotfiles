@@ -65,11 +65,11 @@ function exitstatus {
 
 	EXITSTATUS="$?";
 
-	STATUS="\n";
+	STATUS="\r";
 
 	if [ "${EXITSTATUS}" != 0 ]
 	then
-		STATUS+="${red}× ";
+		STATUS+="${red}×${reset} ";
 		#printf "%$(($COLUMNS))s\e[m" "× $$ ";
 	#else
 		#STATUS+="${green}✓ ";
@@ -83,7 +83,7 @@ PROMPT_COMMAND=exitstatus;
 
 # Highlight the user name when logged in as root.
 if [[ "${USER}" == "root" ]]; then
-	userStyle="${blue}";
+	userStyle="${red}";
 else
 	userStyle="${cyan}";
 fi

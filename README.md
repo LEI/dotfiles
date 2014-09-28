@@ -46,7 +46,7 @@ Just move the dot at the end of the name and place it in a directory before boot
 ## TODO
 
 - rsync -d .* ?
-- ignore, conf
+- ignore, conf, osx loc
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
 - Ruby, compass.. http://www.npmjs.org/package/dotfiles
 - https://github.com/thoughtbot/rcm

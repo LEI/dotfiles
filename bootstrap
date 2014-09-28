@@ -68,7 +68,7 @@ do_gitconfig () {
 			skipped
 		fi
 	else
-		warn "Git configuration already file exists" "$gitconfg_file"
+		warn "Git configuration already file exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
 	fi
 }
 
@@ -139,7 +139,7 @@ do_defaults () {
 			warn "Configuration did not fully complete" "[defaults]"
 		fi
 	else
-		skipped "Brew & Cask"
+		skipped "defaults"
 		((indent_level++))
 	fi
 
@@ -148,7 +148,7 @@ do_defaults () {
 
 do_setup () {
 	# Install deps & utils with homebrew
-	if ask "Download dependencies ?" Y true; then
+	if ask "Download dependencies ?" N true; then
 		((indent_level++))
 
 		local setup=$DOTFILES_DIR/setup
@@ -160,7 +160,7 @@ do_setup () {
 			warn "Dependencies did not fully installed" "[setup]"
 		fi
 	else
-		skipped "Brew & Cask"
+		skipped "setup"
 		((indent_level++))
 	fi
 
@@ -244,6 +244,9 @@ if init_bootstrap; then
 	# Parse arguments and unset recognized ones
 	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 		case ${args[i]} in
+			-a|--auto)
+				force_default=true
+				unset args[i] ;;
 			-d|--debug)
 				debug=true
 				unset args[i] ;;
@@ -252,9 +255,6 @@ if init_bootstrap; then
 				unset args[i] ;;
 			-h|--help)
 				echo_usage
-				unset args[i] ;;
-			-s|--safe)
-				force_default=true
 				unset args[i] ;;
 			-t|--test)
 				sandbox

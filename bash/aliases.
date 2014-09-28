@@ -142,7 +142,3 @@ alias reload="exec $SHELL -l"
 
 # Faster npm for Europeans
 command -v npm > /dev/null && alias npme="npm --registry http://registry.npmjs.eu/"
-
-# Pi
-alias rp="ssh -v LEI@192.168.1.15"
-alias pi="ssh -v LEI@gfrichet.ddns.net"

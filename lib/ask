@@ -22,7 +22,7 @@ ask () {
 	elif [ "$force_default" = true ]; then
 		# Use default without asking
 		key=$default
-		forced=" (predefined)"
+		forced=" (default)"
 	else
 		# Just do it
 		key=Y
