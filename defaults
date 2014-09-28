@@ -11,8 +11,6 @@ source $lib/ask
 UNAME=$( uname )
 
 info "'dot defaults' is an alias to execute this step" " " true
-info "Using $(uname) specific defaults" " " true
-echo ''
 
 if [ -n "$indent_level" ]; then
 	original_level=$indent_level
@@ -48,10 +46,10 @@ case $UNAME in
 				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
 				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
 
-				success "Window settings" "Default now set to $TERM_PROFILE.terminal"
+				success "Terminal window" "Default settings changed to $TERM_PROFILE.terminal"
 			fi
 		else
-			warn "Window settings" "Already set to $TERM_PROFILE.terminal"
+			success "Terminal window" "Settings already set to $TERM_PROFILE.terminal"
 			((indent_level++))
 		fi
 
@@ -69,24 +67,9 @@ case $UNAME in
 				info "Some changes may require a logout/restart to take effect"
 			else
 				fail "$DOTFILES/init/.osx"
+				step_failed=true
 			fi
 		else
-			# step_skipped=true
-			((indent_level++))
-		fi
-
-		((indent_level--))
-
-		# Install deps & utils with homebrew
-		if ask "Download dependencies ?" Y true; then
-			((indent_level++))
-
-			local setup=$DOTFILES_DIR/setup
-			source_file $setup || \
-				warn "Dependencies did not fully installed" "$DOTFILES_DIR/setup"
-			# success "Dependencies were sourced" "$DOTFILES_DIR/setup"
-		else
-			skipped "Brew & Cask"
 			((indent_level++))
 		fi
 
@@ -109,9 +92,10 @@ case $UNAME in
 				success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
 			done
 
-			[ ! -n "$st_success" ] && fail "No application found" "$st_prefix*$st_suffix"
-		# else
-		# 	step_skipped=true
+			if [ ! -n "$st_success" ]; then
+				fail "No application found" "$st_prefix*$st_suffix"
+				step_failed=true
+			fi
 		fi
 
 		;;
@@ -129,4 +113,4 @@ esac
 echo ''
 indent_level=$original_level
 
-[ "$step_skipped" != true ] && return 1
+[ "$step_failed" = true ] && return 0

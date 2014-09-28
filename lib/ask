@@ -6,6 +6,7 @@
 ask () {
 	local question=$1 default=$2 highlight=$3
 	local yesno
+	local forced
 
 	case "$default" in
 		Y) yesno="Y/n" ;;
@@ -14,16 +15,18 @@ ask () {
 
 	user "$question" "($yesno)" $highlight
 
-	if [ "$force" != true ] && [ "$f_default" != true ]; then
+	if [ "$force_all" != true ] && [ "$force_default" != true ]; then
 		read -s -n 1 key
 		# Make enter reflect default
 		[ "$key" = '' ] && key=$default
-	elif [ "$f_default" = true ]; then
+	elif [ "$force_default" = true ]; then
 		# Use default without asking
 		key=$default
+		forced=" (predefined)"
 	else
 		# Just do it
 		key=Y
+		forced=" (forced)"
 	fi
 
 	# Set indentation
@@ -35,9 +38,9 @@ ask () {
 
 	# Return answer
 	case "$key" in
-		Y|y) echo "$indent>  Yes"
+		Y|y) echo "$indent>  Yes$forced"
 			return 0 ;;
-		N|n|*) echo "$indent>  No"
+		N|n|*) echo "$indent>  No$forced"
 			return 1 ;;
 	esac
 }
