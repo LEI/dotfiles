@@ -4,7 +4,7 @@
 #
 # Copy with rsync
 
-lib=$DOTFILES/lib
+lib=$DOTFILES_DIR/lib
 source $lib/join
 
 do_rsync () {
@@ -24,8 +24,7 @@ do_rsync () {
 		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
 	fi
 
-	# --exclude-from "lib/exclude"
-	silent_et rsync ${ignore_cmd} -avh --no-perms --dry-run $src $dst
+	silent_et rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst
 }
 
 copy () {
@@ -37,7 +36,7 @@ copy () {
 	if [ -f "$src" -o -d "$src" ] && \
 		do_rsync $src $TARGET_DIR ${ignore_array[@]}; then
 		# ^ > /dev/null
-		success "$src" "Copied to ~/$src"
+		success "$src" "Copied to ~${TARGET_DIR#$HOME}"
 	else
 		fail "$src" "Failed to be copied"
 	fi

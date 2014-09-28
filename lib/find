@@ -2,7 +2,7 @@
 #
 # Construct find opts
 
-lib=$DOTFILES/lib
+lib=$DOTFILES_DIR/lib
 source $lib/join
 
 find_cmd () {

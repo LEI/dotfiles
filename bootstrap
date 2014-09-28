@@ -8,20 +8,10 @@ cd "$(dirname "$0")"
 
 set -e
 
-export DOTFILES=$(pwd)
-export lib=$DOTFILES/lib
-# Import functions
-source $lib/utils
-source $lib/print
-source $lib/ask
-source $lib/dir
-source $lib/file
-source $lib/link
-source $lib/git
-source $lib/brew
-
-DOTFILES_DIR=$DOTFILES
+DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
+
+export DOTFILES
 
 indent_level=1
 indent_size=3
@@ -36,12 +26,25 @@ reset_colors=
 verbose=
 
 # Get config
+lib=$DOTFILES_DIR/lib
 CONFIG_FILE=$DOTFILES_DIR/config
 source $lib/readconf
 
 init_bootstrap () {
-	echo "bootfiles dotstrap $version"
+	# Cfg vars rdy
+	DOTFILES=$DIRECTORY
+	echo "bootfiles dotstrap $VERSION"
 	#git pull origin master
+
+	# Import functions
+	source $lib/utils
+	source $lib/print
+	source $lib/ask
+	source $lib/dir
+	source $lib/file
+	source $lib/link
+	source $lib/git
+	source $lib/brew
 }
 
 # Print command line usage
@@ -166,43 +169,43 @@ do_setup () {
 
 	((indent_level--))
 }
-
+count=
 sandbox () {
-	TARGET_DIR=$TARGET_DIR/sandbox
+	TARGET_DIR="$TARGET_DIR/sandbox"
 	info "$TARGET_DIR" "Using sandbox folder"
 
+	echo $TARGET_DIR
 	if [ ! -d $TARGET_DIR ]; then
-		mkdir $TARGET_DIR
+		echo $TARGET_DIR
 	fi
+	echo "$count"
+	if [ "$count" = true ]; then exit; fi
+	count=true
 }
 
-new_line () { echo ''; indent_level=1; }
+# New line
+n_l () { echo ''; indent_level=1; }
 
 install () {
 	echo ''
 
 	# Git
-	do_gitconfig
-	new_line
+	do_gitconfig; n_l
 
 	# Symbolic links
-	do_link
-	new_line
+	do_link; n_l
 
 	# Directories
-	do_copy
-	new_line
+	do_copy; n_l
 
 	# Set OS defaults
 
-	info "Using $(uname) specific configuration" " " true
-	new_line
+	info "Using $(uname) specific configuration" " " true; n_l
 
-	do_defaults
-	new_line
+	do_defaults; n_l
 
 	# Dependencies
-	do_setup
+	do_setup; n_l
 }
 
 uninstall () {
@@ -211,15 +214,10 @@ uninstall () {
 	# Does not undo bundles & defaults
 
 	# Symbolic links
-	################
-
-	undo_link
-	new_line
+	undo_link; n_l
 
 	# Directories
-	#############
-
-	undo_copy
+	undo_copy;n_l
 
 	end_message="Bootstrap uninstalled things."
 }
@@ -234,7 +232,6 @@ bootstrap () {
 		'copy')      do_copy ;;
 		'defaults')  do_defaults ;;
 		'setup')     source_file $DOTFILES_DIR/setup ;;
-		'u') undo_copy ;;
 		*)           echo_usage ;;
 	esac
 }
@@ -245,28 +242,30 @@ if init_bootstrap; then
 	# Parse arguments and unset recognized ones
 	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 		case ${args[i]} in
-			-a|--auto)
+			-a|--auto) unset args[i]
 				force_default=true
-				unset args[i] ;;
-			-d|--debug)
+				;;
+			-d|--debug) unset args[i]
 				debug=true
-				unset args[i] ;;
-			-f|--force)
+				;;
+			-f|--force) unset args[i]
 				force_all=true
-				unset args[i] ;;
-			-h|--help)
+				;;
+			-h|--help) unset args[i]
 				echo_usage
-				unset args[i] ;;
-			-t|--test)
-				sandbox
-				unset args[i] ;;
-			-u|--ugly)
+				;;
+			-t|--test) unset args[i]
+				TARGET_DIR="$TARGET_DIR/sandbox"
+				[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
+				info "$TARGET_DIR" "Using sandbox folder"
+				;;
+			-u|--ugly) unset args[i]
 				reset_colors=true
-				unset args[i] ;;
-			-v|--verbose)
+				;;
+			-v|--verbose) unset args[i]
 				verbose=true
-				unset args[i] ;;
-			-*) echo "Unknown option: ${args[i]}"
+				;;
+			-*) fail "${args[i]}" "Unknown option"
 				echo_usage
 				unset args[i] ;;
 		esac
@@ -278,14 +277,10 @@ if init_bootstrap; then
 	cmd=${args[@]}
 
 	# Start
-	#######
-
 	bootstrap $cmd
 
-	echo ''
-	indent_level=0
-
 	# End
+	indent_level=0
 	[ -n "$end_message" ] || end_message="Things were bootstrapped !"
 	success "$end_message" " "
 

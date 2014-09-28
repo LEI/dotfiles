@@ -5,16 +5,16 @@
 # TODO : wtf
 silent_et () {
 	if [ "$verbose" = true ] ; then
-		"$@"
+		eval "$@"
 	else
-		"$@" &>/dev/null # (2|&)>/dev/null
+		eval "$@" &>/dev/null # (2|&)>/dev/null
 	fi
 }
 
 silent () {
 	if [ "$verbose" = true ] ; then
-		"$@"
+		eval "$@"
 	else
-		"$@" >/dev/null # (2|&)>/dev/null
+		eval "$@" >/dev/null # (2|&)>/dev/null
 	fi
 }
