@@ -1,13 +1,41 @@
 #!/bin/bash
 #
 # File manipulations
+#
+# Copy with rsync
+
+lib=$DOTFILES/lib
+source $lib/join
+
+do_rsync () {
+	local src=$1
+	local dst=$2
+	shift; shift;
+	local ignore_array=("$@")
+
+	if [ "$src" = '' -o "$dst" = '' ]
+	then
+		echo "Argument error" > /dev/stderr
+		exit 1
+	fi
+
+	local ignore_cmd=""
+	if [ "${#ignore_array[@]}" != "0" ]; then
+		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
+	fi
+
+	# --exclude-from "lib/exclude"
+	silent_et rsync ${ignore_cmd} -avh --no-perms --dry-run $src $dst
+}
 
 copy () {
 	local src=$1
+	shift
+	local ignore_array=("$@")
 
 	((indent_level++))
 	if [ -f "$src" -o -d "$src" ] && \
-		. $lib/copy $src $TARGET_DIR; then
+		do_rsync $src $TARGET_DIR ${ignore_array[@]}; then
 		# ^ > /dev/null
 		success "$src" "Copied to ~/$src"
 	else
