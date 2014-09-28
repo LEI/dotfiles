@@ -8,6 +8,15 @@ cd "$(dirname "$0")"
 
 export DOTFILES=$(pwd)
 export lib=$DOTFILES/lib
+# Import functions
+source $lib/utils
+source $lib/print
+source $lib/ask
+source $lib/dir
+source $lib/file
+source $lib/link
+source $lib/git
+source $lib/brew
 
 DOTFILES_DIR=$DOTFILES
 TARGET_DIR=$HOME
@@ -29,28 +38,17 @@ set -e
 ignore_global=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
 ignore_vim=(${ignore_global[@]} "vimrc." "gvimrc.")
 
-do_setup () {
+init_bootstrap () {
 	CONFIG_FILE=$DOTFILES_DIR/config
 	source $lib/readconf
 
 	echo "bootfiles dotstrap v$version"
 	#git pull origin master
-
-	# Import functions
-	source $lib/utils
-	source $lib/print
-	source $lib/ask
-	source $lib/dir
-	source $lib/file
-	source $lib/link
-	source $lib/git
-	source $lib/brew
 }
 
 # Print command line usage
 echo_usage () {
-	$lib/usage
-	exit 0
+	. $lib/usage
 }
 
 echo_debug () {
@@ -64,7 +62,7 @@ do_gitconfig () {
 	# Create git/.gitconfig if needed
 	local gitconfig_file="git/gitconfig."
 	if check_file "$gitconfig_file" Y; then
-		if ask "Configure git credentials ?" Y; then
+		if ask "Configure git credentials ?" Y true; then
 			gitconfig
 		else
 			skipped
@@ -91,7 +89,7 @@ undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
 		dir "" unlink_dotfile ${ignore_global[@]} || skipped
-		dir "bin" "" unlink_file ${ignore_global[@]} || skipped
+		dir "bin" unlink_file ${ignore_global[@]} || skipped
 		echo ''
 		success "Symlinks unchained."
 	else
@@ -127,17 +125,46 @@ undo_copy () {
 	fi
 }
 
+# OS specific configuration
 do_defaults () {
 	if ask "Set defaults ?" Y true; then
+		((indent_level++))
+
 		local defaults=$DOTFILES_DIR/defaults
-		source_file $defaults || \
-			warn "Configuration didn't fully complete" "$DOTFILES_DIR/defaults"
-		# success "Defaults loaded" "$DOTFILES_DIR/defaults"
-		indent_level=1
-		success "OS configuration done."
+		if source_file $defaults; then
+			((indent_level--))
+			success "Stuff configured."
+		else
+			((indent_level--))
+			warn "Configuration did not fully complete" "[defaults]"
+		fi
 	else
-		skipped "defaults"
+		skipped "Brew & Cask"
+		((indent_level++))
 	fi
+
+	((indent_level--))
+}
+
+do_setup () {
+	# Install deps & utils with homebrew
+	if ask "Download dependencies ?" Y true; then
+		((indent_level++))
+
+		local setup=$DOTFILES_DIR/setup
+		if source_file $setup; then
+			((indent_level--))
+			success "Stuff installed."
+		else
+			((indent_level--))
+			warn "Dependencies did not fully installed" "[setup]"
+		fi
+	else
+		skipped "Brew & Cask"
+		((indent_level++))
+	fi
+
+	((indent_level--))
 }
 
 sandbox () {
@@ -149,34 +176,33 @@ sandbox () {
 	fi
 }
 
+new_line () { echo ''; indent_level=1; }
+
 install () {
 	echo ''
 
 	# Git
-	#####
-
 	do_gitconfig
-
-	echo ''; indent_level=1
+	new_line
 
 	# Symbolic links
-	################
-
 	do_link
-
-	echo ''; indent_level=1
+	new_line
 
 	# Directories
-	#############
-
 	do_copy
-
-	echo ''; indent_level=1
+	new_line
 
 	# Set OS defaults
-	#################
+
+	info "Using $(uname) specific configuration" " " true
+	new_line
 
 	do_defaults
+	new_line
+
+	# Dependencies
+	do_setup
 }
 
 uninstall () {
@@ -188,8 +214,7 @@ uninstall () {
 	################
 
 	undo_link
-
-	echo ''; indent_level=1
+	new_line
 
 	# Directories
 	#############
@@ -214,25 +239,25 @@ bootstrap () {
 }
 
 # Init
-if do_setup; then
+if init_bootstrap; then
 
-	# -?|--default)
-	# 	force_default=true
-	# 	unset args[i] ;;
-	# -f|--force)
-	# 	force_all=true
-	# 	unset args[i] ;;
 	# Parse arguments and unset recognized ones
 	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 		case ${args[i]} in
 			-d|--debug)
 				debug=true
 				unset args[i] ;;
+			-f|--force)
+				force_all=true
+				unset args[i] ;;
 			-h|--help)
 				echo_usage
 				unset args[i] ;;
-			-s|--sandbox)
-				echo sandbox
+			-s|--safe)
+				force_default=true
+				unset args[i] ;;
+			-t|--test)
+				sandbox
 				unset args[i] ;;
 			-u|--ugly)
 				reset_colors=true
@@ -265,5 +290,6 @@ if do_setup; then
 
 	# Can't get this to work
 	# source ~/.bash_profile || fail "~/.bash_profile"
-
+else
+	die "An error occured while preparing bootstrap"
 fi

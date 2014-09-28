@@ -11,7 +11,6 @@ source $lib/brew
 UNAME=$( uname )
 
 info "'dot setup' is an alias to execute Brew and Cask files" " " true
-echo ''
 
 if [ -n "$indent_level" ]; then
 	original_level=$indent_level
@@ -32,7 +31,9 @@ case $UNAME in
 			# Install dependencies
 			if ask "Bundle brew ?" Y; then
 				((indent_level++))
-				brew_bundle "Brew"
+				if ! brew_bundle "Brew"; then
+					setp_failed=true
+				fi
 			else
 				skipped "Brew"
 				((indent_level++))
@@ -45,7 +46,9 @@ case $UNAME in
 			# Install programs
 			if ask "Bundle cask ?" Y; then
 				((indent_level++))
-				brew_bundle "Cask"
+				if ! brew_bundle "Cask"; then
+					setp_failed=true
+				fi
 			else
 				skipped "Cask"
 				((indent_level++))
@@ -71,4 +74,4 @@ esac
 echo ''
 indent_level=$original_level
 
-[ "$step_skipped" != true ] && return 1
+[ "$setp_failed" = true ] && return 0

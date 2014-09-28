@@ -2,6 +2,15 @@
 #
 # Utility functions
 
+# TODO : wtf
+silent_et () {
+	if [ "$verbose" = true ] ; then
+		"$@"
+	else
+		"$@" &>/dev/null # (2|&)>/dev/null
+	fi
+}
+
 silent () {
 	if [ "$verbose" = true ] ; then
 		"$@"

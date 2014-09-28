@@ -7,7 +7,7 @@ install_homebrew () {
 	# If OS X and brew not already installed
 	if [[ "$OSTYPE" =~ ^darwin ]] && [[ ! "$(type -P brew)" ]]; then
 
-		if ask "Install Homebrew ?" N; then
+		if ask "Install Homebrew ?" Y; then
 			info "Installing Homebrew" "..." true
 
 			#Skip the "Press enter to continue…" prompt.
@@ -30,9 +30,11 @@ brew_bundle () {
 
 	info "brew bundle $file" "..."
 
-	if [ -f "$file" ] && silent brew bundle "$file" $opts 2; then # 2 >/dev/null
+	if [ -f "$file" ] && silent_et brew bundle "$file" $opts; then
 		success "$1 successfully bundled !"
+		return 0
 	else
 		fail "$1 failed to bundle !"
+		return 1
 	fi
 }
