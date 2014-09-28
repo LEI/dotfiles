@@ -3,34 +3,41 @@
 # Usage
 
 cat << EOF
-	Yooo
+
+   Usage: dot [command] [options]
+
+   Where <command> (alias):
+
+         install (dot)
+
+            Execute all bootstrap steps.
+            Run './bootstrap' one time in order to symlink '~/bin' and use 'dot'.
+
+         uninstall (undot)
+
+            Remove symbolic links (files /*.$/ or bin/*) and copied files (directories /^.*/).
+            Does not reverse 'dot defaults' and 'dot setup'.
+
+         defaults (~/.dotfiles/defaults)
+
+            Available on OS X only (for now) and may require to restart.
+
+         setup (~/.dotfiles/setup)
+
+            Check for Homebrew then install bundles with init/Brewfile and init/Caskfile
+
+   And <option>:
+
+         -a, --auto      Use predefined answers
+         -d, --debug     Should only log (not ready yet)
+         -f, --force     Do everything blindlessly
+         -t, --test      Use another directory for symlink and copy
+         -u, --ugly      Reset colors for light backgrounds
+         -v, --verbose   Output external logs
+         -h, --help      Show this message
+
+      Multiple options must be separated by a space e.g. 'dot --auto --verbose'
+
 EOF
-echo "   Usage: dot [command] [options]"
-echo ""
-echo "   Where <command> is:  alias:"
-echo "         install        dot"
-echo "         uninstall      undot"
-echo "         defaults       ~/.dotfiles/defaults"
-echo "         setup          ~/.dotfiles/setup"
-echo ""
-echo "   And <option> is:"
-echo "      -a, --auto        Use predefined answers"
-echo "      -d, --debug       Should only log (not ready yet)"
-echo "      -f, --force       Do everything blindlessly"
-echo "      -t, --test        Use another directory for symlink and copy"
-echo "      -u, --ugly        Reset colors for light backgrounds"
-echo "      -v, --verbose     Output external logs"
-echo "      -h, --help        Show this message"
-echo ""
-echo "   More details:"
-echo "      Multiple options must be separated by a space e.g. 'dot --auto --verbose'"
-echo "      You need to run './bootstrap' one time in order to symlink '~/bin' and use the 'dot' commands."
-echo "      'dot' alone will execute all bootstrap steps unless it is stopped."
-echo "      'dot defaults' is available on OS X only (for now) and may require to restart."
-echo "      'dot setup' consists to check for Homebrew then install bundles with init/Brewfile and init/Caskfile."
-echo "      'dot uninstall' or 'undot' only undo:"
-echo "         - Symbolic links (file /*.$/ or bin/*)"
-echo "         - Copied files (directory /^.*/) in $DOTFILES tree"
-echo "      It does not reverse 'dot defaults' and 'dot setup'."
 
 exit 0
