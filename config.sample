@@ -15,4 +15,4 @@ global_ignore=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "README" "LIC
 symlink_ignore=(${global_ignore[@]})
 # Directories
 atom_ignore=(${global_ignore[@]})
-vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
+vim_ignore=(${global_ignore[@]} "*.")
