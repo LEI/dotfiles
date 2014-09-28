@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Copy with rsync
+# Uses lib/utils
 
 src=$1
 dst=$2
@@ -11,4 +12,4 @@ then
 	exit 1
 fi
 
-rsync --exclude-from "lib/exclude" -avh --no-perms $src $dst # > /dev/null;
+silent rsync --exclude-from "lib/exclude" -avh --no-perms $src $dst # > /dev/null;

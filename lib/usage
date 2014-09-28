@@ -2,8 +2,6 @@
 #
 # Usage
 
-source $lib/colors
-
 echo "$DOTFILES/bootstrap"
 echo ""
 echo "   Usage: dot [command] [options]"
@@ -23,12 +21,13 @@ echo "      -s, --sandbox     Use another directory"
 echo "      -u, --ugly        Remove colors for light backgrounds"
 echo "      -v, --verbose     Print secondary logs"
 echo ""
-echo "   More details on commands:"
-echo "      You need to run './bootstrap' one time in order to symlink '~/bin' and use the 'dot' command."
-echo "      'dot' will execute all bootstrap steps unless it is stopped."
+echo "   More details:"
+echo "      Options have to be separated by a space e.g. 'dot -s -v'"
+echo "      You need to run '$DOTFILES/bootstrap' one time in order to symlink '~/bin' and use the 'dot' commands."
+echo "      'dot' without arguments will execute all bootstrap steps unless it is stopped."
 echo "      'dot defaults' is available on OS X only (for now) and may require to restart."
 echo "      setup consists to check for Homebrew then install bundles with init/Brewfile and init/Caskfile."
-echo "      'dot uninstall / undot' only undo:"
+echo "      'dot uninstall' or 'undot' only undo:"
 echo "         - Symbolic links (files '*.$' and 'bin/*')"
 echo "         - Copied files (root directory '^.*') in $DOTFILES tree"
 echo "      It does not reverse 'dot defaults' and does not uninstall dependencies installed by 'dot setup'."
