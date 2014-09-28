@@ -6,6 +6,8 @@
 # Set working directory
 cd "$(dirname "$0")"
 
+set -e
+
 export DOTFILES=$(pwd)
 export lib=$DOTFILES/lib
 # Import functions
@@ -33,16 +35,12 @@ force_all=
 reset_colors=
 verbose=
 
-set -e
-
-ignore_global=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
-ignore_vim=(${ignore_global[@]} "vimrc." "gvimrc.")
+# Get config
+CONFIG_FILE=$DOTFILES_DIR/config
+source $lib/readconf
 
 init_bootstrap () {
-	CONFIG_FILE=$DOTFILES_DIR/config
-	source $lib/readconf
-
-	echo "bootfiles dotstrap v$version"
+	echo "bootfiles dotstrap $version"
 	#git pull origin master
 }
 
@@ -76,8 +74,8 @@ do_link () {
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name *.
-		dir "" link_dotfile ${ignore_global[@]} || skipped
-		dir "bin" link_file || skipped
+		dir "" link_dotfile ${symlink_ignore[@]} || skipped
+		dir "bin" link_file ${global_ignore[@]} || skipped
 		echo ''
 		success "Stuff linked."
 	else
@@ -88,8 +86,8 @@ do_link () {
 undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
-		dir "" unlink_dotfile ${ignore_global[@]} || skipped
-		dir "bin" unlink_file ${ignore_global[@]} || skipped
+		dir "" unlink_dotfile ${symlink_ignore[@]} || skipped
+		dir "bin" unlink_file ${global_ignore[@]} || skipped
 		echo ''
 		success "Symlinks unchained."
 	else
@@ -101,8 +99,10 @@ do_copy () {
 	if ask "Copy directoriz ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
-		copy ".vim" || skipped
-		copy ".atom" || skipped
+		for folder in ${directoriz[@]}; do
+			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
+			copy $folder ${folder_ignore[@]} || skipped
+		done
 		echo ''
 		success "Stuff copied."
 	else
@@ -113,11 +113,11 @@ do_copy () {
 undo_copy () {
 	if ask "Remove directoriz ?" Y true; then
 		echo_debug
-		# TODO ${vim_ignore[@]} || lib/exclude
-		# remove ".vim/*" || skipped
-		# remove ".atom/*" || skipped
-		dir ".vim" remove ${ignore_vim[@]} || skipped
-		dir ".atom" remove ${ignore_global[@]} || skipped
+		for folder in ${directoriz[@]}; do
+			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
+			dir "$folder" remove ${folder_ignore[@]} || skipped
+		done
+
 		echo ''
 		success "Stuff removed."
 	else
@@ -234,6 +234,7 @@ bootstrap () {
 		'copy')      do_copy ;;
 		'defaults')  do_defaults ;;
 		'setup')     source_file $DOTFILES_DIR/setup ;;
+		'u') undo_copy ;;
 		*)           echo_usage ;;
 	esac
 }

@@ -2,14 +2,15 @@
 #
 # Construct find opts
 
-function join { perl -e '$s = shift @ARGV; print join($s, @ARGV);' "$@"; }
+lib=$DOTFILES/lib
+source $lib/join
 
 find_cmd () {
 	local src=$1;
 	shift
 	#local pattern=$2;
 	local ignore_list=("$@")
-	local ignore_cmd=$(find_ignore ${ignore_array[@]})
+	local ignore_cmd=$(find_ignore ${ignore_list[@]})
 
 	local depth_cmd=" -maxdepth 2 "
 
