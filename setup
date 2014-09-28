@@ -10,7 +10,7 @@ source $lib/brew
 
 UNAME=$( uname )
 
-info "'set-up' is an alias to execute Brew and Cask files" " " true
+info "'dot setup' is an alias to execute Brew and Cask files" " " true
 echo ''
 
 if [ -n "$indent_level" ]; then

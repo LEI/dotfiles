@@ -6,13 +6,14 @@
 # Set working directory
 cd "$(dirname "$0")"
 
-DOTFILES_DIR=$(pwd)
+export DOTFILES=$(pwd)
+export lib=$DOTFILES/lib
+
+DOTFILES_DIR=$DOTFILES
 TARGET_DIR=$HOME
+
 indent_level=1
 indent_size=3
-
-export DOTFILES=$DOTFILES_DIR
-export lib=$DOTFILES_DIR/lib
 
 # Get command
 args=("$@")
@@ -25,21 +26,14 @@ verbose=
 
 set -e
 
+ignore_global=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
+ignore_vim=(${ignore_global[@]} "vimrc." "gvimrc.")
+
 do_setup () {
-	# TODO Configuration file
-	# if [ -e "$DOTFILES_DIR/config" ]
-	# then
-	# 	source $DOTFILES_DIR/config
-	# else
-	# 	echo "$cfg file needed. See config.sample for directions and copy it to config."
-	# 	exit 1
-	# fi
-	# Ignore lists
-	global_ignore=(".DS_Store" ".gitignore" "README.md" ".git" "gitconfig.sample")
-	vim_ignore=(${global_ignore[@]} "vimrc." "gvimrc.")
+	CONFIG_FILE=$DOTFILES_DIR/config
+	source $lib/readconf
 
-	echo 'bootfiles dotstrap'
-
+	echo "bootfiles dotstrap v$version"
 	#git pull origin master
 
 	# Import functions
@@ -83,9 +77,9 @@ do_gitconfig () {
 do_link () {
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
-		dir "" link_dotfile ${global_ignore[@]} || skipped
+		dir "" link_dotfile ${ignore_global[@]} || skipped
 		dir "bin" link_file || skipped
-		# COPY dir ".vim" link_file ${vim_ignore[@]} || skipped
+		# COPY dir ".vim" link_file ${ignore_vim[@]} || skipped
 		echo ''
 		success "Stuff linked."
 	else
@@ -96,8 +90,8 @@ do_link () {
 undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
-		dir "" unlink_dotfile ${global_ignore[@]} || skipped
-		dir "bin" unlink_file ${global_ignore[@]} || skipped
+		dir "" unlink_dotfile ${ignore_global[@]} || skipped
+		dir "bin" unlink_file ${ignore_global[@]} || skipped
 		echo ''
 		success "Symlinks unchained."
 	else
@@ -108,7 +102,8 @@ undo_link () {
 do_copy () {
 	if ask "Copy directoriz ?" Y true; then
 		echo_debug
-		# TODO ${vim_ignore[@]} || lib/exclude
+		# $.* ?
+		# for (( i = ${#copy_list[@]} - 1; i >= 0; i-- )); do
 		copy ".vim" || skipped
 		copy ".atom" || skipped
 		echo ''
@@ -124,8 +119,8 @@ undo_copy () {
 		# TODO ${vim_ignore[@]} || lib/exclude
 		# remove ".vim/*" || skipped
 		# remove ".atom/*" || skipped
-		dir ".vim" remove ${vim_ignore[@]} || skipped
-		dir ".atom" remove || skipped
+		dir ".vim" remove ${ignore_vim[@]} || skipped
+		dir ".atom" remove ${ignore_global[@]} || skipped
 		echo ''
 		success "Stuff removed."
 	else
@@ -173,7 +168,7 @@ install () {
 	echo ''; indent_level=1
 
 	# Directories
-	################
+	#############
 
 	do_copy
 
@@ -190,9 +185,15 @@ uninstall () {
 
 	# Does not undo bundles & defaults
 
+	# Symbolic links
+	################
+
 	undo_link
 
 	echo ''; indent_level=1
+
+	# Directories
+	#############
 
 	undo_copy
 
@@ -201,9 +202,7 @@ uninstall () {
 
 # Execute command
 bootstrap () {
-	local cmd=$1
-
-	case $cmd in
+	case $1 in
 		'')          install ;;
 		'install')   install ;;
 		'uninstall') uninstall ;;
@@ -248,15 +247,15 @@ if do_setup; then
 		esac
 	done
 
-	export debug
-
 	# Print echo_usage if > 1 argument left
 	[ ${#args[@]} -gt 1 ] && echo_usage
 
-	# Launch
-	########
+	cmd=${args[@]}
 
-	bootstrap ${args[@]}
+	# Start
+	#######
+
+	bootstrap $cmd
 
 	echo ''
 	indent_level=0

@@ -17,7 +17,7 @@ Dotfiles setup being build thanks to the Internet.
 - Set defaults (init/.osx)
 - Install dependencies via Homebrew
 - Download applications via Caskroom
-- Link Preferences.sublime-settings
+- Link Preferences.sublime-settings ([todobtr](https://github.com/zargony/dotfiles/tree/master/Library))
 
 ### Add a dotfile to your home
 
@@ -30,6 +30,7 @@ Just move the dot at the end of the name and place it in a directory before boot
 - Nicolas Gallagher [@necolas](//github.com/necolas) [OS X dotfiles](//github.com/necolas/dotfiles)
 - Ben Alman [@cowboy](//github.com/cowboy) [OS X / Linux dotfiles](//github.com/cowboy/dotfiles)
 - Ryan Bates [@ryanb](//github.com/ryanb) [OS X / Linux dotfiles](//github.com/ryanb/dotfiles)
+- [> leoj3n](https://github.com/leoj3n/dotfiles)
 - [tejr](//github.com/tejr/dotfiles)
 - [gf3](//github.com/gf3/dotfiles)
 - [rtomayko](//github.com/rtomayko/dotfiles)
@@ -40,10 +41,12 @@ Just move the dot at the end of the name and place it in a directory before boot
 - [sitaktif](//github.com/sitaktif/dotfiles)
 - [zenorocha](//github.com/zenorocha/dotfiles)
 - [gist/zenorocha/7159780](//gist.github.com/zenorocha/7159780)
+- [mackup](https://github.com/lra/mackup)
 
 ## TODO
 
-- opts undot silent
+- rsync -d .* ?
+- ignore, conf
 - Sync-home (licences, ssh_config...) CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
 - Ruby, compass.. http://www.npmjs.org/package/dotfiles
 - https://github.com/thoughtbot/rcm

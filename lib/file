@@ -7,7 +7,7 @@ copy () {
 
 	((indent_level++))
 	if [ -f "$src" -o -d "$src" ] && \
-		silent . $lib/copy $src $TARGET_DIR; then
+		. $lib/copy $src $TARGET_DIR; then
 		# ^ > /dev/null
 		success "$src" "Copied to ~/$src"
 	else
@@ -22,7 +22,9 @@ remove () {
 	local dst=$TARGET_DIR/${src#$DOTFILES_DIR/}
 
 	((indent_level++))
-	if [ -d "$dst" ]; then
+	if [ ! -e "$dst" ]; then
+		warn "${dst#$HOME/}" "Does not exists"
+	elif [ -d "$dst" ]; then
 		info "${dst#$HOME/}" "Ignored (directory)" true
 	elif [ -f "$dst" -o -L "$dst" ] && rm $dst; then
 		#                                     ^ 2> /dev/null
