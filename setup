@@ -58,11 +58,11 @@ case $UNAME in
 
 		;;
 
-	*)
-
-		echo "No setup for $UNAME"
 		# apt-get stuff ?
 		# https://github.com/Homebrew/linuxbrew ?
+	*)
+
+		warn "No setup available" "$UNAME"
 
 		;;
 

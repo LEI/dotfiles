@@ -60,20 +60,18 @@ case $UNAME in
 				warn "Administrator access is required" " " && sudo -v
 			fi
 
-			ask "SSD specific commands ?" N && SSD=true
+			ask "Execute SSD specific commands ?" Y && SSD=true
 			info "Executing init/.osx" "..." true
 			if source $DOTFILES_DIR/init/.osx; then
-				info "Some changes may require a logout/restart to take effect" " " true
-
+				warn "Some changes may require a logout/restart to take effect" " "
 				# Kill affected applications
-
-				if ask "Kill affected applications (except Terminal) ?" N; then
-					for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
-						"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
-						"Transmission" "Twitter" "iCal"; do # "Terminal"
-						killall "${app}" > /dev/null 2>&1
-					done
-				fi
+				# if ask "Kill affected applications now ? Terminal will be closed." N; then
+				# 	for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
+				# 		"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
+				# 		"Terminal" "Transmission" "Twitter" "iCal"; do
+				# 		killall "${app}" > /dev/null 2>&1
+				# 	done
+				# fi
 			else
 				fail "$DOTFILES/init/.osx" "Failed"
 				step_failed=true
@@ -111,7 +109,7 @@ case $UNAME in
 
 	*)
 
-		echo "No configuration for $UNAME"
+		warn "No configuration available" "$UNAME"
 
 		;;
 

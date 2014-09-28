@@ -34,6 +34,8 @@ init_bootstrap () {
 	# Cfg vars rdy
 	DOTFILES=$DIRECTORY
 	echo "bootfiles dotstrap $VERSION"
+	echo "$DOTFILES/bootstrap"
+
 	#git pull origin master
 
 	# Import functions
@@ -99,24 +101,24 @@ undo_link () {
 }
 
 do_copy () {
-	if ask "Copy directoriz ?" Y true; then
+	if ask "Copy directories ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
-		for folder in ${directoriz[@]}; do
+		for folder in ${directories[@]}; do
 			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
 			copy $folder ${folder_ignore[@]} || skipped
 		done
 		echo ''
 		success "Stuff copied."
 	else
-		skipped "directoriz"
+		skipped "directories"
 	fi
 }
 
 undo_copy () {
-	if ask "Remove directoriz ?" Y true; then
+	if ask "Remove directories ?" Y true; then
 		echo_debug
-		for folder in ${directoriz[@]}; do
+		for folder in ${directories[@]}; do
 			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
 			dir "$folder" remove ${folder_ignore[@]} || skipped
 		done
@@ -124,7 +126,7 @@ undo_copy () {
 		echo ''
 		success "Stuff removed."
 	else
-		skipped "directoriz"
+		skipped "directories"
 	fi
 }
 
@@ -225,14 +227,15 @@ uninstall () {
 # Execute command
 bootstrap () {
 	case $1 in
-		'')          install ;;
-		'install')   install ;;
-		'uninstall') uninstall ;;
-		'link')      do_link ;;
-		'copy')      do_copy ;;
-		'defaults')  do_defaults ;;
-		'setup')     source_file $DOTFILES_DIR/setup ;;
-		*)           echo_usage ;;
+		'')				install ;;
+		'install')		install ;;
+		'uninstall')	uninstall ;;
+		'link')			do_link ;;
+		'copy')			do_copy ;;
+		'defaults')		do_defaults ;;
+		'setup')		source_file $DOTFILES_DIR/setup ;;
+		*)				fail "$1" "Unknown command"
+						echo_usage ;;
 	esac
 }
 
@@ -285,7 +288,7 @@ if init_bootstrap; then
 	success "$end_message" " "
 
 	# Can't get this to work
-	# source ~/.bash_profile || fail "~/.bash_profile"
+	#source ~/.bash_profile || fail "~/.bash_profile"
 else
 	die "An error occured while preparing bootstrap"
 fi

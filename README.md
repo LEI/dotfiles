@@ -9,19 +9,9 @@ Dotfiles setup being build thanks to the Internet.
 
 	dot --help
 
-### Installer
+### Add a dotfile
 
-- Prompt for git credentials
-- Link repository dotfiles, .vim & bin folders to home
-- Apply Terminal window settings
-- Set defaults (init/.osx)
-- Install dependencies via Homebrew
-- Download applications via Caskroom
-- Link Preferences.sublime-settings ([todobtr](https://github.com/zargony/dotfiles/tree/master/Library))
-
-### Add a dotfile to your home
-
-Just move the dot at the end of the name and place it in a directory before bootstraping
+Just move the dot at the end of the name and place the file in any directory.
 
 ## Inspiration
 
@@ -40,6 +30,7 @@ Just move the dot at the end of the name and place it in a directory before boot
 - [travi](//github.com/travi/dotfiles)
 - [sitaktif](//github.com/sitaktif/dotfiles)
 - [zenorocha](//github.com/zenorocha/dotfiles)
+- [Glench](https://github.com/Glench/dotfiles)
 - [gist/zenorocha/7159780](//gist.github.com/zenorocha/7159780)
 - [mackup](https://github.com/lra/mackup)
 
