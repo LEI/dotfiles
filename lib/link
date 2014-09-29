@@ -21,6 +21,7 @@ link () {
 	fi
 
 	# If it is a symbolic link
+	# -o -L ?
 	if [ -h ${dst} ]; then
 		current_src="$(readlink $dst)"
 		if [ ${current_src} = ${src} ]; then

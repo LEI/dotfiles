@@ -8,16 +8,15 @@ cd "$(dirname "$0")"
 
 set -e
 
+# Global directories
+DOTFILES=~/.dotfiles
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
 
-export DOTFILES
-
-indent_level=1
-indent_size=3
-
 # Get command
 args=("$@")
+
+# Declarations
 debug=
 mute=
 force_default=
@@ -31,11 +30,9 @@ CONFIG_FILE=$DOTFILES_DIR/config
 source $lib/readconf
 
 init_bootstrap () {
-	# Cfg vars rdy
-	DOTFILES=$DIRECTORY
+	# Readying
 	echo "bootfiles dotstrap $VERSION"
 	echo "$DOTFILES/bootstrap"
-	#echo ''
 
 	# Import functions
 	source $lib/utils
@@ -219,6 +216,47 @@ uninstall () {
 	end_message="Bootstrap uninstalled things."
 }
 
+# Run bootstrap with command
+parse_flags () {
+	if init_bootstrap; then
+		# Parse arguments and unset recognized ones
+		for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
+			case ${args[i]} in
+				-a|--auto) unset args[i]
+					force_default=true ;;
+				-d|--debug) unset args[i]
+					debug=true ;;
+				-f|--force) unset args[i]
+					force_all=true ;;
+				-h|--help) unset args[i]
+					echo_usage ;;
+				-t|--test) unset args[i]
+					TARGET_DIR="$TARGET_DIR/sandbox"
+					[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
+					info "$TARGET_DIR" "Using sandbox folder" ;;
+				-u|--ugly) unset args[i]
+					reset_colors=true ;;
+				-v|--verbose) unset args[i]
+					verbose=true ;;
+				-*) fail "${args[i]}" "Unknown option"
+					unset args[i]
+					echo_usage ;;
+			esac
+		done
+
+		# Print echo_usage if > 1 argument left
+		[ ${#args[@]} -gt 1 ] && echo_usage
+
+		cmd=${args[@]}
+
+		# Start
+		bootstrap $cmd
+
+	else
+		die "An error occured while preparing bootstrap"
+	fi
+}
+
 # Execute command
 bootstrap () {
 	case $1 in
@@ -233,61 +271,30 @@ bootstrap () {
 	esac
 }
 
-# Run bootstrap with command
-parse_flags () {
-	# Init
-	if init_bootstrap; then
-		# Parse arguments and unset recognized ones
-		for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
-			case ${args[i]} in
-				-a|--auto) unset args[i]
-					force_default=true
-					;;
-				-d|--debug) unset args[i]
-					debug=true
-					;;
-				-f|--force) unset args[i]
-					force_all=true
-					;;
-				-h|--help) unset args[i]
-					echo_usage
-					;;
-				-t|--test) unset args[i]
-					TARGET_DIR="$TARGET_DIR/sandbox"
-					[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
-					info "$TARGET_DIR" "Using sandbox folder"
-					;;
-				-u|--ugly) unset args[i]
-					reset_colors=true
-					;;
-				-v|--verbose) unset args[i]
-					verbose=true
-					;;
-				-*) fail "${args[i]}" "Unknown option"
-					echo_usage
-					unset args[i] ;;
-			esac
-		done
-
-		# Print echo_usage if > 1 argument left
-		[ ${#args[@]} -gt 1 ] && echo_usage
-
-		cmd=${args[@]}
-
-		# Start
-		bootstrap $cmd
-
-		# End
+# Init
+parse_flags
+# install bundle vim prompt and submodule
+# Usage: gitmodule LEI/.dotfiles .vim/bundle/dot?
+do_gitmodule () {
+	echo ''
+	if ask "Add a git submodule ?" Y true; then
+		indent_level=1
+		gitmodule
 		indent_level=0
-		echo ''
-		[ -n "$end_message" ] || end_message="Things were bootstrapped !"
-		success "$end_message" " "
-
-		# Can't get this to work
-		#source ~/.bash_profile || fail "~/.bash_profile"
 	else
-		die "An error occured while preparing bootstrap"
+		skipped
 	fi
 }
 
-parse_flags
+do_gitmodule
+
+# End
+indent_level=0
+
+[ -n "$end_message" ] || end_message="Things were bootstrapped !"
+echo ''
+success "$end_message" " "
+echo ''
+
+# Does not work
+#source_file ~/.bash_profile

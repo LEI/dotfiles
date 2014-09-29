@@ -20,3 +20,13 @@ gitconfig () {
 
 	success "Git credentials generated."
 }
+
+gitmodule () {
+	user "username/repository ?" "GitHub"
+	read -e MODULE_NAME
+
+	user "Path ?" "Relative to $DOTFILES"
+	read -e MODULE_PATH
+
+	git submodule add https://github.com/$MODULE_NAME.git $MODULE_PATH
+}

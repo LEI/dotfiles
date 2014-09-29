@@ -1,18 +1,18 @@
 #!/bin/bash
 #
 # bootfiles dotstrap configuration
+# Files ending by a dot are automatically symlinked in ~
 
 # GLOBAL
 VERSION=0.1
-# Path also defined in ~/.bash_profile
-DIRECTORY=~/.dotfiles
+# Style
+indent_size=3
 
-# Copy
+# Paths to copy in ~
 directories=(".atom" ".vim")
 
 # IGNORE
 global_ignore=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "README" "LICENSE" "CONTRIBUTING")
 symlink_ignore=(${global_ignore[@]})
-# Directories
 atom_ignore=(${global_ignore[@]})
-vim_ignore=(${global_ignore[@]} "*.")
+vim_ignore=(${global_ignore[@]} "*.") # Exclude vimrc. & gvimrc.
