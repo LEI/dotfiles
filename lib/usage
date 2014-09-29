@@ -6,27 +6,27 @@ cat << EOF
 
    Usage: dot [command] [options]
 
-   Where <command> (alias):
+   Commands:
 
-         install (dot)
+         dot install     dot
 
             Execute all bootstrap steps.
             Run './bootstrap' one time in order to symlink '~/bin' and use 'dot'.
 
-         uninstall (undot)
+         dot uninstall   undot
 
             Remove symbolic links (files /*.$/ or bin/*) and copied files (directories /^.*/).
             Does not reverse 'dot defaults' and 'dot setup'.
 
-         defaults (~/.dotfiles/defaults)
+         dot defaults    ~/.dotfiles/defaults
 
             Available on OS X only (for now) and may require to restart.
 
-         setup (~/.dotfiles/setup)
+         dot setup       ~/.dotfiles/setup
 
             Check for Homebrew then install bundles with init/Brewfile and init/Caskfile
 
-   And <option>:
+   Options:
 
          -a, --auto      Use predefined answers
          -d, --debug     Should only log (not ready yet)

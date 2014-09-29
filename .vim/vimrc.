@@ -5,18 +5,17 @@ set nocompatible
 execute pathogen#infect()
 
 " Use the Solarized Dark theme
-set background=dark
+if has('gui_running')
+	set background=light
+else
+	set background=dark
+endif
 colorscheme solarized
 let g:solarized_termcolors=256
-"let g:airline_powerline_fonts = 1
-let g:airline_symbols = {}
-let g:airline_left_sep = "\u2b80" "use double quotes here
-let g:airline_left_alt_sep = "\u2b81"
-let g:airline_right_sep = "\u2b82"
-let g:airline_right_alt_sep = "\u2b83"
-let g:airline_symbols.branch = "\u2b60"
-let g:airline_symbols.readonly = "\u2b64"
-let g:airline_symbols.linenr = "\u2b61"
+" let g:solarized_termtrans=1
+" let g:airline_powerline_fonts = 1
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
 
 " Open NERDTree automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1

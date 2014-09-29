@@ -33,12 +33,13 @@ Just move the dot at the end of the name and place the file in any directory.
 - [Glench](https://github.com/Glench/dotfiles)
 - [gist/zenorocha/7159780](//gist.github.com/zenorocha/7159780)
 - [mackup](https://github.com/lra/mackup)
+- [jigish](https://github.com/jigish/dotfiles)
 
-## TODO
+## ...
 
-- rsync -d .* ?
+- chmods, source
 - ignore, conf, osx loc
-- Sync-home (licences, ssh_config...) rsync host / CLI [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
+- sync-home licences ssh rsync, [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
 - Ruby, compass.. http://www.npmjs.org/package/dotfiles
 - https://github.com/thoughtbot/rcm
 - http://dev.svetlyak.ru/dotfiler-en/
