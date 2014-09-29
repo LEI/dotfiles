@@ -130,8 +130,7 @@ defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 # SSD-specific tweaks                                                         #
 ###############################################################################
 
-if [ "$SSD" = true ]
-then
+if ask "Apply SSD specific tweaks ?" N; then
 	# Disable local Time Machine snapshots
 	sudo tmutil disablelocal
 
@@ -147,7 +146,6 @@ then
 
 	# Disable the sudden motion sensor as it’s not useful for SSDs
 	sudo pmset -a sms 0
-
 fi
 
 ###############################################################################

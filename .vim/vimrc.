@@ -1,3 +1,6 @@
+" Make Vim more useful
+set nocompatible
+
 " Autoload plugins
 execute pathogen#infect()
 
@@ -5,6 +8,7 @@ execute pathogen#infect()
 set background=dark
 colorscheme solarized
 let g:solarized_termcolors=256
+let g:airline_powerline_fonts = 1
 
 " Open NERDTree automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
@@ -13,8 +17,6 @@ autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Show hidden files by default
 let NERDTreeShowHidden=1
 
-" Make Vim more useful
-set nocompatible
 " Use the OS clipboard by default (on versions compiled with `+clipboard`)
 set clipboard=unnamed
 " Enhance command-line completion
@@ -57,7 +59,7 @@ syntax on
 " Highlight current line
 set cursorline
 " Make tabs as wide as two spaces
-set tabstop=2
+set tabstop=4
 " Show “invisible” characters
 set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
 set list

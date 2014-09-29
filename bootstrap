@@ -35,7 +35,7 @@ init_bootstrap () {
 	DOTFILES=$DIRECTORY
 	echo "bootfiles dotstrap $VERSION"
 	echo "$DOTFILES/bootstrap"
-	echo ''
+	#echo ''
 
 	# Import functions
 	source $lib/utils
@@ -48,11 +48,11 @@ init_bootstrap () {
 	source $lib/brew
 
 	# Pull last changes
-	if ask "Pull last version from GitHub ?" Y true; then
-		source $DOTFILES_DIR/bin/git-pup
-	else
-		skipped
-	fi
+	# if ask "Pull last version from GitHub ?" Y true; then
+	# 	source $DOTFILES_DIR/bin/git-pup
+	# else
+	# 	skipped
+	# fi
 }
 
 # Print command line usage
@@ -68,6 +68,7 @@ echo_debug () {
 }
 
 do_gitconfig () {
+	echo ''
 	# Create git/.gitconfig if needed
 	local gitconfig_file="git/gitconfig."
 	if check_file "$gitconfig_file" Y; then
@@ -82,6 +83,7 @@ do_gitconfig () {
 }
 
 do_link () {
+	echo ''
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name *.
@@ -95,6 +97,7 @@ do_link () {
 }
 
 undo_link () {
+	echo ''
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
 		dir "" unlink_dotfile ${symlink_ignore[@]} || skipped
@@ -107,6 +110,7 @@ undo_link () {
 }
 
 do_copy () {
+	echo ''
 	if ask "Copy directories ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
@@ -122,13 +126,13 @@ do_copy () {
 }
 
 undo_copy () {
+	echo ''
 	if ask "Remove directories ?" Y true; then
 		echo_debug
 		for folder in ${directories[@]}; do
 			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
 			dir "$folder" remove ${folder_ignore[@]} || skipped
 		done
-
 		echo ''
 		success "Stuff removed."
 	else
@@ -138,6 +142,7 @@ undo_copy () {
 
 # OS specific configuration
 do_defaults () {
+	echo ''
 	if ask "Set defaults ?" Y true; then
 		((indent_level++))
 
@@ -151,14 +156,12 @@ do_defaults () {
 		fi
 	else
 		skipped "defaults"
-		((indent_level++))
 	fi
-
-	((indent_level--))
 }
 
+# Install deps & utils with homebrew
 do_setup () {
-	# Install deps & utils with homebrew
+	echo ''
 	if ask "Download dependencies ?" N true; then
 		((indent_level++))
 
@@ -172,60 +175,46 @@ do_setup () {
 		fi
 	else
 		skipped "setup"
-		((indent_level++))
+	fi
+}
+
+sandbox () {
+	if [ ! -d $TARGET_DIR ]; then
+		mkdir $TARGET_DIR
 	fi
 
-	((indent_level--))
-}
-count=
-sandbox () {
 	TARGET_DIR="$TARGET_DIR/sandbox"
 	info "$TARGET_DIR" "Using sandbox folder"
-
-	echo $TARGET_DIR
-	if [ ! -d $TARGET_DIR ]; then
-		echo $TARGET_DIR
-	fi
-	echo "$count"
-	if [ "$count" = true ]; then exit; fi
-	count=true
 }
 
-# New line
-n_l () { echo ''; indent_level=1; }
-
 install () {
-	echo ''
-
 	# Git
-	do_gitconfig; n_l
+	do_gitconfig
 
 	# Symbolic links
-	do_link; n_l
+	do_link
 
 	# Directories
-	do_copy; n_l
+	do_copy
 
 	# Set OS defaults
+	echo ''
+	info "Using $(uname) specific configuration" " " true
 
-	info "Using $(uname) specific configuration" " " true; n_l
-
-	do_defaults; n_l
+	do_defaults
 
 	# Dependencies
-	do_setup; n_l
+	do_setup
 }
 
 uninstall () {
-	echo ''
-
 	# Does not undo bundles & defaults
 
 	# Symbolic links
-	undo_link; n_l
+	undo_link
 
 	# Directories
-	undo_copy;n_l
+	undo_copy
 
 	end_message="Bootstrap uninstalled things."
 }
@@ -239,62 +228,66 @@ bootstrap () {
 		'link')			do_link ;;
 		'copy')			do_copy ;;
 		'defaults')		do_defaults ;;
-		'setup')		source_file $DOTFILES_DIR/setup ;;
-		*)				fail "$1" "Unknown command"
-						echo_usage ;;
+		'setup')		do_setup ;;
+		*)				fail "$1" "Unknown command"; echo_usage ;;
 	esac
 }
 
-# Init
-if init_bootstrap; then
+# Run bootstrap with command
+parse_flags () {
+	# Init
+	if init_bootstrap; then
+		# Parse arguments and unset recognized ones
+		for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
+			case ${args[i]} in
+				-a|--auto) unset args[i]
+					force_default=true
+					;;
+				-d|--debug) unset args[i]
+					debug=true
+					;;
+				-f|--force) unset args[i]
+					force_all=true
+					;;
+				-h|--help) unset args[i]
+					echo_usage
+					;;
+				-t|--test) unset args[i]
+					TARGET_DIR="$TARGET_DIR/sandbox"
+					[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
+					info "$TARGET_DIR" "Using sandbox folder"
+					;;
+				-u|--ugly) unset args[i]
+					reset_colors=true
+					;;
+				-v|--verbose) unset args[i]
+					verbose=true
+					;;
+				-*) fail "${args[i]}" "Unknown option"
+					echo_usage
+					unset args[i] ;;
+			esac
+		done
 
-	# Parse arguments and unset recognized ones
-	for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
-		case ${args[i]} in
-			-a|--auto) unset args[i]
-				force_default=true
-				;;
-			-d|--debug) unset args[i]
-				debug=true
-				;;
-			-f|--force) unset args[i]
-				force_all=true
-				;;
-			-h|--help) unset args[i]
-				echo_usage
-				;;
-			-t|--test) unset args[i]
-				TARGET_DIR="$TARGET_DIR/sandbox"
-				[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
-				info "$TARGET_DIR" "Using sandbox folder"
-				;;
-			-u|--ugly) unset args[i]
-				reset_colors=true
-				;;
-			-v|--verbose) unset args[i]
-				verbose=true
-				;;
-			-*) fail "${args[i]}" "Unknown option"
-				echo_usage
-				unset args[i] ;;
-		esac
-	done
+		# Print echo_usage if > 1 argument left
+		[ ${#args[@]} -gt 1 ] && echo_usage
 
-	# Print echo_usage if > 1 argument left
-	[ ${#args[@]} -gt 1 ] && echo_usage
+		cmd=${args[@]}
 
-	cmd=${args[@]}
+		# Start
+		bootstrap $cmd
 
-	# Start
-	bootstrap $cmd
+		# End
+		indent_level=0
+		echo ''
+		[ -n "$end_message" ] || end_message="Things were bootstrapped !"
+		success "$end_message" " "
 
-	# End
-	indent_level=0
-	[ -n "$end_message" ] || end_message="Things were bootstrapped !"
-	success "$end_message" " "
+		# Can't get this to work
+		#source ~/.bash_profile || fail "~/.bash_profile"
+	else
+		die "An error occured while preparing bootstrap"
+	fi
+}
 
-	# Can't get this to work
-	#source ~/.bash_profile || fail "~/.bash_profile"
-else
-	die "An error occured while preparing bootstrap"
-fi
+parse_flags
