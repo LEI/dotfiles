@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# https://pqrs.org/osx/karabiner/seil.html.en
+# Caps Lock remap ("System Preferences > Keyboard > Modifier Keys..." -> "No Action")
+
+cli=/Applications/Seil.app/Contents/Library/bin/seil
+
+$cli set enable_capslock 1
+/bin/echo "enable_capslock 1"
+$cli set keycode_capslock 80
+/bin/echo "keycode_capslock 80"

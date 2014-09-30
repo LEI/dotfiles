@@ -18,6 +18,41 @@ else
 	indent_level=2
 fi
 
+config_keys () {
+	local file
+	local spaces="            "
+	((indent_level++))
+	if ask "Apply custom configuration ?"; then
+
+		# Seil
+		((indent_level++))
+		local file=$DOTFILES_DIR/init/seil
+		if source_file $file | sed "s/^/$spaces/"; then
+			success "Seil" " "
+			((indent_level--))
+		else
+			fail "Seil" " "
+			((indent_level--))
+		fi
+
+		# Karabiner
+		((indent_level++))
+		local file=$DOTFILES_DIR/init/karabiner
+		if source_file $file | sed "s/^/$spaces/"; then
+			success "Karabiner" " "
+			((indent_level--))
+		else
+			fail "Karabiner failed" " "
+			((indent_level--))
+		fi
+
+		success "Configuration"
+	else
+		skipped "configuration"
+	fi
+	((indent_level--))
+}
+
 case $UNAME in
 
 	Darwin)
@@ -29,28 +64,24 @@ case $UNAME in
 			# BREW LIBS
 
 			# Install dependencies
-			if ask "Bundle brew ?" Y; then
-				((indent_level++))
-				brew_bundle "Brew" || setp_failed=true
+			if ask "Bundle brew ?"; then
+				brew_bundle "Brew" || step_failed=true
 			else
 				skipped "Brew"
-				((indent_level++))
 			fi
-
-			((indent_level--))
 
 			# CASK APPS
 
 			# Install programs
-			if ask "Bundle cask ?" Y; then
-				((indent_level++))
-				brew_bundle "Cask" || setp_failed=true
+			if ask "Bundle cask ?"; then
+				if brew_bundle "Cask"; then
+					config_keys || step_failed=true
+				else
+					step_failed=true
+				fi
 			else
 				skipped "Cask"
-				((indent_level++))
 			fi
-
-			((indent_level--))
 
 		else
 			skipped "Homebrew"
@@ -68,7 +99,9 @@ case $UNAME in
 
 esac
 
-echo ''
+# echo ''
 indent_level=$original_level
 
-[ "$setp_failed" = true ] && return 0
+[ "$step_failed" = true ] && return 1
+
+#return 0

@@ -44,3 +44,4 @@ Just move the dot at the end of the name and place the file in any directory.
 - https://github.com/thoughtbot/rcm
 - http://dev.svetlyak.ru/dotfiler-en/
 - [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
+- [nstl](https://github.com/kautsig/dotfile-installer/blob/master/install.sh)

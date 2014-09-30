@@ -1,3 +1,5 @@
+" https://github.com/mutewinter/dot_vim
+
 " Make Vim more useful
 set nocompatible
 
@@ -10,21 +12,30 @@ else
 	set background=dark
 endif
 
-colorscheme molokai
-let g:molokai_original = 1
-let g:rehash256 = 1
-" solarized
+"colorscheme molokai
+"let g:rehash256 = 1
+
+" colorscheme solarized
 " let g:solarized_termcolors=256
+" let g:solarized_termtrans = 1
+" let g:solarized_contrast = "high"
+
+colorscheme jellybeans
 
 " Statusline
-" let g:airline_powerline_fonts = 1
-let g:airline_left_sep = ''
-let g:airline_right_sep = ''
+" set laststatus=2
+let g:airline_powerline_fonts = 1
+"let g:airline_left_sep = ''
+"let g:airline_right_sep = ''
+
+if exists('+colorcolumn')
+	set colorcolumn=80 " Color the 80th column differently as a wrapping guide.
+endif
 
 " Open NERDTree automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
+ 
 " Show hidden files by default
 let NERDTreeShowHidden=1
 
@@ -70,7 +81,7 @@ syntax on
 " Highlight current line
 set cursorline
 " Make tabs as wide as two spaces
-set tabstop=4
+set tabstop=2
 " Show “invisible” characters
 set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
 set list
@@ -99,10 +110,10 @@ set title
 " Show the (partial) command as it’s being typed
 set showcmd
 " Use relative line numbers
-if exists("&relativenumber")
-	set relativenumber
-	au BufReadPost * set relativenumber
-endif
+" if exists("&relativenumber")
+"	set relativenumber
+"	au BufReadPost * set relativenumber
+" endif
 " Start scrolling three lines before the horizontal window border
 set scrolloff=3
 

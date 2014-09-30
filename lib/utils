@@ -3,9 +3,14 @@
 # Utility functions
 
 silent () {
+	local whitespaces=$((indent_level * indent_size))
+	local indent=""
+	for ((i=1; i<=$whitespaces; i++)); do
+		indent+=" "
+	done
 	if [ "$verbose" = true ] ; then
-		eval "$@"
+		eval "$@" | sed "s/^/$indent/"
 	else
-		eval "$@" >/dev/null # (2|&)>/dev/null
+		eval "$@" >/dev/null | sed "s/^/$indent/" # (2|&)>/dev/null
 	fi
 }
