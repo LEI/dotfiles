@@ -12,7 +12,15 @@ indent_size=3
 directories=(".atom" ".vim")
 
 # IGNORE
-global_ignore=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "README" "LICENSE" "CONTRIBUTING")
-symlink_ignore=(${global_ignore[@]})
-atom_ignore=(${global_ignore[@]})
-vim_ignore=(${global_ignore[@]} "*.") # Exclude vimrc. & gvimrc.
+sys_ignore=(".DS_Store")
+# Git
+git_ignore=(".gitignore" ".git" "*.md" "*.markdown")
+# Markdown
+mkd_ignore=("*.md" "*.markdown" "README" "LICENSE" "CONTRIBUTING")
+# Files ending by a dot
+dot_ignore=("*.")
+# Main patterns
+glb_ignore=(${sys_ignore[@]} ${git_ignore[@]} ${mkd_ignore[@]})
+# Specific directories
+atom_ignore=(${glb_ignore[@]} ${dot_ignore[@]})
+vim_ignore=(${glb_ignore[@]} ${dot_ignore[@]})

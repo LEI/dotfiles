@@ -27,11 +27,18 @@ case $UNAME in
 		if ask "Set OS defaults ?" N; then
 			((indent_level++))
 
-			if [ "$(whoami)" != "root" ]; then
-				warn "Administrator access is required" " " && sudo -v
-			fi
+			ask "Apply SSD specific tweaks ?" N && \
+				SSD_SPECIFIC=true
+
+			ask "Disable 'natural' scrolling ?" N && \
+				DISABLE_NATURAL_SCROLLING=true
+
+			[ "$(whoami)" != "root" ] && \
+				warn "Administrator access is required" " " && \
+				sudo -v
 
 			info "Executing init/.osx" "..." true
+
 			if source $DOTFILES_DIR/init/.osx; then
 				warn "Some changes may require a logout/restart to take effect" " "
 				# Kill affected applications
@@ -92,13 +99,14 @@ case $UNAME in
 			st_suffix=/Packages/User/Preferences.sublime-settings
 
 			for f in "$st_prefix"*"$st_suffix"; do
+				if [ -f "$f" ]; then
+					rm "$f" # -f ?
+					ln -s "$DOTFILES_DIR/init/Preferences.sublime-settings" "$f"
 
-				rm "$f" # -f ?
-				ln -s "$DOTFILES_DIR/init/Preferences.sublime-settings" "$f"
-
-				st_success=true
-				st_version=${f#$st_prefix}
-				success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
+					st_success=true
+					st_version=${f#$st_prefix}
+					success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
+				fi
 			done
 
 			if [ ! -n "$st_success" ]; then
@@ -117,7 +125,9 @@ case $UNAME in
 
 esac
 
-echo ''
+# echo ''
 indent_level=$original_level
 
-[ "$step_failed" = true ] && return 0
+[ "$step_failed" = true ] && return 1
+
+return

@@ -33,6 +33,7 @@ init_bootstrap () {
 	# Readying
 	echo "bootfiles dotstrap $VERSION"
 	echo "$DOTFILES/bootstrap"
+	echo ''
 
 	# Import functions
 	source $lib/utils
@@ -65,7 +66,6 @@ echo_debug () {
 }
 
 do_gitconfig () {
-	echo ''
 	# Create git/.gitconfig if needed
 	local gitconfig_file="git/gitconfig."
 	if check_file "$gitconfig_file" Y; then
@@ -80,7 +80,6 @@ do_gitconfig () {
 }
 
 do_gitmodule () {
-	echo ''
 	if ask "Add a git submodule ?" Y true; then
 		indent_level=1
 		gitmodule
@@ -91,13 +90,11 @@ do_gitmodule () {
 }
 
 do_link () {
-	echo ''
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name *.
-		dir "" link_dotfile ${symlink_ignore[@]} || skipped
+		dir "" link_dotfile ${global_ignore[@]} || skipped
 		dir "bin" link_file ${global_ignore[@]} || skipped
-		echo ''
 		success "Stuff linked."
 	else
 		skipped "symlinks"
@@ -105,12 +102,10 @@ do_link () {
 }
 
 undo_link () {
-	echo ''
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
-		dir "" unlink_dotfile ${symlink_ignore[@]} || skipped
+		dir "" unlink_dotfile ${global_ignore[@]} || skipped
 		dir "bin" unlink_file ${global_ignore[@]} || skipped
-		echo ''
 		success "Symlinks unchained."
 	else
 		skipped "symlinks"
@@ -118,7 +113,6 @@ undo_link () {
 }
 
 do_copy () {
-	echo ''
 	if ask "Copy directories ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
@@ -126,7 +120,6 @@ do_copy () {
 			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
 			copy $folder ${folder_ignore[@]} || skipped
 		done
-		echo ''
 		success "Stuff copied."
 	else
 		skipped "directories"
@@ -134,14 +127,12 @@ do_copy () {
 }
 
 undo_copy () {
-	echo ''
 	if ask "Remove directories ?" Y true; then
 		echo_debug
 		for folder in ${directories[@]}; do
 			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
 			dir "$folder" remove ${folder_ignore[@]} || skipped
 		done
-		echo ''
 		success "Stuff removed."
 	else
 		skipped "directories"
@@ -150,10 +141,8 @@ undo_copy () {
 
 # OS specific configuration
 do_defaults () {
-	echo ''
 	if ask "Set defaults ?" Y true; then
 		((indent_level++))
-
 		local defaults=$DOTFILES_DIR/defaults
 		if source_file $defaults; then
 			((indent_level--))
@@ -169,10 +158,8 @@ do_defaults () {
 
 # Install deps & utils with homebrew
 do_setup () {
-	echo ''
-	if ask "Download dependencies ?" N true; then
+	if ask "Set up ?" N true; then
 		((indent_level++))
-
 		local setup=$DOTFILES_DIR/setup
 		if source_file $setup; then
 			((indent_level--))
@@ -200,18 +187,22 @@ install () {
 	do_gitconfig
 
 	# Symbolic links
+	echo ''
 	do_link
 
 	# Directories
+	echo ''
 	do_copy
 
 	# Set OS defaults
 	echo ''
 	info "Using $(uname) specific configuration" " " true
 
+	echo ''
 	do_defaults
 
 	# Dependencies
+	echo ''
 	do_setup
 }
 
@@ -222,6 +213,7 @@ uninstall () {
 	undo_link
 
 	# Directories
+	echo ''
 	undo_copy
 
 	end_message="Bootstrap uninstalled things."

@@ -23,7 +23,7 @@ do_rsync () {
 	if [ "${#ignore_array[@]}" != "0" ]; then
 		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
 	fi
-
+	
 	silent rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst "&"
 }
 
@@ -78,9 +78,9 @@ source_file () {
 
 	if [ -f $file ] && source "$file"; then
 		#success "Operation successfull !"
-		return 1
-	else
+		return
+	#else
 		#fail "Command failed !"
-		return 0
+		#return 0
 	fi
 }
