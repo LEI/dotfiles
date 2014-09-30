@@ -37,7 +37,7 @@ Just move the dot at the end of the name and place the file in any directory.
 
 ## ...
 
-- chmods, source
+- chmods, source returns
 - ignore, conf, osx loc
 - sync-home licences ssh rsync, [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
 - Ruby, compass.. http://www.npmjs.org/package/dotfiles
