@@ -34,8 +34,8 @@ case $UNAME in
 				DISABLE_NATURAL_SCROLLING=true
 
 			[ "$(whoami)" != "root" ] && \
-				warn "Administrator access is required" " " && \
-				sudo -v
+				warn "Administrator access may be required" " "
+				# sudo -v
 
 			info "Executing init/.osx" "..." true
 

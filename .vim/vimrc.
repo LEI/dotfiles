@@ -12,9 +12,11 @@ else
 	set background=dark
 endif
 
-colorscheme solarized
+" colorscheme candy
+" colorscheme distinguished
+ colorscheme solarized
 " let g:solarized_termcolors=256
-" let g:solarized_contrast = "high"
+let g:solarized_contrast = "high"
 
 " Statusline
 " set laststatus=2
@@ -28,8 +30,7 @@ endif
 
 " Open NERDTree automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
- 
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif 
 " Show hidden files by default
 let NERDTreeShowHidden=1
 
