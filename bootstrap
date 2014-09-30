@@ -79,6 +79,17 @@ do_gitconfig () {
 	fi
 }
 
+do_gitmodule () {
+	echo ''
+	if ask "Add a git submodule ?" Y true; then
+		indent_level=1
+		gitmodule
+		indent_level=0
+	else
+		skipped
+	fi
+}
+
 do_link () {
 	echo ''
 	if ask "Create symbolic links ?" Y true; then
@@ -222,25 +233,50 @@ parse_flags () {
 		# Parse arguments and unset recognized ones
 		for (( i = ${#args[@]} - 1; i >= 0; i-- )); do
 			case ${args[i]} in
-				-a|--auto) unset args[i]
-					force_default=true ;;
-				-d|--debug) unset args[i]
-					debug=true ;;
-				-f|--force) unset args[i]
-					force_all=true ;;
-				-h|--help) unset args[i]
-					echo_usage ;;
-				-t|--test) unset args[i]
+
+				-a|--auto)
+					force_default=true
+
+					unset args[i] ;;
+
+				-d|--debug)
+					debug=true
+
+					unset args[i] ;;
+
+				-f|--force)
+					force_all=true
+
+					unset args[i] ;;
+
+				-h|--help)
+					echo_usage
+
+					unset args[i] ;;
+
+				-t|--test)
 					TARGET_DIR="$TARGET_DIR/sandbox"
 					[ ! -d $TARGET_DIR ] && mkdir $TARGET_DIR
-					info "$TARGET_DIR" "Using sandbox folder" ;;
-				-u|--ugly) unset args[i]
-					reset_colors=true ;;
-				-v|--verbose) unset args[i]
-					verbose=true ;;
-				-*) fail "${args[i]}" "Unknown option"
-					unset args[i]
-					echo_usage ;;
+					info "$TARGET_DIR" "Using sandbox folder"
+
+					unset args[i] ;;
+
+				-u|--ugly)
+					reset_colors=true
+
+					unset args[i] ;;
+
+				-v|--verbose)
+					verbose=true
+
+					unset args[i] ;;
+
+				-*)
+					fail "${args[i]}" "Unknown option"
+					echo_usage
+
+					unset args[i] ;;
+
 			esac
 		done
 
@@ -267,26 +303,13 @@ bootstrap () {
 		'copy')			do_copy ;;
 		'defaults')		do_defaults ;;
 		'setup')		do_setup ;;
+		'module')		do_gitmodule ;;
 		*)				fail "$1" "Unknown command"; echo_usage ;;
 	esac
 }
 
 # Init
 parse_flags
-# install bundle vim prompt and submodule
-# Usage: gitmodule LEI/.dotfiles .vim/bundle/dot?
-do_gitmodule () {
-	echo ''
-	if ask "Add a git submodule ?" Y true; then
-		indent_level=1
-		gitmodule
-		indent_level=0
-	else
-		skipped
-	fi
-}
-
-do_gitmodule
 
 # End
 indent_level=0

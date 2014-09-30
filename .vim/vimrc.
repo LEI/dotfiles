@@ -4,16 +4,19 @@ set nocompatible
 " Autoload plugins
 execute pathogen#infect()
 
-" Use the Solarized Dark theme
 if has('gui_running')
 	set background=light
 else
 	set background=dark
 endif
-colorscheme base16-eighties
+
+colorscheme molokai
+let g:molokai_original = 1
+let g:rehash256 = 1
 " solarized
 " let g:solarized_termcolors=256
-" let g:solarized_termtrans=1
+
+" Statusline
 " let g:airline_powerline_fonts = 1
 let g:airline_left_sep = ''
 let g:airline_right_sep = ''
