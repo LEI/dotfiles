@@ -92,7 +92,7 @@ case $UNAME in
 		((indent_level--))
 
 		# SUBLIME TEXT
-
+		# TODO check for current symlink
 		if ask "Link Sublime Text preferences ?" Y; then
 
 			st_prefix=~/Library/Application\ Support/Sublime\ Text
