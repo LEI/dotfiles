@@ -22,34 +22,33 @@ config_keys () {
 	local file
 	local spaces="            "
 	((indent_level++))
-	if ask "Apply custom keys configuration ?" && \
-		brew cask install karabiner && \
-		brew cask install seil; then
-
-		# Seil
-		((indent_level++))
-		local file=$DOTFILES_DIR/init/seil
-		if source_file $file | sed "s/^/$spaces/"; then
-			success "Seil" " "
-			open /Applications/Seil.app
-			((indent_level--))
-		else
-			fail "Seil" " "
-			((indent_level--))
+	if ask "Apply custom keys configuration ?"; then
+		if silent brew cask install seil; then
+			# Seil
+			((indent_level++))
+			local file=$DOTFILES_DIR/init/seil
+			if silent source_file $file; then
+				success "Seil" " "
+				open /Applications/Seil.app
+				((indent_level--))
+			else
+				fail "Seil" " "
+				((indent_level--))
+			fi
 		fi
-
-		# Karabiner
-		((indent_level++))
-		local file=$DOTFILES_DIR/init/karabiner
-		if source_file $file | sed "s/^/$spaces/"; then
-			success "Karabiner" " "
-			open /Applications/Karabiner.app
-			((indent_level--))
-		else
-			fail "Karabiner failed" " "
-			((indent_level--))
+		if silent brew cask install karabiner; then
+			# Karabiner
+			((indent_level++))
+			local file=$DOTFILES_DIR/init/karabiner
+			if silent source_file $file; then
+				success "Karabiner" " "
+				open /Applications/Karabiner.app
+				((indent_level--))
+			else
+				fail "Karabiner failed" " "
+				((indent_level--))
+			fi
 		fi
-
 		success "Configuration"
 	else
 		skipped "configuration"

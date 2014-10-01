@@ -1,10 +1,48 @@
-" https://github.com/mutewinter/dot_vim
-
-" Make Vim more useful
-set nocompatible
+" ~/.vimrc
 
 " Autoload plugins
 execute pathogen#infect()
+" Make Vim more useful
+set nocompatible
+
+" Use UTF-8 without BOM
+set encoding=utf-8 nobomb
+
+" Format -
+
+" Show “invisible” characters
+set list
+set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_,extends:❯,precedes:❮
+set showbreak=↪
+
+" Tabs -o spaces
+set smartindent
+" set expandtab
+set tabstop=4
+set shiftwidth=4
+" Wrapping
+set textwidth=80
+" Don't try to highlight lines longer than 800 characters
+set synmaxcol=800
+
+" Backups -
+
+" Don’t add empty newlines at the end of files
+set binary
+set noeol
+" Centralize backups, swapfiles and undo history
+set backupdir=~/.vim/backups
+set directory=~/.vim/swaps
+if exists("&undodir")
+	set undodir=~/.vim/undo
+endif
+" Don’t create backups when editing files in certain directories
+set backupskip=/tmp/*,/private/tmp/*
+
+" Color scheme -
+
+" Enable syntax highlighting
+syntax on
 
 if has('gui_running')
 	set background=light
@@ -12,26 +50,41 @@ else
 	set background=dark
 endif
 
-colorscheme solarized
 " let g:solarized_termcolors=256
 let g:solarized_contrast = "high"
+colorscheme solarized
 
-" Statusline
-" set laststatus=2
-let g:airline_powerline_fonts = 1
-" let g:airline_left_sep = ''
-" let g:airline_right_sep = ''
-
-" Color the 80th column differently as a wrapping guide.
+" Color the 80th column differently as a wrapping guide
 if exists('+colorcolumn')
 	set colorcolumn=80
 endif
 
-" Open NERDTree automatically if no files were specified
+" Plugin Settings ------------------------------------------------------------
+
+" Airline -
+
+let g:airline_powerline_fonts = 1
+" let g:airline_left_sep = ''
+" let g:airline_right_sep = ''
+
+" NERDTree -
+
+" Open automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif 
 " Show hidden files by default
 let NERDTreeShowHidden=1
+
+" ----------------------------------------------------------------------------
+
+" Change mapleader
+let mapleader=","
+
+" Save a file as root (,W)
+noremap <leader>W :w !sudo tee % > /dev/null<CR>
+
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc
+" https://github.com/mathiasbynens/dotfiles/blob/master/.vimrc ---------------
 
 " Use the OS clipboard by default (on versions compiled with `+clipboard`)
 set clipboard=unnamed
@@ -45,22 +98,6 @@ set backspace=indent,eol,start
 set ttyfast
 " Add the g flag to search/replace by default
 set gdefault
-" Use UTF-8 without BOM
-set encoding=utf-8 nobomb
-" Change mapleader
-let mapleader=","
-" Don’t add empty newlines at the end of files
-set binary
-set noeol
-" Centralize backups, swapfiles and undo history
-set backupdir=~/.vim/backups
-set directory=~/.vim/swaps
-if exists("&undodir")
-	set undodir=~/.vim/undo
-endif
-
-" Don’t create backups when editing files in certain directories
-set backupskip=/tmp/*,/private/tmp/*
 
 " Respect modeline in files
 set modeline
@@ -70,15 +107,8 @@ set exrc
 set secure
 " Enable line numbers
 set number
-" Enable syntax highlighting
-syntax on
 " Highlight current line
 set cursorline
-" Make tabs as wide as two spaces
-set tabstop=2
-" Show “invisible” characters
-set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
-set list
 " Highlight searches
 set hlsearch
 " Ignore case of searches
@@ -120,8 +150,6 @@ function! StripWhitespace()
 	call setreg('/', old_query)
 endfunction
 noremap <leader>ss :call StripWhitespace()<CR>
-" Save a file as root (,W)
-noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
 " Automatic commands
 if has("autocmd")
@@ -132,3 +160,7 @@ if has("autocmd")
 	" Treat .md files as Markdown
 	autocmd BufNewFile,BufRead *.md setlocal filetype=markdown
 endif
+
+set noshowmode
+
+
