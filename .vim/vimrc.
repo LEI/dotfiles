@@ -12,7 +12,6 @@ else
 	set background=dark
 endif
 
-" colorscheme distinguished
 colorscheme solarized
 " let g:solarized_termcolors=256
 let g:solarized_contrast = "high"
@@ -23,8 +22,9 @@ let g:airline_powerline_fonts = 1
 " let g:airline_left_sep = ''
 " let g:airline_right_sep = ''
 
+" Color the 80th column differently as a wrapping guide.
 if exists('+colorcolumn')
-	set colorcolumn=80 " Color the 80th column differently as a wrapping guide.
+	set colorcolumn=80
 endif
 
 " Open NERDTree automatically if no files were specified
