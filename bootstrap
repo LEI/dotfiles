@@ -75,7 +75,7 @@ do_gitconfig () {
 			skipped
 		fi
 	else
-		warn "Git configuration already file exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
+		warn "Git configuration already exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
 	fi
 }
 
