@@ -93,8 +93,8 @@ do_link () {
 	if ask "Create symbolic links ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name *.
-		dir "" link_dotfile ${global_ignore[@]} || skipped
-		dir "bin" link_file ${global_ignore[@]} || skipped
+		dir "" link_dotfile ${ignore_global[@]} || skipped
+		dir "bin" link_file ${ignore_global[@]} || skipped
 		success "Stuff linked."
 	else
 		skipped "symlinks"
@@ -104,8 +104,8 @@ do_link () {
 undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
 		echo_debug
-		dir "" unlink_dotfile ${global_ignore[@]} || skipped
-		dir "bin" unlink_file ${global_ignore[@]} || skipped
+		dir "" unlink_dotfile ${ignore_global[@]} || skipped
+		dir "bin" unlink_file ${ignore_global[@]} || skipped
 		success "Symlinks unchained."
 	else
 		skipped "symlinks"
@@ -116,9 +116,9 @@ do_copy () {
 	if ask "Copy directories ?" Y true; then
 		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
-		for folder in ${directories[@]}; do
-			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
-			copy $folder ${folder_ignore[@]} || skipped
+		for dir in ${directories[@]}; do
+			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
+			copy $dir ${ignore_dir[@]} || skipped
 		done
 		success "Stuff copied."
 	else
@@ -129,9 +129,9 @@ do_copy () {
 undo_copy () {
 	if ask "Remove directories ?" Y true; then
 		echo_debug
-		for folder in ${directories[@]}; do
-			eval "local folder_ignore=\${${folder#.}_ignore[@]}"
-			dir "$folder" remove ${folder_ignore[@]} || skipped
+		for dir in ${directories[@]}; do
+			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
+			dir "$dir" remove ${ignore_dir[@]} || skipped
 		done
 		success "Stuff removed."
 	else
