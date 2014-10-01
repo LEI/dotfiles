@@ -12,21 +12,16 @@ else
 	set background=dark
 endif
 
-"colorscheme molokai
-"let g:rehash256 = 1
-
-" colorscheme solarized
+" colorscheme distinguished
+colorscheme solarized
 " let g:solarized_termcolors=256
-" let g:solarized_termtrans = 1
-" let g:solarized_contrast = "high"
-
-colorscheme jellybeans
+let g:solarized_contrast = "high"
 
 " Statusline
 " set laststatus=2
 let g:airline_powerline_fonts = 1
-"let g:airline_left_sep = ''
-"let g:airline_right_sep = ''
+" let g:airline_left_sep = ''
+" let g:airline_right_sep = ''
 
 if exists('+colorcolumn')
 	set colorcolumn=80 " Color the 80th column differently as a wrapping guide.
@@ -34,8 +29,7 @@ endif
 
 " Open NERDTree automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
- 
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif 
 " Show hidden files by default
 let NERDTreeShowHidden=1
 

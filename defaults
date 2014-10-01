@@ -34,8 +34,8 @@ case $UNAME in
 				DISABLE_NATURAL_SCROLLING=true
 
 			[ "$(whoami)" != "root" ] && \
-				warn "Administrator access is required" " " && \
-				sudo -v
+				warn "Administrator access may be required" " "
+				# sudo -v
 
 			info "Executing init/.osx" "..." true
 
@@ -92,7 +92,7 @@ case $UNAME in
 		((indent_level--))
 
 		# SUBLIME TEXT
-
+		# TODO check for current symlink
 		if ask "Link Sublime Text preferences ?" Y; then
 
 			st_prefix=~/Library/Application\ Support/Sublime\ Text

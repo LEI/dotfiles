@@ -22,13 +22,16 @@ config_keys () {
 	local file
 	local spaces="            "
 	((indent_level++))
-	if ask "Apply custom configuration ?"; then
+	if ask "Apply custom keys configuration ?" && \
+		brew cask install karabiner && \
+		brew cask install seil; then
 
 		# Seil
 		((indent_level++))
 		local file=$DOTFILES_DIR/init/seil
 		if source_file $file | sed "s/^/$spaces/"; then
 			success "Seil" " "
+			open /Applications/Seil.app
 			((indent_level--))
 		else
 			fail "Seil" " "
@@ -40,6 +43,7 @@ config_keys () {
 		local file=$DOTFILES_DIR/init/karabiner
 		if source_file $file | sed "s/^/$spaces/"; then
 			success "Karabiner" " "
+			open /Applications/Karabiner.app
 			((indent_level--))
 		else
 			fail "Karabiner failed" " "
