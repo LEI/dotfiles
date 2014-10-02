@@ -48,3 +48,4 @@ Just move the dot at the end of the name and place the file in any directory.
 - [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
 - [nstl](https://github.com/kautsig/dotfile-installer/blob/master/install.sh)
 - [palette](https://github.com/altercation/solarized/tree/master/apple-colorpalette-solarized)
+- [drpbx](http://coda.caseykuhlman.com/entries/2014/dropbox-as-a-settings-repository.html)

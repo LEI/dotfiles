@@ -3,12 +3,14 @@
 # Setup some defaults
 # Steps specific to init folder & depending on OS type
 
-# Import prompt functions
+# Import functions
 lib=$DOTFILES_DIR/lib
+CONFIG_FILE=$DOTFILES_DIR/config
+source $lib/readconf
 source $lib/ask
 
 UNAME=$( uname )
-THEME='LEI'
+THEME=$USER
 
 info "'dot defaults' is an alias to this step" " " true
 
