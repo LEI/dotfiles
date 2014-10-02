@@ -22,7 +22,7 @@ config_keys () {
 	local file
 	local spaces="            "
 	((indent_level++))
-	if ask "Apply custom keys configuration ?"; then
+	if ask "Custom keyboard settings ?"; then
 		if silent brew cask install seil; then
 			# Seil
 			((indent_level++))
@@ -49,9 +49,9 @@ config_keys () {
 				((indent_level--))
 			fi
 		fi
-		success "Configuration"
+		success "Keyboard"
 	else
-		skipped "configuration"
+		skipped "keyboard"
 	fi
 	((indent_level--))
 }

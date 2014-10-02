@@ -2,6 +2,6 @@
 #
 # Install
 
-eval $DOTFILES/bootstrap "$@"
+$DOTFILES/bootstrap "$@"
 
 # source ~/.bash_profile && echo ". ~/.bash_profile"
