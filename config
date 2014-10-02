@@ -1,29 +1,25 @@
 #!/bin/bash
 #
-# bootfiles dotstrap configuration
-# Files ending by a dot are automatically symlinked in ~
+# bootfiles dotstrap
+# Configuration file (each line is evaluated separately)
 
 # GLOBAL ######################################################################
-
 # Author
 USER="LEI"
 NAME="Guillaume Frichet"
 EMAIL="guillaume.frichet@gmail.com"
-
 # Style
 indent_size=3
 
 # PATHS #######################################################################
-
-# Copied to ~
+# Files ending by a dot are automatically symlinked in ~
+# Directories copied to ~
 directories=(".atom" ".vim")
 
 # IGNORE ######################################################################
- 
 ignore_global=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "*.md" "*.markdown")
 # Files ending by a dot
 ignore_dot=("*.")
-# Main patterns
 # Specific directories
 ignore_atom=(${ignore_global[@]} ${ignore_dot[@]})
 ignore_vim=(${ignore_global[@]} ${ignore_dot[@]})

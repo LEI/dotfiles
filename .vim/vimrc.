@@ -2,13 +2,29 @@
 
 " Autoload plugins
 execute pathogen#infect()
-" Make Vim more useful
+
 set nocompatible
+
+" Settings -------------------------------------------------------------------
 
 " Use UTF-8 without BOM
 set encoding=utf-8 nobomb
 
-" Format -
+set shell=/bin/bash
+
+set numberwidth=3
+" Use relative line numbers
+"if exists("&relativenumber")
+"	set relativenumber
+"	au BufReadPost * set relativenumber
+"endif
+" Enable line numbers
+set number
+
+" Highlight current line
+set cursorline
+" Highlight searches
+set hlsearch
 
 " Show “invisible” characters
 set list
@@ -17,15 +33,13 @@ set showbreak=↪
 
 " Tabs -o spaces
 set smartindent
-" set expandtab
+"set expandtab
 set tabstop=4
 set shiftwidth=4
 " Wrapping
 set textwidth=80
 " Don't try to highlight lines longer than 800 characters
 set synmaxcol=800
-
-" Backups -
 
 " Don’t add empty newlines at the end of files
 set binary
@@ -59,7 +73,7 @@ if exists('+colorcolumn')
 	set colorcolumn=80
 endif
 
-" Plugin Settings ------------------------------------------------------------
+" Plugins --------------------------------------------------------------------
 
 " Airline -
 
@@ -105,12 +119,7 @@ set modelines=4
 " Enable per-directory .vimrc files and disable unsafe commands in them
 set exrc
 set secure
-" Enable line numbers
-set number
-" Highlight current line
-set cursorline
-" Highlight searches
-set hlsearch
+
 " Ignore case of searches
 set ignorecase
 " Highlight dynamically as pattern is typed
@@ -133,11 +142,7 @@ set showmode
 set title
 " Show the (partial) command as it’s being typed
 set showcmd
-" Use relative line numbers
-" if exists("&relativenumber")
-"	set relativenumber
-"	au BufReadPost * set relativenumber
-" endif
+
 " Start scrolling three lines before the horizontal window border
 set scrolloff=3
 
@@ -162,5 +167,4 @@ if has("autocmd")
 endif
 
 set noshowmode
-
 
