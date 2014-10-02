@@ -1,24 +1,28 @@
 #!/bin/bash
 #
 # Set Git Credentials
-# Uses lib/print
+# Uses lib/print 
 
 gitconfig () {
-	local git_credential="cache"
+	local CREDENTIAL="cache"
+	[ "$(uname -s)" == "Darwin" ] && CREDENTIAL="osxkeychain"
 
-	[ "$(uname -s)" == "Darwin" ] && git_credential="osxkeychain"
+	if [ ! -n "$NAME" ]; then
+		user "What is your github author name ?" " "
+		read -e NAME
+	fi
+	
+	if [ ! -n "$EMAIL" ]; then
+		user "What is your github author email ?" " "
+		read -e EMAIL
+	fi
 
-	user "What is your github author name ?" " "
-	read -e GIT_AUTHOR_NAME
-	user "What is your github author email ?" " "
-	read -e GIT_AUTHOR_EMAIL
-
-	sed -e "s/AUTHORNAME/$GIT_AUTHOR_NAME/g" \
-		-e "s/AUTHOREMAIL/$GIT_AUTHOR_EMAIL/g" \
-		-e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
+	sed -e "s/GIT_AUTHOR_NAME/$NAME/g" \
+		-e "s/GIT_AUTHOR_EMAIL/$EMAIL/g" \
+		-e "s/GIT_CREDENTIAL_HELPER/$CREDENTIAL/g" \
 		git/gitconfig.sample > git/gitconfig.
 
-	success "Git credentials generated."
+	success "Git credentials generated." "git/gitconfig."
 }
 
 gitmodule () {

@@ -29,7 +29,7 @@ dir () {
 
 	# Confirm action
 	action=$(echo "${callback//_/ }" | perl -nE 'say ucfirst')
-	if ask "$action ~${dst#$HOME}" Y; then
+	if ask "$action ~${dst#$HOME} ?" Y; then
 		indent_level=3
 	else
 		indent_level=1

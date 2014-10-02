@@ -34,6 +34,8 @@ Just move the dot at the end of the name and place the file in any directory.
 - [gist/zenorocha/7159780](//gist.github.com/zenorocha/7159780)
 - [mackup](https://github.com/lra/mackup)
 - [jigish](https://github.com/jigish/dotfiles)
+- [Puppet](http://garylarizza.com/blog/2013/02/15/puppet-plus-github-equals-laptop-love/)
+- [mscoutermarsh](https://github.com/mscoutermarsh/dotfiles)
 
 ## ...
 

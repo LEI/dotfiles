@@ -3,15 +3,23 @@
 # bootfiles dotstrap configuration
 # Files ending by a dot are automatically symlinked in ~
 
-# GLOBAL
+# GLOBAL ######################################################################
+
 VERSION=0.1
+USER="LEI"
+NAME="Guillaume Frichet"
+EMAIL="guillaume.frichet@gmail.com"
+
 # Style
 indent_size=3
 
-# Paths to copy in ~
+# PATHS #######################################################################
+
+# Copied to ~
 directories=(".atom" ".vim")
 
-# IGNORE
+# IGNORE ######################################################################
+ 
 ignore_global=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "*.md" "*.markdown")
 # Files ending by a dot
 ignore_dot=("*.")
