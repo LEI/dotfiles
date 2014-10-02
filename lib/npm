@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Set npm config 
+
+npmconfig () {
+	if [ ! -n "$NAME" ]; then
+		user "What is your npm author name ?" " "
+		read -e NAME
+	fi
+	
+	if [ ! -n "$EMAIL" ]; then
+		user "What is your npm author email ?" " "
+		read -e EMAIL
+	fi
+
+	sed -e "s/AUTHOR_NAME/$NAME/g" \
+		-e "s/AUTHOR_EMAIL/$EMAIL/g" \
+		.config/npmrc.sample > .config/npmrc.
+
+	success "npm init configured." ".config/npmrc."
+}

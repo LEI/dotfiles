@@ -9,7 +9,7 @@ cd "$(dirname "$0")"
 set -e
 
 # Global directories
-DOTFILES=~/.dotfiles
+export DOTFILES="~/.dotfiles"
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
 
@@ -24,7 +24,7 @@ force_all=
 reset_colors=
 verbose=
 
-# Get config
+# Read configuration
 lib=$DOTFILES_DIR/lib
 CONFIG_FILE=$DOTFILES_DIR/config
 source $lib/readconf
@@ -43,14 +43,20 @@ init_bootstrap () {
 	source $lib/file
 	source $lib/link
 	source $lib/git
+	source $lib/npm
 	source $lib/brew
 
 	# Pull last changes
 	# if ask "Pull last version from GitHub ?" Y true; then
 	# 	source $DOTFILES_DIR/bin/git-pup
+	# 	success ".gitconfig"
 	# else
-	# 	skipped
+	# 	skipped ".gitconfig"
 	# fi
+
+	echo ''
+	info "Using $USER profile" "$DOTFILES/config"
+	echo ''
 }
 
 # Print command line usage
@@ -66,35 +72,38 @@ echo_debug () {
 }
 
 do_gitconfig () {
-	# Create git/.gitconfig if needed
+	# Create gitconfig if needed
 	local gitconfig_file="git/gitconfig."
 	if check_file "$gitconfig_file" Y; then
 		if ask "Configure git credentials ?" Y true; then
 			gitconfig
 		else
-			skipped
+			skipped "git"
 		fi
 	else
-		warn "Git configuration already exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
+		warn ".gitconfig already exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
 	fi
 }
 
-do_gitmodule () {
-	if ask "Add a git submodule ?" Y true; then
-		indent_level=1
-		gitmodule
-		indent_level=0
+do_npmconfig () {
+	# Create npmrc if needed
+	local npmconfig_file=".config/npmrc."
+	if check_file "$npmconfig_file" Y; then
+		if ask "Configure npm init ?" Y true; then
+			npmconfig
+		else
+			skipped "npm"
+		fi
 	else
-		skipped
+		warn ".npmrc already exists" "~${DOTFILES_DIR#$HOME}/$npmconfig_file"
 	fi
 }
 
 do_link () {
 	if ask "Create symbolic links ?" Y true; then
-		echo_debug
 		# find $DOTFILES -name *.
-		dir "" link_dotfile ${ignore_global[@]} || skipped
-		dir "bin" link_file ${ignore_global[@]} || skipped
+		dir "" link_dotfiles ${ignore_global[@]} || skipped
+		dir "bin" link_files ${ignore_global[@]} || skipped
 		success "Stuff linked."
 	else
 		skipped "symlinks"
@@ -103,9 +112,8 @@ do_link () {
 
 undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
-		echo_debug
-		dir "" unlink_dotfile ${ignore_global[@]} || skipped
-		dir "bin" unlink_file ${ignore_global[@]} || skipped
+		dir "" unlink_dotfiles ${ignore_global[@]} || skipped
+		dir "bin" unlink_files ${ignore_global[@]} || skipped
 		success "Symlinks unchained."
 	else
 		skipped "symlinks"
@@ -114,7 +122,6 @@ undo_link () {
 
 do_copy () {
 	if ask "Copy directories ?" Y true; then
-		echo_debug
 		# find $DOTFILES -name ".*" -maxdepth 1
 		for dir in ${directories[@]}; do
 			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
@@ -128,7 +135,6 @@ do_copy () {
 
 undo_copy () {
 	if ask "Remove directories ?" Y true; then
-		echo_debug
 		for dir in ${directories[@]}; do
 			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
 			dir "$dir" remove ${ignore_dir[@]} || skipped
@@ -185,6 +191,10 @@ sandbox () {
 install () {
 	# Git
 	do_gitconfig
+
+	# npm
+	echo ''
+	do_npmconfig
 
 	# Symbolic links
 	echo ''
@@ -282,6 +292,16 @@ parse_flags () {
 
 	else
 		die "An error occured while preparing bootstrap"
+	fi
+}
+
+do_gitmodule () { # TOBOBTR
+	if ask "Add a git submodule ?" Y true; then
+		indent_level=1
+		gitmodule
+		indent_level=0
+	else
+		skipped
 	fi
 }
 

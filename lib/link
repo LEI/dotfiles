@@ -16,13 +16,10 @@ link () {
 
 	# If it is a broken symlink
 	if [ -h ${dst} ] && [ ! -e ${dst} ]; then
-		fail "${dst#$TARGET_DIR/}" "Removing broken link"
+		fail "${dst#$TARGET_DIR/}" "Broken link"
 		remove=true
-	fi
-
-	# If it is a symbolic link
-	# -o -L ?
-	if [ -h ${dst} ]; then
+	# If it is a symbolic link -o -L ?
+	elif [ -h ${dst} ]; then
 		current_src="$(readlink $dst)"
 		if [ ${current_src} = ${src} ]; then
 			# Already linked to this file
@@ -88,21 +85,21 @@ unlink () {
 	fi
 }
 
-link_file () {
+link_files () {
 	local src=$1
 	local name=${src#$DOTFILES_DIR/}
 
 	link $src $TARGET_DIR/$name
 }
 
-unlink_file () {
+unlink_files () {
 	local src=$1
 	local name=${src#$DOTFILES_DIR/}
 
 	unlink $TARGET_DIR/$name
 }
 
-link_dotfile () {
+link_dotfiles () {
 	local src=$1
 	local name
 
@@ -112,7 +109,7 @@ link_dotfile () {
 	fi
 }
 
-unlink_dotfile () {
+unlink_dotfiles () {
 	local src=$1
 	local name
 
