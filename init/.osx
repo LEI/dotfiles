@@ -443,11 +443,19 @@ defaults write com.apple.dock wvous-tr-modifier -int 0
 #defaults write com.apple.dock wvous-bl-corner -int 5
 #defaults write com.apple.dock wvous-bl-modifier -int 0
 
+###############################################################################
+# Chrome                                                                      #
+###############################################################################
+
+# Enable sensitive backswipe
+defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool true
+defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool true
 
 
 
-
-
+#
+#
+#
 # ###############################################################################
 # # Safari & WebKit                                                             #
 # ###############################################################################
@@ -645,10 +653,6 @@ defaults write com.apple.dock wvous-tr-modifier -int 0
 # # Allow installing user scripts via GitHub Gist or Userscripts.org
 # defaults write com.google.Chrome ExtensionInstallSources -array "https://gist.githubusercontent.com/" "http://userscripts.org/*"
 # defaults write com.google.Chrome.canary ExtensionInstallSources -array "https://gist.githubusercontent.com/" "http://userscripts.org/*"
-
-# # Disable the all too sensitive backswipe
-# defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
-# defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool false
 
 # ###############################################################################
 # # GPGMail 2                                                                   #
