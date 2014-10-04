@@ -39,16 +39,6 @@ init_bootstrap () {
 	source $lib/dir
 	source $lib/file
 	source $lib/link
-	source $lib/git
-	source $lib/npm
-
-	# Pull last changes
-	# if ask "Pull last version from GitHub ?" Y true; then
-	# 	source $DOTFILES_DIR/bin/git-pup
-	# 	success ".gitconfig"
-	# else
-	# 	skipped ".gitconfig"
-	# fi
 }
 
 # Print command line usage
@@ -201,6 +191,16 @@ sandbox () {
 }
 
 install () {
+
+	# Pull last changes
+	if ask "Pull last version from GitHub ?" Y true; then
+		source $DOTFILES_DIR/bin/git-pup
+		success "git pull"
+	else
+		skipped "git pull"
+	fi
+
+	echo ''
 	do_config
 
 	# Symbolic links
@@ -315,7 +315,13 @@ parse_flags () {
 do_gitmodule () { # TOBOBTR
 	if ask "Add a git submodule ?" Y true; then
 		indent_level=1
-		gitmodule
+		user "username/repository ?" "GitHub"
+		read -e MODULE_NAME
+
+		user "Path ?" "Relative to $DOTFILES"
+		read -e MODULE_PATH
+
+		git submodule add https://github.com/$MODULE_NAME.git $MODULE_PATH
 		indent_level=0
 	else
 		skipped
