@@ -41,7 +41,6 @@ init_bootstrap () {
 	source $lib/link
 	source $lib/git
 	source $lib/npm
-	source $lib/brew
 
 	# Pull last changes
 	# if ask "Pull last version from GitHub ?" Y true; then
@@ -80,54 +79,43 @@ do_config () {
 			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
 			config.sample > config
 
-		success "Identity saved." "config"
+		success "Configuration file create" "${CONFIG_FILE#$DOTFILES_DIR/}"
+		echo ''
+	else
+		success "Configuration file" "${CONFIG_FILE#$DOTFILES_DIR/} already exists" true
 	fi
 
 	source $lib/readconf
 
-	info "Using $USER profile" "$DOTFILES/config"
+	info "Using $USER profile" "~${CONFIG_FILE#$HOME}"
 
-	echo ''
-	do_gitconfig
-
-	# npm
-	echo ''
-	do_npmconfig
-}
-
-do_gitconfig () {
-	# Create gitconfig if needed
-	local gitconfig_file="git/gitconfig."
-	if check_file "$gitconfig_file" Y; then
-		if ask "Create .gitconfig ?" Y true; then
-			gitconfig
+	# Sample files
+	for sample in ${sample_files[@]}; do
+		local sample_param=(${sample//=/ })
+		local cfg_name=${sample_param[0]}
+		local cfg_path=${sample_param[1]}
+		((indent_level++))
+		# Create config file if needed
+		if [ ! -f "$cfg_path" ]; then
+			if ask "Create $cfg_path ?" Y; then
+				fill_file "$cfg_name" "$cfg_path" "name" "email" "credential"
+				success "$cfg_name" " "
+			else
+				skipped "$cfg_name" " "
+			fi
 		else
-			skipped "git"
+			success "$cfg_name" "$cfg_path already exists" true
 		fi
-	else
-		warn "~${DOTFILES_DIR#$HOME}/$gitconfig_file" "Already exists"
-	fi
-}
-
-do_npmconfig () {
-	# Create npmrc if needed
-	local npmconfig_file=".config/npmrc."
-	if check_file "$npmconfig_file" Y; then
-		if ask "Create .npmrc ?" Y true; then
-			npmconfig
-		else
-			skipped "npm"
-		fi
-	else
-		warn "~${DOTFILES_DIR#$HOME}/$npmconfig_file" "Already exists"
-	fi
+		((indent_level--))
+	done
+	success "$USER profile."
 }
 
 do_link () {
 	if ask "Create symbolic links ?" Y true; then
 		# find $DOTFILES -name *.
-		dir "" link_dotfiles ${ignore_global[@]} || skipped
-		dir "bin" link_files ${ignore_global[@]} || skipped
+		dir "" link_dotfiles ${ignore_global[@]}
+		dir "bin" link_files ${ignore_global[@]}
 		success "Stuff linked."
 	else
 		skipped "symlinks"
@@ -136,8 +124,8 @@ do_link () {
 
 undo_link () {
 	if ask "Erase symbolic links ?" Y true; then
-		dir "" unlink_dotfiles ${ignore_global[@]} || skipped
-		dir "bin" unlink_files ${ignore_global[@]} || skipped
+		dir "" unlink_dotfiles ${ignore_global[@]}
+		dir "bin" unlink_files ${ignore_global[@]}
 		success "Symlinks unchained."
 	else
 		skipped "symlinks"
@@ -314,6 +302,16 @@ parse_flags () {
 	fi
 }
 
+# chmods, source returns
+# ignore, conf, osx loc
+# sync-home licences ssh rsync, [Dropbox](http://www.dropboxwiki.com/tips-and-tricks/using-the-official-dropbox-command-line-interface-cli)
+# Ruby, compass.. http://www.npmjs.org/package/dotfiles
+# https://github.com/thoughtbot/rcm
+# http://dev.svetlyak.ru/dotfiler-en/
+# [HomeSick](http://technicalpickles.com/posts/never-leave-your-dotfiles-behind-again-with-homesick/)
+# [nstl](https://github.com/kautsig/dotfile-installer/blob/master/install.sh)
+# [palette](https://github.com/altercation/solarized/tree/master/apple-colorpalette-solarized)
+# [drpbx](http://coda.caseykuhlman.com/entries/2014/dropbox-as-a-settings-repository.html)
 do_gitmodule () { # TOBOBTR
 	if ask "Add a git submodule ?" Y true; then
 		indent_level=1
