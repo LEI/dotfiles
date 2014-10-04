@@ -24,7 +24,7 @@ cat << EOF
 
          dot setup       ~/.dotfiles/setup
 
-            Check for Homebrew then install bundles with init/Brewfile and init/Caskfile
+            Check for Homebrew then install bundles with Brew and Cask
 
    Options:
 
@@ -35,8 +35,6 @@ cat << EOF
          -u, --ugly      Reset colors for light backgrounds
          -v, --verbose   Output external logs
          -h, --help      Show this message
-
-      Multiple options must be separated by a space e.g. 'dot --auto --verbose'
 
 EOF
 
