@@ -74,13 +74,13 @@ do_gitconfig () {
 	# Create gitconfig if needed
 	local gitconfig_file="git/gitconfig."
 	if check_file "$gitconfig_file" Y; then
-		if ask "Configure git credentials ?" Y true; then
+		if ask "Create .gitconfig ?" Y true; then
 			gitconfig
 		else
 			skipped "git"
 		fi
 	else
-		warn ".gitconfig already exists" "~${DOTFILES_DIR#$HOME}/$gitconfig_file"
+		warn "~${DOTFILES_DIR#$HOME}/$gitconfig_file" "Already exists"
 	fi
 }
 
@@ -88,13 +88,13 @@ do_npmconfig () {
 	# Create npmrc if needed
 	local npmconfig_file=".config/npmrc."
 	if check_file "$npmconfig_file" Y; then
-		if ask "Configure npm init ?" Y true; then
+		if ask "Create .npmrc ?" Y true; then
 			npmconfig
 		else
 			skipped "npm"
 		fi
 	else
-		warn ".npmrc already exists" "~${DOTFILES_DIR#$HOME}/$npmconfig_file"
+		warn "~${DOTFILES_DIR#$HOME}/$npmconfig_file" "Already exists"
 	fi
 }
 
@@ -188,6 +188,8 @@ sandbox () {
 }
 
 install () {
+	# TODO do_config
+
 	# Git
 	do_gitconfig
 
@@ -203,10 +205,10 @@ install () {
 	echo ''
 	do_copy
 
-	# Set OS defaults
 	echo ''
 	info "Using $(uname) specific configuration" " " true
 
+	# Set OS defaults
 	echo ''
 	do_defaults
 

@@ -53,7 +53,7 @@ endif
 " Don’t create backups when editing files in certain directories
 set backupskip=/tmp/*,/private/tmp/*
 
-" Color scheme -
+" Color scheme
 
 " Enable syntax highlighting
 syntax on
@@ -75,13 +75,13 @@ endif
 
 " Plugins --------------------------------------------------------------------
 
-" Airline -
+" Airline
 
 let g:airline_powerline_fonts = 1
 " let g:airline_left_sep = ''
 " let g:airline_right_sep = ''
 
-" NERDTree -
+" NERDTree
 
 " Open automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
