@@ -12,6 +12,8 @@ set -e
 export DOTFILES="~/.dotfiles"
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
+CONFIG_FILE=$DOTFILES_DIR/config
+lib=$DOTFILES_DIR/lib
 
 # Get command
 args=("$@")
@@ -23,11 +25,6 @@ force_default=
 force_all=
 reset_colors=
 verbose=
-
-# Read configuration
-lib=$DOTFILES_DIR/lib
-CONFIG_FILE=$DOTFILES_DIR/config
-source $lib/readconf
 
 init_bootstrap () {
 	# Readying
@@ -53,9 +50,6 @@ init_bootstrap () {
 	# else
 	# 	skipped ".gitconfig"
 	# fi
-
-	info "Using $USER profile" "$DOTFILES/config"
-	echo ''
 }
 
 # Print command line usage
@@ -68,6 +62,37 @@ echo_debug () {
 		info "Debug is enabled." " " true
 		#info "Symbolic dry run" "Changes are not applied while debugging" true
 	fi
+}
+
+do_config () {
+	if [ ! -f "$CONFIG_FILE" ]; then
+		user "What is your nickname ?" " "
+		read -e NICK
+
+		user "What is your name ?" " "
+		read -e NAME
+
+		user "What is your email ?" " "
+		read -e EMAIL
+
+		sed -e "s/AUTHOR_NICK/\"$NICK\"/g" \
+			-e "s/AUTHOR_NAME/\"$NAME\"/g" \
+			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
+			config.sample > config
+
+		success "Identity saved." "config"
+	fi
+
+	source $lib/readconf
+
+	info "Using $USER profile" "$DOTFILES/config"
+
+	echo ''
+	do_gitconfig
+
+	# npm
+	echo ''
+	do_npmconfig
 }
 
 do_gitconfig () {
@@ -188,14 +213,7 @@ sandbox () {
 }
 
 install () {
-	# TODO do_config
-
-	# Git
-	do_gitconfig
-
-	# npm
-	echo ''
-	do_npmconfig
+	do_config
 
 	# Symbolic links
 	echo ''
