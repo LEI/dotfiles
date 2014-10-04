@@ -14,3 +14,61 @@ silent () {
 		eval "$@" >/dev/null | sed "s/^/$indent/" # (2|&)>/dev/null
 	fi
 }
+
+fill_file () {
+	local name=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+	local path=$2
+	shift
+	shift
+
+	local sed_cmd="sed "
+	for var in $@; do
+		local variable=$(echo "$var" | tr '[:lower:]' '[:upper:]')
+		local value=$(eval echo \$$variable)
+		sed_cmd+="-e \"s/${name}_${variable}/$value/g\" "
+	done
+	sed_cmd+="${path}sample > ${path}"
+
+	eval "$sed_cmd"
+}
+
+
+gitconfig () {
+	local CREDENTIAL="cache"
+	[ "$(uname -s)" == "Darwin" ] && CREDENTIAL="osxkeychain"
+
+	if [ ! -n "$NAME" ]; then
+		user "What is your github author name ?" " "
+		read -e NAME
+	fi
+
+	if [ ! -n "$EMAIL" ]; then
+		user "What is your github author email ?" " "
+		read -e EMAIL
+	fi
+
+	sed -e "s/GIT_AUTHOR_NAME/$NAME/g" \
+		-e "s/GIT_AUTHOR_EMAIL/$EMAIL/g" \
+		-e "s/GIT_CREDENTIAL_HELPER/$CREDENTIAL/g" \
+		git/gitconfig.sample > git/gitconfig.
+
+	success "Git credentials generated." "git/gitconfig."
+}
+
+npmconfig () {
+	if [ ! -n "$NAME" ]; then
+		user "What is your npm author name ?" " "
+		read -e NAME
+	fi
+
+	if [ ! -n "$EMAIL" ]; then
+		user "What is your npm author email ?" " "
+		read -e EMAIL
+	fi
+
+	sed -e "s/AUTHOR_NAME/$NAME/g" \
+		-e "s/AUTHOR_EMAIL/$EMAIL/g" \
+		.config/npmrc.sample > .config/npmrc.
+
+	success "npm init configured." ".config/npmrc."
+}

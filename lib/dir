@@ -32,6 +32,7 @@ dir () {
 	if ask "$action ~${dst#$HOME} ?" Y; then
 		indent_level=3
 	else
+		skipped "~${dst#$HOME}" " "
 		indent_level=1
 		return
 	fi
@@ -63,13 +64,13 @@ dir () {
 
 		indent_level=2
 
-		success "~${dst#$HOME}"
+		success "~${dst#$HOME}" " "
 
 	else
 
 		indent_level=2
 
-		fail "Failed, path not found" ~${src#$HOME}
+		fail "Failed" "~${src#$HOME} not found"
 	fi
 
 	indent_level=1

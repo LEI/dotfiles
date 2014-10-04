@@ -73,6 +73,6 @@ die () {
 }
 
 skipped () {
-	success "Skipped $1"
+	success "Skipped $1" "$2"
 	return 0
 }

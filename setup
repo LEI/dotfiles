@@ -2,11 +2,14 @@
 #
 # Setup some defaults
 
-# Import prompt functions
+# Import functions
 lib=$DOTFILES_DIR/lib
+CONFIG_FILE=$DOTFILES_DIR/config
+source $lib/readconf
 source $lib/print
 source $lib/ask
-source $lib/brew
+
+source $DOTFILES_DIR/brew/brew.sh
 
 UNAME=$( uname )
 
@@ -18,44 +21,6 @@ else
 	indent_level=2
 fi
 
-config_keys () {
-	local file
-	local spaces="            "
-	((indent_level++))
-	if ask "Custom keyboard settings ?"; then
-		if silent brew cask install seil; then
-			# Seil
-			((indent_level++))
-			local file=$DOTFILES_DIR/init/seil
-			if silent source_file $file; then
-				success "Seil" " "
-				open /Applications/Seil.app
-				((indent_level--))
-			else
-				fail "Seil" " "
-				((indent_level--))
-			fi
-		fi
-		if silent brew cask install karabiner; then
-			# Karabiner
-			((indent_level++))
-			local file=$DOTFILES_DIR/init/karabiner
-			if silent source_file $file; then
-				success "Karabiner" " "
-				open /Applications/Karabiner.app
-				((indent_level--))
-			else
-				fail "Karabiner failed" " "
-				((indent_level--))
-			fi
-		fi
-		success "Keyboard"
-	else
-		skipped "keyboard"
-	fi
-	((indent_level--))
-}
-
 case $UNAME in
 
 	Darwin)
@@ -63,32 +28,40 @@ case $UNAME in
 		# HOMEBREW
 
 		if install_homebrew; then
+			((indent_level++))
 
 			# BREW LIBS
 
 			# Install dependencies
 			if ask "Bundle brew ?"; then
-				brew_bundle "Brew" || step_failed=true
+				brew_bundle "brew" || step_failed=true
 			else
-				skipped "Brew"
+				skipped "Brew" " "
 			fi
 
 			# CASK APPS
 
 			# Install programs
 			if ask "Bundle cask ?"; then
-				if brew_bundle "Cask"; then
-					config_keys || step_failed=true
+				if brew_bundle "cask"; then
+					for cask in ${cask_files[@]}; do
+						do_cask "$cask"
+					done
 				else
 					step_failed=true
 				fi
 			else
-				skipped "Cask"
+				skipped "Cask" " "
 			fi
 
 		else
-			skipped "Homebrew"
+			((indent_level++))
+			skipped "Homebrew" " "
 		fi
+
+		((indent_level--))
+
+		success "Homebrew" " "
 
 		;;
 

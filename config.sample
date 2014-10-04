@@ -4,19 +4,28 @@
 # Configuration file (each line is evaluated separately)
 
 # GLOBAL ######################################################################
+
 # Author
 USER=AUTHOR_NICK
 NAME=AUTHOR_NAME
 EMAIL=AUTHOR_EMAIL
+# Git
+[ "$(uname -s)" == "Darwin" ] && CREDENTIAL="osxkeychain" || CREDENTIAL="cache"
 # Style
 indent_size=3
 
 # PATHS #######################################################################
+
+# Config files
+sample_files=("npm=.config/npmrc." "git=git/gitconfig.")
 # Files ending by a dot are automatically symlinked in ~
 # Directories copied to ~
 directories=(".atom" ".vim")
+# Cask CLI Applications
+cask_files=("seil" "karabiner")
 
 # IGNORE ######################################################################
+
 ignore_global=(".DS_Store" ".gitignore" ".git" "*.md" "*.markdown" "*.md" "*.markdown")
 # Files ending by a dot
 ignore_dot=("*.")
