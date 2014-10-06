@@ -211,16 +211,16 @@ install () {
 	echo ''
 	do_copy
 
+	# Dependencies
+	echo ''
+	do_setup
+
 	echo ''
 	info "Using $(uname) specific configuration" " " true
 
 	# Set OS defaults
 	echo ''
 	do_defaults
-
-	# Dependencies
-	echo ''
-	do_setup
 }
 
 uninstall () {
