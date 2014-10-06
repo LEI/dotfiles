@@ -233,7 +233,7 @@ function gmail() {
 	user=`dscl . -read /Users/$(whoami) | grep @$mail | sed 's/.*>\(.*\)@.*/\1/'`
 	pass=$(security find-internet-password -w -a "$user")
 	#rsstail -a -t -A "$user:$pass" -u "https://mail.google.com/mail/feed/atom"
-
+	# 401
 	curl -u $user:$pass -k --silent "https://mail.google.com/mail/feed/atom"
 }
 
