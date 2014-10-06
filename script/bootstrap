@@ -194,34 +194,36 @@ sandbox () {
 
 install () {
 
-	# Dependencies
-	echo ''
-	do_deps
-
 	# Pull last changes
-	if ask "Pull last version from GitHub ?" Y true; then
+	if [ -x "/usr/bin/git" ] && \
+		ask "Pull last version from GitHub ?" Y true; then
 		source $DOTFILES_DIR/bin/git-pup
 		success "git pull"
+		echo ''
 	else
 		skipped "git pull"
+		echo ''
 	fi
 
-	echo ''
 	do_config
+	echo ''
+
+	# Dependencies
+	do_deps
+	echo ''
 
 	# Symbolic links
-	echo ''
 	do_link
+	echo ''
 
 	# Directories
-	echo ''
 	do_copy
-
 	echo ''
+
 	info "Using $(uname) specific configuration" " " true
+	echo ''
 
 	# Set OS defaults
-	echo ''
 	do_defaults
 }
 
@@ -230,9 +232,9 @@ uninstall () {
 
 	# Symbolic links
 	undo_link
+	echo ''
 
 	# Directories
-	echo ''
 	undo_copy
 
 	end_message="Bootstrap uninstalled things."
