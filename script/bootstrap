@@ -8,8 +8,6 @@ BOOTSTRAP_DIR=$(dirname "$0")
 # Set working directory
 cd "$(dirname "$0")/.."
 
-set -e
-
 # Global directories
 export DOTFILES="~/.dotfiles"
 DOTFILES_DIR=$(pwd)
@@ -27,6 +25,8 @@ force_default=
 force_all=
 reset_colors=
 verbose=
+
+set -e
 
 init_bootstrap () {
 	# Readying
