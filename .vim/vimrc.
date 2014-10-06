@@ -2,6 +2,7 @@
 
 " Autoload plugins
 execute pathogen#infect()
+Helptags
 
 set nocompatible
 
@@ -29,7 +30,7 @@ set hlsearch
 " Show “invisible” characters
 set list
 set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_,extends:❯,precedes:❮
-set showbreak=↪
+" set showbreak=↪
 
 " Tabs -o spaces
 set smartindent
@@ -44,6 +45,7 @@ set synmaxcol=800
 " Don’t add empty newlines at the end of files
 set binary
 set noeol
+
 " Centralize backups, swapfiles and undo history
 set backupdir=~/.vim/backups
 set directory=~/.vim/swaps
@@ -52,6 +54,8 @@ if exists("&undodir")
 endif
 " Don’t create backups when editing files in certain directories
 set backupskip=/tmp/*,/private/tmp/*
+
+" set visualbell
 
 " Color scheme
 
@@ -80,6 +84,10 @@ endif
 let g:airline_powerline_fonts = 1
 " let g:airline_left_sep = ''
 " let g:airline_right_sep = ''
+" Enable the list of buffers
+let g:airline#extensions#tabline#enabled = 1
+" Show just the filename
+let g:airline#extensions#tabline#fnamemod = ':t'
 
 " NERDTree
 
@@ -91,8 +99,24 @@ let NERDTreeShowHidden=1
 
 " ----------------------------------------------------------------------------
 
+set hidden
+
 " Change mapleader
 let mapleader=","
+
+" https://joshldavis.com/2014/04/05/vim-tab-madness-buffers-vs-tabs/
+" Open a new empty buffer
+nmap <leader>T :enew<CR>
+" Move to the next buffer
+nmap <leader>l :bnext<CR>
+" Move to the previous buffer
+nmap <leader>h :bprevious<CR>
+" Close the current buffer and move to the previous one
+" This replicates the idea of closing a tab
+nmap <leader>bq :bp <BAR> bd #<CR>
+" Show all open buffers and their status
+nmap <leader>bl :ls<CR>
+
 
 " Save a file as root (,W)
 noremap <leader>W :w !sudo tee % > /dev/null<CR>
