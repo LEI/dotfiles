@@ -58,6 +58,7 @@ FORMULAS=(
 	zopfli
 	lua
 	glib
+	rsstail
 	irssi
 	# Install Caskroom
 	caskroom/cask/brew-cask

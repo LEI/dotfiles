@@ -2,9 +2,6 @@
 #
 # Construct find opts
 
-lib=$DOTFILES_DIR/lib
-source $lib/join
-
 find_cmd () {
 	local src=$1;
 	shift
