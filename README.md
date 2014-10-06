@@ -5,7 +5,7 @@ Dotfiles setup being build thanks to the Internet.
 ## Usage
 
 	git clone git@github.com:LEI/dotfiles.git ~/.dotfiles
-	~/.dotfiles/bootstrap install
+	~/.dotfiles/bin/dot
 
 	dot --help
 
