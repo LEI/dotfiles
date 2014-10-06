@@ -2,12 +2,12 @@
 #
 # Setup some defaults
 
-# Import functions
-lib=$DOTFILES_DIR/lib
-CONFIG_FILE=$DOTFILES_DIR/config
-source $lib/readconf
-source $lib/print
-source $lib/ask
+# # Import functions
+# lib=$DOTFILES_DIR/lib
+# CONFIG_FILE=$DOTFILES_DIR/config
+# source $lib/readconf
+# source $lib/print
+# source $lib/ask
 
 UNAME=$( uname )
 

@@ -4,9 +4,6 @@
 #
 # Copy with rsync
 
-lib=$DOTFILES_DIR/lib
-source $lib/join
-
 do_rsync () {
 	local src=$1
 	local dst=$2

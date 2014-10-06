@@ -31,3 +31,11 @@ fill_file () {
 
 	eval "$sed_cmd"
 }
+
+# join "delimiter" ${array[@]}
+join () {
+	# e.g.
+	# join , (a b c)
+	# -> a,b,c
+	perl -e '$s = shift @ARGV; print join($s, @ARGV);' "$@";
+}

@@ -227,6 +227,16 @@ function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
+function gmail() {
+	# http://brettterpstra.com/2013/02/15/gmail-in-the-shell/
+	[ -n "$1" ] && mail="$1" || mail="gmail"
+	user=`dscl . -read /Users/$(whoami) | grep @$mail | sed 's/.*>\(.*\)@.*/\1/'`
+	pass=$(security find-internet-password -w -a "$user")
+	#rsstail -a -t -A "$user:$pass" -u "https://mail.google.com/mail/feed/atom"
+
+	curl -u $user:$pass -k --silent "https://mail.google.com/mail/feed/atom"
+}
+
 # Simple calculator
 function calc() {
 	local result="";
@@ -237,8 +247,8 @@ function calc() {
 		# improve the output for decimal numbers
 		printf "$result" |
 		sed -e 's/^\./0./'        `# add "0" for cases like ".5"` \
-		    -e 's/^-\./-0./'      `# add "0" for cases like "-.5"`\
-		    -e 's/0*$//;s/\.$//';  # remove trailing zeros
+			-e 's/^-\./-0./'      `# add "0" for cases like "-.5"`\
+			-e 's/0*$//;s/\.$//';  # remove trailing zeros
 	else
 		printf "$result";
 	fi;
