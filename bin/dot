@@ -2,6 +2,9 @@
 #
 # Install
 
-$DOTFILES/script/bootstrap "$@"
+[ -n "$DOTFILES" ] || DOTFILES=~/.dotfiles
+cd $DOTFILES
+
+script/bootstrap "$@"
 
 # source ~/.bash_profile && echo ". ~/.bash_profile"
