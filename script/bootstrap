@@ -166,9 +166,9 @@ do_defaults () {
 	fi
 }
 
-# Install deps & utils with homebrew
-do_setup () {
-	if ask "Set up ?" N true; then
+# Install utils with homebrew
+do_deps () {
+	if ask "Install dependencies ?" N true; then
 		((indent_level++))
 		local setup=$BOOTSTRAP_DIR/setup
 		if source_file $setup; then
@@ -176,10 +176,10 @@ do_setup () {
 			success "Stuff installed."
 		else
 			((indent_level--))
-			warn "Dependencies did not fully installed" "[setup]"
+			warn "Dependencies not fully installed" " "
 		fi
 	else
-		skipped "setup"
+		skipped "homebrew"
 	fi
 }
 
@@ -193,6 +193,10 @@ sandbox () {
 }
 
 install () {
+
+	# Dependencies
+	echo ''
+	do_deps
 
 	# Pull last changes
 	if ask "Pull last version from GitHub ?" Y true; then
@@ -212,10 +216,6 @@ install () {
 	# Directories
 	echo ''
 	do_copy
-
-	# Dependencies
-	echo ''
-	do_setup
 
 	echo ''
 	info "Using $(uname) specific configuration" " " true
@@ -339,7 +339,7 @@ bootstrap () {
 		'link')			do_link ;;
 		'copy')			do_copy ;;
 		'defaults')		do_defaults ;;
-		'setup')		do_setup ;;
+		'setup')		do_deps ;;
 		'module')		do_gitmodule ;;
 		*)				fail "$1" "Unknown command"; echo_usage ;;
 	esac

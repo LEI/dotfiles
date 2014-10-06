@@ -45,16 +45,16 @@ case $UNAME in
 		# HOMEBREW
 
 		homebrew_file=init/Homebrew.sh
-		if ask "Homebrew ?" Y; then
+		#if ask "Homebrew ?" Y; then
 			if silent source "$homebrew_file"; then
 				for cask in ${cask_files[@]}; do
 					do_cask "$cask"
 				done
 				success "Homebrew" "$homebrew_file"
 			fi
-		else
-			skipped "Homebrew" "$homebrew_file"
-		fi
+		# else
+		# 	skipped "Homebrew" "$homebrew_file"
+		# fi
 
 
 		;;
