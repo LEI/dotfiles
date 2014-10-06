@@ -69,7 +69,7 @@ do_config () {
 			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
 			config.sample > config
 
-		success "Configuration file create" "${CONFIG_FILE#$DOTFILES_DIR/}"
+		success "Configuration file successfully created" "${CONFIG_FILE#$DOTFILES_DIR/}"
 		echo ''
 	else
 		success "Configuration file" "${CONFIG_FILE#$DOTFILES_DIR/} already exists" true
@@ -352,7 +352,5 @@ indent_level=0
 [ -n "$end_message" ] || end_message="Things were bootstrapped !"
 echo ''
 success "$end_message" " "
-echo ''
 
-# Does not work
 #source_file ~/.bash_profile
