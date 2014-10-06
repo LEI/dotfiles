@@ -9,8 +9,6 @@ source $lib/readconf
 source $lib/print
 source $lib/ask
 
-source $DOTFILES_DIR/brew/brew.sh
-
 UNAME=$( uname )
 
 info "'dot setup' is an alias to this step" " " true
@@ -21,47 +19,43 @@ else
 	indent_level=2
 fi
 
+do_cask () {
+	local cask=$1
+	((indent_level++))
+		if silent brew cask install $cask; then
+			((indent_level++))
+			local file=$DOTFILES_DIR/cask/$cask
+			local app="$(tr '[:lower:]' '[:upper:]' <<< ${cask:0:1})${cask:1}"
+			if silent source_file $file; then
+				success "$app" " "
+				open /Applications/$app.app
+				((indent_level--))
+			else
+				fail "$app" " "
+				((indent_level--))
+			fi
+		fi
+	((indent_level--))
+}
+
 case $UNAME in
 
 	Darwin)
 
 		# HOMEBREW
 
-		if install_homebrew; then
-			((indent_level++))
-
-			# BREW LIBS
-
-			# Install dependencies
-			if ask "Bundle brew ?"; then
-				brew_bundle "brew" || step_failed=true
-			else
-				skipped "Brew" " "
+		homebrew_file=init/Homebrew.sh
+		if ask "Homebrew ?" Y; then
+			if silent source "$homebrew_file"; then
+				for cask in ${cask_files[@]}; do
+					do_cask "$cask"
+				done
+				success "Homebrew" "$homebrew_file"
 			fi
-
-			# CASK APPS
-
-			# Install programs
-			if ask "Bundle cask ?"; then
-				if brew_bundle "cask"; then
-					for cask in ${cask_files[@]}; do
-						do_cask "$cask"
-					done
-				else
-					step_failed=true
-				fi
-			else
-				skipped "Cask" " "
-			fi
-
 		else
-			((indent_level++))
-			skipped "Homebrew" " "
+			skipped "Homebrew" "$homebrew_file"
 		fi
 
-		((indent_level--))
-
-		success "Homebrew" " "
 
 		;;
 
