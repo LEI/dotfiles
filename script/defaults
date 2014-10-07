@@ -3,12 +3,6 @@
 # Setup some defaults
 # Steps specific to init folder & depending on OS type
 
-# # Import functions
-# lib=$BOOTSTRAP_DIR/lib
-# CONFIG_FILE=$BOOTSTRAP_DIR/config
-# source $lib/readconf
-# source $lib/ask
-echo $USER
 UNAME=$( uname )
 THEME=$USER
 

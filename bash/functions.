@@ -227,14 +227,24 @@ function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
+# Check Gmail inbox
 function gmail() {
 	# http://brettterpstra.com/2013/02/15/gmail-in-the-shell/
-	[ -n "$1" ] && mail="$1" || mail="gmail"
-	user=`dscl . -read /Users/$(whoami) | grep @$mail | sed 's/.*>\(.*\)@.*/\1/'`
-	pass=$(security find-internet-password -w -a "$user")
-	#rsstail -a -t -A "$user:$pass" -u "https://mail.google.com/mail/feed/atom"
-	# 401
-	curl -u $user:$pass -k --silent "https://mail.google.com/mail/feed/atom"
+	local user=`dscl . -read /Users/$(whoami) | grep -m 1 @gmail | sed 's/.*>\(.*\)@.*/\1/'`
+	local pass=$(security find-internet-password -w -a "$user")
+
+	#wget -T 3 -t 1 -q --user=$user@gmail.com --password=$pass --no-check-certificate https://mail.google.com/mail/feed/atom -O -
+	local count=`curl -u "$user:$pass" --silent "https://mail.google.com/mail/feed/atom" | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
+
+	if [ "$1" = "-w" ]; then
+		# -w to watch rss feed
+		rsstail -a -t -A "$user:$pass" -u "https://mail.google.com/mail/feed/atom" # -i 10 -r -v 
+	else
+		# Print fullcount
+		[ $count -eq 1 ] \
+			&& echo "$count new message." \
+			|| echo "$count new messages."
+	fi
 }
 
 # Simple calculator
