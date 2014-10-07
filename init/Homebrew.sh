@@ -120,14 +120,14 @@ CASKS=(
 	webp-quicklook
 )
 
-function setup() {
+setup () {
 	# https://raw.github.com/mxcl/homebrew/go
 	[ -x "/usr/local/bin/brew" ] || {
 		ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	}
 }
 
-function install_brewfiles() {
+install_brewfiles () {
 	for tap in "${TAPS[@]}"; do
 		brew tap $tap
 	done
@@ -137,7 +137,7 @@ function install_brewfiles() {
 	done
 }
 
-function install_caskfiles() {
+install_caskfiles () {
 	for cask in "${CASKS[@]}"; do
 		brew cask install --appdir=/Applications $cask
 	done
@@ -148,7 +148,7 @@ function install_caskfiles() {
 	brew cask cleanup
 }
 
-function main() {
+main () {
 	setup
 
 	# Make sure we’re using the latest Homebrew
