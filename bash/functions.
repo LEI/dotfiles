@@ -234,17 +234,17 @@ function tre() {
 # Check Gmail inbox
 function gmail() {
 	# http://brettterpstra.com/2013/02/15/gmail-in-the-shell/
+	local feed="https://mail.google.com/mail/feed/atom"
 	local user=`dscl . -read /Users/$(whoami) | grep -m 1 @gmail | sed 's/.*>\(.*\)@.*/\1/'`
 	local pass=$(security find-internet-password -w -a "$user")
 
 	if [ "$1" = "-w" ]; then
 		# Watch rss feed
-		rsstail -a -t -A "$user:$pass" -u "https://mail.google.com/mail/feed/atom" # -i 10 -r -v 
+		rsstail -a -t -A "$user:$pass" -u "$feed" # -i 10 -r -v 
 	else
 		# Print fullcount
-		#wget -T 3 -t 1 -q --user=$user@gmail.com --password=$pass --no-check-certificate https://mail.google.com/mail/feed/atom -O -
-		local count=`curl -u "$user:$pass" --silent "https://mail.google.com/mail/feed/atom" | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
-		[ $count -eq 1 ] \
+		local count=`curl -u "$user:$pass" --silent "$feed" | grep -m 1 fullcount | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
+		[ "$count" -eq 1 ] \
 			&& echo "$count new message." \
 			|| echo "$count new messages."
 	fi
