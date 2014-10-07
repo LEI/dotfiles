@@ -239,14 +239,12 @@ function gmail() {
 	local pass=$(security find-internet-password -w -a "$user")
 
 	if [ "$1" = "-w" ]; then
-		# Watch rss feed
+		# Watch feed (FIXME)
 		rsstail -a -t -A "$user:$pass" -u "$feed" # -i 10 -r -v 
 	else
 		# Print fullcount
 		local count=`curl -u "$user:$pass" --silent "$feed" | grep -m 1 fullcount | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
-		[ "$count" -eq 1 ] \
-			&& echo "$count new message." \
-			|| echo "$count new messages."
+		[ "$count" -eq 1 ] && echo "$count new message."  || echo "$count new messages."
 	fi
 }
 
