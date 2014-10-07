@@ -2,10 +2,7 @@
 #
 # Create a symbolic link
 # Check the file and prompt if necessary
-# Uses lib/print
-
-lib=$BOOTSTRAP_DIR/lib
-source $lib/ask
+# Uses utils
 
 # Check destination and do symlink
 link () {

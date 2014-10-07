@@ -3,9 +3,7 @@
 # Sets OS X defaults
 # https://mths.be/osx
 # https://github.com/kevinSuttle/OSXDefaults
-
-lib=$DOTFILES_DIR/lib
-source $lib/ask
+# Uses script/lib/utils and execution depends on script/bootstrap
 
 # Ask for the administrator password upfront
 sudo -v
