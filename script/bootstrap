@@ -3,7 +3,7 @@
 # Bootstrap dotfiles
 # Mainly inspired from mathiasbynens/dotfiles and holman/dotfiles
 
-BOOTSTRAP_DIR=$(dirname "$0")
+BOOTSTRAP_DIR="$(pwd)/$(dirname "$0")"
 
 # Set working directory
 cd "$(dirname "$0")/.."
@@ -36,11 +36,8 @@ init_bootstrap () {
 
 	# Import functions
 	source $lib/utils
-	source $lib/print
-	source $lib/ask
-	source $lib/dir
-	source $lib/file
 	source $lib/link
+	source $lib/fs
 }
 
 # Print command line usage
@@ -55,6 +52,7 @@ echo_debug () {
 	fi
 }
 
+# Automated sample filling
 do_config () {
 	if [ ! -f "$CONFIG_FILE" ]; then
 		user "What is your nickname ?" " "
@@ -77,7 +75,8 @@ do_config () {
 		success "Configuration file" "${CONFIG_FILE#$DOTFILES_DIR/} already exists" true
 	fi
 
-	source $lib/readconf
+	# lib/utils
+	readconf
 
 	info "Using $USER profile" "~${CONFIG_FILE#$HOME}"
 

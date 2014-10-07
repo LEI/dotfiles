@@ -1,0 +1,182 @@
+#!/bin/bash
+#
+# File system utilities
+
+# Copy with rsync
+do_rsync () {
+	local src=$1
+	local dst=$2
+	shift; shift;
+	local ignore_array=("$@")
+
+	if [ "$src" = '' -o "$dst" = '' ]
+	then
+		echo "Argument error" > /dev/stderr
+		exit 1
+	fi
+
+	local ignore_cmd=""
+	if [ "${#ignore_array[@]}" != "0" ]; then
+		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
+	fi
+
+	silent rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst "&"
+}
+
+copy () {
+	local src=$1
+	shift
+	local ignore_array=("$@")
+
+	((indent_level++))
+	if [ -f "$src" -o -d "$src" ] && \
+		do_rsync $src $TARGET_DIR ${ignore_array[@]}; then
+		# ^ > /dev/null
+		success "$src" "Copied to ~${TARGET_DIR#$HOME}"
+	else
+		fail "$src" "Failed to be copied"
+	fi
+	((indent_level--))
+}
+
+remove () {
+	local src=$1
+	# Find target
+	local dst=$TARGET_DIR/${src#$DOTFILES_DIR/}
+
+	((indent_level++))
+	if [ ! -e "$dst" ]; then
+		success "${dst#$HOME/}" "Not found" true
+	# elif [ -d "$dst" ]; then
+	# 	info "${dst#$HOME/}" "Directory ignored" true
+	elif [ -f "$dst" -o -d "$dst" -o -L "$dst" ] && \
+		rm -r $dst; then
+		#      ^ 2> /dev/null ?
+		success "${dst#$HOME/}" "Removed"
+	else
+		fail "${dst#$HOME/}" "Cannot be removed"
+	fi
+	((indent_level--))
+}
+
+check_file () {
+	local file=$1
+
+	if [ -f $file ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+source_file () {
+	local file=$1
+
+	if [ -f $file ] && source "$file"; then
+		#success "Operation successfull !"
+		return
+	#else
+		#fail "Command failed !"
+		#return 0
+	fi
+}
+
+# Call the function on each file
+dir () {
+	# $1	Path absolutely relative
+	# $2	Function executed for each file
+	# $3+	File name patterns
+	local dir=$1;
+	local callback=$2;
+	shift; shift
+	#local pattern
+	# Take the rest of the arguments as an array
+	local ignore_array=("$@")
+
+	[ -n "$dir" ] && dir=/$dir
+	local src=$DOTFILES_DIR$dir
+	local dst=$TARGET_DIR$dir
+
+	# Construct command
+	local find_command=$(find_cmd $src ${ignore_array[@]})
+	local skip
+
+	indent_level=2
+
+	# Confirm action
+	action=$(echo "${callback//_/ }" | perl -nE 'say ucfirst')
+	if ask "$action ~${dst#$HOME} ?" Y; then
+		indent_level=3
+	else
+		skipped "~${dst#$HOME}" " "
+		indent_level=1
+		return
+	fi
+
+	# TODO : Automatic ignore <file>. pattern
+	# Check destination only for regular files
+	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
+		mkdir $dst && \
+		success "Destination directoy was created"
+	fi
+
+	# Check directory
+	if [ -d ${src} ]; then
+
+		# Loop on each file and check ignore list
+		paths=$($find_command)
+
+		for file in $paths; do
+
+			# Stop this iteration if it's the same directory
+			if [ "${file##*/}" = "${dir#/}" ]; then
+				continue
+			fi
+
+			# Do action
+			eval $callback $file
+
+		done
+
+		indent_level=2
+
+		success "~${dst#$HOME}" " "
+
+	else
+
+		indent_level=2
+
+		fail "Failed" "~${src#$HOME} not found"
+	fi
+
+	indent_level=1
+}
+
+# Construct find command options
+find_cmd () {
+	local src=$1;
+	shift
+	#local pattern=$2;
+	local ignore_list=("$@")
+	local ignore_cmd=$(find_ignore ${ignore_list[@]})
+
+	local depth_cmd=" -maxdepth 2 " # MAX_DEPTH
+
+	[ -n "$pattern" ] && local pattern_cmd=" -name '$pattern' "
+
+	echo "find $src $pattern_cmd $depth_cmd $ignore_cmd -print"
+}
+
+find_ignore () {
+	local ignore_array=("$@")
+	local ignore_files=""
+	local ignore_cmd=""
+
+	# Construct exclude command
+	if [ "${#ignore_array[@]}" != "0" ]; then
+		ignore_files=`join " -o -name " ${ignore_array[@]}`
+		ignore_cmd="( -path lib -o -name $ignore_files ) -prune -o"
+	fi
+
+	echo " $ignore_cmd "
+}

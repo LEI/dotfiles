@@ -2,6 +2,66 @@
 #
 # Utility functions
 
+# Import colors & print
+lib=$BOOTSTRAP_DIR/lib
+source $lib/colors
+source $lib/print
+
+readconf () {
+	# Read configuration from $CONFIG_FILE
+	while read line; do
+	# skip comments
+		[[ ${line:0:1} == "#" ]] && continue
+	# skip empty lines
+		[[ -z "${line}" ]] && continue
+		eval ${line}
+	done < "${CONFIG_FILE}"
+}
+
+# Prompt the user with a yes/no question
+ask () {
+	local question=$1 default=$2 highlight=$3
+	local yesno
+	local forced
+
+	case "$default" in
+		Y) yesno="Y/n" ;;
+		N|*) yesno="y/N" ;;
+	esac
+
+	user "$question" "($yesno)" $highlight
+
+	if [ "$force_all" != true ] && [ "$force_default" != true ]; then
+		read -s -n 1 key
+		# Make enter reflect default
+		[ "$key" = '' ] && key=$default
+	elif [ "$force_default" = true ]; then
+		# Use default without asking
+		key=$default
+		forced=" (default)"
+	else
+		# Just do it
+		key=Y
+		forced=" (forced)"
+	fi
+
+	# Set indentation
+	local whitespaces=$(((indent_level + 1) * indent_size))
+	local indent=""
+	for ((i=1; i<=$((whitespaces)); i++)); do
+		indent+=" "
+	done
+
+	# Return answer
+	case "$key" in
+		Y|y) echo "$indent>  Yes$forced"
+			return 0 ;;
+		N|n|*) echo "$indent>  No$forced"
+			return 1 ;;
+	esac
+}
+
+
 silent () {
 	local whitespaces=$((indent_level * indent_size))
 	local indent=""
