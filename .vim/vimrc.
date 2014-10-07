@@ -122,6 +122,7 @@ nmap <leader>bl :ls<CR>
 " Save a file as root (,W)
 noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
+" https://github.com/dubgeiser/vimconfig/blob/master/vimrc
 " https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc
 " https://github.com/mathiasbynens/dotfiles/blob/master/.vimrc ---------------
 
