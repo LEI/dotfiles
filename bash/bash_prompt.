@@ -65,18 +65,15 @@ function exitstatus {
 
 	EXITSTATUS="$?";
 
-	STATUS="\r";
+	STATUS=""; # \r\n
 
-	if [ "${EXITSTATUS}" != 0 ]
-	then
-		STATUS+="${red}×${reset} ";
-		#printf "%$(($COLUMNS))s\e[m" "× $$ ";
+	if [ "${EXITSTATUS}" != 0 ]; then
+		STATUS+="${red}×";
 	#else
-		#STATUS+="${green}✓ ";
-		#printf "%$(($COLUMNS))s\e[m" "✓ $$ ";
+		#STATUS+="${green}✓";
 	fi
 
-	echo -ne "$STATUS";
+	echo -ne "$STATUS${reset} ";
 }
 
 PROMPT_COMMAND=exitstatus;
