@@ -68,12 +68,12 @@ function exitstatus {
 	STATUS=""; # \r\n
 
 	if [ "${EXITSTATUS}" != 0 ]; then
-		STATUS+="${red}×";
+		STATUS+="${red}× ";
 	#else
-		#STATUS+="${green}✓";
+		#STATUS+="${green}✓ ";
 	fi
 
-	echo -ne "$STATUS${reset} ";
+	echo -ne "$STATUS${reset}";
 }
 
 PROMPT_COMMAND=exitstatus;
