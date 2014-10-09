@@ -2,8 +2,8 @@
 #
 # ~/.bash_profile
 
-# Add `~/bin` to the `$PATH`
-export PATH="$HOME/bin:$PATH";
+# Full `$PATH`
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$HOME/bin:$HOME/.node/bin";
 
 # Dotfiles home directory
 export DOTFILES="$HOME/.dotfiles";
@@ -54,4 +54,5 @@ complete -W "NSGlobalDomain" defaults;
 # Add `killall` tab completion for common OS X apps
 complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari iTunes SystemUIServer Terminal Twitter" killall;
 
+# Check new messages
 gmail

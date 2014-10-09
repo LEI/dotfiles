@@ -118,6 +118,10 @@ defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 # Disable smart dashes as they’re annoying when typing code
 defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 
+# # Disable “focus follows mouse” for Terminal.app and all X11 apps
+defaults write com.apple.terminal FocusFollowsMouse -bool false
+defaults write org.x.X11 wm_ffm -bool false
+
 # Set a custom wallpaper image. `DefaultDesktop.jpg` is already a symlink, and
 # all wallpapers are in `/Library/Desktop Pictures/`. The default is `Wave.jpg`.
 #rm -rf ~/Library/Application Support/Dock/desktoppicture.db
@@ -559,11 +563,6 @@ defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -boo
 
 # # Only use UTF-8 in Terminal.app
 # defaults write com.apple.terminal StringEncodings -array 4
-
-# # Enable “focus follows mouse” for Terminal.app and all X11 apps
-# # i.e. hover over a window and start typing in it without clicking first
-# defaults write com.apple.terminal FocusFollowsMouse -bool true
-# defaults write org.x.X11 wm_ffm -bool true
 
 # # Install the Solarized Dark theme for iTerm
 # #open "${DOTFILES}/init/${TERM_PROFILE}.itermcolors"

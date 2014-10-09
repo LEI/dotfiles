@@ -182,6 +182,39 @@ do_deps () {
 	fi
 }
 
+do_profile () {
+	# TERMINAL
+	THEME=$USER
+
+	# Search for the terminal configuration
+	for f in `find $DOTFILES_DIR -name *.terminal`; do
+		base_name=$(basename $f)
+		if [ "${base_name%%.*}" = "$THEME" ]; then
+			TERM_PROFILE=$f
+		fi
+	done
+
+	CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
+
+	if [ ! -n "$THEME" ]; then
+		fail "Terminal window" "Settings not found"
+	elif [ ! -n "$TERM_PROFILE" ]; then
+		fail "Terminal window" "$THEME.terminal not found"
+	elif [ "${CURRENT_PROFILE}" != "${THEME}" ]; then
+		info "Terminal window" "Currently uses ${CURRENT_PROFILE#$HOME/}" true
+		if ask "Change window settings ?" Y true; then
+			open "$TERM_PROFILE"
+			sleep 1 # Wait a bit to make sure the theme is loaded
+			defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}" # FIXME
+			defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
+
+			success "Terminal window" "$THEME profile created"
+		fi
+	else
+		success "Terminal window" "Already set to $THEME.terminal" true
+	fi
+}
+
 sandbox () {
 	if [ ! -d $TARGET_DIR ]; then
 		mkdir $TARGET_DIR
@@ -224,6 +257,10 @@ install () {
 
 	# Set OS defaults
 	do_defaults
+	echo ''
+
+	# Directories
+	do_profile
 }
 
 uninstall () {

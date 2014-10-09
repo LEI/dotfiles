@@ -65,7 +65,7 @@ function exitstatus {
 
 	EXITSTATUS="$?";
 
-	STATUS=""; # \r\n
+	STATUS="\r"; # \r\n
 
 	if [ "${EXITSTATUS}" != 0 ]; then
 		STATUS+="${red}× ";
