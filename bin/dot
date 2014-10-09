@@ -3,6 +3,8 @@
 # Install
 
 [ -n "$DOTFILES" ] || DOTFILES=~/.dotfiles
+export DOTFILES
+
 cd $DOTFILES
 
 script/bootstrap "$@"
