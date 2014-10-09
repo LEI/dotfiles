@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# https://github.com/captbaritone/dotfiles/blob/master/ubuntu/install.sh
+
+command -v apt-get || exit
+
+sudo apt-get update
+sudo apt-get install --assume-yes \
+    curl \
+    git \
+    tree \
+    vim
