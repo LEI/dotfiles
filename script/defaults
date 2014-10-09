@@ -5,7 +5,7 @@
 
 UNAME=$( uname )
 
-info "'dot defaults' is an alias to this step" " " true
+info "dot defaults" " " true
 
 if [ -n "$indent_level" ]; then
 	original_level=$indent_level
@@ -36,6 +36,10 @@ case $UNAME in
 
 			if source $DOTFILES_DIR/init/.osx; then
 				warn "Some changes may require a logout/restart to take effect" " "
+
+				# Restart so that changes take effect
+				#killall -HUP SystemUIServer
+				# or
 				# Kill affected applications
 				# if ask "Kill affected applications now ? Terminal will be closed." N; then
 				# 	for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
@@ -44,6 +48,7 @@ case $UNAME in
 				# 		killall "${app}" > /dev/null 2>&1
 				# 	done
 				# fi
+
 			else
 				fail "$DOTFILES/init/.osx" "Failed"
 				step_failed=true
@@ -78,7 +83,49 @@ case $UNAME in
 			fi
 		fi
 
+		# TERMINAL
+		THEME=$USER
+
+		# Search for the terminal configuration
+		for f in `find $DOTFILES_DIR -name *.terminal`; do
+			base_name=$(basename $f)
+			if [ "${base_name%%.*}" = "$THEME" ]; then
+				TERM_PROFILE=$f
+			fi
+		done
+
+		CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
+
+		if [ ! -n "$THEME" ]; then
+			fail "Terminal window" "Settings not found"
+		elif [ ! -n "$TERM_PROFILE" ]; then
+			fail "Terminal window" "$THEME.terminal not found"
+		elif [ "${CURRENT_PROFILE}" != "${THEME}" ]; then
+			info "Terminal window" "Currently uses ${CURRENT_PROFILE#$HOME/}" true
+			if ask "Change window settings ?" Y true; then
+				open "$TERM_PROFILE"
+				sleep 1 # Wait a bit to make sure the theme is loaded
+				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}" # FIXME
+				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
+
+				success "Terminal window" "$THEME profile created"
+			fi
+		else
+			success "Terminal window" "Already set to $THEME.terminal" true
+		fi
+
 		;;
+
+	Linux)
+
+		# APT-GET
+
+		if source $DOTFILES_DIR/init/.ubuntu; then
+			success "apt-get" "Packages installed"
+		else
+			fail "$DOTFILES/init/.ubuntu" "Failed"
+			step_failed=true
+		fi
 
 	*)
 
