@@ -3,13 +3,14 @@
 # Bootstrap dotfiles
 # Mainly inspired from mathiasbynens/dotfiles and holman/dotfiles
 
+[ -n "$DOTFILES" ] || (echo "DOTFILES is undefined" && exit)
+
 BOOTSTRAP_DIR="$(pwd)/$(dirname "$0")"
 
 # Set working directory
 cd "$(dirname "$0")/.."
 
-# Global directories
-export DOTFILES="~/.dotfiles"
+# Globals
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
 CONFIG_FILE=$BOOTSTRAP_DIR/config
