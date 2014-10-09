@@ -36,4 +36,6 @@ Just move the dot at the end of the name and place the file in any directory.
 - [jigish](https://github.com/jigish/dotfiles)
 - [Puppet](http://garylarizza.com/blog/2013/02/15/puppet-plus-github-equals-laptop-love/)
 - [mscoutermarsh](https://github.com/mscoutermarsh/dotfiles)
+- [captbaritone](https://github.com/captbaritone/dotfiles)
+- [lyrixx](https://github.com/lyrixx/dotfiles)
 - [fink](https://github.com/fink/fink)
