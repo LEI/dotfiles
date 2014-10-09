@@ -33,11 +33,9 @@ case $UNAME in
 	Darwin)
 
 		# HOMEBREW
-
-		homebrew_file=init/Homebrew.sh
+		homebrew_file=init/.homebrew
+		info "Executing $homebrew_file" "..." true
 		if silent source "$homebrew_file"; then
-			success "Homebrew" "$homebrew_file"
-
 			if ask "Configure cask apps ?"; then
 				for cask in ${cask_files[@]}; do
 					do_cask "$cask"
@@ -52,6 +50,7 @@ case $UNAME in
 			# curl -L https://www.npmjs.org/install.sh | sh
 			# https://gist.github.com/lakenen/676c60e85779b190c2d4
 			# npm install -g ...
+			success "Homebrew" "$homebrew_file"
 		else
 			fail "Homebrew" "$homebrew_file"
 			step_failed=true
@@ -59,7 +58,7 @@ case $UNAME in
 
 		;;
 
-	# Linux)	# https://github.com/Homebrew/linuxbrew ?
+	# Linux) ;;	# https://github.com/Homebrew/linuxbrew ?
 
 	*)
 

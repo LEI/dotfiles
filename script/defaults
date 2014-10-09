@@ -127,6 +127,8 @@ case $UNAME in
 			step_failed=true
 		fi
 
+		;;
+
 	*)
 
 		warn "No configuration available" "$UNAME"
