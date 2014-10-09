@@ -4,7 +4,6 @@
 # Steps specific to init folder & depending on OS type
 
 UNAME=$( uname )
-THEME=$USER
 
 info "'dot defaults' is an alias to this step" " " true
 
@@ -50,38 +49,6 @@ case $UNAME in
 				step_failed=true
 			fi
 		else
-			((indent_level++))
-		fi
-
-		((indent_level--))
-
-		# TERMINAL
-
-		# Search for the terminal configuration
-		for f in `find $DOTFILES_DIR -name *.terminal`; do
-			base_name=$(basename $f)
-			if [ "${base_name%%.*}" = "$THEME" ]; then
-				TERM_PROFILE=$f
-			fi
-		done
-
-		CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
-
-		if [ ! -n "$TERM_PROFILE" ]; then
-			fail "Terminal window" "Cannot find $THEME.terminal"
-		elif [ "${CURRENT_PROFILE}" != "${THEME}" ]; then
-			if ask "Change Terminal profile ? Currently $CURRENT_PROFILE" Y; then
-				((indent_level++))
-				# Does not really set new default ?
-				open "$TERM_PROFILE"
-				sleep 1 # Wait a bit to make sure the theme is loaded
-				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}"
-				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
-
-				success "Terminal window" "Profile now uses $THEME.terminal"
-			fi
-		else
-			success "Terminal window" "Current profile already uses $THEME.terminal" true
 			((indent_level++))
 		fi
 

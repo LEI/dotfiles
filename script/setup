@@ -43,6 +43,16 @@ case $UNAME in
 				for cask in ${cask_files[@]}; do
 					do_cask "$cask"
 				done
+
+				# TODO
+
+				# https://gist.github.com/DanHerbert/9520689
+				# brew install node --without-npm
+				# echo prefix=~/.node >> ~/.npmrc
+				# curl -L https://www.npmjs.org/install.sh | sh
+				# https://gist.github.com/lakenen/676c60e85779b190c2d4
+				# npm install -g ...
+
 				success "Homebrew" "$homebrew_file"
 			fi
 		# else
@@ -52,9 +62,7 @@ case $UNAME in
 
 		;;
 
-		# apt-get stuff ?
-		# https://github.com/Homebrew/linuxbrew ?
-	*)
+	*)	# https://github.com/Homebrew/linuxbrew ?
 
 		warn "No setup available" "$UNAME"
 
