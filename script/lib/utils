@@ -17,6 +17,20 @@ readconf () {
 	done < "${CONFIG_FILE}"
 }
 
+# Basic prompt
+prompt () {
+	local question=$1
+
+	user "$question" " " >&2
+	read -e REPLY
+
+	#[ -n "$REPLY" ] && echo "!reply"
+	#[ -n "$REPLY" ] || echo "reply!"
+	[ -n "$REPLY" ] || (prompt "$@" && return)
+
+	echo "$REPLY"
+}
+
 # Prompt the user with a yes/no question
 ask () {
 	local question=$1 default=$2 highlight=$3

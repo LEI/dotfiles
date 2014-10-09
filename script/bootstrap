@@ -56,30 +56,26 @@ echo_debug () {
 # Automated sample filling
 do_config () {
 	if [ ! -f "$CONFIG_FILE" ]; then
-		user "What is your nickname ?" " "
-		read -e NICK
 
-		user "What is your name ?" " "
-		read -e NAME
-
-		user "What is your email ?" " "
-		read -e EMAIL
+		NICK=$(prompt "What is your nickname ?")
+		NAME=$(prompt "What is your full name ?")
+		EMAIL=$(prompt "What is your email ?")
 
 		sed -e "s/AUTHOR_NICK/\"$NICK\"/g" \
 			-e "s/AUTHOR_NAME/\"$NAME\"/g" \
 			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
 			$CONFIG_FILE.sample > $CONFIG_FILE
 
-		success "Configuration file successfully created" "${CONFIG_FILE#$DOTFILES_DIR/}"
-		echo ''
+		# success "${CONFIG_FILE#$DOTFILES_DIR/} successfully created" " "
 	else
-		success "Configuration file" "${CONFIG_FILE#$DOTFILES_DIR/} already exists" true
+		success "${CONFIG_FILE#$DOTFILES_DIR/}" "Already exists" true
 	fi
 
 	# lib/utils
 	readconf
 
-	info "Using $USER profile" "~${CONFIG_FILE#$HOME}"
+	echo ''
+	info "Using configuration file" "~${CONFIG_FILE#$HOME}"
 
 	# Sample files
 	for sample in ${sample_files[@]}; do
@@ -91,16 +87,19 @@ do_config () {
 		if [ ! -f "$cfg_path" ]; then
 			if ask "Create $cfg_path ?" Y; then
 				fill_file "$cfg_name" "$cfg_path" "name" "email" "credential"
-				success "$cfg_name" " "
+				success "$cfg_name" "Created $cfg_path"
 			else
-				skipped "$cfg_name" " "
+				skipped "$cfg_name" "$cfg_path"
 			fi
 		else
-			success "$cfg_name" "$cfg_path already exists" true
+			success "$cfg_name" "Exists $cfg_path" true
 		fi
 		((indent_level--))
 	done
-	success "$USER profile."
+	success "$USER" "Profiles configured"
+
+	echo ''
+	info "$(uname)" "Specific configuration" true
 }
 
 do_link () {
@@ -218,9 +217,6 @@ install () {
 
 	# Directories
 	do_copy
-	echo ''
-
-	info "Using $(uname) specific configuration" " " true
 	echo ''
 
 	# Set OS defaults
@@ -352,9 +348,5 @@ parse_flags
 
 # End
 indent_level=0
-
 [ -n "$end_message" ] || end_message="Things were bootstrapped !"
-echo ''
-success "$end_message" " "
-
-#source_file ~/.bash_profile
+echo ''; success "$end_message" " "
