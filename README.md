@@ -4,10 +4,7 @@ Dotfiles setup being build thanks to the Internet.
 
 ## Usage
 
-	git clone git@github.com:LEI/dotfiles.git ~/.dotfiles
-	~/.dotfiles/bin/dot
-
-	dot --help
+	git clone git@github.com:LEI/dotfiles.git ~/.dotfiles && ~/.dotfiles/bin/dot
 
 ### Add a dotfile
 
