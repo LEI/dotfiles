@@ -3,26 +3,6 @@
 # File system utilities
 
 # Copy with rsync
-do_rsync () {
-	local src=$1
-	local dst=$2
-	shift; shift;
-	local ignore_array=("$@")
-
-	if [ "$src" = '' -o "$dst" = '' ]
-	then
-		echo "Argument error" > /dev/stderr
-		exit 1
-	fi
-
-	local ignore_cmd=""
-	if [ "${#ignore_array[@]}" != "0" ]; then
-		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
-	fi
-
-	silent rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst "&"
-}
-
 copy () {
 	local src=$1
 	shift
@@ -59,26 +39,24 @@ remove () {
 	((indent_level--))
 }
 
-check_file () {
-	local file=$1
+do_rsync () {
+	local src=$1
+	local dst=$2
+	shift; shift;
+	local ignore_array=("$@")
 
-	if [ -f $file ]; then
-		return 1
-	else
-		return 0
+	if [ "$src" = '' -o "$dst" = '' ]
+	then
+		echo "Argument error" > /dev/stderr
+		exit 1
 	fi
-}
 
-source_file () {
-	local file=$1
-
-	if [ -f $file ] && source "$file"; then
-		#success "Operation successfull !"
-		return
-	#else
-		#fail "Command failed !"
-		#return 0
+	local ignore_cmd=""
+	if [ "${#ignore_array[@]}" != "0" ]; then
+		ignore_cmd="--exclude \""`join "\" --exclude \"" ${ignore_array[@]}`"\""
 	fi
+
+	silent rsync ${ignore_cmd} -avh --no-perms --human-readable $src $dst "&"
 }
 
 # Call the function on each file
@@ -179,4 +157,26 @@ find_ignore () {
 	fi
 
 	echo " $ignore_cmd "
+}
+
+check_file () {
+	local file=$1
+
+	if [ -f $file ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+source_file () {
+	local file=$1
+
+	if [ -f $file ] && source "$file"; then
+		#success "Operation successfull !"
+		return
+	#else
+		#fail "Command failed !"
+		#return 0
+	fi
 }

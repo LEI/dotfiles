@@ -87,12 +87,12 @@ do_config () {
 		if [ ! -f "$cfg_path" ]; then
 			if ask "Create $cfg_path ?" Y; then
 				fill_file "$cfg_name" "$cfg_path" "name" "email" "credential"
-				success "$cfg_name" "Created $cfg_path"
+				success "$cfg_name" "$cfg_path created"
 			else
 				skipped "$cfg_name" "$cfg_path"
 			fi
 		else
-			success "$cfg_name" "Exists $cfg_path" true
+			success "$cfg_name" "$cfg_path already exists" true
 		fi
 		((indent_level--))
 	done
@@ -100,6 +100,28 @@ do_config () {
 
 	echo ''
 	info "$(uname)" "Specific configuration" true
+}
+
+undo_config () {
+	# TODO
+	echo ".gitignore"
+}
+
+# Install utils with homebrew
+do_deps () {
+	if ask "Install dependencies ?" N true; then
+		((indent_level++))
+		local setup=$BOOTSTRAP_DIR/setup
+		if source_file $setup; then
+			((indent_level--))
+			success "Stuff installed."
+		else
+			((indent_level--))
+			warn "Dependencies not fully installed" " "
+		fi
+	else
+		skipped "dependencies"
+	fi
 }
 
 do_link () {
@@ -162,23 +184,6 @@ do_defaults () {
 		fi
 	else
 		skipped "defaults"
-	fi
-}
-
-# Install utils with homebrew
-do_deps () {
-	if ask "Install dependencies ?" N true; then
-		((indent_level++))
-		local setup=$BOOTSTRAP_DIR/setup
-		if source_file $setup; then
-			((indent_level--))
-			success "Stuff installed."
-		else
-			((indent_level--))
-			warn "Dependencies not fully installed" " "
-		fi
-	else
-		skipped "homebrew"
 	fi
 }
 
