@@ -10,7 +10,7 @@ USER=AUTHOR_NICK
 NAME=AUTHOR_NAME
 EMAIL=AUTHOR_EMAIL
 # Git
-[ "$(uname -s)" == "Darwin" ] && CREDENTIAL="osxkeychain" || CREDENTIAL="cache"
+[ "$(uname)" == "Darwin" ] && CREDENTIAL="osxkeychain" || CREDENTIAL="cache"
 # Style
 indent_size=3
 

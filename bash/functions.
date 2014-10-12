@@ -233,18 +233,22 @@ function tre() {
 
 # Check Gmail inbox
 function gmail() {
-	# http://brettterpstra.com/2013/02/15/gmail-in-the-shell/
-	local feed="https://mail.google.com/mail/feed/atom"
-	local user=`dscl . -read /Users/$(whoami) | grep -m 1 @gmail | sed 's/.*>\(.*\)@.*/\1/'`
-	local pass=$(security find-internet-password -w -a "$user")
+	if [ "$(uname)" == "Darwin" ]; then
+		# http://brettterpstra.com/2013/02/15/gmail-in-the-shell/
+		local feed="https://mail.google.com/mail/feed/atom"
+		local user=`dscl . -read /Users/$(whoami) | grep -m 1 @gmail | sed 's/.*>\(.*\)@.*/\1/'`
+		local pass=$(security find-internet-password -w -a "$user")
 
-	if [ "$1" = "-w" ]; then
-		# Watch feed (FIXME)
-		rsstail -a -t -A "$user:$pass" -u "$feed" # -i 10 -r -v 
+		if [ "$1" = "-w" ]; then
+			# Watch feed (FIXME)
+			rsstail -a -t -A "$user:$pass" -u "$feed" # -i 10 -r -v
+		else
+			# Print fullcount
+			local count=`curl -u "$user:$pass" --silent "$feed" | grep -m 1 fullcount | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
+			[ "$count" -eq 1 ] && echo "$count new message."  || echo "$count new messages."
+		fi
 	else
-		# Print fullcount
-		local count=`curl -u "$user:$pass" --silent "$feed" | grep -m 1 fullcount | sed 's/.*<fullcount>\([0-9]*\)<\/fullcount>.*/\1/'`
-		[ "$count" -eq 1 ] && echo "$count new message."  || echo "$count new messages."
+		echo "No mail for $(whoami) on $(uname)"
 	fi
 }
 
