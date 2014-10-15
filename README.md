@@ -36,3 +36,4 @@ Just move the dot at the end of the name and place the file in any directory.
 - [captbaritone](https://github.com/captbaritone/dotfiles)
 - [lyrixx](https://github.com/lyrixx/dotfiles)
 - [fink](https://github.com/fink/fink)
+- [bashstrap](https://github.com/barryclark/bashstrap)
