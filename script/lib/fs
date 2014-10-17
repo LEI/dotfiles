@@ -91,11 +91,11 @@ dir () {
 		return
 	fi
 
-	# TODO : Automatic ignore <file>. pattern
+	# TODO ? Automatic ignore <file>. pattern
 	# Check destination only for regular files
-	if [ ! -d ${dst} -a ${callback} = "link_file" ]; then
+	if [ ! -d ${dst} ]; then # -a ${callback} = "link_files"
 		mkdir $dst && \
-		success "Destination directoy was created"
+		success "Destination was created"
 	fi
 
 	# Check directory
