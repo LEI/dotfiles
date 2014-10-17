@@ -32,9 +32,11 @@ case $UNAME in
 				warn "Administrator access may be required" " "
 				# sudo -v
 
-			info "Executing init/.osx" "..." true
+			osx_file=init/osx
 
-			if source $DOTFILES_DIR/init/.osx; then
+			info "Executing $osx_file" "..." true
+
+			if source $DOTFILES_DIR/$osx_file; then
 				warn "Some changes may require a logout/restart to take effect" " "
 
 				# Restart so that changes take effect
@@ -50,7 +52,7 @@ case $UNAME in
 				# fi
 
 			else
-				fail "$DOTFILES/init/.osx" "Failed"
+				fail "$DOTFILES/$osx_file" "Failed"
 				step_failed=true
 			fi
 		else
@@ -84,16 +86,15 @@ case $UNAME in
 		fi
 
 		# TERMINAL
-		THEME=$USER
 
 		# Search for the terminal configuration
 		for f in `find $DOTFILES_DIR -name *.terminal`; do
 			base_name=$(basename $f)
-			if [ "${base_name%%.*}" = "$THEME" ]; then
-				TERM_PROFILE=$f
-			fi
+			THEME=${base_name%%.*}
+			TERM_PROFILE=$f
 		done
 
+		# Get current profile
 		CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')"
 
 		if [ ! -n "$THEME" ]; then
@@ -108,7 +109,7 @@ case $UNAME in
 				defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}" # FIXME
 				defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}"
 
-				success "Terminal window" "$THEME profile created"
+				success "Terminal window" "$THEME profile added"
 			fi
 		else
 			success "Terminal window" "Already set to $THEME.terminal" true
@@ -120,10 +121,12 @@ case $UNAME in
 
 		# APT-GET
 
-		if source $DOTFILES_DIR/init/.ubuntu; then
+		ubuntu_file=init/ubuntu
+
+		if source $DOTFILES_DIR/$ubuntu_file; then
 			success "apt-get" "Packages installed"
 		else
-			fail "$DOTFILES/init/.ubuntu" "Failed"
+			fail "$DOTFILES/$ubuntu_file" "Failed"
 			step_failed=true
 		fi
 

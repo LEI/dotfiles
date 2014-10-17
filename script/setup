@@ -33,7 +33,7 @@ case $UNAME in
 	Darwin)
 
 		# HOMEBREW
-		homebrew_file=init/.homebrew
+		homebrew_file=init/Homebrew
 		info "Executing $homebrew_file" "..." true
 		if silent source "$homebrew_file"; then
 			if ask "Configure cask apps ?"; then
