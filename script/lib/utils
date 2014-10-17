@@ -74,6 +74,19 @@ ask () {
 	esac
 }
 
+# Force prompt
+confirm () {
+	local all=$force_all
+	local default=$force_default
+
+	unset force_all
+	unset force_default
+
+	ask "$@"
+
+	force_all=$all
+	force_default=$default
+}
 
 silent () {
 	local whitespaces=$((indent_level * indent_size))
