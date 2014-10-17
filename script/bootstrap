@@ -305,7 +305,7 @@ parse_flags () {
 		bootstrap $cmd
 
 	else
-		die "An error occured while preparing bootstrap"
+		echo "An error occured while preparing bootstrap"
 	fi
 }
 
