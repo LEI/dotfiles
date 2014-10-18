@@ -338,15 +338,15 @@ do_gitmodule () { # TOBOBTR
 # Execute command
 bootstrap () {
 	case $1 in
-		'')				install ;;
-		'install')		install ;;
-		'uninstall')	uninstall ;;
-		'link')			do_link ;;
-		'copy')			do_copy ;;
-		'defaults')		do_defaults ;;
-		'setup')		do_deps ;;
-		'module')		do_gitmodule ;;
-		*)				fail "$1" "Unknown command"; echo_usage ;;
+		'')           install ;;
+		'install')    install ;;
+		'uninstall')  uninstall ;;
+		'link')       do_link ;;
+		'copy')       do_copy ;;
+		'defaults')   do_defaults ;;
+		'setup')      do_deps ;;
+		'module')     do_gitmodule ;;
+		*)            fail "$1" "Unknown command"; echo_usage ;;
 	esac
 }
 

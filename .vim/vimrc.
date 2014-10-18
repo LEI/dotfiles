@@ -33,11 +33,16 @@ set list
 set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_,extends:❯,precedes:❮
 " set showbreak=↪
 
-" Tabs -o spaces
-set smartindent
-"set expandtab
+" Use tabs
+set noexpandtab
+" Indentation displayed
 set tabstop=4
+" Indents size
 set shiftwidth=4
+" Number of columns
+set softtabstop=4
+
+set smartindent
 " Wrapping
 set textwidth=80
 " Don't try to highlight lines longer than 800 characters
@@ -94,7 +99,7 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 
 " Open automatically if no files were specified
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif 
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Show hidden files by default
 let NERDTreeShowHidden=1
 
