@@ -79,21 +79,21 @@ dir () {
 	local find_command=$(find_cmd $src ${ignore_array[@]})
 	local skip
 
-	indent_level=2
+	((indent_level++))
 
-	# Confirm action
+	# Get action from method name
 	action=$(echo "${callback//_/ }" | perl -nE 'say ucfirst')
+	# Confirm action
 	if ask "$action ~${dst#$HOME} ?" Y; then
-		indent_level=3
+		((indent_level++))
 	else
 		skipped "~${dst#$HOME}" " "
-		indent_level=1
+		((indent_level--))
 		return
 	fi
 
-	# TODO ? Automatic ignore <file>. pattern
 	# Check destination only for regular files
-	if [ ! -d ${dst} ]; then # -a ${callback} = "link_files"
+	if [ ! -d ${dst} ]; then
 		mkdir $dst && \
 		success "Destination was created"
 	fi
@@ -116,18 +116,18 @@ dir () {
 
 		done
 
-		indent_level=2
+		((indent_level--))
 
 		success "~${dst#$HOME}" " "
 
 	else
 
-		indent_level=2
+		((indent_level--))
 
 		fail "Failed" "~${src#$HOME} not found"
 	fi
 
-	indent_level=1
+	((indent_level--))
 }
 
 # Construct find command options
