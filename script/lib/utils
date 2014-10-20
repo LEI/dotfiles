@@ -35,7 +35,7 @@ prompt () {
 ask () {
 	local question=$1 default=$2 highlight=$3
 	local yesno
-	local forced
+	local note
 
 	case "$default" in
 		Y) yesno="Y/n" ;;
@@ -51,11 +51,11 @@ ask () {
 	elif [ "$force_default" = true ]; then
 		# Use default without asking
 		key=$default
-		forced=" (default)"
+		note=" (default)"
 	else
 		# Just do it
 		key=Y
-		forced=" (forced)"
+		note=" (forced)"
 	fi
 
 	# Set indentation
@@ -67,13 +67,27 @@ ask () {
 
 	# Return answer
 	case "$key" in
-		Y|y) echo "$indent>  Yes$forced"
+		Y|y) echo "$indent>  Yes$note"
 			return 0 ;;
-		N|n|*) echo "$indent>  No$forced"
+		N|n|*) echo "$indent>  No$note"
 			return 1 ;;
 	esac
 }
 
+# Force prompt
+confirm () {
+	# Save variables
+	local all=$force_all
+	local default=$force_default
+	# Delete before execution
+	unset force_all
+	unset force_default
+	# Prompt the user
+	ask "$@"
+	# Reset to previous values
+	force_all=$all
+	force_default=$default
+}
 
 silent () {
 	local whitespaces=$((indent_level * indent_size))
