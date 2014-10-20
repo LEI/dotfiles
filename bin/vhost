@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# TODO
+# Virtual hosts generator (MAMP PRO)
+
+# Dict {
+# 	MultiViews = false
+# 	documentRoot = /home/test/openpublish-2.3
+# 	Order = 0
+# 	ExecCGI = false
+# 	serverAliases = Array {
+# 	}
+# 	dyndns = Dict {
+# 		displayName = -
+# 	}
+# 	serverName = openpublish-2.3
+# 	FollowSymLinks = true
+# 	AllowOverride = 0
+# 	local = true
+# 	Allow = 0
+# 	Includes = true
+# 	Indexes = false
+# 	SymLinksifOwnerMatch = false
+# }
+
+rootDir=~/Projects
+
+PlistBuddy=/usr/libexec/PlistBuddy
+PlistFile=~/Library/Preferences/de.appsolute.mamppro.plist
+
+cp $PlistFile $PlistFile.bak
+
+if $PlistBuddy -c "Print :virtualHosts: dict" $PlistFile &> /dev/null; then
+	# Entry already exists
+	echo "ok"
+else
+	# Create entry
+	$PlistBuddy -c "Add :virtualHosts: dict" $PlistFilePlistBuddy -c "Add :virtualHosts: dict" safe_to_play.plist
+fi
+
+for project in $(find $rootDir/* -maxdepth 0); do
+	if [ -d "$project" ]; then
+		index=$($PlistBuddy -c "Print :virtualHosts: dist" $PlistFile  | grep documentRoot | wc -l | sed 's/[^0-9]//g')
+		vhost=$(basename $project).local
+		$PlistBuddy -c "Add :virtualHosts:$index:documentRoot string $project" $PlistFile
+		$PlistBuddy -c "Add :virtualHosts:$index:serverName string $vhost" $PlistFile
+	fi
+done
