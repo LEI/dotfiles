@@ -9,6 +9,7 @@ Dotfiles setup being build thanks to the Internet.
 ### Add a dotfile
 
 Just move the dot at the end of the name and place the file in any directory.
+It will be symlinked in the home directory when executing the script.
 
 ## Inspiration
 

@@ -22,10 +22,10 @@ case $UNAME in
 		if ask "Set OS defaults ?" N; then
 			((indent_level++))
 
-			ask "Apply SSD specific tweaks ?" N && \
+			confirm "Apply SSD specific tweaks ?" N && \
 				SSD_SPECIFIC=true
 
-			ask "Disable 'natural' scrolling ?" N && \
+			confirm "Disable 'natural' scrolling ?" N && \
 				DISABLE_NATURAL_SCROLLING=true
 
 			[ "$(whoami)" != "root" ] && \
