@@ -63,24 +63,34 @@ case $UNAME in
 
 		# SUBLIME TEXT
 		# TODO check for current symlink
-		if ask "Link Sublime Text preferences ?" Y; then
+		if ask "Set up Sublime Text ?" Y; then
 
 			st_prefix=~/Library/Application\ Support/Sublime\ Text
-			st_suffix=/Packages/User/Preferences.sublime-settings
+			#st_suffix=/Packages/User/Preferences.sublime-settings
 
-			for f in "$st_prefix"*"$st_suffix"; do
-				if [ -f "$f" ]; then
-					rm "$f" # -f ?
-					ln -s "$DOTFILES_DIR/init/Preferences.sublime-settings" "$f"
+			# For each version of Sublime Text
+			for dir in "$st_prefix"*; do
+				if [ -d "$dir" ]; then
+					found=true
+					# Link theme & color scheme used in preferences
+					st_theme="Spacegray"
+					[ -d "$dir/Packages/Theme - $st_theme" ] || \
+						ln -s "$DOTFILES_DIR/init/$st_theme" "$dir/Packages/Theme - $st_theme"
+					st_color="Base16"
+					[ -d "$dir/Packages/Color Scheme - $st_color" ] || \
+						ln -s "$DOTFILES_DIR/init/$st_color" "$dir/Packages/Color Scheme - $st_color"
+					# Backup then link preferences
+					[ -f "$dir/Packages/User/Preferences.sublime-settings" ] && \
+						mv "$dir/Packages/User/Preferences.sublime-settings" "$dir/Packages/User/Preferences.sublime-settings.bak"
+					ln -s "$DOTFILES_DIR/init/Preferences.sublime-settings" "$dir/Packages/User/Preferences.sublime-settings"
 
-					st_success=true
 					st_version=${f#$st_prefix}
 					success "Sublime Text ${st_version:1:1}" "Symlinked Preferences.sublime-settings"
 				fi
 			done
 
-			if [ ! -n "$st_success" ]; then
-				fail "No application found" "$st_prefix*$st_suffix"
+			if [ ! "$found" = true ]; then
+				fail "Application not found" "$st_prefix*"
 				step_failed=true
 			fi
 		fi

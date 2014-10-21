@@ -12,7 +12,7 @@ link () {
 	local skip remove
 
 	# If it is a broken symlink
-	if [ -h ${dst} ] && [ ! -e ${dst} ]; then
+	if [ -h "${dst}" ] && [ ! -e "${dst}" ]; then
 		fail "${dst#$TARGET_DIR/}" "Broken link"
 		remove=true
 	# If it is a symbolic link -o -L ?
