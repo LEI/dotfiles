@@ -101,12 +101,13 @@ prompt_left () {
 }
 
 prompt_right () {
-	echo -e "\$(prompt_status)\[${reset}\]\\\t\033[0m"
+	# \! \#
+	echo -e "\$(prompt_status)\[${reset}\]\\\t"
 }
 
 prompt () {
 	# Amount of characters required to render the colours
-	compensate=22
+	compensate=18
 	# Prompt line
 	prompt_line="\n\[${white}\]→ \[${reset}\]"
 	# Construct full prompt
