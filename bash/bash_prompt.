@@ -10,7 +10,7 @@
 
 source $DOTFILES/script/lib/colors
 
-prompt_git() {
+prompt_git () {
 	local s='';
 	local branchName='';
 
@@ -60,63 +60,64 @@ prompt_git() {
 	fi
 }
 
-# Display exit status.
-function exitstatus {
-
+prompt_status () {
+	# Status of the last command
 	EXITSTATUS="$?";
-
-	STATUS="\r\n";
-
+	STATUS=""; #\r\n
 	if [ "${EXITSTATUS}" != 0 ]; then
 		STATUS+="${red}× ";
-	#else
-		#STATUS+="${green}✓ ";
+	else
+		STATUS+="${green}  "; # ✓
 	fi
-
 	echo -ne "$STATUS${reset}";
 }
 
-PROMPT_COMMAND=exitstatus;
+prompt_left () {
 
-# Highlight the user name when logged in as root.
-if [[ "${USER}" == "root" ]]; then
-	userStyle="${red}";
-else
-	userStyle="${cyan}";
-fi
+	# Highlight the user name when logged in as root
+	if [[ "${USER}" == "root" ]]; then
+		userStyle="${red}";
+	else
+		userStyle="${cyan}";
+	fi
 
-# Highlight the hostname when connected via SSH.
-if [[ "${SSH_TTY}" ]]; then
-	hostStyle="${orange}";
-else
-	hostStyle="${reset}";
-fi
+	# Username
+	PS1L="\[${userStyle}\]\u ";
 
-# Set the terminal title to the current working directory.
-PS1="\[\033]0;\w\007\]";
+	# Highlight the hostname when connected via SSH
+	if [[ "${SSH_TTY}" ]]; then
+		PS1L+="\[${reset}\]at ";
+		PS1L+="\[${orange}\]\h ";
+	fi
 
-# Time
-#PS1+="\[${reset}\]\t ";
+	# Working directory
+	PS1L+="\[${reset}\]in ";
+	PS1L+="\[${white}\]\w";
 
-# Username
-PS1+="\[${userStyle}\]\u ";
+	# Git repository details
+	PS1L+="\$(prompt_git \"${reset} on ${yellow}\")";
 
-# Host
-if [[ "${SSH_TTY}" ]]; then
-	PS1+="\[${reset}\]at ";
-	PS1+="\[${hostStyle}\]\h ";
-fi
+	echo -e "$PS1L"
+}
 
-# Working directory
-PS1+="\[${reset}\]in ";
-PS1+="\[${white}\]\w";
+prompt_right () {
+	echo -e "\$(prompt_status)\[${reset}\]\\\t\033[0m"
+}
 
-# Git repository details
-PS1+="\$(prompt_git \"${reset} on ${yellow}\")";
+prompt () {
+	# Amount of characters required to render the colours
+	compensate=22
+	# Prompt line
+	prompt_line="\n\[${white}\]→ \[${reset}\]"
+	# Construct full prompt
+	PS1=$(printf "%*s\r%s${prompt_line}" "$(($(tput cols)+${compensate}))" "$(prompt_right)" "$(prompt_left)")
+}
 
-PS1+="\n";
-PS1+="\[${white}\]→ \[${reset}\]"; # $
-export PS1;
+PROMPT_COMMAND=prompt
 
-PS2="\[${yellow}\]→ \[${reset}\]";
-export PS2;
+# Set the terminal title to the current working directory
+PS1="\[\033]0;\w\007\]"
+export PS1
+
+PS2="\[${yellow}\]→ \[${reset}\]"
+export PS2
