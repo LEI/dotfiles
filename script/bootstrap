@@ -53,30 +53,30 @@ echo_debug () {
 	fi
 }
 
-# Automated sample filling
-do_config () {
-	if [ ! -f "$CONFIG_FILE" ]; then
-
+read_conf () {
+	[ -n "$1" ] && answer=$1 || answer=Y
+	# Create the file if needed
+	if [ ! -f "$CONFIG_FILE" ] && ask "Fill configuration file ?" $answer true; then
+		((indent_level++))
 		NICK=$(prompt "What is your nickname ?")
 		NAME=$(prompt "What is your full name ?")
 		EMAIL=$(prompt "What is your email ?")
-
 		sed -e "s/AUTHOR_NICK/\"$NICK\"/g" \
 			-e "s/AUTHOR_NAME/\"$NAME\"/g" \
 			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
 			$CONFIG_FILE.sample > $CONFIG_FILE
-
-		# success "${CONFIG_FILE#$DOTFILES_DIR/} successfully created" " "
+		((indent_level--))
+		success "${CONFIG_FILE#$DOTFILES_DIR/}" "Successfully created"
 	else
 		success "${CONFIG_FILE#$DOTFILES_DIR/}" "Already exists" true
 	fi
 
 	# lib/utils
 	readconf
+}
 
-	echo ''
-	info "Using configuration file" "~${CONFIG_FILE#$HOME}"
-
+# Fill sample files
+fill_files () {
 	# Sample files
 	for sample in ${sample_files[@]}; do
 		local sample_param=(${sample//=/ })
@@ -99,12 +99,12 @@ do_config () {
 	success "$USER" "Profiles configured"
 
 	echo ''
-	info "$(uname)" "Specific configuration" true
+	info "$(uname)" "Specific steps" true
 }
 
 undo_config () {
 	# TODO
-	echo ".gitignore"
+	echo $(cat .gitignore)
 }
 
 # Install utils with homebrew
@@ -158,9 +158,10 @@ do_copy () {
 
 undo_copy () {
 	if ask "Remove directories ?" Y true; then
+		echo ${directories[@]}
 		for dir in ${directories[@]}; do
 			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
-			dir "$dir" remove ${ignore_dir[@]} || skipped
+			dir $dir remove ${ignore_dir[@]} || skipped
 		done
 		success "Stuff removed."
 	else
@@ -195,7 +196,6 @@ sandbox () {
 }
 
 install () {
-
 	# Pull last changes
 	if [ -x "/usr/bin/git" ] && \
 		ask "Pull last version from GitHub ?" Y true; then
@@ -211,7 +211,12 @@ install () {
 		echo ''
 	fi
 
-	do_config
+	read_conf
+	echo ''
+
+	info "Using configuration file" "~${CONFIG_FILE#$HOME}"
+
+	fill_files
 	echo ''
 
 	# Dependencies
@@ -231,7 +236,9 @@ install () {
 }
 
 uninstall () {
-	# Does not undo bundles & defaults
+	# TODO ? Does not undo bundles & defaults
+	read_conf N
+	echo ''
 
 	# Symbolic links
 	undo_link
