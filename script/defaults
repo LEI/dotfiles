@@ -76,9 +76,6 @@ case $UNAME in
 					st_theme="Spacegray"
 					[ -d "$dir/Packages/Theme - $st_theme" ] || \
 						ln -s "$DOTFILES_DIR/init/$st_theme" "$dir/Packages/Theme - $st_theme"
-					st_color="Base16"
-					[ -d "$dir/Packages/Color Scheme - $st_color" ] || \
-						ln -s "$DOTFILES_DIR/init/$st_color" "$dir/Packages/Color Scheme - $st_color"
 					# Backup then link preferences
 					[ -f "$dir/Packages/User/Preferences.sublime-settings" ] && \
 						mv "$dir/Packages/User/Preferences.sublime-settings" "$dir/Packages/User/Preferences.sublime-settings.bak"
