@@ -13,7 +13,6 @@ cd "$(dirname "$0")/.."
 # Globals
 DOTFILES_DIR=$(pwd)
 TARGET_DIR=$HOME
-CONFIG_FILE=$BOOTSTRAP_DIR/config
 lib=$BOOTSTRAP_DIR/lib
 
 # Get command
@@ -53,10 +52,10 @@ echo_debug () {
 	fi
 }
 
-read_conf () {
-	[ -n "$1" ] && answer=$1 || answer=Y
+get_author () {
+	local file=$1
 	# Create the file if needed
-	if [ ! -f "$CONFIG_FILE" ] && ask "Fill configuration file ?" $answer true; then
+	if [ ! -f "$file" ] && ask "Fill configuration file ?" Y true; then
 		((indent_level++))
 		NICK=$(prompt "What is your nickname ?")
 		NAME=$(prompt "What is your full name ?")
@@ -64,19 +63,18 @@ read_conf () {
 		sed -e "s/AUTHOR_NICK/\"$NICK\"/g" \
 			-e "s/AUTHOR_NAME/\"$NAME\"/g" \
 			-e "s/AUTHOR_EMAIL/\"$EMAIL\"/g" \
-			$CONFIG_FILE.sample > $CONFIG_FILE
+			$file.sample > $file
 		((indent_level--))
-		success "${CONFIG_FILE#$DOTFILES_DIR/}" "Successfully created"
+		success "${file#$DOTFILES_DIR/}" "Successfully created"
 	else
-		success "${CONFIG_FILE#$DOTFILES_DIR/}" "Already exists" true
+		success "${file#$DOTFILES_DIR/}" "Already exists" true
 	fi
-
-	# lib/utils
-	readconf
 }
 
 # Fill sample files
 fill_files () {
+	info "Using configuration file" "~${CONFIG_FILE#$HOME}"
+
 	# Sample files
 	for sample in ${sample_files[@]}; do
 		local sample_param=(${sample//=/ })
@@ -158,7 +156,6 @@ do_copy () {
 
 undo_copy () {
 	if ask "Remove directories ?" Y true; then
-		echo ${directories[@]}
 		for dir in ${directories[@]}; do
 			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
 			dir $dir remove ${ignore_dir[@]} || skipped
@@ -211,10 +208,10 @@ install () {
 		echo ''
 	fi
 
-	read_conf
+	get_author $DOTFILES_DIR/author
+	readconf $DOTFILES_DIR/author
+	readconf $BOOTSTRAP_DIR/config
 	echo ''
-
-	info "Using configuration file" "~${CONFIG_FILE#$HOME}"
 
 	fill_files
 	echo ''
@@ -237,7 +234,7 @@ install () {
 
 uninstall () {
 	# TODO ? Does not undo bundles & defaults
-	read_conf N
+	readconf $BOOTSTRAP_DIR/config
 	echo ''
 
 	# Symbolic links

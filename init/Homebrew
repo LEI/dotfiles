@@ -6,6 +6,7 @@
 TAPS=(
 	homebrew/versions
 	caskroom/versions
+	caskroom/fonts
 )
 
 FORMULAS=(
@@ -65,6 +66,7 @@ FORMULAS=(
 )
 
 CASKS=(
+	# Browsers ################################################################
 	google-chrome
 	#google-chrome-canary
 	firefox
@@ -73,6 +75,7 @@ CASKS=(
 	#opera-developer
 	#opera-next
 	torbrowser
+	# Editors #################################################################
 	#atom
 	#sublime-text3
 	#phpstorm
@@ -87,13 +90,16 @@ CASKS=(
 	#filezilla
 	transmit
 	#mamp
+	#anvil
 	sequel-pro
 	robomongo
+	# Utilities
 	kaleidoscope
 	reggy
-	alfred
 	#atext
-	#bartender
+	alfred
+	satellite-eyes
+	bartender
 	caffeine
 	flux
 	hyperdock
@@ -108,8 +114,10 @@ CASKS=(
 	evernote
 	#lastpass-universal
 	little-snitch
+	sidestep
 	skype
 	transmission
+	# Better quick look
 	qlcolorcode
 	qlstephen
 	qlmarkdown
@@ -118,6 +126,9 @@ CASKS=(
 	quicklook-csv
 	betterzipql
 	webp-quicklook
+	# Fonts ###################################################################
+	# https://github.com/caskroom/homebrew-fonts/tree/master/Casks
+	#font-dejavu-sans-mono-for-powerline
 )
 
 setup () {
