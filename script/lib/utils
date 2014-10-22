@@ -6,12 +6,13 @@
 source $lib/colors
 source $lib/print
 
+# Read configuration file
 readconf () {
-	# Read configuration from $CONFIG_FILE
+	CONFIG_FILE=$1
 	while read line; do
-	# skip comments
+		# Skip comments
 		[[ ${line:0:1} == "#" ]] && continue
-	# skip empty lines
+		# Skip empty lines
 		[[ -z "${line}" ]] && continue
 		eval ${line}
 	done < "${CONFIG_FILE}"
