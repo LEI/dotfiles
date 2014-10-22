@@ -208,8 +208,8 @@ install () {
 		echo ''
 	fi
 
-	get_author $DOTFILES_DIR/author
-	readconf $DOTFILES_DIR/author
+	get_author $BOOTSTRAP_DIR/author
+	readconf $BOOTSTRAP_DIR/author
 	readconf $BOOTSTRAP_DIR/config
 	echo ''
 
