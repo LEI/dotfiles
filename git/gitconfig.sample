@@ -24,6 +24,9 @@
 	# Pull in remote changes for the current repository and all its submodules
 	p = !"git pull; git submodule foreach git pull origin master"
 
+	# Fully update the git repository
+	pup = "git pull && git submodule init && git submodule update && git submodule status"
+
 	# Clone a repository including all submodules
 	c = clone --recursive
 
