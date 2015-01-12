@@ -74,12 +74,16 @@ else
 	set background=dark
 endif
 
+colorscheme base16-ocean
+let base16colorspace=256
+
 " let g:solarized_termcolors=256
 " let g:solarized_contrast = "high"
-colorscheme badwolf
-let g:badwolf_darkgutter = 1
-let g:badwolf_tabline = 0
-let g:badwolf_css_props_highlight = 1
+
+" colorscheme badwolf
+" let g:badwolf_darkgutter = 1
+" let g:badwolf_tabline = 0
+" let g:badwolf_css_props_highlight = 1
 
 " Color the 80th column differently as a wrapping guide
 if exists('+colorcolumn')
@@ -90,9 +94,9 @@ endif
 
 " Airline
 
-let g:airline_powerline_fonts = 1
-" let g:airline_left_sep = ''
-" let g:airline_right_sep = ''
+" let g:airline_powerline_fonts = 1
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
 " Enable the list of buffers
 let g:airline#extensions#tabline#enabled = 1
 " Show just the filename

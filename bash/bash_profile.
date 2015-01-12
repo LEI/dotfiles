@@ -16,6 +16,10 @@ for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
 done;
 unset file;
 
+# Base16 Shell
+BASE16_SHELL="$HOME/.dotfiles/init/base16-shell/base16-ocean.dark.sh"
+[[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
+
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob;
 
