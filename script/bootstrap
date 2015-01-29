@@ -144,6 +144,7 @@ undo_link () {
 
 do_copy () {
 	if ask "Copy directories ?" Y true; then
+		echo "${directories[@]}"
 		for dir in ${directories[@]}; do
 			eval "local ignore_dir=\${ignore_${dir#.}[@]}"
 			copy $dir ${ignore_dir[@]} || skipped
