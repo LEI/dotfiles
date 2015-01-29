@@ -2,7 +2,7 @@
 	"color_scheme": "Packages/Theme - Spacegray/base16-ocean.dark.tmTheme",
 	"default_encoding": "UTF-8",
 	"default_line_ending": "unix",
-	"detect_indentation": true,
+	"detect_indentation": false,
 	"draw_white_space": "selection",
 	"ensure_newline_at_eof_on_save": true,
 	"file_exclude_patterns":
@@ -53,9 +53,10 @@
 	"spacegray_tabs_auto_width": false,
 	"spacegray_tabs_font_normal": true,
 	"spacegray_tabs_large": true,
-	"tab_size": 4,
+	"tab_size": 2,
 	"theme": "Spacegray.sublime-theme",
-	"translate_tabs_to_spaces": false,
+	"translate_tabs_to_spaces": true,
+	"trim_automatic_white_space": true,
 	"trim_trailing_white_space_on_save": false,
 	"use_tab_stops": true,
 	"word_wrap": true
