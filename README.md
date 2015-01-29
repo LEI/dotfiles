@@ -18,7 +18,8 @@ It will be symlinked in the home directory when executing the script.
 - Nicolas Gallagher [@necolas](//github.com/necolas) [OS X dotfiles](//github.com/necolas/dotfiles)
 - Ben Alman [@cowboy](//github.com/cowboy) [OS X / Linux dotfiles](//github.com/cowboy/dotfiles)
 - Ryan Bates [@ryanb](//github.com/ryanb) [OS X / Linux dotfiles](//github.com/ryanb/dotfiles)
-- Jordan Eldredge [@captbaritone](//github.com/ryanb) [OS X / Linux dotfiled](//github.com/captbaritone/dotfiles)
+- Jordan Eldredge [@captbaritone](//github.com/captbaritone) [OS X / Linux dotfiles](//github.com/captbaritone/dotfiles)
+
 - [> leoj3n](https://github.com/leoj3n/dotfiles)
 - [tejr](//github.com/tejr/dotfiles)
 - [gf3](//github.com/gf3/dotfiles)
