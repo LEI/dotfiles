@@ -1,3 +1,6 @@
+" Make Vim more useful
+set nocompatible
+
 set background=dark
 
 try
@@ -5,11 +8,8 @@ try
 catch
 endtry
 
-" Make Vim more useful
-set nocompatible
-
 " Pathogen
-execute pathogen#infect('bundle/{}', '~/.dotfiles/vim/bundle/{}')
+execute pathogen#infect('bundle/{}', '~/.dotfiles/.vim/bundle/{}')
 Helptags
 
 set clipboard=unnamed
@@ -87,7 +87,7 @@ set incsearch
 
 "set magic
 
-"set showmatch 
+"set showmatch
 "set mat=2
 
 "set foldcolumn=1
@@ -123,7 +123,7 @@ set showcmd
 " Start scrolling three lines before the horizontal window border
 set scrolloff=3
 
-"let $LANG='en' 
+"let $LANG='en'
 "set langmenu=en
 "source $VIMRUNTIME/delmenu.vim
 "source $VIMRUNTIME/menu.vim
