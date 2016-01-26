@@ -2,26 +2,26 @@
 
 var run = require('run-sequence');
 
-function runSequence(gulp) {
-    var register = gulp.utils.requireTask(gulp);
+function sequence(g) {
+    var Task = g.utils.requireTask(g);
 
-    gulp.task('config', register('config'));
+    g.task('config', Task('config'));
 
-    gulp.task('git', register('git'));
+    g.task('git', Task('git'));
 
-    gulp.task('symlink', ['config'], register('symlink'));
+    g.task('symlink', ['config'], Task('symlink'));
 
-    gulp.task('unlink', ['config'], register('unlink'));
+    g.task('unlink', ['config'], Task('unlink'));
 
-    // gulp.task('end', gulp.plugins.shell.task('ls ~/ | grep vim', { verbose: true }));
+    // g.task('end', g.plugins.shell.task('ls ~/ | grep vim', { verbose: true }));
 
-    gulp.task('default', function (cb) {
+    g.task('default', function (cb) {
         run('git', 'symlink', cb);
     });
 
-    gulp.task('undo', function (cb) {
+    g.task('undo', function (cb) {
         run('unlink', cb);
     });
 }
 
-module.exports = runSequence;
+module.exports = sequence;

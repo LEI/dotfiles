@@ -1,16 +1,16 @@
 'use strict';
 
-var fs = require('fs'),
+var os = require('os'),
+    fs = require('fs'),
     path = require('path'),
-    through = require('through2'),
     util = require('util'),
     gutil = require('gulp-util'),
     gmatch = require('gulp-match'),
-    log = gutil.log,
+    through = require('through2'),
+    config = require('./config'),
     color = gutil.colors,
-    tildify = require('tildify'),
-    EOL = require('os').EOL,
-    config = require('./config');
+    log = gutil.log,
+    EOL = os.EOL;
 
 function requireTask() {
     var args = arguments;
@@ -88,7 +88,7 @@ module.exports = {
     requireTask: requireTask,
     filterSymlinks: filterSymlinks,
     logPaths: logPaths,
-    tildify: tildify
+    tildify: require('tildify')
 };
 
 
