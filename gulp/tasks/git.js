@@ -1,5 +1,7 @@
 'use strict';
 
+var map = require('map-stream');
+
 function gitTask(g) {
     var commands = [
         'git pull',
@@ -7,6 +9,9 @@ function gitTask(g) {
         'git submodule update',
         'git submodule status'
     ];
+
+    // return g.src('.gitmodules')
+    //     .pipe(map(g.utils.logPaths));
 
     return g.plugins.shell.task(commands, { verbose: true });
 }

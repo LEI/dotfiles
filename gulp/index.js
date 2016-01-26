@@ -6,8 +6,6 @@ var _ = require('lodash'),
     config = require('./config'),
     utils = require('./utils');
 
-// var config = utils.loadConfig();
-
 var g = _.extend(gulp, {
     plugins: plugins,
     config: config,
