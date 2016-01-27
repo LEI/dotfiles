@@ -8,7 +8,7 @@ function unlinkTask(g) {
     var commands = [];
 
     function unlink(file, cb) {
-        var symlink = g.utils.getSymlinkPath(file);
+        var symlink = path.resolve(g.config.paths.home, file.relative);
         commands.push('unlink ' + symlink);
 
         cb(null, file);

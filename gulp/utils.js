@@ -1,114 +1,71 @@
 'use strict';
 
-var os = require('os'),
-    fs = require('fs'),
-    path = require('path'),
-    util = require('util'),
-    gutil = require('gulp-util'),
-    gmatch = require('gulp-match'),
+var fs = require('fs'),
+    cp = require('child_process'),
+    // colors = require('chalk'),
     through = require('through2'),
-    config = require('./config'),
-    color = gutil.colors,
-    log = gutil.log,
-    EOL = os.EOL;
+    gutil = require('gulp-util');
 
-function requireTask() {
-    var args = arguments;
-    return function (name) {
-        var task = require('./tasks/' + name);
-        return task.apply(task, args);
-    };
-}
+var utils = {
 
-function filterSymlinks() {
-    function matching(file) {
-        return gmatch(file, function (file) {
-            var symlink = getSymlinkPath(file);
-            // fs.lstat(symlink, function (err, stats) {
-            //
-            // });
-            // console.log(stats);
+    log: function () {
+        gutil.log.apply(this, arguments);
+    },
 
+    error: function () {
+        gutil.log.apply(this, arguments);
+    },
 
-            return true;
+    fileExists: function (filePath) {
+        return new Promise(function (resolve, reject) {
+            fs.lstat(filePath, function (err, stats) {
+                if (err) reject(err);
+                else resolve(stats);
+            });
         });
+    },
+
+    isSymlink: function (filePath) {
+        return utils.fileExists(filePath)
+            .then(function (stats) {
+                return stats.isSymbolicLink();
+            })
+            .catch(function (error) {
+                // throw error;
+                return null;
+            });
+    },
+
+    vp: function (callback) {
+        var stream = through.obj(function (file, enc, cb) {
+            this.paths.push(file.path);
+
+            if (callback) {
+                callback(file.path).then(function () {
+                    cb(null, file);
+                }).catch(cb);
+            } else {
+                cb(null, file);
+            }
+        });
+
+        stream.paths = [];
+
+        return stream;
+    },
+
+    exec: function (cmd) {
+        var promise = new Promise(function (resolve, reject) {
+            cp.exec(cmd, function (error, stdout, stderr) {
+                if (error) throw error;
+                if (stderr) reject(stderr);
+                if (stdout) resolve(stdout);
+            });
+        });
+
+        return promise;
     }
 
-    return through.obj(function (file, enc, cb) {
-        if (matching(file)) {
-            this.push(file);
-        }
-
-        return cb();
-    });
-    // var symlink = getSymlinkPath(file);
-    //
-    // fs.lstat(symlink, function (err, stats) {
-    //     if (!err && stats && stats.isSymbolicLink) {
-    //         console.log(symlink, ':', stats.isSymbolicLink());
-    //         cb(err, file);
-    //     } else {
-    //         cb(null, file);
-    //     }
-    // });
-    //
-    //
-
-    // var promise = new Promise(function (resolve, reject) {
-    //     fs.stat(path, function (err, stats) {
-    //         if (!err && stats) return resolve(stats);
-    //         return reject(err);
-    //     });
-    // });
-    //
-    // return promise
-}
-
-function getSymlinkPath(file) {
-    return path.resolve(config.paths.home, file.relative);
-}
-
-function logPaths(file, cb) {
-    // gutil.log.apply(this, arguments);
-    log(file.path);
-    if (cb) cb(null, file);
-}
-
-console.log = function() {
-    this._stdout.write(util.format.apply(this, arguments) + EOL);
 };
 
-console.error = function() {
-    this._stderr.write(color.red(util.format.apply(this, arguments)) + EOL);
-};
-
-module.exports = {
-    log: log,
-    color: color,
-    requireTask: requireTask,
-    filterSymlinks: filterSymlinks,
-    logPaths: logPaths,
-    tildify: require('tildify')
-};
-
-
-
-// childProcess = require('child_process'),
-// function exec(cmd) {
-//     var promise = new Promise(function (resolve, reject) {
-//         log('`' + color.white(cmd) + '`');
-//         childProcess.exec(cmd, function (error, stdout, stderr) {
-//             // if (error) reject(error);
-//             if (stderr) {
-//                 console.error(stderr);
-//                 reject(stderr);
-//             }
-//             if (stdout) {
-//                 console.log(stdout);
-//                 resolve(stdout);
-//             }
-//         });
-//     });
-//
-//     return promise;
-// }
+module.exports = utils;

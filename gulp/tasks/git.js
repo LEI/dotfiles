@@ -1,8 +1,10 @@
 'use strict';
 
-var map = require('map-stream');
+var gulp = require('gulp'),
+    shell = require('gulp-shell'),
+    utils = require('../utils');
 
-function gitTask(g) {
+module.exports = function git() {
     var commands = [
         'git pull',
         'git submodule init',
@@ -10,10 +12,14 @@ function gitTask(g) {
         'git submodule status'
     ];
 
-    // return g.src('.gitmodules')
-    //     .pipe(map(g.utils.logPaths));
+    return shell.task(commands, { verbose: true });
 
-    return g.plugins.shell.task(commands, { verbose: true });
-}
-
-module.exports = gitTask;
+    // commands.forEach(function (cmd) {
+    //     utils.log('>', cmd);
+    //     utils.exec(cmd).then(function (res) {
+    //         utils.log('exec res', res);
+    //     }, function (err) {
+    //         utils.error('exec err', err);
+    //     });
+    // })
+};

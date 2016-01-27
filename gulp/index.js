@@ -1,16 +1,18 @@
 'use strict';
 
-var _ = require('lodash'),
+var dir = require('require-dir'),
+    run = require('run-sequence'),
     gulp = require('gulp'),
-    plugins = require('gulp-load-plugins')(),
-    config = require('./config'),
-    utils = require('./utils');
+    gutil = require('gulp-util');
 
-var g = _.extend(gulp, {
-    plugins: plugins,
-    config: config,
-    utils: utils
-});
+module.exports = (function sequence() {
+    var tasks = dir('./tasks');
 
-// Define tasks order
-require('./sequence')(g);
+    gulp.task('git', tasks.git);
+    gulp.task('copy', tasks.copy);
+    gulp.task('symlink', tasks.symlink);
+
+    gulp.task('default', ['git'], function (cb) {
+        run('symlink', 'copy', cb);
+    });
+})();

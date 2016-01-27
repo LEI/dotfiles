@@ -1,16 +1,16 @@
 'use strict';
 
-var vfs = require('vinyl-fs'),
-    map = require('map-stream');
+var fs = require('fs'),
+    gulp = require('gulp'),
+    utils = require('../utils'),
+    config = require('../config');
 
-function symlinkTask(g) {
-    return function () {
-        return vfs.src(g.config.paths.symlinks + '/*', { dot: true })
-            // .pipe(map(g.utils.filterSymlinks))
-            .pipe(g.utils.filterSymlinks())
-            // .pipe(vfs.symlink(g.config.paths.home))
-            .pipe(map(g.utils.logPaths));
-    };
-}
+module.exports = function symlink() {
+    var filePath = '/Users/LEI/.vim/bundle';
+    return utils.isSymlink(filePath).then(function (isSymlink) {
+        utils.log(filePath, 'is symlink ~>', isSymlink);
+        // resolve(filePath);
+    });
 
-module.exports = symlinkTask;
+    // return gulp.src(''); // <- config.paths.symlinks.toArguments('dest')
+};
