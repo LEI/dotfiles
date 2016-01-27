@@ -9,28 +9,33 @@
     "type": "git",
     "url": "https://github.com/LEI/dotfiles.git"
   },
-  "author": "LEI",
+  "author": "Guillaume Frichet <guillaume.frichet@gmail.com>",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/LEI/dotfiles/issues"
   },
   "homepage": "https://github.com/LEI/dotfiles",
   "dependencies": {
+    "chalk": "^1.1.1",
     "gulp": "^3.9.0",
+    "gulp-shell": "^0.5.2",
+    "gulp-util": "^3.0.7",
+    "lodash": "^4.0.0",
+    "map-stream": "0.0.6",
+    "require-dir": "^0.3.0",
+    "through2": "^2.0.0"
+  },
+  "devDependencies": {
     "gulp-debug": "^2.1.2",
     "gulp-load-plugins": "^1.2.0",
     "gulp-match": "^1.0.0",
     "gulp-prompt": "^0.1.2",
     "gulp-rename": "^1.2.2",
-    "gulp-util": "^3.0.7",
-    "lodash": "^4.0.0",
-    "map-stream": "0.0.6",
     "run-sequence": "^1.1.5",
-    "through2": "^2.0.0",
     "tildify": "^1.1.2",
-    "vinyl-fs": "^2.3.1",
-    "vinyl-paths": "^2.1.0"
+    "vinyl-fs": "^2.3.1"
   },
-  "devDependencies": {
-    "gulp-shell": "^0.5.2"
+  "engines": {
+    "node": ">=5.0.0"
   }
 }

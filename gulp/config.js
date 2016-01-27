@@ -1,36 +1,28 @@
 'use strict';
 
 var os = require('os'),
-    path = require('path'),
-    _ = require('lodash'),
-    platform = os.platform(),
-    home = os.homedir();
+    _ = require('lodash');
 
-function config() {
-    try {
-        var config = require('../config.json');
-    } catch (err) {
-        console.error(path.normalize('../config.json'), 'Not Found');
+var config = {
+
+    platform: os.platform(),
+    homedir: os.homedir(),
+
+    paths: {
+        symlinks: [
+            {
+                src: 'symlinks/*',
+                dest: '$HOME/'
+            },
+            {
+                src: '.vim/*',
+                dest: '$HOME/.vim/'
+            }
+        ]
     }
 
-    // Configuration defaults
-    return _.merge({
-        os: platform,
-        paths: {
-           home: home,
-           // copy: [],
-           symlinks: [
-               {
-                   src: 'symlinks/*',
-                   dest: home + '/'
-               },
-               {
-                   src: '.vim/*',
-                   dest: home + '/.vim/'
-               }
-           ]
-        }
-    }, config);
-}
+};
 
-module.exports = config();
+// config = _.extend(require('../cfg'), config);
+
+module.exports = config;
