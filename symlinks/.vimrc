@@ -1,16 +1,21 @@
+" ~/.vimrc
+
 " Make Vim more useful
 set nocompatible
 
+" Theming
 set background=dark
-
 try
     colorscheme torte
 catch
 endtry
 
-" Pathogen
-execute pathogen#infect('bundle/{}', '~/.dotfiles/.vim/bundle/{}')
+" Autoload plugins
+runtime bundle/vim-pathogen/autoload/pathogen.vim
+execute pathogen#infect()
 Helptags
+
+filetype plugin indent on
 
 set clipboard=unnamed
 
