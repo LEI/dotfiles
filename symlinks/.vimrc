@@ -1,50 +1,39 @@
 " ~/.vimrc
 
-" Make Vim more useful
 set nocompatible
+
+" Autoload plugins
+runtime bundle/pathogen/autoload/pathogen.vim
+execute pathogen#infect()
+Helptags
+
+runtime! bundle/sensible/plugin/sensible.vim
 
 " Theming
 set background=dark
-try
-    colorscheme torte
-catch
-endtry
-
-" Autoload plugins
-runtime bundle/vim-pathogen/autoload/pathogen.vim
-execute pathogen#infect()
-Helptags
+colorscheme base16-colors
+" osx: https://github.com/chriskempson/base16-shell
 
 filetype plugin indent on
 
 set clipboard=unnamed
 
-set wildmenu
-
 set esckeys
-
-set backspace=indent,eol,start
 
 set ttyfast
 
-set gdefault
+set encoding=utf-8
 
-set encoding=utf-8 nobomb
+set autoread
 
 set binary
 set noeol
 
-set autoread
-
 set nobackup
 set nowb
 set noswapfile
-"set backupdir=~/.vim/backups
-"set directory=~/.vim/swaps
-"if exists("&undodir")
-"	set undodir=~/.vim/undo
-"endif
-"set backupskip=/tmp/*,/private/tmp/*
+
+set hidden
 
 set modeline
 set modelines=4
@@ -53,10 +42,15 @@ set modelines=4
 set exrc
 set secure
 
+syntax on
+
 set number
 
-syntax on
-set synmaxcol=800
+" Use relative line numbers
+"if exists("&relativenumber")
+"	set relativenumber
+"	au BufReadPost * set relativenumber
+"endif
 
 if exists('+colorcolumn')
 	set colorcolumn=80
@@ -64,8 +58,23 @@ endif
 
 set cursorline
 "set cursorcolumn
-hi CursorLine cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-hi ColorColumn ctermbg=black
+hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
+
+set gdefault
+set ignorecase
+set smartcase
+
+set hlsearch
+set incsearch
+
+" Spacing
+
+set synmaxcol=800
+
+set autoindent
+set backspace=indent,eol,start
+"set complete-=i
+"set smarttab
 
 set tabstop=2
 
@@ -73,20 +82,13 @@ set tabstop=2
 set lbr
 set tw=500
 
-set ai "Auto indent
-set si "Smart indent
-set wrap "Wrap lines
+"set si "Smart indent
+"set wrap "Wrap lines
 
 " Show “invisible” characters
-set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_,extends:❯,precedes:❮
-
-set ignorecase
-
-set smartcase
-
-set hlsearch
-
-set incsearch
+"tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+set list
+set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
 
 "set lazyredraw
 
@@ -97,9 +99,6 @@ set incsearch
 
 "set foldcolumn=1
 
-set laststatus=2
-"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
-
 if has("mouse")
 	set mouse=a
 endif
@@ -109,38 +108,26 @@ set visualbell
 
 set nostartofline
 
+set wildmenu
 set ruler
 
 set shortmess=atI
-
-set showmode
 
 set title
 
 set showcmd
 
-" Use relative line numbers
-"if exists("&relativenumber")
-"	set relativenumber
-"	au BufReadPost * set relativenumber
-"endif
+set laststatus=2
 
-" Start scrolling three lines before the horizontal window border
-set scrolloff=3
+set noshowmode
 
-"let $LANG='en'
-"set langmenu=en
-"source $VIMRUNTIME/delmenu.vim
-"source $VIMRUNTIME/menu.vim
+" Start scrolling before the window border
+set scrolloff=5
+set sidescrolloff=5
 
-let mapleader=","
-
-" Save a file as root (,W)
-noremap <leader>W :w !sudo tee % > /dev/null<CR>
-
-" Automatic commands
 if has("autocmd")
-	autocmd BufWritePost .vimrc source $MYVIMRC
+	" Auto reload .vimrc
+	"autocmd BufWritePost .vimrc source $MYVIMRC
 	" Enable file type detection
 	filetype on
 	" Treat .json files as .js
@@ -149,29 +136,87 @@ if has("autocmd")
 	autocmd BufNewFile,BufRead *.md setlocal filetype=markdown
 endif
 
-" Returns true if paste mode is enabled
-function! HasPaste()
-	if &paste
-		return 'PASTE MODE  '
-	endif
-	return ''
-endfunction
+let mapleader=","
 
+" Save a file as root (,W)
+noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
+" Syntastic "
 
-" ...
+let g:syntastic_javascript_checkers = ['jshint']
 
-function! DisplayColorSchemes()
-   let currDir = getcwd()
-   exec "cd $VIMRUNTIME/colors"
-   for myCol in split(glob("*"), '\n')
-      if myCol =~ '\.vim'
-         let mycol = substitute(myCol, '\.vim', '', '')
-         exec "colorscheme " . mycol
-         exec "redraw!"
-         echo "colorscheme = ". myCol
-         sleep 2
-      endif
-   endfor
-   exec "cd " . currDir
-endfunction
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list=1
+let g:syntastic_auto_loc_list=1
+let g:syntastic_check_on_open=1
+let g:syntastic_check_on_wq=0
+
+"let g:syntastic_error_symbol = "✗"
+"let g:syntastic_warning_symbol = "⚠"
+let g:syntastic_error_symbol = "☠"
+let g:syntastic_warning_symbol = "⚠"
+let g:syntastic_style_error_symbol = "☢"
+let g:syntastic_style_warning_error = "⚠"
+
+" The NERD Tree "
+
+let NERDTreeMinimalUI=1
+let NERDTreeShowHidden=1
+let NERDTreeQuitOnOpen=1
+
+" Open with <Ctrl+n>
+map <C-n> :NERDTreeToggle<CR>
+
+" Open if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" Close if the last buffer is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" CtrlP "
+
+" Exclude .gitignore paths
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+" Airline "
+
+let g:airline#extensions#syntastic#enabled=1
+let g:airline#extensions#whitespace#enabled=1
+" Enable the list of buffers
+let g:airline#extensions#tabline#enabled=1
+" Show just the filename
+let g:airline#extensions#tabline#fnamemod=':t'
+"let g:airline#extensions#tabline#left_sep = ' '
+"let g:airline#extensions#tabline#left_alt_sep = '|'
+
+if !exists('g:airline_symbols')
+	let g:airline_symbols={}
+endif
+
+" unicode symbols
+let g:airline_left_sep='»'
+let g:airline_left_sep='▶'
+let g:airline_right_sep='«'
+let g:airline_right_sep='◀'
+let g:airline_symbols.crypt='🔒'
+let g:airline_symbols.linenr='␊'
+let g:airline_symbols.linenr='␤'
+let g:airline_symbols.linenr='¶'
+"let g:airline_symbols.branch='⎇'
+let g:airline_symbols.paste='ρ'
+let g:airline_symbols.paste='Þ'
+let g:airline_symbols.paste='∥'
+let g:airline_symbols.whitespace='Ξ'
+
+" old symbols
+let g:airline_left_sep='⮀'
+let g:airline_left_alt_sep='⮁'
+let g:airline_right_sep='⮂'
+let g:airline_right_alt_sep='⮃'
+let g:airline_symbols.branch='⭠'
+let g:airline_symbols.readonly='⭤'
+"let g:airline_symbols.linenr='⭡'
