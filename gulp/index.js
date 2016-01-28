@@ -5,7 +5,9 @@ var dir = require('require-dir'),
     gulp = require('gulp'),
     gutil = require('gulp-util');
 
-module.exports = (function sequence() {
+module.exports = sequence()
+
+function sequence() {
     var tasks = dir('./tasks');
 
     gulp.task('git', tasks.git);
@@ -15,4 +17,4 @@ module.exports = (function sequence() {
     gulp.task('default', ['git'], function (cb) {
         run('symlink', 'copy', cb);
     });
-})();
+};
