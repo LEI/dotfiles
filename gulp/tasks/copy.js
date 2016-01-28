@@ -6,9 +6,9 @@ var gulp = require('gulp'),
 
 module.exports = function copy() {
 
-    return gulp.src('./.vim/*')
-        .pipe(map(function (file, cb) {
-            utils.log(file.path);
-            if (cb) cb(null, file);
-        }));
+    return gulp.src('');//('./.vim/*')
+        // .pipe(map(function (file, cb) {
+        //     utils.log(file.path);
+        //     if (cb) cb(null, file);
+        // }));
 };
