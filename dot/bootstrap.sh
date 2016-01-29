@@ -2,7 +2,7 @@
 # bootstrap.sh
 
 # .		Import
-# >		Run
+# >		Exec
 # ~		Source
 
 set -o nounset
@@ -16,7 +16,9 @@ bootstrap() {
 	# shopt -s nullglob
 
 	BOOTSTRAP_ROOT="${DOT_ROOT}/dot"
+	DOT_IGNORE_FILE="${DOT_ROOT}/.dotignore"
 	DOT_TARGET=$HOME
+
 	DRY_RUN=false
 	DEBUG=false
 
@@ -24,10 +26,10 @@ bootstrap() {
 	load "${BOOTSTRAP_ROOT}/*/*.sh"
 	load "${BOOTSTRAP_ROOT}/!(bootstrap).sh"
 
-	#
-	DOT_IGNORE=$(read_file "${DOT_ROOT}/.dotignore")
+	# .dotignore
+	DOT_IGNORE=$(read_file "${DOT_IGNORE_FILE}")
 
-	info "Using $DOT_ROOT..."
+	info "Using $DOT_ROOT"
 
 	# Get options
 	parse_args "$@"
@@ -47,12 +49,17 @@ load() {
 	done
 }
 
-check_root() {
+not_root() {
 	if [[ $USER == "root" ]]; then
 		echo "Root detected, aborting."
 		exit 1
+	else
+
+
+
 	fi
 }
 
 # Boot
-check_root && bootstrap "$@"
+not_root
+bootstrap "$@"
