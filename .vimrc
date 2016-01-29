@@ -1,4 +1,6 @@
 " ~/.vimrc
+"
+" ~ github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 
 set nocompatible
 

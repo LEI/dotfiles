@@ -1,0 +1,57 @@
+# .gitignore_global
+#
+# > git config --global core.excludesfile ~/.gitignore_global
+# ~ github.com/github/gitignore
+# ~ gist.github.com/octocat/9257657
+
+*~
+
+# Composer
+vendor
+composer.phar
+
+# Node
+npm-debug.log*
+node_modules
+pids
+*.pid
+*.seed
+
+# Bower
+bower_components
+
+# Compiled source
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+logs
+*.log
+*.sql
+*.sqlite
+
+# OS files
+._*
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
