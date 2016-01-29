@@ -18,16 +18,16 @@ parse_args() {
 				shift
 				DEBUG=true
 			;;
-			-o|--out)
+			-t|--target)
 				shift
-				# if [ $# -gt 0 ]; then # handle no param
-					OUTPUT=$1
+				[ $# -gt 0 ] || usage 1; # handle empty value
+				TARGET=$1
+				shift
+				# isset= [[ -n ${1-} ]]
+				while [ $# -gt 0 ] && [[ $1 != -* ]]; do # handle spaces
+					TARGET="$TARGET $1"
 					shift
-					# isset= [[ -n ${1-} ]]
-					while [ $# -gt 0 ] && [[ $1 != -* ]]; do # handle spaces
-						OUTPUT="$OUTPUT $1"
-						shift
-					done
+				done
 				# elif
 				# 	warn "Missing parameter: --out <param>"
 				# 	usage 1

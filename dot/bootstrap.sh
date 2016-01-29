@@ -15,7 +15,7 @@ bootstrap() {
 	shopt -s extglob
 
 	BOOTSTRAP_ROOT="${DOTFILES_ROOT}/dot"
-	OUTPUT=
+	TARGET=$HOME
 
 	DRY_RUN=false
 	DEBUG=false
@@ -29,9 +29,9 @@ bootstrap() {
 	# Boot
 	parse_args "$@" || return 1
 
-	debug "OUTPUT => $OUTPUT"
+	debug "TARGET => $TARGET"
 
-	dot && return 0
+	dot || return 1
 }
 
 # Source files
