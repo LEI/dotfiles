@@ -1,14 +1,14 @@
 #!/bin/bash
 # parser.sh
 
+# . dot/lib/usage.sh
+
 # Parse arguments
 parse_args() {
 	# [ $# -gt 0 ] || return 0;
-	# debug "Parsing $# arguments: '$@'"
+	# echo "Parsing $# arguments: '$@'"
 	while [ $# -gt 0 ]; do
-
-		debug "Parsing $1 (#$#)"
-
+		# echo "Parsing $1 (#$#)"
 		case $1 in
 			--dry-run)
 				shift
@@ -21,10 +21,10 @@ parse_args() {
 			-t|--target)
 				shift
 				[ $# -gt 0 ] || usage 1; # handle empty value
-				TARGET=$1
+				DOT_TARGET=$1
 				shift
 				# isset= [[ -n ${1-} ]]
-				while [ $# -gt 0 ] && [[ $1 != -* ]]; do # handle spaces
+				while [ $# -gt 0 ] && [[ $1 != -* ]]; do # handle spaces?
 					TARGET="$TARGET $1"
 					shift
 				done
@@ -37,8 +37,7 @@ parse_args() {
 				usage # exit 0
 			;;
 			*)
-				warn "Unrecognized option: '$1'"
-				usage 1 # exit 1
+				usage 1 "Unrecognized option: '$1'" # exit 1
 			;;
 		esac
 	done

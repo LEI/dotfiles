@@ -1,28 +1,20 @@
 #!/bin/bash
 # logger.sh
 
-# . colors
+# . dot/lib/colors.sh
+
+ask() {
+	log $cyan "?" "$@"
+}
 
 info() {
 	# ›
-	log $blu "›" "$@"
+	log $blue "›" "$@"
 }
 
 success() {
 	# ✓ ✔
-	log $grn "✓" "$@"
-}
-
-debug() {
-	# 🐞
-	if [[ "$DEBUG" = true ]]; then
-		log $cyn "*" "$@"
-	fi
-}
-
-warn() {
-	# ⚠
-	log $yel "⚠" "$@"
+	log $green "✓" "$@"
 }
 
 error() {
@@ -30,12 +22,25 @@ error() {
 	log $red "✗" "$@" #
 }
 
+warn() {
+	# ⚠
+	log $yellow "⚠" "$@"
+}
+
+debug() {
+	# 🐞
+	if [[ "$DEBUG" = true ]]; then
+		log $cyan "*" "$@"
+	fi
+}
+
 log() {
 	local color=$1
-	local level=$2
+	local symbol=$2 # log level
 	local message=$3
+	local eol=${4-"\r\n"}
 
-	printf "[$(date +%H:%M:%S)]  $color%b\t%s$end\r\n" "$level" "$message"
+	printf "[$(date +%H:%M:%S)]  $color%b$end\t%s$eol" "$symbol" "$message"
 	# local date=$(date +%Y/%m/%d%H:%M:%S)
 	# echo -e "[$date] $@" >&2
 }

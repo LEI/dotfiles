@@ -12,38 +12,47 @@ bootstrap() {
 	unset -f bootstrap
 
 	# Extend matching operators
-	shopt -s extglob
+	shopt -s dotglob
+	# shopt -s nullglob
 
-	BOOTSTRAP_ROOT="${DOTFILES_ROOT}/dot"
-	TARGET=$HOME
-
+	BOOTSTRAP_ROOT="${DOT_ROOT}/dot"
+	DOT_TARGET=$HOME
 	DRY_RUN=false
 	DEBUG=false
 
-	# Import by alphabetical order
+	# Import scripts by alphabetical order
 	load "${BOOTSTRAP_ROOT}/*/*.sh"
 	load "${BOOTSTRAP_ROOT}/!(bootstrap).sh"
 
-	info "Using $DOTFILES_ROOT"
+	#
+	DOT_IGNORE=$(read_file "${DOT_ROOT}/.dotignore")
 
-	# Boot
-	parse_args "$@" || return 1
+	info "Using $DOT_ROOT..."
 
-	debug "TARGET => $TARGET"
+	# Get options
+	parse_args "$@"
 
-	dot || return 1
+	# Do symlinks
+	link_files "$DOT_ROOT" "$DOT_TARGET" "$DOT_IGNORE"
 }
 
 # Source files
 load() {
+	local file
 	for file in $@; do
 		# echo "source $file"
-		if [ -f "$file" ]; then
+		if [[ -f "$file" ]]; then
 			source "$file" || return 1
 		fi
 	done
-	unset file
 }
 
-# Entry point
-bootstrap "$@"
+check_root() {
+	if [[ $USER == "root" ]]; then
+		echo "Root detected, aborting."
+		exit 1
+	fi
+}
+
+# Boot
+check_root && bootstrap "$@"

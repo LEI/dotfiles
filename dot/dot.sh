@@ -1,6 +1,6 @@
 # dot.sh
 
 dot() {
-  echo "dot()"
-  echo ${DOTFILES_ROOT}/.*
+    info "dot()"
+    info ${DOT_ROOT}/.*
 }
