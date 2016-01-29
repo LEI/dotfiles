@@ -1,8 +1,8 @@
 #!/bin/bash
 # array.sh
 
-# Searches array for needle
-# Usage: contains array "$needle" && echo yes || echo no
+# Searches haystack for needle, example usage:
+# `contains array "$value" && echo yes || echo no`
 in_array () {
     local needle=$1
     local haystack="$2[@]"

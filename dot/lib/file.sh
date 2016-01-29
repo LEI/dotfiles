@@ -48,6 +48,8 @@ symlink() {
 	local target=$2
 	local target_link skip remove
 
+	#TODO: ~
+
 	if [[ -h "$target" ]] && [[ ! -e "$target" ]]; then
 		# Broken link
 		error "$target broken link"
@@ -75,12 +77,12 @@ symlink() {
 		fi
 	elif [[ -d "$target" ]]; then
 		# Directory
-		info "$target is a dir.."
-		# if confirm "Remove $target actual directory? (y/n)"; then
-		# 	remove=true
-		# else
-		# 	skip=true
-		# fi
+		# info "$target is a dir.."
+		if confirm "Remove $target actual directory? (y/n)"; then
+			remove=true
+		else
+			skip=true
+		fi
 	fi
 
 	# Check if the file has to be removed

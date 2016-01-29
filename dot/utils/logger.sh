@@ -40,7 +40,9 @@ log() {
 	local message=$3
 	local eol=${4-"\r\n"}
 
-	printf "[$(date +%H:%M:%S)]  $color%b$end\t%s$eol" "$symbol" "$message"
+	# n * \t ?
+
+	printf "[$(date +%H:%M:%S)]  $color%b\t%s$end$eol" "$symbol" "$message"
 	# local date=$(date +%Y/%m/%d%H:%M:%S)
 	# echo -e "[$date] $@" >&2
 }
