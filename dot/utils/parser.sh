@@ -20,6 +20,7 @@ parse_args() {
 				check_int + $val || usage 1 "Invalid option: $key $val"
 				MAX_DEPTH=$val
 				shift 2
+				usage 1 "Don't try this"
 				;;
 			-d|--debug)
 				DEBUG=true
