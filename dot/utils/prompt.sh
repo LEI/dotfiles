@@ -3,18 +3,6 @@
 
 # . utils/logger.sh
 
-prompt() {
-	local q=$1
-	local answer
-	# Display question
-	ask "$q"
-	# Wait for answer
-	read -e answer
-	[[ -n "$answer" ]] || (prompt "$@" && return)
-
-	echo "$answer"
-}
-
 # Basic prompt (y/N)
 confirm() {
 	local q=$1 # question
@@ -34,13 +22,18 @@ confirm() {
 
 	# Read input
 	while true; do
+		if [ "$DRY_RUN" != true ]; then
+			# read -e -p "$(ask "$q ")" answer
+			#  -p ""
+			# -e -> erase line
+			read -r answer
+			# echo -en "\033[1A\033[2K"
+			# local answer=$(prompt "$q")
+		else
+			printf "\r\n"
+			answer=Y
+		fi
 
-		# read -e -p "$(ask "$q ")" answer
-		#  -p ""
-		# -e -> erase line
-		read -r answer
-		# echo -en "\033[1A\033[2K"
-		# local answer=$(prompt "$q")
 		case $answer in
 			[yY]*)
 				answer=Y
@@ -74,3 +67,15 @@ confirm() {
 
 	return $code
 }
+
+# prompt() {
+# 	local q=$1
+# 	local answer
+# 	# Display question
+# 	ask "$q"
+# 	# Wait for answer
+# 	read -e answer
+# 	[[ -n "$answer" ]] || (prompt "$@" && return)
+#
+# 	echo "$answer"
+# }

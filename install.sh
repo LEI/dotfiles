@@ -7,4 +7,4 @@
 cd $(dirname "${BASH_SOURCE[0]}")
 DOT_ROOT=$(pwd -P)
 
-source dot/bootstrap.sh "$@" && echo "OK" || echo "ERR"
+source dot/bootstrap.sh "$@" && log "OK" || echo "ERROR $?"

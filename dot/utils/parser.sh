@@ -20,21 +20,34 @@ parse_args() {
 				check_int + $val || usage 1 "Invalid option: $key $val"
 				MAX_DEPTH=$val
 				shift 2
-				usage 1 "Don't try this"
+				# usage 2 "Don't try this"
 				;;
 			-d|--debug)
 				DEBUG=true
 				shift
 				;;
 			-t|--target)
-				# Can't handle ' -' without quotes
-				DOT_TARGET="$val"
-				shift 2
-				while [[ $# -gt 0 ]] && [[ $1 != -* ]]; do
-					DOT_TARGET+=" $1"
+				shift
+
+				# Loop until next '-', cannot handle ' -' without quotes
+				# while [[ $# -gt 0 ]] && [[ $1 != -* ]]; do
+				# 	DOT_TARGET+=" $1"
+				# 	shift
+				# done
+
+				# If args left, check value not starting with the command delimiter '-'
+				if [[ $# -gt 0 ]] && [[ ! -z "$val" ]] && [[ $val != -* ]]; then
 					shift
-				done
-				# The destination path should be checked
+				else
+					# Ask for the missing value
+ 					local prompt="Please specify a target path (default: $HOME): "
+ 					read -e -r -p "$prompt" val # -i "$HOME"
+ 					# Use default
+ 					[[ -z "$val" ]] && break
+				fi
+				# Check destination path
+				[[ -d "$val" ]] || usage 1 "Not a directory: $key $val"
+				DOT_TARGET="$val"
 				;;
 			-h|--help)
 				usage
@@ -52,12 +65,8 @@ check_int() {
 
 	if [[ "$val" =~ ^([0-9]+)$ ]]; then
 		case $sign in
-			+)
-				[[ "$val" -ge 0 ]] && return
-				;;
-			-)
-				[[ "$val" -le 0 ]] && return
-				;;
+			+) [[ "$val" -ge 0 ]] && return ;;
+			-) [[ "$val" -le 0 ]] && return ;;
 		esac
 	fi
 

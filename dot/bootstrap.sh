@@ -8,18 +8,18 @@
 set -o nounset
 set -o errexit
 
+# Extend matching operators
+shopt -s dotglob
+# shopt -s nullglob
+
 bootstrap() {
 	unset -f bootstrap
-
-	# Extend matching operators
-	shopt -s dotglob
-	# shopt -s nullglob
 
 	# Paths
 	UNAME=$(uname -s) # Darwin|Linux
 	DOT_TARGET=$HOME
-	BOOTSTRAP_ROOT="${DOT_ROOT}/dot"
-	DOT_IGNORE_FILE="${DOT_ROOT}/.dotignore"
+	DOT_BOOTSTRAP="$DOT_ROOT/dot"
+	DOT_IGNORE_FILE="$DOT_ROOT/.dotignore"
 
 	# Options
 	DEPTH=0 # starting directory
@@ -33,22 +33,28 @@ bootstrap() {
 	indent_level=0
 
 	# Import scripts by alphabetical order
-	load "${BOOTSTRAP_ROOT}/*/*.sh"
-	load "${BOOTSTRAP_ROOT}/!(bootstrap).sh"
+	load "$DOT_BOOTSTRAP/*/*.sh"
+	load "$DOT_BOOTSTRAP/!(bootstrap).sh"
 
 	# .dotignore
-	DOT_IGNORE=$(read_file "${DOT_IGNORE_FILE}")
+	DOT_IGNORE=$(read_file "$DOT_IGNORE_FILE")
 
 	# Get options
 	parse_args "$@"
+	# TODO: DOT_TARGET // -> slashes cleanup
 
-	debug "Debug mode enabled, using" "$DOT_ROOT"
-	info "Targeting" "$DOT_TARGET/"
-	log "Ignoring" "$DOT_IGNORE"
+	# READY #
+
+	# Header info
+	debug "$UNAME" "System"
+	debug "Debug mode" "Enabled"
+	[ "$DRY_RUN" = true ] && local msg="DRY RUN: "
+	log "${msg-}$DOT_ROOT -> $DOT_TARGET"
+	info "${DOT_IGNORE_FILE#$DOT_ROOT/}" "$DOT_IGNORE"
 
 	# Create symbolic lins
 	symlink_files "$DOT_ROOT" "$DOT_TARGET" "$DOT_IGNORE" $DEPTH $MAX_DEPTH && \
-		success "Symlinks done" || (error "Something went wrong" && return 1)
+		success "Symlinked $DOT_TARGET" "$DOT_ROOT" || (error "Something went wrong" && return 1)
 
 	# return
 }

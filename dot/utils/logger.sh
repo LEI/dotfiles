@@ -13,7 +13,7 @@ log() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# echo "$@"
-	print $blue"›"$end "$message" "$path" "$crlf"
+	print $end "›" "$message" "$path" "$crlf"
 }
 
 info() {
@@ -21,7 +21,8 @@ info() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ›
-	print $blue"i" "$message"$end "$path" "$crlf"
+	print $blue "i" "$message" "$path" "$crlf"
+	# printf "%s\n" "${path[@]}"
 }
 
 ask() {
@@ -29,7 +30,7 @@ ask() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ?
-	print $yellow"?" "$message"$end "$path" "$crlf"
+	print $yellow "?" "$message" "$path" "$crlf"
 }
 
 debug() {
@@ -39,7 +40,7 @@ debug() {
 
 	# * >
 	if [[ "$DEBUG" = true ]]; then
-		print $cyan">" "$message"$end "$path" "$crlf"
+		print $cyan ">" "$message" "$path" "$crlf"
 	fi
 }
 
@@ -48,7 +49,7 @@ success() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ✓ ✔
-	print $green"✔" "$message"$end "$path" "$crlf"
+	print $green "✔" "$message" "$path" "$crlf"
 }
 
 error() {
@@ -56,7 +57,7 @@ error() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# × ✕ ✖ ✗ ✘
-	print $red"✘" "$message"$end "$path" "$crlf"
+	print $red "✘" "$message" "$path" "$crlf"
 }
 
 warn() {
@@ -64,28 +65,39 @@ warn() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ⚠ !
-	print $yellow"!" "$message"$end "$path" "$crlf"
+	print $yellow "!" "$message" "$path" "$crlf"
 }
 
 print() {
-	local symbol=$1 # log level
-	local message=$2
-	local path=$3
-	local crlf=$4
+	local color=$1
+	local symbol=$2 # log level
+	local message=$3
+	local path=$4
+	local crlf=$5
 
 	local date=""
 	[[ "$TIMESTAMPS" = true ]] && date="[$(date +%H:%M:%S)] "
 
 	# Build indentation
-	local i=${indent_level-0}
-	local unit=${indent_unit- }
-	local indent=""
-	while [[ $i -gt 0 ]]; do
-		((i-=1))
-		indent+="$unit"
+	local i=0
+	local indent=
+	while [[ $i -lt ${indent_level-0} ]]; do
+		((i+=1)) #
+		if [[ $(( $i % ${#indent_unit} )) -eq 0 ]]; then
+			# Add pipe guides
+			indent+="${indent_separator-|}${indent_unit:1}"
+		else
+			indent+="${indent_unit}"
+		fi
+		#
 	done
 
-	printf "$date%b%b %b %b%b" "$indent" "$symbol" "$message" "$path" "$crlf"
+	# Float right
+	local column=$(tput cols)
+	local col=$(( (${column-25} / 3) - ($i * ${#indent_unit}) )) # - ${#message}
+	# echo "$message -> ${column-25} / 3 - ($i * ${#indent_unit-}) = $col"
+	printf "$date%b%b %-${col}b %b%b" "$indent" "$color$symbol" "$message$end" "$path" "$crlf"
+	# printf "$date%${p}b %b %b%b" "$symbol" "$message" "$path" "$crlf"
 
 	# printf -v line '%*s' "$level"
 	# echo ${line// /-}
