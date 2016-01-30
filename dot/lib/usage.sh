@@ -6,13 +6,16 @@ usage() {
 	unset -f usage
 
 	local code=${1-0}
-	shift
-	local message=${1-}
+	local message=${2-}
 
-	echo "$message"
+	[[ -n "$message" ]] && printf "%s\r\n" "$message"
 
-	echo "
-Usage: TODO
+	printf "%s\r\n" "
+Usage: dot [---]
+
+Commands: ...
+
+	dot [install]
 	"
 	# echo "
 	#

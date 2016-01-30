@@ -42,7 +42,7 @@ bootstrap() {
 	# Get options
 	parse_args "$@"
 
-	debug "Using" "$DOT_ROOT"
+	debug "Debug mode enabled, using" "$DOT_ROOT"
 	info "Targeting" "$DOT_TARGET/"
 	log "Ignoring" "$DOT_IGNORE"
 

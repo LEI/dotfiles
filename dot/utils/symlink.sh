@@ -33,6 +33,7 @@ symlink_files() {
 
 	for file in $source/*; do
 
+		# echo "current depth: $depth"
 		((indent_level+=1))
 
 		# Exclude .dotignore files
@@ -48,13 +49,17 @@ symlink_files() {
 			do_symlink "$file" "$target/${file#$source/}"
 		elif [[ $depth -eq $max_depth ]] && [[ -d "$file" ]]; then
 			# Reached max depth, symlink directories
+			((depth-=1))
 			do_symlink "$file" "$target/${file#$source/}"
 			# continue
 		elif [[ $depth -lt $max_depth ]] && [[ -d "$file" ]]; then
 			# Going deep into directory, self call
 			((depth+=1))
-			debug "INCREMENTING DEPTH, NOW:" "$depth"
-			symlink_files "$file" "$target/${file#$source/}" "$ignore" $depth $max_depth
+			# debug "INCREMENTING DEPTH, NOW:" "$depth"
+			symlink_files "$file" "$target/${file#$source/}" "$ignore" $depth $max_depth && {
+					((indent_level-=1))
+					continue
+			}
 		else
 			error "Weird file" "${file#$source/}" # && return 1
 		fi
@@ -135,7 +140,7 @@ do_symlink() {
 		[ "$DRY_RUN" != true ] && \
 			debug "ln -s" "$source $target"
 
-		success "Symlink" "$src" #"$dst"
+		success "Symlink" "$dst"
 	fi
 
 	# return 0

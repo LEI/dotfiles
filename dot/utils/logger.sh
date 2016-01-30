@@ -21,7 +21,7 @@ info() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ›
-	print $blue"i"$end "$message" "$path" "$crlf"
+	print $blue"i" "$message"$end "$path" "$crlf"
 }
 
 ask() {
@@ -29,7 +29,7 @@ ask() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ?
-	print $yellow"?"$end "$message" "$path" "$crlf"
+	print $yellow"?" "$message"$end "$path" "$crlf"
 }
 
 debug() {
@@ -48,7 +48,7 @@ success() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ✓ ✔
-	print $green"✔"$end "$message" "$path" "$crlf"
+	print $green"✔" "$message"$end "$path" "$crlf"
 }
 
 error() {
@@ -56,7 +56,7 @@ error() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# × ✕ ✖ ✗ ✘
-	print $red"✘"$end "$message" "$path" "$crlf"
+	print $red"✘" "$message"$end "$path" "$crlf"
 }
 
 warn() {
@@ -64,7 +64,7 @@ warn() {
 	local path=${2-}
 	local crlf=${3-"\r\n"}
 	# ⚠ !
-	print $yellow"!"$end "$message" "$path" "$crlf"
+	print $yellow"!" "$message"$end "$path" "$crlf"
 }
 
 print() {

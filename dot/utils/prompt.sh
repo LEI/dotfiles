@@ -37,7 +37,7 @@ confirm() {
 
 		# read -e -p "$(ask "$q ")" answer
 		#  -p ""
-		# -e -> erase line??
+		# -e -> erase line
 		read -r answer
 		# echo -en "\033[1A\033[2K"
 		# local answer=$(prompt "$q")
@@ -56,7 +56,7 @@ confirm() {
 				break
 			;;
 			*) # Unrecognized input, ask again (still no crlf)
-				warn "Invalid answer" "'$answer' ($choices) " ""
+				error "$answer" "is an invalid anwser, please retry: " ""
 			;;
 		esac
 
