@@ -2,8 +2,8 @@
 # bootstrap.sh
 
 # .		Import
-# >		Exec
-# ~		Source
+# >		Command
+# ~		Link
 
 set -o nounset
 set -o errexit
@@ -15,12 +15,22 @@ bootstrap() {
 	shopt -s dotglob
 	# shopt -s nullglob
 
+	# Paths
+	UNAME=$(uname -s) # Darwin|Linux
+	DOT_TARGET=$HOME
 	BOOTSTRAP_ROOT="${DOT_ROOT}/dot"
 	DOT_IGNORE_FILE="${DOT_ROOT}/.dotignore"
-	DOT_TARGET=$HOME
 
+	# Options
+	DEPTH=0 # starting directory
+	MAX_DEPTH=1 # symlink folders at the level
 	DRY_RUN=false
 	DEBUG=false
+	TIMESTAMPS=false
+
+	# Display
+	indent_unit="  "
+	indent_level=0
 
 	# Import scripts by alphabetical order
 	load "${BOOTSTRAP_ROOT}/*/*.sh"
@@ -29,13 +39,18 @@ bootstrap() {
 	# .dotignore
 	DOT_IGNORE=$(read_file "${DOT_IGNORE_FILE}")
 
-	info "Using $DOT_ROOT"
-
 	# Get options
 	parse_args "$@"
 
-	# Do symlinks
-	link_files "$DOT_ROOT" "$DOT_TARGET" "$DOT_IGNORE"
+	debug "Using" "$DOT_ROOT"
+	info "Targeting" "$DOT_TARGET/"
+	log "Ignoring" "$DOT_IGNORE"
+
+	# Create symbolic lins
+	symlink_files "$DOT_ROOT" "$DOT_TARGET" "$DOT_IGNORE" $DEPTH $MAX_DEPTH && \
+		success "Symlinks done" || (error "Something went wrong" && return 1)
+
+	# return
 }
 
 # Source files
@@ -49,17 +64,13 @@ load() {
 	done
 }
 
-not_root() {
+no_root() {
 	if [[ $USER == "root" ]]; then
 		echo "Root detected, aborting."
 		exit 1
-	else
-
-
-
 	fi
 }
 
 # Boot
-not_root
+no_root
 bootstrap "$@"

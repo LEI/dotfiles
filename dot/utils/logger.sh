@@ -1,48 +1,100 @@
 #!/bin/bash
 # logger.sh
 
-# . dot/lib/colors.sh
+# . lib/colors.sh
 
-ask() {
-	log $cyan "?" "$@"
+# Usage:
+# $1	Message string
+# $2	Additional info
+# $3	Optional end of line
+
+log() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+	# echo "$@"
+	print $blue"›"$end "$message" "$path" "$crlf"
 }
 
 info() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
 	# ›
-	log $blue "›" "$@"
+	print $blue"i"$end "$message" "$path" "$crlf"
 }
 
-success() {
-	# ✓ ✔
-	log $green "✓" "$@"
-}
-
-error() {
-	# × ✕ ✖ ✗ ✘
-	log $red "✗" "$@" #
-}
-
-warn() {
-	# ⚠
-	log $yellow "⚠" "$@"
+ask() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+	# ?
+	print $yellow"?"$end "$message" "$path" "$crlf"
 }
 
 debug() {
-	# 🐞
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+
+	# * >
 	if [[ "$DEBUG" = true ]]; then
-		log $cyan "*" "$@"
+		print $cyan">" "$message"$end "$path" "$crlf"
 	fi
 }
 
-log() {
-	local color=$1
-	local symbol=$2 # log level
-	local message=$3
-	local eol=${4-"\r\n"}
-
-	# n * \t ?
-
-	printf "[$(date +%H:%M:%S)]  $color%b\t%s$end$eol" "$symbol" "$message"
-	# local date=$(date +%Y/%m/%d%H:%M:%S)
-	# echo -e "[$date] $@" >&2
+success() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+	# ✓ ✔
+	print $green"✔"$end "$message" "$path" "$crlf"
 }
+
+error() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+	# × ✕ ✖ ✗ ✘
+	print $red"✘"$end "$message" "$path" "$crlf"
+}
+
+warn() {
+	local message=$1
+	local path=${2-}
+	local crlf=${3-"\r\n"}
+	# ⚠ !
+	print $yellow"!"$end "$message" "$path" "$crlf"
+}
+
+print() {
+	local symbol=$1 # log level
+	local message=$2
+	local path=$3
+	local crlf=$4
+
+	local date=""
+	[[ "$TIMESTAMPS" = true ]] && date="[$(date +%H:%M:%S)] "
+
+	# Build indentation
+	local i=${indent_level-0}
+	local unit=${indent_unit- }
+	local indent=""
+	while [[ $i -gt 0 ]]; do
+		((i-=1))
+		indent+="$unit"
+	done
+
+	printf "$date%b%b %b %b%b" "$indent" "$symbol" "$message" "$path" "$crlf"
+
+	# printf -v line '%*s' "$level"
+	# echo ${line// /-}
+}
+
+# carriage_return() {
+# 	printf "\r"
+# }
+#
+# line_feed() {
+# 	printf "\n"
+# }

@@ -6,6 +6,10 @@ usage() {
 	unset -f usage
 
 	local code=${1-0}
+	shift
+	local message=${1-}
+
+	echo "$message"
 
 	echo "
 Usage: TODO

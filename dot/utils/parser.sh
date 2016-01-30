@@ -1,11 +1,11 @@
 #!/bin/bash
 # parser.sh
 
-# . dot/lib/usage.sh
+# . lib/usage.sh
+# . utils/logger.sh
 
-# Parse arguments
+# Handle arguments
 parse_args() {
-	# [ $# -gt 0 ] || return 0;
 	# echo "Parsing $# arguments: '$@'"
 	while [ $# -gt 0 ]; do
 		# echo "Parsing $1 (#$#)"
@@ -13,32 +13,31 @@ parse_args() {
 			--dry-run)
 				shift
 				DRY_RUN=true
-			;;
+				;;
 			-d|--debug)
 				shift
 				DEBUG=true
-			;;
+				echo "Debug mode enabled"
+				;;
 			-t|--target)
 				shift
-				[ $# -gt 0 ] || usage 1; # handle empty value
+				# Handle empty parameter
+				[ $# -gt 0 ] || usage 1 "Missing value for: --target";
+				# Change dotfiles destination
 				DOT_TARGET=$1
 				shift
-				# isset= [[ -n ${1-} ]]
-				while [ $# -gt 0 ] && [[ $1 != -* ]]; do # handle spaces?
-					TARGET="$TARGET $1"
+				# Can't handle " -" in file names
+				while [ $# -gt 0 ] && [[ $1 != -* ]]; do
+					DOT_TARGET="${DOT_TARGET-} $1"
 					shift
 				done
-				# elif
-				# 	warn "Missing parameter: --out <param>"
-				# 	usage 1
-				# fi
-			;;
+				;;
 			-h|--help)
-				usage # exit 0
-			;;
+				usage
+				;;
 			*)
-				usage 1 "Unrecognized option: '$1'" # exit 1
-			;;
+				usage 1 "Unrecognized option: '$1'"
+				;;
 		esac
 	done
 }

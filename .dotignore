@@ -1,9 +1,14 @@
 #!/bin/bash
 # .dotignore
+# Array of excluded globs, watch out!
 
+*.md
+*.sh
 .git
 .gitignore
 .gitmodules
+.gitconfig
 .dotignore
-*.sh
+template.*
+platform
 dot
