@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # prompt.sh
 
 # . utils/logger.sh
@@ -18,7 +18,7 @@ confirm() {
 	# Display question (with no crlf)
 	ask "$q" "$p ($choices) " ""
 
-	((indent_level+=1))
+	((IL+=1))
 
 	# Read input
 	while true; do
@@ -30,7 +30,7 @@ confirm() {
 			# echo -en "\033[1A\033[2K"
 			# local answer=$(prompt "$q")
 		else
-			printf "\r\n"
+			print # new line
 			answer=Y
 		fi
 
@@ -45,7 +45,7 @@ confirm() {
 			;;
 			'')
 				answer=$default
-				# printf "%s\r\n" "$default"
+				# print "$default"
 				break
 			;;
 			*) # Unrecognized input, ask again (still no crlf)
@@ -63,7 +63,7 @@ confirm() {
 		*) error "Unknown answer" "$answer"; code=2 ;;
 	esac
 
-	((indent_level-=1))
+	((IL-=1))
 
 	return $code
 }

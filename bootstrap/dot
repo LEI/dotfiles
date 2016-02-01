@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# bootstrap.sh
+
+# set -o xtrace
+set -o nounset
+set -o errexit
+set -o pipefail
+
+# Extend matching operators
+shopt -s extglob
+# Loop on dotfiles
+shopt -s dotglob
+# Do not loop on empty directory
+shopt -s nullglob
+# Recursive globbing
+shopt -s globstar
+
+# .dotrc
+declare -A CONFIG
+# Register loaded files
+declare -A IMPORTED
+
+main() {
+	unset -f main
+
+	# Paths
+	cd $(dirname "${BASH_SOURCE[0]}")/..
+	DOT_ROOT=$(pwd -P)
+	DOT_TARGET=$HOME
+	DOT_FILES="$DOT_ROOT/files"
+	DOT_BOOTSTRAP="$DOT_ROOT/bootstrap"
+	DOT_RC="$DOT_ROOT/.dotrc"
+
+	# Bootstrap configuration
+	UNAME=$(uname -s) # Darwin|Linux
+	TIMESTAMPS=false
+	DRY_RUN=${DRY_RUN-false}
+	DEBUG=${DEBUG-false}
+	# MIN_DEPTH=1
+	# MAX_DEPTH=1
+
+	# Load library
+	import "lib/log"
+	import "lib/file"
+
+	# Parse settings
+	read_conf "$DOT_RC"
+	log_debug "Debug mode enabled" "$UNAME"
+	# log_info "Configuration loaded" "${CONFIG[@]}"
+
+	# Templates
+	for template in $DOT_FILES/**/template.*; do
+		process_template_file "$template"
+	done
+
+	# Symlinks
+
+	log "STATUS" "$?"
+}
+
+import() {
+	local path="$1"
+	local name="${path##*/}"
+	local ext="sh"
+
+	[[ ${IMPORTED[$name]-} = true ]] && return 0
+	source "$DOT_BOOTSTRAP/$path.$ext"
+	IMPORTED[$name]=true
+
+	return $?
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

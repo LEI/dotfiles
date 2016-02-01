@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # parser.sh
 
 # . lib/usage.sh
@@ -20,7 +20,7 @@ parse_args() {
 				check_int + $val || usage 1 "Invalid option: $key $val"
 				MAX_DEPTH=$val
 				shift 2
-				# usage 2 "Don't try this"
+				# [[ "$val" -gt 2 ]] && usage 2 "Don't try this"
 				;;
 			-d|--debug)
 				DEBUG=true

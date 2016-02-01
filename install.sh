@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # install.sh
 
 # DOT_ROOT="${BASH_SOURCE[0]%/*}"
@@ -7,4 +7,6 @@
 cd $(dirname "${BASH_SOURCE[0]}")
 DOT_ROOT=$(pwd -P)
 
-source dot/bootstrap.sh "$@" && log "OK" || echo "ERROR $?"
+source dot/bootstrap.sh "$@" && \
+  printf "%s\r\n" "DONE" || \
+  printf "%s\r\n" "ERROR $?"

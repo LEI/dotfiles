@@ -1,5 +1,4 @@
-#!/bin/bash
-# ? /usr/bin/env bash
+#!/usr/bin/env bash
 # ubuntu.sh
 
 # ~ github.com/captbaritone/dotfiles/blob/master/ubuntu/install.sh
