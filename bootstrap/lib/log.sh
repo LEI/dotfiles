@@ -12,7 +12,7 @@ print() {
 
 	local c=$(( $(tput cols) / 4 ))
 
-  printf "$(now)$color%s %-${c}s$nc %s\r\n" "$symbol" "$title" "$message"
+	printf "$(now)$color%s %-${c}s$nc %s\r\n" "$symbol" "$title" "$message"
 }
 
 log() {

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# ? /usr/bin/env bash
-# darwin.sh
+# osx.sh
 
 # ~ mths.be/osx
 
