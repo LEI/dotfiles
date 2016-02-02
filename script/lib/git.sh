@@ -2,11 +2,11 @@
 
 # git.sh
 
-git_submodules() {
-  git pull && \
-  git submodule init && \
-  git submodule update && \
-  git submodule status
+git() {
+    git pull && \
+    git submodule init && \
+    git submodule update && \
+    git submodule status
 }
 
 # [submodule "files/.vim/bundle/pathogen"]

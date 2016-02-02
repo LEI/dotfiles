@@ -1,7 +1,56 @@
 #!/usr/bin/env bash
-# bin/dot
 
-dot() {
-    info "dot()"
-    success ${DOT_ROOT}/.*
+# dot
+
+# set -o xtrace
+set -o nounset
+set -o errexit
+set -o pipefail
+
+# Platform
+UNAME=$(uname -s | tr '[:upper:]' '[:lower:]') #Darwin|Linux
+
+# Paths
+cd $(dirname "${BASH_SOURCE[0]}")/..
+DOT_ROOT=$(pwd -P)
+DOT_TARGET=$HOME
+DOT_FILES_ROOT="$DOT_ROOT/files"
+DOT_SCRIPT="$DOT_ROOT/script"
+DOT_RC="$DOT_ROOT/.dotrc"
+
+# Load libraries
+source $DOT_SCRIPT/import.sh
+import "lib/log"
+import "lib/prompt"
+
+function dot() {
+
+    # if ask "Defaults" "" Y; then
+    #     # Set platform defaults
+    #     log_info "Setting defaults" "..."
+    #     . $DOT_SCRIPT/defaults.sh || die "Defaults failed"
+    # fi
+    #
+    # if ask "Dependencies" "" Y; then
+    #     # Install dependencies
+    #     log_info "Installing dependencies" "..."
+    #     . $DOT_SCRIPT/install.sh || die "Install failed"
+    # fi
+
+    if ask "Bootstrap" "" Y; then
+        # Bootstrap dotfiles
+        log_info "Bootstraping" "..."
+        . $DOT_SCRIPT/bootstrap.sh || die "Bootstrap failed"
+    fi
+
+    log_success "Done" "STATUS $?"
 }
+
+die() {
+	local message=$1
+	[[ -z "$message" ]] && message="Died"
+	printf "%s\r\n" "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message." >&2
+	exit 1
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && dot "$@"
