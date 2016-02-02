@@ -31,7 +31,7 @@ ask() {
 
     while true; do
 
-        read -e -r answer # -s -n 1
+        read -e -n 1 answer # -r # -s -n 1
 
         case $answer in
             [yY]*)
@@ -47,8 +47,8 @@ ask() {
                 # print "$default"
                 break
                 ;;
-            *) # Unrecognized input, ask again (still no crlf)
-                log_warn "Invalid anwser, please retry" "$answer"
+            *) # Unrecognized input, ask again
+                log_warn "Invalid anwser, please retry" "($choices) " ""
                 ;;
         esac
 
