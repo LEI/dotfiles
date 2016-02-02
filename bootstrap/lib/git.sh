@@ -2,12 +2,11 @@
 
 # git.sh
 
-# git_pull() { # Sould be done before
-#   git pull origin master
-# }
-
-git_submodule() {
-  git add submodule "https://github.com/$1.git" "files/.vim/bundle/$2"
+git_submodules() {
+  git pull && \
+  git submodule init && \
+  git submodule update && \
+  git submodule status
 }
 
 # [submodule "files/.vim/bundle/pathogen"]

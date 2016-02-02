@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# osx.sh
 
+# darwin.sh
+
+# OS X defaults
 # ~ mths.be/osx
 
 # Ask for the administrator password upfront

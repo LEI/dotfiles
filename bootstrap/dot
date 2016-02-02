@@ -2,6 +2,16 @@
 
 # bootstrap.sh
 
+env() {
+	local min_bash_version=4
+	local bash_version=${BASH_VERSION%%[^0-9]*}
+	[[ $bash_version -lt $min_bash_version ]] && \
+		echo "This script requires bash > ${min_bash_version}." && \
+		exit 1
+}
+
+env
+
 # set -o xtrace
 set -o nounset
 set -o errexit
@@ -16,6 +26,14 @@ shopt -s nullglob
 # Recursive globbing
 shopt -s globstar
 
+# Paths
+cd $(dirname "${BASH_SOURCE[0]}")/..
+DOT_ROOT=$(pwd -P)
+DOT_TARGET=$HOME
+DOT_FILES="$DOT_ROOT/files"
+DOT_BOOTSTRAP="$DOT_ROOT/bootstrap"
+DOT_RC="$DOT_ROOT/.dotrc"
+
 # .dotrc
 declare -A CONFIG
 # Register loaded files
@@ -24,52 +42,88 @@ declare -A IMPORTED
 main() {
 	unset -f main
 
-	# Paths
-	cd $(dirname "${BASH_SOURCE[0]}")/..
-	DOT_ROOT=$(pwd -P)
-	DOT_TARGET=$HOME
-	DOT_FILES="$DOT_ROOT/files"
-	DOT_BOOTSTRAP="$DOT_ROOT/bootstrap"
-	DOT_RC="$DOT_ROOT/.dotrc"
-
-	# Bootstrap configuration
-	UNAME=$(uname -s) # Darwin|Linux
-	TIMESTAMPS=false
+	# Configuration
+	TIMESTAMPS=${TIMESTAMPS-false}
 	DRY_RUN=${DRY_RUN-false}
 	DEBUG=${DEBUG-false}
 	# MIN_DEPTH=1
 	# MAX_DEPTH=1
 
 	# Load libraries
+	source ${DOT_BOOTSTRAP}/import.sh
 	import "lib/git"
 	import "lib/log"
 	import "lib/file"
 
-	# Parse settings
+	# User settings
 	read_conf "$DOT_RC"
-	log_debug "Debug mode enabled" "$UNAME"
-	# log_info "Configuration loaded" "${CONFIG[@]}"
+	# log_info "Configuration loaded:" "${CONFIG[@]}"
+	log_debug "Debug mode enabled"
 
 	# Templates
-	for template in $DOT_FILES/**/template.*; do
-		process_template_file "$template"
-	done
+	# for template in $DOT_FILES/**/template.*; do
+	# 	process_template_file "$template"
+	# done
+
+	platform
 
 	# Symlinks
 
-	log "STATUS" "$?"
+	log "STATUS $?" "<"
 }
 
-import() {
-	local path="$1"
-	local name="${path##*/}"
-	local ext="sh"
+platform() {
+	import "lib/log"
 
-	[[ ${IMPORTED[$name]-} = true ]] && return 0
-	source "$DOT_BOOTSTRAP/$path.$ext"
-	IMPORTED[$name]=true
+	UNAME=$(uname -s) # Darwin|Linux
+	local dir="$DOT_ROOT/platform/${UNAME,,}"
 
-	return $?
+	case $UNAME in
+		Darwin)
+			log "OSX"
+
+			if load "$dir/homebrew.sh"; then
+				# homebrew
+				info "installing dependencies"
+
+				if source "$dir"; then
+				# if source bin/dot > /tmp/dotfiles-dot 2>&1; then
+					success "dependencies installed"
+				else
+					fail "error installing dependencies"
+				fi
+				log_success "Homebrew"
+			fi
+
+			# $dir/defaults.sh
+			;;
+		Linux)
+			log "Linux"
+			;;
+		*)
+			die "Unknown platform: $UNAME"
+			;;
+	esac
+}
+
+load() {
+	local file=$1
+	if [[ -f "$1" ]]; then
+		if source $1; then
+			success "Loaded" "$1"
+		else
+			die "Could not load '$file'"
+		fi
+	else
+		error "Not a file" "$1"
+	fi
+}
+
+die() {
+	local message=$1
+  [[ -z "$message" ]] && message="Died"
+  printf "%s\r\n" "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message." >&2
+  exit 1
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"

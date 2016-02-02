@@ -5,28 +5,32 @@
 import "lib/colors"
 
 print() {
+	printf "%s\r\n" "$@"
+}
+
+_print() {
 	local color=$1
 	local symbol=$2
 	local title=$3
 	local message=$4
 
-	local c=$(( $(tput cols) / 4 ))
+	local col=$(( $(tput cols) / 4 ))
 
-	printf "$(now)$color%s %-${c}s$nc %s\r\n" "$symbol" "$title" "$message"
+	printf "$(now)${color}%s %-${col}s${nc} %s\r\n" "$symbol" "$title" "$message"
 }
 
 log() {
 	local title=$1; shift
 	local msg=$@
 
-	print $nc ">" "$title" "$msg"
+	_print $nc ">" "$title" "$msg"
 }
 
 log_debug() {
 	local title=$1; shift
 	local msg=$@
 	if [[ "$DEBUG" = true ]]; then
-		print $purple "*" "$title" "$msg"
+		_print $purple "*" "$title" "$msg"
 	fi
 }
 
@@ -34,28 +38,28 @@ log_error() {
 	local title=$1; shift
 	local msg=$@
 
-	print $red "x" "$title" "$msg"
+	_print $red "x" "$title" "$msg"
 }
 
 log_info() {
 	local title=$1; shift
 	local msg=$@
 
-	print $blue "i" "$title" "$msg"
+	_print $blue "i" "$title" "$msg"
 }
 
 log_success() {
 	local title=$1; shift
 	local msg=$@
 
-	print $green "v" "$title" "$msg"
+	_print $green "v" "$title" "$msg"
 }
 
 log_warn() {
 	local title=$1; shift
 	local msg=$@
 
-	print $yellow "!" "$title" "$msg"
+	_print $yellow "!" "$title" "$msg"
 }
 
 now() {
