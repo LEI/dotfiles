@@ -6,6 +6,11 @@
     name = "Guillaume Frichet"
     email = "guillaume.frichet@gmail.com"
 
+[config]
+    debug = true
+    dry_run = false
+    timestamps = false
+    
 [ignore]
     template.*
     *.sh

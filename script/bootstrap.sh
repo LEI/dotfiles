@@ -2,7 +2,6 @@
 
 # bootstrap.sh
 
-import "lib/config"
 
 bootstrap() {
 
@@ -15,21 +14,9 @@ bootstrap() {
 	# # Recursive globbing
 	# shopt -s globstar
 
-	# Configuration
-	TIMESTAMPS=${TIMESTAMPS-false}
-	DRY_RUN=${DRY_RUN-false}
-	DEBUG=${DEBUG-false}
-	# MIN_DEPTH=1
-	# MAX_DEPTH=1
 
-	# import "lib/git"
+	# import "git"
 
-	# User settings
-	config "$DOT_RC"
-
-	log_debug "Debug mode" "Enabled"
-
-	log_debug "Hello" "$DOT_AUTHOR_NAME"
 	log_debug "FILES =>" "${DOT_FILES[*]}"
 	log_debug "IGNORE =>" "${DOT_IGNORE[*]}"
 

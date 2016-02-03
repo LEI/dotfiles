@@ -2,8 +2,9 @@
 
 # prompt.sh
 
-import "lib/log"
+import "log"
 
+# Wait for line input
 prompt() {
     local question=$1
 
@@ -16,7 +17,8 @@ prompt() {
     return
 }
 
-ask() {
+# Wait for char input
+confirm() {
     local question=$1
     local text=${2-}
     local default=${3-N}
@@ -27,10 +29,13 @@ ask() {
         *) choices="y/n" ;;
     esac
 
-    log_ask "$question" "$text($choices) " ""
+    [[ "$text" != "" ]] && text="$text " # Add a space if not empty
+    log_ask "$question" "$text($choices) " "" # Display the question
+    # + space between choices and input ^  ^ replace \r\n
 
     while true; do
 
+        # Read one char
         read -e -n 1 answer # -r # -s -n 1
 
         case $answer in

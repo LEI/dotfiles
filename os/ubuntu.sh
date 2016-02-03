@@ -3,15 +3,15 @@
 
 # ~ github.com/captbaritone/dotfiles/blob/master/ubuntu/install.sh
 
-command -v apt-get || exit
+command -v apt-get || exit # 1
 
 echo "Installing Ubuntu apt-get packages"
 
 # For neovim
-sudo add-apt-repository ppa:neovim-ppa/unstable
+# sudo add-apt-repository ppa:neovim-ppa/unstable
 
 sudo apt-get update
-sudo apt-get install --assume-yes \
+echo sudo apt-get install --assume-yes \
     ca-certificates \
     curl \
     git \

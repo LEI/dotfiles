@@ -2,7 +2,7 @@
 
 # log.sh
 
-import "lib/colors"
+import "colors"
 
 log() {
 	local msg=$1
@@ -24,7 +24,8 @@ log_debug() {
 	local msg=$1
 	local txt=${2-}
 	local cr=${3-"\r\n"}
-	if [[ "$DEBUG" = true ]]; then
+
+	if [[ "${DOT_CONFIG_DEBUG-}" = true ]]; then
 		_print $purple "*" "$msg" "$txt" "$cr"
 	fi
 }
@@ -88,8 +89,8 @@ _print() {
 now() {
 	local date=""
 
-	[[ ! -z "${TIMESTAMPS-}" ]] && \
-		[[ "$TIMESTAMPS" = true ]] && \
+	[[ ! -z "${DOT_CONFIG_TIMESTAMPS-}" ]] && \
+		[[ "$DOT_CONFIG_TIMESTAMPS" = true ]] && \
 		date="[$(date +%H:%M:%S)] "
 
 	printf "%s" "$date"

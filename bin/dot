@@ -18,28 +18,46 @@ DOT_FILES_ROOT="$DOT_ROOT/files"
 DOT_SCRIPT="$DOT_ROOT/script"
 DOT_RC="$DOT_ROOT/.dotrc"
 
+# Configuration
+DOT_CONFIG_DEBUG=${DOT_CONFIG_DEBUG-false}
+DOT_CONFIG_DRY_RUN=${DOT_CONFIG_DRY_RUN-false}
+DOT_CONFIG_TIMESTAMPS=${DOT_CONFIG_TIMESTAMPS-false}
+# MIN_DEPTH=1
+# MAX_DEPTH=1
+
 # Load libraries
-source $DOT_SCRIPT/import.sh
-import "lib/log"
-import "lib/prompt"
+source $DOT_SCRIPT/lib/import.sh
+
+import "log"
+import "prompt"
+import "config"
 
 function dot() {
+  	# DOT_CONFIG_*
+  	if config "$DOT_RC"; then
+  		log_success "Hello, $DOT_AUTHOR_NAME" "$DOT_RC"
+  	else
+  		log_error "Could not generate config" "$DOT_RC"
+  		die "$DOT_RC"
+  	fi
 
-    # if ask "Defaults" "" Y; then
-    #     # Set platform defaults
-    #     log_info "Setting defaults" "..."
-    #     . $DOT_SCRIPT/defaults.sh || die "Defaults failed"
-    # fi
-    #
-    # if ask "Dependencies" "" Y; then
-    #     # Install dependencies
-    #     log_info "Installing dependencies" "..."
-    #     . $DOT_SCRIPT/install.sh || die "Install failed"
-    # fi
+  	log_debug "Debug mode" "Enabled"
 
-    if ask "Bootstrap" "" Y; then
+    if confirm "Defaults" "" Y; then
+        # Set platform defaults
+        # log_info "Setting defaults" "..."
+        . $DOT_SCRIPT/defaults.sh || die "Defaults failed"
+    fi
+
+    if confirm "Dependencies" "" Y; then
+        # Install dependencies
+        # log_info "Installing dependencies" "..."
+        . $DOT_SCRIPT/install.sh || die "Install failed"
+    fi
+
+    if confirm "Bootstrap" "" Y; then
         # Bootstrap dotfiles
-        log_info "Bootstraping" "..."
+        # log_info "Bootstraping" "..."
         . $DOT_SCRIPT/bootstrap.sh || die "Bootstrap failed"
     fi
 

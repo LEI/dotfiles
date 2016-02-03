@@ -6,6 +6,11 @@
     name = AUTHOR_NAME
     email = AUTHOR_EMAIL
 
+[config]
+    debug = true
+    dry_run = false
+    timestamps = false
+
 [ignore]
     template.*
     *.sh
