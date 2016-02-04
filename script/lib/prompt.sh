@@ -14,7 +14,7 @@ prompt() {
 
     [ -n "$answer" ] || (prompt "$@" && return)
 
-    echo "$answer"
+    printf "%s" "$answer"
     return
 }
 
