@@ -60,8 +60,10 @@ fill_config() {
 	if [[ -f "$template" ]]; then
 		AUTHOR_NAME=$(prompt "What is your full name ?")
 		AUTHOR_EMAIL=$(prompt "What is your email ?")
+		AUTHOR_USERNAME=$(prompt "What is your user name ?")
 		sed -e "s/AUTHOR_NAME/\"$AUTHOR_NAME\"/g" \
 			-e "s/AUTHOR_EMAIL/\"$AUTHOR_EMAIL\"/g" \
+			-e "s/AUTHOR_USERNAME/\"$AUTHOR_USERNAME\"/g" \
 			$template > $file
 	fi
 }

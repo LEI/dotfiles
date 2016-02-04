@@ -19,9 +19,10 @@ templates() {
 }
 
 symlinks() {
-
+	# echo "-> ${DOT_FILES[@]}"
 	# Symlinks
 	for link in ${DOT_FILES[@]}; do
+		# echo "---> $link"
 		if [[ "$link" =~ [*:*] ]]; then
 			local src=${link%:*}
 			local dst=${link#*:}

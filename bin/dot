@@ -12,7 +12,7 @@ set -o pipefail
 # # Loop on dotfiles
 # shopt -s dotglob
 # # Do not loop on empty directory
-# shopt -s nullglob # TODO: ignore /* paths
+# shopt -s nullglob
 # # Recursive globbing (bash 4)
 # shopt -s globstar
 

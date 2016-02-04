@@ -3,12 +3,12 @@
 # # defaults.sh
 
 defaults() {
-	local os_defaults="$DOT_SCRIPT/os/${UNAME}.sh"
+	local platform_defaults="$DOT_SCRIPT/platform/${UNAME}.sh"
 
-    if [[ -f "$os_defaults" ]]; then
-        source $os_defaults
+    if [[ -f "$platform_defaults" ]]; then
+        source $platform_defaults
     else
-        warn "Defaults file not found" "$os_defaults"
+        log_error "Defaults file not found" "$platform_defaults"
     fi
 }
 

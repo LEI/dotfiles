@@ -31,9 +31,16 @@ confirm() {
 
     [[ "$text" != "" ]] && text="$text " # Add a space if not empty
     log_ask "$question" "$text($choices) " "" # Display the question
-    # + space between choices and input ^  ^ replace \r\n
+  # + space between choices and input ^  ^ replace \r\n
 
+    # Ask
     while true; do
+
+        if [[ "${FORCE-}" = true ]]; then
+          answer=$default
+          log_debug "Force" #"default $default"
+          break
+        fi
 
         # Read one char
         read -e -n 1 answer # -r # -s -n 1
