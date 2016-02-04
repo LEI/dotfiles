@@ -3,24 +3,22 @@
 # .dotrc
 
 [author]
-    name = AUTHOR_NAME
-    email = AUTHOR_EMAIL
+name = AUTHOR_NAME
+email = AUTHOR_EMAIL
 
 [config]
-    debug = true
-    dry_run = false
-    timestamps = false
-
-[ignore]
-    template.*
-    *.sh
+debug=true
+dry_run=false
+timestamps=false
 
 [files]
-    bin/*
-    .bash_profile
-    .config/*
-    .gitconfig
-    .gitignore
-    .inputrc
-    .vim/*
-    .vimrc
+bin/*:bin
+config/*
+git/*
+shell/*
+vim/bundle:vim/bundle
+vim/vimrc:.vimrc
+
+# [ignore]
+# *.template
+# *.sh

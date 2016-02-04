@@ -15,32 +15,33 @@ config() {
 		confirm "Create configuration file" "$file" Y && \
 		fill_config "$file" ); then # Create new config
 
-		while IFS="= " read -r key value; do
+		while IFS=$'=\n' read -r key value; do
 			# echo "$key $value"
 
 			[[ -z "$key" ]] && continue # Empty line
 			[[ ${key:0:1} == "#" ]] && continue # Comment
+			key=${key% #*} # Remove inline comments (everything after ' #')
 
-			if [[ "$key" = \[*\] ]]; then # Section
-				section=${key#*[}
-				section=${section%]*}
-				section="DOT_$section"
-
-			elif [[ -n "$section" ]]; then
-				# CONFIG["${section}_${key}"]=$value
-
+			if [[ "$key" =~ [\[a-zA-Z0-9\]] ]]; then # Section
+				section=${key#*[} # Left
+				section=${section%]*} # Right
+				section="DOT_$section" # Variable name
+			elif [[ -n "${section-}" ]]; then
 				if [[ -n "$value" ]]; then # Key = value
 					var=$(echo "${section}_${key}" | tr "[:lower:]" "[:upper:]")
-					# Assign the value to a variable (DOT_SECTION_VAR)
-					eval ${var}=$value
-					# echo ${var}=$value
-				else # Value
-					section=$(echo "$section" | tr "[:lower:]" "[:upper:]")
-					# Push the value to an array (DOT_SECTION)
-					eval $section+=\(\"$key\"\)
-					# echo "$section+=\(\"$key\"\)"
-				fi
 
+					[[ "${DEBUG-}" = true ]] && echo ${var}=$value
+					eval ${var}=$value # Assign the value to a variable (DOT_SECTION_VAR)
+
+				else # No inline separator, single value
+					section=$(echo "$section" | tr "[:lower:]" "[:upper:]")
+
+					[[ "${DEBUG-}" = true ]] && echo "$section+=\(\"$key\"\)"
+					eval $section+=\(\"$key\"\) # Push the value to an array (DOT_SECTION)
+
+				fi
+			else
+				die "Unrecognized section: $key $value"
 			fi
 
 		done < "$file"

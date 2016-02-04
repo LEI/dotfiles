@@ -7,6 +7,15 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+# # Extend matching operators
+# shopt -s extglob
+# # Loop on dotfiles
+# shopt -s dotglob
+# # Do not loop on empty directory
+# shopt -s nullglob # TODO: ignore /* paths
+# # Recursive globbing (bash 4)
+# shopt -s globstar
+
 # Platform
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]') #Darwin|Linux
 
@@ -14,16 +23,14 @@ UNAME=$(uname -s | tr '[:upper:]' '[:lower:]') #Darwin|Linux
 cd $(dirname "${BASH_SOURCE[0]}")/..
 DOT_ROOT=$(pwd -P)
 DOT_TARGET=$HOME
-DOT_FILES_ROOT="$DOT_ROOT/files"
 DOT_SCRIPT="$DOT_ROOT/script"
 DOT_RC="$DOT_ROOT/.dotrc"
 
 # Configuration
-DOT_CONFIG_DEBUG=${DOT_CONFIG_DEBUG-false}
-DOT_CONFIG_DRY_RUN=${DOT_CONFIG_DRY_RUN-false}
-DOT_CONFIG_TIMESTAMPS=${DOT_CONFIG_TIMESTAMPS-false}
-# MIN_DEPTH=1
-# MAX_DEPTH=1
+# DEBUG=${DEBUG-false}
+# DRY_RUN=${DRY_RUN-false}
+# FORCE=${FORCE-false}
+# TIMESTAMPS=${TIMESTAMPS-false}
 
 # Load libraries
 source $DOT_SCRIPT/lib/import.sh
@@ -33,7 +40,7 @@ import "prompt"
 import "config"
 
 function dot() {
-  	# DOT_CONFIG_*
+
   	if config "$DOT_RC"; then
   		log_success "Hello, $DOT_AUTHOR_NAME" "$DOT_RC"
   	else
@@ -41,7 +48,17 @@ function dot() {
   		die "$DOT_RC"
   	fi
 
-  	log_debug "Debug mode" "Enabled"
+    # DOT_CONFIG_*
+    # [[ -n "${DOT_CONFIG_DEBUG-}" ]] && DEBUG="$DOT_CONFIG_DEBUG"
+    # [[ -n "${DOT_CONFIG_DRY_RUN-}" ]] && DRY_RUN="$DOT_CONFIG_DRY_RUN"
+    # [[ -n "${DOT_CONFIG_FORCE-}" ]] && FORCE="$DOT_CONFIG_FORCE"
+    # [[ -n "${DOT_CONFIG_TIMESTAMPS-}" ]] && TIMESTAMPS="$DOT_CONFIG_TIMESTAMPS"
+    DEBUG="${DOT_CONFIG_DEBUG-${DEBUG-false}}"
+    DRY_RUN="${DOT_CONFIG_DRY_RUN-${DRY_RYN-false}}"
+    FORCE="${DOT_CONFIG_FORCE-${FORCE-false}}"
+    TIMESTAMPS="${DOT_CONFIG_TIMESTAMPS-${TIMESTAMPS-false}}"
+
+  	log_debug "Debug mode" "$BASH_VERSION"
 
     if confirm "Defaults" "" Y; then
         # Set platform defaults

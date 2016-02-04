@@ -25,7 +25,7 @@ log_debug() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	if [[ "${DOT_CONFIG_DEBUG-}" = true ]]; then
+	if [[ "${DEBUG-}" = true ]]; then
 		_print $purple "*" "$msg" "$txt" "$cr"
 	fi
 }
@@ -89,8 +89,8 @@ _print() {
 now() {
 	local date=""
 
-	[[ ! -z "${DOT_CONFIG_TIMESTAMPS-}" ]] && \
-		[[ "$DOT_CONFIG_TIMESTAMPS" = true ]] && \
+	[[ ! -z "${TIMESTAMPS-}" ]] && \
+		[[ "$TIMESTAMPS" = true ]] && \
 		date="[$(date +%H:%M:%S)] "
 
 	printf "%s" "$date"

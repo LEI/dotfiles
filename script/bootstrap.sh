@@ -4,30 +4,37 @@
 
 
 bootstrap() {
-
-	# # Extend matching operators
-	# shopt -s extglob
-	# # Loop on dotfiles
-	# shopt -s dotglob
-	# # Do not loop on empty directory
-	# shopt -s nullglob
-	# # Recursive globbing
-	# shopt -s globstar
-
-
-	# import "git"
-
 	log_debug "FILES =>" "${DOT_FILES[*]}"
-	log_debug "IGNORE =>" "${DOT_IGNORE[*]}"
+	# log_debug "IGNORE =>" "${DOT_IGNORE[*]}"
 
-	# log_info "Configuration loaded:" "${CONFIG[@]}"
+	templates
+	symlinks
+}
 
+templates() {
 	# Templates
-	# for template in $DOT_FILES/**/template.*; do
-	# 	process_template_file "$template"
-	# done
+	for template in $DOT_ROOT/**/*.template; do # Cannot glob on bash 3
+		log_warn "TODO" "Process template ${template/$DOT_ROOT\/}"
+	done
+}
+
+symlinks() {
 
 	# Symlinks
+	for link in ${DOT_FILES[@]}; do
+		if [[ "$link" =~ [*:*] ]]; then
+			local src=${link%:*}
+			local dst=${link#*:}
+			[[ -z "$dst" ]] && dst=$src
+			for path in ${src[@]}; do
+				log_info "$path ->" "~/.${path#*/}"
+			done
+		else
+			local src="$link"
+			local dst="$link"
+			log_info "$src ->" "~/$dst"
+		fi
+	done
 
 }
 
@@ -39,11 +46,6 @@ bootstrap() {
 # 		echo "$line"
 #
 # 	done < "$file"
-# }
-
-# process_template_file() {
-# 	local file="$1"
-# 	log_warn "TODO" "Process template ${file/$DOT_FILES\/}"
 # }
 
 # load() {

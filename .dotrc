@@ -3,24 +3,22 @@
 # .dotrc
 
 [author]
-    name = "Guillaume Frichet"
-    email = "guillaume.frichet@gmail.com"
+name="Guillaume Frichet"
+email="guillaume.frichet@gmail.com"
 
 [config]
-    debug = true
-    dry_run = false
-    timestamps = false
-    
-[ignore]
-    template.*
-    *.sh
+debug=true
+dry_run=false
+timestamps=false
 
 [files]
-    bin/*
-    .bash_profile
-    .config/*
-    .gitconfig
-    .gitignore
-    .inputrc
-    .vim/*
-    .vimrc
+bin/*
+config/*:
+git/*:
+shell/*:
+vim/bundle:.vim/bundle
+vim/vimrc:.vimrc
+
+# [ignore]
+# *.template
+# *.sh

@@ -2,7 +2,7 @@
 
 # git.sh
 
-git() {
+git_submodule() {
     git pull && \
     git submodule init && \
     git submodule update && \

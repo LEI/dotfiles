@@ -3,7 +3,7 @@
 # # defaults.sh
 
 defaults() {
-	local os_defaults="$DOT_ROOT/os/${UNAME}.sh"
+	local os_defaults="$DOT_SCRIPT/os/${UNAME}.sh"
 
     if [[ -f "$os_defaults" ]]; then
         source $os_defaults
