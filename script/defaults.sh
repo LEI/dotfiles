@@ -10,9 +10,12 @@ platform_defaults() {
 		case $UNAME in
 			darwin) # OSX
 				TERMINAL_THEME="Solarized"
-				if [[ -f "$DOT_ROOT/themes/$TERMINAL_THEME.terminal" ]] && \
-					confirm "Use $TERMINAL_THEME theme in Terminal" "$DOT_ROOT/themes/$TERMINAL_THEME.terminal" N; then
+				TERMINAL_THEME_PATH="$DOT_ROOT/themes/$TERMINAL_THEME.terminal"
+				if [[ -f "$TERMINAL_THEME_PATH" ]] && \
+					confirm "Use $TERMINAL_THEME theme in Terminal" "$TERMINAL_THEME_PATH" N; then
 					OSX_TERMINAL_THEME="$TERMINAL_THEME"
+				else
+					log_error "Terminal theme not found" "$TERMINAL_THEME_PATH"
 				fi
 
 				if confirm "Disable Notification Center" "" N; then
@@ -27,7 +30,7 @@ platform_defaults() {
 					OSX_SSD_TWEAKS=true
 				fi
 
-				# if confirm "Kill affected applications" "ABORT" N; then
+				# if confirm "Kill affected applications" "Terminal will be closed!" N; then
 				# 	OSX_KILL_APPS=true
 				# fi
 

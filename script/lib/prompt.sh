@@ -7,9 +7,10 @@ import "log"
 # Wait for line input
 prompt() {
     local question=$1
+    local placeholder=${2-}
 
     log_ask "$question" "?" >&2
-    read -e -r answer
+    read -e -r -i "$placeholder" answer
 
     [ -n "$answer" ] || (prompt "$@" && return)
 

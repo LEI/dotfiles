@@ -1,5 +1,5 @@
 # #!/usr/bin/env bash
-#
+
 # Seil.app
 # https://pqrs.org/osx/karabiner/seil.html.en
 
