@@ -21,7 +21,7 @@ function dot() {
     UNAME=$(uname -s | tr '[:upper:]' '[:lower:]') # darwin|linux
 
     # Paths
-    export DOT_ROOT=$HOME/.dotfiles
+    export DOT_ROOT=$HOME/.dotfiles # Read in shell/path?
     [[ -d "$DOT_ROOT" ]] || die "$DOT_ROOT: No such file or directory"
     # cd $(dirname "${BASH_SOURCE[0]}")/..
     # cd $(dirname "$(readlink "${BASH_SOURCE[0]}")")/..

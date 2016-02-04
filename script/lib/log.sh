@@ -9,7 +9,7 @@ log() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $nc " " "$msg" "$txt" "$cr"
+	_print $reset " " "$msg" "$txt" "$cr"
 }
 
 log_ask() {
@@ -83,7 +83,7 @@ _print() {
 
 	local col=$(( $(tput cols) / 4 ))
 
-	printf "$(now)${color}%b %-${col}s${nc} %s$cr" "$symbol" "$message" "$text"
+	printf "$(now)${color}%b %-${col}s${reset} %s$cr" "$symbol" "$message" "$text"
 }
 
 now() {
