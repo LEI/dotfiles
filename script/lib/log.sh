@@ -17,7 +17,7 @@ log_ask() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $yellow "?" "$msg" "$txt" "$cr"
+	_print $blue "?" "$msg" "$txt" "$cr"
 }
 
 log_debug() {
@@ -43,7 +43,7 @@ log_info() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $blue "›" "$msg" "$txt" "$cr"
+	_print $white "›" "$msg" "$txt" "$cr"
 }
 
 log_exec() {
@@ -51,7 +51,7 @@ log_exec() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $purple ">" "$msg" "$txt" "$cr"
+	_print $cyan ">" "$msg" "$txt" "$cr"
 }
 
 log_success() {

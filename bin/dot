@@ -26,12 +26,6 @@ DOT_TARGET=$HOME
 DOT_SCRIPT="$DOT_ROOT/script"
 DOT_RC="$DOT_ROOT/.dotrc"
 
-# Configuration
-# DEBUG=${DEBUG-false}
-# DRY_RUN=${DRY_RUN-false}
-# FORCE=${FORCE-false}
-# TIMESTAMPS=${TIMESTAMPS-false}
-
 # Load libraries
 source $DOT_SCRIPT/lib/import.sh
 
@@ -48,7 +42,7 @@ function dot() {
   		die "$DOT_RC"
   	fi
 
-    # DOT_CONFIG_*
+    # Configuration (DOT_CONFIG_*)
     # [[ -n "${DOT_CONFIG_DEBUG-}" ]] && DEBUG="$DOT_CONFIG_DEBUG"
     # [[ -n "${DOT_CONFIG_DRY_RUN-}" ]] && DRY_RUN="$DOT_CONFIG_DRY_RUN"
     # [[ -n "${DOT_CONFIG_FORCE-}" ]] && FORCE="$DOT_CONFIG_FORCE"
@@ -60,22 +54,19 @@ function dot() {
 
   	log_debug "Debug mode" "$BASH_VERSION"
 
-    if confirm "Defaults" "" Y; then
-        # Set platform defaults
-        # log_info "Setting defaults" "..."
-        . $DOT_SCRIPT/defaults.sh || die "Defaults failed"
-    fi
-
-    if confirm "Dependencies" "" Y; then
+    if confirm "Homebrew install" "" Y; then
         # Install dependencies
-        # log_info "Installing dependencies" "..."
-        . $DOT_SCRIPT/install.sh || die "Install failed"
+        source $DOT_SCRIPT/install.sh || die "Install failed"
     fi
 
-    if confirm "Bootstrap" "" Y; then
+    if confirm "Bootstrap dotfiles" "" Y; then
         # Bootstrap dotfiles
-        # log_info "Bootstraping" "..."
-        . $DOT_SCRIPT/bootstrap.sh || die "Bootstrap failed"
+        source $DOT_SCRIPT/bootstrap.sh || die "Bootstrap failed"
+    fi
+
+    if confirm "Platform defaults" "" Y; then
+        # Set platform defaults
+        source $DOT_SCRIPT/defaults.sh || die "Defaults failed"
     fi
 
     log_success "Done" "STATUS $?"

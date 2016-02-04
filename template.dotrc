@@ -8,10 +8,16 @@ email = AUTHOR_EMAIL
 username = AUTHOR_USERNAME
 
 [config]
-debug=true
-dry_run=false
-timestamps=false
+debug = true
+dry_run = false
+timestamps = false
 
+# Dotfiles patterns
+#
+# src:dst
+# src:      The destination will be the full path of the source
+# src       The destination will be the source prefixed with a dot without its path
+#
 [files]
 bin/*:bin
 config/*
@@ -23,3 +29,7 @@ vim/vimrc:.vimrc
 # [ignore]
 # *.template
 # *.sh
+
+# [brew]
+#
+# [cask]

@@ -13,30 +13,52 @@ bootstrap() {
 
 templates() {
 	# Templates
-	for template in $DOT_ROOT/**/*.template; do # Cannot glob on bash 3
+	for template in $DOT_ROOT/*/*.template; do # Cannot glob on bash 3
 		log_warn "TODO" "Process template ${template/$DOT_ROOT\/}"
 	done
 }
 
 symlinks() {
+	local src dst target
+	local prefix="."
 	# echo "-> ${DOT_FILES[@]}"
 	# Symlinks
 	for link in ${DOT_FILES[@]}; do
-		# echo "---> $link"
+
 		if [[ "$link" =~ [*:*] ]]; then
-			local src=${link%:*}
-			local dst=${link#*:}
+			# Path specified
+			src=${link%:*}
+			dst=${link#*:}
 			[[ -z "$dst" ]] && dst=$src
-			for path in ${src[@]}; do
-				log_info "$path ->" "~/.${path#*/}"
-			done
+			# 	for path in ${src[@]}; do
+			# 		log_info "$path ->" "~/.${path#*/}"
+			# 	done
 		else
-			local src="$link"
-			local dst="$link"
-			log_info "$src ->" "~/$dst"
+			# Link to home and add prefix
+			src="$link"
+			dst="${prefix}${link#*/}"
 		fi
+
+		dst="$DOT_TARGET/$dst"
+
+		log_debug "$src ->" "$dst"
+
+		target="$src" #"$DOT_TARGET/$dst"
+		find_cmd "$target" || log_error "$target" "No such file or directory"
+
 	done
 
+}
+
+find_cmd() {
+	local path=$1
+
+	# -ok {} \;
+	find $path -prune -print \
+		2> >(grep -i -v "no such file or directory" >&2)
+
+	# local cmd=""
+	# printf "%s" "$cmd"
 }
 
 # read_file() {
