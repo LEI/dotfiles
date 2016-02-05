@@ -77,14 +77,19 @@ fi;
 # PS1+="\[${bold}\]\n"; # newline
 PS1+="\n\[${userStyle}\]\u"; # username
 
-# Highlight the hostname when connected via SSH.
-if [[ "${SSH_TTY}" ]]; then
+if [[ "$(whoami)" != "$(hostname)" ]]; then
+	# Highlight the hostname when connected via SSH.
+	if [[ -n "${SSH_TTY}" ]]; then
+	 	hostStyle="${bold}${red}";
+	 else
+	 	hostStyle="${orange}";
+	fi;
+
 	PS1+="\[${textStyle}\] at ";
-	PS1+="\[${bold}${red}\]\h"; # host
-# 	hostStyle="${bold}${red}";
+	PS1+="\[${hostStyle}\]\h"; # host
 # else
-# 	hostStyle="${yellow}";
-fi;
+# 	PS1+=" ${reset}*"
+fi
 
 PS1+="\[${textStyle}\] in ";
 PS1+="\[${white}\]\w"; # working directory

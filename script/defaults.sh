@@ -9,8 +9,16 @@ platform_defaults() {
 
 		case $UNAME in
 			darwin) # OSX
+
+				_COMPUTER_NAME=${DOT_AUTHOR_NAME%[[:space:]]*}
+				_COMPUTER_NAME=$(prompt "Computer name ?" "$_COMPUTER_NAME")
+				if [[ -n "$_COMPUTER_NAME" ]]; then
+					COMPUTER_NAME=$_COMPUTER_NAME
+				fi
+
 				TERMINAL_THEME="Solarized"
 				TERMINAL_THEME_PATH="$DOT_ROOT/themes/$TERMINAL_THEME.terminal"
+				# find ?
 				if [[ -f "$TERMINAL_THEME_PATH" ]] && \
 					confirm "Use $TERMINAL_THEME theme in Terminal" "$TERMINAL_THEME_PATH" N; then
 					OSX_TERMINAL_THEME="$TERMINAL_THEME"
