@@ -39,18 +39,16 @@ function dot() {
   import "lib/usage"
   import "lib/config"
 
-  # Platform
-  UNAME=$(uname -s | to_lower) # darwin|linux
-
   # Parse command options
   parse_arguments "$@"
 
-  # Configuration ${!DOT_CONFIG_*}
+  # Configuration
   DOT_RC="$DOT_ROOT/.dotrc"
   DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
 
   config "$DOT_RC" "$DOT_RC_TEMPLATE" || die "$DOT_RC"
 
+  # ${!DOT_CONFIG_*}
   DEBUG="${DEBUG-${DOT_CONFIG_DEBUG-false}}"
   DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RYN-false}}"
   FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
@@ -59,19 +57,26 @@ function dot() {
   log_debug "Debug mode enabled" "$BASH_VERSION"
   # debug "DOT_"
 
-  log_info "Hello, $DOT_AUTHOR_USERNAME" "$DOT_AUTHOR_NAME <$DOT_AUTHOR_EMAIL>"
+  # Platform
+  UNAME=$(uname -s | to_lower) # darwin|linux
 
-  if confirm "Homebrew install" "" Y; then
+  DOT_USER_GIT_CREDENTIAL="cache"
+  [[ "$UNAME" = "darwin" ]] && DOT_USER_GIT_CREDENTIAL="osxkeychain"
+
+  # Greeting
+  log_info "Hello, $DOT_USER_NICK" "$DOT_USER_NAME <$DOT_USER_EMAIL>"
+
+  if confirm "**Homebrew install" "" Y; then
     # Install dependencies
     source $DOT_SCRIPT/install.sh || log_warn "Install aborted"
   fi
 
-  if confirm "Symlink files to $DOT_TARGET" "" Y; then
+  if confirm "**Symlink files to $DOT_TARGET" "" Y; then
     # Bootstrap dotfiles
     source $DOT_SCRIPT/bootstrap.sh || log_warn "Bootstrap aborted"
   fi
 
-  if confirm "Setup $UNAME specific defaults" "" Y; then
+  if confirm "**Setup $UNAME specific defaults" "" Y; then
     # Set platform defaults
     source $DOT_SCRIPT/defaults.sh || log_warn "Defaults aborted"
   fi
@@ -91,14 +96,6 @@ parse_arguments() {
     # echo "Parsing $1 (#$#)"
 
     case $key in
-      -d|--debug)
-        DEBUG=true
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
       # -t|--target)
       # 	shift
       #
@@ -122,6 +119,18 @@ parse_arguments() {
       # 	[[ -d "$val" ]] || usage 1 "Not a directory: $key $val"
       # 	DOT_TARGET="$val"
       # 	;;
+      # --uninstall)
+      #   UNINSTALL=true
+      #   shift
+      #   ;;
+      -v|--verbose|--debug)
+        DEBUG=true
+        shift
+        ;;
+      -d|--dry-run)
+        DRY_RUN=true
+        shift
+        ;;
       -h|--help)
         usage
         ;;
@@ -145,4 +154,5 @@ die() {
 }
 
 check_env
+
 [[ "$0" == "$BASH_SOURCE" ]] && dot "$@"

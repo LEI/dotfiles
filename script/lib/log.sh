@@ -81,6 +81,14 @@ _print() {
 	local text=$4
 	local cr=$5
 
+	# Messages starting with "**"
+	if [[ "$message" =~ \*\**  ]]; then
+		message=${message#\*\*} # Remove prefix '**'
+		color="${bold}${color}" # Make the message bold
+	else
+		color="${reset}${color}"
+	fi
+
 	local col=$(( $(tput cols) / 4 ))
 
 	printf "$(now)${color}%b %-${col}s${reset} %s$cr" "$symbol" "$message" "$text"

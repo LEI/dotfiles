@@ -12,14 +12,14 @@ platform_defaults() {
 
 				# _COMPUTER_NAME=${DOT_AUTHOR_NAME%[[:space:]]*}
 				# Uses the hostname as a placeholder
-				_COMPUTER_NAME=$(prompt "Computer name ?" "$(hostname)")
+				_COMPUTER_NAME=$(prompt "Computer name" "$(hostname)")
 				if [[ -n "$_COMPUTER_NAME" ]]; then
 					COMPUTER_NAME=$_COMPUTER_NAME
 				fi
 
 				TERMINAL_THEME="Solarized"
 				TERMINAL_THEME_PATH="$DOT_ROOT/themes/$TERMINAL_THEME.terminal"
-				# find ?
+				# find??
 				if [[ -f "$TERMINAL_THEME_PATH" ]]; then
 					if confirm "Use $TERMINAL_THEME theme in Terminal" "$TERMINAL_THEME_PATH" N; then
 						OSX_TERMINAL_THEME="$TERMINAL_THEME"

@@ -2,6 +2,9 @@
 
 # bootstrap.sh
 
+import "lib/prompt"
+import "lib/file"
+
 bootstrap() {
 	log_debug "FILES =>" "${DOT_FILES[*]}"
 	# log_debug "IGNORE =>" "${DOT_IGNORE[*]}"
@@ -11,9 +14,22 @@ bootstrap() {
 }
 
 template_files() {
-	# Templates
-	for template in $DOT_ROOT/*/*.template; do # Cannot glob on bash 3
-		log_warn "TODO" "Process template ${template/$DOT_ROOT\/}"
+	local file
+	# Gather variable names for sed
+	local vars=("${!DOT_USER_*}")
+	# Look for each file ending with '.template' except .dotrc
+	local templates=$(find $DOT_ROOT -name *.template ! -path $DOT_RC_TEMPLATE)
+
+	for template in ${templates[@]}; do
+		# Extract actual path
+		file=${template%.template}
+
+		# Confirm if target file exists
+		if [[ -f "$file" ]] && confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y && continue
+
+		# Fill file
+		sed_file "$file" "$template" "${vars[@]}" || return 1
+		log_success "Template processed" "${file/$DOT_ROOT\/}"
 	done
 }
 
@@ -40,9 +56,10 @@ symlink_files() {
 
 		dst="$DOT_TARGET/$dst"
 
-		log_debug "$src ->" "$dst"
+		# log_debug "$src ->" "$dst"
 
 		target="$src" #"$DOT_TARGET/$dst"
+		# for loop $(find)?
 		find_files "$target" || log_error "$target" "No such file or directory"
 
 	done
