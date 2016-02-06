@@ -50,7 +50,7 @@ function dot() {
 
   # ${!DOT_CONFIG_*}
   DEBUG="${DEBUG-${DOT_CONFIG_DEBUG-false}}"
-  DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RYN-false}}"
+  DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RUN-false}}"
   FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
   TIMESTAMPS="${TIMESTAMPS-${DOT_CONFIG_TIMESTAMPS-false}}"
 

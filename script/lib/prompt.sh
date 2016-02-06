@@ -8,6 +8,8 @@ import "lib/log"
 prompt() {
   local question=$1
   local placeholder=${2-}
+  local valid_answer=${3-}
+  local answer
 
   if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$placeholder" ]]; then
     # Read with -i if bash > 4
@@ -16,10 +18,18 @@ prompt() {
 
     [[ -n "$answer" ]] || (prompt "$@" && return)
   else
-    log_ask "$question" "(default: $placeholder)" >&2
+    local default_value=
+    [[ -n "$placeholder" ]] && default_value="(default: $placeholder)"
+    log_ask "$question" "$default_value" >&2
     read -e -r answer
 
     [[ -n "$answer" ]] || answer=$placeholder
+  fi
+
+  if [[ -n "$valid_answer" ]] && [[ "$answer" =~ [^$valid_answer] ]]; then
+    # log_debug "Answer pattern" "$valid_answer" >&2
+    log_warn "Invalid anwser, please retry" "($valid_answer) $answer" >&2
+    prompt "$@" && return
   fi
 
   printf "%s" "$answer"
@@ -56,36 +66,37 @@ confirm() {
 
     case $answer in
       [yY]*)
-      answer=Y
-      break
-      ;;
+        answer=Y
+        break
+        ;;
       [nN]*)
-      answer=N
-      break
-      ;;
+        answer=N
+        break
+        ;;
       '')
-      answer=$default
-      # print "$default"
-      break
-      ;;
+        answer=$default
+        # print "$default"
+        break
+        ;;
       *) # Unrecognized input, ask again
-      log_warn "Invalid anwser, please retry" "($choices) " ""
-      ;;
+        log_warn "Invalid anwser, please retry" "($choices) " ""
+        ;;
     esac
 
   done
 
   case $answer in
     Y)
-    log "› Yes"
-    return 0
-    ;;
+      log "› Yes"
+      return 0
+      ;;
     N|n)
-    log "› No"
-    return 1
-    ;;
+      log "› No"
+      return 1
+      ;;
     *)
-    log_error "Invalid answer" "$answer"
-    return 2
+      log_error "Invalid answer" "$answer"
+      return 2
+      ;;
   esac
 }

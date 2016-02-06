@@ -91,5 +91,5 @@ _print() {
 
 	local col=$(( $(tput cols) / 4 ))
 
-	printf "$(now)${color}%b %-${col}s${reset} %s$cr" "$symbol" "$message" "$text"
+	printf "$(now)${color}%b %-${col}b${reset} %b$cr" "$symbol" "$message" "$text"
 }

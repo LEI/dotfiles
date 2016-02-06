@@ -20,6 +20,16 @@ debug() {
   done
 }
 
+dry_run() {
+  local cmd="$@"
+
+  if [[ "${DRY_RUN-}" != true ]]; then
+    $cmd
+  else
+    printf "%s\r\n" "$ $cmd"
+  fi
+}
+
 now() {
 	local date=""
 
