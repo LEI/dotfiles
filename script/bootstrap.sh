@@ -2,23 +2,22 @@
 
 # bootstrap.sh
 
-
 bootstrap() {
 	log_debug "FILES =>" "${DOT_FILES[*]}"
 	# log_debug "IGNORE =>" "${DOT_IGNORE[*]}"
 
-	templates
-	symlinks
+	template_files
+	symlink_files
 }
 
-templates() {
+template_files() {
 	# Templates
 	for template in $DOT_ROOT/*/*.template; do # Cannot glob on bash 3
 		log_warn "TODO" "Process template ${template/$DOT_ROOT\/}"
 	done
 }
 
-symlinks() {
+symlink_files() {
 	local src dst target
 	local prefix="."
 	# echo "-> ${DOT_FILES[@]}"
@@ -44,17 +43,17 @@ symlinks() {
 		log_debug "$src ->" "$dst"
 
 		target="$src" #"$DOT_TARGET/$dst"
-		find_cmd "$target" || log_error "$target" "No such file or directory"
+		find_files "$target" || log_error "$target" "No such file or directory"
 
 	done
 
 }
 
-find_cmd() {
+find_files() {
 	local path=$1
 
 	# -ok {} \;
-	find $path -prune -print \
+	find $path -prune ! -name *.template -print \
 		2> >(grep -i -v "no such file or directory" >&2)
 
 	# local cmd=""
@@ -83,17 +82,5 @@ find_cmd() {
 # 		error "Not a file" "$1"
 # 	fi
 # }
-
-# check_env() {
-# 	local min_bash_version=4
-# 	local bash_version=${BASH_VERSION%%[^0-9]*}
-# 	if [[ $bash_version -lt $min_bash_version ]]; then
-# 		printf "%s\r\n" "This script requires bash > ${min_bash_version}."
-# 		exit 1
-# 	fi
-# }
-
-
-# [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
 
 bootstrap

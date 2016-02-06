@@ -12,11 +12,14 @@ debug = true
 dry_run = false
 timestamps = false
 
-# Dotfiles patterns
-# src:dst
-# src:      The destination will be the full path of the source
-# src       The destination will be the source prefixed with a dot without its path
-[files]
+[files] # Dotfiles
+# If the source contains a wildcard, the destination must be a directory
+# where all matching files will be symlinked.
+#
+# Patterns:
+#   src:(~/)dst
+#   src:(~/src)
+#   src(:~/.)
 bin/*:bin
 config/*
 git/*
@@ -27,7 +30,5 @@ vim/vimrc:.vimrc
 # [ignore]
 # *.template
 # *.sh
-
 # [brew]
-#
 # [cask]

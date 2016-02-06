@@ -2,7 +2,7 @@
 
 # log.sh
 
-import "colors"
+import "lib/utils"
 
 log() {
 	local msg=$1
@@ -17,7 +17,7 @@ log_ask() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $blue "?" "$msg" "$txt" "$cr"
+	_print $blue " " "$msg?" "$txt" "$cr"
 }
 
 log_debug() {
@@ -84,14 +84,4 @@ _print() {
 	local col=$(( $(tput cols) / 4 ))
 
 	printf "$(now)${color}%b %-${col}s${reset} %s$cr" "$symbol" "$message" "$text"
-}
-
-now() {
-	local date=""
-
-	[[ ! -z "${TIMESTAMPS-}" ]] && \
-		[[ "$TIMESTAMPS" = true ]] && \
-		date="[$(date +%H:%M:%S)] "
-
-	printf "%s" "$date"
 }

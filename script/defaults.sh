@@ -5,13 +5,14 @@
 platform_defaults() {
 	local platform_file="$DOT_SCRIPT/platform/${UNAME}.sh"
 
-    if [[ -f "$platform_file" ]]; then
+	if [[ -f "$platform_file" ]]; then
 
 		case $UNAME in
-			darwin) # OSX
+			darwin) # OS X Defaults
 
-				_COMPUTER_NAME=${DOT_AUTHOR_NAME%[[:space:]]*}
-				_COMPUTER_NAME=$(prompt "Computer name ?" "$_COMPUTER_NAME")
+				# _COMPUTER_NAME=${DOT_AUTHOR_NAME%[[:space:]]*}
+				# Uses the hostname as a placeholder
+				_COMPUTER_NAME=$(prompt "Computer name ?" "$(hostname)")
 				if [[ -n "$_COMPUTER_NAME" ]]; then
 					COMPUTER_NAME=$_COMPUTER_NAME
 				fi
@@ -19,9 +20,10 @@ platform_defaults() {
 				TERMINAL_THEME="Solarized"
 				TERMINAL_THEME_PATH="$DOT_ROOT/themes/$TERMINAL_THEME.terminal"
 				# find ?
-				if [[ -f "$TERMINAL_THEME_PATH" ]] && \
-					confirm "Use $TERMINAL_THEME theme in Terminal" "$TERMINAL_THEME_PATH" N; then
-					OSX_TERMINAL_THEME="$TERMINAL_THEME"
+				if [[ -f "$TERMINAL_THEME_PATH" ]]; then
+					if confirm "Use $TERMINAL_THEME theme in Terminal" "$TERMINAL_THEME_PATH" N; then
+						OSX_TERMINAL_THEME="$TERMINAL_THEME"
+					fi
 				else
 					log_error "Terminal theme not found" "$TERMINAL_THEME_PATH"
 				fi
@@ -42,8 +44,7 @@ platform_defaults() {
 				# 	OSX_KILL_APPS=true
 				# fi
 
-				[[ "$(whoami)" != "root" ]] && \
-					log_warn "Root access is required"
+				[[ "$(whoami)" != "root" ]] && log_warn "Root access is required"
 				;;
 		esac
 
@@ -52,9 +53,9 @@ platform_defaults() {
 		else
 			log_error "Could not source" "$platform_file"
 		fi
-    else
-        log_error "Defaults file not found" "$platform_file"
-    fi
+	else
+		log_error "Defaults file not found" "$platform_file"
+	fi
 }
 
 platform_defaults

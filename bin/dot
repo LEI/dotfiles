@@ -16,123 +16,133 @@ set -o pipefail
 # # Recursive globbing (bash 4)
 # shopt -s globstar
 
+MIN_BASH_VERSION=3
+ENV_BASH_VERSION=${BASH_VERSION%%[^0-9]*}
+
 function dot() {
-    # Platform
-    UNAME=$(uname -s | tr '[:upper:]' '[:lower:]') # darwin|linux
+  # Paths
+  # export DOT_ROOT=$HOME/.dotfiles
+  [[ -d "$DOT_ROOT" ]] || die "$DOT_ROOT: No such file or directory"
+  # cd $(dirname "${BASH_SOURCE[0]}")/..
+  # cd $(dirname "$(readlink "${BASH_SOURCE[0]}")")/..
+  # DOT_ROOT=$(pwd -P)
 
-    # Paths
-    export DOT_ROOT=$HOME/.dotfiles # Read in shell/path?
-    [[ -d "$DOT_ROOT" ]] || die "$DOT_ROOT: No such file or directory"
-    # cd $(dirname "${BASH_SOURCE[0]}")/..
-    # cd $(dirname "$(readlink "${BASH_SOURCE[0]}")")/..
-    # DOT_ROOT=$(pwd -P)
+  DOT_TARGET=$HOME
+  DOT_SCRIPT="$DOT_ROOT/script"
 
-    DOT_TARGET=$HOME
-    DOT_SCRIPT="$DOT_ROOT/script"
-    DOT_RC="$DOT_ROOT/.dotrc"
+  source $DOT_SCRIPT/lib/import.sh
 
-    # Load libraries
-    source $DOT_SCRIPT/lib/import.sh
+  # Load libraries
+  import "lib/log"
+  import "lib/utils"
+  import "lib/prompt"
+  import "lib/usage"
+  import "lib/config"
 
-    import "log"
-    import "prompt"
-    import "config"
-    import "usage"
+  # Platform
+  UNAME=$(uname -s | to_lower) # darwin|linux
 
-    # Parse command options
-    parse_arguments "$@"
+  # Parse command options
+  parse_arguments "$@"
 
-	if config "$DOT_RC"; then
-		log_success "Hello, $DOT_AUTHOR_NAME" "$DOT_RC"
-	else
-		log_error "Could not generate config" "$DOT_RC"
-		die "$DOT_RC"
-	fi
+  # Configuration ${!DOT_CONFIG_*}
+  DOT_RC="$DOT_ROOT/.dotrc"
+  DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
 
-    # Configuration (DOT_CONFIG_*)
-    # [[ -n "${DOT_CONFIG_DEBUG-}" ]] && DEBUG="$DOT_CONFIG_DEBUG"
-    # [[ -n "${DOT_CONFIG_DRY_RUN-}" ]] && DRY_RUN="$DOT_CONFIG_DRY_RUN"
-    # [[ -n "${DOT_CONFIG_FORCE-}" ]] && FORCE="$DOT_CONFIG_FORCE"
-    # [[ -n "${DOT_CONFIG_TIMESTAMPS-}" ]] && TIMESTAMPS="$DOT_CONFIG_TIMESTAMPS"
-    DEBUG="${DEBUG-${DOT_CONFIG_DEBUG-false}}"
-    DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RYN-false}}"
-    FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
-    TIMESTAMPS="${TIMESTAMPS-${DOT_CONFIG_TIMESTAMPS-false}}"
+  config "$DOT_RC" "$DOT_RC_TEMPLATE" || die "$DOT_RC"
 
-	log_debug "Debug mode" "$BASH_VERSION"
+  DEBUG="${DEBUG-${DOT_CONFIG_DEBUG-false}}"
+  DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RYN-false}}"
+  FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
+  TIMESTAMPS="${TIMESTAMPS-${DOT_CONFIG_TIMESTAMPS-false}}"
 
-    if confirm "Homebrew install" "" Y; then
-        # Install dependencies
-        source $DOT_SCRIPT/install.sh || die "Install failed"
-    fi
+  log_debug "Debug mode enabled" "$BASH_VERSION"
+  # debug "DOT_"
 
-    if confirm "Bootstrap dotfiles" "" Y; then
-        # Bootstrap dotfiles
-        source $DOT_SCRIPT/bootstrap.sh || die "Bootstrap failed"
-    fi
+  log_info "Hello, $DOT_AUTHOR_USERNAME" "$DOT_AUTHOR_NAME <$DOT_AUTHOR_EMAIL>"
 
-    if confirm "Platform defaults" "" Y; then
-        # Set platform defaults
-        source $DOT_SCRIPT/defaults.sh || die "Defaults failed"
-    fi
+  if confirm "Homebrew install" "" Y; then
+    # Install dependencies
+    source $DOT_SCRIPT/install.sh || log_warn "Install aborted"
+  fi
 
-    log_success "Done" "STATUS $?"
+  if confirm "Symlink files to $DOT_TARGET" "" Y; then
+    # Bootstrap dotfiles
+    source $DOT_SCRIPT/bootstrap.sh || log_warn "Bootstrap aborted"
+  fi
+
+  if confirm "Setup $UNAME specific defaults" "" Y; then
+    # Set platform defaults
+    source $DOT_SCRIPT/defaults.sh || log_warn "Defaults aborted"
+  fi
+
+  if [[ $? -eq 0 ]]; then
+    log_success "Done"
+  else
+    log_error "Status: $?"
+  fi
 }
 
 parse_arguments() {
-	while [[ $# -gt 0 ]]; do
-		local key=$1
-		local val=${2-}
+  while [[ $# -gt 0 ]]; do
+    local key=$1
+    local val=${2-}
 
-        # echo "Parsing $1 (#$#)"
+    # echo "Parsing $1 (#$#)"
 
-		case $key in
-			-d|--debug)
-				DEBUG=true
-				shift
-				;;
-			--dry-run)
-				DRY_RUN=true
-				shift
-				;;
-			# -t|--target)
-			# 	shift
-            #
-			# 	# Loop until next '-', cannot handle ' -' without quotes
-			# 	# while [[ $# -gt 0 ]] && [[ $1 != -* ]]; do
-			# 	# 	DOT_TARGET+=" $1"
-			# 	# 	shift
-			# 	# done
-            #
-			# 	# Check value until the delimiter '-' is found or end of args
-			# 	if [[ $# -gt 0 ]] && [[ ! -z "$val" ]] && [[ $val != -* ]]; then
-			# 		shift
-			# 	else
-            #         # Ask for the missing value
-            #         local prompt="Please specify a target path (default: $HOME): "
-            #         read -e -r -p "$prompt" val # -i "$HOME"
-            #         # Use default
-            #         [[ -z "$val" ]] && break
-			# 	fi
-			# 	# Check destination path
-			# 	[[ -d "$val" ]] || usage 1 "Not a directory: $key $val"
-			# 	DOT_TARGET="$val"
-			# 	;;
-			-h|--help)
-				usage
-				;;
-			*)
-				usage 1 "Unknown option: $key"
-				;;
-		esac
-	done
+    case $key in
+      -d|--debug)
+        DEBUG=true
+        shift
+        ;;
+      --dry-run)
+        DRY_RUN=true
+        shift
+        ;;
+      # -t|--target)
+      # 	shift
+      #
+      # 	# Loop until next '-', cannot handle ' -' without quotes
+      # 	# while [[ $# -gt 0 ]] && [[ $1 != -* ]]; do
+      # 	# 	DOT_TARGET+=" $1"
+      # 	# 	shift
+      # 	# done
+      #
+      # 	# Check value until the delimiter '-' is found or end of args
+      # 	if [[ $# -gt 0 ]] && [[ ! -z "$val" ]] && [[ $val != -* ]]; then
+      # 		shift
+      # 	else
+      #         # Ask for the missing value
+      #         local prompt="Please specify a target path (default: $HOME): "
+      #         read -e -r -p "$prompt" val # -i "$HOME"
+      #         # Use default
+      #         [[ -z "$val" ]] && break
+      # 	fi
+      # 	# Check destination path
+      # 	[[ -d "$val" ]] || usage 1 "Not a directory: $key $val"
+      # 	DOT_TARGET="$val"
+      # 	;;
+      -h|--help)
+        usage
+        ;;
+      *)
+        usage 1 "Unknown option: $key"
+        ;;
+    esac
+  done
+}
+
+check_env() {
+	if [[ $ENV_BASH_VERSION -lt $MIN_BASH_VERSION ]]; then
+		die "This script requires bash > ${MIN_BASH_VERSION}"
+	fi
 }
 
 die() {
-	local message=$1
-	[[ -z "$message" ]] && message="Died"
-	printf "%s\r\n" "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message." >&2
-	exit 1
+  local message=${1:-Died}
+  printf "%s\r\n" "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message" >&2
+  exit 1
 }
 
+check_env
 [[ "$0" == "$BASH_SOURCE" ]] && dot "$@"
