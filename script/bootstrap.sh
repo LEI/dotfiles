@@ -24,54 +24,72 @@ template_files() {
 		# Extract actual path
 		file=${template%.template}
 
-		# Confirm if target file exists
-		if [[ -f "$file" ]] && confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y && continue
+		# Confirm processing if target file exists
+		if [[ -f "$file" ]]; then
+			confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y || continue
+		fi
 
 		# Fill file
-		sed_file "$file" "$template" "${vars[@]}" || return 1
+		sed_file "$file" "$template" "${vars[@]}" || die "Could not sed file"
 		log_success "Template processed" "${file/$DOT_ROOT\/}"
 	done
 }
 
 symlink_files() {
-	local src dst target
+	local src dst
 	local prefix="."
+	local dot_files
 	# echo "-> ${DOT_FILES[@]}"
-	# Symlinks
-	for link in ${DOT_FILES[@]}; do
 
-		if [[ "$link" =~ [*:*] ]]; then
+	# Parse symlink expressions
+	for expr in ${DOT_FILES[@]}; do
+
+		if [[ "$expr" =~ [*:*] ]]; then
 			# Path specified
-			src=${link%:*}
-			dst=${link#*:}
+			src=${expr%:*}
+			dst=${expr#*:}
 			[[ -z "$dst" ]] && dst=$src
 			# 	for path in ${src[@]}; do
 			# 		log_info "$path ->" "~/.${path#*/}"
 			# 	done
 		else
 			# Link to home and add prefix
-			src="$link"
-			dst="${prefix}${link#*/}"
+			src="$expr"
+			dst="${prefix}${expr#*/}"
 		fi
 
+		src="$DOT_ROOT/$src"
 		dst="$DOT_TARGET/$dst"
+		for file in $(find_files "$src"); do
+			# [[ -e "$file" ]] || log_warn "No such file or directory" "$file"
+			stat=$(stats_file "$file" "$dst")
+			echo "stat -> $stat"
+			case $stat in
+				broken) log_success "$file" ;;
+				link) log_warn "$file" ;;
+				file|directory) log_error "$file" ;;
+				empty*) log_info "$file is $stat!" ;;
+				*) log_error "$file is $stat" ;;
+				# 0) log_success "symlink_file $file $dst/" ;;
+				# 10) log_error "$file" ;;
+				# 11) log_warn "$file" ;;
+				# 12) confim "$file" ;;
+				# *) log_debug "Unknown status: $?" ;;
+			esac
+		done
 
-		# log_debug "$src ->" "$dst"
-
-		target="$src" #"$DOT_TARGET/$dst"
-		# for loop $(find)?
-		find_files "$target" || log_error "$target" "No such file or directory"
 
 	done
+	die "${dot_files[@]}"
 
 }
 
 find_files() {
 	local path=$1
 
+	find $path -prune ! -name *.template -print # \
+		#2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
 	# -ok {} \;
-	find $path -prune ! -name *.template -print \
-		2> >(grep -i -v "no such file or directory" >&2)
 
 	# local cmd=""
 	# printf "%s" "$cmd"
