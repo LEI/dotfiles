@@ -8,12 +8,9 @@ import "lib/prompt"
 import "lib/file"
 
 bootstrap_symlinks() {
-  local method
+  local method="build"
 
   case $1 in
-    '')
-      method="build"
-      ;;
     list|build)
       method=$1
       ;;
@@ -93,7 +90,7 @@ bootstrap_symlinks_build() {
         file_prompt="${red}Broken symbolic link ${white}${target}"
         default="overwrite"
       else
-        local file_link=$(readlink $target || echo false) # Works on OS X
+        local file_link=$(readlink_file $target) # Works on OS X
         # log_debug "$file_link == $file"
         if [[ "$file_link" == "$file" ]]; then
           log_success "Already linked" "$target"
@@ -127,21 +124,21 @@ bootstrap_symlinks_build() {
         # [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all
         case $action in
           s*)
-            log_debug "ACTION: Skip" "$target"
+            # log_debug "ACTION: Skip" "$target"
             overwrite=false
             backup=false
             ignore=true
             break
             ;;
           o*)
-            log_debug "ACTION: Overwrite" "$target"
+            # log_debug "ACTION: Overwrite" "$target"
             overwrite=true
             backup=false
             ignore=false
             break
             ;;
           b*)
-            log_debug "ACTION: Backup" "$target"
+            # log_debug "ACTION: Backup" "$target"
             overwrite=false
             backup=true
             ignore=false
@@ -161,25 +158,25 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      dry_run "mv $target $target.bak" || return 1
+      dry_run backup_file "$target" || return 1
 
-      log_info "Backuped $target" "$target.bak"
+      log_success "Backup $target" "$target.bak"
     elif [[ "$overwrite" = true ]]; then
       # Overwrite
-      dry_run "rm $target" || return 1
-      log_info "Removed $target"
+      dry_run remove_file "$target" || return 1
+      log_success "Removed $target"
     fi
 
     if [[ "$ignore" = false ]]; then
       # Link
-      dry_run "ln -s $file $target"
+      dry_run link_file "$file" "$target" || return 1
       log_success "Symlinked $target" "$file"
     else
       log_info "Skipped" "$target"
     fi
 
   else
-    log_info "Ignored" "$target"
+    log_success "Ignored" "$target"
   fi
 }
 

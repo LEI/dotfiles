@@ -2,6 +2,65 @@
 
 # file.sh
 
+find_files() {
+	local path=$1
+	local exclude=${2-}
+
+	[[ -n "$exclude" ]] && exclude="! -name $exclude "
+
+	find ${path} -prune ${exclude}-print # \
+		#2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
+	# -ok {} \;
+
+	# local cmd=""
+	# printf "%s" "$cmd"
+}
+
+link_file() {
+	local file=$1
+	local dest=$2
+
+	if [[ -e "$file" ]] && [[ ! -e "$dest" ]]; then
+		echo "ln -s $file $dest"
+	else
+		return 1
+	fi
+}
+
+backup_file() {
+	local file=$1
+	local backup_ext="bak"
+
+	if [[ -e "$file" ]] && [[ ! -e "$file.$backup_ext" ]]; then
+		echo "mv $file $file.$backup_ext"
+	else
+		log_warn "File does not exists or backup already does"
+		return 1
+	fi
+}
+
+remove_file() {
+	local file=$1
+	[[ -d "$file" ]] && die "$file: is a directory" # TODO -r
+
+	if [[ -e "$file" ]]; then
+		echo "rm $file"
+	else
+		return 1
+	fi
+}
+
+readlink_file() {
+	local file=$1
+
+	if [[ -e "$file" ]]; then
+		local link=$(readlink "$file")
+		printf "%s" "$link"
+	else
+		return 1
+	fi
+}
+
 sed_file() {
 	local file=$1
 	local template=$2
@@ -37,20 +96,6 @@ typeof_file() {
 	fi
 
 	printf "%s" "$is"
-}
-
-find_files() {
-	local path=$1
-	local exclude=${2-}
-
-	[[ -n "$exclude" ]] && exclude="! -name $exclude "
-
-	find ${path} -prune ${exclude}-print # \
-		#2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
-	# -ok {} \;
-
-	# local cmd=""
-	# printf "%s" "$cmd"
 }
 
 # read_file() {
