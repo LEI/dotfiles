@@ -66,6 +66,7 @@ boot() {
   # Greeting
   log_info "Hello, $DOT_USER_NICK" "$DOT_USER_NAME <$DOT_USER_EMAIL>"
   log_debug "Debug mode enabled" "$BASH_VERSION"
+  log_debug "Dry run > > > > > >" "$DRY_RUN"
 
   # Start script
   dot "$DOT_CMD"
@@ -75,10 +76,8 @@ dot() {
   local cmd=$1
 
   case $cmd in
-    '')
-      dot_install
-      dot_bootstrap
-      dot_defaults
+    list)
+      dot_list
       ;;
     install)
       dot_install
@@ -87,6 +86,11 @@ dot() {
       dot_bootstrap
       ;;
     defaults)
+      dot_defaults
+      ;;
+    '') # Default to all
+      dot_install
+      dot_bootstrap
       dot_defaults
       ;;
     *)
@@ -104,24 +108,42 @@ dot() {
   fi
 }
 
+dot_list() {
+  import "bootstrap/symlinks"
+  bootstrap_symlinks_list
+}
+
 dot_install() {
   if confirm "**Homebrew install" "" Y; then
+    import "install/brew"
+    import "install/cask"
+
     # Install dependencies
-    source $DOT_SCRIPT/install.sh || log_warn "Install aborted"
+    install_brew && \
+      install_cask || \
+      log_warn "Install aborted"
   fi
 }
 
 dot_bootstrap() {
   if confirm "**Symlink files to $DOT_TARGET" "" Y; then
+    import "bootstrap/templates"
+    import "bootstrap/symlinks"
+
     # Bootstrap dotfiles
-    source $DOT_SCRIPT/bootstrap.sh || log_warn "Bootstrap aborted"
+    bootstrap_templates && \
+      bootstrap_symlinks || \
+      log_warn "Bootstrap aborted"
   fi
 }
 
 dot_defaults() {
   if confirm "**Setup $UNAME specific defaults" "" Y; then
+    import "platform/defaults"
+
     # Set platform defaults
-    source $DOT_SCRIPT/defaults.sh || log_warn "Defaults aborted"
+    platform_defaults || \
+      log_warn "Defaults aborted"
   fi
 }
 
@@ -131,7 +153,7 @@ parse_arguments() {
     local val=${2-}
     # echo "Parsing $1 (#$#)"
     case $key in
-      install|uninstall|link|unlink|defaults)
+      list|install|uninstall|link|unlink|defaults)
         # Check if a command is already defined
         [[ -n "${DOT_CMD-}" ]] && usage 1 "Too many arguments: $key"
         # Register main action

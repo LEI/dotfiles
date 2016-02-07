@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-# install.sh
+# brew.sh
 
-install() {
-  install_homebrew
-  install_cask
-}
-
-install_homebrew() {
+install_brew() {
   local brew=$(which brew) # /usr/local/bin/brew
 
   if [[ ! -n "$brew" ]] || [[ ! -x "$brew" ]]; then
@@ -59,30 +54,3 @@ install_homebrew() {
     return 1
   fi
 }
-
-install_cask() {
-  local cask_root="$DOT_ROOT/cask"
-  local name
-  # open /Applications/$app.app
-
-  if confirm "Brew cask init" "$DOT_ROOT/cask/*" Y; then
-    for cask in $cask_root/*; do
-      [[ ! -f "$cask" ]] && return 1
-
-      # Capitalize cask name
-      name=${cask##*/} # Remove path
-      # name=${name%.*} # Remove extension
-      name="$(echo "${name:0:1}" | tr "[:lower:]" "[:upper:]")${name:1}"
-
-      # Use cask apps cli to setup defaults
-      log_info "$name" "$cask"
-      if source "$cask"; then
-        log_success "$name"
-      else
-        log_error "An error occurred"
-      fi
-    done
-  fi
-}
-
-install

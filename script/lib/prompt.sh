@@ -5,6 +5,7 @@
 import "lib/log"
 
 # Wait for line input
+# Uses readline option (-r)
 prompt() {
   local question=$1
   local answer_default=${2-}
@@ -38,7 +39,8 @@ prompt() {
   return
 }
 
-# Wait for char input
+# Wait for inline character input
+# (-n 1)
 confirm() {
   local question=$1
   local text=${2-}

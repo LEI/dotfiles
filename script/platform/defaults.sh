@@ -1,5 +1,5 @@
 # #!/usr/bin/env bash
-#
+
 # # defaults.sh
 
 platform_defaults() {
@@ -57,5 +57,3 @@ platform_defaults() {
 		log_error "Defaults file not found" "$platform_file"
 	fi
 }
-
-platform_defaults

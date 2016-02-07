@@ -10,7 +10,7 @@ log() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $reset " " "$msg" "$txt" "$cr"
+	_print $reset " " "${msg}${reset}" "$txt" "$cr"
 }
 
 log_ask() {
@@ -18,7 +18,7 @@ log_ask() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $blue " " "$msg?" "$txt" "$cr"
+	_print $blue " " "${msg}?${reset}" "$txt" "$cr"
 }
 
 log_debug() {
@@ -27,7 +27,7 @@ log_debug() {
 	local cr=${3-"\r\n"}
 
 	if [[ "${DEBUG-}" = true ]]; then
-		_print $cyan "*" "$msg" "$txt" "$cr"
+		_print $cyan "*" "${msg}${reset}" "$txt" "$cr"
 	fi
 }
 
@@ -36,7 +36,7 @@ log_error() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 	# × ✕ ✖ ✗ ✘
-	_print $red "✘" "$msg" "$txt" "$cr"
+	_print $red "✘" "${msg}${reset}" "$txt" "$cr"
 }
 
 log_info() {
@@ -44,7 +44,7 @@ log_info() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 
-	_print $white "›" "$msg" "$txt" "$cr"
+	_print $white "›" "${msg}${reset}" "$txt" "$cr"
 }
 
 log_success() {
@@ -52,7 +52,7 @@ log_success() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 	# ✓ ✔
-	_print $green "✓" "$msg" "$txt" "$cr"
+	_print $green "✓" "${msg}${reset}" "$txt" "$cr"
 }
 
 log_warn() {
@@ -60,7 +60,7 @@ log_warn() {
 	local txt=${2-}
 	local cr=${3-"\r\n"}
 	# ⚠ !
-	_print $yellow "!" "$msg" "$txt" "$cr"
+	_print $yellow "!" "${msg}${reset}" "$txt" "$cr"
 }
 
 print() {
@@ -68,7 +68,7 @@ print() {
 }
 
 _print() {
-	local color=$1
+	local color #=$1
 	local symbol=$2
 	local message=$3
 	local text=$4
@@ -77,12 +77,12 @@ _print() {
 	# Messages starting with "**"
 	if [[ "$message" =~ \*\**  ]]; then
 		message=${message#\*\*} # Remove prefix '**'
-		color="${bold}${color}" # Make the message bold
+		color="${bold}" # Make the message bold
 	else
-		color="${reset}${color}"
+		color="${reset}"
 	fi
 
 	local col=$(( $(tput cols) / 4 ))
 
-	printf "$(now)${color}%b %-${col}b${reset} %b$cr" "$symbol" "$message" "$text"
+	printf "$(now)${color}${1}%b %-${col}b %b$cr" "$symbol" "$message" "$text"
 }
