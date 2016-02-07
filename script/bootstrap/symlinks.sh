@@ -8,8 +8,19 @@ import "lib/prompt"
 import "lib/file"
 
 bootstrap_symlinks() {
-  # [[ $# -le 1 ]] || die "Missing argument: method"
-  local method=${1-build}
+  local method
+
+  case $1 in
+    '')
+      method="build"
+      ;;
+    list|build)
+      method=$1
+      ;;
+    *)
+      die "Unknown method: $1"
+      ;;
+  esac
 
   # Prefix and files must be defined in .dotrc (DOT_CONFIG_PREFIX)
   # The array of files must follow the pattern src[:dst]
