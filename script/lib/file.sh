@@ -41,8 +41,11 @@ typeof_file() {
 
 find_files() {
 	local path=$1
+	local exclude=${2-}
 
-	find $path -prune ! -name *.template -print # \
+	[[ -n "$exclude" ]] && exclude="! -name $exclude "
+
+	find ${path} -prune ${exclude}-print # \
 		#2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
 	# -ok {} \;
 

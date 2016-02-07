@@ -16,75 +16,112 @@ set -o pipefail
 # # Recursive globbing (bash 4)
 # shopt -s globstar
 
-MIN_BASH_VERSION=3
-ENV_BASH_VERSION=${BASH_VERSION%%[^0-9]*}
+boot() {
+  unset -f boot
 
-function dot() {
+  check_env
+
   # Paths
   # export DOT_ROOT=$HOME/.dotfiles
-  [[ -d "$DOT_ROOT" ]] || die "$DOT_ROOT: No such file or directory"
   # cd $(dirname "${BASH_SOURCE[0]}")/..
   # cd $(dirname "$(readlink "${BASH_SOURCE[0]}")")/..
   # DOT_ROOT=$(pwd -P)
-
   DOT_TARGET=$HOME
   DOT_SCRIPT="$DOT_ROOT/script"
+  DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
+  DOT_RC="$DOT_ROOT/.dotrc"
 
-  source $DOT_SCRIPT/lib/import.sh
-
+  source $DOT_SCRIPT/lib/import.sh # TODO import->load?
   # Load libraries
   import "lib/log"
+  import "lib/usage"
   import "lib/utils"
   import "lib/prompt"
-  import "lib/usage"
   import "lib/config"
 
   # Parse command options
+  DOT_CMD=
   parse_arguments "$@"
 
-  # Configuration
-  DOT_RC="$DOT_ROOT/.dotrc"
-  DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
-
+  # Read config file and set config variables -> ${!DOT_CONFIG_SECTION_*}
   config "$DOT_RC" "$DOT_RC_TEMPLATE" || die "$DOT_RC"
+  # var_dump "DOT_CONFIG_"
 
-  # ${!DOT_CONFIG_*}
+  # Set global script variables
   DEBUG="${DEBUG-${DOT_CONFIG_DEBUG-false}}"
   DRY_RUN="${DRY_RUN-${DOT_CONFIG_DRY_RUN-false}}"
   FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
   TIMESTAMPS="${TIMESTAMPS-${DOT_CONFIG_TIMESTAMPS-false}}"
 
-  log_debug "Debug mode enabled" "$BASH_VERSION"
-  # debug "DOT_"
-
-  # Platform
+  # Platform specific
   UNAME=$(uname -s | to_lower) # darwin|linux
 
-  DOT_USER_GIT_CREDENTIAL="cache"
-  [[ "$UNAME" = "darwin" ]] && DOT_USER_GIT_CREDENTIAL="osxkeychain"
+  # Git config credential helper
+  if [[ "$UNAME" = "darwin" ]]; then
+    DOT_USER_GIT_CREDENTIAL="osxkeychain"
+  else
+    DOT_USER_GIT_CREDENTIAL="cache"
+  fi
 
   # Greeting
   log_info "Hello, $DOT_USER_NICK" "$DOT_USER_NAME <$DOT_USER_EMAIL>"
+  log_debug "Debug mode enabled" "$BASH_VERSION"
 
+  # Start script
+  dot "$DOT_CMD"
+}
+
+dot() {
+  local cmd=$1
+
+  case $cmd in
+    '')
+      dot_install
+      dot_bootstrap
+      dot_defaults
+      ;;
+    install)
+      dot_install
+      ;;
+    link)
+      dot_bootstrap
+      ;;
+    defaults)
+      dot_defaults
+      ;;
+    *)
+      log_error "Unsupported command" "$cmd"
+      die "$cmd"
+      ;;
+  esac
+
+  if [[ $? -eq 0 ]]; then
+    log_success "Done" "whit status $?"
+  else
+    log_error "Error" "with status $?"
+
+    return $?
+  fi
+}
+
+dot_install() {
   if confirm "**Homebrew install" "" Y; then
     # Install dependencies
     source $DOT_SCRIPT/install.sh || log_warn "Install aborted"
   fi
+}
 
+dot_bootstrap() {
   if confirm "**Symlink files to $DOT_TARGET" "" Y; then
     # Bootstrap dotfiles
     source $DOT_SCRIPT/bootstrap.sh || log_warn "Bootstrap aborted"
   fi
+}
 
+dot_defaults() {
   if confirm "**Setup $UNAME specific defaults" "" Y; then
     # Set platform defaults
     source $DOT_SCRIPT/defaults.sh || log_warn "Defaults aborted"
-  fi
-
-  if [[ $? -eq 0 ]]; then
-    log_success "Done"
-  else
-    log_error "Status: $?"
   fi
 }
 
@@ -92,10 +129,23 @@ parse_arguments() {
   while [[ $# -gt 0 ]]; do
     local key=$1
     local val=${2-}
-
     # echo "Parsing $1 (#$#)"
-
     case $key in
+      install|uninstall|link|unlink|defaults)
+        # Check if a command is already defined
+        [[ -n "${DOT_CMD-}" ]] && usage 1 "Too many arguments: $key"
+        # Register main action
+        DOT_CMD="$key"
+        shift
+        ;;
+      -v|--verbose|--debug)
+        DEBUG=true
+        shift
+        ;;
+      -d|--dry-run)
+        DRY_RUN=true
+        shift
+        ;;
       # -t|--target)
       # 	shift
       #
@@ -123,14 +173,6 @@ parse_arguments() {
       #   UNINSTALL=true
       #   shift
       #   ;;
-      -v|--verbose|--debug)
-        DEBUG=true
-        shift
-        ;;
-      -d|--dry-run)
-        DRY_RUN=true
-        shift
-        ;;
       -h|--help)
         usage
         ;;
@@ -142,9 +184,17 @@ parse_arguments() {
 }
 
 check_env() {
+  MIN_BASH_VERSION=3
+  ENV_BASH_VERSION=${BASH_VERSION%%[^0-9]*}
+
 	if [[ $ENV_BASH_VERSION -lt $MIN_BASH_VERSION ]]; then
 		die "This script requires bash > ${MIN_BASH_VERSION}"
 	fi
+
+  # Check files?
+  if [[ ! -d "${DOT_ROOT-}" ]]; then
+    die "${DOT_ROOT-undefined}: '\$DOT_ROOT' is not a directory"
+  fi
 }
 
 die() {
@@ -153,6 +203,4 @@ die() {
   exit 1
 }
 
-check_env
-
-[[ "$0" == "$BASH_SOURCE" ]] && dot "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && boot "$@"

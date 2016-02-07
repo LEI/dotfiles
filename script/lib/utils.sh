@@ -2,11 +2,11 @@
 
 # utils.sh
 
-import "lib/colors"
+import "lib/log"
 
-# Usage: debug <prefix>
+# Usage: var_dump <prefix>
 # Prints names and values of variables starting with prefix
-debug() {
+var_dump() {
   [[ $# -eq 0 ]] && die "Missing argument"
   [[ "${DEBUG-}" != true ]] && return 0
 
@@ -24,9 +24,12 @@ dry_run() {
   local cmd="$@"
 
   if [[ "${DRY_RUN-}" != true ]]; then
-    $cmd
+    # Execute command
+    # $cmd
+    log_warn "EXECUTING $cmd"
   else
-    printf "%s\r\n" "$ $cmd"
+    log "> $cmd"
+    # printf "%s\r\n" "$ $cmd"
   fi
 }
 

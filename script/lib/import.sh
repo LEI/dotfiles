@@ -9,14 +9,14 @@ import() {
 	# local ext=${2-sh}
 	local name="${path##*/}"
 
-	[[ ! -f "$DOT_SCRIPT/$path.sh" ]] && \
+	if [[ ! -f "$DOT_SCRIPT/$path.sh" ]]; then
     die "$DOT_SCRIPT/$path.sh No such file" # return 1
-	[[ ${IMPORTED[*]-} =~ $name ]] && return 0  # Already loaded
-
+  elif [[ ${IMPORTED[*]-} =~ $name ]]; then
+    return 0  # Already loaded
+  else
+    IMPORTED+=("$path")
+  	source "$DOT_SCRIPT/$path.sh"
+  fi
   # for file in $DOT_SCRIPT/$path*.sh; then ?
-
-	source "$DOT_SCRIPT/$path.sh"
-	IMPORTED+=("$path")
-
 	return $?
 }

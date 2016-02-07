@@ -7,28 +7,30 @@ import "lib/log"
 # Wait for line input
 prompt() {
   local question=$1
-  local placeholder=${2-}
-  local valid_answer=${3-}
+  local answer_default=${2-}
+  local answer_pattern=${3-}
   local answer
 
-  if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$placeholder" ]]; then
+  if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$answer_default" ]]; then
     # Read with -i if bash > 4
     log_ask "$question" "" >&2
-    read -e -r -i "$placeholder" answer
+    read -e -r -i "$answer_default" answer
 
     [[ -n "$answer" ]] || (prompt "$@" && return)
   else
-    local default_value=
-    [[ -n "$placeholder" ]] && default_value="(default: $placeholder)"
-    log_ask "$question" "$default_value" >&2
+    # Show default value after the question if bash < 4
+    local display_default=
+    [[ -n "$answer_default" ]] && display_default="(default: $answer_default)"
+    log_ask "$question" "$display_default" >&2
     read -e -r answer
 
-    [[ -n "$answer" ]] || answer=$placeholder
+    [[ -n "$answer" ]] || answer=$answer_default
   fi
 
-  if [[ -n "$valid_answer" ]] && [[ "$answer" =~ [^$valid_answer] ]]; then
-    # log_debug "Answer pattern" "$valid_answer" >&2
-    log_warn "Invalid anwser, please retry" "($valid_answer) $answer" >&2
+  # If the is a pattern to valid the answer, and it does not match, ask again
+  if [[ -n "$answer_pattern" ]] && ! [[ $answer =~ [(${answer_pattern})*] ]]; then
+    # log_debug "Answer pattern" "$answer_pattern" >&2
+    log_warn "Invalid anwser, please retry" "($answer_pattern) $answer" >&2
     prompt "$@" && return
   fi
 

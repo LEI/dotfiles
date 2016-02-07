@@ -32,22 +32,22 @@ install_homebrew() {
   if [[ -x "$brew" ]]; then
     if confirm "Brew bundle" "$DOT_ROOT/Brewfile" N; then
       # Make sure we're using the latest Homebrew
-      log_exec "brew update" "Updating"
+      log "> brew update" "Updating"
       brew update
 
       # Upgrade any already installed formulae
-      log_exec "brew upgrade" "Upgrading"
+      log "> brew upgrade" "Upgrading"
       brew upgrade
 
       # brew tap Homebrew/bundle
-      log_exec "brew bundle" "Bundling"
+      log "> brew bundle" "Bundling"
       #brew bundle
       #TODO: DOT_CONFIG_BREW&CASK?
       # https://github.com/Homebrew/homebrew-bundle
       # https://github.com/caskroom/homebrew-cask
 
       # # Remove outdate version from the cellar
-      log_exec "brew cleanup" "Cleaning"
+      log "> brew cleanup" "Cleaning"
       brew cleanup
 
       brew doctor

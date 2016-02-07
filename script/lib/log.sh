@@ -2,7 +2,8 @@
 
 # log.sh
 
-import "lib/utils"
+import "lib/colors"
+import "lib/utils" # now()
 
 log() {
 	local msg=$1
@@ -26,7 +27,7 @@ log_debug() {
 	local cr=${3-"\r\n"}
 
 	if [[ "${DEBUG-}" = true ]]; then
-		_print $purple "*" "$msg" "$txt" "$cr"
+		_print $cyan "*" "$msg" "$txt" "$cr"
 	fi
 }
 
@@ -44,14 +45,6 @@ log_info() {
 	local cr=${3-"\r\n"}
 
 	_print $white "›" "$msg" "$txt" "$cr"
-}
-
-log_exec() {
-	local msg=$1
-	local txt=${2-}
-	local cr=${3-"\r\n"}
-
-	_print $cyan ">" "$msg" "$txt" "$cr"
 }
 
 log_success() {
