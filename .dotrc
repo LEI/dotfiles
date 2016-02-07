@@ -8,24 +8,29 @@ email = guillaume.frichet@gmail.com
 nick = LEI
 
 [config]
-debug = true
+debug = false
 dry_run = true
 timestamps = false
+prefix = .
 
 [files] # Dotfiles
 # If the source contains a wildcard, the destination must be a directory
 # where all matching files will be symlinked.
-#
+# Values:
+#  src: Relative path in .dotfiles
+#  dst: Relative path to $HOME
 # Patterns:
-#   src:(~/)dst
-#   src:(~/src)
-#   src(:~/.)
-bin/*:bin
+#  src:(~/)dst  -> $HOME/$dst    Full expression, source will be linked in
+#  src:(~/src)  -> $HOME/$src    Source ending with delimiter ':' will be used as destination
+#  src(:~/.src) -> $HOME/.$src   No destination or delimiter, source will be prefixed with '.'
+#  vim/~autoload
+atom/*:.atom
 # bin/test/*:bin/test
+bin/*:bin
 config/*
 git/*
 shell/*
-vim/bundle:vim/bundle
+vim/bundle:.vim/bundle
 vim/vimrc:.vimrc
 
 # [ignore]

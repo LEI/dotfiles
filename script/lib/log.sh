@@ -82,7 +82,7 @@ _print() {
 		color="${reset}"
 	fi
 
-	local col=$(( $(tput cols) / 4 ))
+	local col=$(( $(tput cols) / 3 ))
 
 	printf "$(now)${color}${1}%b %-${col}b %b$cr" "$symbol" "$message" "$text"
 }

@@ -18,9 +18,12 @@ bootstrap_templates() {
     # Extract actual path
     file=${template%.template}
 
-    # Confirm processing if target file exists
     if [[ -f "$file" ]]; then
-      confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y || continue
+      # TODO Check modifications?
+      # Confirm processing if target file exists
+      # confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y || continue
+
+      continue
     fi
 
     # Fill file

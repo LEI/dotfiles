@@ -7,10 +7,10 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-# # Extend matching operators
-# shopt -s extglob
-# # Loop on dotfiles
-# shopt -s dotglob
+# Extend matching operators
+shopt -s extglob
+# Loop on dotfiles
+shopt -s dotglob
 # # Do not loop on empty directory
 # shopt -s nullglob
 # # Recursive globbing (bash 4)
@@ -89,9 +89,9 @@ dot() {
       dot_defaults
       ;;
     '') # Default to all
-      dot_install
-      dot_bootstrap
-      dot_defaults
+      confirm "**Homebrew install" "" Y && dot_install
+      confirm "**Symlink files to $DOT_TARGET" "" Y && dot_bootstrap
+      confirm "**Setup $UNAME specific defaults" "" Y && dot_defaults
       ;;
     *)
       log_error "Unsupported command" "$cmd"
@@ -114,37 +114,31 @@ dot_list() {
 }
 
 dot_install() {
-  if confirm "**Homebrew install" "" Y; then
-    import "install/brew"
-    import "install/cask"
+  import "install/brew"
+  import "install/cask"
 
-    # Install dependencies
-    install_brew && \
-      install_cask || \
-      log_warn "Install aborted"
-  fi
+  # Install dependencies
+  install_brew && \
+    install_cask || \
+    log_warn "Install aborted"
 }
 
 dot_bootstrap() {
-  if confirm "**Symlink files to $DOT_TARGET" "" Y; then
-    import "bootstrap/templates"
-    import "bootstrap/symlinks"
+  import "bootstrap/templates"
+  import "bootstrap/symlinks"
 
-    # Bootstrap dotfiles
-    bootstrap_templates && \
-      bootstrap_symlinks build || \
-      log_warn "Bootstrap aborted"
-  fi
+  # Bootstrap dotfiles
+  bootstrap_templates && \
+    bootstrap_symlinks build || \
+    log_warn "Bootstrap aborted"
 }
 
 dot_defaults() {
-  if confirm "**Setup $UNAME specific defaults" "" Y; then
-    import "platform/defaults"
+  import "platform/defaults"
 
-    # Set platform defaults
-    platform_defaults || \
-      log_warn "Defaults aborted"
-  fi
+  # Set platform defaults
+  platform_defaults || \
+    log_warn "Defaults aborted"
 }
 
 parse_arguments() {

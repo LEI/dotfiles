@@ -11,90 +11,52 @@ bootstrap_symlinks() {
   # [[ $# -le 1 ]] || die "Missing argument: method"
   local method=${1-build}
 
+  # Prefix and files must be defined in .dotrc (DOT_CONFIG_PREFIX)
+  # The array of files must follow the pattern src[:dst]
   bootstrap_symlinks_parse $method ${DOT_FILES[@]}
 }
-
 bootstrap_symlinks_parse() {
+  local prefix=$DOT_CONFIG_PREFIX
   local method=$1; shift
   local expressions="$@"
-  local p="."
   local expr file
 
   # Parse paths expressions (src:dst)
   for expr in ${expressions[@]}; do
-    local src= dst= prefix="$p"
-
+    local src=
+    local dst=
     local regexp="(.*):(.*)"
+    # local prefix=$p
 
     if [[ "$expr" =~ $regexp ]]; then
       # Path specified
       src=${expr%:*}
       dst=${expr#*:}
-      [[ -z "$dst" ]] && dst=$src
-      prefix= # No prefix
-
-      #   for path in ${src[@]}; do
-      #     log_info "$path ->" "~/.${path#*/}"
-      #   done
+      [[ -z "$dst" ]] && dst=${src%\/\*} # Normalize destination
     else # No ':' found in expr
       # Link to home and (with prefix)
       src=${expr}
-      # prefix=$p
-      # dst=${prefix} #${expr#*/}
-      # dst=${dst%\*}
+      dst= #${prefix}
     fi
-
-    # Build absolute paths
-    src="$DOT_ROOT/$src"
-    dst="$DOT_TARGET/$dst"
 
 
     # Loop on each destination file
-    # for file in $(find_files "$src" "*.template"); do
-    # find "$src" -prune ! -name *.template -exec $cmd {} "$dst" \;
     while IFS= read -u 3 -rd '' file; do
-      local target=${dst}
+      # local file_rel=${file#$DOT_ROOT/}
       local file_name=${file##*/}
-      local file_link=
+      local target=
 
-      # Handle pattern src/*:dst
-      if [[ -d "$target" ]]; then
-        # Add prefix if needed and append file name to the target directory
-        target="${target%\/}/${prefix}${file_name}"
-
-        # Confirm creation
-        # [[ "$method" == "build" ]] && \
-        #   confirm "Link ${file#$DOT_ROOT/}" "${target}" Y || \
-        #   continue
+      if [[ -n "$dst" ]]; then
+        target="$dst"
+        [[ "$src" =~ [*\*$] ]] && target+="/${file_name}"
       else
-        log_debug "Pristine target" "$target"
+        target="${prefix}${file_name}"
       fi
 
-      # if [[ ! -e "$dst" ]] && [[ -d "$file" ]]; then
-      #   [[ "$method" == "list" ]] && \
-      #     confirm "Create directory ${dst}" "${file}" Y && \
-      #     dry_run "mk d $dst" || \
-      #     continue
-      # if [[ ! -d "$file" ]] && [[ -d "$dst" ]]; then
-      #   [[ "$method" == "build" ]] && \
-      #     confirm "Link ${file#$DOT_ROOT/}" "${dst%\/}/${file_name}" Y || \
-      #     continue
-      #   target="${dst%\/}/${p}${file_name}"
-      # else
-      #   target="${dst}"
-      # fi
-      # elif [[ -d "$file" ]]; then
-      #   target="${dst}/"
-      # else
-      #   log_info "Unhandled target: $dst"
-      # fi
-      #
-      # file_link=$(readlink $target || echo false) # Works on OS X
-      # [[ "$file_link" == "$src" ]] && log_success "Already linked" "$target" && continue
-
-      bootstrap_symlinks_$method "$file" "$target"
-    done 3< <(find $src -name '*.template' -o -depth 0 -print0)
-    # done 3< <(find $src -name '*.template' -o \( -type d -depth 0 -o -type f -depth 0 \) -print0)
+      # Build absolute destination
+      bootstrap_symlinks_$method "$file" "$DOT_TARGET/$target"
+    done 3< <(find $DOT_ROOT/$src -name '*.template' -o -depth 0 -print0) # End while
+    # \( -type d -depth 0 -o -type f -depth 0 \)
 
   done
 }
@@ -133,7 +95,7 @@ bootstrap_symlinks_build() {
     file|directory)
       # log_warn "Existing $file_type" "$target"
       file_prompt="${orange}Existing ${file_type} ${white}${target}"
-      default
+      default="backup"
       ;;
     *)
       # Unrecognized file type
@@ -188,7 +150,7 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      dry_run "mv $target.bak" || return 1
+      dry_run "mv $target $target.bak" || return 1
 
       log_info "Backuped $target" "$target.bak"
     elif [[ "$overwrite" = true ]]; then
@@ -215,3 +177,130 @@ bootstrap_symlinks_list() {
   local target=$2 # Destination
   printf "%s\n" "$file -> $target"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+# _bootstrap_symlinks_parse() {
+#   local prefix=$DOT_CONFIG_PREFIX
+#   local method=$1; shift
+#   local expressions="$@"
+#   local expr file
+#
+#   # Parse paths expressions (src:dst)
+#   for expr in ${expressions[@]}; do
+#     local src=
+#     local dst=
+#     local regexp="(.*):(.*)"
+#     local p=$prefix
+#     # local prefix=$p
+#
+#     if [[ "$expr" =~ $regexp ]]; then
+#       # Path specified
+#       src=${expr%:*}
+#       dst=${expr#*:}
+#       [[ -z "$dst" ]] && dst=$src
+#
+#       # src=${DOT_ROOT}/${src}
+#       # dst=${DOT_TARGET}/${dst}
+#       p="" # No prefix
+#
+#       #   for path in ${src[@]}; do
+#       #     log_info "$path ->" "~/.${path#*/}"
+#       #   done
+#     else # No ':' found in expr
+#       # Link to home and (with prefix)
+#       src=${expr}
+#       dst=
+#       # dst=${prefix}
+#
+#       # dst=${expr}
+#       # dst="${dst%\/}/${prefix}${file_name}"
+#
+#       # prefix=$p
+#       # dst=${prefix} #${expr#*/}
+#       # dst=${dst%\*}
+#     fi
+#
+#     # Build absolute paths
+#     src="$DOT_ROOT/$src"
+#     dst="$DOT_TARGET/$dst"
+#
+#
+#     # Loop on each destination file
+#     # for file in $(find_files "$src" "*.template"); do
+#     # find "$src" -prune ! -name *.template -exec $cmd {} "$dst" \;
+#     while IFS= read -u 3 -rd '' file; do
+#       # local prefix=${prefix}
+#       local file_name=${file##*/}
+#       local target=${dst%\*} # Remove trailing '/*'
+#       # target+=${file_name}
+#       echo "$target == $DOT_TARGET ]]; then $target/$file_name"
+#       # [[ "$has_prefix" = true ]] && target+=$prefix
+#       if [[ -f "$file" ]] && [[ "$target" == "$DOT_TARGET/" ]]; then
+#         # log_debug "F $target -> adding $file_name" #"$src $dst"
+#         # [[ "$has_prefix" != true ]] && target+="/"
+#         target+="${p}${file_name}"
+#         # log_debug "= $target" "<<<<<<<<<<<<<<<<<"
+#       elif [[ -f "$file" ]]; then
+#         target+="/${p}${file_name}"
+#         log_debug "F $file"
+#       elif [[ -d "$file" ]]; then
+#         log_debug "D $target -> triming /?!" #"$src $dst"
+#         # target="${target%\/}"
+#       else
+#         log_warn "todo $target"
+#       fi
+#       printf "%s\n" "$file > $target" && break
+#       # local file_link=
+#
+#       # Handle pattern src/*:dst
+#       # if [[ -d "$target" ]]; then
+#
+#         # Add prefix if needed and append file name to the target directory
+#         # target="${target%\/}/${prefix}${file_name}"
+#
+#         # Confirm creation
+#         # [[ "$method" == "build" ]] && \
+#         #   confirm "Link ${file#$DOT_ROOT/}" "${target}" Y || \
+#         #   continue
+#       # else
+#         log_debug "target => $target" "$src"
+#       # fi
+#
+#       # if [[ ! -e "$dst" ]] && [[ -d "$file" ]]; then
+#       #   [[ "$method" == "list" ]] && \
+#       #     confirm "Create directory ${dst}" "${file}" Y && \
+#       #     dry_run "mk d $dst" || \
+#       #     continue
+#       # if [[ ! -d "$file" ]] && [[ -d "$dst" ]]; then
+#       #   [[ "$method" == "build" ]] && \
+#       #     confirm "Link ${file#$DOT_ROOT/}" "${dst%\/}/${file_name}" Y || \
+#       #     continue
+#       #   target="${dst%\/}/${p}${file_name}"
+#       # else
+#       #   target="${dst}"
+#       # fi
+#       # elif [[ -d "$file" ]]; then
+#       #   target="${dst}/"
+#       # else
+#       #   log_info "Unhandled target: $dst"
+#       # fi
+#       #
+#       # file_link=$(readlink $target || echo false) # Works on OS X
+#       # [[ "$file_link" == "$src" ]] && log_success "Already linked" "$target" && continue
+#
+#       bootstrap_symlinks_$method "$file" "$target"
+#     done 3< <(find $src -name '*.template' -o -depth 0 -print0) # End while
+#     # done 3< <(find $src -name '*.template' -o \( -type d -depth 0 -o -type f -depth 0 \) -print0)
+#
+#   done
+# }
