@@ -110,7 +110,7 @@ dot() {
 
 dot_list() {
   import "bootstrap/symlinks"
-  bootstrap_symlinks_list
+  bootstrap_symlinks list
 }
 
 dot_install() {
@@ -132,7 +132,7 @@ dot_bootstrap() {
 
     # Bootstrap dotfiles
     bootstrap_templates && \
-      bootstrap_symlinks || \
+      bootstrap_symlinks build || \
       log_warn "Bootstrap aborted"
   fi
 }

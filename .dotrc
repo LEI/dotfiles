@@ -20,8 +20,8 @@ timestamps = false
 #   src:(~/)dst
 #   src:(~/src)
 #   src(:~/.)
-bintest/*:bntst
 bin/*:bin
+# bin/test/*:bin/test
 config/*
 git/*
 shell/*
