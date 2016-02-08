@@ -10,47 +10,39 @@ prompt() {
   local question=$1
   local answer_default=${2-}
   local answer_pattern=${3-}
+  local answer_default_display="  › [default: $answer_default] "
   local answer
 
   log_ask "$question" "" >&2
 
   # Read with -i if bash >= 4
   if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$answer_default" ]]; then
-    read -e -r -i "$answer_default" answer
-    [[ -n "$answer" ]] || (prompt "$@" && return)
+    read -e -r -p "$answer_default_display" -i "${answer_default}" answer
+    # [[ -n "$answer" ]] || {
+    #     echo "answer >>> $answer" >&2
+    #   log_warn "No anwser, please retry" "($answer_pattern) $answer" >&2
+    #   prompt "$@"
+    #   return
+    # }
   else
     # local display_default= # Used to display the default answer
     # [[ -n "$answer_default" ]] && display_default="(default: $answer_default)"
     # printf "%s " "[default: $answer_default]" >&2 # Prints on the input line
-    read -e -r -p "  [default: $answer_default] " answer
-    [[ -n "$answer" ]] || answer=$answer_default
+    read -e -r -p "$answer_default_display" answer
   fi
 
-  # if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$answer_default" ]]; then
-  #   # Read with -i if bash > 4
-  #   log_ask "$question" "" >&2
-  #   read -e -r -i "$answer_default" answer
-  #
-  #   [[ -n "$answer" ]] || (prompt "$@" && return)
-  # else
-  #   # Show default value after the question if bash < 4
-  #   local display_default=
-  #   [[ -n "$answer_default" ]] && display_default="(default: $answer_default)"
-  #   log_ask "$question" "$display_default" >&2
-  #   read -e -r answer
-  #
-  #   [[ -n "$answer" ]] || answer=$answer_default
-  # fi
+  # Fallback to default if empty
+  [[ -n "$answer" ]] || (answer=$answer_default && printf "%s" "$answer_default")
 
+  # echo "answer -> $answer =~ [(${answer_pattern})*]" >&2
   # If the is a pattern to valid the answer, and it does not match, ask again
-  if [[ -n "$answer_pattern" ]] && ! [[ $answer =~ [(${answer_pattern})*] ]]; then
+  if [[ -n "$answer_pattern" ]] && ! [[ $answer =~ [(${answer_pattern})*?] ]]; then
     # log_debug "Answer pattern" "$answer_pattern" >&2
     log_warn "Invalid anwser, please retry" "($answer_pattern) $answer" >&2
     prompt "$@" && return
   fi
 
   printf "%s" "$answer"
-  return
 }
 
 # Wait for inline character input

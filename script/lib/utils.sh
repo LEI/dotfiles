@@ -28,7 +28,7 @@ dry_run() {
     # $cmd
     log_warn "EXECUTING $cmd"
   else
-    log "> $cmd"
+    log "$ $cmd" "(dry run)"
     # printf "%s\r\n" "$ $cmd"
   fi
 }

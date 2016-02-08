@@ -21,7 +21,7 @@ link_file() {
 	local dest=$2
 
 	if [[ -e "$file" ]] && [[ ! -e "$dest" ]]; then
-		echo "ln -s $file $dest"
+		dry_run "ln -s $file $dest"
 	else
 		return 1
 	fi
@@ -32,7 +32,7 @@ backup_file() {
 	local backup_ext="bak"
 
 	if [[ -e "$file" ]] && [[ ! -e "$file.$backup_ext" ]]; then
-		echo "mv $file $file.$backup_ext"
+		dry_run "mv $file $file.$backup_ext"
 	else
 		log_warn "File does not exists or backup already does"
 		return 1
@@ -44,7 +44,7 @@ remove_file() {
 	[[ -d "$file" ]] && die "$file: is a directory" # TODO -r
 
 	if [[ -e "$file" ]]; then
-		echo "rm $file"
+		dry_run "rm $file"
 	else
 		return 1
 	fi
