@@ -158,25 +158,25 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      dry_run backup_file "$target" || return 1
+      backup_file "$target" || return 1
 
       log_success "Backup $target" "$target.bak"
     elif [[ "$overwrite" = true ]]; then
       # Overwrite
-      dry_run remove_file "$target" || return 1
+      remove_file "$target" || return 1
       log_success "Removed $target"
     fi
 
     if [[ "$ignore" = false ]]; then
       # Link
-      dry_run link_file "$file" "$target" || return 1
+      link_file "$file" "$target" || return 1
       log_success "Symlinked $target" "$file"
     else
       log_info "Skipped" "$target"
     fi
 
   else
-    log_success "Ignored" "$target"
+    log_info "Ignored" "$target"
   fi
 }
 
