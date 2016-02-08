@@ -29,7 +29,7 @@ link_file() {
 
 backup_file() {
 	local file=$1
-	local backup_ext="bak"
+	local backup_ext="old"
 
 	if [[ -e "$file" ]] && [[ ! -e "$file.$backup_ext" ]]; then
 		echo "mv $file $file.$backup_ext"

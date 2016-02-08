@@ -76,6 +76,9 @@ dot() {
   local cmd=$1
 
   case $cmd in
+    git)
+      dot_git
+      ;;
     list)
       dot_list
       ;;
@@ -106,6 +109,11 @@ dot() {
 
     return $?
   fi
+}
+
+dot_git() {
+  import "lib/git"
+  git_submodule
 }
 
 dot_list() {
