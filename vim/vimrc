@@ -23,90 +23,6 @@ if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
 endif
 
 " }}}
-" Theming {{{
-
-set term=xterm-256color
-"set term=screen-256color
-
-" Disable BCE (Background Color Erase)
-"if &term =~ '256color'
-"  set t_ut=
-"endif
-
-if has('gui_running')
-  set background=light
-else
-  set background=dark
-endif
-
-try
-  "let base16colorspace=256
-  colorscheme base16-railscasts
-catch
-  colorscheme torte
-endtry
-
-" Allow color schemes to do bright colors without forcing bold.
-if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-  set t_Co=16
-endif
-
-" Enable syntax highlighting
-if has('syntax') && !exists('g:syntax_on')
-  syntax enable
-endif
-
-set synmaxcol=800
-"set textwidth=80
-
-set cursorline
-
-if exists('+colorcolumn')
-  set colorcolumn=80
-  "let &colorcolumn=join(range(1,80),",")
-endif
-
-" Hide line number background
-"highlight LineNr ctermbg=none guibg=none
-
-" Custom colors
-hi clear SignColumn
-hi VertSplit    ctermbg=236
-hi ColorColumn  ctermbg=237
-hi LineNr       ctermbg=236 ctermfg=240
-hi CursorLineNr ctermbg=236 ctermfg=240
-hi CursorLine   ctermbg=236
-
-"hi StatusLineNC ctermbg=238 ctermfg=0
-"hi StatusLine   ctermbg=240 ctermfg=12
-hi StatusLine   ctermfg=12 ctermbg=11
-hi StatusLineNC ctermfg=8 ctermbg=0
-
-"hi IncSearch    ctermbg=3   ctermfg=1
-"hi Search       ctermbg=1   ctermfg=3
-hi Visual       ctermbg=3   ctermfg=0
-"hi Pmenu        ctermbg=240 ctermfg=12
-"hi PmenuSel     ctermbg=3   ctermfg=1
-hi SpellBad     ctermbg=0   ctermfg=1
-
-" Highlight the status bar
-if has("autocmd")
-  autocmd InsertEnter * hi StatusLine ctermfg=235 ctermbg=2
-  "autocmd InsertLeave * hi StatusLine ctermbg=240 ctermfg=12
-  autocmd InsertLeave * hi StatusLine ctermfg=12 ctermbg=11
-endif
-
-highlight ExtraWhitespace ctermbg=1 guibg=red
-
-"hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-"hi ColorColumn ctermbg=darkgray guibg=darkgray
-"call matchadd('ColorColumn', '\%81v', 100) "set column nr
-
-" Hightlight text over 80 chars
-"highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-"match OverLength /\%>80v.\+/
-
-" }}}
 " General {{{
 
 set encoding=utf-8
@@ -171,7 +87,94 @@ if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
 endif
 
 " }}}
-" User interface {{{
+" Theming {{{
+
+set term=xterm-256color
+"set term=screen-256color
+
+" Disable BCE (Background Color Erase)
+"if &term =~ '256color'
+"  set t_ut=
+"endif
+
+if has('gui_running')
+  set background=light
+else
+  set background=dark
+endif
+
+try
+  "let base16colorspace=256
+  colorscheme base16-railscasts
+catch
+  colorscheme torte
+endtry
+
+" Allow color schemes to do bright colors without forcing bold.
+if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+  set t_Co=16
+endif
+
+" Enable syntax highlighting
+if has('syntax') && !exists('g:syntax_on')
+  syntax enable
+endif
+
+set synmaxcol=800
+"set textwidth=80
+
+set cursorline
+
+if exists('+colorcolumn')
+  set colorcolumn=80
+  "let &colorcolumn=join(range(1,80),",")
+endif
+
+" }}}
+" Colors {{{
+
+" Hide line number background
+"highlight LineNr ctermbg=none guibg=none
+
+" Custom colors
+hi clear SignColumn
+hi VertSplit    ctermbg=236
+hi ColorColumn  ctermbg=237
+hi LineNr       ctermbg=236 ctermfg=240
+hi CursorLineNr ctermbg=236 ctermfg=240
+hi CursorLine   ctermbg=236
+
+""hi StatusLineNC ctermbg=238 ctermfg=0
+""hi StatusLine   ctermbg=240 ctermfg=12
+"hi StatusLine   ctermfg=12 ctermbg=11
+"hi StatusLineNC ctermfg=8 ctermbg=0
+
+"hi IncSearch    ctermbg=3   ctermfg=1
+"hi Search       ctermbg=1   ctermfg=3
+hi Visual       ctermbg=3   ctermfg=0
+"hi Pmenu        ctermbg=240 ctermfg=12
+"hi PmenuSel     ctermbg=3   ctermfg=1
+hi SpellBad     ctermbg=0   ctermfg=1
+
+" Highlight the status bar
+"if has("autocmd")
+  "autocmd InsertEnter * hi StatusLine ctermfg=235 ctermbg=2
+  ""autocmd InsertLeave * hi StatusLine ctermbg=240 ctermfg=12
+  "autocmd InsertLeave * hi StatusLine ctermfg=12 ctermbg=11
+"endif
+
+highlight ExtraWhitespace ctermbg=1 guibg=red
+
+"hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
+"hi ColorColumn ctermbg=darkgray guibg=darkgray
+"call matchadd('ColorColumn', '\%81v', 100) "set column nr
+
+" Hightlight text over 80 chars
+"highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+"match OverLength /\%>80v.\+/
+
+" }}}
+" Interface {{{
 
 " Line numbers
 set number
@@ -226,60 +229,12 @@ set shortmess=atI
 " Set the window title
 set title
 
-" }}}
-" Status line {{{-
-
 " Always show current position
 set ruler
 "set rulerformat=%l,%c%V%=%P
 
 " Always show the status line
 set laststatus=2
-
-" Format the status line
-"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
-
-" git status, column/row number, total lines, and percentage in status
-"set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
-
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
-endfunction
-
-" Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-" Format markers:
-"   %< truncation point
-"   %n buffer number
-"   %f relative path to file
-"   %m modified flag [+] (modified), [-] (unmodifiable) or nothing
-"   %r readonly flag [RO]
-"   %y filetype [ruby]
-"   %= split point for left and right justification
-"   %-35. width specification
-"   %l current line number
-"   %L number of lines in buffer
-"   %c current column number
-"   %V current virtual column number (-n), if different from %c
-"   %P percentage through buffer
-"   %) end of width specification
-"set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
-
-set statusline=%<
-set statusline+=\ %{Mode()}
-set statusline+=\ %n:%f
-set statusline+=\ %m
-set statusline+=%r
-set statusline+=%= " ----------------------------------------------------------
-"set statusline+=%{getcwd()}
-set statusline+=\ %{fugitive#statusline()}
-set statusline+=\ %y
-set statusline+=\ [%l,%c%V]
-set statusline+=\ [%L,%p%%]
-set statusline+=\
 
 " }}}
 " Spacing {{{
@@ -376,7 +331,11 @@ set nostartofline
 if has("autocmd")
   " Auto reload .vimrc
   "autocmd BufWritePost .vimrc source $MYVIMRC
-  autocmd! BufWritePost .vimrc source %
+  "autocmd! BufWritePost .vimrc source %
+  augroup reload_vimrc
+    autocmd!
+    autocmd bufwritepost $MYVIMRC nested source $MYVIMRC
+  augroup END
 
   " Restore cursor position
   augroup resCur
@@ -397,18 +356,6 @@ if has("autocmd")
   autocmd InsertLeave * match ExtraWhitespace /\s\+$/
   autocmd BufWinLeave * call clearmatches()
 endif
-
-function! Mode()
-  let l:mode = mode()
-  if     mode ==# "n" | return "NORMAL"
-  elseif mode ==# "i" | return "INSERT"
-  elseif mode ==# "R" | return "REPLACE"
-  elseif mode ==# "v" | return "VISUAL"
-  elseif mode ==# "V" | return "V-LINE"
-  elseif mode ==# ""  | return "V-BLOCK"
-  else | return l:mode
-  endif
-endfunc
 
 function! ResCur()
   if line("'\"") <= line("$")
