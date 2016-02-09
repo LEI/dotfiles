@@ -2,6 +2,10 @@
 
 # file.sh
 
+# Return
+# 2: File does not exists
+# 3: Target already exists
+
 find_files() {
 	local path=$1
 	local exclude=${2-}
@@ -20,45 +24,38 @@ link_file() {
 	local file=$1
 	local dest=$2
 
-	if [[ -e "$file" ]] && [[ ! -e "$dest" ]]; then
-		dry_run "ln -s $file $dest"
-	else
-		return 1
-	fi
+	[[ ! -e "$file" ]] && return 2
+	[[ -e "$dest" ]] && return 3
+
+	dry_run "ln -s $file $dest"
 }
 
 backup_file() {
 	local file=$1
 	local backup_ext="old"
 
-	if [[ -e "$file" ]] && [[ ! -e "$file.$backup_ext" ]]; then
-		dry_run "mv $file $file.$backup_ext"
-	else
-		log_warn "File does not exists or backup already does"
-		return 1
-	fi
+	[[ ! -e "$file" ]] && return 2
+	[[ -e "$file.$backup_ext" ]] && return 3
+
+	dry_run "mv $file $file.$backup_ext"
 }
 
 remove_file() {
 	local file=$1
+
+	[[ ! -e "$file" ]] && return 2
 	[[ -d "$file" ]] && die "$file: is a directory" # TODO -r
 
-	if [[ -e "$file" ]]; then
-		dry_run "rm $file"
-	else
-		return 1
-	fi
+	dry_run "rm $file"
 }
 
 readlink_file() {
 	local file=$1
 
-	if [[ -e "$file" ]]; then
-		local link=$(readlink "$file")
-		printf "%s" "$link"
-	else
-		return 1
-	fi
+	[[ -e "$file" ]] || return 2
+
+	local link=$(readlink "$file")
+	printf "%s" "$link"
 }
 
 sed_file() {

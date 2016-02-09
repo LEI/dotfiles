@@ -3,6 +3,7 @@
 # config.sh
 
 import "lib/log"
+import "lib/utils"
 import "lib/prompt"
 import "lib/file"
 
@@ -26,7 +27,7 @@ config() {
     DOT_USER_NAME=$(prompt "What is your full name" "Guillaume Frichet")
     DOT_USER_EMAIL=$(prompt "What is your email" "guillaume.frichet@gmail.com")
     DOT_USER_NICK=$(prompt "What is your nickname" "LEI")
-    
+
     local vars=("${!DOT_USER_*}")
     # Generate .dotrc
     sed_file "$file" "$template" "${vars[@]}" || return 1
@@ -50,13 +51,18 @@ config_read() {
 
     [[ -z "$key" ]] && continue # Empty line
     [[ ${key:0:1} == "#" ]] && continue # Comment
-    key=${key% #*} # Remove inline comments (everything after ' #')
-    key=${key%[[:space:]]} #key=${key%[[:space:]]*}
+
+    # Remove inline comments (everything after ' #')
+    key=${key%[[:space:]]#*}
+    value=${value%[[:space:]]#*}
+
+    # Trim (handle ' = ')
+    key=${key#[[:space:]]}
+    key=${key%[[:space:]]}
+    value=${value#[[:space:]]}
+    value=${value%[[:space:]]}
     # ${var_name%%[![:space:]]*} # Remove leading spaces
     # ${var_name##*[![:space:]]} # Remove trailing spaces
-    value=${value#[[:space:]]}
-
-    # echo "key: $key / value: <$value>"
 
     if [[ "$key" =~ [\[a-zA-Z0-9\]] ]]; then # Section
       section=${key#*[} # Left
@@ -64,13 +70,13 @@ config_read() {
       section="DOT_$section" # Variable name
     elif [[ -n "${section-}" ]]; then
       if [[ -n "$value" ]]; then # Key = value
-        var_name=$(echo "${section}_${key}" | tr "[:lower:]" "[:upper:]") # | tr -d "[[:space:]]"
+        var_name=$(echo "${section}_${key}" | to_upper_case) # | tr -d "[[:space:]]"
 
         log_debug "${var_name}=\"$value\""
         eval ${var_name}=\"$value\" # Assign the value to a variable (DOT_SECTION_VARNAME)
 
       else # No inline separator, single value
-        section=$(echo "$section" | tr "[:lower:]" "[:upper:]")
+        section=$(echo "$section" | to_upper_case)
 
         log_debug "$section+=\(\"$key\"\)"
         eval $section+=\(\"$key\"\) # Push the value to an array (DOT_SECTION)

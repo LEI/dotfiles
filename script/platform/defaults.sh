@@ -3,12 +3,13 @@
 # # defaults.sh
 
 platform_defaults() {
-	local platform_file="$DOT_SCRIPT/platform/${UNAME}.sh"
+  local platform=$(echo "$UNAME" | to_lower_case)
+	local platform_file="$DOT_SCRIPT/platform/$platform.sh"
 
 	if [[ -f "$platform_file" ]]; then
 
 		case $UNAME in
-			darwin) # OS X Defaults
+			Darwin) # OS X Defaults
 
 				# _COMPUTER_NAME=${DOT_AUTHOR_NAME%[[:space:]]*}
 				# Uses the hostname as a placeholder
@@ -45,6 +46,9 @@ platform_defaults() {
 				# fi
 
 				[[ "$(whoami)" != "root" ]] && log_warn "Root access is required"
+				;;
+			*)
+				log_warn "No defaults" "$UNAME"
 				;;
 		esac
 

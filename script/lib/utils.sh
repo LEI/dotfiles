@@ -43,9 +43,15 @@ now() {
 	printf "%s" "$date"
 }
 
-# Usage: <cmd> | to_lower
-to_lower() {
+# Usage: echo <string> | to_lower_case
+to_lower_case() {
   while read str; do
     printf "%s" "$str" | tr '[:upper:]' '[:lower:]'
+  done
+}
+
+to_upper_case() {
+  while read str; do
+    printf "%s" "$str" | tr '[:lower:]' '[:upper:]'
   done
 }

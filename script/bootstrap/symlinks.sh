@@ -158,21 +158,22 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      backup_file "$target" || return 1
-
-      log_success "Backup $target" "$target.bak"
+      backup_file "$target" && log_info "Backup" "$target.old" || return 1
     elif [[ "$overwrite" = true ]]; then
       # Overwrite
-      remove_file "$target" || return 1
-      log_success "Removed $target"
+      remove_file "$target" && log_info "Removed" "$target" || return 1
     fi
 
     if [[ "$ignore" = false ]]; then
       # Link
-      link_file "$file" "$target" || return 1
-      log_success "Symlinked $target" "$file"
+      link_file "$file" "$target" && log_success "Symlinked" "$target" || return 1
     else
       log_info "Skipped" "$target"
+    fi
+
+    echo "-> $?"
+    if [[ $? -gt 0 ]]; then
+      log_error "Errored with status $?"
     fi
 
   else

@@ -1,5 +1,10 @@
 " Airline
 
+" Does not work: not really global?
+if !exists('g:loaded_airline')
+  finish
+endif
+
 " Enable colorscheme
 let g:airline_theme="solarized"
 

@@ -10,10 +10,10 @@ install_brew() {
 
     # Install the correct homebrew for each OS type
     case $UNAME in
-      darwin)
+      Darwin)
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
         ;;
-      linux)
+      Linux)
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
         ;;
       *)
