@@ -89,8 +89,8 @@ endif
 " }}}
 " Theming {{{
 
-set term=xterm-256color
-"set term=screen-256color
+"set term=xterm-256color
+set term=screen-256color
 
 " Disable BCE (Background Color Erase)
 "if &term =~ '256color'
@@ -105,7 +105,7 @@ endif
 
 try
   "let base16colorspace=256
-  colorscheme base16-railscasts
+  colorscheme base16-tomorrow
 catch
   colorscheme torte
 endtry
@@ -138,19 +138,19 @@ endif
 
 " Custom colors
 hi clear SignColumn
-hi VertSplit    ctermbg=236
-hi ColorColumn  ctermbg=237
-hi LineNr       ctermbg=236 ctermfg=240
-hi CursorLineNr ctermbg=236 ctermfg=240
-hi CursorLine   ctermbg=236
+hi VertSplit    ctermbg=10
+hi ColorColumn  ctermbg=10
+"hi LineNr       ctermbg=236 ctermfg=240
+"hi CursorLineNr ctermbg=236 ctermfg=240
+hi CursorLine   ctermbg=10
 
 ""hi StatusLineNC ctermbg=238 ctermfg=0
 ""hi StatusLine   ctermbg=240 ctermfg=12
 "hi StatusLine   ctermfg=12 ctermbg=11
 "hi StatusLineNC ctermfg=8 ctermbg=0
 
-"hi IncSearch    ctermbg=3   ctermfg=1
-"hi Search       ctermbg=1   ctermfg=3
+hi IncSearch    ctermbg=3   ctermfg=1
+hi Search       ctermbg=1   ctermfg=3
 hi Visual       ctermbg=3   ctermfg=0
 "hi Pmenu        ctermbg=240 ctermfg=12
 "hi PmenuSel     ctermbg=3   ctermfg=1
@@ -203,10 +203,10 @@ set noshowmode
 " Disable cursor blink (not working?)
 set gcr=a:blinkon0
 
-" Show matching brackets when text indicator is over them
-set showmatch
+" Do not show matching brackets when text indicator is over them
+set noshowmatch
 " How many tenths of a second to blink when matching brackets
-set mat=2
+"set mat=2
 
 " Beeps and flash
 "set noerrorbells
@@ -240,11 +240,11 @@ set laststatus=2
 " Spacing {{{
 
 set autoindent
-"set smartindent
-"set smarttab
+set smartindent
+set smarttab
 
-"set shiftwidth=2
-"set softtabstop=2
+set shiftwidth=2
+set softtabstop=2
 set tabstop=2
 
 " Use spaces instead of tabs
@@ -379,6 +379,187 @@ map <leader>b :Gblame<cr>
 map <leader>l :!clear && git log -p %<cr>
 map <leader>d :!clear && git diff %<cr>
 
+" }}}
+" Status line {{{
+
+" base16 colors
+" 0: black
+" 1: red
+" 2: green
+" 3: yellow
+" 4: blue
+" 5: magenta
+" 6: bright green (cyan)
+" 7: white
+" 8: bright black
+" 9: bright red
+" 10: deep gray (bright green)
+" 11: gray (bright yellow)
+" 12: light gray (bright blue)
+" 13: white (bright magenta)
+" 14: beige (bright cyan)
+" 15: bright white
+
+if !exists('g:statusline')
+  let g:statusline={}
+endif
+
+if !exists('g:statusline.style')
+  let g:statusline.style={}
+endif
+
+if !exists('g:statusline.symbol')
+  let g:statusline.symbol={}
+endif
+
+let g:statusline.style.nc = 'ctermfg=8 ctermbg=0'
+let g:statusline.style.bold = 'cterm=bold'
+let g:statusline.style.line = 'ctermfg=12 ctermbg=11'
+let g:statusline.style.branch = 'ctermfg=12 ctermbg=10'
+"let g:statusline.style.filetype = 'ctermfg=12 ctermbg=none'
+let g:statusline.style.normal = 'ctermfg=10 ctermbg=4'
+let g:statusline.style.insert = 'ctermfg=10 ctermbg=2'
+let g:statusline.style.replace = 'ctermfg=7 ctermbg=1'
+let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
+
+let g:statusline.symbol.sep = '|'
+let g:statusline.symbol.branch = '⎇'
+"let g:statusline.symbol.readonly = 'RO'
+
+exec 'hi StatusLine '.g:statusline.style.line
+exec 'hi StatusLineNC '.g:statusline.style.nc
+exec 'hi StatusLineBranch '.g:statusline.style.branch.' '.g:statusline.style.bold
+"exec 'hi StatusLineFileType '.g:statusline.style.filetype
+
+
+" Format the status line
+"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
+
+" git status, column/row number, total lines, and percentage in status
+"set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
+
+" Returns true if paste mode is enabled
+function! HasPaste()
+    if &paste
+        return 'PASTE MODE  '
+    endif
+    return ''
+endfunction
+
+" Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" Format markers:
+"   %< truncation point
+"   %n buffer number
+"   %f relative path to file
+"   %m modified flag [+] (modified), [-] (unmodifiable) or nothing
+"   %r readonly flag [RO]
+"   %y filetype [ruby]
+"   %= split point for left and right justification
+"   %-35. width specification
+"   %l current line number
+"   %L number of lines in buffer
+"   %c current column number
+"   %V current virtual column number (-n), if different from %c
+"   %P percentage through buffer
+"   %) end of width specification
+"set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
+
+"autocmd ColorScheme *
+"    \ hi StatusLineMode ctermbg=1 ctermfg=10 cterm=bold " Normal
+"    \ hi User2 ctermbg=2 ctermfg=10 cterm=bold " Replace
+"    \ hi User3 ctermbg=3 ctermfg=10 cterm=bold " Insert
+"    \ hi User4 ctermbg=4 ctermfg=10 cterm=bold " Visual?
+
+function! SetStatusLine()
+  " Display mode with color
+  let l:l="%#StatusLineMode# %{StatusLineMode()} %0*"
+  " Current branch
+  let l:l.="%#StatusLineBranch#%( %{StatusLineFugitive()} %)%0*"
+  " Buffer index, collapse marker and relative path
+  let l:l.=" %n:%<%f "
+  " Readonly, modified and modifiable flags
+  let l:l.="%([%R%M]%) "
+
+  " Right align past this point
+  let l:l.="%= "
+
+  " File type
+  let l:l.="%( %{&filetype} %)".g:statusline.symbol.sep " %y %Y
+  " File format
+  let l:l.="%( %{&fileformat} %)".g:statusline.symbol.sep
+  " File encoding
+  let l:l.="%( %{(&fenc!=''?&fenc:&enc)} %)"
+
+  ""let l:l.=%{g:statusline.symbol.sep}
+
+  let l:l.="[%l,%c%V] "
+  let l:l.="[%L,%p%%] "
+  let l:l.="%{StatusLineSyntastic()}"
+
+  return l:l
+endfunc
+
+function! StatusLineMode()
+  redraw
+  let l:mode = mode()
+  exec 'hi StatusLine '.g:statusline.style.line
+  if mode ==# "n""
+    exec 'hi StatusLineMode '.g:statusline.style.normal.' '.g:statusline.style.bold
+    return "NORMAL"
+  elseif mode ==# "i"
+    exec 'hi StatusLineMode '.g:statusline.style.insert
+    exec 'hi StatusLineMode '.g:statusline.style.insert.' '.g:statusline.style.bold
+    return "INSERT"
+  elseif mode ==# "R"
+    exec 'hi StatusLineMode '.g:statusline.style.replace.' '.g:statusline.style.bold
+    return "REPLACE"
+  elseif mode ==# "v"
+    exec 'hi StatusLineMode '.g:statusline.style.visual.' '.g:statusline.style.bold
+    return "VISUAL"
+  elseif mode ==# "V"
+    exec 'hi StatusLineMode '.g:statusline.style.visual.' '.g:statusline.style.bold
+    return "V-LINE"
+  elseif mode ==# ""
+    exec 'hi StatusLineMode '.g:statusline.style.visual.' '.g:statusline.style.bold
+    return "V-BLOCK"
+  else
+    return l:mode
+  endif
+endfunc
+
+function! StatusLineFugitive()
+  if exists("*fugitive#head")
+    let _ = fugitive#head()
+    return strlen(_) ? g:statusline.symbol.branch.' '._ : ''
+  endif
+  return ''
+endfunc
+
+function! StatusLineSyntastic()
+  if exists("SyntasticStatuslineFlag")
+    let _ = SyntasticStatuslineFlag()
+    return strlen(_) ? '%#warningmsg#'._.'%*' : ''
+  endif
+  return ''
+endfunc
+
+if has("autocmd")
+
+  if !has('gui_running')
+    au InsertEnter  * redraw!
+    au InsertChange * redraw!
+    au InsertLeave  * redraw!
+  endif
+
+  " Highlight the status bar in insert mode
+  "autocmd InsertEnter * hi StatusLine ctermfg=235 ctermbg=2
+  "autocmd InsertLeave * hi StatusLine ctermfg=12 ctermbg=11
+
+  "autocmd ColorScheme,VimEnter * call StatusLine#set()
+
+endif
+
+set statusline=%!SetStatusLine()
 " }}}
 
 " Load custom settings
