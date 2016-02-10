@@ -213,8 +213,19 @@ set noshowmatch
 set visualbell
 "set t_vb=
 
-"set ttimeout
-"set ttimeoutlen=100
+set ttimeout
+set timeoutlen=1000 ttimeoutlen=0
+
+" Mode switch fix?
+" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
+if !has('gui_running')
+  set ttimeoutlen=10
+  augroup FastEscape
+    autocmd!
+    au InsertEnter * set timeoutlen=0
+    au InsertLeave * set timeoutlen=1000
+  augroup END
+endif
 
 if has("mouse")
   set mouse=a
