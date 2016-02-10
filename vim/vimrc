@@ -412,14 +412,15 @@ if !exists('g:statusline.symbol')
   let g:statusline.symbol={}
 endif
 
-let g:statusline.style.nc = 'ctermfg=8 ctermbg=0'
+let g:statusline.style.nc = 'ctermfg=11 ctermbg=0'
 let g:statusline.style.bold = 'cterm=bold'
-let g:statusline.style.line = 'ctermfg=12 ctermbg=11'
-let g:statusline.style.branch = 'ctermfg=12 ctermbg=10'
-"let g:statusline.style.filetype = 'ctermfg=12 ctermbg=none'
+let g:statusline.style.line = 'ctermfg=12 ctermbg=10'
+let g:statusline.style.branch = 'ctermfg=12 ctermbg=11'
+"let g:statusline.style.file = 'ctermfg=12 ctermbg=10'
+let g:statusline.style.pos = 'ctermfg=12 ctermbg=11'
 let g:statusline.style.normal = 'ctermfg=10 ctermbg=4'
 let g:statusline.style.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline.style.replace = 'ctermfg=7 ctermbg=1'
+let g:statusline.style.replace = 'ctermfg=13 ctermbg=1'
 let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
 
 let g:statusline.symbol.sep = '|'
@@ -429,7 +430,8 @@ let g:statusline.symbol.branch = '⎇'
 exec 'hi StatusLine '.g:statusline.style.line
 exec 'hi StatusLineNC '.g:statusline.style.nc
 exec 'hi StatusLineBranch '.g:statusline.style.branch.' '.g:statusline.style.bold
-"exec 'hi StatusLineFileType '.g:statusline.style.filetype
+"exec 'hi StatusLineFile '.g:statusline.style.file
+exec 'hi StatusLinePos '.g:statusline.style.pos
 
 
 " Format the status line
@@ -483,6 +485,8 @@ function! SetStatusLine()
   " Right align past this point
   let l:l.="%= "
 
+  "let l:l.="%#StatusLineFile#"
+
   " File type
   let l:l.="%( %{&filetype} %)".g:statusline.symbol.sep " %y %Y
   " File format
@@ -490,11 +494,17 @@ function! SetStatusLine()
   " File encoding
   let l:l.="%( %{(&fenc!=''?&fenc:&enc)} %)"
 
-  ""let l:l.=%{g:statusline.symbol.sep}
 
-  let l:l.="[%l,%c%V] "
-  let l:l.="[%L,%p%%] "
-  let l:l.="%{StatusLineSyntastic()}"
+  "let l:l.="%0*"
+  let l:l.="%#StatusLinePos#"
+
+  let l:l.=" %l,%c%V "
+  let l:l.=g:statusline.symbol.sep
+  let l:l.=" %L,%p%% "
+
+  let l:l.="%0*"
+
+  "let l:l.="%{StatusLineSyntastic()}"
 
   return l:l
 endfunc
@@ -507,7 +517,7 @@ function! StatusLineMode()
     exec 'hi StatusLineMode '.g:statusline.style.normal.' '.g:statusline.style.bold
     return "NORMAL"
   elseif mode ==# "i"
-    exec 'hi StatusLineMode '.g:statusline.style.insert
+    exec 'hi StatusLine '.g:statusline.style.insert
     exec 'hi StatusLineMode '.g:statusline.style.insert.' '.g:statusline.style.bold
     return "INSERT"
   elseif mode ==# "R"
