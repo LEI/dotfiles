@@ -274,13 +274,14 @@ set laststatus=2
 " }}}
 " Spacing {{{
 
-" Identation
-let shiftwidth=2
-let softtabstop=2
-let tabstop=2
-
-" Use spaces instead of tabs
-set expandtab
+if !exists("g:loaded_sleuth")
+  " Identation
+  set shiftwidth=2
+  set softtabstop=2
+  set tabstop=2
+  " Use spaces instead of tabs
+  set expandtab
+endif
 
 set autoindent
 set smartindent
@@ -288,6 +289,8 @@ set smarttab
 
 " Show invisible characters
 set list listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
+hi NonText ctermfg=11
+hi SpecialKey ctermfg=11
 
 " Don't wrap lines
 set nowrap
@@ -529,7 +532,7 @@ function! SetStatusLine()
   " Current branch
   let l:l.="%#StatusLineBranch#%( %{StatusLineFugitive()} %)%0*"
   " Buffer index, collapse marker and relative path
-  let l:l.=" %n:%<%f "
+  let l:l.=" %n %<%f "
   " Readonly, modified and modifiable flags
   let l:l.="%([%R%M]%) "
 
@@ -587,19 +590,22 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
+" Clear highlighted search results
+map <leader><Space> :noh<CR>
+
 " Save a file as root (,W)
 noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
 " Git commands
 map <leader>b :Gblame<cr>
-map <leader>l :!clear && git log -p %<cr>
-map <leader>d :!clear && git diff %<cr>
+map <leader>l :!clear && git log -p %<CR>
+map <leader>d :!clear && git diff %<CR>
 
 " Sort css properties
 nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 
 " Open .vimrc in a new split
-nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<cr>
+nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " Nop commands
 " nnoremap <up> <nop>

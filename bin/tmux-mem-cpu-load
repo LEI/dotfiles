@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# OS X CPU
+if [[ $OSTYPE =~ darwin* ]]; then
+  cpu_count=$(sysctl -n hw.ncpu)
+  cpu_usage=$(ps -A -o %cpu | awk -v count=$cpu_count '{s+=$1} END {print s/count}')
+
+  #printf "%0.2f%%\n" $cpu_usage
+  echo "${cpu_usage%.*}%"
+fi
+
+exit 0
+
+# https://gist.github.com/russelldavies/4016983
+
+if [ -z $1 ]; then
+  echo "Usage: $0 interval [number of lines]"
+  exit 1
+else
+  INTERVAL=$1
+fi
+
+NUM_LINES=10
+[ $2 ] && NUM_LINES=$2
+
+calc_lines() {
+  if [ $NUM_LINES -gt 0 ]; then
+    ACTIVE_LINES=$(($CPU/$NUM_LINES))
+    LINES=""
+    for (( i = 0; i < $NUM_LINES; i++ )); do
+      if [[ $i < $ACTIVE_LINES ]]; then
+        LINES="$LINES|"
+      else
+        LINES="$LINES "
+      fi
+    done
+  fi
+}
+
+# OS X
+if [[ $OSTYPE =~ darwin* ]]; then
+    cpu_info=($(iostat -n0))
+    CPU=$((${cpu_info[9]} + ${cpu_info[10]}))
+    LOAD=${cpu_info[@]:12}
+
+    mem_info=($(vm_stat))
+    PAGE_SIZE="${mem_info[7]}"
+    FREE="${mem_info[11]%?}"
+    ACTIVE="${mem_info[14]%?}"
+    INACTIVE="${mem_info[17]%?}"
+    WIRED="${mem_info[27]%?}"
+
+    TOTAL_MEM=$(( ($WIRED + $ACTIVE + $INACTIVE + $FREE) * $PAGE_SIZE / 1024 / 1024 ))
+    FREE_MEM=$(( ($INACTIVE + $FREE) * $PAGE_SIZE / 1024 / 1024 ))
+    USED_MEM=$(( ($WIRED + $ACTIVE) * $PAGE_SIZE / 1024 / 1024 ))
+# Linux
+elif [[ $OSTYPE =~ linux* ]]; then
+    read cpu user nice system idle iowait irq softirq steal guest< /proc/stat
+    cpu_active_prev=$((user+system+nice+softirq+steal))
+    cpu_total_prev=$((user+system+nice+softirq+steal+idle+iowait))
+    sleep $INTERVAL
+    read cpu user nice system idle iowait irq softirq steal guest< /proc/stat
+    cpu_active_cur=$((user+system+nice+softirq+steal))
+    cpu_total_cur=$((user+system+nice+softirq+steal+idle+iowait))
+    CPU=$((100 * ( cpu_active_cur - cpu_active_prev ) / (cpu_total_cur -
+           cpu_total_prev) ))
+
+    loadavg=($(</proc/loadavg))
+    read load_one load_five load_ten num_procs last_pid < /proc/loadavg
+    LOAD="$load_one $load_five $load_ten"
+
+    meminfo=($(</proc/meminfo))
+    TOTAL_MEM=$(( ${meminfo[1]} / 1024 ))
+    free_mem=$(( ${meminfo[4]} / 1024 ))
+    buffers_mem=$(( ${meminfo[10]} / 1024 ))
+    cache_mem=$(( ${meminfo[13]} / 1024 ))
+    USED_MEM=$(( $TOTAL_MEM - $free_mem - $buffers_mem - $cache_mem ))
+fi
+
+if [ $NUM_LINES -gt 0 ]; then
+    calc_lines
+    echo "${USED_MEM}/${TOTAL_MEM}MB [${LINES}] ${CPU}% ${LOAD}"
+else
+    echo "${USED_MEM}/${TOTAL_MEM}MB ${CPU}% ${LOAD}"
+fi
