@@ -8,14 +8,16 @@ set nocompatible
 
 " Initialization {{{
 
-" Autoload plugins
+filetype off
+
+" Add pathogen to runtime
 runtime bundle/pathogen/autoload/pathogen.vim
+" Autoload plugins
 call pathogen#infect()
+" Generate plugin help tags
 call pathogen#helptags()
 
-if has('autocmd')
-  filetype plugin indent on
-endif
+filetype plugin indent on
 
 " Load matchit.vim, but only if the user hasn't installed a newer version.
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -85,6 +87,25 @@ if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
   set undodir=~/.vim/backups
   set undofile
 endif
+
+" Misc
+
+set esckeys
+
+set binary
+set noeol
+
+set modeline
+set modelines=0 " 4
+
+" Enable per-directory .vimrc files and disable unsafe commands in them
+set exrc
+set secure
+
+"set complete-=i
+set nrformats-=octal
+
+set nostartofline
 
 " }}}
 " Theming {{{
@@ -208,6 +229,9 @@ set noshowmatch
 " How many tenths of a second to blink when matching brackets
 "set mat=2
 
+" HTML brackets
+set matchpairs+=<:>
+
 " Beeps and flash
 "set noerrorbells
 set visualbell
@@ -250,21 +274,22 @@ set laststatus=2
 " }}}
 " Spacing {{{
 
+" Identation
+let shiftwidth=2
+let softtabstop=2
+let tabstop=2
+
+" Use spaces instead of tabs
+set expandtab
+
 set autoindent
 set smartindent
 set smarttab
 
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
-
-" Use spaces instead of tabs
-"set expandtab
-
-" Display invisible characters
+" Show invisible characters
 set list listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
 
-" Do no wrap lines
+" Don't wrap lines
 set nowrap
 
 " Wrap lines at convenient points
@@ -320,24 +345,7 @@ set smartcase
 set magic
 
 " }}}
-" Misc {{{
-
-set esckeys
-
-set binary
-set noeol
-
-set modeline
-set modelines=4
-
-" Enable per-directory .vimrc files and disable unsafe commands in them
-set exrc
-set secure
-
-"set complete-=i
-set nrformats-=octal
-
-set nostartofline
+" Autocmd {{{
 
 if has("autocmd")
   " Auto reload .vimrc
@@ -346,12 +354,6 @@ if has("autocmd")
   augroup reload_vimrc
     autocmd!
     autocmd bufwritepost $MYVIMRC nested source $MYVIMRC
-  augroup END
-
-  " Restore cursor position
-  augroup resCur
-    autocmd!
-    autocmd BufWinEnter * call ResCur()
   augroup END
 
   " Treat .json files as .js
@@ -366,34 +368,25 @@ if has("autocmd")
   autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
   autocmd InsertLeave * match ExtraWhitespace /\s\+$/
   autocmd BufWinLeave * call clearmatches()
+
+  " Restore cursor position
+  augroup resCur
+    autocmd!
+    autocmd BufWinEnter * call ResCur()
+  augroup END
 endif
 
 function! ResCur()
-  if line("'\"") <= line("$")
+  if line("'\"") > 0 && line("'\"") <= line("$")
     normal! g`"
     return 1
   endif
 endfunction
 
 " }}}
-" Key maps {{{
-
-" Change leader to a comma instead of backslash
-let mapleader=","
-let g:mapleader=","
-
-" Save a file as root (,W)
-noremap <leader>W :w !sudo tee % > /dev/null<CR>
-
-" Git commands
-map <leader>b :Gblame<cr>
-map <leader>l :!clear && git log -p %<cr>
-map <leader>d :!clear && git diff %<cr>
-
-" }}}
 " Status line {{{
 
-" base16 colors
+" base16 colors (?)
 " 0: black
 " 1: red
 " 2: green
@@ -410,54 +403,6 @@ map <leader>d :!clear && git diff %<cr>
 " 13: white (bright magenta)
 " 14: beige (bright cyan)
 " 15: bright white
-
-if !exists('g:statusline')
-  let g:statusline={}
-endif
-
-if !exists('g:statusline.style')
-  let g:statusline.style={}
-endif
-
-if !exists('g:statusline.symbol')
-  let g:statusline.symbol={}
-endif
-
-let g:statusline.style.nc = 'ctermfg=11 ctermbg=0'
-let g:statusline.style.bold = 'cterm=bold'
-let g:statusline.style.line = 'ctermfg=12 ctermbg=10'
-let g:statusline.style.branch = 'ctermfg=12 ctermbg=11'
-"let g:statusline.style.file = 'ctermfg=12 ctermbg=10'
-let g:statusline.style.pos = 'ctermfg=12 ctermbg=11'
-let g:statusline.style.normal = 'ctermfg=10 ctermbg=4'
-let g:statusline.style.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline.style.replace = 'ctermfg=13 ctermbg=1'
-let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
-
-let g:statusline.symbol.sep = '|'
-let g:statusline.symbol.branch = '⎇'
-"let g:statusline.symbol.readonly = 'RO'
-
-exec 'hi StatusLine '.g:statusline.style.line
-exec 'hi StatusLineNC '.g:statusline.style.nc
-exec 'hi StatusLineBranch '.g:statusline.style.branch.' '.g:statusline.style.bold
-"exec 'hi StatusLineFile '.g:statusline.style.file
-exec 'hi StatusLinePos '.g:statusline.style.pos
-
-
-" Format the status line
-"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
-
-" git status, column/row number, total lines, and percentage in status
-"set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
-
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
-endfunction
 
 " Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " Format markers:
@@ -477,48 +422,62 @@ endfunction
 "   %) end of width specification
 "set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
 
+" Format the status line
+"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
+
+" git status, column/row number, total lines, and percentage in status
+"set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
+
+" Returns true if paste mode is enabled
+function! HasPaste()
+    if &paste
+        return 'PASTE MODE  '
+    endif
+    return ''
+endfunction
+
 "autocmd ColorScheme *
 "    \ hi StatusLineMode ctermbg=1 ctermfg=10 cterm=bold " Normal
 "    \ hi User2 ctermbg=2 ctermfg=10 cterm=bold " Replace
 "    \ hi User3 ctermbg=3 ctermfg=10 cterm=bold " Insert
 "    \ hi User4 ctermbg=4 ctermfg=10 cterm=bold " Visual?
 
-function! SetStatusLine()
-  " Display mode with color
-  let l:l="%#StatusLineMode# %{StatusLineMode()} %0*"
-  " Current branch
-  let l:l.="%#StatusLineBranch#%( %{StatusLineFugitive()} %)%0*"
-  " Buffer index, collapse marker and relative path
-  let l:l.=" %n:%<%f "
-  " Readonly, modified and modifiable flags
-  let l:l.="%([%R%M]%) "
+if !exists('g:statusline')
+  let g:statusline={}
+endif
 
-  " Right align past this point
-  let l:l.="%= "
+if !exists('g:statusline.symbol')
+  let g:statusline.symbol={}
+endif
 
-  "let l:l.="%#StatusLineFile#"
+if !exists('g:statusline.style')
+  let g:statusline.style={}
+endif
 
-  " File type
-  let l:l.="%( %{&filetype} %)".g:statusline.symbol.sep " %y %Y
-  " File format
-  let l:l.="%( %{&fileformat} %)".g:statusline.symbol.sep
-  " File encoding
-  let l:l.="%( %{(&fenc!=''?&fenc:&enc)} %)"
+" Symbols
+let g:statusline.symbol.sep = '|'
+let g:statusline.symbol.branch = '⎇'
+"let g:statusline.symbol.readonly = 'RO'
 
+" Colors
+let g:statusline.style.bold = 'cterm=bold'
+let g:statusline.style.nc = 'ctermfg=11 ctermbg=0'
+let g:statusline.style.line = 'ctermfg=12 ctermbg=10'
+let g:statusline.style.branch = 'ctermfg=12 ctermbg=11'
+"let g:statusline.style.file = 'ctermfg=12 ctermbg=10'
+let g:statusline.style.pos = 'ctermfg=12 ctermbg=11'
 
-  "let l:l.="%0*"
-  let l:l.="%#StatusLinePos#"
+let g:statusline.style.normal = 'ctermfg=10 ctermbg=4'
+let g:statusline.style.insert = 'ctermfg=10 ctermbg=2'
+let g:statusline.style.replace = 'ctermfg=13 ctermbg=1'
+let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
 
-  let l:l.=" %l,%c%V "
-  let l:l.=g:statusline.symbol.sep
-  let l:l.=" %L,%p%% "
-
-  let l:l.="%0*"
-
-  "let l:l.="%{StatusLineSyntastic()}"
-
-  return l:l
-endfunc
+" Highlight groups
+exec 'hi StatusLine '.g:statusline.style.line
+exec 'hi StatusLineNC '.g:statusline.style.nc
+exec 'hi StatusLineBranch '.g:statusline.style.branch.' '.g:statusline.style.bold
+"exec 'hi StatusLineFile '.g:statusline.style.file
+exec 'hi StatusLinePos '.g:statusline.style.pos
 
 function! StatusLineMode()
   redraw
@@ -564,23 +523,96 @@ function! StatusLineSyntastic()
   return ''
 endfunc
 
-if has("autocmd")
+function! SetStatusLine()
+  " Display mode with color
+  let l:l="%#StatusLineMode# %{StatusLineMode()} %0*"
+  " Current branch
+  let l:l.="%#StatusLineBranch#%( %{StatusLineFugitive()} %)%0*"
+  " Buffer index, collapse marker and relative path
+  let l:l.=" %n:%<%f "
+  " Readonly, modified and modifiable flags
+  let l:l.="%([%R%M]%) "
 
+  " Right align past this point
+  let l:l.="%= "
+
+  "let l:l.="%#StatusLineFile#"
+
+  " File type
+  let l:l.="%( %{&filetype} %)".g:statusline.symbol.sep " %y %Y
+  " File format
+  let l:l.="%( %{&fileformat} %)".g:statusline.symbol.sep
+  " File encoding
+  let l:l.="%( %{(&fenc!=''?&fenc:&enc)} %)"
+
+
+  "let l:l.="%0*"
+  let l:l.="%#StatusLinePos#"
+
+  let l:l.=" %l,%c%V "
+  let l:l.=g:statusline.symbol.sep
+  let l:l.=" %L,%p%% "
+
+  let l:l.="%0*"
+
+  "let l:l.="%{StatusLineSyntastic()}"
+
+  return l:l
+endfunc
+
+if has("autocmd")
   if !has('gui_running')
     au InsertEnter  * redraw!
     au InsertChange * redraw!
     au InsertLeave  * redraw!
   endif
 
-  " Highlight the status bar in insert mode
-  "autocmd InsertEnter * hi StatusLine ctermfg=235 ctermbg=2
-  "autocmd InsertLeave * hi StatusLine ctermfg=12 ctermbg=11
-
-  "autocmd ColorScheme,VimEnter * call StatusLine#set()
-
+  " Apply the colors
+  autocmd ColorScheme,VimEnter * call SetStatusLine()
 endif
 
+" Set status line
 set statusline=%!SetStatusLine()
+
+" }}}
+" Key maps {{{
+
+" Change leader to a comma instead of backslash
+let mapleader=","
+let g:mapleader=","
+
+" Quicker split navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Save a file as root (,W)
+noremap <leader>W :w !sudo tee % > /dev/null<CR>
+
+" Git commands
+map <leader>b :Gblame<cr>
+map <leader>l :!clear && git log -p %<cr>
+map <leader>d :!clear && git diff %<cr>
+
+" Sort css properties
+nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
+
+" Open .vimrc in a new split
+nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<cr>
+
+" Nop commands
+" nnoremap <up> <nop>
+" nnoremap <down> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" inoremap <up> <nop>
+" inoremap <down> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
+" nnoremap j gj
+" nnoremap k gk
+
 " }}}
 
 " Load custom settings
