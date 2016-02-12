@@ -254,9 +254,9 @@ if !has('gui_running')
   augroup END
 endif
 
-if has("mouse")
+"if has("mouse")
   set mouse=a
-endif
+"endif
 
 " Don't redraw while executing macros
 set lazyredraw
@@ -273,6 +273,10 @@ set ruler
 
 " Always show the status line
 set laststatus=2
+
+" Natural new split focus
+set splitbelow
+set splitright
 
 " }}}
 " Spacing {{{
@@ -293,6 +297,8 @@ set smarttab
 
 " Show invisible characters
 set list listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
+
+" Customize invisible characters color
 hi NonText ctermfg=11
 hi SpecialKey ctermfg=11
 
@@ -375,6 +381,10 @@ if has("autocmd")
   autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
   autocmd InsertLeave * match ExtraWhitespace /\s\+$/
   autocmd BufWinLeave * call clearmatches()
+
+  " Show cursor line on active window only
+  au WinEnter * set cursorline
+  au WinLeave * set nocursorline
 
   " Restore cursor position
   augroup resCur
@@ -462,7 +472,7 @@ if !exists('g:statusline.style')
 endif
 
 " Symbols ⎇ |•·
-let g:statusline.symbol.sep = ''
+let g:statusline.symbol.sep = '|'
 let g:statusline.symbol.branch = '⎇ '
 "let g:statusline.symbol.readonly = 'RO'
 
@@ -490,6 +500,7 @@ hi StatusLineWarning ctermfg=0 ctermbg=1
 " warning 9?
 
 function! StatusLineMode()
+  "redraw
   let l:mode=mode()
 
   " Default status line style
@@ -532,7 +543,7 @@ function! StatusLineMode()
   exec 'hi StatusLineMode '.l:style
   "exec 'hi StatusLineBranch '.l:style
 
-  "exec 'hi StatusLineFile '.l:file
+  exec 'hi StatusLineFile '.l:file
   "exec 'hi StatusLineFileInfo '.l:info
 
   return l:mode
@@ -640,10 +651,7 @@ if has("autocmd")
     "au InsertEnter  * redraw!
     "au InsertChange * redraw!
     "au InsertLeave  * redraw!
-
-    " Set guides on active window only
-    au WinEnter * set cursorline
-    au WinLeave * set nocursorline
+    au InsertLeave * call SetStatusLine()
   endif
 
   autocmd ColorScheme,VimEnter * call SetStatusLine()

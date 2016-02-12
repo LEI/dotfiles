@@ -5,11 +5,15 @@ if [[ $OSTYPE =~ darwin* ]]; then
   cpu_count=$(sysctl -n hw.ncpu)
   cpu_usage=$(ps -A -o %cpu | awk -v count=$cpu_count '{s+=$1} END {print s/count}')
 
+  load=$(uptime | cut -d "," -f 3- | cut -d ":" -f2 | sed -e "s/^[ \t]*//")
+
   #printf "%0.2f%%\n" $cpu_usage
-  echo "${cpu_usage%.*}%"
+  echo -e "${cpu_usage%.*}% ${load}"
 fi
 
 exit 0
+
+# CPU: github.com/erikw/tmux-powerline/blob/master/segments/cpu.sh
 
 # https://gist.github.com/russelldavies/4016983
 
