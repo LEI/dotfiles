@@ -15,3 +15,6 @@ let g:syntastic_loc_list_height = 5
 "let g:syntastic_warning_symbol = "!" " ⚠
 let g:syntastic_style_error_symbol = "☢"
 let g:syntastic_style_warning_error = "⚠"
+
+" Status line format
+let g:syntastic_stl_format='%E{Err %fe #%e}%B{  }%W{Warn %fw #%w}'
