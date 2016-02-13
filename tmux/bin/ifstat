@@ -2,10 +2,14 @@
 
 # github.com/erikw/tmux-powerline/blob/master/segments/ifstat_sys.sh
 
+get_iface() {
+  route get 0.0.0.0 2>/dev/null | awk '/interface: / {print $2}'
+}
+
 sleeptime="0.5"
 
 if [[ $OSTYPE =~ darwin* ]]; then
-  iface="en0"
+  iface=$(get_iface) #"en0"
   RXB=$(netstat -i -b | grep -m 1 $iface | awk '{print $7}')
   TXB=$(netstat -i -b | grep -m 1 $iface | awk '{print $10}')
   sleep "$sleeptime"

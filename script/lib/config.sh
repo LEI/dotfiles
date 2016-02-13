@@ -12,16 +12,17 @@ config() {
   local file=$1
   local template=${2-}
 
-  # If no template is specified, try to add .template
-  if [[ -z "$template" ]]; then
-    # local path=${file%/*}
-    # local name=${file##*/}
-    template="$file.template"
-    log_warn "Guessing template location" "$template"
-  fi
-
   # Fill config from template if needed
   if [[ ! -f "$file" ]]; then
+
+    # If no template is specified, try to add .template
+    if [[ -z "$template" ]]; then
+      # local path=${file%/*}
+      # local name=${file##*/}
+      template="$file.template"
+      log_warn "Assuming template location:" "$template"
+    fi
+
     confirm "Create configuration file" "$file" Y || return 1
     # Prefix is important
     DOT_USER_NAME=$(prompt "What is your full name" "Guillaume Frichet")

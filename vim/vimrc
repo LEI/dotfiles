@@ -129,7 +129,7 @@ endif
 
 try
   "let base16colorspace=256
-  colorscheme base16-tomorrow
+  colorscheme base16-ocean
 catch
   colorscheme torte
 endtry
@@ -471,8 +471,8 @@ if !exists('g:statusline.style')
   let g:statusline.style={}
 endif
 
-" Symbols ⎇ |•·
-let g:statusline.symbol.sep = '/'
+" Symbols ⎇ /|•·
+let g:statusline.symbol.sep = '|'
 let g:statusline.symbol.branch = '⎇ '
 "let g:statusline.symbol.readonly = 'RO'
 
@@ -488,9 +488,9 @@ let g:statusline.style.replace = 'ctermfg=10 ctermbg=1'
 let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
 
 " Highlight groups
-"exec 'hi StatusLine '.g:statusline.style.base
+exec 'hi StatusLine '.g:statusline.style.base
 exec 'hi StatusLineNC '.g:statusline.style.dark
-" Custom (defined by StatusLineMode)
+" Custom
 exec 'hi StatusLineBranch '.g:statusline.style.bright.' cterm=bold'
 "exec 'hi StatusLineFile '.g:statusline.style.base
 exec 'hi StatusLineFileInfo '.g:statusline.style.bright
@@ -506,6 +506,7 @@ function! StatusLineMode()
   " Default status line style
   let l:style=g:statusline.style.base
   let l:line=g:statusline.style.base "^^^
+  let l:branch=g:statusline.style.bright
   let l:file=g:statusline.style.base
 
   if mode ==# "n""
@@ -515,6 +516,7 @@ function! StatusLineMode()
     let l:mode='INSERT'
     let l:style=g:statusline.style.insert
     let l:line=g:statusline.style.insert
+    let l:branch=g:statusline.style.insert
     let l:file=g:statusline.style.insert
   elseif mode ==# "R"
     let l:mode='REPLACE'
@@ -536,12 +538,14 @@ function! StatusLineMode()
   "hi StatusLineMode &l:style
 
   exec 'hi StatusLine '.l:line
+
   exec 'hi StatusLineColor '.l:style
 
   " Add bold to mode label
   let l:style.=' cterm=bold'
+
   exec 'hi StatusLineMode '.l:style
-  "exec 'hi StatusLineBranch '.l:style
+  exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
 
   exec 'hi StatusLineFile '.l:file
   "exec 'hi StatusLineFileInfo '.l:info
@@ -606,21 +610,26 @@ function! SetStatusLine()
   " Current branch
   let l:l.='%#StatusLineBranch#'
   let l:l.='%( %{StatusLineBranch()} %)'
+  " Reset color to default highlight groupe 'StatusLine'
   let l:l.='%*'
 
   " Buffer index, collapse marker and relative path
   "let l:l.='%#StatusLineFile#'
   let l:l.='%< %n %f '
+
   " Help, readonly, and modified flags
   let l:l.='%([%H%R%M] %)'
-  "let l:l.='%*'
+
+  " No color section
+  let l:l.='%#StatusLineNC#'
 
   " Right align past this point
   let l:l.='%='
 
-  let l:l.='%( %{v:register} %)'
+  " Register
+  let l:l.='%{v:register}'
 
-  " File type (y/Y ?)
+  " File type (y/Y)
   let l:l.='%( %{&filetype} %)'
 
   " File type

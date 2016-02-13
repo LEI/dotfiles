@@ -28,7 +28,6 @@ boot() {
   # DOT_ROOT=$(pwd -P)
   DOT_TARGET=$HOME
   DOT_SCRIPT="$DOT_ROOT/script"
-  DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
   DOT_RC="$DOT_ROOT/.dotrc"
 
   source $DOT_SCRIPT/lib/import.sh # TODO import->load?
@@ -44,7 +43,8 @@ boot() {
   parse_arguments "$@"
 
   # Read config file and set config variables -> ${!DOT_CONFIG_SECTION_*}
-  config "$DOT_RC" "$DOT_RC_TEMPLATE" || die "$DOT_RC"
+  #DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
+  config "$DOT_RC" || die "$DOT_RC"
   # var_dump "DOT_CONFIG_"
 
   # Set global script variables
@@ -155,8 +155,9 @@ parse_arguments() {
     local val=${2-}
     # echo "Parsing $1 (#$#)"
     case $key in
+      # All dot commands
       git|list|install|uninstall|link|unlink|defaults)
-        # Check if a command is already defined
+        # Check if a command is already registered
         [[ -n "${DOT_CMD-}" ]] && usage 1 "Too many arguments: $key"
         # Register main action
         DOT_CMD="$key"
