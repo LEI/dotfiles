@@ -496,7 +496,7 @@ exec 'hi StatusLineBranch '.g:statusline.style.bright.' cterm=bold'
 exec 'hi StatusLineFileInfo '.g:statusline.style.bright
 
 hi StatusLineColor ctermbg=0
-hi StatusLineWarning ctermfg=0 ctermbg=1
+"hi StatusLineWarning ctermfg=0 ctermbg=1
 " warning 9?
 
 function! StatusLineMode()
@@ -627,7 +627,7 @@ function! SetStatusLine()
   let l:l.='%='
 
   " Register
-  let l:l.='%{v:register}'
+  let l:l.='%( %{v:register} %)'
 
   " File type (y/Y)
   let l:l.='%( %{&filetype} %)'
@@ -647,8 +647,8 @@ function! SetStatusLine()
   " Total lines: %L
 
   " Syntastic
-  "let l:l.='%#warningmsg#'
-  let l:l.='%#StatusLineWarning#'
+  "let l:l.='%#StatusLineWarning#'
+  let l:l.='%#warningmsg#'
   let l:l.='%( %{StatusLineSyntastic()} %)'
   let l:l.='%*'
 
