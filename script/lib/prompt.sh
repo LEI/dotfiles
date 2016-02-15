@@ -15,6 +15,10 @@ prompt() {
 
   log_ask "$question" "" >&2
 
+  # TODO: default value OR placeholder value?
+  #       e.g. display 'backup', prefill 'b'
+  #       when empty: retry or apply default?
+
   # Read with -i if bash >= 4
   if [[ $ENV_BASH_VERSION -ge 4 ]] && [[ -n "$answer_default" ]]; then
     read -e -r -p "$answer_default_display" -i "${answer_default}" answer
