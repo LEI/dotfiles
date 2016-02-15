@@ -224,8 +224,8 @@ set showcmd
 " Hide current mode
 set noshowmode
 
-" Disable cursor blink (not working?)
-set gcr=a:blinkon0
+" Disable cursor blinking
+set guicursor=a:blinkon0
 
 " Do not show matching brackets when text indicator is over them
 set noshowmatch
@@ -484,7 +484,7 @@ let g:statusline.style.bright = 'ctermfg=12 ctermbg=11'
 " Modes (white color: ctermfg=13)
 let g:statusline.style.normal = 'ctermfg=10 ctermbg=4'
 let g:statusline.style.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline.style.replace = 'ctermfg=10 ctermbg=1'
+let g:statusline.style.replace = 'ctermfg=13 ctermbg=1' " fg=10
 let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
 
 " Highlight groups
@@ -506,7 +506,7 @@ function! StatusLineMode()
   " Default status line style
   let l:style=g:statusline.style.base
   let l:line=g:statusline.style.base "^^^
-  let l:branch=g:statusline.style.bright
+  "let l:branch=g:statusline.style.bright
   let l:file=g:statusline.style.base
 
   if mode ==# "n""
@@ -516,7 +516,7 @@ function! StatusLineMode()
     let l:mode='INSERT'
     let l:style=g:statusline.style.insert
     let l:line=g:statusline.style.insert
-    let l:branch=g:statusline.style.insert
+    "let l:branch=g:statusline.style.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
     let l:file=g:statusline.style.insert
   elseif mode ==# "R"
     let l:mode='REPLACE'
@@ -545,7 +545,7 @@ function! StatusLineMode()
   let l:style.=' cterm=bold'
 
   exec 'hi StatusLineMode '.l:style
-  exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
+  "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
 
   exec 'hi StatusLineFile '.l:file
   "exec 'hi StatusLineFileInfo '.l:info
@@ -617,11 +617,11 @@ function! SetStatusLine()
   "let l:l.='%#StatusLineFile#'
   let l:l.='%< %n %f '
 
-  " Help, readonly, and modified flags
-  let l:l.='%([%H%R%M] %)'
-
   " No color section
   let l:l.='%#StatusLineNC#'
+
+  " Help, readonly, and modified flags
+  let l:l.='%( [%H%R%M] %)'
 
   " Right align past this point
   let l:l.='%='

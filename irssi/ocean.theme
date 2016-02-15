@@ -238,6 +238,7 @@ abstracts = {
   # notices
   ownnotice = "[%r$0%K(%R$1-%K)]%n ";
   notice = "%K-%M$*%K-%n ";
+  #notice = "{indent $*}";
   pubnotice_channel = "%K:%m$*";
   pvtnotice_host = "%K(%m$*%K)";
   servernotice = "%g!$*%n ";
@@ -353,7 +354,7 @@ formats = {
   #pubmsg_channel = "{pubmsgnick $3 {pubnick $[-10]0}{msgchannel $1}}$2";
   "fe-common/core" = {
     line_start = "{line_start}";
-    line_start_irssi = "{line_start}{indent >}{hilight Irssi }";
+    line_start_irssi = "{line_start}%_{indent Irssi}"; #{hilight Irssi }";
     #{hilight Irssi:}
     timestamp = " %G{timestamp %%H:%%M:%%S }%n";
 
