@@ -43,7 +43,7 @@ boot() {
   parse_arguments "$@"
 
   # Read config file and set config variables -> ${!DOT_CONFIG_SECTION_*}
-  #DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
+  # Looks for ${DOT_RC}.template
   config "$DOT_RC" || die "$DOT_RC"
   # var_dump "DOT_CONFIG_"
 
@@ -53,7 +53,7 @@ boot() {
   FORCE="${FORCE-${DOT_CONFIG_FORCE-false}}"
   TIMESTAMPS="${TIMESTAMPS-${DOT_CONFIG_TIMESTAMPS-false}}"
 
-  # Platform specific
+  # Platform name
   UNAME=$(uname -s) # Darwin|Linux
 
   # Git config credential helper
@@ -92,10 +92,18 @@ dot() {
       dot_defaults
       ;;
     '') # Default to all
-      confirm "Update git submodules" "" Y && dot_git
-      confirm "**Homebrew install" "" Y && dot_install
-      confirm "**Symlink files to $DOT_TARGET" "" Y && dot_bootstrap
-      confirm "**Setup $UNAME specific defaults" "" Y && dot_defaults
+      if confirm "Update repository" "" Y; then
+        dot_git
+      fi
+      if confirm "**Install packages" "" Y; then
+        dot_install
+      fi
+      if confirm "**Symlink files to $DOT_TARGET" "" Y; then
+        dot_bootstrap
+      fi
+      if confirm "**Setup $UNAME defaults" "" Y; then
+        dot_defaults
+      fi
       ;;
     *)
       log_error "Unsupported command" "$cmd"
@@ -112,12 +120,10 @@ dot() {
 }
 
 dot_install() {
-  import "install/brew"
-  import "install/cask"
+  import "install"
 
   # Install dependencies
-  install_brew && \
-    install_cask || \
+  install_packages || \
     log_warn "Install aborted" "= $?"
 }
 
@@ -142,10 +148,10 @@ dot_list() {
 }
 
 dot_defaults() {
-  import "platform/defaults"
+  import "defaults"
 
   # Set platform defaults
-  platform_defaults || \
+  os_defaults || \
     log_warn "Defaults aborted" "= $?"
 }
 

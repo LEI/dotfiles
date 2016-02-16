@@ -12,7 +12,6 @@ cd "$DOT_ROOT"
 # DOT_ROOT=$(pwd -P)
 DOT_TARGET=$HOME
 DOT_SCRIPT="$DOT_ROOT/script"
-DOT_RC_TEMPLATE="$DOT_SCRIPT/config/.dotrc.template"
 DOT_RC="$DOT_ROOT/.dotrc"
 
-[[ "$0" == "$BASH_SOURCE" ]] && "$DOT_SCRIPT/main.sh" "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && "$DOT_SCRIPT/dotfiles" "$@"
