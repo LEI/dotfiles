@@ -1,7 +1,7 @@
 # .bash_profile
 
 # Add `~/bin` to the `$PATH`
-export PATH="$HOME/bin:$PATH";
+#export PATH="$HOME/bin:$PATH";
 
 if [ -f ~/.bashrc ]; then
 	[ -n "$PS1" ] && source ~/.bashrc
