@@ -311,17 +311,17 @@ abstracts = {
   topicsbstart = "{sbstart $*}";
   topicsbend = "{sbend $*}";
 
-  prompt = "$* ";
+  prompt = "$*: ";
 
-  sb = "$*";
+  sb = "$* ";
   #sb = " %c[%n$*%c]%n";
   #%w[%n$*%w]%n
   #%K$*%K
 
-  sbmode = "(%k+%n$*)";
+  sbmode = " %K+%n$*";
   sbaway = " %raway!%n";
   #" (%GzZzZ%n)";
-  sbservertag = " $0 (change with ^X)";
+  sbservertag = " $0 ^X";
   sbnickmode = "$0";
 
   # activity in statusbar
@@ -400,9 +400,9 @@ formats = {
   "Irssi::Script::adv_windowlist" = {
     awl_display_nokey = " %K$N%n $H$C$S ";
     awl_display_key = " %K$Q%n $H$C$S ";
-    awl_display_nokey_active = " [%K$N%n $H$C$S] ";
-    awl_display_key_active = " [%K$Q%n $H$C$S] ";
-    awl_display_header = " %_$C%_ ";
+    awl_display_nokey_active = "%4 %K$N $H$C$S %n";
+    awl_display_key_active = "%4 %K$Q $H$C$S %n";
+    awl_display_header = " %K%_$C%_%n ";
     awl_name_display = "$0";
     awl_separator = "";
     awl_viewer_item_bg = "";
