@@ -13,7 +13,7 @@ dry_run = true # Change to false when confident
 timestamps = false
 prefix = .
 
-[files] # Dotfiles
+[symlink] # Dotfiles
 # If the source contains a wildcard, the destination must be a directory
 # where all matching files will be symlinked.
 # Patterns:

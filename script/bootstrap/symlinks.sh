@@ -19,11 +19,12 @@ bootstrap_symlinks() {
       ;;
   esac
 
-  # Prefix and files must be defined in .dotrc (DOT_CONFIG_PREFIX)
-  # The array of files must follow the pattern src[:dst]
-  bootstrap_symlinks_parse $method ${DOT_FILES[@]}
+  # Prefix (DOT_CONFIG_PREFIX) and paths must be defined in .dotrc
+  # Each path  must follow the pattern src[:dst]
+  bootstrap_symlinks_foreach $method ${DOT_SYMLINK[@]}
 }
-bootstrap_symlinks_parse() {
+
+bootstrap_symlinks_foreach() {
   local prefix=$DOT_CONFIG_PREFIX
   local method=$1; shift
   local expressions="$@"

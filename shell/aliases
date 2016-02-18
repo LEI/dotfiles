@@ -151,3 +151,6 @@ alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resource
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec $SHELL -l"
+
+# Fix Irssi scrolling (in tmux?)
+alias irssi='TERM=screen-256color irssi'

@@ -1,4 +1,4 @@
-# ~/.bash_prompt
+# .bash_prompt
 
 # Shell prompt based on the Solarized theme
 
@@ -116,8 +116,7 @@ prompt_command() {
 	# Set the terminal title to the current working directory
 	PS1='\[\033]0;\w\007\]';
 
-	# In case of missing final new line
-	PS1+='\n'
+	#PS1+='\n'
 
 	# Highlight the username when logged in as root
 	if [[ "${USER}" == "root" ]]; then

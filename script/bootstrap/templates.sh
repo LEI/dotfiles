@@ -19,7 +19,7 @@ bootstrap_templates() {
     file=${template%.template}
 
     if [[ -f "$file" ]]; then
-      # TODO Check modifications?
+      # TODO Check modifications -> rebuild if new cfg?
       # Confirm processing if target file exists
       # confirm "Overwrite ${file/$DOT_ROOT\//}" "$template" Y || continue
 
@@ -27,7 +27,7 @@ bootstrap_templates() {
     fi
 
     # Fill file
-    sed_file "$file" "$template" "${vars[@]}" || die "Could not sed file"
+    sed_file "$file" "$template" "${vars[@]}" || die "Could not sed $file"
     log_success "Template processed" "${file/$DOT_ROOT\/}"
   done
 }

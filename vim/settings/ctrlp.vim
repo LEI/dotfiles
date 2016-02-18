@@ -7,3 +7,11 @@
 
 " Exclude .gitignore paths
 let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+"let g:ctrlp_buffer_func = { 'enter': 'BrightHighlightOn', 'exit':  'BrightHighlightOff', }
+"function! BrightHighlightOn()
+"  hi CursorLine ctermbg=3
+"endfunction
+"function! BrightHighlightOff()
+"  hi CursorLine ctermbg=10
+"endfunction

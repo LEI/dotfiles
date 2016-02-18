@@ -17,6 +17,18 @@
 # ...
 # orange:       brightcyan      %C
 
+#   C1      C2      C3       Text Colour (C1) Text Colour (C2) Background (C3)
+#  ---------------------------------------------------------------------------
+#   %k      %K       %0      black            dark grey        black
+#   %r      %R       %1      red              bright red       red
+#   %g      %G       %2      green            bright green     green
+#   %y      %Y       %3      yellow           bright yellow    yellow
+#   %b      %B       %4      blue             bright blue      blue
+#   %m      %M       %5      magenta          bright magenta   magenta
+#   %p      %P               magenta (think: purple)
+#   %c      %C       %6      cyan             bright cyan      cyan
+#   %w      %W       %7      light grey       white            light grey
+
 # When testing changes, the easiest way to reload the theme is with /RELOAD.
 # This reloads the configuration file too, so if you did any changes remember
 # to /SAVE it first. Remember also that /SAVE overwrites the theme file with
@@ -63,18 +75,6 @@
 # set at the beginning before the {foo} template. If there wasn't the %g
 # at start, the normal behaviour of %n would occur. If you _really_ want
 # to use the terminal's default color, use %N.
-
-#   C1      C2      C3       Text Colour (C1) Text Colour (C2) Background (C3)
-#  ---------------------------------------------------------------------------
-#   %k      %K       %0      black            dark grey        black
-#   %r      %R       %1      red              bright red       red
-#   %g      %G       %2      green            bright green     green
-#   %y      %Y       %3      yellow           bright yellow    yellow
-#   %b      %B       %4      blue             bright blue      blue
-#   %m      %M       %5      magenta          bright magenta   magenta
-#   %p      %P               magenta (think: purple)
-#   %c      %C       %6      cyan             bright cyan      cyan
-#   %w      %W       %7      light grey       white            light grey
 
 #############################################################################
 
@@ -329,7 +329,7 @@ abstracts = {
   # ',' separator
   sb_act_sep = "%R$*";
   # normal text
-  sb_act_text = "%Y$*";
+  sb_act_text = "$*";
   # public message
   sb_act_msg = "%W$*";
   #%W
@@ -340,8 +340,8 @@ abstracts = {
   sb_act_hilight_color = "$0$1-%n";
 
   # custom
-  sep = "|";
   indent = "$[-10]0 %G{sep} %n";
+  sep = "|";
 };
 formats = {
   #own_msg = "{ownmsgnick $2 {ownnick $[-10]0}}%W$1";
@@ -401,7 +401,7 @@ formats = {
     awl_display_nokey = " %K$N%n $H$C$S ";
     awl_display_key = " %K$Q%n $H$C$S ";
     awl_display_nokey_active = "%4 %K$N $H$C$S %n";
-    awl_display_key_active = "%4 %K$Q $H$C$S %n";
+    awl_display_key_active = "%4 %K$Q %k$H$C$S %n";
     awl_display_header = " %K%_$C%_%n ";
     awl_name_display = "$0";
     awl_separator = "";
