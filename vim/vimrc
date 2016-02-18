@@ -239,7 +239,7 @@ set timeoutlen=1
 if !has('gui_running')
   set ttimeoutlen=10
   augroup FastEscape
-    autocmd!
+    au!
     au InsertEnter * set timeoutlen=0
     au InsertLeave * set timeoutlen=1000
   augroup END
@@ -346,29 +346,32 @@ set smartcase
 set magic
 
 " }}}
-" Autocmd {{{
+" Automatic commands {{{
 
 if has("autocmd")
-  " Auto reload .vimrc
-  "autocmd BufWritePost .vimrc source $MYVIMRC
-  "autocmd! BufWritePost .vimrc source %
+  " FIXME: Auto reload .vimrc
+  "au BufWritePost .vimrc source $MYVIMRC
+  "au! BufWritePost .vimrc source %
   augroup reload_vimrc
-    autocmd!
-    autocmd bufwritepost $MYVIMRC nested source $MYVIMRC
+    au!
+    au BufWritePost $MYVIMRC nested source $MYVIMRC
   augroup END
 
   " Treat .json files as .js
-  autocmd BufNewFile,BufRead *.json setfiletype json syntax=javascript
+  au BufNewFile,BufRead *.json setfiletype json syntax=javascript
 
   " Treat .md files as Markdown
-  autocmd BufNewFile,BufRead *.md setlocal filetype=markdown
+  au BufNewFile,BufRead *.md setlocal filetype=markdown
+
+  " Treat .twig as .php (or htmljinja)
+  au BufNewFile,BufRead *.twig set filetype=php
 
   " Highlight trailing witespaces in red
   match ExtraWhitespace /\s\+$/
-  autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
-  autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-  autocmd InsertLeave * match ExtraWhitespace /\s\+$/
-  autocmd BufWinLeave * call clearmatches()
+  au BufWinEnter * match ExtraWhitespace /\s\+$/
+  au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+  au InsertLeave * match ExtraWhitespace /\s\+$/
+  au BufWinLeave * call clearmatches()
 
   " Show cursor line on active window only
   au WinEnter * set cursorline
@@ -376,8 +379,8 @@ if has("autocmd")
 
   " Restore cursor position
   augroup resCur
-    autocmd!
-    autocmd BufWinEnter * call ResCur()
+    au!
+    au BufWinEnter * call ResCur()
   augroup END
 endif
 
