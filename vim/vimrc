@@ -320,11 +320,11 @@ set nofoldenable
 
 " Start scrolling before the window border
 if !&scrolloff
-  set scrolloff=8
+  set scrolloff=3
 endif
 
 if !&sidescrolloff
-  set sidescrolloff=16
+  set sidescrolloff=5
 endif
 
 if !&sidescroll
