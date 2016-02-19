@@ -42,14 +42,6 @@
 " git status, column/row number, total lines, and percentage in status
 "set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
 
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
-endfunction
-
 "autocmd ColorScheme *
 "    \ hi StatusLineMode ctermbg=1 ctermfg=10 cterm=bold " Normal
 "    \ hi User2 ctermbg=2 ctermfg=10 cterm=bold " Replace
@@ -88,6 +80,7 @@ let g:statusline.style.visual = 'ctermfg=10 ctermbg=3'
 exec 'hi StatusLine '.g:statusline.style.base
 exec 'hi StatusLineNC '.g:statusline.style.dark
 " Custom
+exec 'hi StatusLinePaste '.g:statusline.style.base
 exec 'hi StatusLineBranch '.g:statusline.style.bright.' cterm=bold'
 "exec 'hi StatusLineFile '.g:statusline.style.base
 exec 'hi StatusLineFileInfo '.g:statusline.style.bright
@@ -151,6 +144,14 @@ function! StatusLineMode()
   return l:mode
 endfunc
 
+" Returns true if paste mode is enabled
+function! StatusLinePaste()
+    if &paste
+        return 'PASTE'
+    endif
+    return ''
+endfunction
+
 " Git
 function! StatusLineBranch()
   if exists("*fugitive#head")
@@ -192,6 +193,8 @@ function! SetStatusLine()
   " Display colored mode
   let l:l.='%#StatusLineMode#'
   let l:l.=' %{StatusLineMode()} '
+  let l:l.='%#StatusLinePaste#'
+  let l:l.='%( %{StatusLinePaste()} %)'
 
   " Current branch
   let l:l.='%#StatusLineBranch#'
