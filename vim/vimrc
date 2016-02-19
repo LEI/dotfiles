@@ -36,7 +36,7 @@ if &history < 1000
   set history=1000
 endif
 
-" Reload files changed from the outside
+" Reload unmodified files when changes are detected outside
 set autoread
 
 "if has('path_extra')
@@ -169,14 +169,23 @@ hi LineNr ctermbg=10
 hi CursorLineNr ctermfg=12
 "hi CursorLine ctermbg=10
 
+" Not supported by Terminal.app
+" See settings/terminal.vim
+" hi Cursor ctermfg=1 ctermbg=7
+
 hi IncSearch ctermfg=10 ctermbg=3
 hi Search ctermfg=0 ctermbg=9
 hi Visual ctermfg=10 ctermbg=3
+
 "hi Pmenu        ctermbg=240 ctermfg=12
 "hi PmenuSel     ctermbg=3   ctermfg=1
 "hi SpellBad ctermfg=1 ctermbg=0
 
 hi ExtraWhitespace ctermbg=1 guibg=red
+
+" Customize invisible characters color
+hi NonText ctermfg=11
+hi SpecialKey ctermfg=11
 
 "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
 "hi ColorColumn ctermbg=darkgray guibg=darkgray
@@ -212,7 +221,7 @@ set showcmd
 set noshowmode
 
 " Disable cursor blinking
-set guicursor=a:blinkon0
+"set guicursor=a:blinkon0
 
 " Do not show matching brackets when text indicator is over them
 set noshowmatch
@@ -284,11 +293,8 @@ set smartindent
 set smarttab
 
 " Show invisible characters
+" Highlight: NonText and SpecialKey
 set list listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
-
-" Customize invisible characters color
-hi NonText ctermfg=11
-hi SpecialKey ctermfg=11
 
 " Don't wrap lines
 set nowrap
@@ -349,13 +355,13 @@ set magic
 " Automatic commands {{{
 
 if has("autocmd")
-  " FIXME: Auto reload .vimrc
-  "au BufWritePost .vimrc source $MYVIMRC
+  " Auto reload .vimrc
+  au BufWritePost .vimrc source $MYVIMRC
   "au! BufWritePost .vimrc source %
-  augroup reload_vimrc
-    au!
-    au BufWritePost $MYVIMRC nested source $MYVIMRC
-  augroup END
+  "augroup reload_vimrc
+  "  au!
+  "  au BufWritePost $MYVIMRC nested source $MYVIMRC
+  "augroup END
 
   " Treat .json files as .js
   au BufNewFile,BufRead *.json setfiletype json syntax=javascript
@@ -377,13 +383,13 @@ if has("autocmd")
   au WinEnter * set cursorline
   au WinLeave * set nocursorline
 
-  " Restore cursor position
   augroup resCur
     au!
     au BufWinEnter * call ResCur()
   augroup END
 endif
 
+" Restore cursor position
 function! ResCur()
   if line("'\"") > 0 && line("'\"") <= line("$")
     normal! g`"
@@ -400,6 +406,20 @@ set backspace=indent,eol,start
 " Change leader to a comma instead of backslash
 let mapleader=","
 let g:mapleader=","
+
+" Nope
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+inoremap <down> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>
+
+" Use virtual columns for vertical movements
+nnoremap j gj
+nnoremap k gk
 
 " Quicker split navigation
 nnoremap <C-h> <C-w>h
@@ -423,18 +443,6 @@ nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 
 " Open .vimrc in a new split
 nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
-
-" Nop commands
-" nnoremap <up> <nop>
-" nnoremap <down> <nop>
-" nnoremap <left> <nop>
-" nnoremap <right> <nop>
-" inoremap <up> <nop>
-" inoremap <down> <nop>
-" inoremap <left> <nop>
-" inoremap <right> <nop>
-" nnoremap j gj
-" nnoremap k gk
 
 " }}}
 

@@ -15,10 +15,10 @@ chatnets = {
   Freenode = {
     type = "IRC";
     nick = "LEI";
-    #autosendcmd = "/msg nickserv identify DOT_USER_PASSWORD; wait 2000;";
-    max_kicks = "1";
-    max_msgs = "4";
-    max_whois = "1";
+    #autosendcmd = "/msg nickserv identify DOT_USER_PASSWORD; wait 2000;/window goto nickserv;/wc";
+    #max_kicks = "1";
+    #max_msgs = "4";
+    #max_whois = "1";
   };
 };
 
@@ -199,7 +199,11 @@ statusbar = {
 settings = {
   core = { real_name = "Guillaume"; user_name = "LEI"; nick = "LEI"; };
   "fe-text" = { actlist_sort = "refnum"; };
-  "fe-common/core" = { theme = "ocean"; };
+  "fe-common/core" = {
+    theme = "ocean";
+    bell_beeps = "yes";
+    beep_msg_level = "MSGS NOTICES INVITES DCC DCCMSGS HILIGHT";
+  };
   "perl/core/scripts" = {
     neat_truncate_nick = "yes";
     neat_maxlength = "10";
@@ -225,6 +229,6 @@ hilights = (
   # Highlight own nickname
   { text = "LEI"; color = "%M"; nick = "yes"; word = "yes"; }
 );
-keyboard = ( 
+keyboard = (
   { key = "meta-[M"; id = "command"; data = "mouse_xterm"; }
 );
