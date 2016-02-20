@@ -50,54 +50,52 @@
 "    \ hi User3 ctermbg=3 ctermfg=10 cterm=bold " Insert
 "    \ hi User4 ctermbg=4 ctermfg=10 cterm=bold " Visual?
 
-let statusline#Build={} "loaded: 1}
+function! s:check_defined(variable, default)
+  if !exists(a:variable)
+    let {a:variable} = a:default
+  endif
+endfunction
 
-if !exists('g:statusline')
-  let g:statusline={}
-endif
+call s:check_defined('g:statusline', {})
+let statusline#Build = {}
 
-if !exists('g:statusline#symbol')
-  let g:statusline#symbol={}
-endif
+call s:check_defined('g:statusline#symbol', {})
+call extend(g:statusline#symbol, {
+  \ 'paste': 'PASTE',
+  \ 'readonly': get(g:, 'powerline_fonts', 0) ? "\ue0a2" : 'RO',
+  \ 'whitespace': get(g:, 'powerline_fonts', 0) ? "\u2739" : '!',
+  \ 'linenr': get(g:, 'powerline_fonts', 0) ? "\ue0a1" : ':',
+  \ 'branch': get(g:, 'powerline_fonts', 0) ? "\ue0a0" : '⎇ ',
+  \ 'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512)),
+  \ 'modified': '+',
+  \ 'space': ' ',
+  \ 'sep': '|',
+  \ }, 'keep')
 
-if !exists('g:statusline#hi')
-  let g:statusline#hi={}
+if !exists('g:statusline#style')
+  let g:statusline#style={}
 endif
 
 " Symbols ⎇ /|•·
-let g:statusline#symbol.space = ' '
-let g:statusline#symbol.sep = '|'
-let g:statusline#symbol.branch = '⎇ '
+"let g:statusline#symbol.space = ' '
+"let g:statusline#symbol.sep = '|'
+"let g:statusline#symbol.branch = '⎇ '
 "let g:statusline#symbol.readonly = 'RO'
 
-" Colors
-let g:statusline#hi.dark = 'ctermfg=11 ctermbg=0'
-let g:statusline#hi.base = 'ctermfg=12 ctermbg=10'
-let g:statusline#hi.bright = 'ctermfg=12 ctermbg=11'
-"let g:statusline#hi.dark = 'ctermfg=12 ctermbg=10'
-" Modes (white color: ctermfg=13)
-let g:statusline#hi.normal = 'ctermfg=10 ctermbg=4'
-let g:statusline#hi.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline#hi.replace = 'ctermfg=13 ctermbg=1' " fg=10
-let g:statusline#hi.visual = 'ctermfg=10 ctermbg=3'
+call s:check_defined('g:statusline#style', {})
+" Palette
+let g:statusline#style.dark = 'ctermfg=11 ctermbg=0'
+let g:statusline#style.base = 'ctermfg=12 ctermbg=10'
+let g:statusline#style.bright = 'ctermfg=13 ctermbg=11'
+" Mode colors
+let g:statusline#style.normal = 'ctermfg=10 ctermbg=4'
+let g:statusline#style.insert = 'ctermfg=10 ctermbg=2'
+let g:statusline#style.replace = 'ctermfg=13 ctermbg=1' " fg=10
+let g:statusline#style.visual = 'ctermfg=10 ctermbg=3'
 
-" Highlight groups
-exec 'hi StatusLine '.g:statusline#hi.base
-exec 'hi StatusLineNC '.g:statusline#hi.dark
-" Custom
-exec 'hi StatusLineBG '.g:statusline#hi.dark
-exec 'hi StatusLinePaste '.g:statusline#hi.base
-exec 'hi StatusLineBranch '.g:statusline#hi.bright.' cterm=bold'
-"exec 'hi StatusLineFile '.g:statusline#hi.base
-exec 'hi StatusLineInfo '.g:statusline#hi.bright
-
-"hi StatusLineColor ctermbg=0
-"hi StatusLineWarning ctermfg=0 ctermbg=1
-" warning 9?
-
-" Vim mode
-
-let g:statusline#mode_map = {
+" Modes
+call s:check_defined('g:statusline#mode_map', {})
+call extend(g:statusline#mode_map, {
   \ '__' : '------',
   \ 'n'  : 'NORMAL',
   \ 'i'  : 'INSERT',
@@ -110,45 +108,56 @@ let g:statusline#mode_map = {
   \ 'S'  : 'S-LINE',
   \ '' : 'S-BLOCK',
   \ 't'  : 'TERMINAL',
-  \ }
+  \ }, 'keep')
 
 function statusline#Build.mode()
   "redraw
   let l:m=mode()
   let l:highlights = [['FileType', 'ctermfg=12']]
 
+  " Default highlight groups
+  call add(l:highlights,['', g:statusline#style.base])
+  call add(l:highlights,['NC', g:statusline#style.dark])
+  " Custom highlight groups
+  "Color,Warning?
+  call add(l:highlights,['BG', g:statusline#style.dark])
+  call add(l:highlights,['Paste', g:statusline#style.base])
+  call add(l:highlights,['Branch', g:statusline#style.bright.' cterm=bold'])
+  "File?
+  call add(l:highlights,['Info', g:statusline#style.bright])
+
   " Default status line style
-  let l:hi_bright=g:statusline#hi.bright
-  let l:hi_color=g:statusline#hi.base
-  let l:hi_line=g:statusline#hi.base "base
-  "let l:hi_file=g:statusline#hi.base
-  let l:hi_bg=g:statusline#hi.dark
+  let l:hi_bright=g:statusline#style.bright
+  let l:hi_color=g:statusline#style.base
+  let l:hi_line=g:statusline#style.base "base
+  "let l:hi_file=g:statusline#style.base
+  let l:hi_bg=g:statusline#style.dark
 
   "if get(w:,'statusline_active', 1)
   if get(w:, 'statusline_active', 1)
     if l:m ==# "n""
-      let l:hi_color=g:statusline#hi.normal
+      let l:hi_color=g:statusline#style.normal
     elseif l:m ==# "i"
-      let l:hi_color=g:statusline#hi.insert
-      let l:hi_line=g:statusline#hi.insert
-      "let l:branch=g:statusline#hi.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
-      "let l:hi_file=g:statusline#hi.insert
-      let l:hi_bg=g:statusline#hi.insert
+      let l:hi_color=g:statusline#style.insert
+      let l:hi_line=g:statusline#style.insert
+      "let l:branch=g:statusline#style.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
+      "let l:hi_file=g:statusline#style.insert
+      let l:hi_bg=g:statusline#style.insert
       "call s:highlight('', 'ctermfg=2')
     elseif l:m ==# "R"
-      let l:hi_color=g:statusline#hi.replace
+      let l:hi_color=g:statusline#style.replace
     elseif l:m ==# "v"
-      let l:hi_color=g:statusline#hi.visual
+      let l:hi_color=g:statusline#style.visual
     elseif l:m ==# "V"
-      let l:hi_color=g:statusline#hi.visual
+      let l:hi_color=g:statusline#style.visual
     elseif l:m ==# ""
-      let l:hi_color=g:statusline#hi.visual
+      let l:hi_color=g:statusline#style.visual
     endif
   else
     let l:m='__'
     "let l:hi_color='ctermfg=12'
     let l:hi_line='ctermfg=12 ctermbg=0'
-    let l:hi_bright=g:statusline#hi.dark
+    let l:hi_bright=g:statusline#style.dark
   endif
 
   "let w:statusline_mode
@@ -160,7 +169,6 @@ function statusline#Build.mode()
   " Set the base color
   "exec 'hi StatusLine '.l:hi_line
   "exec 'hi StatusLineBG '.l:hi_bg
-
   call add(l:highlights, ['File', l:hi_line])
   call add(l:highlights, ['BG', l:hi_bg])
 
@@ -316,11 +324,13 @@ if has("autocmd") && get(g:, 'statusline_loaded_autocmd', 1)
     "au InsertLeave  * redraw!
     "au InsertLeave * call SetStatusLine()
     "call setwinvar(s:render
-    "au WinEnter * exec 'hi StatusLineBG '.g:statusline#hi.dark
+    "au WinEnter * exec 'hi StatusLineBG '.g:statusline#style.dark
     "au WinLeave * hi clear StatusLineBG
   endif
 
   "autocmd ColorScheme,VimEnter * call SetStatusLine()
+
+  " BufWinEnter/Leave?
   au BufEnter,WinEnter * let w:statusline_active = 1
   au BufLeave,WinLeave * let w:statusline_active = 0
   au BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * setl statusline=%!statusline#Build.render()

@@ -355,7 +355,7 @@ set smartcase
 set magic
 
 " }}}
-" Automatic commands {{{
+" Misc {{{
 
 if has("autocmd")
   " Auto reload .vimrc
@@ -390,6 +390,20 @@ function! ResCur()
     return 1
   endif
 endfunction
+
+if $TERM_PROGRAM == "Apple_Terminal" " Terminal.app, xterm and urxvt pass this test
+  if $WINDOWID == ""                  " xterm and urxvt don't pass this test
+    "It is unlikely that anything except Terminal.app will get here
+    call terminal#MacOSX()
+  endif
+endif
+
+if $SSH_TTY != ""            " If the user is connected through ssh
+  if $TERM == "xterm-color" || $ORIGTERM = "xterm-color"
+    "Something other than Terminal.app might well get here
+    call terminal#MacOSX()
+  endif
+endif
 
 " }}}
 " Key maps {{{
