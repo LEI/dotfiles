@@ -94,7 +94,7 @@ bootstrap_symlinks_build() {
         local file_link=$(readlink_file $target) # Works on OS X
         # log_debug "$file_link == $file"
         if [[ "$file_link" == "$file" ]]; then
-          log_success "Already linked" "$target"
+          # log_success "Already linked" "$target"
           ignore=true
         else
           file_prompt="${yellow}Existing symbolic link ${white}${file_link}"
@@ -159,7 +159,7 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      backup_file "$target" && log_info "Backup" "$target.old" || return 1
+      backup_file "$target" && log_info "Saved" "$target.bak" || return 1
     elif [[ "$overwrite" = true ]]; then
       # Overwrite
       remove_file "$target" && log_info "Removed" "$target" || return 1

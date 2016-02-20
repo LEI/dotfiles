@@ -32,7 +32,7 @@ link_file() {
 
 backup_file() {
 	local file=$1
-	local backup_ext="old"
+	local backup_ext="bak"
 
 	[[ ! -e "$file" ]] && return 2
 	[[ -e "$file.$backup_ext" ]] && return 3
@@ -43,8 +43,11 @@ backup_file() {
 remove_file() {
 	local file=$1
 
-	[[ ! -e "$file" ]] && return 2
-	[[ -d "$file" ]] && die "$file: is a directory" # TODO -r
+  # TODO:
+  # Check if file exists or broken symlink
+  # Handle recursive with -r
+	#[[ ! -e "$file" ]] && return 2
+	[[ -d "$file" ]] && die "$file: is a directory"
 
 	dry_run "rm $file"
 }

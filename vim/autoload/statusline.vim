@@ -86,7 +86,7 @@ call s:check_defined('g:statusline#style', {})
 " Palette
 let g:statusline#style.dark = 'ctermfg=11 ctermbg=0'
 let g:statusline#style.base = 'ctermfg=12 ctermbg=10'
-let g:statusline#style.bright = 'ctermfg=13 ctermbg=11'
+let g:statusline#style.bright = 'ctermfg=12 ctermbg=11'
 " Mode colors
 let g:statusline#style.normal = 'ctermfg=10 ctermbg=4'
 let g:statusline#style.insert = 'ctermfg=10 ctermbg=2'
@@ -143,7 +143,7 @@ function statusline#Build.mode()
       "let l:branch=g:statusline#style.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
       "let l:hi_file=g:statusline#style.insert
       let l:hi_bg=g:statusline#style.insert
-      "call s:highlight('', 'ctermfg=2')
+      "let l:hi_bright='ctermfg=13'
     elseif l:m ==# "R"
       let l:hi_color=g:statusline#style.replace
     elseif l:m ==# "v"
@@ -335,3 +335,5 @@ if has("autocmd") && get(g:, 'statusline_loaded_autocmd', 1)
   au BufLeave,WinLeave * let w:statusline_active = 0
   au BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * setl statusline=%!statusline#Build.render()
 endif
+
+setl statusline=%!statusline#Build.render()

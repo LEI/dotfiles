@@ -9,28 +9,35 @@ nick = LEI
 
 [config]
 debug = false
-dry_run = true # Change to false when confident
+dry_run = false
 timestamps = false
 prefix = .
 
-[symlink] # Dotfiles
+# Symlink patterns
+
 # If the source contains a wildcard, the destination must be a directory
 # where all matching files will be symlinked.
-# Patterns:
-# src:(~/)dst -> $HOME/$dst    Full expression, source will be linked in
-# src:(~/src) -> $HOME/$src    Source ending with delimiter ':' will be used as destination
-# src(:~/.)   -> $HOME/.$src   No destination or delimiter, source will be prefixed with '.'
-atom/*:.atom
+
+# Full expression, source will be linked in the specified directory
+# src:(~/)dst -> $HOME/$dst
+
+# Source ending with delimiter ':' will be used as destination
+# src:(~/src) -> $HOME/$src
+
+# No destination or delimiter, source will be prefixed with '.'
+# src(:~/.)   -> $HOME/.$src
+
+[symlink]
+# atom/*:.atom
 # bin/test/*:bin/test
+bash/*
 bin/*:bin
 config/*
 git/*
 irssi/*:.irssi
-shell/*
 tmux/tmux.conf
-tmux/bin/*:bin
-vim/bundle:.vim/bundle
-vim/vimrc:.vimrc
+tmux/plugins:.tmux/plugins
+vim/*:.vim
 
 # [ignore]
 # *.template

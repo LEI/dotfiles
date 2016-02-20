@@ -129,7 +129,7 @@ dot_install() {
 
 dot_git() {
   import "lib/git"
-  git_submodule
+  git_submodule_update
 }
 
 dot_bootstrap() {

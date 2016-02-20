@@ -25,8 +25,8 @@ dry_run() {
 
   if [[ "${DRY_RUN-}" != true ]]; then
     # Execute command
-    # $cmd
-    log_warn "EXECUTING $cmd"
+    #log_warn "EXECUTING" "$cmd"
+    $cmd || die "Failed: $cmd"
   else
     log "$ $cmd" "(dry run)"
     # printf "%s\r\n" "$ $cmd"

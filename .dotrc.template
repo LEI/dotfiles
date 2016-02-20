@@ -9,7 +9,7 @@ nick = DOT_USER_NICK
 
 [config]
 debug = false
-dry_run = true # Change to false when confident
+dry_run = false
 timestamps = false
 prefix = .
 
@@ -28,14 +28,14 @@ prefix = .
 # src(:~/.)   -> $HOME/.$src
 
 [symlink]
-atom/*:.atom
+# atom/*:.atom
 # bin/test/*:bin/test
+bash/*
 bin/*:bin
 config/*
 git/*
 irssi/*:.irssi
 irssi/scripts/autorun/*:.irssi/scripts
-shell/*
 tmux/tmux.conf
 tmux/plugins:.tmux/plugins
 vim/*:.vim
