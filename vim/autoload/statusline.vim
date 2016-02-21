@@ -111,6 +111,7 @@ call extend(g:statusline#mode_map, {
   \ 't'  : 'TERMINAL',
   \ }, 'keep')
 
+" Handle colors
 function statusline#Build.mode()
   "redraw
   let l:m=mode()
@@ -182,8 +183,6 @@ function statusline#Build.mode()
   call add(l:highlights, ['Color', l:hi_color])
   call add(l:highlights, ['Mode', l:hi_color.' cterm=bold'])
 
-
-
   "exec 'hi StatusLineFile '.l:hi_file
   "exec 'hi StatusLineInfo '.l:hi_bright
   call add(l:highlights, ['Branch', l:hi_bright.' cterm=bold'])
@@ -193,7 +192,7 @@ function statusline#Build.mode()
     call s:build.highlight(g, s)
   endfor
 
-  return l:mode
+  return statusline#utils#truncate(l:mode, 20)
 endfunction
 
 " Returns true if paste mode is enabled
@@ -215,6 +214,21 @@ endfunction
 
 " File encoding and format
 function statusline#Build.fileInfo()
+  let l:i=''
+  " File type %(y|Y)
+  "let l:l.='%#StatusLineType#'
+  "let l:l.='%( %{&filetype} %)'
+
+  " File encoding and format
+  "let l:l.='%#StatusLineInfo#'
+
+  let l:i.='%#StatusLineType#'
+  let l:i.='%( '
+  let l:i.=&filetype
+  let l:i.=' %)'
+
+  let l:i.='%#StatusLineInfo#'
+
   if (&fenc!='')
     let l:encoding=&fenc
   else
@@ -225,13 +239,38 @@ function statusline#Build.fileInfo()
     let l:encoding.=",B"
   endif
 
-  let l:i=l:encoding
+  let l:i.=g:statusline#symbol.space
+  let l:i.=l:encoding
   let l:i.=g:statusline#symbol.space
   let l:i.=g:statusline#symbol.sep
   let l:i.=g:statusline#symbol.space
   let l:i.=&fileformat
+  let l:i.=g:statusline#symbol.space
 
   return statusline#utils#truncate(l:i, 80)
+endfunction
+
+function statusline#Build.filePos()
+  " Cursor position
+  let l:p='%#StatusLineColor#'
+
+  let l:p.=g:statusline#symbol.space
+
+  let l:p.='%-4(%p%%%)'
+
+  let l:p.=g:statusline#symbol.space
+
+  " %l Line number
+  " $c Column number
+  " %V Virtual column
+  let l:p.='%3(%l%):%3(%c%V%)'
+
+  " %P Percent through file
+  "let l:p.='%3(%P%)'
+
+  let l:p.=g:statusline#symbol.space
+
+  return statusline#utils#truncate(l:p, 40)
 endfunction
 
 function statusline#Build.warningMsg()
@@ -247,7 +286,7 @@ function statusline#Build.render()
 
   " Display colored mode
   let l:l.='%#StatusLineMode#'
-  let l:l.=' %8{statusline#Build.mode()} '
+  let l:l.='%( %{statusline#Build.mode()} %)'
 
   let l:l.='%#StatusLinePaste#'
   let l:l.='%( %{statusline#Build.hasPaste()} %)'
@@ -260,14 +299,19 @@ function statusline#Build.render()
   let l:l.='%*'
 
 
-  " Buffer index and relative path
+  " File segment
   let l:l.='%#StatusLineFile#'
   " Break point
   let l:l.=' %<'
+  " %n Buffer index
+  " %f Relative path
   let l:l.='%n %f '
 
-  " Help, readonly, and modified flags
-  let l:l.='%([%H%R%M] %)'
+  " File flags
+  " %H Help buffer
+  " %R Readonly
+  " %M Modified or unmodifiable
+  let l:l.='%([%R%M] %)'
 
   " No color section
   let l:l.='%#StatusLineNC#'
@@ -279,22 +323,9 @@ function statusline#Build.render()
   " Register
   let l:l.='%( %{v:register} %)'
 
-  " File type %(y|Y)
-  let l:l.='%#StatusLineType#'
-  let l:l.='%( %{&filetype} %)'
-
-  " File encoding and format
-  let l:l.='%#StatusLineInfo#'
-  let l:l.='%( %{statusline#Build.fileInfo()} %)'
-
-  " File position
-  let l:l.='%#StatusLineColor#'
-  " Percent through file
-  let l:l.=' %3(%P%) '
-  "let l:l.=' %-4(%p%%%)'
-  let l:l.=g:statusline#symbol.sep
-  " Line and column number
-  let l:l.=' %3(%l%):%3(%c%)%V '
+  " File details
+  let l:l.=self.fileInfo()
+  let l:l.=self.filePos()
 
   " Syntastic "let l:l.='%#StatusLineWarning#'
   let l:l.='%#warningmsg#'
