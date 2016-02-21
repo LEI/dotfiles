@@ -6,96 +6,106 @@
 # 2: File does not exists
 # 3: Target already exists
 
+make_dir() {
+  local path=$1
+
+  [[ -e "$path" ]] && return 3
+
+  dry_run "mkdir $path"
+}
+
 find_files() {
-	local path=$1
-	local exclude=${2-}
+  local path=$1
+  local exclude=${2-}
 
-	[[ -n "$exclude" ]] && exclude="! -name $exclude "
+  [[ -n "$exclude" ]] && exclude="! -name $exclude "
 
-	find ${path} -prune ${exclude}-print # \
-		#2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
-	# -ok {} \;
+  find ${path} -prune ${exclude}-print # \
+    #2> >(grep -i -v "no such file or directory" >&2 || log_error "No such file or directory")
+  # -ok {} \;
 
-	# local cmd=""
-	# printf "%s" "$cmd"
+  # local cmd=""
+  # printf "%s" "$cmd"
 }
 
 link_file() {
-	local file=$1
-	local dest=$2
+  local file=$1
+  local dest=$2
 
-	[[ ! -e "$file" ]] && return 2
-	[[ -e "$dest" ]] && return 3
+  [[ ! -e "$file" ]] && return 2
+  [[ -e "$dest" ]] && return 3
 
-	dry_run "ln -s $file $dest"
+  dry_run "ln -s $file $dest"
 }
 
 backup_file() {
-	local file=$1
-	local backup_ext="bak"
+  local file=$1
+  local backup_ext="bak"
 
-	[[ ! -e "$file" ]] && return 2
-	[[ -e "$file.$backup_ext" ]] && return 3
+  [[ ! -e "$file" ]] && return 2
+  [[ -e "$file.$backup_ext" ]] && return 3
 
-	dry_run "mv $file $file.$backup_ext"
+  dry_run "mv $file $file.$backup_ext"
 }
 
 remove_file() {
-	local file=$1
+  local file=$1
 
   # TODO:
   # Check if file exists or broken symlink
   # Handle recursive with -r
-	#[[ ! -e "$file" ]] && return 2
-	[[ -d "$file" ]] && die "$file: is a directory"
+  #[[ ! -e "$file" ]] && return 2
+  [[ -d "$file" ]] && die "$file: is a directory"
 
-	dry_run "rm $file"
+  dry_run "rm $file"
 }
 
 readlink_file() {
-	local file=$1
+  local file=$1
 
-	[[ -e "$file" ]] || return 2
+  [[ -e "$file" ]] || return 2
 
-	local link=$(readlink "$file")
-	printf "%s" "$link"
+  local link=$(readlink "$file")
+  printf "%s" "$link"
 }
 
 sed_file() {
-	local file=$1
-	local template=$2
-	local variables=$3
-	local var value
-	local sed_command="sed "
+  local file=$1
+  local template=$2
+  local variables=$3
+  local var value
+  local sed_command="sed "
 
-	[[ -f "$template" ]] || return 1
+  [[ -f "$template" ]] || return 1
 
-	for var in ${variables[@]}; do
-		value="\$$var"
-		sed_command+="-e \"s/${var}/${value}/g\" "
-	done
-	sed_command+="${template} > ${file}"
+  for var in ${variables[@]}; do
+    value="\$$var"
+    sed_command+="-e \"s/${var}/${value}/g\" "
+  done
+  sed_command+="${template} > ${file}"
 
-	eval "$sed_command" || return 2
+  eval "$sed_command" || return 2
 }
 
-typeof_file() {
-	local file=$1
-	local is
+type_of() {
+  local file=$1
+  local is
 
-	if [[ -h "$file" ]]; then
-		is="link"
-	elif [[ -f "$file" ]]; then
-		is="file"
-	elif [[ -d "$file" ]]; then
-		is="directory"
-	elif [[ ! -e "$file" ]]; then
-		is=
-	else # [[ -e "$file" ]]
-		is="weird"
-	fi
+  #log_debug "$(type -t "$file")" >&2
 
-	printf "%s" "$is"
+  if [[ -h "$file" ]]; then
+    is="link"
+  elif [[ -f "$file" ]]; then
+    is="file"
+  elif [[ -d "$file" ]]; then
+    is="directory"
+  elif [[ ! -e "$file" ]]; then
+    is=
+  else # [[ -e "$file" ]]
+    is="weird"
+  fi
+
+  printf "%s" "$is"
 }
 
 # read_file() {
@@ -170,7 +180,7 @@ typeof_file() {
 # 			fi
 #
 # 			[ "$DRY_RUN" != true ] && \
-# 				debug "rm" "$dst"
+  # 				debug "rm" "$dst"
 # 		fi
 #
 # 		# Check if the symbolic link can be created
@@ -179,7 +189,7 @@ typeof_file() {
 # 		else
 #
 # 			[ "$DRY_RUN" != true ] && \
-# 				debug "ln -s" "$src $dst"
+  # 				debug "ln -s" "$src $dst"
 #
 # 			success "Symlink $destination" "$source"
 # 		fi

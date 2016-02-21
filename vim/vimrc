@@ -278,6 +278,8 @@ set laststatus=2
 "setl statusline=%!
 call statusline#set()
 
+call statusline#tabline#set()
+
 " }}}
 " Spacing {{{
 

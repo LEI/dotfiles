@@ -35,7 +35,9 @@ bin/*:bin
 config/*
 git/*
 irssi/*:.irssi
-irssi/scripts/autorun/*:.irssi/scripts
+#irssi/config:.irssi/config
+#irssi/*.theme:.irssi
+#irssi/scripts/*:.irssi/scripts/autorun
 tmux/tmux.conf
 tmux/plugins:.tmux/plugins
 vim/*:.vim

@@ -12,7 +12,7 @@ bootstrap_templates() {
   # Gather variable names for sed
   local vars=("${!DOT_USER_*}")
   # Look for each file ending with '.template' except .dotrc
-  local templates=$(find $DOT_ROOT -name *.template ! -path $DOT_RC_TEMPLATE)
+  local templates=$(find $DOT_ROOT -name *.template ! -path $DOT_SCRIPT)
 
   for template in ${templates[@]}; do
     # Extract actual path

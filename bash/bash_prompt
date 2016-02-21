@@ -103,14 +103,14 @@ prompt_command() {
 	local col=$(tput cols)
 	local prompt_line
 	# Must be global to be available in single quote PS1
-	text_color="$reset"
+	text_color="$bgreen"
 	user_color=
 	host_color=
 
 	# Set the terminal title to the current working directory
 	PS1='\[\033]0;\w\007\]';
 
-	#PS1+='\n'
+	PS1+='\n'
 
 	# Highlight the username when logged in as root
 	if [[ "${USER}" == "root" ]]; then
@@ -128,7 +128,7 @@ prompt_command() {
 		if [[ -n "${SSH_TTY}" ]]; then
 		 	host_color="${bold}${red}";
 		 else
-		 	host_color="${orange}";
+		 	host_color="${blue}";
 		fi;
 
 		# @hostname
@@ -141,11 +141,12 @@ prompt_command() {
 	PS1+='\[${white}\]\w';
 
 	# Git repository details
-	PS1+='$(prompt_git "\[${text_color}\] on \[${yellow}\]" "\[${blue}\]")';
+	PS1+='$(prompt_git "\[${text_color}\] on \[${bred}\]" "\[${yellow}\]")';
 
 	# Display running and stopped jobs if any
-	PS1+='$(prompt_jobs)';
+	#PS1+='$(prompt_jobs)';
 
+  # FIXME
 	if [[ "$EXIT" -eq 0 ]]; then
 		status="${white}"; # ✓
 	else
@@ -153,7 +154,7 @@ prompt_command() {
 	fi
 
 	PS1+='\n'
-	PS1+='\[${text_color}\]\[${status}\]→ \[${reset}\]'; # '$''
+	PS1+='\[${bwhite}\]\[${status}\]→ \[${white}\]'; # '$''
 	export PS1;
 
 	# col=$(($col + ?)) # Compensate colors length or do not use them
@@ -161,6 +162,6 @@ prompt_command() {
 	# PS1=$(printf "%*s\r%s\n%s" "$col" "$prompt_right"  "$prompt" "$prompt_line")
 	#            ^ Add '\n' here to handle missing final new line in printed outputs
 
-	PS2='\[${yellow}\]→ \[${reset}\]';
+	PS2='\[${text_color}\]→ \[${white}\]';
 	export PS2;
 }

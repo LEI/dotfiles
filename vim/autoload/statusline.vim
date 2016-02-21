@@ -50,16 +50,16 @@
 "    \ hi User3 ctermbg=3 ctermfg=10 cterm=bold " Insert
 "    \ hi User4 ctermbg=4 ctermfg=10 cterm=bold " Visual?
 
-function! s:check_defined(variable, default)
-  if !exists(a:variable)
-    let {a:variable} = a:default
-  endif
-endfunction
-
-call s:check_defined('g:statusline', {})
+let s:build = {}
 let statusline#Build = {}
 
-call s:check_defined('g:statusline#symbol', {})
+function s:build.highlight(group, style)
+  exec 'hi StatusLine'.a:group.' '.a:style
+endfunction
+
+call statusline#utils#define('g:statusline', {})
+
+call statusline#utils#define('g:statusline#symbol', {})
 call extend(g:statusline#symbol, {
   \ 'paste': 'PASTE',
   \ 'readonly': get(g:, 'powerline_fonts', 0) ? "\ue0a2" : 'RO',
@@ -68,6 +68,7 @@ call extend(g:statusline#symbol, {
   \ 'branch': get(g:, 'powerline_fonts', 0) ? "\ue0a0" : '⎇ ',
   \ 'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512)),
   \ 'modified': '+',
+  \ 'close': '✕',
   \ 'space': ' ',
   \ 'sep': '|',
   \ }, 'keep')
@@ -82,7 +83,7 @@ endif
 "let g:statusline#symbol.branch = '⎇ '
 "let g:statusline#symbol.readonly = 'RO'
 
-call s:check_defined('g:statusline#style', {})
+call statusline#utils#define('g:statusline#style', {})
 " Palette
 let g:statusline#style.dark = 'ctermfg=11 ctermbg=0'
 let g:statusline#style.base = 'ctermfg=12 ctermbg=10'
@@ -94,7 +95,7 @@ let g:statusline#style.replace = 'ctermfg=13 ctermbg=1' " fg=10
 let g:statusline#style.visual = 'ctermfg=10 ctermbg=3'
 
 " Modes
-call s:check_defined('g:statusline#mode_map', {})
+call statusline#utils#define('g:statusline#mode_map', {})
 call extend(g:statusline#mode_map, {
   \ '__' : '------',
   \ 'n'  : 'NORMAL',
@@ -195,11 +196,6 @@ function statusline#Build.mode()
   return l:mode
 endfunction
 
-let s:build = {}
-function s:build.highlight(group, style)
-  exec 'hi StatusLine'.a:group.' '.a:style
-endfunction
-
 " Returns true if paste mode is enabled
 function statusline#Build.hasPaste()
     if &paste
@@ -212,13 +208,13 @@ endfunction
 function statusline#Build.branch()
   if exists("*fugitive#head")
     let _ = fugitive#head()
-    return strlen(_) ? g:statusline#symbol.branch.' '._ : ''
+    return strlen(_) ? statusline#utils#truncate(g:statusline#symbol.branch.' '._, 60) : ''
   endif
   return ''
 endfunction
 
-" File encoding
-function statusline#Build.fileEncoding()
+" File encoding and format
+function statusline#Build.fileInfo()
   if (&fenc!='')
     let l:encoding=&fenc
   else
@@ -229,7 +225,13 @@ function statusline#Build.fileEncoding()
     let l:encoding.=",B"
   endif
 
-  return l:encoding
+  let l:i=l:encoding
+  let l:i.=g:statusline#symbol.space
+  let l:i.=g:statusline#symbol.sep
+  let l:i.=g:statusline#symbol.space
+  let l:i.=&fileformat
+
+  return statusline#utils#truncate(l:i, 80)
 endfunction
 
 function statusline#Build.warningMsg()
@@ -285,11 +287,7 @@ function statusline#Build.render()
 
   " File encoding and format
   let l:l.='%#StatusLineInfo#'
-  let l:l.=g:statusline#symbol.space
-  let l:l.='%{statusline#Build.fileEncoding()}'
-  let l:l.=g:statusline#symbol.space.g:statusline#symbol.sep.g:statusline#symbol.space
-  let l:l.=&fileformat
-  let l:l.=g:statusline#symbol.space
+  let l:l.='%( %{statusline#Build.fileInfo()} %)'
 
   " File position
   let l:l.='%#StatusLineColor#'

@@ -48,6 +48,7 @@ bootstrap_symlinks_foreach() {
       dst= #${prefix}
     fi
 
+    #log_debug "find $DOT_ROOT/$src"
 
     # Loop on each destination file
     while IFS= read -u 3 -rd '' file; do
@@ -64,10 +65,18 @@ bootstrap_symlinks_foreach() {
 
       # Build absolute destination
       bootstrap_symlinks_$method "$file" "$DOT_TARGET/$target"
-    done 3< <(find $DOT_ROOT/$src -name '*.template' -o -depth 0 -print0) # End while
+    done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' -print0)
+    #-name '*.template' -o -depth 0 -print0) # End while
     # \( -type d -depth 0 -o -type f -depth 0 \)
 
   done
+}
+
+bootstrap_symlinks_list() {
+  local file=$1 # Source
+  local target=$2 # Destination
+  #printf "%s\n" "$file -> $target"
+  log_info "${file#$DOT_ROOT/} ->" "$target"
 }
 
 bootstrap_symlinks_build() {
@@ -78,7 +87,13 @@ bootstrap_symlinks_build() {
   local file_prompt=
   local default= overwrite= backup= ignore=
 
-  file_type=$(typeof_file "$target")
+  local target_dir="$(dirname $target)"
+  # Check target directory
+  if [[ ! -e "$target_dir" ]]; then
+    make_dir "$target_dir" && log_info "Created" "$target_dir" #|| return 1
+  fi
+
+  file_type=$(type_of "$target")
   case $file_type in
     '')
       # log_success "Empty" "$target"
@@ -172,20 +187,14 @@ bootstrap_symlinks_build() {
       log_info "Skipped" "$target"
     fi
 
-    echo "-> $?"
+    log_debug "-> $?"
     if [[ $? -gt 0 ]]; then
       log_error "Errored with status $?"
     fi
 
   else
-    log_info "Ignored" "$target"
+    log "Ignored" "$target"
   fi
-}
-
-bootstrap_symlinks_list() {
-  local file=$1 # Source
-  local target=$2 # Destination
-  printf "%s\n" "$file -> $target"
 }
 
 
