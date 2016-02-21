@@ -1,6 +1,7 @@
+#!/usr/bin/env bash
 # .bash_prompt
 
-# Shell prompt based on the Solarized theme
+# Shell prompt
 
 # github.com/necolas/dotfiles
 # github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
@@ -8,160 +9,168 @@
 
 # Import colors (DOT_ROOT defined in ~/.exports)
 if [[ -n "$DOT_ROOT" ]]; then
-	source $DOT_ROOT/script/lib/colors.sh
+  source $DOT_ROOT/script/lib/colors.sh
 else
-	echo "DOT_ROOT is undefined!"
+  echo "DOT_ROOT is undefined!"
 fi
 
 # Export prompt
 export PROMPT_COMMAND=prompt_command
 
 prompt_git() {
-	local s='';
-	local branchName='';
+  local s='';
+  local branchName='';
 
-	# Check if the current directory is in a Git repository.
-	if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
+  # Check if the current directory is in a Git repository.
+  if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
 
-		# check if the current directory is in .git before running git checks
-		if [ "$(git rev-parse --is-inside-git-dir 2> /dev/null)" == 'false' ]; then
+    # check if the current directory is in .git before running git checks
+    if [ "$(git rev-parse --is-inside-git-dir 2> /dev/null)" == 'false' ]; then
 
-			# Ensure the index is up to date.
-			git update-index --really-refresh -q &>/dev/null;
+      # Ensure the index is up to date.
+      git update-index --really-refresh -q &>/dev/null;
 
-			# Check for uncommitted changes in the index.
-			if ! $(git diff --quiet --ignore-submodules --cached); then
-				s+='+';
-			fi;
+      # Check for uncommitted changes in the index.
+      if ! $(git diff --quiet --ignore-submodules --cached); then
+        s+='+';
+      fi;
 
-			# Check for unstaged changes.
-			if ! $(git diff-files --quiet --ignore-submodules --); then
-				s+='!';
-			fi;
+      # Check for unstaged changes.
+      if ! $(git diff-files --quiet --ignore-submodules --); then
+        s+='!';
+      fi;
 
-			# Check for untracked files.
-			if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-				s+='?';
-			fi;
+      # Check for untracked files.
+      if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+        s+='?';
+      fi;
 
-			# Check for stashed files.
-			if $(git rev-parse --verify refs/stash &>/dev/null); then
-				s+='$';
-			fi;
+      # Check for stashed files.
+      if $(git rev-parse --verify refs/stash &>/dev/null); then
+        s+='$';
+      fi;
 
-		fi;
+    fi;
 
-		# Get the short symbolic ref.
-		# If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
-		# Otherwise, just give up.
-		branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
-			git rev-parse --short HEAD 2> /dev/null || \
-			echo '(unknown)')";
+    # Get the short symbolic ref.
+    # If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
+    # Otherwise, just give up.
+    branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
+      git rev-parse --short HEAD 2> /dev/null || \
+      echo '(unknown)')";
 
-		[ -n "${s}" ] && s=" [${s}]";
+    [ -n "${s}" ] && s=" ${3-$bgreen}[${2}${s}${3-$bgreen}]";
 
-		printf "%s" "${1}${branchName}${2}${s}";
-	else
-		return;
-	fi;
+    printf "%s" "${1}${branchName}${s}${reset}";
+  else
+    return;
+  fi;
 }
 
 prompt_jobs() {
-	local str
-	local b s
-	# Check backgrounded running jobs
-	local bg_jobs=$(jobs -r | wc -l | tr -d ' ')
-	# Check stopped jobs
-	local stp_jobs=$(jobs -s | wc -l | tr -d ' ')
+  local str
+  local b s
+  # Check backgrounded running jobs
+  local bg_jobs=$(jobs -r | wc -l | tr -d ' ')
+  # Check stopped jobs
+  local stp_jobs=$(jobs -s | wc -l | tr -d ' ')
 
-	if [[ ${bg_jobs} -gt 0 ]] || [[ ${stp_jobs} -gt 0 ]]; then
-		if [[ ${bg_jobs} -gt 2 ]]; then
-			b="${red}"
-		elif [[ ${bg_jobs} -gt 0 ]]; then
-			b="${yellow}"
-		fi
+  if [[ ${bg_jobs} -gt 0 ]] || [[ ${stp_jobs} -gt 0 ]]; then
+    if [[ ${bg_jobs} -gt 2 ]]; then
+      b="${red}"
+    elif [[ ${bg_jobs} -gt 0 ]]; then
+      b="${yellow}"
+    fi
 
-		if [[ ${stp_jobs} -gt 2 ]]; then
-			s="${red}"
-		elif [[ ${stp_jobs} -gt 0 ]]; then
-			s="${yellow}"
-		fi
+    if [[ ${stp_jobs} -gt 2 ]]; then
+      s="${red}"
+    elif [[ ${stp_jobs} -gt 0 ]]; then
+      s="${yellow}"
+    fi
 
-		str="${reset} [${b}${bg_jobs}${reset}:${s}${stp_jobs}${reset}]"
-	fi
+    str="${reset} [${b}${bg_jobs}${reset}:${s}${stp_jobs}${reset}]"
+  fi
 
-	# jobs[bg:stp]
-	printf "%s" "$str"
+  # jobs[bg:stp]
+  printf "%s" "$str"
+}
+
+prompt_status() {
+  local exit=$1
+  local str=
+
+  # Escape!
+  if [[ $exit -eq 0 ]]; then
+    str="\[${white}\]→"
+  else
+    str="\[${red}\]×"
+  fi
+  # ✓
+  # ×
+  printf "%b" "$str "
+}
+
+prompt_right() {
+  printf "%*s" $COLUMNS "$(date +%H:%M:%S)"
 }
 
 prompt_command() {
-	# This needs to be first
-	local EXIT="$?"
-	local status
-	local user=$(whoami)
-	local host=$(hostname)
-	local col=$(tput cols)
-	local prompt_line
-	# Must be global to be available in single quote PS1
-	text_color="$bgreen"
-	user_color=
-	host_color=
+  local EXIT=$? # Must be first
+  local user=$(whoami)
+  local host=$(hostname)
+  local col=$(tput cols)
+  # Must be global to be available in single quote PS1
+  text_color="$bgreen"
+  user_color=
+  host_color=
 
-	# Set the terminal title to the current working directory
-	PS1='\[\033]0;\w\007\]';
+  # Set the terminal title to the current working directory
+  PS1='\[\033]0;\w\007\]';
 
-	PS1+='\n'
+  PS1+='\n'
+  PS1+='\[$(tput sc; prompt_right; tput rc)\]'
 
-	# Highlight the username when logged in as root
-	if [[ "${USER}" == "root" ]]; then
-		user_color="${red}";
-	else
-		user_color="${cyan}"; #orange
-	fi;
+  # Highlight the username when logged in as root
+  if [[ "${USER}" == "root" ]]; then
+    user_color="${red}";
+  else
+    user_color="${cyan}"; #orange
+  fi;
 
-	# Username
-	PS1+='\[${user_color}\]\u';
+  # Username
+  PS1+='\[${user_color}\]\u';
 
-	# Display the hostname when != username
-	if [[ "$user" != "$host" ]]; then
-		# Highlight the hostname when connected via SSH
-		if [[ -n "${SSH_TTY}" ]]; then
-		 	host_color="${bold}${red}";
-		 else
-		 	host_color="${blue}";
-		fi;
+  # Display the hostname when != username
+  if [[ "$user" != "$host" ]]; then
+    # Highlight the hostname when connected via SSH
+    if [[ -n "${SSH_TTY}" ]]; then
+      host_color="${bold}${red}";
+    else
+      host_color="${blue}";
+    fi;
 
-		# @hostname
-		PS1+='\[${text_color}\] at ';
-		PS1+='\[${host_color}\]\h'; # host
-	fi
+    # @hostname
+    PS1+='\[${text_color}\] at ';
+    PS1+='\[${host_color}\]\h'; # host
+  fi
 
-	# Working directory
-	PS1+='\[${text_color}\] in ';
-	PS1+='\[${white}\]\w';
+  # Working directory
+  PS1+='\[${text_color}\] in ';
+  PS1+='\[${white}\]\w';
 
-	# Git repository details
-	PS1+='$(prompt_git "\[${text_color}\] on \[${bred}\]" "\[${yellow}\]")';
+  # Git repository details
+  PS1+='$(prompt_git "\[${text_color}\] on \[${bred}\]" "\[${yellow}\]")';
 
-	# Display running and stopped jobs if any
-	#PS1+='$(prompt_jobs)';
+  # Display running and stopped jobs if any
+  #PS1+='$(prompt_jobs)';
 
-  # FIXME
-	if [[ "$EXIT" -eq 0 ]]; then
-		status="${white}"; # ✓
-	else
-		status="${red}"; # ×
-	fi
+  PS1+='\n'
+  # Command line
+  PS1+='\[${white}\]'
+  PS1+=$(prompt_status $EXIT)
+  PS1+='\[${reset}\]';
+  export PS1;
 
-	PS1+='\n'
-	PS1+='\[${bwhite}\]\[${status}\]→ \[${white}\]'; # '$''
-	export PS1;
-
-	# col=$(($col + ?)) # Compensate colors length or do not use them
-	# prompt_right="[$(date +%H:%M:%S)]"
-	# PS1=$(printf "%*s\r%s\n%s" "$col" "$prompt_right"  "$prompt" "$prompt_line")
-	#            ^ Add '\n' here to handle missing final new line in printed outputs
-
-	PS2='\[${text_color}\]→ \[${white}\]';
-	export PS2;
+  PS2='\[${text_color}\]→ \[${reset}\]';
+  export PS2;
 }

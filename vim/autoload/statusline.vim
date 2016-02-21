@@ -235,10 +235,8 @@ function statusline#Build.fileInfo()
 endfunction
 
 function statusline#Build.warningMsg()
-  "if exists("SyntasticStatuslineFlag")
   if exists("g:loaded_syntastic_plugin")
     let _ = SyntasticStatuslineFlag()
-    echo _
     return strlen(_) ? _ : ''
   endif
   return ''
@@ -249,7 +247,7 @@ function statusline#Build.render()
 
   " Display colored mode
   let l:l.='%#StatusLineMode#'
-  let l:l.=' %{statusline#Build.mode()} '
+  let l:l.=' %8{statusline#Build.mode()} '
 
   let l:l.='%#StatusLinePaste#'
   let l:l.='%( %{statusline#Build.hasPaste()} %)'
@@ -292,15 +290,13 @@ function statusline#Build.render()
   " File position
   let l:l.='%#StatusLineColor#'
   " Percent through file
-  let l:l.=' %p%% '
+  let l:l.=' %3(%P%) '
+  "let l:l.=' %-4(%p%%%)'
   let l:l.=g:statusline#symbol.sep
   " Line and column number
-  let l:l.=' %l: %c '
-  " Virtual column: %V
-  " Total lines: %L
+  let l:l.=' %3(%l%):%3(%c%)%V '
 
-  " Syntastic
-  "let l:l.='%#StatusLineWarning#'
+  " Syntastic "let l:l.='%#StatusLineWarning#'
   let l:l.='%#warningmsg#'
   let l:l.='%( %{statusline#Build.warningMsg()} %)'
   let l:l.='%*'
@@ -310,7 +306,6 @@ endfunction
 
 function! statusline#set()
   setl statusline=%!statusline#Build.render()
-
 endfunction
 
 if has("autocmd") && get(g:, 'statusline_loaded_autocmd', 1)
@@ -334,4 +329,4 @@ if has("autocmd") && get(g:, 'statusline_loaded_autocmd', 1)
   au BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * setl statusline=%!statusline#Build.render()
 endif
 
-setl statusline=%!statusline#Build.render()
+"setl statusline=%!statusline#Build.render()

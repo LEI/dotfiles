@@ -179,7 +179,8 @@ hi Visual ctermfg=10 ctermbg=3
 
 "hi Pmenu        ctermbg=240 ctermfg=12
 "hi PmenuSel     ctermbg=3   ctermfg=1
-"hi SpellBad ctermfg=1 ctermbg=0
+"hi SpellBad ctermfg=1 ctermbg=11 cterm=underline
+hi SpellBad ctermfg=1 ctermbg=10
 
 hi ExtraWhitespace ctermbg=1 guibg=red
 
@@ -213,7 +214,7 @@ set cmdheight=1
 " Show incomplete commands
 set showcmd
 
-" Hide current mode
+" Display current mode
 set noshowmode
 
 " Disable cursor blinking
@@ -236,13 +237,13 @@ set visualbell
 set esckeys
 
 set ttimeout
-"set timeoutlen=1000 ttimeoutlen=0
-set timeoutlen=1
+set timeoutlen=1000 "ttimeoutlen=0
+"set timeoutlen=1
 
 " Mode switch fix?
 " https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
 if !has('gui_running')
-  set ttimeoutlen=10
+  "set ttimeoutlen=10
   augroup FastEscape
     au!
     au InsertEnter * set timeoutlen=0
@@ -415,7 +416,7 @@ set backspace=indent,eol,start
 
 " Change leader to a comma instead of backslash
 let mapleader=","
-let g:mapleader=","
+"let g:mapleader=","
 
 " Nope
 nnoremap <up> <nop>
@@ -427,7 +428,7 @@ inoremap <down> <nop>
 inoremap <left> <nop>
 inoremap <right> <nop>
 
-" Use virtual columns for vertical movements
+" Move by screen lines (use virtual columns)
 nnoremap j gj
 nnoremap k gk
 

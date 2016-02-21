@@ -24,8 +24,8 @@ prefix = .
 # Source ending with delimiter ':' will be used as destination
 # src:(~/src) -> $HOME/$src
 
-# No destination or delimiter, source will be prefixed with '.'
-# src(:~/.)   -> $HOME/.$src
+# No destination or delimiter, source files will be prefixed in ~
+# src/*(:~/.file)   -> $HOME/$prefix$file
 
 [symlink]
 # atom/*:.atom
