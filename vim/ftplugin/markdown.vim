@@ -1,10 +1,10 @@
 " Enable spellchecking
 setlocal spell
 
-" Automatically wrap at 80 characters
+" Automatically add line break at 80 characters
 setlocal textwidth=80
 
-" Always indent by 4
+" Markdown indent size
 setlocal shiftwidth=4
 setlocal softtabstop=4
 setlocal tabstop=4

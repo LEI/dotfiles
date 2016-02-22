@@ -1,12 +1,18 @@
 " ~/.vimrc
 " vim: foldenable foldmethod=marker
+" Folding cheat sheet
+" zR Open all
+" zM Close all
+" za Toggle current
+" zj Down to the start of the next
+" zk Up to the end of the previous
 
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-set nocompatible
-
 " Initialization {{{
+
+set nocompatible
 
 filetype off
 
@@ -20,7 +26,10 @@ call pathogen#infect()
 " Generate plugin help tags
 call pathogen#helptags()
 
-filetype plugin indent on
+if has("autocmd")
+  " Enable filetype detection
+  filetype plugin indent on
+endif
 
 " Load matchit.vim, but only if the user hasn't installed a newer version.
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -140,11 +149,13 @@ if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
 endif
 
 " Enable syntax highlighting
-if has('syntax') && !exists('g:syntax_on')
-  syntax enable
-endif
+if &t_Co > 2 || has("gui_running")
+  if has('syntax') && !exists('g:syntax_on')
+    syntax enable
+  endif
 
-set synmaxcol=800
+  set synmaxcol=500
+endif
 "set textwidth=80
 
 set cursorline
@@ -298,18 +309,19 @@ set autoindent
 set smartindent
 set smarttab
 
-" Show invisible characters
-" Highlight: NonText and SpecialKey
-set list listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
-
-" Don't wrap lines
+" Don't wrap lines by default (see ftplugin)
 set nowrap
-
-" Wrap lines at convenient points
+" Break lines at convenient points (soft wrap)
 set linebreak
+" Line break on 500 characters
+set textwidth=500
+" Display line breaks
+let &showbreak='↳ '
 
-" Linebreak on 500 characters
-set tw=500
+" Show invisible character
+" Highlight: NonText and SpecialKey
+set list
+set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
 
 " }}}
 " Folding {{{
@@ -337,6 +349,9 @@ if !&sidescroll
   set sidescroll=1
 endif
 
+" Enable soft wrap
+command! -nargs=* Wrap set wrap linebreak nolist
+
 "set display+=lastline
 
 " }}}
@@ -361,13 +376,11 @@ set magic
 " Misc {{{
 
 if has("autocmd")
-  " Auto reload .vimrc
-  au BufWritePost .vimrc source $MYVIMRC
-  "au! BufWritePost .vimrc source %
-  "augroup reload_vimrc
-  "  au!
-  "  au BufWritePost $MYVIMRC nested source $MYVIMRC
-  "augroup END
+  " FIXME use :so % instead
+  augroup reload_vimrc
+    au!
+    au BufWritePost $MYVIMRC nested source $MYVIMRC
+  augroup END
 
   " Highlight trailing witespaces in red
   match ExtraWhitespace /\s\+$/
@@ -382,7 +395,7 @@ if has("autocmd")
 
   augroup resCur
     au!
-    au BufWinEnter * call ResCur()
+    au BufReadPost * call ResCur()
   augroup END
 endif
 
@@ -394,19 +407,34 @@ function! ResCur()
   endif
 endfunction
 
-if $TERM_PROGRAM == "Apple_Terminal" " Terminal.app, xterm and urxvt pass this test
-  if $WINDOWID == ""                  " xterm and urxvt don't pass this test
-    "It is unlikely that anything except Terminal.app will get here
-    call terminal#MacOSX()
-  endif
-endif
+" www.damtp.cam.ac.uk/user/rbw/vim-osx-cursor.html
+"If this is Terminal.app, do cursor hack for visible cursor
+"This hack does not behave well with other terminals (particularly xterm)
 
-if $SSH_TTY != ""            " If the user is connected through ssh
-  if $TERM == "xterm-color" || $ORIGTERM = "xterm-color"
-    "Something other than Terminal.app might well get here
-    call terminal#MacOSX()
-  endif
-endif
+"function MacOSX()
+"  " Invisible CursorLine
+"  hi CursorLine term=none cterm=none
+"  " Cursorline required to continuously update cursor position
+"  set cursorline
+"  "I like a reversed cursor, edit this to your liking
+"  hi Cursor cterm=reverse
+"  " This line does all the work
+"  match Cursor /\%#/
+"endfunction
+"
+"if $TERM_PROGRAM == "Apple_Terminal" " Terminal.app, xterm and urxvt pass this test
+"  if $WINDOWID == ""                  " xterm and urxvt don't pass this test
+"    "It is unlikely that anything except Terminal.app will get here
+"    call MacOSX()
+"  endif
+"endif
+"
+"if $SSH_TTY != ""            " If the user is connected through ssh
+"  if $TERM == "xterm-color" || $ORIGTERM = "xterm-color"
+"    "Something other than Terminal.app might well get here
+"    call MacOSX()
+"  endif
+"endif
 
 " }}}
 " Key maps {{{
@@ -441,6 +469,17 @@ nnoremap <C-l> <C-w>l
 " Clear highlighted search results
 map <leader><Space> :noh<CR>
 
+" Edit in the same directory as the current file
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
+" Edit in window
+map <leader>ew :e %%
+" Edit in split
+map <leader>es :sp %%
+" Edit in vertical split
+map <leader>ev :vsp %%
+" Edit in tab
+map <leader>et :tabe %%
+
 " Save a file as root (,W)
 noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
@@ -454,9 +493,6 @@ nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 
 " Open .vimrc in a new split
 nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
-
-" Quick source
-nnoremap <leader>R :so ~/.vim/autoload/statusline.vim<CR>
 
 " }}}
 
