@@ -15,6 +15,10 @@ install_packages() {
   esac
 }
 
+uninstall_packages() {
+  log_error "Not implemented" "uninstall_packages()"
+}
+
 install_brew() {
   local brew=$(which brew) # /usr/local/bin/brew
 

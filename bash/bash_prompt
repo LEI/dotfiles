@@ -17,6 +17,9 @@ fi
 # Export prompt
 export PROMPT_COMMAND=prompt_command
 
+PROMPT_SYMBOL="›" #→
+PROMPT_ERROR_SYMBOL="×"
+
 prompt_git() {
   local s='';
   local branchName='';
@@ -101,9 +104,9 @@ prompt_status() {
 
   # Escape!
   if [[ $exit -eq 0 ]]; then
-    str="\[${white}\]→"
+    str="\[${white}\]${PROMPT_SYMBOL}"
   else
-    str="\[${red}\]×"
+    str="\[${red}\]${PROMPT_ERROR_SYMBOL}"
   fi
   # ✓
   # ×
@@ -111,7 +114,7 @@ prompt_status() {
 }
 
 prompt_right() {
-  printf "%*s" $COLUMNS "$(date +%H:%M:%S)"
+  printf ${bgreen}"%*s" $COLUMNS "$(date +%H:%M:%S)"
 }
 
 prompt_command() {
@@ -171,6 +174,6 @@ prompt_command() {
   PS1+='\[${reset}\]';
   export PS1;
 
-  PS2='\[${text_color}\]→ \[${reset}\]';
+  PS2='\[${text_color}\]${PROMPT_SYMBOL} \[${reset}\]';
   export PS2;
 }

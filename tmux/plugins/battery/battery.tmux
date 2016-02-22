@@ -8,10 +8,10 @@ source "$CURRENT_DIR/scripts/helpers.sh"
 
 battery_percentage="#($CURRENT_DIR/scripts/battery_percentage.sh)"
 #battery_remain="#($CURRENT_DIR/scripts/battery_remain.sh)"
-#battery_icon="#($CURRENT_DIR/scripts/battery_icon.sh)"
+#battery_symbol="#($CURRENT_DIR/scripts/battery_symbol.sh)"
 battery_percentage_interpolation="\#{battery_percentage}"
 #battery_remain_interpolation="\#{battery_remain}"
-#battery_icon_interpolation="\#{battery_icon}"
+battery_symbol_interpolation="\#{battery_symbol}"
 
 set_tmux_option() {
   local option="$1"
@@ -21,10 +21,13 @@ set_tmux_option() {
 
 do_interpolation() {
   local string="$1"
-  local percentage_interpolated="${string/$battery_percentage_interpolation/$battery_percentage}"
-  #local remain_interpolated="${percentage_interpolated/$battery_remain_interpolation/$battery_remain}"
-  #local all_interpolated="${remain_interpolated/$battery_icon_interpolation/$battery_icon}"
-  echo "$percentage_interpolated"
+  local interp=
+
+  interp="${string/$battery_percentage_interpolation/$battery_percentage}"
+  #interp="${interp/$battery_remain_interpolation/$battery_remain}"
+  #interp="${interp/$battery_symbol_interpolation/$battery_symbol}"
+
+  echo "$interp"
 }
 
 update_tmux_option() {

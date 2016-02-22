@@ -175,22 +175,29 @@ dot() {
   esac
 
   if [[ $? -eq 0 ]]; then
-    log_success "Done" "= $?"
+    log_success "Done" "-> $?"
   else
-    log_error "Error" "= $?"
+    log_error "Error" "-> $?"
     return $?
   fi
 }
+
+# Install packages
 
 dot_install() {
   import "install"
 
   # Install dependencies
   install_packages || \
-    log_warn "Install aborted" "= $?"
+    log_warn "Install aborted" "$?"
 }
 
-#dot_uninstall()
+dot_uninstall() {
+  import "install"
+
+  uninstall_packages || \
+    log_warn "Uninstall aborted" "$?"
+}
 
 dot_update() {
   import "lib/git"
@@ -198,6 +205,8 @@ dot_update() {
   # Pulls
   git_submodule_update
 }
+
+# Bootstrap dotfiles
 
 dot_list() {
   import "bootstrap/symlinks"
@@ -208,20 +217,26 @@ dot_link() {
   import "bootstrap/templates"
   import "bootstrap/symlinks"
 
-  # Bootstrap dotfiles
   bootstrap_templates && \
-    bootstrap_symlinks build || \
-    log_warn "Bootstrap aborted" "= $?"
+    bootstrap_symlinks link || \
+    log_warn "Bootstrap aborted" "$?"
 }
 
-#dot_unlink()
+dot_unlink() {
+  import "bootstrap/symlinks"
+
+  bootstrap_symlinks unlink || \
+    log_warn "Bootstrap unlink aborted" "$?"
+}
+
+# Setup platform specific defaults
 
 dot_defaults() {
   import "defaults"
 
   # Set platform defaults
   os_defaults || \
-    log_warn "Defaults aborted" "= $?"
+    log_warn "Defaults aborted" "$?"
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && boot "$@"

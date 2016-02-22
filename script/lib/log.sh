@@ -5,6 +5,8 @@
 import "lib/colors"
 import "lib/utils" # now()
 
+INDENT="     "
+
 log() {
   local msg=$1
   local txt=${2-}
@@ -52,7 +54,7 @@ log_success() {
   local txt=${2-}
   local cr=${3-"\r\n"}
   # ✓ ✔
-  _print $green "✓" "${msg}" "$txt" "$cr"
+  _print $green "✔" "${msg}" "$txt" "$cr"
 }
 
 log_warn() {
@@ -84,7 +86,8 @@ _print() {
   fi
 
   # Identation
-  local ind=$(( 2 * 1 ))
+  local indentation=2
+  local ind=$(( $indentation * 1 ))
   # Tabulation
   local col=$(( $(tput cols) / 3 ))
 

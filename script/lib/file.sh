@@ -50,14 +50,40 @@ backup_file() {
 
 remove_file() {
   local file=$1
+  local args=$2
 
-  # TODO:
+  [[ -n "$args" ]] && args+=" "
+
+  # TODO
+
   # Check if file exists or broken symlink
-  # Handle recursive with -r
   #[[ ! -e "$file" ]] && return 2
-  [[ -d "$file" ]] && die "$file: is a directory"
 
-  dry_run "rm $file"
+  # Handle recursive with -r
+  #[[ -d "$file" ]] && die "$file: is a directory"
+
+  dry_run "rm $args$file"
+}
+
+# Prompt before deleting recursively
+safe_remove_file() {
+  import "lib/prompt"
+
+  local file=$1
+  local args=
+  local recursive=false
+
+  if [[ -d "$file" ]]; then
+    if confirm "Remove directory $file" "" N; then
+      recursive=true
+    else
+      return 0
+    fi
+  fi
+
+  [[ "$recursive" = true ]] && args="-r"
+
+  remove_file "$file" "$args"
 }
 
 readlink_file() {
@@ -65,6 +91,8 @@ readlink_file() {
 
   [[ -e "$file" ]] || return 2
 
+  # Tested on OS X only
+  # Add -f ?
   local link=$(readlink "$file")
   printf "%s" "$link"
 }

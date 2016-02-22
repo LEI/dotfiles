@@ -10,8 +10,12 @@ prompt() {
   local question=$1
   local answer_default=${2-}
   local answer_pattern=${3-}
-  local answer_default_display="  › [default: $answer_default] "
-  local answer
+  local answer_default_display="${INDENT}› "
+  local answer=
+
+  if [[ -n "$answer_default" ]]; then
+    answer_default_display+="[default: ${answer_default}] "
+  fi
 
   log_ask "$question" "" >&2
 

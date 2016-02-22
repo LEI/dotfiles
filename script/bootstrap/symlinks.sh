@@ -4,24 +4,20 @@
 
 # github.com/holman/dotfiles/blob/master/script/bootstrap
 
+import "lib/utils"
 import "lib/prompt"
 import "lib/file"
 
 bootstrap_symlinks() {
-  local method="build"
+  local method="$1"
 
-  case $1 in
-    list|build)
-      method=$1
-      ;;
-    *)
-      die "Unknown method: $1"
-      ;;
-  esac
-
-  # Prefix (DOT_CONFIG_PREFIX) and paths must be defined in .dotrc
-  # Each path  must follow the pattern src[:dst]
-  bootstrap_symlinks_foreach $method ${DOT_SYMLINK[@]}
+  if is_function "bootstrap_symlinks_$method"; then
+    # Prefix (DOT_CONFIG_PREFIX) and paths must be defined in .dotrc
+    # Each path  must follow the pattern src[:dst]
+    bootstrap_symlinks_foreach $method ${DOT_SYMLINK[@]}
+  else
+    die "Unknown method: $method"
+  fi
 }
 
 bootstrap_symlinks_foreach() {
@@ -79,7 +75,7 @@ bootstrap_symlinks_list() {
   log_info "${file#$DOT_ROOT/} ->" "$target"
 }
 
-bootstrap_symlinks_build() {
+bootstrap_symlinks_link() {
   local file=$1 # Source
   local target=$2 # Destination
   # [[ -e "$file" ]] || log_warn "No such file or directory" "$file"
@@ -87,10 +83,11 @@ bootstrap_symlinks_build() {
   local file_prompt=
   local default= overwrite= backup= ignore=
 
-  local target_dir="$(dirname $target)"
   # Check target directory
+  local target_dir="$(dirname $target)"
   if [[ ! -e "$target_dir" ]]; then
-    make_dir "$target_dir" && log_info "Created" "$target_dir" #|| return 1
+    make_dir "$target_dir" && \
+      log_info "Created" "$target_dir" #|| return 1
   fi
 
   file_type=$(type_of "$target")
@@ -103,13 +100,13 @@ bootstrap_symlinks_build() {
     link)
       if [[ ! -e "$target" ]]; then
         # log_error "Broken link" "$target"
-        file_prompt="${red}Broken symbolic link ${white}${target}"
+        file_prompt="${yellow}Broken symbolic link ${white}${target}"
         default="overwrite"
       else
-        local file_link=$(readlink_file $target) # Works on OS X
+        local file_link=$(readlink_file "$target")
         # log_debug "$file_link == $file"
         if [[ "$file_link" == "$file" ]]; then
-          # log_success "Already linked" "$target"
+          #log_success "Already linked" "$target"
           ignore=true
         else
           file_prompt="${yellow}Existing symbolic link ${white}${file_link}"
@@ -135,7 +132,7 @@ bootstrap_symlinks_build() {
         # If prompt is not false, then ask the user to select an action
         local action=$(prompt \
   "${reset}${file_prompt}${reset}, what do you want to do?\n\
-  › [${white}s${reset}]kip, [${white}o${reset}]verwrite, [${white}b${reset}]ackup" \
+${INDENT}› [${white}s${reset}]kip, [${white}o${reset}]verwrite, [${white}b${reset}]ackup" \
         "${default-skip}" "s|o|b")
         # [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all
         case $action in
@@ -174,20 +171,27 @@ bootstrap_symlinks_build() {
 
     if [[ "$backup" = true ]]; then
       # Backup
-      backup_file "$target" && log_info "Saved" "$target.bak" || return 1
+      backup_file "$target" && \
+        log_info "Saved" "$target.bak" || \
+        return 1
     elif [[ "$overwrite" = true ]]; then
       # Overwrite
-      remove_file "$target" && log_info "Removed" "$target" || return 1
+      safe_remove_file "$target" && \
+        log_info "Removed" "$target" || \
+        return 1
     fi
 
     if [[ "$ignore" = false ]]; then
       # Link
-      link_file "$file" "$target" && log_success "Symlinked" "$target" || return 1
+      link_file "$file" "$target" && \
+        log_success "Symlinked" "$target" || \
+        return 1
     else
       log_info "Skipped" "$target"
     fi
 
-    log_debug "-> $?"
+    #log_debug "-> $?"
+
     if [[ $? -gt 0 ]]; then
       log_error "Errored with status $?"
     fi
@@ -197,6 +201,32 @@ bootstrap_symlinks_build() {
   fi
 }
 
+bootstrap_symlinks_unlink() {
+  local file=$1 # Source
+  local target=$2 # Destination
+  local file_type=$(type_of "$target")
+  local remove=false
+
+  # If the target is a symbolic link
+  if [[ "$file_type" == "link" ]]; then
+    # Not broken
+    if [[ -e "$target" ]]; then
+      # That redirects to this repository
+      local file_link=$(readlink_file "$target")
+      if [[ "$file_link" == "$file" ]]; then
+        # Then remove it
+        remove=true
+      fi
+    fi
+  fi
+  if [[ "$remove" = true ]]; then
+    safe_remove_file "$target" && \
+      log_success "Removed" "$target" || \
+      return 1
+  else
+    log "Ignored" "$target"
+  fi
+}
 
 
 

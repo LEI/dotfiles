@@ -17,7 +17,44 @@ print_battery_percentage() {
   fi
 }
 
+print_battery_level() {
+  local status=$1
+  local percentage=$(print_battery_percentage)
+  local percent=${percentage%\%}
+  local display_percentage=true
+  local level=$(spark 0 $percent 100)
+  local level_color= color=
+
+  if [[ $percent -lt 25 ]]; then
+    level_color="red"
+  elif [[ $percent -ge 25 ]] && [[ $percent -lt 75 ]]; then
+    level_color="yellow"
+  elif [[ $percent -ge 75 ]]; then
+    #display_percentage=false
+    level_color=
+  fi
+
+  if [[ $status =~ (charged) ]]; then
+    color="green"
+  elif [[ $status =~ (^charging) ]]; then
+    color="white"
+  elif [[ $status =~ (^discharging) ]]; then
+    color="$level_color"
+  elif [[ $status =~ (attached) ]]; then
+    color="brightred"
+  fi
+
+  if [[ "$display_percentage" = true ]]; then
+    percentage+=" "
+  else
+    percentage=
+  fi
+
+  printf "%s" "${percentage}#[fg=${color}]${level:1:1}"
+}
+
 main() {
-  print_battery_percentage
+  local status=$(battery_status)
+  print_battery_level "$status"
 }
 main

@@ -87,7 +87,7 @@ call statusline#utils#define('g:statusline#style', {})
 " Palette
 let g:statusline#style.dark = 'ctermfg=11 ctermbg=0'
 let g:statusline#style.base = 'ctermfg=12 ctermbg=10'
-let g:statusline#style.bright = 'ctermfg=12 ctermbg=11'
+let g:statusline#style.bright = 'ctermfg=12 ctermbg=11' " fg=13
 " Mode colors
 let g:statusline#style.normal = 'ctermfg=10 ctermbg=4'
 let g:statusline#style.insert = 'ctermfg=10 ctermbg=2'
@@ -123,8 +123,7 @@ function statusline#Build.mode()
   " Custom highlight groups
   "Color,Warning?
   call add(l:highlights,['BG', g:statusline#style.dark])
-  call add(l:highlights,['Paste', g:statusline#style.base])
-  call add(l:highlights,['Branch', g:statusline#style.bright.' cterm=bold'])
+  call add(l:highlights,['BrightBold', g:statusline#style.bright.' cterm=bold'])
   "File?
   call add(l:highlights,['Info', g:statusline#style.bright])
 
@@ -171,22 +170,22 @@ function statusline#Build.mode()
   " Set the base color
   "exec 'hi StatusLine '.l:hi_line
   "exec 'hi StatusLineBG '.l:hi_bg
-  call add(l:highlights, ['File', l:hi_line])
+  call add(l:highlights, ['Base', l:hi_line])
   call add(l:highlights, ['BG', l:hi_bg])
 
   " Use mode color for other parts
-  "exec 'hi StatusLineColor '.l:hi_color
+  "exec 'hi StatusLinePost '.l:hi_color
   " Then add bold to mode label
   "let l:hi_color.=' cterm=bold'
   "exec 'hi StatusLineMode '.l:hi_color.' cterm=bold'
   "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
-  call add(l:highlights, ['Color', l:hi_color])
-  call add(l:highlights, ['Mode', l:hi_color.' cterm=bold'])
+  call add(l:highlights, ['Mode', l:hi_color])
+  call add(l:highlights, ['ModeBold', l:hi_color.' cterm=bold'])
 
   "exec 'hi StatusLineFile '.l:hi_file
   "exec 'hi StatusLineInfo '.l:hi_bright
-  call add(l:highlights, ['Branch', l:hi_bright.' cterm=bold'])
-  call add(l:highlights, ['Info', l:hi_bright])
+  call add(l:highlights, ['BrightBold', l:hi_bright.' cterm=bold'])
+  call add(l:highlights, ['Bright', l:hi_bright])
 
   for [g,s] in l:highlights
     call s:build.highlight(g, s)
@@ -214,7 +213,7 @@ endfunction
 
 " File encoding and format
 function statusline#Build.fileInfo()
-  let l:i=''
+  let l:info=''
   " File type %(y|Y)
   "let l:l.='%#StatusLineType#'
   "let l:l.='%( %{&filetype} %)'
@@ -222,55 +221,59 @@ function statusline#Build.fileInfo()
   " File encoding and format
   "let l:l.='%#StatusLineInfo#'
 
-  let l:i.='%#StatusLineType#'
-  let l:i.='%( '
-  let l:i.=&filetype
-  let l:i.=' %)'
+  let l:info.=g:statusline#symbol.space
 
-  let l:i.='%#StatusLineInfo#'
+  if (&filetype!='')
+    let l:type=&filetype
+  else
+    let l:type='no ft'
+  endif
+
+  let l:info.=l:type
+
+  let l:info.=g:statusline#symbol.space
+  let l:info.=g:statusline#symbol.sep
+  let l:info.=g:statusline#symbol.space
 
   if (&fenc!='')
     let l:encoding=&fenc
   else
     let l:encoding=&enc
   endif
-
   if (exists("+bomb") && &bomb)
     let l:encoding.=",B"
   endif
 
-  let l:i.=g:statusline#symbol.space
-  let l:i.=l:encoding
-  let l:i.=g:statusline#symbol.space
-  let l:i.=g:statusline#symbol.sep
-  let l:i.=g:statusline#symbol.space
-  let l:i.=&fileformat
-  let l:i.=g:statusline#symbol.space
+  let l:info.=l:encoding
 
-  return statusline#utils#truncate(l:i, 80)
+  let l:info.=g:statusline#symbol.space
+  let l:info.=g:statusline#symbol.sep
+  let l:info.=g:statusline#symbol.space
+
+  let l:info.=&fileformat
+  let l:info.=g:statusline#symbol.space
+
+  return statusline#utils#truncate(l:info, 80)
 endfunction
 
 function statusline#Build.filePos()
   " Cursor position
-  let l:p='%#StatusLineColor#'
+  let l:pos=''
 
-  let l:p.=g:statusline#symbol.space
-
-  let l:p.='%-4(%p%%%)'
-
-  let l:p.=g:statusline#symbol.space
+  let l:pos.=g:statusline#symbol.space
 
   " %l Line number
   " $c Column number
   " %V Virtual column
-  let l:p.='%3(%l%):%3(%c%V%)'
+  let l:pos.='%4(%l:%)%-3(%c%V%)'
 
+  "let l:pos.=g:statusline#symbol.space
   " %P Percent through file
-  "let l:p.='%3(%P%)'
+  "let l:pos.='%4(%p%%%)'
 
-  let l:p.=g:statusline#symbol.space
+  let l:pos.=g:statusline#symbol.space
 
-  return statusline#utils#truncate(l:p, 40)
+  return statusline#utils#truncate(l:pos, 40)
 endfunction
 
 function statusline#Build.warningMsg()
@@ -285,27 +288,27 @@ function statusline#Build.render()
   let l:l=''
 
   " Display colored mode
-  let l:l.='%#StatusLineMode#'
+  let l:l.='%#StatusLineModeBold#'
   let l:l.='%( %{statusline#Build.mode()} %)'
 
-  let l:l.='%#StatusLinePaste#'
+  let l:l.='%#StatusLineMode#'
   let l:l.='%( %{statusline#Build.hasPaste()} %)'
 
   " Current branch
-  let l:l.='%#StatusLineBranch#'
+  let l:l.='%#StatusLineBrightBold#'
   let l:l.='%( %{statusline#Build.branch()} %)'
   "
   " Reset color to default highlight groupe 'StatusLine'
   let l:l.='%*'
 
-
   " File segment
-  let l:l.='%#StatusLineFile#'
+  let l:l.='%#StatusLineBase#'
   " Break point
   let l:l.=' %<'
   " %n Buffer index
+  let l:l.='%n'
   " %f Relative path
-  let l:l.='%n %f '
+  let l:l.=' %f '
 
   " File flags
   " %H Help buffer
@@ -324,7 +327,13 @@ function statusline#Build.render()
   let l:l.='%( %{v:register} %)'
 
   " File details
+  let l:l.='%#StatusLineBase#'
   let l:l.=self.fileInfo()
+
+  let l:l.='%#StatusLineBright#'
+  let l:l.=' %3(%P%) '
+
+  let l:l.='%#StatusLineMode#'
   let l:l.=self.filePos()
 
   " Syntastic "let l:l.='%#StatusLineWarning#'
