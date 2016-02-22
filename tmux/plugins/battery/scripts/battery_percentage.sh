@@ -50,7 +50,7 @@ print_battery_level() {
   #  percentage=
   #fi
 
-  printf "%s" "#[fg=${color}]${level:1:1}"
+  printf "%s" "#[fg=${color}]${level:1:1}#[fg=default]"
 }
 
 main() {
