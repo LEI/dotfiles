@@ -20,7 +20,7 @@ prompt() {
   log_ask "$question" "" >&2
 
   # TODO: default value OR placeholder value?
-  #       e.g. display 'backup', prefill 'b'
+  #       e.g. display 'backup' || prefill 'b'
   #       when empty: retry or apply default?
 
   # Read with -i if bash >= 4

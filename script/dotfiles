@@ -2,6 +2,11 @@
 
 # dot
 
+# Yet Another Dotfiles Manager
+# github.com/TheLocehiliosan/yadm/blob/master/yadm.md
+# github.com/TheLocehiliosan/yadm/blob/master/yadm
+# www.agwa.name/projects/git-crypt/
+
 # set -o xtrace
 set -o nounset
 set -o errexit
@@ -16,8 +21,8 @@ shopt -s dotglob
 # # Recursive globbing (bash 4)
 # shopt -s globstar
 
-boot() {
-  unset -f boot
+main() {
+  unset -f main
 
   check_env
 
@@ -69,7 +74,7 @@ boot() {
   log_debug "DRY RUN" "$DRY_RUN"
 
   # Start script
-  dot "$DOT_CMD"
+  boot "$DOT_CMD"
 }
 
 check_env() {
@@ -151,7 +156,8 @@ parse_arguments() {
   done
 }
 
-dot() {
+# Dot command
+boot() {
   local cmd=$1
 
   case $cmd in
@@ -182,6 +188,16 @@ dot() {
   fi
 }
 
+# Required command
+require() {
+  local cmd="$1"
+
+  command -v $cmd >/dev/null 2>&1 || {
+    log_error "The command '${cmd}' could not be located"
+    exit 1
+  }
+}
+
 # Install packages
 
 dot_install() {
@@ -200,6 +216,7 @@ dot_uninstall() {
 }
 
 dot_update() {
+  require "git"
   import "lib/git"
 
   # Pulls
@@ -239,4 +256,4 @@ dot_defaults() {
     log_warn "Defaults aborted" "$?"
 }
 
-[[ "$0" == "$BASH_SOURCE" ]] && boot "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

@@ -54,7 +54,7 @@ install_brew() {
       brew upgrade
 
       # brew tap Homebrew/bundle
-      log "> brew bundle" "Bundling"
+      log "> brew bundle (TODO)" "Bundling"
       #brew bundle
       #TODO: DOT_CONFIG_BREW&CASK?
       # https://github.com/Homebrew/homebrew-bundle
@@ -65,7 +65,8 @@ install_brew() {
       log "> brew cleanup" "Cleaning"
       brew cleanup
 
-      #brew doctor
+      log "> brew doctor" "Verifying"
+      brew doctor
 
       log_success "Homebrew"
     fi

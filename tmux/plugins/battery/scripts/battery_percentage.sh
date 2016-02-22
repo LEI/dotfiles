@@ -44,13 +44,13 @@ print_battery_level() {
     color="brightred"
   fi
 
-  if [[ "$display_percentage" = true ]]; then
-    percentage+=" "
-  else
-    percentage=
-  fi
+  #if [[ "$display_percentage" = true ]]; then
+  #  percentage+=" "
+  #else
+  #  percentage=
+  #fi
 
-  printf "%s" "${percentage}#[fg=${color}]${level:1:1}"
+  printf "%s" "#[fg=${color}]${level:1:1}"
 }
 
 main() {

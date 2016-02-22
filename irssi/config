@@ -15,7 +15,7 @@ chatnets = {
   Freenode = {
     type = "IRC";
     nick = "LEI";
-    #autosendcmd = "/msg nickserv identify DOT_USER_PASSWORD; wait 2000;/window goto nickserv;/wc";
+    autosendcmd = "/msg nickserv identify DOT_USER_PASSWORD; wait 2000;/window goto nickserv;/wc";
     #max_kicks = "1";
     #max_msgs = "4";
     #max_whois = "1";
@@ -229,6 +229,6 @@ hilights = (
   # Highlight own nickname
   { text = "LEI"; color = "%M"; nick = "yes"; word = "yes"; }
 );
-keyboard = ( 
+keyboard = (
   { key = "meta-[M"; id = "command"; data = "mouse_xterm"; }
 );

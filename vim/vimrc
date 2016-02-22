@@ -407,6 +407,14 @@ function! ResCur()
   endif
 endfunction
 
+" }}}
+" Platform {{
+
+"let OS=substitute(system('uname -s'),"\n","","")
+"if (OS == "Darwin")
+  " do something that only makes sense on a Mac
+"endif
+
 " www.damtp.cam.ac.uk/user/rbw/vim-osx-cursor.html
 "If this is Terminal.app, do cursor hack for visible cursor
 "This hack does not behave well with other terminals (particularly xterm)
