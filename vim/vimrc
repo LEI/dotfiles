@@ -119,6 +119,9 @@ set nostartofline
 " Buffers can exist in the background
 set hidden
 
+" Don't redraw while executing macros
+set lazyredraw
+
 " }}}
 " Theming {{{
 
@@ -219,15 +222,6 @@ if exists("&relativenumber")
   au BufReadPost * set relativenumber
 endif
 
-" Height of the command bar
-set cmdheight=1
-
-" Show incomplete commands
-set showcmd
-
-" Display current mode
-set noshowmode
-
 " Disable cursor blinking
 "set guicursor=a:blinkon0
 
@@ -248,7 +242,7 @@ set visualbell
 set esckeys
 
 set ttimeout
-set timeoutlen=1000 "ttimeoutlen=0
+set timeoutlen=1000 ttimeoutlen=0
 "set timeoutlen=1
 
 " Mode switch fix?
@@ -266,8 +260,9 @@ endif
   set mouse=a
 "endif
 
-" Don't redraw while executing macros
-set lazyredraw
+" Natural new split focus
+set splitbelow
+set splitright
 
 " Shorter messages
 set shortmess=atI
@@ -275,22 +270,21 @@ set shortmess=atI
 " Set the window title
 set title
 
-" Always show current position (overwriten by statusline)
-set ruler
-"set rulerformat=%l,%c%V%=%P
-
-" Natural new split focus
-set splitbelow
-set splitright
-
 " Always show the status line
 set laststatus=2
 
-" Set status line
-"setl statusline=%!
-call statusline#set()
+" Display current mode
+set showmode
 
-call statusline#tabline#set()
+" Height of the command bar
+set cmdheight=1
+
+" Show incomplete commands
+set showcmd
+
+" Always show current position (overwriten by statusline)
+set ruler
+"set rulerformat=%l,%c%V%=%P
 
 " }}}
 " Spacing {{{
@@ -503,6 +497,12 @@ nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " }}}
+
+" Set status line
+"setl statusline=%!
+call statusline#set()
+
+"call statusline#tabline#set()
 
 " Load custom settings
 runtime settings.vim

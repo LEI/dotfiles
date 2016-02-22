@@ -5,8 +5,8 @@
 install_packages() {
   case $UNAME in
     Darwin)
+        #install_cask && \
       install_brew && \
-        install_cask && \
         install_cask_settings
       ;;
     *)
@@ -81,7 +81,8 @@ install_cask() {
 }
 
 install_cask_settings() {
-  local cask_path="$DOT_ROOT/os/darwin/cask"
+  # TODO: darwin only?
+  local cask_path="$DOT_ROOT/platform/darwin/cask"
   local name
   # open /Applications/$app.app
 

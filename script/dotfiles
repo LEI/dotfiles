@@ -252,7 +252,7 @@ dot_defaults() {
   import "defaults"
 
   # Set platform defaults
-  os_defaults || \
+  platform_defaults || \
     log_warn "Defaults aborted" "$?"
 }
 

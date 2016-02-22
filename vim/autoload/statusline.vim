@@ -2,6 +2,15 @@
 
 " github.com/vim-airline/vim-airline
 
+" Always show the status line
+set laststatus=2
+
+" Do not display current mode
+set noshowmode
+
+" Display incomplete commands
+set showcmd
+
 " base16 colors (?)
 " 0: black
 " 1: red
@@ -52,10 +61,6 @@
 
 let s:build = {}
 let statusline#Build = {}
-
-function s:build.highlight(group, style)
-  exec 'hi StatusLine'.a:group.' '.a:style
-endfunction
 
 call statusline#utils#define('g:statusline', {})
 
@@ -110,6 +115,11 @@ call extend(g:statusline#mode_map, {
   \ '' : 'S-BLOCK',
   \ 't'  : 'TERMINAL',
   \ }, 'keep')
+
+" Apply style to highlight group
+function s:build.highlight(group, style)
+  exec 'hi StatusLine'.a:group.' '.a:style
+endfunction
 
 " Handle colors
 function statusline#Build.mode()
@@ -257,6 +267,13 @@ function statusline#Build.fileInfo()
 endfunction
 
 function statusline#Build.filePos()
+  " Percent through file
+  let l:pos=' %3(%P%) '
+
+  return statusline#utils#truncate(l:pos, 60)
+endfunction
+
+function statusline#Build.cursorPos()
   " Cursor position
   let l:pos=''
 
@@ -331,10 +348,10 @@ function statusline#Build.render()
   let l:l.=self.fileInfo()
 
   let l:l.='%#StatusLineBright#'
-  let l:l.=' %3(%P%) '
+  let l:l.=self.filePos()
 
   let l:l.='%#StatusLineMode#'
-  let l:l.=self.filePos()
+  let l:l.=self.cursorPos()
 
   " Syntastic "let l:l.='%#StatusLineWarning#'
   let l:l.='%#warningmsg#'

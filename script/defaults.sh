@@ -2,22 +2,22 @@
 
 # # defaults.sh
 
-os_defaults() {
-  local os=$(echo "$UNAME" | to_lower_case)
-  local os_root="$DOT_ROOT/os/$os"
-  local os_file=
+platform_defaults() {
+  local platform=$(echo "$UNAME" | to_lower_case)
+  local platform_root="$DOT_ROOT/platform/$platform"
+  local platform_file=
 
-  [[ -d "$os_root" ]] || {
-    log_error "No defaults for $UNAME" "$os_root not found"
+  [[ -d "$platform_root" ]] || {
+    log_error "No defaults for $UNAME" "$platform_root not found"
     return 1
   }
 
   case $UNAME in
     Darwin) # OS X Defaults
-      os_file="$os_root/defaults.sh"
+      platform_file="$platform_root/defaults.sh"
 
-      [[ -f "$os_file" ]] || {
-        log_error "No defaults for $UNAME" "$os_file not found"
+      [[ -f "$platform_file" ]] || {
+        log_error "No defaults for $UNAME" "$platform_file not found"
         return 1
       }
 
@@ -45,7 +45,7 @@ os_defaults() {
       local theme_path
       local theme_name
       local f
-      for f in $(find $os_root -name *.terminal); do
+      for f in $(find $platform_root -name *.terminal); do
         f="${f%.terminal}"
         theme_name="${f##*/}"
         theme_path="${f%/*}"
@@ -102,7 +102,7 @@ end tell
 EOD
         fi
       else
-        log_error "Terminal theme not found" "$os_root/*.terminal"
+        log_error "Terminal theme not found" "$platform_root/*.terminal"
       fi
 
       # Kill affected applications
@@ -121,9 +121,9 @@ EOD
       ;;
   esac
 
-  if source $os_file; then
+  if source $platform_file; then
     log_info "Some changes require a logout/restart to take effect"
   else
-    log_error "Could not source" "$os_file"
+    log_error "Could not source" "$platform_file"
   fi
 }
