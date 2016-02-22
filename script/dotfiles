@@ -163,7 +163,7 @@ dot() {
         dot_install
       fi
       if confirm "**Symlink files to $DOT_TARGET" "" Y; then
-        dot_bootstrap
+        dot_link
       fi
       if confirm "**Setup $UNAME defaults" "" Y; then
         dot_defaults
