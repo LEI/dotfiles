@@ -118,7 +118,7 @@ bootstrap_symlinks_build() {
       ;;
     file|directory)
       # log_warn "Existing $file_type" "$target"
-      file_prompt="${orange}Existing ${file_type} ${white}${target}"
+      file_prompt="${red}Existing ${file_type} ${white}${target}"
       default="backup"
       ;;
     *)
