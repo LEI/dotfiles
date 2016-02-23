@@ -3,7 +3,7 @@
 # log.sh
 
 import "lib/colors"
-import "lib/utils" # now()
+import "lib/utils" # now(), tildify()
 
 INDENT="     "
 

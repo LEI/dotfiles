@@ -43,6 +43,29 @@ now() {
   printf "%s" "$date"
 }
 
+cwdify() {
+  local path="$1"
+
+  if [[ -n "$path" ]]; then
+    # Replace working directory
+    local cwd=$(pwd -P)
+    path=${path/$cwd/\.}
+  fi
+
+  printf "%s" "$path"
+}
+
+tildify() {
+  local path="$1"
+
+  if [[ -n "$path" ]]; then
+    # Replace home directory
+    path=${path/$HOME/\~}
+  fi
+
+  printf "%s" "$path"
+}
+
 # Usage: echo <string> | to_lower_case
 to_lower_case() {
   while read str; do
