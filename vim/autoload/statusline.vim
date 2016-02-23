@@ -247,7 +247,7 @@ function statusline#Build.fileInfo()
   let l:info.=l:type
 
   let l:info.=' '
-  let l:info.=g:statusline#symbol.sep
+  "let l:info.=g:statusline#symbol.sep
   let l:info.=' '
 
   if (&fenc!='')
@@ -262,7 +262,7 @@ function statusline#Build.fileInfo()
   let l:info.=l:encoding
 
   let l:info.=' '
-  let l:info.=g:statusline#symbol.sep
+  "let l:info.=g:statusline#symbol.sep
   let l:info.=' '
 
   let l:info.=&fileformat
