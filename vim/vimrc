@@ -1,6 +1,7 @@
 " ~/.vimrc
 " vim: foldenable foldmethod=marker
-" Folding cheat sheet
+
+" zi Folding on/off
 " zR Open all
 " zM Close all
 " za Toggle current
@@ -10,7 +11,7 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-" Initialization {{{
+" Initialization {{{1
 
 set nocompatible
 
@@ -36,8 +37,7 @@ if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime macros/matchit.vim
 endif
 
-" }}}
-" General {{{
+" General {{{1
 
 set encoding=utf-8
 
@@ -122,8 +122,7 @@ set hidden
 " Don't redraw while executing macros
 set lazyredraw
 
-" }}}
-" Theming {{{
+" Theming {{{1
 
 "set term=xterm-256color
 set term=screen-256color
@@ -168,8 +167,7 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-" }}}
-" Colors {{{
+" Colors {{{1
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
@@ -210,8 +208,7 @@ hi SpecialKey ctermfg=11
 "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
 "match OverLength /\%>80v.\+/
 
-" }}}
-" Interface {{{
+" Interface {{{1
 
 " Line numbers
 set number
@@ -286,8 +283,7 @@ set showcmd
 set ruler
 "set rulerformat=%l,%c%V%=%P
 
-" }}}
-" Spacing {{{
+" Spacing {{{1
 
 if !exists("g:loaded_sleuth")
   " Identation
@@ -317,8 +313,7 @@ let &showbreak='↳ '
 set list
 set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
 
-" }}}
-" Folding {{{
+" Folding {{{1
 
 " Add a bit extra margin to the left
 "set foldcolumn=1
@@ -327,8 +322,7 @@ set foldmethod=indent
 set foldnestmax=3
 set nofoldenable
 
-" }}}
-" Scrolling {{{
+" Scrolling {{{1
 
 " Start scrolling before the window border
 if !&scrolloff
@@ -348,8 +342,7 @@ command! -nargs=* Wrap setl wrap linebreak nolist
 
 "set display+=lastline
 
-" }}}
-" Search {{{
+" Search {{{1
 
 set gdefault
 
@@ -366,8 +359,7 @@ set smartcase
 " Turn magic on for regular expressions
 set magic
 
-" }}}
-" Misc {{{
+" Autocmd {{{1
 
 if has("autocmd")
   " FIXME use :so % instead
@@ -401,13 +393,12 @@ function! ResCur()
   endif
 endfunction
 
-" }}}
-" Platform {{
+" Platform {{{1
 
-"let OS=substitute(system('uname -s'),"\n","","")
-"if (OS == "Darwin")
+let OS=substitute(system('uname -s'),"\n","","")
+if (OS == "Darwin")
   " do something that only makes sense on a Mac
-"endif
+endif
 
 " www.damtp.cam.ac.uk/user/rbw/vim-osx-cursor.html
 "If this is Terminal.app, do cursor hack for visible cursor
@@ -438,8 +429,7 @@ endfunction
 "  endif
 "endif
 
-" }}}
-" Key maps {{{
+" Key maps {{{1
 
 " Allow backspace in insert mode
 set backspace=indent,eol,start
@@ -496,7 +486,6 @@ nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 " Open .vimrc in a new split
 nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
-" }}}
 
 " Set status line
 "setl statusline=%!
