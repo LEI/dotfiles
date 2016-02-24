@@ -130,10 +130,7 @@ bootstrap_symlinks_link() {
     if [[ "$file_prompt" != false ]]; then
       while true; do # wait for a valid reply
         # If prompt is not false, then ask the user to select an action
-        local action=$(prompt \
-  "${reset}${file_prompt}${reset}, what do you want to do?\n\
-${INDENT}› [${white}s${reset}]kip, [${white}o${reset}]verwrite, [${white}b${reset}]ackup" \
-        "${default-skip}" "s|o|b")
+        local action=$(prompt "${reset}${file_prompt}${reset}, what do you want to do?\n${INDENT}› [${white}s${reset}]kip, [${white}o${reset}]verwrite, [${white}b${reset}]ackup" "${default-skip}" "s|o|b")
         # [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all
         case $action in
           s*)
