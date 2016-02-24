@@ -141,7 +141,7 @@ function statusline#Build.mode()
 
   " Default status line style
   let l:hi_bright=g:statusline#style.bright
-  let l:mode_color=g:statusline#style.base
+  let l:mode_color=g:statusline#style.white
   let l:hi_line=g:statusline#style.base
   let l:hi_file=g:statusline#style.white
   let l:hi_bg=g:statusline#style.dark "base dark?
@@ -346,6 +346,13 @@ function statusline#Build.render()
   " Right align past this point
   let l:l.='%='
 
+  " Syntastic "let l:l.='%#StatusLineWarning#'
+  let l:l.='%#warningmsg#'
+  let l:l.='%( %{statusline#Build.warningMsg()} %)'
+  "let l:l.='%*'
+
+  let l:l.='%#StatusLineBG#'
+
   " Register
   let l:l.='%( %{v:register} %)'
 
@@ -358,11 +365,6 @@ function statusline#Build.render()
 
   let l:l.='%#StatusLineMode#'
   let l:l.=self.cursorPos()
-
-  " Syntastic "let l:l.='%#StatusLineWarning#'
-  let l:l.='%#warningmsg#'
-  let l:l.='%( %{statusline#Build.warningMsg()} %)'
-  let l:l.='%*'
 
   return l:l
 endfunction
