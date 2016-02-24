@@ -31,7 +31,7 @@ print_battery_level() {
     level_color="yellow"
   elif [[ $percent -ge 75 ]]; then
     #display_percentage=false
-    level_color=
+    level_color="reset"
   fi
 
   if [[ $status =~ (charged) ]]; then
