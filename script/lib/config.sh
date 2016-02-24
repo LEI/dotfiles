@@ -12,6 +12,8 @@ config() {
   local file=$1
   local template=${2-}
 
+  local file_name=$(tildify $file)
+
   # Fill config from template if needed
   if [[ ! -f "$file" ]]; then
 
@@ -20,10 +22,10 @@ config() {
       # local path=${file%/*}
       # local name=${file##*/}
       template="$file.template"
-      log_warn "Assuming template location:" "$template"
+      log_warn "Assuming template location:" "${file_name}.template"
     fi
 
-    confirm "Create configuration file" "$file" Y || return 1
+    confirm "Create configuration file" "$file_name" Y || return 1
     # Prefix is important
     DOT_USER_NAME=$(prompt "What is your full name" "Guillaume Frichet")
     DOT_USER_EMAIL=$(prompt "What is your email" "guillaume.frichet@gmail.com")
@@ -37,9 +39,9 @@ config() {
   [[ -f "$file" ]] || return 1
 
   if config_read "$file"; then
-    log_success "Using configuration file" "$file"
+    log_success "Using configuration file" "$file_name"
   else
-    log_error "Could not generate configuration file" "$file"
+    log_error "Could not generate configuration file" "$file_name"
     return 1
   fi
 }

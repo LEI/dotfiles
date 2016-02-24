@@ -72,7 +72,7 @@ bootstrap_symlinks_list() {
   local file=$1 # Source
   local target=$2 # Destination
   #printf "%s\n" "$file -> $target"
-  log_info "${file#$DOT_ROOT/} ->" "$target"
+  log "$(tildify $target)" "-> $(cwdify $file)"
 }
 
 bootstrap_symlinks_link() {

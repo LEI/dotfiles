@@ -59,6 +59,8 @@ set showcmd
 "    \ hi User3 ctermbg=3 ctermfg=10 cterm=bold " Insert
 "    \ hi User4 ctermbg=4 ctermfg=10 cterm=bold " Visual?
 
+" g:loaded_statusline?
+
 let s:build = {}
 let statusline#Build = {}
 
@@ -74,16 +76,15 @@ call extend(g:statusline#symbol, {
   \ 'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512)),
   \ 'modified': '+',
   \ 'close': '✕',
-  \ 'space': ' ',
   \ 'sep': '|',
-  \ }, 'keep')
+  \ })
 
 if !exists('g:statusline#style')
   let g:statusline#style={}
 endif
 
 " Symbols ⎇ /|•·
-"let g:statusline#symbol.space = ' '
+"let ' ' = ' '
 "let g:statusline#symbol.sep = '|'
 "let g:statusline#symbol.branch = '⎇ '
 "let g:statusline#symbol.readonly = 'RO'
@@ -92,7 +93,8 @@ call statusline#utils#define('g:statusline#style', {})
 " Palette
 let g:statusline#style.dark = 'ctermfg=11 ctermbg=0'
 let g:statusline#style.base = 'ctermfg=12 ctermbg=10'
-let g:statusline#style.bright = 'ctermfg=12 ctermbg=11' " fg=13
+let g:statusline#style.white = 'ctermfg=13 ctermbg=10'
+let g:statusline#style.bright = 'ctermfg=13 ctermbg=11' " fg=12|13
 " Mode colors
 let g:statusline#style.normal = 'ctermfg=10 ctermbg=4'
 let g:statusline#style.insert = 'ctermfg=10 ctermbg=2'
@@ -133,49 +135,51 @@ function statusline#Build.mode()
   " Custom highlight groups
   "Color,Warning?
   call add(l:highlights,['BG', g:statusline#style.dark])
-  call add(l:highlights,['BrightBold', g:statusline#style.bright.' cterm=bold'])
+  "call add(l:highlights,['BrightBold', g:statusline#style.bright]) " .' cterm=bold'])
   "File?
   call add(l:highlights,['Info', g:statusline#style.bright])
 
   " Default status line style
   let l:hi_bright=g:statusline#style.bright
-  let l:hi_color=g:statusline#style.base
-  let l:hi_line=g:statusline#style.base "base
-  "let l:hi_file=g:statusline#style.base
-  let l:hi_bg=g:statusline#style.dark
+  let l:mode_color=g:statusline#style.base
+  let l:hi_line=g:statusline#style.base
+  let l:hi_file=g:statusline#style.white
+  let l:hi_bg=g:statusline#style.dark "base dark?
 
   "if get(w:,'statusline_active', 1)
   if get(w:, 'statusline_active', 1)
     if l:m ==# "n""
-      let l:hi_color=g:statusline#style.normal
+      let l:mode_color=g:statusline#style.normal
     elseif l:m ==# "i"
-      let l:hi_color=g:statusline#style.insert
+      let l:mode_color=g:statusline#style.insert
       let l:hi_line=g:statusline#style.insert
       "let l:branch=g:statusline#style.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
-      "let l:hi_file=g:statusline#style.insert
+      let l:hi_file=g:statusline#style.insert
       let l:hi_bg=g:statusline#style.insert
       "let l:hi_bright='ctermfg=13'
     elseif l:m ==# "R"
-      let l:hi_color=g:statusline#style.replace
+      let l:mode_color=g:statusline#style.replace
     elseif l:m ==# "v"
-      let l:hi_color=g:statusline#style.visual
+      let l:mode_color=g:statusline#style.visual
     elseif l:m ==# "V"
-      let l:hi_color=g:statusline#style.visual
+      let l:mode_color=g:statusline#style.visual
     elseif l:m ==# ""
-      let l:hi_color=g:statusline#style.visual
+      let l:mode_color=g:statusline#style.visual
     endif
   else
     let l:m='__'
-    "let l:hi_color='ctermfg=12'
-    let l:hi_line='ctermfg=12 ctermbg=0'
-    let l:hi_bright=g:statusline#style.dark
+    "let l:mode_color='ctermfg=12'
+    "let l:hi_line='ctermfg=12 ctermbg=0'
+    let l:hi_bg = g:statusline#style.base
+    let l:hi_file = g:statusline#style.base
+    let l:hi_bright=g:statusline#style.base
   endif
 
   "let w:statusline_mode
   let l:mode = get(g:statusline#mode_map, l:m, l:m)
 
   "hi StatusLine &l:base
-  "hi StatusLineMode &l:hi_color
+  "hi StatusLineMode &l:mode_color
 
   " Set the base color
   "exec 'hi StatusLine '.l:hi_line
@@ -184,17 +188,18 @@ function statusline#Build.mode()
   call add(l:highlights, ['BG', l:hi_bg])
 
   " Use mode color for other parts
-  "exec 'hi StatusLinePost '.l:hi_color
+  "exec 'hi StatusLinePost '.l:mode_color
   " Then add bold to mode label
-  "let l:hi_color.=' cterm=bold'
-  "exec 'hi StatusLineMode '.l:hi_color.' cterm=bold'
+  "let l:mode_color.=' cterm=bold'
+  "exec 'hi StatusLineMode '.l:mode_color.' cterm=bold'
   "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
-  call add(l:highlights, ['Mode', l:hi_color])
-  call add(l:highlights, ['ModeBold', l:hi_color.' cterm=bold'])
+  call add(l:highlights, ['Mode', l:mode_color])
+  call add(l:highlights, ['ModeBold', l:mode_color.' cterm=bold'])
 
+  call add(l:highlights, ['File', l:hi_file])
   "exec 'hi StatusLineFile '.l:hi_file
   "exec 'hi StatusLineInfo '.l:hi_bright
-  call add(l:highlights, ['BrightBold', l:hi_bright.' cterm=bold'])
+  call add(l:highlights, ['BrightBold', l:hi_bright]) " .' cterm=bold'])
   call add(l:highlights, ['Bright', l:hi_bright])
 
   for [g,s] in l:highlights
@@ -231,7 +236,7 @@ function statusline#Build.fileInfo()
   " File encoding and format
   "let l:l.='%#StatusLineInfo#'
 
-  let l:info.=g:statusline#symbol.space
+  let l:info.=' '
 
   if (&filetype!='')
     let l:type=&filetype
@@ -241,9 +246,9 @@ function statusline#Build.fileInfo()
 
   let l:info.=l:type
 
-  let l:info.=g:statusline#symbol.space
-  let l:info.=g:statusline#symbol.sep
-  let l:info.=g:statusline#symbol.space
+  let l:info.=' '
+  "let l:info.=g:statusline#symbol.sep
+  let l:info.=' '
 
   if (&fenc!='')
     let l:encoding=&fenc
@@ -256,12 +261,12 @@ function statusline#Build.fileInfo()
 
   let l:info.=l:encoding
 
-  let l:info.=g:statusline#symbol.space
-  let l:info.=g:statusline#symbol.sep
-  let l:info.=g:statusline#symbol.space
+  let l:info.=' '
+  "let l:info.=g:statusline#symbol.sep
+  let l:info.=' '
 
   let l:info.=&fileformat
-  let l:info.=g:statusline#symbol.space
+  let l:info.=' '
 
   return statusline#utils#truncate(l:info, 80)
 endfunction
@@ -277,18 +282,18 @@ function statusline#Build.cursorPos()
   " Cursor position
   let l:pos=''
 
-  let l:pos.=g:statusline#symbol.space
+  let l:pos.=' '
 
   " %l Line number
   " $c Column number
   " %V Virtual column
   let l:pos.='%4(%l:%)%-3(%c%V%)'
 
-  "let l:pos.=g:statusline#symbol.space
+  "let l:pos.=' '
   " %P Percent through file
   "let l:pos.='%4(%p%%%)'
 
-  let l:pos.=g:statusline#symbol.space
+  let l:pos.=' '
 
   return statusline#utils#truncate(l:pos, 40)
 endfunction
@@ -319,7 +324,7 @@ function statusline#Build.render()
   let l:l.='%*'
 
   " File segment
-  let l:l.='%#StatusLineBase#'
+  let l:l.='%#StatusLineFile#'
   " Break point
   let l:l.=' %<'
   " %n Buffer index
@@ -334,8 +339,9 @@ function statusline#Build.render()
   let l:l.='%([%R%M] %)'
 
   " No color section
-  let l:l.='%#StatusLineNC#'
-  "let l:l.='%#StatusLineBG#'
+  "let l:l.='%#StatusLineNC#'
+
+  let l:l.='%#StatusLineBG#'
 
   " Right align past this point
   let l:l.='%='
