@@ -116,7 +116,7 @@ call extend(g:statusline#mode_map, {
   \ 'S'  : 'S-LINE',
   \ '' : 'S-BLOCK',
   \ 't'  : 'TERMINAL',
-  \ }, 'keep')
+  \ })
 
 " Apply style to highlight group
 function s:build.highlight(group, style)
@@ -141,7 +141,7 @@ function statusline#Build.mode()
 
   " Default status line style
   let l:hi_bright=g:statusline#style.bright
-  let l:mode_color=g:statusline#style.base
+  let l:mode_color=g:statusline#style.white
   let l:hi_line=g:statusline#style.base
   let l:hi_file=g:statusline#style.white
   let l:hi_bg=g:statusline#style.dark "base dark?
@@ -212,7 +212,7 @@ endfunction
 " Returns true if paste mode is enabled
 function statusline#Build.hasPaste()
     if &paste
-        return 'PASTE'
+        return g:statusline#symbol.paste
     endif
     return ''
 endfunction
@@ -314,7 +314,7 @@ function statusline#Build.render()
   let l:l.='%( %{statusline#Build.mode()} %)'
 
   let l:l.='%#StatusLineMode#'
-  let l:l.='%( %{statusline#Build.hasPaste()} %)'
+  let l:l.='%(%{statusline#Build.hasPaste()} %)'
 
   " Current branch
   let l:l.='%#StatusLineBrightBold#'
@@ -330,21 +330,27 @@ function statusline#Build.render()
   " %n Buffer index
   let l:l.='%n'
   " %f Relative path
-  let l:l.=' %f '
-
+  let l:l.=' %f'
   " File flags
   " %H Help buffer
   " %R Readonly
   " %M Modified or unmodifiable
-  let l:l.='%([%R%M] %)'
+  let l:l.='%([%R%M]%) '
 
   " No color section
   "let l:l.='%#StatusLineNC#'
 
-  let l:l.='%#StatusLineBG#'
+  "let l:l.='%#StatusLineBG#'
 
   " Right align past this point
   let l:l.='%='
+
+  " Syntastic "let l:l.='%#StatusLineWarning#'
+  let l:l.='%#warningmsg#'
+  let l:l.='%( %{statusline#Build.warningMsg()} %)'
+  "let l:l.='%*'
+
+  let l:l.='%#StatusLineBG#'
 
   " Register
   let l:l.='%( %{v:register} %)'
@@ -358,11 +364,6 @@ function statusline#Build.render()
 
   let l:l.='%#StatusLineMode#'
   let l:l.=self.cursorPos()
-
-  " Syntastic "let l:l.='%#StatusLineWarning#'
-  let l:l.='%#warningmsg#'
-  let l:l.='%( %{statusline#Build.warningMsg()} %)'
-  let l:l.='%*'
 
   return l:l
 endfunction

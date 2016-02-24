@@ -18,7 +18,7 @@ set nocompatible
 filetype off
 
 let g:pathogen_disabled = []
-"call add(g:pathogen_disabled, 'syntastic')
+call add(g:pathogen_disabled, 'sleuth')
 
 " Add pathogen to runtime
 runtime bundle/pathogen/autoload/pathogen.vim
@@ -191,14 +191,16 @@ hi Visual ctermfg=10 ctermbg=3
 
 "hi Pmenu        ctermbg=240 ctermfg=12
 "hi PmenuSel     ctermbg=3   ctermfg=1
-"hi SpellBad ctermfg=1 ctermbg=11 cterm=underline
-hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
+"hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
+
+"hi SpellBad ctermfg=13 ctermbg=1
+"hi SpellCap ctermfg=13 ctermbg=9
 
 hi ExtraWhitespace ctermbg=1 guibg=red
 
 " Customize invisible characters color
-hi NonText ctermfg=11
-hi SpecialKey ctermfg=11
+hi NonText ctermfg=10
+hi SpecialKey ctermfg=10
 
 "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
 "hi ColorColumn ctermbg=darkgray guibg=darkgray
@@ -238,20 +240,19 @@ set visualbell
 " Recognize escape immediately
 set esckeys
 
-set ttimeout
+set timeout
 set timeoutlen=1000 ttimeoutlen=0
-"set timeoutlen=1
 
 " Mode switch fix?
 " https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
-if !has('gui_running')
-  "set ttimeoutlen=10
-  augroup FastEscape
-    au!
-    au InsertEnter * set timeoutlen=0
-    au InsertLeave * set timeoutlen=1000
-  augroup END
-endif
+"if !has('gui_running')
+"  "set ttimeoutlen=10
+"  augroup FastEscape
+"    au!
+"    au InsertEnter * set timeoutlen=0
+"    au InsertLeave * set timeoutlen=1000
+"  augroup END
+"endif
 
 "if has("mouse")
   set mouse=a
@@ -285,18 +286,25 @@ set ruler
 
 " Spacing {{{1
 
-if !exists("g:loaded_sleuth")
-  " Identation
-  set shiftwidth=2
-  set softtabstop=2
-  set tabstop=2
-endif
+" Quick 4 spaces identation: set ts=4 sw=4 sts=4 et
+
+"if !exists("g:loaded_sleuth")
+"endif
+
+" Indent size
+set shiftwidth=4
+" Set the number of columns for a tab
+set softtabstop=4
+" Visual width of a tabulation
+set tabstop=4
 
 " Use spaces instead of tabs
 set expandtab
 
+" Automatically insert idents
 set autoindent
 set smartindent
+" Make <Tab> insert indents instead of tabs at the beginning of a line
 set smarttab
 
 " Don't wrap lines by default (see ftplugin)
@@ -306,10 +314,9 @@ set linebreak
 " Line break on 500 characters
 set textwidth=500
 " Display line breaks
-let &showbreak='↳ '
+let &showbreak='↳'
 
-" Show invisible character
-" Highlight: NonText and SpecialKey
+" Show invisible character (highlighted with NonText and SpecialKey)
 set list
 set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
 
