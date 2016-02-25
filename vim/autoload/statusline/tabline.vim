@@ -1,4 +1,4 @@
-" Tab line
+" Tabline
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/extensions/tabline.vim
 
