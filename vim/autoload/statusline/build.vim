@@ -1,6 +1,7 @@
 " Builder
+" set foldenable foldmethod=marker
 
-" Handle colors
+" Handle colors and mode
 function statusline#build#mode()
   "redraw
   let l:m=mode()

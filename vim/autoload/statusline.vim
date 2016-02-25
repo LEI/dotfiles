@@ -1,18 +1,7 @@
 " Statusline
-" vim: foldenable foldmethod=marker
+" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
 
 " github.com/vim-airline/vim-airline
-
-" Options {{{1
-
-" Always show the status line
-set laststatus=2
-
-" Do not display current mode
-set noshowmode
-
-" Display incomplete commands
-set showcmd
 
 " Cheat sheet {{{1
 
@@ -107,7 +96,7 @@ let g:statusline_colors.insert = 'ctermfg=10 ctermbg=2'
 let g:statusline_colors.replace = 'ctermfg=13 ctermbg=1' " fg=10
 let g:statusline_colors.visual = 'ctermfg=10 ctermbg=3'
 
-" Render status line {{{1
+" Render status l ine {{{1
 
 function statusline#render()
   let l:l=''

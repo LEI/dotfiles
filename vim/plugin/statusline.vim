@@ -5,6 +5,15 @@ if get(g:, 'loaded_statusline', 0) || v:version < 700 || &cp
 endif
 let g:loaded_statusline = 1
 
+" Always show the status line
+set laststatus=2
+
+" Do not display current mode
+set noshowmode
+
+" Display incomplete commands
+set showcmd
+
 function s:render()
     setl statusline=%!statusline#render()
 endfunction

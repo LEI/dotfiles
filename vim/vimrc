@@ -1,5 +1,5 @@
 " ~/.vimrc
-" vim: foldenable foldmethod=marker
+" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
 
 " zi Folding on/off
 " zR Open all
@@ -255,7 +255,7 @@ set timeoutlen=1000 ttimeoutlen=0
 "endif
 
 "if has("mouse")
-  set mouse=a
+set mouse=a
 "endif
 
 " Natural new split focus
