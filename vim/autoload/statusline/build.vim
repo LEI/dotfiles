@@ -1,5 +1,5 @@
 " Builder
-" set foldenable foldmethod=marker
+" set foldenable foldmethod=marker et sts=2 sw=2 ts=2
 
 " Handle colors and mode
 function statusline#build#mode()
@@ -34,7 +34,7 @@ function statusline#build#mode()
       "let l:branch=g:statusline_colors.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
       let l:hi_file=g:statusline_colors.insert
       let l:hi_bg=g:statusline_colors.insert
-      "let l:hi_bright='ctermfg=13'
+      let l:hi_bright='ctermfg=12'
     elseif l:m ==# "R"
       let l:mode_color=g:statusline_colors.replace
     elseif l:m ==# "v"
@@ -93,15 +93,6 @@ function statusline#build#hasPaste()
         return g:statusline_symbols.paste
     endif
     return ''
-endfunction
-
-" Git
-function statusline#build#branch()
-  if exists("*fugitive#head")
-    let _ = fugitive#head()
-    return strlen(_) ? statusline#utils#truncate(g:statusline_symbols.branch.' '._, 60) : ''
-  endif
-  return ''
 endfunction
 
 " File encoding and format
@@ -174,13 +165,5 @@ function statusline#build#cursorPos()
   let l:pos.=' '
 
   return statusline#utils#truncate(l:pos, 40)
-endfunction
-
-function statusline#build#syntastic()
-  if exists("g:loaded_syntastic_plugin")
-    let _ = SyntasticStatuslineFlag()
-    return strlen(_) ? _ : ''
-  endif
-  return ''
 endfunction
 
