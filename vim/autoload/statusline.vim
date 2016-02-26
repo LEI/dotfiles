@@ -58,7 +58,7 @@ call extend(g:statusline#mode_map, {
   \ 'S'  : 'S-LINE',
   \ '' : 'S-BLOCK',
   \ 't'  : 'TERMINAL',
-  \ })
+  \ }, 'keep')
 
 " Symbols {{{2
 
@@ -74,7 +74,7 @@ call extend(g:statusline_symbols, {
   \ 'modified': '+',
   \ 'close': '✕',
   \ 'sep': '|',
-  \ })
+  \ }, 'keep')
 
 " Colors {{{2
 
@@ -96,9 +96,43 @@ let g:statusline_colors.insert = 'ctermfg=10 ctermbg=2'
 let g:statusline_colors.replace = 'ctermfg=13 ctermbg=1' " fg=10
 let g:statusline_colors.visual = 'ctermfg=10 ctermbg=3'
 
-" Render status l ine {{{1
+" Functions {{{1
 
-function statusline#render()
+let s:items = {}
+
+" github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
+" v:version >= 704
+function s:invoke(funcList, ...)
+  if len(a:funcList) != 0
+    for funcName in keys(a:funcList)
+      "echo funcName
+
+      "let result = call(funcName, [])
+      "if result != -1
+      "  echom result
+      "endif
+    endfor
+  endif
+endfunction
+
+function statusline#extend(name, opts)
+  let s:items[a:name] = get(s:items, a:name, {})
+  call extend(s:items[a:name], a:opts, 'force')
+endfunction
+
+function statusline#init()
+  "let args = get(a:options, 'arguments', [])
+
+  " Build items
+  call statusline#extend('mode', { 'function': 'statusline#build#mode' })
+
+  call s:invoke(map(s:items, 'v:val.function'))
+
+  " Add extensions
+  call statusline#extend#load()
+endfunction
+
+function statusline#build()
   let l:l=''
 
   " Display colored mode
@@ -108,10 +142,12 @@ function statusline#render()
   let l:l.='%#StatusLineMode#'
   let l:l.='%(%{statusline#build#hasPaste()} %)'
 
+
   " Current branch
-  let l:l.='%#StatusLineBrightBold#'
-  let l:l.='%( %{statusline#build#branch()} %)'
-  "
+  "let l:l.='%#StatusLineBrightBold#'
+  "let l:l.='%( %{statusline#extend#fugitive()} %)'
+
+
   " Reset color to default highlight groupe 'StatusLine'
   let l:l.='%*'
 
@@ -138,10 +174,11 @@ function statusline#render()
   " Right align past this point
   let l:l.='%='
 
+
   " Syntastic "let l:l.='%#StatusLineWarning#'
-  let l:l.='%#warningmsg#'
-  let l:l.='%( %{statusline#build#syntastic()} %)'
-  "let l:l.='%*'
+  "let l:l.='%#warningmsg#'
+  "let l:l.='%( %{statusline#extend#syntastic()} %)'
+  ""let l:l.='%*'
 
   let l:l.='%#StatusLineBG#'
 
@@ -159,4 +196,11 @@ function statusline#render()
   let l:l.=statusline#build#cursorPos()
 
   return l:l
+endfunction
+
+function statusline#set()
+  let l:ine = statusline#build()
+
+
+  return l:ine
 endfunction
