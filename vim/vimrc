@@ -19,6 +19,7 @@ filetype off
 
 let g:pathogen_disabled = []
 call add(g:pathogen_disabled, 'sleuth')
+"call add(g:pathogen_disabled, 'base16')
 
 " Add pathogen to runtime
 runtime bundle/pathogen/autoload/pathogen.vim
@@ -124,13 +125,28 @@ set lazyredraw
 
 " Theming {{{1
 
-"set term=xterm-256color
-set term=screen-256color
+set term=xterm-256color
+"set term=screen-256color
 
 " Disable BCE (Background Color Erase)
 "if &term =~ '256color'
 "  set t_ut=
 "endif
+
+" Allow color schemes to do bright colors without forcing bold
+" if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+"   set t_Co=16
+" endif
+
+" Enable syntax highlighting
+if has('syntax')
+  syntax enable
+endif
+" if &t_Co > 2 || has("gui_running")
+"   if has('syntax') && !exists('g:syntax_on')
+"     syntax enable
+"   endif
+" endif
 
 if has('gui_running')
   set background=light
@@ -139,26 +155,16 @@ else
 endif
 
 try
+  " Access colors present in 256 colorspace
   "let base16colorspace=256
   colorscheme base16-ocean
 catch
   colorscheme torte
 endtry
 
-" Allow color schemes to do bright colors without forcing bold.
-if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-  set t_Co=16
-endif
-
-" Enable syntax highlighting
-if &t_Co > 2 || has("gui_running")
-  if has('syntax') && !exists('g:syntax_on')
-    syntax enable
-  endif
-
-  set synmaxcol=500
-endif
 "set textwidth=80
+
+set synmaxcol=500
 
 set cursorline
 
@@ -173,42 +179,43 @@ endif
 "highlight LineNr ctermbg=none guibg=none
 
 " Custom colors
-"hi clear SignColumn
-hi VertSplit ctermbg=10
-hi ColorColumn ctermbg=10
-
-hi LineNr ctermbg=10
-hi CursorLineNr ctermfg=12
-"hi CursorLine ctermbg=10
-
-" Not supported by Terminal.app
-" See settings/terminal.vim
-" hi Cursor ctermfg=1 ctermbg=7
-
-hi IncSearch ctermfg=10 ctermbg=3
-hi Search ctermfg=0 ctermbg=9
-hi Visual ctermfg=10 ctermbg=3
-
-"hi Pmenu        ctermbg=240 ctermfg=12
-"hi PmenuSel     ctermbg=3   ctermfg=1
-"hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
-
-"hi SpellBad ctermfg=13 ctermbg=1
-"hi SpellCap ctermfg=13 ctermbg=9
-
-hi ExtraWhitespace ctermbg=1 guibg=red
+" "hi clear SignColumn
+" hi VertSplit ctermbg=10
+" hi ColorColumn ctermbg=10
+"
+" hi LineNr ctermbg=10
+" hi CursorLineNr ctermfg=12
+" "hi CursorLine ctermbg=10
+"
+" " Not supported by Terminal.app
+" " See settings/terminal.vim
+" " hi Cursor ctermfg=1 ctermbg=7
+"
+" hi IncSearch ctermfg=10 ctermbg=3
+" hi Search ctermfg=0 ctermbg=9
+" hi Visual ctermfg=10 ctermbg=3
+"
+" "hi Pmenu        ctermbg=240 ctermfg=12
+" "hi PmenuSel     ctermbg=3   ctermfg=1
+" "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
+"
+" "hi SpellBad ctermfg=13 ctermbg=1
+" "hi SpellCap ctermfg=13 ctermbg=9
+"
+" "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
+" "hi ColorColumn ctermbg=darkgray guibg=darkgray
+" "call matchadd('ColorColumn', '\%81v', 100) "set column nr
+"
+" " Hightlight text over 80 chars
+" "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+" "match OverLength /\%>80v.\+/
 
 " Customize invisible characters color
 hi NonText ctermfg=10
 hi SpecialKey ctermfg=10
 
-"hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-"hi ColorColumn ctermbg=darkgray guibg=darkgray
-"call matchadd('ColorColumn', '\%81v', 100) "set column nr
-
-" Hightlight text over 80 chars
-"highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-"match OverLength /\%>80v.\+/
+" Custom autocmd
+hi ExtraWhitespace ctermbg=1 guibg=red
 
 " Interface {{{1
 
@@ -216,10 +223,10 @@ hi SpecialKey ctermfg=10
 set number
 
 " Use relative line numbers
-if exists("&relativenumber")
-  set relativenumber
-  au BufReadPost * set relativenumber
-endif
+" if exists("&relativenumber")
+"   set relativenumber
+"   au BufReadPost * set relativenumber
+" endif
 
 " Disable cursor blinking
 "set guicursor=a:blinkon0

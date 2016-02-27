@@ -1,6 +1,6 @@
 # #!/usr/bin/env bash
 
-# # defaults.sh
+# # platform.sh
 
 platform_defaults() {
   local platform=$(echo "$UNAME" | to_lower_case)
@@ -52,6 +52,7 @@ platform_defaults() {
       done
 
       # Set the theme in Terminal.app
+      # TODO: applescript -> .scpt
       if [[ -n "$theme_path-" ]] && [[ -n "$theme_name" ]] && \
         [[ -f "${theme_path}/${theme_name}.terminal" ]]; then
         if confirm "Use $theme_name theme in Terminal.app" "" N; then

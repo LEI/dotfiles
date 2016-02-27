@@ -41,11 +41,16 @@
 "   %) end of width specification
 "set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
 
-" Variables {{{1
+" Init {{{1
 
 call statusline#utils#define('g:statusline', {})
-call statusline#utils#define('g:statusline#mode_map', {})
-call extend(g:statusline#mode_map, {
+
+call statusline#utils#define('g:statusline_list', [])
+
+" Mode map {{{1
+
+call statusline#utils#define('g:statusline_modes', {})
+call extend(g:statusline_modes, {
   \ '__' : '------',
   \ 'n'  : 'NORMAL',
   \ 'i'  : 'INSERT',
@@ -76,36 +81,14 @@ call extend(g:statusline_symbols, {
   \ 'sep': '|',
   \ }, 'keep')
 
-" Colors {{{2
-
-if !exists('g:statusline_colors')
-  let g:statusline_colors={}
-endif
-
-call statusline#utils#define('g:statusline_colors', {})
-
-" Palette
-let g:statusline_colors.dark = 'ctermfg=11 ctermbg=0'
-let g:statusline_colors.base = 'ctermfg=12 ctermbg=10'
-let g:statusline_colors.white = 'ctermfg=13 ctermbg=10'
-let g:statusline_colors.bright = 'ctermfg=13 ctermbg=11' " fg=12|13
-
-" Mode colors
-let g:statusline_colors.normal = 'ctermfg=10 ctermbg=4'
-let g:statusline_colors.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline_colors.replace = 'ctermfg=13 ctermbg=1' " fg=10
-let g:statusline_colors.visual = 'ctermfg=10 ctermbg=3'
-
 " Functions {{{1
-
-let s:items = {}
 
 " github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
 " v:version >= 704
 function s:invoke(funcList, ...)
   if len(a:funcList) != 0
     for funcName in keys(a:funcList)
-      "echo funcName
+      echom funcName
 
       "let result = call(funcName, [])
       "if result != -1
@@ -115,92 +98,22 @@ function s:invoke(funcList, ...)
   endif
 endfunction
 
-function statusline#extend(name, opts)
-  let s:items[a:name] = get(s:items, a:name, {})
-  call extend(s:items[a:name], a:opts, 'force')
-endfunction
-
 function statusline#init()
-  "let args = get(a:options, 'arguments', [])
+  call statusline#utils#define('g:statusline_parts', {})
+  call statusline#utils#define('g:statusline_theme', 'base16_ocean')
 
-  " Build items
-  call statusline#extend('mode', { 'function': 'statusline#build#mode' })
+  " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
+  call statusline#themes#load(g:statusline_theme)
 
-  call s:invoke(map(s:items, 'v:val.function'))
-
-  " Add extensions
-  call statusline#extend#load()
-endfunction
-
-function statusline#build()
-  let l:l=''
-
-  " Display colored mode
-  let l:l.='%#StatusLineModeBold#'
-  let l:l.='%( %{statusline#build#mode()} %)'
-
-  let l:l.='%#StatusLineMode#'
-  let l:l.='%(%{statusline#build#hasPaste()} %)'
-
-
-  " Current branch
-  "let l:l.='%#StatusLineBrightBold#'
-  "let l:l.='%( %{statusline#extend#fugitive()} %)'
-
-
-  " Reset color to default highlight groupe 'StatusLine'
-  let l:l.='%*'
-
-  " File segment
-  let l:l.='%#StatusLineFile#'
-  " Break point
-  let l:l.=' %<'
-  " %n Buffer index
-  let l:l.='%n'
-  " %f Relative path
-  let l:l.=' %f '
-
-  " File flags
-  " %H Help buffer
-  " %R Readonly
-  " %M Modified or unmodifiable
-  let l:l.='%([%R%M] %)'
-
-  " No color section
-  "let l:l.='%#StatusLineNC#'
-
-  "let l:l.='%#StatusLineBG#'
-
-  " Right align past this point
-  let l:l.='%='
-
-
-  " Syntastic "let l:l.='%#StatusLineWarning#'
-  "let l:l.='%#warningmsg#'
-  "let l:l.='%( %{statusline#extend#syntastic()} %)'
-  ""let l:l.='%*'
-
-  let l:l.='%#StatusLineBG#'
-
-  " Register
-  let l:l.='%( %{v:register} %)'
-
-  " File details
-  let l:l.='%#StatusLineBase#'
-  let l:l.=statusline#build#fileInfo()
-
-  let l:l.='%#StatusLineBright#'
-  let l:l.=statusline#build#filePos()
-
-  let l:l.='%#StatusLineMode#'
-  let l:l.=statusline#build#cursorPos()
-
-  return l:l
+  "call s:invoke(map(g:statusline_parts, 'v:val.function'))
 endfunction
 
 function statusline#set()
-  let l:ine = statusline#build()
+  " Register core section
+  call statusline#core#load()
+  " Add extensions
+  call statusline#extensions#load()
 
-
-  return l:ine
+  " Build parts
+  return statusline#builder#render()
 endfunction

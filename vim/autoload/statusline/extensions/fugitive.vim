@@ -14,7 +14,3 @@ function statusline#extend#fugitive#branch()
 
   return ''
 endfunction
-
-function statusline#extend#fugitive#load()
-  call statusline#extend('fugitive', { 'function': 'statusline#extend#fugitive#branch' })
-endfunction

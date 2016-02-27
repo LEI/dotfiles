@@ -14,7 +14,3 @@ function statusline#extend#syntastic#flags()
 
   return ''
 endfunction
-
-function statusline#extend#syntastic#load()
-  call statusline#extend('syntastic', { 'function': 'statusline#extend#syntastic#flags' })
-endfunction

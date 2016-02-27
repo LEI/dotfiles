@@ -29,7 +29,7 @@ function statusline#tabline#Build.render()
     let l:s.= '%=%#TabLine#%999X'.g:statusline#symbol.close
   endif
 
-  return s
+  return l:s
 endfunction
 
 function statusline#tabline#Build.label(n)

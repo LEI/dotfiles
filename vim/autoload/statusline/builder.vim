@@ -1,10 +1,87 @@
-" Builder
-" set foldenable foldmethod=marker et sts=2 sw=2 ts=2
+" Parts
+" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
 
-" Handle colors and mode
-function statusline#build#mode()
+" Register new section
+function statusline#builder#add(name, opts)
+  let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
+  call extend(g:statusline_parts[a:name], a:opts, 'force')
+endfunction
+
+" Output statusline string
+function statusline#builder#render()
+  return s:main()
+endfunction
+
+function s:main()
+  let l:l=''
+
+  " Display colored mode
+  let l:l.='%#StatusLineModeBold#'
+  let l:l.='%( %{statusline#core#mode()} %)'
+
+  let l:l.='%#StatusLineMode#'
+  let l:l.='%(%{statusline#core#hasPaste()} %)'
+
+
+  " Current branch
+  "let l:l.='%#StatusLineBrightBold#'
+  "let l:l.='%( %{statusline#extensions#fugitive()} %)'
+
+
+  " Reset color to default highlight groupe 'StatusLine'
+  let l:l.='%*'
+
+  " File segment
+  let l:l.='%#StatusLineFile#'
+  " Break point
+  let l:l.=' %<'
+  " %n Buffer index
+  let l:l.='%n'
+  " %f Relative path
+  let l:l.=' %f '
+
+  " File flags
+  " %H Help buffer
+  " %R Readonly
+  " %M Modified or unmodifiable
+  let l:l.='%([%R%M] %)'
+
+  " No color section
+  "let l:l.='%#StatusLineNC#'
+
+  let l:l.='%#StatusLineBG#'
+
+  " Right align past this point
+  let l:l.='%='
+
+
+  " Syntastic "let l:l.='%#StatusLineWarning#'
+  "let l:l.='%#warningmsg#'
+  "let l:l.='%( %{statusline#extensions#syntastic()} %)'
+  ""let l:l.='%*'
+
+  let l:l.='%#StatusLineBG#'
+
+  " Register
+  let l:l.='%( %{v:register} %)'
+
+  " File details
+  let l:l.='%#StatusLineBase#'
+  let l:l.=statusline#core#fileInfo()
+
+  let l:l.='%#StatusLineBright#'
+  let l:l.=statusline#core#filePos()
+
+  let l:l.='%#StatusLineMode#'
+  let l:l.=statusline#core#cursorPos()
+
+  return l:l
+endfunction
+
+" Highlight groups
+function statusline#builder#highlight(active)
+  let l:m = mode()
   "redraw
-  let l:m=mode()
   let l:highlights = [['FileType', 'ctermfg=12']]
 
   " Default highlight groups
@@ -19,13 +96,13 @@ function statusline#build#mode()
 
   " Default status line style
   let l:hi_bright=g:statusline_colors.bright
-  let l:mode_color=g:statusline_colors.white
+  let l:mode_color=g:statusline_colors.dark
   let l:hi_line=g:statusline_colors.base
   let l:hi_file=g:statusline_colors.white
   let l:hi_bg=g:statusline_colors.dark "base dark?
 
-  "if get(w:,'statusline_active', 1)
-  if get(w:, 'statusline_active', 1)
+  "if get(w:, 'statusline_active', 1)
+  if get(a:, 'active', 0)
     if l:m ==# "n""
       let l:mode_color=g:statusline_colors.normal
     elseif l:m ==# "i"
@@ -45,16 +122,15 @@ function statusline#build#mode()
       let l:mode_color=g:statusline_colors.visual
     endif
   else
-    let l:m='__'
     "let l:mode_color='ctermfg=12'
     "let l:hi_line='ctermfg=12 ctermbg=0'
-    let l:hi_bg = g:statusline_colors.base
+    let l:mode_color = g:statusline_colors.base
+    "let l:hi_bg = g:statusline_colors.base
     let l:hi_file = g:statusline_colors.base
     let l:hi_bright=g:statusline_colors.base
   endif
 
   "let w:statusline_mode
-  let l:mode = get(g:statusline#mode_map, l:m, l:m)
 
   "hi StatusLine &l:base
   "hi StatusLineMode &l:mode_color
@@ -80,90 +156,9 @@ function statusline#build#mode()
   call add(l:highlights, ['BrightBold', l:hi_bright]) " .' cterm=bold'])
   call add(l:highlights, ['Bright', l:hi_bright])
 
+  " Apply highlightings
   for [g,s] in l:highlights
     call statusline#utils#highlight(g, s)
   endfor
-
-  return statusline#utils#truncate(l:mode, 20)
-endfunction
-
-" Returns true if paste mode is enabled
-function statusline#build#hasPaste()
-    if &paste
-        return g:statusline_symbols.paste
-    endif
-    return ''
-endfunction
-
-" File encoding and format
-function statusline#build#fileInfo()
-  let l:info=''
-  " File type %(y|Y)
-  "let l:l.='%#StatusLineType#'
-  "let l:l.='%( %{&filetype} %)'
-
-  " File encoding and format
-  "let l:l.='%#StatusLineInfo#'
-
-  let l:info.=' '
-
-  if (&filetype!='')
-    let l:type=&filetype
-  else
-    let l:type='no ft'
-  endif
-
-  let l:info.=l:type
-
-  let l:info.=' '
-  "let l:info.=g:statusline_symbols.sep
-  let l:info.=' '
-
-  if (&fenc!='')
-    let l:encoding=&fenc
-  else
-    let l:encoding=&enc
-  endif
-  if (exists("+bomb") && &bomb)
-    let l:encoding.=",B"
-  endif
-
-  let l:info.=l:encoding
-
-  let l:info.=' '
-  "let l:info.=g:statusline_symbols.sep
-  let l:info.=' '
-
-  let l:info.=&fileformat
-  let l:info.=' '
-
-  return statusline#utils#truncate(l:info, 80)
-endfunction
-
-function statusline#build#filePos()
-  " Percent through file
-  let l:pos=' %3(%P%) '
-
-  return statusline#utils#truncate(l:pos, 60)
-endfunction
-
-function statusline#build#cursorPos()
-  " Cursor position
-  let l:pos=''
-
-  let l:pos.=' '
-
-  " %l Line number
-  " $c Column number
-  " %V Virtual column
-  let l:pos.='%4(%l:%)%-3(%c%V%)'
-
-  "let l:pos.=' '
-  " %P Percent through file
-  "let l:pos.='%4(%p%%%)'
-
-  let l:pos.=' '
-
-  return statusline#utils#truncate(l:pos, 40)
 endfunction
 
