@@ -15,13 +15,6 @@ set noshowmode
 " Display incomplete commands
 set showcmd
 
-function s:update()
-  setl statusline=%!statusline#set()
-endfunction
-
-call statusline#init()
-"set statusline=%!statusline#set()
-
 if has('autocmd')
   if !has('gui_running')
     au InsertLeave * call s:update()
@@ -37,8 +30,8 @@ if has('autocmd')
   "autocmd ColorScheme,VimEnter * call SetStatusLine()
 
   " BufWinEnter/Leave?
-  au BufEnter,WinEnter * let w:statusline_active = 1
-  au BufLeave,WinLeave * let w:statusline_active = 0
+  "au BufEnter,WinEnter * let w:statusline_active = 1
+  "au BufLeave,WinLeave * let w:statusline_active = 0
   au BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * call s:update()
   " getcmdwintype()
   " The character used for the pattern indicates the type of command-line:
@@ -49,5 +42,12 @@ if has('autocmd')
   "  =	expression for "= |expr-register|
   "  @	string for |input()|
   "  -	text for |:insert| or |:append|
-  "au CmdwinEnter,CmdwinLeave * call s:update()
+  "au CmdwinEnter,CmdwinLeave * setlocal statusline=%!statusline#set()
 endif
+
+function s:update()
+  call statusline#update()
+  "setlocal statusline=%!statusline#set()
+endfunction
+
+"set statusline=%!statusline#set()

@@ -44,88 +44,160 @@
 " Declarations {{{1
 
 call statusline#utils#define('g:statusline', {})
-call statusline#utils#define('g:statusline_theme', 'base16_ocean')
+call statusline#utils#define('g:statusline_theme', 'dark')
+call statusline#utils#define('g:statusline_template', 'base')
 
-" Parts {{{2
+" Templates {{{2
 
-call statusline#utils#define('g:statusline_list', [])
-call extend(g:statusline_list, [
-\ 'mode', 'paste', 'fugitive', 'buffer',
-  \ '%=',
-  \ 'reg', 'info', 'percent', 'cursor', 'syntastic'
+call statusline#utils#define('g:statusline_tpl_minimal', [])
+call extend(g:statusline_tpl_minimal, [
+  \   {
+  \     'highlight': 'mode',
+  \     'format': ' %{statusline#core#mode()()} ',
+  \     'width': '-9',
+  \     'truncate': 33,
+  \   },
+  \   '%<%f%( [%M%R]%)',
+  \   '%=',
+  \   '%( [%{&filetype}]%) ',
+  \   '%-8.(%l,%c%V%) %P ',
   \ ], 'keep')
 
-call statusline#utils#define('g:statusline_parts', {})
-call extend(g:statusline_parts, {
-  \   'mode': {
-  \     'highlight': 'StatusLineModeBold',
-  \     'function': 'statusline#core#mode',
+call statusline#utils#define('g:statusline_tpl_base', [])
+call extend(g:statusline_tpl_ocean, [
+  \   {
+  \     'highlight': 'mode',
+  \     'format': ' %{statusline#core#mode()} ',
+  \     'width': '-8',
   \     'truncate': 20,
   \   },
-  \   'paste': {
+  \   {
   \     'function': 'statusline#core#paste',
   \   },
-  \   'fugitive': {
-  \     'highlight': 'StatusLineBright',
-  \     'function': 'statusline#extensions#fugitive#branch',
+  \   {
+  \     'highlight': 'StatusLine',
+  \     'format': ' %{statusline#extensions#fugitive#branch()} ',
   \     'truncate': 60,
   \   },
-  \   'buffer': {
+  \   {
   \     'highlight': 'StatusLineFile',
-  \     'expr': '%<%n %f%( [%R%M]%)'
+  \     'format': ' %<%n %f %([%M%R] %)'
   \   },
-  \   'reg': {
+  \   '%#StatusLineBG#%=',
+  \   {
   \     'highlight': 'StatusLineBG',
-  \     'expr': '%{v:register}',
+  \     'format': '%( %{v:register} %)',
   \   },
-  \   'info': {
+  \   {
   \     'highlight': 'StatusLineBase',
   \     'truncate': 80,
-  \     'item': { 'sep': ' | ' },
+  \     'sep': '|',
   \     'items': [
-  \       { 'function': 'statusline#core#format' },
-  \       { 'function': 'statusline#core#encoding' },
-  \       { 'function': 'statusline#core#type' },
+  \       { 'format': ' %{statusline#core#format()} ' },
+  \       { 'format': ' %{statusline#core#encoding()} ' },
+  \       { 'format': ' %{statusline#core#type()} ' },
   \     ],
   \   },
-  \   'percent': {
-  \     'highlight': 'StatusLineBright',
-  \     'expr': '%P',
-  \     'width': '3',
+  \   {
+  \     'highlight': 'StatusLine',
+  \     'format': ' %p%% ',
+  \     'width': '6',
   \     'truncate': 60,
   \   },
-  \   'cursor': {
-  \     'highlight': 'StatusLineMode',
+  \   {
+  \     'highlight': 'mode',
   \     'truncate': 40,
+  \     'sep': ':',
   \     'items': [
-  \       { 'expr': '%l:', 'width': '4' },
-  \       { 'expr': '%c%V', 'width': '-3' },
+  \       { 'format': '%l', 'width': '4' },
+  \       { 'format': '%c%V', 'width': '-4' },
   \     ],
   \   },
-  \   'syntastic': {
-  \     'highlight': 'warningmsg',
-  \     'function': 'statusline#extensions#syntastic#flags',
-  \     'width': '3',
+  \   {
+  \     'highlight': 'WarningMsg',
+  \     'format': '%{statusline#extensions#syntastic#flags()}',
   \     'truncate': 60,
   \   },
-  \ }, 'keep')
+  \ ], 'keep')
+
+"call statusline#utils#define('g:statusline_tpl_ocean', [])
+"call extend(g:statusline_tpl_ocean, [
+"  \   'mode', 'paste', 'fugitive', 'buffer',
+"  \   '%#StatusLineBG#%=',
+"  \   'reg', 'info', 'percent', 'cursor', 'syntastic'
+"  \ ], 'keep')
+"
+"call statusline#utils#define('g:statusline_parts', {})
+"call extend(g:statusline_parts, {
+"  \   'mode': {
+"  \     'highlight': 'mode',
+"  \     'function': 'statusline#core#mode',
+"  \     'truncate': 20,
+"  \   },
+"  \   'paste': {
+"  \     'function': 'statusline#core#paste',
+"  \   },
+"  \   'fugitive': {
+"  \     'highlight': 'StatusLineBright',
+"  \     'function': 'statusline#extensions#fugitive#branch',
+"  \     'truncate': 60,
+"  \   },
+"  \   'buffer': {
+"  \     'highlight': 'StatusLineFile',
+"  \     'format': '%<%n %f%( [%M%R]%)'
+"  \   },
+"  \   'reg': {
+"  \     'highlight': 'StatusLineBG',
+"  \     'format': '%{v:register}',
+"  \   },
+"  \   'info': {
+"  \     'highlight': 'StatusLineBase',
+"  \     'truncate': 80,
+"  \     'item': { 'sep': ' | ' },
+"  \     'items': [
+"  \       { 'function': 'statusline#core#format' },
+"  \       { 'function': 'statusline#core#encoding' },
+"  \       { 'function': 'statusline#core#type' },
+"  \     ],
+"  \   },
+"  \   'percent': {
+"  \     'highlight': 'StatusLineBright',
+"  \     'format': '%P',
+"  \     'width': '3',
+"  \     'truncate': 60,
+"  \   },
+"  \   'cursor': {
+"  \     'highlight': 'StatusLineMode',
+"  \     'truncate': 40,
+"  \     'items': [
+"  \       { 'format': '%l:', 'width': '4' },
+"  \       { 'format': '%c%V', 'width': '-3' },
+"  \     ],
+"  \   },
+"  \   'syntastic': {
+"  \     'highlight': 'WarningMsg',
+"  \     'function': 'statusline#extensions#syntastic#flags',
+"  \     'width': '3',
+"  \     'truncate': 60,
+"  \   },
+"  \ }, 'keep')
 
 " Mode map {{{2
 
-call statusline#utils#define('g:statusline_modes', {})
-call extend(g:statusline_modes, {
-  \ '__' : '------',
-  \ 'n'  : 'NORMAL',
-  \ 'i'  : 'INSERT',
-  \ 'R'  : 'REPLACE',
-  \ 'v'  : 'VISUAL',
-  \ 'V'  : 'V-LINE',
-  \ 'c'  : 'COMMAND',
-  \ '' : 'V-BLOCK',
-  \ 's'  : 'SELECT',
-  \ 'S'  : 'S-LINE',
-  \ '' : 'S-BLOCK',
-  \ 't'  : 'TERMINAL',
+call statusline#utils#define('g:statusline_mode_map', {})
+call extend(g:statusline_mode_map, {
+  \ 'inactive' : '------',
+  \ 'n': 'NORMAL',
+  \ 'i': 'INSERT',
+  \ 'R': 'REPLACE',
+  \ 'v': 'VISUAL',
+  \ 'V': 'V-LINE',
+  \ 'c': 'COMMAND',
+  \ '': 'V-BLOCK',
+  \ 's': 'SELECT',
+  \ 'S': 'S-LINE',
+  \ '': 'S-BLOCK',
+  \ 't': 'TERMINAL',
   \ }, 'keep')
 
 " Symbols {{{2
@@ -144,15 +216,175 @@ call extend(g:statusline_symbols, {
   \ 'sep': '|',
   \ }, 'keep')
 
-" Functions {{{1
+" Main {{{1
 
-function statusline#init()
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function statusline#theme(theme)
   " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
-  call statusline#builder#theme(g:statusline_theme)
+  "let g:statusline_colors = g:statusline#themes#{a:theme}#colors
+
+  let g:statusline_palette = g:statusline#themes#{a:theme}#palette
+
+endfunction
+call statusline#theme(g:statusline_theme)
+
+let s:wins = {}
+
+" TODO: highlight
+" function statusline#active(...)
+"   "let l:a = get(w:, 'statusline_active', 0)
+"   let l:active = a:0 > 0 ? a:1 : 'nope'
+"   return l:active
+" endfunction
+
+function statusline#update()
+  for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
+  "for nr in range(1, winnr('$'))
+    call statusline#win(nr, 0)
+  endfor
+
+  call statusline#win(winnr(), 1)
+  "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
 endfunction
 
-function statusline#set()
-
-  " Build parts
-  return statusline#builder#render()
+function statusline#win(nr, active)
+  let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
+  let s:wins[a:nr] = l:win
+  "setlocal statusline=%!statusline#set(winnr())
+  let &l:statusline = '%!statusline#build(' . l:win.nr . ')'
+  "call setwinvar(l:win.nr, '&statusline', '%!statusline#set(' . l:win.nr . ')')
 endfunction
+
+function statusline#build(winnr)
+  let l:win = s:wins[a:winnr]
+  let l:m = mode()
+
+  if l:win.active
+    if l:m ==# 'n'
+      let l:mode = ['normal']
+    elseif l:m ==# 'i'
+      let l:mode = ['insert']
+    elseif l:m ==# 'R'
+      let l:mode = ['replace']
+    elseif l:m =~# '\v(v|V||s|S|)'
+      let l:mode = ['visual']
+    "elseif l:m ==# 't'
+    "  let l:mode = ['terminal']
+    else
+      let l:mode = [l:m]
+    endif
+  else
+    let l:mode = ['inactive']
+  endif
+
+  let l:mode_string = join(l:mode)
+
+  if get(w:, 'statusline_mode', '') != l:mode_string || !exists('l:win.line')
+    call setwinvar(l:win.nr, 'statusline_mode', l:mode_string)
+
+    let l:line = ''
+    "call statusline#highlight(l:mode_string)
+    let w:statusline_mode = l:mode_string
+    "let l:line.= l:mode_string
+
+    let l:items = g:statusline_tpl_{g:statusline_template}
+    for item in l:items
+      let l:line.= statusline#builder#part(item, l:win)
+      unlet item
+    endfor
+
+    let l:win.line = l:line
+    "let s:wins[a:winnr] = l:win
+  "else
+    "let l:line = l:win.line
+  endif
+
+  "echom l:win.line
+
+  return l:win.line
+endfunction
+
+function statusline#hi(mode)
+  let l:mode = a:mode "get(w:, 'statusline_lastmode', '')
+  "let l:active = get(w:, 'statusline_active', 1)
+  "let l:active = statusline#utils#getwinvar(a:winnr, 'statusline_active', 0)
+  "echom "winnr" . winnr() . " active?" . a:active
+
+  "redraw
+  let l:highlights = [['FileType', 'ctermfg=12']]
+
+  " Default highlight groups
+  call add(l:highlights,['', g:statusline_colors.base])
+  call add(l:highlights,['NC', g:statusline_colors.dark])
+  " Custom highlight groups
+  "Color,Warning?
+  call add(l:highlights,['BG', g:statusline_colors.dark])
+  "call add(l:highlights,['BrightBold', g:statusline_colors.bright]) " .' cterm=bold'])
+  "File?
+  call add(l:highlights,['Info', g:statusline_colors.bright])
+
+  " Default status line style
+  let l:hi_bright=g:statusline_colors.bright
+  let l:mode_color=g:statusline_colors.dark
+  let l:hi_line=g:statusline_colors.base
+  let l:hi_file=g:statusline_colors.white
+  let l:hi_bg=g:statusline_colors.dark "base dark?
+
+  "if get(w:, 'statusline_active', 1)
+  if l:mode ==# 'normal'
+    let l:mode_color=g:statusline_colors.normal
+  elseif l:mode ==# 'insert'
+    let l:mode_color=g:statusline_colors.insert
+    let l:hi_line=g:statusline_colors.insert
+    "let l:branch=g:statusline_colors.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
+    let l:hi_file=g:statusline_colors.insert
+    let l:hi_bg=g:statusline_colors.insert
+    let l:hi_bright='ctermfg=12'
+  elseif l:mode ==# 'replace'
+    let l:mode_color=g:statusline_colors.replace
+  elseif l:mode ==# 'visual'
+    let l:mode_color=g:statusline_colors.visual
+  elseif l:mode ==# 'inactive'
+    "let l:mode_color='ctermfg=12'
+    "let l:hi_line='ctermfg=12 ctermbg=0'
+    let l:mode_color = g:statusline_colors.base
+    "let l:hi_bg = g:statusline_colors.base
+    let l:hi_file = g:statusline_colors.base
+    let l:hi_bright=g:statusline_colors.base
+  else
+    let l:mode_color = 'ctermfg=red'
+  endif
+
+  "let w:statusline_mode
+
+  "hi StatusLine &l:base
+  "hi StatusLineMode &l:mode_color
+
+  " Set the base color
+  "exec 'hi StatusLine '.l:hi_line
+  "exec 'hi StatusLineBG '.l:hi_bg
+  call add(l:highlights, ['Base', l:hi_line])
+  call add(l:highlights, ['BG', l:hi_bg])
+
+  " Use mode color for other parts
+  "exec 'hi StatusLinePost '.l:mode_color
+  " Then add bold to mode label
+  "let l:mode_color.=' cterm=bold'
+  "exec 'hi StatusLineMode '.l:mode_color.' cterm=bold'
+  "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
+  call add(l:highlights, ['Mode', l:mode_color])
+  call add(l:highlights, ['ModeBold', l:mode_color.' cterm=bold'])
+
+  call add(l:highlights, ['File', l:hi_file])
+  "exec 'hi StatusLineFile '.l:hi_file
+  "exec 'hi StatusLineInfo '.l:hi_bright
+  call add(l:highlights, ['BrightBold', l:hi_bright]) " .' cterm=bold'])
+  call add(l:highlights, ['Bright', l:hi_bright])
+
+  " Apply highlightings
+  for [g,s] in l:highlights
+    "call statusline#utils#highlight(g, s)
+    exec 'hi StatusLine'.g.' '.s
+  endfor
+endfunction
+

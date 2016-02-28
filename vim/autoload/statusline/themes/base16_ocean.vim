@@ -63,6 +63,8 @@ let s:map = {
   \ }
 
 call extend(g:statusline#themes#base16_ocean#colors, s:map, 'force')
-call statusline#utils#highlight('', s:map.base)
-call statusline#utils#highlight('NC', s:map.dark)
+"call statusline#utils#highlight('', s:map.base)
+"call statusline#utils#highlight('NC', s:map.dark)
+hi StatusLine ctermfg=12 ctermbg=10
+hi StatusLineNC ctermfg=8 ctermbg=0
 

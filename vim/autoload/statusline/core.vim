@@ -4,16 +4,13 @@
 " Display mode name
 function statusline#core#mode()
   let l:m = mode()
-  let l:active = get(w:, 'statusline_active', 0)
+  let l:mode = get(w:, 'statusline_mode', '')
 
-  if !l:active
-    let l:m='__'
+  if l:mode == 'inactive'
+    let l:m = l:mode
   endif
 
-  " Refresh colors
-  call statusline#builder#highlight()
-
-  let l:mode = get(g:statusline_modes, l:m, l:m)
+  let l:mode = get(g:statusline_mode_map, l:m, l:m)
 
   return l:mode
 endfunction

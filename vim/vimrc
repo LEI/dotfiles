@@ -11,7 +11,7 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-" Initialization {{{1
+" Plugins {{{1
 
 set nocompatible
 
@@ -19,6 +19,7 @@ filetype off
 
 let g:pathogen_disabled = []
 call add(g:pathogen_disabled, 'sleuth')
+call add(g:pathogen_disabled, 'supertab')
 "call add(g:pathogen_disabled, 'base16')
 
 " Add pathogen to runtime
@@ -298,12 +299,14 @@ set ruler
 "if !exists("g:loaded_sleuth")
 "endif
 
-" Indent size
-set shiftwidth=4
+let s:tabsize=4
+
+" Indent commands
+let &shiftwidth = s:tabsize
 " Set the number of columns for a tab
-set softtabstop=4
+let &softtabstop = s:tabsize
 " Visual width of a tabulation
-set tabstop=4
+let &tabstop = s:tabsize
 
 " Use spaces instead of tabs
 set expandtab
