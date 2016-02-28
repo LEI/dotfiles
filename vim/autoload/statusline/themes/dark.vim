@@ -18,6 +18,7 @@ let s:palette = {
   \  'normal': 'StatusLineNormal',
   \  'replace': 'StatusLineReplace',
   \  'visual': 'StatusLineVisual',
+  \  'select': 'StatusLineVisual',
   \  'inactive': 'StatusLineNC',
   \ }
 

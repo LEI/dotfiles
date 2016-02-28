@@ -2,37 +2,29 @@
 " vim: et sts=2 sw=2 ts=2
 
 " Register new section
-function statusline#builder#add(name, opts)
-  let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
-  call extend(g:statusline_parts[a:name], a:opts, 'force')
-
-  echom "Builder: added " . a:name
-endfunction
+"function statusline#builder#add(name, opts)
+"  let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
+"  call extend(g:statusline_parts[a:name], a:opts, 'force')
+"
+"  echom "Builder: added " . a:name
+"endfunction
 
 " Highlight groups
-function statusline#builder#highlight(group)
-
-  " if l:mode =~ '^normal'
-  "   let l:color = 'User4'
-  " elseif l:mode =~ '^insert'
-  "   let l:color = 'User5'
-  " elseif l:mode =~ '^replace'
-  "   let l:color = 'User6'
-  " elseif l:mode =~ '^visual'
-  "   let l:color = 'User7'
-  " "elseif l:mode =~ '^inactive'
-  " "  let l:color = 'User8'
-  " endif
+function statusline#builder#highlight(winnr, group)
   let l:hi = ''
 
-  if a:group ==# 'mode' && len(w:statusline_mode) > 0
-    let l:mode = split(get(w:, 'statusline_mode'))[0]
-    if has_key(g:statusline_palette, l:mode)
+  let l:mode = get(w:, 'statusline_mode', '')
+  "let l:mode = statusline#utils#getwinvar(a:winnr, 'statusline_mode', '')
+
+  if len(l:mode) > 0 && l:mode =~ '^inactive'
+    let l:hi = g:statusline_palette['inactive']
+  elseif len(l:mode) > 0 && a:group ==# 'mode'
+    if has_key(g:statusline_palette, split(l:mode)[0])
       let l:hi = g:statusline_palette[l:mode]
     endif
   elseif has_key(g:statusline_palette, a:group)
     let l:hi = g:statusline_palette[a:group]
-  else " Must be a valid highlight group
+  elseif len(a:group) > 0 " Must be a valid highlight group
     let l:hi = a:group
   endif
 
@@ -68,7 +60,7 @@ function statusline#builder#wrap(string, item)
 
     " Highlight group
     if exists('l:p.highlight')
-      let l:hi = statusline#builder#highlight(l:p.highlight)
+      let l:hi = statusline#builder#highlight(l:p.nr, l:p.highlight)
       "let l:hi = '%#' . l:p.highlight . '#'
     endif
 
@@ -168,105 +160,3 @@ function statusline#builder#part(item, parent)
 
   return l:str
 endfunction
-
-" ----------------------------------------------------------------------------
-
-"" Output statusline string
-"function statusline#builder#render()
-"  let l:line = ''
-"
-"  "call s:invoke(map(g:statusline_parts, 'v:val.function'))
-"  "for slug in keys(g:statusline_parts)
-"  "  let l:line.='%( %{' . g:statusline_parts[slug].function . '()} %)'
-"  "endfor
-"
-"  " Main loop
-"  for key in g:statusline_list
-"    let l:line.= statusline#builder#part(key, {})
-"  endfor
-"
-"  return l:line
-"endfunction
-
-"call s:invoke(map(g:statusline_parts, 'v:val.function'))
-" github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
-" v:version >= 704
-function s:invoke(list, ...)
-  if len(a:list) != 0
-    for name in keys(a:list)
-      echom a:list[name]
-
-      "let result = call(funcName, [])
-      "if result != -1
-      "  echom result
-      "endif
-    endfor
-  endif
-endfunction
-
-
-" function s:main()
-"   let l:l=''
-"
-"   " Display colored mode
-"   let l:l.='%#StatusLineModeBold#'
-"   let l:l.='%( %{statusline#core#mode()} %)'
-"
-"   let l:l.='%#StatusLineMode#'
-"   let l:l.='%(%{statusline#core#hasPaste()} %)'
-"
-"
-"   " Current branch
-"   "let l:l.='%#StatusLineBrightBold#'
-"   "let l:l.='%( %{statusline#extensions#fugitive()} %)'
-"
-"
-"   " Reset color to default highlight groupe 'StatusLine'
-"   let l:l.='%*'
-"
-"   " File segment
-"   let l:l.='%#StatusLineFile#'
-"   " Break point
-"   let l:l.=' %<'
-"   " %n Buffer index
-"   let l:l.='%n'
-"   " %f Relative path
-"   let l:l.=' %f '
-"
-"   " File flags
-"   " %H Help buffer
-"   " %R Readonly
-"   " %M Modified or unmodifiable
-"   let l:l.='%([%R%M] %)'
-"
-"   " No color section
-"   "let l:l.='%#StatusLineNC#'
-"
-"   let l:l.='%#StatusLineBG#'
-"
-"   " Right align past this point
-"   let l:l.='%='
-"
-"
-"   " Syntastic "let l:l.='%#StatusLineWarning#'
-"   "let l:l.='%#warningmsg#'
-"   "let l:l.='%( %{statusline#extensions#syntastic()} %)'
-"   ""let l:l.='%*'
-"
-"   let l:l.='%#StatusLineBG#'
-"
-"   " Register
-"   let l:l.='%( %{v:register} %)'
-"
-"   " File details
-"   let l:l.='%#StatusLineBase#'
-"   let l:l.=statusline#core#fileInfo()
-"
-"   let l:l.='%#StatusLineBright#'
-"   let l:l.=statusline#core#filePos()
-"
-"   let l:l.='%#StatusLineMode#'
-"   let l:l.=statusline#core#cursorPos()
-"
-"   return l:l
-" endfunction

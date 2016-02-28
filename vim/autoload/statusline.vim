@@ -60,11 +60,11 @@ call extend(g:statusline_tpl_minimal, [
   \   '%<%f%( [%M%R]%)',
   \   '%=',
   \   '%( [%{&filetype}]%) ',
-  \   '%-8.(%l,%c%V%) %P ',
+  \   '%-8.(%l,%c%V%) %p%% ',
   \ ], 'keep')
 
 call statusline#utils#define('g:statusline_tpl_base', [])
-call extend(g:statusline_tpl_ocean, [
+call extend(g:statusline_tpl_base, [
   \   {
   \     'highlight': 'mode',
   \     'format': ' %{statusline#core#mode()} ',
@@ -72,7 +72,7 @@ call extend(g:statusline_tpl_ocean, [
   \     'truncate': 20,
   \   },
   \   {
-  \     'function': 'statusline#core#paste',
+  \     'format': '%{statusline#core#paste()} ',
   \   },
   \   {
   \     'highlight': 'StatusLine',
@@ -83,7 +83,7 @@ call extend(g:statusline_tpl_ocean, [
   \     'highlight': 'StatusLineFile',
   \     'format': ' %<%n %f %([%M%R] %)'
   \   },
-  \   '%#StatusLineBG#%=',
+  \   '%=',
   \   {
   \     'highlight': 'StatusLineBG',
   \     'format': '%( %{v:register} %)',
@@ -100,8 +100,8 @@ call extend(g:statusline_tpl_ocean, [
   \   },
   \   {
   \     'highlight': 'StatusLine',
-  \     'format': ' %p%% ',
-  \     'width': '6',
+  \     'format': ' %P ',
+  \     'width': '5',
   \     'truncate': 60,
   \   },
   \   {
@@ -109,8 +109,8 @@ call extend(g:statusline_tpl_ocean, [
   \     'truncate': 40,
   \     'sep': ':',
   \     'items': [
-  \       { 'format': '%l', 'width': '4' },
-  \       { 'format': '%c%V', 'width': '-4' },
+  \       { 'format': ' %l', 'width': '4' },
+  \       { 'format': '%c%V ', 'width': '-4' },
   \     ],
   \   },
   \   {
@@ -119,70 +119,6 @@ call extend(g:statusline_tpl_ocean, [
   \     'truncate': 60,
   \   },
   \ ], 'keep')
-
-"call statusline#utils#define('g:statusline_tpl_ocean', [])
-"call extend(g:statusline_tpl_ocean, [
-"  \   'mode', 'paste', 'fugitive', 'buffer',
-"  \   '%#StatusLineBG#%=',
-"  \   'reg', 'info', 'percent', 'cursor', 'syntastic'
-"  \ ], 'keep')
-"
-"call statusline#utils#define('g:statusline_parts', {})
-"call extend(g:statusline_parts, {
-"  \   'mode': {
-"  \     'highlight': 'mode',
-"  \     'function': 'statusline#core#mode',
-"  \     'truncate': 20,
-"  \   },
-"  \   'paste': {
-"  \     'function': 'statusline#core#paste',
-"  \   },
-"  \   'fugitive': {
-"  \     'highlight': 'StatusLineBright',
-"  \     'function': 'statusline#extensions#fugitive#branch',
-"  \     'truncate': 60,
-"  \   },
-"  \   'buffer': {
-"  \     'highlight': 'StatusLineFile',
-"  \     'format': '%<%n %f%( [%M%R]%)'
-"  \   },
-"  \   'reg': {
-"  \     'highlight': 'StatusLineBG',
-"  \     'format': '%{v:register}',
-"  \   },
-"  \   'info': {
-"  \     'highlight': 'StatusLineBase',
-"  \     'truncate': 80,
-"  \     'item': { 'sep': ' | ' },
-"  \     'items': [
-"  \       { 'function': 'statusline#core#format' },
-"  \       { 'function': 'statusline#core#encoding' },
-"  \       { 'function': 'statusline#core#type' },
-"  \     ],
-"  \   },
-"  \   'percent': {
-"  \     'highlight': 'StatusLineBright',
-"  \     'format': '%P',
-"  \     'width': '3',
-"  \     'truncate': 60,
-"  \   },
-"  \   'cursor': {
-"  \     'highlight': 'StatusLineMode',
-"  \     'truncate': 40,
-"  \     'items': [
-"  \       { 'format': '%l:', 'width': '4' },
-"  \       { 'format': '%c%V', 'width': '-3' },
-"  \     ],
-"  \   },
-"  \   'syntastic': {
-"  \     'highlight': 'WarningMsg',
-"  \     'function': 'statusline#extensions#syntastic#flags',
-"  \     'width': '3',
-"  \     'truncate': 60,
-"  \   },
-"  \ }, 'keep')
-
-" Mode map {{{2
 
 call statusline#utils#define('g:statusline_mode_map', {})
 call extend(g:statusline_mode_map, {
@@ -268,8 +204,8 @@ function statusline#build(winnr)
       let l:mode = ['replace']
     elseif l:m =~# '\v(v|V||s|S|)'
       let l:mode = ['visual']
-    "elseif l:m ==# 't'
-    "  let l:mode = ['terminal']
+    elseif l:m ==# 't'
+      let l:mode = ['terminal']
     else
       let l:mode = [l:m]
     endif
