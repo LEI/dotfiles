@@ -1,5 +1,5 @@
 " Parts
-" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
+" vim: et sts=2 sw=2 ts=2
 
 " Register new section
 function statusline#builder#add(name, opts)
@@ -7,9 +7,159 @@ function statusline#builder#add(name, opts)
   call extend(g:statusline_parts[a:name], a:opts, 'force')
 endfunction
 
+function statusline#builder#wrap(string, part)
+  let l:str = a:string
+  let l:p = a:part
+
+  let l:reset = '%*'
+  let l:wid = ''
+  let l:hi = ''
+  if len(l:str) > 0
+    let l:str = ' ' . l:str . ' '
+
+    " Group width
+    if exists('l:p.width')
+      let l:wid = l:p.width
+    endif
+
+    " Highlight group
+    if exists('l:p.highlight')
+      let l:hi = '%#' . l:p.highlight . '#'
+    endif
+  endif
+
+  " Wrap and highlight
+  let l:str = l:hi . '%' . l:wid . '(' . l:str . '%)' . l:reset
+
+  return l:str
+endfunction
+
+function statusline#builder#parse(key, part, index)
+  let l:p = a:part
+  let l:str = ''
+
+  if exists('l:p.expr')
+    " Complex expression
+    let l:str = l:p.expr
+  elseif exists('l:p.core') "&& l:p.core != 0
+    " Core function call
+    if exists('*statusline#core#{a:key}')
+      let l:str = statusline#core#{a:key}()
+    elseif type(l:p.core) == type('')
+    "elseif exists('*statusline#core#{l:p.core)')
+      " info/type,encoding,formar -> WHY not found
+      let l:str = statusline#core#{l:p.core}()
+    else
+      echom "Core function not found: " . l:p.core . ' / ' . a:key
+    endif
+  elseif exists('l:p.items')
+    let l:sub_part = ''
+
+    if type(l:p.items) == type({})
+      " Dictionnary crappy order
+      for k in keys(l:p.items)
+        echom "Ignored Dict subitem: " . k
+        "let l:sub_part.= statusline#builder#part(k, l:p.items[k])
+      endfor
+    elseif type(l:p.items) == type([])
+
+      if a:index > 0
+        let l:index = a:index
+      else
+        let l:index = 0
+      endif
+
+      for k in l:p.items
+        let l:key = a:key
+
+        " if type(k) == type('')
+        "   let l:key = k "l:p.item[k]
+        "   let l:item.core = 1
+        if type(k) == type({})
+          let l:parent = deepcopy(l:p)
+          call remove(l:parent, 'items')
+          call extend(l:parent, k, 'force')
+
+          let l:sub_part.= statusline#builder#parse(l:key, l:parent, l:index)
+
+          let l:index = l:index + 1
+
+          if l:index < len(l:p.items)
+            if exists('l:p.item')
+              if exists('l:p.item.sep')
+                let l:sub_part.= l:p.item.sep
+              endif
+            endif
+          endif
+        elseif
+          echom "Unknown item type: " . type(k)
+        endif
+
+        " Recursive part
+        "echo l:item
+      endfor
+    else
+      echom "Unkown items type: " . type(l:p.items)
+    endif
+
+    let l:str = l:sub_part
+  else
+    echom "Unhandled key: " . a:key
+  endif
+
+  return l:str
+endfunction
+
+function statusline#builder#part(key, part)
+  let l:p = a:part
+  let l:str = ''
+
+  if a:key =~ '^%'
+    " Use the key as expression
+    let l:str = a:key
+  elseif exists('g:statusline_parts[a:key]')
+    let l:p = g:statusline_parts[a:key]
+    let l:str = statusline#builder#parse(a:key, l:p, 0)
+    let l:str = statusline#builder#wrap(l:str, l:p)
+  else
+    echo "Unknown part: " . a:key
+    return ''
+  endif
+
+  return l:str
+endfunction
+
 " Output statusline string
 function statusline#builder#render()
-  return s:main()
+  let l:line = ''
+
+  "call s:invoke(map(g:statusline_parts, 'v:val.function'))
+  "for slug in keys(g:statusline_parts)
+  "  let l:line.='%( %{' . g:statusline_parts[slug].function . '()} %)'
+  "endfor
+
+  " Main loop
+  for key in g:statusline_list
+    let l:line.= statusline#builder#part(key, {})
+  endfor
+
+  return l:line
+endfunction
+
+"call s:invoke(map(g:statusline_parts, 'v:val.function'))
+" github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
+" v:version >= 704
+function s:invoke(list, ...)
+  if len(a:list) != 0
+    for name in keys(a:list)
+      echom a:list[name]
+
+      "let result = call(funcName, [])
+      "if result != -1
+      "  echom result
+      "endif
+    endfor
+  endif
 endfunction
 
 function s:main()
@@ -79,8 +229,10 @@ function s:main()
 endfunction
 
 " Highlight groups
-function statusline#builder#highlight(active)
+function statusline#builder#highlight()
   let l:m = mode()
+  let l:active = get(w:, 'statusline_active', 0)
+
   "redraw
   let l:highlights = [['FileType', 'ctermfg=12']]
 
@@ -102,7 +254,7 @@ function statusline#builder#highlight(active)
   let l:hi_bg=g:statusline_colors.dark "base dark?
 
   "if get(w:, 'statusline_active', 1)
-  if get(a:, 'active', 0)
+  if l:active
     if l:m ==# "n""
       let l:mode_color=g:statusline_colors.normal
     elseif l:m ==# "i"

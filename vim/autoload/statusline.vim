@@ -1,5 +1,5 @@
 " Statusline
-" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
+" vim: et sts=2 sw=2 ts=2
 
 " github.com/vim-airline/vim-airline
 
@@ -41,13 +41,68 @@
 "   %) end of width specification
 "set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
 
-" Init {{{1
+" Declarations {{{1
 
 call statusline#utils#define('g:statusline', {})
+call statusline#utils#define('g:statusline_theme', 'base16_ocean')
+
+" Parts {{{2
 
 call statusline#utils#define('g:statusline_list', [])
+call extend(g:statusline_list, [
+\ 'mode', 'paste', 'fugitive', 'buffer',
+  \ '%=',
+  \ 'reg', 'info', 'percent', 'cursor',
+  \ ], 'keep')
 
-" Mode map {{{1
+call statusline#utils#define('g:statusline_parts', {})
+call extend(g:statusline_parts, {
+  \   'mode': {
+  \     'highlight': 'StatusLineModeBold',
+  \     'core': 1,
+  \     'truncate': 20,
+  \   },
+  \   'paste': {
+  \     'core': 1,
+  \   },
+  \   'fugitive': {
+  \     'highlight': 'StatusLineBright',
+  \   },
+  \   'buffer': {
+  \     'highlight': 'StatusLineFile',
+  \     'expr': '%< %n %f%( [%R%M]%)'
+  \   },
+  \   'reg': {
+  \     'highlight': 'StatusLineBG',
+  \     'expr': '%{v:register}',
+  \   },
+  \   'info': {
+  \     'highlight': 'StatusLineBase',
+  \     'truncate': 80,
+  \     'item': { 'sep': ' | ' },
+  \     'items': [
+  \       { 'core': 'format' },
+  \       { 'core': 'encoding' },
+  \       { 'core': 'type' },
+  \     ],
+  \   },
+  \   'percent': {
+  \      'highlight': 'StatusLineBright',
+  \      'expr': '%P',
+  \      'width': '3',
+  \      'truncate': 60,
+  \   },
+  \   'cursor': {
+  \     'highlight': 'StatusLineMode',
+  \     'truncate': 40,
+  \     'items': [
+  \       { 'expr': '%l:', 'width': '4' },
+  \       { 'expr': '%c%V', 'width': '-3' },
+  \     ],
+  \   },
+  \ }, 'keep')
+
+" Mode map {{{2
 
 call statusline#utils#define('g:statusline_modes', {})
 call extend(g:statusline_modes, {
@@ -83,34 +138,15 @@ call extend(g:statusline_symbols, {
 
 " Functions {{{1
 
-" github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
-" v:version >= 704
-function s:invoke(funcList, ...)
-  if len(a:funcList) != 0
-    for funcName in keys(a:funcList)
-      echom funcName
-
-      "let result = call(funcName, [])
-      "if result != -1
-      "  echom result
-      "endif
-    endfor
-  endif
-endfunction
-
 function statusline#init()
-  call statusline#utils#define('g:statusline_parts', {})
-  call statusline#utils#define('g:statusline_theme', 'base16_ocean')
+  " Register core functions
+  call statusline#core#load()
 
   " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
   call statusline#themes#load(g:statusline_theme)
-
-  "call s:invoke(map(g:statusline_parts, 'v:val.function'))
 endfunction
 
 function statusline#set()
-  " Register core section
-  call statusline#core#load()
   " Add extensions
   call statusline#extensions#load()
 

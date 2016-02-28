@@ -1,5 +1,5 @@
 " Utils
-" vim: st=2 sts=2 sw=2
+" vim: et st=2 sts=2 sw=2
 
 function statusline#utils#define(variable, default)
   if !exists(a:variable)

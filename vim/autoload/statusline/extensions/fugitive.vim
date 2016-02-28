@@ -5,11 +5,11 @@ if !exists("*fugitive#head")
   finish
 endif
 
-function statusline#extend#fugitive#branch()
+function statusline#extensions#fugitive#branch()
   let l:branch = fugitive#head()
 
   if strlen(l:branch) > 0
-    statusline#utils#truncate(g:statusline_symbols.branch.' '.l:branch, 60)
+    return statusline#utils#truncate(g:statusline_symbols.branch.' '.l:branch, 60)
   endif
 
   return ''

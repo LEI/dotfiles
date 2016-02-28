@@ -1,4 +1,5 @@
 " Tabline
+" vim: et sts=2 st=2 sw=2
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/extensions/tabline.vim
 

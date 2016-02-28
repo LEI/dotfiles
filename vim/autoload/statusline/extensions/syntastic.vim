@@ -5,7 +5,7 @@ if !exists(':SyntasticCheck')
   finish
 endif
 
-function statusline#extend#syntastic#flags()
+function statusline#extensions#syntastic#flags()
   let l:warnings = SyntasticStatuslineFlag()
 
   if strlen(l:warnings) > 0

@@ -1,8 +1,8 @@
 " Core sections
-" set foldenable foldmethod=marker et sts=2 sw=2 ts=2
+" vim: et sts=2 sw=2 ts=2
 
 function statusline#core#load()
-  call statusline#builder#add('mode', { 'function': 'statusline#core#mode' })
+  "echom "Core loaded"
 endfunction
 
 " Display mode name
@@ -14,21 +14,57 @@ function statusline#core#mode()
     let l:m='__'
   endif
 
+  " Refresh colors
+  call statusline#builder#highlight()
+
   let l:mode = get(g:statusline_modes, l:m, l:m)
 
-  " This needs to be called when the statusline is rendered
-  call statusline#builder#highlight(l:active)
-
-  return statusline#utils#truncate(l:mode, 20)
+  return l:mode
 endfunction
 
 " Returns true if paste mode is enabled
-function statusline#core#hasPaste()
-    if &paste
-        return g:statusline_symbols.paste
-    endif
-    return ''
+function statusline#core#paste()
+  if &paste
+    return g:statusline_symbols.paste
+  endif
+  return ''
 endfunction
+
+" File type
+function statusline#core#type()
+  if (&filetype!='')
+    let l:type=&filetype
+  else
+    let l:type='no ft'
+  endif
+
+  return l:type
+endfunction
+
+" File encoding
+function statusline#core#encoding()
+  if (&fenc!='')
+    let l:encoding=&fenc
+  else
+    let l:encoding=&enc
+  endif
+
+  if (exists("+bomb") && &bomb)
+    let l:encoding.=",B"
+  endif
+
+  return l:encoding
+endfunction
+
+" File format
+function statusline#core#format()
+  return &fileformat
+endfunction
+
+
+
+
+" DELETEME: {{{1
 
 " File encoding and format
 function statusline#core#fileInfo()

@@ -1,5 +1,5 @@
 " Load theme
-" vim: st=2 sts=2 sw=2
+" vim: et st=2 sts=2 sw=2
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
 
