@@ -7,6 +7,16 @@ function statusline#utils#define(variable, default)
   endif
 endfunction
 
+function statusline#utils#minwidth(minwidth)
+  if a:minwidth > 0 && winwidth(0) < a:minwidth
+    let l:r = 0
+  else
+    let l:r = 1
+  endif
+
+  return l:r
+endfunction
+
 " Apply style to status line highlight group
 function statusline#utils#highlight(group, style)
   exec 'hi StatusLine'.a:group.' '.a:style

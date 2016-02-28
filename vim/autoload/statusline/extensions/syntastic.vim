@@ -1,6 +1,7 @@
 " Errors and warnings
 " vim: et sts=2 st=2 sw=2
 
+" if get(g:, 'loaded_syntastic_plugin', 0)
 if !exists(':SyntasticCheck')
   finish
 endif

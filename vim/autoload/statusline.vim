@@ -52,25 +52,27 @@ call statusline#utils#define('g:statusline_list', [])
 call extend(g:statusline_list, [
 \ 'mode', 'paste', 'fugitive', 'buffer',
   \ '%=',
-  \ 'reg', 'info', 'percent', 'cursor',
+  \ 'reg', 'info', 'percent', 'cursor', 'syntastic'
   \ ], 'keep')
 
 call statusline#utils#define('g:statusline_parts', {})
 call extend(g:statusline_parts, {
   \   'mode': {
   \     'highlight': 'StatusLineModeBold',
-  \     'core': 1,
+  \     'function': 'statusline#core#mode',
   \     'truncate': 20,
   \   },
   \   'paste': {
-  \     'core': 1,
+  \     'function': 'statusline#core#paste',
   \   },
   \   'fugitive': {
   \     'highlight': 'StatusLineBright',
+  \     'function': 'statusline#extensions#fugitive#branch',
+  \     'truncate': 60,
   \   },
   \   'buffer': {
   \     'highlight': 'StatusLineFile',
-  \     'expr': '%< %n %f%( [%R%M]%)'
+  \     'expr': '%<%n %f%( [%R%M]%)'
   \   },
   \   'reg': {
   \     'highlight': 'StatusLineBG',
@@ -81,16 +83,16 @@ call extend(g:statusline_parts, {
   \     'truncate': 80,
   \     'item': { 'sep': ' | ' },
   \     'items': [
-  \       { 'core': 'format' },
-  \       { 'core': 'encoding' },
-  \       { 'core': 'type' },
+  \       { 'function': 'statusline#core#format' },
+  \       { 'function': 'statusline#core#encoding' },
+  \       { 'function': 'statusline#core#type' },
   \     ],
   \   },
   \   'percent': {
-  \      'highlight': 'StatusLineBright',
-  \      'expr': '%P',
-  \      'width': '3',
-  \      'truncate': 60,
+  \     'highlight': 'StatusLineBright',
+  \     'expr': '%P',
+  \     'width': '3',
+  \     'truncate': 60,
   \   },
   \   'cursor': {
   \     'highlight': 'StatusLineMode',
@@ -99,6 +101,12 @@ call extend(g:statusline_parts, {
   \       { 'expr': '%l:', 'width': '4' },
   \       { 'expr': '%c%V', 'width': '-3' },
   \     ],
+  \   },
+  \   'syntastic': {
+  \     'highlight': 'warningmsg',
+  \     'function': 'statusline#extensions#syntastic#flags',
+  \     'width': '3',
+  \     'truncate': 60,
   \   },
   \ }, 'keep')
 
@@ -139,16 +147,11 @@ call extend(g:statusline_symbols, {
 " Functions {{{1
 
 function statusline#init()
-  " Register core functions
-  call statusline#core#load()
-
   " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
-  call statusline#themes#load(g:statusline_theme)
+  call statusline#builder#theme(g:statusline_theme)
 endfunction
 
 function statusline#set()
-  " Add extensions
-  call statusline#extensions#load()
 
   " Build parts
   return statusline#builder#render()

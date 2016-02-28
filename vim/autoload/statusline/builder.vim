@@ -5,6 +5,13 @@
 function statusline#builder#add(name, opts)
   let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
   call extend(g:statusline_parts[a:name], a:opts, 'force')
+
+  echom "Builder: added " . a:name
+endfunction
+
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function statusline#builder#theme(theme)
+  let g:statusline_colors = g:statusline#themes#{a:theme}#colors
 endfunction
 
 function statusline#builder#wrap(string, part)
@@ -41,17 +48,14 @@ function statusline#builder#parse(key, part, index)
   if exists('l:p.expr')
     " Complex expression
     let l:str = l:p.expr
-  elseif exists('l:p.core') "&& l:p.core != 0
-    " Core function call
-    if exists('*statusline#core#{a:key}')
-      let l:str = statusline#core#{a:key}()
-    elseif type(l:p.core) == type('')
-    "elseif exists('*statusline#core#{l:p.core)')
-      " info/type,encoding,formar -> WHY not found
-      let l:str = statusline#core#{l:p.core}()
-    else
-      echom "Core function not found: " . l:p.core . ' / ' . a:key
-    endif
+  elseif exists('l:p.function')
+    let l:func = l:p.function
+    "if exists('*{l:func}') "|| filereadable('l:p.function')
+      " Core function call
+      let l:str = {l:func}()
+    "else
+    "  echom "Function not found: " . l:p.function . ' (' . l:path . ')'
+    "endif
   elseif exists('l:p.items')
     let l:sub_part = ''
 
@@ -119,8 +123,10 @@ function statusline#builder#part(key, part)
     let l:str = a:key
   elseif exists('g:statusline_parts[a:key]')
     let l:p = g:statusline_parts[a:key]
-    let l:str = statusline#builder#parse(a:key, l:p, 0)
-    let l:str = statusline#builder#wrap(l:str, l:p)
+    if !exists('l:p.truncate') || statusline#utils#minwidth(l:p.truncate)
+      let l:str = statusline#builder#parse(a:key, l:p, 0)
+      let l:str = statusline#builder#wrap(l:str, l:p)
+    endif
   else
     echo "Unknown part: " . a:key
     return ''

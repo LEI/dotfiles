@@ -1,10 +1,6 @@
 " Core sections
 " vim: et sts=2 sw=2 ts=2
 
-function statusline#core#load()
-  "echom "Core loaded"
-endfunction
-
 " Display mode name
 function statusline#core#mode()
   let l:m = mode()

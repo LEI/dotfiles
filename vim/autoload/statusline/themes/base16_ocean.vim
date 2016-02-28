@@ -51,7 +51,7 @@ call statusline#utils#define('g:statusline#themes#base16_ocean#colors', {})
 "let g:statusline#themes#base16_ocean#colors.replace = 'ctermfg=13 ctermbg=1' " fg=10
 "let g:statusline#themes#base16_ocean#colors.visual = 'ctermfg=10 ctermbg=3'
 
-call extend(g:statusline#themes#base16_ocean#colors, {
+let s:map = {
   \ 'dark': 'ctermfg=8 ctermbg=0',
   \ 'base': 'ctermfg=12 ctermbg=10',
   \ 'bright': 'ctermfg=13 ctermbg=11',
@@ -60,4 +60,9 @@ call extend(g:statusline#themes#base16_ocean#colors, {
   \ 'insert': 'ctermfg=10 ctermbg=2',
   \ 'replace': 'ctermfg=13 ctermbg=1',
   \ 'visual': 'ctermfg=10 ctermbg=3',
-  \ }, 'force')
+  \ }
+
+call extend(g:statusline#themes#base16_ocean#colors, s:map, 'force')
+call statusline#utils#highlight('', s:map.base)
+call statusline#utils#highlight('NC', s:map.dark)
+
