@@ -1,4 +1,5 @@
 " Tabline
+" vim: et sts=2 st=2 sw=2
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/extensions/tabline.vim
 
@@ -29,7 +30,7 @@ function statusline#tabline#Build.render()
     let l:s.= '%=%#TabLine#%999X'.g:statusline#symbol.close
   endif
 
-  return s
+  return l:s
 endfunction
 
 function statusline#tabline#Build.label(n)

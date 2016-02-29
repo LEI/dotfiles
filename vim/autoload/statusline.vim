@@ -1,5 +1,5 @@
 " Statusline
-" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
+" vim: et sts=2 sw=2 ts=2
 
 " github.com/vim-airline/vim-airline
 
@@ -41,23 +41,99 @@
 "   %) end of width specification
 "set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
 
-" Variables {{{1
+" Declarations {{{1
 
 call statusline#utils#define('g:statusline', {})
-call statusline#utils#define('g:statusline#mode_map', {})
-call extend(g:statusline#mode_map, {
-  \ '__' : '------',
-  \ 'n'  : 'NORMAL',
-  \ 'i'  : 'INSERT',
-  \ 'R'  : 'REPLACE',
-  \ 'v'  : 'VISUAL',
-  \ 'V'  : 'V-LINE',
-  \ 'c'  : 'COMMAND',
-  \ '' : 'V-BLOCK',
-  \ 's'  : 'SELECT',
-  \ 'S'  : 'S-LINE',
-  \ '' : 'S-BLOCK',
-  \ 't'  : 'TERMINAL',
+call statusline#utils#define('g:statusline_theme', 'dark')
+call statusline#utils#define('g:statusline_template', 'base')
+
+" Templates {{{2
+
+call statusline#utils#define('g:statusline_tpl_minimal', [])
+call extend(g:statusline_tpl_minimal, [
+  \   {
+  \     'highlight': 'mode',
+  \     'format': ' %{statusline#core#mode()()} ',
+  \     'width': '-9',
+  \     'truncate': 33,
+  \   },
+  \   '%<%f%( [%M%R]%)',
+  \   '%=',
+  \   '%( [%{&filetype}]%) ',
+  \   '%-8.(%l,%c%V%) %p%% ',
+  \ ], 'keep')
+
+call statusline#utils#define('g:statusline_tpl_base', [])
+call extend(g:statusline_tpl_base, [
+  \   {
+  \     'highlight': 'mode',
+  \     'format': ' %{statusline#core#mode()} ',
+  \     'width': '-8',
+  \     'truncate': 20,
+  \   },
+  \   {
+  \     'format': '%{statusline#core#paste()} ',
+  \   },
+  \   {
+  \     'highlight': 'StatusLine',
+  \     'format': ' %{statusline#extensions#fugitive#branch()} ',
+  \     'truncate': 60,
+  \   },
+  \   {
+  \     'highlight': 'StatusLineFile',
+  \     'format': ' %<%n %f %([%M%R] %)'
+  \   },
+  \   '%=',
+  \   {
+  \     'highlight': 'StatusLineBG',
+  \     'format': '%( %{v:register} %)',
+  \   },
+  \   {
+  \     'highlight': 'StatusLineBase',
+  \     'truncate': 80,
+  \     'sep': '|',
+  \     'items': [
+  \       { 'format': ' %{statusline#core#format()} ' },
+  \       { 'format': ' %{statusline#core#encoding()} ' },
+  \       { 'format': ' %{statusline#core#type()} ' },
+  \     ],
+  \   },
+  \   {
+  \     'highlight': 'StatusLine',
+  \     'format': ' %P ',
+  \     'width': '5',
+  \     'truncate': 60,
+  \   },
+  \   {
+  \     'highlight': 'mode',
+  \     'truncate': 40,
+  \     'sep': ':',
+  \     'items': [
+  \       { 'format': ' %l', 'width': '4' },
+  \       { 'format': '%c%V ', 'width': '-4' },
+  \     ],
+  \   },
+  \   {
+  \     'highlight': 'WarningMsg',
+  \     'format': '%{statusline#extensions#syntastic#flags()}',
+  \     'truncate': 60,
+  \   },
+  \ ], 'keep')
+
+call statusline#utils#define('g:statusline_mode_map', {})
+call extend(g:statusline_mode_map, {
+  \ 'inactive' : '------',
+  \ 'n': 'NORMAL',
+  \ 'i': 'INSERT',
+  \ 'R': 'REPLACE',
+  \ 'v': 'VISUAL',
+  \ 'V': 'V-LINE',
+  \ 'c': 'COMMAND',
+  \ '': 'V-BLOCK',
+  \ 's': 'SELECT',
+  \ 'S': 'S-LINE',
+  \ '': 'S-BLOCK',
+  \ 't': 'TERMINAL',
   \ }, 'keep')
 
 " Symbols {{{2
@@ -76,131 +152,175 @@ call extend(g:statusline_symbols, {
   \ 'sep': '|',
   \ }, 'keep')
 
-" Colors {{{2
+" Main {{{1
 
-if !exists('g:statusline_colors')
-  let g:statusline_colors={}
-endif
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function statusline#theme(theme)
+  " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
+  "let g:statusline_colors = g:statusline#themes#{a:theme}#colors
 
-call statusline#utils#define('g:statusline_colors', {})
+  let g:statusline_palette = g:statusline#themes#{a:theme}#palette
 
-" Palette
-let g:statusline_colors.dark = 'ctermfg=11 ctermbg=0'
-let g:statusline_colors.base = 'ctermfg=12 ctermbg=10'
-let g:statusline_colors.white = 'ctermfg=13 ctermbg=10'
-let g:statusline_colors.bright = 'ctermfg=13 ctermbg=11' " fg=12|13
+endfunction
+call statusline#theme(g:statusline_theme)
 
-" Mode colors
-let g:statusline_colors.normal = 'ctermfg=10 ctermbg=4'
-let g:statusline_colors.insert = 'ctermfg=10 ctermbg=2'
-let g:statusline_colors.replace = 'ctermfg=13 ctermbg=1' " fg=10
-let g:statusline_colors.visual = 'ctermfg=10 ctermbg=3'
+let s:wins = {}
 
-" Functions {{{1
+" TODO: highlight
+" function statusline#active(...)
+"   "let l:a = get(w:, 'statusline_active', 0)
+"   let l:active = a:0 > 0 ? a:1 : 'nope'
+"   return l:active
+" endfunction
 
-let s:items = {}
+function statusline#update()
+  for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
+  "for nr in range(1, winnr('$'))
+    call statusline#win(nr, 0)
+  endfor
 
-" github.com/vim-scripts/genutils/blob/master/autoload/genutils.vim
-" v:version >= 704
-function s:invoke(funcList, ...)
-  if len(a:funcList) != 0
-    for funcName in keys(a:funcList)
-      "echo funcName
+  call statusline#win(winnr(), 1)
+  "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
+endfunction
 
-      "let result = call(funcName, [])
-      "if result != -1
-      "  echom result
-      "endif
-    endfor
+function statusline#win(nr, active)
+  let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
+  let s:wins[a:nr] = l:win
+  "setlocal statusline=%!statusline#set(winnr())
+  let &l:statusline = '%!statusline#build(' . l:win.nr . ')'
+  "call setwinvar(l:win.nr, '&statusline', '%!statusline#set(' . l:win.nr . ')')
+endfunction
+
+function statusline#build(winnr)
+  let l:win = s:wins[a:winnr]
+  let l:m = mode()
+
+  if l:win.active
+    if l:m ==# 'n'
+      let l:mode = ['normal']
+    elseif l:m ==# 'i'
+      let l:mode = ['insert']
+    elseif l:m ==# 'R'
+      let l:mode = ['replace']
+    elseif l:m =~# '\v(v|V||s|S|)'
+      let l:mode = ['visual']
+    elseif l:m ==# 't'
+      let l:mode = ['terminal']
+    else
+      let l:mode = [l:m]
+    endif
+  else
+    let l:mode = ['inactive']
   endif
+
+  let l:mode_string = join(l:mode)
+
+  if get(w:, 'statusline_mode', '') != l:mode_string || !exists('l:win.line')
+    call setwinvar(l:win.nr, 'statusline_mode', l:mode_string)
+
+    let l:line = ''
+    "call statusline#highlight(l:mode_string)
+    let w:statusline_mode = l:mode_string
+    "let l:line.= l:mode_string
+
+    let l:items = g:statusline_tpl_{g:statusline_template}
+    for item in l:items
+      let l:line.= statusline#builder#part(item, l:win)
+      unlet item
+    endfor
+
+    let l:win.line = l:line
+    "let s:wins[a:winnr] = l:win
+  "else
+    "let l:line = l:win.line
+  endif
+
+  "echom l:win.line
+
+  return l:win.line
 endfunction
 
-function statusline#extend(name, opts)
-  let s:items[a:name] = get(s:items, a:name, {})
-  call extend(s:items[a:name], a:opts, 'force')
+function statusline#hi(mode)
+  let l:mode = a:mode "get(w:, 'statusline_lastmode', '')
+  "let l:active = get(w:, 'statusline_active', 1)
+  "let l:active = statusline#utils#getwinvar(a:winnr, 'statusline_active', 0)
+  "echom "winnr" . winnr() . " active?" . a:active
+
+  "redraw
+  let l:highlights = [['FileType', 'ctermfg=12']]
+
+  " Default highlight groups
+  call add(l:highlights,['', g:statusline_colors.base])
+  call add(l:highlights,['NC', g:statusline_colors.dark])
+  " Custom highlight groups
+  "Color,Warning?
+  call add(l:highlights,['BG', g:statusline_colors.dark])
+  "call add(l:highlights,['BrightBold', g:statusline_colors.bright]) " .' cterm=bold'])
+  "File?
+  call add(l:highlights,['Info', g:statusline_colors.bright])
+
+  " Default status line style
+  let l:hi_bright=g:statusline_colors.bright
+  let l:mode_color=g:statusline_colors.dark
+  let l:hi_line=g:statusline_colors.base
+  let l:hi_file=g:statusline_colors.white
+  let l:hi_bg=g:statusline_colors.dark "base dark?
+
+  "if get(w:, 'statusline_active', 1)
+  if l:mode ==# 'normal'
+    let l:mode_color=g:statusline_colors.normal
+  elseif l:mode ==# 'insert'
+    let l:mode_color=g:statusline_colors.insert
+    let l:hi_line=g:statusline_colors.insert
+    "let l:branch=g:statusline_colors.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
+    let l:hi_file=g:statusline_colors.insert
+    let l:hi_bg=g:statusline_colors.insert
+    let l:hi_bright='ctermfg=12'
+  elseif l:mode ==# 'replace'
+    let l:mode_color=g:statusline_colors.replace
+  elseif l:mode ==# 'visual'
+    let l:mode_color=g:statusline_colors.visual
+  elseif l:mode ==# 'inactive'
+    "let l:mode_color='ctermfg=12'
+    "let l:hi_line='ctermfg=12 ctermbg=0'
+    let l:mode_color = g:statusline_colors.base
+    "let l:hi_bg = g:statusline_colors.base
+    let l:hi_file = g:statusline_colors.base
+    let l:hi_bright=g:statusline_colors.base
+  else
+    let l:mode_color = 'ctermfg=red'
+  endif
+
+  "let w:statusline_mode
+
+  "hi StatusLine &l:base
+  "hi StatusLineMode &l:mode_color
+
+  " Set the base color
+  "exec 'hi StatusLine '.l:hi_line
+  "exec 'hi StatusLineBG '.l:hi_bg
+  call add(l:highlights, ['Base', l:hi_line])
+  call add(l:highlights, ['BG', l:hi_bg])
+
+  " Use mode color for other parts
+  "exec 'hi StatusLinePost '.l:mode_color
+  " Then add bold to mode label
+  "let l:mode_color.=' cterm=bold'
+  "exec 'hi StatusLineMode '.l:mode_color.' cterm=bold'
+  "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
+  call add(l:highlights, ['Mode', l:mode_color])
+  call add(l:highlights, ['ModeBold', l:mode_color.' cterm=bold'])
+
+  call add(l:highlights, ['File', l:hi_file])
+  "exec 'hi StatusLineFile '.l:hi_file
+  "exec 'hi StatusLineInfo '.l:hi_bright
+  call add(l:highlights, ['BrightBold', l:hi_bright]) " .' cterm=bold'])
+  call add(l:highlights, ['Bright', l:hi_bright])
+
+  " Apply highlightings
+  for [g,s] in l:highlights
+    "call statusline#utils#highlight(g, s)
+    exec 'hi StatusLine'.g.' '.s
+  endfor
 endfunction
 
-function statusline#init()
-  "let args = get(a:options, 'arguments', [])
-
-  " Build items
-  call statusline#extend('mode', { 'function': 'statusline#build#mode' })
-
-  call s:invoke(map(s:items, 'v:val.function'))
-
-  " Add extensions
-  call statusline#extend#load()
-endfunction
-
-function statusline#build()
-  let l:l=''
-
-  " Display colored mode
-  let l:l.='%#StatusLineModeBold#'
-  let l:l.='%( %{statusline#build#mode()} %)'
-
-  let l:l.='%#StatusLineMode#'
-  let l:l.='%(%{statusline#build#hasPaste()} %)'
-
-
-  " Current branch
-  "let l:l.='%#StatusLineBrightBold#'
-  "let l:l.='%( %{statusline#extend#fugitive()} %)'
-
-
-  " Reset color to default highlight groupe 'StatusLine'
-  let l:l.='%*'
-
-  " File segment
-  let l:l.='%#StatusLineFile#'
-  " Break point
-  let l:l.=' %<'
-  " %n Buffer index
-  let l:l.='%n'
-  " %f Relative path
-  let l:l.=' %f '
-
-  " File flags
-  " %H Help buffer
-  " %R Readonly
-  " %M Modified or unmodifiable
-  let l:l.='%([%R%M] %)'
-
-  " No color section
-  "let l:l.='%#StatusLineNC#'
-
-  "let l:l.='%#StatusLineBG#'
-
-  " Right align past this point
-  let l:l.='%='
-
-
-  " Syntastic "let l:l.='%#StatusLineWarning#'
-  "let l:l.='%#warningmsg#'
-  "let l:l.='%( %{statusline#extend#syntastic()} %)'
-  ""let l:l.='%*'
-
-  let l:l.='%#StatusLineBG#'
-
-  " Register
-  let l:l.='%( %{v:register} %)'
-
-  " File details
-  let l:l.='%#StatusLineBase#'
-  let l:l.=statusline#build#fileInfo()
-
-  let l:l.='%#StatusLineBright#'
-  let l:l.=statusline#build#filePos()
-
-  let l:l.='%#StatusLineMode#'
-  let l:l.=statusline#build#cursorPos()
-
-  return l:l
-endfunction
-
-function statusline#set()
-  let l:ine = statusline#build()
-
-
-  return l:ine
-endfunction

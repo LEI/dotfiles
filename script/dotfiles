@@ -249,9 +249,8 @@ dot_unlink() {
 # Setup platform specific defaults
 
 dot_defaults() {
-  import "defaults"
+  import "platform"
 
-  # Set platform defaults
   platform_defaults || \
     log_warn "Defaults aborted" "$?"
 }
