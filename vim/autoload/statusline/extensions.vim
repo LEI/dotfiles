@@ -3,14 +3,14 @@
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/extensions.vim
 
-function statusline#extensions#register(name, function)
-  if filereadable('autoload/extensions/' . a:name . '.vim')
-    call statusline#builder#add(a:name, {
-      \   'function': 'statusline#extensions#' . a:name . '#' . a:function,
-      \ })
-    echom "add" . a:name . a:function
-  endif
-endfunction
+"function statusline#extensions#register(name, function)
+"  if filereadable('autoload/extensions/' . a:name . '.vim')
+"    call statusline#builder#add(a:name, {
+"      \   'function': 'statusline#extensions#' . a:name . '#' . a:function,
+"      \ })
+"    echom "add" . a:name . a:function
+"  endif
+"endfunction
 
 " function statusline#extensions#load()
 "   "if get(g:, 'loaded_ctrlp', 0)
