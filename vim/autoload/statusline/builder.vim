@@ -1,20 +1,17 @@
 " Parts
 " vim: et sts=2 sw=2 ts=2
 
-" Register new section
-"function statusline#builder#add(name, opts)
-"  let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
-"  call extend(g:statusline_parts[a:name], a:opts, 'force')
-"
-"  echom "Builder: added " . a:name
-"endfunction
+" TODO:
+" Highlight(string, item) /// wrap?
+" Recursive items: copy() or deepcopy()?
 
 " Highlight groups
-function statusline#builder#highlight(item)
+function s:highlight(item)
   let l:item = a:item
   let l:hi = l:item.highlight
 
   let l:mode = get(w:, 'statusline_mode', '')
+
   " Gets the first part of the mode string
   if len(l:mode) > 0
     let l:mode = split(l:mode)[0]
@@ -55,7 +52,7 @@ function statusline#builder#highlight(item)
   return l:hi
 endfunction
 
-function statusline#builder#wrap(string, item)
+function s:wrap(string, item)
   let l:str = a:string
 
   if len(l:str) > 0
@@ -72,7 +69,7 @@ function statusline#builder#wrap(string, item)
 
     " Highlight group
     if exists('l:item.highlight')
-      let l:hi = statusline#builder#highlight(l:item)
+      let l:hi = s:highlight(l:item)
       "let l:hi = '%#' . l:item.highlight . '#'
     endif
 
@@ -83,24 +80,23 @@ function statusline#builder#wrap(string, item)
   return l:str
 endfunction
 
-function statusline#builder#parse(item, parent, index)
+function s:parse(item, parent, index)
   let l:item = a:item
   call extend(l:item, a:parent, 'keep')
 
   let l:str = ''
 
   if exists('l:item.format')
-    " Complex expression
+    " Custom expression
     let l:str = l:item.format
   elseif exists('l:item.function')
-    "let l:func = l:item.function
-    " FIXME: cannot check if autoload function exists?
-    "if exists('*{l:func}') "|| filereadable('l:item.function')
-      " Core function call
+    " Function call (unused?)
+    "exists('*{l:item.function}') "|| filereadable('l:item.function')
+    try
       let l:str = {l:item.function}()
-    "else
-    "  echom "Function not found: " . l:item.function . ' (' . l:itemath . ')'
-    "endif
+    catch
+      echom "Function not found: " . l:item.function
+    endtry
   elseif exists('l:item.items')
     let l:sub_item = ''
 
@@ -122,11 +118,10 @@ function statusline#builder#parse(item, parent, index)
           call remove(l:parent, 'items')
           "call extend(l:parent, k, 'force')
 
-          let l:sub_str = statusline#builder#parse(k, l:parent, l:index)
-          let l:sub_item.= statusline#builder#wrap(l:sub_str, k)
+          let l:sub_string = s:parse(k, l:parent, l:index)
+          let l:sub_item.= s:wrap(l:sub_string, k)
 
           let l:index = l:index + 1
-
           if l:index < len(l:item.items)
             if exists('l:item.sep')
               let l:sub_item.= l:item.sep
@@ -148,7 +143,7 @@ function statusline#builder#parse(item, parent, index)
   return l:str
 endfunction
 
-function statusline#builder#part(item, parent)
+function statusline#builder#add(item, parent)
   let l:item = a:item
   let l:parent = a:parent
   let l:str = ''
@@ -159,8 +154,8 @@ function statusline#builder#part(item, parent)
   elseif type(l:item) == type({}) "exists('g:statusline_parts[l:item]')
 
     if !exists('l:item.truncate') || !statusline#utils#truncate(l:item.truncate)
-      let l:str = statusline#builder#parse(l:item, l:parent, 0)
-      let l:str = statusline#builder#wrap(l:str, l:item)
+      let l:str = s:parse(l:item, l:parent, 0)
+      let l:str = s:wrap(l:str, l:item)
     endif
 
   else
@@ -170,3 +165,11 @@ function statusline#builder#part(item, parent)
 
   return l:str
 endfunction
+
+" Register new section
+"function statusline#builder#add(name, opts)
+"  let g:statusline_parts[a:name] = get(g:statusline_parts, a:name, {})
+"  call extend(g:statusline_parts[a:name], a:opts, 'force')
+"
+"  echom "Builder: added " . a:name
+"endfunction

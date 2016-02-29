@@ -178,38 +178,55 @@ call extend(g:statusline_tpl_base, [
 
 " Main {{{1
 
-" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
-function statusline#theme(theme)
-  " Load theme (statusline#themes#{name}#colors -> g:statusline_color)
-  "let g:statusline_colors = g:statusline#themes#{a:theme}#colors
-
-  let g:statusline_palette = g:statusline#themes#{a:theme}#palette
-
-endfunction
-call statusline#theme(g:statusline_theme)
-
 let s:wins = {}
-
-" TODO: highlight
-" function statusline#active(...)
-"   "let l:a = get(w:, 'statusline_active', 0)
-"   let l:active = a:0 > 0 ? a:1 : 'nope'
-"   return l:active
-" endfunction
 
 " Updates the status line in the current window
 function statusline#set()
   for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
   "for nr in range(1, winnr('$'))
-    call statusline#win(nr, 0)
+    call s:update(nr, 0)
   endfor
 
-  call statusline#win(winnr(), 1)
+  call s:update(winnr(), 1)
   "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
 endfunction
 
-" Set statusline locally
-function statusline#win(nr, active)
+" Build status string
+function statusline#build(winnr)
+  let l:win = s:wins[a:winnr]
+  let l:mode = s:mode(l:win.active)
+
+  " Refresh the status line string
+  " Only if the mode changed, the window was resized or the string is undefined
+  if get(w:, 'statusline_mode', '') != l:mode
+      \ || (exists('l:win.columns') && l:win.columns != &columns)
+      \ || !exists('l:win.line')
+
+    " Update last window mode (used in autoload/builder s:highlight)
+    let w:statusline_mode = l:mode
+
+    " Build line
+    let l:line = ''
+    let l:items = g:statusline_tpl_{g:statusline_template}
+    for item in l:items
+      let l:line.= statusline#builder#add(item, l:win)
+      unlet item
+    endfor
+
+    " Update window object
+    let l:win.line = l:line
+    let l:win.columns = &columns
+    "let s:wins[a:winnr] = l:win
+  "else
+    "let l:line = l:win.line
+  endif
+
+  " Send final string
+  return l:win.line
+endfunction
+
+" Update local status line
+function s:update(nr, active)
   let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
   let s:wins[a:nr] = l:win
 
@@ -218,12 +235,11 @@ function statusline#win(nr, active)
   "call setwinvar(l:win.nr, '&statusline', '%!statusline#set(' . l:win.nr . ')')
 endfunction
 
-" Build status string
-function statusline#build(winnr)
-  let l:win = s:wins[a:winnr]
+" Output mode string
+function s:mode(active)
   let l:m = mode()
 
-  if l:win.active
+  if a:active
     if l:m ==# 'n'
       let l:mode = ['normal']
     elseif l:m ==# 'i'
@@ -243,120 +259,37 @@ function statusline#build(winnr)
     let l:mode = ['inactive']
   endif
 
-  let l:mode_string = join(l:mode)
-
-  " Refresh the status line string
-  " Only if the mode changed, the window was resized or the string is undefined
-  if get(w:, 'statusline_mode', '') != l:mode_string
-      \ || (exists('l:win.columns') && l:win.columns != &columns)
-      \ || !exists('l:win.line')
-
-    " Update last mode
-    call setwinvar(l:win.nr, 'statusline_mode', l:mode_string)
-
-    " Build line
-    let l:line = ''
-    let l:items = g:statusline_tpl_{g:statusline_template}
-    for item in l:items
-      let l:line.= statusline#builder#part(item, l:win)
-      unlet item
-    endfor
-
-    " Update window object
-    let l:win.line = l:line
-    let l:win.columns = &columns
-    "let s:wins[a:winnr] = l:win
-  "else
-    "let l:line = l:win.line
-  endif
-
-  " Send final string
-  return l:win.line
+  return join(l:mode)
 endfunction
 
-"-----------------------------------------------------------------------------
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function s:theme()
+  " User defined theme
+  if exists('g:statusline_theme')
+    try
+      let g:statusline_palette = g:statusline#themes#{g:statusline_theme}#palette
+    catch
+      echom 'Could not find theme "' . g:statusline_theme . '"'
+    endtry
+  endif
 
-" function statusline#hi(mode)
-"   let l:mode = a:mode "get(w:, 'statusline_lastmode', '')
-"   "let l:active = get(w:, 'statusline_active', 1)
-"   "let l:active = statusline#utils#getwinvar(a:winnr, 'statusline_active', 0)
-"   "echom "winnr" . winnr() . " active?" . a:active
-"
-"   "redraw
-"   let l:highlights = [['FileType', 'ctermfg=12']]
-"
-"   " Default highlight groups
-"   call add(l:highlights,['', g:statusline_colors.base])
-"   call add(l:highlights,['NC', g:statusline_colors.dark])
-"   " Custom highlight groups
-"   "Color,Warning?
-"   call add(l:highlights,['BG', g:statusline_colors.dark])
-"   "call add(l:highlights,['BrightBold', g:statusline_colors.bright]) " .' cterm=bold'])
-"   "File?
-"   call add(l:highlights,['Info', g:statusline_colors.bright])
-"
-"   " Default status line style
-"   let l:hi_bright=g:statusline_colors.bright
-"   let l:mode_color=g:statusline_colors.dark
-"   let l:hi_line=g:statusline_colors.base
-"   let l:hi_file=g:statusline_colors.white
-"   let l:hi_bg=g:statusline_colors.dark "base dark?
-"
-"   "if get(w:, 'statusline_active', 1)
-"   if l:mode ==# 'normal'
-"     let l:mode_color=g:statusline_colors.normal
-"   elseif l:mode ==# 'insert'
-"     let l:mode_color=g:statusline_colors.insert
-"     let l:hi_line=g:statusline_colors.insert
-"     "let l:branch=g:statusline_colors.insert " 'ctermfg=2 ctermbg=11 cterm=bold'
-"     let l:hi_file=g:statusline_colors.insert
-"     let l:hi_bg=g:statusline_colors.insert
-"     let l:hi_bright='ctermfg=12'
-"   elseif l:mode ==# 'replace'
-"     let l:mode_color=g:statusline_colors.replace
-"   elseif l:mode ==# 'visual'
-"     let l:mode_color=g:statusline_colors.visual
-"   elseif l:mode ==# 'inactive'
-"     "let l:mode_color='ctermfg=12'
-"     "let l:hi_line='ctermfg=12 ctermbg=0'
-"     let l:mode_color = g:statusline_colors.base
-"     "let l:hi_bg = g:statusline_colors.base
-"     let l:hi_file = g:statusline_colors.base
-"     let l:hi_bright=g:statusline_colors.base
-"   else
-"     let l:mode_color = 'ctermfg=red'
-"   endif
-"
-"   "let w:statusline_mode
-"
-"   "hi StatusLine &l:base
-"   "hi StatusLineMode &l:mode_color
-"
-"   " Set the base color
-"   "exec 'hi StatusLine '.l:hi_line
-"   "exec 'hi StatusLineBG '.l:hi_bg
-"   call add(l:highlights, ['Base', l:hi_line])
-"   call add(l:highlights, ['BG', l:hi_bg])
-"
-"   " Use mode color for other parts
-"   "exec 'hi StatusLinePost '.l:mode_color
-"   " Then add bold to mode label
-"   "let l:mode_color.=' cterm=bold'
-"   "exec 'hi StatusLineMode '.l:mode_color.' cterm=bold'
-"   "exec 'hi StatusLineBranch '.l:branch.' cterm=bold'
-"   call add(l:highlights, ['Mode', l:mode_color])
-"   call add(l:highlights, ['ModeBold', l:mode_color.' cterm=bold'])
-"
-"   call add(l:highlights, ['File', l:hi_file])
-"   "exec 'hi StatusLineFile '.l:hi_file
-"   "exec 'hi StatusLineInfo '.l:hi_bright
-"   call add(l:highlights, ['BrightBold', l:hi_bright]) " .' cterm=bold'])
-"   call add(l:highlights, ['Bright', l:hi_bright])
-"
-"   " Apply highlightings
-"   for [g,s] in l:highlights
-"     "call statusline#utils#highlight(g, s)
-"     exec 'hi StatusLine'.g.' '.s
-"   endfor
+  " Default theme
+  if !exists('g:statusline_palette')
+    let l:theme = 'dark'
+    let g:statusline_palette = g:statusline#themes#{l:theme}#palette
+  endif
+endfunction
+
+function s:init()
+  " Load theme at startup
+  call s:theme()
+endfunction
+
+" Initialization
+call s:init()
+
+" function statusline#active(...)
+"   "let l:a = get(w:, 'statusline_active', 0)
+"   let l:active = a:0 > 0 ? a:1 : 'nope'
+"   return l:active
 " endfunction
-
