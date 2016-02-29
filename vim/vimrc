@@ -506,5 +506,7 @@ nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 " Open .vimrc in a new split
 nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
+" Runtime {{{1
+
 " Load custom settings
 runtime settings.vim

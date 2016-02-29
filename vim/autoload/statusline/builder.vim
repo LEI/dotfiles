@@ -29,19 +29,27 @@ function statusline#builder#highlight(item)
   elseif has_key(g:statusline_palette, l:hi)
     " Group highlighting using theme palette
     let l:hi = g:statusline_palette[l:hi]
+  "else
+  "  let l:hi = l:hi
   endif
 
-  " Uses the highlight property as a highlight group if nothing else matches
+  " Build the highlight group
   if len(l:hi) > 0
     let l:result = ''
-    " Highlight group
-    let l:result.= '%#'
-    let l:result.= l:hi
-    let l:result.= '#'
+
+    if type(l:hi) == type(0)
+      " Integer, User highlight
+      let l:result.= '%'
+      let l:result.= l:hi
+      let l:result.= '*'
+    elseif type(l:hi) == type('')
+      " String, classic highlight
+      let l:result.= '%#'
+      let l:result.= l:hi
+      let l:result.= '#'
+    endif
 
     let l:hi = l:result
-
-    " Reset all styles only when a new style is applied
   endif
 
   return l:hi
@@ -78,6 +86,7 @@ endfunction
 function statusline#builder#parse(item, parent, index)
   let l:item = a:item
   call extend(l:item, a:parent, 'keep')
+
   let l:str = ''
 
   if exists('l:item.format')
@@ -85,6 +94,7 @@ function statusline#builder#parse(item, parent, index)
     let l:str = l:item.format
   elseif exists('l:item.function')
     "let l:func = l:item.function
+    " FIXME: cannot check if autoload function exists?
     "if exists('*{l:func}') "|| filereadable('l:item.function')
       " Core function call
       let l:str = {l:item.function}()
@@ -94,13 +104,11 @@ function statusline#builder#parse(item, parent, index)
   elseif exists('l:item.items')
     let l:sub_item = ''
 
-    if type(l:item.items) == type({})
-      " Dictionnary crappy order
-      for k in keys(l:item.items)
-        echom "Ignored Dict subitem: " . k
-        "let l:sub_item.= statusline#builder#part(k, l:item.items[k])
-      endfor
-    elseif type(l:item.items) == type([])
+    "if type(l:item.items) == type({})
+    "  for k in keys(l:item.items)
+    "    echom "Dict subitem: " . k
+    "  endfor
+    if type(l:item.items) == type([])
 
       if a:index > 0
         let l:index = a:index
@@ -109,10 +117,6 @@ function statusline#builder#parse(item, parent, index)
       endif
 
       for k in l:item.items
-
-        " if type(k) == type('')
-        "   let l:item = k "l:item.item[k]
-        "   let l:item.core = 1
         if type(k) == type({})
           let l:parent = deepcopy(l:item)
           call remove(l:parent, 'items')
@@ -146,20 +150,21 @@ endfunction
 
 function statusline#builder#part(item, parent)
   let l:item = a:item
-  let l:p = a:parent
+  let l:parent = a:parent
   let l:str = ''
 
   if type(l:item) == type('') && l:item =~ '^%'
     " Use the key as expression
     let l:str = l:item
   elseif type(l:item) == type({}) "exists('g:statusline_parts[l:item]')
-    "let l:p = g:statusline_parts[l:item]
-    if !exists('l:item.truncate') || statusline#utils#minwidth(l:item.truncate)
-      let l:str = statusline#builder#parse(l:item, l:p, 0)
+
+    if !exists('l:item.truncate') || !statusline#utils#truncate(l:item.truncate)
+      let l:str = statusline#builder#parse(l:item, l:parent, 0)
       let l:str = statusline#builder#wrap(l:str, l:item)
     endif
+
   else
-    echo "Unknown part: " . l:item
+    echom "Unknown part: " . l:item
     return ''
   endif
 

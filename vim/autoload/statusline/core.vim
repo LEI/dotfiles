@@ -3,16 +3,16 @@
 
 " Display mode name
 function statusline#core#mode()
-  let l:m = mode()
-  let l:mode = get(w:, 'statusline_mode', '')
+  let l:mode = mode()
+  let l:stl_mode = get(w:, 'statusline_mode', '')
 
-  if l:mode =~ '^inactive'
-    let l:m = l:mode
+  if l:stl_mode =~ '^inactive'
+    let l:mode = '__'
+  else
+    let l:mode = mode()
   endif
 
-  let l:mode = get(g:statusline_mode_map, l:m, l:m)
-
-  return l:mode
+  return get(g:statusline_mode_map, l:mode, l:mode)
 endfunction
 
 " Returns true if paste mode is enabled

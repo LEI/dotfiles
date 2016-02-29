@@ -20,11 +20,11 @@ else
   endfunction
 endif
 
-function statusline#utils#minwidth(minwidth)
+function statusline#utils#truncate(minwidth)
   if a:minwidth > 0 && winwidth(0) < a:minwidth
-    return 0
-  else
     return 1
+  else
+    return 0
   endif
 endfunction
 

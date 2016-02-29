@@ -48,10 +48,28 @@ call statusline#utils#define('g:statusline_theme', 'dark')
 call statusline#utils#define('g:statusline_template', 'base')
 
 " Mode map {{{2
+" n      : Normal
+" no     : Operator-pending
+" v      : Visual by character
+" V      : Visual by line
+" CTRL-V : Visual blockwise
+" s      : Select by character
+" S      : Select by line
+" CTRL-S : Select blockwise
+" i      : Insert
+" R      : Replace |R|
+" Rv     : Virtual Replace |gR|
+" c      : Command-line
+" cv     : Vim Ex mode |gQ|
+" ce     : Normal Ex mode |Q|
+" r      : Hit-enter prompt
+" rm     : The -- more -- prompt
+" r?     : A confirm query of some sort
+" !      : Shell or external command is executing
 
 call statusline#utils#define('g:statusline_mode_map', {})
 call extend(g:statusline_mode_map, {
-  \ 'inactive' : '------',
+  \ '__' : '------',
   \ 'n': 'NORMAL',
   \ 'i': 'INSERT',
   \ 'R': 'REPLACE',
@@ -62,8 +80,8 @@ call extend(g:statusline_mode_map, {
   \ 's': 'SELECT',
   \ 'S': 'S-LINE',
   \ '': 'S-BLOCK',
-  \ 't': 'TERMINAL',
   \ }, 'keep')
+  " 't': 'TERMINAL',
 
 " Symbols {{{2
 
@@ -110,12 +128,12 @@ call extend(g:statusline_tpl_base, [
   \     'format': '%{statusline#core#paste()} ',
   \   },
   \   {
-  \     'highlight': 'StatusLine',
+  \     'highlight': 'default',
   \     'format': ' %{statusline#extensions#fugitive#branch()} ',
   \     'truncate': 60,
   \   },
   \   {
-  \     'highlight': 'StatusLineFile',
+  \     'highlight': 'file',
   \     'format': ' %<%n %f %([%M%R] %)'
   \   },
   \   {
@@ -123,11 +141,11 @@ call extend(g:statusline_tpl_base, [
   \   },
   \   '%=',
   \   {
-  \     'highlight': 'StatusLineBG',
-  \     'format': '%( %{v:register} %)',
+  \     'highlight': 'bg',
+  \     'format': ' %{v:register} ',
   \   },
   \   {
-  \     'highlight': 'StatusLineBase',
+  \     'highlight': 'base',
   \     'truncate': 80,
   \     'sep': g:statusline_symbols.sep,
   \     'items': [
@@ -137,7 +155,7 @@ call extend(g:statusline_tpl_base, [
   \     ],
   \   },
   \   {
-  \     'highlight': 'StatusLine',
+  \     'highlight': 'default',
   \     'format': ' %P ',
   \     'width': '5',
   \     'truncate': 60,
@@ -152,8 +170,8 @@ call extend(g:statusline_tpl_base, [
   \     ],
   \   },
   \   {
-  \     'highlight': 'WarningMsg',
-  \     'format': '%{statusline#extensions#syntastic#flags()}',
+  \     'highlight': 'warning',
+  \     'format': ' %{statusline#extensions#syntastic#flags()} ',
   \     'truncate': 60,
   \   },
   \ ], 'keep')
@@ -179,7 +197,8 @@ let s:wins = {}
 "   return l:active
 " endfunction
 
-function statusline#update()
+" Updates the status line in the current window
+function statusline#set()
   for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
   "for nr in range(1, winnr('$'))
     call statusline#win(nr, 0)
@@ -189,14 +208,17 @@ function statusline#update()
   "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
 endfunction
 
+" Set statusline locally
 function statusline#win(nr, active)
   let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
   let s:wins[a:nr] = l:win
+
   "setlocal statusline=%!statusline#set(winnr())
   let &l:statusline = '%!statusline#build(' . l:win.nr . ')'
   "call setwinvar(l:win.nr, '&statusline', '%!statusline#set(' . l:win.nr . ')')
 endfunction
 
+" Build status string
 function statusline#build(winnr)
   let l:win = s:wins[a:winnr]
   let l:m = mode()
@@ -210,6 +232,8 @@ function statusline#build(winnr)
       let l:mode = ['replace']
     elseif l:m =~# '\v(v|V||s|S|)'
       let l:mode = ['visual']
+    elseif l:m ==# 'c'
+      let l:mode = ['command']
     elseif l:m ==# 't'
       let l:mode = ['terminal']
     else
@@ -221,28 +245,32 @@ function statusline#build(winnr)
 
   let l:mode_string = join(l:mode)
 
-  if get(w:, 'statusline_mode', '') != l:mode_string || !exists('l:win.line')
+  " Refresh the status line string
+  " Only if the mode changed, the window was resized or the string is undefined
+  if get(w:, 'statusline_mode', '') != l:mode_string
+      \ || (exists('l:win.columns') && l:win.columns != &columns)
+      \ || !exists('l:win.line')
+
+    " Update last mode
     call setwinvar(l:win.nr, 'statusline_mode', l:mode_string)
 
+    " Build line
     let l:line = ''
-    "call statusline#highlight(l:mode_string)
-    let w:statusline_mode = l:mode_string
-    "let l:line.= l:mode_string
-
     let l:items = g:statusline_tpl_{g:statusline_template}
     for item in l:items
       let l:line.= statusline#builder#part(item, l:win)
       unlet item
     endfor
 
+    " Update window object
     let l:win.line = l:line
+    let l:win.columns = &columns
     "let s:wins[a:winnr] = l:win
   "else
     "let l:line = l:win.line
   endif
 
-  "echom l:win.line
-
+  " Send final string
   return l:win.line
 endfunction
 

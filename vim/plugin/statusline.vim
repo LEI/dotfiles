@@ -15,39 +15,41 @@ set noshowmode
 " Display incomplete commands
 set showcmd
 
-if has('autocmd')
-  if !has('gui_running')
-    au InsertLeave * call s:update()
+if has('autocmd') && !exists('#statusline')
+  "if !has('gui_running')
     "au InsertEnter  * redraw!
     "au InsertChange * redraw!
     "au InsertLeave  * redraw!
     "au InsertLeave * call SetStatusLine()
-    "call setwinvar(s:update
+    "call setwinvar(statusline#set()
     "au WinEnter * exec 'hi StatusLineBG '.g:statusline#style.dark
     "au WinLeave * hi clear StatusLineBG
-  endif
+  "endif
 
   "autocmd ColorScheme,VimEnter * call SetStatusLine()
 
   " BufWinEnter/Leave?
   "au BufEnter,WinEnter * let w:statusline_active = 1
   "au BufLeave,WinLeave * let w:statusline_active = 0
-  au BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * call s:update()
-  " getcmdwintype()
-  " The character used for the pattern indicates the type of command-line:
-  "  :	normal Ex command
-  "  >	debug mode command |debug-mode|
-  "  /	forward search string
-  "  ?	backward search string
-  "  =	expression for "= |expr-register|
-  "  @	string for |input()|
-  "  -	text for |:insert| or |:append|
-  "au CmdwinEnter,CmdwinLeave * setlocal statusline=%!statusline#set()
+
+  augroup statusline
+    "autocmd InsertLeave * call statusline#set()
+    "autocmd VimResized * call statusline#set()
+    autocmd BufEnter,BufLeave,BufAdd,WinEnter,WinLeave * call statusline#set()
+    "autocmd BufWinEnter,BufWinLeave * call statusline#set()
+
+    autocmd CmdwinEnter,CmdwinLeave * call statusline#set()
+    " getcmdwintype()
+    " The character used for the pattern indicates the type of command-line:
+    "  :: normal Ex command
+    "  >: debug mode command |debug-mode|
+    "  /: forward search string
+    "  ?: backward search string
+    "  =: expression for "= |expr-register|
+    "  @: string for |input()|
+    "  -: text for |:insert| or |:append|
+
+    "autocmd TabEnter * echom "TabEntered"
+    "autocmd TabLeave * echom "TabLeaved"
+  augroup END
 endif
-
-function s:update()
-  call statusline#update()
-  "setlocal statusline=%!statusline#set()
-endfunction
-
-"set statusline=%!statusline#set()
