@@ -42,6 +42,7 @@ hi StatusLineBG ctermfg=8 ctermbg=0
 hi StatusLineBase ctermfg=12 ctermbg=10
 hi StatusLineFile ctermfg=13 ctermbg=10
 
+"set fillchars+=stl:\ ,stlnc:\
 "set showmode
 "hi ModeMsg ctermfg=11
 

@@ -10,24 +10,28 @@
 "endfunction
 
 " Highlight groups
-function statusline#builder#highlight(winnr, group)
-  let l:hi = ''
+function statusline#builder#highlight(item)
+  let l:item = a:item
+  let l:hi = l:item.highlight
 
   let l:mode = get(w:, 'statusline_mode', '')
-  "let l:mode = statusline#utils#getwinvar(a:winnr, 'statusline_mode', '')
-
-  if len(l:mode) > 0 && l:mode =~ '^inactive'
-    let l:hi = g:statusline_palette['inactive']
-  elseif len(l:mode) > 0 && a:group ==# 'mode'
-    if has_key(g:statusline_palette, split(l:mode)[0])
-      let l:hi = g:statusline_palette[l:mode]
-    endif
-  elseif has_key(g:statusline_palette, a:group)
-    let l:hi = g:statusline_palette[a:group]
-  elseif len(a:group) > 0 " Must be a valid highlight group
-    let l:hi = a:group
+  " Gets the first part of the mode string
+  if len(l:mode) > 0
+    let l:mode = split(l:mode)[0]
   endif
 
+  if l:mode ==# 'inactive'
+    " Override colors when inactive
+    let l:hi = g:statusline_palette[l:mode]
+  elseif l:hi ==# 'mode' && has_key(g:statusline_palette, l:mode)
+    " Mode highlighting using theme palette
+    let l:hi = g:statusline_palette[l:mode]
+  elseif has_key(g:statusline_palette, l:hi)
+    " Group highlighting using theme palette
+    let l:hi = g:statusline_palette[l:hi]
+  endif
+
+  " Uses the highlight property as a highlight group if nothing else matches
   if len(l:hi) > 0
     let l:result = ''
     " Highlight group
@@ -47,21 +51,21 @@ function statusline#builder#wrap(string, item)
   let l:str = a:string
 
   if len(l:str) > 0
-    let l:p = a:item
+    let l:item = a:item
     let l:reset = '%*'
     let l:wid = ''
     let l:hi = ''
     "let l:str = ' ' . l:str . ' '
 
     " Group width
-    if exists('l:p.width')
-      let l:wid = l:p.width
+    if exists('l:item.width')
+      let l:wid = l:item.width
     endif
 
     " Highlight group
-    if exists('l:p.highlight')
-      let l:hi = statusline#builder#highlight(l:p.nr, l:p.highlight)
-      "let l:hi = '%#' . l:p.highlight . '#'
+    if exists('l:item.highlight')
+      let l:hi = statusline#builder#highlight(l:item)
+      "let l:hi = '%#' . l:item.highlight . '#'
     endif
 
     " Wrap and highlight
@@ -72,31 +76,31 @@ function statusline#builder#wrap(string, item)
 endfunction
 
 function statusline#builder#parse(item, parent, index)
-  let l:p = a:item
-  call extend(l:p, a:parent, 'keep')
+  let l:item = a:item
+  call extend(l:item, a:parent, 'keep')
   let l:str = ''
 
-  if exists('l:p.format')
+  if exists('l:item.format')
     " Complex expression
-    let l:str = l:p.format
-  elseif exists('l:p.function')
-    "let l:func = l:p.function
-    "if exists('*{l:func}') "|| filereadable('l:p.function')
+    let l:str = l:item.format
+  elseif exists('l:item.function')
+    "let l:func = l:item.function
+    "if exists('*{l:func}') "|| filereadable('l:item.function')
       " Core function call
-      let l:str = {l:p.function}()
+      let l:str = {l:item.function}()
     "else
-    "  echom "Function not found: " . l:p.function . ' (' . l:path . ')'
+    "  echom "Function not found: " . l:item.function . ' (' . l:itemath . ')'
     "endif
-  elseif exists('l:p.items')
+  elseif exists('l:item.items')
     let l:sub_item = ''
 
-    if type(l:p.items) == type({})
+    if type(l:item.items) == type({})
       " Dictionnary crappy order
-      for k in keys(l:p.items)
+      for k in keys(l:item.items)
         echom "Ignored Dict subitem: " . k
-        "let l:sub_item.= statusline#builder#part(k, l:p.items[k])
+        "let l:sub_item.= statusline#builder#part(k, l:item.items[k])
       endfor
-    elseif type(l:p.items) == type([])
+    elseif type(l:item.items) == type([])
 
       if a:index > 0
         let l:index = a:index
@@ -104,13 +108,13 @@ function statusline#builder#parse(item, parent, index)
         let l:index = 0
       endif
 
-      for k in l:p.items
+      for k in l:item.items
 
         " if type(k) == type('')
-        "   let l:item = k "l:p.item[k]
+        "   let l:item = k "l:item.item[k]
         "   let l:item.core = 1
         if type(k) == type({})
-          let l:parent = deepcopy(l:p)
+          let l:parent = deepcopy(l:item)
           call remove(l:parent, 'items')
           "call extend(l:parent, k, 'force')
 
@@ -119,42 +123,43 @@ function statusline#builder#parse(item, parent, index)
 
           let l:index = l:index + 1
 
-          if l:index < len(l:p.items)
-            if exists('l:p.sep')
-              let l:sub_item.= l:p.sep
+          if l:index < len(l:item.items)
+            if exists('l:item.sep')
+              let l:sub_item.= l:item.sep
             endif
           endif
-        elseif
+        else
           echom "Unknown item type: " . type(k)
         endif
       endfor
     else
-      echom "Unkown items type: " . type(l:p.items)
+      echom "Unkown items type: " . type(l:item.items)
     endif
 
     let l:str = l:sub_item
   else
-    echom "Unhandled key: " . type(a:item)
+    echom "Unhandled key: " . type(l:item)
   endif
 
   return l:str
 endfunction
 
 function statusline#builder#part(item, parent)
+  let l:item = a:item
   let l:p = a:parent
   let l:str = ''
 
-  if type(a:item) == type('') && a:item =~ '^%'
+  if type(l:item) == type('') && l:item =~ '^%'
     " Use the key as expression
-    let l:str = a:item
-  elseif type(a:item) == type({}) "exists('g:statusline_parts[a:item]')
-    "let l:p = g:statusline_parts[a:item]
-    if !exists('a:item.truncate') || statusline#utils#minwidth(a:item.truncate)
-      let l:str = statusline#builder#parse(a:item, l:p, 0)
-      let l:str = statusline#builder#wrap(l:str, a:item)
+    let l:str = l:item
+  elseif type(l:item) == type({}) "exists('g:statusline_parts[l:item]')
+    "let l:p = g:statusline_parts[l:item]
+    if !exists('l:item.truncate') || statusline#utils#minwidth(l:item.truncate)
+      let l:str = statusline#builder#parse(l:item, l:p, 0)
+      let l:str = statusline#builder#wrap(l:str, l:item)
     endif
   else
-    echo "Unknown part: " . a:item
+    echo "Unknown part: " . l:item
     return ''
   endif
 
