@@ -5,7 +5,7 @@ cask_args appdir: '/Applications'
 tap 'homebrew/bundle'
 #tap 'caskroom/cask'
 
-#brew 'ack'
+brew 'ack'
 #brew 'alfred'
 # Install Bash 4
 # Note: add '/usr/local/bin/bash' to '/etc/shells' before running 'chsh'
@@ -54,7 +54,7 @@ cask 'seil'
 cask 'sequel-pro'
 cask 'skype'
 #cask 'slack'
-cask 'spectacle'
+#cask 'spectacle' #slate?
 #cask 'steam'
 #cask 'sublime-text'
 #cask 'torbrowser'
