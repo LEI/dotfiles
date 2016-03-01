@@ -3,8 +3,6 @@
 
 " github.com/vim-airline/vim-airline
 
-" Cheat sheet {{{1
-
 " Declarations {{{1
 
 call statusline#utils#define('g:statusline', {})
@@ -87,14 +85,14 @@ call extend(g:statusline_mode_map, {
 " A template is an array describing each section of the statusline
 " Each template item can be an expression or an object
 " Each item should have only one of the following properties
-"   format (string) expression evaluated in the statusline
-"   function (string) full name of a function
-"   items (list) nested item array
+"   format *string* expression evaluated in the statusline
+"   *function* full name without ()
+"   items *list* nested item array
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
   \{
-    \'format': ' %{statusline#core#mode()} ',
+    \'string': ' %{statusline#core#mode()} ',
     \'highlight': 'mode',
     \'width': '-9',
     \'truncate': 33,
@@ -108,62 +106,66 @@ call extend(g:statusline_tpl_minimal, [
 call statusline#utils#define('g:statusline_tpl_base', [])
 call extend(g:statusline_tpl_base, [
   \{
-    \'format': ' %{statusline#core#mode()} ',
+    \'string': ' %{statusline#core#mode()} ',
     \'highlight': 'mode',
     \'width': '-8',
     \'truncate': 20,
   \},
   \{
-    \'format': '%{statusline#core#paste()} ',
+    \'string': '%{statusline#core#paste()} ',
   \},
   \{
-    \'format': ' %{statusline#extensions#fugitive#branch()} ',
+    \'list': [
+      \{ 'string': ' ' . g:statusline_symbols.branch . ' ', },
+      \{
+        \'string': '%{statusline#extensions#fugitive#branch()} ',
+        \'truncate': 60,
+      \},
+    \],
     \'highlight': 'default',
-    \'truncate': 60,
   \},
   \{
-    \'format': ' %<%n ',
+    \'string': ' %<%n ',
     \'highlight': 'base',
   \},
   \{
-    \'format': '%f %([%M%R] %)',
+    \'string': '%f %([%M%R] %)',
     \'highlight': 'file',
   \},
   \{
-    \'format': '%{statusline#core#crypt()} ',
+    \'string': '%{statusline#core#crypt()} ',
   \},
   \'%=',
   \{
-    \'format': ' %{v:register} ',
+    \'string': ' %{v:register} ',
     \'highlight': 'bg',
   \},
   \{
-    \'items': [
-      \{ 'format': ' %{&fileformat} ' },
-      \{ 'format': ' %{statusline#core#encoding()} ' },
-      \{ 'format': ' %{statusline#core#type()} ' },
+    \'list': [
+      \{ 'string': ' %{&fileformat} ' },
+      \{ 'string': ' %{statusline#core#encoding()} ' },
     \],
     \'highlight': 'base',
     \'truncate': 80,
     \'sep': g:statusline_symbols.sep,
   \},
   \{
-    \'format': ' %P ',
+    \'string': ' %{statusline#core#type()} ',
     \'highlight': 'default',
-    \'width': '5',
     \'truncate': 60,
   \},
   \{
-    \'items': [
-      \{ 'format': ' %l', 'width': '4' },
-      \{ 'format': '%c%V ', 'width': '-4' },
+    \'list': [
+      \{ 'string': ' %P ', 'width': '5' },
+      \{ 'string': ' %l', 'width': '4' },
+      \{ 'string': ':' },
+      \{ 'string': '%c%V ', 'width': '-4' },
     \],
     \'highlight': 'mode',
     \'truncate': 40,
-    \'sep': ':',
   \},
   \{
-    \'format': ' %{statusline#extensions#syntastic#flags()} ',
+    \'string': ' %{statusline#extensions#syntastic#flags()} ',
     \'highlight': 'warning',
     \'truncate': 60,
   \},
@@ -202,8 +204,8 @@ function statusline#build(winnr)
 
     " Build line
     let l:line = ''
-    let l:items = g:statusline_tpl_{g:statusline_template}
-    for item in l:items
+    let l:list = g:statusline_tpl_{g:statusline_template}
+    for item in l:list
       let l:line.= statusline#builder#add(item, l:win)
       unlet item
     endfor

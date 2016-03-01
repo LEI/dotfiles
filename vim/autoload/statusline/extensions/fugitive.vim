@@ -9,7 +9,7 @@ function statusline#extensions#fugitive#branch()
   let l:branch = fugitive#head()
 
   if strlen(l:branch) > 0
-    return g:statusline_symbols.branch.' '.l:branch
+    return l:branch
   endif
 
   return ''

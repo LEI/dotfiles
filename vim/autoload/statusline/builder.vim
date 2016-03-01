@@ -6,9 +6,11 @@
 " Recursive items: copy() or deepcopy()?
 
 " Highlight groups
-function s:highlight(item)
+function s:highlight(string, item)
+  let l:str = a:string
   let l:item = a:item
   let l:hi = l:item.highlight
+  "let l:reset = '%*'
 
   let l:mode = get(w:, 'statusline_mode', '')
 
@@ -46,35 +48,31 @@ function s:highlight(item)
       let l:result.= '#'
     endif
 
-    let l:hi = l:result
+    let l:str = l:result . l:str
   endif
 
-  return l:hi
+  return l:str
 endfunction
 
 function s:wrap(string, item)
   let l:str = a:string
+  let l:item = a:item
+  let l:width = ''
 
   if len(l:str) > 0
-    let l:item = a:item
-    let l:reset = '%*'
-    let l:wid = ''
-    let l:hi = ''
-    "let l:str = ' ' . l:str . ' '
-
     " Group width
     if exists('l:item.width')
-      let l:wid = l:item.width
+      let l:width = l:item.width
     endif
 
     " Highlight group
     if exists('l:item.highlight')
-      let l:hi = s:highlight(l:item)
+      let l:str = s:highlight(l:str, l:item)
     endif
-
-    " Wrap and highlight
-    let l:str = l:hi . '%' . l:wid . '(' . l:str . '%)' " . l:reset
   endif
+
+  let l:str = '%' . l:width . '(' . l:str . '%)'
+  echom "<".l:str.">"
 
   return l:str
 endfunction
@@ -85,9 +83,9 @@ function s:parse(item, parent, index)
 
   let l:str = ''
 
-  if exists('l:item.format')
+  if exists('l:item.string')
     " Custom expression
-    let l:str = l:item.format
+    let l:str = l:item.string
   elseif exists('l:item.function')
     " Function call (unused?)
     "exists('*{l:item.function}') "|| filereadable('l:item.function')
@@ -96,14 +94,14 @@ function s:parse(item, parent, index)
     catch
       echom "Function not found: " . l:item.function
     endtry
-  elseif exists('l:item.items')
+  elseif exists('l:item.list')
     let l:sub_item = ''
 
-    "if type(l:item.items) == type({})
-    "  for k in keys(l:item.items)
+    "if type(l:item.list) == type({})
+    "  for k in keys(l:item.list)
     "    echom "Dict subitem: " . k
     "  endfor
-    if type(l:item.items) == type([])
+    if type(l:item.list) == type([])
 
       if a:index > 0
         let l:index = a:index
@@ -111,17 +109,20 @@ function s:parse(item, parent, index)
         let l:index = 0
       endif
 
-      for k in l:item.items
-        if type(k) == type({})
+      for k in l:item.list
+        if type(k) == type('')
+          let l:sub_item.= k
+        elseif type(k) == type({})
           let l:parent = deepcopy(l:item)
-          call remove(l:parent, 'items')
+          call remove(l:parent, 'list')
+          call remove(l:parent, 'highlight')
           "call extend(l:parent, k, 'force')
 
-          let l:sub_string = s:parse(k, l:parent, l:index)
-          let l:sub_item.= s:wrap(l:sub_string, k)
+          let l:sub_item.= s:parse(k, l:parent, l:index)
+          "let l:sub_item.= s:wrap(l:sub_string, k)
 
           let l:index = l:index + 1
-          if l:index < len(l:item.items)
+          if l:index < len(l:item.list)
             if exists('l:item.sep')
               let l:sub_item.= l:item.sep
             endif
@@ -129,15 +130,18 @@ function s:parse(item, parent, index)
         else
           echom "Unknown item type: " . type(k)
         endif
+        unlet k
       endfor
     else
-      echom "Unkown items type: " . type(l:item.items)
+      echom "Unkown item type: " . type(l:item.list)
     endif
 
     let l:str = l:sub_item
   else
     echom "Unhandled key: " . type(l:item)
   endif
+
+  let l:str = s:wrap(l:str, l:item)
 
   return l:str
 endfunction
@@ -155,7 +159,6 @@ function statusline#builder#add(item, parent)
     " Display only if not truncated
     if !exists('l:item.truncate') || !statusline#utils#truncate(l:item.truncate)
       let l:str = s:parse(l:item, l:parent, 0)
-      let l:str = s:wrap(l:str, l:item)
     endif
   else
     echom "Unhandled section type: " . type(l:item)

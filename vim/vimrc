@@ -240,10 +240,8 @@ set noshowmatch
 " HTML brackets
 set matchpairs+=<:>
 
-" Beeps and flash
-"set noerrorbells
 set visualbell
-"set t_vb=
+set t_vb=
 
 " Recognize escape immediately
 set esckeys
@@ -293,8 +291,6 @@ set ruler
 "set rulerformat=%l,%c%V%=%P
 
 " Spacing {{{1
-
-" Quick 4 spaces identation: set ts=4 sw=4 sts=4 et
 
 "if !exists("g:loaded_sleuth")
 "endif
