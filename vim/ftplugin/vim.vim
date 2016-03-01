@@ -1,1 +1,4 @@
-autocmd FileType vim setlocal foldenable foldmethod=marker
+" Vim
+
+setlocal foldenable
+setlocal foldmethod=marker

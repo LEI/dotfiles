@@ -5,49 +5,29 @@
 
 " Cheat sheet {{{1
 
-" base16 colors (?)
-" 0: black
-" 1: red
-" 2: green
-" 3: yellow
-" 4: blue
-" 5: magenta
-" 6: bright green (cyan)
-" 7: white
-" 8: bright black
-" 9: bright red
-" 10: deep gray (bright green)
-" 11: gray (bright yellow)
-" 12: light gray (bright blue)
-" 13: white (bright magenta)
-" 14: beige (bright cyan)
-" 15: bright white
-
-" Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-" Format markers:
-"   %< truncation point
-"   %n buffer number
-"   %f relative path to file
-"   %m modified flag [+] (modified), [-] (unmodifiable) or nothing
-"   %r readonly flag [RO]
-"   %y filetype [ruby]
-"   %= split point for left and right justification
-"   %-35. width specification
-"   %l current line number
-"   %L number of lines in buffer
-"   %c current column number
-"   %V current virtual column number (-n), if different from %c
-"   %P percentage through buffer
-"   %) end of width specification
-"set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
-
 " Declarations {{{1
 
 call statusline#utils#define('g:statusline', {})
 call statusline#utils#define('g:statusline_theme', 'dark')
 call statusline#utils#define('g:statusline_template', 'base')
 
+" Symbols {{{2
+
+call statusline#utils#define('g:statusline_symbols', {})
+call extend(g:statusline_symbols, {
+  \'paste': 'PASTE',
+  \'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : 'RO',
+  \'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
+  \'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
+  \'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : '⎇ ',
+  \'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512) . ' '),
+  \'modified': '+',
+  \'close': '✕',
+  \'sep': '│',
+\}, 'keep')
+
 " Mode map {{{2
+
 " n      : Normal
 " no     : Operator-pending
 " v      : Visual by character
@@ -69,116 +49,131 @@ call statusline#utils#define('g:statusline_template', 'base')
 
 call statusline#utils#define('g:statusline_mode_map', {})
 call extend(g:statusline_mode_map, {
-  \ '__' : '------',
-  \ 'n': 'NORMAL',
-  \ 'i': 'INSERT',
-  \ 'R': 'REPLACE',
-  \ 'v': 'VISUAL',
-  \ 'V': 'V-LINE',
-  \ 'c': 'COMMAND',
-  \ '': 'V-BLOCK',
-  \ 's': 'SELECT',
-  \ 'S': 'S-LINE',
-  \ '': 'S-BLOCK',
-  \ }, 'keep')
+  \'__' : '------',
+  \'n': 'NORMAL',
+  \'i': 'INSERT',
+  \'R': 'REPLACE',
+  \'v': 'VISUAL',
+  \'V': 'V-LINE',
+  \'c': 'COMMAND',
+  \'': 'V-BLOCK',
+  \'s': 'SELECT',
+  \'S': 'S-LINE',
+  \'': 'S-BLOCK',
+\}, 'keep')
   " 't': 'TERMINAL',
 
-" Symbols {{{2
-
-" ⎇ /|•·
-call statusline#utils#define('g:statusline_symbols', {})
-call extend(g:statusline_symbols, {
-  \ 'paste': 'PASTE',
-  \ 'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : 'RO',
-  \ 'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
-  \ 'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
-  \ 'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : '⎇ ',
-  \ 'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512) . ' '),
-  \ 'modified': '+',
-  \ 'close': '✕',
-  \ 'sep': '│',
-  \ }, 'keep')
-
 " Templates {{{2
+
 " Format: %-0{minwid}.{maxwid}{item}
+" Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" Format markers:
+"   %< truncation point
+"   %n buffer number
+"   %f relative path to file
+"   %m modified flag [+] (modified), [-] (unmodifiable) or nothing
+"   %r readonly flag [RO]
+"   %y filetype [ruby]
+"   %= split point for left and right justification
+"   %-35. width specification
+"   %l current line number
+"   %L number of lines in buffer
+"   %c current column number
+"   %V current virtual column number (-n), if different from %c
+"   %P percentage through buffer
+"   %) end of width specification
+"set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
+
+" A template is an array describing each section of the statusline
+" Each template item can be an expression or an object
+" Each item should have only one of the following properties
+"   format (string) expression evaluated in the statusline
+"   function (string) full name of a function
+"   items (list) nested item array
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
-  \   {
-  \     'highlight': 'mode',
-  \     'format': ' %{statusline#core#mode()} ',
-  \     'width': '-9',
-  \     'truncate': 33,
-  \   },
-  \   '%<%f%( [%M%R]%)',
-  \   '%=',
-  \   '%( [%{&filetype}]%) ',
-  \   '%-8.(%l,%c%V%) %p%% ',
-  \ ], 'keep')
+  \{
+    \'format': ' %{statusline#core#mode()} ',
+    \'highlight': 'mode',
+    \'width': '-9',
+    \'truncate': 33,
+  \},
+  \'%<%f%( [%M%R]%)',
+  \'%=',
+  \'%( [%{&filetype}]%) ',
+  \'%-8.(%l,%c%V%) %p%% ',
+\], 'keep')
 
 call statusline#utils#define('g:statusline_tpl_base', [])
 call extend(g:statusline_tpl_base, [
-  \   {
-  \     'highlight': 'mode',
-  \     'format': ' %{statusline#core#mode()} ',
-  \     'width': '-8',
-  \     'truncate': 20,
-  \   },
-  \   {
-  \     'format': '%{statusline#core#paste()} ',
-  \   },
-  \   {
-  \     'highlight': 'default',
-  \     'format': ' %{statusline#extensions#fugitive#branch()} ',
-  \     'truncate': 60,
-  \   },
-  \   {
-  \     'highlight': 'file',
-  \     'format': ' %<%n %f %([%M%R] %)'
-  \   },
-  \   {
-  \     'format': '%{statusline#core#crypt()} ',
-  \   },
-  \   '%=',
-  \   {
-  \     'highlight': 'bg',
-  \     'format': ' %{v:register} ',
-  \   },
-  \   {
-  \     'highlight': 'base',
-  \     'truncate': 80,
-  \     'sep': g:statusline_symbols.sep,
-  \     'items': [
-  \       { 'format': ' %{&fileformat} ' },
-  \       { 'format': ' %{statusline#core#encoding()} ' },
-  \       { 'format': ' %{statusline#core#type()} ' },
-  \     ],
-  \   },
-  \   {
-  \     'highlight': 'default',
-  \     'format': ' %P ',
-  \     'width': '5',
-  \     'truncate': 60,
-  \   },
-  \   {
-  \     'highlight': 'mode',
-  \     'truncate': 40,
-  \     'sep': ':',
-  \     'items': [
-  \       { 'format': ' %l', 'width': '4' },
-  \       { 'format': '%c%V ', 'width': '-4' },
-  \     ],
-  \   },
-  \   {
-  \     'highlight': 'warning',
-  \     'format': ' %{statusline#extensions#syntastic#flags()} ',
-  \     'truncate': 60,
-  \   },
-  \ ], 'keep')
+  \{
+    \'format': ' %{statusline#core#mode()} ',
+    \'highlight': 'mode',
+    \'width': '-8',
+    \'truncate': 20,
+  \},
+  \{
+    \'format': '%{statusline#core#paste()} ',
+  \},
+  \{
+    \'format': ' %{statusline#extensions#fugitive#branch()} ',
+    \'highlight': 'default',
+    \'truncate': 60,
+  \},
+  \{
+    \'format': ' %<%n ',
+    \'highlight': 'base',
+  \},
+  \{
+    \'format': '%f %([%M%R] %)',
+    \'highlight': 'file',
+  \},
+  \{
+    \'format': '%{statusline#core#crypt()} ',
+  \},
+  \'%=',
+  \{
+    \'format': ' %{v:register} ',
+    \'highlight': 'bg',
+  \},
+  \{
+    \'items': [
+      \{ 'format': ' %{&fileformat} ' },
+      \{ 'format': ' %{statusline#core#encoding()} ' },
+      \{ 'format': ' %{statusline#core#type()} ' },
+    \],
+    \'highlight': 'base',
+    \'truncate': 80,
+    \'sep': g:statusline_symbols.sep,
+  \},
+  \{
+    \'format': ' %P ',
+    \'highlight': 'default',
+    \'width': '5',
+    \'truncate': 60,
+  \},
+  \{
+    \'items': [
+      \{ 'format': ' %l', 'width': '4' },
+      \{ 'format': '%c%V ', 'width': '-4' },
+    \],
+    \'highlight': 'mode',
+    \'truncate': 40,
+    \'sep': ':',
+  \},
+  \{
+    \'format': ' %{statusline#extensions#syntastic#flags()} ',
+    \'highlight': 'warning',
+    \'truncate': 60,
+  \},
+\], 'keep')
 
-" Main {{{1
+" Functions {{{1
 
 let s:wins = {}
+
+" Public {{{2
 
 " Updates the status line in the current window
 function statusline#set()
@@ -225,6 +220,8 @@ function statusline#build(winnr)
   return l:win.line
 endfunction
 
+" Core {{{2
+
 " Update local status line
 function s:update(nr, active)
   let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
@@ -262,6 +259,8 @@ function s:mode(active)
   return join(l:mode)
 endfunction
 
+" Init {{{2
+
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
 function s:theme()
   " User defined theme
@@ -285,7 +284,6 @@ function s:init()
   call s:theme()
 endfunction
 
-" Initialization
 call s:init()
 
 " function statusline#active(...)

@@ -1,6 +1,24 @@
 " Base16 colors
 " vim: et sts=2 sw=2 ts=2
 
+" base16 ocean
+" 0: black
+" 1: red
+" 2: green
+" 3: yellow
+" 4: blue
+" 5: magenta
+" 6: bright green (cyan)
+" 7: white
+" 8: bright black
+" 9: bright red
+" 10: deep gray (bright green)
+" 11: gray (bright yellow)
+" 12: light gray (bright blue)
+" 13: white (bright magenta)
+" 14: beige (bright cyan)
+" 15: bright white
+
 call statusline#utils#define('g:statusline#themes#dark#palette', {})
 
 " Called in the builder to map the template highlight groups

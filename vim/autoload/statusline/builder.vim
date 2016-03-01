@@ -70,7 +70,6 @@ function s:wrap(string, item)
     " Highlight group
     if exists('l:item.highlight')
       let l:hi = s:highlight(l:item)
-      "let l:hi = '%#' . l:item.highlight . '#'
     endif
 
     " Wrap and highlight
@@ -148,18 +147,18 @@ function statusline#builder#add(item, parent)
   let l:parent = a:parent
   let l:str = ''
 
-  if type(l:item) == type('') && l:item =~ '^%'
-    " Use the key as expression
+  if type(l:item) == type('')
+    " Treat as expression
+    " && l:item =~ '^%'
     let l:str = l:item
   elseif type(l:item) == type({}) "exists('g:statusline_parts[l:item]')
-
+    " Display only if not truncated
     if !exists('l:item.truncate') || !statusline#utils#truncate(l:item.truncate)
       let l:str = s:parse(l:item, l:parent, 0)
       let l:str = s:wrap(l:str, l:item)
     endif
-
   else
-    echom "Unknown part: " . l:item
+    echom "Unhandled section type: " . type(l:item)
     return ''
   endif
 

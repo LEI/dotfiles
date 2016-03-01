@@ -6,6 +6,9 @@ if get(g:, 'loaded_statusline', 0) || v:version < 700 || &cp
 endif
 let g:loaded_statusline = 1
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 " Always show the status line
 set laststatus=2
 
@@ -53,3 +56,6 @@ if has('autocmd') && !exists('#statusline')
     "autocmd TabLeave * echom "TabLeaved"
   augroup END
 endif
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
