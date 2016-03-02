@@ -72,16 +72,20 @@ function s:wrap(string, item)
   endif
 
   let l:str = '%' . l:width . '(' . l:str . '%)'
-  echom "<".l:str.">"
 
   return l:str
 endfunction
 
 function s:parse(item, parent, index)
   let l:item = a:item
-  call extend(l:item, a:parent, 'keep')
-
   let l:str = ''
+
+  " Display only if not truncated
+  if exists('l:item.truncate') && statusline#utils#truncate(l:item.truncate)
+    return l:str
+  endif
+
+  call extend(l:item, a:parent, 'keep')
 
   if exists('l:item.string')
     " Custom expression
@@ -156,10 +160,7 @@ function statusline#builder#add(item, parent)
     " && l:item =~ '^%'
     let l:str = l:item
   elseif type(l:item) == type({}) "exists('g:statusline_parts[l:item]')
-    " Display only if not truncated
-    if !exists('l:item.truncate') || !statusline#utils#truncate(l:item.truncate)
-      let l:str = s:parse(l:item, l:parent, 0)
-    endif
+    let l:str = s:parse(l:item, l:parent, 0)
   else
     echom "Unhandled section type: " . type(l:item)
     return ''

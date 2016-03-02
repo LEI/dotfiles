@@ -116,10 +116,13 @@ call extend(g:statusline_tpl_base, [
   \},
   \{
     \'list': [
-      \{ 'string': ' ' . g:statusline_symbols.branch . ' ', },
+      \{
+        \'string': ' %{get(g:statusline_symbols,"branch","on")} ',
+        \'truncate': 20,
+      \},
       \{
         \'string': '%{statusline#extensions#fugitive#branch()} ',
-        \'truncate': 60,
+        \'truncate': 40,
       \},
     \],
     \'highlight': 'default',
@@ -147,12 +150,12 @@ call extend(g:statusline_tpl_base, [
     \],
     \'highlight': 'base',
     \'truncate': 80,
-    \'sep': g:statusline_symbols.sep,
+    \'sep': '%*' . g:statusline_symbols.sep,
   \},
   \{
     \'string': ' %{statusline#core#type()} ',
     \'highlight': 'default',
-    \'truncate': 60,
+    \'truncate': 40,
   \},
   \{
     \'list': [
@@ -162,12 +165,11 @@ call extend(g:statusline_tpl_base, [
       \{ 'string': '%c%V ', 'width': '-4' },
     \],
     \'highlight': 'mode',
-    \'truncate': 40,
+    \'truncate': 60,
   \},
   \{
     \'string': ' %{statusline#extensions#syntastic#flags()} ',
     \'highlight': 'warning',
-    \'truncate': 60,
   \},
 \], 'keep')
 
