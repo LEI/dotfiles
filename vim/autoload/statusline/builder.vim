@@ -72,7 +72,6 @@ function s:wrap(string, item)
   endif
 
   let l:str = '%' . l:width . '(' . l:str . '%)'
-  echom "<".l:str.">"
 
   return l:str
 endfunction
