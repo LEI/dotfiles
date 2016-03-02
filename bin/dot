@@ -2,7 +2,10 @@
 
 # dot
 
-[[ -z "$DOT_ROOT" ]] && echo "\$DOT_ROOT is undefined" && exit 1
+if [[ -z "$DOT_ROOT" ]]; then
+   echo "\$DOT_ROOT is undefined"
+   exit 1
+fi
 
 # Paths
 cd "$DOT_ROOT"
