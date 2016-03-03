@@ -121,11 +121,12 @@ call extend(g:statusline_tpl_base, [
         \'truncate': 20,
       \},
       \{
-        \'string': '%{statusline#extensions#fugitive#branch()} ',
+        \'string': '%{fugitive#head()} ',
         \'truncate': 40,
       \},
     \],
     \'highlight': 'default',
+    \'condition': 'exists("*fugitive#head") && strlen(fugitive#head()) > 0',
   \},
   \{
     \'string': ' %<%n ',
@@ -168,8 +169,9 @@ call extend(g:statusline_tpl_base, [
     \'truncate': 60,
   \},
   \{
-    \'string': ' %{statusline#extensions#syntastic#flags()} ',
+    \'string': ' %{SyntasticStatuslineFlag()} ',
     \'highlight': 'warning',
+    \'condition': 'exists(":SyntasticCheck") && strlen(SyntasticStatuslineFlag()) > 0',
   \},
 \], 'keep')
 

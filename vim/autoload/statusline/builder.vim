@@ -33,7 +33,7 @@ function s:highlight(string, item)
   endif
 
   " Build the highlight group
-  if len(l:hi) > 0
+  if strlen(l:hi) > 0
     let l:result = ''
 
     if type(l:hi) == type(0)
@@ -59,15 +59,19 @@ function s:wrap(string, item)
   let l:item = a:item
   let l:width = ''
 
-  if len(l:str) > 0
-    " Group width
-    if exists('l:item.width')
-      let l:width = l:item.width
+  if strlen(l:str) > 0
+    if exists('l:item.condition')
+      "let l:str = s:condition(l:str, l:item)
+      let l:str = substitute(l:str, '{', '\="{".(l:item.condition)."?"', '')
+      let l:str = substitute(l:str, '}', ':""}', '')
     endif
-
     " Highlight group
     if exists('l:item.highlight')
       let l:str = s:highlight(l:str, l:item)
+    endif
+    " Group width
+    if exists('l:item.width')
+      let l:width = l:item.width
     endif
   endif
 
