@@ -13,3 +13,7 @@ elif infocmp xterm-256color >/dev/null 2>&1; then
 fi;
 
 # [[ -n "$TMUX" ]] && export TERM=screen-256color
+
+# Specify Homebrew Cask defaults
+export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+#--caskroom=/etc/Caskroom

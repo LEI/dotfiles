@@ -150,7 +150,7 @@ call extend(g:statusline_tpl_base, [
     \],
     \'highlight': 'base',
     \'truncate': 80,
-    \'sep': '%*' . g:statusline_symbols.sep,
+    \'sep': g:statusline_symbols.sep,
   \},
   \{
     \'string': ' %{statusline#core#type()} ',
