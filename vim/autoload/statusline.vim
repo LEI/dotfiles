@@ -84,10 +84,15 @@ call extend(g:statusline_mode_map, {
 
 " A template is an array describing each section of the statusline
 " Each template item can be an expression or an object
-" Each item should have only one of the following properties
+" Each item should have one and only one of the following properties
 "   format *string* expression evaluated in the statusline
 "   *function* full name without ()
 "   items *list* nested item array
+" Optional
+"   *highlight* specification
+"   *width* group
+"   *truncate* minimum width
+"   *condition* expression
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
