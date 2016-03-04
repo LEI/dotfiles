@@ -17,6 +17,28 @@ function statusline#utils#truncate(minwidth)
   endif
 endfunction
 
+function statusline#utils#construct(string, width)
+  let l:string = '%' . a:width . '(' . a:string . '%)'
+  return l:string
+endfunction
+
+function statusline#utils#highlight(string, highlight)
+  if strlen(a:highlight) > 0
+    let l:highlight = '%'
+    if type(a:highlight) == type(0)
+      " Integer: User highlight
+      let l:highlight.= a:highlight . '*'
+    elseif type(a:highlight) == type('')
+      " String: Highlight group
+      let l:highlight.= '#' . a:highlight . '#'
+    endif
+    let l:string = l:highlight . a:string
+  else
+    let l:string = a:string
+  endif
+  return l:string
+endfunction
+
 "if v:version >= 704
 "  function statusline#utils#getwinvar(winnr, key, default)
 "    return getwinvar(a:winnr, a:key, a:default)

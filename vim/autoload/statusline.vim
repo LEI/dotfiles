@@ -84,10 +84,15 @@ call extend(g:statusline_mode_map, {
 
 " A template is an array describing each section of the statusline
 " Each template item can be an expression or an object
-" Each item should have only one of the following properties
+" Each item should have one and only one of the following properties
 "   format *string* expression evaluated in the statusline
 "   *function* full name without ()
 "   items *list* nested item array
+" Optional
+"   *highlight* specification
+"   *width* group
+"   *truncate* minimum width
+"   *condition* expression
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
@@ -121,12 +126,12 @@ call extend(g:statusline_tpl_base, [
 \        'truncate': 20,
 \      },
 \      {
-\        'string': '%{fugitive#head()} ',
+\        'string': '%{fugitive#head(7)} ',
 \        'truncate': 40,
 \      },
 \    ],
 \    'highlight': 'default',
-\    'condition': 'exists("*fugitive#head") && strlen(fugitive#head()) > 0',
+\    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
 \  },
 \  {
 \    'string': ' %<%n ',
@@ -151,7 +156,7 @@ call extend(g:statusline_tpl_base, [
 \    ],
 \    'highlight': 'base',
 \    'truncate': 80,
-\    'sep': g:statusline_symbols.sep,
+\    'sep': get(g:statusline_symbols, 'sep', '|')
 \  },
 \  {
 \    'string': ' %{statusline#core#type()} ',
@@ -171,7 +176,7 @@ call extend(g:statusline_tpl_base, [
 \  {
 \    'string': ' %{SyntasticStatuslineFlag()} ',
 \    'highlight': 'warning',
-\    'condition': 'exists(":SyntasticCheck") && strlen(SyntasticStatuslineFlag()) > 0',
+\    'condition': 'exists(":SyntasticCheck")',
 \  },
 \], 'keep')
 

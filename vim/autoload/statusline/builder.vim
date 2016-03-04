@@ -5,12 +5,11 @@
 " Highlight(string, item) /// wrap?
 " Recursive items: copy() or deepcopy()?
 
-" Highlight groups
+" Apply highlight group
 function s:highlight(string, item)
   let l:str = a:string
   let l:item = a:item
-  let l:hi = l:item.highlight
-  "let l:reset = '%*'
+  let l:highlight = l:item.highlight
 
   let l:mode = get(w:, 'statusline_mode', '')
 
@@ -21,61 +20,20 @@ function s:highlight(string, item)
 
   if l:mode ==# 'inactive'
     " Override colors when inactive
-    let l:hi = g:statusline_palette[l:mode]
-  elseif l:hi ==# 'mode' && has_key(g:statusline_palette, l:mode)
-    " Mode highlighting using theme palette
-    let l:hi = g:statusline_palette[l:mode]
-  elseif has_key(g:statusline_palette, l:hi)
-    " Group highlighting using theme palette
-    let l:hi = g:statusline_palette[l:hi]
+    let l:highlight = g:statusline_palette[l:mode]
+  elseif l:highlight ==# 'mode' && has_key(g:statusline_palette, l:mode)
+    " Mode interactive highlighting
+    let l:highlight = g:statusline_palette[l:mode]
+  elseif has_key(g:statusline_palette, l:highlight)
+    " Group highlighting
+    let l:highlight = g:statusline_palette[l:highlight]
   "else
-  "  let l:hi = l:hi
+  "  let l:highlight = l:highlight
   endif
 
-  " Build the highlight group
-  if strlen(l:hi) > 0
-    let l:result = ''
-
-    if type(l:hi) == type(0)
-      " Integer, User highlight
-      let l:result.= '%'
-      let l:result.= l:hi
-      let l:result.= '*'
-    elseif type(l:hi) == type('')
-      " String, classic highlight
-      let l:result.= '%#'
-      let l:result.= l:hi
-      let l:result.= '#'
-    endif
-
-    let l:str = l:result . l:str
-  endif
-
-  return l:str
-endfunction
-
-function s:wrap(string, item)
-  let l:str = a:string
-  let l:item = a:item
-  let l:width = ''
-
-  if strlen(l:str) > 0
-    if exists('l:item.condition')
-      "let l:str = s:condition(l:str, l:item)
-      let l:str = substitute(l:str, '{', '\="{".(l:item.condition)."?"', '')
-      let l:str = substitute(l:str, '}', ':""}', '')
-    endif
-    " Highlight group
-    if exists('l:item.highlight')
-      let l:str = s:highlight(l:str, l:item)
-    endif
-    " Group width
-    if exists('l:item.width')
-      let l:width = l:item.width
-    endif
-  endif
-
-  let l:str = '%' . l:width . '(' . l:str . '%)'
+  " Build the highlight string
+  let l:str = statusline#utils#highlight(l:str, l:highlight)
+  "let l:reset = '%*'
 
   return l:str
 endfunction
@@ -149,7 +107,29 @@ function s:parse(item, parent, index)
     echom "Unhandled key: " . type(l:item)
   endif
 
-  let l:str = s:wrap(l:str, l:item)
+  " Wrap string
+  if strlen(l:str) > 0
+    " Display condition
+    if exists('l:item.condition')
+      "let l:str = s:condition(l:str, l:item)
+      let l:str = substitute(l:str, '{', '\="{".(l:item.condition)."?"', '')
+      let l:str = substitute(l:str, '}', ':""}', '')
+    endif
+    " Highlight group
+    if exists('l:item.highlight')
+      let l:str = s:highlight(l:str, l:item)
+    endif
+  endif
+
+  " Width specification
+  if exists('l:item.width')
+    let l:width = l:item.width
+  else
+    let l:width = ''
+  endif
+
+  " Section wrap
+  let l:str = statusline#utils#construct(l:str, l:width)
 
   return l:str
 endfunction
