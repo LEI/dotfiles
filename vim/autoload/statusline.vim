@@ -13,15 +13,15 @@ call statusline#utils#define('g:statusline_template', 'base')
 
 call statusline#utils#define('g:statusline_symbols', {})
 call extend(g:statusline_symbols, {
-  \'paste': 'PASTE',
-  \'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : 'RO',
-  \'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
-  \'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
-  \'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : '⎇ ',
-  \'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512) . ' '),
-  \'modified': '+',
-  \'close': '✕',
-  \'sep': '│',
+\  'paste': 'PASTE',
+\  'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : 'RO',
+\  'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
+\  'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
+\  'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : '⎇ ',
+\  'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512) . ' '),
+\  'modified': '+',
+\  'close': '✕',
+\  'sep': '│',
 \}, 'keep')
 
 " Mode map {{{2
@@ -47,17 +47,17 @@ call extend(g:statusline_symbols, {
 
 call statusline#utils#define('g:statusline_mode_map', {})
 call extend(g:statusline_mode_map, {
-  \'__' : '------',
-  \'n': 'NORMAL',
-  \'i': 'INSERT',
-  \'R': 'REPLACE',
-  \'v': 'VISUAL',
-  \'V': 'V-LINE',
-  \'c': 'COMMAND',
-  \'': 'V-BLOCK',
-  \'s': 'SELECT',
-  \'S': 'S-LINE',
-  \'': 'S-BLOCK',
+\  '__' : '------',
+\  'n': 'NORMAL',
+\  'i': 'INSERT',
+\  'R': 'REPLACE',
+\  'v': 'VISUAL',
+\  'V': 'V-LINE',
+\  'c': 'COMMAND',
+\  '': 'V-BLOCK',
+\  's': 'SELECT',
+\  'S': 'S-LINE',
+\  '': 'S-BLOCK',
 \}, 'keep')
   " 't': 'TERMINAL',
 
@@ -91,88 +91,88 @@ call extend(g:statusline_mode_map, {
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
-  \{
-    \'string': ' %{statusline#core#mode()} ',
-    \'highlight': 'mode',
-    \'width': '-9',
-    \'truncate': 33,
-  \},
-  \'%<%f%( [%M%R]%)',
-  \'%=',
-  \'%( [%{&filetype}]%) ',
-  \'%-8.(%l,%c%V%) %p%% ',
+\  {
+\    'string': ' %{statusline#core#mode()} ',
+\    'highlight': 'mode',
+\    'width': '-9',
+\    'truncate': 33,
+\  },
+\  '%<%f%( [%M%R]%)',
+\  '%=',
+\  '%( [%{&filetype}]%) ',
+\  '%-8.(%l,%c%V%) %p%% ',
 \], 'keep')
 
 call statusline#utils#define('g:statusline_tpl_base', [])
 call extend(g:statusline_tpl_base, [
-  \{
-    \'string': ' %{statusline#core#mode()} ',
-    \'highlight': 'mode',
-    \'width': '-8',
-    \'truncate': 20,
-  \},
-  \{
-    \'string': '%{statusline#core#paste()} ',
-  \},
-  \{
-    \'list': [
-      \{
-        \'string': ' %{get(g:statusline_symbols,"branch","on")} ',
-        \'truncate': 20,
-      \},
-      \{
-        \'string': '%{fugitive#head()} ',
-        \'truncate': 40,
-      \},
-    \],
-    \'highlight': 'default',
-    \'condition': 'exists("*fugitive#head") && strlen(fugitive#head()) > 0',
-  \},
-  \{
-    \'string': ' %<%n ',
-    \'highlight': 'base',
-  \},
-  \{
-    \'string': '%f %([%M%R] %)',
-    \'highlight': 'file',
-  \},
-  \{
-    \'string': '%{statusline#core#crypt()} ',
-  \},
-  \'%=',
-  \{
-    \'string': ' %{v:register} ',
-    \'highlight': 'bg',
-  \},
-  \{
-    \'list': [
-      \{ 'string': ' %{&fileformat} ' },
-      \{ 'string': ' %{statusline#core#encoding()} ' },
-    \],
-    \'highlight': 'base',
-    \'truncate': 80,
-    \'sep': g:statusline_symbols.sep,
-  \},
-  \{
-    \'string': ' %{statusline#core#type()} ',
-    \'highlight': 'default',
-    \'truncate': 40,
-  \},
-  \{
-    \'list': [
-      \{ 'string': ' %P ', 'width': '5' },
-      \{ 'string': ' %l', 'width': '4' },
-      \{ 'string': ':' },
-      \{ 'string': '%c%V ', 'width': '-4' },
-    \],
-    \'highlight': 'mode',
-    \'truncate': 60,
-  \},
-  \{
-    \'string': ' %{SyntasticStatuslineFlag()} ',
-    \'highlight': 'warning',
-    \'condition': 'exists(":SyntasticCheck") && strlen(SyntasticStatuslineFlag()) > 0',
-  \},
+\  {
+\    'string': ' %{statusline#core#mode()} ',
+\    'highlight': 'mode',
+\    'width': '-8',
+\    'truncate': 20,
+\  },
+\  {
+\    'string': '%{statusline#core#paste()} ',
+\  },
+\  {
+\    'list': [
+\      {
+\        'string': ' %{get(g:statusline_symbols,"branch","on")} ',
+\        'truncate': 20,
+\      },
+\      {
+\        'string': '%{fugitive#head()} ',
+\        'truncate': 40,
+\      },
+\    ],
+\    'highlight': 'default',
+\    'condition': 'exists("*fugitive#head") && strlen(fugitive#head()) > 0',
+\  },
+\  {
+\    'string': ' %<%n ',
+\    'highlight': 'base',
+\  },
+\  {
+\    'string': '%f %([%M%R] %)',
+\    'highlight': 'file',
+\  },
+\  {
+\    'string': '%{statusline#core#crypt()} ',
+\  },
+\  '%=',
+\  {
+\    'string': ' %{v:register} ',
+\    'highlight': 'bg',
+\  },
+\  {
+\    'list': [
+\      { 'string': ' %{&fileformat} ' },
+\      { 'string': ' %{statusline#core#encoding()} ' },
+\    ],
+\    'highlight': 'base',
+\    'truncate': 80,
+\    'sep': g:statusline_symbols.sep,
+\  },
+\  {
+\    'string': ' %{statusline#core#type()} ',
+\    'highlight': 'default',
+\    'truncate': 40,
+\  },
+\  {
+\    'list': [
+\      { 'string': ' %P ', 'width': '5' },
+\      { 'string': ' %l', 'width': '4' },
+\      { 'string': ':' },
+\      { 'string': '%c%V ', 'width': '-4' },
+\    ],
+\    'highlight': 'mode',
+\    'truncate': 60,
+\  },
+\  {
+\    'string': ' %{SyntasticStatuslineFlag()} ',
+\    'highlight': 'warning',
+\    'condition': 'exists(":SyntasticCheck") && strlen(SyntasticStatuslineFlag()) > 0',
+\  },
 \], 'keep')
 
 " Functions {{{1

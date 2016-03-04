@@ -54,13 +54,15 @@ remove_file() {
 
   [[ -n "$args" ]] && args+=" "
 
-  # TODO
+  # If it is not a symlink
+  if [[ ! -h "$file" ]]; then
+    # Check if file exists
+    [[ ! -e "$file" ]] && return 2
 
-  # Check if file exists or broken symlink
-  #[[ ! -e "$file" ]] && return 2
-
-  # Handle recursive with -r
-  #[[ -d "$file" ]] && die "$file: is a directory"
+    # Do not remove directories
+    # TODO: check if empty?
+    #[[ -d "$file" ]] && die "$file: is a directory"
+  fi
 
   dry_run "rm $args$file"
 }
