@@ -109,7 +109,7 @@ call extend(g:statusline_tpl_base, [
     \'string': ' %{statusline#core#mode()} ',
     \'highlight': 'mode',
     \'width': '-8',
-    \'truncate': 20,
+    \'truncate': 30,
   \},
   \{
     \'string': '%{statusline#core#paste()} ',
@@ -121,12 +121,12 @@ call extend(g:statusline_tpl_base, [
         \'truncate': 20,
       \},
       \{
-        \'string': '%{fugitive#head()} ',
+        \'string': '%{fugitive#head(7)} ',
         \'truncate': 40,
       \},
     \],
     \'highlight': 'default',
-    \'condition': 'exists("*fugitive#head") && strlen(fugitive#head()) > 0',
+    \'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
   \},
   \{
     \'string': ' %<%n ',
