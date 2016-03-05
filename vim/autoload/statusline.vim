@@ -7,7 +7,7 @@
 
 call statusline#utils#define('g:statusline', {})
 call statusline#utils#define('g:statusline_theme', 'dark')
-call statusline#utils#define('g:statusline_template', 'base')
+call statusline#utils#define('g:statusline_template', 'tomorrow')
 
 " Symbols {{{2
 
@@ -108,8 +108,8 @@ call extend(g:statusline_tpl_minimal, [
 \  '%-8.(%l,%c%V%) %p%% ',
 \], 'keep')
 
-call statusline#utils#define('g:statusline_tpl_base', [])
-call extend(g:statusline_tpl_base, [
+call statusline#utils#define('g:statusline_tpl_tomorrow', [])
+call extend(g:statusline_tpl_tomorrow, [
 \  {
 \    'string': ' %{statusline#core#mode()} ',
 \    'highlight': 'mode',

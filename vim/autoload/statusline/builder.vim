@@ -17,8 +17,8 @@ function s:highlight(string, item)
     let l:mode = split(l:mode)[0]
   endif
 
-  if l:mode ==# 'inactive'
-    " Override colors when inactive
+  if l:mode ==# 'inactive' && l:highlight !=# 'bg'
+    " Override colors when inactive, unless bg color is already used
     let l:highlight = g:statusline_palette[l:mode]
   elseif l:highlight ==# 'mode' && has_key(g:statusline_palette, l:mode)
     " Mode interactive highlighting

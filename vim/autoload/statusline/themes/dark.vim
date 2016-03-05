@@ -50,8 +50,8 @@ function statusline#themes#dark#apply()
   hi StatusLineVisual ctermfg=10 ctermbg=3
 
   " User groups
-  hi User1 ctermfg=8 ctermbg=0
-  hi User2 ctermfg=12 ctermbg=10
+  hi User1 ctermfg=11 ctermbg=0
+  hi User2 ctermfg=8 ctermbg=10
   hi User3 ctermfg=13 ctermbg=10
 
   " WarningMsg

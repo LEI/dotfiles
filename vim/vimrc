@@ -127,12 +127,12 @@ set lazyredraw
 set term=xterm-256color
 "set term=screen-256color
 
-" Disable BCE (Background Color Erase)
-if &term =~ '256color'
-  set t_ut=
-endif
+" " Disable BCE (Background Color Erase)
+" if &term =~ '256color'
+"   set t_ut=
+" endif
 
-" Allow color schemes to do bright colors without forcing bold
+" " Allow color schemes to do bright colors without forcing bold
 " if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
 "   set t_Co=16
 " endif
@@ -156,7 +156,7 @@ endif
 try
   " Access colors present in 256 colorspace
   "let base16colorspace=256
-  colorscheme base16-ocean
+  colorscheme base16-tomorrow
 catch
   colorscheme torte
 endtry
