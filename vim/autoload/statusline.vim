@@ -184,8 +184,6 @@ call extend(g:statusline_tpl_tomorrow, [
 
 let s:wins = {}
 
-" Public {{{2
-
 " Updates the status line in the current window
 function statusline#set()
   for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
@@ -249,8 +247,6 @@ function statusline#build(winnr)
   return l:win.line
 endfunction
 
-" Core {{{2
-
 " Update local status line
 function s:update(nr, active)
   let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
@@ -287,16 +283,3 @@ function s:mode(active)
 
   return join(l:mode)
 endfunction
-
-function s:init()
-  " Load theme at startup
-  call statusline#theme()
-endfunction
-
-call s:init()
-
-" function statusline#active(...)
-"   "let l:a = get(w:, 'statusline_active', 0)
-"   let l:active = a:0 > 0 ? a:1 : 'nope'
-"   return l:active
-" endfunction
