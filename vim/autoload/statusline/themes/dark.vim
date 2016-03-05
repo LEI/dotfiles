@@ -19,8 +19,6 @@
 " 14: beige (bright cyan)
 " 15: bright white
 
-call statusline#utils#define('g:statusline#themes#dark#palette', {})
-
 " Called in the builder to map the template highlight groups
 let s:palette = {
   \  'default': 'StatusLine',
@@ -37,26 +35,31 @@ let s:palette = {
   \  'file': 3,
   \ }
 
-" Default groups
-hi StatusLine ctermfg=13 ctermbg=11
-hi StatusLineNC ctermfg=8 ctermbg=10
+"call statusline#utils#define('g:statusline#themes#dark#palette', {})
+"call extend(g:statusline#themes#dark#palette, s:palette, 'force')
 
-" Custom groups
-hi StatusLineInsert ctermfg=10 ctermbg=2
-hi StatusLineNormal ctermfg=10 ctermbg=4
-hi StatusLineReplace ctermfg=13 ctermbg=1
-hi StatusLineVisual ctermfg=10 ctermbg=3
+function statusline#themes#dark#apply()
+  " Default groups
+  hi StatusLine ctermfg=13 ctermbg=11
+  hi StatusLineNC ctermfg=8 ctermbg=10
 
-" User groups
-hi User1 ctermfg=8 ctermbg=0
-hi User2 ctermfg=12 ctermbg=10
-hi User3 ctermfg=13 ctermbg=10
+  " Custom groups
+  hi StatusLineInsert ctermfg=10 ctermbg=2
+  hi StatusLineNormal ctermfg=10 ctermbg=4
+  hi StatusLineReplace ctermfg=13 ctermbg=1
+  hi StatusLineVisual ctermfg=10 ctermbg=3
 
-" WarningMsg
-hi User9 ctermfg=13 ctermbg=1
+  " User groups
+  hi User1 ctermfg=8 ctermbg=0
+  hi User2 ctermfg=12 ctermbg=10
+  hi User3 ctermfg=13 ctermbg=10
 
-"set fillchars+=stl:\ ,stlnc:\
-"set showmode
-"hi ModeMsg ctermfg=11
+  " WarningMsg
+  hi User9 ctermfg=13 ctermbg=1
 
-call extend(g:statusline#themes#dark#palette, s:palette, 'force')
+  "set fillchars+=stl:\ ,stlnc:\
+  "set showmode
+  "hi ModeMsg ctermfg=11
+
+  return s:palette
+endfunction

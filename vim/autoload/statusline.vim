@@ -25,7 +25,6 @@ call extend(g:statusline_symbols, {
 \}, 'keep')
 
 " Mode map {{{2
-
 " n      : Normal
 " no     : Operator-pending
 " v      : Visual by character
@@ -59,13 +58,11 @@ call extend(g:statusline_mode_map, {
 \  'S': 'S-LINE',
 \  '': 'S-BLOCK',
 \}, 'keep')
-  " 't': 'TERMINAL',
+"'t': 'TERMINAL',
 
 " Templates {{{2
-
-" Format: %-0{minwid}.{maxwid}{item}
-" Default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-" Format markers:
+" Default Status Line: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" Format Markers:
 "   %< truncation point
 "   %n buffer number
 "   %f relative path to file
@@ -80,19 +77,22 @@ call extend(g:statusline_mode_map, {
 "   %V current virtual column number (-n), if different from %c
 "   %P percentage through buffer
 "   %) end of width specification
-"set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
-
-" A template is an array describing each section of the statusline
-" Each template item can be an expression or an object
-" Each item should have one and only one of the following properties
-"   format *string* expression evaluated in the statusline
+" Description:
+"   A template is an array describing each part of the status line
+"   Each template item can be an string or a dictionary
+"   Each item should have one and only one of the following:
+" Properties:
+"   format *string* expression
 "   *function* full name without ()
-"   items *list* nested item array
-" Optional
-"   *highlight* specification
-"   *width* group
-"   *truncate* minimum width
-"   *condition* expression
+"   items *list* nested items array
+" Optional:
+"   *highlight* group: User<int> or <string>
+"   *width* specification: %-0{minwid}.{maxwid}{item}
+"   *truncate* minimum column number
+"   *condition* for displaying the item
+
+call statusline#utils#define('g:statusline_tpl_default', [])
+call extend(g:statusline_tpl_default, ['%<%f %h%m%r%=%-14.(%l,%c%V%) %P'], 'keep')
 
 call statusline#utils#define('g:statusline_tpl_minimal', [])
 call extend(g:statusline_tpl_minimal, [
@@ -197,6 +197,24 @@ function statusline#set()
   "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
 endfunction
 
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function statusline#theme()
+  " User defined theme
+  if exists('g:statusline_theme')
+    try
+      let g:statusline_palette = g:statusline#themes#{g:statusline_theme}#apply()
+    catch
+      echom 'Could not find theme "' . g:statusline_theme . '"'
+    endtry
+  endif
+
+  " Default theme
+  if !exists('g:statusline_palette')
+    let l:theme = 'dark'
+    let g:statusline_palette = g:statusline#themes#{l:theme}#apply()
+  endif
+endfunction
+
 " Build status string
 function statusline#build(winnr)
   let l:win = s:wins[a:winnr]
@@ -270,29 +288,9 @@ function s:mode(active)
   return join(l:mode)
 endfunction
 
-" Init {{{2
-
-" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
-function s:theme()
-  " User defined theme
-  if exists('g:statusline_theme')
-    try
-      let g:statusline_palette = g:statusline#themes#{g:statusline_theme}#palette
-    catch
-      echom 'Could not find theme "' . g:statusline_theme . '"'
-    endtry
-  endif
-
-  " Default theme
-  if !exists('g:statusline_palette')
-    let l:theme = 'dark'
-    let g:statusline_palette = g:statusline#themes#{l:theme}#palette
-  endif
-endfunction
-
 function s:init()
   " Load theme at startup
-  call s:theme()
+  call statusline#theme()
 endfunction
 
 call s:init()

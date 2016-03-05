@@ -42,6 +42,10 @@ if has('autocmd') && !exists('#statusline')
     "autocmd BufWinEnter,BufWinLeave * call statusline#set()
 
     autocmd CmdwinEnter,CmdwinLeave * call statusline#set()
+    "autocmd CmdwinEnter,CmdwinLeave * call statusline#set()
+
+    autocmd ColorScheme * call statusline#theme()
+
     " getcmdwintype()
     " The character used for the pattern indicates the type of command-line:
     "  :: normal Ex command
@@ -52,8 +56,8 @@ if has('autocmd') && !exists('#statusline')
     "  @: string for |input()|
     "  -: text for |:insert| or |:append|
 
-    "autocmd TabEnter * echom "TabEntered"
-    "autocmd TabLeave * echom "TabLeaved"
+    "autocmd TabEnter * echom 'TabEnter'
+    "autocmd TabLeave * echom 'TabLeave'
   augroup END
 endif
 

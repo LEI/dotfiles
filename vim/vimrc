@@ -128,9 +128,9 @@ set term=xterm-256color
 "set term=screen-256color
 
 " Disable BCE (Background Color Erase)
-"if &term =~ '256color'
-"  set t_ut=
-"endif
+if &term =~ '256color'
+  set t_ut=
+endif
 
 " Allow color schemes to do bright colors without forcing bold
 " if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
