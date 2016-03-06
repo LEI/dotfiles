@@ -3,14 +3,12 @@
 
 " github.com/vim-airline/vim-airline
 
-" Declarations {{{1
-
+" Declarations
 call statusline#utils#define('g:statusline', {})
-call statusline#utils#define('g:statusline_theme', 'dark')
-call statusline#utils#define('g:statusline_template', 'tomorrow')
+call statusline#utils#define('g:statusline_theme', 'tomorrow')
+call statusline#utils#define('g:statusline_template', 'sline')
 
-" Symbols {{{2
-
+" Symbols
 call statusline#utils#define('g:statusline_symbols', {})
 call extend(g:statusline_symbols, {
 \  'paste': 'PASTE',
@@ -24,7 +22,7 @@ call extend(g:statusline_symbols, {
 \  'sep': '│',
 \}, 'keep')
 
-" Mode map {{{2
+" Mode map
 " n      : Normal
 " no     : Operator-pending
 " v      : Visual by character
@@ -60,7 +58,6 @@ call extend(g:statusline_mode_map, {
 \}, 'keep')
 "'t': 'TERMINAL',
 
-" Templates {{{2
 " Default Status Line: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " Format Markers:
 "   %< truncation point
@@ -82,105 +79,30 @@ call extend(g:statusline_mode_map, {
 "   Each template item can be an string or a dictionary
 "   Each item should have one and only one of the following:
 " Properties:
-"   format *string* expression
-"   *function* full name without ()
-"   items *list* nested items array
+"   format *string* expression      : ''
+"   *function* reference            : function('')
+"   items *list* nested items array : []
 " Optional:
 "   *highlight* group: User<int> or <string>
 "   *width* specification: %-0{minwid}.{maxwid}{item}
 "   *truncate* minimum column number
 "   *condition* for displaying the item
-
-call statusline#utils#define('g:statusline_tpl_default', [])
-call extend(g:statusline_tpl_default, ['%<%f %h%m%r%=%-14.(%l,%c%V%) %P'], 'keep')
-
-call statusline#utils#define('g:statusline_tpl_minimal', [])
-call extend(g:statusline_tpl_minimal, [
-\  {
-\    'string': ' %{statusline#core#mode()} ',
-\    'highlight': 'mode',
-\    'width': '-9',
-\    'truncate': 33,
-\  },
-\  '%<%f%( [%M%R]%)',
-\  '%=',
-\  '%( [%{&filetype}]%) ',
-\  '%-8.(%l,%c%V%) %p%% ',
-\], 'keep')
-
-call statusline#utils#define('g:statusline_tpl_tomorrow', [])
-call extend(g:statusline_tpl_tomorrow, [
-\  {
-\    'string': ' %{statusline#core#mode()} ',
-\    'highlight': 'mode',
-\    'width': '-8',
-\    'truncate': 20,
-\  },
-\  {
-\    'string': '%{statusline#core#paste()} ',
-\  },
-\  {
-\    'list': [
-\      {
-\        'string': ' %{get(g:statusline_symbols,"branch","on")} ',
-\        'truncate': 20,
-\      },
-\      {
-\        'string': '%{fugitive#head(7)} ',
-\        'truncate': 40,
-\      },
-\    ],
-\    'highlight': 'default',
-\    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
-\  },
-\  {
-\    'string': ' %<%n ',
-\    'highlight': 'base',
-\  },
-\  {
-\    'string': '%f %([%M%R] %)',
-\    'highlight': 'file',
-\  },
-\  {
-\    'string': '%{statusline#core#crypt()} ',
-\  },
-\  '%=',
-\  {
-\    'string': ' %{v:register} ',
-\    'highlight': 'bg',
-\  },
-\  {
-\    'list': [
-\      { 'string': ' %{&fileformat} ' },
-\      { 'string': ' %{statusline#core#encoding()} ' },
-\    ],
-\    'highlight': 'base',
-\    'truncate': 80,
-\    'sep': get(g:statusline_symbols, 'sep', '|')
-\  },
-\  {
-\    'string': ' %{statusline#core#type()} ',
-\    'highlight': 'default',
-\    'truncate': 40,
-\  },
-\  {
-\    'list': [
-\      { 'string': ' %P ', 'width': '5' },
-\      { 'string': ' %l', 'width': '4' },
-\      { 'string': ':' },
-\      { 'string': '%c%V ', 'width': '-4' },
-\    ],
-\    'highlight': 'mode',
-\    'truncate': 60,
-\  },
-\  {
-\    'string': ' %{SyntasticStatuslineFlag()} ',
-\    'highlight': 'warning',
-\    'condition': 'exists(":SyntasticCheck")',
-\  },
-\], 'keep')
-
-" Functions {{{1
+" Example:
+"   let s:palette = [
+"   \  {
+"   \    'string': ' %{statusline#core#mode()} ',
+"   \    'highlight': 'mode',
+"   \    'width': '-9',
+"   \    'truncate': 33,
+"   \  },
+"   \  '%<%f%( [%M%R]%)',
+"   \  '%=',
+"   \  '%( [%{&filetype}]%) ',
+"   \  '%-8.(%l,%c%V%) %p%% ',
+"   \]
+"   function statusline#templates#<name>#apply()
+"     return s:palette
+"   endfunction
 
 let s:wins = {}
 
@@ -188,10 +110,10 @@ let s:wins = {}
 function statusline#set()
   for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
   "for nr in range(1, winnr('$'))
-    call s:update(nr, 0)
+    call s:build(nr, 0)
   endfor
 
-  call s:update(winnr(), 1)
+  call s:build(winnr(), 1)
   "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
 endfunction
 
@@ -208,8 +130,23 @@ function statusline#theme()
 
   " Default theme
   if !exists('g:statusline_palette')
-    let l:theme = 'dark'
+    let l:theme = 'tomorrow'
     let g:statusline_palette = g:statusline#themes#{l:theme}#apply()
+  endif
+endfunction
+
+function statusline#template()
+  if exists('g:statusline_template')
+    try
+      let s:template = g:statusline#templates#{g:statusline_template}#apply()
+    catch
+      echom 'Could not find template "' . g:statusline_template . '"'
+    endtry
+  endif
+
+  if !exists('s:template')
+    let l:tpl = 'default'
+    let s:template = g:statusline#templates#{l:tpl}#apply()
   endif
 endfunction
 
@@ -229,8 +166,8 @@ function statusline#build(winnr)
 
     " Build line
     let l:line = ''
-    let l:list = g:statusline_tpl_{g:statusline_template}
-    for item in l:list
+    "let l:list = s:template_{g:statusline_template}
+    for item in s:template
       let l:line.= statusline#builder#add(item, l:win)
       unlet item
     endfor
@@ -248,7 +185,7 @@ function statusline#build(winnr)
 endfunction
 
 " Update local status line
-function s:update(nr, active)
+function s:build(nr, active)
   let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
   let s:wins[a:nr] = l:win
 

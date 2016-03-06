@@ -33,6 +33,7 @@ if has('autocmd') && !exists('#statusline')
     "autocmd CmdwinLeave * call statusline#reset()
 
     autocmd ColorScheme,VimEnter * call statusline#theme()
+    autocmd VimEnter * call statusline#template()
 
     " getcmdwintype()
     " The character used for the pattern indicates the type of command-line:

@@ -29,16 +29,16 @@ let s:palette = {
   \  'visual': 'StatusLineVisual',
   \  'select': 'StatusLineVisual',
   \  'command': 3,
-  \  'warning': 9,
   \  'bg': 1,
   \  'base': 2,
   \  'file': 3,
+  \  'sep': 9,
   \ }
 
-"call statusline#utils#define('g:statusline#themes#dark#palette', {})
-"call extend(g:statusline#themes#dark#palette, s:palette, 'force')
+"call statusline#utils#define('g:statusline#themes#tomorrow#palette', {})
+"call extend(g:statusline#themes#tomorrow#palette, s:palette, 'force')
 
-function statusline#themes#dark#apply()
+function statusline#themes#tomorrow#apply()
   " Default groups
   hi StatusLine ctermfg=13 ctermbg=11
   hi StatusLineNC ctermfg=8 ctermbg=10
@@ -53,9 +53,9 @@ function statusline#themes#dark#apply()
   hi User1 ctermfg=11 ctermbg=0
   hi User2 ctermfg=8 ctermbg=10
   hi User3 ctermfg=13 ctermbg=10
+  hi User9 ctermfg=11
 
-  " WarningMsg
-  hi User9 ctermfg=13 ctermbg=1
+  "hi WarningMsg ctermfg=13 ctermbg=1
 
   "set fillchars+=stl:\ ,stlnc:\
   "set showmode

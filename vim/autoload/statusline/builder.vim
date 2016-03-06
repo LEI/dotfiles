@@ -52,13 +52,13 @@ function s:parse(item, parent, index)
     " Custom expression
     let l:str = l:item.string
   elseif exists('l:item.function')
-    " Function call (unused?)
+    let l:str = l:item.function()
     "exists('*{l:item.function}') "|| filereadable('l:item.function')
-    try
-      let l:str = {l:item.function}()
-    catch
-      echom "Function not found: " . l:item.function
-    endtry
+    " try
+    "   let l:str = {l:item.function}()
+    " catch
+    "   echom "Function not found: " . l:item.function
+    " endtry
   elseif exists('l:item.list')
     let l:sub_item = ''
     "if type(l:item.list) == type({})
