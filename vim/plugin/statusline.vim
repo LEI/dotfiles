@@ -9,15 +9,6 @@ let g:loaded_statusline = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-" Always show the status line
-set laststatus=2
-
-" Do not display current mode
-set noshowmode
-
-" Display incomplete commands
-set showcmd
-
 if has('autocmd') && !exists('#statusline')
 
   augroup statusline

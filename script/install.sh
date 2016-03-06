@@ -6,8 +6,8 @@ install_packages() {
   case $UNAME in
     Darwin)
         #install_cask && \
-      install_brew && \
-        install_cask_settings
+      install_homebrew_bundle && \
+        install_cask_files
       ;;
     *)
       log_warn "No packages" ":("
@@ -15,11 +15,7 @@ install_packages() {
   esac
 }
 
-uninstall_packages() {
-  log_error "Not implemented" "uninstall_packages()"
-}
-
-install_brew() {
+install_homebrew_bundle() {
   local brew=$(which brew) # /usr/local/bin/brew
 
   if [[ ! -n "$brew" ]] || [[ ! -x "$brew" ]]; then
@@ -42,7 +38,7 @@ install_brew() {
   fi
 
   if [[ -x "$brew" ]]; then
-    if confirm "Homebrew packages" "" N; then
+    if confirm "Homebrew bundle" "" N; then
       # Check exit statuses?
 
       # Make sure we're using the latest Homebrew
@@ -54,12 +50,14 @@ install_brew() {
       brew upgrade
 
       # brew tap Homebrew/bundle
-      log "> brew bundle (TODO)" "Bundling"
+      local brewfile="$DOT_ROOT/platform/darwin/Brewfile"
+      log "> brew bundle" "Brewfile: $brewfile"
       #brew bundle
       #TODO: DOT_CONFIG_BREW&CASK?
       # https://github.com/Homebrew/homebrew-bundle
       # https://github.com/caskroom/homebrew-cask
       #"$DOT_ROOT/os/darwin/brewfile" #caskfile?
+      brew bundle --file="$brewfile"
 
       # # Remove outdate version from the cellar
       log "> brew cleanup" "Cleaning"
@@ -76,11 +74,7 @@ install_brew() {
   fi
 }
 
-install_cask() {
-  echo "TODO: Brewfile && Caskfile"
-}
-
-install_cask_settings() {
+install_cask_files() {
   # TODO: darwin only?
   local cask_path="$DOT_ROOT/platform/darwin/cask"
   local name
@@ -104,4 +98,8 @@ install_cask_settings() {
       fi
     done
   fi
+}
+
+uninstall_packages() {
+  log_error "Not implemented" "uninstall_packages()"
 }

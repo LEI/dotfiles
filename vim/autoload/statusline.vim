@@ -22,26 +22,6 @@ call extend(g:statusline_symbols, {
 \  'sep': '│',
 \}, 'keep')
 
-" Mode map
-" n      : Normal
-" no     : Operator-pending
-" v      : Visual by character
-" V      : Visual by line
-" CTRL-V : Visual blockwise
-" s      : Select by character
-" S      : Select by line
-" CTRL-S : Select blockwise
-" i      : Insert
-" R      : Replace |R|
-" Rv     : Virtual Replace |gR|
-" c      : Command-line
-" cv     : Vim Ex mode |gQ|
-" ce     : Normal Ex mode |Q|
-" r      : Hit-enter prompt
-" rm     : The -- more -- prompt
-" r?     : A confirm query of some sort
-" !      : Shell or external command is executing
-
 call statusline#utils#define('g:statusline_mode_map', {})
 call extend(g:statusline_mode_map, {
 \  '__' : '------',
@@ -57,6 +37,26 @@ call extend(g:statusline_mode_map, {
 \  '': 'S-BLOCK',
 \}, 'keep')
 "'t': 'TERMINAL',
+
+" Mode Map:
+"   n       Normal
+"   no      Operator-pending
+"   v       Visual by character
+"   V       Visual by line
+"   CTRL-V  Visual blockwise
+"   s       Select by character
+"   S       Select by line
+"   CTRL-S  Select blockwise
+"   i       Insert
+"   R       Replace |R|
+"   Rv      Virtual Replace |gR|
+"   c       Command-line
+"   cv      Vim Ex mode |gQ|
+"   ce      Normal Ex mode |Q|
+"   r       Hit-enter prompt
+"   rm      The -- more -- prompt
+"   r?      A confirm query of some sort
+"   !       Shell or external command is executing
 
 " Default Status Line: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " Format Markers:
@@ -79,12 +79,12 @@ call extend(g:statusline_mode_map, {
 "   Each template item can be an string or a dictionary
 "   Each item should have one and only one of the following:
 " Properties:
-"   format *string* expression      : ''
-"   *function* reference            : function('')
-"   items *list* nested items array : []
+"   format *string* expression       'string'
+"   *function* reference             function('fn')
+"   items *list* nested items array  ['item', {}]
 " Optional:
-"   *highlight* group: User<int> or <string>
-"   *width* specification: %-0{minwid}.{maxwid}{item}
+"   *highlight* group                User<int> or <string>
+"   *width* specification            %-0{minwid}.{maxwid}{item}
 "   *truncate* minimum column number
 "   *condition* for displaying the item
 " Example:
@@ -115,39 +115,6 @@ function statusline#set()
 
   call s:build(winnr(), 1)
   "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
-endfunction
-
-" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
-function statusline#theme()
-  " User defined theme
-  if exists('g:statusline_theme')
-    try
-      let g:statusline_palette = g:statusline#themes#{g:statusline_theme}#apply()
-    catch
-      echom 'Could not find theme "' . g:statusline_theme . '"'
-    endtry
-  endif
-
-  " Default theme
-  if !exists('g:statusline_palette')
-    let l:theme = 'tomorrow'
-    let g:statusline_palette = g:statusline#themes#{l:theme}#apply()
-  endif
-endfunction
-
-function statusline#template()
-  if exists('g:statusline_template')
-    try
-      let s:template = g:statusline#templates#{g:statusline_template}#apply()
-    catch
-      echom 'Could not find template "' . g:statusline_template . '"'
-    endtry
-  endif
-
-  if !exists('s:template')
-    let l:tpl = 'default'
-    let s:template = g:statusline#templates#{l:tpl}#apply()
-  endif
 endfunction
 
 " Build status string
@@ -182,6 +149,30 @@ function statusline#build(winnr)
 
   " Send final string
   return l:win.line
+endfunction
+
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
+function statusline#theme(...)
+  let l:theme = a:0 > 0 ? a:1 : g:statusline_theme
+  call s:apply('g:statusline_palette', 'g:statusline#themes', l:theme, 'tomorrow')
+endfunction
+
+function statusline#template(...)
+  let l:template = a:0 > 0 ? a:1 : g:statusline_template
+  call s:apply('s:template', 'g:statusline#templates', l:template, 'default')
+endfunction
+
+function s:apply(var, func, name, default)
+  if strlen(a:name) > 0
+    try
+      let {a:var} = {a:func}#{a:name}#apply()
+    catch
+      echom 'Could not apply "' . a:func . '#' . a:name . '#apply()"'
+    endtry
+  endif
+  if !exists(a:var)
+    let {a:var} = {a:func}#{a:default}#apply()
+  endif
 endfunction
 
 " Update local status line

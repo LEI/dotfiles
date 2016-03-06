@@ -44,13 +44,10 @@ Plug 'tpope/vim-sleuth'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'Yggdroot/indentLine'
 Plug 'godlygeek/tabular'
-
+Plug 'sjl/gundo.vim'
 Plug 'SirVer/ultisnips'
 
-Plug 'sjl/gundo.vim'
-
-Plug 'scrooloose/syntastic'
-Plug 'dbakker/vim-lint', { 'for': 'vim' }
+Plug 'scrooloose/syntastic' "| Plug 'dbakker/vim-lint', { 'for': 'vim' }
 
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
@@ -224,8 +221,8 @@ endif
 " " See settings/terminal.vim
 " " hi Cursor ctermfg=1 ctermbg=7
 "
-" hi IncSearch ctermfg=10 ctermbg=3
-" hi Search ctermfg=0 ctermbg=9
+hi IncSearch ctermfg=10 ctermbg=9
+hi Search ctermfg=10 ctermbg=3
 " hi Visual ctermfg=10 ctermbg=3
 "
 " "hi Pmenu        ctermbg=240 ctermfg=12
@@ -244,8 +241,8 @@ endif
 " "match OverLength /\%>80v.\+/
 
 " Customize invisible characters color
-hi NonText ctermfg=10
-hi SpecialKey ctermfg=10
+hi NonText ctermfg=11
+hi SpecialKey ctermfg=11
 
 " Custom autocmd
 hi ExtraWhitespace ctermbg=1 guibg=red
@@ -309,14 +306,14 @@ set title
 " Always show the status line
 set laststatus=2
 
-" Display current mode
-set showmode
+" Do not display current mode
+set noshowmode
+
+" Display incomplete commands
+set showcmd
 
 " Height of the command bar
 set cmdheight=1
-
-" Show incomplete commands
-set showcmd
 
 " Always show current position
 "set rulerformat=%l,%c%V%=%P
