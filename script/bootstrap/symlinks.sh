@@ -61,7 +61,8 @@ bootstrap_symlinks_foreach() {
 
       # Build absolute destination
       bootstrap_symlinks_$method "$file" "$DOT_TARGET/$target"
-    done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' -print0)
+    done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' ! -name '.DS_Store' -print0)
+    # TODO: exclude DOT_CONFIG_IGNORE
     #-name '*.template' -o -depth 0 -print0) # End while
     # \( -type d -depth 0 -o -type f -depth 0 \)
 
