@@ -11,21 +11,47 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-" Plugins {{{1
-
 set nocompatible
 
-filetype off
+" Plugins {{{1
 
-let g:pathogen_disabled = []
-"call add(g:pathogen_disabled, 'base16')
+" Vim Plug
+call plug#begin('~/.vim/plugged')
 
-" Add pathogen to runtime
-runtime bundle/pathogen/autoload/pathogen.vim
-" Autoload plugins
-call pathogen#infect()
-" Generate plugin help tags
-call pathogen#helptags()
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-sleuth'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'sjl/gundo.vim'
+Plug 'scrooloose/syntastic'
+Plug 'dbakker/vim-lint'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'Yggdroot/indentLine'
+Plug 'godlygeek/tabular'
+Plug 'SirVer/ultisnips'
+Plug 'StanAngeloff/php.vim'
+Plug 'pangloss/vim-javascript'
+Plug 'digitaltoad/vim-jade'
+Plug 'chriskempson/base16-vim'
+
+" Add plugins to &runtimepath
+call plug#end()
+
+" " Pathogen
+" filetype off
+" let g:pathogen_disabled = []
+" "call add(g:pathogen_disabled, 'base16')
+" " Add pathogen to runtime
+" runtime bundle/pathogen/autoload/pathogen.vim
+" " Autoload plugins
+" call pathogen#infect()
+" " Generate plugin help tags
+" call pathogen#helptags()
 
 if has("autocmd")
   " Enable filetype detection
