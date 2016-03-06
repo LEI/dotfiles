@@ -1,4 +1,3 @@
-" raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 " vim-plug: Vim plugin manager
 " ============================
 "
@@ -2173,3 +2172,4 @@ endif
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
+

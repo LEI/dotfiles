@@ -19,24 +19,33 @@ set nocompatible
 call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-surround'
-Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-sleuth'
+
+Plug 'tpope/vim-unimpaired'
+
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
-Plug 'sjl/gundo.vim'
-Plug 'scrooloose/syntastic'
-Plug 'dbakker/vim-lint'
-Plug 'ctrlpvim/ctrlp.vim'
+
+Plug 'tpope/vim-sleuth'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'Yggdroot/indentLine'
 Plug 'godlygeek/tabular'
+
 Plug 'SirVer/ultisnips'
-Plug 'StanAngeloff/php.vim'
-Plug 'pangloss/vim-javascript'
-Plug 'digitaltoad/vim-jade'
+
+Plug 'ctrlpvim/ctrlp.vim'
+
+Plug 'sjl/gundo.vim'
+
+Plug 'scrooloose/syntastic'
+Plug 'dbakker/vim-lint', { 'for': 'vim' }
+
+Plug 'StanAngeloff/php.vim', { 'for': 'php' }
+Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
+Plug 'digitaltoad/vim-jade', { 'for': 'jade' }
+
 Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath
