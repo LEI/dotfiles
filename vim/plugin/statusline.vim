@@ -19,9 +19,9 @@ if has('autocmd') && !exists('#statusline')
     "autocmd TabEnter * echom 'TabEnter'
     "autocmd TabLeave * echom 'TabLeave'
 
-    "autocmd CmdwinEnter * let &l:statusline=' %{statusline#core#mode()} [COMMAND LINE] %#StatusLineNC#%< %h%m%r%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
-    autocmd CmdwinEnter * call statusline#set(1)
-    "autocmd CmdwinLeave * call statusline#set()
+    autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode()} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
+    "autocmd CmdwinEnter * call statusline#set({ 'branch': 0, 'encoding': 0, 'format': 0 })
+    "autocmd CmdwinLeave * call statusline#unset()
 
     autocmd ColorScheme,VimEnter * call statusline#theme()
     autocmd VimEnter * call statusline#template()
