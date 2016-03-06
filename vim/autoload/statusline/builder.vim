@@ -11,11 +11,11 @@ function s:highlight(string, item)
   let l:item = a:item
   let l:highlight = l:item.highlight
 
-  " Gets the first part of the mode string
   let l:mode = get(w:, 'statusline_mode', '')
-  if len(l:mode) > 0
-    let l:mode = split(l:mode)[0]
-  endif
+  " Gets the first part of the mode string
+  "if len(l:mode) > 0
+  "  let l:mode = split(l:mode)[0]
+  "endif
 
   if l:mode ==# 'inactive' && l:highlight !=# 'bg'
     " Override colors when inactive, unless bg color is already used
@@ -29,6 +29,8 @@ function s:highlight(string, item)
   "else
   "  let l:highlight = l:highlight
   endif
+
+  " echom l:mode . ' # ' . l:highlight
 
   " Build the highlight string
   let l:str = statusline#utils#highlight(l:str, l:highlight)

@@ -107,10 +107,16 @@ call extend(g:statusline_mode_map, {
 let s:wins = {}
 
 " Updates the status line in the current window
-function statusline#set()
-  for nr in filter(range(1, winnr('$')), 'v:val != winnr()')
+function statusline#set(...)
+  " Force active
+  if a:0 > 0 && a:0 == 1
+    call s:build(winnr(), 1)
+    return
+  endif
+
+  for winnr in filter(range(1, winnr('$')), 'v:val != winnr()')
   "for nr in range(1, winnr('$'))
-    call s:build(nr, 0)
+    call s:build(winnr, 0)
   endfor
 
   call s:build(winnr(), 1)
@@ -120,7 +126,13 @@ endfunction
 " Build status string
 function statusline#build(winnr)
   let l:win = s:wins[a:winnr]
-  let l:mode = s:mode(l:win.active)
+  if exists('l:win.mode')
+    let l:mode = l:win.mode
+  else
+    let l:mode = s:mode(l:win.active)
+  endif
+
+  "echom "mode " . l:mode . ' / ' . l:win.winnr . " active? " . l:win.active
 
   " Refresh the status line string
   " Only if the mode changed, the window was resized or the string is undefined
@@ -176,38 +188,36 @@ function s:apply(var, func, name, default)
 endfunction
 
 " Update local status line
-function s:build(nr, active)
-  let l:win = { 'nr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
+function s:build(nr, active, ...)
+  let l:win = { 'winnr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
+  if a:0 > 2 && strlen(a:3) > 0
+    let l:win.mode = a:3
+  endif
   let s:wins[a:nr] = l:win
-
   "setlocal statusline=%!statusline#set(winnr())
-  let &l:statusline = '%!statusline#build(' . l:win.nr . ')'
-  "call setwinvar(l:win.nr, '&statusline', '%!statusline#set(' . l:win.nr . ')')
+  let &l:statusline = '%!statusline#build(' . l:win.winnr . ')'
+  "call setwinvar(l:win.winnr, '&statusline', '%!statusline#set(' . l:win.winnr . ')')
 endfunction
 
 " Output mode string
 function s:mode(active)
-  let l:m = mode()
+  let l:mode = mode()
 
-  if a:active
-    if l:m ==# 'n'
-      let l:mode = ['normal']
-    elseif l:m ==# 'i'
-      let l:mode = ['insert']
-    elseif l:m ==# 'R'
-      let l:mode = ['replace']
-    elseif l:m =~# '\v(v|V||s|S|)'
-      let l:mode = ['visual']
-    elseif l:m ==# 'c'
-      let l:mode = ['command']
-    elseif l:m ==# 't'
-      let l:mode = ['terminal']
-    else
-      let l:mode = [l:m]
-    endif
-  else
-    let l:mode = ['inactive']
+  if !a:active
+    let l:mode = 'inactive'
+  elseif l:mode ==# 'n'
+    let l:mode = 'normal'
+  elseif l:mode ==# 'i'
+    let l:mode = 'insert'
+  elseif l:mode ==# 'R'
+    let l:mode = 'replace'
+  elseif l:mode =~# '\v(v|V||s|S|)'
+    let l:mode = 'visual'
+  elseif l:mode ==# 'c'
+    let l:mode = 'command'
+  elseif l:mode ==# 't'
+    let l:mode = 'terminal'
   endif
 
-  return join(l:mode)
+  return l:mode "join(l:mode)
 endfunction
