@@ -56,8 +56,8 @@ let s:template = [
 \  },
 \  {
 \    'list': [
-\      { 'string': ' %P ', 'width': '5' },
-\      { 'string': ' %l', 'width': '4' },
+\      { 'string': ' %P ', 'width': '4' },
+\      { 'string': '%l', 'width': '4' },
 \      { 'string': ':' },
 \      { 'string': '%c%V ', 'width': '-4' },
 \    ],
