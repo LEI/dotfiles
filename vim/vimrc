@@ -15,18 +15,9 @@ set nocompatible
 
 " Plugins {{{1
 
-" " Pathogen
-" filetype off
-" let g:pathogen_disabled = []
-" "call add(g:pathogen_disabled, 'base16')
-" " Add pathogen to runtime
-" runtime bundle/pathogen/autoload/pathogen.vim
-" " Autoload plugins
-" call pathogen#infect()
-" " Generate plugin help tags
-" call pathogen#helptags()
+" Load Vim Plug
+runtime bundle/plug/plugin/plug.vim
 
-" Vim Plug
 call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-repeat'
