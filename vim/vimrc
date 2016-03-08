@@ -154,10 +154,10 @@ set term=xterm-256color
 "   set t_ut=
 " endif
 
-" " Allow color schemes to do bright colors without forcing bold
-" if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-"   set t_Co=16
-" endif
+" Allow color schemes to do bright colors without forcing bold
+if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+  set t_Co=16
+endif
 
 " Enable syntax highlighting
 if has('syntax')
@@ -175,6 +175,7 @@ else
   set background=dark
 endif
 
+" FIXME: loaded_?
 try
   " Access colors present in 256 colorspace
   "let base16colorspace=256

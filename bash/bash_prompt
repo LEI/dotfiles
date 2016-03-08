@@ -114,7 +114,9 @@ prompt_status() {
 }
 
 prompt_right() {
-  printf ${bgreen}"%*s" $COLUMNS "$(date +%H:%M:%S)"
+  local col=$(tput cols)
+  #printf "%s" "$COLUMNS"?
+  printf ${bgreen}"%*s" "$cols" "$(date +%H:%M:%S)"
 }
 
 prompt_command() {
