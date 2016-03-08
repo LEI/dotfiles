@@ -16,7 +16,7 @@ set nocompatible
 " Plugins {{{1
 
 " Load Vim Plug
-runtime bundle/plug/plugin/plug.vim
+"runtime bundle/plug/plugin/plug.vim
 
 call plug#begin('~/.vim/plugged')
 
@@ -36,13 +36,15 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'Yggdroot/indentLine'
 Plug 'godlygeek/tabular'
 Plug 'sjl/gundo.vim'
-Plug 'SirVer/ultisnips'
 
 Plug 'scrooloose/syntastic' "| Plug 'dbakker/vim-lint', { 'for': 'vim' }
 
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
+
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
 Plug 'chriskempson/base16-vim'
 
