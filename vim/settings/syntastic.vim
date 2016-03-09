@@ -3,6 +3,9 @@
 " Specific syntax checkers
 let g:syntastic_javascript_checkers = ['jshint']
 
+" Ignore specific levels
+"let g:syntastic_quiet_messages = {'level': 'warnings'}
+
 " Run each checker in turn and stop to display errors
 let g:syntastic_aggregate_errors = 0
 

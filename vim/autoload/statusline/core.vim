@@ -2,9 +2,8 @@
 " vim: et sts=2 sw=2 ts=2
 
 " Display mode name
-function statusline#core#mode()
-  let l:mode = mode()
-  let l:stl_mode = get(w:, 'statusline_mode', '')
+function statusline#core#mode(...)
+  let l:stl_mode = a:0 > 0 ? a:1 : get(w:, 'statusline_mode', '')
 
   if l:stl_mode =~ '^inactive'
     let l:mode = '__'

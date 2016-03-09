@@ -1,5 +1,6 @@
 " Tabular
 
+" Automatically invoke Tabular when inserting new pipes
 inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
 
 function! s:align()

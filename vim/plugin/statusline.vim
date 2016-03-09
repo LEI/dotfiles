@@ -10,16 +10,20 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 if has('autocmd') && !exists('#statusline')
-
   augroup statusline
-    "autocmd InsertLeave * redraw "call statusline#set()
+    autocmd!
+
+    " Redraw the status line of the current window
+    autocmd InsertLeave * redrawstatus
+
+    "autocmd InsertLeave * call statusline#set()
     "autocmd VimResized * call statusline#set()
     autocmd BufAdd,BufEnter,BufLeave,WinEnter,WinLeave * call statusline#set()
     "autocmd BufWinEnter,BufWinLeave * call statusline#set()
     "autocmd TabEnter * echom 'TabEnter'
     "autocmd TabLeave * echom 'TabLeave'
 
-    autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode()} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
+    autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode("cl")} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
     "autocmd CmdwinEnter * call statusline#set({ 'branch': 0, 'encoding': 0, 'format': 0 })
     "autocmd CmdwinLeave * call statusline#unset()
 

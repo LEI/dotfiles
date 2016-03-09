@@ -11,13 +11,13 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-set nocompatible
-
 " Plugins {{{1
 
-" Load Vim Plug
-"runtime bundle/plug/plugin/plug.vim
+set nocompatible
 
+filetype off
+
+" Vim Plug
 call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-repeat'
@@ -127,7 +127,6 @@ endif
 "set binary
 "set noeol
 
-" Number of lines checked for set commands (not safe)
 set modeline
 set modelines=2
 
