@@ -18,7 +18,7 @@ fi
 export PROMPT_COMMAND=prompt_command
 
 PROMPT_SYMBOL="›" #→
-PROMPT_ERROR_SYMBOL="×"
+PROMPT_SYMBOL_ERROR="×"
 
 prompt_git() {
   local prefix="$1"
@@ -26,7 +26,7 @@ prompt_git() {
   local branch_color="$3"
   local master_color="$4"
   local branch=
-  local str=
+  local sign=
 
   # Check if the current directory is in a Git repository.
   if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
@@ -39,22 +39,22 @@ prompt_git() {
 
       # Check for uncommitted changes in the index.
       if ! $(git diff --quiet --ignore-submodules --cached); then
-        sign='+'
+        sign+='+'
       fi;
 
       # Check for unstaged changes.
       if ! $(git diff-files --quiet --ignore-submodules --); then
-        sign='!'
+        sign+='!'
       fi;
 
       # Check for untracked files.
       if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        sign='?'
+        sign+='?'
       fi;
 
       # Check for stashed files.
       if $(git rev-parse --verify refs/stash &>/dev/null); then
-        sign='$'
+        sign+='$'
       fi;
 
     fi;
@@ -113,19 +113,23 @@ prompt_jobs() {
   printf "%s" "$str"
 }
 
+# ✓
+# ×
 prompt_status() {
   local exit=$1
+  local default="> "
+  local default_error="x "
+  local success="${2-$default}"
+  local error="${3-$default_error}"
   local str=
 
-  # Escape!
   if [[ $exit -eq 0 ]]; then
-    str="\[${white}\]${PROMPT_SYMBOL}"
+    str="$success"
   else
-    str="\[${red}\]${PROMPT_ERROR_SYMBOL}"
+    str="$error"
   fi
-  # ✓
-  # ×
-  printf "%b" "$str "
+
+  printf "%b" "$str"
 }
 
 prompt_right() {
@@ -183,12 +187,12 @@ prompt_command() {
   PS1+='\[${white}\]\w';
 
   # Git repository details
-  PS1+='$(prompt_git "\[${text_color}\] on " "\[${text_color}\] " "\[${yellow}\]" "\[${red}\]")';
+  PS1+='$(prompt_git "\[${text_color}\] on " "\[${white}\] " "\[${yellow}\]" "\[${red}\]")';
 
   PS1+='\n'
   # Command line
   PS1+='\[${white}\]'
-  PS1+=$(prompt_status $EXIT)
+  PS1+=$(prompt_status $EXIT "\[${white}\]${PROMPT_SYMBOL} " "\[${red}\]${PROMPT_SYMBOL_ERROR} " )
   PS1+='\[${reset}\]';
   export PS1;
 
