@@ -21,53 +21,67 @@ PROMPT_SYMBOL="›" #→
 PROMPT_ERROR_SYMBOL="×"
 
 prompt_git() {
-  local s='';
-  local branchName='';
+  local prefix="$1"
+  local sign_prefix="$2"
+  local branch_color="$3"
+  local master_color="$4"
+  local branch=
+  local str=
 
   # Check if the current directory is in a Git repository.
   if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
 
-    # check if the current directory is in .git before running git checks
+    # Check if the current directory is in .git before running git checks
     if [ "$(git rev-parse --is-inside-git-dir 2> /dev/null)" == 'false' ]; then
 
       # Ensure the index is up to date.
-      git update-index --really-refresh -q &>/dev/null;
+      git update-index --really-refresh -q &>/dev/null
 
       # Check for uncommitted changes in the index.
       if ! $(git diff --quiet --ignore-submodules --cached); then
-        s+='+';
+        sign='+'
       fi;
 
       # Check for unstaged changes.
       if ! $(git diff-files --quiet --ignore-submodules --); then
-        s+='!';
+        sign='!'
       fi;
 
       # Check for untracked files.
       if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        s+='?';
+        sign='?'
       fi;
 
       # Check for stashed files.
       if $(git rev-parse --verify refs/stash &>/dev/null); then
-        s+='$';
+        sign='$'
       fi;
 
     fi;
 
-    # Get the short symbolic ref.
+    # Get the short symbolic ref
     # If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
-    # Otherwise, just give up.
-    branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
+    # Otherwise, just give up
+    branch="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
       git rev-parse --short HEAD 2> /dev/null || \
-      echo '(unknown)')";
+      echo '(unknown)')"
 
-    [ -n "${s}" ] && s=" ${3-$bgreen}[${2}${s}${3-$bgreen}]";
+    if [[ -n "$branch" ]]; then
+      if [[ "$branch" != master ]]; then
+        branch="${branch_color}${branch}"
+      else
+        branch="${master_color}${branch}"
+      fi
+    fi
 
-    printf "%s" "${1}${branchName}${s}${reset}";
+    if [[ -n "${sign}" ]]; then
+      sign="${sign_prefix}${sign}"
+    fi
+
+    printf "%s" "${prefix}${branch}${sign}"
   else
-    return;
-  fi;
+    return
+  fi
 }
 
 prompt_jobs() {
@@ -78,6 +92,7 @@ prompt_jobs() {
   # Check stopped jobs
   local stp_jobs=$(jobs -s | wc -l | tr -d ' ')
 
+  # Display running and stopped jobs if any
   if [[ ${bg_jobs} -gt 0 ]] || [[ ${stp_jobs} -gt 0 ]]; then
     if [[ ${bg_jobs} -gt 2 ]]; then
       b="${red}"
@@ -114,16 +129,22 @@ prompt_status() {
 }
 
 prompt_right() {
-  printf ${bgreen}"%*s" $COLUMNS "$(date +%H:%M:%S)"
+  local date="$(date +%H:%M:%S)"
+
+  if [[ ! -n $COLUMNS ]]; then
+    COLUMNS=$(tput cols)
+  fi
+
+  local string="$(prompt_jobs) $date"
+  printf ${bblack}"%*s" $COLUMNS "$string"
 }
 
 prompt_command() {
   local EXIT=$? # Must be first
   local user=$(whoami)
   local host=$(hostname)
-  local col=$(tput cols)
   # Must be global to be available in single quote PS1
-  text_color="$bgreen"
+  text_color="$bblack"
   user_color=
   host_color=
 
@@ -162,10 +183,7 @@ prompt_command() {
   PS1+='\[${white}\]\w';
 
   # Git repository details
-  PS1+='$(prompt_git "\[${text_color}\] on \[${bred}\]" "\[${yellow}\]")';
-
-  # Display running and stopped jobs if any
-  #PS1+='$(prompt_jobs)';
+  PS1+='$(prompt_git "\[${text_color}\] on " "\[${text_color}\] " "\[${yellow}\]" "\[${red}\]")';
 
   PS1+='\n'
   # Command line
