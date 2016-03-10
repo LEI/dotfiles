@@ -191,7 +191,8 @@ set synmaxcol=500
 set cursorline
 
 if exists('+colorcolumn')
-  set colorcolumn=80
+  " Relative to textwidth
+  set colorcolumn=+1
   "let &colorcolumn=join(range(1,80),",")
 endif
 
@@ -225,7 +226,6 @@ hi Search ctermfg=10 ctermbg=3
 " "hi SpellCap ctermfg=13 ctermbg=9
 "
 " "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-" "hi ColorColumn ctermbg=darkgray guibg=darkgray
 " "call matchadd('ColorColumn', '\%81v', 100) "set column nr
 "
 " " Hightlight text over 80 chars
@@ -247,7 +247,7 @@ set number
 " Use relative line numbers
 if exists("&relativenumber")
   set relativenumber
-  au BufReadPost * set relativenumber
+  "autocmd BufReadPost * set relativenumber
 endif
 
 " Disable cursor blinking
@@ -275,9 +275,9 @@ set timeoutlen=1000 ttimeoutlen=0
 "if !has('gui_running')
 "  "set ttimeoutlen=10
 "  augroup FastEscape
-"    au!
-"    au InsertEnter * set timeoutlen=0
-"    au InsertLeave * set timeoutlen=1000
+"    autocmd!
+"    autocmd InsertEnter * set timeoutlen=0
+"    autocmd InsertLeave * set timeoutlen=1000
 "  augroup END
 "endif
 
@@ -395,29 +395,34 @@ set magic
 
 " Autocmd {{{1
 
-if has("autocmd")
-  " FIXME use :so % instead
-  augroup reload_vimrc
-    au!
-    au BufWritePost $MYVIMRC nested source $MYVIMRC
-  augroup END
+" FIXME: not reading model lines on source
+" augroup VimReload
+"   autocmd!
+"   autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
+"   autocmd BufWritePost ~/.dotfiles/vim/vimrc nested source %
+" augroup END
 
-  " Highlight trailing witespaces in red
-  match ExtraWhitespace /\s\+$/
-  au BufWinEnter * match ExtraWhitespace /\s\+$/
-  au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-  au InsertLeave * match ExtraWhitespace /\s\+$/
-  au BufWinLeave * call clearmatches()
+" Highlight trailing witespaces in red
+match ExtraWhitespace /\s\+$/
+augroup MatchWitespace
+  autocmd!
+  autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+  autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+  autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+  autocmd BufWinLeave * call clearmatches()
+augroup END
 
-  " Show cursor line on active window only
-  au WinEnter * set cursorline
-  au WinLeave * set nocursorline
+" Show cursor line on active window only
+augroup HideCursorline
+  autocmd!
+  autocmd WinEnter * set cursorline
+  autocmd WinLeave * set nocursorline
+augroup END
 
-  augroup resCur
-    au!
-    au BufReadPost * call ResCur()
-  augroup END
-endif
+augroup RestoreCursor
+  autocmd!
+  autocmd BufReadPost * call ResCur()
+augroup END
 
 " Restore cursor position
 function! ResCur()
@@ -427,12 +432,35 @@ function! ResCur()
   endif
 endfunction
 
-" Platform {{{1
-
-let OS=substitute(system('uname -s'),"\n","","")
-if (OS == "Darwin")
-  " do something that only makes sense on a Mac
-endif
+" github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
+"
+" " Can't use a custom color
+" hi ColorColumnMargin ctermfg=11 ctermbg=1
+"
+" function! MarkMargin (on)
+"   if exists('b:MarkMargin')
+"     try
+"       call matchdelete(b:MarkMargin)
+"     catch /./
+"     endtry
+"     unlet b:MarkMargin
+"   endif
+"   if a:on
+"     let b:MarkMargin = matchadd('ColorColumnMargin', '\%81v\s*\S', 100)
+"   endif
+" endfunction
+"
+" augroup MarkMargin
+"   autocmd!
+"   autocmd BufEnter * :call MarkMargin(1)
+" augroup END
+"
+" " Platform {{{1
+"
+" let OS=substitute(system('uname -s'),"\n","","")
+" if (OS == "Darwin")
+"   " do something that only makes sense on a Mac
+" endif
 
 " www.damtp.cam.ac.uk/user/rbw/vim-osx-cursor.html
 "If this is Terminal.app, do cursor hack for visible cursor
