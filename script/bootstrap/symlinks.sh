@@ -45,9 +45,16 @@ bootstrap_symlinks_foreach() {
     fi
 
     #log_debug "find $DOT_ROOT/$src"
-
     # Loop on each destination file
-    while IFS= read -u 3 -rd '' file; do
+    # CYGWIN_NT-6.1
+    for file in $DOT_ROOT/$src; do
+    #while IFS= read -u 3 -rd '' file; do
+    #done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' ! -name '.DS_Store' -print0)
+      case $file in
+        *.template) continue ;;
+        .DS_Store) continue ;;
+      esac
+
       # local file_rel=${file#$DOT_ROOT/}
       local file_name=${file##*/}
       local target=
@@ -61,7 +68,7 @@ bootstrap_symlinks_foreach() {
 
       # Build absolute destination
       bootstrap_symlinks_$method "$file" "$DOT_TARGET/$target"
-    done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' ! -name '.DS_Store' -print0)
+    done
     # TODO: exclude DOT_CONFIG_IGNORE
     #-name '*.template' -o -depth 0 -print0) # End while
     # \( -type d -depth 0 -o -type f -depth 0 \)

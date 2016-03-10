@@ -1,14 +1,14 @@
 # #!/usr/bin/env bash
 
-# # platform.sh
+# init.sh
 
-platform_defaults() {
+init_platform() {
   local platform=$(echo "$UNAME" | to_lower_case)
-  local platform_root="$DOT_ROOT/platform/$platform"
+  local platform_root="${DOT_INIT}/${platform}"
   local platform_file=
 
   [[ -d "$platform_root" ]] || {
-    log_error "No defaults for $UNAME" "$platform_root not found"
+    log_error "No init directory for $UNAME" "$platform_root not found"
     return 1
   }
 
@@ -41,7 +41,16 @@ platform_defaults() {
         OSX_SSD_TWEAKS=true
       fi
 
+      # Source init file
+      if source $platform_file; then
+        log_info "Some changes require a logout/restart to take effect"
+      else
+        log_error "Could not source" "$platform_file"
+      fi
+
+
       # TODO: Handle multiple files
+      # Currently only the last file *.terminal is used
       local theme_path
       local theme_name
       local f
@@ -56,51 +65,12 @@ platform_defaults() {
       if [[ -n "$theme_path-" ]] && [[ -n "$theme_name" ]] && \
         [[ -f "${theme_path}/${theme_name}.terminal" ]]; then
         if confirm "Use $theme_name theme in Terminal.app" "" N; then
-osascript <<EOD
-
-tell application "Terminal"
-
-  local allOpenedWindows
-  local initialOpenedWindows
-  local windowID
-  set themeName to "$theme_name"
-
-  (* Store the IDs of all the open terminal windows. *)
-  set initialOpenedWindows to id of every window
-
-  (* Open the custom theme so that it gets added to the list
-     of available terminal themes (note: this will open two
-     additional terminal windows). *)
-  do shell script "open '$theme_path" & themeName & ".terminal'"
-
-  (* Wait a little bit to ensure that the custom theme is added. *)
-  delay 1
-
-  (* Set the custom theme as the default terminal theme. *)
-  set default settings to settings set themeName
-
-  (* Get the IDs of all the currently opened terminal windows. *)
-  set allOpenedWindows to id of every window
-
-  repeat with windowID in allOpenedWindows
-
-    (* Close the additional windows that were opened in order
-       to add the custom theme to the list of terminal themes. *)
-    if initialOpenedWindows does not contain windowID then
-      close (every window whose id is windowID)
-
-    (* Change the theme for the initial opened terminal windows
-       to remove the need to close them in order for the custom
-       theme to be applied. *)
-    else
-      set current settings of tabs of (every window whose id is windowID) to settings set themeName
-    end if
-
-  end repeat
-
-end tell
-
-EOD
+          local terminal_osascript="$platform_root/osascript/terminal.scpt"
+          if [[ -f "$terminal_osascript" ]]; then
+            log_info "TODO: execute apple script" "$terminal_osascript"
+          else
+            log_warn "Could not execute apple script" "$terminal_osascript"
+          fi
         fi
       else
         log_error "Terminal theme not found" "$platform_root/*.terminal"
@@ -117,14 +87,8 @@ EOD
       fi
       ;;
     *)
-      log_warn "No defaults" "$UNAME"
+      log_warn "No init script" "$UNAME"
       return 0
       ;;
   esac
-
-  if source $platform_file; then
-    log_info "Some changes require a logout/restart to take effect"
-  else
-    log_error "Could not source" "$platform_file"
-  fi
 }

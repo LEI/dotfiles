@@ -33,6 +33,7 @@ main() {
   # DOT_ROOT=$(pwd -P)
   DOT_TARGET="$HOME"
   DOT_SCRIPT="$DOT_ROOT/script"
+  DOT_INIT="$DOT_ROOT/init"
   DOT_RC="$DOT_ROOT/.dotrc"
 
   source $DOT_SCRIPT/lib/import.sh # TODO import->load?
@@ -98,7 +99,7 @@ parse_arguments() {
     # echo "Parsing $1 (#$#)"
     case $key in
       # All dot commands
-      install|uninstall|update|list|link|unlink|defaults)
+      install|uninstall|update|list|link|unlink|init)
         # Check if a command is already registered
         [[ -n "${DOT_CMD-}" ]] && usage 1 "Too many arguments: $key"
         key="dot_$key"
@@ -162,17 +163,17 @@ boot() {
 
   case $cmd in
     '') # Default process
-      if confirm "**Update repository" "" Y; then
+      if confirm "**Update dotfiles repository" "" Y; then
         dot_update
       fi
-      if confirm "**Install packages" "" Y; then
+      if confirm "**Download and install packages" "" Y; then
         dot_install
       fi
-      if confirm "**Symlink files to $DOT_TARGET" "" Y; then
+      if confirm "**Create symbolic links in $DOT_TARGET" "" Y; then
         dot_link
       fi
-      if confirm "**Setup $UNAME defaults" "" Y; then
-        dot_defaults
+      if confirm "**Initialize $UNAME configuration" "" Y; then
+        dot_init
       fi
       ;;
     *) # Execute function
@@ -248,11 +249,11 @@ dot_unlink() {
 
 # Setup platform specific defaults
 
-dot_defaults() {
-  import "platform"
+dot_init() {
+  import "init"
 
-  platform_defaults || \
-    log_warn "Defaults aborted" "$?"
+  init_platform || \
+    log_warn "Initialization aborted" "$?"
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"

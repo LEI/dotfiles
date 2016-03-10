@@ -10,7 +10,7 @@ install_packages() {
         install_cask_files
       ;;
     *)
-      log_warn "No packages" ":("
+      log_warn "No packages for $UNAME" ":("
       ;;
   esac
 }
@@ -30,7 +30,7 @@ install_homebrew_bundle() {
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
         ;;
       *)
-        die "Unknown platform: $UNAME"
+        log_warn "Unknown platform $UNAME"
         ;;
     esac
 
@@ -50,14 +50,18 @@ install_homebrew_bundle() {
       brew upgrade
 
       # brew tap Homebrew/bundle
-      local brewfile="$DOT_ROOT/platform/darwin/Brewfile"
-      log "> brew bundle" "Brewfile: $brewfile"
-      #brew bundle
-      #TODO: DOT_CONFIG_BREW&CASK?
-      # https://github.com/Homebrew/homebrew-bundle
-      # https://github.com/caskroom/homebrew-cask
-      #"$DOT_ROOT/os/darwin/brewfile" #caskfile?
-      brew bundle --file="$brewfile"
+      local brewfile="$DOT_INIT/darwin/Brewfile"
+      if [[ -f "$brewfile" ]]; then
+        log "> brew bundle" "Brewfile: $brewfile"
+        #brew bundle
+        #TODO: DOT_CONFIG_BREW&CASK?
+        # https://github.com/Homebrew/homebrew-bundle
+        # https://github.com/caskroom/homebrew-cask
+        #"$DOT_ROOT/os/darwin/brewfile" #caskfile?
+        brew bundle --file="$brewfile"
+      else
+        log_error "Brewfile not found" "$brewfile"
+      fi
 
       # # Remove outdate version from the cellar
       log "> brew cleanup" "Cleaning"
@@ -74,10 +78,10 @@ install_homebrew_bundle() {
   fi
 }
 
+# Configure cask apps settings
 install_cask_files() {
-  # TODO: darwin only?
-  local cask_path="$DOT_ROOT/platform/darwin/cask"
-  local name
+  local cask_path="$DOT_INIT/darwin/cask"
+  local name=
   # open /Applications/$app.app
 
   if confirm "Homebrew cask settings" "${cask_path}/*" Y; then
@@ -89,7 +93,6 @@ install_cask_files() {
       # name=${name%.*} # Remove extension
       name="$(echo "${name:0:1}" | tr "[:lower:]" "[:upper:]")${name:1}"
 
-      # Use cask apps cli to setup defaults
       log_info "$name" "$cask"
       if source "$cask"; then
         log_success "$name"
