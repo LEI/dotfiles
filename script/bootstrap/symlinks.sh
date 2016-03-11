@@ -52,7 +52,7 @@ bootstrap_symlinks_foreach() {
     #done 3< <(find $DOT_ROOT/$src -depth 0 ! -name '*.template' ! -name '.DS_Store' -print0)
       case $file in
         *.template) continue ;;
-        .DS_Store) continue ;;
+        *.DS_Store) continue ;;
       esac
 
       # local file_rel=${file#$DOT_ROOT/}
