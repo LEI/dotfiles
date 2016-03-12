@@ -17,6 +17,22 @@ set nocompatible
 
 filetype off
 
+function! BuildYCM(info)
+  " info is a dictionary with 3 fields
+  " - name: name of the plugin
+  " - status: 'installed', 'updated', or 'unchanged'
+  " - force: set on PlugInstall! or PlugUpdate!
+  if a:info.status == 'installed' || a:info.force
+    " The following additional language support options are available
+    " - C# support: add --omnisharp-completer to ./install.py
+    " - Go support: ensure go is installed and add --gocode-completer
+    " - TypeScript support: install nodejs and npm then install the TypeScript SDK with npm install -g typescript.
+    " - JavaScript support: install nodejs and npm and add --tern-completer when calling ./install.py
+    " - Rust support: install rustc and cargo and add --racer-completer when calling ./install.py
+    !./install.py --tern-completer
+  endif
+endfunction
+
 " Vim Plug
 call plug#begin('~/.vim/plugged')
 
@@ -37,11 +53,15 @@ Plug 'Yggdroot/indentLine'
 Plug 'godlygeek/tabular'
 Plug 'sjl/gundo.vim'
 
-Plug 'scrooloose/syntastic' "| Plug 'dbakker/vim-lint', { 'for': 'vim' }
+Plug 'scrooloose/syntastic'
 
+"Plug 'dbakker/vim-lint', { 'for': 'vim' }
+Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
+
+Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
@@ -314,20 +334,19 @@ set ruler
 
 " Spacing {{{1
 
-"if !exists("g:loaded_sleuth")
-"endif
+if !exists("g:loaded_sleuth")
+  let s:tabsize=4
 
-let s:tabsize=4
+  " Indent commands
+  let &shiftwidth = s:tabsize
+  " Set the number of columns for a tab
+  let &softtabstop = s:tabsize
+  " Visual width of a tabulation
+  let &tabstop = s:tabsize
 
-" Indent commands
-let &shiftwidth = s:tabsize
-" Set the number of columns for a tab
-let &softtabstop = s:tabsize
-" Visual width of a tabulation
-let &tabstop = s:tabsize
-
-" Use spaces instead of tabs
-set expandtab
+  " Use spaces instead of tabs
+  set expandtab
+endif
 
 " Automatically insert idents
 set autoindent
@@ -397,11 +416,11 @@ set magic
 " Autocmd {{{1
 
 " FIXME: not reading model lines on source
-" augroup VimReload
-"   autocmd!
-"   autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
-"   autocmd BufWritePost ~/.dotfiles/vim/vimrc nested source %
-" augroup END
+augroup VimReload
+  autocmd!
+  autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
+  autocmd BufWritePost ~/.dotfiles/vim/vimrc nested source %
+augroup END
 
 " Highlight trailing witespaces in red
 match ExtraWhitespace /\s\+$/

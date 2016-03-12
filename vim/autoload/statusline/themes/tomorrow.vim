@@ -38,7 +38,7 @@ let s:palette = {
 "call statusline#utils#define('g:statusline#themes#tomorrow#palette', {})
 "call extend(g:statusline#themes#tomorrow#palette, s:palette, 'force')
 
-function statusline#themes#tomorrow#apply()
+function statusline#themes#tomorrow#load()
   " Default groups
   hi StatusLine ctermfg=13 ctermbg=11
   hi StatusLineNC ctermfg=8 ctermbg=10

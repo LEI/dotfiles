@@ -71,6 +71,6 @@ let s:template = [
 \  },
 \]
 
-function statusline#templates#sline#apply()
+function statusline#templates#sline#load()
   return s:template
 endfunction

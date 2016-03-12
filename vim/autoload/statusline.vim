@@ -100,7 +100,7 @@ call extend(g:statusline_mode_map, {
 "   \  '%( [%{&filetype}]%) ',
 "   \  '%-8.(%l,%c%V%) %p%% ',
 "   \]
-"   function statusline#templates#<name>#apply()
+"   function statusline#templates#<name>#load()
 "     return s:palette
 "   endfunction
 
@@ -166,24 +166,28 @@ endfunction
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
 function statusline#theme(...)
   let l:theme = a:0 > 0 ? a:1 : g:statusline_theme
-  call s:apply('g:statusline_palette', 'g:statusline#themes', l:theme, 'tomorrow')
+  call s:load('g:statusline_palette', 'g:statusline#themes', l:theme, 'tomorrow')
 endfunction
 
 function statusline#template(...)
   let l:template = a:0 > 0 ? a:1 : g:statusline_template
-  call s:apply('s:template', 'g:statusline#templates', l:template, 'default')
+  call s:load('s:template', 'g:statusline#templates', l:template, 'default')
 endfunction
 
-function s:apply(var, func, name, default)
+function s:load(var, func, name, default)
+  " var: script variable to assign
+  " func: autoload path
+  " name: autoload file name
+  " default: fallback if name is empty or autoload failed
   if strlen(a:name) > 0
     try
-      let {a:var} = {a:func}#{a:name}#apply()
+      let {a:var} = {a:func}#{a:name}#load()
     catch
-      echom 'Could not apply "' . a:func . '#' . a:name . '#apply()"'
+      echom 'Could not load "' . a:func . '#' . a:name . '#load()"'
     endtry
   endif
   if !exists(a:var)
-    let {a:var} = {a:func}#{a:default}#apply()
+    let {a:var} = {a:func}#{a:default}#load()
   endif
 endfunction
 
