@@ -33,6 +33,18 @@ function! BuildYCM(info)
   endif
 endfunction
 
+function! EnableYCM()
+  call plug#load('YouCompleteMe')
+  if exists('g:loaded_youcompleteme')
+    call youcompleteme#Enable()
+  endif
+endfunction
+
+augroup YouCompleteMe
+  autocmd!
+  autocmd FileReadPost * call EnableYCM() | autocmd! YouCompleteMe
+augroup END
+
 " Vim Plug
 call plug#begin('~/.vim/plugged')
 
@@ -50,23 +62,19 @@ Plug 'godlygeek/tabular', { 'on': 'Tab' }
 Plug 'Yggdroot/indentLine'
 Plug 'sjl/gundo.vim'
 Plug 'scrooloose/syntastic'
-"Plug 'dbakker/vim-lint', { 'for': 'vim' }
 Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
-Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
+Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM'), 'for': 'cpp' }
+"Plug 'SirVer/ultisnips'
+"Plug 'honza/vim-snippets'
 Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath
 call plug#end()
 
-if has("autocmd")
-  " Enable filetype detection
-  filetype plugin indent on
-endif
+" Runtime {{{2
 
 " Load matchit.vim, but only if the user hasn't installed a newer version.
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -76,6 +84,11 @@ endif
 " General {{{1
 
 set encoding=utf-8
+
+if has("autocmd")
+  " Enable filetype detection
+  filetype plugin indent on
+endif
 
 if &history < 1000
   set history=1000
@@ -407,6 +420,9 @@ set smartcase
 set magic
 
 " Autocmd {{{1
+
+" Remove trailing whitespaces on save
+autocmd BufWritePre * :%s/\s\+$//e
 
 augroup VimReload
   autocmd!

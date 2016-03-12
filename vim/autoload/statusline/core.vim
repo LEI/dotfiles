@@ -24,22 +24,28 @@ function statusline#core#paste()
 endfunction
 
 function statusline#core#file()
-  let l:str = expand('%')
+  let l:modifier = ':p:~:.' " :.
+
+  let l:str = expand('%') " :t?
   "'string': '%{expand("%")==""?"NO NAME":expand("%")=="[Command Line]"?"COMMAND LINE":expand("%:r")} ',
-  "let l:str = expand('%:t')
-  if strlen(l:str) == 0
-    let l:str = 'NO NAME'
-  elseif l:str ==# '[Command Line]'
-    let l:str = 'COMMAND LINE'
-  "elseif l:str =~ '['
-  "  let l:str = '[' . l:str . ']'
+
+  if l:str =~ '\[[^\]]\+\]'
+    " Remove surrounding brackets and uppercase matched string
+    let l:str = substitute(l:str, '\[\([^\]]\+\)\]', '\U\1\E', 'g')
   elseif &filetype =~ 'help'
-    let l:str = expand('%:t') . ' [?]'
+    let l:str = expand('%:t') . ' [HELP]'
+  elseif strlen(l:str) == 0
+    let l:str = 'NO NAME'
   else
-    let l:str = fnamemodify(l:str, ':p:~')
+    let l:str = fnamemodify(l:str, l:modifier)
   endif
 
   return l:str
+endfunction
+
+function statusline#core#netrw()
+  let l:order = (g:netrw_sort_direction =~ 'n') ? '+' : '-'
+  return g:netrw_sort_by . l:order
 endfunction
 
 " File type

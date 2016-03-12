@@ -39,7 +39,7 @@ function s:highlight(string, item)
   return l:str
 endfunction
 
-function s:parse(item, parent, index)
+function s:parse(item, parent, ...)
   let l:item = a:item
   let l:str = ''
   " Truncate if the window is too small
@@ -62,19 +62,22 @@ function s:parse(item, parent, index)
     "   echom "Function not found: " . l:item.function
     " endtry
   elseif exists('l:item.list')
-    let l:sub_item = ''
+    let l:str = ''
     "if type(l:item.list) == type({})
     "  for k in keys(l:item.list)
     "    echom "Dict subitem: " . k
     "  endfor
     if type(l:item.list) == type([]) && len(l:item.list) > 0
       " Recursive items
-      if a:index > 0
-        let l:index = a:index
-      else
-        let l:index = 0
-      endif
+      "if a:index > 0
+      "  let l:index = a:index
+      "else
+      "  let l:index = 0
+      "endif
+
+      let l:index = 0
       for k in l:item.list
+        let l:sub_item = ''
         if type(k) == type('')
           " Use string as is
           let l:sub_item.= k
@@ -85,25 +88,25 @@ function s:parse(item, parent, index)
           call remove(l:parent, 'highlight')
           "call extend(l:parent, k, 'force')
           " Self function call
-          let l:sub_item.= s:parse(k, l:parent, l:index)
+          let l:sub_item.= s:parse(k, l:parent)
           "let l:sub_item.= s:wrap(l:sub_string, k)
-
-          let l:index = l:index + 1
-          if l:index < len(l:item.list)
-            if exists('l:item.sep')
-              let l:sub_item.= l:item.sep
-            endif
-          endif
         else
           echom "Unknown item type: " . type(k)
         endif
+
+        let l:index = l:index + 1
+        if l:index > 1 && l:index <= len(l:item.list) && exists('l:item.separator')
+          let l:sub_item = '%(' . l:item.separator . l:sub_item . '%)'
+        endif
+
+        " Final loop result
+        let l:str.= l:sub_item
+
         unlet k
       endfor
     else
       echom "Unkown item list type: " . type(l:item.list)
     endif
-    " Final loop result
-    let l:str = l:sub_item
   else
     echom "Unhandled key (looking for string, function or type)"
     "echo type(l:item)

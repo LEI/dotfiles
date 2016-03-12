@@ -13,7 +13,9 @@ call extend(g:statusline, {
 \}, 'keep')
 
 " Symbols
-"call statusline#utils#define('g:statusline.symbols', {})
+"  'branch_alt': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : nr2char(0x2523) . nr2char(0x251B),
+" Full width tilde FF5E
+" Github branch octicon f020
 call extend(g:statusline.symbols, {
 \  'paste': 'PASTE',
 \  'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
@@ -23,10 +25,9 @@ call extend(g:statusline.symbols, {
 \  'key': get(g:, 'crypt_symbol', nr2char(0x1F511) . ' '),
 \  'modified': '+',
 \  'close': nr2char(0x2715),
-\  'sep': nr2char(0x2502),
+\  'separator': nr2char(0x2502),
 \}, 'keep')
 
-"call statusline#utils#define('g:statusline.mode_map', {})
 call extend(g:statusline.mode_map, {
 \  '__' : '------',
 \  'n': 'NORMAL',

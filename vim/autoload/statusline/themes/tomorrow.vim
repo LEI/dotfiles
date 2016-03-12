@@ -28,7 +28,6 @@ let s:palette = {
   \  'replace': 'StatusLineReplace',
   \  'visual': 'StatusLineVisual',
   \  'select': 'StatusLineVisual',
-  \  'command': 3,
   \  'bg': 1,
   \  'base': 2,
   \  'file': 3,
@@ -40,7 +39,7 @@ let s:palette = {
 
 function statusline#themes#tomorrow#load()
   " Default groups
-  hi StatusLine ctermfg=13 ctermbg=11
+  hi StatusLine ctermfg=7 ctermbg=11
   hi StatusLineNC ctermfg=8 ctermbg=10
 
   " Custom groups

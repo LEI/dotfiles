@@ -25,7 +25,7 @@ let s:template = [
 \    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
 \  },
 \  {
-\    'string': '%( %{&filetype!~"help" && &readonly ? "' . get(g:statusline.symbols, 'readonly', 'RO') . '" : ""}%)',
+\    'string': '%( %{&ft=~"help"||&ft=="netrw" ? "" : &readonly ? "' . get(g:statusline.symbols, 'readonly', 'RO') . '" : ""}%)',
 \    'highlight': 'file',
 \  },
 \  {
@@ -41,7 +41,7 @@ let s:template = [
 \    'highlight': 'file',
 \  },
 \  {
-\    'string': '%([%{&filetype=~"help" ? "" : &modified ? "+" : &modifiable ? "" : "-"}] %)',
+\    'string': '%([%{&ft=~"help"||&ft=="netrw" ? "" : &modified ? "+" : &modifiable ? "" : "-"}] %)',
 \  },
 \  '%=',
 \  {
@@ -49,18 +49,21 @@ let s:template = [
 \    'highlight': 'bg',
 \  },
 \  {
-\    'string': ' %{statusline#core#type()} ',
+\    'list': [
+\       { 'string': ' %{statusline#core#type()} ' },
+\       { 'string': '[%{statusline#core#netrw()}] ', 'condition': '&ft=="netrw"' },
+\    ],
 \    'highlight': 'base',
 \    'truncate': 40,
 \  },
 \  {
 \    'list': [
-\      { 'string': ' %{&fileformat}' },
-\      { 'string': '%{statusline#core#encoding()} ' },
+\      { 'string': ' %{&fileformat} ' },
+\      { 'string': ' %{statusline#core#encoding()} ' },
 \    ],
 \    'highlight': 'default',
 \    'truncate': 80,
-\    'sep': get(g:statusline, 'symbols.separator', ' ')
+\    'separator': get(g:statusline.symbols, 'separator', ':'),
 \  },
 \  {
 \    'list': [
