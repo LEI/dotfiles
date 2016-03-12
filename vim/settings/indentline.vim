@@ -20,8 +20,8 @@ let g:indentLine_concealcursor = ''
 " 3: Concealed text is completely hidden
 let g:indentLine_conceallevel = 2
 
-" Identation guide character (UTF-8: ¦, ┆, or │)
-let g:indentLine_char = '│'
+" Identation guide character (UTF-8: 00A6, 2506, or |)
+let g:indentLine_char = nr2char(0x2502)
 
 " Colors
 let g:indentLine_color_term = 10

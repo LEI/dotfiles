@@ -11,16 +11,35 @@ function statusline#core#mode(...)
     let l:mode = mode()
   endif
 
-  return get(g:statusline_mode_map, l:mode, l:mode)
+  return get(g:statusline.mode_map, l:mode, l:mode)
 endfunction
 
 " Returns true if paste mode is enabled
 function statusline#core#paste()
   if &paste
-    return g:statusline_symbols.paste
+    return g:statusline.symbols.paste
   endif
 
   return ''
+endfunction
+
+function statusline#core#file()
+  let l:str = expand('%')
+  "'string': '%{expand("%")==""?"NO NAME":expand("%")=="[Command Line]"?"COMMAND LINE":expand("%:r")} ',
+  "let l:str = expand('%:t')
+  if strlen(l:str) == 0
+    let l:str = 'NO NAME'
+  elseif l:str ==# '[Command Line]'
+    let l:str = 'COMMAND LINE'
+  "elseif l:str =~ '['
+  "  let l:str = '[' . l:str . ']'
+  elseif &filetype =~ 'help'
+    let l:str = expand('%:t') . ' [?]'
+  else
+    let l:str = fnamemodify(l:str, ':p:~')
+  endif
+
+  return l:str
 endfunction
 
 " File type
@@ -50,7 +69,7 @@ endfunction
 " Encrypted buffer
 function statusline#core#crypt()
   if exists('+key') && !empty(&key)
-    return g:statusline_symbols.crypt
+    return g:statusline.symbols.key
   endif
 
   return ''

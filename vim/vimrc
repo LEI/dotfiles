@@ -40,32 +40,24 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-commentary'
-
-Plug 'tpope/vim-vinegar'
-Plug 'ctrlpvim/ctrlp.vim'
-
-Plug 'tpope/vim-fugitive'
-Plug 'airblade/vim-gitgutter'
-
 Plug 'tpope/vim-sleuth'
-Plug 'editorconfig/editorconfig-vim'
+Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-fugitive'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'airblade/vim-gitgutter'
+"Plug 'editorconfig/editorconfig-vim'
+Plug 'godlygeek/tabular', { 'on': 'Tab' }
 Plug 'Yggdroot/indentLine'
-Plug 'godlygeek/tabular'
 Plug 'sjl/gundo.vim'
-
 Plug 'scrooloose/syntastic'
-
 "Plug 'dbakker/vim-lint', { 'for': 'vim' }
 Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
-
 Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
-
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
-
 Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath
@@ -360,12 +352,13 @@ set nowrap
 set linebreak
 " Line break on 500 characters
 set textwidth=500
-" Display line breaks
-let &showbreak='↳'
+" Show line breaks (or nr2char(0x08627))
+let &showbreak=nr2char(0x21AA)
 
-" Show invisible character (highlighted with NonText and SpecialKey)
+" Show invisible character (highlighted with NonText and SpecialKey)aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 set list
-set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:_,eol:¬
+let &listchars='tab:'.nr2char(0x25B8).' ,trail:'.nr2char(0x00B7).',extends:>,precedes:<,nbsp:'.nr2char(0x005F).',eol:'.nr2char(0x00AC)
+
 
 " Folding {{{1
 
@@ -415,7 +408,6 @@ set magic
 
 " Autocmd {{{1
 
-" FIXME: not reading model lines on source
 augroup VimReload
   autocmd!
   autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
@@ -517,8 +509,7 @@ endfunction
 set backspace=indent,eol,start
 
 " Change leader to a comma instead of backslash
-let mapleader=","
-"let g:mapleader=","
+let g:mapleader=","
 
 " Nope
 nnoremap <up> <nop>

@@ -5,25 +5,29 @@
 
 " Declarations
 call statusline#utils#define('g:statusline', {})
-call statusline#utils#define('g:statusline_theme', 'tomorrow')
-call statusline#utils#define('g:statusline_template', 'sline')
-
-" Symbols
-call statusline#utils#define('g:statusline_symbols', {})
-call extend(g:statusline_symbols, {
-\  'paste': 'PASTE',
-\  'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : 'RO',
-\  'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
-\  'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
-\  'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : '⎇ ',
-\  'crypt': get(g:, 'crypt_symbol', nr2char(0x1F512) . ' '),
-\  'modified': '+',
-\  'close': '✕',
-\  'sep': '│',
+call extend(g:statusline, {
+\  'theme': 'tomorrow',
+\  'template': 'flatline',
+\  'symbols': {},
+\  'mode_map': {},
 \}, 'keep')
 
-call statusline#utils#define('g:statusline_mode_map', {})
-call extend(g:statusline_mode_map, {
+" Symbols
+"call statusline#utils#define('g:statusline.symbols', {})
+call extend(g:statusline.symbols, {
+\  'paste': 'PASTE',
+\  'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
+\  'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
+\  'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : nr2char(0x2387). ' ',
+\  'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : nr2char(0x1F512) . ' ',
+\  'key': get(g:, 'crypt_symbol', nr2char(0x1F511) . ' '),
+\  'modified': '+',
+\  'close': nr2char(0x2715),
+\  'sep': nr2char(0x2502),
+\}, 'keep')
+
+"call statusline#utils#define('g:statusline.mode_map', {})
+call extend(g:statusline.mode_map, {
 \  '__' : '------',
 \  'n': 'NORMAL',
 \  'i': 'INSERT',
@@ -118,15 +122,16 @@ let s:wins = {}
 
 " Updates the status line in the current window
 function statusline#update(...)
-  if !exists('g:statusline_tpl')
+  " Init
+  if !exists('g:statusline.tpl')
     call statusline#template()
   endif
-  if !exists('g:statusline_thm')
+  if !exists('g:statusline.thm')
     call statusline#theme()
   endif
 
   let l:winnr = a:0 > 0 ? a:1 : winnr()
-  let g:statusline_debug = 1
+  let g:statusline.debug = 1
 
   "for winnr in filter(range(1, winnr('$')), 'v:val != winnr()')
   "echom l:winnr . ' ------------- '
@@ -172,16 +177,16 @@ function statusline#build(winnr)
     " Build line
     let l:line = ''
 
-    "if exists('g:statusline_debug') && g:statusline_debug
+    "if exists('g:statusline.debug') && g:statusline.debug
     "  let l:line.= mode() . ' nr' . l:win.winnr . ':' . l:win.bufnr . ' (' . l:win.active . ')'
-    "  "call add(g:statusline_tpl, { 'string': l:win.debug_string })
+    "  "call add(g:statusline.tpl, { 'string': l:win.debug_string })
     "endif
 
     " if exists('w:statusline_overwrite')
     "   let l:line.= w:statusline_overwrite
     " endif
-    "let l:list = s:template_{g:statusline_template}
-    for item in g:statusline_tpl
+    "let l:list = s:template_{g:statusline.template}
+    for item in g:statusline.tpl
       let l:line.= statusline#builder#add(item, l:win)
       unlet item
     endfor
@@ -200,13 +205,13 @@ endfunction
 
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
 function statusline#theme(...)
-  let l:theme = a:0 > 0 ? a:1 : g:statusline_theme
-  call s:load('g:statusline_thm', 'g:statusline#themes', l:theme, 'tomorrow')
+  let l:theme = a:0 > 0 ? a:1 : g:statusline.theme
+  call s:load('thm', 'g:statusline#themes', l:theme, 'tomorrow')
 endfunction
 
 function statusline#template(...)
-  let l:template = a:0 > 0 ? a:1 : g:statusline_template
-  call s:load('g:statusline_tpl', 'g:statusline#templates', l:template, 'default')
+  let l:template = a:0 > 0 ? a:1 : g:statusline.template
+  call s:load('tpl', 'g:statusline#templates', l:template, 'default')
 endfunction
 
 function s:load(var, func, name, default)
@@ -214,15 +219,16 @@ function s:load(var, func, name, default)
   " func: autoload path
   " name: autoload file name
   " default: fallback if name is empty or autoload failed
-  if strlen(a:name) > 0
+  if strlen(a:name) > 0 && strlen(a:var) > 0
     try
-      let {a:var} = {a:func}#{a:name}#load()
+      let g:statusline[a:var] = {a:func}#{a:name}#load()
     catch
       echom 'Could not load "' . a:func . '#' . a:name . '#load()"'
     endtry
   endif
-  if !exists(a:var)
-    let {a:var} = {a:func}#{a:default}#load()
+  "if !get(g:statusline, a:var, [])
+  if !has_key(g:statusline, a:var)
+    let g:statusline[a:var] = {a:func}#{a:default}#load()
   endif
 endfunction
 
@@ -248,3 +254,4 @@ function s:mode()
 
   return l:mode "join(l:mode)
 endfunction
+

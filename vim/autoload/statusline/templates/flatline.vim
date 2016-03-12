@@ -13,7 +13,7 @@ let s:template = [
 \  {
 \    'list': [
 \      {
-\        'string': ' %{get(g:statusline_symbols,"branch","on")} ',
+\        'string': ' %{get(g:statusline.symbols,"branch","on")} ',
 \        'truncate': 20,
 \      },
 \      {
@@ -25,15 +25,23 @@ let s:template = [
 \    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
 \  },
 \  {
+\    'string': '%( %{&filetype!~"help" && &readonly ? "' . get(g:statusline.symbols, 'readonly', 'RO') . '" : ""}%)',
+\    'highlight': 'file',
+\  },
+\  {
+\    'string': '%( %{statusline#core#crypt()}%)',
+\    'highlight': 'file',
+\  },
+\  {
 \    'string': ' %<%n ',
 \    'highlight': 'base',
 \  },
 \  {
-\    'string': '%f %([%M%R] %)',
+\    'string': '%{statusline#core#file()} ',
 \    'highlight': 'file',
 \  },
 \  {
-\    'string': '%{statusline#core#crypt()} ',
+\    'string': '%([%{&filetype=~"help" ? "" : &modified ? "+" : &modifiable ? "" : "-"}] %)',
 \  },
 \  '%=',
 \  {
@@ -52,7 +60,7 @@ let s:template = [
 \    ],
 \    'highlight': 'default',
 \    'truncate': 80,
-\    'sep': get(g:statusline_symbols, 'separator', ' ')
+\    'sep': get(g:statusline, 'symbols.separator', ' ')
 \  },
 \  {
 \    'list': [
@@ -71,6 +79,6 @@ let s:template = [
 \  },
 \]
 
-function statusline#templates#sline#load()
+function statusline#templates#flatline#load()
   return s:template
 endfunction
