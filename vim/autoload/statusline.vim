@@ -106,32 +106,58 @@ call extend(g:statusline_mode_map, {
 
 let s:wins = {}
 
+" function statusline#set()
+"   if !exists('s:wins[winnr()]') "!exists('w:statusline') || w:statusline
+"     call statusline#update()
+"   endif
+" endfunction
+
+" function statusline#unset()
+"   unlet w:statusline_overwrite
+" endfunction
+
 " Updates the status line in the current window
-function statusline#set(...)
-  " Force active
-  if a:0 > 0 && a:0 == 1
-    call s:build(winnr(), 1)
-    return
+function statusline#update(...)
+  if !exists('g:statusline_tpl')
+    call statusline#template()
+  endif
+  if !exists('g:statusline_thm')
+    call statusline#theme()
   endif
 
-  for winnr in filter(range(1, winnr('$')), 'v:val != winnr()')
-  "for nr in range(1, winnr('$'))
-    call s:build(winnr, 0)
-  endfor
+  let l:winnr = a:0 > 0 ? a:1 : winnr()
+  let g:statusline_debug = 1
 
-  call s:build(winnr(), 1)
-  "statusline#utils#getwinvar(l:winnr, 'statusline_active', 0)
+  "for winnr in filter(range(1, winnr('$')), 'v:val != winnr()')
+  "echom l:winnr . ' ------------- '
+  for nr in range(1, winnr('$'))
+    "let l:active = get(w:, 'statusline_active', nr != l:winnr ) ? w:statusline_active : 1
+    let l:active = nr == l:winnr
+    "if a:0>0 | echom l:winnr . ' == ' . a:1nr . ' | ' . (l:active ? 'active' : '') | endif
+
+    " Update local status line
+    let l:win = { 'winnr': nr, 'active': l:active, 'bufnr': winbufnr(nr) }
+    " if a:0 > 2 && strlen(a:3) > 0
+    "   let l:win.mode = a:3
+    " endif
+
+    let s:wins[nr] = l:win
+    if nr != l:winnr
+      let l:win.mode = 'inactive'
+      "call setwinvar(n, 'statusline_mode', 'inactive')
+    endif
+
+    "setlocal statusline=%!statusline#set(winnr())
+    "let &l:statusline = '%!statusline#build(' . l:win.winnr . ')'
+    call setwinvar(nr, '&statusline', '%!statusline#build(' . nr . ')')
+    "call setwinvar(l:win.winnr, '&statusline', '%!statusline#set(' . l:win.winnr . ')')
+  endfor
 endfunction
 
 " Build status string
 function statusline#build(winnr)
   let l:win = s:wins[a:winnr]
-  if exists('l:win.mode')
-    let l:mode = l:win.mode
-  else
-    let l:mode = s:mode(l:win.active)
-  endif
-
+  let l:mode = exists('l:win.mode') ? l:win.mode : s:mode()
   "echom "mode " . l:mode . ' / ' . l:win.winnr . " active? " . l:win.active
 
   " Refresh the status line string
@@ -145,8 +171,17 @@ function statusline#build(winnr)
 
     " Build line
     let l:line = ''
+
+    "if exists('g:statusline_debug') && g:statusline_debug
+    "  let l:line.= mode() . ' nr' . l:win.winnr . ':' . l:win.bufnr . ' (' . l:win.active . ')'
+    "  "call add(g:statusline_tpl, { 'string': l:win.debug_string })
+    "endif
+
+    " if exists('w:statusline_overwrite')
+    "   let l:line.= w:statusline_overwrite
+    " endif
     "let l:list = s:template_{g:statusline_template}
-    for item in s:template
+    for item in g:statusline_tpl
       let l:line.= statusline#builder#add(item, l:win)
       unlet item
     endfor
@@ -166,12 +201,12 @@ endfunction
 " github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
 function statusline#theme(...)
   let l:theme = a:0 > 0 ? a:1 : g:statusline_theme
-  call s:load('g:statusline_palette', 'g:statusline#themes', l:theme, 'tomorrow')
+  call s:load('g:statusline_thm', 'g:statusline#themes', l:theme, 'tomorrow')
 endfunction
 
 function statusline#template(...)
   let l:template = a:0 > 0 ? a:1 : g:statusline_template
-  call s:load('s:template', 'g:statusline#templates', l:template, 'default')
+  call s:load('g:statusline_tpl', 'g:statusline#templates', l:template, 'default')
 endfunction
 
 function s:load(var, func, name, default)
@@ -191,25 +226,13 @@ function s:load(var, func, name, default)
   endif
 endfunction
 
-" Update local status line
-function s:build(nr, active, ...)
-  let l:win = { 'winnr': a:nr, 'active': a:active, 'bufnr': winbufnr(a:nr) }
-  if a:0 > 2 && strlen(a:3) > 0
-    let l:win.mode = a:3
-  endif
-  let s:wins[a:nr] = l:win
-  "setlocal statusline=%!statusline#set(winnr())
-  let &l:statusline = '%!statusline#build(' . l:win.winnr . ')'
-  "call setwinvar(l:win.winnr, '&statusline', '%!statusline#set(' . l:win.winnr . ')')
-endfunction
-
 " Output mode string
-function s:mode(active)
+function s:mode()
   let l:mode = mode()
 
-  if !a:active
-    let l:mode = 'inactive'
-  elseif l:mode ==# 'n'
+  " if !a:active
+  "   let l:mode = 'inactive'
+  if l:mode ==# 'n'
     let l:mode = 'normal'
   elseif l:mode ==# 'i'
     let l:mode = 'insert'

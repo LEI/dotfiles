@@ -15,20 +15,26 @@ if has('autocmd') && !exists('#statusline')
 
     " Redraw the status line of the current window
     autocmd InsertLeave * redrawstatus
+    "autocmd InsertLeave * call statusline#update()
+    "autocmd BufWinEnter,BufWinLeave * call statusline#update()
 
-    "autocmd InsertLeave * call statusline#set()
-    "autocmd VimResized * call statusline#set()
-    autocmd BufAdd,BufEnter,BufLeave,WinEnter,WinLeave * call statusline#set()
-    "autocmd BufWinEnter,BufWinLeave * call statusline#set()
+    autocmd BufAdd,BufEnter,WinEnter * call statusline#update()
+    "autocmd BufLeave,WinLeave * call statusline#update(1)
+    "autocmd WinEnter,BufWinEnter,FileType,ColorScheme,SessionLoadPost * call statusline#update()
+
     "autocmd TabEnter * echom 'TabEnter'
     "autocmd TabLeave * echom 'TabLeave'
+    "autocmd VimResized * call statusline#update()
 
-    autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode("cl")} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
-    "autocmd CmdwinEnter * call statusline#set({ 'branch': 0, 'encoding': 0, 'format': 0 })
+    "autocmd ColorScheme,VimEnter * call statusline#theme()
+    "autocmd VimEnter * call statusline#template()
+
+    " autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode("cl")} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'
+    autocmd CmdwinEnter * call statusline#update()
+    autocmd CmdwinLeave * call statusline#update(winnr() - 1)
+
+    "autocmd CmdwinEnter * call statusline#update({ 'branch': 0, 'encoding': 0, 'format': 0 })
     "autocmd CmdwinLeave * call statusline#unset()
-
-    autocmd ColorScheme,VimEnter * call statusline#theme()
-    autocmd VimEnter * call statusline#template()
 
     " getcmdwintype()
     " The character used for the pattern indicates the type of command-line:
