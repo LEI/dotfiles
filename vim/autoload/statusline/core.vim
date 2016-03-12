@@ -24,7 +24,8 @@ function statusline#core#paste()
 endfunction
 
 function statusline#core#file()
-  let l:modifier = ':p:~:.' " :.
+  let l:modifier = ':p:~' " :.
+  " :s?pat?sub?
 
   let l:str = expand('%') " :t?
   "'string': '%{expand("%")==""?"NO NAME":expand("%")=="[Command Line]"?"COMMAND LINE":expand("%:r")} ',
@@ -35,10 +36,14 @@ function statusline#core#file()
   elseif &filetype =~ 'help'
     let l:str = expand('%:t') . ' [HELP]'
   elseif strlen(l:str) == 0
-    let l:str = 'NO NAME'
+    let l:str = strlen(&ft) > 0 ? toupper(&ft) : 'NO NAME'
   else
     let l:str = fnamemodify(l:str, l:modifier)
   endif
+
+  "if strlen(l:str) == 0
+  "  let l:str = './'
+  "endif
 
   return l:str
 endfunction
