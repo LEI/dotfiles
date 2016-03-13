@@ -83,7 +83,7 @@ let s:template = [
 \  {
 \    'string': ' %{SyntasticStatuslineFlag()} ',
 \    'highlight': 'WarningMsg',
-\    'condition': 'exists(":SyntasticCheck")',
+\    'condition': 'exists("*SyntasticStatuslineFlag")',
 \  },
 \]
 

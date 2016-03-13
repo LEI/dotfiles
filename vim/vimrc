@@ -17,7 +17,7 @@ set nocompatible
 
 filetype off
 
-function! BuildYCM(info)
+function! YCMInstall(info)
   " info is a dictionary with 3 fields
   " - name: name of the plugin
   " - status: 'installed', 'updated', or 'unchanged'
@@ -33,23 +33,32 @@ function! BuildYCM(info)
   endif
 endfunction
 
-function! EnableYCM()
-  call plug#load('YouCompleteMe')
-  if exists('g:loaded_youcompleteme')
-    call youcompleteme#Enable()
+function! YCMEnable()
+  if !exists('g:loaded_youcompleteme')
+    call plug#load('YouCompleteMe')
+    if exists('g:loaded_youcompleteme')
+      call youcompleteme#Enable()
+    endif
   endif
 endfunction
 
-augroup YouCompleteMe
-  autocmd!
-  autocmd FileReadPost * call EnableYCM() | autocmd! YouCompleteMe
-augroup END
+function! SyntasticEnable()
+  if !exists('g:loaded_syntastic_plugin')
+    call plug#load('syntastic')
+  endif
+endfunction
+
+" augroup VimPlug
+"   autocmd!
+"   autocmd VimEnter * call LoadPlug() | autocmd! VimPlug
+" augroup END
 
 " Vim Plug
 call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-sleuth'
@@ -66,7 +75,7 @@ Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
-Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM'), 'for': 'cpp' }
+Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['vim', 'php', 'js', 'cpp'] }
 "Plug 'SirVer/ultisnips'
 "Plug 'honza/vim-snippets'
 Plug 'chriskempson/base16-vim'
@@ -210,15 +219,16 @@ catch
   colorscheme torte
 endtry
 
-"set textwidth=80
-
 set synmaxcol=500
 
 set cursorline
 
 if exists('+colorcolumn')
+  " See vim/settings/colorcolumn.vim
+  set colorcolumn=
   " Relative to textwidth
-  set colorcolumn=+1
+  "set colorcolumn=+1
+  "set colorcolumn=80
   "let &colorcolumn=join(range(1,80),",")
 endif
 
@@ -229,21 +239,22 @@ endif
 
 " Custom colors
 " "hi clear SignColumn
-" hi VertSplit ctermbg=10
+hi VertSplit ctermfg=10 ctermbg=10
 " hi ColorColumn ctermbg=10
+hi ColorColumn ctermfg=10 ctermbg=1
 "
 " hi LineNr ctermbg=10
-" hi CursorLineNr ctermfg=12
-" "hi CursorLine ctermbg=10
-"
-" " Not supported by Terminal.app
-" " See settings/terminal.vim
-" " hi Cursor ctermfg=1 ctermbg=7
-"
+hi CursorLineNr ctermfg=12
+" hi CursorLine ctermbg=10
+
+" Not supported by Terminal.app
+" See settings/terminal.vim
+" hi Cursor ctermfg=1 ctermbg=7
+
 hi IncSearch ctermfg=10 ctermbg=9
 hi Search ctermfg=10 ctermbg=3
-" hi Visual ctermfg=10 ctermbg=3
-"
+hi Visual ctermfg=11 ctermbg=3
+
 " "hi Pmenu        ctermbg=240 ctermfg=12
 " "hi PmenuSel     ctermbg=3   ctermfg=1
 " "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
@@ -252,7 +263,7 @@ hi Search ctermfg=10 ctermbg=3
 " "hi SpellCap ctermfg=13 ctermbg=9
 "
 " "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-" "call matchadd('ColorColumn', '\%81v', 100) "set column nr
+" call matchadd('ColorColumn', '\%81v', 100) "set column nr
 "
 " " Hightlight text over 80 chars
 " "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
@@ -460,29 +471,6 @@ function! ResCur()
   endif
 endfunction
 
-" github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
-"
-" " Can't use a custom color
-" hi ColorColumnMargin ctermfg=11 ctermbg=1
-"
-" function! MarkMargin (on)
-"   if exists('b:MarkMargin')
-"     try
-"       call matchdelete(b:MarkMargin)
-"     catch /./
-"     endtry
-"     unlet b:MarkMargin
-"   endif
-"   if a:on
-"     let b:MarkMargin = matchadd('ColorColumnMargin', '\%81v\s*\S', 100)
-"   endif
-" endfunction
-"
-" augroup MarkMargin
-"   autocmd!
-"   autocmd BufEnter * :call MarkMargin(1)
-" augroup END
-"
 " " Platform {{{1
 "
 " let OS=substitute(system('uname -s'),"\n","","")
