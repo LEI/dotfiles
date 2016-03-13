@@ -33,28 +33,59 @@ function statusline#core#file()
   let l:cwd = ':s?' . getcwd() . '?.?'
   let l:dir = ':s?/$??'
   let l:name = ':t:r'
-
-  let l:brackets_pattern = '\[\([^\]]\+\)\]'
   let l:modifier = ':p' . l:cwd . l:dir . ':~'
 
+  " [Command Line] ...
+  let l:brackets_pattern = '\[\([^\]]\+\)\]'
+  " __Gundo_Preview__ ...
+  let l:underscores_pattern = '__\(\w\+\)__'
+  " Title case
+  " let l:title_case_pattern = '\(\<\w\+\>\)'
+
+  " Get the current file name
   let l:str = expand('%') " :t?
-  "'string': '%{expand("%")==""?"NO NAME":expand("%")=="[Command Line]"?"COMMAND LINE":expand("%:r")} ',
 
   if l:str =~ l:brackets_pattern
-    " Remove surrounding brackets and uppercase matched string
-    let l:str = substitute(l:str, l:brackets_pattern, '\U\1\E', 'g')
+    " Remove surrounding brackets
+    " Uppercase matched string: \U\1\E
+    let l:str = substitute(l:str, l:brackets_pattern, '\1', '')
+  elseif l:str =~ l:underscores_pattern
+    let l:str = substitute(l:str, l:underscores_pattern, '\1', '')
+    let l:str = substitute(l:str, '_', ' ', 'g')
   elseif &filetype =~ 'help'
     " Display only file name in help buffers
-    let l:str = fnamemodify(l:str, l:name) . ' [H]'
+    let l:str = fnamemodify(l:str, l:name)
   elseif strlen(l:str) == 0
-    " Try to display uppercase file type if no name is available
-    let l:str = strlen(&ft) > 0 ? toupper(&ft) : 'NO NAME'
+    let l:str = 'No Name'
+    " Try to display filetype if no name is available
+    " if strlen(&ft) > 0
+    "   " UPPER CASE
+    "   " let l:str = toupper(&ft)
+    "   " Title Case
+    "   " let l:str = substitute(&ft, l:title_case_pattern, '\u\1', 'g')
+    "   let l:str = &ft
+    " else
+    "   let l:str = '?'
+    " endif
   else
     " Cwdify and tildify the current file path
     let l:str = fnamemodify(l:str, l:modifier)
   endif
 
   return l:str
+endfunction
+
+function statusline#core#flags()
+  let l:file = expand('%')
+  let l:flags = ''
+
+  if &filetype =~ 'help'
+    let l:flags = 'H'
+  elseif l:file !~ 'gundo' && &filetype !~ 'help\|netrw'
+    let l:flags = &modified ? "+" : &modifiable ? "" : "-"
+  endif
+
+  return l:flags
 endfunction
 
 " File type

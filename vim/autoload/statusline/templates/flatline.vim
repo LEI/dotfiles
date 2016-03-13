@@ -1,4 +1,4 @@
-" Tomorrow
+" Fat Line
 
 " 'separator': get(g:statusline.symbols, 'separator', ':'),
 
@@ -39,11 +39,11 @@ let s:template = [
 \    'highlight': 'base',
 \  },
 \  {
-\    'string': '%{statusline#core#file()} ',
+\    'list': [
+\      { 'string': '%{statusline#core#file()} ' },
+\      { 'string': '[%{statusline#core#flags()}] ' },
+\    ],
 \    'highlight': 'file',
-\  },
-\  {
-\    'string': '%([%{&ft=~"help"||&ft=="netrw" ? "" : &modified ? "+" : &modifiable ? "" : "-"}] %)',
 \  },
 \  '%=',
 \  {
