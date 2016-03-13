@@ -24,33 +24,37 @@ function statusline#core#paste()
 endfunction
 
 function statusline#core#file()
-  let l:modifier = ':p:~' " :.
-  " :s?pat?sub?
+  " File name modifiers:
+  "   % Replaced by the current file name
+  "   :p Expand to the full path of the file
+  "   :~ Reduce file name to be relative to the home directory
+  "   :. Reduce file name to be relative to current directory
+  "   :s(|gs)?pat?sub? Substitute first(|all) occurence(s) of pat with sub
+  let l:cwd = ':s?' . getcwd() . '?.?'
+  let l:dir = ':s?/$??'
+  let l:name = ':t:r'
+
+  let l:brackets_pattern = '\[\([^\]]\+\)\]'
+  let l:modifier = ':p' . l:cwd . l:dir . ':~'
 
   let l:str = expand('%') " :t?
   "'string': '%{expand("%")==""?"NO NAME":expand("%")=="[Command Line]"?"COMMAND LINE":expand("%:r")} ',
 
-  if l:str =~ '\[[^\]]\+\]'
+  if l:str =~ l:brackets_pattern
     " Remove surrounding brackets and uppercase matched string
-    let l:str = substitute(l:str, '\[\([^\]]\+\)\]', '\U\1\E', 'g')
+    let l:str = substitute(l:str, l:brackets_pattern, '\U\1\E', 'g')
   elseif &filetype =~ 'help'
-    let l:str = expand('%:t') . ' [HELP]'
+    " Display only file name in help buffers
+    let l:str = fnamemodify(l:str, l:name) . ' [H]'
   elseif strlen(l:str) == 0
+    " Try to display uppercase file type if no name is available
     let l:str = strlen(&ft) > 0 ? toupper(&ft) : 'NO NAME'
   else
+    " Cwdify and tildify the current file path
     let l:str = fnamemodify(l:str, l:modifier)
   endif
 
-  "if strlen(l:str) == 0
-  "  let l:str = './'
-  "endif
-
   return l:str
-endfunction
-
-function statusline#core#netrw()
-  let l:order = (g:netrw_sort_direction =~ 'n') ? '+' : '-'
-  return g:netrw_sort_by . l:order
 endfunction
 
 " File type

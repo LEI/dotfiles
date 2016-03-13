@@ -95,6 +95,7 @@ function s:parse(item, parent, ...)
         endif
 
         let l:index = l:index + 1
+        " strlen(l:sub_item)?
         if l:index > 1 && l:index <= len(l:item.list) && exists('l:item.separator')
           let l:sub_item = '%(' . l:item.separator . l:sub_item . '%)'
         endif

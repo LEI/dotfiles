@@ -1,5 +1,7 @@
 " Tomorrow
 
+" 'separator': get(g:statusline.symbols, 'separator', ':'),
+
 let s:template = [
 \  {
 \    'string': ' %{statusline#core#mode()} ',
@@ -50,20 +52,27 @@ let s:template = [
 \  },
 \  {
 \    'list': [
-\       { 'string': ' %{statusline#core#type()} ' },
-\       { 'string': '[%{statusline#core#netrw()}] ', 'condition': '&ft=="netrw"' },
+\      { 'string': ' %{statusline#core#type()} ' },
 \    ],
 \    'highlight': 'base',
 \    'truncate': 40,
 \  },
 \  {
 \    'list': [
-\      { 'string': ' %{&fileformat} ' },
-\      { 'string': ' %{statusline#core#encoding()} ' },
+\      { 'string': ' %{statusline#extensions#netrw#sortBy()} ' },
+\      { 'string': '[%{statusline#extensions#netrw#order()}] ' },
 \    ],
 \    'highlight': 'default',
+\    'condition': '&ft=="netrw"',
+\  },
+\  {
+\    'list': [
+\      { 'string': ' %{&fileformat} ' },
+\      { 'string': '[%{statusline#core#encoding()}] ' },
+\    ],
+\    'highlight': 'default',
+\    'condition': '&ft!="netrw"',
 \    'truncate': 80,
-\    'separator': get(g:statusline.symbols, 'separator', ':'),
 \  },
 \  {
 \    'list': [
