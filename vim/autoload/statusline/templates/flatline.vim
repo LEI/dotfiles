@@ -27,10 +27,6 @@ let s:template = [
 \    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
 \  },
 \  {
-\    'string': '%( %{&ft=~"help"||&ft=="netrw" ? "" : &readonly ? "' . get(g:statusline.symbols, 'readonly', 'RO') . '" : ""}%)',
-\    'highlight': 'file',
-\  },
-\  {
 \    'string': '%( %{statusline#core#crypt()}%)',
 \    'highlight': 'file',
 \  },

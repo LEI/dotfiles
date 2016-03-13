@@ -30,10 +30,10 @@ function statusline#core#file()
   "   :~ Reduce file name to be relative to the home directory
   "   :. Reduce file name to be relative to current directory
   "   :s(|gs)?pat?sub? Substitute first(|all) occurence(s) of pat with sub
-  let l:cwd = ':s?' . getcwd() . '?.?'
-  let l:dir = ':s?/$??'
-  let l:name = ':t:r'
-  let l:modifier = ':p' . l:cwd . l:dir . ':~'
+  let l:cwd = ':s?' . getcwd() . '?.?' " pwd -> '.'
+  let l:dir = ':s?/$??' " Trailing slash
+  let l:name = ':t:r' " File name without extension
+  let l:modifier = ':p' . l:cwd . ':~' . l:dir
 
   " [Command Line] ...
   let l:brackets_pattern = '\[\([^\]]\+\)\]'
@@ -79,10 +79,13 @@ function statusline#core#flags()
   let l:file = expand('%')
   let l:flags = ''
 
-  if &filetype =~ 'help'
-    let l:flags = 'H'
-  elseif l:file !~ 'gundo' && &filetype !~ 'help\|netrw'
+  if l:file !~ 'gundo' && &filetype !~ 'help\|netrw'
     let l:flags = &modified ? "+" : &modifiable ? "" : "-"
+    if &readonly
+      let l:flags.= ',RO' " . get(g:statusline.symbols, 'readonly', 'RO')
+    endif
+  elseif &filetype =~ 'help'
+    let l:flags = 'H'
   endif
 
   return l:flags
