@@ -79,13 +79,15 @@ function statusline#core#flags()
   let l:file = expand('%')
   let l:flags = ''
 
-  if l:file !~ 'gundo' && &filetype !~ 'help\|netrw\|vim-plug'
-    let l:flags = &modified ? "+" : &modifiable ? "" : "-"
+  if l:file !~ 'gundo' &&
+  \ &filetype !~ 'help\|netrw\|vim-plug' &&
+  \ &buftype !=# 'nofile'
+    let l:flags.= &modified ? "+" : &modifiable ? "" : "-"
     if &readonly
       let l:flags.= ',RO' " . get(g:statusline.symbols, 'readonly', 'RO')
     endif
   elseif &filetype =~ 'help'
-    let l:flags = 'H'
+    let l:flags.= 'H'
   endif
 
   return l:flags

@@ -12,23 +12,28 @@ function s:highlight(string, item)
   let l:highlight = l:item.highlight
 
   let l:mode = get(w:, 'statusline_mode', '')
+
   " Gets the first part of the mode string
   "if len(l:mode) > 0
   "  let l:mode = split(l:mode)[0]
   "endif
 
-  if l:mode ==# 'inactive' && l:highlight !=# 'bg'
-    " Override colors when inactive, unless bg color is already used
-    let l:highlight = g:statusline.thm[l:mode]
-  elseif l:highlight ==# 'mode' && has_key(g:statusline.thm, l:mode)
-    " Mode interactive highlighting
-    let l:highlight = g:statusline.thm[l:mode]
-  elseif has_key(g:statusline.thm, l:highlight)
-    " Group highlighting
-    let l:highlight = g:statusline.thm[l:highlight]
-  "else
-  "  let l:highlight = l:highlight
+  if type(l:highlight) == type(0)
+    let l:highlight = 'StatusLine' . l:mode . l:highlight
   endif
+
+  "if l:mode ==# 'inactive' && l:highlight !=# 'bg'
+  "  " Override colors when inactive, unless bg color is already used
+  "  let l:highlight = g:statusline.colors[l:mode]
+  "elseif l:highlight ==# 'mode' && has_key(g:statusline.colors, l:mode)
+  "  " Mode interactive highlighting
+  "  let l:highlight = g:statusline.colors[l:mode]
+  "elseif has_key(g:statusline.colors, l:highlight)
+  "  " Group highlighting
+  "  let l:highlight = g:statusline.colors[l:highlight]
+  ""else
+  ""  let l:highlight = l:highlight
+  "endif
 
   " echom l:mode . ' # ' . l:highlight
 

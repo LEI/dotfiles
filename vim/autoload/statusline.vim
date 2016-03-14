@@ -6,7 +6,7 @@
 " Declarations
 call statusline#utils#define('g:statusline', {})
 call extend(g:statusline, {
-\  'theme': 'tomorrow',
+\  'colorscheme': 'base16',
 \  'template': 'flatline',
 \  'symbols': {},
 \  'mode_map': {},
@@ -127,8 +127,8 @@ function statusline#update(...)
   if !exists('g:statusline.tpl')
     call statusline#template()
   endif
-  if !exists('g:statusline.thm')
-    call statusline#theme()
+  if !exists('g:statusline.color')
+    call statusline#colorscheme()
   endif
 
   let l:winnr = a:0 > 0 ? a:1 : winnr()
@@ -204,15 +204,42 @@ function statusline#build(winnr)
   return l:win.line
 endfunction
 
-" github.com/vim-airline/vim-airline/blob/master/autoload/airline/themes.vim
-function statusline#theme(...)
-  let l:theme = a:0 > 0 ? a:1 : g:statusline.theme
-  call s:load('thm', 'g:statusline#themes', l:theme, 'tomorrow')
-endfunction
-
 function statusline#template(...)
   let l:template = a:0 > 0 ? a:1 : g:statusline.template
   call s:load('tpl', 'g:statusline#templates', l:template, 'default')
+endfunction
+
+" github.com/vim-airline/vim-airline/blob/master/autoload/airline/colorschemes.vim
+function statusline#colorscheme(...)
+  let l:colorscheme = a:0 > 0 ? a:1 : g:statusline.colorscheme
+  " Match &colorscheme?
+  call s:load('color', 'g:statusline#colorschemes', l:colorscheme, 'base16')
+
+  " Update highlight groups (User#)
+  call statusline#highlight()
+endfunction
+
+function statusline#highlight()
+  if !exists('g:statusline.color') | return | endif
+  let l:cterm = g:statusline.color.map.cterm
+  let l:gui = g:statusline.color.map.gui
+  for group in g:statusline.color.scheme "[key, colors] in items(s:colorscheme)
+    let l:index = 0
+    if has_key(group, 'mode') && has_key (group, 'map') && len(group.map) > 0
+      for color in group.map
+        if len(color) != 2 | continue | endif
+        let l:index = l:index + 1
+        let l:hi = 'highlight StatusLine' . group.mode . l:index
+        " let l:hi = 'highlight statusline' . key . (l:index > 0 ? l:index + 1 : '')
+        " TODO: check has_key
+        let l:hi.= ' ctermfg=' . l:cterm[color[0]] . ' ctermbg=' . l:cterm[color[1]]
+        let l:hi.= ' guifg=' . l:gui[color[0]] . ' guibg=' . l:gui[color[1]]
+        execute l:hi
+        unlet color
+      endfor
+    endif
+    unlet group
+  endfor
 endfunction
 
 function s:load(var, func, name, default)

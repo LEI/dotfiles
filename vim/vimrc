@@ -75,9 +75,10 @@ Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
-Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['vim', 'php', 'js', 'cpp'] }
-"Plug 'SirVer/ultisnips'
-"Plug 'honza/vim-snippets'
+Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall') }
+" 'for': ['vim', 'php', 'javascript', 'cpp'] }
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath

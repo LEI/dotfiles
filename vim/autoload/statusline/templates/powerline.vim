@@ -5,7 +5,7 @@
 let s:template = [
 \  {
 \    'string': ' %{statusline#core#mode()} ',
-\    'highlight': 1,
+\    'highlight': 'mode',
 \    'width': '-8',
 \    'truncate': 20,
 \  },
@@ -23,34 +23,34 @@ let s:template = [
 \        'truncate': 40,
 \      },
 \    ],
-\    'highlight': 2,
+\    'highlight': 'default',
 \    'condition': 'exists("*fugitive#head") && strlen(fugitive#head(7)) > 0',
 \  },
 \  {
 \    'string': '%( %{statusline#core#crypt()}%)',
-\    'highlight': 3,
+\    'highlight': 'file',
 \  },
 \  {
 \    'string': ' %<%n ',
-\    'highlight': 3,
+\    'highlight': 'base',
 \  },
 \  {
 \    'list': [
 \      { 'string': '%{statusline#core#file()} ' },
 \      { 'string': '[%{statusline#core#flags()}] ' },
 \    ],
-\    'highlight': 3,
+\    'highlight': 'file',
 \  },
 \  '%=',
 \  {
 \    'string': ' %{v:register} ',
-\    'highlight': 4,
+\    'highlight': 'bg',
 \  },
 \  {
 \    'list': [
 \      { 'string': ' %{statusline#core#type()} ' },
 \    ],
-\    'highlight': 3,
+\    'highlight': 'base',
 \    'truncate': 40,
 \  },
 \  {
@@ -58,7 +58,7 @@ let s:template = [
 \      { 'string': ' %{statusline#extensions#netrw#sortBy()} ' },
 \      { 'string': '[%{statusline#extensions#netrw#order()}] ' },
 \    ],
-\    'highlight': 2,
+\    'highlight': 'default',
 \    'condition': '&ft=="netrw"',
 \  },
 \  {
@@ -66,7 +66,7 @@ let s:template = [
 \      { 'string': ' %{&fileformat} ' },
 \      { 'string': '[%{statusline#core#encoding()}] ' },
 \    ],
-\    'highlight': 2,
+\    'highlight': 'default',
 \    'condition': '&ft!="netrw"',
 \    'truncate': 80,
 \  },
@@ -77,7 +77,7 @@ let s:template = [
 \      { 'string': ':' },
 \      { 'string': '%c%V ', 'width': '-4' },
 \    ],
-\    'highlight': 1,
+\    'highlight': 'mode',
 \    'truncate': 60,
 \  },
 \  {

@@ -1,5 +1,18 @@
 {
+    "libs": [
+        "browser",
+        "jquery",
+        "underscore"
+    ],
+    "dontLoad": [
+        "dist",
+        "node_modules",
+        "bower_components",
+        "vendor"
+    ],
     "plugins": {
-        "node": {}
+        "node": {},
+        "angular": {},
+        "complete_strings": {}
     }
 }
