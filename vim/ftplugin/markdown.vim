@@ -9,7 +9,7 @@ setlocal spell
 " Automatically add line break at 80 characters
 setlocal textwidth=80
 
-" Indentation size
+" Indentation size (overwritten by vim-sleuth!)
 setlocal shiftwidth=4
 setlocal softtabstop=4
 setlocal tabstop=4

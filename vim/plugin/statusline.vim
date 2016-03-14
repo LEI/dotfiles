@@ -26,7 +26,7 @@ if has('autocmd') && !exists('#statusline')
     "autocmd TabLeave * echom 'TabLeave'
     "autocmd VimResized * call statusline#update()
 
-    autocmd ColorScheme * call statusline#theme()
+    autocmd ColorScheme * call statusline#colorscheme()
     "autocmd VimEnter * call statusline#template()
 
     " autocmd CmdwinEnter * let &l:statusline=' %#StatusLineMode#%{statusline#core#mode("cl")} %#StatusLineNC# %<COMMAND LINE %h%m%r %#StatusLineNC#%=%5.(%p%%%)%4.(%l%):%-4.(%c%V%)'

@@ -254,7 +254,7 @@ hi CursorLineNr ctermfg=12
 
 hi IncSearch ctermfg=10 ctermbg=9
 hi Search ctermfg=10 ctermbg=3
-hi Visual ctermfg=11 ctermbg=3
+"hi Visual ctermfg=11 ctermbg=3
 
 " "hi Pmenu        ctermbg=240 ctermfg=12
 " "hi PmenuSel     ctermbg=3   ctermfg=1
@@ -384,7 +384,6 @@ let &showbreak=nr2char(0x21AA)
 set list
 let &listchars='tab:'.nr2char(0x25B8).' ,trail:'.nr2char(0x00B7).',extends:>,precedes:<,nbsp:'.nr2char(0x005F).',eol:'.nr2char(0x00AC)
 
-
 " Folding {{{1
 
 " Add a bit extra margin to the left
@@ -408,9 +407,6 @@ endif
 if !&sidescroll
   set sidescroll=1
 endif
-
-" Enable soft wrap with ':Wrap'
-command! -nargs=* Wrap setl wrap linebreak nolist
 
 "set display+=lastline
 
@@ -507,6 +503,15 @@ endfunction
 "    call MacOSX()
 "  endif
 "endif
+
+" Commands {{{1
+
+" Enable soft wrap with ':Wrap'
+command! -nargs=* Wrap setlocal wrap linebreak nolist
+
+" Quick spell lang switch
+command! En set spelllang=en
+command! Fr set spelllang=fr
 
 " Key maps {{{1
 

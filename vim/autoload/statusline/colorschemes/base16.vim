@@ -98,7 +98,7 @@ let s:scheme = [
 function statusline#colorschemes#base16#load()
   " Default groups
   hi StatusLine ctermfg=8 ctermbg=10
-  hi StatusLineNC ctermfg=10 ctermbg=0
+  hi StatusLineNC ctermfg=11 ctermbg=10
 
   " 'bg': 1,
   " 'base': 2,
