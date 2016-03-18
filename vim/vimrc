@@ -125,8 +125,10 @@ set ffs=unix,dos,mac
 " Use system clipboard
 set clipboard=unnamed
 
-" Fast terminal connection
-set ttyfast
+if !has('nvim')
+  " Fast terminal connection
+  set ttyfast
+endif
 
 " Delete comment character when joining commented lines
 if v:version > 703 || v:version == 703 && has("patch541")
@@ -182,7 +184,8 @@ set lazyredraw
 
 " Theming {{{1
 
-set term=xterm-256color
+set term=$TERM
+"set term=xterm-256color
 "set term=screen-256color
 
 " Disable BCE (Background Color Erase)
