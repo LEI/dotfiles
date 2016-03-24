@@ -126,21 +126,20 @@ function s:parse(item, parent, ...)
       let l:str = substitute(l:str, '{', '\="{".(l:item.condition)."?"', '')
       let l:str = substitute(l:str, '}', ':""}', '')
     endif
+
+    " Width specification
+    if exists('l:item.width')
+      let l:width = l:item.width
+    else
+      let l:width = ''
+    endif
+    let l:str = statusline#utils#construct(l:str, l:width)
+
     " Highlight group
     if exists('l:item.highlight')
       let l:str = s:highlight(l:str, l:item)
     endif
   endif
-
-  " Width specification
-  if exists('l:item.width')
-    let l:width = l:item.width
-  else
-    let l:width = ''
-  endif
-
-  " Section wrap
-  let l:str = statusline#utils#construct(l:str, l:width)
 
   return l:str
 endfunction
