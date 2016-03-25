@@ -12,6 +12,6 @@
         dest: "{{ dot_root }}"
         version: ansible
         update: no
-      # ignore_errors: yes
+      ignore_errors: yes
   roles:
     - {role: hammerspoon, when: ansible_os_family == "Darwin"}
