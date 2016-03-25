@@ -9,17 +9,18 @@
 
 - name: Setup local development environment
   hosts: local
-  pre_tasks:
-    - name: Update repository
-      git:
-        repo: git://github.com/LEI/dotfiles.git
-        dest: "{{ dot_root }}"
-        version: ansible
-        update: no
-      ignore_errors: yes
+  # pre_tasks:
+  #   - name: Update repository
+  #     git:
+  #       repo: git://github.com/LEI/dotfiles.git
+  #       dest: "{{ dot_root }}"
+  #       version: ansible
+  #       update: no
+  #     ignore_errors: yes
   roles:
     - git
-    - {role: package_manager, tags: ['bootstrap']}
+    - package_manager
+    - npm
     # - npm
     # - tmux
 
