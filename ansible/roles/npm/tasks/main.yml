@@ -2,4 +2,4 @@
 
 - name: Install npm packages globally
   npm: name={{ item }} state=present global=yes
-  with_items: npm_global_packages
+  with_items: "{{ npm_global_packages }}"

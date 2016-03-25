@@ -3,9 +3,11 @@
 #   hosts: local
 #   gather_facts: yes
 
-- hosts: all
+- name: Bootstrap
+  hosts: all
   tasks:
-    - group_by: key=os_{{ ansible_distribution }}
+    - name: "Distribution: {{ ansible_distribution }}"
+      group_by: key=os_{{ ansible_distribution }}
 
 - name: Setup local development environment
   hosts: local
@@ -19,10 +21,9 @@
   #     ignore_errors: yes
   roles:
     - git
-    - package_manager
+    - pkg
     - npm
-    # - npm
-    # - tmux
+    - tmux
 
 - name: Max OS X
   hosts: os_MacOSX

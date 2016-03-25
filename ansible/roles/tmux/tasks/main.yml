@@ -1,0 +1,10 @@
+- include: "{{ os_distribution }}.yml"
+
+- name: Symlink tmux configuration
+  file:
+    src: "{{ dot_root }}/tmux/{{ item }}"
+    dest: "{{ dot_home }}/tmux/{{ item }}"
+    state: link
+  with_items:
+    - tmux.conf
+    - plugins
