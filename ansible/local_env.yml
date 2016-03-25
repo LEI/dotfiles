@@ -1,0 +1,8 @@
+- name: Facts
+  hosts: local
+  gather_facts: yes
+
+- name: Local development environment
+  hosts: local
+  roles:
+    - {role: hammerspoon, when: ansible_os_family == "Darwin"}

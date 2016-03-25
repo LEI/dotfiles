@@ -1,0 +1,12 @@
+- name: Install Hammerspoon
+  homebrew_cask: name={{ item }} state=present
+  with_items:
+    - hammerspoon
+
+- name: Symlink Hamerspoon configuration
+  file:
+    src: "{{ dot_root }}/{{ item.key }}"
+    dest: "{{ dot_home }}/{{ item.value }}"
+    state: link
+  with_dict:
+    hammerspoon: .hammerspoon

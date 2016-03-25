@@ -1,0 +1,7 @@
+# vi: ft=yaml
+dot_home: "{{ '~' | expanduser }}"
+dot_root: "{{ dot_home }}/Projects/ansible"
+
+full_name: Guillaume Frichet
+git_user: Guillaume
+git_email: guillaume.frichet@flexnetwork.fr
