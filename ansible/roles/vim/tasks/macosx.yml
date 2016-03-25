@@ -1,0 +1,5 @@
+- name: Install vim with Homebrew
+  homebrew:
+    name: vim
+    state: present
+    install_options: with-override-system-vim, with-python3

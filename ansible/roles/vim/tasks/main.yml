@@ -1,0 +1,30 @@
+- include: "{{ ansible_distribution }}.yml"
+
+- name: Check files
+  stat:
+    path: "{{ dot_home }}/.vim/{{ item }}"
+  register: "sym"
+  with_items: "{{ symlinks }}"
+  failed_when: false
+
+# - debug: var=sym
+
+- name: Backup files
+  command: "mv {{ dot_home }}/.vim/{{ item.item }} {{ dot_home }}/.vim/{{ item.item }}.bak"
+  args:
+    creates: "{{ dot_home }}/.vim/{{ item.item }}.bak"
+  with_items: "{{ sym.results }}"
+  when: item.stat.exists and item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
+
+- name: Symlink files
+  file:
+    src: "{{ dot_root }}/vim/{{ item.item }}"
+    dest: "{{ dot_home }}/.vim/{{ item.item }}"
+    state: link
+  with_items: "{{ sym.results }}"
+  when: item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
+
+# - name: Install vim-plug
+#   get_url:
+#     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+#     dest: "{{ dot_home }}/.vim/autoload/plug.vim"

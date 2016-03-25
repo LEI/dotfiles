@@ -1,0 +1,5 @@
+- name: Install tmux with Homebrew
+  homebrew: name={{ item }} state=latest
+  with_items:
+    - tmux
+    # - reattach-to-user-namespace
