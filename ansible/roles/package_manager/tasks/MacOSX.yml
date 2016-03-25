@@ -1,0 +1,7 @@
+- name: Update Homebrew
+  homebrew: update_homebrew=yes
+  when: package_update
+
+- name: Update Homebrew packages
+  homebrew: upgrade_all=yes
+  when: package_upgrade

@@ -1,0 +1,9 @@
+- include: "{{ ansible_distribution }}.yml"
+
+# https://github.com/sloria/dotfiles/blob/master/roles/git/tasks/main.yml
+# - name: Symlink global gitignore
+#   file:
+#     src:
+#     dest:
+#     state: link
+#     force: yes

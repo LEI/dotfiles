@@ -1,0 +1,29 @@
+---
+# - name: Gathering facts
+#   hosts: local
+#   gather_facts: yes
+
+- hosts: all
+  tasks:
+    - group_by: key=os_{{ ansible_distribution }}
+
+- name: Setup local development environment
+  hosts: local
+  pre_tasks:
+    - name: Update repository
+      git:
+        repo: git://github.com/LEI/dotfiles.git
+        dest: "{{ dot_root }}"
+        version: ansible
+        update: no
+      ignore_errors: yes
+  roles:
+    - git
+    - {role: package_manager, tags: ['bootstrap']}
+    # - npm
+    # - tmux
+
+- name: Max OS X
+  hosts: os_MacOSX
+  roles:
+    - hammerspoon
