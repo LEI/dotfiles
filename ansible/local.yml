@@ -6,8 +6,10 @@
   hosts: local
   pre_tasks:
     - name: Update repository
-      repo: git://github.com/LEI/dotfiles.git
-      dest: "{{ dot_root }}"
-      branch: ansible
+      git:
+        repo: git://github.com/LEI/dotfiles.git
+        dest: "{{ dot_root }}"
+        branch: ansible
+      # ignore_errors: yes
   roles:
     - {role: hammerspoon, when: ansible_os_family == "Darwin"}
