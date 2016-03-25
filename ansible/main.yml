@@ -21,9 +21,9 @@
   #     ignore_errors: yes
   roles:
     - git
-    - pkg
+    - {role: pkg, tags: ['bootstrap']}
     - npm
-    - tmux
+    - {role: tmux, tags: ['tmux']}
     - {role: vim, tags: ['vim']}
 
 - name: Max OS X

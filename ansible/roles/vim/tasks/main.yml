@@ -7,13 +7,13 @@
   with_items: "{{ symlinks }}"
   failed_when: false
 
-# - debug: var=sym
+- debug: var=sym
 
 - name: Backup files
   command: "mv {{ dot_home }}/.vim/{{ item.item }} {{ dot_home }}/.vim/{{ item.item }}.bak"
   args:
     creates: "{{ dot_home }}/.vim/{{ item.item }}.bak"
-  with_items: "{{ sym.results }}"
+  with_items: "{{ sym.results|map(attribute='item')|map(attribute='stat')|list }}"
   when: item.stat.exists and item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
 
 - name: Symlink files
@@ -21,10 +21,14 @@
     src: "{{ dot_root }}/vim/{{ item.item }}"
     dest: "{{ dot_home }}/.vim/{{ item.item }}"
     state: link
-  with_items: "{{ sym.results }}"
+  with_items: "{{ sym.results|map(attribute='item')|list }}"
   when: item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
 
-# - name: Install vim-plug
-#   get_url:
-#     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-#     dest: "{{ dot_home }}/.vim/autoload/plug.vim"
+- name: Install vim-plug
+  get_url:
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    dest: "{{ dot_home }}/.vim/autoload/plug.vim"
+
+- name: Install plugins
+  command: vim +PlugInstall +qall
+  when: vim_install_plugins
