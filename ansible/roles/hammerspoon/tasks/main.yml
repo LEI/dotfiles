@@ -1,3 +1,4 @@
+---
 - name: Install Hammerspoon
   homebrew_cask: name={{ item }} state=present
   with_items:

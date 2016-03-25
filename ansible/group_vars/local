@@ -1,4 +1,5 @@
 # vi: ft=yaml
+---
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/Projects/ansible"
 
