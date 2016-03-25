@@ -1,0 +1,13 @@
+# - name: Gathering facts
+#   hosts: all
+#   gather_facts: yes
+
+- name: Setup local development environment
+  hosts: local
+  pre_tasks:
+    - name: Update repository
+      repo: git://github.com/LEI/dotfiles.git
+      dest: "{{ dot_root }}"
+      branch: ansible
+  roles:
+    - {role: hammerspoon, when: ansible_os_family == "Darwin"}
