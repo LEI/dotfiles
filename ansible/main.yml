@@ -8,13 +8,14 @@
   tasks:
     - name: "Distribution: {{ ansible_distribution }}"
       group_by: key=os_{{ ansible_distribution }}
+      tags:
+        - always
 
 - name: Debian
   hosts: os_Debian
   roles:
-    - {role: apt, tags: ['pkg']}
+    - {role: apt, tags: ['pkg'], become: yes}
     # - {role: debops.nodejs, tags: ['node']}
-  become: yes
 
 - name: Mac OS X
   hosts: os_MacOSX
