@@ -4,8 +4,10 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-- name: Make sure .tmux directory exists
-  file: path="{{ dot_home }}/.tmux" state=directory
+- name: Check if .tmux exists
+  file:
+    path: "{{ dot_home }}/.tmux"
+    state: directory
 
 - name: Symlink tmux configuration
   file:

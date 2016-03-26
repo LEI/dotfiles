@@ -1,4 +1,11 @@
-- include: "{{ ansible_distribution }}.yml"
+- include: osx.yml
+  when: ansible_os_family == 'Darwin'
+
+- include: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Make sure .vim directory exists
+  file: path={{ dot_home }}/.vim state=directory
 
 - name: Check files
   stat:
@@ -13,16 +20,18 @@
   command: "mv {{ dot_home }}/.vim/{{ item.item }} {{ dot_home }}/.vim/{{ item.item }}.bak"
   args:
     creates: "{{ dot_home }}/.vim/{{ item.item }}.bak"
-  with_items: "{{ sym.results|map(attribute='item')|map(attribute='stat')|list }}"
-  when: item.stat.exists and item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
+  # with_items: "{{ sym.results|map(attribute='item')|map(attribute='stat')|list }}"
+  with_items: "{{ sym.results }}"
+  when: item.stat.exists # and item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
 
 - name: Symlink files
   file:
     src: "{{ dot_root }}/vim/{{ item.item }}"
     dest: "{{ dot_home }}/.vim/{{ item.item }}"
     state: link
-  with_items: "{{ sym.results|map(attribute='item')|list }}"
-  when: item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
+  # with_items: "{{ sym.results|map(attribute='item')|list }}"
+  with_items: "{{ sym.results }}"
+  # when: item.stat.lnk_source != "{{ dot_root }}/vim/{{ item.item }}"
 
 - name: Install vim-plug
   get_url:
