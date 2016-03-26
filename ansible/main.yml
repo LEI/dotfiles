@@ -3,17 +3,24 @@
 #   hosts: local
 #   gather_facts: yes
 
-- name: Bootstrap
+- name: Bootstrap dotfiles and install packages
   hosts: local
   tasks:
     - name: "Distribution: {{ ansible_distribution }}"
       group_by: key=os_{{ ansible_distribution }}
 
-# - name: Debian
-#   hosts: os_Debian
-#   roles:
-#     - {role: debops.nodejs, tag: ['node']}
-#   sudo: yes
+- name: Debian
+  hosts: os_Debian
+  roles:
+    - {role: apt, tags: ['pkg']}
+    # - {role: debops.nodejs, tags: ['node']}
+  become: yes
+
+- name: Mac OS X
+  hosts: os_MacOSX
+  roles:
+    - {role: homebrew, tags: ['pkg']}
+    - {role: hammerspoon, tags: ['wm']}
 
 - name: Setup local development environment
   hosts: local
@@ -26,16 +33,10 @@
   #       update: no
   #     ignore_errors: yes
   roles:
-    - git
-    - {role: pkg, tags: ['bootstrap']}
+    - {role: git, tags: ['git']}
     - {role: npm, tags: ['node']}
     - {role: tmux, tags: ['tmux']}
     - {role: vim, tags: ['vim']}
-  handlers:
-    - include: handlers/symlink.yml
-
-- name: Max OS X
-  hosts: os_MacOSX
-  roles:
-    - hammerspoon
+  # handlers:
+  #   - include: handlers/handlers.yml
 

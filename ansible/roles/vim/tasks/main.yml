@@ -14,7 +14,7 @@
   with_items: "{{ symlinks }}"
   failed_when: false
 
-- debug: var=sym
+# - debug: var=sym
 
 - name: Backup files
   command: "mv {{ dot_home }}/.vim/{{ item.item }} {{ dot_home }}/.vim/{{ item.item }}.bak"

@@ -7,4 +7,4 @@
 - name: Install npm packages globally
   npm: name={{ item }} state=present global=yes # path=~/.node_modules
   with_items: "{{ npm_global_packages }}"
-  sudo: yes
+  become: yes

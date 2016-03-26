@@ -1,5 +1,5 @@
-# vi: ft=yaml
 ---
+# vi: ft=yaml
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/.dotfiles"
 
@@ -7,4 +7,4 @@ full_name: Guillaume Frichet
 git_user: Guillaume
 git_email: guillaume.frichet@flexnetwork.fr
 
-vim_install_plugins: yes
+# vim_install_plugins: yes

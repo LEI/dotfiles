@@ -1,0 +1,12 @@
+- name: Update apt cache
+  apt: update_cache=yes
+  when: update_packages
+
+- name: Upgrade apt packages
+  apt: upgrade=yes
+  when: upgrade_packages
+
+- name: Install apt package
+  apt: name={{ item }} state=latest
+  with_items: "{{ apt_packages }}"
+  when: install_packages

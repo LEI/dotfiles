@@ -4,7 +4,7 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-- include: ../../../includes/symlink_items.yml
+- include: ../../common/symlink_items.yml
 
 # - name: Make sure .tmux directory exists
 #   file:
