@@ -302,6 +302,7 @@ set noshowmatch
 " HTML brackets
 set matchpairs+=<:>
 
+set noerrorbells
 set visualbell
 set t_vb=
 
@@ -309,7 +310,7 @@ set t_vb=
 set esckeys
 
 set timeout
-set timeoutlen=1000 ttimeoutlen=0
+set timeoutlen=500 ttimeoutlen=0
 
 " Mode switch fix?
 " https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
@@ -432,9 +433,6 @@ set magic
 
 " Autocmd {{{1
 
-" Remove trailing whitespaces on save
-autocmd BufWritePre * :%s/\s\+$//e
-
 augroup VimReload
   autocmd!
   autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
@@ -449,6 +447,9 @@ augroup MatchWitespace
   autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
   autocmd InsertLeave * match ExtraWhitespace /\s\+$/
   autocmd BufWinLeave * call clearmatches()
+  " Remove trailing whitespaces on save for any FileType
+  " autocmd BufWritePre * :%s/\s\+$//e
+  autocmd BufWritePre * :call TrimWhitespace()
 augroup END
 
 " Show cursor line on active window only
@@ -469,6 +470,13 @@ function! ResCur()
     normal! g`"
     return 1
   endif
+endfunction
+
+" Remove trailing whitespaces and center cursor on last position
+function! TrimWhitespace()
+  exe "normal mz"
+  %s/\s\+$//e
+  exe "normal `z"
 endfunction
 
 " " Platform {{{1
@@ -544,40 +552,50 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-" Edit in the same directory as the current file
-cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
-" Edit in window
-map <leader>ew :e %%
-" Edit in split
-map <leader>es :sp %%
-" Edit in vertical split
-map <leader>ev :vsp %%
-" Edit in tab
-map <leader>et :tabe %%
-
-" Quicker quit
-noremap <leader>q :q<CR>
-" Save a file
-noremap <leader>w :w<CR>
-" Save as root (,W)
-noremap <leader>W :w !sudo tee % > /dev/null<CR>
-
-" Clear highlighted search results
-map <leader><Space> :noh<CR>
-
-" Git shortcuts
-map <leader>b :Gblame<cr>
-map <leader>l :!clear && git log -p %<CR>
-map <leader>d :!clear && git diff %<CR>
-
+" Repeat latest f, t, F or T [count] times
+noremap <Tab> ;
 " Repeat last command on next match
+noremap ; :normal n.<CR>
 " ; ? nnoremap Q :normal n.<CR>
 
-" Sort css properties
-nnoremap <leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
+" Edit in the same directory as the current file
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
 
 " Open .vimrc in a new split
-nnoremap <leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
+nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
+
+" Edit in window
+noremap <Leader>ew :e %%
+" Edit in split
+noremap <Leader>es :sp %%
+" Edit in vertical split
+noremap <Leader>ev :vsp %%
+" Edit in tab
+noremap <Leader>et :tabe %%
+
+" Quicker quit
+noremap <Leader>q :q<CR>
+" Save a file
+noremap <Leader>w :w<CR>
+" Save as root
+noremap <Leader>W :w !sudo tee % > /dev/null<CR>
+
+" Visually select the whole buffer
+noremap <Leader>a <Esc>ggVG
+
+" Clear highlighted search results
+noremap <Leader><Space> :noh<CR>
+
+" Remove trailing whitespaces (see TrimWhitespace())
+" noremap <Leader><BS> :%s/\s\+$//e<CR>
+
+" Sort css properties
+nnoremap <Leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
+
+" Git shortcuts
+noremap <Leader>b :Gblame<cr>
+noremap <Leader>l :!clear && git log -p %<CR>
+noremap <Leader>d :!clear && git diff %<CR>
 
 " Runtime {{{1
 
