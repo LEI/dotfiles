@@ -2,7 +2,7 @@
 
 " github.com/skwp/dotfiles/blob/master/vim/settings.vim
 
-let vimsettings = '~/.vim/settings'
+let vimsettings = '~/.vim/plugin/settings'
 "let uname = system("uname -s")
 
 for fpath in split(globpath(vimsettings, '*.vim'), '\n')
