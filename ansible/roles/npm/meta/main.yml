@@ -1,0 +1,2 @@
+dependencies:
+  - {role: debops.nodejs, when: "ansible_os_family == 'Debian'"}
