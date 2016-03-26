@@ -4,14 +4,15 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-- name: Make sure .tmux directory exists
-  file: path="{{ dot_home }}/.tmux" state=directory
+- include: ../../../includes/symlink_items.yml
 
-- name: Symlink tmux configuration
-  file:
-    src: "{{ dot_root }}/tmux/{{ item }}"
-    dest: "{{ dot_home }}/.tmux/{{ item }}"
-    state: link
-  with_items:
-   - tmux.conf
-   - plugins
+# - name: Make sure .tmux directory exists
+#   file:
+#     path: "{{ dot_home }}/{{ paths.dst }}"
+#     state: directory
+
+# - name: Symlink tmux configuration
+#   # register: files
+#   with_items: "{{ symlinks }}"
+#   # when: item.changed
+#   notify: symlink_items
