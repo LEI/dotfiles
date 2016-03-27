@@ -1,8 +1,8 @@
 paths:
-  src: vim
+  src: ansible/roles/vim/files
   dst: .vim
 
-symlinks:
+files:
   - vimrc
   - autoload
   - colors

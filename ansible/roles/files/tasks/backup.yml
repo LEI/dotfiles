@@ -4,5 +4,5 @@
     creates: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ item.item }}.{{ backup_ext|default('bak') }}"
   # with_items: "{{ stat.results|map(attribute='item')|map(attribute='stat')|list }}"
   with_items: "{{ stat.results }}"
-  when: item.stat.exists and item.stat.lnk_source != "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.item }}"
-  # no_log: yes
+  when: item.stat.exists #and item.stat.lnk_source != "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.item }}"
+  no_log: yes
