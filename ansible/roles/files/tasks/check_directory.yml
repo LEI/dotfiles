@@ -1,4 +1,4 @@
 - name: Make sure the directory exists
   file:
-    path: "{{ dot_home }}/{{ paths.dst }}"
+    path: "{{ dot_home }}/{{ paths.dst|default('') }}"
     state: directory

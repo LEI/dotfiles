@@ -4,10 +4,11 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-# https://github.com/sloria/dotfiles/blob/master/roles/git/tasks/main.yml
-# - name: Symlink global gitignore
+- include: ../../files/tasks/symlink_items.yml
+# # Source relative to dot_root, destination relative to dot_home
+# - name: Symlink items
 #   file:
-#     src:
-#     dest:
+#     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.src|default(item) }}"
+#     dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ paths.prefix|default('') }}{{ item.dst|default(item) }}"
 #     state: link
-#     force: yes
+#   with_items: "{{ symlinks }}"

@@ -4,17 +4,6 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-- name: Stats
-  stat:
-    path: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ item }}"
-    follow: false
-  register: stat
-  with_items: "{{ files }}"
-  failed_when: false
-
-- include: ../../files/tasks/backup.yml
-  when: enable_backup
-
 - include: ../../files/tasks/symlink_items.yml
 #
 #- name: Check files

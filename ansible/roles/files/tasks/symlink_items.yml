@@ -1,5 +1,18 @@
 - include: check_directory.yml
 
+- name: Gather files stat
+  stat:
+    path: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst else '' }}{{ item }}"
+    follow: false
+  register: stat
+  with_items: "{{ files }}"
+  failed_when: false
+
+- include: backups.yml
+  when: enable_backup
+
+- include: templates.yml
+
 # # Source relative to dot_root, destination relative to dot_home
 # - name: Symlink items
 #   file:
@@ -12,9 +25,11 @@
 - name: Symlink items
   file:
     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src else '' }}{{ item.src|default(item) }}"
-    dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ paths.prefix|default('') }}{{ item.dst|default(item)|basename }}"
+    dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst else '' }}{{ paths.prefix|default('') }}{{ item.dst|default(item)|basename }}"
     state: link
   with_items: "{{ files }}"
+  # fail_when;: false
+
 # # first ensure our target directory exists
 # - file: dest=/etc/fooapp state=directory
 #
