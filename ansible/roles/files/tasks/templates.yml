@@ -5,7 +5,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "{{ source }}{{ item }}"
-    backup: yes
+    # backup: yes
     # force: yes
   # args:
   #   creates: "{{ source }}{{ item.item }}"

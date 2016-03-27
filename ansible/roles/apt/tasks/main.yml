@@ -7,7 +7,7 @@
   apt: upgrade=yes
   when: upgrade_packages
 
-- name: Install apt package
+- name: Install apt packages
   apt: name={{ item }} state=latest
   with_items: "{{ apt_packages }}"
   when: install_packages

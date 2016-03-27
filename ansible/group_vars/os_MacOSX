@@ -1,10 +1,36 @@
----
-# vi: ft=yaml
+--- # vi: ft=yaml
 
-git_credential: osxkeychain
+git_credential_helper: osxkeychain
 
 homebrew_packages:
+  # - ack
+  - bash
+  - bash-completion
+  - coreutils
+  - findutils
+  # - moreutils
+  # - grc
+  - imagemagick
+  - nmap
+  # - openssl
+  # - rbenv
   - tree
+  - wget
+  # - youtube-dl
 
 homebrew_casks:
+  # - dropbox
+  - firefox
+  - google-chrome
+  - little-snitch
+  # - robomongo
+  # - sequel-pro
+  # - skype
+  # - slack
+  # - torbrowser
+  - transmission
+  - transmit
+  # - tunnelbear
   - vagrant
+  - virtualbox
+  - vlc

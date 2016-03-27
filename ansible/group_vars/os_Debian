@@ -1,4 +1,8 @@
----
-# vi: ft=yaml
+--- # vi: ft=yaml
+
 apt_packages:
+  - ca-certificates
+  - curl
+  - locate
+  # - lynx
   - tree

@@ -5,6 +5,9 @@
 #- include: debian.yml
 #  when: ansible_os_family == 'Debian'
 
+- include: ../../files/tasks/templates.yml
+- include: ../../files/tasks/symlink_items.yml
+
 - name: Install npm packages globally
   npm: name={{ item }} state=present global=yes # path=~/.node_modules
   with_items: "{{ npm_global_packages }}"

@@ -1,12 +1,20 @@
----
-# vi: ft=yaml
+--- # vi: ft=yaml
+
+# Author
+full_name: Guillaume Frichet
+user_name: LEI
+email: guillaume.frichet@gmail.com
+
+# Role specific
+git_credential_helper: cache
+git_email: "{{ email }}"
+npm_email: "{{ email }}"
+
+# Targets
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/.dotfiles"
 
-full_name: Guillaume Frichet
-user_name: LEI
-git_email: guillaume.frichet@gmail.com #flexnetwork.fr
-
-# vim_install_plugins: yes
+# Options
 enable_backup: yes
 backup_symlinks: yes
+# vim_install_plugins: yes

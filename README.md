@@ -1,15 +1,9 @@
-# .dotfiles
+# Ansible dotfiles
 
-## Installation
+## TODO
 
-    $ cd
-    $ git clone https://github.com/LEI/dotfiles.git .dotfiles
-    $ .dotfiles/bin/dot
+- Seil / Karabiner
 
-### vim
-
-    :PlugInstall
-
-### tmux
+## tmux
 
     C-a (prefix) + I
