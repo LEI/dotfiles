@@ -1,12 +1,13 @@
 ---
-- include: register_paths.yml
+- include: targets.yml
 
-- name: Gather file info
+- name: Check symlink destination
   stat:
     path: "{{ destination }}{{ prefix|default('') }}{{ item }}"
     follow: false
-  register: stat
+  register: backup_files
   with_items: "{{ files }}"
+  when: enable_backup
   # failed_when: false
 
 - include: backups.yml
@@ -21,9 +22,9 @@
 #   with_items: "{{ symlinks }}"
 
 # Source relative to dot_root, destination relative to dot_home
-- name: Symlink files
+- name: Create symbolic links
   file:
-    src: "{{ source }}{{ item.src|default(item) }}"
+    src: "{{ source }}{{ item.src|default(item)|basename }}"
     dest: "{{ destination }}{{ prefix|default('') }}{{ item.dst|default(item)|basename }}"
     state: link
   with_items: "{{ files }}"

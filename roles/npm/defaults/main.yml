@@ -1,6 +1,6 @@
 ---
 paths:
-  src: ./roles/npm/files
+  src: roles/npm/files
   dst:
 
 prefix: .
@@ -8,8 +8,7 @@ prefix: .
 templates:
   - npmrc
 
-files:
-  - npmrc
+files: []
 
 npm_global_packages:
   - bower

@@ -12,6 +12,7 @@ dot_root: "{{ dot_home }}/.dotfiles"
 # Options
 enable_backup: yes
 backup_symlinks: yes
+backup_templates: yes
 
 # git
 git_email: "{{ email }}"

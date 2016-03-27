@@ -7,7 +7,7 @@
   with_items:
     - hammerspoon
 
-- include: ../../files/tasks/{{ action|default('sym') }}link_items.yml
+- include: ../../files/tasks/{{ action|default('sym') }}links.yml
 
 # - name: Symlink Hamerspoon configuration
 #   file:

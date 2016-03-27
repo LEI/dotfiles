@@ -7,7 +7,7 @@
 
 - include: ../../files/tasks/templates.yml
 
-- include: ../../files/tasks/symlink_items.yml
+- include: ../../files/tasks/symlinks.yml
 # # Source relative to dot_root, destination relative to dot_home
 # - name: Symlink items
 #   file:

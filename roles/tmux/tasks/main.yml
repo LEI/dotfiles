@@ -9,7 +9,7 @@
 
 - include: ../../files/tasks/templates.yml
 
-- include: ../../files/tasks/symlink_items.yml
+- include: ../../files/tasks/symlinks.yml
 
 - name: Source ~/.tmux/tmux.conf from ~/.tmux.conf
   lineinfile:
@@ -35,4 +35,4 @@
 #   # register: files
 #   with_items: "{{ symlinks }}"
 #   # when: item.changed
-#   notify: symlink_items
+#   notify: symlinks

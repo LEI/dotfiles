@@ -1,11 +1,32 @@
 ---
-- include: register_paths.yml
+- include: targets.yml
+
+- name: Check template destination
+  stat:
+    path: "{{ destination }}{{ prefix|default('') }}{{ item }}"
+    follow: false
+  register: backup_files
+  with_items: "{{ templates }}"
+  when: enable_backup
+  # failed_when: false
+
+# - name: Backup templates
+#   vars:
+#     dst: "{{ destination }}{{ prefix|default('') }}{{ item.item }}"
+#   command: "mv {{ dst }} {{ dst }}.{{ backup_ext|default('bak') }}"
+#   args:
+#     creates: "{{ dst }}.{{ backup_ext|default('bak') }}"
+#   # with_items: "{{ stat.results|map(attribute='item')|map(attribute='stat')|list }}"
+#   with_items: "{{ backup_files.results }}"
+#   when: enable_backup and item.stat.exists and backup_templates
+#     # (backup_templates and item.stat.path != source + item.item)
+#   no_log: yes
 
 - name: Generate templates
   template:
-    src: "{{ item }}.j2"
-    dest: "{{ source }}{{ item }}"
-    # backup: yes
+    src: "{{ item.src|default(item) }}.j2"
+    dest: "{{ destination }}{{ prefix|default('') }}{{ item.dst|default(item) }}"
+    backup: "{{ 'yes' if backup_templates else 'no' }}"
     # force: yes
   # args:
   #   creates: "{{ source }}{{ item.item }}"
