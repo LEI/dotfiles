@@ -1,7 +1,10 @@
+---
 # Trailing slash is important
 paths:
-  src: tmux
+  src: ansible/roles/tmux/files
   dst: .tmux
+
+prefix:
 
 files:
  - tmux.conf

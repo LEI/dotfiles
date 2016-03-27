@@ -1,7 +1,12 @@
+---
 paths:
   src: ansible/roles/git/files
   dst:
-  prefix: .
+
+prefix: .
+
+templates:
+  - gitconfig
 
 files:
   - gitignore

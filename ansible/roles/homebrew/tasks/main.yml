@@ -1,3 +1,4 @@
+---
 - name: Update Homebrew
   homebrew: update_homebrew=yes
   when: update_packages
@@ -9,3 +10,5 @@
 - name: Install Homebrew packages
   homebrew: name={{ item }} state=latest
   with_items: "{{ homebrew_packages }}"
+
+# TODO: casks

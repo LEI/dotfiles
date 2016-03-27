@@ -3,6 +3,6 @@
 - name: Symlink dict
   file:
     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.key|default(item) }}"
-    dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ paths.prefix|default('') }}{{ item.value|default(item) }}"
+    dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ prefix|default('') }}{{ item.value|default(item) }}"
     state: link
   with_dict: "{{ symlinks }}"

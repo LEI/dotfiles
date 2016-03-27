@@ -1,6 +1,9 @@
+---
 paths:
   src: ansible/roles/vim/files
   dst: .vim
+
+prefix:
 
 files:
   - vimrc

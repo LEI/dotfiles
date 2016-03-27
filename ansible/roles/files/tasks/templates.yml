@@ -1,10 +1,38 @@
+---
+- include: register_paths.yml
+
 - name: Generate templates
   template:
-    src: "{{ item.item }}.j2"
-    dest: "{{ dot_root }}/{{ paths.src + '/' if paths.src else '' }}{{ item.item }}"
+    src: "{{ item }}.j2"
+    dest: "{{ source }}{{ item }}"
     backup: yes
-  with_items: "{{ stat.results }}"
-  # when: not item.stat.exists
+    # force: yes
+  # args:
+  #   creates: "{{ source }}{{ item.item }}"
+  with_items: "{{ templates }}"
+  # ignore_errors: True
+  # failed_when: not item.stat.exists
+  # when: item.stat.exists == false
+
+# - name: Looking for templates
+#   template:
+#     src: "{{ item.item }}.j2"
+#     dest: "{{ source }}{{ item.item }}"
+#     backup: yes
+#     # force: yes
+#   # args:
+#   #   creates: "{{ source }}{{ item.item }}"
+#   register: templates
+#   with_items: "{{ stat.results }}"
+#   ignore_errors: True
+#   # failed_when: not item.stat.exists
+#   # when: item.stat.exists == false
+
+# - name: fail the play if the previous command did not succeed
+#   fail: msg={{ item.msg }}
+#   when: item.failed|default(False) and 'No such' in item.msg
+#   with_items: "{{ templates.results }}"
+#   # when: "'FAILED' in templates.results"
 
 # - name: Backup files
 #   command: "mv  {{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ item.item }}.{{ backup_ext|default('bak') }}"
