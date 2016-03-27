@@ -1,0 +1,15 @@
+---
+# FIXME: do not copy broken symlink (stat follow: true?)
+- name: Backup files
+  vars:
+    dst: "{{ destination }}{{ prefix|default('') }}{{ item.item }}"
+  command: "mv {{ dst }} {{ dst }}.{{ backup_ext|default('bak') }}"
+  args:
+    creates: "{{ dst }}.{{ backup_ext|default('bak') }}"
+  # with_items: "{{ stat.results|map(attribute='item')|map(attribute='stat')|list }}"
+  with_items: "{{ stat.results }}"
+  when: item.stat.exists and
+    (not item.stat.islnk or
+    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != source + item.item))
+    # (item.stat.islnk == true and item.stat.lnk_source != "{{ dot_root }}/{{ paths.src + '/' if paths.src else '' }}{{ item.item }}")
+  no_log: yes

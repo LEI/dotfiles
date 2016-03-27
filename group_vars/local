@@ -1,0 +1,21 @@
+--- # vi: ft=yaml
+
+# General
+full_name: Guillaume Frichet
+user_name: LEI
+email: guillaume.frichet@gmail.com
+
+# Source and destination
+dot_home: "{{ '~' | expanduser }}"
+dot_root: "{{ dot_home }}/.dotfiles"
+
+# Options
+enable_backup: yes
+backup_symlinks: yes
+
+# git
+git_email: "{{ email }}"
+git_credential_helper: cache
+
+# npm
+npm_email: "{{ email }}"

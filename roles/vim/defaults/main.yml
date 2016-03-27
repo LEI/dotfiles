@@ -1,0 +1,16 @@
+---
+paths:
+  src: ./roles/vim/files
+  dst: .vim
+
+prefix:
+
+files:
+  - vimrc
+  - autoload
+  - colors
+  - ftdetect
+  - ftplugin
+  - plugin
+
+vim_install_plugins: no

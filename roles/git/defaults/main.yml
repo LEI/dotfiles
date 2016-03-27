@@ -1,0 +1,13 @@
+---
+paths:
+  src: ./roles/git/files
+  dst:
+
+prefix: .
+
+templates:
+  - gitconfig
+
+files:
+  - gitignore
+  - gitconfig
