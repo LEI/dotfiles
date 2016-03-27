@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Usage: e [<path>]
+# Quick shortcut to an editor
+# e: opens the current directory in your editor
+# e /usr/local: opens the specified directory in your editor
+
+# github.com/holman/dotfiles/blob/master/bin/e
+
+if [[ -z "$EDITOR" ]]; then
+  echo "\$EDITOR is undefined"
+  exit 1
+fi
+
+if [[ "$1" = "" ]] ; then
+  exec $EDITOR .
+else
+  exec $EDITOR "$1"
+fi

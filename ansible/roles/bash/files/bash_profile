@@ -1,0 +1,5 @@
+# .bash_profile
+
+if [ -f ~/.bashrc ]; then
+	[ -n "$PS1" ] && source ~/.bashrc
+fi

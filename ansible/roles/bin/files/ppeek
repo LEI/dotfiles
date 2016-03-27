@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Usage: ppeek [<prefix>]
+# Read lines from standard input and write to both standard output and
+# standard error, useful for peeking in on a pipeline
+
+# github.com/rtomayko/dotfiles/blob/rtomayko/bin/ppeek
+
+set -e
+
+ppeek() {
+  prefix="${1:-> }"
+
+  while read -r line
+  do echo "$line"
+     echo "$prefix$line" 1>&2
+  done
+
+  exit 0
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && ppeek "$@"
