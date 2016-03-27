@@ -2,7 +2,11 @@
 
 ## TODO
 
-- Seil / Karabiner
+- Defaults (sh) [osx]
+- Apple (terminal.scpt) [osx]
+- Casks [homebrew] + Karabiner & Seil script [?]
+- mutt
+- mintty?
 
 ## tmux
 
