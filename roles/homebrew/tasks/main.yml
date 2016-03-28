@@ -1,14 +1,8 @@
 ---
-- name: Update Homebrew
+- name: Update homebrew
   homebrew: update_homebrew=yes
-  when: update_packages
+  when: packages_update
 
-- name: Update Homebrew packages
+- name: Update homebrew packages
   homebrew: upgrade_all=yes
-  when: upgrade_packages
-
-- name: Install Homebrew packages
-  homebrew: name={{ item }} state=latest
-  with_items: "{{ homebrew_packages }}"
-
-# TODO: casks
+  when: packages_upgrade

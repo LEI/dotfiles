@@ -1,13 +1,6 @@
 ---
-- fail: msg="Hammerspoon is for OSX only"
-  when: ansible_os_family != 'Darwin'
 
-- name: Install Hammerspoon
-  homebrew_cask: name={{ item }} state=present
-  with_items:
-    - hammerspoon
-
-- include: ../../files/tasks/{{ action|default('sym') }}links.yml
+# - include: "{{ lib }}/{{ action|default('sym') }}links.yml"
 
 # - name: Symlink Hamerspoon configuration
 #   file:

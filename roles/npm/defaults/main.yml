@@ -1,15 +1,4 @@
 ---
-paths:
-  src: roles/npm/files
-  dst:
-
-prefix: .
-
-templates:
-  - npmrc
-
-files: []
-
 npm_global_packages:
   - bower
   - gulp

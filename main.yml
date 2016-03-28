@@ -1,8 +1,4 @@
 ---
-# - name: Gathering facts
-#   hosts: local
-#   gather_facts: yes
-
 - name: Group by distribution
   hosts: local
   tasks:
@@ -15,18 +11,23 @@
   hosts: os_debian
   tags: ['deb']
   roles:
-    - {role: apt, tags: ['pkg','apt'], become: yes}
+    - {role: apt, tags: ['apt','pkg'], packages: "{{ apt_packages }}"}
 
 - name: MacOSX packages
   hosts: os_macosx
   tags: ['osx']
   roles:
-    - {role: homebrew, tags: ['pkg','brew']}
+    - {role: brew, tags: ['brew','pkg'], packages: "{{ brew_packages }}"}
+    # - {role: cask, tags: ['brew','cask'], packages: "{{ cask_apps }}"}
     - {role: hammerspoon, tags: ['ws','hs']}
     # - {role: osx, tags:['defaults']}
 
 - name: Setup local environment
   hosts: local
+  # FIXME: disable duplicates roles (apt-get, homebrew)
+  vars:
+    packages_update: no
+    packages_upgrad: no
   # pre_tasks:
   #   - name: Update repository
   #     git:
@@ -43,5 +44,5 @@
     - {role: vim, tags: ['vim']}
     - {role: bash, tags: ['bash']}
     - {role: bin, tags: ['bin']}
-    - {role: files, tags: ['cfg']}
+    # - {role: files, tags: ['cfg']}
 

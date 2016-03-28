@@ -1,0 +1,20 @@
+---
+# - name: "Register {{ name }} source and destination"
+#   set_fact:
+#     source: "{{ dot_root }}{{ '/roles/' + name + '/templates' if name else '' }}"
+#     destination: "{{ dot_home }}{{ '/' + templates_destination if templates_destination else '' }}"
+
+# - name: "Ensure {{ name }} destination exists"
+#   file:
+#     path: "{{ item }}"
+#     state: directory
+#   with_items:
+#     - "{{ destination }}"
+
+- name: "Generate {{ role_dir }} templates"
+  template:
+    src: "{{ source }}/{{ item.src|default(item) }}.j2"
+    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dst|default(item) }}"
+    backup: "{{ 'yes' if backup_enable and backup_templates else 'no' }}"
+    # force: yes
+  with_items: "{{ templates }}"

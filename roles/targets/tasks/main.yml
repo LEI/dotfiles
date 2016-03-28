@@ -1,0 +1,53 @@
+---
+- name: "Register {{ role_dir }} source and destination"
+  # set_fact:
+  #   "{{ item.key }}": "{{ item.value.root }}/{{ item.value ...".
+  # with_dict:
+  set_fact:
+    # source: "{{ dot_root }}" #{{ '/' + paths.src if paths.src else 'roles/' + role_name  }}"
+    # destination: "{{ dot_home }}" #{{ '/' + paths.dst if paths.dst else '' }}"
+    source: "{{ dot_root }}{{ '/' + vars[directory + '_source'] if vars[directory + '_source'] else '/roles/' + role_dir + '/' + directory if role_dir else '' }}"
+    destination: "{{ dot_home }}{{ '/' + vars[directory + '_destination'] if vars[directory + '_destination'] else '' }}"
+
+# - debug:
+#     msg:
+#       "1": "{{ source }}"
+#       "2": "{{ destination }}"
+
+# - name: Source #"{{ name|default(source) }}"
+#   set_fact:
+#     "{{ dir }}_source": "{{ source }}/roles/{{ name }}/{{ dir }}"
+#   when: name is defined
+
+# - name: Source
+#   set_fact:
+#     "{{ dir }}_source": "{{ source }}"
+#   when: name is undefined
+
+# # - debug: msg={{ hostvars[ansible_host] }}
+
+# - name: Destination
+#   set_fact:
+#     "{{ dir }}_destination": "{{ destination }}{{ '/' + vars[dir + '_destination'] if vars[dir + '_destination'] else '' }}"
+#   when: "{{ dir }}_destination is defined"
+
+# - name: Destination
+#   set_fact:
+#     "{{ dir }}_destination": "{{ destination }}"
+#   when: "{{ dir }}_destination is undefined"
+
+# - debug:
+#     msg:
+#       source: "{{ source }}"
+#       destination: "{{ destination }}"
+#       # dir: dir
+#       # dir_source: "{{ vars[dir + '_source'] }}"
+#       # dir_destination: "{{ vars[dir + '_destination'] }}"
+
+- name: "Ensure {{ role_dir }} destination exists"
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    # - "{{ source }}"
+    - "{{ destination }}"

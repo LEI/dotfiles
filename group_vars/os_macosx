@@ -1,8 +1,9 @@
---- # vi: ft=yaml
+---
+# vi: ft=yaml
 
 git_credential_helper: osxkeychain
 
-homebrew_packages:
+brew_packages:
   # - ack
   - bash
   - bash-completion
@@ -18,7 +19,7 @@ homebrew_packages:
   - wget
   # - youtube-dl
 
-homebrew_casks:
+cask_apps:
   # - dropbox
   - firefox
   - google-chrome

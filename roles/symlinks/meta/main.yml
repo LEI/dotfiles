@@ -1,0 +1,7 @@
+---
+allow_duplicates: yes
+dependencies:
+  - role: targets
+    directory: files
+  - role: backup
+    when: backup_enable

@@ -1,0 +1,8 @@
+---
+dependencies:
+  - role: brew
+    packages:
+      - hammerspoon
+    when: "ansible_os_family == 'Darwin'"
+  - role: symlinks
+    role_dir: hammerspoon

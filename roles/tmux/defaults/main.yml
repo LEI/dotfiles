@@ -1,16 +1,4 @@
 ---
-paths:
-  src: roles/tmux/files
-  dst: .tmux
-
-prefix:
-
-templates:
-  - tmux.conf
-
-files:
-  - tmux.conf
-
 tmux_plugins:
   # - battery
   - tmux-plugins/tmux-resurrect

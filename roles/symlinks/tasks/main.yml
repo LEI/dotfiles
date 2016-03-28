@@ -1,0 +1,20 @@
+---
+# - name: "Register {{ name }} source and destination"
+#   set_fact:
+#     source: "{{ dot_root }}{{ '/roles/' + name + '/files' if name else '' }}"
+#     destination: "{{ dot_home }}{{ '/' + files_destination if files_destination else '' }}"
+
+# - name: "Ensure {{ name }} destination exists"
+#   file:
+#     path: "{{ item }}"
+#     state: directory
+#   with_items:
+#     - "{{ destination }}"
+
+# Source relative to dot_root, destination relative to dot_home |basename?
+- name: "Create {{ role_dir }} symlinks : {{ destination }}"
+  file:
+    src: "{{ source }}/{{ item.src|default(item) }}"
+    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dest|default(item) }}"
+    state: link
+  with_items: "{{ files }}"
