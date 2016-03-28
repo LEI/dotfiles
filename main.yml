@@ -3,25 +3,23 @@
 #   hosts: local
 #   gather_facts: yes
 
-- name: Bootstrap dotfiles and install packages
+- name: Group by distribution
   hosts: local
   tasks:
-    - name: "Distribution: {{ ansible_distribution }}"
-      group_by: key=os_{{ ansible_distribution }}
+    - name: "os : {{ ansible_distribution }}"
+      group_by: key=os_{{ ansible_distribution|lower }}
       tags:
         - always
 
-- name: Debian
-  hosts: os_Debian
-  tags:
-    - deb
+- name: Debian packages
+  hosts: os_debian
+  tags: ['deb']
   roles:
     - {role: apt, tags: ['pkg','apt'], become: yes}
 
-- name: Mac OS X
-  hosts: os_MacOSX
-  tags:
-    - osx
+- name: MacOSX packages
+  hosts: os_macosx
+  tags: ['osx']
   roles:
     - {role: homebrew, tags: ['pkg','brew']}
     - {role: hammerspoon, tags: ['ws','hs']}
