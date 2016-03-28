@@ -2,13 +2,16 @@ import json
 
 class FilterModule(object):
     def filters(self):
-      return {'stat_log': stat_log}
+        return {
+          'stat': stat_log
+        }
 
-def stat_log(a):
+def stat_log(data):
+    for item in data:
+        item = item
+    return data
     # r = '%s - %s' % (a['key'], a['value']['svn_tag'])
     # return r
-    o = {item: a.item, stat: a.stat}
-    return o
 
 # # import operator
 # # def sort_multi(L,*operators):
