@@ -1,0 +1,14 @@
+---
+- name: Common
+  hosts: all
+  gather_facts: no
+  tags: [common, home]
+
+  roles:
+    - {role: git, tags: [git]}
+    - {role: npm, tags: [node, npm]}
+    - {role: tmux, tags: [tmux]}
+    - {role: vim, tags: [vim]}
+    - {role: bash, tags: [bash]}
+    - {role: bin, tags: [bin]}
+    # - {role: files, tags: [cfg]}

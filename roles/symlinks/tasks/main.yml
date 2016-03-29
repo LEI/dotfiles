@@ -1,6 +1,6 @@
 ---
 # Source relative to dot_root, destination relative to dot_home |basename?
-- name: "{{ role_dir }} : Create symlinks in {{ destination }}"
+- name: "Create {{ role_dir }} symlinks in {{ destination }}"
   file:
     src: "{{ item }}"
     dest: "{{ destination }}/{{ prefix|default('') }}{{ item|basename }}"

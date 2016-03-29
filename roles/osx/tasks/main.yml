@@ -1,0 +1,5 @@
+---
+# docs.ansible.com/ansible/script_module.html
+- name: Setup OSX defaults
+  debug: msg={{ osx_defaults }}
+  # script: ..

@@ -11,7 +11,7 @@
 #   with_items:
 #     - "{{ destination }}"
 
-- name: "{{ role_dir }} : Generate templates in {{ destination }}"
+- name: "Generate {{ role_dir }} templates in {{ destination }}"
   template:
     src: "{{ item }}"
     dest: "{{ destination }}/{{ prefix|default('') }}{{ item|basename|regex_replace('.j2','') }}"

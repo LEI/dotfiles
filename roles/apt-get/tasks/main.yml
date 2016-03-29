@@ -1,10 +1,15 @@
 ---
+# TODO: Package module? docs.ansible.com/ansible/package_module.html
+
 - name: Update apt cache
-  apt: update_cache=yes
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_time|default('') }}"
   when: packages_update
   become: yes
 
 - name: Upgrade apt packages
-  apt: upgrade=yes
+  apt:
+    upgrade: yes
   when: packages_upgrade
   become: yes

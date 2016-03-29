@@ -1,0 +1,10 @@
+---
+- name: Debian
+  hosts: os_debian
+  gather_facts: no
+  tags: [deb]
+
+  roles:
+    - {role: apt, tags: [apt, pkg], packages: "{{ apt_packages }}"}
+    - {role: debops.nodejs, tags: [npm, node]}
+

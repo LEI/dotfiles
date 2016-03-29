@@ -5,6 +5,9 @@
 # dot_dir: .dotfiles
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
+# dot_repo: git@github.com:LEI/dotfiles.git
+dot_repo: git://github.com/LEI/dotfiles.git
+dot_version: ansible
 
 # Options
 # packages_update: yes
