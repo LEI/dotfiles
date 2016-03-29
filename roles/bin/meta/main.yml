@@ -1,4 +1,8 @@
 ---
 dependencies:
-  - role: symlinks
+
+  - role: symlink
     role_dir: bin
+    prefix:
+    files_source: bin
+    files_destination: bin

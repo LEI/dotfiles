@@ -1,28 +1,23 @@
 ---
 # vi: ft=yaml
 
+# {{ inventory_dir }}
 # Source and destination
-# dot_dir: .dotfiles
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
 # dot_repo: git@github.com:LEI/dotfiles.git
-dot_repo: git://github.com/LEI/dotfiles.git
-dot_version: ansible
 
 # Options
-# packages_update: yes
-# packages_upgrade: yes
-# packages_install: yes
+find_options: -maxdepth 0 -print ! -name '*~'
+log_enable: yes
 # backup_enable: yes
 # backup_files: yes
 # backup_symlinks: no
 # backup_templates: yes
-find_options: -maxdepth 0 -print ! -name '*~'
-
-# User
-full_name: Guillaume Frichet
-user_name: LEI
-email: guillaume.frichet@gmail.com
+# backup_log: no
+# packages_update: yes
+# packages_upgrade: yes
+# packages_install: yes
 
 # git
 git_name: "{{ full_name }}"
@@ -34,6 +29,6 @@ npm_user: "{{ user_name }}"
 npm_email: "{{ email }}"
 
 npm_packages:
-  - bower
-  - gulp
-  - jshint
+  - name: bower
+  - name: gulp
+  - name: jshint

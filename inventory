@@ -2,4 +2,12 @@
 localhost
 
 [local:vars]
-ansible_connection=local
+ansible_connection = local
+
+dot_dir = .dotfiles
+dot_repo = git://github.com/LEI/dotfiles.git
+dot_version = ansible
+
+full_name = Guillaume Frichet
+email = guillaume.frichet@gmail.com
+user_name = LEI
