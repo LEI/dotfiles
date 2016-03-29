@@ -1,20 +1,29 @@
 ---
 # github.com/mjanser/ansible-role-tmux
 
+- name: Ensure ~/.tmux.conf exists
+  copy:
+    content: ""
+    dest: "{{ dot_home }}/.tmux.conf"
+    force: no
+
 - name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
   lineinfile:
     dest: "{{ dot_home }}/.tmux.conf"
     line: "source ~/.tmux/tmux.conf"
+    backup: yes
     create: yes
+    state: present
   # become: yes
   # become_user: "{{ item }}"
   # when: item in home_dirs.stdout_lines
   # with_items: "{{ tmux_users }}"
 
-- name: Ensure .tmux/plugins exists
+- name: Ensure .tmux/plugins directory exists
   file:
     path: "{{ destination }}/plugins"
     state: directory
+    follow: true
 
 - name: Clone tmux plugin manager
   git:

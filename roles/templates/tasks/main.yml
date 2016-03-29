@@ -11,10 +11,13 @@
 #   with_items:
 #     - "{{ destination }}"
 
-- name: "Generate {{ role_dir }} templates"
+- name: "{{ role_dir }} : Generate templates in {{ destination }}"
   template:
-    src: "{{ source }}/{{ item.src|default(item) }}.j2"
-    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dst|default(item) }}"
+    src: "{{ item }}"
+    dest: "{{ destination }}/{{ prefix|default('') }}{{ item|basename|regex_replace('.j2','') }}"
+    # src: "{{ source }}/{{ item.src|default(item) }}.j2"
+    # dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dst|default(item) }}"
     backup: "{{ 'yes' if backup_enable and backup_templates else 'no' }}"
     # force: yes
-  with_items: "{{ templates }}"
+  with_lines: "find {{ source }}/* {{ find_options }}"
+  # with_items: "{{ templates }}"

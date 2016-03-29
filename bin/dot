@@ -2,7 +2,7 @@
 
 [[ -z "$DOT_ROOT" ]] && DOT_ROOT="$HOME/.dotfiles"
 
-install_ansible() {
+run_ansible() {
   local uname=$(uname -s)
   local ansible=$(which ansible)
   local playbook="main.yml"
@@ -28,6 +28,9 @@ install_ansible() {
   fi
 
   cd "$DOT_ROOT"
+
+  # -i inventory
+  # -K
   ansible-playbook "$playbook" "$@"
 }
 
@@ -48,4 +51,4 @@ install_ansible() {
 # DOT_SCRIPT="$DOT_ROOT/script"
 # DOT_RC="$DOT_ROOT/.dotrc"
 
-[[ "$0" == "$BASH_SOURCE" ]] && install_ansible "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"

@@ -1,0 +1,7 @@
+---
+- name: Cask applications
+  homebrew_cask:
+    name: "{{ item.name|default(item) }}"
+    state: "{{ item.state|default(casks_state) }}"
+  with_items: "{{ packages }}"
+  when: casks_install

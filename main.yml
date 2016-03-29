@@ -1,33 +1,35 @@
 ---
-- name: Group by distribution
-  hosts: local
+- hosts: all
   tasks:
-    - name: "os : {{ ansible_distribution }}"
+    - name: "Group hosts by OS distribution"
       group_by: key=os_{{ ansible_distribution|lower }}
-      tags:
-        - always
+      tags: ['always']
 
-- name: Debian packages
+- name: "Debian"
   hosts: os_debian
   tags: ['deb']
   roles:
+    - {role: apt-get}
     - {role: apt, tags: ['apt','pkg'], packages: "{{ apt_packages }}"}
+    - {role: debops.nodejs, tags: ['npm', 'node']}
 
-- name: MacOSX packages
+- name: "MacOSX"
   hosts: os_macosx
   tags: ['osx']
   roles:
+    - {role: homebrew}
     - {role: brew, tags: ['brew','pkg'], packages: "{{ brew_packages }}"}
-    # - {role: cask, tags: ['brew','cask'], packages: "{{ cask_apps }}"}
+    - {role: cask, tags: ['brew','cask'], packages: "{{ brew_casks }}"}
+    - {role: brew, tags: ['npm', 'node'], packages: ['node']}
     - {role: hammerspoon, tags: ['ws','hs']}
     # - {role: osx, tags:['defaults']}
 
-- name: Setup local environment
+- name: "setup : Development environment"
   hosts: local
-  # FIXME: disable duplicates roles (apt-get, homebrew)
-  vars:
-    packages_update: no
-    packages_upgrad: no
+  # # FIXME: disable duplicates roles (apt-get, homebrew)
+  # vars:
+  #   packages_update: no
+  #   packages_upgrade: no
   # pre_tasks:
   #   - name: Update repository
   #     git:

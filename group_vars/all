@@ -14,6 +14,7 @@ dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
 # backup_files: yes
 # backup_symlinks: no
 # backup_templates: yes
+find_options: -maxdepth 0 -print ! -name '*~'
 
 # User
 full_name: Guillaume Frichet
@@ -28,3 +29,8 @@ git_credential_helper: cache
 # npm
 npm_user: "{{ user_name }}"
 npm_email: "{{ email }}"
+
+npm_packages:
+  - bower
+  - gulp
+  - jshint

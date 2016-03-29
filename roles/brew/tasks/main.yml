@@ -1,10 +1,8 @@
 ---
-- name: Install homebrew packages
+- name: Homebrew packages
   homebrew:
     name: "{{ item.name|default(item) }}"
     state: "{{ item.state|default(packages_state) }}"
     install_options: "{{ item.install_options|default('') }}"
   with_items: "{{ packages }}"
   when: packages_install
-
-# TODO: casks

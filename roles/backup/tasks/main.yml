@@ -1,19 +1,17 @@
 ---
-- name: "Check {{ role_dir }} files destination"
+- name: "{{ role_dir }} : Check destination files"
   stat:
-    path: "{{ destination }}/{{ prefix|default('') }}{{ item.dest|default(item) }}"
+    path: "{{ destination }}/{{ prefix|default('') }}{{ item|basename }}"
     follow: false
-  register: backup_files
-  with_items: "{{ files }}"
+  with_lines: "find {{ source }}/* {{ find_options }}"
+  # with_items: "{{ source_files.stdout_lines }}"
+  # with_items: "{{ files }}"
   when: backup_enable
+  register: backup_files
 
-# - debug:
-#     msg: "{{ backup_files }}"
-#   when: debug_enable
-
-- name: "Backup existing {{ role_dir }} files"
+- name: "{{ role_dir }} : Backup existing files"
   vars:
-    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.item }}"
+    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.item|basename }}"
   command: "mv {{ dest }} {{ dest }}.{{ backup_ext|default(item.stat.mtime|datetime) }}~"
   args:
     creates: "{{ dest }}.{{ backup_ext|default(item.stat.mtime|datetime) }}~"
@@ -21,6 +19,6 @@
   with_items: "{{ backup_files.results }}"
   when: backup_enable and item.stat.exists and
     ((backup_files and not item.stat.islnk) or
-    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != source + '/' + item.item))
+    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != item.item)) # source + '/' +
     # FIXME: do not backup broken symlinks (stat follow: true?)
   no_log: "{{ not log_enable }}"

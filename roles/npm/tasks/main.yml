@@ -1,5 +1,20 @@
 ---
-- name: Install npm packages globally
-  npm: name={{ item }} state=present global=yes # path=~/.node_modules
-  with_items: "{{ npm_global_packages }}"
-  become: yes
+# - name: Get npm configuration prefix
+#   shell: "npm config get prefix"
+#   register: npm_prefix
+
+# # docs.npmjs.com/getting-started/fixing-npm-permissions
+# - name: Check node_modules permissions
+#   file:
+#     path: "{{ npm_prefix }}/lib/node_modules"
+#     owner: "$(whoami)"
+
+- name: "Install node packages{{ ' globally' if npm_global else '' }}"
+  npm:
+    name: "{{ item.name|default(item) }}"
+    state: "{{ item.state|default(npm_state) }}"
+    global: "{{ item.global|default(npm_global) }}"
+    path: ~/.node_modules
+  with_items: "{{ npm_packages }}"
+  when: npm_install
+  # become: yes

@@ -6,9 +6,9 @@ local caffeine = hs.menubar.new()
 function setCaffeineDisplay(state)
     local result
     if state then
-        caffeine:setIcon("caffeine-on.pdf")
+        caffeine:setIcon("img/caffeine-on.pdf")
     else
-        caffeine:setIcon("caffeine-off.pdf")
+        caffeine:setIcon("img/caffeine-off.pdf")
     end
 end
 
