@@ -5,6 +5,7 @@
 
   # pre_tasks:
   #   - name: Update dotfiles repository
+  #     # tags: []
   #     git:
   #       repo: "{{ dot_repo }}"
   #       dest: "{{ dot_root }}"
