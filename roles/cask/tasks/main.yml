@@ -1,7 +1,20 @@
 ---
-- name: Cask applications
+- name: Install Homebrew Casks
   homebrew_cask:
     name: "{{ item.name|default(item) }}"
     state: "{{ item.state|default(casks_state) }}"
   with_items: "{{ packages }}"
   when: casks_install
+
+# - name: Casks
+#   debug: msg={{ item }}
+#   with_fileglob:
+#     - "*"
+
+# - name: Configure Homebrew Casks
+#   command: "{{ item.1 }}"
+#   args:
+#     executable: "{{ item.0.cli }}"
+#   with_subelements:
+#     - "{{ casks_cli }}"
+#     - options

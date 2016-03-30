@@ -3,3 +3,17 @@ casks_install: yes
 casks_state: present
 
 packages: []
+
+casks_cli:
+
+  # Seil:
+  #
+  # To remap Caps Lock to Escape:
+  #   System Preferences > Keyboard > Modifier Keys
+  #   Caps Lock Key -> No Action
+  #   53: Escape, 80: F19
+  seil:
+    cli: /Applications/Seil.app/Contents/Library/bin/seil
+    options:
+      - set enable_capslock 1
+      - set keycode_capslock 53
