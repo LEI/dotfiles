@@ -3,6 +3,7 @@
   package:
     name: "{{ item.name|default(item) }}"
     state: "{{ item.state|default(packages_state) }}"
+    install_options: no
   with_items: "{{ packages }}"
   when: packages_install
-  become: yes
+  become: "'yes' if ansible_distribution != 'Darwin' else 'no'"

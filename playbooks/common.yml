@@ -6,16 +6,37 @@
 
   roles:
 
-    - {role: common, tags: [cmn]}
-    - {role: bash, tags: [bash]}
-    - {role: bin, tags: [bin]}
-    - {role: git, tags: [git]}
+    - role: bash
+      tags: [bash]
+      files:
+        prefix: .
 
-    - role: vim
-      tags: [vim]
-      prefix: .
-      files_destination: .vim
+    - role: bin
+      tags: [bin]
+      files:
+        src: bin
+        dest: bin
+
+    - role: common
+      tags: [cmn]
+      files:
+        prefix: .
+      templates:
+        prefix: .
+
+    - role: git
+      tags: [git]
+      files:
+        prefix: .
+      templates:
+        prefix: .
 
     - role: tmux
       tags: [tmux]
-      templates_destination: .tmux
+      templates:
+        dest: .tmux
+
+    - role: vim
+      tags: [vim]
+      files:
+        dest: .vim

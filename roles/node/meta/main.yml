@@ -1,0 +1,7 @@
+---
+dependencies:
+
+  - role: package
+    packages:
+      - node
+    when: "ansible_os_family == 'Darwin'"

@@ -13,12 +13,6 @@ dependencies:
 
   - role: template
     role_dir: git
-    prefix: .
-    templates_source:
-    templates_destination:
 
   - role: symlink
     role_dir: git
-    prefix: .
-    files_source:
-    files_destination:

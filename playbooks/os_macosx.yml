@@ -18,21 +18,19 @@
       tags: [pkg]
       packages: "{{ brew_packages }}"
 
-    - role: package
-      tags: [node, npm]
-      packages:
-        - node
-
     - role: cask
       tags: [cask]
       packages: "{{ brew_casks }}"
 
-    - role: npm
-      tags: [npm]
-      # npm_packages: []
+    # Install node and global npm packages
+    - role: node
+      tags: [node, npm]
+      packages: "{{ npm_packages }}"
 
     - role: hammerspoon
       tags: [ws, hs]
+      files:
+        dest: .hammerspoon
 
     # - role: osx
     #   tags:[defaults]

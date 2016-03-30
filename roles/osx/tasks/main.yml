@@ -2,4 +2,4 @@
 # docs.ansible.com/ansible/script_module.html
 - name: Setup OSX defaults
   debug: msg={{ osx_defaults }}
-  # script: ..
+  # script: .. (path relative to role files)

@@ -9,6 +9,7 @@
   when: backup_enable
   register: backup_files
 
+# TODO: use ansible_date_time .date & .time ?
 - name: "Backup existing {{ role_dir }} files"
   vars:
     dest: "{{ destination }}/{{ prefix|default('') }}{{ item.item|basename }}"
