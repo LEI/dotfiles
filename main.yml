@@ -21,10 +21,10 @@
       group_by: key=os_{{ ansible_distribution|lower }}
       tags: [always]
 
-- include: "playbooks/os_debian.yml"
+- include: "playbooks/debian.yml"
   when: ansible_distribution == 'Debian'
 
-- include: "playbooks/os_macosx.yml"
+- include: "playbooks/macosx.yml"
   when: ansible_distribution == 'MacOSX'
 
 - include: "playbooks/common.yml"
