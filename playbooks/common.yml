@@ -1,6 +1,6 @@
 ---
-- name: Common roles
-  hosts: all
+- name: Local development environment
+  hosts: local
   gather_facts: no
   tags: [common]
 
