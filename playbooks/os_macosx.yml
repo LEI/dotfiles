@@ -4,15 +4,10 @@
   gather_facts: no
   tags: [osx]
 
-  # vars_prompt:
-  #   - name: "osx_defaults"
-  #     prompt: "MacOSX defaults"
-  #     default: "test"
-
   roles:
 
     - role: homebrew
-      tags: [brew]
+      tags: [brew, cask]
 
     - role: package
       tags: [pkg]
@@ -33,4 +28,4 @@
         dest: .hammerspoon
 
     # - role: osx
-    #   tags:[defaults]
+    #   tags: [defaults]

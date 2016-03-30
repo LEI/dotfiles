@@ -4,14 +4,15 @@
 - name: "Register {{ role_dir }} source and destination"
   set_fact:
     prefix: "{{ vars[directory]['prefix'] | default('') }}"
-    source: "{{ dot_root }}{{ '/' if vars[directory]['src'] is defined and vars[directory]['src'] else '' }}{{ vars[directory]['src'] | default('/roles/' + role_dir + '/' + directory) | default('') }}"
-    destination: "{{ dot_home }}{{ '/' if vars[directory]['dest'] is defined and vars[directory]['dest'] else '' }}{{ vars[directory]['dest'] | default('') }}"
+    source: "{{ dot_root }}{{ '/' if vars[directory]['src'] | default(false) else '' }}{{ vars[directory]['src'] | default('/roles/' + role_dir + '/' + directory) | default('') }}"
+    destination: "{{ dot_home }}{{ '/' if vars[directory]['dest'] | default(false) else '' }}{{ vars[directory]['dest'] | default('') }}"
 
-- assert:
+- name: Check source path
+  assert:
     that:
       - "source != inventory_dir"
 
-- name: "Ensure {{ role_dir }} targets exists"
+- name: "Ensure {{ role_dir }} targets are directories"
   file:
     path: "{{ item }}"
     state: directory

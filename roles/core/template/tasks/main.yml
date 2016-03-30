@@ -1,19 +1,19 @@
 ---
-- name: "Generate {{ role_dir }} templates => {{ destination }}"
+- name: "Generate templates {{ source }}/* => {{ destination }}"
   template:
     src: "{{ item }}"
-    dest: "{{ destination }}/{{ prefix|default('') }}{{ item|basename|regex_replace('.j2','') }}"
-    # src: "{{ source }}/{{ item.src|default(item) }}.j2"
-    # dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dst|default(item) }}"
+    dest: "{{ destination }}/{{ prefix | default('') }}{{ item | basename | regex_replace('.j2','') }}"
+    # src: "{{ source }}/{{ item.src | default(item) }}.j2"
+    # dest: "{{ destination }}/{{ prefix | default('') }}{{ item.dst | default(item) }}"
     backup: "{{ 'yes' if backup_enable and backup_templates else 'no' }}"
     # force: yes
   with_lines: "find {{ source }}/* {{ find_options }}"
   # with_items: "{{ templates }}"
   register: items
 
-- name: "Log template result"
+- name: "Log {{ role_dir }} template result"
   debug:
-    msg: "=> {{ destination }}/{{ prefix|default('') }}{{ item|basename|regex_replace('.j2','') }}"
-  with_items: "{{ items.results|map(attribute='item')|list }}"
+    msg: " {{ destination }}/{{ prefix | default('') }}{{ item | basename | regex_replace('.j2','') }}"
+  with_items: "{{ items.results | map(attribute='item') | list }}"
   when: log_enable
   # verbosity: 1

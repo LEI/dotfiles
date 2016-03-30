@@ -1,8 +1,8 @@
 ---
 - name: "Check packages state : {{ packages_state }}"
   package:
-    name: "{{ item.name|default(item) }}"
-    state: "{{ item.state|default(packages_state) }}"
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default(packages_state) }}"
     install_options: no
   with_items: "{{ packages }}"
   when: packages_install

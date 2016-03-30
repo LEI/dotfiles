@@ -1,5 +1,19 @@
 ---
+- name: Verify defaults
+  assert:
+    that:
+      - timezone | default('') != ''
+      - osx_defaults.natural_scroll in [true, false]
+      - osx_defaults.notification_center in [true, false]
+      - osx_defaults.ssd_tweaks in [true, false]
+
+- debug: var=osx_defaults
+  when: log_enable
+
 # docs.ansible.com/ansible/script_module.html
-- name: Setup OSX defaults
-  debug: msg={{ osx_defaults }}
+- name: "Generate {{ script }}"
+  template:
+    src: "{{ script }}.j2"
+    dest: "{{ role_path }}/files/{{ script }}"
+  # debug: msg={{ osx_defaults }}
   # script: .. (path relative to role files)

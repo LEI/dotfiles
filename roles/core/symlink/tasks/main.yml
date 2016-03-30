@@ -1,11 +1,11 @@
 ---
-# Source relative to dot_root, destination relative to dot_home |basename?
-- name: "Create {{ role_dir }} symlinks => {{ destination }}"
+# Source relative to dot_root, destination relative to dot_home  | basename?
+- name: "Create symlinks {{ source }}/* => {{ destination }}"
   file:
     src: "{{ item }}"
-    dest: "{{ destination }}/{{ prefix|default('') }}{{ item|basename }}"
-    # src: "{{ source }}/{{ item.src|default(item) }}"
-    # dest: "{{ destination }}/{{ prefix|default('') }}{{ item.dest|default(item) }}"
+    dest: "{{ destination }}/{{ prefix | default('') }}{{ item | basename }}"
+    # src: "{{ source }}/{{ item.src | default(item) }}"
+    # dest: "{{ destination }}/{{ prefix | default('') }}{{ item.dest | default(item) }}"
     state: link
   with_lines: "find {{ source }}/* {{ find_options }}"
   # with_items: "{{ files }}"
@@ -13,14 +13,14 @@
 
 # - name: Symlink dict
 #   file:
-#     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.key|default(item) }}"
-#     dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ prefix|default('') }}{{ item.value|default(item) }}"
+#     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.key | default(item) }}"
+#     dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ prefix | default('') }}{{ item.value | default(item) }}"
 #     state: link
 #   with_dict: "{{ symlinks }}"
 
-- name: "Log symlink result"
+- name: "Log {{ role_dir }} symlink result"
   debug:
-    msg: "=> {{ destination }}/{{ prefix|default('') }}{{ item|basename }}"
-  with_items: "{{ items.results|map(attribute='item')|list }}"
+    msg: " {{ destination }}/{{ prefix | default('') }}{{ item | basename }}"
+  with_items: "{{ items.results | map(attribute='item') | list }}"
   when: log_enable
   # verbosity: 1
