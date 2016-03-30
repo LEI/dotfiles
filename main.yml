@@ -3,15 +3,18 @@
   hosts: local
   gather_facts: yes
 
-  # pre_tasks:
-  #   - name: Update dotfiles repository
-  #     # tags: []
-  #     git:
-  #       repo: "{{ dot_repo }}"
-  #       dest: "{{ dot_root }}"
-  #       version: "{{ dot_version }}"
-  #       update: no
-  #     # ignore_errors: yes
+  pre_tasks:
+    - name: Update dotfiles repository
+      tags: ['repo']
+      git:
+        version: "{{ dot_version }}"
+        repo: "{{ dot_repo }}"
+        dest: "{{ dot_root }}"
+        # Discard any modified files in the working repository
+        force: no
+        # Retrieve new revisions from the origin repository
+        update: no
+      # ignore_errors: yes
 
   tasks:
     - name: "Group hosts by OS distribution"
