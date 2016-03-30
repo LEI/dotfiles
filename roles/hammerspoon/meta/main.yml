@@ -1,8 +1,13 @@
 ---
 dependencies:
+
   - role: cask
     packages:
       - hammerspoon
     when: "ansible_os_family == 'Darwin'"
-  - role: symlinks
+
+  - role: symlink
     role_dir: hammerspoon
+    prefix:
+    files_source:
+    files_destination:

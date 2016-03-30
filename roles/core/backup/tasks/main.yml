@@ -1,0 +1,24 @@
+---
+- name: "Check {{ role_dir }} files"
+  stat:
+    path: "{{ destination }}/{{ prefix|default('') }}{{ item|basename }}"
+    follow: false
+  with_lines: "find {{ source }}/* {{ find_options }}"
+  # with_items: "{{ source_files.stdout_lines }}"
+  # with_items: "{{ files }}"
+  when: backup_enable
+  register: backup_files
+
+- name: "Backup existing {{ role_dir }} files"
+  vars:
+    dest: "{{ destination }}/{{ prefix|default('') }}{{ item.item|basename }}"
+  command: "mv {{ dest }} {{ dest }}.{{ backup_ext|default(item.stat.mtime|datetime) }}~"
+  args:
+    creates: "{{ dest }}.{{ backup_ext|default(item.stat.mtime|datetime) }}~"
+  # with_items: "{{ stat.results|map(attribute='item')|map(attribute='stat')|list }}"
+  with_items: "{{ backup_files.results }}"
+  when: backup_enable and item.stat.exists and
+    ((backup_files and not item.stat.islnk) or
+    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != item.item)) # source + '/' +
+    # FIXME: do not backup broken symlinks (stat follow: true?)
+  no_log: "{{ not backup_log }}"

@@ -5,7 +5,6 @@
 run_ansible() {
   local uname=$(uname -s)
   local ansible=$(which ansible)
-  local playbook="playbooks/main.yml"
 
   cd "$DOT_ROOT"
 
@@ -29,6 +28,9 @@ run_ansible() {
     exit 1
   fi
 
+  ansible-galaxy install -r requirements.yml
+
+  local playbook="main.yml"
   ansible-playbook "$playbook" "$@"
 }
 

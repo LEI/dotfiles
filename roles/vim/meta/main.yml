@@ -1,13 +1,19 @@
 ---
 dependencies:
-  - role: apt
+
+  - role: package
     packages:
       - vim
-    when: "ansible_os_family == 'Debian'"
-  - role: brew
+    when: "ansible_os_family != 'Darwin'"
+
+  - role: package
     packages:
       - name: vim
-        install_options: with-override-system-vi, with-pyhton3
+        install_options: with-override-system-vi #, with-pyhton3
     when: "ansible_os_family == 'Darwin'"
-  - role: symlinks
+
+  - role: symlink
     role_dir: vim
+    # prefix:
+    # files_source:
+    # files_destination: .vim

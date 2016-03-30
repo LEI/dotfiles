@@ -1,8 +1,12 @@
 ---
-- name: Install apt packages
+- name: Update apt cache
   apt:
-    name: "{{ item.name|default(item) }}"
-    state: "{{ item.state|default(packages_state) }}"
-  with_items: "{{ packages }}"
-  when: packages_install
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_time|default('') }}"
+  when: packages_update
+  become: yes
+
+- name: Upgrade apt packages
+  apt: upgrade=yes
+  when: packages_upgrade
   become: yes

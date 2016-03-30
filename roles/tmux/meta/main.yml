@@ -1,13 +1,19 @@
 ---
 dependencies:
-  - role: apt
+
+  - role: package
     packages:
       - tmux
-    when: "ansible_os_family == 'Debian'"
-  - role: brew
-    packages:
-      - tmux
-      # - reattach-to-user-namespace
-    when: "ansible_os_family == 'Darwin'"
-  - role: templates
+
+  #   when: "ansible_os_family == 'Debian'"
+  # - role: brew
+  #   packages:
+  #     - tmux
+  #     # - reattach-to-user-namespace
+  #   when: "ansible_os_family == 'Darwin'"
+  #
+  - role: template
     role_dir: tmux
+    # prefix:
+    # templates_source:
+    # templates_destination: .tmux

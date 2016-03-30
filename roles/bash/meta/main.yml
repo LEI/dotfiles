@@ -1,4 +1,8 @@
 ---
 dependencies:
-  - role: symlinks
+
+  - role: symlink
     role_dir: bash
+    prefix: .
+    files_source:
+    files_destination:

@@ -1,14 +1,21 @@
 ---
-- name: Common
+- name: Common roles
   hosts: all
   gather_facts: no
-  tags: [common, home]
+  tags: [common]
 
   roles:
-    - {role: git, tags: [git]}
-    - {role: npm, tags: [node, npm]}
-    - {role: tmux, tags: [tmux]}
-    - {role: vim, tags: [vim]}
+
+    - {role: common, tags: [cmn]}
     - {role: bash, tags: [bash]}
     - {role: bin, tags: [bin]}
-    # - {role: files, tags: [cfg]}
+    - {role: git, tags: [git]}
+
+    - role: vim
+      tags: [vim]
+      prefix: .
+      files_destination: .vim
+
+    - role: tmux
+      tags: [tmux]
+      templates_destination: .tmux

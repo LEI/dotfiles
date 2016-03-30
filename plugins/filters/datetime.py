@@ -3,10 +3,10 @@ import datetime
 class FilterModule(object):
     def filters(self):
         return {
-            'datetime': format_datetime
+            'datetime': format_timestamp
         }
 
-def format_datetime(value, format='default'):
+def format_timestamp(value, format='default'):
     if format == 'default':
         format = '%Y-%m-%d@%H:%M:%S'
     elif format == 'date':

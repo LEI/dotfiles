@@ -1,14 +1,24 @@
 ---
 dependencies:
-  - role: apt
+
+  - role: package
     packages:
       - git
-    when: "ansible_os_family == 'Debian'"
-  - role: brew
-    packages:
-      - git
-    when: "ansible_os_family == 'Darwin'"
-  - role: templates
+
+  #   when: "ansible_os_family == 'Debian'"
+  # - role: brew
+  #   packages:
+  #     - git
+  #   when: "ansible_os_family == 'Darwin'"
+
+  - role: template
     role_dir: git
-  - role: symlinks
+    prefix: .
+    templates_source:
+    templates_destination:
+
+  - role: symlink
     role_dir: git
+    prefix: .
+    files_source:
+    files_destination:

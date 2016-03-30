@@ -1,0 +1,27 @@
+---
+- name: Setup local host
+  hosts: local
+  gather_facts: yes
+
+  # pre_tasks:
+  #   - name: Update dotfiles repository
+  #     # tags: []
+  #     git:
+  #       repo: "{{ dot_repo }}"
+  #       dest: "{{ dot_root }}"
+  #       version: "{{ dot_version }}"
+  #       update: no
+  #     # ignore_errors: yes
+
+  tasks:
+    - name: "Group hosts by OS distribution"
+      group_by: key=os_{{ ansible_distribution|lower }}
+      tags: [always]
+
+- include: "playbooks/os_debian.yml"
+  when: ansible_distribution == 'Debian'
+
+- include: "playbooks/os_macosx.yml"
+  when: ansible_distribution == 'MacOSX'
+
+- include: "playbooks/common.yml"
