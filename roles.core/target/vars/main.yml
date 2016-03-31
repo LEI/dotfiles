@@ -1,0 +1,4 @@
+---
+prefix: "{{ vars[directory]['prefix'] | default('') }}"
+source: "{{ dot_root }}{{ '/' if vars[directory]['src'] | default(false) else '' }}{{ vars[directory]['src'] | default('/roles/' + role_dir + '/' + directory) | default('') }}"
+destination: "{{ dot_home }}{{ '/' if vars[directory]['dest'] | default(false) else '' }}{{ vars[directory]['dest'] | default('') }}"

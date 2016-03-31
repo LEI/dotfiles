@@ -1,3 +1,36 @@
 ---
 # github.com/geerlingguy/ansible-role-composer
 # github.com/osxstrap/ansible-osx-php
+
+# getcomposer.org/download/
+
+# php -r "readfile('https://getcomposer.org/installer');" > composer-setup.php
+# php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === '41e71d86b40f28e771d4bb662b997f79625196afcca95a5abf44391188c695c6c1456e16154c75a211d238cc3bc5cb47') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+# php composer-setup.php
+# php -r "unlink('composer-setup.php');
+
+- name: Check if Composer is installed
+  stat:
+    path: "{{ composer_path }}"
+  register: composer_bin
+
+- include: install-composer.yml
+  when: not composer_bin.stat.exists
+
+# - name: Ensure Composer is executable
+#   file:
+#     path: "{{ composer_path }}"
+#     mode: a+x
+#     state: file
+
+- name: Self update Composer
+  # composer:
+  #   command: self-update
+  #   working_dir: "{{ composer_home_path }}"
+  shell: "{{ php_executable}} {{ composer_path }} self-update"
+  register: composer_update_result
+  when: composer_update
+  changed_when: "'Updating to version' in composer_update_result.stdout"
+
+- include: global-require.yml
+  when: composer_packages | length > 0

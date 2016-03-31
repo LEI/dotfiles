@@ -6,6 +6,39 @@
 
   roles:
 
+    # Tools
+
+    - role: git
+      tags: [git, vcs]
+      files:
+        prefix: .
+      templates:
+        prefix: .
+
+    - role: npm
+      tags: [npm, js]
+      packages: "{{ npm_packages }}"
+
+    - role: composer
+      tags: [composer, php]
+
+    - role: irssi
+      tags: [irssi, irc]
+      files:
+        dest: .irssi
+      templates:
+        dest: .irssi
+
+    - role: tmux
+      tags: [tmux]
+      templates:
+        dest: .tmux
+
+    - role: vim
+      tags: [vim]
+      files:
+        dest: .vim
+
     # Dotfiles
 
     - role: bash
@@ -25,33 +58,3 @@
         prefix: .
       templates:
         prefix: .
-
-    # Tools
-
-    - role: git
-      tags: [git, vcs]
-      files:
-        prefix: .
-      templates:
-        prefix: .
-
-    - role: npm
-      tags: [npm, js]
-      packages: "{{ npm_packages }}"
-
-    - role: irssi
-      tags: [irssi, irc]
-      files:
-        dest: .irssi
-      templates:
-        dest: .irssi
-
-    - role: tmux
-      tags: [tmux]
-      templates:
-        dest: .tmux
-
-    - role: vim
-      tags: [vim]
-      files:
-        dest: .vim

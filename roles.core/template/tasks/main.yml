@@ -11,7 +11,7 @@
   # with_items: "{{ templates }}"
   register: items
 
-- name: "Log {{ role_dir }} template result"
+- name: "Log {{ role_dir }} templates"
   debug:
     msg: " {{ destination }}/{{ prefix | default('') }}{{ item | basename | regex_replace('.j2','') }}"
   with_items: "{{ items.results | map(attribute='item') | list }}"

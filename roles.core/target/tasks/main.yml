@@ -1,16 +1,10 @@
 ---
 # - debug: var=vars[directory]
 
-- name: "Register {{ role_dir }} source and destination"
-  set_fact:
-    prefix: "{{ vars[directory]['prefix'] | default('') }}"
-    source: "{{ dot_root }}{{ '/' if vars[directory]['src'] | default(false) else '' }}{{ vars[directory]['src'] | default('/roles/' + role_dir + '/' + directory) | default('') }}"
-    destination: "{{ dot_home }}{{ '/' if vars[directory]['dest'] | default(false) else '' }}{{ vars[directory]['dest'] | default('') }}"
-
-- name: Check source path
-  assert:
-    that:
-      - "source != inventory_dir"
+# - name: Check source path
+#   assert:
+#     that:
+#       - "source != inventory_dir"
 
 - name: "Ensure {{ role_dir }} targets are directories"
   file:
@@ -20,22 +14,3 @@
   with_items:
     - "{{ source }}"
     - "{{ destination }}"
-
-# - name: "{{ role_dir }} : Register source and destination"
-#   # set_fact:
-#   #   "{{ item.key }}": "{{ item.value.root }}/{{ item.value ...".
-#   # with_dict:
-#   set_fact:
-#     # source: "{{ dot_root }}" #{{ '/' + paths.src if paths.src else 'roles/' + role_name  }}"
-#     # destination: "{{ dot_home }}" #{{ '/' + paths.dst if paths.dst else '' }}"
-#     source: "{{ dot_root }}{{ '/' + vars[directory + '_source'] if vars[directory + '_source'] else '/roles/' + role_dir + '/' + directory if role_dir else '' }}"
-#     destination: "{{ dot_home }}{{ '/' + vars[directory + '_destination'] if vars[directory + '_destination'] else '' }}"
-
-# - name: "{{ role_dir }} : Ensure targets exists"
-#   file:
-#     path: "{{ item }}"
-#     state: directory
-#     follow: true
-#   with_items:
-#     - "{{ source }}"
-#     - "{{ destination }}"

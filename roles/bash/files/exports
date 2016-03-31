@@ -14,6 +14,6 @@ fi;
 
 # [[ -n "$TMUX" ]] && export TERM=screen-256color
 
-# Specify Homebrew Cask defaults
+# Change Homebrew cask apps default location
 export HOMEBREW_CASK_OPTS="--appdir=/Applications"
 #--caskroom=/etc/Caskroom

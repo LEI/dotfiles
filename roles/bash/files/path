@@ -1,6 +1,11 @@
 # .path
 
 # Add ~/bin
-PATH="$PATH:$HOME/bin"
+# PATH="$PATH:$HOME/bin"
 
-export PATH="/usr/local/sbin:$PATH"
+# export PATH="/usr/local/sbin:$PATH"
+
+# Globally required Composer packages
+COMPOSER_HOME=~/.composer
+COMPOSER_BIN_DIR=vendor/bin
+export PATH="$PATH:$COMPOSER_HOME/$COMPOSER_BIN_DIR"

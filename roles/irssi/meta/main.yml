@@ -1,6 +1,10 @@
 ---
 dependencies:
 
+  - role: package
+    packages:
+      - irssi
+
   - role: symlink
     role_dir: irssi
 

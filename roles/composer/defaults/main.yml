@@ -1,2 +1,14 @@
 ---
+php_executable: php
+
 composer_path: /usr/local/bin/composer
+composer_update: yes
+composer_version: ""
+composer_home_path: "{{ '~/.composer' | expanduser }}"
+
+composer_add_to_path: yes
+composer_packages_release: "@stable"
+composer_packages: []
+  # # Examples:
+  # - laravel/laravel
+  # - { name: phpunit/phpunit, release: "4.7.*" }
