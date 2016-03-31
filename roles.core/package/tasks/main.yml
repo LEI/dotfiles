@@ -4,13 +4,13 @@
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
   with_items: "{{ packages }}"
-  become: yes
-  when: "packages_install and ansible_distribution != 'Darwin'"
+  become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
+  when: packages_install
 
-- name: "Check packages state : {{ packages_state }}"
-  homebrew:
-    name: "{{ item.name | default(item) }}"
-    state: "{{ item.state | default(packages_state) }}"
-    install_options: "{{ item.state | default(packages_state) }}"
-  with_items: "{{ packages }}"
-  when: "packages_install and ansible_distribution == 'Darwin'"
+# - name: "Check packages state : {{ packages_state }}"
+#   homebrew:
+#     name: "{{ item.name | default(item) }}"
+#     state: "{{ item.state | default(packages_state) }}"
+#     install_options: "{{ item.state | default(packages_state) }}"
+#   with_items: "{{ packages }}"
+#   when: "packages_install and ansible_distribution == 'Darwin'"

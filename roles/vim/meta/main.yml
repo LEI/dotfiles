@@ -4,8 +4,8 @@ dependencies:
   - role: package
     packages:
       - name: vim
-        install_options: with-override-system-vi #, with-pyhton3
-    # when: "ansible_os_family == 'Darwin'"
+        # install_options: with-override-system-vi #, with-pyhton3
+    when: "ansible_os_family != 'Darwin'"
 
   - role: symlink
     role_dir: vim
