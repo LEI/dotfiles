@@ -1,17 +1,20 @@
 ---
 vi: ft=yaml
 
-# git
+# Git identity
 git_name: "{{ full_name }}"
 git_email: "{{ email }}"
 git_credential_helper: cache
 
-# npm
+# npm identity
 npm_user: "{{ user_name }}"
 npm_email: "{{ email }}"
 
-# Node modules
+# NodeJS modules
 npm_packages:
   - name: bower
   - name: gulp
   - name: jshint
+
+# IRC identity
+irc_freenode_nick: "{{ user_name }}"

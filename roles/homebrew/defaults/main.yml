@@ -2,6 +2,13 @@
 packages_update: yes
 packages_upgrade: yes
 
-homebrew_taps: []
-
+homebrew_install_script: "https://raw.githubusercontent.com/Homebrew/install/master/install"
+homebrew_install_path: /usr/local
+homebrew_install: yes
 homebrew_cleanup: yes
+
+homebrew_taps: []
+  # - homebrew/dupes
+  # - caskroom/cask
+  # - caskroom/versions
+

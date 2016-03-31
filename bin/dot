@@ -2,12 +2,10 @@
 
 [[ -z "$DOT_ROOT" ]] && DOT_ROOT="$HOME/.dotfiles"
 
-uname=$(uname -s)
+cd "$DOT_ROOT"
 
 run_ansible() {
   local ansible=$(which ansible)
-
-  cd "$DOT_ROOT"
 
   if [[ -n "$ansible" ]] && [[ -x "$ansible" ]]; then
     ansible-galaxy install -r requirements.yml
@@ -20,16 +18,15 @@ run_ansible() {
 }
 
 install_ansible() {
+  local uname=$(uname -s)
+
   case $uname in
     Darwin)
       # xcode-select --install
       # sudo easy_install pip
       # sudo pip install -r requirements.txt
-
-      # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
       ;;
     Linux)
-      # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
       ;;
     *)
       echo "Unsupported platform: $uname"

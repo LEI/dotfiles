@@ -1,4 +1,19 @@
 ---
+# - name: Setup Homebrew install path permissions
+#   file:
+#     path: "{{ homebrew_install_path }}"
+#     group: admin
+#     mode: 0775
+#     state: directory
+#     # recurse: true
+#   become: yes
+
+- name: Ensure Homebrew is installed
+  shell: "ruby -e '$(curl -fsSL {{ homebrew_install_script }})'"
+  args:
+    creates: "{{ homebrew_install_path }}/bin/brew"
+  when: homebrew_install
+
 - name: Update Homebrew
   homebrew: update_homebrew=yes
   when: packages_update
@@ -7,11 +22,11 @@
   homebrew: upgrade_all=yes
   when: packages_upgrade
 
-- name: Ensure Homebrew taps are tapped
+- name: Ensure Homebrew taps are present
   homebrew:
     tap: "{{ item }}"
     state: present
-  with_items: homebrew_taps
+  with_items: "{{ homebrew_taps }}"
 
 # - name: Cleanup Homebrew
 #   shell: brew cleanup
