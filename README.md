@@ -12,4 +12,5 @@
 
 - OS X role (defaults, applescript)
 - Homebrew casks cli (skipped?)
-
+- SSH (ansible vault?)
+- irssi / mutt
