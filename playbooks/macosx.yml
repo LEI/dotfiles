@@ -6,13 +6,14 @@
 
   roles:
 
+    # brew update, upgrade, cleanup
     - role: homebrew
       tags: [brew, cask]
 
     # brew install
     - role: package
       tags: [pkg]
-      packages: "{{ brew_packages }}"
+      packages: "{{ homebrew_packages }}"
 
     # brew cask install
     - role: cask

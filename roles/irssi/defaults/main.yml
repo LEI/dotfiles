@@ -1,0 +1,2 @@
+---
+irc_irssi_autosendcmd: "/msg nickserv identify {{ irc_freenode_pass }}; wait 2000; /window goto nickserv; /wc"

@@ -1,10 +1,12 @@
 ---
-casks_install: yes
-casks_state: present
+homebrew_cask_install: yes
+homebrew_cask_state: present
+homebrew_cask_appdir: /Applications
+homebrew_cask_cleanup: yes
 
-brew_casks: []
+homebrew_cask_apps: []
 
-casks_cli:
+homebrew_cask_cli:
 
   # To remap Caps Lock to Escape:
   #   System Preferences > Keyboard > Modifier Keys

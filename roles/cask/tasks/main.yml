@@ -2,9 +2,15 @@
 - name: Install Homebrew Casks
   homebrew_cask:
     name: "{{ item.name | default(item) }}"
-    state: "{{ item.state | default(casks_state) }}"
-  with_items: "{{ brew_casks }}"
-  when: casks_install
+    state: "{{ item.state | default(homebrew_cask_state) }}"
+  environment:
+    HOMEBREW_CASK_OPTS: "--appdir={{ homebrew_cask_appdir }}"
+  with_items: "{{ homebrew_cask_apps }}"
+  when: homebrew_cask_install
+
+# - name: Cask cleanup
+#   shell: brew cask cleanup
+#   when: cask_cleanup
 
 # - name: Casks
 #   debug: msg={{ item }}

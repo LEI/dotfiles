@@ -19,16 +19,5 @@ log_enable: yes
 # packages_upgrade: yes
 # packages_install: yes
 
-# git
-git_name: "{{ full_name }}"
-git_email: "{{ email }}"
-git_credential_helper: cache
-
-# npm
-npm_user: "{{ user_name }}"
-npm_email: "{{ email }}"
-
-npm_packages:
-  - name: bower
-  - name: gulp
-  - name: jshint
+# Vault
+irc_freenode_pass: "{{ vaul_irc_freenode_pass }}"

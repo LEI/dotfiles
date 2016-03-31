@@ -1,0 +1,17 @@
+---
+vi: ft=yaml
+
+# git
+git_name: "{{ full_name }}"
+git_email: "{{ email }}"
+git_credential_helper: cache
+
+# npm
+npm_user: "{{ user_name }}"
+npm_email: "{{ email }}"
+
+# Node modules
+npm_packages:
+  - name: bower
+  - name: gulp
+  - name: jshint

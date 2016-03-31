@@ -49,3 +49,10 @@
       tags: [vim]
       files:
         dest: .vim
+
+    - role: irssi
+      tags: [irssi, irc]
+      files:
+        dest: .irssi
+      templates:
+        dest: .irssi
