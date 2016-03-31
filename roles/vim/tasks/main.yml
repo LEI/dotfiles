@@ -17,6 +17,7 @@
     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     dest: "{{ destination }}/autoload/plug.vim"
 
+# FIXME: timeout deb? python
 - name: Install plugins
   command: vim +PlugInstall +qall
   when: vim_install_plugins

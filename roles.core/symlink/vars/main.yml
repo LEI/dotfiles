@@ -1,2 +1,4 @@
 ---
-
+prefix: "{{ files.prefix | default('') }}"
+source: "{{ dot_root }}{% if files.src | default(false) %}/{{ files.src }}{% else %}/roles/{{ role_dir }}/files{% endif %}"
+destination: "{{ dot_home }}{% if files.dest | default(false) %}/{{ files.dest }}{% endif %}"

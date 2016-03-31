@@ -1,1 +1,4 @@
 ---
+prefix: "{{ templates.prefix | default('') }}"
+source: "{{ dot_root }}{% if templates.src | default(false) %}/{{ templates.src }}{% else %}/roles/{{ role_dir }}/templates{% endif %}"
+destination: "{{ dot_home }}{% if templates.dest | default(false) %}/{{ templates.dest }}{% endif %}"

@@ -1,6 +1,18 @@
 ---
+- name: Check if npm is installed
+  command: npm -v
+  register: npm_installed_version
+  ignore_errors: yes
+  changed_when: false
+
+# - debug: var=npm_installed_version #.stdout
+
 - include: debian.yml
-  when: ansible_os_family == 'Debian'
+  when: >
+    {{ npm_installed_version.rc | default(false) }} != 0 and
+    ansible_os_family == 'Debian'
 
 - include: redhat.yml
-  when: ansible_os_family == 'RedHat'
+  when: >
+    {{ npm_installed_version.rc | default(false) }} != 0 and
+    ansible_os_family == 'RedHat'

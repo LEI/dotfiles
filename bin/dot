@@ -7,11 +7,11 @@ cd "$DOT_ROOT"
 run_ansible() {
   local ansible=$(which ansible)
 
-  if [[ -n "$ansible" ]] && [[ -x "$ansible" ]]; then
-    ansible-galaxy install -r requirements.yml
-  else
+  if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
     install_ansible
   fi
+
+  # ansible-galaxy install -r requirements.yml
 
   local playbook="main.yml"
   ansible-playbook "$playbook" "$@"
@@ -24,16 +24,16 @@ install_ansible() {
     Darwin)
       # xcode-select --install
       # sudo easy_install pip
-      pip install -r requirements.txt
       ;;
     Linux)
-      sudo pip install -r requirements.txt
       ;;
     *)
       echo "Unsupported platform: $uname"
       exit 1
       ;;
   esac
+
+  pip install -r requirements.txt
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"

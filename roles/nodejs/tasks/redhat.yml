@@ -1,6 +1,8 @@
 ---
 # github.com/geerlingguy/ansible-role-nodejs
-# Requires the EPEL repository on RedHat/CentOS
+
+- debug:
+    msg: "Requires the EPEL repository on RedHat/CentOS"
 
 - name: Add NodeSource repository
   yum:
