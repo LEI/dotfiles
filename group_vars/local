@@ -18,3 +18,5 @@ npm_packages:
 
 # IRC identity
 irc_freenode_nick: "{{ user_name }}"
+# Vault: docs.ansible.com/ansible/playbooks_vault.html
+irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
