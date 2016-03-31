@@ -2,12 +2,10 @@
 casks_install: yes
 casks_state: present
 
-packages: []
+brew_casks: []
 
 casks_cli:
 
-  # Seil:
-  #
   # To remap Caps Lock to Escape:
   #   System Preferences > Keyboard > Modifier Keys
   #   Caps Lock Key -> No Action

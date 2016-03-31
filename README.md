@@ -1,13 +1,15 @@
 # Ansible dotfiles
 
-## TODO
+## Install
 
-- Defaults (sh) [osx]
-- Apple (terminal.scpt) [osx]
-- Casks [homebrew] + Karabiner & Seil script [?]
-- mutt
-- mintty?
+    bin/dot
 
 ## tmux
 
     C-a (prefix) + I
+
+## TODO
+
+- OS X role (defaults, applescript)
+- Homebrew casks cli (skipped?)
+

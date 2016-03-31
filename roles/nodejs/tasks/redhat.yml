@@ -1,0 +1,19 @@
+---
+# github.com/geerlingguy/ansible-role-nodejs
+# Requires the EPEL repository on RedHat/CentOS
+
+- name: Register the NodeSource RPM variable
+  set_fact:
+    nodejs_rhel_rpm_dir: "{{ 'pub' if nodejs_version == 0.10 else 'pub_' + nodejs_version }}"
+  when: nodejs_version == '0.10'
+
+- name: Add NodeSource repository
+  yum:
+    name: "https://rpm.nodesource.com/{{ nodejs_rhel_rpm_dir }}/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/nodesource-release-el{{ ansible_distribution_major_version }}-1.noarch.rpm"
+    state: present
+
+- name: Install node and npm
+  yum:
+    name: nodejs
+    state: present
+    enablerepo: epel,nodesource

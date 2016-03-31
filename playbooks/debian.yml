@@ -12,11 +12,3 @@
     - role: package
       tags: [pkg]
       packages: "{{ apt_packages }}"
-
-    # Install node and global npm packages
-    - role: geerlingguy.nodejs # Requires the EPEL repository on RedHat/CentOS
-      become: yes
-      tags: [node, npm]
-      when: "ansible_os_family == 'Debian'"
-      nodejs_forever: false
-      nodejs_npm_global_packages: "{{ npm_packages }}"

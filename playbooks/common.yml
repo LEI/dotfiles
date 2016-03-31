@@ -6,6 +6,8 @@
 
   roles:
 
+    # Dotfiles
+
     - role: bash
       tags: [bash]
       files:
@@ -24,12 +26,19 @@
       templates:
         prefix: .
 
+    # Tools
+
     - role: git
       tags: [git]
       files:
         prefix: .
       templates:
         prefix: .
+
+    # Install node and global npm packages
+    - role: npm
+      tags: [npm, node, js]
+      packages: "{{ npm_packages }}"
 
     - role: tmux
       tags: [tmux]

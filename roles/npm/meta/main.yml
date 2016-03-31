@@ -5,3 +5,6 @@ dependencies:
     packages:
       - node
     when: "ansible_os_family == 'Darwin'"
+
+  - role: nodejs
+    when: "ansible_os_family == 'Debian'"

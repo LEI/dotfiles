@@ -17,12 +17,6 @@
     # brew cask install
     - role: cask
       tags: [cask]
-      packages: "{{ brew_casks }}"
-
-    # Install node and global npm packages
-    - role: npm
-      tags: [node, npm]
-      packages: "{{ npm_packages }}"
 
     # Window manager
     - role: hammerspoon

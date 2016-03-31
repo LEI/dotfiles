@@ -2,36 +2,42 @@
 
 [[ -z "$DOT_ROOT" ]] && DOT_ROOT="$HOME/.dotfiles"
 
+uname=$(uname -s)
+
 run_ansible() {
-  local uname=$(uname -s)
   local ansible=$(which ansible)
 
   cd "$DOT_ROOT"
 
-  if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
-    case $uname in
-      Darwin)
-	# xcode-select --install
-	# sudo easy_install pip
-	# sudo pip install -r requirements.txt
-	# ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	;;
-      Linux)
-	# ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
-	;;
-      *)
-	echo "Unsupported platform: $uname"
-	exit 1
-	;;
-    esac
-    echo "TODO Install Ansible"
-    exit 1
+  if [[ -n "$ansible" ]] && [[ -x "$ansible" ]]; then
+    ansible-galaxy install -r requirements.yml
+  else
+    install_ansible
   fi
-
-  ansible-galaxy install -r requirements.yml
 
   local playbook="main.yml"
   ansible-playbook "$playbook" "$@"
+}
+
+install_ansible() {
+  case $uname in
+    Darwin)
+      # xcode-select --install
+      # sudo easy_install pip
+      # sudo pip install -r requirements.txt
+
+      # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ;;
+    Linux)
+      # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
+      ;;
+    *)
+      echo "Unsupported platform: $uname"
+      exit 1
+      ;;
+  esac
+  echo "TODO: Install Ansible"
+  exit 0
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"
