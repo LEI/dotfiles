@@ -5,7 +5,6 @@
 # Source and destination
 dot_home: "{{ '~' | expanduser }}"
 dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
-dot_repo: "git@github.com:LEI/dotfiles.git"
 
 # Options
 find_options: -maxdepth 0 -print ! -name '*~'
@@ -18,3 +17,5 @@ log_enable: yes
 # packages_update: yes
 # packages_upgrade: yes
 # packages_install: yes
+
+tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
