@@ -1,14 +1,16 @@
 ---
 # vi: ft=yaml
 
-# Git identity
 git_name: "{{ full_name }}"
 git_email: "{{ email }}"
 git_credential_helper: cache
 
-# npm identity
 npm_user: "{{ user_name }}"
 npm_email: "{{ email }}"
+
+irc_freenode_nick: "{{ user_name }}"
+# Vault: docs.ansible.com/ansible/playbooks_vault.html
+irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
 
 # NodeJS modules
 npm_packages:
@@ -17,12 +19,12 @@ npm_packages:
   - jshint
 
 # PHP dependencies
-composer_packages:
-  - phpunit/phpunit
-  # - name: laravel/laravel
+php_packages:
+  # - php5
+  - php5-cli
+  # - php5-curl
+composer_packages: []
+  # - laravel/laravel
+  # - name: phpunit/phpunit
   # - { name: phpunit/phpunit, release: "4.7.*" }
 
-# IRC identity
-irc_freenode_nick: "{{ user_name }}"
-# Vault: docs.ansible.com/ansible/playbooks_vault.html
-irc_freenode_pass: "{{ vault_irc_freenode_pass }}"

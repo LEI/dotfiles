@@ -6,7 +6,7 @@
 
   roles:
 
-    # Install and configure git
+    # Install git
     - role: git
       tags: [git, vcs]
       files:
@@ -22,43 +22,37 @@
     - role: npm
       tags: [npm, js]
 
-    # IRC client
-    - role: irssi
-      tags: [irssi, irc]
-      files:
-        dest: .irssi
-      templates:
-        dest: .irssi
-
-    # Terminal multiplexer
-    - role: tmux
-      tags: [tmux]
-      templates:
-        dest: .tmux
-
-    # Editor
-    - role: vim
-      tags: [vim]
-      files:
-        dest: .vim
-
-    # Bash dotfiles
     - role: bash
       tags: [bash, files]
       files:
         prefix: .
 
-    # ~/bin
     - role: bin
       tags: [bin, files]
       files:
         src: bin
         dest: bin
 
-    # Misc dotfiles
     - role: common
       tags: [cmn, files]
       files:
         prefix: .
       templates:
         prefix: .
+
+    - role: tmux
+      tags: [tmux]
+      templates:
+        dest: .tmux
+
+    - role: vim
+      tags: [vim]
+      files:
+        dest: .vim
+
+    - role: irssi
+      tags: [irssi, irc]
+      files:
+        dest: .irssi
+      templates:
+        dest: .irssi

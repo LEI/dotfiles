@@ -4,8 +4,7 @@
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
   with_items: "{{ packages }}"
-  become: ansible_os_family != 'Darwin'
-  # become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
+  become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
   when: packages_install
 
 # - name: "Check packages state : {{ packages_state }}"

@@ -593,9 +593,9 @@ noremap <Leader><Space> :noh<CR>
 nnoremap <Leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 
 " Git shortcuts
-noremap <Leader>b :Gblame<cr>
-noremap <Leader>l :!clear && git log -p %<CR>
-noremap <Leader>d :!clear && git diff %<CR>
+" noremap <Leader>b :Gblame<cr>
+" noremap <Leader>l :!clear && git log -p %<CR>
+" noremap <Leader>d :!clear && git diff %<CR>
 
 " Runtime {{{1
 
