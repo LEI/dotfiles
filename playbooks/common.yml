@@ -9,18 +9,18 @@
     # Dotfiles
 
     - role: bash
-      tags: [bash]
+      tags: [bash, files]
       files:
         prefix: .
 
     - role: bin
-      tags: [bin]
+      tags: [bin, files]
       files:
         src: bin
         dest: bin
 
     - role: common
-      tags: [cmn]
+      tags: [cmn, files]
       files:
         prefix: .
       templates:
@@ -29,15 +29,14 @@
     # Tools
 
     - role: git
-      tags: [git]
+      tags: [git, vcs]
       files:
         prefix: .
       templates:
         prefix: .
 
-    # Install node and global npm packages
     - role: npm
-      tags: [npm, node, js]
+      tags: [npm, js]
       packages: "{{ npm_packages }}"
 
     - role: irssi

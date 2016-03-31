@@ -6,18 +6,24 @@
 
   roles:
 
-    # brew update, upgrade, cleanup
+    # Homebrew update, upgrade, tap
     - role: homebrew
       tags: [brew, cask]
 
-    # brew install
+    # Homebrew packages
     - role: package
       tags: [pkg]
       packages: "{{ homebrew_packages }}"
 
-    # brew cask install
+    # Homebrew cask apps
     - role: cask
       tags: [cask]
+
+    # NodeJS
+    - role: package
+      tags: [node, npm, js]
+      packages:
+        - node
 
     # Window manager
     - role: hammerspoon

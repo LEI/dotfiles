@@ -25,7 +25,7 @@
 - name: Ensure Homebrew taps are present
   homebrew:
     tap: "{{ item }}"
-    state: present
+    state: "{{ homebrew_taps_state }}"
   with_items: "{{ homebrew_taps }}"
 
 # - name: Cleanup Homebrew

@@ -1,5 +1,5 @@
 ---
-- name: "Check packages state : {{ packages_state }}"
+- name: "Ensure packages are {{ packages_state }}"
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"

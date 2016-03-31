@@ -12,3 +12,6 @@
     - role: package
       tags: [pkg]
       packages: "{{ apt_packages }}"
+
+    - role: nodejs
+      tags: [node, npm, js]

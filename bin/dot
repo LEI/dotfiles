@@ -24,17 +24,16 @@ install_ansible() {
     Darwin)
       # xcode-select --install
       # sudo easy_install pip
-      # sudo pip install -r requirements.txt
+      pip install -r requirements.txt
       ;;
     Linux)
+      sudo pip install -r requirements.txt
       ;;
     *)
       echo "Unsupported platform: $uname"
       exit 1
       ;;
   esac
-  echo "TODO: Install Ansible"
-  exit 0
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"

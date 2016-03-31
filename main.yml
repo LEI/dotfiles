@@ -7,9 +7,9 @@
     - name: Update dotfiles repository
       tags: ['repo']
       git:
-        version: "{{ dot_version }}"
         repo: "{{ dot_repo }}"
         dest: "{{ dot_root }}"
+        version: "{{ dot_version | default('HEAD') }}"
         # Discard any modified files in the working repository
         force: no
         # Retrieve new revisions from the origin repository
