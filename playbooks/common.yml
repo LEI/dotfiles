@@ -6,8 +6,7 @@
 
   roles:
 
-    # Tools
-
+    # Install and configure git
     - role: git
       tags: [git, vcs]
       files:
@@ -15,13 +14,15 @@
       templates:
         prefix: .
 
-    - role: npm
-      tags: [npm, js]
-      packages: "{{ npm_packages }}"
-
+    # Install composer and PHP dependencies
     - role: composer
       tags: [composer, php]
 
+    # Install global node modules
+    - role: npm
+      tags: [npm, js]
+
+    # IRC client
     - role: irssi
       tags: [irssi, irc]
       files:
@@ -29,29 +30,32 @@
       templates:
         dest: .irssi
 
+    # Terminal multiplexer
     - role: tmux
       tags: [tmux]
       templates:
         dest: .tmux
 
+    # Editor
     - role: vim
       tags: [vim]
       files:
         dest: .vim
 
-    # Dotfiles
-
+    # Bash dotfiles
     - role: bash
       tags: [bash, files]
       files:
         prefix: .
 
+    # ~/bin
     - role: bin
       tags: [bin, files]
       files:
         src: bin
         dest: bin
 
+    # Misc dotfiles
     - role: common
       tags: [cmn, files]
       files:

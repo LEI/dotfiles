@@ -1,5 +1,5 @@
 ---
-vi: ft=yaml
+# vi: ft=yaml
 
 # Git identity
 git_name: "{{ full_name }}"
@@ -12,9 +12,15 @@ npm_email: "{{ email }}"
 
 # NodeJS modules
 npm_packages:
-  - name: bower
-  - name: gulp
-  - name: jshint
+  - bower
+  - gulp
+  - jshint
+
+# PHP dependencies
+composer_packages:
+  - phpunit/phpunit
+  # - name: laravel/laravel
+  # - { name: phpunit/phpunit, release: "4.7.*" }
 
 # IRC identity
 irc_freenode_nick: "{{ user_name }}"

@@ -6,12 +6,15 @@
 
   roles:
 
+    # Update and upgrade apt
     - role: apt
       tags: [apt]
 
+    # Install apt packages
     - role: package
       tags: [pkg]
       packages: "{{ apt_packages }}"
 
+    # Install NodeJS for Debian/RedHat
     - role: nodejs
       tags: [node, npm, js]

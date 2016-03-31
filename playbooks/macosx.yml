@@ -10,7 +10,7 @@
     - role: homebrew
       tags: [brew, cask]
 
-    # Homebrew packages
+    # Install Homebrew packages
     - role: package
       tags: [pkg]
       packages: "{{ homebrew_packages }}"
