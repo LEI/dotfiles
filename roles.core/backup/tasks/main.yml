@@ -9,17 +9,23 @@
   when: backup_enable
   register: backup_files
 
-# TODO: use ansible_date_time .date & .time instead of item.stat.mtime
+# - debug:
+#     msg: "{{ item.stat.path | realpath }}"
+#   with_items: "{{ backup_files.results }}"
+
+# FIXME: do not backup broken symlinks
+# stat follow: true -> how to get lnk_source?
+# when: not link and item.stat.path != item.item?
 - name: "Backup existing {{ role_dir }} files"
   vars:
     dest: "{{ destination }}/{{ prefix | default('') }}{{ item.item | basename }}"
-  command: "mv {{ dest }} {{ dest }}.{{ backup_ext | default(item.stat.mtime | datetime) }}~"
+    ext: "{{ backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
+    # ext: "{{ backup_ext | default(item.stat.mtime | datetime) }}~"
+  command: "mv {{ dest }} {{ dest }}.{{ ext }}"
   args:
-    creates: "{{ dest }}.{{ backup_ext | default(item.stat.mtime | datetime) }}~"
-  # with_items: "{{ stat.results | map(attribute='item') | map(attribute='stat') | list }}"
+    creates: "{{ dest }}.{{ ext }}"
   with_items: "{{ backup_files.results }}"
   when: backup_enable and item.stat.exists and
     ((backup_files and not item.stat.islnk) or
-    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != item.item)) # source + '/' +
-    # FIXME: do not backup broken symlinks (stat follow: true?)
+    (backup_symlinks and item.stat.islnk and item.stat.lnk_source != item.item))
   no_log: "{{ not backup_log }}"

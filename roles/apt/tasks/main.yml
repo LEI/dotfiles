@@ -2,7 +2,7 @@
 - name: Update apt cache
   apt:
     update_cache: yes
-    cache_valid_time: "{{ apt_cache_time|default('') }}"
+    cache_valid_time: "{{ apt_cache_time | default('') }}"
   when: packages_update
   become: yes
 

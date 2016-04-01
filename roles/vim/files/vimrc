@@ -15,8 +15,6 @@
 
 set nocompatible
 
-filetype off
-
 function! YCMInstall(info)
   " info is a dictionary with 3 fields
   " - name: name of the plugin
@@ -33,20 +31,20 @@ function! YCMInstall(info)
   endif
 endfunction
 
-function! YCMEnable()
-  if !exists('g:loaded_youcompleteme')
-    call plug#load('YouCompleteMe')
-    if exists('g:loaded_youcompleteme')
-      call youcompleteme#Enable()
-    endif
-  endif
-endfunction
+" function! YCMEnable()
+"   if !exists('g:loaded_youcompleteme')
+"     call plug#load('YouCompleteMe')
+"   endif
+"   if exists('g:loaded_youcompleteme')
+"     call youcompleteme#Enable()
+"   endif
+" endfunction
 
-function! SyntasticEnable()
-  if !exists('g:loaded_syntastic_plugin')
-    call plug#load('syntastic')
-  endif
-endfunction
+" function! SyntasticEnable()
+"   if !exists('g:loaded_syntastic_plugin')
+"     call plug#load('syntastic')
+"   endif
+" endfunction
 
 " augroup VimPlug
 "   autocmd!
@@ -76,6 +74,7 @@ Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
 Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall') }
+autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
 " 'for': ['vim', 'php', 'javascript', 'cpp'] }
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
@@ -83,8 +82,6 @@ Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath
 call plug#end()
-
-" Runtime {{{2
 
 " Load matchit.vim, but only if the user hasn't installed a newer version.
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -435,8 +432,8 @@ set magic
 
 augroup VimReload
   autocmd!
-  autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
-  autocmd BufWritePost ~/.dotfiles/vim/vimrc nested source %
+  autocmd BufWritePost $MYVIMRC nested source %
+  " autocmd BufWritePost ~/.dotfiles/roles/vim/files/vimrc nested source %
 augroup END
 
 " Highlight trailing witespaces in red

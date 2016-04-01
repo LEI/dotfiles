@@ -8,7 +8,7 @@
 
     # Update and upgrade apt
     - role: apt
-      tags: [apt, always]
+      tags: [apt]
 
     # Install apt packages
     - role: package

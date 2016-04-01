@@ -5,12 +5,6 @@ dependencies:
     packages:
       - git
 
-  #   when: "ansible_os_family == 'Debian'"
-  # - role: brew
-  #   packages:
-  #     - git
-  #   when: "ansible_os_family == 'Darwin'"
-
   - role: template
     role_dir: git
 

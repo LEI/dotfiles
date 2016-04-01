@@ -1,2 +1,5 @@
 ---
-vim_install_plugins: no
+# Run :PlugInstall inside vim
+vim_install_plugins: yes
+# Install plugins even if ~/.vim/plugged already exists
+vim_update_plugins: no

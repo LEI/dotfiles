@@ -4,6 +4,9 @@
     that:
       - "source != inventory_dir"
 
+# - name: Confirm destination
+#   pause: prompt={{ destination }}
+
 - name: "Ensure {{ role_dir }} targets are directories"
   file:
     path: "{{ item }}"
