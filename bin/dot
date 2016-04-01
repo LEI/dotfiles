@@ -6,15 +6,16 @@ cd "$DOT_ROOT"
 
 run_ansible() {
   local ansible=$(which ansible)
+  local playbook="main.yml"
 
   if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
     install_ansible
   fi
 
-  # ansible-galaxy install -r requirements.yml
-
-  local playbook="main.yml"
-  ansible-playbook "$playbook" "$@"
+  if [[ $? == 0 ]]; then
+    # ansible-galaxy install -r requirements.yml
+    ansible-playbook "$playbook" "$@"
+  fi
 }
 
 install_ansible() {
@@ -26,6 +27,9 @@ install_ansible() {
       # sudo easy_install pip
       ;;
     Linux)
+      sudo apt-get install python-dev python-pip
+      # libffi-dev
+      # Fedora / CentOS sudo yum install python-devel
       ;;
     *)
       echo "Unsupported platform: $uname"
@@ -33,7 +37,7 @@ install_ansible() {
       ;;
   esac
 
-  pip install -r requirements.txt
+  sudo pip install -r requirements.txt
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"
