@@ -29,7 +29,7 @@ install_ansible() {
     Linux)
       sudo apt-get install python-dev python-pip
       # libffi-dev
-      # Fedora / CentOS sudo yum install python-devel
+      # Fedora/CentOS: sudo yum install python-devel
       ;;
     *)
       echo "Unsupported platform: $uname"

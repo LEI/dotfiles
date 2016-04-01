@@ -8,7 +8,7 @@
 
     # Homebrew update, upgrade, tap
     - role: homebrew
-      tags: [brew, cask]
+      tags: [brew, cask, always]
 
     # Install Homebrew packages
     - role: package

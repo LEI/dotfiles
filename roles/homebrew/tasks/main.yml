@@ -23,7 +23,7 @@
   when: packages_upgrade
 
 - name: Ensure Homebrew taps are present
-  homebrew:
+  homebrew_tap:
     tap: "{{ item }}"
     state: "{{ homebrew_taps_state }}"
   with_items: "{{ homebrew_taps }}"

@@ -8,10 +8,11 @@ git_credential_helper: osxkeychain
 #   notification_center: true
 #   ssd_tweaks: false
 
-# homebrew_taps:
-#   - homebrew/dupes
+homebrew_taps:
+  - homebrew/dupes
+  - caskroom/versions
+  - homebrew/homebrew-php
 #   - caskroom/cask
-#   - caskroom/versions
 
 homebrew_packages:
   # - ack
@@ -46,3 +47,6 @@ homebrew_cask_apps:
   - vagrant
   - virtualbox
   - vlc
+
+php_packages:
+  - php55
