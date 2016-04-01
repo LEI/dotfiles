@@ -4,7 +4,7 @@
 - [ ] Homebrew casks cli (skipped?)
 - [x] Ansible vault
 - [ ] SSH config?
-- [ ] irssi, mutt
+- [ ] assemble (tmux: Wheel Pane, vim: Plug...)
 
 ## Install
 
