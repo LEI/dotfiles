@@ -6,6 +6,9 @@
 
   roles:
 
+    - role: ack
+      tags: [ack]
+
     # Install composer and PHP dependencies
     - role: composer.php
       tags: [composer, php]

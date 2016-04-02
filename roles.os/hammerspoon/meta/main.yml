@@ -1,0 +1,13 @@
+---
+dependencies:
+
+  - role: cask
+    homebrew_cask_apps:
+      - hammerspoon
+    # when: "ansible_os_family == 'Darwin'"
+
+  - role: dot.files
+    dot_files:
+      symlinks:
+        hammerspoon:
+          dest: .hammerspoon
