@@ -13,6 +13,7 @@ run_ansible() {
   fi
 
   if [[ $? == 0 ]]; then
+    # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
     # ansible-galaxy install -r requirements.yml
     time ansible-playbook "$playbook" "$@"
   fi
@@ -24,7 +25,6 @@ install_ansible() {
   case $uname in
     Darwin)
       # xcode-select --install
-      # sudo easy_install pip
       ;;
     Linux)
       sudo apt-get install python-dev python-pip
@@ -37,6 +37,7 @@ install_ansible() {
       ;;
   esac
 
+  sudo easy_install pip
   sudo pip install -r requirements.txt
 }
 
