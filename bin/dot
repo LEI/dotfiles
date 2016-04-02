@@ -4,21 +4,6 @@
 
 cd "$DOT_ROOT"
 
-run_ansible() {
-  local ansible=$(which ansible)
-  local playbook="main.yml"
-
-  if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
-    install_ansible
-  fi
-
-  if [[ $? == 0 ]]; then
-    # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
-    # ansible-galaxy install -r requirements.yml
-    time ansible-playbook "$playbook" "$@"
-  fi
-}
-
 install_ansible() {
   local uname=$(uname -s)
 
@@ -39,6 +24,43 @@ install_ansible() {
 
   sudo easy_install pip
   sudo pip install -r requirements.txt
+  # pip cryptography on raspbian ->
+  # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
 }
 
-[[ "$0" == "$BASH_SOURCE" ]] && run_ansible "$@"
+vault_ansible() {
+  local extra_file="$HOME/.extra"
+  local vault_file="$HOME/.vault_pass.txt"
+  local vault_pass=
+
+  if [[ ! -f "$extra_file" ]]; then # && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]
+    echo "export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file" >> $extra_file
+  fi
+
+  if [[ ! -f "$vault_file" ]]; then
+    echo "Vault?"
+    read -e -r -s vault_pass
+    if [[ -n "$vault_pass" ]]; then
+      echo "$vault_pass" >> $vault_file
+    else
+      vault_ansible
+    fi
+  fi
+}
+
+run_ansible() {
+  local playbook="main.yml"
+  local ansible=$(which ansible)
+
+  if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
+    install_ansible
+  fi
+
+  if [[ $? == 0 ]]; then
+    vault_ansible
+    # ansible-galaxy install -r requirements.yml
+    ansible-playbook "$playbook" "$@"
+  fi
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && time run_ansible "$@"
