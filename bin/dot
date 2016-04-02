@@ -34,15 +34,16 @@ vault_ansible() {
   local vault_pass=
 
 
-  if [[ ! -f "$vault_file" ]]; then
+  if [[ ! -f "$vault_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
     echo "Vault?"
     read -e -r -s vault_pass
     if [[ -n "$vault_pass" ]]; then
       echo "$vault_pass" >> $vault_file
-      if [[ ! -f "$extra_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
-        echo "export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file" >> $extra_file
-        source $extra_file
-      fi
+      export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
+      # if [[ ! -f "$extra_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+      #   echo "export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file" >> $extra_file
+      #   source $extra_file
+      # fi
     else
       vault_ansible
     fi

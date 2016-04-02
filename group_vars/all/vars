@@ -19,3 +19,10 @@ tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 # dot_packages_update: yes
 # dot_packages_upgrade: yes
 # dot_packages_install: yes
+
+# Vault
+# docs.ansible.com/ansible/playbooks_vault.html
+
+ssh_config: "{{ vault_ssh_config }}"
+irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
+

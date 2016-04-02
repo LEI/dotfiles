@@ -9,8 +9,6 @@ npm_user: "{{ user_name }}"
 npm_email: "{{ email }}"
 
 irc_freenode_nick: "{{ user_name }}"
-# Vault: docs.ansible.com/ansible/playbooks_vault.html
-irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
 
 # NodeJS modules
 npm_packages:

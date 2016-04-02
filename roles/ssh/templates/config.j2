@@ -1,0 +1,6 @@
+{% for item in ssh_config %}
+Host {{ item.name }}
+  HostName {{ item.host }}
+  User {{ item.user }}
+  IdentityFile {{ item.key }}
+{% endfor %}
