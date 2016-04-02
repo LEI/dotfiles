@@ -1,0 +1,27 @@
+---
+- include: targets.yml
+  vars:
+    dot_dict_key: symlinks
+    dot_dir_name: files
+  when: dot_files.symlinks | length > 0
+  tags: [sym, link]
+
+- include: symlinks.yml
+  with_dict: "{{ dot_files.symlinks }}"
+  when: dot_files.symlinks | length > 0
+  tags: [sym, link]
+
+- include: targets.yml
+  vars:
+    dot_dict_key: templates
+    dot_dir_name: templates
+  when: dot_files.templates | length > 0
+  tags: [tpl]
+
+- include: templates.yml
+  with_dict: "{{ dot_files.templates }}"
+  when: dot_files.templates | length > 0
+  tags: [tpl]
+
+# - include: templates.yml
+#   with_dict: "{{ dot_templates }}"

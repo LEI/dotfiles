@@ -3,11 +3,8 @@
   hosts: local
   gather_facts: yes
 
-  # vars_files:
-  #   - "vars/common.yml"
-  #   - [ "vars/{{ ansible_os_family }}.yml", "vars/os_defaults.yml" ]
-
   pre_tasks:
+
     - name: Update dotfiles repository
       tags: ['repo']
       git:
@@ -21,9 +18,17 @@
       # ignore_errors: yes
 
   tasks:
+
     - name: "Group hosts by OS distribution"
-      group_by: key=os_{{ ansible_distribution|lower }}
+      group_by: key=os_{{ ansible_distribution | lower }}
       tags: [always]
+
+    # - name: "Load OS specific vars"
+    #   include_vars: "{{ item }}"
+    #   with_first_found:
+    #     - "vars/{{ ansible_distribution | lower }}.yml"
+    #     - "vars/{{ ansible_os_family | lower }}.yml"
+    #     - "vars/os_defaults.yml"
 
 - include: "playbooks/debian.yml"
   when: ansible_distribution == 'Debian'

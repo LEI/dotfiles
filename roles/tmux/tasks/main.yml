@@ -10,7 +10,7 @@
 - name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
   lineinfile:
     dest: "{{ dot_home }}/.tmux.conf"
-    line: "source ~/.tmux/tmux.conf"
+    line: "source {{ dot_home }}/.tmux/tmux.conf"
     backup: yes
     create: yes
     state: present
@@ -21,13 +21,13 @@
 
 - name: Ensure .tmux/plugins directory exists
   file:
-    path: "{{ destination }}/plugins"
+    path: "{{ dot_home }}/.tmux/plugins"
     state: directory
     follow: true
 
 - name: Clone tmux plugin manager
   git:
     repo: https://github.com/tmux-plugins/tpm.git
-    dest: "{{ destination }}/plugins/tpm"
+    dest: "{{ dot_home }}/.tmux/plugins/tpm"
 
 # TODO: tpm C-<prefix> I

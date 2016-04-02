@@ -2,9 +2,11 @@
 
 - [ ] OSX defaults, applescript
 - [ ] Homebrew casks cli (skipped?)
-- [x] Ansible vault
 - [ ] SSH config?
 - [ ] assemble (tmux: Wheel Pane, vim: Plug...)
+- [ ] Ansible tags: coercing to Unicode: need string or buffer /
+  UndefinedVariable found
+- [ ] Vim truncate inactive statusline
 
 ## Install
 

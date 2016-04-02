@@ -1,20 +1,21 @@
 ---
 # vi: ft=yaml
 
-# {{ inventory_dir }}
-# Source and destination
+# Targets
+
 dot_home: "{{ '~' | expanduser }}"
-dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
+# dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
+dot_root: "{{ dot_home + '/' + dot_dir if dot_dir is defined else inventory_dir }}"
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
 # Options
-find_options: -maxdepth 0 -print ! -name '*~'
-log_enable: yes
-# backup_enable: yes
-# backup_files: yes
-# backup_symlinks: no
-# backup_templates: yes
-# backup_log: no
-# packages_update: yes
-# packages_upgrade: yes
-# packages_install: yes
+
+# dot_backup_enable: yes
+# dot_backup_files: yes
+# dot_backup_symlinks: no
+# dot_backup_templates: yes
+# dot_backup_no_log: yes
+#
+# dot_packages_update: yes
+# dot_packages_upgrade: yes
+# dot_packages_install: yes

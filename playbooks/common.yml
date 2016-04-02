@@ -6,14 +6,6 @@
 
   roles:
 
-    # Install git
-    - role: git
-      tags: [git, vcs]
-      files:
-        prefix: .
-      templates:
-        prefix: .
-
     # Install composer and PHP dependencies
     - role: composer
       tags: [composer, php]
@@ -22,37 +14,33 @@
     - role: npm
       tags: [npm, js]
 
+    # Install git
+    - role: git
+      tags: [git, vcs]
+      # files:
+      #   prefix: .
+      # templates:
+      #   prefix: .
+
+    - role: home
+      tags: [home]
+
     - role: bash
-      tags: [bash, files]
-      files:
-        prefix: .
+      tags: [bash]
 
     - role: bin
-      tags: [bin, files]
-      files:
-        src: bin
-        dest: bin
-
-    - role: common
-      tags: [cmn, files]
-      files:
-        prefix: .
-      templates:
-        prefix: .
+      tags: [bin]
 
     - role: tmux
       tags: [tmux]
-      templates:
-        dest: .tmux
 
     - role: vim
       tags: [vim]
-      files:
-        dest: .vim
 
     - role: irssi
       tags: [irssi, irc]
-      files:
-        dest: .irssi
-      templates:
-        dest: .irssi
+
+    - role: dot.files
+      tags: [dot, files]
+      dot_files: "{{ common_dot_files }}"
+      # dot_files: "{{ hostvars[inventory_hostname][(ansible_distribution | lower) + '_dot_files'] }}"

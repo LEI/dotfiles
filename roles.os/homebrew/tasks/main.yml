@@ -11,7 +11,8 @@
 - name: Ensure Homebrew is installed
   command: "ruby -e '$(curl -fsSL {{ homebrew_install_script }})'"
   args:
-    creates: "{{ homebrew_install_path }}/bin/brew"
+    creates: "{{ homebrew_install_path }}/Cellar"
+    # creates: "{{ homebrew_install_path }}/bin/brew"
   when: homebrew_install
 
 - name: Update Homebrew
@@ -31,3 +32,5 @@
 # - name: Cleanup Homebrew
 #   shell: brew cleanup
 #   when: homebrew_cleanup
+
+# TODO: check lineinfile homebrew.casks appdir
