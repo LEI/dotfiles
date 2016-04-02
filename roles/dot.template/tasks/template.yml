@@ -1,0 +1,16 @@
+---
+- name: "Register {{ item.key }} templates target paths"
+  set_fact:
+    dot_target: "{{ item }}"
+    dot_find_cmd: "find {{ item.value._src + item.value.pattern }} {{ dot_find_options }}"
+
+- name: "Generate {{ dot_target.key }} templates"
+  template:
+    src: "{{ item }}"
+    dest: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix | default('') }}{{ item | basename | regex_replace('.j2','') }}"
+    # src: "{{ source }}/{{ item.src | default(item) }}.j2"
+    # dest: "{{ dot_target.value.dest }}/{{ prefix | default('') }}{{ item.dst | default(item) }}"
+    backup: "{{ 'yes' if dot_backup_enable and dot_backup_templates else 'no' }}"
+    # force: yes
+  with_lines: "{{ dot_find_cmd }}"
+  # register: items

@@ -1,0 +1,7 @@
+---
+dependencies:
+
+  - role: dot.target
+    dot_dict_key: symlinks
+    dot_dir_name: files
+    when: dot_files | length > 0
