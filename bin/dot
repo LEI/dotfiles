@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-[[ -z "$DOT_ROOT" ]] && DOT_ROOT="$HOME/.dotfiles"
+set -o nounset
+set -o errexit
+set -o pipefail
+
+[[ -z "${DOT_ROOT-}" ]] && DOT_ROOT="$HOME/.dotfiles"
 
 cd "$DOT_ROOT"
 
@@ -34,19 +38,23 @@ vault_ansible() {
   local vault_pass=
 
 
-  if [[ ! -f "$vault_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+  if [[ ! -f "$vault_file" ]]; then
     echo "Vault?"
     read -e -r -s vault_pass
     if [[ -n "$vault_pass" ]]; then
       echo "$vault_pass" >> $vault_file
-      export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
       # if [[ ! -f "$extra_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
       #   echo "export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file" >> $extra_file
       #   source $extra_file
       # fi
     else
       vault_ansible
+      return
     fi
+  fi
+
+  if [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+    export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
   fi
 }
 
