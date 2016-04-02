@@ -14,7 +14,7 @@ run_ansible() {
 
   if [[ $? == 0 ]]; then
     # ansible-galaxy install -r requirements.yml
-    ansible-playbook "$playbook" "$@"
+    time ansible-playbook "$playbook" "$@"
   fi
 }
 

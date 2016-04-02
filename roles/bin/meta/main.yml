@@ -1,5 +1,8 @@
 ---
 dependencies:
 
-  # - role: symlink
-  #   role_dir: bin
+  - role: dot.symlink
+    dot_files:
+      bin:
+        src: bin
+        dest: bin

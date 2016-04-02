@@ -23,30 +23,24 @@ composer_packages: []
   # - name: phpunit/phpunit
   # - { name: phpunit/phpunit, release: "4.7.*" }
 
-common_dot_files:
-
-  symlinks:
-    bash:
-      prefix: .
-    bin:
-      src: bin
-      dest: bin
-        # prefix:
-    git:
-      prefix: .
-    home:
-      prefix: .
-    irssi:
-      dest: .irssi
-    vim:
-      dest: .vim
-
-  templates:
-    git:
-      prefix: .
-    home:
-      prefix: .
-    irssi:
-      dest: .irssi
-    tmux:
-      dest: .tmux
+# common_dot_files:
+#   symlinks:
+#     bash:
+#       prefix: .
+#     bin:
+#       src: bin
+#       dest: bin
+#         # prefix:
+#     home:
+#       prefix: .
+#     irssi:
+#       dest: .irssi
+#     vim:
+#       dest: .vim
+#   templates:
+#     home:
+#       prefix: .
+#     irssi:
+#       dest: .irssi
+#     tmux:
+#       dest: .tmux

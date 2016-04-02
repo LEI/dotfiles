@@ -7,5 +7,7 @@ dependencies:
         # install_options: with-override-system-vi #, with-pyhton3
     when: "ansible_os_family != 'Darwin'"
 
-  # - role: symlink
-  #   role_dir: vim
+  - role: dot.symlink
+    dot_files:
+      vim:
+        dest: .vim

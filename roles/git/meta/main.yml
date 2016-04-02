@@ -5,8 +5,12 @@ dependencies:
     packages:
       - git
 
-  # - role: template
-  #   role_dir: git
+  - role: dot.symlink
+    dot_files:
+      git:
+        prefix: .
 
-  # - role: symlink
-  #   role_dir: git
+  - role: dot.template
+    dot_files:
+      git:
+        prefix: .

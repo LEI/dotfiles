@@ -1,5 +1,7 @@
 ---
 dependencies:
 
-  # - role: symlink
-  #   role_dir: bash
+  - role: dot.symlink
+    dot_files:
+      bash:
+        prefix: .

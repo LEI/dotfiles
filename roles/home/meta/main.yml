@@ -1,9 +1,12 @@
 ---
-dependencies: []
-  # - role: dot.files
+dependencies:
 
-  # - role: template
-  #   role_dir: common
+  - role: dot.symlink
+    dot_files:
+      home:
+        prefix: .
 
-  # - role: symlink
-  #   role_dir: common
+  - role: dot.template
+    dot_files:
+      home:
+        prefix: .

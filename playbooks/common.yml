@@ -7,7 +7,7 @@
   roles:
 
     # Install composer and PHP dependencies
-    - role: composer
+    - role: composer.php
       tags: [composer, php]
 
     # Install global node modules
@@ -39,8 +39,3 @@
 
     - role: irssi
       tags: [irssi, irc]
-
-    - role: dot.files
-      tags: [dot, files]
-      dot_files: "{{ common_dot_files }}"
-      # dot_files: "{{ hostvars[inventory_hostname][(ansible_distribution | lower) + '_dot_files'] }}"

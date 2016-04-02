@@ -5,9 +5,12 @@ dependencies:
     packages:
       - irssi
 
-  - role: dot.files
-  # - role: symlink
-  #   role_dir: irssi
+  - role: dot.symlink
+    dot_files:
+      irssi:
+        dest: .irssi
 
-  # - role: template
-  #   role_dir: irssi
+  - role: dot.template
+    dot_files:
+      irssi:
+        dest: .irssi
