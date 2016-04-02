@@ -1,15 +1,6 @@
 ---
 # vi: ft=yaml
 
-git_name: "{{ full_name }}"
-git_email: "{{ email }}"
-git_credential_helper: cache
-
-npm_user: "{{ user_name }}"
-npm_email: "{{ email }}"
-
-irc_freenode_nick: "{{ user_name }}"
-
 # NodeJS modules
 npm_packages:
   - bower
@@ -20,25 +11,3 @@ composer_packages: []
   # - laravel/laravel
   # - name: phpunit/phpunit
   # - { name: phpunit/phpunit, release: "4.7.*" }
-
-# common_dot_files:
-#   symlinks:
-#     bash:
-#       prefix: .
-#     bin:
-#       src: bin
-#       dest: bin
-#         # prefix:
-#     home:
-#       prefix: .
-#     irssi:
-#       dest: .irssi
-#     vim:
-#       dest: .vim
-#   templates:
-#     home:
-#       prefix: .
-#     irssi:
-#       dest: .irssi
-#     tmux:
-#       dest: .tmux

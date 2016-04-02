@@ -1,6 +1,6 @@
 ---
-- name: Setup local host
-  hosts: local
+- name: Setup hosts
+  hosts: all
   gather_facts: yes
 
   pre_tasks:
@@ -37,3 +37,5 @@
   when: ansible_distribution == 'MacOSX'
 
 - include: "playbooks/common.yml"
+
+- include: "playbooks/local.yml"

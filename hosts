@@ -4,6 +4,10 @@ localhost
 [local:vars]
 ansible_connection = local
 
+# [remote]
+# raspberry ansible_host=192.168.1.20 ansible_user=LEI
+
+[all:vars]
 dot_repo = git://github.com/LEI/dotfiles.git
 dot_repo_dir = .dotfiles
 

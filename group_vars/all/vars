@@ -1,28 +1,30 @@
 ---
 # vi: ft=yaml
 
-# Targets
+# Identity
+git_name: "{{ full_name }}"
+git_email: "{{ email }}"
+git_credential_helper: cache
+npm_user: "{{ user_name }}"
+npm_email: "{{ email }}"
+irc_freenode_nick: "{{ user_name }}"
+# Vault: docs.ansible.com/ansible/playbooks_vault.html
+irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
+ssh_config: "{{ vault_ssh_config }}"
 
+# Targets
 dot_home: "{{ '~' | expanduser }}"
-# dot_root: "{{ dot_home }}/{{ dot_dir|default('.dotfiles') }}"
+# dot_root: "{{ dot_home }}/{{ dot_dir | default('.dotfiles') }}"
+# FIXME: get actual home from remote hosts!
 dot_root: "{{ dot_home + '/' + dot_dir if dot_dir is defined else inventory_dir }}"
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
 # Options
-
 # dot_backup_enable: yes
 # dot_backup_files: yes
 # dot_backup_symlinks: no
 # dot_backup_templates: yes
 # dot_backup_no_log: yes
-
 # dot_packages_update: yes
 # dot_packages_upgrade: yes
 # dot_packages_install: yes
-
-# Vault
-# docs.ansible.com/ansible/playbooks_vault.html
-
-ssh_config: "{{ vault_ssh_config }}"
-irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
-
