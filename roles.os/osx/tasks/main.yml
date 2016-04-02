@@ -10,10 +10,17 @@
 - debug: var=osx_defaults
   when: log_enable
 
+- name: Ensure ~/.osx directory exists
+  file:
+    path: "{{ dot_home }}/{{ osx_dir }}"
+    state: directory
+
 # docs.ansible.com/ansible/script_module.html
-- name: "Generate {{ script }}"
+- name: Generate OSX scripts
   template:
-    src: "{{ script }}.j2"
-    dest: "{{ role_path }}/files/{{ script }}"
+    src: "{{ item }}.j2"
+    dest: "{{ dot_home }}/{{ osx_dir }}/{{ item }}"
+  with_items: "{{ osx_templates }}"
+    # dest: "{{ role_path }}/files/{{ script }}"
   # debug: msg={{ osx_defaults }}
   # script: .. (path relative to role files)

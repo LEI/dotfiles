@@ -11,3 +11,22 @@
         }
       }, recursive=true) }}
   with_dict: "{{ dot_files }}"
+
+# - debug:
+#     msg: "{{ item }}"
+#   with_dict: "{{ dot_files }}"
+#   when: dot_log_enable
+
+# - name: Check source path
+#   assert:
+#     that:
+#       - "source != inventory_dir"
+
+# - name: Ensure source and destination directories exist
+#   file:
+#     path: "{{ item }}"
+#     state: directory
+#     follow: true
+#   with_items:
+#     - "{{ source }}"
+#     - "{{ destination }}"
