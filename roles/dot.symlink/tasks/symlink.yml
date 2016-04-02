@@ -4,28 +4,8 @@
     dot_target: "{{ item }}"
     dot_find_cmd: "find {{ item.value._src + item.value.pattern }} {{ dot_find_options }}"
 
-- name: "Retrieve {{ dot_target.key }} files stat"
-  stat:
-    path: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
-    follow: false
-  with_lines: "{{ dot_find_cmd }}"
-  register: dot_stat
-  when: dot_backup_files
-
-- name: "Backup existing {{ dot_target.key }} files"
-  vars:
-    dest: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix }}{{ item.item | basename }}"
-    ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
-    # ext: "{{ dot_backup_ext | default(item.stat.mtime | datetime) }}~"
-  command: "mv {{ dest }} {{ dest }}.{{ ext }}"
-  # TODO: -rw-r--r-- ?
-  args:
-    creates: "{{ dest }}.{{ ext }}"
-  with_items: "{{ dot_stat.results }}"
-  when: dot_backup_enable and item.stat.exists and
-    ((dot_backup_files and not item.stat.islnk) or
-    (dot_backup_symlinks and item.stat.islnk and item.stat.lnk_source != item.item))
-  no_log: "{{ dot_backup_no_log }}"
+- include: backup.yml
+  when: dot_backup_enable
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value._dest }}"

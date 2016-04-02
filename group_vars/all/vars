@@ -15,7 +15,7 @@ tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 # dot_backup_symlinks: no
 # dot_backup_templates: yes
 # dot_backup_no_log: yes
-#
+
 # dot_packages_update: yes
 # dot_packages_upgrade: yes
 # dot_packages_install: yes
