@@ -53,7 +53,7 @@ vault_ansible() {
     fi
   fi
 
-  if [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+  if [[ ! -n "${ANSIBLE_VAULT_PASSWORD_FILE-}" ]]; then
     export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
   fi
 }
