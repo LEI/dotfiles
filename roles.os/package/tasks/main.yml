@@ -3,6 +3,7 @@
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
+    install_options: "{{ item.install_options | default(omit) }}"
   with_items: "{{ packages }}"
   become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
   when: packages_install
@@ -11,6 +12,6 @@
 #   homebrew:
 #     name: "{{ item.name | default(item) }}"
 #     state: "{{ item.state | default(packages_state) }}"
-#     install_options: "{{ item.state | default(packages_state) }}"
+#     install_options: "{{ item.install_options | default(false) }}"
 #   with_items: "{{ packages }}"
 #   when: "packages_install and ansible_distribution == 'Darwin'"

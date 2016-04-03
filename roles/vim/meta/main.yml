@@ -4,8 +4,9 @@ dependencies:
   - role: package
     packages:
       - name: vim
-        # install_options: with-override-system-vi #, with-pyhton3
     when: "ansible_os_family != 'Darwin'"
+    # TODO: omit install_options test osx
+    # install_options: "{{ osx_vim_options | join(',') if ansible_os_family == 'Darwin' and osx_vim_options | length > 0 else omit }}"
 
   - role: dot.symlink
     dot_files:

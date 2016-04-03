@@ -3,19 +3,19 @@
   hosts: all
   gather_facts: yes
 
-  # pre_tasks:
+  pre_tasks:
 
-  #   - name: Update dotfiles repository
-  #     tags: ['repo']
-  #     git:
-  #       repo: "{{ dot_repo }}"
-  #       dest: "{{ dot_root }}"
-  #       version: "{{ dot_version | default('HEAD') }}"
-  #       # Discard any modified files in the working repository
-  #       force: no
-  #       # Retrieve new revisions from the origin repository
-  #       update: no
-  #     # ignore_errors: yes
+    - name: Update dotfiles repository
+      tags: ['repo']
+      git:
+        repo: "{{ dot_repo }}"
+        dest: "{{ dot_root }}"
+        version: "{{ dot_version | default(omit) }}"
+        # Discard any modified files in the working repository
+        force: no
+        # Retrieve new revisions from the origin repository
+        update: no
+      # ignore_errors: yes
 
   tasks:
 
@@ -24,7 +24,9 @@
     - name: "Gyoup hosts by OS distribution"
       group_by: key=os_{{ ansible_distribution | lower }}
       tags: [always]
-    - debug: var=group_names
+
+    - name: Group names
+      debug: var=group_names
 
     # - name: "Load OS specific vars"
     #   include_vars: "{{ item }}"
@@ -43,3 +45,6 @@
 
 - include: "local.yml"
   when: "'local' in group_names"
+
+- include: "remote.yml"
+  when: "'remote' in group_names"

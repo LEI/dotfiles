@@ -1,0 +1,10 @@
+---
+- name: Remote environment
+  hosts: remote
+  gather_facts: no
+  tags: [remote]
+
+  roles:
+
+    - role: ack
+      tags: [ack]

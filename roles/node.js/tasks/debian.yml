@@ -2,6 +2,9 @@
 # Install Node.js using packages crafted by NodeSource
 # github.com/nodesource/ansible-nodejs-role
 
+# FIXME on Pi:
+# github.com/nodejs/node-v0.x-archive/issues/7222
+
 - name: Ensure the system can use the HTTPS transport for apt
   stat:
     path: /usr/lib/apt/methods/https

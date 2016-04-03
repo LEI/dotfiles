@@ -9,6 +9,7 @@
 - [ ] Vim truncate inactive statusline
 - [ ] Check npm stat ala https
 - [ ] Composer checksum get_url
+- [ ] Fix dot_home (used in osx, tmux, vim)
 
 ## Install
 
