@@ -23,14 +23,12 @@
 #     that:
 #       - "source != inventory_dir"
 
-# - name: Ensure source and destination directories exist
-#   file:
-#     path: "{{ item }}"
-#     state: directory
-#     follow: true
-#   with_items:
-#     - "{{ source }}"
-#     - "{{ destination }}"
+- name: Ensure destination directory exists
+  file:
+    path: "{{ item.value.dest }}"
+    state: directory
+    follow: true
+  with_dict: "{{ dot_files_target }}"
 
 
 # - name: "Construct {{ dot_files_dir | default('directory') }} dict"
