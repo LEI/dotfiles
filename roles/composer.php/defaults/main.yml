@@ -6,6 +6,7 @@ composer_update: yes
 composer_version: ""
 composer_bin_path: /usr/local/bin
 # composer_add_to_path: yes
+composer_force_install: no
 
 composer_home_path: "{{ '~/.composer' | expanduser }}"
 composer_packages_release: "@stable"

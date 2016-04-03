@@ -7,6 +7,8 @@
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
 - [ ] Vim truncate inactive statusline
+- [ ] Check npm stat ala https
+- [ ] Composer checksum get_url
 
 ## Install
 

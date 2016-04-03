@@ -8,7 +8,7 @@
   register: composer_bin
 
 - include: install-composer.yml
-  when: not composer_bin.stat.exists
+  when: composer_force_install or not composer_bin.stat.exists
 
 # - name: Ensure Composer is executable
 #   file:
