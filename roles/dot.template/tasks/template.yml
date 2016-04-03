@@ -2,23 +2,29 @@
 - name: "Register {{ item.key }} templates target paths"
   set_fact:
     dot_target: "{{ item }}"
-    dot_find_cmd: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+    dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+
+# - name: "Find {{ item.value.src + item.value.pattern }}"
+#   shell: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+#   register: dot_items
+#   changed_when: no # not dot_items.stdout_lines | length > 0
 
 - name: "Generate {{ dot_target.key }} templates"
   template:
     src: "{{ item }}"
-    dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix | default('') }}{{ item | basename | regex_replace('.j2','') }}"
+    dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename | regex_replace('.j2','') }}"
     # src: "{{ source }}/{{ item.src | default(item) }}.j2"
     # dest: "{{ dot_target.value.dest }}/{{ prefix | default('') }}{{ item.dst | default(item) }}"
     backup: "{{ 'yes' if dot_backup_enable and dot_backup_templates else 'no' }}"
     # force: yes
-  with_lines: "{{ dot_find_cmd }}"
-  register: items
+  with_lines: "{{ dot_find }}"
+  # with_items: "{{ dot_items.stdout_lines }}"
+  register: dot_items
 
 - name: "Log templates"
   vars:
     dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename | regex_replace('.j2','') }}"
   debug: var=dest
-  with_items: "{{ items.results | map(attribute='item') | list }}"
+  with_items: "{{ dot_items.results | map(attribute='item') | list }}"
   when: dot_log_enable
   # verbosity: 1

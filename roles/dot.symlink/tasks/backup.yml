@@ -3,7 +3,8 @@
   stat:
     path: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
     follow: false
-  with_lines: "{{ dot_find_cmd }}"
+  # with_lines: "{{ dot_find }}"
+  with_items: "{{ dot_items.stdout_lines }}"
   register: dot_stat
 
 - name: "Backup existing {{ dot_target.key }} files"
