@@ -3,19 +3,19 @@
   hosts: all
   gather_facts: yes
 
-  pre_tasks:
+  # pre_tasks:
 
-    - name: Update dotfiles repository
-      tags: ['repo']
-      git:
-        repo: "{{ dot_repo }}"
-        dest: "{{ dot_root }}"
-        version: "{{ dot_version | default('HEAD') }}"
-        # Discard any modified files in the working repository
-        force: no
-        # Retrieve new revisions from the origin repository
-        update: no
-      # ignore_errors: yes
+  #   - name: Update dotfiles repository
+  #     tags: ['repo']
+  #     git:
+  #       repo: "{{ dot_repo }}"
+  #       dest: "{{ dot_root }}"
+  #       version: "{{ dot_version | default('HEAD') }}"
+  #       # Discard any modified files in the working repository
+  #       force: no
+  #       # Retrieve new revisions from the origin repository
+  #       update: no
+  #     # ignore_errors: yes
 
   tasks:
 
@@ -37,3 +37,5 @@
   when: ansible_distribution == 'MacOSX'
 
 - include: "playbooks/common.yml"
+
+- include: "playbooks/local.yml"

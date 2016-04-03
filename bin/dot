@@ -69,7 +69,7 @@ run_ansible() {
   if [[ $? == 0 ]]; then
     vault_ansible
     # ansible-galaxy install -r requirements.yml
-    ansible-playbook "$playbook" "$@"
+    ansible-playbook "$playbook" "$@" # --ask-become-pass
   fi
 }
 

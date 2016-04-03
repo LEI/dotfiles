@@ -19,8 +19,9 @@
   register: items
 
 - name: "Log symlinks"
-  debug:
-    msg: " {{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
+  vars:
+    dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
+  debug: var=dest
   with_items: "{{ items.results | map(attribute='item') | list }}"
   when: dot_log_enable
   # verbosity: 1

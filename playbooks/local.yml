@@ -1,0 +1,16 @@
+---
+- name: Local environment
+  hosts: local
+  gather_facts: no
+  tags: [common]
+
+  roles:
+
+    - role: home
+      tags: [home]
+
+    - role: ssh
+      tags: [ssh]
+
+    - role: irssi
+      tags: [irssi, irc]
