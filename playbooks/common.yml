@@ -20,10 +20,6 @@
     # Install git
     - role: git
       tags: [git, vcs]
-      # files:
-      #   prefix: .
-      # templates:
-      #   prefix: .
 
     - role: home
       tags: [home]
