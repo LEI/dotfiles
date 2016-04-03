@@ -19,9 +19,12 @@
 
   tasks:
 
-    - name: "Group hosts by OS distribution"
+    # - debug: var=inventory_hostname
+
+    - name: "Gyoup hosts by OS distribution"
       group_by: key=os_{{ ansible_distribution | lower }}
       tags: [always]
+    - debug: var=group_names
 
     # - name: "Load OS specific vars"
     #   include_vars: "{{ item }}"
@@ -39,3 +42,4 @@
 - include: "playbooks/common.yml"
 
 - include: "playbooks/local.yml"
+  when: "'local' in group_names"
