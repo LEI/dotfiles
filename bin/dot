@@ -8,6 +8,9 @@ set -o pipefail
 
 cd "$DOT_ROOT"
 
+# Use ask become pass or -K instead?
+# sudo -v
+
 install_ansible() {
   local uname=$(uname -s)
 
@@ -59,7 +62,7 @@ vault_ansible() {
 }
 
 run_ansible() {
-  local playbook="main.yml"
+  local playbook="playbooks/main.yml"
   local ansible=$(which ansible)
 
   if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then

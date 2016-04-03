@@ -1,5 +1,5 @@
 ---
-# dependencies:
+dependencies:
 
 #   - role: package
 #     packages:
@@ -8,3 +8,8 @@
 
 #   - role: nodejs
 #     when: "ansible_os_family == 'Debian'"
+
+  - role: dot.template
+    dot_files:
+      npm:
+        prefix: .

@@ -33,13 +33,13 @@
     #     - "vars/{{ ansible_os_family | lower }}.yml"
     #     - "vars/os_defaults.yml"
 
-- include: "playbooks/debian.yml"
+- include: "debian.yml"
   when: ansible_distribution == 'Debian'
 
-- include: "playbooks/macosx.yml"
+- include: "macosx.yml"
   when: ansible_distribution == 'MacOSX'
 
-- include: "playbooks/common.yml"
+- include: "all.yml"
 
-- include: "playbooks/local.yml"
+- include: "local.yml"
   when: "'local' in group_names"
