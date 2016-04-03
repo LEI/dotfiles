@@ -1,14 +1,14 @@
 ---
 - name: "Retrieve {{ dot_target.key }} files stat"
   stat:
-    path: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
+    path: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
     follow: false
   with_lines: "{{ dot_find_cmd }}"
   register: dot_stat
 
 - name: "Backup existing {{ dot_target.key }} files"
   vars:
-    dest: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix }}{{ item.item | basename }}"
+    dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item.item | basename }}"
     ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
     # ext: "{{ dot_backup_ext | default(item.stat.mtime | datetime) }}~"
   command: "mv {{ dest }} {{ dest }}.{{ ext }}"

@@ -37,5 +37,3 @@
   when: ansible_distribution == 'MacOSX'
 
 - include: "playbooks/common.yml"
-
-- include: "playbooks/local.yml"

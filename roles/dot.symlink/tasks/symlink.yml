@@ -2,19 +2,25 @@
 - name: "Register {{ item.key }} symlinks target paths"
   set_fact:
     dot_target: "{{ item }}"
-    dot_find_cmd: "find {{ item.value._src + item.value.pattern }} {{ dot_find_options }}"
+    dot_find_cmd: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
 
 - include: backup.yml
   when: dot_backup_enable
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
-- name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value._dest }}"
+- name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value.dest }}"
   file:
     src: "{{ item }}"
-    dest: "{{ dot_target.value._dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
-    # src: "{{ item.value._src }}/{{ item._src | default(item) }}"
-    # dest: "{{ item.value._dest }}/{{ item.value.prefix | default('') }}{{ item._dest | default(item) }}"
+    dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
+    # src: "{{ item.value.src }}/{{ item.src | default(item) }}"
+    # dest: "{{ item.value.dest }}/{{ item.value.prefix | default('') }}{{ item.dest | default(item) }}"
     state: link
   with_lines: "{{ dot_find_cmd }}"
-  # register: items
+  register: items
 
+- name: "Log symlinks"
+  debug:
+    msg: " {{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
+  with_items: "{{ items.results | map(attribute='item') | list }}"
+  when: dot_log_enable
+  # verbosity: 1

@@ -1,7 +1,8 @@
 ---
+# allow_duplicates: yes
+
 dependencies:
 
   - role: dot.target
-    dot_dict_key: templates
-    dot_dir_name: templates
+    dot_files_dir: templates
     when: dot_files | length > 0

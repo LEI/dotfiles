@@ -1,5 +1,5 @@
 ---
 - include: template.yml
-  with_dict: "{{ dot_files }}"
-  when: dot_files | length > 0
+  with_dict: "{{ dot_files_target }}"
+  when: dot_files_target | length > 0
   tags: [tpl, template]

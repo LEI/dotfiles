@@ -1,19 +1,20 @@
 ---
-- name: "Construct {{ dot_dir_name | default('directory') }} dict"
+- name: "Construct {{ dot_files_dir | default('directory') }} dict"
   set_fact:
-    dot_files: >
-      {{ dot_files | combine({
+    dot_files_target: >
+      {{{
         item.key: {
-          '_src': dot_root + ('/' + item.value.src if item.value.src | default(false) else '/' + dot_roles_dir + '/' + item.key + '/' + dot_dir_name if dot_dir_name and dot_roles_dir else item.key),
-          '_dest': dot_home + ('/' + item.value.dest if item.value.dest | default(false) else ''),
+          'src': dot_root + ('/' + item.value.src if item.value.src | default(false) else '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir if dot_files_dir and dot_roles_dir else item.key),
+          'dest': dot_home + ('/' + item.value.dest if item.value.dest | default(false) else ''),
           'prefix': item.value.prefix | default(''),
           'pattern': item.value.pattern | default(dot_find_pattern)
         }
-      }, recursive=true) }}
+      }}}
   with_dict: "{{ dot_files }}"
 
 # - debug:
-#     msg: "{{ item }}"
+#     # var: dot_files_target
+#     msg: "{{ item.value }}"
 #   with_dict: "{{ dot_files }}"
 #   when: dot_log_enable
 
@@ -30,3 +31,19 @@
 #   with_items:
 #     - "{{ source }}"
 #     - "{{ destination }}"
+
+
+# - name: "Construct {{ dot_files_dir | default('directory') }} dict"
+#   set_fact:
+#     dot_target_map: >
+#       {{ dot_target_map | combine({
+#         dot_dict_key: {
+#           item.key: {
+#             '_src': dot_root + ('/' + item.value.src if item.value.src | default(false) else '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir if dot_files_dir and dot_roles_dir else item.key),
+#             '_dest': dot_home + ('/' + item.value.dest if item.value.dest | default(false) else ''),
+#             'prefix': item.value.prefix | default(''),
+#             'pattern': item.value.pattern | default(dot_find_pattern)
+#           }
+#         }
+#       }, recursive=true) }}
+#   with_dict: "{{ dot_files }}"

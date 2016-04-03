@@ -1,7 +1,8 @@
 ---
+# allow_duplicates: yes
+
 dependencies:
 
   - role: dot.target
-    dot_dict_key: symlinks
-    dot_dir_name: files
+    dot_files_dir: files
     when: dot_files | length > 0
