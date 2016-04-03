@@ -2,7 +2,7 @@
 - name: Local environment
   hosts: local
   gather_facts: no
-  tags: [common]
+  tags: [local]
 
   roles:
 
