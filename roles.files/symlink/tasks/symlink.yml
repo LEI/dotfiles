@@ -5,7 +5,7 @@
     # dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
 
 - name: "Find {{ item.value.src + item.value.pattern }}"
-  command: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+  shell: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
   register: dot_items
   changed_when: no # not dot_items.stdout_lines | length > 0
 
