@@ -1,0 +1,16 @@
+---
+- name: "Set {{ item.key }} fact"
+  set_fact:
+    app: "{{ item }}"
+
+- name: "Set {{ app.key }} defaults"
+  osx_defaults:
+    key: "{{ item.key }}" # required
+    domain: "{{ item.value.domain | default(omit) }}" # default: NSGlobalDomain
+    state: "{{ item.value.state | default('present') }}" # default: present
+    type: "{{ item.value.type | default(omit) }}" # default: string
+    value: "{{ item.value.value }}" # Required when state = present
+    # array_add: "{{ item.value.array_add | default(omit) }}"
+    # host: # default: currentHost
+  with_dict: "{{ app.value }}"
+  notify: "Restart {{ app.key }}"

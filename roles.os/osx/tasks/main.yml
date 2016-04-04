@@ -1,26 +1,30 @@
 ---
-- name: Verify defaults
-  assert:
-    that:
-      - timezone | default('') != ''
-      - osx_defaults.natural_scroll in [true, false]
-      - osx_defaults.notification_center in [true, false]
-      - osx_defaults.ssd_tweaks in [true, false]
+# - name: Verify defaults
+#   assert:
+#     that:
+#       - timezone | default('') != ''
+#       - osx_defaults.natural_scroll in [true, false]
+#       - osx_defaults.notification_center in [true, false]
+#       - osx_defaults.ssd_tweaks in [true, false]
 
-- debug: var=osx_defaults
-  when: log_enable
+# - debug: var=osx_defaults
+#   when: log_enable
 
-- name: Ensure ~/.osx directory exists
-  file:
-    path: "{{ dot_home }}/{{ osx_dir }}"
-    state: directory
+# - name: Ensure ~/.osx directory exists
+#   file:
+#     path: "{{ dot_home }}/{{ osx_dir }}"
+#     state: directory
 
-# docs.ansible.com/ansible/script_module.html
-- name: Generate OSX scripts
-  template:
-    src: "{{ item }}.j2"
-    dest: "{{ dot_home }}/{{ osx_dir }}/{{ item }}"
-  with_items: "{{ osx_templates }}"
-    # dest: "{{ role_path }}/files/{{ script }}"
-  # debug: msg={{ osx_defaults }}
-  # script: .. (path relative to role files)
+# # docs.ansible.com/ansible/script_module.html
+# - name: Generate OSX scripts
+#   template:
+#     src: "{{ item }}.j2"
+#     dest: "{{ dot_home }}/{{ osx_dir }}/{{ item }}"
+#   with_items: "{{ osx_templates }}"
+#     # dest: "{{ role_path }}/files/{{ script }}"
+
+# # docs.ansible.com/ansible/osx_defaults_module.html
+- include: defaults.yml
+  with_dict: "{{ osx_defaults }}"
+  vars:
+    process: "{{ item.key }}"

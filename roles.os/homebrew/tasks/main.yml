@@ -33,4 +33,10 @@
 #   shell: brew cleanup
 #   when: homebrew_cleanup
 
+# - name: Check Homebrew installation
+#   command: brew doctor
+#   register: brew_doctor
+#   failed_when: brew_doctor != 0
+#   when: homebrew_doctor
+
 # TODO: check lineinfile homebrew.casks appdir

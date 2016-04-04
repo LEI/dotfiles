@@ -16,11 +16,13 @@ install_ansible() {
 
   case $uname in
     Darwin)
-      # xcode-select --install
+      if [[ ! -x /usr/bin/gcc ]]; then
+        # Command Line Tools
+        xcode-select --install
+      fi
       ;;
     Linux)
-      sudo apt-get install python-dev python-pip
-      # libffi-dev
+      sudo apt-get install python-dev python-pip # libffi-dev
       # Fedora/CentOS: sudo yum install python-devel
       ;;
     *)

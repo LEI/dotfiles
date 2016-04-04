@@ -3,6 +3,6 @@
 
 dependencies:
 
-  - role: dot.target
+  - role: target
     dot_files_dir: files
     when: dot_files | length > 0

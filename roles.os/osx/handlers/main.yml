@@ -1,0 +1,33 @@
+---
+- name: Restart Finder
+  command: killall Finder
+  when: osx_notify_killall
+
+- name: Restart SystemUIServer
+  command: killall SystemUIServer
+  when: osx_notify_killall
+
+# - name: "Restart {{ item }}"
+#   command: "killall {{ item }}"
+#   when: osx_notify_killall
+#   with_items:
+#     - Activity Monitor
+#     - Address Book
+#     - Calendar
+#     - Contacts
+#     - cfprefsd
+#     - Dock
+#     - Finder
+#     # - Google Chrome
+#     # - Google Chrome Canary
+#     - Mail
+#     - Messages
+#     # - Opera
+#     - Photos
+#     - Safari
+#     - SystemUIServer
+#     # - Terminal
+#     - Transmission
+#     # - Tweetbot
+#     # - Twitter
+#     - iCal

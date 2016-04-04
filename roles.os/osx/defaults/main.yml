@@ -1,5 +1,8 @@
 ---
-osx_dir: .osx
-osx_templates:
-  - defaults.sh
-  - terminal.scpt
+# osx_files:
+#   - *.terminal
+# osx_templates:
+#   - terminal.scpt
+
+osx_notify_killall: yes
+osx_defaults: {}
