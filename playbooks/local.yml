@@ -6,8 +6,9 @@
 
   roles:
 
-    - role: ssh
-      tags: [ssh]
+    # # TODO: host specific
+    # - role: ssh
+    #   tags: [ssh]
 
     - role: irssi
       tags: [irssi, irc]

@@ -15,10 +15,6 @@
 
     bin/dot
 
-## tmux
-
-    C-a (prefix) + I
-
 ## Inspiration
 
 - Puppet [boxen](https://github.com/boxen/our-boxen)

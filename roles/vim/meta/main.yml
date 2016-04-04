@@ -4,9 +4,8 @@ dependencies:
   - role: package
     packages:
       - name: vim
-    when: "ansible_os_family != 'Darwin'"
-    # TODO: omit install_options test osx
-    # install_options: "{{ osx_vim_options | join(',') if ansible_os_family == 'Darwin' and osx_vim_options | length > 0 else omit }}"
+        install_options: "{{ osx_vim_install_options | join(',') if ansible_os_family == 'Darwin' and osx_vim_install_options | length > 0 else omit }}"
+    # when: "ansible_os_family != 'Darwin'"
 
   - role: dot.symlink
     dot_files:

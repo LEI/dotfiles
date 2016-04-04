@@ -1,9 +1,9 @@
 ---
-darwin_vim_install_options:
-  - with-override-system-vi
-  # - with-pyhton3
-
 # Run :PlugInstall inside vim
 vim_install_plugins: yes
 # Install plugins even if ~/.vim/plugged already exists
 vim_update_plugins: no
+
+osx_vim_install_options:
+  - with-override-system-vi
+  # - with-pyhton3

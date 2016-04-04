@@ -6,6 +6,7 @@
     content: ""
     dest: "{{ dot_home }}/.tmux.conf"
     force: no
+  when: tmux_conf
 
 - name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
   lineinfile:
@@ -18,16 +19,25 @@
   # become_user: "{{ item }}"
   # when: item in home_dirs.stdout_lines
   # with_items: "{{ tmux_users }}"
+  when: tmux_conf
 
 - name: Ensure .tmux/plugins directory exists
   file:
     path: "{{ dot_home }}/.tmux/plugins"
     state: directory
     follow: true
+  when: tmux_conf and tmux_plugin_manager
 
 - name: Clone tmux plugin manager
   git:
     repo: https://github.com/tmux-plugins/tpm.git
     dest: "{{ dot_home }}/.tmux/plugins/tpm"
+  when: tmux_conf and tmux_plugin_manager
 
-# TODO: tpm C-<prefix> I
+# github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
+- name: "Install {{ tmux_plugins | length }} tmux plugins"
+  command: "{{ dot_home }}/.tmux/plugins/tpm/bin/install_plugins"
+  args:
+    # if tmux_plugins | length > 0 else false
+    creates: "{{ dot_home }}/.tmux/plugins/{{ tmux_plugins[0] | basename }}"
+  when: tmux_conf and tmux_plugin_manager and tmux_install_plugins and tmux_plugins | length > 0

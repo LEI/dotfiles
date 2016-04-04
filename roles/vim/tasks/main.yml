@@ -1,11 +1,4 @@
 ---
-- name: Ensure vim is installed on OSX
-  homebrew:
-    name: vim
-    state: present
-    install_options: with-override-system-vi
-  when: "ansible_os_family == 'Darwin'"
-
 - name: Make sure .vim/autoload directory exists
   file:
     path: "{{ dot_home }}/.vim/autoload"

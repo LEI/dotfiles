@@ -1,9 +1,0 @@
----
-allow_duplicates: no
-
-dependencies:
-
-  - role: target
-
-  - role: backup
-    when: backup_enable
