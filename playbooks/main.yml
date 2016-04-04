@@ -21,7 +21,12 @@
 
   tasks:
 
-    # - debug: var=inventory_hostname
+    - name: "Distribution {{ ansible_os_family }}"
+      vars:
+        os: "{{ ansible_distribution }} {{ ansible_distribution_release }}"
+      debug: # inventory_hostname
+        var: os
+      tags: [distro]
 
     - name: "Gyoup hosts by OS distribution"
       group_by: key=os_{{ ansible_distribution | lower }}
@@ -32,23 +37,22 @@
         msg: "{{ group_names | to_nice_json }}"
       when: log_enable is defined and log_enable
 
-    # - name: "Load OS specific vars"
+    # - name: "Include OS vars"
     #   include_vars: "{{ item }}"
     #   with_first_found:
     #     - "vars/{{ ansible_distribution | lower }}.yml"
     #     - "vars/{{ ansible_os_family | lower }}.yml"
     #     - "vars/os_defaults.yml"
 
-- include: "debian.yml"
+- include: "os_debian.yml"
   when: ansible_distribution == 'Debian'
 
-- include: "macosx.yml"
+- include: "os_macosx.yml"
   when: ansible_distribution == 'MacOSX'
 
 - include: "all.yml"
 
 - include: "local.yml"
-  # when: "'local' in group_names"
 
 - include: "remote.yml"
   # when: "'remote' in group_names"

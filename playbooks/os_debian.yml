@@ -16,5 +16,5 @@
       packages: "{{ apt_packages }}"
 
     # Install NodeJS for Debian/RedHat
-    - role: node.js
+    - role: node
       tags: [node, npm, js]
