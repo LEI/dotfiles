@@ -15,6 +15,7 @@ ssh_config: "{{ vault_ssh_config }}"
 # Targets
 dot_home: "{{ ansible_env.HOME }}"
 dot_root: "{{ ansible_env.HOME }}/{{ dot_repo_dir | default('.dotfiles') }}"
+dot_local_dir: "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir | default('.dotfiles') }}"
 # dot_home: "{{ hostvars[inventory_hostname]['ansible_env']['HOME'] }}" # "{{ '~' | expanduser }}"
 # dot_root: "{{ dot_home }}/{{ dot_dir | default('.dotfiles') }}"
 # dot_root: "{{ dot_home + '/' + dot_dir if dot_dir is defined else inventory_dir }}"

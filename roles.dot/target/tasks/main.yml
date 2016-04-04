@@ -9,7 +9,7 @@
 
 - name: "Construct {{ dot_files_dir | default('directory') }} dict"
   vars:
-    _dot_root: "{{ dot_root if dot_files_dir != 'templates' else inventory_dir }}"
+    _dot_root: "{{ dot_root if dot_files_dir != 'templates' else dot_local_dir }}"
   set_fact:
     dot_files_target: >
       {{{
