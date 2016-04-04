@@ -5,12 +5,12 @@
     # dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
 
 - name: "Find {{ item.value.src + item.value.pattern }}"
-  shell: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+  command: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
   register: dot_items
   changed_when: no # not dot_items.stdout_lines | length > 0
 
 - include: backup.yml
-  when: dot_backup_enable
+  when: dot_backup_enable # and dot_items.stdout_lines | length > 0
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value.dest }}"

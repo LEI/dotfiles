@@ -35,7 +35,7 @@
     - name: Group names
       debug:
         msg: "{{ group_names | to_nice_json }}"
-      # when: log_enable is defined and log_enable
+      when: log_enable is defined and log_enable
 
     # - name: "Include OS vars"
     #   include_vars: "{{ item }}"

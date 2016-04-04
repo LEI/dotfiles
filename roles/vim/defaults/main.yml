@@ -1,8 +1,8 @@
 ---
 # Run :PlugInstall inside vim
 vim_install_plugins: yes
-# Install plugins even if ~/.vim/plugged already exists
-vim_update_plugins: no
+# Install plugins even if ~/.vim/plugged/ already exists
+# vim_force_install_plugins: yes
 
 osx_vim_install_options:
   - with-override-system-vi

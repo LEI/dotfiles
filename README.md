@@ -8,6 +8,8 @@
 - [ ] Vim truncate inactive statusline
 - [ ] Check npm stat ala https
 - [ ] Composer checksum get_url
+- [ ] --check module find: Skipping task due to undefined Error
+  (msg: remote module does not support check mode)
 
 ## Install
 
