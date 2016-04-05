@@ -1,7 +1,7 @@
 ---
 dependencies:
 
-  - role: cask
+  - role: homebrew-cask
     homebrew_cask_apps:
       - hammerspoon
     # when: "ansible_os_family == 'Darwin'"

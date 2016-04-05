@@ -10,7 +10,7 @@
   changed_when: no # not dot_items.stdout_lines | length > 0
 
 - include: backup.yml
-  when: dot_backup_enable
+  when: dot_backup_enable # and dot_items.stdout_lines | length > 0
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value.dest }}"

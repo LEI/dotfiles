@@ -6,15 +6,15 @@
 
   roles:
 
-    # Install composer and PHP dependencies
-    - role: composer.php
+    # Composer & PHP
+    - role: composer
       tags: [composer, php]
 
-    # Install global node modules
+    # NodeJS & global npm packages
     - role: npm
       tags: [npm, js]
 
-    # Install git
+    # Git via homebrew or apt
     - role: git
       tags: [git, vcs]
 
@@ -24,11 +24,11 @@
     - role: bin
       tags: [bin]
 
+    - role: home
+      tags: [home]
+
     - role: tmux
       tags: [tmux]
 
     - role: vim
       tags: [vim]
-
-    - role: home
-      tags: [home]
