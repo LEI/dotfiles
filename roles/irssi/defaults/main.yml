@@ -1,3 +1,4 @@
 ---
-# irc_freenode_nick:
+irc_freenode_nick: "{{ user_name }}"
+irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
 irc_irssi_autosendcmd: "/msg nickserv identify {{ irc_freenode_pass }}; wait 2000; /window goto nickserv; /wc"

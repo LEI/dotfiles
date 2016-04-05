@@ -5,12 +5,12 @@
 
 - name: "Set {{ app.key }} defaults"
   osx_defaults:
-    key: "{{ item.key }}" # required
-    domain: "{{ item.value.domain | default(omit) }}" # default: NSGlobalDomain
-    state: "{{ item.value.state | default('present') }}" # default: present
-    type: "{{ item.value.type | default(omit) }}" # default: string
+    key: "{{ item.key }}" # Required
+    domain: "{{ item.value.domain | default(omit) }}" # Default: NSGlobalDomain
+    state: "{{ item.value.state | default('present') }}" # Default: present
+    type: "{{ item.value.type | default(omit) }}" # Default: string
     value: "{{ item.value.value }}" # Required when state = present
-    # array_add: "{{ item.value.array_add | default(omit) }}"
-    # host: # default: currentHost
+    array_add: "{{ item.value.array_add | default(omit) }}"
+    host: "{{ item.value.host | default(omit) }}" # Default: currentHost
   with_dict: "{{ app.value }}"
   notify: "Restart {{ app.key }}"

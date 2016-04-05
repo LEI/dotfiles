@@ -21,9 +21,9 @@
 
   tasks:
 
-    - name: "Distribution {{ ansible_os_family }}"
+    - name: "Distribution {{ ansible_os_family }}" # ansible_model
       vars:
-        os: "{{ ansible_distribution }} {{ ansible_distribution_release }}"
+        os: "{{ ansible_distribution }} {{ ansible_distribution_release | default(ansible_distribution_version) }}"
       debug: # inventory_hostname
         var: os
       tags: [distro]

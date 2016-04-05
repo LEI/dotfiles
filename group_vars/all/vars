@@ -1,28 +1,35 @@
 ---
 # vi: ft=yaml
-# Vault: docs.ansible.com/ansible/playbooks_vault.html
 
-git_name: "{{ full_name }}"
-git_email: "{{ email }}"
-git_credential_helper: cache
+# Identity
 
-npm_user: "{{ user_name }}"
-npm_email: "{{ email }}"
+# git_name: "{{ full_name }}"
+# git_email: "{{ email }}"
+# git_credential_helper: cache
 
-irc_freenode_nick: "{{ user_name }}"
-irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
+# npm_user: "{{ user_name }}"
+# npm_email: "{{ email }}"
 
-ssh_config: "{{ vault_ssh_config }}"
+# irc_freenode_nick: "{{ user_name }}"
+# irc_freenode_pass: "{{ vault_irc_freenode_pass }}"
 
 # Targets
+
+dot_repo: git://github.com/LEI/dotfiles.git
+dot_repo_dir: .dotfiles
+# dot_repo_version = master
+
 dot_home: "{{ ansible_env.HOME }}"
-dot_root: "{{ ansible_env.HOME }}/{{ dot_repo_dir | default('.dotfiles') }}"
+# "{{ '~' | expanduser }}"
+# "{{ hostvars[inventory_hostname]['ansible_env']['HOME'] }}"
+dot_root: "{{ ansible_env.HOME }}/{{ dot_repo_dir }}"
 dot_local_dir: "{{ inventory_dir }}"
-# dot_home: "{{ hostvars[inventory_hostname]['ansible_env']['HOME'] }}" # "{{ '~' | expanduser }}"
-# dot_local_dir: "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir | default('.dotfiles') }}"
+# "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir }}"
+
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
 # Options
+
 # dot_backup_enable: yes
 # dot_backup_files: yes
 # dot_backup_symlinks: no
@@ -32,3 +39,7 @@ tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 # packages_upgrade: yes
 # packages_install: yes
 packages_state: latest # default: present
+
+# Vault: docs.ansible.com/ansible/playbooks_vault.html
+
+ssh_config: "{{ vault_ssh_config }}"

@@ -1,11 +1,11 @@
 ---
 - name: Restart Finder
   command: killall Finder
-  when: osx_notify_killall
+  when: osx_kill_apps
 
 - name: Restart SystemUIServer
   command: killall SystemUIServer
-  when: osx_notify_killall
+  when: osx_kill_apps
 
 # - name: "Restart {{ item }}"
 #   command: "killall {{ item }}"

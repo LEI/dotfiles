@@ -28,3 +28,7 @@
   with_dict: "{{ osx_defaults }}"
   vars:
     process: "{{ item.key }}"
+
+# - include: apple-script.yml
+#   with_fileglob:
+#     - "*.scpt"
