@@ -13,12 +13,12 @@
   tags: vim-plug
 
 # g:plug_timeout?
-# - name: Install vim plugins
-#   command: "vim +PlugInstall +qall"
-#   args:
-#     creates: "{{ false if vim_force_install_plugins else dot_home + '/.vim/plugged/*' }}"
-#   when: vim_install_plugins
-#   tags: vim-plug
+- name: Install vim plugins
+  command: "vim +PlugInstall +qall"
+  args:
+    creates: "{{ false if vim_force_install_plugins else dot_home + '/.vim/plugged/*' }}"
+  when: vim_install_plugins
+  tags: vim-plug
 
   # command: "vim -E -s +'source {{ destination }}/vimrc' +PlugInstall +qall"
   # args:
