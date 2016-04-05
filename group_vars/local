@@ -1,6 +1,9 @@
 ---
 # vi: ft=yaml
 
+# localhost
+ansible_connection: local
+
 # NodeJS modules
 npm_packages:
   - bower
