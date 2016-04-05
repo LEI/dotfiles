@@ -20,7 +20,7 @@
   # Show the diff between the latest commit and the current state
   d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-  # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+  # 'git di $number' shows the diff between the state '$number' revisions ago and the current state
   di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
   # Pull in remote changes for the current repository and all its submodules
@@ -100,7 +100,7 @@
 
   editor = vim
 
-  # Use custom `.gitignore` and `.gitattributes`
+  # Use custom '.gitignore' and '.gitattributes'
   excludesfile = ~/.gitignore
   attributesfile = ~/.gitattributes
 
@@ -109,7 +109,7 @@
   # [default] space-before-tab: looks for spaces before tabs at the beginning of a line
   whitespace = space-before-tab,-indent-with-non-tab,trailing-space
 
-  # Make `git rebase` safer on OS X
+  # Make 'git rebase' safer on OS X
   # More info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
   trustctime = false
 
@@ -148,11 +148,11 @@
 
 [push]
 
-  # Use the Git 1.x.x default to avoid errors on machines with old Git
-  # installations. To use `simple` instead, add this to your `~/.extra` file:
-  # `git config --global push.default simple`. See http://git.io/mMah-w.
-  # default = matching
-  # Make `git push` push relevant annotated tags when pushing branches out.
+  # Use 'matching' (Git 1.x.x default) to avoid errors on old machines
+  # Or 'git config --global push.default simple'  http://git.io/mMah-w
+  default = simple
+
+  # Make 'git push' push relevant annotated tags when pushing branches out.
   followTags = true
 
 # URL shorthands
