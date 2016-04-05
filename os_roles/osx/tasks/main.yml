@@ -23,11 +23,12 @@
 #   with_items: "{{ osx_templates }}"
 #     # dest: "{{ role_path }}/files/{{ script }}"
 
-# # docs.ansible.com/ansible/osx_defaults_module.html
+# Set up OSX defaults
+# docs.ansible.com/ansible/osx_defaults_module.html
 - include: defaults.yml
   with_dict: "{{ osx_defaults }}"
-  vars:
-    process: "{{ item.key }}"
+  # vars:
+  #   app: "{{ item.key }}"
 
 # - include: apple-script.yml
 #   with_fileglob:

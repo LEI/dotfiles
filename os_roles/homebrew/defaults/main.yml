@@ -4,6 +4,7 @@ packages_upgrade: yes
 
 homebrew_install_script: "https://raw.githubusercontent.com/Homebrew/install/master/install"
 homebrew_install_path: /usr/local
+homebrew_creates: Cellar # Relative to install path
 homebrew_install: yes
 homebrew_cleanup: yes
 

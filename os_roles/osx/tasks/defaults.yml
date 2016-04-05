@@ -9,8 +9,8 @@
     domain: "{{ item.value.domain | default(omit) }}" # Default: NSGlobalDomain
     state: "{{ item.value.state | default('present') }}" # Default: present
     type: "{{ item.value.type | default(omit) }}" # Default: string
-    value: "{{ item.value.value }}" # Required when state = present
+    value: "{{ item.value.value | default(omit) }}" # Required when state = present
     array_add: "{{ item.value.array_add | default(omit) }}"
     host: "{{ item.value.host | default(omit) }}" # Default: currentHost
-  with_dict: "{{ app.value }}"
+  with_dict: "{{ app.value }}" # TODO: when condition?
   notify: "Restart {{ app.key }}"

@@ -8,9 +8,9 @@ homebrew_cask_apps: []
 
 homebrew_cask_cli:
   # To remap Caps Lock to Escape:
-  #   System Preferences > Keyboard > Modifier Keys
-  #   Caps Lock Key -> No Action
-  #   53: Escape, 80: F19
+  # System Preferences > Keyboard > Modifier Keys
+  # Caps Lock Key -> No Action
+  # Escape (53), F19 (80)
   seil:
     cli: /Applications/Seil.app/Contents/Library/bin/seil
     options:
