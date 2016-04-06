@@ -28,9 +28,6 @@ Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-fugitive'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'airblade/vim-gitgutter'
-"Plug 'editorconfig/editorconfig-vim'
-Plug 'godlygeek/tabular', { 'on': 'Tab' }
-Plug 'Yggdroot/indentLine'
 Plug 'sjl/gundo.vim'
 Plug 'scrooloose/syntastic'
 Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
@@ -39,7 +36,10 @@ Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'digitaltoad/vim-jade'
 " Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['cpp'] }
 " Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
+" Plug 'honza/vim-snippets'
+" Plug 'Yggdroot/indentLine'
+" Plug 'godlygeek/tabular', { 'on': 'Tab' }
+" Plug 'editorconfig/editorconfig-vim'
 Plug 'chriskempson/base16-vim'
 
 " Add plugins to &runtimepath
