@@ -17,15 +17,16 @@ ansible_install() {
   case $uname in
     Darwin)
       if [[ ! -x /usr/bin/gcc ]]; then
-        # Command Line Tools
         local x="xcode-select --install"
         echo "${x}..."
         $x
       fi
       ;;
     Linux)
-      # Debian: sudo apt-get install python-dev python-pip # libffi-dev
-      # Fedora/CentOS: sudo yum install python-devel
+      # Debian/Ubuntu:
+      # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
+      # Fedora/CentOS:
+      # sudo yum install gcc libffi-devel openssl-devel python-devel
       ;;
     *)
       echo "Unsupported platform: $uname"
