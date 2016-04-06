@@ -11,7 +11,7 @@ cd "$DOT_ROOT"
 # Use ask become pass or -K instead?
 # sudo -v
 
-install_ansible() {
+ansible_install() {
   local uname=$(uname -s)
 
   case $uname in
@@ -19,12 +19,12 @@ install_ansible() {
       if [[ ! -x /usr/bin/gcc ]]; then
         # Command Line Tools
         local x="xcode-select --install"
-        echo "Run: $x"
-        exit 0
+        echo "${x}..."
+        $x
       fi
       ;;
     Linux)
-      # sudo apt-get install python-dev python-pip # libffi-dev
+      # Debian: sudo apt-get install python-dev python-pip # libffi-dev
       # Fedora/CentOS: sudo yum install python-devel
       ;;
     *)
@@ -34,12 +34,12 @@ install_ansible() {
   esac
 
   sudo easy_install pip
-  sudo pip install -r requirements.txt
+  sudo pip install -r requirements/pip.txt
   # pip cryptography on raspbian ->
   # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
 }
 
-vault_ansible() {
+ansible_vault() {
   local extra_file="$HOME/.extra"
   local vault_file="$HOME/.vault_pass.txt"
   local vault_pass=
@@ -50,12 +50,8 @@ vault_ansible() {
     read -e -r -s vault_pass
     if [[ -n "$vault_pass" ]]; then
       echo "$vault_pass" >> $vault_file
-      # if [[ ! -f "$extra_file" ]] && [[ ! -n "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
-      #   echo "export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file" >> $extra_file
-      #   source $extra_file
-      # fi
     else
-      vault_ansible
+      ansible_vault
       return
     fi
   fi
@@ -65,19 +61,19 @@ vault_ansible() {
   fi
 }
 
-run_ansible() {
+ansible_playbook() {
   local playbook="playbooks/main.yml"
   local ansible=$(which ansible)
 
   if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
-    install_ansible
+    ansible_install
   fi
 
   if [[ $? == 0 ]]; then
-    vault_ansible
-    # ansible-galaxy install -r requirements.yml
+    ansible_vault
+    # ansible-galaxy install -r requirements/galaxy.yml
     ansible-playbook "$playbook" "$@" # --ask-become-pass
   fi
 }
 
-[[ "$0" == "$BASH_SOURCE" ]] && time run_ansible "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && time ansible_playbook "$@"
