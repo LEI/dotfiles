@@ -3,7 +3,10 @@
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
-    install_options: "{{ item.install_options | default(omit) }}"
+    install_options: >
+      item.install_options | join(',') if ansible_os_family == 'Darwin' and
+      item.install_options is defined and
+      item.install_options | length > 0 else omit
   with_items: "{{ packages }}"
   become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
   when: packages_install

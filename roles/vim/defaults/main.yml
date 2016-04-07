@@ -4,6 +4,6 @@ vim_install_plugins: yes
 # Install plugins even if ~/.vim/plugged/* already exists
 vim_force_install_plugins: no
 
-osx_vim_install_options:
+vim_brew_install_options:
   - with-override-system-vi
   # - with-pyhton3

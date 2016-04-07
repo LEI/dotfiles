@@ -4,7 +4,7 @@ hs.autoLaunch(true)
 hs.automaticallyCheckForUpdates(true)
 hs.consoleOnTop(true)
 hs.dockIcon(false)
-hs.menuIcon(true)
+-- hs.menuIcon(true) -- Added on each reload!
 
 -- General
 

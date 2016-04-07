@@ -31,6 +31,7 @@ end
 local diskIconPath = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/SidebarRemovableDisk.icns"
 local diskImage = hs.image.imageFromPath(diskIconPath)
 
+-- https://github.com/Hammerspoon/hammerspoon/issues/815
 volumes.menu = hs.menubar.new():setMenu(volumesMenu)
 volumes.menu:setTitle("⏏")
 -- volumes.menu = hs.menubar.new():setMenu(volumesMenu):setIcon(diskImage:setSize({w=16,h=16}))

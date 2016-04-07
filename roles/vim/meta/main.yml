@@ -4,7 +4,7 @@ dependencies:
   - role: package
     packages:
       - name: vim
-        install_options: "{{ osx_vim_install_options | join(',') if ansible_os_family == 'Darwin' and osx_vim_install_options | length > 0 else omit }}"
+        install_options: "{{ vim_brew_install_options }}"
 
   - role: symlink
     dot_files:

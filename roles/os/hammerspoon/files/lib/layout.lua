@@ -36,7 +36,7 @@ applyWindowLayout()
     if (eventType == hs.application.watcher.activated) then
         if (appName == "Terminal") then
             local win = appObject:focusedWindow()
-            if win ~= nil then
+            if win ~= nil then -- & isFullScreen?
                 win:setFullScreen(true)
             end
         end

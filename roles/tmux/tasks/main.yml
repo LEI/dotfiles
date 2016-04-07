@@ -27,12 +27,14 @@
     state: directory
     follow: true
   when: tmux_conf and tmux_plugin_manager
+  tags: [tpm]
 
 - name: Clone tmux plugin manager
   git:
     repo: https://github.com/tmux-plugins/tpm.git
     dest: "{{ dot_home }}/.tmux/plugins/tpm"
   when: tmux_conf and tmux_plugin_manager
+  tags: [tpm]
 
 # github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
 - name: "Install {{ tmux_plugins | length }} tmux plugins"
@@ -40,4 +42,7 @@
   args:
     # if tmux_plugins | length > 0 else false
     creates: "{{ dot_home }}/.tmux/plugins/{{ tmux_plugins[0] | basename }}"
-  when: tmux_conf and tmux_plugin_manager and tmux_install_plugins and tmux_plugins | length > 0
+  when: >
+    tmux_conf and tmux_plugin_manager and
+    tmux_install_plugins and tmux_plugins | length > 0
+  tags: [tpm]

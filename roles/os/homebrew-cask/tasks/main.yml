@@ -8,9 +8,11 @@
   with_items: "{{ homebrew_cask_apps }}"
   when: homebrew_cask_install
 
-# - name: Homebrew Casks cleanup
-#   shell: brew cask cleanup
-#   when: homebrew_cask_cleanup
+- name: Homebrew Casks cleanup
+  shell: brew cask cleanup
+  when: homebrew_cask_cleanup
+  register: cleanup_result
+  changed_when: "'Nothing to do' not in cleanup_result.stdout_lines"
 
 # - name: Configure Homebrew Casks
 #   command: "{{ item.1 }}"
