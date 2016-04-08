@@ -412,7 +412,7 @@ osx_defaults:
     # persistent-apps: {domain: com.apple.dock, type: array, value: []}
 
     # Show only open applications in the Dock
-    static-only: {domain: com.apple.dock, type: bool, value: true}
+    # static-only: {domain: com.apple.dock, type: bool, value: true}
 
     # Don't animate opening applications from the Dock
     launchanim: {domain: com.apple.dock, type: bool, value: false}
