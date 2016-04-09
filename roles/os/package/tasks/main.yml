@@ -3,6 +3,7 @@
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
+    # Homebrew module options
     # role_brew_install_options
     install_options: "{{
       item.install_options | join(',') if ansible_os_family == 'Darwin' and

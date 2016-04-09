@@ -6,17 +6,19 @@
 
 ## Inspiration
 
+- Ansible:
 - [osxc](https://github.com/osxc)
 - [battleschool](https://github.com/spencergibb/battleschool)
 - [superlumic](https://github.com/superlumic)
 - [mac-dev-playbook](https://github.com/geerlingguy/mac-dev-playbook)
-- [osx gist](https://gist.github.com/saetia/1623487)
-
-- [boxen](https://github.com/boxen/our-boxen)
-- [workstation](https://github.com/jtimberman/workstation-chef-repo)
-
+- [delucks](https://github.com/delucks/dotfiles)
+- Puppet: [boxen](https://github.com/boxen/our-boxen)
+- Chef: [workstation](https://github.com/jtimberman/workstation-chef-repo)
+- Dotfiles:
 - [diimdeep](https://github.com/diimdeep/dotfiles)
 - [ornicar](https://github.com/ornicar/dotfiles)
+- Gist:
+- [osx gist](https://gist.github.com/saetia/1623487)
 
 ## TODO
 
