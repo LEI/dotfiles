@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+# vi: ft=gitconfig
+
+[user]
+
+  name = {{ git_name }}
+  email = {{ git_email }}
+
+[credential]
+
+  helper = {{ git_credential_helper }}

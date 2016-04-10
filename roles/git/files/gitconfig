@@ -1,13 +1,4 @@
-# {{ ansible_managed }}
-
-[user]
-
-  name = {{ git_name }}
-  email = {{ git_email }}
-
-[credential]
-
-  helper = {{ git_credential_helper }}
+# vi: ft=gitconfig
 
 [alias]
 
@@ -176,3 +167,6 @@
 [url "git://gist.github.com/"]
 
   insteadOf = "gist:"
+
+[include]
+  path = ~/.gitconfig.local
