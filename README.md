@@ -12,6 +12,7 @@
 - [superlumic](https://github.com/superlumic)
 - [mac-dev-playbook](https://github.com/geerlingguy/mac-dev-playbook)
 - [delucks](https://github.com/delucks/dotfiles)
+- [sheldonh](https://github.com/sheldonh/dotfiles-ansible)
 - Puppet: [boxen](https://github.com/boxen/our-boxen)
 - Chef: [workstation](https://github.com/jtimberman/workstation-chef-repo)
 - Dotfiles:
