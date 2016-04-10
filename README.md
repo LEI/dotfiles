@@ -33,3 +33,4 @@
 - [ ] Composer checksum get_url
 - [ ] --check module find: Skipping task due to undefined Error
   (msg: remote module does not support check mode)
+- [ ] [git-prompt.sh](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
