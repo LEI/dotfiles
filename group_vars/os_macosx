@@ -364,6 +364,12 @@ osx_defaults:
     # Stop iTunes from responding to the keyboard media keys
     # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
+    # Disable Dashboard
+    mcx-disabled: {domain: com.apple.dashboard, type: bool, value: true}
+
+    # Enable Dashboard dev mode (allows keeping widgets on the desktop)
+    devmode: {domain: com.apple.dashboard, type: bool, value: true}
+
     # Screen ##################################################################
 
     # Require password immediately after sleep or screen saver begins
@@ -471,22 +477,16 @@ osx_defaults:
     # 12: Notification Center
 
     # Top left screen corner → Mission Control
-    # defaults write com.apple.dock wvous-tl-corner -int 2
-    # defaults write com.apple.dock wvous-tl-modifier -int 0
+    wvous-tl-corner: {domain: com.apple.dock, type: int, value: 2}
+    wvous-tl-modifier: {domain: com.apple.dock, type: int, value: 0}
 
     # Top right screen corner → Desktop
-    # defaults write com.apple.dock wvous-tr-corner -int 4
-    # defaults write com.apple.dock wvous-tr-modifier -int 0
+    wvous-tr-corner: {domain: com.apple.dock, type: int, value: 4}
+    wvous-tr-modifier: {domain: com.apple.dock, type: int, value: 0}
 
     # Bottom left screen corner → Start screen saver
-    # #defaults write com.apple.dock wvous-bl-corner -int 5
-    # #defaults write com.apple.dock wvous-bl-modifier -int 0
-
-    # Disable Dashboard
-    mcx-disabled: {domain: com.apple.dashboard, type: bool, value: true}
-
-    # Enable Dashboard dev mode (allows keeping widgets on the desktop)
-    devmode: {domain: com.apple.dashboard, type: bool, value: true}
+    # wvous-bl-corner: {domain: com.apple.dock, type: int, value: 5}
+    # wvous-bl-modifier: {domain: com.apple.dock, type: int, value: 0}
 
   Safari: # & WebKit
 
@@ -560,22 +560,24 @@ osx_defaults:
     # Disable automatic spell checking
     SpellCheckingBehavior: {domain: com.apple.mail, value: "NoSpellCheckingEnabled"}
 
-    # # Spotlight #############################################################
+  # Spotlight
 
-    # # Hide Spotlight tray-icon (and subsequent helper)
-    # #sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
-    # # Disable Spotlight indexing for any volume that gets mounted and has not yet
-    # # been indexed before.
-    # # Use 'sudo mdutil -i off "/Volumes/foo"' to stop indexing any volume.
+    # Hide Spotlight tray-icon (and subsequent helper)
+    # sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
+
+    # Disable Spotlight indexing for any volume that gets mounted and has not yet
+    # been indexed before.
+    # Use 'sudo mdutil -i off "/Volumes/foo"' to stop indexing any volume.
     # sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
-    # # Change indexing order and disable some search results
-    # # Yosemite-specific search results (remove them if you are using OS X 10.9 or older):
-    # # 	MENU_DEFINITION
-    # # 	MENU_CONVERSION
-    # # 	MENU_EXPRESSION
-    # # 	MENU_SPOTLIGHT_SUGGESTIONS (send search queries to Apple)
-    # # 	MENU_WEBSEARCH             (send search queries to Apple)
-    # # 	MENU_OTHER
+
+    # Change indexing order and disable some search results
+    # Yosemite-specific search results (remove them if you are using OS X 10.9 or older):
+    # 	MENU_DEFINITION
+    # 	MENU_CONVERSION
+    # 	MENU_EXPRESSION
+    # 	MENU_SPOTLIGHT_SUGGESTIONS (send search queries to Apple)
+    # 	MENU_WEBSEARCH             (send search queries to Apple)
+    # 	MENU_OTHER
     # defaults write com.apple.spotlight orderedItems -array \
     #   '{"enabled" = 1;"name" = "APPLICATIONS";}' \
     #   '{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
@@ -599,11 +601,14 @@ osx_defaults:
     #   '{"enabled" = 0;"name" = "MENU_EXPRESSION";}' \
     #   '{"enabled" = 0;"name" = "MENU_WEBSEARCH";}' \
     #   '{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
-    # # Load new settings before rebuilding the index
+
+    # Load new settings before rebuilding the index
     # killall mds > /dev/null 2>&1
-    # # Make sure indexing is enabled for the main volume
+
+    # Make sure indexing is enabled for the main volume
     # sudo mdutil -i on / > /dev/null
-    # # Rebuild the index from scratch
+
+    # Rebuild the index from scratch
     # sudo mdutil -E / > /dev/null
 
   Terminal:
@@ -619,10 +624,10 @@ osx_defaults:
     # Don't display the annoying prompt when quitting iTerm
     # defaults write com.googlecode.iterm2 PromptOnQuit -bool false
 
-  # Time Machine:
+  Time Machine:
 
     # Prevent Time Machine from prompting to use new hard drives as backup volume
-    # DoNotOfferNewDisksForBackup: {domain: com.apple.TimeMachine, type: bool, value: true}
+    DoNotOfferNewDisksForBackup: {domain: com.apple.TimeMachine, type: bool, value: true}
 
     # Disable local Time Machine backups
     # hash tmutil &> /dev/null && sudo tmutil disablelocal
@@ -643,31 +648,36 @@ osx_defaults:
     SortDirection: {domain: com.apple.ActivityMonitor, type: int, value: 0}
 
   Address Book:
-    # # Address Book, Dashboard, iCal, TextEdit, Disk Utility
 
     # Enable the debug menu in Address Book
     ABShowDebugMenu: {domain: com.apple.addressbook, type: bool, value: true}
 
-    # # Enable the debug menu in iCal (pre-10.8)
-    # defaults write com.apple.iCal IncludeDebugMenu -bool true
+  Calendar:
 
-    # # Use plain text mode for new TextEdit documents
-    # defaults write com.apple.TextEdit RichText -int 0
-    # # Open and save files as UTF-8 in TextEdit
-    # defaults write com.apple.TextEdit PlainTextEncoding -int 4
-    # defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+    # Enable the debug menu in iCal (pre-10.8)
+    IncludeDebugMenu: {domain: com.apple.iCal, type: bool, value: true}
 
-    # # Enable the debug menu in Disk Utility
-    # defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
-    # defaults write com.apple.DiskUtility advanced-image-options -bool true
+  TextEdit:
 
-    # # Mac App Store #########################################################
+    # Use plain text mode for new TextEdit documents
+    RichText: {domain: com.apple.TextEdit, type: int, value: 0}
+    # Open and save files as UTF-8 in TextEdit
+    PlainTextEncoding: {domain: com.apple.TextEdit, type: int, value: 4}
+    PlainTextEncodingForWrite: {domain: com.apple.TextEdit, type: int, value: 4}
 
-    # # Enable the WebKit Developer Tools in the Mac App Store
-    # defaults write com.apple.appstore WebKitDeveloperExtras -bool true
+  Disk Utility: # killall?
 
-    # # Enable Debug Menu in the Mac App Store
-    # defaults write com.apple.appstore ShowDebugMenu -bool true
+    # Enable the debug menu in Disk Utility
+    DUDebugMenuEnabled: {domain: com.apple.DiskUtility, type: bool, value: true}
+    advanced-image-options: {domain: com.apple.DiskUtility, type: bool, value: true}
+
+  App Store: # killall?
+
+    # Enable the WebKit Developer Tools in the Mac App Store
+    WebKitDeveloperExtras: {domain: com.apple.appstore, type: bool, value: true}
+
+    # Enable Debug Menu in the Mac App Store
+    ShowDebugMenu: {domain: com.apple.appstore, type: bool, value: true}
 
   Photos:
 

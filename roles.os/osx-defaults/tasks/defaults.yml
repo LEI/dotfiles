@@ -1,5 +1,5 @@
 ---
-- name: "Set {{ item.key }} fact"
+- name: "{{ item.key }} fact"
   set_fact:
     app: "{{ item }}"
 
@@ -13,4 +13,4 @@
     array_add: "{{ item.value.array_add | default(omit) }}"
     host: "{{ item.value.host | default(omit) }}" # Default: currentHost
   with_dict: "{{ app.value }}" # TODO: when condition?
-  notify: "Restart {{ app.key }}"
+  notify: "killall {{ app.key }}"

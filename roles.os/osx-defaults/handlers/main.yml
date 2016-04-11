@@ -1,13 +1,70 @@
 ---
-- name: Restart Finder
+- name: killall Finder
   command: killall Finder
   when: osx_kill_apps
 
-- name: Restart SystemUIServer
+- name: killall SystemUIServer
   command: killall SystemUIServer
   when: osx_kill_apps
 
-# - name: "Restart {{ item }}"
+- name: killall Dock
+  command: killall Dock
+  when: osx_kill_apps
+
+- name: killall Safari
+  command: killall Safari
+  when: osx_kill_apps
+  failed_when: false
+
+- name: killall Mail
+  command: killall Mail
+  when: osx_kill_apps
+  failed_when: false
+
+# - name: killall Terminal
+#   command: killall Terminal
+#   when: osx_kill_apps
+
+- name: killall Activity Monitor
+  command: killall Activity Monitor
+  when: osx_kill_apps
+  failed_when: false
+
+- name: killall Address Book
+  command: killall Address Book
+  when: osx_kill_apps
+  failed_when: false
+
+- name: killall Calendar
+  command: killall Calendar
+  when: osx_kill_apps
+  failed_when: false
+
+- name: killall Photos
+  command: killall Photos
+  when: osx_kill_apps
+  failed_when: false
+
+# - name: killall Google Chrome
+#   command: killall Google Chrome
+#   when: osx_kill_apps
+
+- name: killall Opera
+  command: killall Opera
+  when: osx_kill_apps
+  failed_when: false
+
+- name: killall Transmission
+  command: killall Transmission
+  when: osx_kill_apps
+  failed_when: false
+
+# - name: killall Twitter
+#   command: killall Twitter
+#   when: osx_kill_apps
+
+# :(
+# - name: "killall {{ item }}"
 #   command: "killall {{ item }}"
 #   when: osx_notify_killall
 #   with_items:

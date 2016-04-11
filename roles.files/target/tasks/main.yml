@@ -7,6 +7,8 @@
 #     # file_type: file/directory
 #     hidden: true
 
+# Use shell/find + register?
+# http://docs.ansible.com/ansible/playbooks_loops.html#id24
 - name: "Construct {{ dot_files_dir | default('directory') }} dict"
   vars:
     _dot_root: "{{ dot_root if dot_files_dir != 'templates' else dot_local_dir }}"

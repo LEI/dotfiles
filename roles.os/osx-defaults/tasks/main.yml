@@ -26,10 +26,11 @@
 # Set up OSX defaults
 # docs.ansible.com/ansible/osx_defaults_module.html
 - include: defaults.yml
+  # vars: # using set_fact instead to notify handlers
+  #   app: "{{ item }}"
   with_dict: "{{ osx_defaults }}"
-  # vars:
-  #   app: "{{ item.key }}"
 
+# TODO: default terminal theme
 # - include: apple-script.yml
 #   with_fileglob:
 #     - "*.scpt"
