@@ -18,8 +18,8 @@
         item.key: {
           'src': _dot_root + ('/' + item.value.src if item.value.src | default(false) else '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir if dot_files_dir and dot_roles_dir else item.key),
           'dest': dot_home + ('/' + item.value.dest if item.value.dest | default(false) else ''),
-          'prefix': item.value.prefix | default(''),
-          'pattern': item.value.pattern | default(dot_find_pattern)
+          'pattern': '/' + item.value.pattern | default(dot_find_pattern),
+          'prefix': item.value.prefix | default('')
         }
       }}}
   with_dict: "{{ dot_files }}"

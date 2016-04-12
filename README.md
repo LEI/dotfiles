@@ -25,7 +25,7 @@
 
 - [ ] os/osx-\* roles
 - [ ] Homebrew casks cli skipped?
-- [ ] assemble (tmux: Wheel Pane, vim: Plug...)
+- [ ] assemble (tmux: Wheel Pane, vim: Plug...) / lineinfile check home
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
 - [ ] Vim truncate inactive statusline
