@@ -1,5 +1,5 @@
 ---
-- name: Install Homebrew Casks
+- name: Install Homebrew Cask apps
   homebrew_cask:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(homebrew_cask_state) }}"
@@ -8,21 +8,17 @@
   with_items: "{{ homebrew_cask_apps }}"
   when: homebrew_cask_install
 
-- name: Homebrew Casks cleanup
+- name: Cleanup Homebrew Cask apps
   shell: brew cask cleanup
   when: homebrew_cask_cleanup
-  register: cleanup_result
-  changed_when: "'Nothing to do' not in cleanup_result.stdout_lines"
+  register: cleanup
+  changed_when: "'Nothing to do' not in cleanup.stdout_lines"
 
-# - name: Configure Homebrew Casks
-#   command: "{{ item.1 }}"
-#   args:
-#     executable: "{{ item.0.cli }}"
-#   with_subelements:
-#     - "{{ casks_cli }}"
-#     - options
-
-# - name: Cask files
-#   debug: msg={{ item }}
-#   with_fileglob:
-#     - "*"
+- name: Configure Homebrew Cask apps
+  command: "./{{ item.0.name }} {{ item.1 }}"
+  args:
+    chdir: "{{ item.0.bin }}"
+  with_subelements:
+    - "{{ homebrew_cask_opts }}"
+    - opt
+  changed_when: false

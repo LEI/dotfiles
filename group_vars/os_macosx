@@ -44,12 +44,32 @@ homebrew_cask_apps:
   - virtualbox
   - vlc
 
+homebrew_cask_opts:
+  # Remap Caps Lock to Escape
+  # System Preferences > Keyboard > Modifier Keys
+  # Caps Lock Key -> No Action
+  - name: seil
+    bin: /Applications/Seil.app/Contents/Library/bin
+    opt:
+      - set enable_capslock 1
+      # Escape (53), F19 (80)
+      - set keycode_capslock 53
+
 php_packages:
   - php55
 
 osx_natural_scroll: true
 # osx_notification_center: false
 # osx_ssd_tweaks: true
+
+osx_system:
+  # Never go into computer sleep mode
+  computersleep: Never
+  # Restart automatically if the computer freezes
+  restartfreeze: On
+  # Set the timezone; see 'sudo systemsetup -listtimezones' for other values
+  timezone: "{{ timezone }}"
+
 
 # FIXME sinstance() arg 2 must be a class, type, or tuple of classes and types
 # https://github.com/ansible/ansible-modules-extras/issues/1742
@@ -250,7 +270,6 @@ osx_defaults:
 
     # Save to disk (not to iCloud) by default
     NSDocumentSaveNewDocumentsToCloud: {type: bool, value: false}
-    #defaults write NSGlobalDomain  -bool false
 
     # Automatically quit printer app once the print jobs complete
     Quit When Finished: {domain: com.apple.print.PrintingPrefs, type: bool, value: true}
@@ -283,12 +302,6 @@ osx_defaults:
 
     # Reveal IP address, hostname, OS version, etc. when clicking the clock in the login window
     AdminHostInfo: {domain: /Library/Preferences/com.apple.loginwindow, value: HostName} # sudo?
-
-    # Restart automatically if the computer freezes
-    # sudo systemsetup -setrestartfreeze on
-
-    # Never go into computer sleep mode
-    # sudo systemsetup -setcomputersleep Off > /dev/null
 
     # Check for software updates daily, not just once per week
     ScheduleFrequency: {domain: com.apple.SoftwareUpdate, type: int, value: 1}
@@ -354,9 +367,6 @@ osx_defaults:
     AppleLocale: {value: "en_GB@currency=EUR"}
     AppleMeasurementUnits: {value: "Centimeters"}
     AppleMetricUnits: {type: bool, value: true}
-
-    # Set the timezone; see 'sudo systemsetup -listtimezones' for other values
-    # sudo systemsetup -settimezone {{ timezone }} > /dev/null
 
     # Disable auto-correct
     NSAutomaticSpellingCorrectionEnabled: {type: bool, value: false}

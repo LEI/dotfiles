@@ -6,17 +6,17 @@
 
   roles:
 
+    # Git via homebrew or apt
+    - role: git
+      tags: [git, vcs]
+
     # Composer & PHP
     - role: composer
       tags: [composer, php]
 
     # NodeJS & global npm packages
     - role: npm
-      tags: [npm, js]
-
-    # Git via homebrew or apt
-    - role: git
-      tags: [git, vcs]
+      tags: [npm, node, js]
 
     - role: bash
       tags: [bash]

@@ -19,12 +19,6 @@
     - role: homebrew-cask
       tags: [cask]
 
-    # NodeJS
-    - role: package
-      tags: [node, npm, js]
-      packages:
-        - node
-
     # Hammerspoon
     - role: hammerspoon
       tags: [ws, hs]

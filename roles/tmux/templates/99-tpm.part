@@ -1,0 +1,21 @@
+# Tmux Plugin Manager
+
+# Examples:
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+# set -g @plugin 'github_username/plugin_name'
+# set -g @plugin 'git@github.com/user/plugin'
+# set -g @plugin 'git@bitbucket.com/user/plugin'
+
+# CPU
+# set -g @plugin 'tmux-plugins/tmux-cpu'
+# {cpu_icon} #{cpu_percentage}
+# Battery
+# set -g @plugin 'tmux-plugins/tmux-battery'
+# :( 'thewtex/tmux-mem-cpu-load'
+
+{% for plugin in tmux_plugins %}
+set -g @plugin '{{ plugin }}'
+{% endfor %}
+
+# Keep this line at the very bottom of tmux.conf
+run '~/.tmux/plugins/tpm/tpm'

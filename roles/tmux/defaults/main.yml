@@ -4,5 +4,6 @@ tmux_install_plugins: yes
 # tmux_update_plugins: all
 tmux_plugin_manager: yes
 tmux_plugins:
-  # - battery
+  - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
+  # - battery

@@ -3,16 +3,6 @@ homebrew_cask_install: yes
 homebrew_cask_state: present
 homebrew_cask_appdir: /Applications
 homebrew_cask_cleanup: yes
-
+# Cf. group_vars/os_macosx
 homebrew_cask_apps: []
-
-homebrew_cask_cli:
-  # To remap Caps Lock to Escape:
-  # System Preferences > Keyboard > Modifier Keys
-  # Caps Lock Key -> No Action
-  # Escape (53), F19 (80)
-  seil:
-    cli: /Applications/Seil.app/Contents/Library/bin/seil
-    options:
-      - set enable_capslock 1
-      - set keycode_capslock 53
+homebrew_cask_opts: []

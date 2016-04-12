@@ -1,0 +1,11 @@
+---
+# TODO: -get -> changed when false
+# if item.value not in result.stdout -> -set
+
+- name: System setup
+  command: "systemsetup -get{{ item.key }}"
+  register: out
+  become: yes
+  become_method: sudo
+
+- debug: var=out

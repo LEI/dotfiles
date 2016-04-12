@@ -4,5 +4,7 @@
 # osx_templates:
 #   - terminal.scpt
 
-osx_defaults: {} # Cf. group_vars/os_macosx
+# Cf. group_vars/os_macosx
+osx_defaults: {}
+osx_system: {}
 osx_kill_apps: yes # Kill affected applications

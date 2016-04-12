@@ -1,0 +1,54 @@
+# Bindings
+
+# Use emacs bindings?
+setw -g mode-keys emacs
+
+# Change the prefix key to C-a
+set -g prefix C-a
+unbind C-b
+bind C-a send-prefix
+
+# Switch to last window
+bind a last-window
+
+# Open windows and splits in the current directory
+bind c new-window -c '#{pane_current_path}'
+bind '"' split-window -c '#{pane_current_path}'
+bind % split-window -h -c '#{pane_current_path}'
+
+# Vim style pane navigation
+unbind-key j
+bind-key j select-pane -D
+unbind-key k
+bind-key k select-pane -U
+unbind-key h
+bind-key h select-pane -L
+unbind-key l
+bind-key l select-pane -R
+
+# Pane resizing
+bind H resize-pane -L 5
+bind J resize-pane -D 5
+bind K resize-pane -U 5
+bind L resize-pane -R 5
+
+# Quick pane cycling
+# unbind ^A
+# bind ^A select-pane -t :.+
+
+# Some extra key bindings to select higher numbered windows
+bind F1 selectw -t:10
+bind F2 selectw -t:11
+bind F3 selectw -t:12
+bind F4 selectw -t:13
+bind F5 selectw -t:14
+bind F6 selectw -t:15
+bind F7 selectw -t:16
+bind F8 selectw -t:17
+bind F9 selectw -t:18
+bind F10 selectw -t:19
+bind F11 selectw -t:20
+bind F12 selectw -t:21
+
+# Reload config
+bind r source-file ~/.tmux.conf \; display-message 'Reloaded ~/.tmux.conf'

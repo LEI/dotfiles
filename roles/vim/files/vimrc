@@ -385,7 +385,12 @@ let &showbreak=nr2char(0x21AA)
 
 " Show invisible character (highlighted with NonText and SpecialKey)aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 set list
-let &listchars='tab:'.nr2char(0x25B8).' ,trail:'.nr2char(0x00B7).',extends:>,precedes:<,nbsp:'.nr2char(0x005F).',eol:'.nr2char(0x00AC)
+let &listchars='tab:'.nr2char(0x25B8).' '
+let &listchars.=',trail:'.nr2char(0x00B7)
+let &listchars.=',extends:'.nr2char(0x276F)
+let &listchars.=',precedes:'.nr2char(0x276E)
+let &listchars.=',nbsp:'.nr2char(0x005F)
+let &listchars.=',eol:'.nr2char(0x00AC)
 
 " Folding {{{1
 

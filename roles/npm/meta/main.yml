@@ -1,13 +1,15 @@
 ---
 dependencies:
 
-#   - role: package
-#     packages:
-#       - node
-#     when: "ansible_os_family == 'Darwin'"
+  # Install NodeJS for MacOSX
+  - role: package
+    packages:
+      - node
+    when: "ansible_os_family == 'Darwin'"
 
-#   - role: nodejs
-#     when: "ansible_os_family == 'Debian'"
+  # Install NodeJS for Debian/RedHat
+  - role: node
+    when: "ansible_os_family == 'Debian'"
 
   - role: template
     dot_files:
