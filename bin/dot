@@ -41,10 +41,9 @@ ansible_install() {
 }
 
 ansible_vault() {
-  local extra_file="$HOME/.extra"
+  # local extra_file="$HOME/.extra"
   local vault_file="$HOME/.vault_pass.txt"
   local vault_pass=
-
 
   if [[ ! -f "$vault_file" ]]; then
     echo "Vault?"
