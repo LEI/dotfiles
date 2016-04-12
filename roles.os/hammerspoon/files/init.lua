@@ -207,15 +207,15 @@ hs.hotkey.bind(super, "Left", hs.window.focusWindowWest)
 -- hs.hotkey.bind(hyper, "Down", hs.window.moveOneScreenSouth)
 -- hs.hotkey.bind(hyper, "Left", hs.window.moveOneScreenWest)
 
-local msg = {"Config"}
+local msg = {""}
 local wasLoaded = #hs.console.getHistory()
 
 if wasLoaded == 0 then
     -- Add an empty command in the history
     hs.console.setHistory({""})
-    table.insert(msg, " loaded")
+    table.insert(msg, "Loaded")
 else
-    table.insert(msg, " re-loaded")
+    table.insert(msg, "Re-loaded")
 end
 
 hs.alert(table.concat(msg))

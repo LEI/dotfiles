@@ -2,11 +2,16 @@
 
 " github.com/skwp/dotfiles/blob/master/vim/settings.vim
 
-let vimsettings = '~/.vim/plugin/settings'
+if get(g:, 'loaded_settings', 0)
+  finish
+endif
+let g:loaded_settings = 1
+
+let s:settings_path = '~/.vim/plugin/settings'
 "let uname = system("uname -s")
 
-for fpath in split(globpath(vimsettings, '*.vim'), '\n')
-  exe 'source' fpath
+for s:file_path in split(globpath(s:settings_path, '*.vim'), '\n')
+  exe 'source' s:file_path
 endfor
 
 "if (fpath == expand(vimsettings) . "/yadr-keymap-mac.vim") && uname[:4] ==? "linux"
