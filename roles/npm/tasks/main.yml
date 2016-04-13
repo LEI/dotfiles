@@ -1,16 +1,19 @@
 ---
-# # #  OSX?
-# # - name: Get npm configuration prefix
-# #   shell: "npm config get prefix"
-# #   register: npm_prefix
-# #   changed_when: false
-# # # docs.npmjs.com/getting-started/fixing-npm-permissions
-# # - name: "Check {{ npm_prefix.stdout }}/lib/node_modules permissions"
-# #   file:
-# #     path: "{{ npm_prefix.stdout }}/lib/node_modules"
-# #     owner: "{{ ansible_user_id }}"
-# #     # recurse: yes
-# #   when: npm_prefix.stdout is defined
+# npm config prefix:
+# docs.npmjs.com/getting-started/fixing-npm-permissions
+# github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
+
+# - name: Get npm configuration prefix
+#   shell: "npm config get prefix"
+#   register: npm_prefix
+#   changed_when: false
+
+# - name: "Check {{ npm_prefix.stdout }}/lib/node_modules permissions"
+#   file:
+#     path: "{{ npm_prefix.stdout }}/lib/node_modules"
+#     owner: "{{ ansible_user_id }}"
+#     # recurse: yes
+#   when: npm_prefix.stdout is defined
 
 - name: "Install npm packages"
   npm:
