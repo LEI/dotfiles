@@ -23,8 +23,13 @@ ansible_install() {
       fi
       ;;
     Linux)
+      # pip cryptography on raspbian ->
+      # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
+
       # Debian/Ubuntu:
+      sudo apt-get install python-setuptools
       # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
+
       # Fedora/CentOS:
       # sudo yum install gcc libffi-devel openssl-devel python-devel
       ;;
@@ -36,8 +41,6 @@ ansible_install() {
 
   sudo easy_install pip
   sudo pip install -r requirements/pip.txt
-  # pip cryptography on raspbian ->
-  # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
 }
 
 ansible_vault() {

@@ -23,5 +23,5 @@
     state: "{{ item.state | default(npm_state) }}"
     # path: ~/.node_modules
   with_items: "{{ npm_packages }}"
-  when: "npm_install and ansible_distribution == 'Darwin'"
-  # become: yes
+  when: npm_install
+  become: "{{ 'yes' if ansible_os_family == 'Debian' else 'no' }}"
