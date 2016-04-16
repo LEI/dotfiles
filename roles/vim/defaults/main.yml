@@ -1,9 +1,50 @@
 ---
-# Run :PlugInstall inside vim
-vim_install_plugins: yes
-# Install plugins even if ~/.vim/plugged/* already exists
-vim_force_install_plugins: no
-
-vim_brew_install_options:
+# Homebrew install options
+vim_brew_options:
   - with-override-system-vi
   # - with-pyhton3
+
+# Vim Plug
+# https://github.com/junegunn/vim-plug
+vim_plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+vim_plug_path: .vim/autoload
+vim_plug_file: plug.vim
+
+# Run :PlugInstall inside vim
+vim_plug_install: yes
+# Install plugins even if ~/.vim/plugged already exists
+vim_plug_force: no
+
+# Directory where the plugins will be cloned
+vim_plugins_path: .vim/plugged
+
+# List of plugins used in templates/plug.vim.j2
+# TODO: handle plugin.opts without quotes: function('')
+vim_plugins:
+  - LEI/vim-statusline
+  - tpope/vim-repeat
+  - tpope/vim-surround
+  - tpope/vim-endwise
+  - tpope/vim-unimpaired
+  - tpope/vim-commentary
+  - tpope/vim-sleuth
+  - tpope/vim-vinegar
+  - tpope/vim-fugitive
+  - chriskempson/base16-vim
+  - ctrlpvim/ctrlp.vim
+  - airblade/vim-gitgutter
+  - sjl/gundo.vim
+  - scrooloose/syntastic
+  - syngan/vim-vimlint # | Plug 'ynkdir/vim-vimlparser'
+  - ynkdir/vim-vimlparser
+  - plug: StanAngeloff/php.vim
+    opts: { for: php }
+  - plug: pangloss/vim-javascript
+    opts: { for: javascript }
+  - digitaltoad/vim-jade
+#   - 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['cpp'] }
+#   - 'SirVer/ultisnips'
+#   - 'honza/vim-snippets'
+#   - 'Yggdroot/indentLine'
+#   - 'godlygeek/tabular', { 'on': 'Tab' }
+#   - 'editorconfig/editorconfig-vim'

@@ -1,23 +1,24 @@
 ---
-- name: Make sure .vim/autoload directory exists
+- name: "Make sure {{ vim_plug_path }} exists"
   file:
-    path: "{{ dot_home }}/.vim/autoload"
+    path: "{{ dot_home }}/{{ vim_plug_path }}"
     state: directory
-    follow: true
+    follow: true # autoload is a symlink
   tags: vim-plug
 
 - name: Install vim-plug
   get_url:
-    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    dest: "{{ dot_home }}/.vim/autoload/plug.vim"
+    url: "{{ vim_plug_url }}"
+    dest: "{{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}"
   tags: vim-plug
 
 # g:plug_timeout?
+# github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 - name: Install vim plugins
-  command: "vim +PlugInstall +qall"
+  command: "vim +PlugInstall{{ '!' if vim_plug_force else '' }} +qall"
   args:
-    creates: "{{ false if vim_force_install_plugins else dot_home + '/.vim/plugged/*' }}"
-  when: vim_install_plugins
+    creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
+  when: vim_plug_install
   tags: vim-plug
 
   # command: "vim -E -s +'source {{ destination }}/vimrc' +PlugInstall +qall"

@@ -1,31 +1,11 @@
 " Vim Plug
-" {{ ansible_managed }}"
+" {{ ansible_managed }}
 
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/{{ vim_plugins_path }}')
 
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-sleuth'
-Plug 'tpope/vim-vinegar'
-Plug 'tpope/vim-fugitive'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'airblade/vim-gitgutter'
-Plug 'sjl/gundo.vim'
-Plug 'scrooloose/syntastic'
-Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
-Plug 'StanAngeloff/php.vim', { 'for': 'php' }
-Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
-Plug 'digitaltoad/vim-jade'
-" Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['cpp'] }
-" Plug 'SirVer/ultisnips'
-" Plug 'honza/vim-snippets'
-" Plug 'Yggdroot/indentLine'
-" Plug 'godlygeek/tabular', { 'on': 'Tab' }
-" Plug 'editorconfig/editorconfig-vim'
-Plug 'chriskempson/base16-vim'
+{% for plugin in vim_plugins %}
+Plug '{{ plugin.plug | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'')) if plugin.opts is defined else '' }}
+{% endfor %}
 
 " Add plugins to &runtimepath
 call plug#end()

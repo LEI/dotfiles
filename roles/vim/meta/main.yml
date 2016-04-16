@@ -4,7 +4,7 @@ dependencies:
   - role: package
     packages:
       - name: vim
-        install_options: "{{ vim_brew_install_options }}"
+        install_options: "{{ vim_brew_options }}"
 
   - role: template
     dot_files:
