@@ -1,17 +1,8 @@
 " Vim Plug
 " {{ ansible_managed }}
 
-call plug#begin('~/{{ vim_plugins_path }}')
-
-{% for plugin in vim_plugins %}
-Plug '{{ plugin.plug | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'')) if plugin.opts is defined else '' }}
-{% endfor %}
-
-" Add plugins to &runtimepath
-call plug#end()
-
 function YCMInstall(info)
-  " info is a dictionary with 3 fields
+  " The variable a:info is a dictionary with 3 fields:
   " - name: name of the plugin
   " - status: 'installed', 'updated', or 'unchanged'
   " - force: set on PlugInstall! or PlugUpdate!
@@ -25,6 +16,15 @@ function YCMInstall(info)
     !./install.py --tern-completer
   endif
 endfunction
+
+call plug#begin('~/{{ vim_plugins_path }}')
+
+{% for plugin in vim_plugins %}
+Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
+{% endfor %}
+
+" Add plugins to &runtimepath
+call plug#end()
 
 " autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
 " function! YCMEnable()
