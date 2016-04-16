@@ -42,8 +42,8 @@ vim_plugins:
     opts: { for: php }
   - repo: pangloss/vim-javascript
     opts: { for: javascript }
-  # - repo: Valloric/YouCompleteMe
-  #   opts: { do: function('YCMInstall'), for: [cpp] }
+  - repo: Valloric/YouCompleteMe
+    opts: { do: function('YCMInstall'), for: [cpp] }
 #   - 'SirVer/ultisnips'
 #   - 'honza/vim-snippets'
 #   - 'Yggdroot/indentLine'

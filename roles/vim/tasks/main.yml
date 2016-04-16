@@ -14,12 +14,15 @@
 
 # g:plug_timeout?
 # github.com/junegunn/vim-plug#pluginstall-and-plugupdate
+# stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
 - name: Install vim plugins
   command: "vim +PlugInstall{{ '!' if vim_plug_force else '' }} +qall"
   args:
     creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
   when: vim_plug_install
   tags: vim-plug
+
+  # vim -E -s +'source {{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}'
 
   # command: "vim -E -s +'source {{ destination }}/vimrc' +PlugInstall +qall"
   # args:
