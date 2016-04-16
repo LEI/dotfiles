@@ -11,82 +11,16 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-" Plugins {{{1
+" Runtime {{{1
 
 set nocompatible
 
-" Vim Plug
-call plug#begin('~/.vim/plugged')
+runtime before/plug.vim
 
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-sleuth'
-Plug 'tpope/vim-vinegar'
-Plug 'tpope/vim-fugitive'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'airblade/vim-gitgutter'
-Plug 'sjl/gundo.vim'
-Plug 'scrooloose/syntastic'
-Plug 'syngan/vim-vimlint' | Plug 'ynkdir/vim-vimlparser'
-Plug 'StanAngeloff/php.vim', { 'for': 'php' }
-Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
-Plug 'digitaltoad/vim-jade'
-" Plug 'Valloric/YouCompleteMe', { 'do': function('YCMInstall'), 'for': ['cpp'] }
-" Plug 'SirVer/ultisnips'
-" Plug 'honza/vim-snippets'
-" Plug 'Yggdroot/indentLine'
-" Plug 'godlygeek/tabular', { 'on': 'Tab' }
-" Plug 'editorconfig/editorconfig-vim'
-Plug 'chriskempson/base16-vim'
-
-" Add plugins to &runtimepath
-call plug#end()
-
-" Load matchit.vim, but only if the user hasn't installed a newer version.
+" Load matchit.vim, but only if the user hasn't installed a newer version
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime macros/matchit.vim
 endif
-
-function! YCMInstall(info)
-  " info is a dictionary with 3 fields
-  " - name: name of the plugin
-  " - status: 'installed', 'updated', or 'unchanged'
-  " - force: set on PlugInstall! or PlugUpdate!
-  if a:info.status == 'installed' || a:info.force
-    " The following additional language support options are available
-    " - C# support: add --omnisharp-completer to ./install.py
-    " - Go support: ensure go is installed and add --gocode-completer
-    " - TypeScript support: install nodejs and npm then install the TypeScript SDK with npm install -g typescript.
-    " - JavaScript support: install nodejs and npm and add --tern-completer when calling ./install.py
-    " - Rust support: install rustc and cargo and add --racer-completer when calling ./install.py
-    !./install.py --tern-completer
-  endif
-endfunction
-
-" autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
-" function! YCMEnable()
-"   if !exists('g:loaded_youcompleteme')
-"     call plug#load('YouCompleteMe')
-"   endif
-"   if exists('g:loaded_youcompleteme')
-"     call youcompleteme#Enable()
-"   endif
-" endfunction
-
-" function! SyntasticEnable()
-"   if !exists('g:loaded_syntastic_plugin')
-"     call plug#load('syntastic')
-"   endif
-" endfunction
-
-" augroup VimPlug
-"   autocmd!
-"   autocmd VimEnter * call LoadPlug() | autocmd! VimPlug
-" augroup END
-
 
 " General {{{1
 

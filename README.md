@@ -20,6 +20,8 @@
 - [ornicar](https://github.com/ornicar/dotfiles)
 - Gist:
 - [osx gist](https://gist.github.com/saetia/1623487)
+- [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
+- [yadr](https://github.com/skwp/dotfiles/)
 
 ## TODO
 

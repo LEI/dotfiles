@@ -6,6 +6,7 @@
   stat:
     path: "{{ composer_bin_path }}/composer"
   register: composer_bin
+  # when: php_packages | length > 0 # Check if composer is executable?
 
 - include: install-composer.yml
   when: composer_force_install or not composer_bin.stat.exists

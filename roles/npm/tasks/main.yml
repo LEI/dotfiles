@@ -18,7 +18,7 @@
 - name: "Install npm packages"
   npm:
     name: "{{ item.name | default(item) }}"
-    version: "{{ item.version | default('') }}"
+    version: "{{ item.version | default(omit) }}"
     global: "{{ item.global | default(npm_global) }}"
     state: "{{ item.state | default(npm_state) }}"
     # path: ~/.node_modules
