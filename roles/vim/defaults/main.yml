@@ -41,10 +41,10 @@ vim_plugins:
   - Glench/Vim-Jinja2-Syntax
   - syngan/vim-vimlint # | Plug 'ynkdir/vim-vimlparser'
   - ynkdir/vim-vimlparser
-  # - repo: Valloric/YouCompleteMe
-  #   opts: { do: function('YCMInstall'), for: [cpp] }
-  # - SirVer/ultisnips
-  # - honza/vim-snippets
+  - repo: Valloric/YouCompleteMe
+    opts: { do: function('YCMInstall') }
+  - SirVer/ultisnips
+  - honza/vim-snippets
   # - Yggdroot/indentLine
   # - repo: godlygeek/tabular
   #   opts: { on: Tab }

@@ -27,7 +27,7 @@ ansible_install() {
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
 
       # Debian/Ubuntu:
-      sudo apt-get install python-setuptools
+      # sudo apt-get install python-setuptools # Installed in requirements?
       # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
 
       # Fedora/CentOS:
