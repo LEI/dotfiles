@@ -8,10 +8,5 @@ tmux_plugins:
   - tmux-plugins/tmux-resurrect
   # - battery
 
-# lookup('fileglob', '../roles/tmux/templates/tmux-*.conf.j2', wantlist=true)
-tmux_conf_templates:
-  - general
-  - status
-  - mouse
-  - bind
-  - tpm
+tmux_template_path: ../roles/tmux/templates/tmux-*.conf.j2
+tmux_template_name: ^tmux-(.*)-(.*)\.conf\.j2$

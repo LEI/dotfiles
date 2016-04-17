@@ -15,8 +15,8 @@
 
 # https://github.com/alexanderjeurissen/dotfiles
 
-{% for template in tmux_conf_templates %}
-# START {{ template | upper }} {1
-{{ lookup('template', '../roles/tmux/templates/tmux-' + template + '.conf.j2') }}
-# END {{ template | upper }}
+{% for template in lookup('fileglob', tmux_template_path, wantlist=true) | sort %}
+# {{ template | basename | regex_replace(tmux_template_name, '\\2') | upper }} {1
+{{ lookup('template', template) }}
+# 1} {{ template | basename | regex_replace(tmux_template_name, '\\2') | upper }}
 {% endfor %}

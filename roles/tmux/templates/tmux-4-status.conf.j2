@@ -1,4 +1,4 @@
-# Status line
+# Status line {2
 
 set -g status on
 set -g status-interval 2
@@ -16,6 +16,7 @@ setw -g status-style fg=white,bg=colour10
 setw -g status-left-style fg=colour12,bg=colour10
 setw -g status-right-style fg=colour12,bg=colour10
 
+# 2}
 # Left section {2
 
 setw -g status-left ''
@@ -33,6 +34,7 @@ setw -ga status-left ' #S #I.#P '
 #setw -ga status-left '#[fg=white,bg=default] #(uname -r | cut -c 1-6) #(echo $MACHTYPE) '
 setw -ga status-left '#[fg=colour11,bg=default] '
 
+# 2}
 # Right section {2
 
 setw -g status-right ''
@@ -59,6 +61,7 @@ setw -ga status-right ' %H:%M '
 # Session and panel index
 #setw -ga status-right '#[fg=black,bg=blue]#{?client_prefix,#[bg=green],} #I: #P '
 
+# 2}
 # Windows {2
 
 setw -g window-status-style fg=colour11,bg=colour10
@@ -76,4 +79,4 @@ set -g message-style fg=black,bg=green
 
 #(ifstat)
 #(cpu-load 1)
-
+# 2}
