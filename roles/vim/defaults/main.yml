@@ -1,8 +1,6 @@
 ---
-# Homebrew install options
-vim_brew_options:
-  - with-override-system-vi
-  # - with-pyhton3
+vim_packages:
+  - vim
 
 # Vim Plug
 # https://github.com/junegunn/vim-plug
@@ -35,17 +33,19 @@ vim_plugins:
   - airblade/vim-gitgutter
   - sjl/gundo.vim
   - scrooloose/syntastic
-  - syngan/vim-vimlint # | Plug 'ynkdir/vim-vimlparser'
-  - ynkdir/vim-vimlparser
-  - digitaltoad/vim-jade
   - repo: StanAngeloff/php.vim
     opts: { for: php }
   - repo: pangloss/vim-javascript
     opts: { for: javascript }
-  - repo: Valloric/YouCompleteMe
-    opts: { do: function('YCMInstall'), for: [cpp] }
-#   - 'SirVer/ultisnips'
-#   - 'honza/vim-snippets'
-#   - 'Yggdroot/indentLine'
-#   - 'godlygeek/tabular', { 'on': 'Tab' }
-#   - 'editorconfig/editorconfig-vim'
+  - digitaltoad/vim-jade
+  - Glench/Vim-Jinja2-Syntax
+  - syngan/vim-vimlint # | Plug 'ynkdir/vim-vimlparser'
+  - ynkdir/vim-vimlparser
+  # - repo: Valloric/YouCompleteMe
+  #   opts: { do: function('YCMInstall'), for: [cpp] }
+  # - SirVer/ultisnips
+  # - honza/vim-snippets
+  # - Yggdroot/indentLine
+  # - repo: godlygeek/tabular
+  #   opts: { on: Tab }
+  # - editorconfig/editorconfig-vim

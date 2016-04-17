@@ -15,8 +15,8 @@
 
 # https://github.com/alexanderjeurissen/dotfiles
 
-{% for template in lookup('fileglob', '../roles/tmux/templates/*.part.j2', wantlist=true) %}
-# START {{ template | basename | regex_replace('^\d+-(.*)\.conf\.part\.j2$', '\\1') | upper }} {1
-{{ lookup('template', template) }}
-# END {{ template | basename | regex_replace('^\d+-(.*)\.conf\.part\.j2$', '\\1') | upper }}
+{% for template in tmux_conf_templates %}
+# START {{ template | upper }} {1
+{{ lookup('template', '../roles/tmux/templates/tmux-' + template + '.conf.j2') }}
+# END {{ template | upper }}
 {% endfor %}

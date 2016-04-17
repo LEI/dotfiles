@@ -16,12 +16,20 @@
 # github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
 - name: Install vim plugins
-  command: "vim +PlugInstall{{ '!' if vim_plug_force else '' }} +qall"
+  vars:
+    # -E -s +'source {{ dot_home }}/.vim/before/plug.vim'
+    plug_install:  "vim +PlugInstall{{ '!' if vim_plug_force else '' }} +qall"
+  command: "{{ plug_install }}"
   args:
     creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
+  register: vim_plug_output
+  # failed_when: vim_plug_output.rc != 0
   when: vim_plug_install
   tags: vim-plug
 
+# TODO: Install YCM ./install.py --tern-completer?
+
+- debug: var=vim_plug_output
   # vim -E -s +'source {{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}'
 
   # command: "vim -E -s +'source {{ destination }}/vimrc' +PlugInstall +qall"

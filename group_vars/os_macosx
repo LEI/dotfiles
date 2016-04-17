@@ -58,6 +58,13 @@ homebrew_cask_opts:
 php_packages:
   - php55
 
+vim_packages:
+  - name: vim
+    # Homebrew install options
+    install_options:
+      - with-override-system-vi
+      # - with-pyhton3
+
 osx_natural_scroll: true
 # osx_notification_center: false
 # osx_ssd_tweaks: true

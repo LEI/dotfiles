@@ -2,9 +2,12 @@
 dependencies:
 
   - role: package
-    packages:
-      - name: vim
-        install_options: "{{ vim_brew_options }}"
+    packages: "{{ vim_packages }}"
+
+  # - role: package
+  #   packages:
+  #     - vim-python # vim-nox?
+  #   when: "ansible_os_family == 'Debian'"
 
   - role: template
     dot_files:
