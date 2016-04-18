@@ -12,14 +12,17 @@
     dest: "{{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}"
   tags: vim-plug
 
-# g:plug_timeout?
 # github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
 - name: Install vim plugins
   vars:
-    # -E -s +'source {{ dot_home }}/.vim/before/plug.vim'
-    plug_install:  "vim +PlugInstall{{ '!' if vim_plug_force else '' }} +qall"
-  command: "{{ plug_install }}"
+    # FIXME: Vim Warning:
+    # Output is not to a terminal / Input is not from a terminal
+    # -E -s -V +'source {{ dot_home }}/.vim/before/plug.vim' < /dev/tty
+    # "silent" is required or vim hangs on YCM installation
+    # YCM: ./install.py --tern-completer
+    plug_install:  "vim -u NONE +'source {{ dot_home }}/.vim/before/plug.vim' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
+  shell: "{{ plug_install }}"
   args:
     creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
   register: vim_plug_output
@@ -27,20 +30,4 @@
   when: vim_plug_install
   tags: vim-plug
 
-# TODO: Install YCM ./install.py --tern-completer?
-
-- debug: var=vim_plug_output
-  # vim -E -s +'source {{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}'
-
-  # command: "vim -E -s +'source {{ destination }}/vimrc' +PlugInstall +qall"
-  # args:
-  #   creates:  "{{ destination }}/plugged/*"
-  # register: vim_plug_output
-  # changed_when: >
-  #   vim_plug_output.stdout != '' or
-  #   vim_plug_output.stderr != ''
-  # failed_when: vim_plug_output.rc != 0
-
-# - debug:
-#     var: vim_plug_output
-#   tags: vim-plug
+# - debug: var=vim_plug_output

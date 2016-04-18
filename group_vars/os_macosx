@@ -77,10 +77,6 @@ osx_system:
   # Set the timezone; see 'sudo systemsetup -listtimezones' for other values
   timezone: "{{ timezone }}"
 
-# Show remaining battery time; hide percentage
-# defaults write com.apple.menuextra.battery ShowPercent -string "NO"
-# defaults write com.apple.menuextra.battery ShowTime -string "YES"
-
 # FIXME sinstance() arg 2 must be a class, type, or tuple of classes and types
 # https://github.com/ansible/ansible-modules-extras/issues/1742
 osx_defaults:
@@ -264,7 +260,15 @@ osx_defaults:
     #   type: string
     #   value: "0.764700 0.976500 0.568600" # Green
 
-    AppleShowScrollBars: {type: string, value: WhenScrolling}
+    # isinstance() arg 2 must be a class, type, or tuple of classes and types
+    # https://github.com/ansible/ansible-modules-extras/issues/1742
+    #
+    # # Show remaining battery percentage
+    # ShowPercent: {domain: com.apple.menuextra.battery, value: YES}
+    # # Show remaining battery time
+    # ShowTime: {domain: com.apple.menuextra.battery, value: NO}
+
+    AppleShowScrollBars: {domain: NSGlobalDomain, type: string, value: WhenScrolling}
     # WhenScrolling, Automatic or Always
 
     # Disable the over-the-top focus ring animation

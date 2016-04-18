@@ -33,9 +33,9 @@ local diskImage = hs.image.imageFromPath(diskIconPath)
 
 -- https://github.com/Hammerspoon/hammerspoon/issues/815
 volumes.menu = hs.menubar.new():setMenu(volumesMenu)
-volumes.menu:setTitle("⏏")
+-- volumes.menu:setTitle("⏏")
 -- volumes.menu = hs.menubar.new():setMenu(volumesMenu):setIcon(diskImage:setSize({w=16,h=16}))
--- volumes.menu:setIcon(diskImage) --:setSize({w=16,h=16}))
+volumes.menu:setIcon(diskImage:setSize({w=16,h=16}))
 
 volumes.watcher = hs.fs.volume.new(volumesMenu):start()
 volumesMenu()
