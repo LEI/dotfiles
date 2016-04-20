@@ -1,22 +1,5 @@
 # {{ ansible_managed }}
-# vim: foldenable foldmethod=marker foldmarker={,}
+# vim: foldenable foldmethod=marker foldmarker=START,END
 
-# ! https://github.com/tmux-plugins/tpm
-
-# ? https://github.com/edkolev/tmuxline.vim
-
-# github.com/tmux/tmux/blob/master/example_tmux.conf
-# github.com/demure/dotfiles/blob/master/tmux.conf
-# github.com/tangledhelix/dotfiles/blob/master/tmux.conf
-#
-# Seamless tmux/vim navigation?
-# https://github.com/christoomey/vim-tmux-navigator
-# https://gist.github.com/mislav/5189704
-
-# https://github.com/alexanderjeurissen/dotfiles
-
-{% for template in lookup('fileglob', tmux_template_path, wantlist=true) | sort %}
-# {{ template | basename | regex_replace(tmux_template_name, '\\2') | upper }} {1
-{{ lookup('template', template) }}
-# 1} {{ template | basename | regex_replace(tmux_template_name, '\\2') | upper }}
-{% endfor %}
+# START OS
+{{ lookup('template', lookup('first_found', tmux_templates)) }}
