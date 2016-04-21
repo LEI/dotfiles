@@ -1,0 +1,6 @@
+# END OS
+{% for template in lookup('fileglob', tmux_templates_dir + '/' + tmux_parts_glob, wantlist=true) | sort %}
+# START {{ template | basename | regex_replace(tmux_parts_name, '\2') | upper }}
+{{ lookup('template', template) }}
+# END {{ template | basename | regex_replace(tmux_parts_name, '\2') | upper }}
+{% endfor %}

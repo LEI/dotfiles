@@ -1,0 +1,18 @@
+# Mouse scroll
+# https://github.com/NHDaly/tmux-scroll-copy-mode
+
+# https://wiki.archlinux.org/index.php/Tmux#Mouse_scrolling
+# bind -T root WheelUpPane   if-shell -F -t = "#{alternate_on}" "send-keys -M" "select-pane -t =; copy-mode -e; send-keys -M"
+# bind -T root WheelDownPane if-shell -F -t = "#{alternate_on}" "send-keys -M" "select-pane -t =; send-keys -M"
+
+# FIXME set -g terminal-overrides 'xterm*:smcup@:rmcup@'
+
+# ?
+#bind -n WheelUpPane   select-pane -t= \; copy-mode -e \; send-keys -M
+#bind -n WheelDownPane select-pane -t= \;                 send-keys -M
+
+# OSX
+# bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
+# bind -n WheelDownPane select-pane -t= \; send-keys -M
+
+{{ lookup('template', tmux_templates_dir + '/' + tmux_template) }}

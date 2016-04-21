@@ -6,7 +6,15 @@ tmux_plugin_manager: yes
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
+  # - nhdaly/tmux-scroll-copy-mode
   # - battery
 
-tmux_template_path: ../roles/tmux/templates/tmux-*.conf.j2
-tmux_template_name: ^tmux-(.*)-(.*)\.conf\.j2$
+tmux_parts_glob: tmux-*.conf.j2
+tmux_parts_name: ^tmux-(.*)-(.*)\.conf\.j2$
+tmux_template: tmux.template.conf.j2
+tmux_templates_dir: ../roles/tmux/templates
+tmux_templates:
+  # - "{{ lookup('first_found', 'tmux.' + (ansible_distribution | lower) + '.conf.j2') }}"
+  - "{{ tmux_templates_dir }}/tmux.{{ ansible_distribution | lower }}.conf.j2"
+  - "{{ tmux_templates_dir }}/tmux.{{ ansible_os_family | lower }}.conf.j2"
+  - "{{ tmux_templates_dir + '/' + tmux_template }}"
