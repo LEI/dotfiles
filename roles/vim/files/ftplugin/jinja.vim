@@ -29,7 +29,7 @@ endfunction
 
 " Must be called after BufNewFile,BufRead and model lines,
 " so the filetype have a chance to be detected
-autocmd BufWinEnter *.jinja2,*.j2,*.jinja call AddJinjaSyntax()
+"autocmd BufWinEnter *.jinja2,*.j2,*.jinja call AddJinjaSyntax()
 
 " autocmd! BufNewFile,BufRead *.j2
 " let &l:filetype = (strlen(&l:filetype) > 0 ? &l:filetype . '.jinja' : 'jinja')
