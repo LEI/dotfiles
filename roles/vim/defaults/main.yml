@@ -19,6 +19,8 @@ vim_plugins_path: .vim/plugged
 # List of plugins used in templates/plug.vim.j2
 # TODO: handle plugin.opts without quotes: function('')
 vim_plugins:
+  # - vim-airline/vim-airline
+  # - vim-airline/vim-airline-themes
   - LEI/vim-statusline
   - tpope/vim-repeat
   - tpope/vim-surround
@@ -42,7 +44,7 @@ vim_plugins:
   - syngan/vim-vimlint # | Plug 'ynkdir/vim-vimlparser'
   - ynkdir/vim-vimlparser
   - repo: Valloric/YouCompleteMe
-    opts: { do: function('YCMInstall') }
+    # opts: { do: function('YCMInstall') }
   - SirVer/ultisnips
   - honza/vim-snippets
   # - Yggdroot/indentLine

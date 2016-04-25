@@ -5,30 +5,61 @@ git_credential_helper: osxkeychain
 
 homebrew_taps:
   - homebrew/dupes
-  - caskroom/versions
   - homebrew/homebrew-php
 #   - caskroom/cask
+  - caskroom/fonts
+  - caskroom/versions
 
 homebrew_packages:
   - bash
-  - bash-completion
+  # - bash-completion2?
   - cmake
   - coreutils
-  - findutils
-  # - moreutils
+  - name: curl
+    install_options:
+      - with-openssl
+  # - diffutils
+    # gnu-diff gnu-indent gnu-tar gnu-which...
+  - name: findutils # find, locale, updatedb, xargs
+    install_options:
+      - with-default-names
+  - name: gnu-sed
+    install_options:
+      - with-default-names
+  - gnutls
+  - name: grep
+    install_options:
+      - with-default-names
+  # - gnupg / gnupg2?
   # - grc
-  - imagemagick
+  # - gzip
+  - name: imagemagick
+    install_options:
+      - with-webp
+  # - less
+  - lua
+  - luajit
+  # - lynx
+  # - moreutils
   - nmap
-  # - openssl
+  - openssl
+  - openssh
+  # - rename
   # - rbenv
+  # - rsync
+  # - screen
   # - ssh-copy-id
   - tree
+  # - upzip
+  # - watch
   - wget
-  # - youtube-dl
+  - youtube-dl
 
 homebrew_cask_apps:
+  # - bettertouchtool
   # - dropbox
   - firefox
+  - font-hack
   - google-chrome
   - little-snitch
   # - robomongo
@@ -44,7 +75,7 @@ homebrew_cask_apps:
   - virtualbox
   - vlc
 
-homebrew_cask_opts:
+homebrew_cask_options:
   # Remap Caps Lock to Escape
   # System Preferences > Keyboard > Modifier Keys
   # Caps Lock Key -> No Action
@@ -62,11 +93,23 @@ vim_packages:
   - name: vim
     # Homebrew install options
     install_options:
+      - with-cscope
+      - with-lua
+      - with-luajit
       - with-override-system-vi
+      - with-python
       # - with-pyhton3
 
+# Ask password after this delay
+osx_lock_delay: 0
+
+# Enable Lion-style scrolling
 osx_natural_scroll: true
+
+# Disable notification center
 # osx_notification_center: false
+
+# Apply SSD tweaks (not defaults)
 # osx_ssd_tweaks: true
 
 osx_system:
@@ -74,11 +117,14 @@ osx_system:
   computersleep: Never
   # Restart automatically if the computer freezes
   restartfreeze: On
+  # Set clock using network time
+  # usingnetworktime: On
   # Set the timezone; see 'sudo systemsetup -listtimezones' for other values
   timezone: "{{ timezone }}"
 
 # FIXME sinstance() arg 2 must be a class, type, or tuple of classes and types
 # https://github.com/ansible/ansible-modules-extras/issues/1742
+# https://github.com/herrbischoff/awesome-osx-command-line
 osx_defaults:
 
   # # Set computer name (as done via System Preferences → Sharing)
@@ -162,6 +208,9 @@ osx_defaults:
 
     # Avoid creating .DS_Store files on network volumes
     DSDontWriteNetworkStores: {domain: com.apple.desktopservices, type: bool, value: true}
+
+    # Disable creation of metadata files on USB volumes
+    DSDontWriteUSBStores: {domain: com.apple.desktopservices, type: bool, value: true}
 
     # Disable disk image verification
     skip-verify: {domain: com.apple.frameworks.diskimages, type: bool, value: true}
@@ -401,7 +450,7 @@ osx_defaults:
 
     # Require password immediately after sleep or screen saver begins
     askForPassword: {domain: com.apple.screensaver, type: int, value: 1}
-    askForPasswordDelay: {domain: com.apple.screensaver, type: int, value: 0}
+    askForPasswordDelay: {domain: com.apple.screensaver, type: int, value: "{{ osx_lock_delay }}"}
 
     # Save screenshots to the desktop
     location: {domain: com.apple.screencapture, value: "{{ ansible_env.HOME }}/Desktop"}
