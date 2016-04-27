@@ -19,8 +19,7 @@ vim_plugins_path: .vim/plugged
 # List of plugins used in templates/plug.vim.j2
 # TODO: handle plugin.opts without quotes: function('')
 vim_plugins:
-  # - vim-airline/vim-airline
-  # - vim-airline/vim-airline-themes
+  # - itchyny/lightline.vim
   - LEI/vim-statusline
   - tpope/vim-repeat
   - tpope/vim-surround
@@ -31,6 +30,7 @@ vim_plugins:
   - tpope/vim-vinegar
   - tpope/vim-fugitive
   - chriskempson/base16-vim
+  - whatyouhide/vim-gotham
   - ctrlpvim/ctrlp.vim
   - airblade/vim-gitgutter
   - sjl/gundo.vim

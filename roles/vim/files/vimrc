@@ -148,8 +148,8 @@ endif
 " FIXME: loaded_?
 try
   " Access colors present in 256 colorspace
-  "let base16colorspace=256
   colorscheme base16-tomorrow
+  " colorscheme gotham
 catch
   colorscheme torte
 endtry
