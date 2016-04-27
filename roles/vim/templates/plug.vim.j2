@@ -18,9 +18,13 @@ function! YCMInstall(info)
 endfunction
 
 call plug#begin('~/{{ vim_plugins_path }}')
+{% macro plug(plugin) -%}
+Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
+{%- endmacro %}
 
 {% for plugin in vim_plugins %}
-Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
+{{ plug(plugin) }}{% if plugin.plug is defined %}{% for p in plugin.plug %} | {{ plug(p) }}{% endfor %}{% endif %}
+
 {% endfor %}
 
 " Add plugins to &runtimepath

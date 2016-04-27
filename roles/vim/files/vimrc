@@ -528,7 +528,7 @@ noremap <Leader><Space> :noh<CR>
 " noremap <Leader><BS> :%s/\s\+$//e<CR>
 
 " Sort css properties
-nnoremap <Leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
+" nnoremap <Leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
 
 " Git shortcuts
 " noremap <Leader>b :Gblame<cr>
