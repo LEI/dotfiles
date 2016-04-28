@@ -24,12 +24,11 @@
 
 ## TODO
 
-- [ ] Bash prompt [git-prompt.sh](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
-- [ ] OS X Terminal (osx-defaults -> meta)
-- [ ] Template tmux debian Wheel Pane & mouse
+- [ ] Bash [git-prompt.sh](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+- [ ] OS X Terminal (osx-defaults -> meta dep)
+- [ ] Tmux mouse & wheel pane options
 - [ ] Check lineinfile regexp
-- [ ] Check if npm is executable
-- [ ] Composer auto update checksum
+- [ ] Node & npm verification
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
 - [ ] Module find: Skipping task due to undefined Error
