@@ -53,6 +53,8 @@
 # github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
 - name: "Install {{ tmux_plugins | length }} tmux plugins"
   command: "{{ dot_home }}/.tmux/plugins/tpm/bin/install_plugins"
+  environment:
+    TMUX_PLUGIN_MANAGER_PATH: "{{ dot_home }}/.tmux/plugin"
   args:
     # if tmux_plugins | length > 0 else false
     creates: "{{ dot_home }}/.tmux/plugins/{{ tmux_plugins[tmux_plugins | length - 1] | basename }}"

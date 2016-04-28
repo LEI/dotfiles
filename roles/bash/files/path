@@ -2,10 +2,15 @@
 
 export PATH="/usr/local/sbin:$PATH"
 
-# Global Composer packages
+# Add ~/bin
+PATH="$PATH:$HOME/bin"
+
+# Global packages
+
+# Composer
 COMPOSER_HOME=~/.composer
 COMPOSER_BIN_DIR=vendor/bin
 export PATH="$PATH:$COMPOSER_HOME/$COMPOSER_BIN_DIR"
 
-# Add ~/bin
-PATH="$PATH:$HOME/bin"
+# Node
+export PATH="$PATH:~/.node_modules/bin"

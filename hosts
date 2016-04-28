@@ -7,7 +7,7 @@ user_name = LEI
 timezone = Europe/Paris
 
 [local]
-localhost
+localhost ansible_python_interpreter=python2
 
 [remote]
 # homestead

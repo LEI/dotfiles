@@ -6,16 +6,20 @@
 #   php composer-setup.php
 #   php -r "unlink('composer-setup.php');
 
-# https://composer.github.io/pubkeys.html
+- name: Get Composer installer signature
+  get_url:
+    url: https://composer.github.io/installer.sig
+    dest: "{{ tmp_dir }}composer-installer.sig"
+
 - name: Download Composer installer
   get_url:
     url: https://getcomposer.org/installer
-    dest: "{{ tmp_dir }}composer-setup.php"
+    dest: "{{ tmp_dir }}composer-installer.php"
     mode: 0755
-    checksum: "sha384:7228c001f88bee97506740ef0888240bd8a760b046ee16db8f4095c0d8d525f2367663f22a46b48d072c816e7fe19959"
+    checksum: "sha384:{{ lookup('file', tmp_dir + 'composer-installer.sig') }}"
 
 - name: Run Composer installer
-  shell: "{{ php_executable }} composer-setup.php --install-dir={{ composer_bin_path }} --filename=composer {% if composer_version != '' %} --version={{ composer_version }}{% endif %}"
+  shell: "{{ php_executable }} composer-installer.php --install-dir={{ composer_bin_path }} --filename=composer {% if composer_version != '' %} --version={{ composer_version }}{% endif %}"
   args:
     chdir: "{{ tmp_dir }}"
   become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
