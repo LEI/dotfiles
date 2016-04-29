@@ -31,5 +31,4 @@
 - [ ] Node & npm verification
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
-- [ ] Module find: Skipping task due to undefined Error
-  (remote module does not support --check mode)
+- [ ] Symlink task find module (file_type: files && directories)

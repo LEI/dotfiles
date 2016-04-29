@@ -4,13 +4,42 @@
     dot_target: "{{ item }}"
     # dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
 
-- name: "Find {{ item.value.src + item.value.pattern }}"
-  shell: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
-  register: dot_items
-  changed_when: no # not dot_items.stdout_lines | length > 0
+- name: "Find {{ item.value.src + item.value.pattern }} files"
+  # shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
+  find:
+    # contains:
+    file_type: file
+    hidden: yes
+    path: "{{ item.value.src }}"
+    pattern: "{{ item.value.pattern }}"
+    recurse: no
+  register: dot_files_items
+  # changed_when: no # not dot_items.stdout_lines | length > 0
 
-- include: backup.yml
-  when: dot_backup_enable # and dot_items.stdout_lines | length > 0
+- name: "Find {{ item.value.src + item.value.pattern }} directories"
+  # shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
+  find:
+    # contains:
+    file_type: directory
+    hidden: yes
+    path: "{{ item.value.src }}"
+    pattern: "{{ item.value.pattern }}"
+    recurse: no
+  register: dot_files_dirs
+
+- name: "Merge files and directories..."
+  set_fact:
+    dot_items:
+      files: "{{ dot_files_items.files + dot_files_dirs.files }}"
+      matched: "{{ dot_files_items.matched + dot_files_dirs.matched }}"
+      examined: "{{ dot_files_items.examined + dot_files_dirs.examined }}"
+      msg:
+        file: "{{ dot_files_items.msg }}"
+        directory: "{{ dot_files_dirs.msg }}"
+
+- name: "Backup"
+  include: backup.yml
+  when: dot_backup_enable and dot_items.matched > 0
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value.dest }}"
@@ -21,7 +50,7 @@
     # dest: "{{ item.value.dest }}/{{ item.value.prefix | default('') }}{{ item.dest | default(item) }}"
     state: link
   # with_lines: "{{ dot_find }}"
-  with_items: "{{ dot_items.stdout_lines }}"
+  with_items: "{{ dot_items.files | map(attribute='path') | list }}"
   register: dot_items
 
 - name: "Log symlinks"

@@ -1,6 +1,8 @@
-# .path
+#
+# ~/.path
+#
 
-export PATH="/usr/local/sbin:$PATH"
+# PATH="/usr/local/sbin:$PATH"
 
 # Add ~/bin
 PATH="$PATH:$HOME/bin"
@@ -8,9 +10,9 @@ PATH="$PATH:$HOME/bin"
 # Global packages
 
 # Composer
-COMPOSER_HOME=~/.composer
-COMPOSER_BIN_DIR=vendor/bin
-export PATH="$PATH:$COMPOSER_HOME/$COMPOSER_BIN_DIR"
+COMPOSER_HOME="$HOME/.composer"
+COMPOSER_BIN_DIR="vendor/bin"
+PATH="$PATH:$COMPOSER_HOME/$COMPOSER_BIN_DIR"
 
-# Node
-export PATH="$PATH:~/.node_modules/bin"
+# NodeJS
+PATH="$PATH:$HOME/.node_modules/bin"

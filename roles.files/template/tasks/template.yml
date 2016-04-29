@@ -2,7 +2,7 @@
 - name: "Register {{ item.key }} templates target paths"
   set_fact:
     dot_target: "{{ item }}"
-    dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
+    dot_find: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
 
 # - name: "Find {{ item.value.src + item.value.pattern }}"
 #   shell: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"

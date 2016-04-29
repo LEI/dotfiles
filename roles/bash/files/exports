@@ -1,18 +1,9 @@
-# .exports
+#
+# ~/.exports
+#
 
-# Dotfiles root directory
-# export DOT_ROOT=$HOME/.dotfiles
-
-# Editor shortcut 'e'
+# ~/bin/e
 export EDITOR='vim'
-
-if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then
-  export TERM='gnome-256color';
-elif infocmp xterm-256color >/dev/null 2>&1; then
-  export TERM='xterm-256color';
-fi;
-
-# [[ -n "$TMUX" ]] && export TERM=screen-256color
 
 # Change Homebrew cask apps default location
 export HOMEBREW_CASK_OPTS="--appdir=/Applications"
