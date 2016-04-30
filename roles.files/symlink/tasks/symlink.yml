@@ -2,40 +2,32 @@
 - name: "Register {{ item.key }} symlinks target paths"
   set_fact:
     dot_target: "{{ item }}"
-    # dot_find: "find {{ item.value.src + item.value.pattern }} {{ dot_find_options }}"
 
+# shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
 - name: "Find {{ item.value.src + item.value.pattern }} files"
-  # shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
   find:
     # contains:
     file_type: file
     hidden: yes
     path: "{{ item.value.src }}"
     pattern: "{{ item.value.pattern }}"
-    recurse: no
   register: dot_files_items
-  # changed_when: no # not dot_items.stdout_lines | length > 0
 
 - name: "Find {{ item.value.src + item.value.pattern }} directories"
-  # shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
   find:
-    # contains:
     file_type: directory
-    hidden: yes
     path: "{{ item.value.src }}"
     pattern: "{{ item.value.pattern }}"
     recurse: no
   register: dot_files_dirs
 
-- name: "Merge files and directories..."
+- name: "Merge file and directory lists"
   set_fact:
     dot_items:
       files: "{{ dot_files_items.files + dot_files_dirs.files }}"
       matched: "{{ dot_files_items.matched + dot_files_dirs.matched }}"
       examined: "{{ dot_files_items.examined + dot_files_dirs.examined }}"
-      msg:
-        file: "{{ dot_files_items.msg }}"
-        directory: "{{ dot_files_dirs.msg }}"
+      msg: "{{ dot_files_items.msg + dot_files_dirs.msg }}"
 
 - name: "Backup"
   include: backup.yml
