@@ -24,7 +24,7 @@
 
 ## TODO
 
-- [ ] Bash [git-prompt.sh](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+- [ ] Customize [git prompt](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh) symbols and colors
 - [ ] OS X Terminal (osx-defaults -> meta dep)
 - [ ] Tmux mouse & wheel pane options
 - [ ] Check lineinfile regexp

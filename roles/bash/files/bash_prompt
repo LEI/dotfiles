@@ -2,124 +2,115 @@
 #
 # ~/.bash_prompt
 #
-
-PROMPT_SYMBOL="›" #→
-PROMPT_SYMBOL_ERROR="×"
-
-GIT_PS1_SHOWDIRTYSTATE=true
-GIT_PS1_SHOWUNTRACKEDFILES=true
-GIT_PS1_SHOWUPSTREAM=verbose
-
-PROMPT_COMMAND='__git_ps1 "\u@\h:\w" "\\\$ "'
-
-
-# Shell prompt
-
 # github.com/necolas/dotfiles
 # github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # github.com/demure/dotfiles/blob/master/subbash/prompt
 
-# Import colors (DOT_ROOT defined in ~/.exports)
-# if [[ -n "$DOT_ROOT" ]]; then
-#   source $DOT_ROOT/script/lib/colors.sh
-# else
-#   echo "DOT_ROOT is undefined!"
-# fi
+# ~/.git-prompt.sh
+# Show dirty state next to the branch name
+#   '*' unstaged changes
+#   '+' staged changes
+GIT_PS1_SHOWDIRTYSTATE=1
+#   '$': stashed items
+GIT_PS1_SHOWSTASHSTATE=1
+#   '%': untracked files
+GIT_PS1_SHOWUNTRACKEDFILES=1
+# Difference between HEAD and its upstream:
+#   '<'           behind
+#   '>'           ahead
+#   '<>'          diverged
+#   '='           no difference
+# Other values:
+#   verbose       show number of commits ahead/behind (+/-) upstream
+#   name          if verbose, then also show the upstream abbrev name
+#   legacy        don't use the '--count' option available in recent
+#                 versions of git-rev-list
+#   git           always compare HEAD to @{upstream}
+#   svn           always compare HEAD to your SVN upstream
+GIT_PS1_SHOWUPSTREAM="auto"
+# Colored dirty state hints if non empty
+GIT_PS1_SHOWCOLORHINTS=
 
-# Export prompt
-# export PROMPT_COMMAND=prompt_command
+# Exit status symbol
+PROMPT_SYMBOL="›" #→
+PROMPT_SYMBOL_ERROR="×"
 
-prompt_git() {
-  local prefix="$1"
-  local sign_prefix="$2"
-  local branch_color="$3"
-  local master_color="$4"
-  local branch=
-  local sign=
+PROMPT_COMMAND='prompt_command'
+PS2="$PROMPT_SYMBOL "
 
-  # Check if the current directory is in a Git repository.
-  if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
+prompt_command() {
+  # Exit code
+  local ec=$?
+  local user=$(whoami)
+  local host=$(hostname)
+  # No color
+  local nc='\[${bblack}\]'
 
-    # Check if the current directory is in .git before running git checks
-    if [ "$(git rev-parse --is-inside-git-dir 2> /dev/null)" == 'false' ]; then
+  local ps='\n'
+  local pe='\n'
 
-      # Ensure the index is up to date.
-      git update-index --really-refresh -q &>/dev/null
+  # Prompt START
 
-      # Check for uncommitted changes in the index.
-      if ! $(git diff --quiet --ignore-submodules --cached); then
-        sign+='+'
-      fi
+  # Set the terminal title to the current working directory
+  ps+='\[\033]0;\w\007\]'
 
-      # Check for unstaged changes.
-      if ! $(git diff-files --quiet --ignore-submodules --); then
-        sign+='!'
-      fi
+  # Right align datetime
+  ps+='\[$(tput sc; prompt_right; tput rc)\]'
 
-      # Check for untracked files.
-      if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        sign+='?'
-      fi
-
-      # Check for stashed files.
-      if $(git rev-parse --verify refs/stash &>/dev/null); then
-        sign+='$'
-      fi
-
-    fi
-
-    # Get the short symbolic ref
-    # If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
-    # Otherwise, just give up
-    branch="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
-      git rev-parse --short HEAD 2> /dev/null || \
-      echo '(unknown)')"
-
-    if [[ -n "$branch" ]]; then
-      if [[ "$branch" != master ]]; then
-        branch="${branch_color}${branch}"
-      else
-        branch="${master_color}${branch}"
-      fi
-    fi
-
-    if [[ -n "${sign}" ]]; then
-      sign="${sign_prefix}${sign}"
-    fi
-
-    printf "%s" "${prefix}${branch}${sign}"
+  if [[ "$user" == "root" ]]; then
+    ps+='\[${red}\]'
   else
-    return
+    ps+='\[${cyan}\]'
   fi
+  # User
+  ps+='\u'
+  ps+='\[${reset}\]'
+
+  # Display the hostname when != username
+  if [[ "$user" != "$host" ]]; then
+    ps+=$nc
+    ps+=' at '
+    # Highlight the hostname when connected via SSH
+    if [[ -n "${SSH_TTY}" ]]; then
+      ps+='\[${bold}\]'
+      ps+='\[${red}\]'
+    else
+      ps+='\[${blue}\]'
+    fi
+    # Host
+    ps+='\h'
+    ps+='\[${reset}\]'
+  fi
+
+  ps+=$nc
+  ps+=' in '
+  ps+='\[${white}\]'
+  # Working directory
+  ps+='\w'
+  ps+='\[${reset}\]'
+
+  # TODO: colorize git prompt, yellow if != master?
+  ps+='\[${red}\]'
+
+  # Prompt END
+
+  pe+=$(prompt_status $ec "\[${white}\]${PROMPT_SYMBOL} " "\[${red}\]${PROMPT_SYMBOL_ERROR} " )
+  pe+='\[${reset}\]'
+
+  # Prompt command
+
+  __git_ps1 "$ps" "$pe"
 }
 
-prompt_jobs() {
-  local str
-  local b s
-  # Check backgrounded running jobs
-  local bg_jobs=$(jobs -r | wc -l | tr -d ' ')
-  # Check stopped jobs
-  local stp_jobs=$(jobs -s | wc -l | tr -d ' ')
+prompt_right() {
+  local date="$(date +%H:%M:%S)"
 
-  # Display running and stopped jobs if any
-  if [[ ${bg_jobs} -gt 0 ]] || [[ ${stp_jobs} -gt 0 ]]; then
-    if [[ ${bg_jobs} -gt 2 ]]; then
-      b="${red}"
-    elif [[ ${bg_jobs} -gt 0 ]]; then
-      b="${yellow}"
-    fi
-
-    if [[ ${stp_jobs} -gt 2 ]]; then
-      s="${red}"
-    elif [[ ${stp_jobs} -gt 0 ]]; then
-      s="${yellow}"
-    fi
-
-    str="${reset} [${b}${bg_jobs}${reset}:${s}${stp_jobs}${reset}]"
+  if [[ ! -n $COLUMNS ]]; then
+    COLUMNS=$(tput cols)
   fi
 
-  # jobs[bg:stp]
-  printf "%s" "$str"
+  #$(prompt_jobs)
+  printf ${bblack}"%*s" $COLUMNS "$date"
 }
 
 # ✓
@@ -139,72 +130,4 @@ prompt_status() {
   fi
 
   printf "%b" "$str"
-}
-
-prompt_right() {
-  local date="$(date +%H:%M:%S)"
-
-  if [[ ! -n $COLUMNS ]]; then
-    COLUMNS=$(tput cols)
-  fi
-
-  #$(prompt_jobs)
-  printf ${bblack}"%*s" $COLUMNS "$date"
-}
-
-prompt_command() {
-  local EXIT=$? # Must be first
-  local user=$(whoami)
-  local host=$(hostname)
-  # Must be global to be available in single quote PS1
-  text_color="$bblack"
-  user_color=
-  host_color=
-
-  # Set the terminal title to the current working directory
-  PS1='\[\033]0;\w\007\]'
-
-  PS1+='\n'
-  PS1+='\[$(tput sc; prompt_right; tput rc)\]'
-
-  # Highlight the username when logged in as root
-  if [[ "${USER}" == "root" ]]; then
-    user_color="${red}"
-  else
-    user_color="${cyan}" #orange
-  fi
-
-  # Username
-  PS1+='\[${user_color}\]\u'
-
-  # Display the hostname when != username
-  if [[ "$user" != "$host" ]]; then
-    # Highlight the hostname when connected via SSH
-    if [[ -n "${SSH_TTY}" ]]; then
-      host_color="${bold}${red}"
-    else
-      host_color="${blue}"
-    fi
-
-    # @hostname
-    PS1+='\[${text_color}\] at '
-    PS1+='\[${host_color}\]\h' # host
-  fi
-
-  # Working directory
-  PS1+='\[${text_color}\] in '
-  PS1+='\[${white}\]\w'
-
-  # Git repository details
-  PS1+='$(prompt_git "\[${text_color}\] on " "\[${white}\] " "\[${yellow}\]" "\[${red}\]")'
-
-  PS1+='\n'
-  # Command line
-  PS1+='\[${white}\]'
-  PS1+=$(prompt_status $EXIT "\[${white}\]${PROMPT_SYMBOL} " "\[${red}\]${PROMPT_SYMBOL_ERROR} " )
-  PS1+='\[${reset}\]'
-  export PS1
-
-  PS2='\[${text_color}\]${PROMPT_SYMBOL} \[${reset}\]'
-  export PS2
 }
