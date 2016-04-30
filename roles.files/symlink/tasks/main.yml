@@ -1,5 +1,34 @@
 ---
-- include: symlink.yml
-  with_dict: "{{ dot_files_target }}"
-  when: dot_files_target | length > 0
-  tags: [sym, link]
+# - include: symlink.yml
+#   with_dict: "{{ dot_files_target }}"
+#   when: dot_files_target | length > 0
+#   tags: [sym, link]
+
+- name: "Backup existing {{ dot_role_dir }} files"
+  vars:
+    backup_ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
+  command: "mv {{ item.dest }} {{ item.dest }}.{{ backup_ext }}"
+  args:
+    creates: "{{ item.dest }}.{{ backup_ext }}"
+    removes: "{{ item.dest }}"
+  with_items: "{{ dot_targets }}"
+  when: item.exists and (
+      (dot_backup_files and not item.link) or
+      (dot_backup_symlinks and item.link != item.src)
+    )
+  no_log: "{{ dot_no_log }}"
+
+# # Source relative to dot_root, destination relative to dot_home  | basename?
+- name: "Create {{ dot_role_dir }} symlinks ({{ dot_targets | length }})"
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items: "{{ dot_targets }}"
+  register: dot_items
+
+# - name: "Log results"
+#   debug: var=item
+#   with_items: "{{ dot_items.results | map(attribute='dest') | list }}"
+#   when: dot_debug is defined and dot_debug
+#   # verbosity: 1

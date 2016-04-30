@@ -13,9 +13,9 @@
     ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
     # ext: "{{ dot_backup_ext | default(item.stat.mtime | datetime) }}~"
   command: "mv {{ dest }} {{ dest }}.{{ ext }}"
-  # TODO: -rw-r--r-- ?
   args:
     creates: "{{ dest }}.{{ ext }}"
+    removes: "{{ dest }}"
   with_items: "{{ dot_stat.results }}"
   when: item.stat.exists and
     ((dot_backup_files and not item.stat.islnk) or

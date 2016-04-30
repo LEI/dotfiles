@@ -1,6 +1,11 @@
 ---
 dot_find_options: -maxdepth 0 -print ! -name '*~'
 dot_find_pattern: "*"
-dot_log_enable: yes
+dot_debug: yes
+dot_no_log: yes
 dot_roles_dir: roles
 # dot_local_dir:
+
+dot_files_type:
+  - file
+  - directory
