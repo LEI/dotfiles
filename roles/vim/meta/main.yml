@@ -12,7 +12,7 @@ dependencies:
   - role: template
     dot_files:
       vim:
-        dest: .vim/before
+        dest: .vim
 
   - role: symlink
     dot_files:

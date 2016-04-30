@@ -40,13 +40,13 @@ vim_plugins:
   - repo: pangloss/vim-javascript
     opts: { for: javascript }
   - digitaltoad/vim-jade
-  - Glench/Vim-Jinja2-Syntax
+  # - Glench/Vim-Jinja2-Syntax
   - repo: syngan/vim-vimlint
     plug:
       - ynkdir/vim-vimlparser
   - keith/tmux.vim
   - repo: Valloric/YouCompleteMe
-    # opts: { do: function('YCMInstall') }
+    opts: { do: function('YCMInstall') }
   - repo: SirVer/ultisnips
     plug:
       - honza/vim-snippets

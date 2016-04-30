@@ -1,6 +1,6 @@
 " Add syntax highlighting and append jinja filetype
 
-function s:AddJinjaSyntax()
+function! s:AddJinjaSyntax()
   let l:ft = &filetype
   let l:e = expand('%:r:e')
 

@@ -15,7 +15,7 @@
 
 set nocompatible
 
-runtime before/plug.vim
+runtime plug.vimrc
 
 " Load matchit.vim, but only if the user hasn't installed a newer version
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -81,9 +81,10 @@ endif
 " Do not capture all global options
 set sessionoptions-=options
 
+" Disable swapfiles and backups
 set noswapfile
 set nobackup
-set nowb
+set nowritebackup
 
 " Keep undo history across sessions, by storing in file.
 if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
