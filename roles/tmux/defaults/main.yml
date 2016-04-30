@@ -3,6 +3,7 @@ tmux_conf: yes
 tmux_install_plugins: yes
 # tmux_update_plugins: all
 tmux_plugin_manager: yes
+tmux_plugin_manager_path: "{{ dot_home }}/.tmux/plugins"
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect

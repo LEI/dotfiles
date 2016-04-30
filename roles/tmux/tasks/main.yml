@@ -37,7 +37,7 @@
 
 - name: Ensure .tmux/plugins directory exists
   file:
-    path: "{{ dot_home }}/.tmux/plugins"
+    path: "{{ tmux_plugin_manager_path }}"
     state: directory
     follow: true
   when: tmux_conf and tmux_plugin_manager
@@ -46,18 +46,18 @@
 - name: Clone tmux plugin manager
   git:
     repo: https://github.com/tmux-plugins/tpm.git
-    dest: "{{ dot_home }}/.tmux/plugins/tpm"
+    dest: "{{ tmux_plugin_manager_path }}/tpm"
   when: tmux_conf and tmux_plugin_manager
   tags: [tpm]
 
 # github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.md
 - name: "Install {{ tmux_plugins | length }} tmux plugins"
-  command: "{{ dot_home }}/.tmux/plugins/tpm/bin/install_plugins"
-  environment:
-    TMUX_PLUGIN_MANAGER_PATH: "{{ dot_home }}/.tmux/plugin"
+  command: "{{ tmux_plugin_manager_path }}/tpm/bin/install_plugins"
+  # environment:
+  #   TMUX_PLUGIN_MANAGER_PATH: "{{ dot_home }}/.tmux/plugin"
   args:
     # if tmux_plugins | length > 0 else false
-    creates: "{{ dot_home }}/.tmux/plugins/{{ tmux_plugins[tmux_plugins | length - 1] | basename }}"
+    creates: "{{ tmux_plugin_manager_path }}/{{ tmux_plugins[tmux_plugins | length - 1] | basename }}"
   when: >
     tmux_conf and tmux_plugin_manager and
     tmux_install_plugins and tmux_plugins | length > 0

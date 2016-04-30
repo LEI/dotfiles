@@ -3,17 +3,23 @@
 function! s:AddJinjaSyntax()
   let l:ft = &filetype
   let l:e = expand('%:r:e')
-
   " echom 'Detected filetype: ' . l:ft
   if strlen(l:e) > 0
     execute 'doautocmd BufRead *.' . l:e
-    if strlen(l:ft) > 0
-      let &filetype = l:ft . '.' . &ft
-    endif
-    let &filetype.= '.jinja'
-    unlet b:current_syntax
-    runtime syntax/jinja.vim " set ft=jinja
   endif
+  if strlen(l:ft) > 0
+    if l:ft !~ &ft
+      let &filetype = l:ft . '.' . &ft
+    elseif l:ft != &ft
+      let &filetype = l:ft
+    endif
+  endif
+  if &ft !~ 'jinja'
+    let &filetype.= '.jinja'
+  endif
+  " Apply syntax highlighting
+  unlet b:current_syntax
+  runtime syntax/jinja.vim " set ft=jinja
 endfunction
 
 " BufReadPost is too soon?
