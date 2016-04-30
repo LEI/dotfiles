@@ -1,0 +1,10 @@
+# Mouse scroll
+# https://github.com/NHDaly/tmux-scroll-copy-mode
+
+# FIXME set -g terminal-overrides 'xterm*:smcup@:rmcup@'
+
+# ?
+#bind -n WheelUpPane   select-pane -t= \; copy-mode -e \; send-keys -M
+#bind -n WheelDownPane select-pane -t= \;                 send-keys -M
+
+{{ lookup('template', tmux_templates_dir + '/' + tmux_template) }}

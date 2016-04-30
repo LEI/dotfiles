@@ -9,12 +9,14 @@ tmux_plugins:
   # - nhdaly/tmux-scroll-copy-mode
   # - battery
 
-tmux_parts_glob: tmux-*.conf.j2
+tmux_parts_glob: tmux-*-*.conf.j2
 tmux_parts_name: ^tmux-(.*)-(.*)\.conf\.j2$
 tmux_template: tmux.template.conf.j2
 tmux_templates_dir: ../roles/tmux/templates
+# "{{ template_path }}"
+# "{{ lookup('first_found', tmux_templates, skip=true) }}"
 tmux_templates:
   # - "{{ lookup('first_found', 'tmux.' + (ansible_distribution | lower) + '.conf.j2') }}"
-  - "{{ tmux_templates_dir }}/tmux.{{ ansible_distribution | lower }}.conf.j2"
-  - "{{ tmux_templates_dir }}/tmux.{{ ansible_os_family | lower }}.conf.j2"
+  - "{{ tmux_templates_dir }}/tmux-{{ ansible_distribution | lower }}.conf.j2"
+  - "{{ tmux_templates_dir }}/tmux-{{ ansible_os_family | lower }}.conf.j2"
   - "{{ tmux_templates_dir + '/' + tmux_template }}"

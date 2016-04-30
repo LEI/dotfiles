@@ -4,7 +4,7 @@
     path: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
     # follow: false
   # with_lines: "{{ dot_find }}"
-  with_items: "{{ dot_items.files | map(attribute='path') | list }}"
+  with_items: "{{ dot_source.files | map(attribute='path') | list }}"
   register: dot_stat
 
 - name: "Backup existing {{ dot_target.key }} files"

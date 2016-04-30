@@ -1,37 +1,37 @@
 ---
-- name: "Register {{ item.key }} symlinks target paths"
-  set_fact:
-    dot_target: "{{ item }}"
-
 # shell: "find {{ item.value.src + '/' + item.value.pattern }} {{ dot_find_options }}"
-- name: "Find {{ item.value.src + item.value.pattern }} files"
+# with_lines: "{{ dot_find }}"
+
+- name: "Find {{ item.key }} files"
   find:
     # contains:
     file_type: file
     hidden: yes
     path: "{{ item.value.src }}"
     pattern: "{{ item.value.pattern }}"
-  register: dot_files_items
+  register: dot_found_files
 
-- name: "Find {{ item.value.src + item.value.pattern }} directories"
+- name: "Find {{ item.key }} directories"
   find:
     file_type: directory
     path: "{{ item.value.src }}"
     pattern: "{{ item.value.pattern }}"
     recurse: no
-  register: dot_files_dirs
+  register: dot_found_dirs
 
-- name: "Merge file and directory lists"
+- name: "Set {{ item.key }} facts"
   set_fact:
-    dot_items:
-      files: "{{ dot_files_items.files + dot_files_dirs.files }}"
-      matched: "{{ dot_files_items.matched + dot_files_dirs.matched }}"
-      examined: "{{ dot_files_items.examined + dot_files_dirs.examined }}"
-      msg: "{{ dot_files_items.msg + dot_files_dirs.msg }}"
+    dot_target: "{{ item }}"
+    dot_source:
+      files: "{{ dot_found_files.files + dot_found_dirs.files }}"
+      matched: "{{ dot_found_files.matched + dot_found_dirs.matched }}"
+      examined: "{{ dot_found_files.examined + dot_found_dirs.examined }}"
+      msg: "{{ dot_found_files.msg + dot_found_dirs.msg }}"
+  # with_together?
 
 - name: "Backup"
   include: backup.yml
-  when: dot_backup_enable and dot_items.matched > 0
+  when: dot_backup_enable and dot_source.matched > 0
 
 # # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_target.key }} symlinks in {{ dot_target.value.dest }}"
@@ -41,14 +41,13 @@
     # src: "{{ item.value.src }}/{{ item.src | default(item) }}"
     # dest: "{{ item.value.dest }}/{{ item.value.prefix | default('') }}{{ item.dest | default(item) }}"
     state: link
-  # with_lines: "{{ dot_find }}"
-  with_items: "{{ dot_items.files | map(attribute='path') | list }}"
-  register: dot_items
+  with_items: "{{ dot_source.files | map(attribute='path') | list }}"
+  register: dot_source
 
 - name: "Log symlinks"
   vars:
     dest: "{{ dot_target.value.dest }}/{{ dot_target.value.prefix }}{{ item | basename }}"
   debug: var=dest
-  with_items: "{{ dot_items.results | map(attribute='item') | list }}"
+  with_items: "{{ dot_source.results | map(attribute='item') | list }}"
   when: dot_log_enable
   # verbosity: 1
