@@ -1,3 +1,7 @@
 ---
-bin_urls:
-  spark: "https://raw.githubusercontent.com/holman/spark/master/spark"
+bash_urls:
+  spark:
+    url: "https://raw.githubusercontent.com/holman/spark/master/spark"
+    dest: bin
+  .git-prompt.sh:
+    url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"

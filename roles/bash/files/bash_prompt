@@ -3,6 +3,16 @@
 # ~/.bash_prompt
 #
 
+PROMPT_SYMBOL="›" #→
+PROMPT_SYMBOL_ERROR="×"
+
+GIT_PS1_SHOWDIRTYSTATE=true
+GIT_PS1_SHOWUNTRACKEDFILES=true
+GIT_PS1_SHOWUPSTREAM=verbose
+
+PROMPT_COMMAND='__git_ps1 "\u@\h:\w" "\\\$ "'
+
+
 # Shell prompt
 
 # github.com/necolas/dotfiles
@@ -17,10 +27,7 @@
 # fi
 
 # Export prompt
-export PROMPT_COMMAND=prompt_command
-
-PROMPT_SYMBOL="›" #→
-PROMPT_SYMBOL_ERROR="×"
+# export PROMPT_COMMAND=prompt_command
 
 prompt_git() {
   local prefix="$1"
