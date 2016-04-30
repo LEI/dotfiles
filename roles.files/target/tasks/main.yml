@@ -17,7 +17,6 @@
       }}}
   with_dict: "{{ dot_files }}"
 
-# dot_files_type | join(' and ')
 - name: "Find {{ dot_role_dir }} {{ dot_files_dir }}"
   find:
     path: "{{ dot_paths[item[0]].src }}"
@@ -53,16 +52,6 @@
           'role_directory': dot_files_dir,
         }
       ] }}
-  # set_fact:
-  #   dot_targets: >
-  #     {{ dot_targets + [
-  #       {
-  #         'dot_file': item[0].item[0],
-  #         'dot_file_type': item[0].item[1],
-  #         'dot_src': item[1].path,
-  #         'dot_dest': dot_paths[item[0].item[0]].dest + '/' + dot_paths[item[0].item[0]].prefix + item[1].path | basename | regex_replace(dot_paths[item[0].item[0]].regex_replace, ''),
-  #       }
-  #     ] }}
   with_items: "{{ dot_stats.results }}"
   no_log: "{{ dot_no_log }}"
 

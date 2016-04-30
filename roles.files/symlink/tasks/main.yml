@@ -1,9 +1,4 @@
 ---
-# - include: symlink.yml
-#   with_dict: "{{ dot_files_target }}"
-#   when: dot_files_target | length > 0
-#   tags: [sym, link]
-
 - name: "Backup existing {{ dot_role_dir }} files"
   vars:
     backup_ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
@@ -12,13 +7,12 @@
     creates: "{{ item.dest }}.{{ backup_ext }}"
     removes: "{{ item.dest }}"
   with_items: "{{ dot_targets }}"
-  when: item.exists and (
+  when: dot_backup_enable and item.exists and (
       (dot_backup_files and not item.link) or
       (dot_backup_symlinks and item.link != item.src)
     )
   no_log: "{{ dot_no_log }}"
 
-# # Source relative to dot_root, destination relative to dot_home  | basename?
 - name: "Create {{ dot_role_dir }} symlinks ({{ dot_targets | length }})"
   file:
     src: "{{ item.src }}"
