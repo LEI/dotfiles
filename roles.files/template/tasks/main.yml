@@ -1,5 +1,5 @@
 ---
-- name: "Generate {{ dot_role_dir }} templates ({{ dot_targets | length }})"
+- name: "Generate templates ({{ dot_targets | length }})"
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"

@@ -1,1 +1,7 @@
 ---
+- name: "Get {{ bin_urls | length }} urls" # ~/bin
+  get_url:
+    url: "{{ item.value.url | default(item.value) }}"
+    dest: "{{ ansible_env.HOME }}/bin/{{ item.value.dest | default(item.key) }}"
+    mode: "{{ item.value.mode | default(0755) }}"
+  with_dict: "{{ bin_urls }}"

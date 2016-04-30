@@ -1,13 +1,19 @@
 ---
-# Parse dot_files dict
-- name: "Initialize {{ dot_files_dir }} paths"
-  vars:
-    _dot_root: "{{ dot_root if dot_files_dir != 'templates' else dot_local_dir }}"
+- name: "Initialize facts"
   set_fact:
-    dot_paths: >
-      {{{
+    # Parsed dict
+    dot_files_paths: {}
+    # Final list
+    dot_targets: []
+    # Role directory (ansible role_* variables return 'target')
+    # dot_role_dir: "{{ item.key }}"
+
+- name: "Gather {{ dot_files_dir }} paths"
+  set_fact:
+    dot_files_paths: >
+      {{ dot_files_paths | combine({
         item.key: {
-          'src': _dot_root + (
+          'src': (dot_root if dot_files_dir != 'templates' else dot_local_dir) + (
             '/' + item.value.src
               if item.value.src | default(false) else
             '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir
@@ -21,28 +27,24 @@
           'prefix': item.value.prefix | default(''),
           'regex_replace': '' if dot_files_dir != 'templates' else '.j2',
         }
-      }}}
-    # Role directory (ansible role_* variables return 'target')
-    dot_role_dir: "{{ item.key }}"
-    # Initialize final list
-    dot_targets: []
+      }, recursive=true) }}
   with_dict: "{{ dot_files }}"
 
-- name: "Find {{ dot_role_dir }} {{ dot_files_dir }}"
+- name: "Find {{ dot_files_dir }}"
   find:
-    path: "{{ dot_paths[item[0]].src }}"
-    pattern: "{{ dot_paths[item[0]].pattern }}"
+    path: "{{ dot_files_paths[item[0]].src }}"
+    pattern: "{{ dot_files_paths[item[0]].pattern }}"
     file_type: "{{ item[1] }}"
     hidden: yes
     recurse: no
   with_nested:
-    - "{{ dot_paths }}"
+    - "{{ dot_files_paths }}"
     - "{{ dot_files_type }}"
   register: dot_find
 
-- name: "Check {{ dot_role_dir }} {{ dot_files_dir }} destination"
+- name: "Check {{ dot_files_dir }} destination"
   stat:
-    path: "{{ dot_paths[item[0].item[0]].dest + '/' + dot_paths[item[0].item[0]].prefix + item[1].path | basename | regex_replace(dot_paths[item[0].item[0]].regex_replace, '') }}"
+    path: "{{ dot_files_paths[item[0].item[0]].dest + '/' + dot_files_paths[item[0].item[0]].prefix + item[1].path | basename | regex_replace(dot_files_paths[item[0].item[0]].regex_replace, '') }}"
   with_subelements:
     - "{{ dot_find.results }}"
     - files
@@ -50,13 +52,13 @@
   no_log: "{{ dot_no_log }}"
 
 # Final target list
-- name: "Gather {{ dot_role_dir }} {{ dot_files_dir }} facts"
+- name: "Gather {{ dot_files_dir }} stats"
   set_fact:
     dot_targets: >
       {{ dot_targets + [
         {
           'src': item.item.1.path,
-          'dest': dot_paths[item.item.0.item.0].dest + '/' + dot_paths[item.item.0.item.0].prefix + item.item.1.path | basename | regex_replace(dot_paths[item.item.0.item.0].regex_replace, ''),
+          'dest': dot_files_paths[item.item.0.item.0].dest + '/' + dot_files_paths[item.item.0.item.0].prefix + item.item.1.path | basename | regex_replace(dot_files_paths[item.item.0.item.0].regex_replace, ''),
           'exists': item.stat.exists,
           'link': item.stat.lnk_source | default(false),
           'type': item.item.0.item.1,
