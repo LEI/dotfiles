@@ -44,10 +44,13 @@
     #     - "vars/{{ ansible_os_family | lower }}.yml"
     #     - "vars/os_defaults.yml"
 
-- include: "os_debian.yml"
+- include: "os/arch.yml"
+  when: ansible_distribution == 'Archlinux'
+
+- include: "os/debian.yml"
   when: ansible_distribution == 'Debian'
 
-- include: "os_macosx.yml"
+- include: "os/macosx.yml"
   when: ansible_distribution == 'MacOSX'
 
 - include: "all.yml"

@@ -1,0 +1,18 @@
+---
+- name: Archlinux roles
+  hosts: os_archlinux
+  gather_facts: no
+  tags: [arch]
+
+  roles:
+
+    # Update and upgrade system
+    # - role: pacman
+    #   tags: [pacman]
+
+    # Install apt packages
+    - role: package
+      tags: [pkg]
+      packages: "{{ pacman_packages }}"
+
+    # TODO: yaourt

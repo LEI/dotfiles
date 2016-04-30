@@ -1,20 +1,31 @@
 ---
-- name: "Set {{ dot_files_dir | default('directory') }} facts"
+# Parse dot_files dict
+- name: "Initialize {{ dot_files_dir }} paths"
   vars:
     _dot_root: "{{ dot_root if dot_files_dir != 'templates' else dot_local_dir }}"
   set_fact:
-    dot_targets: []
-    dot_role_dir: "{{ item.key }}"
     dot_paths: >
       {{{
         item.key: {
-          'src': _dot_root + ('/' + item.value.src if item.value.src | default(false) else '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir if dot_files_dir and dot_roles_dir else item.key),
-          'dest': dot_home + ('/' + item.value.dest if item.value.dest | default(false) else ''),
+          'src': _dot_root + (
+            '/' + item.value.src
+              if item.value.src | default(false) else
+            '/' + dot_roles_dir + '/' + item.key + '/' + dot_files_dir
+              if dot_files_dir and dot_roles_dir else
+            item.key),
+          'dest': dot_home + (
+            '/' + item.value.dest
+              if item.value.dest | default(false) else
+            ''),
           'pattern': item.value.pattern | default(dot_find_pattern),
           'prefix': item.value.prefix | default(''),
           'regex_replace': '' if dot_files_dir != 'templates' else '.j2',
         }
       }}}
+    # Role directory (ansible role_* variables return 'target')
+    dot_role_dir: "{{ item.key }}"
+    # Initialize final list
+    dot_targets: []
   with_dict: "{{ dot_files }}"
 
 - name: "Find {{ dot_role_dir }} {{ dot_files_dir }}"
@@ -38,7 +49,8 @@
   register: dot_stats
   no_log: "{{ dot_no_log }}"
 
-- name: "Register {{ dot_role_dir }} {{ dot_files_dir }} target"
+# Final target list
+- name: "Gather {{ dot_role_dir }} {{ dot_files_dir }} facts"
   set_fact:
     dot_targets: >
       {{ dot_targets + [

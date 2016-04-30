@@ -34,6 +34,9 @@ ansible_install() {
 
       # Fedora/CentOS:
       # sudo yum install gcc libffi-devel openssl-devel python-devel
+
+      # Archlinux: http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
+      # sudo pacman -S ansible git --noconfirm
       ;;
     *)
       echo "Unsupported platform: $uname"
