@@ -70,9 +70,6 @@ prompt_right() {
 prompt_command() {
   # Exit code
   local exit=$?
-  # Default symbols
-  local p_symbol="${PROMPT_SYMBOL:-$ }"
-  local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
 
   # ~/.colors
   local c_text="\[${bblack}\]"
@@ -86,8 +83,12 @@ prompt_command() {
 
   # Start of PS1
   local p='\n'
-  # End of PS1 (before symbol)
+  # End of the first line (before symbol and command line prompt)
   local p_end='\n'
+
+  # Default symbols
+  local p_symbol="${PROMPT_SYMBOL:-$ }"
+  local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
 
   # Set the terminal title to the current working directory
   p+='\[\033]0;\w\007\]'
@@ -146,7 +147,4 @@ prompt_command() {
   if [[ "${!git_branch}" == "master" ]]; then
     PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_yellow}\${${git_branch}}"}
   fi
-
-  # echo $PS1
-  # PS1=
 }
