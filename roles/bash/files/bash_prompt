@@ -49,9 +49,12 @@ prompt_right() {
   local text=${1:-}
   local color=${2:-}
   local margin=${3:-0}
+  local columns=
 
-  if [[ ! -n "$COLUMNS" ]]; then
-    COLUMNS=$(tput cols)
+  if [[ -n "$COLUMNS" ]]; then
+    columns="$COLUMNS"
+  else
+    columns=$(tput cols)
   fi
 
   if [[ -n "$color" ]]; then
@@ -59,7 +62,7 @@ prompt_right() {
     margin=$((${margin} - ${#color}))
   fi
 
-  printf "%*s" "$((${COLUMNS} - ${margin}))" "${text}"
+  printf "%*s" "$((${columns} - ${margin}))" "${text}"
 }
 
 prompt_command() {
