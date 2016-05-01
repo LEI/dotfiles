@@ -9,8 +9,41 @@
 # user=$(whoami)
 # host=$(hostname)
 
+PROMPT_SYMBOL="›" # →
+PROMPT_SYMBOL_ERROR="×"
+
 # No color (reset)
 NC='\[${bblack}\]'
+
+# ~/.git-prompt.sh
+
+# Show dirty state next to the branch name
+#   '*' unstaged changes
+#   '+' staged changes
+GIT_PS1_SHOWDIRTYSTATE=1
+
+#   '$': stashed items
+GIT_PS1_SHOWSTASHSTATE=1
+
+#   '%': untracked files
+GIT_PS1_SHOWUNTRACKEDFILES=1
+
+# Difference between HEAD and its upstream:
+#   '<'           behind
+#   '>'           ahead
+#   '<>'          diverged
+#   '='           no difference
+GIT_PS1_SHOWUPSTREAM="auto"
+# Other values:
+#   verbose       show number of commits ahead/behind (+/-) upstream
+#   name          if verbose, then also show the upstream abbrev name
+#   legacy        don't use the '--count' option available in recent
+#                 versions of git-rev-list
+#   git           always compare HEAD to @{upstream}
+#   svn           always compare HEAD to your SVN upstream
+
+# Colored hints (only when used with 2 arguments as prompt command)
+# GIT_PS1_SHOWCOLORHINTS=1
 
 prompt_right() {
   local date="$(date +%H:%M:%S)"
@@ -19,8 +52,7 @@ prompt_right() {
     COLUMNS=$(tput cols)
   fi
 
-  #$(prompt_jobs)
-  printf ${bblack}"%*s" $COLUMNS "$date"
+  printf ${bblack}"%*s" $COLUMNS "$date "
 }
 
 # ✓
@@ -44,41 +76,17 @@ prompt_status() {
 
 prompt_command() {
   # Exit code
-  EXIT=$?
+  local exit=$?
+  local symbol="${PROMPT_SYMBOL:-$}"
+  local symbol_error="${PROMPT_SYMBOL_ERROR:-!}"
 
-  # Exit status symbol
-  PROMPT_SYMBOL="›" #→
-  PROMPT_SYMBOL_ERROR="×"
+  if [[ $exit -eq 0 ]]; then
+    prompt_status="${white}${symbol} "
+  else
+    prompt_status="${red}${symbol_error} "
+  fi
 
-  EXIT_STATUS=$(prompt_status $EXIT "${white}${PROMPT_SYMBOL} " "${red}${PROMPT_SYMBOL_ERROR} " )
-
-  # ~/.git-prompt.sh
-  # Show dirty state next to the branch name
-  #   '*' unstaged changes
-  #   '+' staged changes
-  GIT_PS1_SHOWDIRTYSTATE=1
-  #   '$': stashed items
-  GIT_PS1_SHOWSTASHSTATE=1
-  #   '%': untracked files
-  GIT_PS1_SHOWUNTRACKEDFILES=1
-  # Difference between HEAD and its upstream:
-  #   '<'           behind
-  #   '>'           ahead
-  #   '<>'          diverged
-  #   '='           no difference
-  # Other values:
-  #   verbose       show number of commits ahead/behind (+/-) upstream
-  #   name          if verbose, then also show the upstream abbrev name
-  #   legacy        don't use the '--count' option available in recent
-  #                 versions of git-rev-list
-  #   git           always compare HEAD to @{upstream}
-  #   svn           always compare HEAD to your SVN upstream
-  GIT_PS1_SHOWUPSTREAM="auto"
-  # Colored dirty state hints
-  GIT_PS1_SHOWCOLORHINTS=1
-
-  # Git prompt
-  GIT_PROMPT=$(__git_ps1 " on %s" | sed -re "s/(\son\s)(\w+|\(.*\.\.\.\))(.*)/\1$red\2$white\3/")
+  prompt_git=$(__git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/")
 }
 
 # Set the terminal title to the current working directory
@@ -122,12 +130,12 @@ PS1+='\[${reset}\]'
 
 # Git branch
 PS1+=$NC
-PS1+='$GIT_PROMPT'
+PS1+='$prompt_git'
 PS1+='\[${reset}\]'
 
 # Command line
 PS1+='\n'
-PS1+='$EXIT_STATUS'
+PS1+='$prompt_status'
 PS1+='\[${reset}\]'
 
 PROMPT_COMMAND='prompt_command'
