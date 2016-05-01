@@ -77,8 +77,8 @@ prompt_command() {
   # Colored dirty state hints
   GIT_PS1_SHOWCOLORHINTS=1
 
-  # Git branch
-  GIT_PROMPT=$(__git_ps1 "${bblack} on %s" | sed -re "s/(on\s)(\w+)(.*)/\1$red\2$white\3/")
+  # Git prompt
+  GIT_PROMPT=$(__git_ps1 " on %s" | sed -re "s/(\son\s)(\w+|\(.*\.\.\.\))(.*)/\1$red\2$white\3/")
 }
 
 # Set the terminal title to the current working directory
@@ -121,8 +121,9 @@ PS1+='\w'
 PS1+='\[${reset}\]'
 
 # Git branch
+PS1+=$NC
 PS1+='$GIT_PROMPT'
-# PS1+='\[${reset}\]'
+PS1+='\[${reset}\]'
 
 # Command line
 PS1+='\n'
