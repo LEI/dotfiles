@@ -36,8 +36,7 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 # >           ahead
 # <>          diverged
 # =           no difference
-# GIT_PS1_SHOWUPSTREAM="auto"
-# auto        default?
+GIT_PS1_SHOWUPSTREAM="auto"
 # verbose     show number of commits ahead/behind (+/-) upstream
 # name        if verbose, then also show the upstream abbrev name
 # legacy      don't use the '--count' option available in recent
@@ -69,83 +68,85 @@ prompt_command() {
   # Exit code
   local exit=$?
 
-  # ~/.colors
-  local c_text="\[${bblack}\]"
-  local c_reset="\[${reset}\]"
-  local c_bold="\[${bold}\]"
-  local c_blue="\[${blue}\]"
-  local c_bblue="\[${bblue}\]"
-  local c_cyan="\[${cyan}\]"
-  local c_red="\[${red}\]"
-  local c_white="\[${white}\]"
-  local c_yellow="\[${yellow}\]"
-
-  # Start of the primary prompt
-  local p='\n'
-  # Right aligned text
-  local p_right='$(date +%H:%M:%S)'
-  # End of the first prompt line (before symbol and command line prompt)
-  local p_end='\n'
-
   # Default symbols
   local p_symbol="${PROMPT_SYMBOL:-$ }"
   local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
 
-  # Set the terminal title to the current working directory
+  # Colors
+  local c_reset="\[${reset}\]"
+  local c_user="\[${blue}\]"
+  local c_user_root="\[${red}\]"
+  local c_host="\[${bblue}\]"
+  local c_host_ssh="\[${bold}\]\[${red}\]"
+  local c_cwd="\[${white}\]"
+  local c_text="\[${bblack}\]"
+  local c_symbol="\[${white}\]"
+  local c_symbol_error="\[${red}\]"
+  local c_git_master="\[${yellow}\]"
+
+  # Prompt format
+  # local prefix_host="@" prefix_cwd=":" prefix_git="(" suffix_git=")"
+  local prefix_host="${c_text} at ${c_reset}"
+  local prefix_cwd="${c_text} in ${c_reset}"
+  local prefix_git="${c_text} on ${c_reset}"
+  local suffix_git=""
+
+  # Start of the primary prompt
+  local p='\n'
+
+  # Terminal title to the current working directory
   p+='\[\033]0;\w\007\]'
 
-  # Move the cursor position and print right aligned text
+  # Timestamp to the right
+  local p_right='$(date +%H:%M:%S)'
   p+='\[$(tput sc; prompt_right "'${p_right}'" "'${c_text}'"; tput rc)\]'
 
-  # Red if root
-  if [[ "$USER" == "root" ]]; then
-    p+="$c_red"
-  else
-    p+="$c_blue"
-  fi
   # Username
+  if [[ "$USER" == "root" ]]; then
+    # Highlight when logged in as root
+    p+="${c_user_root}"
+  else
+    p+="${c_user}"
+  fi
   p+='\u'
-  p+="$c_reset"
+  p+="${c_reset}"
 
-  # if [[ ! "$HOSTNAME" =~ "$USER" ]]; then
+  # Hostname
+  # [[ ! "$HOSTNAME" =~ "$USER" ]]
   if [[ "$USER" != "$HOSTNAME" ]]; then
-    p+="$c_text"
-    p+=' at '
-    p+="$c_reset"
-    # Highlight the hostname when connected via SSH
+    p+="${prefix_host}"
     if [[ -n "${SSH_TTY}" ]]; then
-      p+="$c_bold"
-      p+="$c_red"
+      # Highlight when connected via SSH
+      p+="${c_host_ssh}"
     else
-      p+="${c_bblue}"
+      p+="${c_host}"
     fi
-    # Hostname
     p+='\h'
-    p+="$c_reset"
+    p+="${c_reset}"
   fi
 
-  p+="$c_text"
-  p+=' in '
-  p+="$c_reset"
-  p+="$c_white"
+  p+="${prefix_cwd}"
   # Working directory
+  p+="${c_cwd}"
   p+='\w'
-  p+="$c_reset"
+  p+="${c_reset}"
+
+  # End of the first prompt line
+  local p_end='\n'
 
   # Exit code
   if [[ $exit -eq 0 ]]; then
-    p_end+="${c_white}${p_symbol}${c_reset}"
+    p_end+="${c_symbol}${p_symbol}${c_reset}"
   else
-    p_end+="${c_red}${p_symbol_error}${c_reset}"
+    p_end+="${c_symbol_error}${p_symbol_error}${c_reset}"
   fi
 
-  # ~/.git-prompt.sh
-  local git_format="${c_text} on ${c_reset}%s"
-  __git_ps1 "${p}" "${p_end}" "${git_format}"
+  # git-prompt.sh
+  __git_ps1 "${p}" "${p_end}" "${prefix_git}%s${suffix_git}"
 
   # Change master branch color from green to yellow
   local git_branch='__git_ps1_branch_name'
   if [[ "${!git_branch}" == "master" ]]; then
-    PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_yellow}\${${git_branch}}"}
+    PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}
   fi
 }
