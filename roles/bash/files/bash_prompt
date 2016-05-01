@@ -15,8 +15,8 @@ PROMPT_SYMBOL_ERROR="× " # ! ×
 PROMPT_COMMAND='prompt_command'
 PS2="${PROMPT_SYMBOL:->} "
 
-# ~/.git-prompt.sh
 # PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
+# __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 
 # Difference between HEAD and its upstream:
 #   '<'           behind
@@ -46,42 +46,55 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 GIT_PS1_SHOWCOLORHINTS=1
 
 prompt_right() {
-  local date="$(date +%H:%M:%S) "
-  local color=${1:-}
+  local text=${1:-}
+  local color=${2:-}
+  local margin=${3:-0}
+  local columns=${COLUMNS:-}
 
-  if [[ ! -n $COLUMNS ]]; then
-    COLUMNS=$(tput cols)
+  if [[ -z "$columns" ]]; then
+    columns=$(tput cols)
   fi
 
-  printf ${color}"%*s" $COLUMNS "$date"
+  if [[ -n "$color" ]]; then
+    text="${color}${text}"
+    columns=$((${columns} + ${#color}))
+  fi
+
+  if [[ "$margin" -gt 0 ]]; then
+    columns=$((${columns} - ${margin}))
+  fi
+
+  printf "%*s" "$columns" "${text}"
 }
 
 prompt_command() {
   # Exit code
   local exit=$?
-  # Start of PS1
-  local p=
-  # End of PS1 (before symbol)
-  local p_end='\n'
   # Default symbols
   local p_symbol="${PROMPT_SYMBOL:-$ }"
   local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
 
-  # Colors
-  local c_text='\['${bblack}'\]'
-  local c_reset='\['${reset}'\]'
-  local c_bold='\['${bold}'\]'
-  local c_blue='\['${blue}'\]'
-  local c_cyan='\['${cyan}'\]'
-  local c_red='\['${red}'\]'
-  local c_white='\['${white}'\]'
-  local c_yellow='\['${yellow}'\]'
+  # ~/.colors
+  local c_text="\[${bblack}\]"
+  local c_reset="\[${reset}\]"
+  local c_bold="\[${bold}\]"
+  local c_blue="\[${blue}\]"
+  local c_cyan="\[${cyan}\]"
+  local c_red="\[${red}\]"
+  local c_white="\[${white}\]"
+  local c_yellow="\[${yellow}\]"
+
+  # Start of PS1
+  local p='\n'
+  # End of PS1 (before symbol)
+  local p_end='\n'
 
   # Set the terminal title to the current working directory
   p+='\[\033]0;\w\007\]'
 
   # Right align datetime
-  p+='\[$(tput sc; prompt_right '${c_text}'; tput rc)\]'
+  local p_right='$(date +%H:%M:%S)'
+  p+='\[$(tput sc; prompt_right "'${p_right}'" "'${c_text}'"; tput rc)\]'
 
   # User
   if [[ "$USER" == "root" ]]; then
@@ -92,8 +105,6 @@ prompt_command() {
   p+='\u'
   p+="$c_reset"
 
-  # Display the hostname only if it is different
-  # FIXME: $(hostname) & $HOST != \h
   # if [[ ! "$HOSTNAME" =~ "$USER" ]]; then
   if [[ "$USER" != "$HOSTNAME" ]]; then
     p+="$c_text"
@@ -104,9 +115,9 @@ prompt_command() {
       p+="$c_bold"
       p+="$c_red"
     else
-      p+="$c_cyan"
+      p+="\[${bblue}\]"
     fi
-    # Host
+    # Hostname
     p+='\h'
     p+="$c_reset"
   fi
@@ -126,20 +137,16 @@ prompt_command() {
     p_end+="${c_red}${p_symbol_error}${c_reset}"
   fi
 
-  local git_printf_format="${c_text} on ${c_reset}%s"
-  __git_ps1 "${p}" "${p_end}" "${git_printf_format}"
+  # ~/.git-prompt.sh
+  local git_format="${c_text} on ${c_reset}%s"
+  __git_ps1 "${p}" "${p_end}" "${git_format}"
 
-  if [[ "$__git_ps1_branch_name" == "master" ]]; then
-    # Change master branch color from green to yellow
-    PS1=${PS1/'\[\e[32m\]${__git_ps1_branch_name}'/${c_yellow}'${__git_ps1_branch_name}'}
+  # Change master branch color from green to yellow
+  local git_branch='__git_ps1_branch_name'
+  if [[ "${!git_branch}" == "master" ]]; then
+    PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_yellow}\${${git_branch}}"}
   fi
-
-  # if [[ "$__git_ps1_branch_name" == "master" && "$PS1" =~ '\[\e[32m\]${__git_ps1_branch_name}' ]]; then
-  #   __git_ps1_branch_name="${yellow}${__git_ps1_branch_name}"
-  # fi
 
   # echo $PS1
   # PS1=
-
-  # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 }
