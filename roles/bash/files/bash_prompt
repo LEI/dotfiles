@@ -6,6 +6,16 @@
 # github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # github.com/demure/dotfiles/blob/master/subbash/prompt
 
+# user=$(whoami)
+# host=$(hostname)
+
+# No color (reset)
+NC='\[${bblack}\]'
+
+# Exit status symbol
+PROMPT_SYMBOL="›" #→
+PROMPT_SYMBOL_ERROR="×"
+
 # ~/.git-prompt.sh
 # Show dirty state next to the branch name
 #   '*' unstaged changes
@@ -28,79 +38,8 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 #   git           always compare HEAD to @{upstream}
 #   svn           always compare HEAD to your SVN upstream
 GIT_PS1_SHOWUPSTREAM="auto"
-# Colored dirty state hints if non empty
-GIT_PS1_SHOWCOLORHINTS=
-
-# Exit status symbol
-PROMPT_SYMBOL="›" #→
-PROMPT_SYMBOL_ERROR="×"
-
-PROMPT_COMMAND='prompt_command'
-PS2="$PROMPT_SYMBOL "
-
-prompt_command() {
-  # Exit code
-  local ec=$?
-  local user=$(whoami)
-  local host=$(hostname)
-  # No color
-  local nc='\[${bblack}\]'
-
-  local ps='\n'
-  local pe='\n'
-
-  # Prompt START
-
-  # Set the terminal title to the current working directory
-  ps+='\[\033]0;\w\007\]'
-
-  # Right align datetime
-  ps+='\[$(tput sc; prompt_right; tput rc)\]'
-
-  if [[ "$user" == "root" ]]; then
-    ps+='\[${red}\]'
-  else
-    ps+='\[${cyan}\]'
-  fi
-  # User
-  ps+='\u'
-  ps+='\[${reset}\]'
-
-  # Display the hostname when != username
-  if [[ "$user" != "$host" ]]; then
-    ps+=$nc
-    ps+=' at '
-    # Highlight the hostname when connected via SSH
-    if [[ -n "${SSH_TTY}" ]]; then
-      ps+='\[${bold}\]'
-      ps+='\[${red}\]'
-    else
-      ps+='\[${blue}\]'
-    fi
-    # Host
-    ps+='\h'
-    ps+='\[${reset}\]'
-  fi
-
-  ps+=$nc
-  ps+=' in '
-  ps+='\[${white}\]'
-  # Working directory
-  ps+='\w'
-  ps+='\[${reset}\]'
-
-  # TODO: colorize git prompt, yellow if != master?
-  ps+='\[${red}\]'
-
-  # Prompt END
-
-  pe+=$(prompt_status $ec "\[${white}\]${PROMPT_SYMBOL} " "\[${red}\]${PROMPT_SYMBOL_ERROR} " )
-  pe+='\[${reset}\]'
-
-  # Prompt command
-
-  __git_ps1 "$ps" "$pe"
-}
+# Colored dirty state hints
+GIT_PS1_SHOWCOLORHINTS=1
 
 prompt_right() {
   local date="$(date +%H:%M:%S)"
@@ -131,3 +70,65 @@ prompt_status() {
 
   printf "%b" "$str"
 }
+
+prompt_command() {
+  # Exit code
+  EXIT=$?
+  EXIT_STATUS=$(prompt_status $EXIT "${white}${PROMPT_SYMBOL} " "${red}${PROMPT_SYMBOL_ERROR} " )
+
+  # Git branch
+  GIT_PROMPT=$(__git_ps1 " on %s" | sed -re "s/(\son\s)(.*)(\s.*)/$bblack\1$red\2$white\3/")
+}
+
+# Set the terminal title to the current working directory
+PS1='\[\033]0;\w\007\]'
+
+# Right align datetime
+PS1+='\[$(tput sc; prompt_right; tput rc)\]'
+
+if [[ "$USER" == "root" ]]; then
+  PS1+='\[${red}\]'
+else
+  PS1+='\[${cyan}\]'
+fi
+# User
+PS1+='\u'
+PS1+='\[${reset}\]'
+
+# Display the hostname when != username
+# FIXME: $(hostname) & $HOST != \h
+if [[ "$USER" != "$HOSTNAME" ]]; then
+  PS1+=$NC
+  PS1+=' at '
+  # Highlight the hostname when connected via SSH
+  if [[ -n "${SSH_TTY}" ]]; then
+	PS1+='\[${bold}\]'
+	PS1+='\[${red}\]'
+  else
+	PS1+='\[${blue}\]'
+  fi
+  # Host
+  PS1+='\h'
+  PS1+='\[${reset}\]'
+fi
+
+PS1+=$NC
+PS1+=' in '
+PS1+='\[${white}\]'
+# Working directory
+PS1+='\w'
+PS1+='\[${reset}\]'
+
+# Git branch
+PS1+='$GIT_PROMPT'
+# PS1+='\[${reset}\]'
+
+# Command line
+PS1+='\n'
+PS1+='$EXIT_STATUS'
+PS1+='\[${reset}\]'
+
+PROMPT_COMMAND='prompt_command'
+# PROMPT_COMMAND='__git_ps1 "\@\h:\w" "\\\$ "'
+
+PS2='$PROMPT_SYMBOL '
