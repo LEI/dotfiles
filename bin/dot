@@ -70,7 +70,7 @@ ansible_vault() {
 }
 
 ansible_playbook() {
-  local playbook="playbooks/main.yml"
+  local playbook="playbook.yml"
   local ansible=$(which ansible)
 
   if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then

@@ -3,11 +3,11 @@
 
 pacman_packages:
   - ca-certificates
+  - yaourt
+
+pacman_yaourt_packages:
+  - rxvt-unicode
 
 php_packages:
   - php
   # - php-composer
-
-vim_packages:
-  - vim
-  # - vim-youcompleteme-git

@@ -6,13 +6,16 @@
 
   roles:
 
-    # Update and upgrade system
-    # - role: pacman
-    #   tags: [pacman]
+    # Update and upgrade pacman
+    - role: pacman
+      tags: [pacman]
 
     # Install apt packages
     - role: package
       tags: [pkg]
       packages: "{{ pacman_packages }}"
 
-    # TODO: yaourt
+    # Install yaourt packages
+    - role: yaourt
+      tags: [yaourt]
+      yaourt_packages: "{{ pacman_yaourt_packages }}"

@@ -44,18 +44,18 @@
     #     - "vars/{{ ansible_os_family | lower }}.yml"
     #     - "vars/os_defaults.yml"
 
-- include: "os/arch.yml"
-  when: ansible_distribution == 'Archlinux'
+- include: "playbooks/os_archlinux.yml"
+  # when: ansible_distribution == 'Archlinux'
 
-- include: "os/debian.yml"
-  when: ansible_distribution == 'Debian'
+- include: "playbooks/os_debian.yml"
+  # when: ansible_distribution == 'Debian'
 
-- include: "os/macosx.yml"
-  when: ansible_distribution == 'MacOSX'
+- include: "playbooks/os_macosx.yml"
+  # when: ansible_distribution == 'MacOSX'
 
-- include: "all.yml"
+- include: "playbooks/all.yml"
 
-- include: "local.yml"
+- include: "playbooks/local.yml"
 
-- include: "remote.yml"
+- include: "playbooks/remote.yml"
   # when: "'remote' in group_names"

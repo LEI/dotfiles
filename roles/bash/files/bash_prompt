@@ -74,12 +74,12 @@ prompt_command() {
 
   # Colors
   local c_reset="\[${reset}\]"
+  local c_text="\[${bblack}\]" # \[\e[2m\]
   local c_user="\[${blue}\]"
   local c_user_root="\[${red}\]"
   local c_host="\[${bblue}\]"
   local c_host_ssh="\[${bold}\]\[${red}\]"
   local c_cwd="\[${white}\]"
-  local c_text="\[${bblack}\]"
   local c_symbol="\[${white}\]"
   local c_symbol_error="\[${red}\]"
   local c_git_master="\[${yellow}\]"
