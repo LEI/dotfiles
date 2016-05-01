@@ -12,21 +12,11 @@
 PROMPT_SYMBOL="› " # $ ✓ →
 PROMPT_SYMBOL_ERROR="× " # ! ×
 
-PS2="${PROMPT_SYMBOL:->} "
-
 PROMPT_COMMAND='prompt_command'
+PS2="${PROMPT_SYMBOL:->} "
 
 # ~/.git-prompt.sh
 # PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
-
-# Show state next to the branch name
-#   '*' unstaged changes
-#   '+' staged changes
-GIT_PS1_SHOWDIRTYSTATE=1
-#   '$': stashed items
-GIT_PS1_SHOWSTASHSTATE=1
-#   '%': untracked files
-GIT_PS1_SHOWUNTRACKEDFILES=1
 
 # Difference between HEAD and its upstream:
 #   '<'           behind
@@ -34,12 +24,23 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 #   '<>'          diverged
 #   '='           no difference
 GIT_PS1_SHOWUPSTREAM="auto"
+#   auto          default?
 #   verbose       show number of commits ahead/behind (+/-) upstream
 #   name          if verbose, then also show the upstream abbrev name
 #   legacy        don't use the '--count' option available in recent
 #                 versions of git-rev-list
 #   git           always compare HEAD to @{upstream}
 #   svn           always compare HEAD to your SVN upstream
+
+#   '*' unstaged changes
+#   '+' staged changes
+GIT_PS1_SHOWDIRTYSTATE=1
+
+#   '$': stashed items
+GIT_PS1_SHOWSTASHSTATE=1
+
+#   '%': untracked files
+GIT_PS1_SHOWUNTRACKEDFILES=1
 
 # Colored hints (only when used with 2 arguments as prompt command)
 GIT_PS1_SHOWCOLORHINTS=1
