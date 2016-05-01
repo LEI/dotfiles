@@ -69,8 +69,8 @@ prompt_command() {
   local exit=$?
 
   # Default symbols
-  local p_symbol="${PROMPT_SYMBOL:-$ }"
-  local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
+  local prompt_symbol="${PROMPT_SYMBOL:-$ }"
+  local prompt_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
 
   # Colors
   local c_reset="\[${reset}\]"
@@ -92,61 +92,61 @@ prompt_command() {
   local suffix_git=""
 
   # Start of the primary prompt
-  local p='\n'
+  local prompt='\n'
 
   # Terminal title to the current working directory
-  p+='\[\033]0;\w\007\]'
+  prompt+='\[\033]0;\w\007\]'
 
   # Timestamp to the right
-  local p_right='$(date +%H:%M:%S)'
-  p+='\[$(tput sc; prompt_right "'${p_right}'" "'${c_text}'"; tput rc)\]'
+  local prompt_right='$(date +%H:%M:%S)'
+  prompt+='\[$(tput sc; prompt_right "'${prompt_right}'" "'${c_text}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then
     # Highlight when logged in as root
-    p+="${c_user_root}"
+    prompt+="${c_user_root}"
   else
-    p+="${c_user}"
+    prompt+="${c_user}"
   fi
-  p+='\u'
-  p+="${c_reset}"
+  prompt+='\u'
+  prompt+="${c_reset}"
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
   if [[ "$USER" != "$HOSTNAME" ]]; then
-    p+="${prefix_host}"
+    prompt+="${prefix_host}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH
-      p+="${c_host_ssh}"
+      prompt+="${c_host_ssh}"
     else
-      p+="${c_host}"
+      prompt+="${c_host}"
     fi
-    p+='\h'
-    p+="${c_reset}"
+    prompt+='\h'
+    prompt+="${c_reset}"
   fi
 
-  p+="${prefix_cwd}"
+  prompt+="${prefix_cwd}"
   # Working directory
-  p+="${c_cwd}"
-  p+='\w'
-  p+="${c_reset}"
+  prompt+="${c_cwd}"
+  prompt+='\w'
+  prompt+="${c_reset}"
 
-  # End of the first prompt line
-  local p_end='\n'
+  # End of the first line
+  local prompt_end='\n'
 
   # Exit code
   if [[ $exit -eq 0 ]]; then
-    p_end+="${c_symbol}${p_symbol}${c_reset}"
+    prompt_end+="${c_symbol}${prompt_symbol}${c_reset}"
   else
-    p_end+="${c_symbol_error}${p_symbol_error}${c_reset}"
+    prompt_end+="${c_symbol_error}${prompt_symbol_error}${c_reset}"
   fi
 
   # git-prompt.sh
-  __git_ps1 "${p}" "${p_end}" "${prefix_git}%s${suffix_git}"
+  __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
 
   # Change master branch color from green to yellow
-  local git_branch='__git_ps1_branch_name'
-  if [[ "${!git_branch}" == "master" ]]; then
-    PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}
-  fi
+  # local git_branch='__git_ps1_branch_name'
+  # if [[ "${!git_branch}" == "master" ]]; then
+  #   PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}
+  # fi
 }
