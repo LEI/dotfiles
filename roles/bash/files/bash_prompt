@@ -77,7 +77,7 @@ prompt_command() {
   EXIT_STATUS=$(prompt_status $EXIT "${white}${PROMPT_SYMBOL} " "${red}${PROMPT_SYMBOL_ERROR} " )
 
   # Git branch
-  GIT_PROMPT=$(__git_ps1 "${bblack} on %s" | sed -re "s/(on\s)(.*)\s(.*)/\1$red\2$white\3/")
+  GIT_PROMPT=$(__git_ps1 "${bblack} on %s" | sed -re "s/(on\s)(\w+)(.*)/\1$red\2$white\3/")
 }
 
 # Set the terminal title to the current working directory
