@@ -9,30 +9,22 @@
 # user=$(whoami)
 # host=$(hostname)
 
-PROMPT_COMMAND='__ps1'
-# PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
+PROMPT_SYMBOL="› " # $ ✓ →
+PROMPT_SYMBOL_ERROR="× " # ! ×
 
-PS2='${PROMPT_SYMBOL} '
+PS2="${PROMPT_SYMBOL:->} "
 
-# $ ✓ →
-PROMPT_SYMBOL="›"
-
-# ! ×
-PROMPT_SYMBOL_ERROR="×"
-
-# No color (reset)
-NC="${bblack}"
+PROMPT_COMMAND='prompt_command'
 
 # ~/.git-prompt.sh
+# PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
 
-# Show dirty state next to the branch name
+# Show state next to the branch name
 #   '*' unstaged changes
 #   '+' staged changes
 GIT_PS1_SHOWDIRTYSTATE=1
-
 #   '$': stashed items
 GIT_PS1_SHOWSTASHSTATE=1
-
 #   '%': untracked files
 GIT_PS1_SHOWUNTRACKEDFILES=1
 
@@ -42,7 +34,7 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 #   '<>'          diverged
 #   '='           no difference
 GIT_PS1_SHOWUPSTREAM="auto"
-# Other values:
+#   auto
 #   verbose       show number of commits ahead/behind (+/-) upstream
 #   name          if verbose, then also show the upstream abbrev name
 #   legacy        don't use the '--count' option available in recent
@@ -54,75 +46,100 @@ GIT_PS1_SHOWUPSTREAM="auto"
 GIT_PS1_SHOWCOLORHINTS=1
 
 prompt_right() {
-  local date="$(date +%H:%M:%S)"
+  local date="$(date +%H:%M:%S) "
+  local color=${1:-}
 
   if [[ ! -n $COLUMNS ]]; then
     COLUMNS=$(tput cols)
   fi
 
-  printf ${bblack}"%*s" $COLUMNS "$date "
+  printf ${color}"%*s" $COLUMNS "$date"
 }
 
-__ps1() {
+prompt_command() {
   # Exit code
   local exit=$?
+  # Start of PS1
+  local p=
+  # End of PS1 (before symbol)
+  local p_end='\n'
+  # Default symbols
+  local p_symbol="${PROMPT_SYMBOL:-$ }"
+  local p_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
+
+  # Colors
+  local c_text='\['${bblack}'\]'
+  local c_reset='\['${reset}'\]'
+  local c_bold='\['${bold}'\]'
+  local c_blue='\['${blue}'\]'
+  local c_cyan='\['${cyan}'\]'
+  local c_red='\['${red}'\]'
+  local c_white='\['${white}'\]'
+  local c_yellow='\['${yellow}'\]'
 
   # Set the terminal title to the current working directory
-  local ps1='\[\033]0;\w\007\]'
+  p+='\[\033]0;\w\007\]'
 
   # Right align datetime
-  ps1+='\[$(tput sc; prompt_right; tput rc)\]'
+  p+='\[$(tput sc; prompt_right '${c_text}'; tput rc)\]'
 
-  if [[ "$USER" == "root" ]]; then
-    ps1+='\[${red}\]'
-  else
-    ps1+='\[${cyan}\]'
-  fi
   # User
-  ps1+='\u'
-  ps1+='\[${reset}\]'
+  if [[ "$USER" == "root" ]]; then
+    p+="$c_red"
+  else
+    p+="$c_blue"
+  fi
+  p+='\u'
+  p+="$c_reset"
 
-  # Display the hostname when != username
+  # Display the hostname only if it is different
   # FIXME: $(hostname) & $HOST != \h
+  # if [[ ! "$HOSTNAME" =~ "$USER" ]]; then
   if [[ "$USER" != "$HOSTNAME" ]]; then
-    ps1+='\[${NC}\]'
-    ps1+=' at '
-    ps1+='\[${reset}\]'
+    p+="$c_text"
+    p+=' at '
+    p+="$c_reset"
     # Highlight the hostname when connected via SSH
     if [[ -n "${SSH_TTY}" ]]; then
-	  ps1+='\[${bold}\]'
-	  ps1+='\[${red}\]'
+      p+="$c_bold"
+      p+="$c_red"
     else
-	  ps1+='\[${blue}\]'
+      p+="$c_cyan"
     fi
     # Host
-    ps1+='\h'
-    ps1+='\[${reset}\]'
+    p+='\h'
+    p+="$c_reset"
   fi
 
-  ps1+='\[${NC}\]'
-  ps1+=' in '
-  ps1+='\[${reset}\]'
+  p+="$c_text"
+  p+=' in '
+  p+="$c_reset"
   # Working directory
-  ps1+='\[${white}\]'
-  ps1+='\w'
-  ps1+='\[${reset}\]'
+  p+="$c_white"
+  p+='\w'
+  p+="$c_reset"
 
   # Exit code
-  local ps1_end='\n'
   if [[ $exit -eq 0 ]]; then
-    ps1_end+='\[${white}\]${PROMPT_SYMBOL} \[${reset}\]'
+    p_end+="${c_white}${p_symbol}${c_reset}"
   else
-    ps1_end+='\[${red}\]${PROMPT_SYMBOL_ERROR} \[${reset}\]'
+    p_end+="${c_red}${p_symbol_error}${c_reset}"
   fi
 
-  __git_ps1 "${ps1}" "${ps1_end}" ' \[${NC}\]on\[${reset}\] %s'
-  # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
+  local git_printf_format="${c_text} on ${c_reset}%s"
+  __git_ps1 "${p}" "${p_end}" "${git_printf_format}"
 
-  # if [[ "$__git_ps1_branch_name" == "master" ]]; then
+  if [[ "$__git_ps1_branch_name" == "master" ]]; then
+    # Change master branch color from green to yellow
+    PS1=${PS1/'\[\e[32m\]${__git_ps1_branch_name}'/${c_yellow}'${__git_ps1_branch_name}'}
+  fi
+
+  # if [[ "$__git_ps1_branch_name" == "master" && "$PS1" =~ '\[\e[32m\]${__git_ps1_branch_name}' ]]; then
   #   __git_ps1_branch_name="${yellow}${__git_ps1_branch_name}"
   # fi
 
   # echo $PS1
   # PS1=
+
+  # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 }
