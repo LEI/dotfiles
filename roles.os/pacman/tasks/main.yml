@@ -11,7 +11,9 @@
   when: packages_upgrade
   become: yes
 
-# AUR?
+# AUR
+# TODO: ini_file
+# https://github.com/jpic/jpic.pacman/blob/master/tasks/main.yml
 # - name: "Check {{ pacman_conf }}"
 #   lineinfile:
 #     dest: "{{ pacman_conf }}"
