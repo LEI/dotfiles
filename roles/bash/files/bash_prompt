@@ -18,53 +18,48 @@ PS2="${PROMPT_SYMBOL:->} "
 # PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
 # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 
-# Difference between HEAD and its upstream:
-#   '<'           behind
-#   '>'           ahead
-#   '<>'          diverged
-#   '='           no difference
-GIT_PS1_SHOWUPSTREAM="auto"
-#   auto          default?
-#   verbose       show number of commits ahead/behind (+/-) upstream
-#   name          if verbose, then also show the upstream abbrev name
-#   legacy        don't use the '--count' option available in recent
-#                 versions of git-rev-list
-#   git           always compare HEAD to @{upstream}
-#   svn           always compare HEAD to your SVN upstream
-
-#   '*' unstaged changes
-#   '+' staged changes
-GIT_PS1_SHOWDIRTYSTATE=1
-
-#   '$': stashed items
-GIT_PS1_SHOWSTASHSTATE=1
-
-#   '%': untracked files
-GIT_PS1_SHOWUNTRACKEDFILES=1
-
 # Colored hints (only when used with 2 arguments as prompt command)
 GIT_PS1_SHOWCOLORHINTS=1
+
+# * unstaged changes
+# + staged changes
+GIT_PS1_SHOWDIRTYSTATE=1
+
+# $ stashed items
+GIT_PS1_SHOWSTASHSTATE=1
+
+# % untracked files
+GIT_PS1_SHOWUNTRACKEDFILES=1
+
+# Difference between HEAD and its upstream:
+# <           behind
+# >           ahead
+# <>          diverged
+# =           no difference
+# GIT_PS1_SHOWUPSTREAM="auto"
+# auto        default?
+# verbose     show number of commits ahead/behind (+/-) upstream
+# name        if verbose, then also show the upstream abbrev name
+# legacy      don't use the '--count' option available in recent
+#             versions of git-rev-list
+# git         always compare HEAD to @{upstream}
+# svn         always compare HEAD to your SVN upstream
 
 prompt_right() {
   local text=${1:-}
   local color=${2:-}
   local margin=${3:-0}
-  local columns=${COLUMNS:-}
 
-  if [[ -z "$columns" ]]; then
-    columns=$(tput cols)
+  if [[ ! -n "$COLUMNS" ]]; then
+    COLUMNS=$(tput cols)
   fi
 
   if [[ -n "$color" ]]; then
     text="${color}${text}"
-    columns=$((${columns} + ${#color}))
+    margin=$((${margin} - ${#color}))
   fi
 
-  if [[ "$margin" -gt 0 ]]; then
-    columns=$((${columns} - ${margin}))
-  fi
-
-  printf "%*s" "$columns" "${text}"
+  printf "%*s" "$((${COLUMNS} - ${margin}))" "${text}"
 }
 
 prompt_command() {
@@ -76,14 +71,17 @@ prompt_command() {
   local c_reset="\[${reset}\]"
   local c_bold="\[${bold}\]"
   local c_blue="\[${blue}\]"
+  local c_bblue="\[${bblue}\]"
   local c_cyan="\[${cyan}\]"
   local c_red="\[${red}\]"
   local c_white="\[${white}\]"
   local c_yellow="\[${yellow}\]"
 
-  # Start of PS1
+  # Start of the primary prompt
   local p='\n'
-  # End of the first line (before symbol and command line prompt)
+  # Right aligned text
+  local p_right='$(date +%H:%M:%S)'
+  # End of the first prompt line (before symbol and command line prompt)
   local p_end='\n'
 
   # Default symbols
@@ -93,16 +91,16 @@ prompt_command() {
   # Set the terminal title to the current working directory
   p+='\[\033]0;\w\007\]'
 
-  # Right align datetime
-  local p_right='$(date +%H:%M:%S)'
+  # Move the cursor position and print right aligned text
   p+='\[$(tput sc; prompt_right "'${p_right}'" "'${c_text}'"; tput rc)\]'
 
-  # User
+  # Red if root
   if [[ "$USER" == "root" ]]; then
     p+="$c_red"
   else
     p+="$c_blue"
   fi
+  # Username
   p+='\u'
   p+="$c_reset"
 
@@ -116,7 +114,7 @@ prompt_command() {
       p+="$c_bold"
       p+="$c_red"
     else
-      p+="\[${bblue}\]"
+      p+="${c_bblue}"
     fi
     # Hostname
     p+='\h'
@@ -126,8 +124,8 @@ prompt_command() {
   p+="$c_text"
   p+=' in '
   p+="$c_reset"
-  # Working directory
   p+="$c_white"
+  # Working directory
   p+='\w'
   p+="$c_reset"
 
