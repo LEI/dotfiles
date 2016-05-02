@@ -6,7 +6,11 @@
 
   roles:
 
-    # # TODO: host specific
+    - role: symlink
+      dot_files:
+        ruby:
+          prefix: .
+
     # - role: ssh
     #   tags: [ssh]
 
