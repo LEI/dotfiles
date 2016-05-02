@@ -471,15 +471,15 @@ set backspace=indent,eol,start
 " Change leader
 let g:mapleader="\<Space>"
 
-" Nope
-nnoremap <up> <nop>
-nnoremap <down> <nop>
-nnoremap <left> <nop>
-nnoremap <right> <nop>
-inoremap <up> <nop>
-inoremap <down> <nop>
-inoremap <left> <nop>
-inoremap <right> <nop>
+" Do not use arrows
+" nnoremap <up> <nop>
+" nnoremap <down> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" inoremap <up> <nop>
+" inoremap <down> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
 
 " Move vertically on wrapped lines
 nnoremap j gj

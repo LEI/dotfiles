@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/python
 
-# cdown/ansible-yaourt
+# https://github.com/cdown/ansible-yaourt
 
 from ansible.module_utils.basic import *
 

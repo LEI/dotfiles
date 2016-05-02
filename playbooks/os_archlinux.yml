@@ -16,6 +16,6 @@
       packages: "{{ pacman_packages }}"
 
     # Install yaourt packages
-    - role: yaourt
+    - role: pacman-yaourt
       tags: [yaourt]
       yaourt_packages: "{{ pacman_yaourt_packages }}"

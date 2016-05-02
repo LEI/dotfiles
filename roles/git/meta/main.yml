@@ -3,7 +3,7 @@ dependencies:
 
   - role: package
     packages:
-      - "{{ 'git' if ansible_distribution != 'Debian' else 'git-core' }}"
+      - "{{ 'git-core' if ansible_distribution == 'Debian' else 'git' }}"
 
   - role: symlink
     dot_files:

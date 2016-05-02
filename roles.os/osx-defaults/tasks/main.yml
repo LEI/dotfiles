@@ -1,8 +1,4 @@
 ---
-# TODO: default terminal theme
-# - include: apple-script.yml
-#   with_fileglob:
-#     - "*.scpt"
 
 # TODO: idempotent (changed?)
 # - name: Setup system
@@ -33,16 +29,3 @@
 
 # - debug: var=osx_defaults
 #   when: log_enable
-
-# - name: Ensure ~/.osx directory exists
-#   file:
-#     path: "{{ dot_home }}/{{ osx_dir }}"
-#     state: directory
-
-# # docs.ansible.com/ansible/script_module.html
-# - name: Generate OSX scripts
-#   template:
-#     src: "{{ item }}.j2"
-#     dest: "{{ dot_home }}/{{ osx_dir }}/{{ item }}"
-#   with_items: "{{ osx_templates }}"
-#     # dest: "{{ role_path }}/files/{{ script }}"

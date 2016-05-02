@@ -4,21 +4,19 @@
 
     bin/dot
 
-## Other dotfiles
+## Inspiration
 
 - [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
-- [boxen](https://github.com/boxen/our-boxen) (Puppet)
-- [workstation](https://github.com/jtimberman/workstation-chef-repo) (Chef)
-- [yadr](https://github.com/skwp/dotfiles/)
 - [diimdeep](https://github.com/diimdeep/dotfiles)
 - [ornicar](https://github.com/ornicar/dotfiles)
-
-### Ansible
-
+- [yadr](https://github.com/skwp/dotfiles/)
+- Puppet [boxen](https://github.com/boxen/our-boxen)
+- Chef [workstation](https://github.com/jtimberman/workstation-chef-repo)
 - [osxc](https://github.com/osxc)
 - [battleschool](https://github.com/spencergibb/battleschool)
 - [superlumic](https://github.com/superlumic)
 - [mac-dev-playbook](https://github.com/geerlingguy/mac-dev-playbook)
+- [ansible-mac-provision](https://github.com/reecefowell/ansible-mac-provision)
 - [delucks](https://github.com/delucks/dotfiles)
 - [sheldonh](https://github.com/sheldonh/dotfiles-ansible)
 
