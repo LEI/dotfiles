@@ -1,17 +1,17 @@
 ---
 # vi: ft=yaml
 
-# Repository
+# Github repository
 dot_repo: git://github.com/LEI/dotfiles.git
 dot_repo_dir: .dotfiles
 # dot_repo_version = master
 
-# Targets
-dot_home: "{{ ansible_env.HOME }}" # "{{ '~' | expanduser }}"
-# "{{ hostvars[inventory_hostname]['ansible_env']['HOME'] }}"
+# Target machines
+dot_home: "{{ ansible_env.HOME }}" # "{{ '~' | expanduser }}" "{{ hostvars[inventory_hostname]['ansible_env']['HOME'] }}"
 dot_root: "{{ ansible_env.HOME }}/{{ dot_repo_dir }}"
-dot_local_dir: "{{ inventory_dir }}"
-# "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir }}"
+
+# Managment machine
+dot_local_dir: "{{ lookup('env', 'HOME') }}" # "{{ inventory_dir }}" "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir }}"
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
 # Options
