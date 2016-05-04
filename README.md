@@ -4,7 +4,7 @@
 
     bin/dot
 
-## Managers
+## Inspiration
 
 - [dotfiles.github.io](https://dotfiles.github.io/)
 - [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
@@ -31,4 +31,3 @@
 - [ ] Node & npm verification
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
-- [ ] Symlink task find module (file_type: files && directories)
