@@ -1,13 +1,20 @@
 ---
 dependencies:
 
-  # Install NodeJS for MacOSX
+  # MacOSX
   - role: package
     packages:
       - node
     when: "ansible_os_family == 'Darwin'"
 
-  # Install NodeJS for Debian/RedHat
+  # Arch
+  - role: package
+    packages:
+      - nodejs
+      - npm
+    when: "ansible_os_family == 'Archlinux'"
+
+  # Debian/RedHat
   - role: node
     when: "ansible_os_family == 'Debian'"
 

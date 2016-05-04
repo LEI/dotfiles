@@ -1,16 +1,17 @@
 ---
 # - name: Check if npm is installed
 #   command: npm -v
-#   register: npm_installed_version
 #   ignore_errors: yes
 #   changed_when: false
+#   register: npm_version
+
+# - debug: var=npm_version #.stdout
+# - fail:
 
 - name: Ensure npm is installed
   stat:
     path: /usr/bin/npm
   register: npm_installed
-
-# - debug: var=npm_installed_version #.stdout
 
 - include: debian.yml
   when: not npm_installed.stat.exists and

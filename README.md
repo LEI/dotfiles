@@ -31,3 +31,4 @@
 - [ ] Node & npm verification
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
+- [ ] Check node and npm are installed (--version?)
