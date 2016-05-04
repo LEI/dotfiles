@@ -10,9 +10,6 @@ set -o pipefail
 
 cd "$DOT_ROOT"
 
-# Use ask become pass or -K instead?
-# sudo -v
-
 ansible_install() {
   local uname=$(uname -s)
 
@@ -69,19 +66,20 @@ ansible_vault() {
   fi
 }
 
-ansible_playbook() {
-  local playbook="playbook.yml"
+main() {
   local ansible=$(which ansible)
+  local playbook="playbook.yml"
 
   if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
     ansible_install
   fi
 
+  # ansible-galaxy install -r requirements/galaxy.yml
+
   if [[ $? == 0 ]]; then
     ansible_vault
-    # ansible-galaxy install -r requirements/galaxy.yml
     ansible-playbook "$playbook" "$@" # --ask-become-pass
   fi
 }
 
-[[ "$0" == "$BASH_SOURCE" ]] && time ansible_playbook "$@"
+[[ "$0" == "$BASH_SOURCE" ]] && time main "$@"
