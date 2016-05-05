@@ -31,14 +31,19 @@ ansible_install() {
 
   case $uname in
     Darwin)
-      local x="xcode-select --install"
       # If /usr/bin/gcc is absent
       if ! installed gcc; then
-        echo "› $x" # Install Xcode
-        $x
+        _do "xcode-select --install"
+        # echo "› $x" # Install Xcode
+        # $x
       fi
       ;;
     Linux)
+      if ! installed ansible; then
+        echo "TODO: detect distribution"
+        exit 1
+      fi
+
       # pip cryptography on raspbian ->
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
 
@@ -53,11 +58,6 @@ ansible_install() {
       # sudo pacman -Syu # --noconfirm
       # sudo pacman -S ansible git python2-setuptools --noconfirm
       # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
-
-      if ! installed ansible; then
-        echo "TODO: detect distribution"
-        exit 1
-      fi
       ;;
     *)
       echo "Unsupported platform: $uname"
@@ -65,14 +65,17 @@ ansible_install() {
       ;;
   esac
 
-  if ! installed pip; then
-    # Install python package manager
-    su_do easy_install pip
-  fi
-
+  # If ansible is not already present
   if ! installed ansible; then
+
+    if ! installed pip; then
+      # Install python package manager
+      su_do easy_install pip
+    fi
+
     # Install ansible and cryptography requirements
     su_do pip install -r requirements/pip.txt
+
   fi
 }
 
@@ -87,7 +90,7 @@ ansible_vault() {
       # Create the vault file
       echo "$vault_pass" >> $vault_file
     else
-      # Ask again
+      # Empty variable, ask again
       ansible_vault
       return
     fi
@@ -105,16 +108,19 @@ ansible_play() {
   # ansible-galaxy install -r requirements/galaxy.yml
 
   # Run the main playbook
-  _do ansible-playbook "$playbook" "$@" # --ask-become-pass
+  # _do ansible-playbook "$playbook" "$@"
+  ansible-playbook "$playbook" "$@" # --ask-become-pass
 }
 
 installed() {
+  [[ "$1" == "sudo" ]] && shift # Skip the first parameter
   local name="$1"
 
   # Test if the program can be executed
   hash $name 2>/dev/null
 
   if [[ $? != 0 ]]; then
+    # Display warning
     echo >&2 "! $name is not installed"
     return 1
   fi
@@ -127,15 +133,12 @@ su_do() {
 _do() {
   local cmd="$@"
 
-  if [[ "$1" == "sudo" ]]; then
-    shift
-  fi
-
-  if installed "$1"; then
+  if installed $cmd; then
     # Execute the command
     echo "› $cmd"
     $cmd
   else
+    # Die
     echo >&2 "× $cmd"
     exit 1
   fi
