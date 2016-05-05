@@ -12,13 +12,8 @@ cd "$DOT_ROOT"
 
 main() {
   ansible_install
-
   ansible_vault
-
-  # ansible-galaxy install -r requirements/galaxy.yml
-
-  local playbook="playbook.yml"
-  ansible-playbook "$playbook" "$@" # --ask-become-pass
+  ansible_play "$@"
 }
 
 # opts() {
@@ -76,7 +71,7 @@ ansible_install() {
   fi
 
   if ! installed ansible; then
-    # Install ansible and cryptography
+    # Install ansible and cryptography requirements
     su_do pip install -r requirements/pip.txt
   fi
 }
@@ -89,16 +84,28 @@ ansible_vault() {
     echo "Vault?"
     read -e -r -s vault_pass
     if [[ -n "$vault_pass" ]]; then
+      # Create the vault file
       echo "$vault_pass" >> $vault_file
     else
+      # Ask again
       ansible_vault
       return
     fi
   fi
 
   if [[ ! -n "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
+    # Set the environment variable
     export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
   fi
+}
+
+ansible_play() {
+  local playbook="playbook.yml"
+
+  # ansible-galaxy install -r requirements/galaxy.yml
+
+  # Run the main playbook
+  _do ansible-playbook "$playbook" "$@" # --ask-become-pass
 }
 
 installed() {
