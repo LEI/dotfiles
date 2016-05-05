@@ -26,7 +26,7 @@
 
 - [ ] Bash [git-prompt](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh) symbols
 - [ ] OS X Terminal theme, osascripts
-- [ ] Tmux mouse & wheel pane options
+- [ ] Tmux mouse & wheel pane options (check version 1.8, 2.1)
 - [ ] Check lineinfile regexp (tmux), ini_file arch
 - [ ] Node & npm verification
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
