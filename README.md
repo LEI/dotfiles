@@ -11,7 +11,8 @@
 - [ ] Linux bin/dot ansible install
 - [ ] OS X Terminal theme and (osa)scripts
 - [ ] Tmux mouse and wheel pane options if version 1.8 or 2.1
-- [ ] Xresources arch
+- [ ] Xresources rxvt, xinitrc
+- [ ] virtualenv, nvm, rvm/rbenv
 
 ## Resources
 

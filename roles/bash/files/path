@@ -19,6 +19,6 @@ pathmunge "$(composer config -g home)/$(composer config -g bin-dir)" after
 pathmunge "$HOME/.node_modules/bin" after
 
 # Ruby gems
-pathmunge "$(ruby -e 'print Gem.user_dir')/bin" after
+pathmunge "$GEM_HOME/bin" after
 
 # vi: ft=sh

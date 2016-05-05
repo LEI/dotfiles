@@ -3,7 +3,8 @@
 # Usage: extract <file>
 # Extracts archived files / mounts disk images
 
-# github.com/holman/dotfiles/blob/master/functions/extract
+# https://github.com/holman/dotfiles/blob/master/functions/extract
+# https://github.com/Bash-it/bash-it/blob/master/plugins/available/extract.plugin.bash
 
 extract () {
   if [[ -f $1 ]]; then
