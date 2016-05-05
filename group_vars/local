@@ -1,8 +1,11 @@
 ---
 # vi: ft=yaml
 
-# localhost
-ansible_connection: local
+# Examples:
+# - laravel/laravel
+# - name: phpunit/phpunit
+# - { name: phpunit/phpunit, release: "4.7.*" }
+composer_packages: []
 
 # NodeJS modules
 npm_packages:
@@ -10,7 +13,8 @@ npm_packages:
   - gulp
   - jshint
 
-composer_packages: []
-  # - laravel/laravel
-  # - name: phpunit/phpunit
-  # - { name: phpunit/phpunit, release: "4.7.*" }
+pip_packages:
+  - bashate
+
+# ruby_gems:
+#   - compass

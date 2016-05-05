@@ -4,12 +4,7 @@
   gather_facts: no
   tags: [local]
 
-  roles:
-
-    - role: symlink
-      dot_files:
-        ruby:
-          prefix: .
+  roles: []
 
     # - role: ssh
     #   tags: [ssh]

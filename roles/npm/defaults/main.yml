@@ -6,7 +6,6 @@ npm_install: yes
 npm_global: yes
 npm_state: present
 
-# Adjust your PATH accordingly
+# Must be in PATH (roles/bash/files/path)
 npm_prefix: ~/.node_modules
-
 npm_packages: []

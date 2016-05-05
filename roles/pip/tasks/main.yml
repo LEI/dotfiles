@@ -1,0 +1,11 @@
+---
+- name: "Install {{ pip_packages | length }} packages"
+  pip:
+    name: "{{ item.name | default(item) }}"
+    version: "{{ item.version | default(omit) }}"
+    state: "{{ item.state | default(pip_state) }}"
+    # chdir:
+    # extra_args:
+    # requirements:
+  with_items: "{{ pip_packages }}"
+  when: pip_install

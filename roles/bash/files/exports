@@ -2,9 +2,9 @@
 # ~/.exports
 #
 
-# ~/bin/e
 export EDITOR='vim'
 
-# Change Homebrew cask apps default location
-export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-#--caskroom=/etc/Caskroom
+# Change default location of Homebrew Cask applications
+export HOMEBREW_CASK_OPTS="--appdir=/Applications" #--caskroom=/etc/Caskroom
+
+# vi: ft=sh
