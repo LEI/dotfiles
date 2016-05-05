@@ -6,21 +6,42 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-[[ -z "${DOT_ROOT:-}" ]] && DOT_ROOT="$HOME/.dotfiles"
+[[ -z "${DOT_ROOT-}" ]] && DOT_ROOT="$HOME/.dotfiles"
 
 cd "$DOT_ROOT"
+
+main() {
+  ansible_install
+
+  ansible_vault
+
+  # ansible-galaxy install -r requirements/galaxy.yml
+
+  local playbook="playbook.yml"
+  ansible-playbook "$playbook" "$@" # --ask-become-pass
+}
+
+# opts() {
+#   local install=
+#   case ${1:-} in
+#     install)
+#       install=true
+#       shift
+#       ;;
+#   esac
+# }
 
 ansible_install() {
   local uname=$(uname -s)
 
   case $uname in
     Darwin)
-      if [[ ! -x /usr/bin/gcc ]]; then
-        local x="xcode-select --install"
-        echo "${x}..."
+      local x="xcode-select --install"
+      # If /usr/bin/gcc is absent
+      if ! installed gcc; then
+        echo "› $x" # Install Xcode
         $x
       fi
-
       ;;
     Linux)
       # pip cryptography on raspbian ->
@@ -37,6 +58,11 @@ ansible_install() {
       # sudo pacman -Syu # --noconfirm
       # sudo pacman -S ansible git python2-setuptools --noconfirm
       # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
+
+      if ! installed ansible; then
+        echo "TODO: detect distribution"
+        exit 1
+      fi
       ;;
     *)
       echo "Unsupported platform: $uname"
@@ -44,17 +70,14 @@ ansible_install() {
       ;;
   esac
 
-  # Install python package manager
-  if ! x pip; then
-    if ! x easy_install; then
-      exit 1
-    fi
-    sudo easy_install pip
+  if ! installed pip; then
+    # Install python package manager
+    su_do easy_install pip
   fi
 
-  # Install ansible and cryptography
-  if ! x ansible; then
-    sudo pip install -r requirements/pip.txt
+  if ! installed ansible; then
+    # Install ansible and cryptography
+    su_do pip install -r requirements/pip.txt
   fi
 }
 
@@ -78,34 +101,37 @@ ansible_vault() {
   fi
 }
 
-# Test if a command can be executed
-x() {
-  local cmd="$1"
-  hash $cmd 2>/dev/null
+installed() {
+  local name="$1"
+
+  # Test if the program can be executed
+  hash $name 2>/dev/null
+
   if [[ $? != 0 ]]; then
-    echo >&2 "$cmd is not installed"
+    echo >&2 "! $name is not installed"
     return 1
   fi
 }
 
-main() {
-  local playbook="playbook.yml"
+su_do() {
+  _do sudo "$@"
+}
 
-  # local install=
-  # case ${1:-} in
-  #   install)
-  #     install=true
-  #     shift
-  #     ;;
-  # esac
+_do() {
+  local cmd="$@"
 
-  ansible_install
+  if [[ "$1" == "sudo" ]]; then
+    shift
+  fi
 
-  ansible_vault
-
-  # ansible-galaxy install -r requirements/galaxy.yml
-
-  ansible-playbook "$playbook" "$@" # --ask-become-pass
+  if installed "$1"; then
+    # Execute the command
+    echo "› $cmd"
+    $cmd
+  else
+    echo >&2 "× $cmd"
+    exit 1
+  fi
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && time main "$@"
