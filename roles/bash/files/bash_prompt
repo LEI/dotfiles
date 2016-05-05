@@ -1,10 +1,11 @@
-#!/usr/bin/env bash
 #
 # ~/.bash_prompt
 #
-# github.com/necolas/dotfiles
-# github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
-# github.com/demure/dotfiles/blob/master/subbash/prompt
+# https://github.com/necolas/dotfiles
+# https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
+# https://github.com/demure/dotfiles/blob/master/subbash/prompt
+
+require ~/.git-prompt.sh
 
 # user=$(whoami)
 # host=$(hostname)
@@ -141,7 +142,7 @@ prompt_command() {
     prompt_end+="${c_symbol_error}${prompt_symbol_error}${c_reset}"
   fi
 
-  # git-prompt.sh
+  # Use ~/.git-prompt.sh to set PS1
   __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
 
   # Change master branch color from green to yellow
@@ -150,3 +151,5 @@ prompt_command() {
     PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}
   fi
 }
+
+# vi: ft=sh

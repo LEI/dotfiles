@@ -8,6 +8,7 @@ apt_packages:
   - curl
   - locate
   # - lynx
+  - make
   - python-dev
   - python3-dev
   - tree
@@ -17,6 +18,10 @@ php_packages:
   # - php5
   - php5-cli
   # - php5-curl
+
+ruby_packages:
+  - ruby
+  - ruby-dev
 
 # vim_packages:
 #   - vim

@@ -1,11 +1,22 @@
 #
 # ~/.functions
 #
+# https://github.com/mathiasbynens/dotfiles/blob/master/.functions
+# https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
 
-# http://github.com/mathiasbynens/dotfiles/blob/master/.functions
+require() {
+  local file="$1"
+
+  if [[ -r "$file" ]] && [[ -f "$file" ]]; then
+    source "$file"
+  else
+    echo "Required file does not exists: $file"
+    return 1
+  fi
+}
 
 # man() {
-#     env \
+#   env \
 #     LESS_TERMCAP_mb=$(printf "\e[1;31m") \
 #     LESS_TERMCAP_md=$(printf "\e[1;31m") \
 #     LESS_TERMCAP_me=$(printf "\e[0m") \
@@ -15,3 +26,20 @@
 #     LESS_TERMCAP_us=$(printf "\e[1;32m") \
 #     man "$@"
 # }
+
+# Prevent duplicate directories in the PATH variable
+if ! type pathmunge > /dev/null 2>&1; then
+  pathmunge() {
+    if ! [[ $PATH =~ (^|:)$1($|:) ]]; then
+      if [[ "$2" == "after" ]]; then
+        # pathmunge /path/to/dir after
+        PATH=$PATH:$1
+      else
+        # pathmunge /path/to/dir
+        PATH=$1:$PATH
+      fi
+    fi
+  }
+fi
+
+# vi: ft=sh

@@ -5,3 +5,5 @@
 if [[ -f ~/.bashrc ]] && [[ -r ~/.bashrc ]]; then
   [[ -n "$PS1" ]] && source ~/.bashrc
 fi
+
+# vi: ft=sh

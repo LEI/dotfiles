@@ -1,18 +1,24 @@
 #
 # ~/.path
 #
+# require ~/.functions
 
-# PATH="/usr/local/sbin:$PATH"
+pathmunge /usr/local/sbin
 
-# Add ~/bin
-PATH="$PATH:$HOME/bin"
+# ~/bin
+pathmunge "$HOME/bin" after
 
-# Global packages
+# Composer packages
+# COMPOSER_HOME="$HOME/.composer"
+# COMPOSER_BIN_DIR="vendor/bin"
+# pathmunge "$COMPOSER_HOME/$COMPOSER_BIN_DIR" after
+pathmunge "$(composer config -g home)/$(composer config -g bin-dir)" after
 
-# Composer
-COMPOSER_HOME="$HOME/.composer"
-COMPOSER_BIN_DIR="vendor/bin"
-PATH="$PATH:$COMPOSER_HOME/$COMPOSER_BIN_DIR"
+# NodeJS modules (npm config get > 400ms)
+# [[ "$(which npm)" ]] && pathmunge "$(npm config get prefix)/bin" after
+pathmunge "$HOME/.node_modules/bin" after
 
-# NodeJS
-PATH="$PATH:$HOME/.node_modules/bin"
+# Ruby gems
+pathmunge "$(ruby -e 'print Gem.user_dir')/bin" after
+
+# vi: ft=sh

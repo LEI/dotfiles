@@ -1,0 +1,10 @@
+---
+dependencies:
+
+  - role: package
+    packages: "{{ ruby_packages }}"
+
+  - role: symlink
+    dot_files:
+      ruby:
+        prefix: .

@@ -15,7 +15,7 @@
 #     # recurse: yes
 #   when: npm_prefix.stdout is defined
 
-- name: "Install npm packages"
+- name: "Install {{ npm_packages | length }} npm packages"
   npm:
     name: "{{ item.name | default(item) }}"
     version: "{{ item.version | default(omit) }}"

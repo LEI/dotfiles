@@ -1,0 +1,8 @@
+---
+- name: "Install {{ ruby_gems | length }} gems"
+  gem:
+    name: "{{ item.name | default(item) }}"
+    version: "{{ item.version | default(omit) }}"
+    state: "{{ item.state | default(ruby_gems_state) }}"
+  with_items: "{{ ruby_gems }}"
+  when: ruby_gems_install

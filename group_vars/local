@@ -4,13 +4,22 @@
 # localhost
 ansible_connection: local
 
+# Examples:
+# - laravel/laravel
+# - name: phpunit/phpunit
+# - { name: phpunit/phpunit, release: "4.7.*" }
+composer_packages: []
+
 # NodeJS modules
 npm_packages:
   - bower
   - gulp
   - jshint
 
-composer_packages: []
-  # - laravel/laravel
-  # - name: phpunit/phpunit
-  # - { name: phpunit/phpunit, release: "4.7.*" }
+pip_packages:
+  - bashate
+
+ruby_packages: []
+
+ruby_gems:
+  - compass

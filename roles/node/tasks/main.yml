@@ -1,24 +1,14 @@
 ---
-# - name: Check if npm is installed
-#   command: npm -v
-#   ignore_errors: yes
-#   changed_when: false
-#   register: npm_version
-
-# - debug: var=npm_version #.stdout
-# - fail:
-
-- name: Ensure npm is installed
-  stat:
-    path: /usr/bin/npm
-  register: npm_installed
+- name: Check if node is installed
+  command: node --version
+  ignore_errors: yes
+  changed_when: false
+  register: node_version
 
 - include: debian.yml
-  when: not npm_installed.stat.exists and
+  when: node_version.rc != 0 and
     ansible_os_family == 'Debian'
-    # {{ npm_installed_version.rc | default(false) }} != 0 and
 
 - include: redhat.yml
-  when: not npm_installed.stat.exists and
+  when: node_version.rc != 0 and
     ansible_os_family == 'RedHat'
-    # {{ npm_installed_version.rc | default(false) }} != 0 and

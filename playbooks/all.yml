@@ -18,14 +18,27 @@
     - role: npm
       tags: [npm, node, js]
 
+    # Python packages
+    # - role: pyhton?
+    - role: pip
+      tags: [pip]
+
+    # Ruby gems and .gemrc
+    - role: ruby
+      tags: [ruby, gem]
+
+    # Shell dotfiles
     - role: bash
       tags: [bash, bin]
 
+    # Misc dotfiles
     - role: home
       tags: [home]
 
+    # Tmux
     - role: tmux
       tags: [tmux]
 
+    # Vim
     - role: vim
       tags: [vim]
