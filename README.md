@@ -13,22 +13,26 @@
 - [ ] Ansible tags: coercing to Unicode: need string or buffer /
   UndefinedVariable found
 
-#
+## Resources
 
 - [Github does dotfiles](https://dotfiles.github.io/)
 - [Awesome dotfiles](https://github.com/webpro/awesome-dotfiles)
 
-- Puppet [boxen](https://github.com/boxen/our-boxen)
-- Chef [workstation](https://github.com/jtimberman/workstation-chef-repo)
-- [battleschool](https://github.com/spencergibb/battleschool)
-- [superlumic](https://github.com/superlumic)
-- [osxc](https://github.com/osxc)
+### Managers
 
-- [ansible-mac-provision](https://github.com/reecefowell/ansible-mac-provision)
-- [mac-dev-playbook](https://github.com/geerlingguy/mac-dev-playbook)
-- [sheldonh](https://github.com/sheldonh/dotfiles-ansible)
-- [diimdeep](https://github.com/diimdeep/dotfiles)
-- [ornicar](https://github.com/ornicar/dotfiles)
+- Ansible [battleschool](https://github.com/spencergibb/battleschool)
+- Ansible [superlumic](https://github.com/superlumic)
+- Ansible [osxc](https://github.com/osxc)
+- Chef [workstation](https://github.com/jtimberman/workstation-chef-repo)
+- Puppet [boxen](https://github.com/boxen/our-boxen)
+
+### Others
+
 - [alexanderjeurissen](https://github.com/alexanderjeurissen/dotfiles)
+- [ansible-mac-provision](https://github.com/reecefowell/ansible-mac-provision)
 - [delucks](https://github.com/delucks/dotfiles)
+- [diimdeep](https://github.com/diimdeep/dotfiles)
+- [mac-dev-playbook](https://github.com/geerlingguy/mac-dev-playbook)
+- [ornicar](https://github.com/ornicar/dotfiles)
+- [sheldonh](https://github.com/sheldonh/dotfiles-ansible)
 - [yadr](https://github.com/skwp/dotfiles)
