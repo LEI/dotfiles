@@ -1,9 +1,6 @@
 ---
 # vi: ft=yaml
 
-# localhost
-ansible_connection: local
-
 # Examples:
 # - laravel/laravel
 # - name: phpunit/phpunit
@@ -19,7 +16,5 @@ npm_packages:
 pip_packages:
   - bashate
 
-ruby_packages: []
-
-ruby_gems:
-  - compass
+# ruby_gems:
+#   - compass
