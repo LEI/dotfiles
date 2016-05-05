@@ -6,12 +6,12 @@
 
 ## TODO
 
-- [ ] Bash-it, git-prompt symbols
-- [ ] OS X Terminal theme, osascripts
-- [ ] Tmux mouse & wheel pane options (check version 1.8, 2.1)
-- [ ] Check lineinfile regexp (tmux), ini_file arch
-- [ ] Ansible tags: coercing to Unicode: need string or buffer /
-  UndefinedVariable found
+- [ ] Bash prompt git symbols (bash-it?)
+- [ ] Check lineinfile with regexp, use ini_file
+- [ ] Linux bin/dot ansible install
+- [ ] OS X Terminal theme and (osa)scripts
+- [ ] Tmux mouse and wheel pane options if version 1.8 or 2.1
+- [ ] Xresources arch
 
 ## Resources
 

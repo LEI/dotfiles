@@ -6,7 +6,7 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-[[ -z "${DOT_ROOT-}" ]] && DOT_ROOT="$HOME/.dotfiles"
+[[ -z "${DOT_ROOT:-}" ]] && DOT_ROOT="$HOME/.dotfiles"
 
 cd "$DOT_ROOT"
 
@@ -20,6 +20,7 @@ ansible_install() {
         echo "${x}..."
         $x
       fi
+
       ;;
     Linux)
       # pip cryptography on raspbian ->
@@ -33,7 +34,9 @@ ansible_install() {
       # sudo yum install gcc libffi-devel openssl-devel python-devel
 
       # Archlinux: http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
-      # sudo pacman -S ansible git --noconfirm
+      # sudo pacman -Syu # --noconfirm
+      # sudo pacman -S ansible git python2-setuptools --noconfirm
+      # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       ;;
     *)
       echo "Unsupported platform: $uname"
@@ -41,13 +44,22 @@ ansible_install() {
       ;;
   esac
 
-  sudo easy_install pip
-  sudo pip install -r requirements/pip.txt
+  # Install python package manager
+  if ! x pip; then
+    if ! x easy_install; then
+      exit 1
+    fi
+    sudo easy_install pip
+  fi
+
+  # Install ansible and cryptography
+  if ! x ansible; then
+    sudo pip install -r requirements/pip.txt
+  fi
 }
 
 ansible_vault() {
-  # local extra_file="$HOME/.extra"
-  local vault_file="$HOME/.vault_pass.txt"
+  local vault_file="${ANSIBLE_VAULT_PASSWORD_FILE:-$HOME/.vault_pass.txt}"
   local vault_pass=
 
   if [[ ! -f "$vault_file" ]]; then
@@ -61,25 +73,39 @@ ansible_vault() {
     fi
   fi
 
-  if [[ ! -n "${ANSIBLE_VAULT_PASSWORD_FILE-}" ]]; then
+  if [[ ! -n "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
     export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
   fi
 }
 
+# Test if a command can be executed
+x() {
+  local cmd="$1"
+  hash $cmd 2>/dev/null
+  if [[ $? != 0 ]]; then
+    echo >&2 "$cmd is not installed"
+    return 1
+  fi
+}
+
 main() {
-  local ansible=$(which ansible)
   local playbook="playbook.yml"
 
-  if [[ ! -n "$ansible" ]] || [[ ! -x "$ansible" ]]; then
-    ansible_install
-  fi
+  # local install=
+  # case ${1:-} in
+  #   install)
+  #     install=true
+  #     shift
+  #     ;;
+  # esac
+
+  ansible_install
+
+  ansible_vault
 
   # ansible-galaxy install -r requirements/galaxy.yml
 
-  if [[ $? == 0 ]]; then
-    ansible_vault
-    ansible-playbook "$playbook" "$@" # --ask-become-pass
-  fi
+  ansible-playbook "$playbook" "$@" # --ask-become-pass
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && time main "$@"

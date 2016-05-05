@@ -9,3 +9,4 @@
     # requirements:
   with_items: "{{ pip_packages }}"
   when: pip_install
+  become: "{{ 'yes' if ansible_os_family == 'Archlinux' else 'no' }}"
