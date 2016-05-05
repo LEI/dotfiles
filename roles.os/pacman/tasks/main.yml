@@ -4,6 +4,8 @@
     update_cache: yes
   when: packages_update
   become: yes
+  # register: pacman_cache
+  # changed_when: "pacman_cache.msg != 'Updated the package master lists'"
 
 - name: Upgrade pacman packages
   pacman:
@@ -11,7 +13,7 @@
   when: packages_upgrade
   become: yes
 
-# AUR
+# Arch User Repository
 # TODO: ini_file
 # https://github.com/jpic/jpic.pacman/blob/master/tasks/main.yml
 # - name: "Check {{ pacman_conf }}"
