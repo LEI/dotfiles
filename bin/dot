@@ -73,7 +73,7 @@ ansible_install() {
       su_do easy_install pip
     fi
 
-    # Install ansible and cryptography requirements
+    # Install ansible and cryptography and their dependencies
     su_do pip install -r requirements/pip.txt
 
   fi
