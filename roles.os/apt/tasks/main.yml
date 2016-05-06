@@ -7,6 +7,7 @@
   become: yes
 
 - name: Upgrade apt packages
-  apt: upgrade=yes
+  apt:
+    upgrade: "{{ apt_upgrade | default(packages_upgrade) }}"
   when: packages_upgrade
   become: yes
