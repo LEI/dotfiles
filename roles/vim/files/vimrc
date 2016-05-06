@@ -1,5 +1,6 @@
-" ~/.vimrc
-" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
+"
+" ~/.vim/vimrc
+"
 
 " zi Folding on/off
 " zR Open all
@@ -113,6 +114,9 @@ set hidden
 
 " Don't redraw while executing macros
 set lazyredraw
+
+" Allow backspace in insert mode
+set backspace=indent,eol,start
 
 " Theming {{{1
 
@@ -284,8 +288,8 @@ set showcmd
 set cmdheight=1
 
 " Always show current position
-"set rulerformat=%l,%c%V%=%P
 set ruler
+"set rulerformat=%l,%c%V%=%P
 
 " Spacing {{{1
 
@@ -465,9 +469,6 @@ command! Fr set spelllang=fr
 
 " Key maps {{{1
 
-" Allow backspace in insert mode
-set backspace=indent,eol,start
-
 " Change leader
 let g:mapleader="\<Space>"
 
@@ -536,3 +537,6 @@ noremap <Leader><Space> :noh<CR>
 " noremap <Leader>l :!clear && git log -p %<CR>
 " noremap <Leader>d :!clear && git diff %<CR>
 
+" 1}}}
+
+" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2

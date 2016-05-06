@@ -6,10 +6,15 @@
 #   php composer-setup.php
 #   php -r "unlink('composer-setup.php');
 
+# Save the checksum on the managing machine to be used with the file lookup
 - name: Get Composer installer signature
-  get_url:
-    url: https://composer.github.io/installer.sig
-    dest: "{{ tmp_dir }}composer-installer.sig"
+  # get_url:
+  #   url: https://composer.github.io/installer.sig
+  #   dest: "{{ tmp_dir }}composer-installer.sig"
+  local_action: >
+    get_url
+    url=https://composer.github.io/installer.sig
+    dest="{{ tmp_dir }}composer-installer.sig"
 
 - name: Download Composer installer
   get_url:

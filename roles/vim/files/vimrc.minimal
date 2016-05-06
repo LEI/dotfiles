@@ -1,0 +1,76 @@
+"
+" Minimal vimrc
+"
+
+set nocompatible
+
+runtime plug.vimrc
+
+if has("autocmd")
+  " Enable filetype detection
+  filetype plugin indent on
+endif
+
+if &history < 1000
+  set history=1000
+endif
+
+" Disable swapfiles and backups
+set noswapfile
+set nobackup
+set nowritebackup
+
+" Keep undo history across sessions, by storing in file.
+if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
+  silent !mkdir ~/.vim/backups > /dev/null 2>&1
+  set undodir=~/.vim/backups
+  set undofile
+endif
+
+if !has('nvim')
+  " Fast terminal connection
+  set ttyfast
+endif
+
+" Enable per-directory .vimrc files and disable unsafe commands in them
+set exrc
+set secure
+
+" Buffers can exist in the background
+set hidden
+
+" Don't redraw while executing macros
+set lazyredraw
+
+" Enable syntax highlighting
+if has('syntax')
+  syntax enable
+endif
+
+set number
+
+" set cursorline
+
+" Always show the status line
+set laststatus=2
+
+" Display current mode
+set showmode
+
+" Display incomplete commands
+set showcmd
+
+" Height of the command bar
+set cmdheight=1
+
+" Always show current position
+set ruler
+"set rulerformat=%l,%c%V%=%P
+
+" Allow backspace in insert mode
+set backspace=indent,eol,start
+
+" set modeline
+" set modelines=2
+
+" vim: et sts=2 sw=2 ts=2

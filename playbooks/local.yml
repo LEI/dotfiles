@@ -4,7 +4,23 @@
   gather_facts: no
   tags: [local]
 
-  roles: []
+  roles:
+
+    # Shell dotfiles
+    - role: bash
+      tags: [bash, bin]
+
+    # Misc dotfiles
+    - role: home
+      tags: [home]
+
+    # Tmux
+    - role: tmux
+      tags: [tmux]
+
+    # Vim
+    - role: vim
+      tags: [vim]
 
     # - role: ssh
     #   tags: [ssh]

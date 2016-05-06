@@ -11,11 +11,14 @@ php_packages:
   - php
   # - php-composer
 
+# Manage gems with pacman on arch: ruby-<gem>
+# https://wiki.archlinux.org/index.php/Ruby#Managing_RubyGems_using_pacman
 ruby_packages:
   - ruby
-  # - ruby-bundler
+  - ruby-bundler
 
-# ruby_gems: []
+ruby_gems: []
 
 # vim_packages:
 #   - vim # clang,llvm?
+# yaourt: vim-youcompleteme-git

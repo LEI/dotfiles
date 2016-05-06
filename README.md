@@ -10,6 +10,7 @@
 - [ ] Check lineinfile with regexp, use ini_file
 - [ ] Linux bin/dot ansible install
 - [ ] OS X Terminal theme and (osa)scripts
+- [ ] The Silver Searcher
 - [ ] Tmux mouse and wheel pane options if version 1.8 or 2.1
 - [ ] Xresources rxvt, xinitrc
 - [ ] virtualenv, nvm, rvm/rbenv
