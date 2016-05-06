@@ -3,13 +3,17 @@
 # github.com/osxstrap/ansible-osx-php
 
 - name: Check if Composer is installed
-  stat:
-    path: "{{ composer_bin_path }}/composer"
-  register: composer_bin
-  # when: php_packages | length > 0 # Check if composer is executable?
+  command: composer --version
+  ignore_errors: yes
+  changed_when: false
+  register: composer_version
+  # stat:
+  #   path: "{{ composer_bin_path }}/composer"
+  # register: composer_bin
+  # when: php_packages | length > 0
 
 - include: install-composer.yml
-  when: composer_force_install or not composer_bin.stat.exists
+  when: composer_force_install or composer_version.rc != 0
 
 # - name: Ensure Composer is executable
 #   file:
