@@ -48,9 +48,9 @@ setw -g status-right ''
 
 # IP
 setw -ga status-right '#[fg=brightblack]'
-setw -ga status-right '#(curl ipecho.net/plain;echo)'
-# Battery level TODO: hide if not a laptop
-setw -ga status-right ' #{battery_percentage}#[bg=default] '
+setw -ga status-right ' #(curl ipecho.net/plain;echo) '
+# Battery
+# setw -ga status-right ' #{battery_percentage}#[bg=default] '
 setw -ga status-right '#[fg=colour7,bg=colour11]'
 # Date
 setw -ga status-right ' %a %b %d '

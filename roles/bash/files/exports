@@ -2,7 +2,7 @@
 # ~/.exports
 #
 
-export EDITOR="vim"
+export EDITOR="vim -f"
 
 # Gems install path
 GEM_HOME="$(ruby -e 'print Gem.user_dir')"

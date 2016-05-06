@@ -26,8 +26,8 @@
     repo: "{{ item }}"
     state: present
   with_items:
-    - "deb https://deb.nodesource.com/node_{{ nodejs_debian_repo_version }} {{ ansible_distribution_release }} main"
-    - "deb-src https://deb.nodesource.com/node_{{ nodejs_debian_repo_version }} {{ ansible_distribution_release }} main"
+    - "deb https://deb.nodesource.com/node_{{ node_debian_repo_version }} {{ ansible_distribution_release }} main"
+    - "deb-src https://deb.nodesource.com/node_{{ node_debian_repo_version }} {{ ansible_distribution_release }} main"
   become: yes
 
 # - name: Add NodeSource repository preferences
@@ -36,11 +36,10 @@
 #     dest: /etc/apt/preferences.d/deb_nodesource_com_node.pref
 #   become: yes
 
-- name: Install node and npm
+- name: Install NodeJS and npm
   apt:
-    pkg:
-      - nodejs={{ nodejs_version }}*
-    # name: nodejs={{ nodejs_version | regex_replace('\.x$', '') }}*
+    # pkg: nodejs={{ node_version }}*
+    name: nodejs={{ node_version | regex_replace('\.x$', '') }}*
     state: present
     update_cache: yes
   become: yes

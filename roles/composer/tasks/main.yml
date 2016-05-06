@@ -4,22 +4,12 @@
 
 - name: Check if Composer is installed
   command: composer --version
-  ignore_errors: yes
-  changed_when: false
-  register: composer_version
-  # stat:
-  #   path: "{{ composer_bin_path }}/composer"
-  # register: composer_bin
-  # when: php_packages | length > 0
+  changed_when: composer_version_result.rc != 0
+  failed_when: false
+  register: composer_version_result
 
 - include: install-composer.yml
-  when: composer_force_install or composer_version.rc != 0
-
-# - name: Ensure Composer is executable
-#   file:
-#     path: "{{ composer_bin_path }}/composer"
-#     mode: a+x
-#     state: file
+  when: composer_version_result.rc != 0 or composer_force_install
 
 - name: Update Composer
   # composer:
