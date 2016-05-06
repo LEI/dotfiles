@@ -1,7 +1,10 @@
 ---
-# github.com/nodesource/distributions
-# 0.10 or 0.12 or 4.x
+# https://github.com/nodesource/distributions
+# 0.10, 0.12, 4.x or 6.x
 nodejs_version: "0.12"
+
+# FIXME on Pi:
+# https://github.com/nodejs/node-v0.x-archive/issues/7222
 
 # Pin-Priority of NodeSource apt repository
 nodejs_nodesource_pin_priority: 500

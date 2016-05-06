@@ -5,6 +5,6 @@ packages_upgrade: yes
 # yes or safe: aptitude safe-upgrade
 # full: aptitude full-upgrade
 # dist: apt-get dist-upgrade
-apt_upgrade: full
+apt_upgrade: safe # Change to 'full' for ruby on Raspbian
 
 # apt_cache_time: 86400

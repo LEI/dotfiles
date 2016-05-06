@@ -1,6 +1,9 @@
 ---
 dependencies:
 
+  # https://github.com/rvm/rvm1-ansible
+  # rbenv?
+
   - role: package
     packages: "{{ ruby_packages }}"
 

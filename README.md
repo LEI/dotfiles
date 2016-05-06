@@ -13,6 +13,7 @@
 - [ ] The Silver Searcher
 - [ ] Tmux mouse and wheel pane options if version 1.8 or 2.1
 - [ ] Xresources rxvt, xinitrc
+- [ ] Vim before runtime (plug.vim)
 - [ ] virtualenv, nvm, rvm/rbenv
 
 ## Resources

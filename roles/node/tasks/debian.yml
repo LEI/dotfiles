@@ -1,22 +1,19 @@
 ---
 # Install Node.js using packages crafted by NodeSource
-# github.com/nodesource/ansible-nodejs-role
+# https://github.com/nodesource/ansible-nodejs-role
 
-# FIXME on Pi:
-# github.com/nodejs/node-v0.x-archive/issues/7222
+# - name: Ensure the system can use the HTTPS transport for apt
+#   stat:
+#     path: /usr/lib/apt/methods/https
+#   register: apt_https_transport
 
-- name: Ensure the system can use the HTTPS transport for apt
-  stat:
-    path: /usr/lib/apt/methods/https
-  register: apt_https_transport
-
-- name: Install HTTPS transport for apt
-  apt:
-    pkg: apt-transport-https
-    state: installed
-    # force: yes
-  when: not apt_https_transport.stat.exists
-  become: yes
+# - name: Install HTTPS transport for apt
+#   apt:
+#     pkg: apt-transport-https
+#     state: installed
+#     # force: yes
+#   when: not apt_https_transport.stat.exists
+#   become: yes
 
 - name: Import the NodeSource GPG key into apt
   apt_key:
@@ -43,6 +40,7 @@
   apt:
     pkg:
       - nodejs={{ nodejs_version }}*
+    # name: nodejs={{ nodejs_version | regex_replace('\.x$', '') }}*
     state: present
     update_cache: yes
   become: yes

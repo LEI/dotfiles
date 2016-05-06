@@ -24,6 +24,7 @@
               if item.value.dest | default(false) else
             ''),
           'pattern': item.value.pattern | default(dot_find_pattern),
+          'use_regex': item.value.use_regex | default(omit),
           'prefix': item.value.prefix | default(''),
           'regex_replace': '' if dot_files_dir != 'templates' else '.j2',
         }
@@ -32,8 +33,9 @@
 
 - name: "Find {{ dot_files_dir }}"
   find:
-    path: "{{ dot_files_paths[item[0]].src }}"
-    pattern: "{{ dot_files_paths[item[0]].pattern }}"
+    paths: "{{ dot_files_paths[item[0]].src }}"
+    patterns: "{{ dot_files_paths[item[0]].pattern }}"
+    use_regex: "{{ dot_files_paths[item[0]].use_regex }}"
     file_type: "{{ item[1] }}"
     hidden: yes
     recurse: no
