@@ -18,11 +18,11 @@
   vars:
     # FIXME: Vim Warning:
     # Output is not to a terminal / Input is not from a terminal
-    # -E -s -V +'source {{ dot_home }}/.vim/before/plug.vim' < /dev/tty
+    # -E -s -V +'source {{ dot_home }}/.vim/plug.vimrc' < /dev/tty
     # "silent" is required or vim hangs on YCM installation
     # YCM: ./install.py --tern-completer
-    plug_install:  "vim -E -s -u '{{ dot_home }}/.vim/before/plug.vim' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
-    # plug_install:  "vim -u NONE +'source {{ dot_home }}/.vim/before/plug.vim' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
+    plug_install:  "vim -E -s -u '{{ dot_home }}/.vim/plug.vimrc' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
+    # plug_install:  "vim -u NONE +'source {{ dot_home }}/.vim/plug.vimrc' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
   shell: "{{ plug_install }}"
   args:
     creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
@@ -31,4 +31,4 @@
   when: vim_plug_install
   tags: vim-plug
 
-# - debug: var=vim_plug_output
+- debug: var=vim_plug_output
