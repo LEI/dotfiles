@@ -28,7 +28,7 @@
     creates: "{{ false if vim_plug_force else dot_home + '/' + vim_plugins_path + '/*' }}"
   register: vim_plug_output
   # failed_when: vim_plug_output.rc != 0
-  when: vim_plug_install
+  when: vim_plug_install # and vim_plug_template.changed
   tags: vim-plug
 
 # - debug: var=vim_plug_output
