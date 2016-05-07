@@ -8,13 +8,24 @@ set -o pipefail
 
 main() {
   DOT_ROOT="${DOT_ROOT:-$HOME/.dotfiles}"
-  cd "$DOT_ROOT"
-  ansible_install
+  DOT_REQUIREMENTS="$DOT_ROOT/requirements"
+  DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
+
+  # cd "$DOT_ROOT"
+
+  if ! has ansible; then
+    ansible_install
+  fi
+
   ansible_vault
-  ansible_play "$@"
+
+  # ansible-galaxy install -r "$DOT_REQUIREMENTS/galaxy.yml"
+
+  # Run the main playbook
+  ansible-playbook "$DOT_PLAYBOOK" "$@"
 }
 
-# opts() {
+# arg() {
 #   local install=
 #   case ${1:-} in
 #     install)
@@ -24,23 +35,31 @@ main() {
 #   esac
 # }
 
+ansible_vault() {
+  if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
+    export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
+  fi
+
+  # Create the vault file if needed
+  if [[ ! -f "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+    local vault_pass=$(prompt "Vault password?")
+    echo "$vault_pass" >> $ANSIBLE_VAULT_PASSWORD_FILE
+  fi
+}
+
 ansible_install() {
   local uname=$(uname -s)
 
   case $uname in
     Darwin)
       # If /usr/bin/gcc is absent
-      if ! installed gcc; then
+      if ! has gcc; then
+        # Install Xcode
         _do "xcode-select --install"
-        # echo "› $x" # Install Xcode
-        # $x
       fi
       ;;
     Linux)
-      if ! installed ansible; then
-        echo "TODO: detect distribution"
-        exit 1
-      fi
+      die "TODO: detect linux package manager"
 
       # pip cryptography on raspbian ->
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
@@ -58,60 +77,57 @@ ansible_install() {
       # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       ;;
     *)
-      echo "Unsupported platform: $uname"
-      exit 1
+      die "Unsupported platform: $uname"
       ;;
   esac
 
-  # If ansible is not already present
-  if ! installed ansible; then
-
-    if ! installed pip; then
+  # If Ansible is still not present
+  if ! has ansible; then
+    if ! has pip; then
       # Install python package manager
       su_do easy_install pip
     fi
 
     # Install ansible and cryptography and their dependencies
-    su_do pip install -r requirements/pip.txt
-
+    su_do pip install -r "$DOT_REQUIREMENTS/pip.txt"
   fi
 }
 
-ansible_vault() {
-  local vault_file="${ANSIBLE_VAULT_PASSWORD_FILE:-$HOME/.vault_pass.txt}"
-  local vault_pass=
+# Utils
 
-  if [[ ! -f "$vault_file" ]]; then
-    echo "Vault?"
-    read -e -r -s vault_pass
-    if [[ -n "$vault_pass" ]]; then
-      # Create the vault file
-      echo "$vault_pass" >> $vault_file
-    else
-      # Empty variable, ask again
-      ansible_vault
-      return
-    fi
-  fi
+log() {
+  printf "%s\r\n" "$@"
+}
 
-  if [[ ! -n "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
-    # Set the environment variable
-    export ANSIBLE_VAULT_PASSWORD_FILE=$vault_file
+error() {
+  log >&2 "$@"
+  return 1
+}
+
+die() {
+  error "$@"
+  exit 1
+}
+
+prompt() {
+  local q="$1"
+  log "$q" >&2
+
+  local a=
+  read -e -r -s a
+
+  if [[ -n "$a" ]]; then
+    # Echo answer
+    printf "%s" "$a"
+  else
+    # Empty answer, ask again
+    prompt "$@" && return
   fi
 }
 
-ansible_play() {
-  local playbook="playbook.yml"
-
-  # ansible-galaxy install -r requirements/galaxy.yml
-
-  # Run the main playbook
-  # _do ansible-playbook "$playbook" "$@"
-  ansible-playbook "$playbook" "$@" # --ask-become-pass
-}
-
-installed() {
-  [[ "$1" == "sudo" ]] && shift # Skip the first parameter
+has() {
+   # Skip the first parameter if it is 'sudo'
+  [[ "$1" == "sudo" ]] && shift
   local name="$1"
 
   # Test if the program can be executed
@@ -119,27 +135,25 @@ installed() {
 
   if [[ $? != 0 ]]; then
     # Display warning
-    echo >&2 "! $name is not installed"
-    return 1
+    error "! $name is not installed"
   fi
-}
-
-su_do() {
-  _do sudo "$@"
 }
 
 _do() {
   local cmd="$@"
 
-  if installed $cmd; then
+  if has $cmd; then
+    log "› $cmd"
     # Execute the command
-    echo "› $cmd"
     $cmd
   else
     # Die
-    echo >&2 "× $cmd"
-    exit 1
+    die "× $cmd"
   fi
+}
+
+su_do() {
+  _do sudo "$@"
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && time main "$@"
