@@ -2,21 +2,22 @@
 # Bash init
 #
 
-if [[ -z "$DOT_BASH" ]]; then
-  export DOT_BASH="$HOME/.bash.d"
-fi
+# https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
+# https://github.com/mathiasbynens/dotfiles/blob/master/.functions
+# https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
+# https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
 
-require() {
-  for p in $@; do
-    if [[ -r "$p" ]] && [[ -f "$p" ]]; then
-      source "$p"
-    else
-      echo >&2 "Could not source $p"
-      return 1 # exit 1
-    fi
-  done
-  unset p
-}
+export DOT_BASH="$HOME/.bash.d"
 
-# Source the bash directories
-require ${DOT_BASH}/{aliases,completion,lib,plugins,theme}/*.bash
+source ~/.bash.d/loader.bash
+source ~/.bash.d/theme/colors.bash
+
+bash_load aliases
+bash_load library
+bash_load plugins
+
+# for file in $DOT_BASH/{aliases,completion,library,plugins}/*.bash; do
+#   if [[ -r "$file" ]] && [[ -f "$file" ]]; then
+#     source "$file"
+#   fi
+# done

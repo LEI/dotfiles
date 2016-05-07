@@ -1,0 +1,11 @@
+#
+# Bash completion
+#
+
+if ! type bash_load &> /dev/null; then
+  source ~/.bash.d/loader.bash
+fi
+
+bash_load completion
+
+# vi: ft=sh

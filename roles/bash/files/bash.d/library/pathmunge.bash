@@ -1,13 +1,10 @@
 #
-# Bash functions
+# Append or prepend to PATH
 #
 
-# https://github.com/mathiasbynens/dotfiles/blob/master/.functions
-# https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
-# https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
-
 # Prevent duplicate directories in the PATH variable
-if ! type pathmunge > /dev/null 2>&1; then
+# /dev/null 2>&1
+if ! type pathmunge &>/dev/null; then
   pathmunge() {
     if ! [[ $PATH =~ (^|:)$1($|:) ]]; then
       if [[ "$2" == "after" ]]; then

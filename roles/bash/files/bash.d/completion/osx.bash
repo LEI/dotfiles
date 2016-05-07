@@ -2,6 +2,19 @@
 # OS X completion
 #
 
+# https://github.com/Bash-it/bash-it/blob/master/completion/available/system.completion.bash
+
+# Source brew completion scripts
+if [[ "$(uname -s)" == "Darwin" ]] && type brew &>/dev/null; then
+  BREW_PREFIX=$(brew --prefix)
+
+  if [[ -f "$BREW_PREFIX/share/bash-completion/bash_completion" ]]; then
+    source "$BREW_PREFIX/share/bash-completion/bash_completion"
+  # elif [[ -f "$BREW_PREFIX/etc/bash_completion" ]]; then
+  #   source "$BREW_PREFIX/etc/bash_completion"
+  fi
+fi
+
 # Add tab completion for 'defaults read|write NSGlobalDomain' (or '-g')
 complete -W "NSGlobalDomain" defaults
 
