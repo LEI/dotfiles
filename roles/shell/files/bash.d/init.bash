@@ -23,8 +23,8 @@ add() {
         bash_load "$dir"
         ;;
       *)
-        echo "Unknown module: $dir"
-        return 1
+        echo >&2 "Unknown module: $dir"
+        # return 1
         ;;
     esac
   done
