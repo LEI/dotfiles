@@ -4,10 +4,6 @@ tmux_conf: yes
 tmux_directory: .tmux
 tmux_path: "{{ dot_home }}/{{ tmux_directory }}"
 
-tmux_options:
-  - command: set-option -g mouse on
-    version: 2.1
-
 tmux_plugin_install: yes
 tmux_plugin_manager: yes
 tmux_plugin_manager_path: "{{ tmux_path }}/plugins"
@@ -29,6 +25,9 @@ tmux_plugins:
   - tmux-plugins/tmux-resurrect
   # - nhdaly/tmux-scroll-copy-mode
   # - battery
+
+tmux_role_path: ../roles/tmux
+
 
 # tmux_template_glob: tmux-*-*.conf.j2
 # tmux_template_pattern: ^tmux-(.*)-(.*)\.conf\.j2$
