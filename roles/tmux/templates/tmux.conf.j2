@@ -9,6 +9,7 @@ source-file {{ file }}
 run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digit:])"'
 
 # Load options targeting specific versions
+# https://raw.githubusercontent.com/tmux/tmux/master/CHANGES
 {% for file in lookup('fileglob', tmux_role_path + '/files/versions/*.conf', wantlist=true) %}
 {% set compare = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\1') %}
 {% set version = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\2') %}
