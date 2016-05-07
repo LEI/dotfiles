@@ -2,12 +2,6 @@
 # ~/.exports
 #
 
-# Erase duplicates (or 'ignoredups')
-export HISTCONTROL=${HISTCONTROL:-erasedups}
-
-# History size
-export HISTSIZE=${HISTSIZE:-5000}
-
 # Editor
 export EDITOR="vim -f"
 

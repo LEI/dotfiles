@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+PROMPT_SYMBOL="› " # $ ✓ →
+PROMPT_SYMBOL_ERROR="× " # ! ×
+
 # Load bash configuration
 source ~/.bash.d/init.bash
 
@@ -16,9 +19,6 @@ unset file
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob
 
-# Append to the Bash history file, rather than overwriting it
-shopt -s histappend
-
 # Autocorrect typos in path names when using 'cd'
 shopt -s cdspell
 
@@ -28,6 +28,3 @@ shopt -s cdspell
 for option in autocd globstar; do
   shopt -s "$option" 2> /dev/null
 done
-
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
