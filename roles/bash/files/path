@@ -1,11 +1,11 @@
 #
 # ~/.path
 #
-# require ~/.functions
 
-pathmunge /usr/local/sbin
+# Prepend to PATH
+# pathmunge /usr/local/sbin
 
-# ~/bin
+# Append ~/bin
 pathmunge "$HOME/bin" after
 
 # Composer packages

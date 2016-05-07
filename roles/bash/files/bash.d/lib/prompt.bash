@@ -1,49 +1,12 @@
 #
-# ~/.bash_prompt
+# Bash prompt
 #
 # https://github.com/necolas/dotfiles
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # https://github.com/demure/dotfiles/blob/master/subbash/prompt
 
-require ~/.git-prompt.sh
-
 # user=$(whoami)
 # host=$(hostname)
-
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
-
-PROMPT_COMMAND='prompt_command'
-PS2="${PROMPT_SYMBOL:->} "
-
-# PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
-# __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
-
-# Colored hints (only when used with 2 arguments as prompt command)
-GIT_PS1_SHOWCOLORHINTS=1
-
-# * unstaged changes
-# + staged changes
-GIT_PS1_SHOWDIRTYSTATE=1
-
-# $ stashed items
-GIT_PS1_SHOWSTASHSTATE=1
-
-# % untracked files
-GIT_PS1_SHOWUNTRACKEDFILES=1
-
-# Difference between HEAD and its upstream:
-# <           behind
-# >           ahead
-# <>          diverged
-# =           no difference
-# GIT_PS1_SHOWUPSTREAM="auto"
-# verbose     show number of commits ahead/behind (+/-) upstream
-# name        if verbose, then also show the upstream abbrev name
-# legacy      don't use the '--count' option available in recent
-#             versions of git-rev-list
-# git         always compare HEAD to @{upstream}
-# svn         always compare HEAD to your SVN upstream
 
 prompt_right() {
   local text=${1:-}
@@ -148,7 +111,7 @@ prompt_command() {
   # Change master branch color from green to yellow
   local git_branch='__git_ps1_branch_name'
   if [[ "${!git_branch}" == "master" ]]; then
-    PS1=${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}
+    PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}"
   fi
 }
 

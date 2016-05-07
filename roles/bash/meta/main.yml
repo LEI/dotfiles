@@ -4,10 +4,11 @@ dependencies:
   - role: symlink
     dot_files:
 
-      bash:
-        prefix: .
-
       # ~/.dotfiles/bin
       bin:
         src: bin
         dest: bin
+
+      bash:
+        dest:
+        prefix: .
