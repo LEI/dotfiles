@@ -3,10 +3,14 @@ dependencies:
 
   - role: symlink
     dot_files:
+
       bin:
-        src: bin # ~/.dotfiles/bin
-        dest: bin # ~/bin
-      bash:
+        # ~/.dotfiles/bin
+        src: bin
+        # ~/bin
+        dest: bin
+
+      shell:
         prefix: .
 
   - role: get-url

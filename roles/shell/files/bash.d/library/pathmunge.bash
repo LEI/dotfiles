@@ -3,8 +3,7 @@
 #
 
 # Prevent duplicate directories in the PATH variable
-# /dev/null 2>&1
-if ! type pathmunge &>/dev/null; then
+if ! hash pathmunge 2>/dev/null; then
   pathmunge() {
     if ! [[ $PATH =~ (^|:)$1($|:) ]]; then
       if [[ "$2" == "after" ]]; then

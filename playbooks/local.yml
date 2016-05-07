@@ -6,9 +6,9 @@
 
   roles:
 
-    # Shell dotfiles
-    - role: bash
-      tags: [bash, bin]
+    # Bash dotfiles
+    - role: shell
+      tags: [bash, bin, shell]
 
     # Misc dotfiles
     - role: home

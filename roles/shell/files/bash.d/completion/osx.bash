@@ -5,7 +5,7 @@
 # https://github.com/Bash-it/bash-it/blob/master/completion/available/system.completion.bash
 
 # Source brew completion scripts
-if [[ "$(uname -s)" == "Darwin" ]] && type brew &>/dev/null; then
+if [[ "$(uname -s)" == "Darwin" ]] && hash brew 2>/dev/null; then
   BREW_PREFIX=$(brew --prefix)
 
   if [[ -f "$BREW_PREFIX/share/bash-completion/bash_completion" ]]; then

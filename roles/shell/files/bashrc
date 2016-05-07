@@ -1,0 +1,24 @@
+#
+# ~/.bashrc
+#
+
+# $ ✓ →
+PROMPT_SYMBOL="› "
+# ! ×
+PROMPT_SYMBOL_ERROR="× "
+
+if ! hash add 2>/dev/null; then source ~/.bash.d/init.bash; fi
+
+# Source each file in: ~/.bash.d/<directory>/*.bash
+# ~/.bash_completion should take care of adding 'completion'
+add aliases colors library plugins
+
+# ~/.exports can be used to export variables
+# ~/.path can be used to extend '$PATH'.
+# ~/.extra can be used for other settings you don’t want to commit.
+load ~/.{exports,path,extra}
+
+# for file in ~/.{exports,path,extra}; do
+#   [[ -r "$file" ]] && [[ -f "$file" ]] && source "$file"
+# done
+# unset file
