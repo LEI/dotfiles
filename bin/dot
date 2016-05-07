@@ -6,11 +6,9 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-[[ -z "${DOT_ROOT-}" ]] && DOT_ROOT="$HOME/.dotfiles"
-
-cd "$DOT_ROOT"
-
 main() {
+  DOT_ROOT="${DOT_ROOT:-$HOME/.dotfiles}"
+  cd "$DOT_ROOT"
   ansible_install
   ansible_vault
   ansible_play "$@"
