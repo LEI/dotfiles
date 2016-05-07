@@ -6,13 +6,9 @@
 
   roles:
 
-    # Bash dotfiles
+    # Shell dotfiles
     - role: shell
       tags: [bash, bin, shell]
-
-    # Misc dotfiles
-    - role: home
-      tags: [home]
 
     # Tmux
     - role: tmux

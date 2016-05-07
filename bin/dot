@@ -6,12 +6,11 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-main() {
-  DOT_ROOT="${DOT_ROOT:-$HOME/.dotfiles}"
-  DOT_REQUIREMENTS="$DOT_ROOT/requirements"
-  DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
+DOT_ROOT="${DOT_ROOT:-$HOME/.dotfiles}"
+DOT_REQUIREMENTS="$DOT_ROOT/requirements"
+DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
 
-  # cd "$DOT_ROOT"
+main() {
 
   if ! has ansible; then
     ansible_install
@@ -19,7 +18,12 @@ main() {
 
   ansible_vault
 
+  # Ansible root directory
+  cd "$DOT_ROOT"
+
   # ansible-galaxy install -r "$DOT_REQUIREMENTS/galaxy.yml"
+
+  # Inventory file defined in ansible.cfg
 
   # Run the main playbook
   ansible-playbook "$DOT_PLAYBOOK" "$@"
