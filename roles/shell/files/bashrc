@@ -7,7 +7,9 @@ PROMPT_SYMBOL="› "
 # ! ×
 PROMPT_SYMBOL_ERROR="× "
 
-if ! hash add 2>/dev/null; then source ~/.bash.d/init.bash; fi
+if ! hash add 2>/dev/null; then
+  source ~/.bash.d/init.bash
+fi
 
 # Source each file in: ~/.bash.d/<directory>/*.bash
 # ~/.bash_completion should take care of adding 'completion'

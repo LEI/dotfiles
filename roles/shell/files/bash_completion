@@ -2,7 +2,9 @@
 # ~/.bash_completion
 #
 
-if ! hash add 2>/dev/null; then source ~/.bash.d/init.bash; fi
+if ! hash add 2>/dev/null; then
+  source ~/.bash.d/init.bash
+fi
 
 add completion
 

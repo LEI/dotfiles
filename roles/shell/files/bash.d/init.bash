@@ -7,31 +7,23 @@
 # https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
 # https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
 
-export BASH_DIR="$HOME/.bash.d"
-
-# for file in $BASH_DIR/{aliases,completion,library,plugins}/*.bash; do
-#   if [[ -r "$file" ]] && [[ -f "$file" ]]; then
-#     source "$file"
-#   fi
-# done
-# source ~/.bash.d/loader.bash
-# init() {
-#   bash_load aliases
-#   bash_load library
-#   bash_load plugins
-# }
+# Use the directory where this file is stored if $BASH_DIR is not defined
+export BASH_DIR="${BASH_DIR:-$(dirname "$BASH_SOURCE")}"
+# export BASH_DIR="$HOME/.bash.d"
 
 add() {
+  cd "$BASH_DIR"
+
   for dir in "$@"; do
     case $dir in
       colors)
-        source ~/.bash.d/theme/colors.bash
+        source theme/colors.bash
         ;;
       aliases|completion|library|plugins)
         bash_load "$dir"
         ;;
       *)
-        echo "Unknown directory: $dir"
+        echo "Unknown module: $dir"
         return 1
         ;;
     esac
@@ -40,13 +32,12 @@ add() {
 }
 
 bash_load() {
-  # Use the directory where this file is stored if $BASH_DIR is not defined
-  local directory="${BASH_DIR:-$(dirname "$BASH_SOURCE")}/$1"
+  local directory="$1"
 
   if [[ -d "$directory" ]]; then
     load $directory/*.bash
   else
-    echo >&2 "Could not find $directory"
+    echo >&2 "Not a directory: $directory"
     return 1
   fi
 }
