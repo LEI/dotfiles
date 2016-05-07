@@ -1,13 +1,10 @@
 # {{ ansible_managed }}
-# Tmux configuration
+
+# Tmux version, expecting only 2 digits in $(tmux -V | cut -d " " -f2)
+run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digit:])"'
 
 {% for file in lookup('fileglob', tmux_path + '/tmux-*.conf', wantlist=true) %}
 source-file {{ file }}
-{% endfor %}
-
-# Enable options per version
-{% for option in tmux_options %}
-if-shell '[[ "{{ option.version }}" = $(printf "%s\n" "{{ option.version }}" "$(tmux -V | cut -d ' ' -f2)" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -n | head -1) ]]' '{{ option.command }}'
 {% endfor %}
 
 # Tmux Plugin Manager

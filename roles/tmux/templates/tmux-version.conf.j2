@@ -1,0 +1,7 @@
+# Tmux options targeting specific versions
+
+{% for file in lookup('fileglob', tmux_role_path + '/files/versions/*.conf', wantlist=true) %}
+{% set compare = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\1') %}
+{% set version = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\2') %}
+if-shell 'test "$TMUX_VERSION_INT" -{{ compare }} "{{ version }}"' 'source {{ tmux_path }}/versions/{{ file | basename }}'
+{% endfor %}
