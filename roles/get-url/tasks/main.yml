@@ -1,7 +1,7 @@
 ---
-- name: "Get {{ bash_urls | length }} urls" # ~/bin
+- name: "Download {{ files | length }} files"
   get_url:
     url: "{{ item.value.url | default(item.value) }}"
     dest: "{{ ansible_env.HOME }}/{{ item.value.dest + '/' + item.key if item.value.dest is defined else item.key }}"
-    mode: "{{ item.value.mode | default(0755) }}"
-  with_dict: "{{ bash_urls }}"
+    mode: "{{ item.value.mode | default(omit) }}"
+  with_dict: "{{ files }}"

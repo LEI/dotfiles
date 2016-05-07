@@ -1,7 +1,12 @@
 #
-# Prevent duplicate directories in the PATH variable
+# Bash functions
 #
 
+# https://github.com/mathiasbynens/dotfiles/blob/master/.functions
+# https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
+# https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
+
+# Prevent duplicate directories in the PATH variable
 if ! type pathmunge > /dev/null 2>&1; then
   pathmunge() {
     if ! [[ $PATH =~ (^|:)$1($|:) ]]; then

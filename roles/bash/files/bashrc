@@ -2,7 +2,16 @@
 # ~/.bashrc
 #
 
-# https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
+# Load bash configuration
+source ~/.bash.d/init.bash
+
+# ~/.exports can be used to export variables
+# ~/.path can be used to extend '$PATH'.
+# ~/.extra can be used for other settings you don’t want to commit.
+for file in ~/.{exports,path,extra}; do
+  [[ -r "$file" ]] && [[ -f "$file" ]] && source "$file"
+done
+unset file
 
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob
@@ -20,14 +29,5 @@ for option in autocd globstar; do
   shopt -s "$option" 2> /dev/null
 done
 
-# Bash prompt
-PROMPT_COMMAND='prompt_command'
-
-# PS1
 PROMPT_SYMBOL="› " # $ ✓ →
 PROMPT_SYMBOL_ERROR="× " # ! ×
-
-PS2="${PROMPT_SYMBOL:->} "
-
-# Load bash configuration
-source ~/.bash.d/init.bash
