@@ -18,4 +18,8 @@
     # Install yaourt packages
     - role: pacman-yaourt
       tags: [yaourt]
-      yaourt_packages: "{{ pacman_yaourt_packages }}"
+      pacman_yaourt_packages: "{{ yaourt_packages }}"
+
+    # Install and configure rxvt
+    - role: rxvt
+      tags: [rxvt, terminal]

@@ -1,5 +1,21 @@
 # {{ ansible_managed }}
-# vim: foldenable foldmethod=marker foldmarker=START,END
+# Tmux configuration
 
-# START OS
-{{ lookup('template', lookup('first_found', tmux_templates)) }}
+{% for file in lookup('fileglob', tmux_path + '/tmux-*.conf', wantlist=true) %}
+source-file {{ file }}
+{% endfor %}
+
+# Enable options per version
+{% for option in tmux_options %}
+if-shell '[[ "{{ option.version }}" = $(printf "%s\n" "{{ option.version }}" "$(tmux -V | cut -d ' ' -f2)" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -n | head -1) ]]' '{{ option.command }}'
+{% endfor %}
+
+# Tmux Plugin Manager
+set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ tmux_plugin_manager_path }}'
+
+{% for plugin in tmux_plugins %}
+set -g @plugin '{{ plugin }}'
+{% endfor %}
+
+# Keep this line at the very bottom of tmux.conf
+run '~/.tmux/plugins/tpm/tpm'

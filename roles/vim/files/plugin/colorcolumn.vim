@@ -1,5 +1,10 @@
 " github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
 
+set colorcolumn=
+
+" ctermf=none
+highlight ColorColumn ctermbg=red guibg=red
+
 function! MarkMargin (on)
   if exists('b:MarkMargin')
     try

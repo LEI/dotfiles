@@ -4,6 +4,6 @@
   yaourt:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(omit) }}"
-  with_items: "{{ yaourt_packages }}"
+  with_items: "{{ pacman_yaourt_packages }}"
   # become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
   when: packages_install

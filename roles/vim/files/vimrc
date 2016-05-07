@@ -144,17 +144,17 @@ endif
 "   endif
 " endif
 
-if has('gui_running')
+" if has('gui_running')
   set background=light
-else
-  set background=dark
-endif
+" else
+"   set background=dark
+" endif
 
-" FIXME: loaded_?
+" FIXME: test if loaded_?
 try
   " Access colors present in 256 colorspace
-  colorscheme base16-tomorrow
-  " colorscheme gotham
+  " colorscheme base16-tomorrow
+  colorscheme solarized
 catch
   colorscheme torte
 endtry
@@ -163,60 +163,56 @@ set synmaxcol=500
 
 set cursorline
 
-if exists('+colorcolumn')
-  " See vim/settings/colorcolumn.vim
-  set colorcolumn=
-  " Relative to textwidth
-  "set colorcolumn=+1
-  "set colorcolumn=80
-  "let &colorcolumn=join(range(1,80),",")
-endif
+" Cf. ~/.vim/plugin/colorcolumn.vim
+" if exists('+colorcolumn')
+"   set colorcolumn=80
+"   " Relative to textwidth
+"   "set colorcolumn=+1
+"   "let &colorcolumn=join(range(1,80),",")
+" endif
 
 " Colors {{{1
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
 
-" Custom colors
-" "hi clear SignColumn
-hi VertSplit ctermfg=10 ctermbg=10
-" hi ColorColumn ctermbg=10
-hi ColorColumn ctermfg=10 ctermbg=1
-"
-" hi LineNr ctermbg=10
-hi CursorLineNr ctermfg=12
-" hi CursorLine ctermbg=10
+" " Custom Base16 colors
+" " "hi clear SignColumn
+" hi VertSplit ctermfg=10 ctermbg=10
+" " hi ColorColumn ctermbg=10
+" hi ColorColumn ctermfg=10 ctermbg=1
+" "
+" " hi LineNr ctermbg=10
+" hi CursorLineNr ctermfg=12
+" " hi CursorLine ctermbg=10
 
-" Not supported by Terminal.app
-" See settings/terminal.vim
-" hi Cursor ctermfg=1 ctermbg=7
+" " Not supported by Terminal.app
+" " See settings/terminal.vim
+" " hi Cursor ctermfg=1 ctermbg=7
 
-hi MatchParen ctermfg=13 ctermbg=11
+" hi MatchParen ctermfg=13 ctermbg=11
 
-hi IncSearch ctermfg=10 ctermbg=9
-hi Search ctermfg=10 ctermbg=3
-"hi Visual ctermfg=11 ctermbg=3
+" hi IncSearch ctermfg=10 ctermbg=9
+" hi Search ctermfg=10 ctermbg=3
+" "hi Visual ctermfg=11 ctermbg=3
 
-" "hi Pmenu        ctermbg=240 ctermfg=12
-" "hi PmenuSel     ctermbg=3   ctermfg=1
-" "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
-"
-" "hi SpellBad ctermfg=13 ctermbg=1
-" "hi SpellCap ctermfg=13 ctermbg=9
-"
-" "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-" call matchadd('ColorColumn', '\%81v', 100) "set column nr
-"
-" " Hightlight text over 80 chars
-" "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-" "match OverLength /\%>80v.\+/
+" " "hi Pmenu        ctermbg=240 ctermfg=12
+" " "hi PmenuSel     ctermbg=3   ctermfg=1
+" " "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
+" "
+" " "hi SpellBad ctermfg=13 ctermbg=1
+" " "hi SpellCap ctermfg=13 ctermbg=9
+" "
+" " "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
+" " call matchadd('ColorColumn', '\%81v', 100) "set column nr
+" "
+" " " Hightlight text over 80 chars
+" " "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+" " "match OverLength /\%>80v.\+/
 
-" Customize invisible characters color
-hi NonText ctermfg=11
-hi SpecialKey ctermfg=11
-
-" Custom autocmd
-hi ExtraWhitespace ctermbg=1 guibg=red
+" " Customize invisible characters color
+" hi NonText ctermfg=11
+" hi SpecialKey ctermfg=11
 
 " Interface {{{1
 
@@ -278,8 +274,8 @@ set title
 " Always show the status line
 set laststatus=2
 
-" Do not display current mode
-set noshowmode
+" Display current mode
+set showmode
 
 " Display incomplete commands
 set showcmd
@@ -307,18 +303,23 @@ if !exists("g:loaded_sleuth")
   set expandtab
 endif
 
-" Automatically insert idents
+" Automatically insert indents
 set autoindent
+
 set smartindent
+
 " Make <Tab> insert indents instead of tabs at the beginning of a line
 set smarttab
 
 " Don't wrap lines by default (see ftplugin)
 set nowrap
+
 " Break lines at convenient points (soft wrap)
 set linebreak
+
 " Line break on 500 characters
 set textwidth=500
+
 " Show line breaks (or nr2char(0x08627))
 let &showbreak=nr2char(0x21AA)
 
@@ -374,25 +375,12 @@ set smartcase
 " Turn magic on for regular expressions
 set magic
 
-" Autocmd {{{1
+" Commands {{{1
 
 augroup VimReload
   autocmd!
   autocmd BufWritePost $MYVIMRC nested source %
   " autocmd BufWritePost ~/.dotfiles/roles/vim/files/vimrc nested source %
-augroup END
-
-" Highlight trailing witespaces in red
-match ExtraWhitespace /\s\+$/
-augroup MatchWitespace
-  autocmd!
-  autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
-  autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-  autocmd InsertLeave * match ExtraWhitespace /\s\+$/
-  autocmd BufWinLeave * call clearmatches()
-  " Remove trailing whitespaces on save for any FileType
-  " autocmd BufWritePre * :%s/\s\+$//e
-  autocmd BufWritePre * :call TrimWhitespace()
 augroup END
 
 " Show cursor line on active window only
@@ -401,64 +389,6 @@ augroup HideCursorline
   autocmd WinEnter * set cursorline
   autocmd WinLeave * set nocursorline
 augroup END
-
-augroup RestoreCursor
-  autocmd!
-  autocmd BufReadPost * call ResCur()
-augroup END
-
-" Restore cursor position
-function! ResCur()
-  if line("'\"") > 0 && line("'\"") <= line("$")
-    normal! g`"
-    return 1
-  endif
-endfunction
-
-" Remove trailing whitespaces and center cursor on last position
-function! TrimWhitespace()
-  exe "normal mz"
-  %s/\s\+$//e
-  exe "normal `z"
-endfunction
-
-" " Platform {{{1
-"
-" let OS=substitute(system('uname -s'),"\n","","")
-" if (OS == "Darwin")
-"   " do something that only makes sense on a Mac
-" endif
-
-" www.damtp.cam.ac.uk/user/rbw/vim-osx-cursor.html
-"If this is Terminal.app, do cursor hack for visible cursor
-"This hack does not behave well with other terminals (particularly xterm)
-
-"function MacOSX()
-"  " Invisible CursorLine
-"  hi CursorLine term=none cterm=none
-"  " Cursorline required to continuously update cursor position
-"  set cursorline
-"  "I like a reversed cursor, edit this to your liking
-"  hi Cursor cterm=reverse
-"  " This line does all the work
-"  match Cursor /\%#/
-"endfunction
-"
-"if $TERM_PROGRAM == "Apple_Terminal" " Terminal.app, xterm and urxvt pass this test
-"  if $WINDOWID == ""                  " xterm and urxvt don't pass this test
-"    "It is unlikely that anything except Terminal.app will get here
-"    call MacOSX()
-"  endif
-"endif
-"
-"if $SSH_TTY != ""            " If the user is connected through ssh
-"  if $TERM == "xterm-color" || $ORIGTERM = "xterm-color"
-"    "Something other than Terminal.app might well get here
-"    call MacOSX()
-"  endif
-"endif
-
-" Commands {{{1
 
 " Enable soft wrap with ':Wrap'
 command! -nargs=* Wrap setlocal wrap linebreak nolist

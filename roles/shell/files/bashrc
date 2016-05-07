@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+# If not running interactively, do not do anything
+[[ $- != *i* ]] && return
+
 # $ ✓ →
 PROMPT_SYMBOL="› "
 # ! ×
@@ -20,3 +23,8 @@ load ~/.{exports,path,extra}
 # Export variables: ~/.exports
 # Extend '$PATH' with pathmunge: ~/.path
 # Extra settings, not committed: ~/.extra
+
+# Start or attach tmux on every shell login
+# if hash tmux 2>/dev/null; then
+#   [[ -z "$TMUX" ]] && (tmux attach || tmux new-session)
+# fi

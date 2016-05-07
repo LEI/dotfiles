@@ -4,8 +4,8 @@ dependencies:
   - role: package
     packages: "{{ vim_packages }}"
 
-  # - role: yaourt
-  #   yaourt_packages:
+  # - role: pacman-yaourt
+  #   pacman_yaourt_packages:
   #     - vim-youcompleteme-git
   #   when: "ansible_os_family == 'Archlinux'"
 

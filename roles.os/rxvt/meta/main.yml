@@ -1,0 +1,12 @@
+---
+dependencies:
+
+  - role: pacman-yaourt
+    pacman_yaourt_packages:
+      - rxvt-unicode
+
+  - role: symlink
+    dot_roles_dir: roles.os
+    dot_files:
+      rxvt:
+        prefix: .

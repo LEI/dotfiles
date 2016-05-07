@@ -25,7 +25,7 @@
 - name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
   lineinfile:
     dest: "{{ dot_home }}/.tmux.conf"
-    line: "source {{ dot_home }}/.tmux/tmux.conf"
+    line: "source {{ tmux_path }}/tmux.conf"
     backup: yes
     create: yes
     state: present
@@ -54,11 +54,11 @@
 - name: "Install {{ tmux_plugins | length }} tmux plugins"
   command: "{{ tmux_plugin_manager_path }}/tpm/bin/install_plugins"
   # environment:
-  #   TMUX_PLUGIN_MANAGER_PATH: "{{ dot_home }}/.tmux/plugin"
+  #   TMUX_PLUGIN_MANAGER_PATH: "{{ dot_home }}/{{ tmux_directory }}/plugin"
   args:
     # if tmux_plugins | length > 0 else false
     creates: "{{ tmux_plugin_manager_path }}/{{ tmux_plugins[tmux_plugins | length - 1] | basename }}"
   when: >
     tmux_conf and tmux_plugin_manager and
-    tmux_install_plugins and tmux_plugins | length > 0
+    tmux_plugin_install and tmux_plugins | length > 0
   tags: [tpm]

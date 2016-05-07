@@ -67,7 +67,7 @@ prompt_command() {
 
   # Colors
   local c_reset="\[${reset}\]"
-  local c_text="\[${bblack}\]" # \[\e[2m\]
+  local c_text="\[${byellow}\]" # \[\e[2m\]
   local c_user="\[${blue}\]"
   local c_user_root="\[${red}\]"
   local c_host="\[${bblue}\]"

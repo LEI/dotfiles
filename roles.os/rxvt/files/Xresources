@@ -1,0 +1,28 @@
+!
+! ~/.Xresources
+!
+
+! General
+URxvt.termName: rxvt-256color
+URxvt.saveLines: 100000
+URxvt.scrollBar: false
+
+! Do not scroll with output
+URxvt*scrollTtyOutput: false
+! Scroll in relation to buffer
+URxvt*scrollWithBuffer: true
+! Scroll back to the bottom on keypress
+URxvt*scrollTtyKeypress: true
+
+! Clickable URLs
+URxvt.perl-ext-common: default,matcher
+URxvt.url-launcher: /usr/bin/firefox
+URxvt.matcher.button: 1
+
+! Font
+! URxvt.font: xft:DejaVu Sans Mono:size=10
+URxvt.font: xft:Hack:size=10
+URxvt.letterSpace: -0.6
+
+!#include ".Xresources.d/colors/base16-tomorrow-dark"
+#include ".Xresources.d/colors/solarized-dark"
