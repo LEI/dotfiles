@@ -3,7 +3,8 @@ bash_download:
   spark:
     url: "https://raw.githubusercontent.com/holman/spark/master/spark"
     dest: bin
-    mode: 0755
+    # mode: u=rwx,g=rx,o=rx
+    mode: u+x # 0755
   git-prompt.bash:
     url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
     dest: .bash.d/library
