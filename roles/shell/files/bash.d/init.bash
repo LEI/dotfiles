@@ -12,19 +12,13 @@ export BASH_DIR="${BASH_DIR:-$(dirname "$BASH_SOURCE")}"
 # export BASH_DIR="$HOME/.bash.d"
 
 add() {
-  cd "$BASH_DIR"
-
   for dir in "$@"; do
     case $dir in
       colors)
-        source theme/colors.bash
+        source $BASH_DIR/theme/colors.bash
         ;;
-      aliases|completion|library|plugins)
-        bash_load "$dir"
-        ;;
-      *)
-        echo >&2 "Unknown module: $dir"
-        # return 1
+      aliases|completion|library|plugins|*)
+        bash_load "$BASH_DIR/$dir"
         ;;
     esac
   done
