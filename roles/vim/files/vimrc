@@ -116,18 +116,8 @@ set hidden
 set lazyredraw
 
 set timeout
-set timeoutlen=1000 ttimeoutlen=0
-
-" Mode switch fix?
-" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
-"if !has('gui_running')
-"  "set ttimeoutlen=10
-"  augroup FastEscape
-"    autocmd!
-"    autocmd InsertEnter * set timeoutlen=0
-"    autocmd InsertLeave * set timeoutlen=1000
-"  augroup END
-"endif
+set timeoutlen=1
+" set timeoutlen=1000 ttimeoutlen=0
 
 " Interface {{{1
 
@@ -162,7 +152,6 @@ set number
 " Use relative line numbers
 if exists("&relativenumber")
   set relativenumber
-  "autocmd BufReadPost * set relativenumber
 endif
 
 " Disable cursor blinking
@@ -282,7 +271,7 @@ set smartcase
 " Turn magic on for regular expressions
 set magic
 
-" Theming {{{1
+" Colors {{{1
 
 " set term=$TERM
 " set term=xterm-256color
@@ -305,13 +294,6 @@ endif
 
 set synmaxcol=500
 
-" Show cursor line on active window only
-augroup HideCursorline
-  autocmd!
-  autocmd WinEnter * set cursorline
-  autocmd WinLeave * set nocursorline
-augroup END
-
 " Cf. ~/.vim/plugin/colorcolumn.vim
 if exists('+colorcolumn')
   set colorcolumn=80
@@ -320,13 +302,11 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-" if has('gui_running')
-"   set background=light
-" else
-"   set background=dark
-" endif
-
 function! s:SetBackground(...)
+  if exists('*strftime')
+    return 0
+  endif
+
   let l:sunrise = a:0 >= 1 ? a:1 : 7
   let l:sunset = a:0 >= 2 ? a:2 : 20
 
@@ -344,6 +324,12 @@ function! s:SetBackground(...)
     let &background = l:newBG
   endif
 endfunction
+
+if has('gui_running')
+  set background=light
+else
+  set background=dark
+endif
 
 try
   call s:SetBackground()
@@ -395,12 +381,6 @@ endtry
 
 " Commands {{{1
 
-augroup VimReload
-  autocmd!
-  autocmd BufWritePost $MYVIMRC nested source %
-  " autocmd BufWritePost ~/.dotfiles/roles/vim/files/vimrc nested source %
-augroup END
-
 " Enable soft wrap with ':Wrap'
 command! -nargs=* Wrap setlocal wrap linebreak nolist
 
@@ -408,7 +388,30 @@ command! -nargs=* Wrap setlocal wrap linebreak nolist
 command! En set spelllang=en
 command! Fr set spelllang=fr
 
-" Key maps {{{1
+" Auto commands {{{1
+
+" Show cursor line on active window only
+augroup HideCursorline
+  autocmd!
+  autocmd WinEnter * set cursorline
+  autocmd WinLeave * set nocursorline
+augroup END
+
+augroup VimReload
+  autocmd!
+  autocmd BufWritePost $MYVIMRC nested source %
+augroup END
+
+" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
+"if !has('gui_running')
+"  augroup FastEscape
+"    autocmd!
+"    autocmd InsertEnter * set timeoutlen=0
+"    autocmd InsertLeave * set timeoutlen=1000
+"  augroup END
+"endif
+
+" Bindings {{{1
 
 " Change leader
 let g:mapleader="\<Space>"
@@ -442,9 +445,6 @@ noremap ; :normal n.<CR>
 " Edit in the same directory as the current file
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
 
-" Open .vimrc in a new split
-nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
-
 " Edit in window
 noremap <Leader>ew :e %%
 " Edit in split
@@ -477,6 +477,9 @@ noremap <Leader><Space> :noh<CR>
 " noremap <Leader>b :Gblame<cr>
 " noremap <Leader>l :!clear && git log -p %<CR>
 " noremap <Leader>d :!clear && git diff %<CR>
+
+" Open .vimrc in a new split
+nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " 1}}}
 
