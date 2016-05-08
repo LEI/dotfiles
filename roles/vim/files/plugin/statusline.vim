@@ -12,7 +12,8 @@ function! StatusLine()
   let l:s.= '%( [%H%R%M]%)'
 
   let l:s.='%='
-  let l:s.='%-14.(%l,%c%V%)'
+  " let l:s.=' %{&ft} '
+  let l:s.='%-12.(%l,%c%V%)'
   let l:s.=' %P '
 
   return l:s
@@ -26,7 +27,7 @@ endfunction
 " Cyan: 6
 " Brightred: 9
 
-highlight link StatusLine StatusLineInsert
+" highlight link StatusLine StatusLineInsert
 highlight StatusLineInsert ctermfg=7 ctermbg=9 gui=bold
 
 augroup StatusLine
