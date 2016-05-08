@@ -145,31 +145,25 @@ endif
 " endif
 
 " if has('gui_running')
-  set background=light
+"   set background=light
 " else
 "   set background=dark
 " endif
 
-" FIXME: test if loaded_?
-try
-  " Access colors present in 256 colorspace
-  " colorscheme base16-tomorrow
-  colorscheme solarized
-catch
-  colorscheme torte
-endtry
+" Cf. ~/.vim/plugin/background.vim
+let g:colors_name = 'solarized'
+
+" Cf. ~/.vim/plugin/colorcolumn.vim
+if exists('+colorcolumn')
+  set colorcolumn=80
+  " Relative to textwidth
+  "set colorcolumn=+1
+  "let &colorcolumn=join(range(1,80),",")
+endif
 
 set synmaxcol=500
 
 set cursorline
-
-" Cf. ~/.vim/plugin/colorcolumn.vim
-" if exists('+colorcolumn')
-"   set colorcolumn=80
-"   " Relative to textwidth
-"   "set colorcolumn=+1
-"   "let &colorcolumn=join(range(1,80),",")
-" endif
 
 " Colors {{{1
 
