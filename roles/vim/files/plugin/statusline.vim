@@ -62,7 +62,7 @@ endfunction
 
 augroup StatusLine
   autocmd!
-  autocmd VimEnter,ColorScheme * highlight StatusLineInsert ctermfg=7 ctermbg=2 gui=bold
+  autocmd VimEnter,ColorScheme * highlight StatusLineInsert ctermfg=7 ctermbg=9 gui=bold
   autocmd InsertEnter * highlight! link StatusLine StatusLineInsert
   autocmd InsertLeave * highlight link StatusLine NONE
   " autocmd InsertEnter * highlight StatusLine ctermfg=9
