@@ -47,7 +47,7 @@ vim_plugins:
       - ynkdir/vim-vimlparser
   - keith/tmux.vim
   - repo: Valloric/YouCompleteMe
-    # opts: { do: function('YCMInstall') }
+    opts: { do: function('YCMInstall') }
   - repo: SirVer/ultisnips
     plug:
       - honza/vim-snippets

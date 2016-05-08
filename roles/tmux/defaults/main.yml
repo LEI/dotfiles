@@ -1,12 +1,11 @@
 ---
 tmux_conf: yes
-
 tmux_directory: .tmux
+tmux_colors: solarized-dark
 tmux_path: "{{ dot_home }}/{{ tmux_directory }}"
-
-tmux_plugin_install: yes
 tmux_plugin_manager: yes
 tmux_plugin_manager_path: "{{ tmux_path }}/plugins"
+tmux_plugin_install: yes
 
 # Examples:
 # set -g @plugin 'tmux-plugins/tmux-sensible'
@@ -14,21 +13,22 @@ tmux_plugin_manager_path: "{{ tmux_path }}/plugins"
 # set -g @plugin 'git@github.com/user/plugin'
 # set -g @plugin 'git@bitbucket.com/user/plugin'
 
-# CPU
-# set -g @plugin 'tmux-plugins/tmux-cpu'
-# {cpu_icon} #{cpu_percentage}
-# Battery
-# set -g @plugin 'tmux-plugins/tmux-battery'
-# :( 'thewtex/tmux-mem-cpu-load'
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
   # - nhdaly/tmux-scroll-copy-mode
   # - battery
+  # CPU
+  # set -g @plugin 'tmux-plugins/tmux-cpu'
+  # {cpu_icon} #{cpu_percentage}
+  # Battery
+  # set -g @plugin 'tmux-plugins/tmux-battery'
+  # :( 'thewtex/tmux-mem-cpu-load'
 
+# No {{ role_path }}
 tmux_role_path: ../roles/tmux
 
-
+# Dynamic template:
 # tmux_template_glob: tmux-*-*.conf.j2
 # tmux_template_pattern: ^tmux-(.*)-(.*)\.conf\.j2$
 # tmux_template_path: ../roles/tmux/templates

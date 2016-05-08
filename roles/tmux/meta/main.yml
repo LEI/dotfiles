@@ -12,12 +12,6 @@ dependencies:
   #     # - reattach-to-user-namespace
   #   when: "ansible_os_family == 'Darwin'"
 
-  - role: template
-    dot_files:
-      tmux:
-        dest: .tmux
-        pattern: "tmux-*.conf.j2"
-
   - role: symlink
     dot_files:
       tmux:
