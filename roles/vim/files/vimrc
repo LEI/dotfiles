@@ -333,7 +333,6 @@ function! s:SetBackground(...)
   let l:BG = &background
   let l:hour = strftime('%H')
 
-  " Select a light background during the day and a dark one during the night
   if l:hour <= l:sunrise || l:hour >= l:sunset
     let l:newBG = 'dark'
   else
@@ -346,10 +345,14 @@ function! s:SetBackground(...)
 endfunction
 
 try
+  " Select a light background during the day and a dark one during the night
   call s:SetBackground()
+  " Apply the colorscheme
   colorscheme solarized
   " Manual background toggle (vim-colors-solarized)
   call togglebg#map("<F5>") "
+catch
+  echoerr 'Could not load solarized colorscheme'
 endtry
 
 " Hide line number background
