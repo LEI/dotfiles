@@ -12,7 +12,7 @@
 " github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 
-" Runtime {{{1
+" Before {{{1
 
 set nocompatible
 
@@ -25,7 +25,7 @@ endif
 
 " General {{{1
 
-set encoding=utf-8
+" set encoding=utf-8
 
 if has("autocmd")
   " Enable filetype detection
@@ -57,8 +57,8 @@ set ffs=unix,dos,mac
 " Use system clipboard
 set clipboard=unnamed
 
+" Fast terminal connection
 if !has('nvim')
-  " Fast terminal connection
   set ttyfast
 endif
 
@@ -109,106 +109,52 @@ set nrformats-=octal
 
 set nostartofline
 
-" Buffers can exist in the background
+" Modified buffers can persist in the background
 set hidden
 
 " Don't redraw while executing macros
 set lazyredraw
 
-" Allow backspace in insert mode
-set backspace=indent,eol,start
+set timeout
+set timeoutlen=1000 ttimeoutlen=0
 
-" Theming {{{1
-
-set term=$TERM
-"set term=xterm-256color
-"set term=screen-256color
-
-" Disable BCE (Background Color Erase)
-if &term =~ '256color'
-  set t_ut=
-endif
-
-" " Allow color schemes to do bright colors without forcing bold
-" if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-"   set t_Co=16
-" endif
-
-" Enable syntax highlighting
-if has('syntax')
-  syntax enable
-endif
-" if &t_Co > 2 || has("gui_running")
-"   if has('syntax') && !exists('g:syntax_on')
-"     syntax enable
-"   endif
-" endif
-
-" if has('gui_running')
-"   set background=light
-" else
-"   set background=dark
-" endif
-
-" Cf. ~/.vim/plugin/background.vim
-let g:colors_name = 'solarized'
-
-" Cf. ~/.vim/plugin/colorcolumn.vim
-if exists('+colorcolumn')
-  set colorcolumn=80
-  " Relative to textwidth
-  "set colorcolumn=+1
-  "let &colorcolumn=join(range(1,80),",")
-endif
-
-set synmaxcol=500
-
-set cursorline
-
-" Colors {{{1
-
-" Hide line number background
-"highlight LineNr ctermbg=none guibg=none
-
-" " Custom Base16 colors
-" " "hi clear SignColumn
-" hi VertSplit ctermfg=10 ctermbg=10
-" " hi ColorColumn ctermbg=10
-" hi ColorColumn ctermfg=10 ctermbg=1
-" "
-" " hi LineNr ctermbg=10
-" hi CursorLineNr ctermfg=12
-" " hi CursorLine ctermbg=10
-
-" " Not supported by Terminal.app
-" " See settings/terminal.vim
-" " hi Cursor ctermfg=1 ctermbg=7
-
-" hi MatchParen ctermfg=13 ctermbg=11
-
-" hi IncSearch ctermfg=10 ctermbg=9
-" hi Search ctermfg=10 ctermbg=3
-" "hi Visual ctermfg=11 ctermbg=3
-
-" " "hi Pmenu        ctermbg=240 ctermfg=12
-" " "hi PmenuSel     ctermbg=3   ctermfg=1
-" " "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
-" "
-" " "hi SpellBad ctermfg=13 ctermbg=1
-" " "hi SpellCap ctermfg=13 ctermbg=9
-" "
-" " "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
-" " call matchadd('ColorColumn', '\%81v', 100) "set column nr
-" "
-" " " Hightlight text over 80 chars
-" " "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-" " "match OverLength /\%>80v.\+/
-
-" " Customize invisible characters color
-" hi NonText ctermfg=11
-" hi SpecialKey ctermfg=11
+" Mode switch fix?
+" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
+"if !has('gui_running')
+"  "set ttimeoutlen=10
+"  augroup FastEscape
+"    autocmd!
+"    autocmd InsertEnter * set timeoutlen=0
+"    autocmd InsertLeave * set timeoutlen=1000
+"  augroup END
+"endif
 
 " Interface {{{1
+
+" Normal backspace in insert mode
+set backspace=indent,eol,start
+
+" Recognize escape immediately
+set esckeys
+
+" Set the window title
+set title
+
+" Always show the status line
+set laststatus=2
+
+" Display current mode
+set showmode
+
+" Display incomplete commands
+set showcmd
+
+" Height of the command bar
+set cmdheight=1
+
+" Always show current position
+set ruler
+"set rulerformat=%l,%c%V%=%P
 
 " Line numbers
 set number
@@ -230,27 +176,6 @@ set noshowmatch
 " HTML brackets
 set matchpairs+=<:>
 
-set noerrorbells
-set visualbell
-set t_vb=
-
-" Recognize escape immediately
-set esckeys
-
-set timeout
-set timeoutlen=1000 ttimeoutlen=0
-
-" Mode switch fix?
-" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
-"if !has('gui_running')
-"  "set ttimeoutlen=10
-"  augroup FastEscape
-"    autocmd!
-"    autocmd InsertEnter * set timeoutlen=0
-"    autocmd InsertLeave * set timeoutlen=1000
-"  augroup END
-"endif
-
 "if has("mouse")
 set mouse=a
 "endif
@@ -262,24 +187,9 @@ set splitright
 " Shorter messages
 set shortmess=atI
 
-" Set the window title
-set title
-
-" Always show the status line
-set laststatus=2
-
-" Display current mode
-set showmode
-
-" Display incomplete commands
-set showcmd
-
-" Height of the command bar
-set cmdheight=1
-
-" Always show current position
-set ruler
-"set rulerformat=%l,%c%V%=%P
+set noerrorbells
+set visualbell
+set t_vb=
 
 " Spacing {{{1
 
@@ -317,7 +227,10 @@ set textwidth=500
 " Show line breaks (or nr2char(0x08627))
 let &showbreak=nr2char(0x21AA)
 
-" Show invisible character (highlighted with NonText and SpecialKey)aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+" set fillchars+=stl:\ ,stlnc:\
+" let &fillchars='vert:|,fold:-,stl:x,stlnc:y'
+
+" Show invisible character (highlighted with NonText and SpecialKey)
 set list
 let &listchars='tab:'.nr2char(0x25B8).' '
 let &listchars.=',trail:'.nr2char(0x00B7)
@@ -369,19 +282,123 @@ set smartcase
 " Turn magic on for regular expressions
 set magic
 
-" Commands {{{1
+" Theming {{{1
 
-augroup VimReload
-  autocmd!
-  autocmd BufWritePost $MYVIMRC nested source %
-  " autocmd BufWritePost ~/.dotfiles/roles/vim/files/vimrc nested source %
-augroup END
+" set term=$TERM
+" set term=xterm-256color
+" set term=screen-256color
+
+" Disable BCE (Background Color Erase)
+if &term =~ '256color'
+  set t_ut=
+endif
+
+" " Allow color schemes to do bright colors without forcing bold
+" if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+"   set t_Co=16
+" endif
+
+" Enable syntax highlighting
+if has('syntax')
+  syntax enable
+endif
+
+set synmaxcol=500
 
 " Show cursor line on active window only
 augroup HideCursorline
   autocmd!
   autocmd WinEnter * set cursorline
   autocmd WinLeave * set nocursorline
+augroup END
+
+" Cf. ~/.vim/plugin/colorcolumn.vim
+if exists('+colorcolumn')
+  set colorcolumn=80
+  " Relative to textwidth
+  "set colorcolumn=+1
+  "let &colorcolumn=join(range(1,80),",")
+endif
+
+" if has('gui_running')
+"   set background=light
+" else
+"   set background=dark
+" endif
+
+function! s:SetBackground(...)
+  let l:sunrise = a:0 >= 1 ? a:1 : 7
+  let l:sunset = a:0 >= 2 ? a:2 : 20
+
+  let l:BG = &background
+  let l:hour = strftime('%H')
+
+  " Select a light background during the day and a dark one during the night
+  if l:hour <= l:sunrise || l:hour >= l:sunset
+    let l:newBG = 'dark'
+  else
+    let l:newBG = 'light'
+  endif
+
+  if l:BG != l:newBG
+    let &background = l:newBG
+  endif
+endfunction
+
+try
+  call s:SetBackground()
+  colorscheme solarized
+  " Manual background toggle (vim-colors-solarized)
+  call togglebg#map("<F5>") "
+endtry
+
+" Hide line number background
+"highlight LineNr ctermbg=none guibg=none
+
+" " Custom Base16 colors
+" " "hi clear SignColumn
+" hi VertSplit ctermfg=10 ctermbg=10
+" " hi ColorColumn ctermbg=10
+" hi ColorColumn ctermfg=10 ctermbg=1
+" "
+" " hi LineNr ctermbg=10
+" hi CursorLineNr ctermfg=12
+" " hi CursorLine ctermbg=10
+
+" " Not supported by Terminal.app
+" " See settings/terminal.vim
+" " hi Cursor ctermfg=1 ctermbg=7
+
+" hi MatchParen ctermfg=13 ctermbg=11
+
+" hi IncSearch ctermfg=10 ctermbg=9
+" hi Search ctermfg=10 ctermbg=3
+" "hi Visual ctermfg=11 ctermbg=3
+
+" " "hi Pmenu        ctermbg=240 ctermfg=12
+" " "hi PmenuSel     ctermbg=3   ctermfg=1
+" " "hi SpellBad ctermfg=1 ctermbg=0 cterm=underline
+" "
+" " "hi SpellBad ctermfg=13 ctermbg=1
+" " "hi SpellCap ctermfg=13 ctermbg=9
+" "
+" " "hi CursorColumn cterm=none ctermbg=darkgray ctermfg=white guibg=darkgray guifg=white
+" " call matchadd('ColorColumn', '\%81v', 100) "set column nr
+" "
+" " " Hightlight text over 80 chars
+" " "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+" " "match OverLength /\%>80v.\+/
+
+" " Customize invisible characters color
+" hi NonText ctermfg=11
+" hi SpecialKey ctermfg=11
+
+" Commands {{{1
+
+augroup VimReload
+  autocmd!
+  autocmd BufWritePost $MYVIMRC nested source %
+  " autocmd BufWritePost ~/.dotfiles/roles/vim/files/vimrc nested source %
 augroup END
 
 " Enable soft wrap with ':Wrap'

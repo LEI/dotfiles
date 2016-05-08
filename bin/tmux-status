@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Print tmux status
+
+set -e
+
+main() {
+  local prefix=${1:-}
+  local suffix=${2:-}
+  local ip=$(curl ipecho.net/plain)
+
+  if [[ -n "$ip" ]]; then
+    echo "$prefix$ip$suffix"
+  else
+    echo ""
+    return 1
+  fi
+}
+
+main "$@"

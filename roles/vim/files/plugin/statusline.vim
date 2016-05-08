@@ -5,16 +5,49 @@ set statusline=%!StatusLine()
 function! StatusLine()
   let l:s = ''
 
+  " TODO: fugitive
+
+  " File
   let l:s.=' %n'
   let l:s.='%<'
   let l:s.= ' %f'
-  " let l:s.= '%h%m%r'
-  let l:s.= '%( [%H%R%M]%)'
 
+  " Flags
+  " let l:s.= '%h%m%r'
+  let l:s.= '%( '
+  " expand('%') == 'gundo', &buftype == 'nofile'?
+  if &filetype !~ 'help\|netrw\|vim-plug'
+    " %R RO (readonly)
+    " %M +,- (modifiable)
+    let l:s.= '[%R%M]'
+  elseif &filetype == 'help'
+    " %h [Help]
+    " %H HLP
+    let l:s.= '[H]'
+  endif
+  let l:s.= '%)'
+
+  " Break
   let l:s.='%='
-  " let l:s.=' %{&ft} '
-  let l:s.='%-12.(%l,%c%V%)'
+
+  " File format
+  let l:s.=' %{&fileformat}'
+  " File encoding
+  let l:s.=' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+
+  " File type
+  let l:s.=' %{&ft != "" ? &ft : "no ft"}'
+
+  " Separator
+  let l:s.=' '
+
+  " Cursor position
+  let l:s.=' %-12.(%l,%c%V%)'
+
+  " File position
   let l:s.=' %P '
+
+  " TODO: syntastic
 
   return l:s
 endfunction
@@ -27,11 +60,9 @@ endfunction
 " Cyan: 6
 " Brightred: 9
 
-" highlight link StatusLine StatusLineInsert
-highlight StatusLineInsert ctermfg=7 ctermbg=9 gui=bold
-
 augroup StatusLine
   autocmd!
+  autocmd VimEnter,ColorScheme * highlight StatusLineInsert ctermfg=7 ctermbg=2 gui=bold
   autocmd InsertEnter * highlight! link StatusLine StatusLineInsert
   autocmd InsertLeave * highlight link StatusLine NONE
   " autocmd InsertEnter * highlight StatusLine ctermfg=9

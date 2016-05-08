@@ -1,11 +1,11 @@
-" Colorscheme helper
+" Colorscheme
 
 if exists('g:loaded_colorscheme')
   finish
 endif
 
 if !exists('g:colors_name')
-  echoerr 'Undefined variable g:colors_name'
+  " echoerr 'Undefined variable g:colors_name'
   finish
 endif
 
