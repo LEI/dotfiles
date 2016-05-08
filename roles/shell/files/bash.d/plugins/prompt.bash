@@ -5,9 +5,6 @@
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # https://github.com/demure/dotfiles/blob/master/subbash/prompt
 
-# user=$(whoami)
-# host=$(hostname)
-
 # PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
 # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 
@@ -106,7 +103,7 @@ prompt_command() {
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
-  if [[ "$USER" != "$HOSTNAME" ]]; then
+  if [[ "$(whoami)" != "$(hostname -s)" ]]; then
     prompt+="${prefix_host}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH

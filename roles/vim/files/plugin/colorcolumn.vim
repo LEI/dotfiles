@@ -1,10 +1,6 @@
-" github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
+" Reverse highlight of characters on the color column
 
-set colorcolumn=
-
-" ctermf=none
-highlight ColorColumn ctermbg=red guibg=red
-
+" https://github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
 function! MarkMargin (on)
   if exists('b:MarkMargin')
     try
@@ -14,12 +10,16 @@ function! MarkMargin (on)
     unlet b:MarkMargin
   endif
   if a:on
-    let b:MarkMargin = matchadd('ColorColumn', '\%81v', 100)
+    let b:MarkMargin = matchadd('ColorMargin', '\%81v', 100)
     "let b:MarkMargin = matchadd('ColorColumn', '\%81v\s*\S', 100)
   endif
 endfunction
 
+" highlight ColorColumn ctermbg=red guibg=red
+highlight ColorMargin term=reverse cterm=reverse
+
 augroup MarkMargin
   autocmd!
-  autocmd BufEnter * :call MarkMargin(1)
+  autocmd ColorScheme * highlight ColorMargin term=reverse cterm=reverse
+  autocmd BufEnter * set colorcolumn= | call MarkMargin(1)
 augroup END

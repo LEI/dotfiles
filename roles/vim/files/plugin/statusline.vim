@@ -8,9 +8,6 @@ let g:loaded_statusline = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-" set statusline=%!Statusline()
-" set noshowmode
-
 " Default Status Line:
 "   %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
@@ -74,38 +71,25 @@ let g:statusline_symbols = {
 "  'close': nr2char(0x2715),
 "  'separator': nr2char(0x2502),
 
-function! StatuslineUpdate()
-  for nr in range(1, winnr('$'))
-    call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
-  endfor
-endfunction
-
 function! Statusline(winnr)
-  " let w:mode = a:active ? mode() : 'nope'
-  " echom winnr() . ' active? ' . a:active
-
-  " let l:mode = g:current_winnr == a:winnr ? mode() : ''
-  let l:mode = a:winnr == winnr() ? mode() : ''
+  let l:active = a:winnr == winnr()
+  let l:mode = l:active ? mode() : '------'
   call setwinvar(a:winnr, 'mode', l:mode)
 
   let l:s = ''
 
   " Mode
-  let l:s.= '%-9.( %{get(g:statusline_mode_map, w:mode, "------")} %)'
-  let l:s.= '%(%{&paste ? g:statusline_symbols.paste : ""} %)'
+  let l:s.= ' %{get(g:statusline_mode_map, w:mode, w:mode)} '
+  let l:s.= '%{&paste ? g:statusline_symbols.paste . " " : ""}'
 
-  " Fugitive
-  if exists("*fugitive#head") && strlen(fugitive#head(7)) > 0
-    let l:s.= '%{fugitive#head(7)} '
-  endif
+  " Buffer index
+  " let l:s.= '%n'
 
-  " File
-  let l:s.= '%n'
+  " Truncate
   let l:s.= '%<'
-  let l:s.= ' %f '
 
-  " File type
-  let l:s.= '%{&ft != "" ? "[" . &ft . "]" : ""}'
+  " File path
+  let l:s.= '%f '
 
   " Flags '%h%m%r'
   " %H HLP (help buffer)
@@ -113,21 +97,34 @@ function! Statusline(winnr)
   " %M +,- (modifiable)
   let l:s.= '%([%{StatuslineFlags()}]%)'
 
-  " Break
+  " Split
   let l:s.= '%='
 
-  " File format
-  let l:s.= ' %{&fileformat}'
-  " File encoding
-  let l:s.= ' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+  " Fugitive
+  if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
+    let l:s.= ' %{fugitive#head(7)}'
+  endif
+
+  " Syntastic
+  " if get(g:, 'loaded_syntastic_plugin', 0)
+  if exists('*SyntasticStatuslineFlag') && strlen(SyntasticStatuslineFlag()) > 0
+    let l:s.= '%( %#WarningMsg# %{SyntasticStatuslineFlag()} %*%)'
+  endif
+
+  " File type
+  " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
+  " let l:s.= '%([%{&filetype}]%)'
+  let l:s.= ' %y'
+
+  " " File format
+  " let l:s.= ' %{&fileformat}'
+  " " File encoding
+  " let l:s.= ' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
 
   " Encrypted buffer (TODO: symbol)
   " if exists('+key') && !empty(&key)
   "   let l:s.= get(g:statusline_symbols, 'key', '')
   " endif
-
-  " Separator
-  let l:s.= ' '
 
   " Cursor position
   let l:s.= ' %-12.(%l,%c%V%)'
@@ -135,10 +132,9 @@ function! Statusline(winnr)
   " File position
   let l:s.= ' %P '
 
-  " TODO: syntastic
-
   return l:s
 endfunction
+
 function! StatuslineFlags()
   let l:flags = ''
 
@@ -155,6 +151,7 @@ function! StatuslineFlags()
   return l:flags
 endfunction
 
+" Solarized Statusline Colors:
 " Red: 1
 " Green: 2
 " Yellow: 3
@@ -162,8 +159,29 @@ endfunction
 " Magenta: 5
 " Cyan: 6
 " Brightred: 9
+function! StatuslineColors()
+  if &background == 'dark'
+    " highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
+    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
 
-function! StatuslineModeColor(mode)
+    highlight Statusline term=none cterm=none ctermfg=14 ctermbg=0 gui=bold
+    highlight StatuslineNC term=none cterm=none ctermfg=11 ctermbg=0 gui=none
+
+    highlight StatuslineInsert ctermfg=0 ctermbg=2
+    highlight StatuslineReplace ctermfg=0 ctermbg=1
+  else
+    " highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
+    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
+
+    highlight Statusline term=none cterm=none ctermfg=10 ctermbg=7 gui=bold
+    highlight StatuslineNC term=none cterm=none ctermfg=12 ctermbg=7 gui=none
+
+    highlight StatuslineInsert ctermfg=7 ctermbg=2
+    highlight StatuslineReplace ctermfg=7 ctermbg=1
+  endif
+endfunction
+
+function! StatuslineMode(mode)
   if a:mode == 'i'
     highlight! link Statusline StatuslineInsert
   elseif a:mode == 'r'
@@ -174,29 +192,26 @@ function! StatuslineModeColor(mode)
   endif
 endfunction
 
+function! StatuslineUpdate()
+  for nr in range(1, winnr('$'))
+    call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
+  endfor
+endfunction
+
+" set statusline=%!Statusline(winnr())
+" set noshowmode
+
 augroup Statusline
   autocmd!
-
-  autocmd VimEnter,ColorScheme *
-        \ highlight StatuslineInsert ctermfg=7 ctermbg=2 gui=bold |
-        \ highlight StatuslineReplace ctermfg=7 ctermbg=9 gui=bold
-
+  " Create the highlight groups on startup and when the colorscheme changes
+  autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
+  " Update the statusline function (setlocal statusline=%!)
   autocmd BufAdd,BufEnter,WinEnter * call StatuslineUpdate()
-
-  autocmd InsertEnter * call StatuslineModeColor(v:insertmode)
-  autocmd InsertChange * call StatuslineModeColor(v:insertmode)
+  " Update the statusline highlight group
+  autocmd InsertEnter * call StatuslineMode(v:insertmode)
+  autocmd InsertChange * call StatuslineMode(v:insertmode)
+  " Clear highlight link
   autocmd InsertLeave * highlight link Statusline NONE
-
-  " " Create highlight group on startup and when colorscheme changes
-  " autocmd VimEnter,ColorScheme * highlight StatuslineInsert ctermfg=7 ctermbg=9 gui=bold
-  " " Change the statusline color while in insert mode
-  " autocmd InsertEnter * highlight! link Statusline StatuslineInsert
-  " " Remove highlight link
-  " autocmd InsertLeave * highlight link Statusline NONE
-
-  " autocmd InsertEnter * highlight Statusline ctermfg=9
-  " autocmd InsertLeave * highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
-  " StatuslineNC fg=12 bg=7
 augroup END
 
 let &cpo = s:save_cpo
