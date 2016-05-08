@@ -148,8 +148,8 @@ function! StatuslineFlags()
     let l:flags = &modified ? '+' : &modifiable ? '' : '-'
     " %M
     let l:flags.= &readonly ? ',RO' : ''
-  elseif &filetype == 'help'
-    let l:flags = 'H'
+  " elseif &filetype == 'help'
+  "   let l:flags = 'H'
   endif
 
   return l:flags
