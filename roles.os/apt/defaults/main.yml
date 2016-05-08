@@ -2,9 +2,12 @@
 packages_update: yes
 packages_upgrade: yes
 
+apt_upgrade: safe # "{{ apt_upgrade | default(packages_upgrade) }}"
 # yes or safe: aptitude safe-upgrade
 # full: aptitude full-upgrade
 # dist: apt-get dist-upgrade
-apt_upgrade: safe # Change to 'full' for ruby on Raspbian
+
+# Change to 'full' for ruby on Raspbian?
+# 'safe' on Debian -> Failed to lock apt for exclusive operation
 
 # apt_cache_time: 86400

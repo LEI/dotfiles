@@ -5,14 +5,11 @@
 set -e
 
 main() {
-  local prefix=${1:-}
-  local suffix=${2:-}
-  local ip=$(curl ipecho.net/plain)
+  local ip=$(curl -s ipecho.net/plain)
 
   if [[ -n "$ip" ]]; then
-    echo "$prefix$ip$suffix"
+    echo "$ip"
   else
-    echo ""
     return 1
   fi
 }

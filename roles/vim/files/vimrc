@@ -143,8 +143,8 @@ set title
 " Always show the status line
 set laststatus=2
 
-" Display current mode
-set showmode
+" Display current mode (not needed with a custom statusline)
+set noshowmode
 
 " Display incomplete commands
 set showcmd

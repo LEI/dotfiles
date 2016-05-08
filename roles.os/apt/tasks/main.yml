@@ -8,6 +8,6 @@
 
 - name: Upgrade apt packages
   apt:
-    upgrade: "{{ apt_upgrade | default(packages_upgrade) }}"
+    upgrade: "{{ apt_upgrade }}"
   when: packages_upgrade
   become: yes
