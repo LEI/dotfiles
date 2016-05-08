@@ -161,20 +161,20 @@ endfunction
 " Brightred: 9
 function! StatuslineColors()
   if &background == 'dark'
-    " highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
-    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
+    highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
+    highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
 
-    highlight Statusline term=none cterm=none ctermfg=14 ctermbg=0 gui=bold
-    highlight StatuslineNC term=none cterm=none ctermfg=11 ctermbg=0 gui=none
+    " highlight Statusline term=none cterm=none ctermfg=14 ctermbg=0 gui=bold
+    " highlight StatuslineNC term=none cterm=none ctermfg=11 ctermbg=0 gui=none
 
     highlight StatuslineInsert ctermfg=0 ctermbg=2
     highlight StatuslineReplace ctermfg=0 ctermbg=1
   else
-    " highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
-    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
+    highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
+    highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
 
-    highlight Statusline term=none cterm=none ctermfg=10 ctermbg=7 gui=bold
-    highlight StatuslineNC term=none cterm=none ctermfg=12 ctermbg=7 gui=none
+    " highlight Statusline term=none cterm=none ctermfg=10 ctermbg=7 gui=bold
+    " highlight StatuslineNC term=none cterm=none ctermfg=12 ctermbg=7 gui=none
 
     highlight StatuslineInsert ctermfg=7 ctermbg=2
     highlight StatuslineReplace ctermfg=7 ctermbg=1
