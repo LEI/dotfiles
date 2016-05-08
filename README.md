@@ -6,17 +6,15 @@
 
 ## TODO
 
-- [ ] Bash prompt git symbols (bash-it?)
+- [ ] Bash prompt git symbols, colors fg/bg (bash-it?)
 - [ ] Check lineinfile with regexp, use ini_file
 - [ ] Linux bin/dot ansible install
 - [ ] OS X Terminal theme and (osa)scripts
+- [ ] README.md in roles
 - [ ] Role npm: editorconfig, tern-project?
-- [ ] Roles README
-- [ ] Tmux mouse and wheel pane options if version 1.8 or 2.1
 - [ ] Vim before runtime (plug.vim)
 - [ ] Xresources rxvt, xinitrc
-- [ ] bash.d colors fg, bg...
-- [ ] virtualenv, nvm, rvm/rbenv
+- [ ] virtualenv, nvm, rvm/rbenv...
 
 ## Resources
 
