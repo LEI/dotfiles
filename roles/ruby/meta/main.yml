@@ -6,6 +6,7 @@ dependencies:
 
   - role: package
     packages: "{{ ruby_packages }}"
+    # Debian: You may need to run a full aptitude upgrade to get the ruby package
 
   - role: symlink
     dot_files:
