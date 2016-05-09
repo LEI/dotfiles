@@ -5,6 +5,6 @@ bash_download:
     dest: bin
     # mode: u=rwx,g=rx,o=rx
     mode: u+x # 0755
-  git-prompt.bash:
-    url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
-    dest: .bash.d/library
+  # git-prompt.bash:
+  #   url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
+  #   dest: .bash.d/library

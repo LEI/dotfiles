@@ -77,7 +77,7 @@ call extend(g:statusline.symbols, {
 \}, 'keep')
 
 function! Statusline(winnr)
-  call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : v:false)
+  call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : 0)
 
   let l:s = ''
 

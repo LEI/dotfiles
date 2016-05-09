@@ -14,16 +14,15 @@ if ! hash add 2>/dev/null; then
   source ~/.bash.d/init.bash
 fi
 
-# Source each bash script in ~/.bash.d/$directory/*.bash
-# TODO: Load completion with ~/.bash_completion? (not sourced on OSX)
-add aliases colors completion library plugins
+# Load each bash script in ~/.bash.d/$directory/*.bash
+# FIXME: Load completion with ~/.bash_completion (not sourced on OSX)
+add aliases completion plugins
 
-# Base16 Shell (256 colors)
-# BASE16_SHELL="$BASH_DIR/colors/base16-default.dark.sh"
-# [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
+lib "colors.bash"
+lib "prompt.bash"
 
-# Source shell dotfiles
+# Load home dotfiles
 # Export variables: ~/.exports
 # Extend '$PATH' with pathmunge: ~/.path
 # Extra settings, not committed: ~/.extra
-load ~/.{exports,path,extra}
+source_files ~/.{exports,path,extra}

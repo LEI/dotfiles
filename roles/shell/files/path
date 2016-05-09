@@ -2,6 +2,8 @@
 # ~/.path
 #
 
+lib "pathmunge.bash"
+
 # Prepend to PATH
 # pathmunge /usr/local/sbin
 
@@ -14,9 +16,14 @@ pathmunge "$HOME/bin" after
 # pathmunge "$COMPOSER_HOME/$COMPOSER_BIN_DIR" after
 pathmunge "$(composer config -g home)/$(composer config -g bin-dir)" after
 
-# NodeJS modules (npm config get > 400ms)
-# [[ "$(which npm)" ]] && pathmunge "$(npm config get prefix)/bin" after
-pathmunge "$HOME/.node_modules/bin" after
+# NodeJS modules
+if hash npm 2>/dev/null; then
+  pathmunge "$HOME/.node_modules/bin" after
+  # if [[ -z "${NODE_MODULES_PATH:-}" ]]; then
+  #   export NODE_MODULES_PATH="$(npm config get prefix)/bin"
+  # fi
+  # pathmunge "$NODE_MODULES_PATH" after
+fi
 
 # Ruby gems
 pathmunge "$GEM_HOME/bin" after

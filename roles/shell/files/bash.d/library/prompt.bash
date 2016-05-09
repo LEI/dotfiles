@@ -7,26 +7,6 @@
 
 PROMPT_COMMAND='prompt_command'
 
-prompt_right() {
-  local text=${1:-}
-  local color=${2:-}
-  local margin=${3:-0}
-  local columns=
-
-  if [[ -n "$COLUMNS" ]]; then
-    columns="$COLUMNS"
-  else
-    columns=$(tput cols)
-  fi
-
-  if [[ -n "$color" ]]; then
-    text="${color}${text}"
-    margin=$((${margin} - ${#color}))
-  fi
-
-  printf "%*s" "$((${columns} - ${margin}))" "${text}"
-}
-
 prompt_command() {
   # Exit code
   local exit=$?
@@ -98,8 +78,12 @@ prompt_command() {
   PS1+="${c_reset}"
 
   # Git
-  # local branch_name=
-  # PS1+="${prefix_git}${branch_name}${suffix_git}"
+  # PS1+="$(prompt_git)"
+  local git_branch_name=$(git symbolic-ref HEAD 2>/dev/null)
+  if [[ -n "$git_branch_name" ]]; then
+    git_branch_name=${git_branch_name##refs/heads/}
+    PS1+="${prefix_git}${git_branch_name}${suffix_git}"
+  fi
 
   # End of the first line
   PS1+='\n'
@@ -124,8 +108,62 @@ prompt_command() {
   # fi
 }
 
-# PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
-# __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
+# https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
+prompt_git() {
+  local exit=$?
+  # local ps1_expanded=yes
+  # [ -z "$ZSH_VERSION" ] || [[ -o PROMPT_SUBST ]] || ps1_expanded=no
+  # [ -z "$BASH_VERSION" ] || shopt -q promptvars || ps1_expanded=no
+
+  local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
+    --is-bare-repository --is-inside-work-tree \
+    --short HEAD 2>/dev/null)"
+  local rev_parse_exit_code="$?"
+  if [[ -z "$repo_info" ]]; then
+    return $exit
+  fi
+  if [[ "$rev_parse_exit_code" = "0" ]]; then
+    local short_sha="${repo_info##*$'\n'}"
+    local repo_info="${repo_info%$'\n'*}"
+
+    local inside_worktree="${repo_info##*$'\n'}"
+    repo_info="${repo_info%$'\n'*}"
+    local bare_repo="${repo_info##*$'\n'}"
+    repo_info="${repo_info%$'\n'*}"
+    local inside_gitdir="${repo_info##*$'\n'}"
+    local g="${repo_info%$'\n'*}"
+
+    if [[ "true" = "$inside_worktree" ]] &&
+      [[ -n "${GIT_PS1_HIDE_IF_PWD_IGNORED-}" ]] &&
+      [[ "$(git config --bool bash.hideIfPwdIgnored)" != "false" ]] &&
+      git check-ignore -q .; then
+      return $exit
+    fi
+
+    echo $short_sha
+    echo $repo_info
+  fi
+}
+
+prompt_right() {
+  local text=${1:-}
+  local color=${2:-}
+  local margin=${3:-0}
+  local columns=
+
+  if [[ -n "$COLUMNS" ]]; then
+    columns="$COLUMNS"
+  else
+    columns=$(tput cols)
+  fi
+
+  if [[ -n "$color" ]]; then
+    text="${color}${text}"
+    margin=$((${margin} - ${#color}))
+  fi
+
+  printf "%*s" "$((${columns} - ${margin}))" "${text}"
+}
 
 # Colored hints (only when used with 2 arguments as prompt command)
 GIT_PS1_SHOWCOLORHINTS=1
@@ -152,3 +190,6 @@ GIT_PS1_SHOWUNTRACKEDFILES=1
 #   git         always compare HEAD to @{upstream}
 #   svn         always compare HEAD to your SVN upstream
 # GIT_PS1_SHOWUPSTREAM="auto"
+
+# PROMPT_COMMAND='__git_ps1 "\u at \h in \w" "\n\\\$ "'
+# __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"

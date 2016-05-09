@@ -1,5 +1,5 @@
 #
-# Bash init
+# Bash utils
 #
 
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
@@ -11,38 +11,47 @@
 export BASH_DIR="${BASH_DIR:-$(dirname "$BASH_SOURCE")}"
 # export BASH_DIR="$HOME/.bash.d"
 
+lib() {
+  source_file "$BASH_DIR/library/$1"
+}
+
 add() {
   for dir in "$@"; do
     case $dir in
-      colors)
-        source $BASH_DIR/theme/colors.bash
-        ;;
+      # colors)
+      #   source_file $BASH_DIR/theme/colors.bash
+      #   ;;
       aliases|completion|library|plugins|*)
-        bash_load "$BASH_DIR/$dir"
+        source_bash "$BASH_DIR/$dir"
         ;;
     esac
   done
   unset dir
 }
 
-bash_load() {
+source_bash() {
   local directory="$1"
 
   if [[ -d "$directory" ]]; then
-    load $directory/*.bash
+    source_file $directory/*.bash
   else
     echo >&2 "Not a directory: $directory"
     return 1
   fi
 }
 
-load() {
+source_files() {
   for file in "$@"; do
-    if [[ -r "$file" ]] && [[ -f "$file" ]]; then
-      source "$file"
-    # else
-    #   echo >&2 "Could not source $file"
-    fi
+    source_file "$file"
   done
   unset file
+}
+
+source_file() {
+  local file="$1"
+  if [[ -r "$file" ]] && [[ -f "$file" ]]; then
+    source "$file"
+  # else
+  #   echo >&2 "Could not source $file"
+  fi
 }
