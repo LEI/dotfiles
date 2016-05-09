@@ -66,17 +66,15 @@ call extend(g:statusline.modes, {
       \ '': 'S-BLOCK',
 \}, 'keep')
 
+" OSX Command: nr2char(0x2387)
+" Close: nr2char(0x2715)
+" Lock: nr2char(0x1F512)
 call extend(g:statusline.symbols, {
-      \ 'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : nr2char(0x2387). ' ',
       \ 'key': nr2char(0x1F511) . ' ',
       \ 'readonly': 'RO',
       \ 'paste': '(paste)',
+      \ 'separator': nr2char(0x2502),
 \}, 'keep')
-" 'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
-" 'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
-" 'close': nr2char(0x2715),
-" 'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : nr2char(0x1F512) . ' ',
-" 'separator': nr2char(0x2502),
 
 function! Statusline(winnr)
   call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : v:false)
@@ -92,7 +90,7 @@ function! Statusline(winnr)
   if winwidth(0) > 60
     " Fugitive
     if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
-      let l:s.= '%{g:statusline.symbols.branch} %{fugitive#head(7)} '
+      let l:s.= '%{fugitive#head(7)}'
     endif
   endif
 

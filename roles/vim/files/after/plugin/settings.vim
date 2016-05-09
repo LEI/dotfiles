@@ -7,7 +7,8 @@ if get(g:, 'loaded_settings', 0)
 endif
 let g:loaded_settings = 1
 
-let s:settings_path = '~/.vim/plugin/settings'
+" TODO: Load only if plugin is enabled, autoload#init()
+let s:settings_path = '~/.vim/autoload/settings'
 "let uname = system("uname -s")
 
 for s:file_path in split(globpath(s:settings_path, '*.vim'), '\n')

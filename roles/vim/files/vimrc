@@ -304,35 +304,29 @@ endif
 
 function! SetBackground(...)
   if !exists('*strftime')
-    return 0
-  endif
-
-  let l:sunrise = a:0 >= 1 ? a:1 : 7
-  let l:sunset = a:0 >= 2 ? a:2 : 20
-
-  let l:BG = &background
-  let l:hour = strftime('%H')
-
-  if l:hour <= l:sunrise || l:hour >= l:sunset
-    let l:newBG = 'dark'
+    " let l:background = &background == 'light' ? 'dark' : 'light'
+    if has('gui_running')
+      let l:background = 'light'
+    else
+      let l:background = 'dark'
+    endif
   else
-    let l:newBG = 'light'
+    let l:sunrise = a:0 > 0 ? a:1 : 7
+    let l:sunset = a:0 > 1 ? a:2 : 21
+    let l:hour = strftime('%H')
+    if l:hour > l:sunrise && l:hour < l:sunset
+      let l:background = 'light'
+    else
+      let l:background = 'dark'
+    endif
   endif
-
-  if l:BG != l:newBG
-    let &background = l:newBG
+  if &background != l:background
+    let &background = l:background
   endif
 endfunction
 
-if has('gui_running')
-  set background=light
-else
-  set background=dark
-endif
-
+call SetBackground()
 try
-  " Select a light background during the day and a dark one during the night
-  call SetBackground()
   " Apply the colorscheme
   colorscheme solarized
 catch

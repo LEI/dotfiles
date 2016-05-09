@@ -2,6 +2,5 @@
 # Tmux aliases
 #
 
-alias t="tmux"
-
-alias tmux="tmux attach || tmux new-session"
+# Attach to session or create one
+alias t='[[ "$#" -eq 0 ]] && tmux attach || tmux "$@"'
