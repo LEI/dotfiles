@@ -19,11 +19,9 @@ vim_plugins_path: .vim/plugged
 # List of plugins used in templates/plug.vim.j2
 # TODO: handle plugin.opts without quotes: function('')
 vim_plugins:
-  # - itchyny/lightline.vim
-  # - LEI/vim-statusline
-  # - chriskempson/base16-vim
   # - whatyouhide/vim-gotham
   - altercation/vim-colors-solarized
+  # - chriskempson/base16-vim
   - tpope/vim-repeat
   - tpope/vim-surround
   - tpope/vim-endwise

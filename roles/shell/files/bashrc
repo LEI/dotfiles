@@ -14,17 +14,16 @@ if ! hash add 2>/dev/null; then
   source ~/.bash.d/init.bash
 fi
 
-# Source each bash script in ~/.bash.d/$directory
-add aliases colors library plugins
-# ~/.bash_completion should take care of adding 'completion'
+# Source each bash script in ~/.bash.d/$directory/*.bash
+# TODO: Load completion with ~/.bash_completion? (not sourced on OSX)
+add aliases colors completion library plugins
+
+# Base16 Shell (256 colors)
+# BASE16_SHELL="$BASH_DIR/colors/base16-default.dark.sh"
+# [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
 
 # Source shell dotfiles
-load ~/.{exports,path,extra}
 # Export variables: ~/.exports
 # Extend '$PATH' with pathmunge: ~/.path
 # Extra settings, not committed: ~/.extra
-
-# Start or attach tmux on every shell login
-# if hash tmux 2>/dev/null; then
-#   [[ -z "$TMUX" ]] && (tmux attach || tmux new-session)
-# fi
+load ~/.{exports,path,extra}

@@ -6,6 +6,8 @@
 if ! hash _git 2>/dev/null; then
   if [[ -f /usr/share/bash-completion/completions/git ]]; then
     source /usr/share/bash-completion/completions/git
+  elif [[ -f /usr/local/etc/bash_completion.d/git-completion.bash ]]; then
+    source /usr/local/etc/bash_completion.d/git-completion.bash
   fi
 fi
 

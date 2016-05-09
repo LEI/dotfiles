@@ -58,6 +58,9 @@ prompt_command() {
   # Exit code
   local exit=$?
 
+  local user=$(id -un) # $(whoami)
+  local host=$(hostname -s)
+
   # Default symbols
   local prompt_symbol="${PROMPT_SYMBOL:-$ }"
   local prompt_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
@@ -103,7 +106,7 @@ prompt_command() {
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
-  if [[ "$(whoami)" != "$(hostname -s)" ]]; then
+  if [[ "$user" != "$host" ]]; then
     prompt+="${prefix_host}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH

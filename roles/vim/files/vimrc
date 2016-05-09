@@ -335,10 +335,8 @@ try
   call SetBackground()
   " Apply the colorscheme
   colorscheme solarized
-  " Manual background toggle (vim-colors-solarized)
-  call togglebg#map("<F5>") "
 catch
-  echoerr 'Could not load solarized colorscheme'
+  echoerr 'Could not load colorscheme'
 endtry
 
 " Hide line number background

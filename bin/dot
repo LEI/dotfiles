@@ -40,11 +40,12 @@ main() {
 # }
 
 ansible_vault() {
+  # Export the vault file path
   if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
     export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
   fi
 
-  # Create the vault file if needed
+  # Create the vault file if it does not exists
   if [[ ! -f "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
     local vault_pass=$(prompt "Vault password?")
     echo "$vault_pass" >> $ANSIBLE_VAULT_PASSWORD_FILE
@@ -97,38 +98,6 @@ ansible_install() {
   fi
 }
 
-# Utils
-
-log() {
-  printf "%s\r\n" "$@"
-}
-
-error() {
-  log >&2 "$@"
-  return 1
-}
-
-die() {
-  error "$@"
-  exit 1
-}
-
-prompt() {
-  local q="$1"
-  log "$q" >&2
-
-  local a=
-  read -e -r -s a
-
-  if [[ -n "$a" ]]; then
-    # Echo answer
-    printf "%s" "$a"
-  else
-    # Empty answer, ask again
-    prompt "$@" && return
-  fi
-}
-
 has() {
    # Skip the first parameter if it is 'sudo'
   [[ "$1" == "sudo" ]] && shift
@@ -158,6 +127,36 @@ _do() {
 
 su_do() {
   _do sudo "$@"
+}
+
+prompt() {
+  local q="$1"
+  log "$q" >&2
+
+  local a=
+  read -e -r -s a
+
+  if [[ -n "$a" ]]; then
+    # Echo answer
+    printf "%s" "$a"
+  else
+    # No answer, ask again
+    prompt "$@" && return
+  fi
+}
+
+log() {
+  printf "%s\r\n" "$@"
+}
+
+error() {
+  log >&2 "$@"
+  return 1
+}
+
+die() {
+  error "$@"
+  exit 1
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && time main "$@"

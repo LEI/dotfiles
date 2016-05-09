@@ -1,7 +1,8 @@
 ---
-- name: killall Finder
-  command: killall Finder
-  when: osx_kill_apps
+# FIXME
+# - name: killall Finder
+#   command: killall Finder
+#   when: osx_kill_apps
 
 - name: killall SystemUIServer
   command: killall SystemUIServer
