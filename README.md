@@ -6,14 +6,14 @@
 
 ## TODO
 
-- [ ] Bash prompt git symbols, colors fg/bg (bash-it?)
-- [ ] Check lineinfile with regexp, use ini_file
-- [ ] Linux bin/dot ansible install
-- [ ] OS X Terminal theme and (osa)scripts
-- [ ] README.md in roles
-- [ ] Role npm: editorconfig, tern-project?
-- [ ] Vim before runtime (plug.vim)
+- [ ] Bash color escape function (fg, bg)
+- [ ] Bash prompt, git branch
+- [ ] Linux install ansible bin/dot
+- [ ] OS X (osa)scripts and Terminal settings
+- [ ] Use regex with lineinfile or ini_file module when possible
 - [ ] Xresources rxvt, xinitrc
+- [ ] npm: editorconfig, tern-project?
+- [ ] vim before/after
 - [ ] virtualenv, nvm, rvm/rbenv...
 
 ## Resources

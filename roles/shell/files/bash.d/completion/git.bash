@@ -12,8 +12,6 @@ if ! hash _git 2>/dev/null; then
 fi
 
 # Enable tab completion for 'g' by marking it as an alias for 'git'
-if hash __git_complete 2>/dev/null && hash __git_main 2>/dev/null; then
-  # [[ -f /usr/local/etc/bash_completion.d/git-completion.bash ]]; then
-  # complete -o default -o nospace -F _git g
-  __git_complete g __git_main
+if hash _git 2>/dev/null; then # && [[ -f /usr/local/etc/bash_completion.d/git-completion.bash ]]; then
+  complete -o default -o nospace -F _git g
 fi

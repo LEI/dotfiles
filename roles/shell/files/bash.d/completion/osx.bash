@@ -4,10 +4,11 @@
 
 # https://github.com/Bash-it/bash-it/blob/master/completion/available/system.completion.bash
 
-# Source brew completion scripts
-if [[ "$(uname -s)" == "Darwin" ]] && hash brew 2>/dev/null; then
-  BREW_PREFIX=$(brew --prefix)
+[[ "$(uname -s)" == "Darwin" ]] || return
 
+# Add tab completion for brew commands
+if hash brew 2>/dev/null; then
+  BREW_PREFIX=$(brew --prefix)
   # /usr/local/share/bash-completion/completion/* ?
   if [[ -f "$BREW_PREFIX/share/bash-completion/bash_completion" ]]; then
     source "$BREW_PREFIX/share/bash-completion/bash_completion"

@@ -16,8 +16,9 @@ fi
 
 # Load each bash script in ~/.bash.d/$directory/*.bash
 # FIXME: Load completion with ~/.bash_completion (not sourced on OSX)
-add aliases completion plugins
+add aliases completion settings
 
+lib "colorize-cat-less.bash"
 lib "colors.bash"
 lib "prompt.bash"
 

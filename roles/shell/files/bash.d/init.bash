@@ -5,7 +5,7 @@
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
 # https://github.com/mathiasbynens/dotfiles/blob/master/.functions
 # https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
-# https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
+# https://github.com/Bash-it/bash-it/blob/master/settings/available/base.plugin.bash
 
 # Use the directory where this file is stored if $BASH_DIR is not defined
 export BASH_DIR="${BASH_DIR:-$(dirname "$BASH_SOURCE")}"
@@ -21,7 +21,7 @@ add() {
       # colors)
       #   source_file $BASH_DIR/theme/colors.bash
       #   ;;
-      aliases|completion|library|plugins|*)
+      aliases|completion|library|settings|*)
         source_bash "$BASH_DIR/$dir"
         ;;
     esac
