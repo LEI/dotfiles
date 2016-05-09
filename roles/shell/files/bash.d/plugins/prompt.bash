@@ -134,11 +134,11 @@ prompt_command() {
   # Use ~/.git-prompt.sh to set PS1
   __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
 
-  # Change master branch color from green to yellow
-  local git_branch='__git_ps1_branch_name'
-  if [[ "${!git_branch}" == "master" ]]; then
-    PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}"
-  fi
+  # # Change master branch color from green to yellow
+  # local git_branch='__git_ps1_branch_name'
+  # if [[ "${!git_branch}" == "master" ]]; then
+  #   PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}"
+  # fi
 }
 
 PROMPT_COMMAND='prompt_command'

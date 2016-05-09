@@ -302,8 +302,8 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-function! s:SetBackground(...)
-  if exists('*strftime')
+function! SetBackground(...)
+  if !exists('*strftime')
     return 0
   endif
 
@@ -332,7 +332,7 @@ endif
 
 try
   " Select a light background during the day and a dark one during the night
-  call s:SetBackground()
+  call SetBackground()
   " Apply the colorscheme
   colorscheme solarized
   " Manual background toggle (vim-colors-solarized)
@@ -418,7 +418,7 @@ augroup END
 " Bindings {{{1
 
 " Change leader
-let mapleader = "\<Space>"
+let g:mapleader = "\<Space>"
 
 " Do not use arrows
 " nnoremap <up> <nop>

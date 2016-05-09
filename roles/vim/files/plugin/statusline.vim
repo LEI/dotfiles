@@ -47,87 +47,106 @@ set cpo&vim
 "   r?      A confirm query of some sort
 "   !       Shell or external command is executing
 
-let g:statusline_mode_map = {
-\  'n': 'NORMAL',
-\  'i': 'INSERT',
-\  'R': 'REPLACE',
-\  'v': 'VISUAL',
-\  'V': 'V-LINE',
-\  'c': 'COMMAND',
-\  '': 'V-BLOCK',
-\  's': 'SELECT',
-\  'S': 'S-LINE',
-\  '': 'S-BLOCK',
-\}
+if !exists('g:statusline')
+  let g:statusline = {}
+endif
 
-let g:statusline_symbols = {
-\  'paste': 'PASTE',
-\  'key': nr2char(0x1F511) . ' ',
-\}
-"  'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
-"  'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
-"  'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : nr2char(0x2387). ' ',
-"  'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : nr2char(0x1F512) . ' ',
-"  'close': nr2char(0x2715),
-"  'separator': nr2char(0x2502),
+call extend(g:statusline, { 'modes': {}, 'symbols': {}, }, 'keep')
+
+call extend(g:statusline.modes, {
+      \ 'n': 'NORMAL',
+      \ 'i': 'INSERT',
+      \ 'R': 'REPLACE',
+      \ 'v': 'VISUAL',
+      \ 'V': 'V-LINE',
+      \ 'c': 'COMMAND',
+      \ '': 'V-BLOCK',
+      \ 's': 'SELECT',
+      \ 'S': 'S-LINE',
+      \ '': 'S-BLOCK',
+\}, 'keep')
+
+call extend(g:statusline.symbols, {
+      \ 'branch': get(g:, 'powerline_fonts', 0) ? '\ue0a0' : nr2char(0x2387). ' ',
+      \ 'key': nr2char(0x1F511) . ' ',
+      \ 'readonly': 'RO',
+      \ 'paste': '(paste)',
+\}, 'keep')
+" 'whitespace': get(g:, 'powerline_fonts', 0) ? '\u2739' : '!',
+" 'linenr': get(g:, 'powerline_fonts', 0) ? '\ue0a1' : ':',
+" 'close': nr2char(0x2715),
+" 'readonly': get(g:, 'powerline_fonts', 0) ? '\ue0a2' : nr2char(0x1F512) . ' ',
+" 'separator': nr2char(0x2502),
 
 function! Statusline(winnr)
-  let l:active = a:winnr == winnr()
-  let l:mode = l:active ? mode() : '------'
-  call setwinvar(a:winnr, 'mode', l:mode)
+  call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : 0)
 
   let l:s = ''
 
-  " Mode
-  let l:s.= ' %{get(g:statusline_mode_map, w:mode, w:mode)} '
-  let l:s.= '%{&paste ? g:statusline_symbols.paste . " " : ""}'
+  if winwidth(0) > 40
+    " Mode
 
-  " Buffer index
-  " let l:s.= '%n'
+    let l:s.= ' %{StatuslineMode(w:mode)} '
+  endif
+
+  if winwidth(0) > 60
+    " Fugitive
+    if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
+      let l:s.= '%{g:statusline.symbols.branch} %{fugitive#head(7)} '
+    endif
+  endif
 
   " Truncate
   let l:s.= '%<'
 
+  " Buffer number
+  " let l:s.= '%n'
   " File path
   let l:s.= '%f '
 
-  " Flags '%h%m%r'
+  " Flags
   " %H HLP (help buffer)
   " %R RO (readonly)
   " %M +,- (modifiable)
   let l:s.= '%([%{StatuslineFlags()}]%)'
+  " if &filetype !~ 'help\|netrw\|vim-plug'
+  "   let l:s.= '[%R%M]'
+  " elseif &filetype ==  'help'
+  "   let l:s.= '[H]'
+  " endif
 
   " Split
   let l:s.= '%='
 
-  " Fugitive
-  if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
-    let l:s.= ' %{fugitive#head(7)}'
-  endif
-
   " Syntastic
-  " if get(g:, 'loaded_syntastic_plugin', 0)
-  if exists('*SyntasticStatuslineFlag') && strlen(SyntasticStatuslineFlag()) > 0
-    let l:s.= '%( %#WarningMsg# %{SyntasticStatuslineFlag()} %*%)'
+  let l:s.= '%#StatuslineWarning#'
+  let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
+  let l:s.= '%*'
+
+  if winwidth(0) > 80
+    " Register
+    let l:s.= ' %{v:register}'
+
+    " " File format
+    " let l:s.= ' %{&fileformat}'
+    " " File encoding
+    " let l:s.= ' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+
+    " File type
+    let l:s.= ' %y'
+    " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
+    " let l:s.= '%([%{&filetype}]%)'
+
+    " Encrypted buffer (TODO: symbol)
+    " if exists('+key') && !empty(&key)
+    "   let l:s.= get(g:statusline.symbols, 'key', '')
+    " endif
   endif
-
-  " File type
-  " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
-  " let l:s.= '%([%{&filetype}]%)'
-  let l:s.= ' %y'
-
-  " " File format
-  " let l:s.= ' %{&fileformat}'
-  " " File encoding
-  " let l:s.= ' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
-
-  " Encrypted buffer (TODO: symbol)
-  " if exists('+key') && !empty(&key)
-  "   let l:s.= get(g:statusline_symbols, 'key', '')
-  " endif
 
   " Cursor position
-  let l:s.= ' %-12.(%l,%c%V%)'
+  " let l:s.= ' %-12.(%l,%c%V%)'
+  " <line>,<column>/<total>
+  let l:s.= ' %-12.(%l,%c%V/%L%)'
 
   " File position
   let l:s.= ' %P '
@@ -135,20 +154,39 @@ function! Statusline(winnr)
   return l:s
 endfunction
 
-function! StatuslineFlags()
-  let l:flags = ''
+function! StatuslineMode(mode)
+  let l:mode = get(g:statusline.modes, a:mode, '------')
 
-  " expand('%') == 'gundo', &buftype == 'nofile'?
-  if &filetype !~ 'help\|netrw\|vim-plug'
-    " %R
-    let l:flags = &modified ? '+' : &modifiable ? '' : '-'
-    " %M
-    let l:flags.= &readonly ? ',RO' : ''
-  " elseif &filetype == 'help'
-  "   let l:flags = 'H'
+  " If the window is active and has &paste
+  if a:mode && &paste
+    let l:mode.= ' ' . g:statusline.symbols.paste
   endif
 
-  return l:flags
+  return l:mode
+endfunction
+
+function! StatuslineFlags()
+  let l:flags = []
+
+  " Note: gundo, help and vim-plug set &buftype to 'nofile'
+  "   %w,%W -> [Preview],PRV
+  "   %a -> Argument list status if > 1
+  "   %T,%X <N> -> 'tabline'
+
+  if &buftype == 'help'
+    call add(l:flags, 'H')
+  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|vim-plug'
+    if &readonly
+      call add(l:flags, g:statusline.symbols.readonly)
+    endif
+    if &modified
+      call add(l:flags, '+')
+    elseif !&modifiable
+      call add(l:flags, '-')
+    endif
+  endif
+
+  return join(l:flags, ',')
 endfunction
 
 " Solarized Statusline Colors:
@@ -179,9 +217,12 @@ function! StatuslineColors()
     highlight StatuslineInsert ctermfg=7 ctermbg=2
     highlight StatuslineReplace ctermfg=7 ctermbg=1
   endif
+
+  " highlight link StatuslineWarning WarningMsg
+  highlight StatuslineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
 endfunction
 
-function! StatuslineMode(mode)
+function! StatuslineHighlight(mode)
   if a:mode == 'i'
     highlight! link Statusline StatuslineInsert
   elseif a:mode == 'r'
@@ -192,7 +233,7 @@ function! StatuslineMode(mode)
   endif
 endfunction
 
-function! StatuslineUpdate()
+function! StatuslineBuild()
   for nr in range(1, winnr('$'))
     call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
   endfor
@@ -206,10 +247,10 @@ augroup Statusline
   " Create the highlight groups on startup and when the colorscheme changes
   autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
   " Update the statusline function (setlocal statusline=%!)
-  autocmd BufAdd,BufEnter,WinEnter * call StatuslineUpdate()
+  autocmd BufAdd,BufEnter,WinEnter * call StatuslineBuild()
   " Update the statusline highlight group
-  autocmd InsertEnter * call StatuslineMode(v:insertmode)
-  autocmd InsertChange * call StatuslineMode(v:insertmode)
+  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
+  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
   " Clear highlight link
   autocmd InsertLeave * highlight link Statusline NONE
 augroup END
