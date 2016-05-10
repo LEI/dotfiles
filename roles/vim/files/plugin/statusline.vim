@@ -84,18 +84,18 @@ function! Statusline(winnr)
   if winwidth(0) > 40
     " Mode
 
-    let l:s.= ' %{StatuslineMode(w:mode)} '
+    let l:s.= ' %{StatuslineMode(w:mode)}'
   endif
 
   if winwidth(0) > 60
     " Fugitive
     if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
-      let l:s.= '%{fugitive#head(7)}'
+      let l:s.= ' %{fugitive#head(7)}'
     endif
   endif
 
   " Truncate
-  let l:s.= '%<'
+  let l:s.= ' %<'
 
   " Buffer number
   " let l:s.= '%n'

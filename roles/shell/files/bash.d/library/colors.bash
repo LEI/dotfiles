@@ -4,6 +4,20 @@
 
 # https://github.com/Bash-it/bash-it/blob/master/themes/colors.theme.bash
 
+# __() {
+#   echo "$@"
+# }
+
+# __echo_ansi() {
+#   next-$1; shift
+#   echo "\[\e[$(__$next $@)m\]"
+# }
+
+# __echo() {
+#   next-$1; shift
+#   echo "\033[$(__$next $@)m"
+# }
+
 if tput setaf 1 &> /dev/null; then
 
   #tput sgr0; # reset colors

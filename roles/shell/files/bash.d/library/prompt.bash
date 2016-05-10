@@ -5,6 +5,11 @@
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # https://github.com/demure/dotfiles/blob/master/subbash/prompt
 
+# $ ✓ →
+PROMPT_SYMBOL="› "
+# ! ×
+PROMPT_SYMBOL_ERROR="× "
+
 PROMPT_COMMAND='prompt_command'
 
 prompt_command() {
@@ -15,9 +20,9 @@ prompt_command() {
   local host=$(hostname -s)
 
   # Default symbols
-  local prompt_symbol="${PROMPT_SYMBOL:-$ }"
-  local prompt_symbol_2="${PROMPT_SYMBOL_2:-${PROMPT_SYMBOL:-> }}"
-  local prompt_symbol_error="${PROMPT_SYMBOL_ERROR:-! }"
+  local ps1_symbol="${PROMPT_SYMBOL:-$ }"
+  local ps2_symbol="${PROMPT_SYMBOL_PS2:-${PROMPT_SYMBOL:-> }}"
+  local err_symbol="${PROMPT_SYMBOL_ERROR:-! }"
 
   # Colors TODO: function
   local c_reset="\[${reset}\]"
@@ -79,24 +84,24 @@ prompt_command() {
 
   # Git
   # PS1+="$(prompt_git)"
-  local git_branch_name=$(git symbolic-ref HEAD 2>/dev/null)
-  if [[ -n "$git_branch_name" ]]; then
-    git_branch_name=${git_branch_name##refs/heads/}
-    PS1+="${prefix_git}${git_branch_name}${suffix_git}"
-  fi
+  # local git_branch_name=$(git symbolic-ref HEAD 2>/dev/null)
+  # if [[ -n "$git_branch_name" ]]; then
+  #   git_branch_name=${git_branch_name##refs/heads/}
+  #   PS1+="${prefix_git}${git_branch_name}${suffix_git}"
+  # fi
 
   # End of the first line
   PS1+='\n'
 
   # Exit code color and symbol
   if [[ $exit -eq 0 ]]; then
-    PS1+="${c_symbol}${prompt_symbol}${c_reset}"
+    PS1+="${c_symbol}${ps1_symbol}${c_reset}"
   else
-    PS1+="${c_symbol_error}${prompt_symbol_error}${c_reset}"
+    PS1+="${c_symbol_error}${err_symbol}${c_reset}"
   fi
 
   # Secondary prompt
-  PS2="${prompt_symbol_2} "
+  PS2="${ps2_symbol} "
 
   # ~/.git-prompt.sh
   # __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
@@ -140,8 +145,8 @@ prompt_git() {
       return $exit
     fi
 
-    echo $short_sha
-    echo $repo_info
+    # echo $short_sha
+    # echo $repo_info
   fi
 }
 
