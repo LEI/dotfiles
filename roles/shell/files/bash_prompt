@@ -25,11 +25,11 @@ prompt_command() {
   local err_symbol="${PROMPT_SYMBOL_ERROR:-! }"
 
   # Colors TODO: function
-  local c_reset="\[${reset}\]"
-  local c_text="\[${byellow}\]" # \[\e[2m\]
+  local c_reset="\[${reset_color}\]"
+  local c_text="\[${b_yellow}\]" # \[\e[2m\]
   local c_user="\[${blue}\]"
   local c_user_root="\[${red}\]"
-  local c_host="\[${bblue}\]"
+  local c_host="\[${b_blue}\]"
   local c_host_ssh="\[${bold}\]\[${red}\]"
   local c_cwd="\[${white}\]"
   local c_symbol="\[${white}\]"
@@ -84,11 +84,13 @@ prompt_command() {
 
   # Git
   # PS1+="$(prompt_git)"
-  # local git_branch_name=$(git symbolic-ref HEAD 2>/dev/null)
-  # if [[ -n "$git_branch_name" ]]; then
-  #   git_branch_name=${git_branch_name##refs/heads/}
-  #   PS1+="${prefix_git}${git_branch_name}${suffix_git}"
-  # fi
+  local git_branch_name=$(git symbolic-ref HEAD 2>/dev/null)
+  local git_status git_string
+  if [[ -n "$git_branch_name" ]]; then
+    git_status=$(git status --porcelain) # TODO: count M, D, ?...
+    git_string=${git_branch_name##refs/heads/}
+    PS1+="${prefix_git}${git_string}${suffix_git}"
+  fi
 
   # End of the first line
   PS1+='\n'

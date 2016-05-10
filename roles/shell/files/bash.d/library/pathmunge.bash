@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Append or prepend to PATH
 #

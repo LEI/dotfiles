@@ -312,7 +312,7 @@ function! SetBackground(...)
     endif
   else
     let l:sunrise = a:0 > 0 ? a:1 : 7
-    let l:sunset = a:0 > 1 ? a:2 : 21
+    let l:sunset = a:0 > 1 ? a:2 : 20
     let l:hour = strftime('%H')
     if l:hour > l:sunrise && l:hour < l:sunset
       let l:background = 'light'

@@ -1,31 +1,23 @@
+#!/usr/bin/env bash
 #
 # Bash utils
 #
 
-source_dir() {
-  for directory in "$@"; do
-    if [[ -d "$directory" ]]; then
-      source_files $directory/*
+# Test if a command is available
+has() {
+  hash "$1" 2>/dev/null
+}
+
+# Source a list of path
+_source() {
+  for path in "$@"; do
+    if [[ -d "$path" ]]; then
+      _source $path/*
+    elif [[ -f "$path" ]]; then
+      source "$path"
     else
-      echo >&2 "Not a directory: $directory"
+      echo >&2 "No such file or directory: $path"
     fi
   done
-  unset dir
-
-}
-
-source_files() {
-  for file in "$@"; do
-    source_file "$file"
-  done
-  unset file
-}
-
-source_file() {
-  local file="$1"
-  if [[ -r "$file" ]] && [[ -f "$file" ]]; then
-    source "$file"
-  # else
-  #   echo >&2 "Not a file: $file"
-  fi
+  unset path
 }

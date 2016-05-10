@@ -11,19 +11,16 @@
 [[ $- != *i* ]] && return
 
 # Bash directory
-export BASH_DIR="$HOME/.bash.d"
+BASH_DIR="$HOME/.bash.d"
 
-# Load functions
-if ! hash add 2>/dev/null; then
-  source $BASH_DIR/library/utils.bash
-fi
+source $BASH_DIR/library/utils.bash
 
-# Load directories
-# TODO: Load completion with ~/.bash_completion (not sourced on OSX?)
-source_dir $BASH_DIR/{aliases,completion,settings}
+# TODO? Source completion with ~/.bash_completion (not loaded on OSX)
+_source $BASH_DIR/{aliases,completion,settings}
 
-# Load helpers
-source_files $BASH_DIR/library/{colorize-cat-less,colors,pathmunge,prompt}.bash
+_source $BASH_DIR/library/{colorize-cat-less,colors,pathmunge}.bash
 
-# Load home dotfiles
-source_files ~/.{exports,path,extra}
+# Colors are used in ~/.bash_prompt
+# ~/.path is using pathmunge
+# ~/.extra may not exist
+_source ~/.{bash_prompt,exports,path,extra} 2>/dev/null

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Pigmentize cat and less
 #
