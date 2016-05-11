@@ -27,8 +27,8 @@ prompt_command() {
   local symbol_error_color="\[${red}\]"
 
   local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
-  local git_ahead_format="${dim_color}%s${reset_color}"
-  local git_flags_format=" [${white}%s${reset_color}]"
+  local git_ahead_format="${dim_color}+%s${reset_color}"
+  local git_flags_format=" ${white}%s${reset_color}"
 
   # Default symbols
   local ps1_symbol="${PROMPT_SYMBOL:-$ }"
@@ -136,7 +136,7 @@ git_status() {
   # Branch name (master)
   local branch branch_format="${1:- %s}"
   # Difference between HEAD and its upstream (+n)
-  local ahead ahead_format="${2:-(+%s)}"
+  local ahead ahead_format="${2:-(%s)}"
   # Remote and branch name (origin/master)
   local remote_branch
   # Repository status flags
