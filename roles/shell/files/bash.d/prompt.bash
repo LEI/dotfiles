@@ -141,8 +141,7 @@ git_status() {
   local remote_branch
   # Repository status flags
   local flags flags_format="${3:-%s}"
-
-  local clean=0
+  # local clean=0
 
   local line file
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
@@ -172,9 +171,10 @@ git_status() {
 
   if [[ -z "$ahead" ]]; then
     if [[ "$ahead" -eq 0 ]]; then
-      ahead="="
+      # ahead="="
       ahead_format="%s"
     # elif [[ "$ahead" -gt 0 ]]; then
+      # Committed changes
     fi
   fi
 
@@ -189,7 +189,7 @@ git_status() {
   if [[ -n "$flags" ]]; then
     flags="$flags"
   else
-    clean=1
+    # clean=1
     # flags -> PROMPT_SYMBOL_CLEAN?
     flags_format="%s"
   fi
