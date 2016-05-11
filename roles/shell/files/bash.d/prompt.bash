@@ -170,8 +170,12 @@ git_status() {
     remote_branch="${remote_branch% [ahead*}"
   fi
 
-  if [[ -z "$ahead" ]] || [[ "$ahead" -eq 0 ]]; then
-    ahead_format="%s"
+  if [[ -z "$ahead" ]]; then
+    if [[ "$ahead" -eq 0 ]]; then
+      ahead="="
+      ahead_format="%s"
+    # elif [[ "$ahead" -gt 0 ]]; then
+    fi
   fi
 
   flags=
@@ -187,7 +191,7 @@ git_status() {
   else
     clean=1
     # flags -> PROMPT_SYMBOL_CLEAN?
-    flags_format="=%s"
+    flags_format="%s"
   fi
 
   printf "${branch_format}${ahead_format}${flags_format}" "${branch}" "${ahead}" "${flags}"
