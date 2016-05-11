@@ -24,4 +24,7 @@ _source $BASH_DIR/library/{colorize-cat-less,colors,pathmunge}.bash
 # ~/.bash.d/path is using pathmunge
 _source $BASH_DIR/{exports,path,prompt}.bash
 
+PROMPT_SYMBOL="› " # $ ✓ →
+PROMPT_SYMBOL_ERROR="× " # ! ×
+
 _source ~/.bashrc.local 2>/dev/null

@@ -4,9 +4,6 @@
 
 PROMPT_COMMAND='prompt_command'
 
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
-
 prompt_command() {
   # Exit code
   local exit=$?
@@ -18,82 +15,87 @@ prompt_command() {
   local user=$(id -un) # $(whoami)
   local host=$(hostname -s)
 
+  local reset_color="${reset}"
+  local dim_color="${b_yellow}"
+  local user_color="${blue}"
+  local user_root_color="${red}"
+  local host_color="${b_blue}"
+  local host_ssh_color="${bold}${red}"
+  local cwd_color="${white}"
+  local branch_color="${red}"
+  local symbol_color="${white}"
+  local symbol_error_color="${red}"
+
+  local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
+  local git_ahead_format="${dim_color}(%s)${reset_color}"
+  local git_flags_format="%s"
+
   # Default symbols
   local ps1_symbol="${PROMPT_SYMBOL:-$ }"
   local ps2_symbol="${PROMPT_SYMBOL_PS2:-${PROMPT_SYMBOL:-> }}"
   local err_symbol="${PROMPT_SYMBOL_ERROR:-! }"
 
-  local reset_color="\[${reset}\]"
-  local dim_color="\[${b_yellow}\]"
-  local user_color="\[${blue}\]"
-  local user_root_color="\[${red}\]"
-  local host_color="\[${b_blue}\]"
-  local host_ssh_color="\[${bold}\]\[${red}\]"
-  local cwd_color="\[${white}\]"
-  local branch_color="\[${red}\]"
-  local symbol_color="\[${white}\]"
-  local symbol_error_color="\[${red}\]"
-
-  # Start of the primary prompt
-  PS1='\n'
+  # Start of the prompt
+  PROMPT='\n'
 
   # Terminal title to the current working directory
-  PS1+='\[\033]0;\w\007\]'
+  # Tmus escape sequence? \033k\w\033\\
+  # OSC title? \033]2;\w\033\\
+  PROMPT+='\033]0;\w\007'
 
   # Timestamp to the right
   local prompt_right='$(date +%H:%M:%S)'
-  PS1+='\[$(tput sc; prompt_right "'${prompt_right}'" "'${dim_color}'"; tput rc)\]'
+  PROMPT+='\[$(tput sc; prompt_right "'${prompt_right}'" "'${dim_color}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then
     # Highlight when logged in as root
-    PS1+="${user_root_color}"
+    PROMPT+="${user_root_color}"
   else
-    PS1+="${user_color}"
+    PROMPT+="${user_color}"
   fi
-  PS1+='\u'
-  PS1+="${reset_color}"
+  PROMPT+='\u'
+  PROMPT+="${reset_color}"
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
   if [[ "$user" != "$host" ]]; then
-    PS1+="${dim_color} at ${reset_color}"
+    PROMPT+="${dim_color} at ${reset_color}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH
-      PS1+="${host_ssh_color}"
+      PROMPT+="${host_ssh_color}"
     else
-      PS1+="${host_color}"
+      PROMPT+="${host_color}"
     fi
-    PS1+='\h'
-    PS1+="${reset_color}"
+    PROMPT+='\h'
+    PROMPT+="${reset_color}"
   fi
 
-  PS1+="${dim_color} in ${reset_color}"
+  PROMPT+="${dim_color} in ${reset_color}"
   # Working directory
-  PS1+="${cwd_color}"
-  PS1+='\w'
-  PS1+="${reset_color}"
+  PROMPT+="${cwd_color}"
+  PROMPT+='\w'
+  PROMPT+="${reset_color}"
 
-  # Git
+  # Git prompt
   # TODO: disable ahead or flags?
-  local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
-  local git_ahead_format="${dim_color}(%s)${reset_color}"
-  local git_flags_format="%s"
   # Colors in format string?
-  PS1+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
+  PROMPT+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
 
   # End of the first line
-  PS1+='\n'
+  PROMPT+='\n'
 
   # Exit code color and symbol
   if [[ $exit -eq 0 ]]; then
-    PS1+="${symbol_color}${ps1_symbol}${reset_color}"
+    PROMPT+="${symbol_color}${ps1_symbol}${reset_color}"
   else
-    PS1+="${symbol_error_color}${err_symbol}${reset_color}"
+    PROMPT+="${symbol_error_color}${err_symbol}${reset_color}"
   fi
 
+  PS1="$PROMPT"
+
   # Secondary prompt
-  PS2="${ps2_symbol} "
+  PS2="${ps2_symbol}"
 }
 
 prompt_right() {
@@ -251,11 +253,11 @@ git_status() {
 # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 
 # __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
-# local git_master_color="\[${yellow}\]"
+# local git_master_color="${yellow}"
 # # Change master branch color from green to yellow
 # local git_branch='__git_ps1_branch_name'
 # if [[ "${!git_branch}" == "master" ]]; then
-#   PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${git_master_color}\${${git_branch}}"}"
+#   PS1="${PS1/"\e[32m\${${git_branch}}"/"${git_master_color}\${${git_branch}}"}"
 # fi
 
 # PROMPT_SYMBOL_DIRTY="✘"
