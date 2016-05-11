@@ -122,21 +122,8 @@ prompt_right() {
 }
 
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
+# https://github.com/magicmonty/bash-git-prompt/blob/master/gitstatus.sh
 git_status() {
-  local branch_format="${1:- %s}"
-  local ahead_format="${2:-(%s)}"
-  local flags_format="${3:-%s}"
-
-  # Git prompt symbols
-  # PROMPT_SYMBOL_DIRTY="✘"
-  # PROMPT_SYMBOL_CLEAN="✔"
-  # PROMPT_SYMBOL_ADDED="✚"
-  # PROMPT_SYMBOL_MODIFIED="✹"
-  # PROMPT_SYMBOL_DELETED="✖"
-  # PROMPT_SYMBOL_RENAMED="➜"
-  # PROMPT_SYMBOL_UNMERGED="═"
-  # PROMPT_SYMBOL_UNTRACKED="✭"
-
   local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
     --is-bare-repository --is-inside-work-tree \
     --short HEAD 2>/dev/null)"
@@ -145,12 +132,22 @@ git_status() {
     return
   fi
 
-  local line=
-  local file_status=
+  # Branch name (master)
+  local branch branch_format="${1:- %s}"
+  # Difference between HEAD and its upstream (+n)
+  local ahead ahead_format="${2:-(%s)}"
+  # Remote and branch name (origin/master)
+  local remote_branch
+  # Repository status flags
+  local flags flags_format="${3:-%s}"
+
+  local clean=0
+
+  local line file
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
   while IFS= read -r -d '' line; do
-    file_status=${line:0:2}
-    case $file_status in
+    file=${line:0:2}
+    case $file in
       \#\#) branch_line="${line#\#\# }" ;;
       ?M) ((changed++)) ;; # status+="M" ;; # Modified
       ?A) ((added++)) ;; # status+="A" ;; # Added
@@ -162,21 +159,22 @@ git_status() {
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #]
 
-  local ahead=
-  local branch="${branch_line%\.\.\.*}"
-  # local remote_branch="${branch_line#$branch\.\.\.}"
+  branch="${branch_line%\.\.\.*}"
+  ahead=
+  remote_branch="${branch_line#$branch\.\.\.}"
+
   if [[ "$branch_line" =~ "[ahead" ]]; then
-    # remote_branch="${remote_branch% [ahead*}"
     ahead="${branch_line#*[ahead }"
     ahead="+${ahead%]}"
+    remote_branch="${remote_branch% [ahead*}"
   fi
 
   if [[ -z "$ahead" ]] || [[ "$ahead" -eq 0 ]]; then
     ahead_format="%s"
   fi
 
-  local flags=
-  local clean=0
+  flags=
+  # TODO: color and symbol vars
   [[ "$changed" -gt 0 ]] && flags+="~"
   [[ "$added" -gt 0 ]] && flags+="+"
   [[ "$deleted" -gt 0 ]] && flags+="-"
@@ -199,7 +197,6 @@ git_status() {
   #   branch_name=${sref##refs/heads/}
   # fi
 
-  # Repository state
   # local flags=
   # if [[ "$status" -ne 0 ]]; then
   #   flags="*"
@@ -261,3 +258,12 @@ git_status() {
 # if [[ "${!git_branch}" == "master" ]]; then
 #   PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}"
 # fi
+
+# PROMPT_SYMBOL_DIRTY="✘"
+# PROMPT_SYMBOL_CLEAN="✔"
+# PROMPT_SYMBOL_ADDED="✚"
+# PROMPT_SYMBOL_MODIFIED="✹"
+# PROMPT_SYMBOL_DELETED="✖"
+# PROMPT_SYMBOL_RENAMED="➜"
+# PROMPT_SYMBOL_UNMERGED="═"
+# PROMPT_SYMBOL_UNTRACKED="✭"
