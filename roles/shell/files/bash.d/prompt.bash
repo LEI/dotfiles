@@ -134,7 +134,7 @@ git_status() {
   # Branch name (master)
   local branch branch_format="${1:- %s}"
   # Difference between HEAD and its upstream (+n)
-  local ahead ahead_format="${2:-(%s)}"
+  local ahead ahead_format="${2:-(+%s)}"
   # Remote and branch name (origin/master)
   local remote_branch
   # Repository status flags
@@ -164,7 +164,7 @@ git_status() {
 
   if [[ "$branch_line" =~ "[ahead" ]]; then
     ahead="${branch_line#*[ahead }"
-    ahead="+${ahead%]}"
+    ahead="${ahead%]}"
     remote_branch="${remote_branch% [ahead*}"
   fi
 
