@@ -12,8 +12,8 @@ prompt_command() {
   # [ -z "$ZSH_VERSION" ] || [[ -o PROMPT_SUBST ]] || ps1_expanded=no
   # [ -z "$BASH_VERSION" ] || shopt -q promptvars || ps1_expanded=no
 
-  local user=$(id -un) # $(whoami)
-  local host=$(hostname -s)
+  local user="$(id -un)" # $(whoami)
+  local host="$(hostname -s)"
 
   local reset_color="${reset}"
   local dim_color="${b_yellow}"
@@ -80,7 +80,7 @@ prompt_command() {
   # Git prompt
   # TODO: disable ahead or flags?
   # Colors in format string?
-  PROMPT+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
+  PROMPT+="$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")"
 
   # End of the first line
   PROMPT+='\n'
@@ -111,12 +111,12 @@ prompt_right() {
   if [[ -n "$COLUMNS" ]]; then
     columns="$COLUMNS"
   else
-    columns=$(tput cols)
+    columns="$(tput cols)"
   fi
 
   if [[ -n "$color" ]]; then
     string="${color}${string}"
-    margin=$((${margin} - ${#color}))
+    margin="$((${margin} - ${#color}))"
   fi
 
   printf "%*s" "$((${columns} - ${margin}))" "${string}"
