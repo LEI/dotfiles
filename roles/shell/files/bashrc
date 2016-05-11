@@ -4,6 +4,7 @@
 
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
 # https://github.com/mathiasbynens/dotfiles/blob/master/.functions
+# https://github.com/Bash-it/bash-it/blob/master/bash_it.sh
 # https://github.com/Bash-it/bash-it/blob/master/lib/helpers.bash
 # https://github.com/Bash-it/bash-it/blob/master/settings/available/base.plugin.bash
 
@@ -28,5 +29,7 @@ _source $BASH_DIR/library/{colorize,colors,pathmunge}.bash
 _source $BASH_DIR/{exports,path,prompt}.bash
 
 has most && PREVIEW="most"
+[[ -s /usr/bin/gloobus-preview ]] && PREVIEW="gloobus-preview"
+[[ -s /Applications/Preview.app ]] && PREVIEW="/Applications/Preview.app"
 
 _source ~/.bashrc.local 2>/dev/null
