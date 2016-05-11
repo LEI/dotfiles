@@ -150,8 +150,9 @@ prompt_git() {
   # done < <(git status -z --porcelain)
 
   local status=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
-  if [[ "$count" != "0" ]]; then
-    status="*"
+
+  if [[ "$count" == "0" ]]; then
+    return
   fi
 
   printf "$format" "$string" "$status"
