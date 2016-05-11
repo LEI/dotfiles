@@ -1,5 +1,5 @@
 # Detect which 'ls' flavor is in use
-if ls --color > /dev/null 2>&1; then GNU
+if ls --color > /dev/null 2>&1; then # GNU
   ls_color="--color"
 # elif hash gls 2>/dev/null; then
 #   # Homebrew coreutils
