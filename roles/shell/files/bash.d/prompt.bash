@@ -78,8 +78,8 @@ prompt_command() {
   # Git
   # TODO: disable ahead or flags?
   local git_branch_format="${c_dim} on ${c_branch}%s${c_reset}"
-  local git_ahead_format="${c_dim}%s${c_reset}"
-  local git_flags_format=" %s"
+  local git_ahead_format="${c_dim}(%s)${c_reset}"
+  local git_flags_format="%s"
   # Colors in format string?
   PS1+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
 
