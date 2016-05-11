@@ -172,6 +172,7 @@ prompt_git() {
   local ahead=${branch_line#*[ahead }
   ahead=${ahead%]}
 
+
   string="$branch ($remote) +$ahead [$status]"
 
   # Repository state
