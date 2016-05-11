@@ -10,6 +10,9 @@
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
 
+PROMPT_SYMBOL="› " # $ ✓ →
+PROMPT_SYMBOL_ERROR="× " # ! ×
+
 # Bash directory
 BASH_DIR="$HOME/.bash.d"
 
@@ -24,7 +27,6 @@ _source $BASH_DIR/library/{colorize-cat-less,colors,pathmunge}.bash
 # ~/.bash.d/path is using pathmunge
 _source $BASH_DIR/{exports,path,prompt}.bash
 
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
+has most && PREVIEW="most"
 
 _source ~/.bashrc.local 2>/dev/null
