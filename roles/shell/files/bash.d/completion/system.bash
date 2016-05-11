@@ -6,7 +6,7 @@
 # if [[ -f /usr/share/bash-completion/bash_completion ]]; then
 #   source /usr/share/bash-completion/bash_completion
 # elif [[ -f /etc/bash_completion ]]; then # See ~/.bash_completion
-#   source /etc/bash_completion
+#   source /etc/bash_completion # .d?
 # fi
 
 # Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards

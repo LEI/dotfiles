@@ -5,9 +5,8 @@
 
 if tput setaf 1 &> /dev/null; then
 
-  normal=
+  reset=$(tput sgr0)
   bold=$(tput bold)
-  reset_color=$(tput sgr0)
 
   black=$(tput setaf 0)
   red=$(tput setaf 1)
@@ -43,9 +42,9 @@ if tput setaf 1 &> /dev/null; then
 else
 
   # https://github.com/Bash-it/bash-it/blob/master/themes/colors.theme.bash
-  normal="\[\e[0m\]"
-  bold=
-  reset_color="\[\e[39m\]"
+  reset="\[\e[0m\]"
+  bold="\[\e[1m\]"
+  # reset_color="\[\e[39m\]" # Default foreground color
 
   black="\[\e[0;30m\]"
   red="\[\e[0;31m\]"
@@ -54,7 +53,7 @@ else
   blue="\[\e[0;34m\]"
   magenta="\[\e[0;35m\]"
   cyan="\[\e[0;36m\]"
-  white="\[\e[0;37;1m\]"
+  white="\[\e[0;37m\]"
   orange="\[\e[0;91m\]"
 
 fi
@@ -86,7 +85,7 @@ background_yellow="\[\e[43m\]"
 background_blue="\[\e[44m\]"
 background_magenta="\[\e[45m\]"
 background_cyan="\[\e[46m\]"
-background_white="\[\e[47;1m\]"
+background_white="\[\e[47m\]"
 background_orange="\[\e[101m\]"
 
 # These colors are meant to be used with `echo -e`
@@ -100,7 +99,7 @@ echo_yellow="\033[0;33m"
 echo_blue="\033[0;34m"
 echo_magenta="\033[0;35m"
 echo_cyan="\033[0;36m"
-echo_white="\033[0;37;1m"
+echo_white="\033[0;37m"
 echo_orange="\033[0;91m"
 
 echo_bold_black="\033[30;1m"
@@ -130,5 +129,5 @@ echo_background_yellow="\033[43m"
 echo_background_blue="\033[44m"
 echo_background_magenta="\033[45m"
 echo_background_cyan="\033[46m"
-echo_background_white="\033[47;1m"
+echo_background_white="\033[47m"
 echo_background_orange="\033[101m"

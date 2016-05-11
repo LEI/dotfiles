@@ -1,7 +1,3 @@
-#
-# OS X aliases
-#
-
 [[ "$(uname -s)" == "Darwin" ]] || return
 
 # Get OS X Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages

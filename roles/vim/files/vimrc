@@ -327,10 +327,10 @@ endfunction
 
 call SetBackground()
 try
-  " Apply the colorscheme
   colorscheme solarized
-catch
-  echoerr 'Could not load colorscheme'
+  call togglebg#map("<F5>")
+catch /E185:/
+  colorscheme default
 endtry
 
 " Hide line number background

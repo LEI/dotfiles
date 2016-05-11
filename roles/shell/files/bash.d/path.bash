@@ -1,7 +1,3 @@
-#
-# ~/.path
-#
-
 # Prepend to PATH
 # pathmunge /usr/local/sbin
 
@@ -25,5 +21,3 @@ fi
 
 # Ruby gems
 pathmunge "$GEM_HOME/bin" after
-
-# vi: ft=sh

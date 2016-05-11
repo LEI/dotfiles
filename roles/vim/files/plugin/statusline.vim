@@ -82,16 +82,13 @@ function! Statusline(winnr)
   let l:s = ''
 
   if winwidth(0) > 40
-    " Mode
-
+    " Vim mode
     let l:s.= ' %{StatuslineMode(w:mode)}'
   endif
 
   if winwidth(0) > 60
     " Fugitive
-    if exists('*fugitive#head') && strlen(fugitive#head(7)) > 0
-      let l:s.= ' %{fugitive#head(7)}'
-    endif
+    let l:s.= '%( %{StatuslineFugitive()}%)'
   endif
 
   " Truncate
@@ -103,23 +100,10 @@ function! Statusline(winnr)
   let l:s.= '%f '
 
   " Flags
-  " %H HLP (help buffer)
-  " %R RO (readonly)
-  " %M +,- (modifiable)
   let l:s.= '%([%{StatuslineFlags()}]%)'
-  " if &filetype !~ 'help\|netrw\|vim-plug'
-  "   let l:s.= '[%R%M]'
-  " elseif &filetype ==  'help'
-  "   let l:s.= '[H]'
-  " endif
 
   " Split
   let l:s.= '%='
-
-  " Syntastic
-  let l:s.= '%#StatuslineWarning#'
-  let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
-  let l:s.= '%*'
 
   if winwidth(0) > 80
     " The name of the register in effect for the current normal mode
@@ -155,6 +139,11 @@ function! Statusline(winnr)
   " File position
   let l:s.= ' %P '
 
+  " Syntastic
+  let l:s.= '%#StatuslineWarning#'
+  let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
+  let l:s.= '%*'
+
   return l:s
 endfunction
 
@@ -174,13 +163,27 @@ function! StatuslineMode(mode)
   "       \ l:mode
 endfunction
 
+function! StatuslineFugitive()
+  if !exists('*fugitive#head')
+    return ''
+  endif
+
+  " system('git status --porcelain ' . shellescape(expand('%')))
+  return fugitive#head(7)
+endfunction
+
 function! StatuslineFlags()
   let l:flags = []
 
+  " %H HLP (help buffer)
+  " %R RO (readonly)
+  " %M +,- (modifiable)
+
+  " %w,%W -> [Preview],PRV
+  " %a -> Argument list status if argv() > 1
+  " %T,%X <N> -> 'tabline'
+
   " Note: gundo, help and vim-plug set &buftype to 'nofile'
-  "   %w,%W -> [Preview],PRV
-  "   %a -> Argument list status if argv() > 1
-  "   %T,%X <N> -> 'tabline'
 
   if &buftype == 'help'
     call add(l:flags, 'H')

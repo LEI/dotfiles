@@ -17,15 +17,11 @@ tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
   # - nhdaly/tmux-scroll-copy-mode
-  # - battery
-  # CPU
-  # set -g @plugin 'tmux-plugins/tmux-cpu'
-  # {cpu_icon} #{cpu_percentage}
-  # Battery
-  # set -g @plugin 'tmux-plugins/tmux-battery'
-  # :( 'thewtex/tmux-mem-cpu-load'
+  # - tmux-plugins/tmux-cpu
+  # - tmux-plugins/tmux-battery
+  # - thewtex/tmux-mem-cpu-load
 
-# No {{ role_path }}
+# Y U NO {{ role_path }}
 tmux_role_path: ../roles/tmux
 
 # Dynamic template:

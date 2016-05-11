@@ -15,3 +15,6 @@ for option in autocd globstar; do
   shopt -s "$option" 2> /dev/null
 done
 unset option
+
+# Make bash check its window size after a process completes
+# shopt -s checkwinsize

@@ -20,7 +20,8 @@ _source $BASH_DIR/{aliases,completion,settings}
 
 _source $BASH_DIR/library/{colorize-cat-less,colors,pathmunge}.bash
 
-# Colors are used in ~/.bash_prompt
-# ~/.path is using pathmunge
-# ~/.extra may not exist
-_source ~/.{bash_prompt,exports,path,extra} 2>/dev/null
+# Colors are used in ~/.bash.d/prompt
+# ~/.bash.d/path is using pathmunge
+_source $BASH_DIR/{exports,path,prompt}.bash
+
+_source ~/.bashrc.local 2>/dev/null
