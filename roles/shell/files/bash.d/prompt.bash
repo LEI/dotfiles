@@ -149,10 +149,10 @@ prompt_git() {
   #   esac
   # done < <(git status -z --porcelain)
 
-  local status=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
-
-  if [[ "$count" == "0" ]]; then
-    return
+  local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
+  local status=
+  if [[ "$count" -ne 0 ]]; then
+    status="*"
   fi
 
   printf "$format" "$string" "$status"
