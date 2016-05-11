@@ -5,6 +5,7 @@
 
 # Test if a command is available
 has() {
+  [[ -z "${1:-}" ]] && return 1
   hash "$1" 2>/dev/null
 }
 

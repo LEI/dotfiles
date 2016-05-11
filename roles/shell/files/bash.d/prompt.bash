@@ -176,12 +176,12 @@ git_status() {
 
   flags=
   # TODO: color and symbol vars
+  [[ "$staged" -gt 0 ]] && flags+="*"
+  [[ "$updated" -gt 0 ]] && flags+="!"
+  [[ "$untracked" -gt 0 ]] && flags+="?"
   [[ "$changed" -gt 0 ]] && flags+="~"
   [[ "$added" -gt 0 ]] && flags+="+"
   [[ "$deleted" -gt 0 ]] && flags+="-"
-  [[ "$updated" -gt 0 ]] && flags+="!"
-  [[ "$untracked" -gt 0 ]] && flags+="?"
-  [[ "$staged" -gt 0 ]] && flags+="*"
   if [[ -n "$flags" ]]; then
     flags="$flags"
   else
