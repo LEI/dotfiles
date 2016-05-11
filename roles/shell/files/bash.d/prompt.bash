@@ -121,41 +121,65 @@ prompt_git() {
   local string=
   local format="${1:- %s %s}"
 
-  # local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
-  #   --is-bare-repository --is-inside-work-tree \
-  #   --short HEAD 2>/dev/null)"
-  # local rev_parse_exit_code="$?"
-  # if [[ -z "$repo_info" ]]; then
-  #   return
-  # fi
+  # Git prompt symbols
+  # PROMPT_SYMBOL_DIRTY="✘"
+  # PROMPT_SYMBOL_CLEAN="✔"
+  # PROMPT_SYMBOL_ADDED="✚"
+  # PROMPT_SYMBOL_MODIFIED="✹"
+  # PROMPT_SYMBOL_DELETED="✖"
+  # PROMPT_SYMBOL_RENAMED="➜"
+  # PROMPT_SYMBOL_UNMERGED="═"
+  # PROMPT_SYMBOL_UNTRACKED="✭"
 
-  local branch=$(git symbolic-ref HEAD 2>/dev/null)
-  if [[ -n "$branch" ]]; then
-    string=${branch##refs/heads/}
-  else
+  local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
+    --is-bare-repository --is-inside-work-tree \
+    --short HEAD 2>/dev/null)"
+  local rev_parse_exit_code="$?"
+  if [[ -z "$repo_info" ]]; then
     return
   fi
 
-  # local status=
-  # while IFS= read -r -d '' file; do
-  #   case $file in
-  #     M*|\ M*) status+="M" ;;
-  #     A*|\ A*) status+="A" ;;
-  #     D*|\ D*) status+="D" ;;
-  #     \ R*) status+="R" ;;
-  #     # C*) copied= ;;
-  #     # U*) updated= ;; # but unmerged
-  #     \?*) status+="?" ;;
-  #   esac
-  # done < <(git status -z --porcelain)
+  # Branch name
+  # local branch=$(git symbolic-ref HEAD 2>/dev/null)
+  # if [[ -n "$branch" ]]; then
+  #   string=${branch##refs/heads/}
+  # fi
 
-  local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
-  local status=
-  if [[ "$count" -ne 0 ]]; then
-    status="*"
-  fi
 
-  printf "$format" "$string" "$status"
+  local line
+  local file_status
+  local status
+  while IFS= read -r -d '' line; do
+    file_status=${line:0:2}
+    case $file_status in
+      \#\#) branch_line="${line#\#\# }" ;;
+      ?M) status+="M" ;; # Modified
+      # ?A) status+="A" ;; # Added
+      ?D) status+="D" ;; # Deleted
+      U?) status+="U" ;; # Updated (conflict)
+      \?\?) status+="?" ;; # Untracked
+      *) status+="*" ;; # Staged
+    esac
+  done < <(git status -z --porcelain --branch)
+  ## master...origin/master [ahead #]
+
+  local branch=${branch_line%\.\.\.*}
+  # local remote=$(git remote show)
+
+  local remote=${branch_line#$branch\.\.\.}
+  remote=${remote% [ahead*}
+
+  local ahead=${branch_line#*[ahead }
+  ahead=${ahead%]}
+
+  string="$branch ($remote) +$ahead [$status]"
+
+  # Repository state
+  # local flags=
+  # local status=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
+  # if [[ "$status" -ne 0 ]]; then
+  #   flags="*"
+  # fi
 
   # if [[ "$rev_parse_exit_code" = "0" ]]; then
   #   local short_sha="${repo_info##*$'\n'}"
@@ -176,15 +200,7 @@ prompt_git() {
   #   fi
   # fi
 
-  # Git prompt symbols
-  # PROMPT_SYMBOL_DIRTY="✘"
-  # PROMPT_SYMBOL_CLEAN="✔"
-  # PROMPT_SYMBOL_ADDED="✚"
-  # PROMPT_SYMBOL_MODIFIED="✹"
-  # PROMPT_SYMBOL_DELETED="✖"
-  # PROMPT_SYMBOL_RENAMED="➜"
-  # PROMPT_SYMBOL_UNMERGED="═"
-  # PROMPT_SYMBOL_UNTRACKED="✭"
+  printf "$format" "$string" "$flags"
 }
 
 # # Colored hints (only when used with 2 arguments as prompt command)
