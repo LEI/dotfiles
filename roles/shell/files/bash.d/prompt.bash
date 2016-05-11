@@ -76,10 +76,12 @@ prompt_command() {
   PS1+="${c_reset}"
 
   # Git
+  # TODO: disable ahead or flags?
   local git_branch_format="${c_dim} on ${c_branch}%s${c_reset}"
-  local git_flags_format="${c_dim}[%s]${c_reset}"
+  local git_ahead_format="${c_dim}%s${c_reset}"
+  local git_flags_format=" %s"
   # Colors in format string?
-  PS1+=$(git_status) # "$git_branch_format" "$git_flags_format")
+  PS1+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
 
   # End of the first line
   PS1+='\n'
@@ -122,8 +124,8 @@ prompt_right() {
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
 git_status() {
   local branch_format="${1:- %s}"
-  local ahead_format="${1:-(%s)}"
-  local flags_format="${1:-%s}"
+  local ahead_format="${2:-(%s)}"
+  local flags_format="${3:-%s}"
 
   # Git prompt symbols
   # PROMPT_SYMBOL_DIRTY="✘"
