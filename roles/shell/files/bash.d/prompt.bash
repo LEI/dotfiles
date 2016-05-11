@@ -122,7 +122,8 @@ prompt_right() {
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
 git_status() {
   local branch_format="${1:- %s}"
-  local flags_format="${1:-[%s]}"
+  local ahead_format="${1:-(%s)}"
+  local flags_format="${1:-%s}"
 
   # Git prompt symbols
   # PROMPT_SYMBOL_DIRTY="✘"
@@ -165,7 +166,11 @@ git_status() {
   if [[ "$branch_line" =~ "[ahead" ]]; then
     # remote_branch="${remote_branch% [ahead*}"
     ahead="${branch_line#*[ahead }"
-    ahead=" +${ahead%]}"
+    ahead="+${ahead%]}"
+  fi
+
+  if [[ -z "$ahead" ]] || [[ "$ahead" -eq 0 ]]; then
+    ahead_format="%s"
   fi
 
   local flags=
@@ -184,7 +189,7 @@ git_status() {
     flags_format="%s"
   fi
 
-  printf "${branch_format}${flags_format}" "${branch}${ahead}" "${flags}"
+  printf "${branch_format}${ahead_format}${flags_format}" "${branch}" "${ahead}" "${flags}"
 
   # local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
   # local sref=$(git symbolic-ref HEAD 2>/dev/null)
