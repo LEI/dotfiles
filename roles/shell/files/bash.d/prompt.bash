@@ -23,17 +23,16 @@ prompt_command() {
   local ps2_symbol="${PROMPT_SYMBOL_PS2:-${PROMPT_SYMBOL:-> }}"
   local err_symbol="${PROMPT_SYMBOL_ERROR:-! }"
 
-  # Colors TODO: function
-  local c_reset="\[${reset}\]"
-  local c_dim="\[${b_yellow}\]" # \[\e[2m\]
-  local c_user="\[${blue}\]"
-  local c_user_root="\[${red}\]"
-  local c_host="\[${b_blue}\]"
-  local c_host_ssh="\[${bold}\]\[${red}\]"
-  local c_cwd="\[${white}\]"
-  local c_branch="\[${red}\]"
-  local c_symbol="\[${white}\]"
-  local c_symbol_error="\[${red}\]"
+  local reset_color="\[${reset}\]"
+  local dim_color="\[${b_yellow}\]"
+  local user_color="\[${blue}\]"
+  local user_root_color="\[${red}\]"
+  local host_color="\[${b_blue}\]"
+  local host_ssh_color="\[${bold}\]\[${red}\]"
+  local cwd_color="\[${white}\]"
+  local branch_color="\[${red}\]"
+  local symbol_color="\[${white}\]"
+  local symbol_error_color="\[${red}\]"
 
   # Start of the primary prompt
   PS1='\n'
@@ -43,42 +42,42 @@ prompt_command() {
 
   # Timestamp to the right
   local prompt_right='$(date +%H:%M:%S)'
-  PS1+='\[$(tput sc; prompt_right "'${prompt_right}'" "'${c_dim}'"; tput rc)\]'
+  PS1+='\[$(tput sc; prompt_right "'${prompt_right}'" "'${dim_color}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then
     # Highlight when logged in as root
-    PS1+="${c_user_root}"
+    PS1+="${user_root_color}"
   else
-    PS1+="${c_user}"
+    PS1+="${user_color}"
   fi
   PS1+='\u'
-  PS1+="${c_reset}"
+  PS1+="${reset_color}"
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
   if [[ "$user" != "$host" ]]; then
-    PS1+="${c_dim} at ${c_reset}"
+    PS1+="${dim_color} at ${reset_color}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH
-      PS1+="${c_host_ssh}"
+      PS1+="${host_ssh_color}"
     else
-      PS1+="${c_host}"
+      PS1+="${host_color}"
     fi
     PS1+='\h'
-    PS1+="${c_reset}"
+    PS1+="${reset_color}"
   fi
 
-  PS1+="${c_dim} in ${c_reset}"
+  PS1+="${dim_color} in ${reset_color}"
   # Working directory
-  PS1+="${c_cwd}"
+  PS1+="${cwd_color}"
   PS1+='\w'
-  PS1+="${c_reset}"
+  PS1+="${reset_color}"
 
   # Git
   # TODO: disable ahead or flags?
-  local git_branch_format="${c_dim} on ${c_branch}%s${c_reset}"
-  local git_ahead_format="${c_dim}(%s)${c_reset}"
+  local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
+  local git_ahead_format="${dim_color}(%s)${reset_color}"
   local git_flags_format="%s"
   # Colors in format string?
   PS1+=$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")
@@ -88,9 +87,9 @@ prompt_command() {
 
   # Exit code color and symbol
   if [[ $exit -eq 0 ]]; then
-    PS1+="${c_symbol}${ps1_symbol}${c_reset}"
+    PS1+="${symbol_color}${ps1_symbol}${reset_color}"
   else
-    PS1+="${c_symbol_error}${err_symbol}${c_reset}"
+    PS1+="${symbol_error_color}${err_symbol}${reset_color}"
   fi
 
   # Secondary prompt
@@ -252,11 +251,11 @@ git_status() {
 # __git_ps1 " on %s" | sed -re "s/(\son\s)(\W*)(\w+)(\W*)/\1\2$red\3$white\4/"
 
 # __git_ps1 "${prompt}" "${prompt_end}" "${prefix_git}%s${suffix_git}"
-# local c_git_master="\[${yellow}\]"
+# local git_master_color="\[${yellow}\]"
 # # Change master branch color from green to yellow
 # local git_branch='__git_ps1_branch_name'
 # if [[ "${!git_branch}" == "master" ]]; then
-#   PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${c_git_master}\${${git_branch}}"}"
+#   PS1="${PS1/"\[\e[32m\]\${${git_branch}}"/"${git_master_color}\${${git_branch}}"}"
 # fi
 
 # PROMPT_SYMBOL_DIRTY="✘"
