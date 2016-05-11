@@ -187,7 +187,7 @@ git_status() {
   else
     clean=1
     # flags -> PROMPT_SYMBOL_CLEAN?
-    flags_format="%s"
+    flags_format="=%s"
   fi
 
   printf "${branch_format}${ahead_format}${flags_format}" "${branch}" "${ahead}" "${flags}"
