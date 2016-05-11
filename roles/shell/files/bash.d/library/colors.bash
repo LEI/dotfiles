@@ -7,6 +7,9 @@ if tput setaf 1 &> /dev/null; then
 
   reset=$(tput sgr0)
   bold=$(tput bold)
+  # blink=$(tput blink)
+  # reverse=$(tput smso)
+  # underline=$(tput smul)
 
   black=$(tput setaf 0)
   red=$(tput setaf 1)

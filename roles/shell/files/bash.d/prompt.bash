@@ -76,7 +76,10 @@ prompt_command() {
   PS1+="${c_reset}"
 
   # Git
-  PS1+=$(git_status "${c_dim} on ${c_branch}%s${c_reset}%s")
+  local git_branch_format="${c_dim} on ${c_branch}%s${c_reset}"
+  local git_flags_format="${c_dim}[%s]${c_reset}"
+  # Colors in format string?
+  PS1+=$(git_status) # "$git_branch_format" "$git_flags_format")
 
   # End of the first line
   PS1+='\n'
@@ -118,8 +121,8 @@ prompt_right() {
 
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
 git_status() {
-  local string=
-  local format="${1:- %s %s}"
+  local branch_format="${1:- %s}"
+  local flags_format="${1:-[%s]}"
 
   # Git prompt symbols
   # PROMPT_SYMBOL_DIRTY="✘"
@@ -139,45 +142,47 @@ git_status() {
     return
   fi
 
-  local line
-  local file_status
+  local line=
+  local file_status=
+  local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
   while IFS= read -r -d '' line; do
     file_status=${line:0:2}
     case $file_status in
       \#\#) branch_line="${line#\#\# }" ;;
-      ?M) changed_flag=1 ;; # status+="M" ;; # Modified
-      ?A) added_flag=1 ;; # status+="A" ;; # Added
-      ?D) deleted_flag=1 ;; # status+="D" ;; # Deleted
-      U?) updated_flag=1 ;; # status+="U" ;; # Updated (conflict)
-      \?\?) untracked_flag=1 ;; # status+="?" ;; # Untracked
-      *) staged_flag=1 ;; # status+="*" ;; # Staged
+      ?M) ((changed++)) ;; # status+="M" ;; # Modified
+      ?A) ((added++)) ;; # status+="A" ;; # Added
+      ?D) ((deleted++)) ;; # status+="D" ;; # Deleted
+      U?) ((updated++)) ;; # status+="U" ;; # Updated (conflict)
+      \?\?) ((untracked++)) ;; # status+="?" ;; # Untracked
+      *) ((staged++)) ;; # status+="*" ;; # Staged
     esac
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #]
 
-  local branch="${branch_line%\.\.\.*}"
-
-  local remote_branch="${branch_line#$branch\.\.\.}"
-
   local ahead=
+  local branch="${branch_line%\.\.\.*}"
+  # local remote_branch="${branch_line#$branch\.\.\.}"
   if [[ "$branch_line" =~ "[ahead" ]]; then
-    remote_branch="${remote_branch% [ahead*}"
-
+    # remote_branch="${remote_branch% [ahead*}"
     ahead="${branch_line#*[ahead }"
     ahead=" +${ahead%]}"
   fi
-  branch="${remote_branch}"
 
   local flags=
-  [[ "$changed_flag" -eq 1 ]] && flags+="~"
-  [[ "$added_flag" -eq 1 ]] && flags+="+"
-  [[ "$deleted_flag" -eq 1 ]] && flags+="-"
-  [[ "$updated_flag" -eq 1 ]] && flags+="!"
-  [[ "$untracked_flag" -eq 1 ]] && flags+="?"
-  [[ "$staged_flag" -eq 1 ]] && flags+="*"
-  [[ -n "$flags" ]] && flags=" [$flags]"
+  local clean=0
+  [[ "$changed" -gt 0 ]] && flags+="~"
+  [[ "$added" -gt 0 ]] && flags+="+"
+  [[ "$deleted" -gt 0 ]] && flags+="-"
+  [[ "$updated" -gt 0 ]] && flags+="!"
+  [[ "$untracked" -gt 0 ]] && flags+="?"
+  [[ "$staged" -gt 0 ]] && flags+="*"
+  if [[ -n "$flags" ]]; then
+    flags="$flags"
+  else
+    clean=1
+  fi
 
-  string="${branch}${ahead}"
+  printf "${branch_format}${flags_format}" "${branch}${ahead}" "${flags}"
 
   # local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
   # local sref=$(git symbolic-ref HEAD 2>/dev/null)
@@ -209,8 +214,6 @@ git_status() {
   #     return $exit
   #   fi
   # fi
-
-  printf "$format" "$string" "$flags"
 }
 
 # # Colored hints (only when used with 2 arguments as prompt command)
