@@ -27,8 +27,8 @@ prompt_command() {
   local symbol_error_color="\[${red}\]"
 
   local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
-  local git_ahead_format="${dim_color}%s${reset_color}"
-  local git_flags_format=" [${white}%s${reset_color}]"
+  local git_ahead_format="${dim_color}(%s)${reset_color}"
+  local git_flags_format="%s"
 
   # Default symbols
   local ps1_symbol="${PROMPT_SYMBOL:-$ }"
@@ -37,17 +37,16 @@ prompt_command() {
 
   # Start of the prompt
   PS1=''
+  # PS1+='\n'
 
   # Terminal title to the current working directory
-  # Tmux? \033k\w\033\\
+  # Tmus escape sequence? \033k\w\033\\
   # OSC title? \033]2;\w\033\\
   PS1+='\033]0;\w\007'
-  # FIXME: weird prompt with a title escape sequence on the same line
-  PS1+='\n'
 
   # Timestamp to the right
-  # local date='$(date +%H:%M:%S)'
-  # PS1+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
+  local date='$(date +%H:%M:%S)'
+  PS1+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then
@@ -85,7 +84,7 @@ prompt_command() {
   PS1+="$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")"
 
   # End of the first line
-  PS1+='\n'
+  # PS1+='\n'
 
   # Exit code color and symbol
   if [[ $exit -eq 0 ]]; then
@@ -93,6 +92,7 @@ prompt_command() {
   else
     PS1+="${symbol_error_color}${err_symbol}${reset_color}"
   fi
+  PS1=\w
 
   # Secondary prompt
   PS2="${ps2_symbol}"
