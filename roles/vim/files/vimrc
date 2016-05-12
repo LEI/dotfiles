@@ -388,7 +388,7 @@ command! Fr set spelllang=fr
 " Auto commands {{{1
 
 " Show cursor line on active window only
-" set cursorline
+set cursorline
 augroup HideCursorline
   autocmd!
   autocmd WinEnter * set cursorline

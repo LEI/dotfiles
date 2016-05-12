@@ -26,10 +26,6 @@ prompt_command() {
   local symbol_color="\[${white}\]"
   local symbol_error_color="\[${red}\]"
 
-  local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
-  local git_diff_format="${dim_color}%s${reset_color}"
-  local git_flags_format=" ${white}%s${reset_color}"
-
   # Default symbols
   local ps1_symbol="${PROMPT_SYMBOL:-$ }"
   local ps2_symbol="${PROMPT_SYMBOL_PS2:-${PROMPT_SYMBOL:-> }}"
@@ -80,8 +76,11 @@ prompt_command() {
   p+="${reset_color}"
 
   # Git prompt
-  # TODO: disable ahead or flags?
+  # TODO disable ahead or flags?
   # Colors in format string?
+  local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
+  local git_diff_format="${dim_color}%s${reset_color}"
+  local git_flags_format=" ${white}%s${reset_color}"
   p+="$(git_status "$git_branch_format" "$git_diff_format" "$git_flags_format")"
 
   # End of the first line
@@ -142,9 +141,12 @@ git_status() {
   # Repository status flags
   local flags_format="${3:-%s}"
 
-  # TODO: async git fetch
-
-  # local clean=0
+  # TODO async git fetch, check time
+  # local fetch_head="$repo/.git/FETCH_HEAD"
+  # $(git fetch --quiet &> /dev/null &)
+  # git remote update &> /dev/null
+  # git rev-pase @{0} @{u}
+  # git rev-list HEAD...origin/master --count
 
   local line file branch_line
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
@@ -162,9 +164,13 @@ git_status() {
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #, behind, #]
 
+  # Local branch name
+  local branch="${branch_line%\.\.\.*}"
+  # Remote name and remote branch name (origin/master)
+  # local remote_branch="${branch_line#$branch\.\.\.}"
+  # remote_branch="${remote_branch% [*}"
+
   local behind ahead
-  # local behind behind_format="${2:-%s}"
-  # local ahead ahead_format="${2:-%s}"
   local status pattern
   for status in {ahead,behind}; do
     pattern='(\[|[[:space:]])'${status}'[[:space:]]+([[:digit:]])(,|\])'
@@ -176,12 +182,40 @@ git_status() {
     fi
   done
 
-  local branch="${branch_line%\.\.\.*}"
-  # Remote name and remote branch name (origin/master)
-  local remote_branch="${branch_line#$branch\.\.\.}"
-  if [[ -n "$ahead" ]] || [[ -n "$behind" ]]; then
-    remote_branch="${remote_branch% [*}"
+  local diff=
+  local behind_flag="<"
+  local ahead_flag=">"
+  [[ -n "$behind" ]] && diff+="$behind_flag"
+  [[ -n "$ahead" ]] && diff+="$ahead_flag"
+  [[ -n "$diff" ]] || diff_format="%s"
+  # [[ -n "$diff" ]] || diff="="
+
+  local flags=
+  local staged_flag="*"
+  local updated_flag="!"
+  local untracked_flag="?"
+  local changed_flag="~"
+  local added_flag="+"
+  local deleted_flag="-"
+  [[ "$staged" -gt 1 ]] && flags+="$staged" # Display count if > 0
+  [[ "$staged" -gt 0 ]] && flags+="$staged_flag"
+  [[ "$updated" -gt 0 ]] && flags+="$updated_flag"
+  [[ "$untracked" -gt 0 ]] && flags+="$untracked_flag"
+  [[ "$changed" -gt 0 ]] && flags+="$changed_flag"
+  [[ "$added" -gt 0 ]] && flags+="$added_flag"
+  [[ "$deleted" -gt 0 ]] && flags+="$deleted_flag"
+  if [[ -n "$flags" ]]; then
+    flags="$flags"
+  else
+    # flags -> PROMPT_SYMBOL_CLEAN?
+    flags_format="%s"
   fi
+
+  # TODO gitstring
+  local printf_format="${branch_format}${diff_format}${flags_format}"
+  printf -- "${printf_format}" "${branch}" "${diff}" "${flags}"
+
+  # [[ "${__printf_v-}" != yes ]]
 
   # if [[ "$branch_line" =~ "[ahead" ]]; then
   #   ahead="${branch_line#*[ahead }"
@@ -197,29 +231,6 @@ git_status() {
   #     # Committed changes
   #   fi
   # fi
-
-  local diff=
-  [[ -n "$behind" ]] && diff+="<" # "$behind<"
-  [[ -n "$ahead" ]] && diff+=">" # ">$ahead"
-  [[ -n "$diff" ]] || diff="="
-
-  local flags=
-  # TODO: color and symbol vars
-  [[ "$staged" -gt 0 ]] && flags+="*"
-  [[ "$updated" -gt 0 ]] && flags+="!"
-  [[ "$untracked" -gt 0 ]] && flags+="?"
-  [[ "$changed" -gt 0 ]] && flags+="~"
-  [[ "$added" -gt 0 ]] && flags+="+"
-  [[ "$deleted" -gt 0 ]] && flags+="-"
-  if [[ -n "$flags" ]]; then
-    flags="$flags"
-  else
-    # clean=1
-    # flags -> PROMPT_SYMBOL_CLEAN?
-    flags_format="%s"
-  fi
-
-  printf "${branch_format}${diff_format}${flags_format}" "${branch}" "${diff}" "${flags}"
 
   # local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
   # local sref=$(git symbolic-ref HEAD 2>/dev/null)
