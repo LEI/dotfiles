@@ -162,12 +162,6 @@ git_status() {
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #, behind, #]
 
-  local branch="${branch_line%\.\.\.*}"
-  # Remote name and remote branch name (origin/master)
-  local remote_branch="${branch_line#$branch\.\.\.}"
-  branch="${remote_branch% [*}"
-
-
   local behind ahead
   # local behind behind_format="${2:-%s}"
   # local ahead ahead_format="${2:-%s}"
@@ -181,6 +175,13 @@ git_status() {
       fi
     fi
   done
+
+  local branch="${branch_line%\.\.\.*}"
+  # Remote name and remote branch name (origin/master)
+  local remote_branch="${branch_line#$branch\.\.\.}"
+  if [[ -n "$ahead" ]] || [[ -n "$behind" ]]; then
+    remote_branch="${remote_branch% [*}"
+  fi
 
   # if [[ "$branch_line" =~ "[ahead" ]]; then
   #   ahead="${branch_line#*[ahead }"
