@@ -27,7 +27,7 @@ prompt_command() {
   local symbol_error_color="\[${red}\]"
 
   local git_branch_format="${dim_color} on ${branch_color}%s${reset_color}"
-  local git_ahead_format="${dim_color}+%s${reset_color}"
+  local git_diff_format="${dim_color}%s${reset_color}"
   local git_flags_format=" ${white}%s${reset_color}"
 
   # Default symbols
@@ -82,7 +82,7 @@ prompt_command() {
   # Git prompt
   # TODO: disable ahead or flags?
   # Colors in format string?
-  p+="$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")"
+  p+="$(git_status "$git_branch_format" "$git_diff_format" "$git_flags_format")"
 
   # End of the first line
   p+='\n'
@@ -135,14 +135,18 @@ git_status() {
     return
   fi
 
+  # TODO: async git fetch
+
   # Branch name (master)
   local branch branch_format="${1:- %s}"
   # Difference between HEAD and its upstream (+n)
-  local ahead ahead_format="${2:-(%s)}"
+  local diff diff_format="${2:-(%s)}"
+  # local behind behind_format="${2:-%s}"
+  # local ahead ahead_format="${2:-%s}"
   # Remote and branch name (origin/master)
-  local remote_branch
+  # local remote_branch
   # Repository status flags
-  local flags flags_format="${3:-%s}"
+  local flags_format="${3:-%s}"
   # local clean=0
 
   local line file
@@ -159,28 +163,43 @@ git_status() {
       *) ((staged++)) ;; # status+="*" ;; # Staged
     esac
   done < <(git status -z --porcelain --branch)
-  ## master...origin/master [ahead #]
+  ## master...origin/master [ahead #, behind, #]
 
   branch="${branch_line%\.\.\.*}"
-  ahead=
-  remote_branch="${branch_line#$branch\.\.\.}"
+  # remote_branch="${branch_line#$branch\.\.\.}"
 
-  if [[ "$branch_line" =~ "[ahead" ]]; then
-    ahead="${branch_line#*[ahead }"
-    ahead="${ahead%]}"
-    remote_branch="${remote_branch% [ahead*}"
-  fi
-
-  if [[ -z "$ahead" ]]; then
-    if [[ "$ahead" -eq 0 ]]; then
-      # ahead="="
-      ahead_format="%s"
-    # elif [[ "$ahead" -gt 0 ]]; then
-      # Committed changes
+  local status pattern
+  for status in {ahead,behind}; do
+    pattern='(\[|[[:space:]])'${status}'[[:space:]]+([[:digit:]])(,|\])'
+    if [[ "$branch_line" =~ $pattern ]]; then
+      if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
+        # ${!status}="${BASH_REMATCH[2]}"
+        declare "${status}"="${BASH_REMATCH[2]}"
+      fi
     fi
-  fi
+  done
 
-  flags=
+  local diff
+  [[ -z "$behind" ]] && [[ -z "$ahead" ]] && diff="="
+  [[ -n "$behind" ]] && diff+="<"
+  [[ -n "$ahead" ]] && diff+=">"
+
+  # if [[ "$branch_line" =~ "[ahead" ]]; then
+  #   ahead="${branch_line#*[ahead }"
+  #   ahead="${ahead%]}"
+  #   remote_branch="${remote_branch% [ahead*}"
+  # fi
+
+  # if [[ -z "$ahead" ]]; then
+  #   if [[ "$ahead" -eq 0 ]]; then
+  #     # ahead="="
+  #     ahead_format="%s"
+  #   # elif [[ "$ahead" -gt 0 ]]; then
+  #     # Committed changes
+  #   fi
+  # fi
+
+  local flags=
   # TODO: color and symbol vars
   [[ "$staged" -gt 0 ]] && flags+="*"
   [[ "$updated" -gt 0 ]] && flags+="!"
@@ -196,7 +215,7 @@ git_status() {
     flags_format="%s"
   fi
 
-  printf "${branch_format}${ahead_format}${flags_format}" "${branch}" "${ahead}" "${flags}"
+  printf "${branch_format}${diff_format}${flags_format}" "${branch}" "${diff}" "${flags}"
 
   # local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
   # local sref=$(git symbolic-ref HEAD 2>/dev/null)
