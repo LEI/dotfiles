@@ -135,21 +135,20 @@ git_status() {
     return
   fi
 
-  # TODO: async git fetch
-
   # Branch name (master)
-  local branch branch_format="${1:- %s}"
+  local branch_format="${1:- %s}"
   # Difference between HEAD and its upstream (+n)
-  local diff diff_format="${2:-(%s)}"
-  # local behind behind_format="${2:-%s}"
-  # local ahead ahead_format="${2:-%s}"
-  # Remote and branch name (origin/master)
-  # local remote_branch
+  local diff_format="${2:-(%s)}"
   # Repository status flags
   local flags_format="${3:-%s}"
+
+  # TODO: async git fetch
+
+  # Remote and branch name (origin/master)
+  # local remote_branch
   # local clean=0
 
-  local line file
+  local line file branch_line
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
   while IFS= read -r -d '' line; do
     file=${line:0:2}
@@ -165,24 +164,23 @@ git_status() {
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #, behind, #]
 
-  branch="${branch_line%\.\.\.*}"
+  local branch="${branch_line%\.\.\.*}"
   # remote_branch="${branch_line#$branch\.\.\.}"
 
+
+  local behind ahead
+  # local behind behind_format="${2:-%s}"
+  # local ahead ahead_format="${2:-%s}"
   local status pattern
   for status in {ahead,behind}; do
     pattern='(\[|[[:space:]])'${status}'[[:space:]]+([[:digit:]])(,|\])'
     if [[ "$branch_line" =~ $pattern ]]; then
       if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
-        # ${!status}="${BASH_REMATCH[2]}"
-        declare "${status}"="${BASH_REMATCH[2]}"
+        ${!status}="${BASH_REMATCH[2]}"
+        # declare "${status}"="${BASH_REMATCH[2]}"
       fi
     fi
   done
-
-  local diff
-  [[ -z "$behind" ]] && [[ -z "$ahead" ]] && diff="="
-  [[ -n "$behind" ]] && diff+="<" # "$behind<"
-  [[ -n "$ahead" ]] && diff+=">" # ">$ahead"
 
   # if [[ "$branch_line" =~ "[ahead" ]]; then
   #   ahead="${branch_line#*[ahead }"
@@ -198,6 +196,11 @@ git_status() {
   #     # Committed changes
   #   fi
   # fi
+
+  local diff=
+  [[ -n "$behind" ]] && diff+="<" # "$behind<"
+  [[ -n "$ahead" ]] && diff+=">" # ">$ahead"
+  [[ -n "$diff" ]] || diff="="
 
   local flags=
   # TODO: color and symbol vars
