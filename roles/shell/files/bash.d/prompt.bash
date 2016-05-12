@@ -134,114 +134,7 @@ git_status() {
     return
   fi
 
-  # Branch name (master)
-  local branch_format="${1:- %s}"
-  # Difference between HEAD and its upstream (+n)
-  local diff_format="${2:-(%s)}"
-  # Repository status flags
-  local flags_format="${3:-%s}"
-
-  # TODO async git fetch, check time
-  # local fetch_head="$repo/.git/FETCH_HEAD"
-  # $(git fetch --quiet &> /dev/null &)
-  # git remote update &> /dev/null
-  # git rev-pase @{0} @{u}
-  # git rev-list HEAD...origin/master --count
-
-  local line file branch_line
-  local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
-  while IFS= read -r -d '' line; do
-    file=${line:0:2}
-    case $file in
-      \#\#) branch_line="${line#\#\# }" ;;
-      ?M) ((changed++)) ;; # status+="M" ;; # Modified
-      ?A) ((added++)) ;; # status+="A" ;; # Added
-      ?D) ((deleted++)) ;; # status+="D" ;; # Deleted
-      U?) ((updated++)) ;; # status+="U" ;; # Updated (conflict)
-      \?\?) ((untracked++)) ;; # status+="?" ;; # Untracked
-      *) ((staged++)) ;; # status+="*" ;; # Staged
-    esac
-  done < <(git status -z --porcelain --branch)
-  ## master...origin/master [ahead #, behind, #]
-
-  # Local branch name
-  local branch="${branch_line%\.\.\.*}"
-  # Remote name and remote branch name (origin/master)
-  # local remote_branch="${branch_line#$branch\.\.\.}"
-  # remote_branch="${remote_branch% [*}"
-
-  local behind ahead
-  local status pattern
-  for status in {ahead,behind}; do
-    pattern='(\[|[[:space:]])'${status}'[[:space:]]+([[:digit:]])(,|\])'
-    if [[ "$branch_line" =~ $pattern ]]; then
-      if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
-        # ${!status}="${BASH_REMATCH[2]}"
-        declare "${status}"="${BASH_REMATCH[2]}"
-      fi
-    fi
-  done
-
-  local diff=
-  local behind_flag="<"
-  local ahead_flag=">"
-  [[ -n "$behind" ]] && diff+="$behind_flag"
-  [[ -n "$ahead" ]] && diff+="$ahead_flag"
-  [[ -n "$diff" ]] || diff_format="%s"
-  # [[ -n "$diff" ]] || diff="="
-
-  local flags=
-  local staged_flag="*"
-  local updated_flag="!"
-  local untracked_flag="?"
-  local changed_flag="~"
-  local added_flag="+"
-  local deleted_flag="-"
-  [[ "$staged" -gt 1 ]] && flags+="$staged" # Display count if > 0
-  [[ "$staged" -gt 0 ]] && flags+="$staged_flag"
-  [[ "$updated" -gt 0 ]] && flags+="$updated_flag"
-  [[ "$untracked" -gt 0 ]] && flags+="$untracked_flag"
-  [[ "$changed" -gt 0 ]] && flags+="$changed_flag"
-  [[ "$added" -gt 0 ]] && flags+="$added_flag"
-  [[ "$deleted" -gt 0 ]] && flags+="$deleted_flag"
-  if [[ -n "$flags" ]]; then
-    flags="$flags"
-  else
-    # flags -> PROMPT_SYMBOL_CLEAN?
-    flags_format="%s"
-  fi
-
-  # TODO gitstring
-  local printf_format="${branch_format}${diff_format}${flags_format}"
-  printf -- "${printf_format}" "${branch}" "${diff}" "${flags}"
-
-  # [[ "${__printf_v-}" != yes ]]
-
-  # if [[ "$branch_line" =~ "[ahead" ]]; then
-  #   ahead="${branch_line#*[ahead }"
-  #   ahead="${ahead%]}"
-  #   remote_branch="${remote_branch% [ahead*}"
-  # fi
-
-  # if [[ -z "$ahead" ]]; then
-  #   if [[ "$ahead" -eq 0 ]]; then
-  #     # ahead="="
-  #     ahead_format="%s"
-  #   # elif [[ "$ahead" -gt 0 ]]; then
-  #     # Committed changes
-  #   fi
-  # fi
-
-  # local count=$(git status --porcelain | wc -l | tr -d '[[:space:]]')
-  # local sref=$(git symbolic-ref HEAD 2>/dev/null)
-  # if [[ -n "$sref" ]]; then
-  #   branch_name=${sref##refs/heads/}
-  # fi
-
-  # local flags=
-  # if [[ "$status" -ne 0 ]]; then
-  #   flags="*"
-  # fi
+  local short_sha="${repo_info##*$'\n'}"
 
   # if [[ "$rev_parse_exit_code" = "0" ]]; then
   #   local short_sha="${repo_info##*$'\n'}"
@@ -261,6 +154,92 @@ git_status() {
   #     return $exit
   #   fi
   # fi
+
+  # Branch name (master)
+  local branch_format="${1:- %s}"
+  # Difference between HEAD and its upstream (+n)
+  local diff_format="${2:-(%s)}"
+  # Repository status flags
+  local flags_format="${3:-%s}"
+
+  local line file branch_line
+  local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
+
+  local branch remote_branch
+  local behind ahead
+  local var pattern
+
+  local diff_flags=
+  local behind_flag="<"
+  local ahead_flag=">"
+
+  local file_flags=
+  local staged_flag="*"
+  local updated_flag="!"
+  local untracked_flag="?"
+  local changed_flag="~"
+  local added_flag="+"
+  local deleted_flag="-"
+
+  while IFS= read -r -d '' line; do
+    file=${line:0:2}
+    case $file in
+      \#\#) branch_line="${line#\#\# }" ;;
+      ?M) ((changed++)) ;;
+      ?A) ((added++)) ;;
+      ?D) ((deleted++)) ;;
+      U?) ((updated++)) ;;
+      \?\?) ((untracked++)) ;;
+      *) ((staged++)) ;;
+    esac
+  done < <(git status -z --porcelain --branch)
+  ## master...origin/master [ahead #, behind, #]
+
+  # Local branch name (master)
+  branch="${branch_line%\.\.\.*}"
+  # Remote and remote branch name (origin/master)
+  # remote_branch="${branch_line#*\.\.\.}"
+  # remote_branch="${remote_branch% [*}"
+
+  # Fallback
+  [[ -z "$branch" ]] && branch="$short_sha"
+
+  for var in {ahead,behind}; do
+    pattern='(\[|[[:space:]])'${var}'[[:space:]]+([[:digit:]])(,|\])'
+    if [[ "$branch_line" =~ $pattern ]]; then
+      if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
+        # ${!var}="${BASH_REMATCH[2]}"
+        declare "${var}"="${BASH_REMATCH[2]}"
+      fi
+    fi
+  done
+
+  [[ -n "$behind" ]] && diff_flags+="$behind_flag"
+  [[ -n "$ahead" ]] && diff_flags+="$ahead_flag"
+  [[ -z "$diff_flags" ]] && diff_format="%s" # diff_flags="=" # Up to date
+
+  # Display count if there is more than one staged file
+  [[ "$staged" -gt 1 ]] && file_flags+="$staged"
+  [[ "$staged" -gt 0 ]] && file_flags+="$staged_flag"
+
+  # Conflicts?
+  [[ "$updated" -gt 0 ]] && file_flags+="$updated_flag"
+  [[ "$untracked" -gt 0 ]] && file_flags+="$untracked_flag"
+  [[ "$changed" -gt 0 ]] && file_flags+="$changed_flag"
+  [[ "$added" -gt 0 ]] && file_flags+="$added_flag"
+  [[ "$deleted" -gt 0 ]] && file_flags+="$deleted_flag"
+
+  if [[ -n "$file_flags" ]]; then
+    # Display flags (colors?)
+    file_flags="$file_flags"
+  else
+    # PROMPT_SYMBOL_CLEAN?
+    flags_format="%s"
+  fi
+
+  # TODO gitstring
+  local printf_format="${branch_format}${diff_format}${flags_format}"
+  printf -- "${printf_format}" "${branch}" "${diff_flags}" "${file_flags}"
 }
 
 # # Colored hints (only when used with 2 arguments as prompt command)
