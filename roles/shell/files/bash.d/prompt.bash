@@ -36,63 +36,65 @@ prompt_command() {
   local err_symbol="${PROMPT_SYMBOL_ERROR:-! }"
 
   # Start of the prompt
-  PS1=''
+  local p=''
 
   # Terminal title to the current working directory
   # Tmux? \033k\w\033\\
   # OSC title? \033]2;\w\033\\
-  PS1+='\033]0;\w\007'
+  p+='\033]0;\w\007'
   # FIXME: weird prompt with a title escape sequence on the same line
-  PS1+='\n'
+  p+='\n'
 
   # Timestamp to the right
   local date='$(date +%H:%M:%S)'
-  PS1+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
+  p+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then
     # Highlight when logged in as root
-    PS1+="${user_root_color}"
+    p+="${user_root_color}"
   else
-    PS1+="${user_color}"
+    p+="${user_color}"
   fi
-  PS1+='\u'
-  PS1+="${reset_color}"
+  p+='\u'
+  p+="${reset_color}"
 
   # Hostname
   # [[ ! "$HOSTNAME" =~ "$USER" ]]
   if [[ "$user" != "$host" ]]; then
-    PS1+="${dim_color} at ${reset_color}"
+    p+="${dim_color} at ${reset_color}"
     if [[ -n "${SSH_TTY}" ]]; then
       # Highlight when connected via SSH
-      PS1+="${host_ssh_color}"
+      p+="${host_ssh_color}"
     else
-      PS1+="${host_color}"
+      p+="${host_color}"
     fi
-    PS1+='\h'
-    PS1+="${reset_color}"
+    p+='\h'
+    p+="${reset_color}"
   fi
 
-  PS1+="${dim_color} in ${reset_color}"
+  p+="${dim_color} in ${reset_color}"
   # Working directory
-  PS1+="${cwd_color}"
-  PS1+='\w'
-  PS1+="${reset_color}"
+  p+="${cwd_color}"
+  p+='\w'
+  p+="${reset_color}"
 
   # Git prompt
   # TODO: disable ahead or flags?
   # Colors in format string?
-  PS1+="$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")"
+  p+="$(git_status "$git_branch_format" "$git_ahead_format" "$git_flags_format")"
 
   # End of the first line
-  PS1+='\n'
+  p+='\n'
 
   # Exit code color and symbol
   if [[ $exit -eq 0 ]]; then
-    PS1+="${symbol_color}${ps1_symbol}${reset_color}"
+    p+="${symbol_color}${ps1_symbol}${reset_color}"
   else
-    PS1+="${symbol_error_color}${err_symbol}${reset_color}"
+    p+="${symbol_error_color}${err_symbol}${reset_color}"
   fi
+
+  PS1="$p"
 
   # Secondary prompt
   PS2="${ps2_symbol}"
@@ -263,12 +265,3 @@ git_status() {
 # if [[ "${!git_branch}" == "master" ]]; then
 #   PS1="${PS1/"\e[32m\${${git_branch}}"/"${git_master_color}\${${git_branch}}"}"
 # fi
-
-# PROMPT_SYMBOL_DIRTY="✘"
-# PROMPT_SYMBOL_CLEAN="✔"
-# PROMPT_SYMBOL_ADDED="✚"
-# PROMPT_SYMBOL_MODIFIED="✹"
-# PROMPT_SYMBOL_DELETED="✖"
-# PROMPT_SYMBOL_RENAMED="➜"
-# PROMPT_SYMBOL_UNMERGED="═"
-# PROMPT_SYMBOL_UNTRACKED="✭"

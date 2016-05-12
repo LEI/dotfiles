@@ -11,25 +11,51 @@
 # If not running interactively, do not do anything
 [[ $- != *i* ]] && return
 
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
-
 # Bash directory
 BASH_DIR="$HOME/.bash.d"
 
-source $BASH_DIR/library/utils.bash
-
-# TODO? Source completion with ~/.bash_completion (not loaded on OSX)
-_source $BASH_DIR/{aliases,completion,settings}
-
-_source $BASH_DIR/library/{colorize,colors,pathmunge}.bash
-
-# Colors are used in ~/.bash.d/prompt
-# ~/.bash.d/path is using pathmunge
-_source $BASH_DIR/{exports,path,prompt}.bash
+# PAGER="less"
+# MANPAGER="less"
 
 PREVIEW="less"
 [[ -s /usr/bin/gloobus-preview ]] && PREVIEW="gloobus-preview"
 [[ -s /Applications/Preview.app ]] && PREVIEW="/Applications/Preview.app"
 
-_source ~/.bashrc.local 2>/dev/null
+PROMPT_SYMBOL="› " # $ ✓ →
+PROMPT_SYMBOL_ERROR="× " # ! ×
+
+# PROMPT_SYMBOL_DIRTY="✘"
+# PROMPT_SYMBOL_CLEAN="✔"
+# PROMPT_SYMBOL_ADDED="✚"
+# PROMPT_SYMBOL_MODIFIED="✹"
+# PROMPT_SYMBOL_DELETED="✖"
+# PROMPT_SYMBOL_RENAMED="➜"
+# PROMPT_SYMBOL_UNMERGED="═"
+# PROMPT_SYMBOL_UNTRACKED="✭"
+
+init() {
+  # TODO? Source completion with ~/.bash_completion (not loaded on OSX)
+  load $BASH_DIR/{aliases,functions,completion,settings}
+
+  # Colors are used in ~/.bash.d/prompt
+  # ~/.bash.d/path is using pathmunge
+  load $BASH_DIR/{colors,exports,path,prompt}.bash
+
+  load ~/.bashrc.local 2>/dev/null
+}
+
+# Source a list of path
+load() {
+  for path in "$@"; do
+    if [[ -d "$path" ]]; then
+      load $path/*
+    elif [[ -f "$path" ]]; then
+      source "$path"
+    else
+      echo >&2 "No such file or directory: $path"
+    fi
+  done
+  unset path
+}
+
+init "$@"
