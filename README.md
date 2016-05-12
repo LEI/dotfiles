@@ -12,7 +12,7 @@
 - [ ] Use regex with lineinfile or ini_file module when possible
 - [ ] Xresources rxvt, xinitrc
 - [ ] npm: editorconfig, tern-project?
-- [ ] vim before/after
+- [ ] vim before/after, YCM arch, MarkMargin
 - [ ] virtualenv, nvm, rvm/rbenv...
 
 ## Resources
