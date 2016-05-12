@@ -1,7 +1,4 @@
-#!/usr/bin/env bash
-#
 # Pigmentize cat and less
-#
 
 # https://github.com/Bash-it/bash-it/blob/master/plugins/available/less-pretty-cat.plugin.bash
 

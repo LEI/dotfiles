@@ -1,6 +1,4 @@
-#
 # OS X completion
-#
 
 # https://github.com/Bash-it/bash-it/blob/master/completion/available/system.completion.bash
 

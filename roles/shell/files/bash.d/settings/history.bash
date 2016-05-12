@@ -1,6 +1,4 @@
-#
 # Bash history
-#
 
 # Erase duplicates (or 'ignoredups')
 # export HISTCONTROL=${HISTCONTROL:-erasedups}

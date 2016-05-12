@@ -1,6 +1,7 @@
-#
-# Git completion
-#
+# Git
+
+alias g="git"
+# More aliases in ~/.gitconfig
 
 # Try to source git completion if there is no _git function
 if ! hash _git 2>/dev/null; then

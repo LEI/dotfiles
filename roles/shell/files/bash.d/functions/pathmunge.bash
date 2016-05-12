@@ -1,7 +1,4 @@
-#!/usr/bin/env bash
-#
 # Append or prepend to PATH
-#
 
 # Prevent duplicate directories in the PATH variable
 if ! hash pathmunge 2>/dev/null; then

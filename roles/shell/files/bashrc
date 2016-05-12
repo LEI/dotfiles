@@ -14,13 +14,6 @@
 # Bash directory
 BASH_DIR="$HOME/.bash.d"
 
-# PAGER="less"
-# MANPAGER="less"
-
-PREVIEW="less"
-[[ -s /usr/bin/gloobus-preview ]] && PREVIEW="gloobus-preview"
-[[ -s /Applications/Preview.app ]] && PREVIEW="/Applications/Preview.app"
-
 PROMPT_SYMBOL="› " # $ ✓ →
 PROMPT_SYMBOL_ERROR="× " # ! ×
 
@@ -33,9 +26,9 @@ PROMPT_SYMBOL_ERROR="× " # ! ×
 # PROMPT_SYMBOL_UNMERGED="═"
 # PROMPT_SYMBOL_UNTRACKED="✭"
 
-init() {
+main() {
   # TODO? Source completion with ~/.bash_completion (not loaded on OSX)
-  load $BASH_DIR/{aliases,functions,completion,settings}
+  load $BASH_DIR/{aliases,completion,functions,plugins,settings}
 
   # Colors are used in ~/.bash.d/prompt
   # ~/.bash.d/path is using pathmunge
@@ -44,7 +37,7 @@ init() {
   load ~/.bashrc.local 2>/dev/null
 }
 
-# Source a list of path
+# Source a list of path recursively
 load() {
   for path in "$@"; do
     if [[ -d "$path" ]]; then
@@ -58,4 +51,4 @@ load() {
   unset path
 }
 
-init "$@"
+main "$@"
