@@ -181,8 +181,8 @@ git_status() {
 
   local diff
   [[ -z "$behind" ]] && [[ -z "$ahead" ]] && diff="="
-  [[ -n "$behind" ]] && diff+="<"
-  [[ -n "$ahead" ]] && diff+=">"
+  [[ -n "$behind" ]] && diff+="<" # "$behind<"
+  [[ -n "$ahead" ]] && diff+=">" # ">$ahead"
 
   # if [[ "$branch_line" =~ "[ahead" ]]; then
   #   ahead="${branch_line#*[ahead }"
