@@ -28,7 +28,7 @@ _source $BASH_DIR/library/{colorize,colors,pathmunge}.bash
 # ~/.bash.d/path is using pathmunge
 _source $BASH_DIR/{exports,path,prompt}.bash
 
-has most && PREVIEW="most"
+PREVIEW="less"
 [[ -s /usr/bin/gloobus-preview ]] && PREVIEW="gloobus-preview"
 [[ -s /Applications/Preview.app ]] && PREVIEW="/Applications/Preview.app"
 

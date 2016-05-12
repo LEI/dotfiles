@@ -14,7 +14,10 @@ npm_packages:
   - jshint
 
 pip_packages:
+  - name: pip
+    extra_args: --upgrade
   - bashate
+  - pygments
 
 ruby_gems:
   - bundler

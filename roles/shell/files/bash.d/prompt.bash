@@ -46,8 +46,8 @@ prompt_command() {
   PS1+='\n'
 
   # Timestamp to the right
-  # local date='$(date +%H:%M:%S)'
-  # PS1+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
+  local date='$(date +%H:%M:%S)'
+  PS1+='\[$(tput sc; prompt_right "'${date}'" "'${dim_color}'"; tput rc)\]'
 
   # Username
   if [[ "$USER" == "root" ]]; then

@@ -12,8 +12,9 @@ if hash pygmentize 2>/dev/null; then
 
   # Runs either pygmentize or cat on each file passed in
   cat() {
-    for var; do
-      pygmentize "$var" 2>/dev/null || "$CAT_BIN" "$var";
+    for var in "$@"; do
+      pygmentize -g "$var" 2>/dev/null || "$CAT_BIN" "$var";
+      # pygmentize "$var" 2>/dev/null || "$CAT_BIN" "$var";
     done
   }
 
@@ -25,14 +26,17 @@ if hash pygmentize 2>/dev/null; then
   # most, ...
 fi
 
-# man() {
-#   env \
-#     LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-#     LESS_TERMCAP_md=$(printf "\e[1;31m") \
-#     LESS_TERMCAP_me=$(printf "\e[0m") \
-#     LESS_TERMCAP_se=$(printf "\e[0m") \
-#     LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-#     LESS_TERMCAP_ue=$(printf "\e[0m") \
-#     LESS_TERMCAP_us=$(printf "\e[1;32m") \
-#     man "$@"
-# }
+man() {
+  # TODO:
+  # LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+  # LESS_TERMCAP_md=$(printf "\e[1;31m") \
+  # LESS_TERMCAP_me=$(printf "\e[0m") \
+  # LESS_TERMCAP_se=$(printf "\e[0m") \
+  # LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+  # LESS_TERMCAP_ue=$(printf "\e[0m") \
+  # LESS_TERMCAP_us=$(printf "\e[1;32m") \
+  local width=$(tput cols)
+  [[ "$width" -gt "$MANWIDTH" ]] && with=$MANWIDTH
+  env MANWIDTH=$width \
+  man "$@"
+}
