@@ -2,4 +2,63 @@
 
 # https://github.com/Bash-it/bash-it/blob/master/plugins/available/battery.plugin.bash
 
-# TODO
+battery_percentage() {
+  local b
+  if hash pmset 2>/dev/null; then
+    pmset -g batt | awk 'NR==2 { gsub(/;/,""); print $2 }'
+  elif hash upower 2>/dev/null; then
+    for b in $(upower -e | grep battery); do
+      upower -i $b | grep percentage | awk '{print $2}'
+    done | xargs echo
+  elif hash acpi 2>/dev/null; then
+    acpi -b | grep -Eo "[0-9]+%"
+  else
+    return 1
+  fi
+}
+
+# battery_remaining() {
+#   local b
+#   if hash pmset 2>/dev/null; then
+#     b="$(pmset -g batt | awk 'NR==2 { gsub(/;/,""); print $4 }')"
+#     echo $b
+#     # output has to match format "10:42"
+#     if [[ "$b" =~ ([[:digit:]]{1,2}:[[:digit:]]{2}) ]]; then
+#       printf "$b"
+#     fi
+#   elif hash upower 2>/dev/null; then
+#     b=$(upower -e | grep battery | head -1)
+#     upower -i $b | grep remain | awk '{print $4}'
+#   elif hash acpi 2>/dev/null; then
+#     acpi -b | grep -Eo "[0-9]+:[0-9]+:[0-9]+"
+#   fi
+# }
+
+battery_status() {
+  local b
+  if hash pmset 2>/dev/null; then
+    pmset -g batt | awk -F '; *' 'NR==2 { print $2 }'
+  elif hash upower 2>/dev/null; then
+    # sort order: attached, charging, discharging
+    for b in $(upower -e | grep battery); do
+      upower -i $b | grep state | awk '{print $2}'
+    done | sort | head -1
+  elif hash acpi 2>/dev/null; then
+    acpi -b | grep -oi 'discharging' | awk '{print tolower($0)}'
+  fi
+}
+
+main() {
+  # TODO: check has battery!
+  local status="$(battery_status)"
+  # [[ "$status" =~ (discharging) ]]
+  # (charged), (^charging), (^discharging), (attached)
+
+  local percentage="$(battery_percentage)"
+  # local bar="$(spark 0 ${percentage%\%} 100)"
+  # printf "%s" "${bar:1:1}"
+
+  printf "%s (%s)" "$percentage" "$status"
+}
+
+main "$@"

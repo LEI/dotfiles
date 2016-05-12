@@ -273,14 +273,15 @@ set magic
 
 " Colors {{{1
 
+" FIXME: Graphical issues if not xterm-256color
 " set term=$TERM
-" set term=xterm-256color
 " set term=screen-256color
+" set term=xterm-256color
 
-" Disable BCE (Background Color Erase)
-if &term =~ '256color'
-  set t_ut=
-endif
+" Background Color Erase (clearing bg color)
+" if &term =~ '256color'
+"   set t_ut=
+" endif
 
 " " Allow color schemes to do bright colors without forcing bold
 " if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
@@ -327,6 +328,7 @@ endfunction
 
 call SetBackground()
 try
+  " let g:solarized_termtrans = 1
   colorscheme solarized
   call togglebg#map("<F5>")
 catch /E185:/
