@@ -144,8 +144,6 @@ git_status() {
 
   # TODO: async git fetch
 
-  # Remote and branch name (origin/master)
-  # local remote_branch
   # local clean=0
 
   local line file branch_line
@@ -165,7 +163,9 @@ git_status() {
   ## master...origin/master [ahead #, behind, #]
 
   local branch="${branch_line%\.\.\.*}"
-  # remote_branch="${branch_line#$branch\.\.\.}"
+  # Remote name and remote branch name (origin/master)
+  local remote_branch="${branch_line#$branch\.\.\.}"
+  branch="${remote_branch% [*}"
 
 
   local behind ahead
@@ -176,8 +176,8 @@ git_status() {
     pattern='(\[|[[:space:]])'${status}'[[:space:]]+([[:digit:]])(,|\])'
     if [[ "$branch_line" =~ $pattern ]]; then
       if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
-        ${!status}="${BASH_REMATCH[2]}"
-        # declare "${status}"="${BASH_REMATCH[2]}"
+        # ${!status}="${BASH_REMATCH[2]}"
+        declare "${status}"="${BASH_REMATCH[2]}"
       fi
     fi
   done
