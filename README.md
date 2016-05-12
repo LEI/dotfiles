@@ -7,7 +7,8 @@
 ## TODO
 
 - [ ] Bash color escape function (fg, bg)
-- [ ] Bash prompt, git branch
+- [ ] Bash prompt, git branch (behind)
+- [ ] PAGER / PREVIEW
 - [ ] Linux install ansible bin/dot
 - [ ] OS X (osa)scripts and Terminal settings
 - [ ] Use regex with lineinfile or ini_file module when possible
