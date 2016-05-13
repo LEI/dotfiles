@@ -165,22 +165,6 @@ git_status() {
   local line file branch_line
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
 
-  local branch remote_branch
-  local behind ahead
-  local var pattern
-
-  local diff_flags=
-  local behind_flag="<"
-  local ahead_flag=">"
-
-  local file_flags=
-  local staged_flag="*"
-  local updated_flag="!"
-  local untracked_flag="?"
-  local changed_flag="~"
-  local added_flag="+"
-  local deleted_flag="-"
-
   while IFS= read -r -d '' line; do
     file=${line:0:2}
     case $file in
@@ -195,14 +179,16 @@ git_status() {
   done < <(git status -z --porcelain --branch)
   ## master...origin/master [ahead #, behind, #]
 
+  local branch remote_branch
+  local behind ahead
+  local var pattern
+
   # Local branch name (master)
   branch="${branch_line%\.\.\.*}"
+  [[ -z "$branch" ]] && branch="$short_sha"
   # Remote and remote branch name (origin/master)
   # remote_branch="${branch_line#*\.\.\.}"
   # remote_branch="${remote_branch% [*}"
-
-  # Fallback
-  [[ -z "$branch" ]] && branch="$short_sha"
 
   for var in {ahead,behind}; do
     pattern='(\[|[[:space:]])'${var}'[[:space:]]+([[:digit:]])(,|\])'
@@ -213,6 +199,18 @@ git_status() {
       fi
     fi
   done
+
+  local diff_flags=
+  local behind_flag="<"
+  local ahead_flag=">"
+
+  local file_flags=
+  local staged_flag="*"
+  local updated_flag="!"
+  local untracked_flag="?"
+  local changed_flag="~"
+  local added_flag="+"
+  local deleted_flag="-"
 
   [[ -n "$behind" ]] && diff_flags+="$behind_flag"
   [[ -n "$ahead" ]] && diff_flags+="$ahead_flag"
