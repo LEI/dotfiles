@@ -5,7 +5,7 @@
     state: "{{ item.state | default(homebrew_cask_state) }}"
   environment:
     HOMEBREW_CASK_OPTS: "--appdir={{ homebrew_cask_appdir }}"
-  with_items: "{{ cask_apps }}"
+  with_items: "{{ homebrew_cask_apps }}"
   when: homebrew_cask_install
 
 - name: Cleanup Homebrew Cask apps
@@ -19,6 +19,6 @@
   args:
     chdir: "{{ item.0.bin }}"
   with_subelements:
-    - "{{ cask_options }}"
+    - "{{ homebrew_cask_options }}"
     - opt
   changed_when: false

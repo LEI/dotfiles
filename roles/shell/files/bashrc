@@ -14,9 +14,6 @@
 # Bash directory
 BASH_DIR="$HOME/.bash.d"
 
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
-
 # PROMPT_SYMBOL_DIRTY="✘"
 # PROMPT_SYMBOL_CLEAN="✔"
 # PROMPT_SYMBOL_ADDED="✚"
@@ -27,80 +24,23 @@ PROMPT_SYMBOL_ERROR="× " # ! ×
 # PROMPT_SYMBOL_UNTRACKED="✭"
 
 main() {
-  local exit=$?
+  # local user="$(id -un)" # $(whoami)
+  # local host="$(hostname -s)"
+
   # TODO? Source completion with ~/.bash_completion (not loaded on OSX)
   load $BASH_DIR/{aliases,completion,functions,plugins,settings}
 
   # Colors are used in ~/.bash.d/prompt
   # ~/.bash.d/path is using pathmunge
-  load $BASH_DIR/{colors,exports,path}.bash
+  load $BASH_DIR/{colors,exports,path,prompt}.bash
 
+  PROMPT_SYMBOL='› '
+  PROMPT_COMMAND='__prompt_command'
+  PS1=$(__prompt_string "$PROMPT_SYMBOL") # $ ✓ → ×
+  PS2=${PROMPT_SYMBOL:-> }
+
+  # Extra settings
   load ~/.bashrc.local 2>/dev/null
-
-  PROMPT_COMMAND='__pre_prompt'
-
-  PS1='\n'
-
-  # TODO title
-
-  # Right align the time
-  # printf "%*(%T)T\r" "$width"
-  # PS1+='\[$(tput sc; printf "%*s\r" "$width" "$(date +%T)"; tput rc)\]'
-  PS1+='\[$(tput sc; printf "%*s" "$width" "\t"; tput rc)\]'
-
-  # Highlight the user when logged in as root
-  if [[ "${USER}" == "root" ]]; then
-    PS1+='\[${red}\]'
-  else
-    PS1+='\[${blue}\]'
-  fi
-  PS1+='\u'
-  PS1+='\[${reset}\]'
-
-  # Display the host only if different of the user
-  if [[ "${USER}" != "${HOSTNAME%%.*}" ]]; then
-    PS1+=' at'
-    # Highlight the host when connected via SSH
-    if [[ -n "${SSH_TTY}" ]]; then
-      PS1+='\[${red}\]'
-    else
-      PS1+='\[${b_blue}\]'
-    fi
-    PS1+='\[${__psc_host}\]'
-    PS1+=' \h'
-    PS1+='\[${reset}\]'
-  fi
-
-  PS1+=' in'
-  PS1+='\[${white}\]'
-  PS1+=' \w'
-  PS1+='\[${reset}\]'
-
-  PS1+='$(git_status " on \[${red}\]%s\[${reset}\]" "%s" " \[${white}\]%s\[${reset}\]")'
-
-  PS1+='\n'
-
-  PS1+='\[${prompt_symbol_color}\]'
-  PS1+='\$ '
-  PS1+='\[${reset}\]'
-}
-
-__pre_prompt() {
-  local exit=$?
-  # local user="$(id -un)" # $(whoami)
-  # local host="$(hostname -s)"
-
-  if [[ "$exit" -eq 0 ]]; then
-    prompt_symbol_color=""
-  else
-    prompt_symbol_color="${red}"
-  fi
-
-  if [[ -n "$COLUMNS" ]]; then
-    width="$COLUMNS"
-  else
-    width="$(tput cols)"
-  fi
 }
 
 # Source a list of path recursively

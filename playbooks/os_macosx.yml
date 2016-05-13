@@ -18,8 +18,8 @@
     # Homebrew Cask applications
     - role: homebrew-cask
       tags: [cask]
-      cask_apps: "{{ homebrew_cask_apps }}"
-      cask_options: "{{ homebrew_cask_options }}"
+      homebrew_cask_apps: "{{ cask_apps }}"
+      homebrew_cask_options: "{{ cask_options }}"
 
     # Hammerspoon
     - role: hammerspoon
