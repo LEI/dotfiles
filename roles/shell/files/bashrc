@@ -14,9 +14,6 @@
 # Bash directory
 BASH_DIR="$HOME/.bash.d"
 
-PROMPT_SYMBOL="› " # $ ✓ →
-PROMPT_SYMBOL_ERROR="× " # ! ×
-
 # PROMPT_SYMBOL_DIRTY="✘"
 # PROMPT_SYMBOL_CLEAN="✔"
 # PROMPT_SYMBOL_ADDED="✚"
@@ -27,6 +24,9 @@ PROMPT_SYMBOL_ERROR="× " # ! ×
 # PROMPT_SYMBOL_UNTRACKED="✭"
 
 main() {
+  # local user="$(id -un)" # $(whoami)
+  # local host="$(hostname -s)"
+
   # TODO? Source completion with ~/.bash_completion (not loaded on OSX)
   load $BASH_DIR/{aliases,completion,functions,plugins,settings}
 
@@ -34,6 +34,12 @@ main() {
   # ~/.bash.d/path is using pathmunge
   load $BASH_DIR/{colors,exports,path,prompt}.bash
 
+  PROMPT_SYMBOL='› '
+  PROMPT_COMMAND='__prompt_command'
+  PS1=$(__prompt_string "$PROMPT_SYMBOL") # $ ✓ → ×
+  PS2=${PROMPT_SYMBOL:-> }
+
+  # Extra settings
   load ~/.bashrc.local 2>/dev/null
 }
 
