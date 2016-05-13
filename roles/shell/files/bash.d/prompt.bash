@@ -2,7 +2,7 @@
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # https://github.com/demure/dotfiles/blob/master/subbash/prompt
 
-PROMPT_COMMAND='prompt_command'
+# PROMPT_COMMAND='prompt_command'
 
 prompt_command() {
   # Exit code
