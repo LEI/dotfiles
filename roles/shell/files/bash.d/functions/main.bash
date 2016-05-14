@@ -31,7 +31,8 @@ down4me() {
 }
 
 reload() {
-  # TODO source ~/.bashrc instead?
   # Invoke as a login shell
-  exec $SHELL -l
+  # exec $SHELL -l
+
+  source "$HOME/.bashrc"
 }
