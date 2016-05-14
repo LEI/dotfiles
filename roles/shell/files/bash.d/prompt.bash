@@ -72,7 +72,7 @@ __prompt_string() {
   p+='\[${reset}\]'
 
   # Git status
-  p+='$(__prompt_git " on \[${red}\]%s\[${reset}\]" "%s" " \[${white}\]%s\[${reset}\]")'
+  p+='$(__prompt_git " on " "%s" "\[${white}\]%s\[${reset}\]")'
 
   p+='\n'
 
@@ -131,7 +131,7 @@ __prompt_git() {
   fi
 
   # Branch name (master)
-  local branch_format="${1:- %s}"
+  local branch_prefix="${1:- git:}"
   # Difference between HEAD and its upstream (+n)
   local diff_format="${2:-(%s)}"
   # Repository status flags
@@ -163,6 +163,8 @@ __prompt_git() {
   branch="${branch_line%\.\.\.*}"
   # TODO handle white spaces in branch name?
   branch="${branch##* }"
+
+  # __git_branch="${branch}"
 
   # Remote and remote branch name (origin/master)
   # remote_branch="${branch_line#*\.\.\.}"
@@ -208,14 +210,16 @@ __prompt_git() {
   if [[ -n "$file_flags" ]]; then
     # Display flags (colors?)
     file_flags="$file_flags"
+    branch="${red}${branch}${reset}"
   else
     # PROMPT_SYMBOL_CLEAN?
     flags_format="%s"
+    branch="${green}${branch}${reset}"
   fi
 
   # TODO gitstring
-  local printf_format="${branch_format}${diff_format}${flags_format}"
-  printf -- "${printf_format}" "${branch}" "${diff_flags}" "${file_flags}"
+  local printf_format="%s${diff_format}${flags_format}"
+  printf -- "${printf_format}" "${branch_prefix}${branch}" "${diff_flags}" "${file_flags}"
 }
 
 # # Colored hints (only when used with 2 arguments as prompt command)
