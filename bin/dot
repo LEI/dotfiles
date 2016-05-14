@@ -87,16 +87,14 @@ ansible_install() {
       #   lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
       #   install apt-cyg /bin
       # fi
-      apt-cyg install git python-{crypto,jinja2,six,yaml}
-      ANSIBLE="$HOME/ansible"
-      git clone --depth 1 git://github.com/ansible/ansible "$ANSIBLE"
+      # apt-cyg install git python-{crypto,jinja2,six,yaml}
+      # ANSIBLE="$HOME/ansible"
+      # git clone --depth 1 git://github.com/ansible/ansible "$ANSIBLE"
       # cd ~/ansible
       # git submodule update --init lib/ansible/modules/{core,extras}
-      if has ansible; then
-        PATH="$PATH:$ANSIBLE/bin"
-        PYTHONPATH="$ANSIBLE/lib"
-        ANSIBLE_LIBRARY="$ANSIBLE/library"
-      fi
+      # PATH="$PATH:$ANSIBLE/bin"
+      # PYTHONPATH="$ANSIBLE/lib"
+      # ANSIBLE_LIBRARY="$ANSIBLE/library"
       ;;
     *)
       die "Unsupported platform: $os"

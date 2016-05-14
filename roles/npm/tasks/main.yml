@@ -21,7 +21,7 @@
     version: "{{ item.version | default(omit) }}"
     global: "{{ item.global | default(npm_global) }}"
     state: "{{ item.state | default(npm_state) }}"
-    # path: ~/.node_modules
+    path: "{{ item.path | default(omit) }}" # npm_prefix?
   with_items: "{{ npm_packages }}"
   when: npm_install
-  become: "{{ 'yes' if ansible_os_family == 'Debian' else 'no' }}"
+  become: "{{ 'yes' if ansible_os_family in ['Debian'] else 'no' }}"

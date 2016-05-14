@@ -9,5 +9,5 @@
     # requirements:
   with_items: "{{ pip_packages }}"
   when: pip_install
-  become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
+  become: "{{ 'yes' if ansible_os_family in ['Archlinux', 'Debian'] else 'no' }}"
   # sudo required on arch, but only needed for 'pip' on debian?
