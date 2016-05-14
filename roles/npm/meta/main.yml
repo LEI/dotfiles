@@ -1,22 +1,19 @@
 ---
 dependencies:
 
-  # MacOSX
+  # Archlinux (nodejs, npm), MacOSX (node)
   - role: package
-    packages:
-      - node
-    when: "ansible_os_family == 'Darwin'"
-
-  # Arch
-  - role: package
-    packages:
-      - nodejs
-      - npm
-    when: "ansible_os_family == 'Archlinux'"
+    packages: "{{ node_packages }}"
+    when: node_packages | length > 0
+    # and ansible_os_family in ['Archlinux', 'Darwin']
 
   # Debian/RedHat
   - role: node
     when: "ansible_os_family == 'Debian'"
+
+  # Windows
+  # Download and execute the installer on nodejs.org
+  # Add '/cygdrive/c/Program Files/nodejs' to $PATH
 
   - role: template
     dot_files:

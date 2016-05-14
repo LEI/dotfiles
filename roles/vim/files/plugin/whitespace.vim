@@ -1,4 +1,5 @@
 " Whitespaces
+" FIXME: restrict filetype (e.g. not .py)
 
 " Highlight trailing witespaces in red
 " highlight ExtraWhitespace ctermbg=red guibg=red

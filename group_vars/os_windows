@@ -1,0 +1,23 @@
+---
+# vi: ft=yaml
+
+# CYGWIN_NT-6.1
+os: Windows
+
+# https://github.com/naokirin/ansible-apt-cyg-module
+apt_cyg_packages:
+  - cmake
+  - curl
+  # - dos2unix
+  - tree
+  - wget
+
+php_packages:
+  - php
+  - php-json
+  - php-phar
+  - php-iconv # or 'php-mbstring'
+
+ruby_packages:
+  - ruby
+  # - rubygems

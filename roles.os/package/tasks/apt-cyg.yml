@@ -1,0 +1,7 @@
+---
+- name: "{{ packages | length }} packages : {{ packages_state }}"
+  apt_cyg:
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default(packages_state) }}"
+  with_items: "{{ packages }}"
+  when: packages_install

@@ -53,9 +53,9 @@ ansible_vault() {
 }
 
 ansible_install() {
-  local uname=$(uname -s)
+  local os=$(uname -o)
 
-  case $uname in
+  case $os in
     Darwin)
       # If /usr/bin/gcc is absent
       if ! has gcc; then
@@ -81,8 +81,25 @@ ansible_install() {
       # sudo pacman -S ansible git python2-setuptools --noconfirm
       # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       ;;
+    Cygwin)
+      # https://github.com/grlee/ansible-galaxy.ansible-init/blob/develop/files/setup.sh
+      # if ! has apt-cyg; then
+      #   lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
+      #   install apt-cyg /bin
+      # fi
+      apt-cyg install git python-{crypto,jinja2,six,yaml}
+      ANSIBLE="$HOME/ansible"
+      git clone --depth 1 git://github.com/ansible/ansible "$ANSIBLE"
+      # cd ~/ansible
+      # git submodule update --init lib/ansible/modules/{core,extras}
+      if has ansible; then
+        PATH="$PATH:$ANSIBLE/bin"
+        PYTHONPATH="$ANSIBLE/lib"
+        ANSIBLE_LIBRARY="$ANSIBLE/library"
+      fi
+      ;;
     *)
-      die "Unsupported platform: $uname"
+      die "Unsupported platform: $os"
       ;;
   esac
 

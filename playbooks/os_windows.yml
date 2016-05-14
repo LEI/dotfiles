@@ -1,0 +1,16 @@
+---
+- name: Windows roles
+  hosts: os_windows
+  gather_facts: no
+  tags: [win]
+  tasks:
+    - debug: var=ansible_os_family
+  roles:
+
+    # - role: cygwin
+    #   tags: [cygwin]
+
+    # Install apt packages
+    - role: package
+      tags: [pkg]
+      packages: "{{ apt_cyg_packages }}"

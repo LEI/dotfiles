@@ -6,23 +6,23 @@
 
   roles:
 
-    # Git via homebrew or apt
+    # Update and configure Git
     - role: git
       tags: [git, vcs]
 
-    # Composer & PHP
+    # Install PHP and Composer packages
     - role: composer
       tags: [composer, php]
 
-    # NodeJS & global npm packages
+    # Install NodeJS and npm packages
     - role: npm
       tags: [npm, node, js]
 
-    # Python packages
     # - role: pyhton?
+    # Install python packages
     - role: pip
       tags: [pip]
 
-    # Ruby gems and .gemrc
+    # Install ruby gems
     - role: ruby
       tags: [ruby, gem]
