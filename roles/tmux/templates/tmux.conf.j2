@@ -4,7 +4,7 @@
 source-file {{ tmux_path }}/colors/{{ tmux_colors }}.conf
 
 # Load general settings and bindings
-{% for file in lookup('fileglob', tmux_role_path + '/files/settings/*.conf', wantlist=true) %}
+{% for file in lookup('fileglob', tmux_role_path + '/files/settings/tmux-*.conf', wantlist=true) %}
 source-file {{ tmux_path }}/settings/{{ file | basename }}
 {% endfor %}
 
@@ -13,9 +13,9 @@ run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digi
 
 # Load options targeting specific versions
 # https://raw.githubusercontent.com/tmux/tmux/master/CHANGES
-{% for file in lookup('fileglob', tmux_role_path + '/files/versions/*.conf', wantlist=true) %}
-{% set compare = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\1') %}
-{% set version = file | basename | regex_replace('^(\w+)-(\d+)\.conf$', '\\2') %}
+{% for file in lookup('fileglob', tmux_role_path + '/files/versions/tmux-*.conf', wantlist=true) %}
+{% set compare = file | basename | regex_replace('^tmux-(\w+)-(\d+)\.conf$', '\\1') %}
+{% set version = file | basename | regex_replace('^tmux-(\w+)-(\d+)\.conf$', '\\2') %}
 if-shell 'test "$TMUX_VERSION_INT" -{{ compare }} "{{ version }}"' 'source-file {{ tmux_path }}/versions/{{ file | basename }}'
 {% endfor %}
 

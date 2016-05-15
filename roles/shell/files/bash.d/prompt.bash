@@ -58,7 +58,7 @@ __prompt_string() {
     if [[ -n "${SSH_TTY}" ]]; then
       p+='\[${red}\]'
     else
-      p+='\[${orange}\]'
+      p+='\[${cyan}\]'
     fi
     p+=' \h'
     p+='\[${reset}\]'

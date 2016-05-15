@@ -229,6 +229,9 @@ function! StatuslineColors()
 
     " highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
     " highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
+
+    highlight StatuslineInsert ctermfg=0 ctermbg=2
+    highlight StatuslineReplace ctermfg=0 ctermbg=1
   else
     " Base16 Solarized Light
     " StatusLine: term=bold,reverse ctermfg=8 ctermbg=7 guifg=#657b83 guibg=#93a1a1
@@ -240,10 +243,10 @@ function! StatuslineColors()
 
     " highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
     " highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
-  endif
 
-  highlight StatuslineInsert ctermfg=7 ctermbg=2
-  highlight StatuslineReplace ctermfg=7 ctermbg=1
+    highlight StatuslineInsert ctermfg=7 ctermbg=2
+    highlight StatuslineReplace ctermfg=7 ctermbg=1
+  endif
 
   " highlight link StatuslineWarning WarningMsg
   highlight StatuslineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
