@@ -210,9 +210,9 @@ __prompt_git() {
 
   [[ -z "$file_flags" ]] && flags_format="%s"
 
-  if [[ -n "$behind_flags" ]]; then
+  if [[ -n "$behind" ]]; then
     branch_color="${red}"
-  elif [[ -n "$ahead_flag" ]]; then
+  elif [[ -n "$ahead" ]]; then
     branch_color="${orange}"
   elif [[ -n "$file_flags" ]]; then
     branch_color="${yellow}"
