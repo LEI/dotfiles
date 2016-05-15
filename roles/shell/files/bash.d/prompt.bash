@@ -181,17 +181,19 @@ __prompt_git() {
     fi
   done
 
+  # Signs
   local diff_flags=
   local behind_flag="<"
   local ahead_flag=">"
 
   local file_flags=
-  local staged_flag="*"
-  local updated_flag="!"
-  local untracked_flag="?"
-  local changed_flag="~"
   local added_flag="+"
+  local changed_flag="~"
   local deleted_flag="-"
+  local staged_flag="*"
+  local untracked_flag="?"
+  local updated_flag="!"
+  # stashed -> $
 
   [[ -n "$behind" ]] && diff_flags+="$behind_flag"
   [[ -n "$ahead" ]] && diff_flags+="$ahead_flag"
@@ -202,11 +204,11 @@ __prompt_git() {
   [[ "$staged" -gt 0 ]] && file_flags+="$staged_flag"
 
   # Conflicts?
-  [[ "$updated" -gt 0 ]] && file_flags+="$updated_flag"
-  [[ "$untracked" -gt 0 ]] && file_flags+="$untracked_flag"
-  [[ "$changed" -gt 0 ]] && file_flags+="$changed_flag"
   [[ "$added" -gt 0 ]] && file_flags+="$added_flag"
+  [[ "$changed" -gt 0 ]] && file_flags+="$changed_flag"
   [[ "$deleted" -gt 0 ]] && file_flags+="$deleted_flag"
+  [[ "$untracked" -gt 0 ]] && file_flags+="$untracked_flag"
+  [[ "$updated" -gt 0 ]] && file_flags+="$updated_flag"
 
   [[ -z "$file_flags" ]] && flags_format="%s"
 
