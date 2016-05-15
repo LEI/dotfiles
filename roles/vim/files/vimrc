@@ -303,23 +303,20 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-function! SetBackground(...)
+function! DayTime(...)
+  let l:sunrise = a:0 > 0 ? a:1 : 7
+  let l:sunset = a:0 > 1 ? a:2 : 20
+  let l:hour = strftime('%H')
+  return l:hour > l:sunrise && l:hour < l:sunset
+endfunction
+
+function! SetBackground()
   if !exists('*strftime')
-    " let l:background = &background == 'light' ? 'dark' : 'light'
-    if has('gui_running')
-      let l:background = 'light'
-    else
-      let l:background = 'dark'
-    endif
+    let l:background = has('gui_running') ? 'light' : 'dark'
+  elseif DayTime()
+    let l:background = 'light'
   else
-    let l:sunrise = a:0 > 0 ? a:1 : 7
-    let l:sunset = a:0 > 1 ? a:2 : 20
-    let l:hour = strftime('%H')
-    if l:hour > l:sunrise && l:hour < l:sunset
-      let l:background = 'light'
-    else
-      let l:background = 'dark'
-    endif
+    let l:background = 'dark'
   endif
   if &background != l:background
     let &background = l:background
