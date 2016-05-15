@@ -2,7 +2,9 @@
 # pathmunge /usr/local/sbin
 
 # Append ~/bin
-pathmunge "$HOME/bin" after
+if [[ -d "$HOME/bin" ]]; then
+  pathmunge "$HOME/bin" after
+fi
 
 # Composer packages
 if hash composer 2>/dev/null; then
