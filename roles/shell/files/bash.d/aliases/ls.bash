@@ -1,19 +1,21 @@
 # Detect which 'ls' flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU
   ls_color="--color"
-# elif hash gls 2>/dev/null; then
-#   # Homebrew coreutils
-#   ls_command="gls"
-#   ls_color="--color"
+  # elif hash gls 2>/dev/null; then
+  #   # Homebrew coreutils
+  #   ls_command="gls"
+  #   ls_color="--color"
 else # OSX
   ls_color="-G"
 fi
 
 # List all files colorized in long format
-alias l="ls -lF ${ls_color}"
+alias l="ls -lF ${ls_color}" # -CF ?
+
+# alias ll="ls -l"
 
 # List all files colorized in long format, including dot files
-alias la="ls -laF ${ls_color}"
+alias la="ls -laF ${ls_color}" # -A ?
 
 # List only directories
 alias lsd="ls -lF ${ls_color} | grep --color=never '^d'"

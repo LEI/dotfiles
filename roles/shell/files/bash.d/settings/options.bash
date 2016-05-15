@@ -7,12 +7,12 @@ shopt -s nocaseglob
 shopt -s cdspell
 
 # Enable some Bash 4 features when possible:
-#   'autocd', e.g. '**/qux' will enter './foo/bar/baz/qux'
-#   Recursive globbing, e.g. 'echo **/*.txt'
+# 'autocd', '**/qux' will enter './foo/bar/baz/qux'
+# 'globstar': e.g. 'echo **/*.txt'
 for option in autocd globstar; do
   shopt -s "$option" 2> /dev/null
 done
 unset option
 
-# Make bash check its window size after a process completes
-# shopt -s checkwinsize
+# Check the window size after each command and updat LINE and COLUMNS
+shopt -s checkwinsize
