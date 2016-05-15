@@ -156,10 +156,11 @@ function! Statusline(winnr)
 endfunction
 
 function! StatuslineMode(mode)
-  let l:mode = get(g:statusline.modes, a:mode, '------')
+  let l:inactive = '------'
+  let l:mode = get(g:statusline.modes, a:mode, l:inactive)
 
-  " If the window is active and has &paste
-  if a:mode && &paste
+  " If the window is active and paste mode is enabled
+  if a:mode != l:inactive && &paste
     let l:mode.= ' ' . g:statusline.symbols.paste
   endif
 
