@@ -28,8 +28,10 @@
         var: os
       tags: [distro]
 
-    - name: "Group hosts by OS distribution"
-      group_by: key=os_{{ ansible_distribution | lower }}
+    - name: "Group hosts by OS"
+      # MacOSX -> os_macosx
+      # CYGWIN_NT-6.1 -> os_cygwin
+      group_by: key=os_{{ ansible_distribution | lower | regex_replace('^([a-zA-Z]+)[-|_](.*)$', '\\1') }}
       tags: [always]
 
     - name: Group names
@@ -49,7 +51,7 @@
 - include: "playbooks/os_archlinux.yml" # Archlinux
 - include: "playbooks/os_debian.yml" # Debian
 - include: "playbooks/os_macosx.yml" # MacOSX
-- include: "playbooks/os_windows.yml" # Windows
+- include: "playbooks/os_cygwin.yml" # Windows
 
 - include: "playbooks/all.yml"
 

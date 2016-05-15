@@ -6,10 +6,13 @@ os: Windows
 
 # https://github.com/naokirin/ansible-apt-cyg-module
 apt_cyg_packages:
+  - bash
   # - bash-completion # Always changed?
   - cmake
   - curl
-  - dos2unix
+  # - dos2unix
+  # - gcc-core
+  - make
   - tree
   - wget
 
