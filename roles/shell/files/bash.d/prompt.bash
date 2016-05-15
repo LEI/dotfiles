@@ -72,7 +72,7 @@ __prompt_string() {
   p+='\[${reset}\]'
 
   # Git status
-  p+='$(__prompt_git " on " "%s" "\[${white}\]%s\[${reset}\]")'
+  p+='$(__prompt_git " on " "\[${white}\]%s\[${reset}\]" "%s")'
 
   p+='\n'
 
@@ -85,6 +85,7 @@ __prompt_string() {
 
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
 # https://github.com/magicmonty/bash-git-prompt/blob/master/gitstatus.sh
+# https://wiki.archlinux.org/index.php/Bash/Prompt_customization
 __prompt_git() {
   local exit=$?
   local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
@@ -94,6 +95,13 @@ __prompt_git() {
   if [[ -z "$repo_info" ]]; then
     return $exit
   fi
+
+  # Branch name (master)
+  local branch_prefix="${1:- git:}"
+  # Difference between HEAD and its upstream (+n)
+  local diff_format="${2:-(%s)}"
+  # Repository status flags
+  local flags_format="${3:-%s}"
 
   local short_sha
   if [[ "$rev_parse_exit" == "0" ]]; then
@@ -129,13 +137,6 @@ __prompt_git() {
     printf "%s" " not inside worktree"
     return $exit
   fi
-
-  # Branch name (master)
-  local branch_prefix="${1:- git:}"
-  # Difference between HEAD and its upstream (+n)
-  local diff_format="${2:-(%s)}"
-  # Repository status flags
-  local flags_format="${3:-%s}"
 
   local line file branch_line
   local changed=0 added=0 deleted=0 updated=0 untracked=0 staged=0
@@ -207,15 +208,17 @@ __prompt_git() {
   [[ "$added" -gt 0 ]] && file_flags+="$added_flag"
   [[ "$deleted" -gt 0 ]] && file_flags+="$deleted_flag"
 
-  if [[ -n "$file_flags" ]]; then
-    # Display flags (colors?)
-    file_flags="$file_flags"
-    branch="${red}${branch}${reset}"
+  [[ -z "$file_flags" ]] && flags_format="%s"
+
+  if [[ -n "$behind_flags" ]]; then
+    branch_color="${red}"
+  elif [[ -n "$file_flags" ]]; then
+    branch_color="${orange}"
   else
-    # PROMPT_SYMBOL_CLEAN?
-    flags_format="%s"
-    branch="${green}${branch}${reset}"
+    branch_color="${yellow}"
   fi
+
+  branch="${branch_color}${branch}${reset}"
 
   # TODO gitstring
   local printf_format="%s${diff_format}${flags_format}"

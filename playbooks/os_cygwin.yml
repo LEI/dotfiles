@@ -6,10 +6,10 @@
 
   roles:
 
-    # Install apt packages
+    # Install Cygwin packages with apt-cyg
     - role: package
       tags: [pkg]
-      packages: "{{ apt_cyg_packages }}"
+      packages: "{{ cygwin_packages }}"
 
     - role: cygwin
       tags: [cyg]

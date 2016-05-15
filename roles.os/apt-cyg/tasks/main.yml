@@ -5,5 +5,5 @@
   apt_cyg:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
-  with_items: "{{ packages }}"
+  with_items: "{{ apt_cyg_packages }}"
   when: packages_install

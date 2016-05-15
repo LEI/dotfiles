@@ -6,6 +6,8 @@ dependencies:
       - name: weechat
         install_options: "{{ weechat_brew_install_options }}"
 
+  # Files or Templates?
+
   # - role: symlink
   #   dot_files:
   #     weechat:
