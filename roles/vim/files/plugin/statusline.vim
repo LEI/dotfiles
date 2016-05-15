@@ -82,13 +82,13 @@ function! Statusline(winnr)
 
   let l:s = ''
 
-  if winwidth(0) > 20
+  if winwidth(0) > 40
     " Vim mode
     let l:s.= ' %{StatuslineMode(w:mode)}'
     let l:s.= ' ' . l:sep
   endif
 
-  if winwidth(0) > 50
+  if winwidth(0) > 60
     " Fugitive
     let l:s.= '%( %{StatuslineFugitive()} ' . l:sep . '%)'
   endif
@@ -97,7 +97,7 @@ function! Statusline(winnr)
   let l:s.= '%<'
 
   " Buffer number
-  let l:s.= ' %n'
+  " let l:s.= ' %n'
 
   " File path
   let l:s.= ' %f'
@@ -125,7 +125,7 @@ function! Statusline(winnr)
     let l:s.= ' ' . l:sep . ' '
   endif
 
-  if winwidth(0) > 40
+  if winwidth(0) > 60
     " File type (%y, %Y)
     let l:s.= '%{&filetype != "" ? &filetype : "no ft"}'
     " let l:s.= '%([%{&filetype}]%)'
@@ -137,7 +137,7 @@ function! Statusline(winnr)
   "   let l:s.= get(g:statusline.symbols, 'key', '')
   " endif
 
-  if winwidth(0) > 30
+  if winwidth(0) > 40
     " Cursor position
     " let l:s.= ' %-12.(%l,%c%V%)'
     " <line>,<column>/<total>
@@ -224,54 +224,54 @@ function! StatuslineColors()
     " StatusLineNC: term=reverse ctermfg=8 ctermbg=10 guifg=#657b83 guibg=#073642
     " highlight StatusLine term=bold,reverse ctermfg=13 ctermbg=11 guifg=#839496 guibg=#586e75
     " highlight StatusLineNC term=reverse ctermfg=8 ctermbg=10 guifg=#657b83 guibg=#073642
-    " highlight StatuslineInsert ctermfg=0 ctermbg=2
-    " highlight StatuslineReplace ctermfg=13 ctermbg=1
+    " highlight StatusLineInsert ctermfg=0 ctermbg=2
+    " highlight StatusLineReplace ctermfg=13 ctermbg=1
 
-    " highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
-    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
+    " highlight StatusLine term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
+    " highlight StatusLineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
 
-    highlight StatuslineInsert ctermfg=0 ctermbg=2
-    highlight StatuslineReplace ctermfg=0 ctermbg=1
+    highlight StatusLineInsert ctermfg=0 ctermbg=2
+    highlight StatusLineReplace ctermfg=0 ctermbg=1
   else
     " Base16 Solarized Light
     " StatusLine: term=bold,reverse ctermfg=8 ctermbg=7 guifg=#657b83 guibg=#93a1a1
     " StatusLineNC: term=reverse ctermfg=12 ctermbg=13 guifg=#839496 guibg=#eee8d5
     " highlight StatusLine term=bold,reverse ctermfg=15 ctermbg=7 guifg=#657b83 guibg=#93a1a1
     " highlight StatusLineNC term=reverse ctermfg=12 ctermbg=13 guifg=#839496 guibg=#eee8d5
-    " highlight StatuslineInsert ctermfg=13 ctermbg=2
-    " highlight StatuslineReplace ctermfg=13 ctermbg=1
+    " highlight StatusLineInsert ctermfg=13 ctermbg=2
+    " highlight StatusLineReplace ctermfg=13 ctermbg=1
 
-    " highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
-    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
+    " highlight StatusLine term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
+    " highlight StatusLineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
 
-    highlight StatuslineInsert ctermfg=7 ctermbg=2
-    highlight StatuslineReplace ctermfg=7 ctermbg=1
+    highlight StatusLineInsert ctermfg=7 ctermbg=2
+    highlight StatusLineReplace ctermfg=7 ctermbg=1
   endif
 
-  " highlight link StatuslineWarning WarningMsg
-  highlight StatuslineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
+  " highlight link StatusLineWarning WarningMsg
+  highlight StatusLineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
 endfunction
 
 function! StatuslineHighlight(mode)
   if a:mode == 'i'
     " Insert mode
-    highlight! link Statusline StatuslineInsert
+    highlight! link StatusLine StatusLineInsert
   elseif a:mode == 'r'
     " Replace mode
-    highlight! link Statusline StatuslineReplace
+    highlight! link StatusLine StatusLineReplace
   elseif a:mode == 'v'
     " Virtual replace mode
-    highlight! link Statusline StatuslineReplace
-  " else
+    highlight! link StatusLine StatusLineReplace
+  else
   "   echom 'MODE: ' . a:mode
-  "   highlight link Statusline NONE
+    highlight link StatusLine NONE
   endif
 endfunction
 
 " set statusline=%!Statusline(winnr())
 " set noshowmode
 
-" autocmd BufAdd,BufEnter,WinEnter * call StatuslineBuild()
+" autocmd BufAdd,BufEnter,WinEnter * call StatusLineBuild()
 " function! StatuslineBuild()
 "   for nr in range(1, winnr('$'))
 "     call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
@@ -288,7 +288,7 @@ augroup Statusline
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
   " Clear highlight link
-  autocmd InsertLeave * highlight link Statusline NONE
+  autocmd InsertLeave * highlight link StatusLine NONE
 augroup END
 
 let &cpo = s:save_cpo
