@@ -96,6 +96,7 @@ function! Statusline(winnr)
 
   " Buffer number
   " let l:s.= '%n'
+
   " File path
   let l:s.= '%f '
 
@@ -103,38 +104,36 @@ function! Statusline(winnr)
   let l:s.= '%([%{StatuslineFlags()}]%)'
 
   " Split
-  let l:s.= '%='
+  let l:s.= '%= '
 
-  if winwidth(0) > 80
-    " The name of the register in effect for the current normal mode
-    " command (regardless of whether that command actually used a
-    " register).  Or for the currently executing normal mode mapping
-    " (use this in custom commands that take a register).
-    " If none is supplied it is the default register '"', unless
-    " 'clipboard' contains "unnamed" or "unnamedplus", then it is
-    " '*' or '+'.
-    let l:s.= ' %{v:register}'
+  " The name of the register in effect for the current normal mode
+  " command (regardless of whether that command actually used a
+  " register).  Or for the currently executing normal mode mapping
+  " (use this in custom commands that take a register).
+  " If none is supplied it is the default register '"', unless
+  " 'clipboard' contains "unnamed" or "unnamedplus", then it is
+  " '*' or '+'.
+  " let l:s.= '%{v:register}'
 
-    " " File format
-    " let l:s.= ' %{&fileformat}'
-    " " File encoding
-    " let l:s.= ' [%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+  " if winwidth(0) > 60
+  "   " File format and encoding
+  "   let l:s.= '%{&fileformat}[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+  " endif
 
-    " File type
-    let l:s.= ' %y'
-    " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
-    " let l:s.= '%([%{&filetype}]%)'
+  " File type
+  let l:s.= '%y'
+  " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
+  " let l:s.= '%([%{&filetype}]%)'
 
-    " Encrypted buffer (TODO: symbol)
-    " if exists('+key') && !empty(&key)
-    "   let l:s.= get(g:statusline.symbols, 'key', '')
-    " endif
-  endif
+  " Encrypted buffer (TODO: symbol)
+  " if exists('+key') && !empty(&key)
+  "   let l:s.= get(g:statusline.symbols, 'key', '')
+  " endif
 
   " Cursor position
   " let l:s.= ' %-12.(%l,%c%V%)'
   " <line>,<column>/<total>
-  let l:s.= ' %-12.(%l,%c%V/%L%)'
+  let l:s.= ' %-14.(%l,%c%V/%L%)'
 
   " File position
   let l:s.= ' %P '

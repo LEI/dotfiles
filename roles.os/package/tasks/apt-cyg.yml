@@ -1,4 +1,6 @@
 ---
+# https://github.com/transcode-open/apt-cyg
+# https://github.com/naokirin/ansible-apt-cyg-module
 - name: "{{ packages | length }} packages : {{ packages_state }}"
   apt_cyg:
     name: "{{ item.name | default(item) }}"
