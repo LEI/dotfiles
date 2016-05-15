@@ -40,7 +40,7 @@ __prompt_string() {
   # printf "%*(%T)T\r" "$width"
   # p+='\[$(tput sc; printf "%*s\r" "$width" "$(date +%T)"; tput rc)\]'
   # p+='\[$(tput sc; printf "%*s" "$width" "\t"; tput rc)\]'
-  p+='\[$(tput sc; __prompt_right "\t"; tput rc)\]'
+  # p+='\[$(tput sc; __prompt_right "\t"; tput rc)\]'
 
   # Highlight the user when logged in as root
   if [[ "${USER}" = "root" ]]; then
@@ -58,7 +58,7 @@ __prompt_string() {
     if [[ -n "${SSH_TTY}" ]]; then
       p+='\[${red}\]'
     else
-      p+='\[${yellow}\]'
+      p+='\[${orange}\]'
     fi
     p+=' \h'
     p+='\[${reset}\]'

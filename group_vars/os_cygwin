@@ -6,15 +6,22 @@ os: Windows
 
 # https://github.com/naokirin/ansible-apt-cyg-module
 apt_cyg_packages:
-  - bash
+  # - bash
   # - bash-completion # Always changed?
+  # - clang
   - cmake
   - curl
   # - dos2unix
   # - gcc-core
+  - gcc-g++
+  # - libncurses-devel
   - make
+  - patch
   - tree
   - wget
+
+# YCM on Cygwin
+# https://github.com/Valloric/YouCompleteMe/wiki/Windows-Installation-Guide#instructions-for-cygwin64-wo-clang
 
 php_packages:
   - php

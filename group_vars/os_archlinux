@@ -2,9 +2,10 @@
 # vi: ft=yaml
 
 pacman_packages:
+  - base-devel
   - ca-certificates
-  - most
-  # - the_silver_searcher # Conflicting with silver-searcher-git, pt?
+  # - the_silver_searcher # Conflicting with silver-searcher-git
+  # - ack / ag / pt?
 
 # Arch User Repository
 yaourt_packages: []
