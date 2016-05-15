@@ -78,30 +78,32 @@ call extend(g:statusline.symbols, {
 
 function! Statusline(winnr)
   call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : 0)
+  let l:sep = get(g:statusline.symbols, 'separator')
 
   let l:s = ''
 
-  if winwidth(0) > 40
+  if winwidth(0) > 20
     " Vim mode
     let l:s.= ' %{StatuslineMode(w:mode)}'
+    let l:s.= ' ' . l:sep
   endif
 
-  if winwidth(0) > 60
+  if winwidth(0) > 50
     " Fugitive
-    let l:s.= '%( %{StatuslineFugitive()}%)'
+    let l:s.= '%( %{StatuslineFugitive()} ' . l:sep . '%)'
   endif
 
   " Truncate
-  let l:s.= ' %<'
+  let l:s.= '%<'
 
   " Buffer number
-  " let l:s.= '%n'
+  let l:s.= ' %n'
 
   " File path
-  let l:s.= '%f '
+  let l:s.= ' %f'
 
   " Flags
-  let l:s.= '%([%{StatuslineFlags()}]%)'
+  let l:s.= '%( [%{StatuslineFlags()}]%)'
 
   " Split
   let l:s.= '%= '
@@ -115,28 +117,35 @@ function! Statusline(winnr)
   " '*' or '+'.
   " let l:s.= '%{v:register}'
 
-  " if winwidth(0) > 60
-  "   " File format and encoding
-  "   let l:s.= '%{&fileformat}[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
-  " endif
+  if winwidth(0) > 80
+    " File format
+    let l:s.= '%{&fileformat} '
+    " File encoding
+    let l:s.= '[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+    let l:s.= ' ' . l:sep . ' '
+  endif
 
-  " File type
-  let l:s.= '%y'
-  " let l:s.= ' %{&ft != "" ? "[" . &ft . "]" : ""}'
-  " let l:s.= '%([%{&filetype}]%)'
+  if winwidth(0) > 40
+    " File type (%y, %Y)
+    let l:s.= '%{&filetype != "" ? &filetype : "no ft"}'
+    " let l:s.= '%([%{&filetype}]%)'
+    let l:s.= ' ' . l:sep . ' '
+  endif
 
   " Encrypted buffer (TODO: symbol)
   " if exists('+key') && !empty(&key)
   "   let l:s.= get(g:statusline.symbols, 'key', '')
   " endif
 
-  " Cursor position
-  " let l:s.= ' %-12.(%l,%c%V%)'
-  " <line>,<column>/<total>
-  let l:s.= ' %-14.(%l,%c%V/%L%)'
+  if winwidth(0) > 30
+    " Cursor position
+    " let l:s.= ' %-12.(%l,%c%V%)'
+    " <line>,<column>/<total>
+    let l:s.= '%-14.(%l,%c%V/%L %)'
 
-  " File position
-  let l:s.= ' %P '
+    " File position
+    let l:s.= '%P '
+  endif
 
   " Syntastic
   let l:s.= '%#StatuslineWarning#'
@@ -218,11 +227,8 @@ function! StatuslineColors()
     " highlight StatuslineInsert ctermfg=0 ctermbg=2
     " highlight StatuslineReplace ctermfg=13 ctermbg=1
 
-    highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
-    highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
-
-    highlight StatuslineInsert ctermfg=0 ctermbg=2
-    highlight StatuslineReplace ctermfg=0 ctermbg=1
+    " highlight Statusline term=reverse cterm=reverse ctermfg=14 ctermbg=0 gui=bold,reverse
+    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
   else
     " Base16 Solarized Light
     " StatusLine: term=bold,reverse ctermfg=8 ctermbg=7 guifg=#657b83 guibg=#93a1a1
@@ -232,12 +238,12 @@ function! StatuslineColors()
     " highlight StatuslineInsert ctermfg=13 ctermbg=2
     " highlight StatuslineReplace ctermfg=13 ctermbg=1
 
-    highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
-    highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
-
-    highlight StatuslineInsert ctermfg=7 ctermbg=2
-    highlight StatuslineReplace ctermfg=7 ctermbg=1
+    " highlight Statusline term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
+    " highlight StatuslineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
   endif
+
+  highlight StatuslineInsert ctermfg=7 ctermbg=2
+  highlight StatuslineReplace ctermfg=7 ctermbg=1
 
   " highlight link StatuslineWarning WarningMsg
   highlight StatuslineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
