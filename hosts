@@ -6,13 +6,13 @@ full_name = Guillaume Frichet
 user_name = LEI
 timezone = Europe/Paris
 
+[local]
+localhost
+
 [local:vars]
 ansible_connection=local
 # Archlinux uses python3 by default
 ansible_python_interpreter=python2
-
-[local]
-localhost
 
 # [remote]
 # homestead
