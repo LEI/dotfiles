@@ -95,20 +95,17 @@ __prompt_git() {
     return $exit
   fi
 
-  local short_sha
+  local short_sha=
   if [[ "$rev_parse_exit" == "0" ]]; then
     short_sha="${repo_info##*$'\n'}"
     repo_info="${repo_info%$'\n'*}"
-  # else
-  #   echo &>2 "ERR:$rev_parse_exit"
   fi
-
   local inside_worktree="${repo_info##*$'\n'}"
   repo_info="${repo_info%$'\n'*}"
   local bare_repo="${repo_info##*$'\n'}"
   repo_info="${repo_info%$'\n'*}"
   local inside_gitdir="${repo_info##*$'\n'}"
-  # local g="${repo_info%$'\n'*}"
+  local g="${repo_info%$'\n'*}"
 
   # Hide if the current directory is ignored
   # if [[ "$inside_worktree" = "true" ]] && git check-ignore -q . 2>/dev/null; then
@@ -117,17 +114,13 @@ __prompt_git() {
   #   return $exit
   # fi
 
-  # FIXME inside_gitdir + bare_repo?
-
   if [[ "$bare_repo" = "true" ]]; then
     printf "%s" " in bare repo"
     return $exit
   elif [[ "$inside_gitdir" = "true" ]]; then
     printf "%s" " in git dir"
     return $exit
-  elif [[ "$inside_worktree" != "true" ]]; then
-    printf "%s" " not inside worktree"
-    return $exit
+  # elif [[ "$inside_worktree" = "true" ]]; then
   fi
 
   # Branch name (master)
