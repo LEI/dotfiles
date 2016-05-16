@@ -21,4 +21,43 @@ pip_packages:
 
 ruby_gems:
   - bundler
-#   - compass
+  # - compass
+
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+# set -g @plugin 'github_username/plugin_name'
+# set -g @plugin 'git@github.com/user/plugin'
+# set -g @plugin 'git@bitbucket.com/user/plugin'
+tmux_plugins:
+  - tmux-plugins/tpm
+  - tmux-plugins/tmux-resurrect
+  # - nhdaly/tmux-scroll-copy-mode
+  # - tmux-plugins/tmux-cpu
+  # - tmux-plugins/tmux-battery
+  # - thewtex/tmux-mem-cpu-load
+
+# TODO: handle plugin.opts without quotes other than function('')
+vim_plugins:
+  - altercation/vim-colors-solarized
+  - tpope/vim-commentary
+  - tpope/vim-endwise
+  - tpope/vim-fugitive
+  - tpope/vim-repeat
+  - tpope/vim-sleuth
+  - tpope/vim-surround
+  - tpope/vim-unimpaired
+  - tpope/vim-vinegar
+  - airblade/vim-gitgutter
+  - ctrlpvim/ctrlp.vim
+  - sjl/gundo.vim
+  - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
+  - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
+  - scrooloose/syntastic
+  - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
+  - { repo: StanAngeloff/php.vim, opts: { for: php } }
+  - { repo: pangloss/vim-javascript, opts: { for: javascript } }
+  - digitaltoad/vim-jade
+  - keith/tmux.vim
+  # - Glench/Vim-Jinja2-Syntax
+  # - Yggdroot/indentLine
+  # - editorconfig/editorconfig-vim
+  # - { repo: godlygeek/tabular, opts: { on: Tab } }

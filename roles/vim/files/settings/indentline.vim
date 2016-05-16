@@ -1,5 +1,9 @@
 " Indent line
 
+if !exists("g:indentLine_loaded")
+  finish
+endif
+
 let g:indentLine_enabled = 1
 
 " Modes in which text in the cursor line can be concealed (default: inc)

@@ -1,5 +1,7 @@
 " Vim statusline
 
+" https://github.com/itchyny/lightline.vim
+
 if get(g:, 'loaded_statusline', 0)
   finish
 endif
@@ -66,31 +68,43 @@ call extend(g:statusline.modes, {
       \ '': 'S-BLOCK',
 \}, 'keep')
 
-" OSX Command: nr2char(0x2387)
+" Branch: system('uname -s')[:5] ==? 'Darwin' ? nr2char(0x2387) . ' ' : ''
 " Close: nr2char(0x2715)
 " Lock: nr2char(0x1F512)
+" |- nr2char(0x251C),
 call extend(g:statusline.symbols, {
+      \ 'branch': '',
       \ 'key': nr2char(0x1F511) . ' ',
       \ 'readonly': 'RO',
       \ 'paste': '(paste)',
       \ 'separator': nr2char(0x2502),
 \}, 'keep')
 
-function! Statusline(winnr)
-  call setwinvar(a:winnr, 'mode', a:winnr == winnr() ? mode() : 0)
+function! Statusline(winnr, ...)
+  let l:mode = a:winnr == winnr() ? mode() : 0
+  call setwinvar(a:winnr, 'mode', l:mode)
+
+  let l:title = a:0 > 0 ? a:1 : ''
+
+  " Readonly: hide non relevant parts
+  " (1: branch, 2: mode, ft)
+  let l:ro = a:0 > 1 ? a:2 : 0
+
   let l:sep = get(g:statusline.symbols, 'separator')
 
   let l:s = ''
 
-  if winwidth(0) > 40
+  if winwidth(0) > 40 && l:ro < 2
     " Vim mode
     let l:s.= ' %{StatuslineMode(w:mode)}'
     let l:s.= ' ' . l:sep
   endif
 
-  if winwidth(0) > 60
+  if winwidth(0) > 60 && l:ro < 1
     " Fugitive
-    let l:s.= '%( %{StatuslineFugitive()} ' . l:sep . '%)'
+    let l:s.= '%( ' . get(g:statusline.symbols, 'branch')
+    let l:s.='%{StatuslineFugitive()}'
+    let l:s.= ' ' . l:sep . '%)'
   endif
 
   " Truncate
@@ -99,14 +113,24 @@ function! Statusline(winnr)
   " Buffer number
   " let l:s.= ' %n'
 
-  " File path
-  let l:s.= ' %f'
+  if strlen(l:title) > 0
+    let l:s.= ' ' . l:title
+  else
+    " File path
+    let l:s.= ' %f'
+  endif
 
   " Flags
+  " let l:s.= '%( [%H%R%M]%)'
   let l:s.= '%( [%{StatuslineFlags()}]%)'
 
   " Split
-  let l:s.= '%= '
+  let l:s.= '%='
+
+  " Syntastic
+  let l:s.= ' %#StatuslineWarning#'
+  let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
+  let l:s.= '%*'
 
   " The name of the register in effect for the current normal mode
   " command (regardless of whether that command actually used a
@@ -117,17 +141,17 @@ function! Statusline(winnr)
   " '*' or '+'.
   " let l:s.= '%{v:register}'
 
-  if winwidth(0) > 80
-    " File format
-    let l:s.= '%{&fileformat} '
-    " File encoding
-    let l:s.= '[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
-    let l:s.= ' ' . l:sep . ' '
-  endif
+  " if winwidth(0) > 80 && l:ro < 1
+  "   " File format
+  "   let l:s.= ' %{&fileformat} '
+  "   " File encoding
+  "   let l:s.= '[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
+  "   let l:s.= ' ' . l:sep
+  " endif
 
-  if winwidth(0) > 60
+  if winwidth(0) > 60 && l:ro < 2
     " File type (%y, %Y)
-    let l:s.= '%{&filetype != "" ? &filetype : "no ft"}'
+    let l:s.= ' %{&filetype != "" ? &filetype : "no ft"}'
     " let l:s.= '%([%{&filetype}]%)'
     let l:s.= ' ' . l:sep . ' '
   endif
@@ -147,11 +171,6 @@ function! Statusline(winnr)
     let l:s.= '%P '
   endif
 
-  " Syntastic
-  let l:s.= '%#StatuslineWarning#'
-  let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
-  let l:s.= '%*'
-
   return l:s
 endfunction
 
@@ -165,11 +184,6 @@ function! StatuslineMode(mode)
   endif
 
   return l:mode
-  " let l:file = expand('%:t')
-  " " Cf. https://github.com/itchyny/lightline.vim
-  " return l:file == '__Gundo__' ? 'Gundo' :
-  "       \ l:file == '__Gundo_Preview__' ? 'Preview' :
-  "       \ l:mode
 endfunction
 
 function! StatuslineFugitive()
@@ -196,7 +210,7 @@ function! StatuslineFlags()
 
   if &buftype == 'help'
     call add(l:flags, 'H')
-  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|vim-plug'
+  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|qf\|vim-plug'
     if &readonly
       call add(l:flags, g:statusline.symbols.readonly)
     endif
@@ -253,18 +267,20 @@ function! StatuslineColors()
   highlight StatusLineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
 endfunction
 
-function! StatuslineHighlight(mode)
-  if a:mode == 'i'
+function! StatuslineHighlight(...)
+  let l:mode = a:0 > 0 ? a:1 : ''
+  if l:mode == 'i'
     " Insert mode
     highlight! link StatusLine StatusLineInsert
-  elseif a:mode == 'r'
+  elseif l:mode == 'r'
     " Replace mode
     highlight! link StatusLine StatusLineReplace
-  elseif a:mode == 'v'
+  elseif l:mode == 'v'
     " Virtual replace mode
     highlight! link StatusLine StatusLineReplace
+  elseif strlen(l:mode) > 0
+    echoerr 'Unknown mode: ' . l:mode
   else
-  "   echom 'MODE: ' . a:mode
     highlight link StatusLine NONE
   endif
 endfunction
@@ -273,23 +289,40 @@ endfunction
 " set noshowmode
 
 " autocmd BufAdd,BufEnter,WinEnter * call StatusLineBuild()
-" function! StatuslineBuild()
-"   for nr in range(1, winnr('$'))
-"     call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
-"   endfor
-" endfunction
+" for nr in range(1, winnr('$'))
+"   call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
+" endfor
+
+function! SetStatusline(nr)
+  let l:stl = ''
+  let l:file = expand('%:t')
+  if l:file == '__Gundo__'
+    let l:stl = '%!Statusline(' . a:nr . ', "[Gundo]", 2)'
+  elseif l:file == '__Gundo_Preview__'
+    let l:stl = '%!Statusline(' . a:nr . ', "[Preview]", 2)'
+  elseif &filetype != 'qf'
+    let l:stl = '%!Statusline(' . a:nr . ')'
+  endif
+
+  if strlen(l:stl) > 0
+    call setwinvar(a:nr, '&statusline', l:stl)
+  endif
+endfunction
 
 augroup Statusline
   autocmd!
   " Create the highlight groups on startup and when the colorscheme changes
   autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
-  " Assign the statusline function
-  autocmd BufAdd,BufEnter,WinEnter * call setwinvar(winnr(), '&statusline', '%!Statusline(' . winnr() . ')')
+  " Assign the statusline to the window
+  autocmd BufAdd,BufEnter,WinEnter * call SetStatusline(winnr())
+  " Command line mode
+  autocmd CmdWinEnter * let &l:statusline='%!Statusline(' . winnr() . ', "", 1)'
+  " Quickfix location list
+  autocmd FileType qf let &l:statusline='%!Statusline(' . winnr() . ', "%f %{w:quickfix_title}", 2)'
   " Update the statusline highlight group
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  " Clear highlight link
-  autocmd InsertLeave * highlight link StatusLine NONE
+  autocmd InsertLeave * call StatuslineHighlight()
 augroup END
 
 let &cpo = s:save_cpo
