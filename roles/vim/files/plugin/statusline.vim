@@ -80,6 +80,46 @@ call extend(g:statusline.symbols, {
       \ 'separator': nr2char(0x2502),
 \}, 'keep')
 
+" set statusline=%!Statusline(winnr())
+" set noshowmode
+
+" autocmd BufAdd,BufEnter,WinEnter * call StatusLineBuild()
+" for nr in range(1, winnr('$'))
+"   call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
+" endfor
+
+augroup Statusline
+  autocmd!
+  " Create the highlight groups on startup and when the colorscheme changes
+  autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
+  " Assign the statusline to the window
+  autocmd BufAdd,BufEnter,WinEnter * call SetStatusline(winnr())
+  " Command line mode
+  autocmd CmdWinEnter * let &l:statusline='%!Statusline(' . winnr() . ', "", 1)'
+  " Quickfix location list
+  autocmd FileType qf let &l:statusline='%!Statusline(' . winnr() . ', "%f %{w:quickfix_title}", 2)'
+  " Update the statusline highlight group
+  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
+  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
+  autocmd InsertLeave * call StatuslineHighlight()
+augroup END
+
+function! SetStatusline(nr)
+  let l:stl = ''
+  let l:file = expand('%:t')
+  if l:file == '__Gundo__'
+    let l:stl = '%!Statusline(' . a:nr . ', "[Gundo]", 2)'
+  elseif l:file == '__Gundo_Preview__'
+    let l:stl = '%!Statusline(' . a:nr . ', "[Preview]", 2)'
+  elseif &filetype != 'qf'
+    let l:stl = '%!Statusline(' . a:nr . ')'
+  endif
+
+  if strlen(l:stl) > 0
+    call setwinvar(a:nr, '&statusline', l:stl)
+  endif
+endfunction
+
 function! Statusline(winnr, ...)
   let l:mode = a:winnr == winnr() ? mode() : 0
   call setwinvar(a:winnr, 'mode', l:mode)
@@ -132,13 +172,6 @@ function! Statusline(winnr, ...)
   let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
   let l:s.= '%*'
 
-  " The name of the register in effect for the current normal mode
-  " command (regardless of whether that command actually used a
-  " register).  Or for the currently executing normal mode mapping
-  " (use this in custom commands that take a register).
-  " If none is supplied it is the default register '"', unless
-  " 'clipboard' contains "unnamed" or "unnamedplus", then it is
-  " '*' or '+'.
   " let l:s.= '%{v:register}'
 
   " if winwidth(0) > 80 && l:ro < 1
@@ -284,46 +317,6 @@ function! StatuslineHighlight(...)
     highlight link StatusLine NONE
   endif
 endfunction
-
-" set statusline=%!Statusline(winnr())
-" set noshowmode
-
-" autocmd BufAdd,BufEnter,WinEnter * call StatusLineBuild()
-" for nr in range(1, winnr('$'))
-"   call setwinvar(nr, '&statusline', '%!Statusline(' . nr . ')')
-" endfor
-
-function! SetStatusline(nr)
-  let l:stl = ''
-  let l:file = expand('%:t')
-  if l:file == '__Gundo__'
-    let l:stl = '%!Statusline(' . a:nr . ', "[Gundo]", 2)'
-  elseif l:file == '__Gundo_Preview__'
-    let l:stl = '%!Statusline(' . a:nr . ', "[Preview]", 2)'
-  elseif &filetype != 'qf'
-    let l:stl = '%!Statusline(' . a:nr . ')'
-  endif
-
-  if strlen(l:stl) > 0
-    call setwinvar(a:nr, '&statusline', l:stl)
-  endif
-endfunction
-
-augroup Statusline
-  autocmd!
-  " Create the highlight groups on startup and when the colorscheme changes
-  autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
-  " Assign the statusline to the window
-  autocmd BufAdd,BufEnter,WinEnter * call SetStatusline(winnr())
-  " Command line mode
-  autocmd CmdWinEnter * let &l:statusline='%!Statusline(' . winnr() . ', "", 1)'
-  " Quickfix location list
-  autocmd FileType qf let &l:statusline='%!Statusline(' . winnr() . ', "%f %{w:quickfix_title}", 2)'
-  " Update the statusline highlight group
-  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
-  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  autocmd InsertLeave * call StatuslineHighlight()
-augroup END
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
