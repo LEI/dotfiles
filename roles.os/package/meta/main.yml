@@ -1,1 +1,6 @@
 ---
+dependencies:
+
+  - role: apt-cyg
+    apt_cyg_packages: "{{ packages }}"
+    when: os == 'Windows'

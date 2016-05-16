@@ -1,0 +1,15 @@
+---
+- name: Windows roles
+  hosts: os_cygwin
+  gather_facts: no
+  tags: [win]
+
+  roles:
+
+    # Install Cygwin packages with apt-cyg
+    - role: package
+      tags: [pkg]
+      packages: "{{ cygwin_packages }}"
+
+    - role: cygwin
+      tags: [cyg]

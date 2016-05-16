@@ -12,13 +12,11 @@ localhost
 [local:vars]
 ansible_connection=local
 # Archlinux uses python3 by default
-# [os_archlinux]
-# [os_archlinux:vars]
 ansible_python_interpreter=python2
 
-; [remote]
-; # homestead
-; pi ansible_host=192.168.1.20 ansible_user=pi
+# [remote]
+# homestead
+# pi ansible_host=192.168.1.20 ansible_user=pi
 
 # [vagrant]
 # Default: vagrant@127.0.0.1:2222 (cf. group_vars/vagrant)

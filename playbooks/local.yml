@@ -21,5 +21,6 @@
     # - role: ssh
     #   tags: [ssh]
 
-    # - role: weechat
-    #   tags: [weechat, irc]
+    # IRC
+    - role: weechat
+      tags: [weechat, irc]

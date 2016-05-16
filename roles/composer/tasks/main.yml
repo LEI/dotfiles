@@ -18,8 +18,8 @@
   shell: "{{ php_executable }} {{ composer_bin_path }}/composer self-update"
   register: composer_update_result
   when: composer_update
-  changed_when: "'Updating to version' in composer_update_result.stdout"
-  become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
+  changed_when: "'Updating to version' in composer_update_result.stdout | default(omit)"
+  become: "{{ 'yes' if os in ['Archlinux', 'Debian'] else 'no' }}"
 
 - include: global-require.yml
   when: composer_packages | length > 0

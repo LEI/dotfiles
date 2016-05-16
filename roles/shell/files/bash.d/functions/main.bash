@@ -29,3 +29,10 @@ pmd() {
 down4me() {
   curl -s "http://www.downforeveryoneorjustme.com/$1" | sed '/just you/!d;s/<[^>]*>//g'
 }
+
+reload() {
+  # Invoke as a login shell
+  # exec $SHELL -l
+
+  source "$HOME/.bashrc"
+}

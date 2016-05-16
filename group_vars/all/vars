@@ -12,6 +12,8 @@ dot_root: "{{ ansible_env.HOME }}/{{ dot_repo_dir }}"
 dot_local_dir: "{{ inventory_dir }}" # "{{ lookup('env', 'HOME') }}" "{{ hostvars['localhost']['ansible_env']['HOME'] }}/{{ dot_repo_dir }}"
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
+os: "{{ ansible_os_family }}"
+
 # Options
 # dot_backup_enable: yes
 # dot_backup_files: yes

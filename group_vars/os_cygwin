@@ -1,0 +1,29 @@
+---
+# vi: ft=yaml
+
+# CYGWIN_NT-6.1
+os: Windows
+
+cygwin_packages:
+  # - bash
+  # - bash-completion # Always changed?
+  # - clang
+  - cmake
+  - curl
+  # - dos2unix
+  # - gcc-core/gcc-g++
+  # - libncurses-devel
+  - make
+  - patch
+  - tree
+  - wget
+
+php_packages:
+  - php
+  - php-json
+  - php-phar
+  - php-iconv # or 'php-mbstring'
+
+ruby_packages:
+  - ruby
+  # - rubygems

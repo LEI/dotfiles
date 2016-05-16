@@ -6,6 +6,7 @@
 
 ## TODO
 
+- [ ] Bash aliases & completion: bash-doc/examples
 - [ ] Bash color escape function (fg, bg)
 - [ ] Linux install ansible bin/dot
 - [ ] OS X (osa)scripts and Terminal settings

@@ -6,6 +6,10 @@ npm_install: yes
 npm_global: yes
 npm_state: present
 
-# Must be in PATH (roles/bash/files/path)
-npm_prefix: ~/.node_modules
+npm_prefix: "{{ ansible_env.HOME }}/.node_modules" # /bin?
+
+# Node modules
 npm_packages: []
+
+# System packages
+node_packages: []

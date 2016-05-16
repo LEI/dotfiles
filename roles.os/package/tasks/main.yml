@@ -1,5 +1,5 @@
 ---
-- name: "Check {{ packages | length }} packages state : {{ packages_state }}"
+- name: "{{ packages | length }} packages : {{ packages_state }}"
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
@@ -12,4 +12,5 @@
     }}"
   with_items: "{{ packages }}"
   become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
-  when: packages_install
+  # sudo if os in ['Archlinux', 'Debian'] ?
+  when: packages_install and os != 'Windows'

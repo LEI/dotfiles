@@ -1,7 +1,5 @@
 # OS X completion
 
-# https://github.com/Bash-it/bash-it/blob/master/completion/available/system.completion.bash
-
 [[ "$(uname -s)" == "Darwin" ]] || return
 
 # Add tab completion for brew commands
