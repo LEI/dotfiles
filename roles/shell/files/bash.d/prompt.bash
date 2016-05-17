@@ -72,7 +72,7 @@ __prompt_string() {
   p+='\[${reset}\]'
 
   # Git status
-  p+='$(__prompt_git " on " "\[${white}\]%s\[${reset}\]" "%s")'
+  p+='$(__prompt_git " on " "%s" "\[${white}\]%s\[${reset}\]")'
 
   p+='\n'
 
@@ -192,10 +192,10 @@ __prompt_git() {
   [[ -n "$ahead" ]] && diff_flags+="$ahead_flag"
   [[ -z "$diff_flags" ]] && diff_format="%s" # diff_flags="=" # Up to date
 
-  # Display count if there is more than one staged file
-  [[ "$staged" -gt 1 ]] && file_flags+="$staged"
-  [[ "$staged" -gt 0 ]] && file_flags+="$staged_flag"
+  # Display count if there is more than one file
+  # [[ "$staged" -gt 1 ]] && file_flags+="$staged"
 
+  [[ "$staged" -gt 0 ]] && file_flags+="$staged_flag"
   # Conflicts?
   [[ "$added" -gt 0 ]] && file_flags+="$added_flag"
   [[ "$changed" -gt 0 ]] && file_flags+="$changed_flag"

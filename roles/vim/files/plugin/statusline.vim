@@ -101,7 +101,7 @@ augroup Statusline
   " Update the statusline highlight group
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  autocmd InsertLeave * call StatuslineHighlight()
+  autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
 augroup END
 
 function! SetStatusline(nr)
@@ -172,21 +172,18 @@ function! Statusline(winnr, ...)
   let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
   let l:s.= '%*'
 
-  " let l:s.= '%{v:register}'
-
-  " if winwidth(0) > 80 && l:ro < 1
-  "   " File format
-  "   let l:s.= ' %{&fileformat} '
-  "   " File encoding
-  "   let l:s.= '[%{&fenc != "" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]'
-  "   let l:s.= ' ' . l:sep
-  " endif
+  let l:s.= '%( %{v:register}%)'
 
   if winwidth(0) > 60 && l:ro < 2
     " File type (%y, %Y)
     let l:s.= ' %{&filetype != "" ? &filetype : "no ft"}'
     " let l:s.= '%([%{&filetype}]%)'
-    let l:s.= ' ' . l:sep . ' '
+    let l:s.= ' ' . l:sep
+  endif
+
+  if winwidth(0) > 80 && l:ro < 1
+    " File format and encoding
+    let l:s.= '%( %{StatuslineEncoding()} ' . l:sep . '%)'
   endif
 
   " Encrypted buffer (TODO: symbol)
@@ -198,7 +195,7 @@ function! Statusline(winnr, ...)
     " Cursor position
     " let l:s.= ' %-12.(%l,%c%V%)'
     " <line>,<column>/<total>
-    let l:s.= '%-14.(%l,%c%V/%L %)'
+    let l:s.= ' %-14.(%l,%c%V/%L %)'
 
     " File position
     let l:s.= '%P '
@@ -257,6 +254,19 @@ function! StatuslineFlags()
   return join(l:flags, ',')
 endfunction
 
+function! StatuslineEncoding()
+  let l:encoding = ''
+
+  if &fileformat != 'unix' || &fenc != 'utf-8' || &enc != 'utf-8'
+    let l:encoding.= &fenc != '' ? &fenc : &enc
+    let l:encoding.= exists('+bomb') && &bomb ? ',B' : ''
+
+    let l:encoding = &fileformat . '[' . l:encoding . ']'
+  endif
+
+  return l:encoding
+endfunction
+
 function! StatuslineColors()
   " Solarized Statusline Colors:
   " Red: 1
@@ -291,13 +301,15 @@ function! StatuslineColors()
 
     " highlight StatusLine term=reverse cterm=reverse ctermfg=10 ctermbg=7 gui=bold,reverse
     " highlight StatusLineNC term=reverse cterm=reverse ctermfg=12 ctermbg=7 gui=reverse
+    " highlight StatusLineNC ctermfg=7 ctermbg=12
 
     highlight StatusLineInsert ctermfg=7 ctermbg=2
     highlight StatusLineReplace ctermfg=7 ctermbg=1
   endif
 
   " highlight link StatusLineWarning WarningMsg
-  highlight StatusLineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
+  " highlight StatusLineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
+  highlight StatusLineWarning term=reverse cterm=reverse ctermfg=9 guifg=red
 endfunction
 
 function! StatuslineHighlight(...)
