@@ -3,9 +3,8 @@
 # docs.npmjs.com/getting-started/fixing-npm-permissions
 # github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
 
-# - name: Get npm configuration prefix
-#   shell: "npm config get prefix"
-#   register: npm_prefix
+# - name: Set npm configuration prefix
+#   shell: "npm config set prefix {{ npm_prefix }}"
 #   changed_when: false
 
 # - name: "Check {{ npm_prefix.stdout }}/lib/node_modules permissions"
@@ -21,7 +20,7 @@
     version: "{{ item.version | default(omit) }}"
     global: "{{ item.global | default(npm_global) }}"
     state: "{{ item.state | default(npm_state) }}"
-    path: "{{ item.path | default(omit) }}" # npm_prefix?
+    path: "{{ item.path | default(omit) }}"
   with_items: "{{ npm_packages }}"
   when: npm_install
-  become: "{{ 'yes' if ansible_os_family in ['Debian'] else 'no' }}"
+  # become: "{{ 'yes' if ansible_os_family in ['Debian'] else 'no' }}"

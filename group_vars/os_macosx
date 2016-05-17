@@ -14,28 +14,18 @@ homebrew_packages:
   - bash
   # - bash-completion2?
   - cmake
+  # - ctags
   - coreutils
-  - name: curl
-    install_options:
-      - with-openssl
-  # - diffutils
-    # gnu-diff gnu-indent gnu-tar gnu-which...
-  - name: findutils # find, locale, updatedb, xargs
-    install_options:
-      - with-default-names
-  - name: gnu-sed
-    install_options:
-      - with-default-names
+  - { name: curl, install_options: ['with-openssl'] }
+  # - diffutils # gnu-diff gnu-indent gnu-tar gnu-which...
+  - { name: findutils, install_options: ['with-default-names'] }
+  - { name: gnu-sed, install_options: ['with-default-names'] }
   - gnutls
-  - name: grep
-    install_options:
-      - with-default-names
+  - { name: grep, install_options: ['with-default-names'] }
   # - gnupg / gnupg2?
   # - grc
   # - gzip
-  - name: imagemagick
-    install_options:
-      - with-webp
+  - { name: imagemagick, install_options: ['with-webp'] }
   # - less
   - lua
   - luajit

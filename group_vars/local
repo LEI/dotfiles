@@ -14,8 +14,7 @@ npm_packages:
   - jshint
 
 pip_packages:
-  - name: pip
-    extra_args: --upgrade
+  - { name: pip, extra_args: --upgrade }
   - bashate
   - pygments
 
