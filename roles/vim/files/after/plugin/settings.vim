@@ -27,5 +27,5 @@ function SourcePluginSettings(directory, check_directory)
   "endif
 endfunction
 
-" TODO: use autoload#init()?
+" TODO: autoload#init()?
 call SourcePluginSettings(s:settings_path, s:plugins_path)

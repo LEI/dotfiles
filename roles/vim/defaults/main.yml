@@ -17,4 +17,5 @@ vim_plug_force: no
 vim_plugins_path: .vim/plugged
 
 # List of plugins used in templates/plug.vim.j2
+# TODO strip quotes in plugin.opts values like function('')
 vim_plugins: []

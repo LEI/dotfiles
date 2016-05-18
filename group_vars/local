@@ -34,7 +34,6 @@ tmux_plugins:
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
 
-# TODO: handle plugin.opts without quotes other than function('')
 vim_plugins:
   - altercation/vim-colors-solarized
   - tpope/vim-commentary
@@ -47,11 +46,12 @@ vim_plugins:
   # - tpope/vim-tbone
   - tpope/vim-unimpaired
   - tpope/vim-vinegar
-  - airblade/vim-gitgutter
   - ctrlpvim/ctrlp.vim
   - sjl/gundo.vim
   - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
   - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
+  - airblade/vim-gitgutter
+  - Yggdroot/indentLine
   - scrooloose/syntastic
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
   - { repo: StanAngeloff/php.vim, opts: { for: php } }
@@ -59,6 +59,5 @@ vim_plugins:
   - digitaltoad/vim-jade
   - keith/tmux.vim
   # - Glench/Vim-Jinja2-Syntax
-  # - Yggdroot/indentLine
   # - editorconfig/editorconfig-vim
   # - { repo: godlygeek/tabular, opts: { on: Tab } }
