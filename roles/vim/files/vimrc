@@ -116,8 +116,10 @@ set hidden
 set lazyredraw
 
 set timeout
-" Wait for input, but not when returning to normal mode
-set timeoutlen=666 ttimeoutlen=0
+" Wait for macros
+set timeoutlen=1200
+" Make Escape work faster
+set ttimeoutlen=50
 
 " Interface {{{1
 

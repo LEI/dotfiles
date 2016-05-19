@@ -94,14 +94,16 @@ augroup Statusline
   autocmd VimEnter,ColorScheme * call StatuslineColors() | redrawstatus
   " Assign the statusline to the window
   autocmd BufAdd,BufEnter,WinEnter * call SetStatusline(winnr())
-  " Command line mode
+  " Command line mode (CmdWinLeave?)
   autocmd CmdWinEnter * let &l:statusline='%!Statusline(' . winnr() . ', "", 1)'
-  " Quickfix location list
+  " Quickfix location list (QuickFixCmdPre, QuickFixCmdPost?)
   autocmd FileType qf let &l:statusline='%!Statusline(' . winnr() . ', "%f %{w:quickfix_title}", 2)'
   " Update the statusline highlight group
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
   autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
+
+  autocmd BufWritePost * redrawstatus
 augroup END
 
 function! SetStatusline(nr)
@@ -117,12 +119,15 @@ function! SetStatusline(nr)
 
   if strlen(l:stl) > 0
     call setwinvar(a:nr, '&statusline', l:stl)
+    redrawstatus
   endif
 endfunction
 
 function! Statusline(winnr, ...)
-  let l:mode = a:winnr == winnr() ? mode() : 0
-  call setwinvar(a:winnr, 'mode', l:mode)
+  let l:mode = a:winnr == winnr() ? mode() : ''
+  " call setwinvar(a:winnr, 'mode', l:mode)
+  " if !exists('w:mode') || w:mode != l:mode
+  " endif
 
   let l:title = a:0 > 0 ? a:1 : ''
 
@@ -136,7 +141,7 @@ function! Statusline(winnr, ...)
 
   if winwidth(0) > 40 && l:ro < 2
     " Vim mode
-    let l:s.= ' %{StatuslineMode(w:mode)}'
+    let l:s.= ' %{StatuslineMode("' . l:mode . '")}'
     let l:s.= ' ' . l:sep
   endif
 
@@ -168,11 +173,11 @@ function! Statusline(winnr, ...)
   let l:s.= '%='
 
   " Syntastic
-  let l:s.= ' %#StatuslineWarning#'
+  let l:s.= ' %#ErrorMsg#'
   let l:s.= '%( %{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""} %)'
   let l:s.= '%*'
 
-  let l:s.= '%( %{v:register}%)'
+  " let l:s.= '%( %{v:register}%)'
 
   if winwidth(0) > 60 && l:ro < 2
     " File type (%y, %Y)
@@ -205,12 +210,24 @@ function! Statusline(winnr, ...)
 endfunction
 
 function! StatuslineMode(mode)
-  let l:inactive = '------'
-  let l:mode = get(g:statusline.modes, a:mode, l:inactive)
+  let l:mode = get(g:statusline.modes, a:mode, '------')
 
-  " If the window is active and paste mode is enabled
-  if a:mode != l:inactive && &paste
-    let l:mode.= ' ' . g:statusline.symbols.paste
+  " if a:mode ==# 'n'
+  "   let l:mode = 'normal'
+  " elseif a:mode ==# 'i'
+  "   let l:mode = 'insert'
+  " elseif a:mode ==# 'R'
+  "   let l:mode = 'replace'
+  " elseif a:mode =~# '\v(v|V||s|S|)'
+  "   let l:mode = 'visual'
+  " elseif a:mode ==# 'c'
+  "   let l:mode = 'command'
+  " endif
+
+  if a:mode " Active window
+    if &paste " PASTE mode enabled
+      let l:mode.= ' ' . g:statusline.symbols.paste
+    endif
   endif
 
   return l:mode
@@ -289,7 +306,7 @@ function! StatuslineColors()
     " highlight StatusLineNC term=reverse cterm=reverse ctermfg=11 ctermbg=0 gui=reverse
 
     highlight StatusLineInsert ctermfg=0 ctermbg=2
-    highlight StatusLineReplace ctermfg=0 ctermbg=1
+    highlight StatusLineReplace ctermfg=0 ctermbg=9
   else
     " Base16 Solarized Light
     " StatusLine: term=bold,reverse ctermfg=8 ctermbg=7 guifg=#657b83 guibg=#93a1a1
@@ -304,12 +321,8 @@ function! StatuslineColors()
     " highlight StatusLineNC ctermfg=7 ctermbg=12
 
     highlight StatusLineInsert ctermfg=7 ctermbg=2
-    highlight StatusLineReplace ctermfg=7 ctermbg=1
+    highlight StatusLineReplace ctermfg=7 ctermbg=9
   endif
-
-  " highlight link StatusLineWarning WarningMsg
-  " highlight StatusLineWarning term=reverse cterm=reverse ctermfg=1 guifg=Red
-  highlight StatusLineWarning term=reverse cterm=reverse ctermfg=9 guifg=red
 endfunction
 
 function! StatuslineHighlight(...)
@@ -324,7 +337,7 @@ function! StatuslineHighlight(...)
     " Virtual replace mode
     highlight! link StatusLine StatusLineReplace
   elseif strlen(l:mode) > 0
-    echoerr 'Unknown mode: ' . l:mode
+    echom 'Unknown mode: ' . l:mode
   else
     highlight link StatusLine NONE
   endif
