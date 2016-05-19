@@ -4,7 +4,7 @@ if !exists("g:indentLine_loaded")
   finish
 endif
 
-let g:indentLine_enabled = 1
+" let g:indentLine_enabled = 1
 
 " Modes in which text in the cursor line can be concealed (default: inc)
 " n: Normal mode
@@ -28,7 +28,11 @@ let g:indentLine_conceallevel = 2
 let g:indentLine_char = nr2char(0x2502)
 
 " Colors
-let g:indentLine_color_term = 0 " 10
+if &background == 'dark'
+  let g:indentLine_color_term = 0 " 10
+else
+  let g:indentLine_color_term = 7
+endif
 " GVim
 "let g:indentLine_color_gui = '#A4E57E'
 " none X terminal
