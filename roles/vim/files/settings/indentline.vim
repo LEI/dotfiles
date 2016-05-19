@@ -11,7 +11,7 @@ let g:indentLine_enabled = 1
 " v: Visual mode
 " i: Insert mode
 " c: Command line editing, for 'incsearch'
-let g:indentLine_concealcursor = ''
+" let g:indentLine_concealcursor = ''
 
 " Display concealed text (default: 2)
 " 0: Text is shown normally
@@ -28,7 +28,7 @@ let g:indentLine_conceallevel = 2
 let g:indentLine_char = nr2char(0x2502)
 
 " Colors
-let g:indentLine_color_term = 10
+let g:indentLine_color_term = 0 " 10
 " GVim
 "let g:indentLine_color_gui = '#A4E57E'
 " none X terminal

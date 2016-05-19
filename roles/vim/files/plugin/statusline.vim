@@ -1,14 +1,13 @@
 " Vim statusline
 
 " https://github.com/itchyny/lightline.vim
+" https://github.com/tpope/vim-flagship
+" https://github.com/vim-airline/vim-airline
 
 if get(g:, 'loaded_statusline', 0)
   finish
 endif
 let g:loaded_statusline = 1
-
-let s:save_cpo = &cpo
-set cpo&vim
 
 " Default Status Line:
 "   %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
@@ -342,6 +341,3 @@ function! StatuslineHighlight(...)
     highlight link StatusLine NONE
   endif
 endfunction
-
-let &cpo = s:save_cpo
-unlet s:save_cpo
