@@ -6,23 +6,30 @@ alias j="jobs"
 # alias mkd="mkdir -p" # Cf. functions/main.bash
 alias rd="rmdir"
 
+alias cp="cp -i"
+alias ln='ln -i'
+alias mv="mv -i"
+# Interactive prompt (rm -i prompts for every file)
+alias rm="rm -I"
+
 # Always enable colored 'grep' output
 # Note: 'GREP_OPTIONS="--color=auto"' is deprecated, hence the alias usage.
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
+alias grep="grep --color=auto"
+alias fgrep="fgrep --color=auto"
+alias egrep="egrep --color=auto"
 
-# Enable aliases to be sudo’ed
-alias sudo='sudo '
+# Enable aliases to be sudo'ed
+# (( UID != 0 ))
+alias sudo="sudo "
 
 # Get week number
-alias week='date +%V'
+alias week="date +%V"
 
 # Stopwatch
-alias timer='echo "Timer started. Stop with Ctrl-D." && date && time cat && date'
+alias timer="echo 'Timer started. Stop with Ctrl-D.' && date && time cat && date"
 
 # URL-encode strings
-alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1]);"'
+alias urlencode="python -c 'import sys, urllib as ul; print ul.quote_plus(sys.argv[1]);'"
 
 # Ring the terminal bell, and put a badge on Terminal.app’s Dock icon
 # (useful when executing time-consuming commands)
