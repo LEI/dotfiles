@@ -9,21 +9,13 @@ if get(g:, 'loaded_statusline', 0)
 endif
 let g:loaded_statusline = 1
 
+" cpo?
+
 if !exists('g:statusline')
   let g:statusline = {}
 endif
 
-call extend(g:statusline, { 'modes': {}, 'symbols': {}, 'components': {}, 'items': [
-      \   {'key': 'mode', 'surround': 'separator', 'minwidth': 20},
-      \   {'key': 'branch', 'surround': 'separator', 'minwidth': 60},
-      \   'buffer',
-      \   {'key': 'flags', 'surround': [' [', ']']},
-      \   '%=',
-      \   {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'},
-      \   {'key': 'fileinfo', 'surround': 'separator', 'minwidth': 80},
-      \   {'key': 'filetype', 'surround': 'separator', 'minwidth': 60},
-      \   {'key': 'ruler', 'surround': ' ', 'minwidth': 40},
-      \ ] }, 'keep')
+call extend(g:statusline, {'modes': {}, 'symbols': {}, 'components': {}}, 'keep')
 
 " Mode Map:
 " n      Normal
@@ -85,9 +77,53 @@ call extend(g:statusline.symbols, {
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
 
-function! StatuslineFlags()
-  " TODO PRV
+" Default Statusline:
+" %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+call extend(g:statusline.components, {
+      \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
+      \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
+      \   'buffer': '%f%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}',
+      \   'flags': '%{StatuslineFlags()}',
+      \   'errors': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
+      \   'fileinfo': '%{&fileformat}[%{&fenc!="" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]',
+      \   'filetype': '%{&filetype!="" ? &filetype : "no ft"}',
+      \   'ruler': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
+      \ }, 'keep')
+
+let g:statusline.items = [
+      \   {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'},
+      \   {'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'},
+      \   {'key': 'buffer', 'surround': ['%< ', ' ']},
+      \   {'key': 'flags', 'surround': ['[', '] ']},
+      \   '%=',
+      \   {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'},
+      \   {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
+      \   {'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'},
+      \   {'key': 'ruler', 'surround': ' ', 'minwidth': 40},
+      \ ]
+
+function! StatuslineInit() abort
+  " setglobal statusline=%!StatuslineBuild()
+  let &statusline = StatuslineBuild()
+  let g:statusline.commandline = StatuslineBuild({'branch': 0, 'fileinfo': 0, 'filetype': 0})
+  let g:statusline.quickfix = StatuslineBuild({'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0})
+  if &laststatus == 1
+    set laststatus=2
+  endif
+  " Initialize colors
+  if &background == 'dark'
+    highlight StatusLineInsert ctermfg=0 ctermbg=2
+    highlight StatusLineReplace ctermfg=0 ctermbg=9
+  else
+    highlight StatusLineInsert ctermfg=7 ctermbg=2
+    highlight StatusLineReplace ctermfg=7 ctermbg=9
+  endif
+endfunction
+
+function! StatuslineFlags() abort
   let flags = []
+
+  " TODO PRV
   if &buftype == 'help'
     call add(flags, 'H')
   elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|qf\|vim-plug'
@@ -100,89 +136,12 @@ function! StatuslineFlags()
       call add(flags, '-')
     endif
   endif
+
   return join(flags, ',')
 endfunction
 
-" Default Statusline:
-" %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-call extend(g:statusline.components, {
-      \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
-      \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
-      \   'buffer': '%< %f%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}',
-      \   'flags': function('StatuslineFlags'),
-      \   'errors': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
-      \   'fileinfo': '%{&fileformat}[%{&fenc!="" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]',
-      \   'filetype': '%{&filetype!="" ? &filetype : "no ft"}',
-      \   'ruler': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
-      \ }, 'keep')
-
-let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
-let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0}
-" let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
-" let g:statusline.quickfix = {'mode': 0, 'buffer': '%t%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}', 'flags': 0, 'fileinfo': 0, 'filetype': 0}
-
-" Normal Buffer: WinEnter,BufEnter,BufAdd
-" autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!Statusline() | endif
-" Quickfix Location List: QuickFixCmdPre,QuickFixCmdPost / BufWinEnter quickfix
-" %t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P
-" autocmd FileType qf let &l:statusline = '%!Statusline({"mode": 0, "branch": 0, "flags": 0, "title": " %f %{w:quickfix_title}"})'
-" autocmd BufWinEnter quickfix let b:statusline = {'mode': 0,'title': '%t%f%{exists("w:quickfix_title") ? " ".w:quickfix_title : ""}'}
-" Command Line Mode: CmdWinEnter,CmdWinLeave
-" autocmd CmdWinEnter * let &l:statusline='%!Statusline({"branch": 0})'
-augroup Statusline
-  autocmd!
-  " Create the highlight groups on startup and when the colorscheme changes
-  autocmd VimEnter,ColorScheme * call StatuslineInit() "| redrawstatus
-  " Adjust statusline according to the context
-  autocmd CmdWinEnter * setlocal statusline=%!Statusline(g:statusline.commandline)
-  autocmd FileType qf setlocal statusline=%!Statusline(g:statusline.quickfix)
-  " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
-  " autocmd FileType qf setlocal statusline=%!Statusline(g:statusline.quickfix)
-  " Change the statusline color and redraw faster
-  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
-  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
-  autocmd BufWritePost * redrawstatus
-augroup END
-
-" if exists('loaded_gundo')
-" TODO g:gundo_preview/tree_statusline
-
-function! StatuslineInit() abort
-  setglobal statusline=%!Statusline()
-  if &laststatus == 1
-    set laststatus=2
-  endif
-  if &background == 'dark'
-    highlight StatusLineInsert ctermfg=0 ctermbg=2
-    highlight StatusLineReplace ctermfg=0 ctermbg=9
-  else
-    highlight StatusLineInsert ctermfg=7 ctermbg=2
-    highlight StatusLineReplace ctermfg=7 ctermbg=9
-  endif
-endfunction
-
-function! StatuslineHighlight(...) abort
-  let l:mode = a:0 ? a:1 : ''
-
-  if l:mode == 'i'
-    " Insert mode
-    highlight! link StatusLine StatusLineInsert
-  elseif l:mode == 'r'
-    " Replace mode
-    highlight! link StatusLine StatusLineReplace
-  elseif l:mode == 'v'
-    " Virtual replace mode
-    highlight! link StatusLine StatusLineReplace
-  elseif strlen(l:mode) > 0
-    echoerr 'Unknown mode: ' . l:mode
-  else
-    highlight link StatusLine NONE
-  endif
-endfunction
-
 " TODO item list loop (s:show) [left, right]?
-function! Statusline(...) abort
+function! StatuslineBuild(...) abort
   " echom "STL " . strftime('%H:%M:%S')
 
   let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline', {}))
@@ -222,18 +181,20 @@ function! Statusline(...) abort
     endif
 
     if strlen(str)
-      " TODO surround array [prefix, suffix]
-      let match = {'[': ']', '{': '}', '(': ')', '<': '>', ',': ''}
       if len(surround) == 2
-        let prefix = surround[0]
-        let suffix = surround[1]
-        let str = prefix . str . suffix
+        let str = surround[0] . str . surround[1]
       elseif strlen(surround) > 0
-        let prefix = has_key(match, surround) ? surround : ' '
-        let suffix = get(match, surround, ' ' . get(g:statusline.symbols, surround, ''))
-        let str = prefix . str . suffix
+        let match = {'[': ']', '{': '}', '(': ')', '<': '>', ',': ''}
+        let str = surround . str . get(match, surround, surround)
       endif
-      let str = '%(' . str . '%)'
+      let prefix = get(item, 'prefix', '')
+      let prefix = get(g:statusline.symbols, prefix, prefix)
+      let suffix = get(item, 'suffix', '')
+      let suffix = get(g:statusline.symbols, suffix, suffix)
+      let str = prefix . str . suffix
+      if get(item, 'wrap', 1)
+        let str = '%(' . str . '%)'
+      endif
       if strlen(highlight) > 0
         let str = '%#' . highlight . '#' . str . '%*'
       endif
@@ -245,7 +206,7 @@ function! Statusline(...) abort
   return line
 endfunction
 
-function! s:parse(item)
+function! s:parse(item) abort
   if type(a:item) == type(0) && a:item == 0
     return ''
   elseif type(a:item) == type('') && strlen(a:item) > 0
@@ -256,3 +217,51 @@ function! s:parse(item)
     echoerr 'Unkown type: ' . a:item
   endif
 endfunction
+
+function! StatuslineHighlight(...) abort
+  let l:mode = a:0 ? a:1 : ''
+
+  if l:mode == 'i'
+    " Insert mode
+    highlight! link StatusLine StatusLineInsert
+  elseif l:mode == 'r'
+    " Replace mode
+    highlight! link StatusLine StatusLineReplace
+  elseif l:mode == 'v'
+    " Virtual replace mode
+    highlight! link StatusLine StatusLineReplace
+  elseif strlen(l:mode) > 0
+    echoerr 'Unknown mode: ' . l:mode
+  else
+    highlight link StatusLine NONE
+  endif
+endfunction
+
+" Normal Buffer: WinEnter,BufEnter,BufAdd
+" autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
+  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline.commandline)
+  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
+  " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
+  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
+" Quickfix Location List: QuickFixCmdPre,QuickFixCmdPost / BufWinEnter quickfix
+" %t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P
+" autocmd FileType qf let &l:statusline = '%!StatuslineBuild({"mode": 0, "branch": 0, "flags": 0, "title": " %f %{w:quickfix_title}"})'
+" autocmd BufWinEnter quickfix let b:statusline = {'mode': 0,'title': '%t%f%{exists("w:quickfix_title") ? " ".w:quickfix_title : ""}'}
+" Command Line Mode: CmdWinEnter,CmdWinLeave
+" autocmd CmdWinEnter * let &l:statusline='%!StatuslineBuild({"branch": 0})'
+augroup Statusline
+  autocmd!
+  " Create the highlight groups on startup and when the colorscheme changes
+  autocmd VimEnter,ColorScheme,VimResized * call StatuslineInit() "| redrawstatus
+  " Adjust statusline according to the context
+  autocmd CmdWinEnter * if exists('g:statusline.quickfix') | let &l:statusline = g:statusline.commandline | endif
+  autocmd FileType qf if exists('g:statusline.quickfix') | let &l:statusline = g:statusline.quickfix | endif
+  " Change the statusline color and redraw faster
+  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
+  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
+  autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
+  autocmd BufWritePost * redrawstatus
+augroup END
+
+" if exists('loaded_gundo')
+" TODO g:gundo_preview/tree_statusline
