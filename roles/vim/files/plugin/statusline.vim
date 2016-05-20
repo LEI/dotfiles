@@ -26,24 +26,24 @@ call extend(g:statusline, { 'modes': {}, 'symbols': {}, 'components': {}, 'items
       \ ] }, 'keep')
 
 " Mode Map:
-" n       Normal
-" no      Operator-pending
-" v       Visual by character
-" V       Visual by line
-" CTRL-V  Visual blockwise
-" s       Select by character
-" S       Select by line
-" CTRL-S  Select blockwise
-" i       Insert
-" R       Replace |R|
-" Rv      Virtual Replace |gR|
-" c       Command-line
-" cv      Vim Ex mode |gQ|
-" ce      Normal Ex mode |Q|
-" r       Hit-enter prompt
-" rm      The -- more -- prompt
-" r?      A confirm query of some sort
-" !       Shell or external command is executing
+" n      Normal
+" no     Operator-pending
+" v      Visual by character
+" V      Visual by line
+" CTRL-V Visual blockwise
+" s      Select by character
+" S      Select by line
+" CTRL-S Select blockwise
+" i      Insert
+" R      Replace |R|
+" Rv     Virtual Replace |gR|
+" c      Command-line
+" cv     Vim Ex mode |gQ|
+" ce     Normal Ex mode |Q|
+" r      Hit-enter prompt
+" rm     The -- more -- prompt
+" r?     A confirm query of some sort
+" !      Shell or external command is executing
 call extend(g:statusline.modes, {
       \   'n': 'NORMAL',
       \   'i': 'INSERT',
@@ -67,23 +67,23 @@ call extend(g:statusline.symbols, {
       \ }, 'keep')
 
 " Format Markers:
-" %< Where to truncate line if too long
-" %n Buffer number
-" %F Full path to the file in the buffed
-" %f Relative path or as typed
-" %t File name (tail)
-" %m Modified flag [+] (modified), [-] (unmodifiable) or nothing
-" %r Readonly flag [RO]
-" %w Preview window flag
-" %y Filetype [ruby]
-" %= Separation point between left and right aligned items
-" %l Current line number
-" %L Number of lines in buffer
-" %c Current column number
-" %V Current virtual column number (-n), if different from %c
-" %P Percentage through file of displayed window
-" %( Start of item group (%-35. width and alignement of a section)
-" %) End of item group
+" %<    Where to truncate line if too long
+" %n    Buffer number
+" %F    Full path to the file in the buffed
+" %f    Relative path or as typed
+" %t    File name (tail)
+" %m    Modified flag [+] (modified), [-] (unmodifiable) or nothing
+" %r    Readonly flag [RO]
+" %w    Preview window flag
+" %y    Filetype [ruby]
+" %=    Separation point between left and right aligned items
+" %l    Current line number
+" %L    Number of lines in buffer
+" %c    Current column number
+" %V    Current virtual column number (-n), if different from %c
+" %P    Percentage through file of displayed window
+" %(    Start of item group (%-35. width and alignement of a section)
+" %)    End of item group
 
 function! StatuslineFlags()
   " TODO PRV
@@ -138,13 +138,15 @@ augroup Statusline
   autocmd FileType qf setlocal statusline=%!Statusline(g:statusline.quickfix)
   " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
   " autocmd FileType qf setlocal statusline=%!Statusline(g:statusline.quickfix)
-  " TODO __Gundo*__
   " Change the statusline color and redraw faster
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
   autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
   autocmd BufWritePost * redrawstatus
 augroup END
+
+" if exists('loaded_gundo')
+" TODO g:gundo_preview/tree_statusline
 
 function! StatuslineInit() abort
   setglobal statusline=%!Statusline()
@@ -164,16 +166,16 @@ function! StatuslineHighlight(...) abort
   let l:mode = a:0 ? a:1 : ''
 
   if l:mode == 'i'
-    " insert mode
+    " Insert mode
     highlight! link StatusLine StatusLineInsert
   elseif l:mode == 'r'
-    " replace mode
+    " Replace mode
     highlight! link StatusLine StatusLineReplace
   elseif l:mode == 'v'
-    " virtual replace mode
+    " Virtual replace mode
     highlight! link StatusLine StatusLineReplace
-  " elseif strlen(l:mode) > 0
-  "   echom 'unknown mode: ' . l:mode
+  elseif strlen(l:mode) > 0
+    echoerr 'Unknown mode: ' . l:mode
   else
     highlight link StatusLine NONE
   endif
