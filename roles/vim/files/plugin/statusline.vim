@@ -117,7 +117,7 @@ call add(s:items, {'key': 'buffer', 'surround': ['%< ', ' ']})
 call add(s:items, {'key': 'flags', 'surround': ['[', '] ']})
 call add(s:items, '%=')
 call add(s:items, {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'})
-call add(s:items, {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
+" call add(s:items, {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
 call add(s:items, {'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'})
 call add(s:items, {'key': 'ruler', 'surround': ' ', 'minwidth': 40})
 let g:statusline.items = s:items
@@ -222,7 +222,6 @@ function! StatuslineBuild(...) abort
     let highlight = ''
 
     if type(item) == type('')
-      " Look for component, otherwise return the string
       if has_key(stl, item)
         let str = s:parse(stl[item])
       else " if item =~ '^%'
@@ -231,11 +230,9 @@ function! StatuslineBuild(...) abort
       endif
     " TODO type function('tr')
     elseif type(item) == type({})
-      " Do not display component if the minimum width is reached
       if has_key(item, 'minwidth') && winwidth(0) < item.minwidth
         continue
       endif
-      " Look for the component by its name, or use the item itself
       if has_key(item, 'key') && has_key(stl, item.key)
         let str = s:parse(stl[item.key])
       else
@@ -246,7 +243,6 @@ function! StatuslineBuild(...) abort
     endif
 
     if strlen(str)
-      " TM TPOPE
       let surround = get(item, 'surround', '')
       if type(surround) == type([]) && len(surround) == 2
         let str = surround[0] . str . surround[1]
