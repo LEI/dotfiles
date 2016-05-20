@@ -9,7 +9,7 @@ if get(g:, 'loaded_statusline', 0)
 endif
 let g:loaded_statusline = 1
 
-" cpo?
+" use-cpo-save if compatible is set
 
 if !exists('g:statusline')
   let g:statusline = {}
@@ -110,17 +110,17 @@ function! StatuslineFlags() abort
   return join(flags, ',')
 endfunction
 
-let g:statusline.items = [
-      \   {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'},
-      \   {'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'},
-      \   {'key': 'buffer', 'surround': ['%< ', ' ']},
-      \   {'key': 'flags', 'surround': ['[', '] ']},
-      \   '%=',
-      \   {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'},
-      \   {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
-      \   {'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'},
-      \   {'key': 'ruler', 'surround': ' ', 'minwidth': 40},
-      \ ]
+let s:items = []
+call add(s:items, {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
+call add(s:items, {'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'})
+call add(s:items, {'key': 'buffer', 'surround': ['%< ', ' ']})
+call add(s:items, {'key': 'flags', 'surround': ['[', '] ']})
+call add(s:items, '%=')
+call add(s:items, {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'})
+call add(s:items, {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
+call add(s:items, {'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'})
+call add(s:items, {'key': 'ruler', 'surround': ' ', 'minwidth': 40})
+let g:statusline.items = s:items
 
 let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
 let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0}
