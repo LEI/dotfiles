@@ -158,7 +158,7 @@ augroup Statusline
   " Update the highlight group in insert and replace modes
   autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
   autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  autocmd InsertLeave * call StatuslineHighlight() " | redrawstatus
+  autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
 
   " autocmd BufWritePost * redrawstatus
 augroup END
@@ -217,32 +217,33 @@ function! StatuslineBuild(...) abort
 
   let line = ''
   for item in g:statusline.items
-    let str = ''
-    let surround = ''
-    let highlight = ''
+    let component = 0
 
     if type(item) == type('')
       if has_key(stl, item)
-        let str = s:parse(stl[item])
+        let component = stl[item]
       else " if item =~ '^%'
         let line.= item
+        unlet item
         continue
       endif
-    " TODO type function('tr')
     elseif type(item) == type({})
       if has_key(item, 'minwidth') && winwidth(0) < item.minwidth
+        unlet item
         continue
       endif
       if has_key(item, 'key') && has_key(stl, item.key)
-        let str = s:parse(stl[item.key])
+        let component = stl[item.key]
       else
-        let str = s:parse(item)
+        let component = item
       endif
     else
       echoerr 'Invalid type: ' . item
+      break
     endif
 
-    if strlen(str)
+    if strlen(component) && type(item) == type({})
+      let str = s:parse(component)
       let surround = get(item, 'surround', '')
       if type(surround) == type([]) && len(surround) == 2
         let str = surround[0] . str . surround[1]
@@ -250,6 +251,7 @@ function! StatuslineBuild(...) abort
         let match = {'[': ']', '{': '}', '(': ')', '<': '>', ',': ''}
         let str = surround . str . get(match, surround, surround)
       endif
+      unlet surround
 
       let prefix = get(item, 'prefix', '')
       let prefix = get(g:statusline.symbols, prefix, prefix)
@@ -268,7 +270,10 @@ function! StatuslineBuild(...) abort
       endif
 
       let line.= str
+    else
+      echoerr component
     endif
+    unlet item
   endfor
 
   return line
@@ -276,12 +281,16 @@ endfunction
 
 function! s:parse(item) abort
   if type(a:item) == type(0) && a:item == 0
+    " False
     return ''
   elseif type(a:item) == type('') && strlen(a:item) > 0
+    " String
     return a:item
   elseif type(a:item) == type(function('tr'))
+    " Function reference
     return '%{' . string(a:item) . '()}'
   else
     echoerr 'Unkown type: ' . a:item
+    return a:item
   endif
 endfunction
