@@ -219,39 +219,54 @@ function! StatuslineBuild(...) abort
   for item in g:statusline.items
     let component = 0
 
-    if type(item) == type('') && has_key(stl, item)
-      " Component key
-      let component = stl[item]
-    elseif type(item) == type('') && strlen(item) > 0
-      " Statusline string
-      let line.= item
-      unlet item
-      continue
-    elseif has_key(item, 'minwidth') && winwidth(0) < item.minwidth
-      " Truncated if below minimum width
-      unlet item
-      continue
-    elseif has_key(item, 'key') && has_key(stl, item.key)
-      " Dictionnary with 'key'
-      let component = stl[item.key]
-    else
-      " echoerr 'Invalid type: ' . item
-      let component = item
-    endif
-
-    if strlen(component) > 0 && type(item) == type({})
-      let str = s:parse(component)
-      let str = s:surround(str, get(item, 'surround', ''))
-      let str = s:symbol(item, 'prefix') . str . s:symbol(item, 'suffix')
-      let str = s:wrap(str, get(item, 'wrap', 1))
-      let str = s:highlight(str, get(item, 'highlight', ''))
-      if strlen(str) > 0
-        let line.= str
+    if type(item) == type('')
+      if has_key(stl, item)
+        let component = stl[item]
+      else " if item =~ '^%'
+        let line.= item
+        unlet item
+        continue
+      endif
+    elseif type(item) == type({})
+      if has_key(item, 'minwidth') && winwidth(0) < item.minwidth
+        unlet item
+        continue
+      endif
+      if has_key(item, 'key') && has_key(stl, item.key)
+        let component = stl[item.key]
+      else
+        let component = item
       endif
     else
-      echoerr 'Invalid component: ' . component
+      echoerr 'Invalid type: ' . item
+      break
     endif
 
+    if strlen(component) && type(item) == type({})
+      let str = s:parse(component)
+      let surround = get(item, 'surround', '')
+      unlet surround
+
+      let prefix = get(item, 'prefix', '')
+      let prefix = get(g:statusline.symbols, prefix, prefix)
+      let suffix = get(item, 'suffix', '')
+      let suffix = get(g:statusline.symbols, suffix, suffix)
+      let str = prefix . str . suffix
+
+      " TODO width, align (%-35.)
+      if get(item, 'wrap', 1)
+        let str = '%(' . str . '%)'
+      endif
+
+      let highlight = get(item, 'highlight', '')
+      if strlen(highlight) > 0
+        let str = '%#' . highlight . '#' . str . '%*'
+      endif
+
+      let line.= str
+    else
+      echoerr component
+    endif
     unlet item
   endfor
 
@@ -275,48 +290,13 @@ function! s:parse(item) abort
 endfunction
 
 function! s:surround(string, ...) abort
-  let str = a:string
   let surround = a:0 ? a:1 : ''
+  let match = {'[': ']', '{': '}', '(': ')', '<': '>', ',': ''}
 
-  if empty(surround)
-    return str
-  elseif type(surround) == type([]) && len(surround) == 2
+  if type(surround) == type([]) && len(surround) == 2
     let str = surround[0] . str . surround[1]
   elseif strlen(surround) > 0
-    let match = {'[': ']', '{': '}', '(': ')', '<': '>', ',': ''}
     let str = surround . str . get(match, surround, surround)
-  endif
-
-  return str
-endfunction
-
-function! s:symbol(dict, key) abort
-  let s = get(a:dict, a:key, '')
-  let s = get(g:statusline.symbols, s, s)
-
-  return s
-endfunction
-
-function! s:wrap(string, ...) abort
-  let wrap = a:0 ? a:1 : 0
-
-  if wrap > 0
-    " TODO width, align (%-35.)
-    let str = '%(' . a:string . '%)'
-  else
-    let str = a:string
-  endif
-
-  return str
-endfunction
-
-function! s:highlight(string, ...) abort
-  let group = a:0 ? a:1 : ''
-
-  if strlen(group) > 0
-    let str = '%#' . group . '#' . a:string . '%*'
-  else
-    let str = a:string
   endif
 
   return str

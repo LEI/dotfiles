@@ -3,6 +3,10 @@
 " Specific syntax checkers
 let g:syntastic_javascript_checkers = ['jshint']
 
+" https://github.com/scrooloose/syntastic/wiki/VimL:---vimlint#checker-options
+" Ignore undefined variable (unlet before continue in for E706)
+" let g:syntastic_vimlint_options = { 'EVL101': 1 }
+
 " Ignore specific levels
 "let g:syntastic_quiet_messages = {'level': 'warnings'}
 
