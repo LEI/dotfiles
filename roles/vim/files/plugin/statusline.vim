@@ -340,7 +340,7 @@ augroup StatuslineMode
   " Set global vim options once
   autocmd VimEnter * call statusline.init()
   " Build the full statusline on startup
-  autocmd VimEnter* call statusline.apply() " | redrawstatus
+  autocmd VimEnter * call statusline.apply() " | redrawstatus
   " FIXME update width checks when a new split is created or removed (not winwidth?)
   " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
   autocmd VimResized * call statusline.apply() " | redrawstatus
