@@ -10,8 +10,6 @@ if get(g:, 'loaded_statusline', 0)
 endif
 let g:loaded_statusline = 1
 
-" use-cpo-save if compatible is set
-
 " Variables: {{{1
 
 if !exists('g:statusline')
@@ -132,19 +130,24 @@ function! StatuslineFiletype() abort
 endfunction
 
 let s:items = []
-call add(s:items, {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
-call add(s:items, {'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'})
-call add(s:items, {'key': 'buffer', 'surround': ['%< ', ' ']})
-call add(s:items, {'key': 'flags', 'surround': ['[', '] ']})
-call add(s:items, '%=')
-call add(s:items, {'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'})
-" call add(s:items, {'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
-call add(s:items, {'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'})
-call add(s:items, {'key': 'ruler', 'surround': ' ', 'minwidth': 40})
-let g:statusline.items = s:items
 
 let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
 let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0}
+
+function! g:statusline.add(item) abort dict
+  call add(self.items, a:item)
+endfunction
+
+let g:statusline.items = []
+call statusline.add({'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
+call statusline.add({'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'})
+call statusline.add({'key': 'buffer', 'surround': ['%< ', ' ']})
+call statusline.add({'key': 'flags', 'surround': ['[', '] ']})
+call statusline.add('%=')
+call statusline.add({'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'})
+" call statusline.add({'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
+call statusline.add({'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'})
+call statusline.add({'key': 'ruler', 'surround': ' ', 'minwidth': 40})
 
 " Functions: {{{1
 
@@ -152,13 +155,17 @@ function! g:statusline.init() abort dict
   if &laststatus == 1
     set laststatus=2
   endif
-  let &g:statusline = g:statusline.build()
+  let &g:statusline = self.build()
   " setglobal statusline=%!StatuslineBuild()
 endfunction
 
 function! g:statusline.apply(...) abort dict
-  let map = a:0 ? get(g:statusline, a:1, a:1) : {}
-  let &l:statusline = g:statusline.build(map)
+  if empty(&l:statusline)
+    let map = a:0 ? get(self, a:1, a:1) : {}
+    let &l:statusline = self.build(map)
+  else
+    echom 'Existing local statusline: ' . &l:stl
+  endif
 endfunction
 
 " Highlight: {{{2
@@ -199,10 +206,10 @@ function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
 
   let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline', {}))
-  call extend(stl, g:statusline.components, 'keep')
+  call extend(stl, self.components, 'keep')
 
   let line = ''
-  for item in g:statusline.items
+  for item in self.items
     let component = 0
 
     if type(item) == type('') && has_key(stl, item)
@@ -317,7 +324,7 @@ endfunction
 
 " Normal Buffer: WinEnter,BufEnter,BufAdd
 " autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
-  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline.commandline)
+  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline:statusline.commandline)
   " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
   " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
   " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)

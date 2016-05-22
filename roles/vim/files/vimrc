@@ -184,6 +184,9 @@ set noerrorbells
 set visualbell
 set t_vb=
 
+" set wildmode=full
+set wildmenu
+
 " Spacing {{{1
 
 if !exists("g:loaded_sleuth")
@@ -200,9 +203,10 @@ if !exists("g:loaded_sleuth")
   set expandtab
 endif
 
-" Automatically insert indents
+" Copy ident from curreent line when starting a new line
 set autoindent
 
+" Smart autoindenting when starting a new line
 set smartindent
 
 " Make <Tab> insert indents instead of tabs at the beginning of a line
