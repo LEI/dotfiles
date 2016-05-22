@@ -1,8 +1,38 @@
 ---
-
 # http://benoliver999.com/2014/02/18/weechatconf/
 # https://robots.thoughtbot.com/weechat-for-slacks-irc-gateway
 # https://wiki.archlinux.org/index.php/WeeChat
 
 weechat_packages:
   - weechat
+
+weechat_cmd:
+  - "script install buffers.pl buffer_autoclose.py iset.pl colorize_nicks.py"
+  - "filter add irc_smart * irc_smart_filter *"
+  - "filter add irc_join_names * irc_366,irc_332,irc_333,irc_329,irc_324 *"
+  # - "upgrade -quit"
+  # - "wait 5 /quit"
+
+weechat_conf:
+  weechat.look.mouse: "on"
+  weechat.bar.status.color_bg: 0
+  weechat.bar.title.color_bg: 0
+  weechat.color.chat_nick_colors: '"1,2,3,4,5,6"'
+  buffers.color.hotlist_message_fg: 7
+  # weechat.bar.buffers.items: '"buffers"'
+  weechat.bar.buffers.position: top
+
+  weechat.look.buffer_notify_default: message
+  irc.look.smart_filter: "on"
+
+  # weechat.look.prefix_same_nick "⤷"
+  # weechat.look.prefix_error "⚠"
+  # weechat.look.prefix_network "ℹ "
+  # weechat.look.prefix_action "⚡"
+  # weechat.look.bar_more_down "▼▼"
+  # weechat.look.bar_more_left "◀◀"
+  # weechat.look.bar_more_right "▶▶"
+  # weechat.look.bar_more_up "▲▲"
+  # weechat.look.prefix_suffix "╡"
+
+  # weechat.look.prefix_align_max 15
