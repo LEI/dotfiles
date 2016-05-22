@@ -8,10 +8,10 @@ dependencies:
 
   # Files or Templates?
 
-  # - role: symlink
-  #   dot_files:
-  #     weechat:
-  #       dest: .weechat
+  - role: symlink
+    dot_files:
+      weechat:
+        dest: .weechat
 
   # - role: template
   #   dot_files:
