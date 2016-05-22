@@ -3,6 +3,7 @@
 " https://github.com/itchyny/lightline.vim
 " https://github.com/tpope/vim-flagship
 " https://github.com/vim-airline/vim-airline
+" https://gist.github.com/suderman/1229444
 
 if get(g:, 'loaded_statusline', 0)
   finish
@@ -125,56 +126,18 @@ let g:statusline.items = s:items
 let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
 let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0}
 
-" Normal Buffer: WinEnter,BufEnter,BufAdd
-" autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
-  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline.commandline)
-  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
-  " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
-  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
-" Quickfix Location List: QuickFixCmdPre,QuickFixCmdPost / BufWinEnter quickfix
-" %t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P
-" autocmd FileType qf let &l:statusline = '%!StatuslineBuild({"mode": 0, "branch": 0, "flags": 0, "title": " %f %{w:quickfix_title}"})'
-" autocmd BufWinEnter quickfix let b:statusline = {'mode': 0,'title': '%t%f%{exists("w:quickfix_title") ? " ".w:quickfix_title : ""}'}
-" Command Line Mode: CmdWinEnter,CmdWinLeave
-" autocmd CmdWinEnter * let &l:statusline='%!StatuslineBuild({"branch": 0})'
-
-" TODO doautocmd User
-augroup Statusline
-  autocmd!
-  " Set global vim options
-  autocmd VimEnter * call StatuslineInit()
-
-  " Create the highlight groups on startup and when the colorscheme changes
-  autocmd VimEnter,ColorScheme * call StatuslineColors()
-
-  " Build the full statusline on startup and on resize
-  " FIXME update width checks when a new split is created or removed (not winwidth?)
-  autocmd VimEnter,VimResized * call StatuslineApply() " | redrawstatus
-
-  " Override the displayed items according to the context
-  autocmd CmdWinEnter * call StatuslineApply('commandline')
-  autocmd FileType qf call StatuslineApply('quickfix')
-
-  " Update the highlight group in insert and replace modes
-  autocmd InsertEnter * call StatuslineHighlight(v:insertmode)
-  autocmd InsertChange * call StatuslineHighlight(v:insertmode)
-  autocmd InsertLeave * call StatuslineHighlight() | redrawstatus
-
-  " autocmd BufWritePost * redrawstatus
-augroup END
-
 " if exists('loaded_gundo')
 " TODO g:gundo_preview/tree_statusline
 
-function! StatuslineInit() abort
-  let &statusline = StatuslineBuild()
+function! g:statusline.init() abort dict
+  let &statusline = g:statusline.build()
   " setglobal statusline=%!StatuslineBuild()
   if &laststatus == 1
     set laststatus=2
   endif
 endfunction
 
-function! StatuslineColors() abort
+function! g:statusline.colors() abort dict
   " Initialize colors
   if &background == 'dark'
     highlight StatusLineInsert ctermfg=0 ctermbg=2
@@ -185,12 +148,12 @@ function! StatuslineColors() abort
   endif
 endfunction
 
-function! StatuslineApply(...) abort
+function! g:statusline.apply(...) abort dict
   let map = a:0 ? get(g:statusline, a:1, a:1) : {}
-  let &l:statusline = StatuslineBuild(map)
+  let &l:statusline = g:statusline.build(map)
 endfunction
 
-function! StatuslineHighlight(...) abort
+function! g:statusline.highlight(...) abort dict
   let l:mode = a:0 ? a:1 : ''
 
   if l:mode == 'i'
@@ -209,7 +172,7 @@ function! StatuslineHighlight(...) abort
   endif
 endfunction
 
-function! StatuslineBuild(...) abort
+function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
 
   let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline', {}))
@@ -241,11 +204,12 @@ function! StatuslineBuild(...) abort
 
     if strlen(component) > 0 && type(item) == type({})
       let str = s:parse(component)
-      let str = s:surround(str, get(item, 'surround', ''))
-      let str = s:symbol(item, 'prefix') . str . s:symbol(item, 'suffix')
-      let str = s:wrap(str, get(item, 'wrap', 1))
-      let str = s:highlight(str, get(item, 'highlight', ''))
+      " echom 'Component ' . component . ': ' . str
       if strlen(str) > 0
+        let str = s:surround(str, get(item, 'surround', ''))
+        let str = s:symbol(item, 'prefix') . str . s:symbol(item, 'suffix')
+        let str = s:wrap(str, get(item, 'wrap', 1))
+        let str = s:highlight(str, get(item, 'highlight', ''))
         let line.= str
       endif
     else
@@ -321,3 +285,40 @@ function! s:highlight(string, ...) abort
 
   return str
 endfunction
+
+" Normal Buffer: WinEnter,BufEnter,BufAdd
+" autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
+  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline.commandline)
+  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
+  " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
+  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
+" Quickfix Location List: QuickFixCmdPre,QuickFixCmdPost / BufWinEnter quickfix
+" %t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P
+" autocmd FileType qf let &l:statusline = '%!StatuslineBuild({"mode": 0, "branch": 0, "flags": 0, "title": " %f %{w:quickfix_title}"})'
+" autocmd BufWinEnter quickfix let b:statusline = {'mode': 0,'title': '%t%f%{exists("w:quickfix_title") ? " ".w:quickfix_title : ""}'}
+" Command Line Mode: CmdWinEnter,CmdWinLeave
+" autocmd CmdWinEnter * let &l:statusline='%!StatuslineBuild({"branch": 0})'
+
+" TODO doautocmd User
+augroup StatuslineMode
+  autocmd!
+  " Set global vim options once
+  autocmd VimEnter * call statusline.init()
+  " Build the full statusline on startup and on resize
+  " FIXME update width checks when a new split is created or removed (not winwidth?)
+  autocmd VimEnter,VimResized * call statusline.apply() " | redrawstatus
+  " Override the statusline components according to the context
+  autocmd CmdWinEnter * call statusline.apply('commandline')
+  autocmd FileType qf call statusline.apply('quickfix')
+  " autocmd BufWritePost * redrawstatus
+augroup END
+
+augroup StatuslineHighlight
+  autocmd!
+  " Create the highlight groups on startup and when the colorscheme changes
+  autocmd VimEnter,ColorScheme * call statusline.colors()
+  " Update the highlight group in insert and replace modes
+  autocmd InsertEnter * call statusline.highlight(v:insertmode)
+  autocmd InsertChange * call statusline.highlight(v:insertmode)
+  autocmd InsertLeave * call statusline.highlight() | redrawstatus
+augroup END
