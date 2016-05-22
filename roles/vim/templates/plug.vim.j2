@@ -19,7 +19,7 @@ endfunction
 
 autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
 
-call plug#begin('~/{{ vim_plugins_path }}')
+call plug#begin('{{ vim_plugin_path }}')
 {% macro plug(plugin) -%}
 Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
 {%- endmacro %}

@@ -7,14 +7,15 @@ vim_packages:
 vim_plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 vim_plug_path: .vim/autoload
 vim_plug_file: plug.vim
-
 # Run :PlugInstall inside vim
 vim_plug_install: yes
 # Install plugins even if ~/.vim/plugged already exists
 vim_plug_force: no
 
 # Directory where the plugins will be cloned
-vim_plugins_path: .vim/plugged
+vim_plugin_path: "{{ dot_home }}/.vim/plugged"
+# vim_plugin_manager_repo: https://github.com/Shougo/dein.vim
+# vim_plugin_manager_path: "{{ vim_plugin_path }}/repos/github.com/Shougo/dein.vim"
 
 # List of plugins used in templates/plug.vim.j2
 # TODO strip quotes in plugin.opts values like function('')

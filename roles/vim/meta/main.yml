@@ -13,6 +13,7 @@ dependencies:
     dot_files:
       vim:
         dest: .vim
+        pattern: "*.j2"
 
   - role: symlink
     dot_files:
