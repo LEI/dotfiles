@@ -2,16 +2,14 @@
 dependencies:
 
   - role: package
-    packages:
-      - name: weechat
-        install_options: "{{ weechat_brew_install_options }}"
+    packages: "{{ weechat_packages }}"
 
   # Files or Templates?
 
-  - role: symlink
-    dot_files:
-      weechat:
-        dest: .weechat
+  # - role: symlink
+  #   dot_files:
+  #     weechat:
+  #       dest: .weechat
 
   # - role: template
   #   dot_files:

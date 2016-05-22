@@ -4,8 +4,5 @@
 # https://robots.thoughtbot.com/weechat-for-slacks-irc-gateway
 # https://wiki.archlinux.org/index.php/WeeChat
 
-weechat_brew_install_options:
-  - with-lua
-  - with-python
-  - with-perl
-  - with-ruby
+weechat_packages:
+  - weechat

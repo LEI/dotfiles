@@ -97,6 +97,14 @@ vim_packages:
       - with-python
       # - with-pyhton3
 
+weechat_packages:
+  - name: weechat
+    install_options:
+      - with-lua
+      - with-perl
+      - with-python
+      - with-ruby
+
 # Ask password after this delay
 osx_lock_delay: 0
 
