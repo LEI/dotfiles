@@ -85,6 +85,7 @@ call extend(g:statusline.symbols, {
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
 
+" FIXME Current window number
 call extend(g:statusline.components, {
       \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
@@ -95,6 +96,16 @@ call extend(g:statusline.components, {
       \   'filetype': '%{StatuslineFiletype()}',
       \   'ruler': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
       \ }, 'keep')
+
+" function! StatuslineMode() abort
+"   for nr in range(1, winnr('$'))
+"     if (nr == w:nr)
+"       return get(g:statusline.modes, mode(), mode()) . (&paste ? ' PASTE' : '')
+"     else
+"       return '------'
+"     endif
+"   endfor
+" endfunction
 
 function! StatuslineFlags() abort
   let flags = []
@@ -154,20 +165,20 @@ call statusline.add({'key': 'ruler', 'surround': ' ', 'minwidth': 40})
 " Functions: {{{1
 
 function! g:statusline.init() abort dict
+  " setglobal statusline=%!statusline.build()
   if &laststatus == 1
     set laststatus=2
   endif
   let &g:statusline = self.build()
-  " setglobal statusline=%!StatuslineBuild()
 endfunction
 
 function! g:statusline.apply(...) abort dict
-  if empty(&l:statusline)
-    let map = a:0 ? get(self, a:1, a:1) : {}
-    let &l:statusline = self.build(map)
-  else
-    echom 'Existing local statusline: ' . &l:stl
-  endif
+  " let self.current = winnr()
+  " if !empty(&l:statusline)
+  "   echom 'Existing local statusline: ' . &l:stl
+  " endif
+  let map = a:0 ? get(self, a:1, a:1) : {}
+  let &l:statusline = self.build(map)
 endfunction
 
 " Highlight: {{{2
@@ -349,7 +360,8 @@ augroup StatuslineMode
   " Override the statusline components according to the context
   autocmd CmdWinEnter * call statusline.apply('commandline')
   autocmd FileType qf call statusline.apply('quickfix')
-  " autocmd BufWritePost * redrawstatus
+  " Redraw faster
+  autocmd BufWritePost * redrawstatus
 augroup END
 
 augroup StatuslineHighlight
