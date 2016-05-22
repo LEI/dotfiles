@@ -53,14 +53,16 @@ call extend(g:statusline.modes, {
 
 " Symbols: {{{2
 
-" Branch: system('uname -s')[:5] ==? 'Darwin' ? nr2char(0x2387) . ' ' : ''
-" Close: nr2char(0x2715)
-" Lock: nr2char(0x1F512)
-" nr2char(0x251C)
+" https://github.com/ryanoasis/nerd-fonts
 call extend(g:statusline.symbols, {
+      \   'branch': nr2char(0xE0A0) . ' ',
       \   'key': nr2char(0x1F511) . ' ',
       \   'separator': nr2char(0x2502),
       \ }, 'keep')
+" Branch: system('uname -s')[:5] ==? 'Darwin' ? nr2char(0x2387) . ' ' : ''
+" Close: nr2char(0x2715)
+" Lock: nr2char(0x1F512)
+" |- nr2char(0x251C)
 
 " Statusline: {{{2
 
