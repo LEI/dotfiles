@@ -205,7 +205,7 @@ endfunction
 function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
 
-  let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline', {}))
+  let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline_map', {}))
   call extend(stl, self.components, 'keep')
 
   let line = ''
@@ -339,9 +339,11 @@ augroup StatuslineMode
   autocmd!
   " Set global vim options once
   autocmd VimEnter * call statusline.init()
-  " Build the full statusline on startup and on resize
+  " Build the full statusline on startup
+  autocmd VimEnter* call statusline.apply() " | redrawstatus
   " FIXME update width checks when a new split is created or removed (not winwidth?)
-  autocmd VimEnter,VimResized * call statusline.apply() " | redrawstatus
+  " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
+  autocmd VimResized * call statusline.apply() " | redrawstatus
   " Override the statusline components according to the context
   autocmd CmdWinEnter * call statusline.apply('commandline')
   autocmd FileType qf call statusline.apply('quickfix')

@@ -23,12 +23,12 @@ endif
 
 " General {{{1
 
-" set encoding=utf-8
-
 if has("autocmd")
   " Enable filetype detection
   filetype plugin indent on
 endif
+
+set encoding=utf-8
 
 if &history < 1000
   set history=1000
