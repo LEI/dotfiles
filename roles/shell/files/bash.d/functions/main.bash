@@ -7,16 +7,12 @@ has() {
 }
 
 mkd() {
-  mkdir -p -- "$*"
-}
-
-mkcd() {
-  mkd "$*" && cd -- "$*"
+  mkdir -p "$1" && cd -- "$_"
 }
 
 del() {
   local trash="/tmp/.trash"
-  mkd "$trash" && mv "$*" "$trash"
+  mkdir -p "$trash" && mv "$*" "$trash"
 }
 
 # Preview markdown
