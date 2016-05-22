@@ -64,9 +64,9 @@ call extend(g:statusline.symbols, {
       \   'separator': nr2char(0x2502),
       \ }, 'keep')
 
-" Format: {{{2
+" Statusline: {{{2
 
-" Default Statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" Default Format: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " %<    Where to truncate line if too long
 " %n    Buffer number
 " %F    Full path to the file in the buffed
@@ -84,14 +84,15 @@ call extend(g:statusline.symbols, {
 " %P    Percentage through file of displayed window
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
+
 call extend(g:statusline.components, {
       \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
       \   'buffer': '%f%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}',
       \   'flags': '%{StatuslineFlags()}',
       \   'errors': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
-      \   'fileinfo': '%{&fileformat}[%{&fenc!="" ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]',
-      \   'filetype': '%{&filetype!="" ? &filetype : "no ft"}',
+      \   'fileinfo': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]',
+      \   'filetype': '%{StatuslineFiletype()}',
       \   'ruler': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
       \ }, 'keep')
 
@@ -101,9 +102,9 @@ function! StatuslineFlags() abort
   " TODO PRV
   if &buftype == 'help'
     call add(flags, 'H')
-  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|qf\|vim-plug'
+  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|vim-plug'
     if &readonly
-      call add(flags, g:statusline.symbols.readonly)
+      call add(flags, 'RO')
     endif
     if &modified
       call add(flags, '+')
@@ -115,7 +116,20 @@ function! StatuslineFlags() abort
   return join(flags, ',')
 endfunction
 
-" Items: {{{2
+function! StatuslineFiletype() abort
+  if empty(&filetype)
+    let ft = 'no ft'
+  else
+    let ft = &filetype
+  endif
+
+  if &filetype == 'netrw'
+    let order = (g:netrw_sort_direction =~ 'n') ? '+' : '-'
+    let ft.= '[' . g:netrw_sort_by . order . ']'
+  endif
+
+  return ft
+endfunction
 
 let s:items = []
 call add(s:items, {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
@@ -130,16 +144,16 @@ call add(s:items, {'key': 'ruler', 'surround': ' ', 'minwidth': 40})
 let g:statusline.items = s:items
 
 let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
-let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0}
+let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0}
 
 " Functions: {{{1
 
 function! g:statusline.init() abort dict
-  let &statusline = g:statusline.build()
-  " setglobal statusline=%!StatuslineBuild()
   if &laststatus == 1
     set laststatus=2
   endif
+  let &g:statusline = g:statusline.build()
+  " setglobal statusline=%!StatuslineBuild()
 endfunction
 
 function! g:statusline.apply(...) abort dict
