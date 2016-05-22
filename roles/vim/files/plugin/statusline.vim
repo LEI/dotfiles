@@ -12,13 +12,16 @@ let g:loaded_statusline = 1
 
 " use-cpo-save if compatible is set
 
+" Variables: {{{1
+
 if !exists('g:statusline')
   let g:statusline = {}
 endif
 
 call extend(g:statusline, {'modes': {}, 'symbols': {}, 'components': {}}, 'keep')
 
-" Mode Map:
+" Modes: {{{2
+
 " n      Normal
 " no     Operator-pending
 " v      Visual by character
@@ -50,6 +53,8 @@ call extend(g:statusline.modes, {
       \   '': 'S-BLOCK',
       \ }, 'keep')
 
+" Symbols: {{{2
+
 " Branch: system('uname -s')[:5] ==? 'Darwin' ? nr2char(0x2387) . ' ' : ''
 " Close: nr2char(0x2715)
 " Lock: nr2char(0x1F512)
@@ -59,7 +64,9 @@ call extend(g:statusline.symbols, {
       \   'separator': nr2char(0x2502),
       \ }, 'keep')
 
-" Format Markers:
+" Format: {{{2
+
+" Default Statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " %<    Where to truncate line if too long
 " %n    Buffer number
 " %F    Full path to the file in the buffed
@@ -77,9 +84,6 @@ call extend(g:statusline.symbols, {
 " %P    Percentage through file of displayed window
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
-
-" Default Statusline:
-" %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 call extend(g:statusline.components, {
       \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
@@ -111,6 +115,8 @@ function! StatuslineFlags() abort
   return join(flags, ',')
 endfunction
 
+" Items: {{{2
+
 let s:items = []
 call add(s:items, {'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
 call add(s:items, {'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'})
@@ -126,8 +132,7 @@ let g:statusline.items = s:items
 let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
 let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0, 'filetype': 0}
 
-" if exists('loaded_gundo')
-" TODO g:gundo_preview/tree_statusline
+" Functions: {{{1
 
 function! g:statusline.init() abort dict
   let &statusline = g:statusline.build()
@@ -136,6 +141,13 @@ function! g:statusline.init() abort dict
     set laststatus=2
   endif
 endfunction
+
+function! g:statusline.apply(...) abort dict
+  let map = a:0 ? get(g:statusline, a:1, a:1) : {}
+  let &l:statusline = g:statusline.build(map)
+endfunction
+
+" Highlight: {{{2
 
 function! g:statusline.colors() abort dict
   " Initialize colors
@@ -146,11 +158,6 @@ function! g:statusline.colors() abort dict
     highlight StatusLineInsert ctermfg=7 ctermbg=2
     highlight StatusLineReplace ctermfg=7 ctermbg=9
   endif
-endfunction
-
-function! g:statusline.apply(...) abort dict
-  let map = a:0 ? get(g:statusline, a:1, a:1) : {}
-  let &l:statusline = g:statusline.build(map)
 endfunction
 
 function! g:statusline.highlight(...) abort dict
@@ -171,6 +178,8 @@ function! g:statusline.highlight(...) abort dict
     highlight link StatusLine NONE
   endif
 endfunction
+
+" Build: {{{2
 
 function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
@@ -221,6 +230,8 @@ function! g:statusline.build(...) abort dict
 
   return line
 endfunction
+
+" Utils: {{{2
 
 function! s:parse(item) abort
   if type(a:item) == type(0) && a:item == 0
@@ -286,6 +297,10 @@ function! s:highlight(string, ...) abort
   return str
 endfunction
 
+" Auto Commands: {{{1
+
+" TODO g:gundo_preview/tree_statusline, doautocmd User?
+
 " Normal Buffer: WinEnter,BufEnter,BufAdd
 " autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
   " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline.commandline)
@@ -299,7 +314,6 @@ endfunction
 " Command Line Mode: CmdWinEnter,CmdWinLeave
 " autocmd CmdWinEnter * let &l:statusline='%!StatuslineBuild({"branch": 0})'
 
-" TODO doautocmd User
 augroup StatuslineMode
   autocmd!
   " Set global vim options once
