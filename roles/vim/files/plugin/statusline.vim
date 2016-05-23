@@ -10,15 +10,13 @@ if get(g:, 'loaded_statusline', 0)
 endif
 let g:loaded_statusline = 1
 
-" Variables: {{{1
-
 if !exists('g:statusline')
   let g:statusline = {}
 endif
 
-call extend(g:statusline, {'modes': {}, 'symbols': {}, 'components': {}}, 'keep')
+call extend(g:statusline, {'modes': {}, 'symbols': {}, 'items': []}, 'keep')
 
-" Modes: {{{2
+" Modes: {{{1
 
 " n      Normal
 " no     Operator-pending
@@ -51,7 +49,7 @@ call extend(g:statusline.modes, {
       \   '': 'S-BLOCK',
       \ }, 'keep')
 
-" Symbols: {{{2
+" Symbols: {{{1
 
 " https://github.com/ryanoasis/nerd-fonts
 call extend(g:statusline.symbols, {
@@ -64,9 +62,9 @@ call extend(g:statusline.symbols, {
 " Lock: nr2char(0x1F512)
 " |- nr2char(0x251C)
 
-" Statusline: {{{2
+" Format: {{{1
 
-" Default Format: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" Default: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 " %<    Where to truncate line if too long
 " %n    Buffer number
 " %F    Full path to the file in the buffed
@@ -85,18 +83,6 @@ call extend(g:statusline.symbols, {
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
 
-" FIXME Current window number
-call extend(g:statusline.components, {
-      \   'mode': '%{winnr() != winnr("#") ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
-      \   'branch': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
-      \   'buffer': '%f%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}',
-      \   'flags': '%{StatuslineFlags()}',
-      \   'errors': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
-      \   'fileinfo': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]',
-      \   'filetype': '%{StatuslineFiletype()}',
-      \   'ruler': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
-      \ }, 'keep')
-
 " function! StatuslineMode() abort
 "   for nr in range(1, winnr('$'))
 "     if (nr == w:nr)
@@ -114,6 +100,9 @@ function! StatuslineFlags() abort
   if &buftype == 'help'
     call add(flags, 'H')
   elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|vim-plug'
+    if &previewwindow
+      call add(flags, 'PRV')
+    endif
     if &readonly
       call add(flags, 'RO')
     endif
@@ -142,34 +131,47 @@ function! StatuslineFiletype() abort
   return ft
 endfunction
 
-let s:items = []
+let g:statusline.items = {
+      \   'mode': {'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'},
+      \   'branch': {'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'},
+      \   'buffer': {'string': '%f', 'surround': ' '},
+      \   'quickfix': {'string': '%{exists("w:quickfix_title") ? w:quickfix_title : ""}'},
+      \   'flags': {'string': '%{StatuslineFlags()}', 'surround': ['[', '] ']},
+      \   'errors': {'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}', 'surround': ' ', 'highlight': 'ErrorMsg'},
+      \   'filetype': {'string': '%{StatuslineFiletype()}', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'},
+      \   'ruler': {'string': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '', 'surround': ' ', 'minwidth': 40},
+      \ }
+      "   '%=',
+      "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
 
-let g:statusline.commandline = {'branch': 0, 'fileinfo': 0, 'filetype': 0}
-let g:statusline.quickfix = {'mode': 0, 'flags': 0, 'fileinfo': 0}
+" 0: mode
+" 1: branch
+" 2: buffer
+" 3: flags
+" 4: break
+" 5: errors
+" 6: fileinfo
+" 7: filetype
+" 8: ruler
+let g:statusline.default = ['mode', 'branch', '%<', 'buffer', 'flags', '%=', 'errors', 'filetype', 'ruler']
+let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'errors', 'ruler']
+let g:statusline.quickfix = ['buffer', '%<', 'quickfix', '%=', 'errors', 'ruler']
+let g:statusline.gundo = ['buffer', 'flags', '%=', 'errors', 'ruler']
 
-function! g:statusline.add(item) abort dict
-  call add(self.items, a:item)
-endfunction
-
-let g:statusline.items = []
-call statusline.add({'key': 'mode', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'})
-call statusline.add({'key': 'branch', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'})
-call statusline.add({'key': 'buffer', 'surround': ['%< ', ' ']})
-call statusline.add({'key': 'flags', 'surround': ['[', '] ']})
-call statusline.add('%=')
-call statusline.add({'key': 'errors', 'surround': ' ', 'highlight': 'ErrorMsg'})
-" call statusline.add({'key': 'fileinfo', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'})
-call statusline.add({'key': 'filetype', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'})
-call statusline.add({'key': 'ruler', 'surround': ' ', 'minwidth': 40})
-
-" Functions: {{{1
+" Main: {{{1
 
 function! g:statusline.init() abort dict
-  " setglobal statusline=%!statusline.build()
+
   if &laststatus == 1
     set laststatus=2
   endif
+
+  " setglobal statusline=%!statusline.build()
   let &g:statusline = self.build()
+
+  " Overrides
+  let g:gundo_tree_statusline = self.build(self.gundo)
+  let g:gundo_preview_statusline = self.build(self.gundo)
 endfunction
 
 function! g:statusline.apply(...) abort dict
@@ -177,11 +179,15 @@ function! g:statusline.apply(...) abort dict
   " if !empty(&l:statusline)
   "   echom 'Existing local statusline: ' . &l:stl
   " endif
-  let map = a:0 ? get(self, a:1, a:1) : {}
-  let &l:statusline = self.build(map)
+  let items = a:0 ? get(self, a:1, []) : []
+  let &l:statusline = self.build(items)
 endfunction
 
-" Highlight: {{{2
+function! g:statusline.active() abort dict
+  return winnr() == self.current_winnr
+endfunction
+
+" Highlight: {{{1
 
 function! g:statusline.colors() abort dict
   " Initialize colors
@@ -213,59 +219,45 @@ function! g:statusline.highlight(...) abort dict
   endif
 endfunction
 
-" Build: {{{2
+" Build: {{{1
 
 function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
-
-  let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline_map', {}))
-  call extend(stl, self.components, 'keep')
-
+  " let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline_map', {}))
+  " call extend(stl, self.components, 'keep')
   let line = ''
-  for item in self.items
-    let component = 0
-
-    if type(item) == type('') && has_key(stl, item)
-      " Component key
-      let component = stl[item]
-    elseif type(item) == type('') && strlen(item) > 0
-      " Statusline string
-      let line.= item
-      unlet item
-      continue
-    elseif has_key(item, 'minwidth') && winwidth(0) < item.minwidth
-      " Truncated if below minimum width
-      unlet item
-      continue
-    elseif has_key(item, 'key') && has_key(stl, item.key)
-      " Dictionnary with 'key'
-      let component = stl[item.key]
-    else
-      " echoerr 'Invalid type: ' . item
-      let component = item
-    endif
-
-    if strlen(component) > 0 && type(item) == type({})
-      let str = s:parse(component)
-      " echom 'Component ' . component . ': ' . str
-      if strlen(str) > 0
-        let str = s:surround(str, get(item, 'surround', ''))
-        let str = s:symbol(item, 'prefix') . str . s:symbol(item, 'suffix')
-        let str = s:wrap(str, get(item, 'wrap', 1))
-        let str = s:highlight(str, get(item, 'highlight', ''))
-        let line.= str
+  let items = a:0 && len(a:1) ? a:1 : self.default
+  " let items = a:0 && len(a:1) ? a:1 : range(0, len(self.items) - 1)
+  for key in items
+    if has_key(self.items, key)
+      let item = self.items[key]
+      if has_key(item, 'string') && strlen(item.string)
+        let str = s:parse(item.string)
+        if strlen(str)
+          let str = s:truncate(str, get(item, 'minwidth', 0))
+          let str = s:surround(str, get(item, 'surround', ''))
+          let str = s:symbol(item, 'prefix') . str . s:symbol(item, 'suffix')
+          let str = s:wrap(str, get(item, 'wrap', 1))
+          let str = s:highlight(str, get(item, 'highlight', ''))
+          let line.= str
+        endif
+      else
+        echoerr 'Invalid item: ' . key
       endif
+    elseif strlen(key)
+      let line.= key
+      continue
     else
-      echoerr 'Invalid component: ' . component
+      echoerr 'Invalid key: ' . key
+      continue
     endif
-
     unlet item
   endfor
 
   return line
 endfunction
 
-" Utils: {{{2
+" Utils: {{{1
 
 function! s:parse(item) abort
   if type(a:item) == type(0) && a:item == 0
@@ -281,6 +273,23 @@ function! s:parse(item) abort
     echoerr 'Unkown type: ' . a:item
     return a:item
   endif
+endfunction
+
+function! s:truncate(string, ...) abort
+  let str = a:string
+  let minwidth = a:0 ? a:1 : 0
+
+  if minwidth > 0
+    if str =~ '^%{'
+      let condition = 'winwidth(0) >= ' . minwidth
+      let str = substitute(str, '{', '\="{" . condition . " ? "', '')
+      let str = substitute(str, '}', ' : ""}', '')
+    " else
+    "   echoerr 'Component should start with "%{", got: ' . str
+    endif
+  endif
+
+  return str
 endfunction
 
 function! s:surround(string, ...) abort
@@ -353,15 +362,20 @@ augroup StatuslineMode
   " Set global vim options once
   autocmd VimEnter * call statusline.init()
   " Build the full statusline on startup
-  autocmd VimEnter * call statusline.apply() " | redrawstatus
-  " FIXME update width checks when a new split is created or removed (not winwidth?)
   " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
-  autocmd VimResized * call statusline.apply() " | redrawstatus
+  autocmd VimEnter * call statusline.apply() " | redrawstatus
+  " autocmd VimResized * redrawstatus
+  " Update current window number
+  autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
+        " \ | call statusline.width(winwidth(0))
   " Override the statusline components according to the context
-  autocmd CmdWinEnter * call statusline.apply('commandline')
+  autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
+        \ | call statusline.apply('commandline')
+  autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
   autocmd FileType qf call statusline.apply('quickfix')
   " Redraw faster
   autocmd BufWritePost * redrawstatus
+
 augroup END
 
 augroup StatuslineHighlight

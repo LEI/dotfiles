@@ -1,6 +1,6 @@
 ---
 # FIXME command works in interactive shell only and /quit is always executed first
-- name: Weechat command
+- name: Weechat command (execute manually)
   debug:
     msg: "weechat --no-connect --no-scripts --run-command '/{{ weechat_cmd | join('; /') }}'"
 
