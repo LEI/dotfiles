@@ -1,10 +1,11 @@
 ---
 # FIXME command works in interactive shell only and /quit is always executed first
-- name: Weechat command (execute manually)
+# Config files? (running weechat create ~/.weechat)
+- name: Install scripts and add filters
   debug:
     msg: "weechat --no-connect --no-scripts --run-command '/{{ weechat_cmd | join('; /') }}'"
 
-- name: Weechat configuration
+- name: Configuration
   vars:
     keys: "{{ item.key | split('.') }}"
     file: "{{ [0] | map('extract', keys) | first }}"

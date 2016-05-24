@@ -61,6 +61,7 @@ alias p="cd ~/projects"
 
 # Enable aliases to be sudo'ed
 # (( UID != 0 ))
+# FIXME sudo: command: command not found
 alias sudo="sudo "
 
 # Get week number
