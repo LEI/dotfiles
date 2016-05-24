@@ -1,10 +1,10 @@
 # https://github.com/ansible/ansible/issues/15279
+# TODO check if already defined (>2.0)
 def extract(item, container, morekeys=None):
-    from jinja2.runtime import Undefined
-
     value = container[item]
 
-    if value is not Undefined and morekeys is not None:
+    # value is not Undefined
+    if morekeys is not None:
         if not isinstance(morekeys, list):
             morekeys = [morekeys]
 
@@ -13,7 +13,7 @@ def extract(item, container, morekeys=None):
     return value
 
 class FilterModule(object):
-    ''' Ansible 2.1 core jinja2 filters '''
+    ''' Ansible extract filter '''
 
     def filters(self):
         return {
