@@ -21,7 +21,8 @@
     state: present
   become: yes
 
-- name: Add NodeSource repositories
+- debug: var=ansible_distribution_release
+- name: "Add NodeSource repositories for {{ ansible_distribution_release }}"
   apt_repository:
     repo: "{{ item }}"
     state: present
