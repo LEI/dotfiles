@@ -83,6 +83,55 @@ call extend(g:statusline.symbols, {
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
 
+let g:statusline.items = {
+      \   'mode': {
+      \     'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
+      \     'surround': ' ',
+      \     'minwidth': 20,
+      \     'suffix': 'separator'
+      \   },
+      \   'branch': {
+      \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
+      \     'surround': ' ',
+      \     'minwidth': 60,
+      \     'suffix': 'separator'
+      \   },
+      \   'buffer': {
+      \     'string': '%f',
+      \     'surround': ' '
+      \   },
+      \   'quickfix': {
+      \     'string': ' Location List ' . get(g:statusline.symbols, 'separator', '') .
+      \       '%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}'
+      \   },
+      \   'flags': {
+      \     'string': '%{StatuslineFlags()}',
+      \     'surround': ['[', '] ']
+      \   },
+      \   'errors': {
+      \     'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
+      \     'surround': ' ',
+      \     'highlight': 'ErrorMsg'
+      \   },
+      \   'filetype': {
+      \     'string': '%{StatuslineFiletype()}',
+      \     'surround': ' ',
+      \     'minwidth': 80,
+      \     'suffix': 'separator'
+      \   },
+      \   'ruler': {
+      \     'string': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
+      \     'surround': ' ',
+      \     'minwidth': 40
+      \   },
+      \ }
+      "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
+
+let g:statusline.default = ['mode', 'branch', '%<', 'buffer', 'flags', '%=', 'errors', 'filetype', 'ruler']
+let g:statusline.commandline = ['mode', '%<', ' Command Line', 'flags', '%=', 'ruler']
+let g:statusline.quickfix = ['quickfix', '%=', 'filetype', 'ruler']
+let g:statusline.gundo = ['buffer', 'flags', '%=', 'ruler']
+
 " function! StatuslineMode() abort
 "   for nr in range(1, winnr('$'))
 "     if (nr == w:nr)
@@ -131,41 +180,9 @@ function! StatuslineFiletype() abort
   return ft
 endfunction
 
-let g:statusline.items = {
-      \   'mode': {'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}', 'surround': ' ', 'minwidth': 20, 'suffix': 'separator'},
-      \   'branch': {'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}', 'surround': ' ', 'minwidth': 60, 'suffix': 'separator'},
-      \   'buffer': {'string': '%f', 'surround': ' '},
-      \   'quickfix': {'string': '%{exists("w:quickfix_title") ? w:quickfix_title : ""}'},
-      \   'flags': {'string': '%{StatuslineFlags()}', 'surround': ['[', '] ']},
-      \   'errors': {'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}', 'surround': ' ', 'highlight': 'ErrorMsg'},
-      \   'filetype': {'string': '%{StatuslineFiletype()}', 'surround': ' ', 'minwidth': 80, 'suffix': 'separator'},
-      \   'ruler': {'string': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '', 'surround': ' ', 'minwidth': 40},
-      \ }
-      "   '%=',
-      "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
-
-" 0: mode
-" 1: branch
-" 2: buffer
-" 3: flags
-" 4: break
-" 5: errors
-" 6: fileinfo
-" 7: filetype
-" 8: ruler
-let g:statusline.default = ['mode', 'branch', '%<', 'buffer', 'flags', '%=', 'errors', 'filetype', 'ruler']
-let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'errors', 'ruler']
-let g:statusline.quickfix = ['buffer', '%<', 'quickfix', '%=', 'errors', 'ruler']
-let g:statusline.gundo = ['buffer', 'flags', '%=', 'errors', 'ruler']
-
 " Main: {{{1
 
 function! g:statusline.init() abort dict
-
-  if &laststatus == 1
-    set laststatus=2
-  endif
-
   " setglobal statusline=%!statusline.build()
   let &g:statusline = self.build()
 
@@ -342,40 +359,29 @@ endfunction
 
 " Auto Commands: {{{1
 
-" TODO g:gundo_preview/tree_statusline, doautocmd User?
+" TODO doautocmd User?
 
-" Normal Buffer: WinEnter,BufEnter,BufAdd
-" autocmd BufWinEnter * if &filetype!~'qf' | setlocal statusline=%!StatuslineBuild() | endif
-  " autocmd CmdWinEnter * setlocal statusline=%!StatuslineBuild(g:statusline:statusline.commandline)
-  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
-  " autocmd CmdWinEnter * let b:statusline = g:statusline.commandline
-  " autocmd FileType qf setlocal statusline=%!StatuslineBuild(g:statusline.quickfix)
-" Quickfix Location List: QuickFixCmdPre,QuickFixCmdPost / BufWinEnter quickfix
-" %t%{exists('w:quickfix_title')? ' '.w:quickfix_title : ''} %=%-15(%l,%c%V%) %P
-" autocmd FileType qf let &l:statusline = '%!StatuslineBuild({"mode": 0, "branch": 0, "flags": 0, "title": " %f %{w:quickfix_title}"})'
-" autocmd BufWinEnter quickfix let b:statusline = {'mode': 0,'title': '%t%f%{exists("w:quickfix_title") ? " ".w:quickfix_title : ""}'}
-" Command Line Mode: CmdWinEnter,CmdWinLeave
-" autocmd CmdWinEnter * let &l:statusline='%!StatuslineBuild({"branch": 0})'
-
-augroup StatuslineMode
+augroup StatuslineInit
   autocmd!
   " Set global vim options once
   autocmd VimEnter * call statusline.init()
   " Build the full statusline on startup
   " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
   autocmd VimEnter * call statusline.apply() " | redrawstatus
-  " autocmd VimResized * redrawstatus
+augroup END
+
+augroup StatuslineMode
   " Update current window number
   autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
-        " \ | call statusline.width(winwidth(0))
   " Override the statusline components according to the context
   autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
         \ | call statusline.apply('commandline')
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
+  " BufWinEnter quickfix, QuickFixCmdPre, QuickFixCmdPost
   autocmd FileType qf call statusline.apply('quickfix')
-  " Redraw faster
+  " Redraw directly after saving
   autocmd BufWritePost * redrawstatus
-
+  " autocmd VimResized * redrawstatus
 augroup END
 
 augroup StatuslineHighlight
