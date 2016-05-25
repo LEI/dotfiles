@@ -97,12 +97,12 @@ let g:statusline.items = {
       \     'suffix': 'separator'
       \   },
       \   'buffer': {
+      \     'string': '%{StatuslineBuffer()}',
+      \     'surround': ' ',
+      \   },
+      \   'file': {
       \     'string': '%f',
       \     'surround': ' '
-      \   },
-      \   'quickfix': {
-      \     'string': ' Location List ' . get(g:statusline.symbols, 'separator', '') .
-      \       '%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}'
       \   },
       \   'flags': {
       \     'string': '%{StatuslineFlags()}',
@@ -114,7 +114,13 @@ let g:statusline.items = {
       \     'highlight': 'ErrorMsg'
       \   },
       \   'filetype': {
-      \     'string': '%{StatuslineFiletype()}',
+      \     'string': '%{strlen(&filetype) ? &filetype : "no ft"}',
+      \     'surround': ' ',
+      \     'minwidth': 80,
+      \     'suffix': 'separator'
+      \   },
+      \   'netrw': {
+      \     'string': '%{g:netrw_sort_by}[%{(g:netrw_sort_direction =~ "n") ? "+" : "-"}]',
       \     'surround': ' ',
       \     'minwidth': 80,
       \     'suffix': 'separator'
@@ -124,13 +130,18 @@ let g:statusline.items = {
       \     'surround': ' ',
       \     'minwidth': 40
       \   },
+      \   'sep': {
+      \     'string': get(g:statusline.symbols, 'separator'),
+      \   },
       \ }
       "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
 
-let g:statusline.default = ['mode', 'branch', '%<', 'buffer', 'flags', '%=', 'errors', 'filetype', 'ruler']
-let g:statusline.commandline = ['mode', '%<', ' Command Line', 'flags', '%=', 'ruler']
-let g:statusline.quickfix = ['quickfix', '%=', 'filetype', 'ruler']
+let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler']
+let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
+let g:statusline.quickfix = [' Location List ', 'sep', '%< ', '%{exists("w:quickfix_title") ? w:quickfix_title : ""}', '%=', 'filetype', 'ruler']
 let g:statusline.gundo = ['buffer', 'flags', '%=', 'ruler']
+let g:statusline.scratch = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
+let g:statusline.netrw = [' NETRW ', 'sep', 'branch', '%<', ' %f ', '%=', 'netrw', 'ruler']
 
 " function! StatuslineMode() abort
 "   for nr in range(1, winnr('$'))
@@ -142,13 +153,26 @@ let g:statusline.gundo = ['buffer', 'flags', '%=', 'ruler']
 "   endfor
 " endfunction
 
+function! StatuslineBuffer() abort
+  let name = expand('%')
+
+  let name = g:statusline.bufname(name)
+  " if &buftype == 'nofile'
+  "   echom name
+  " else
+  "   echoerr 'Buffer type: ' . &buftype
+  " endif
+
+  return name
+endfunction
+
 function! StatuslineFlags() abort
   let flags = []
 
   " TODO PRV
   if &buftype == 'help'
     call add(flags, 'H')
-  elseif &buftype != 'nofile' && &filetype !~ 'help\|netrw\|vim-plug'
+  elseif &buftype != 'nofile' && &filetype !~ 'help\|vim-plug' " netrw, qf...
     if &previewwindow
       call add(flags, 'PRV')
     endif
@@ -163,21 +187,6 @@ function! StatuslineFlags() abort
   endif
 
   return join(flags, ',')
-endfunction
-
-function! StatuslineFiletype() abort
-  if empty(&filetype)
-    let ft = 'no ft'
-  else
-    let ft = &filetype
-  endif
-
-  if &filetype == 'netrw'
-    let order = (g:netrw_sort_direction =~ 'n') ? '+' : '-'
-    let ft.= '[' . g:netrw_sort_by . order . ']'
-  endif
-
-  return ft
 endfunction
 
 " Main: {{{1
@@ -274,6 +283,25 @@ function! g:statusline.build(...) abort dict
   return line
 endfunction
 
+" Format buffer name
+function! g:statusline.bufname(string) abort dict
+  let name = a:string
+
+  let brackets_pattern = '\[\([^\]]\+\)\]'
+  " __Gundo_Preview__ ...
+  let underscores_pattern = '__\(\w\+\)__'
+  if name =~ brackets_pattern
+    " Remove surrounding brackets
+    " Uppercase matched string: \U\1\E
+    let name = substitute(name, brackets_pattern, '\1', '')
+  elseif name =~ underscores_pattern
+    let name = substitute(name, underscores_pattern, '\1', '')
+    let name = substitute(name, '_', ' ', 'g')
+  endif
+
+  return name
+endfunction
+
 " Utils: {{{1
 
 function! s:parse(item) abort
@@ -368,9 +396,14 @@ augroup StatuslineInit
   " Build the full statusline on startup
   " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
   autocmd VimEnter * call statusline.apply() " | redrawstatus
+
+  " Redraw directly after saving
+  autocmd BufWritePost * redrawstatus
+  " autocmd VimResized * redrawstatus
 augroup END
 
-augroup StatuslineMode
+augroup StatuslineType
+  autocmd!
   " Update current window number
   autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
   " Override the statusline components according to the context
@@ -379,9 +412,10 @@ augroup StatuslineMode
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
   " BufWinEnter quickfix, QuickFixCmdPre, QuickFixCmdPost
   autocmd FileType qf call statusline.apply('quickfix')
-  " Redraw directly after saving
-  autocmd BufWritePost * redrawstatus
-  " autocmd VimResized * redrawstatus
+  " Netrw
+  autocmd FileType netrw call statusline.apply('netrw')
+  " g:ScratchBufferName
+  autocmd BufNewFile __Scratch__ call statusline.apply('scratch')
 augroup END
 
 augroup StatuslineHighlight
