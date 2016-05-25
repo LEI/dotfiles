@@ -11,8 +11,7 @@ alias cp="cp -i"
 alias ln='ln -i'
 alias mkdir="mkdir -p"
 alias mv="mv -i"
-# Interactive prompt (rm -i prompts for every file)
-alias rm="rm -I"
+# alias rm="rm -I" # Interactive prompt (not on osx?)
 
 # Always enable colored 'grep' output
 # Note: 'GREP_OPTIONS="--color=auto"' is deprecated, hence the alias usage.
