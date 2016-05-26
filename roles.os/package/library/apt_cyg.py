@@ -35,26 +35,25 @@ import zipfile
 import shutil
 import re
 
-# if isinstance(name, list):
-#     names = ' '.join(name)
+def installed_version(module, name):
+    (rc, out, err) = module.run_command('awk "$1~pkg && $0=$2" pkg=^%s$ /etc/setup/installed.db' % (name))
+    r = re.compile(r'%s-([0-9a-zA-Z]+\.[0-9a-zA-Z]+\.[0-9a-zA-Z]+-[0-9a-zA-Z]+)' % (name))
+    version = r.search(out)
+    installed_version = None
+    if version != None:
+        installed_version = version.group(1)
 
-# try:
-#     current_version = installed_version(module, name)
-#     latest = latest_version(module, name)
-#     if p['state'] == 'anything' and current_version != None:
-#         module.exit_json(changed=False)
-#         return
-#     if current_version == None or latest != current_version:
-#         if module.check_mode:
-#             module.exit_json(changed=True)
-#             return
-#     else:
-#         module.exit_json(changed=False)
-#         return
-#     module.exit_json(changed=True, msg='%s %s' % (current_version, latest))
-#     module.exit_json(changed=True, msg='%s %s' % (current_version, latest))
-# except Exception as e:
-#     module.fail_json(msg=str(e))
+    return installed_version
+
+def latest_version(module, name):
+    (rc, out, err) = module.run_command('%s show %s' % (APT_CYG_PATH, name))
+    r = re.compile(r'version: ([0-9\.-]+)')
+    version = r.search(out.strip())
+    latest_version = None
+    if version != None:
+        latest_version = version.group(1)
+
+    return latest_version
 
 def install_packages(module):
     if not module.check_mode:
@@ -108,26 +107,6 @@ def remove_packages(module, names):
         module.fail_json(msg='failed to remove %s package(s)' % (names))
     module.exit_json(changed=True, msg='removed %s package(s)' % (names))
 
-def installed_version(module, name):
-    (rc, out, err) = module.run_command('awk "$1~pkg && $0=$2" pkg=^%s$ /etc/setup/installed.db' % (name))
-    r = re.compile(r'%s-([0-9a-zA-Z]+\.[0-9a-zA-Z]+\.[0-9a-zA-Z]+-[0-9a-zA-Z]+)' % (name))
-    version = r.search(out)
-    installed_version = None
-    if version != None:
-        installed_version = version.group(1)
-
-    return installed_version
-
-def latest_version(module, name):
-    (rc, out, err) = module.run_command('%s show %s' % (APT_CYG_PATH, name))
-    r = re.compile(r'version: ([0-9\.-]+)')
-    version = r.search(out.strip())
-    latest_version = None
-    if version != None:
-        latest_version = version.group(1)
-
-    return latest_version
-
 # ==========================================
 
 def main():
@@ -158,6 +137,26 @@ def main():
         remove_packages(module, p['name'])
     else:
         module.fail_json(msg='unknown state %s' % (p['state']))
+
+    # if isinstance(name, list):
+    #     names = ' '.join(name)
+    # try:
+    #     current_version = installed_version(module, name)
+    #     latest = latest_version(module, name)
+    #     if p['state'] == 'anything' and current_version != None:
+    #         module.exit_json(changed=False)
+    #         return
+    #     if current_version == None or latest != current_version:
+    #         if module.check_mode:
+    #             module.exit_json(changed=True)
+    #             return
+    #     else:
+    #         module.exit_json(changed=False)
+    #         return
+    #     module.exit_json(changed=True, msg='%s %s' % (current_version, latest))
+    #     module.exit_json(changed=True, msg='%s %s' % (current_version, latest))
+    # except Exception as e:
+    #     module.fail_json(msg=str(e))
 
 # Import module snippets
 from ansible.module_utils.basic import *
