@@ -3,6 +3,12 @@
 # $ANSIBLE_HOME/hacking/test-module -m ./library/apt-cyg -a "version=0.1.0 prefix=$HOME/bin"
 
 # https://github.com/naokirin/ansible-apt-cyg-module/blob/master/library/apt-cyg
+# & ansible/modules/extras/packaging/os/apk.py
+# ==========================================
+# FIXME
+# install bach-completion, make, git, tmux: always changed?
+# remove make: not possible?
+
 DOCUMENTATION = '''
 ---
 module: apt-cyg
@@ -55,7 +61,7 @@ def latest_version(module, name):
 
     return latest_version
 
-def install_packages(module):
+def update_packages(module):
     if not module.check_mode:
         cmd = '%s update' % (APT_CYG_PATH)
 
@@ -107,12 +113,10 @@ def remove_packages(module, names):
         module.fail_json(msg='failed to remove %s package(s)' % (names))
     module.exit_json(changed=True, msg='removed %s package(s)' % (names))
 
-# ==========================================
-
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            state = dict(default='latest', choices=['present', 'absent', 'latest', 'anything']),
+            state = dict(default='latest', choices=['present', 'absent', 'latest']),
             name = dict(type='list'),
             update = dict(default='no', type='bool'),
         ),
@@ -128,15 +132,12 @@ def main():
     if p['update']:
         update_packages(module)
 
-    # FIXME
-    # install make, git, tmux: always changed?
-    # remove make: not possible?
     if p['state'] in ['present', 'latest']:
         install_packages(module, p['name'], p['state'])
     elif p['state'] == 'absent':
         remove_packages(module, p['name'])
     else:
-        module.fail_json(msg='unknown state %s' % (p['state']))
+        module.fail_json(msg='unhandled state %s' % (p['state']))
 
     # if isinstance(name, list):
     #     names = ' '.join(name)

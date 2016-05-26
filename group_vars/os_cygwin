@@ -5,16 +5,18 @@
 os: Windows
 
 cygwin_packages:
-  # - bash
-  # - bash-completion # Always changed?
+  - {name: bash, state: present}
+  - bash-completion
   # - clang
   - cmake
   - curl
+  # - diffutils
   # - dos2unix
   # - gcc-core/gcc-g++
   # - libncurses-devel
-  # - make # => always changed
-  - patch
+  # - make
+  - patchutils
+  # - rxvt-unicode
   - tree
   - wget
 
