@@ -10,7 +10,10 @@
       item.install_options is defined and
       item.install_options | length > 0 else omit
     }}"
+    # https://github.com/transcode-open/apt-cyg
+    # https://github.com/naokirin/ansible-apt-cyg-module
+    use: "{{ 'auto' if os != 'Windows' else 'apt_cyg' }}"
   with_items: "{{ packages }}"
-  become: "{{ 'yes' if ansible_os_family != 'Darwin' else 'no' }}"
-  # sudo if os in ['Archlinux', 'Debian'] ?
-  when: packages_install and os != 'Windows'
+  # ansible_os_family
+  become: "{{ 'yes' if os in ['Archlinux', 'Debian'] else 'no' }}"
+  when: packages_install
