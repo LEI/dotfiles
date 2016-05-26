@@ -97,7 +97,7 @@ let g:statusline.items = {
       \     'suffix': 'separator'
       \   },
       \   'buffer': {
-      \     'string': '%{StatuslineBuffer()}',
+      \     'string': '%{g:statusline.bufname(expand("%"))}',
       \     'surround': ' ',
       \   },
       \   'file': {
@@ -138,41 +138,20 @@ let g:statusline.items = {
 
 let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler']
 let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
+let g:statusline.help = ['file', 'flags', '%=', 'filetype', 'ruler']
 let g:statusline.quickfix = [' Location List ', 'sep', '%< ', '%{exists("w:quickfix_title") ? w:quickfix_title : ""}', '%=', 'filetype', 'ruler']
-let g:statusline.gundo = ['buffer', 'flags', '%=', 'ruler']
+let g:statusline.netrw = [' Netrw ', 'sep', 'branch', '%<', ' %f ', '%=', 'netrw', 'ruler']
+let g:statusline.plug = ['buffer', '%<', '%=', 'filetype', 'ruler']
 let g:statusline.scratch = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
-let g:statusline.netrw = [' NETRW ', 'sep', 'branch', '%<', ' %f ', '%=', 'netrw', 'ruler']
-
-" function! StatuslineMode() abort
-"   for nr in range(1, winnr('$'))
-"     if (nr == w:nr)
-"       return get(g:statusline.modes, mode(), mode()) . (&paste ? ' PASTE' : '')
-"     else
-"       return '------'
-"     endif
-"   endfor
-" endfunction
-
-function! StatuslineBuffer() abort
-  let name = expand('%')
-
-  let name = g:statusline.bufname(name)
-  " if &buftype == 'nofile'
-  "   echom name
-  " else
-  "   echoerr 'Buffer type: ' . &buftype
-  " endif
-
-  return name
-endfunction
+let g:statusline.gundo = ['buffer', '%=', 'ruler']
 
 function! StatuslineFlags() abort
   let flags = []
 
-  " TODO PRV
+  " elseif &buftype != 'nofile' && &filetype !~ 'help\|vim-plug' " netrw, qf...
   if &buftype == 'help'
     call add(flags, 'H')
-  elseif &buftype != 'nofile' && &filetype !~ 'help\|vim-plug' " netrw, qf...
+  else
     if &previewwindow
       call add(flags, 'PRV')
     endif
@@ -196,8 +175,10 @@ function! g:statusline.init() abort dict
   let &g:statusline = self.build()
 
   " Overrides
-  let g:gundo_tree_statusline = self.build(self.gundo)
-  let g:gundo_preview_statusline = self.build(self.gundo)
+  if exists('g:loaded_gundo')
+    let g:gundo_tree_statusline = self.build(self.gundo)
+    let g:gundo_preview_statusline = self.build(self.gundo)
+  endif
 endfunction
 
 function! g:statusline.apply(...) abort dict
@@ -410,10 +391,14 @@ augroup StatuslineType
   autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
         \ | call statusline.apply('commandline')
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
+  " Help buffer
+  autocmd FileType help call statusline.apply('help')
   " BufWinEnter quickfix, QuickFixCmdPre, QuickFixCmdPost
   autocmd FileType qf call statusline.apply('quickfix')
   " Netrw
   autocmd FileType netrw call statusline.apply('netrw')
+  " Vim Plug
+  autocmd FileType vim-plug call statusline.apply('plug')
   " g:ScratchBufferName
   autocmd BufNewFile __Scratch__ call statusline.apply('scratch')
 augroup END

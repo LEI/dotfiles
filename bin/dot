@@ -62,6 +62,7 @@ ansible_install() {
         # Install Xcode
         _do "xcode-select --install"
       fi
+      # Install ansible with homebrew? (pip installs 2.0)
       ;;
     Linux)
       die "TODO: detect linux package manager"
