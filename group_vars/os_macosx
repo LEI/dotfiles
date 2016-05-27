@@ -17,7 +17,7 @@ homebrew_packages:
   # - ctags
   - coreutils
   - { name: curl, install_options: ['with-openssl'] }
-  # - diffutils # gnu-diff gnu-indent gnu-tar gnu-which...
+  - diffutils # gnu-diff gnu-indent gnu-tar gnu-which...
   - { name: findutils, install_options: ['with-default-names'] }
   - { name: gnu-sed, install_options: ['with-default-names'] }
   - gnutls
@@ -34,6 +34,7 @@ homebrew_packages:
   - nmap
   - openssl
   - openssh
+  - patchutils
   # - rename
   # - rbenv
   # - rsync
