@@ -85,7 +85,11 @@ battery_charge() {
       full=$(cat $battery_full)
       BATT_PCT=$((100 * $now / $full))
       ;;
+    # *)
+    #   echo "?"
+    #   ;;
   esac
+  [[ -z "$BATT_PCT" ]] && exit 1
 }
 
 

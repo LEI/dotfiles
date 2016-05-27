@@ -1,0 +1,18 @@
+---
+- name: Check if node is installed
+  command: node --version
+  register: node_version_result
+  changed_when: node_version_result.rc != 0
+  failed_when: false
+
+- name: Check if npm is installed
+  command: npm --version
+  register: npm_version_result
+  changed_when: npm_version_result.rc != 0
+  failed_when: false
+
+- name: Register node and npm version
+  set_facts:
+    node_installed: "{{ node_version_result != 0 and npm_version_result != 0 }}"
+    node_version: "{{ node_version_result.stdout if node_version_result.rc != 0 else false }}"
+    npm_version: "{{ npm_version_result.stdout if npm_version_result.rc != 0 else false }}"

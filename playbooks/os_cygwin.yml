@@ -6,10 +6,11 @@
 
   roles:
 
+    # Update setup.ini and symlink ~/.minttyrc
+    - role: cygwin
+      tags: [cyg]
+
     # Install Cygwin packages with apt-cyg
     - role: package
       tags: [pkg]
       packages: "{{ cygwin_packages }}"
-
-    - role: cygwin
-      tags: [cyg]

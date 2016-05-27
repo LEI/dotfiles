@@ -139,7 +139,7 @@ let g:statusline.items = {
 let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler']
 let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
 let g:statusline.help = [' Help ', 'sep', '%<', 'file', '%=', 'ruler']
-let g:statusline.quickfix = ['file', '%< ', '%{exists("w:quickfix_title") ? w:quickfix_title : ""}', '%=', 'filetype', 'ruler']
+let g:statusline.quickfix = ['file', '%<', '%{exists("w:quickfix_title") ? w:quickfix_title : ""}', '%=', 'filetype', 'ruler']
 let g:statusline.netrw = [' Netrw ', 'sep', 'branch', '%<', ' %f ', '%=', 'netrw', 'ruler']
 let g:statusline.plug = ['buffer', '%<', '%=', 'filetype', 'ruler']
 let g:statusline.scratch = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']

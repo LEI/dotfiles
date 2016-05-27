@@ -1,24 +1,10 @@
 ---
-- name: Check if node is installed
-  command: node --version
-  changed_when: node_version_result.rc != 0
-  failed_when: false
-  register: node_version_result
-
-- name: Check if npm is installed
-  command: npm --version
-  changed_when: npm_version_result.rc != 0
-  failed_when: false
-  register: npm_version_result
+- include: installed.yml
 
 - include: debian.yml
   when: ansible_os_family == 'Debian' and
-    (node_force_install or
-    node_version_result.rc != 0 or
-    npm_version_result.rc != 0)
+    (node_force_install or not node_installed)
 
 - include: redhat.yml
-  when: ansible_os_family == 'RedHat' and
-    (node_force_install or
-    node_version_result.rc != 0 or
-    npm_version_result.rc != 0)
+  when: ansible_os_family == 'RedHat'
+    (node_force_install or not node_installed)

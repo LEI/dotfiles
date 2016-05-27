@@ -41,6 +41,7 @@ import zipfile
 import shutil
 import re
 
+# TODO check executables outside cygwin?
 def installed_version(module, name):
     (rc, out, err) = module.run_command('awk "$1~pkg && $0=$2" pkg=^%s$ /etc/setup/installed.db' % (name))
     r = re.compile(r'%s-([0-9a-zA-Z]+\.[0-9a-zA-Z]+\.[0-9a-zA-Z]+-[0-9a-zA-Z]+)' % (name))
