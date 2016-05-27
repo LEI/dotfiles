@@ -135,6 +135,7 @@ let g:statusline.items = {
       \   },
       \ }
       "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
+      " trailing whitespaces?
 
 let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler']
 let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']

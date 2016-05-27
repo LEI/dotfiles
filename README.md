@@ -31,6 +31,7 @@
 
 ---
 
+- [thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles)
 - [alexanderjeurissen](https://github.com/alexanderjeurissen/dotfiles)
 - [ansible-mac-provision](https://github.com/reecefowell/ansible-mac-provision)
 - [delucks](https://github.com/delucks/dotfiles)

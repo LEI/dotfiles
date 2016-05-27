@@ -55,11 +55,6 @@ set ffs=unix,dos,mac
 " Use system clipboard
 set clipboard=unnamed
 
-" Fast terminal connection
-if !has('nvim')
-  set ttyfast
-endif
-
 " Delete comment character when joining commented lines
 if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j
@@ -169,9 +164,19 @@ set noshowmatch
 " HTML brackets
 set matchpairs+=<:>
 
-"if has("mouse")
-set mouse=a
-"endif
+" has("mouse")
+set mouse+=a
+
+" Fix mouse inside tmux (e.g. drag splits)
+" needed outside too?
+if &term =~ '^screen' || strlen($TMUX) > 0
+    set ttymouse=xterm2
+endif
+
+" Fast terminal connection
+if !has('nvim')
+  set ttyfast
+endif
 
 " Natural new split focus
 set splitbelow
