@@ -5,31 +5,12 @@
 " https://github.com/vim-airline/vim-airline
 " https://gist.github.com/suderman/1229444
 
-if get(g:, 'loaded_statusline', 0) || &cp
+if &cp || get(g:, 'loaded_statusline', 0)
   finish
 endif
 let g:loaded_statusline = 1
 
 " Variables: {{{1
-
-" Default: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-" %<    Where to truncate line if too long
-" %n    Buffer number
-" %F    Full path to the file in the buffed
-" %f    Relative path or as typed
-" %t    File name (tail)
-" %m    Modified flag [+] (modified), [-] (unmodifiable) or nothing
-" %r    Readonly flag [RO]
-" %w    Preview window flag
-" %y    Filetype [ruby]
-" %=    Separation point between left and right aligned items
-" %l    Current line number
-" %L    Number of lines in buffer
-" %c    Current column number
-" %V    Current virtual column number (-n), if different from %c
-" %P    Percentage through file of displayed window
-" %(    Start of item group (%-35. width and alignement of a section)
-" %)    End of item group
 
 if !exists('g:statusline')
   let g:statusline = {}
@@ -86,6 +67,9 @@ call extend(g:statusline.symbols, {
 
 " States {{{2
 
+" Default statusline:
+" %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+
 call extend(g:statusline.states, {
       \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
@@ -98,6 +82,25 @@ call extend(g:statusline.states, {
       \ }, 'keep')
 
 " Items {{{2
+
+" Format markers:
+" %<    Where to truncate line if too long
+" %n    Buffer number
+" %F    Full path to the file in the buffed
+" %f    Relative path or as typed
+" %t    File name (tail)
+" %m    Modified flag [+] (modified), [-] (unmodifiable) or nothing
+" %r    Readonly flag [RO]
+" %w    Preview window flag
+" %y    Filetype [ruby]
+" %=    Separation point between left and right aligned items
+" %l    Current line number
+" %L    Number of lines in buffer
+" %c    Current column number
+" %V    Current virtual column number (-n), if different from %c
+" %P    Percentage through file of displayed window
+" %(    Start of item group (%-35. width and alignement of a section)
+" %)    End of item group
 
 let g:statusline.items = {
       \   'mode': {
