@@ -1,4 +1,5 @@
 " Add syntax highlighting and append jinja filetype
+" Use after/ftdetect/jinja.vim?
 
 function! s:AddJinjaSyntax()
   let l:ft = &filetype

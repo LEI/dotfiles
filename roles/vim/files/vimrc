@@ -167,8 +167,7 @@ set matchpairs+=<:>
 " has("mouse")
 set mouse+=a
 
-" Fix mouse inside tmux (e.g. drag splits)
-" needed outside too?
+" Fix mouse inside screen and tmux (e.g. drag splits)
 if &term =~ '^screen' || strlen($TMUX) > 0
     set ttymouse=xterm2
 endif

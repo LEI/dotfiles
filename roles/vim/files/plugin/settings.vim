@@ -5,11 +5,12 @@
 if get(g:, 'loaded_settings', 0)
   finish
 endif
+let g:loaded_settings = 1
 
 let s:settings_path = '~/.vim/settings'
 let s:plugins_path = '~/.vim/plugged'
 
-function SourcePluginSettings(directory, check_directory)
+function! SourcePluginSettings(directory, check_directory)
   for l:path in split(globpath(a:directory, '*.vim'), '\n')
     let l:name = fnamemodify(l:path, ':t:r')
     let l:check = !empty(glob(a:check_directory . '/*' . l:name . '*'))

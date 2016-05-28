@@ -22,10 +22,7 @@ ruby_gems:
   - bundler
   # - compass
 
-# set -g @plugin 'tmux-plugins/tmux-sensible'
-# set -g @plugin 'github_username/plugin_name'
-# set -g @plugin 'git@github.com/user/plugin'
-# set -g @plugin 'git@bitbucket.com/user/plugin'
+  # TODO MacOSX reattach to user namespace (pbcopy)
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
