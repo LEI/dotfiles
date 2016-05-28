@@ -1,5 +1,5 @@
 " Reverse highlight of characters on the color column
-" FIXME: bug EOL char
+" FIXME: EOL char
 
 " https://github.com/thoughtstream/Damian-Conway-s-Vim-Setup/blob/master/.vimrc
 " highlight ColorColumn ctermbg=red guibg=red

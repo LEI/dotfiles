@@ -133,14 +133,6 @@ set title
 
 " set guioptions-=e
 
-set noshowmode
-
-" Display incomplete commands
-set showcmd
-
-" Height of the command bar
-set cmdheight=1
-
 " Always show current position
 set ruler
 
@@ -149,7 +141,21 @@ set ruler
 " Always show the status line
 set laststatus=2
 
+" Cf. autoload/statusline.vim
 set statusline=%!statusline#build()
+
+" Statusline completion
+" set wildmode=full
+set wildmenu
+
+" Display current mode
+set noshowmode
+
+" Display incomplete commands
+set showcmd
+
+" Height of the command bar
+set cmdheight=1
 
 " Line numbers
 set number
@@ -181,10 +187,7 @@ set noerrorbells
 set visualbell
 set t_vb=
 
-" set wildmode=full
-set wildmenu
-
-" Spacing {{{1
+" Indentation {{{1
 
 if !exists("g:loaded_sleuth")
   let s:tabsize=4
@@ -215,8 +218,7 @@ set nowrap
 " Break lines at convenient points (soft wrap)
 set linebreak
 
-" Line break on 500 characters
-set textwidth=500
+set textwidth=79
 
 " Show line breaks (or nr2char(0x08627))
 let &showbreak=nr2char(0x21AA)
@@ -316,11 +318,10 @@ endif
 
 set synmaxcol=500
 
-" Cf. ~/.vim/plugin/colorcolumn.vim
 if exists('+colorcolumn')
-  set colorcolumn=80
+  " set colorcolumn=80
   " Relative to textwidth
-  "set colorcolumn=+1
+  set colorcolumn=+1
   "let &colorcolumn=join(range(1,80),",")
 endif
 

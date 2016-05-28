@@ -302,8 +302,8 @@ function! s:truncate(string, ...) abort
   if minwidth > 0
     if str =~ '^%{'
       let condition = 'winwidth(0) >= ' . minwidth
-      let str = substitute(str, '{', '\="{" . condition . " ? "', '')
-      let str = substitute(str, '}', ' : ""}', '')
+      let str = substitute(str, '{', '\="{" . condition . " ? "', 'g')
+      let str = substitute(str, '}', ' : ""}', 'g')
     " else
     "   echoerr 'Component should start with "%{", got: ' . str
     endif
