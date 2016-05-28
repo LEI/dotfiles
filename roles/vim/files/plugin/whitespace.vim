@@ -1,19 +1,22 @@
 " Whitespaces
 
+" TODO count & warn?
+
 " Remove trailing whitespaces and preserve cursor position
-function! <SID>TrimWhitespace()
-  let l:line = line('.')
-  let l:col = col('.')
-  " exe "normal mz"
+" exe "normal mz"
+" exe "normal `z"
+function! <SID>StripTrailingWhitespaces()
+  let line = line('.')
+  let col = col('.')
+
   %s/\s\+$//e
-  " exe "normal `z"
-  call cursor(l:line, l:col)
+
+  call cursor(line, col)
 endfunction
 
-augroup MatchWitespace
+augroup RemoveWitespace
   autocmd!
-  " Remove trailing whitespaces on save
-  autocmd BufWritePre * call <SID>TrimWhitespace()
+  autocmd BufWritePre * call <SID>StripTrailingWhitespaces()
 augroup END
 
 " Highlight trailing witespaces in red

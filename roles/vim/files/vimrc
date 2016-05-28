@@ -25,7 +25,7 @@ if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime macros/matchit.vim
 endif
 
-" Global settings {{{1
+" General {{{1
 
 if has("autocmd")
   " Enable filetype detection
@@ -85,8 +85,10 @@ set nobackup
 set nowritebackup
 
 " Keep undo history across sessions, by storing in file.
-if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
-  silent !mkdir ~/.vim/backups > /dev/null 2>&1
+if has('persistent_undo')
+  if !isdirectory(expand('~').'/.vim/backups')
+    silent !mkdir ~/.vim/backups > /dev/null 2>&1
+  endif
   set undodir=~/.vim/backups
   set undofile
 endif
@@ -141,21 +143,21 @@ set ruler
 " Always show the status line
 set laststatus=2
 
-" Cf. autoload/statusline.vim
+" if strlen(&stl) == 0
 set statusline=%!statusline#build()
 
 " Statusline completion
 " set wildmode=full
 set wildmenu
 
+" Height of the command bar
+set cmdheight=1
+
 " Display current mode
 set noshowmode
 
 " Display incomplete commands
 set showcmd
-
-" Height of the command bar
-set cmdheight=1
 
 " Line numbers
 set number
@@ -189,18 +191,21 @@ set t_vb=
 
 " Indentation {{{1
 
-if !exists("g:loaded_sleuth")
-  let s:tabsize=4
-
+" set sw=4 sts=4 ts=4 et
+function! SetTabSize(...)
+  let tabsize = a:0 ? a:1 : 4
   " Indent commands
-  let &shiftwidth = s:tabsize
+ let &shiftwidth = tabsize
   " Set the number of columns for a tab
-  let &softtabstop = s:tabsize
+  let &softtabstop = tabsize
   " Visual width of a tabulation
-  let &tabstop = s:tabsize
+  let &tabstop = tabsize
+endfunction
 
+if !exists("g:loaded_sleuth")
   " Use spaces instead of tabs
   set expandtab
+  call SetTabSize()
 endif
 
 " Copy ident from curreent line when starting a new line
@@ -220,7 +225,7 @@ set linebreak
 
 set textwidth=79
 
-" Show line breaks (or nr2char(0x08627))
+" Show line breaks (0x08627)
 let &showbreak=nr2char(0x21AA)
 
 " set fillchars+=stl:\ ,stlnc:\
@@ -228,12 +233,12 @@ let &showbreak=nr2char(0x21AA)
 
 " Show invisible character (highlighted with NonText and SpecialKey)
 set list
-let &listchars='tab:'.nr2char(0x25B8).' '
-let &listchars.=',trail:'.nr2char(0x00B7)
-let &listchars.=',extends:'.nr2char(0x276F)
-let &listchars.=',precedes:'.nr2char(0x276E)
-let &listchars.=',nbsp:'.nr2char(0x005F)
-let &listchars.=',eol:'.nr2char(0x00AC)
+let &listchars = 'tab:' . nr2char(0x25B8) . ' '
+let &listchars.= ',trail:' . nr2char(0x00B7)
+let &listchars.= ',extends:' . nr2char(0x276F)
+let &listchars.= ',precedes:' . nr2char(0x276E)
+let &listchars.= ',nbsp:' . nr2char(0x005F)
+let &listchars.= ',eol:' . nr2char(0x00AC)
 
 " Folding {{{1
 
@@ -345,14 +350,19 @@ function! SetBackground()
   endif
 endfunction
 
-call SetBackground()
-try
-  " let g:solarized_termtrans = 1
-  colorscheme solarized
-  call togglebg#map("<F5>")
-catch /E185:/
-  colorscheme default
-endtry
+function! SetColors()
+  call SetBackground()
+  try
+    " let g:solarized_termtrans = 1
+    colorscheme solarized
+    call togglebg#map("<F5>")
+  catch /E185:/
+    colorscheme default
+  endtry
+endfunction
+
+" autocmd VimEnter *
+call SetColors()
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
@@ -428,7 +438,7 @@ augroup END
 "  augroup END
 "endif
 
-" Bindings {{{1
+" Key mappings {{{1
 
 " Change leader
 let g:mapleader = "\<Space>"
