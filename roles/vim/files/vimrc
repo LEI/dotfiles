@@ -1,7 +1,6 @@
 "
 " ~/.vim/vimrc
 "
-
 " zi Folding on/off
 " zR Open all
 " zM Close all
@@ -9,26 +8,31 @@
 " zj Down to the start of the next
 " zk Up to the end of the previous
 
-" github.com/mathiasbynens/dotfiles/blob/master/.vimrc
-" github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
+" https://github.com/mathiasbynens/dotfiles/blob/master/.vimrc
+" https://github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
+" https://github.com/lukaszkorecki/DotVim/blob/master/vimrc
 
+" Plugins {{{1
+
+" Already set by .vimrc presence
 set nocompatible
 
+" Source Vim Plug
 runtime plug.vim
 
-" Load matchit.vim, but only if the user hasn't installed a newer version
+" Load matchit.vim, but only if a newer version isn't installed
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime macros/matchit.vim
 endif
 
-" General {{{1
+" Global settings {{{1
 
 if has("autocmd")
   " Enable filetype detection
   filetype plugin indent on
 endif
 
-set encoding=utf-8
+set encoding=utf-8 " fileencoding?
 
 if &history < 1000
   set history=1000
@@ -125,14 +129,10 @@ set esckeys
 " Set the window title
 set title
 
-" Always show the status line
-set laststatus=2
-
 " set showtabline=2
 
 " set guioptions-=e
 
-" Display current mode (not needed with a custom statusline)
 set noshowmode
 
 " Display incomplete commands
@@ -143,7 +143,13 @@ set cmdheight=1
 
 " Always show current position
 set ruler
-"set rulerformat=%l,%c%V%=%P
+
+" set rulerformat=%-14(%l,%c%V%)\ %P
+
+" Always show the status line
+set laststatus=2
+
+set statusline=%!statusline#build()
 
 " Line numbers
 set number
@@ -163,19 +169,6 @@ set noshowmatch
 
 " HTML brackets
 set matchpairs+=<:>
-
-" has("mouse")
-set mouse+=a
-
-" Fix mouse inside screen and tmux (e.g. drag splits)
-if &term =~ '^screen' || strlen($TMUX) > 0
-    set ttymouse=xterm2
-endif
-
-" Fast terminal connection
-if !has('nvim')
-  set ttyfast
-endif
 
 " Natural new split focus
 set splitbelow
@@ -283,15 +276,29 @@ set smartcase
 " Turn magic on for regular expressions
 set magic
 
-" Colors {{{1
+" Terminal {{{1
+
+if has("mouse")
+  set mouse+=a
+endif
+
+" Fix mouse inside screen and tmux (e.g. drag splits)
+if &term =~ '^screen' || strlen($TMUX) > 0
+    set ttymouse=xterm2
+endif
+
+" Fast terminal connection
+if !has('nvim')
+  set ttyfast
+endif
 
 " FIXME: Graphical issues if not xterm-256color (currently set by tmux)
-" set term=$TERM
-" set term=screen-256color
-" set term=xterm-256color
+" set term=$TERM screen-256color xterm-256color
 
-" Fix background clearing (Background Color Erase)
 if &term =~ '256color'
+  " Disable Background Color Erase (BCE) so that color schemes
+  " work properly when Vim is used inside tmux and GNU screen.
+  " See also http://snk.tuxfamily.org/log/vim-256color-bce.html
   set t_ut=
 endif
 
@@ -299,6 +306,8 @@ endif
 " if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
 "   set t_Co=16
 " endif
+
+" Colors {{{1
 
 " Enable syntax highlighting
 if has('syntax')

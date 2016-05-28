@@ -113,6 +113,7 @@ let g:statusline.items = {
       \     'surround': ' ',
       \     'highlight': 'ErrorMsg'
       \   },
+      \   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fileencoding) ? &fileencoding : &encoding}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
       \   'filetype': {
       \     'string': '%{strlen(&filetype) ? &filetype : "no ft"}',
       \     'surround': ' ',
@@ -126,7 +127,7 @@ let g:statusline.items = {
       \     'suffix': 'separator'
       \   },
       \   'ruler': {
-      \     'string': &ruler ? &rulerformat ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
+      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
       \     'surround': ' ',
       \     'minwidth': 40
       \   },
@@ -134,10 +135,9 @@ let g:statusline.items = {
       \     'string': get(g:statusline.symbols, 'separator'),
       \   },
       \ }
-      "   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fenc) ? &fenc : &enc}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
       " trailing whitespaces?
 
-let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler']
+let g:statusline.default = ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'fileinfo', 'filetype', 'ruler']
 let g:statusline.commandline = ['mode', '%<', 'buffer', 'flags', '%=', 'ruler']
 let g:statusline.help = [' Help ', 'sep', '%<', 'file', '%=', 'ruler']
 let g:statusline.quickfix = ['file', '%<', '%{exists("w:quickfix_title") ? w:quickfix_title : ""}', '%=', 'filetype', 'ruler']
@@ -171,17 +171,6 @@ endfunction
 
 " Main: {{{1
 
-function! g:statusline.init() abort dict
-  " setglobal statusline=%!statusline.build()
-  let &g:statusline = self.build()
-
-  " Overrides
-  if exists('g:loaded_gundo')
-    let g:gundo_tree_statusline = self.build(self.gundo)
-    let g:gundo_preview_statusline = self.build(self.gundo)
-  endif
-endfunction
-
 function! g:statusline.apply(...) abort dict
   " let self.current = winnr()
   " if !empty(&l:statusline)
@@ -192,6 +181,10 @@ function! g:statusline.apply(...) abort dict
 endfunction
 
 function! g:statusline.active() abort dict
+  if !exists('self.current_winnr')
+    let self.current_winnr = winnr()
+  endif
+
   return winnr() == self.current_winnr
 endfunction
 
@@ -373,12 +366,11 @@ endfunction
 
 augroup StatuslineInit
   autocmd!
-  " Set global vim options once
-  autocmd VimEnter * call statusline.init()
-  " Build the full statusline on startup
+  " Build the default statusline once
   " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
-  autocmd VimEnter * call statusline.apply() " | redrawstatus
-
+  " autocmd VimEnter * call statusline.apply() " | redrawstatus
+  " Update current window number
+  autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
   " Redraw directly after saving
   autocmd BufWritePost * redrawstatus
   " autocmd VimResized * redrawstatus
@@ -386,8 +378,6 @@ augroup END
 
 augroup StatuslineType
   autocmd!
-  " Update current window number
-  autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
   " Override the statusline components according to the context
   autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
         \ | call statusline.apply('commandline')
@@ -413,3 +403,16 @@ augroup StatuslineHighlight
   autocmd InsertChange * call statusline.highlight(v:insertmode)
   autocmd InsertLeave * call statusline.highlight() | redrawstatus
 augroup END
+
+function! statusline#build()
+  " setglobal statusline=%!statusline.build()
+  " let &g:statusline = g:statusline.build()
+
+  " Overrides
+  if exists('g:loaded_gundo')
+    let g:gundo_tree_statusline = g:statusline.build(g:statusline.gundo)
+    let g:gundo_preview_statusline = g:statusline.build(g:statusline.gundo)
+  endif
+
+  return g:statusline.build()
+endfunction
