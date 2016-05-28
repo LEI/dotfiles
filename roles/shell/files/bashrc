@@ -27,7 +27,9 @@ main() {
   # local user="$(id -un)" # $(whoami)
   # local host="$(hostname -s)"
 
-  # TODO? Source completion with ~/.bash_completion (not loaded on OSX)
+  # TODO
+  # use .aliases, .functions...
+  # Source completion with ~/.bash_completion (not loaded on OSX)
   load $BASH_DIR/{aliases,completion,functions,plugins,settings}
 
   # Colors are used in ~/.bash.d/prompt
