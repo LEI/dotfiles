@@ -1,4 +1,14 @@
-" Status Line
+" Vim statusline plugin
+
+" https://github.com/itchyny/lightline.vim
+" https://github.com/tpope/vim-flagship
+" https://github.com/vim-airline/vim-airline
+" https://gist.github.com/suderman/1229444
+
+if get(g:, 'loaded_statusline', 0) || &cp
+  finish
+endif
+let g:loaded_statusline = 1
 
 " Variables: {{{1
 
@@ -25,9 +35,9 @@ if !exists('g:statusline')
   let g:statusline = {}
 endif
 
-call extend(g:statusline, {'modes': {}, 'symbols': {}, 'types': {}, 'items': []}, 'keep')
+call extend(g:statusline, {'modes': {}, 'symbols': {}, 'states': {}, 'items': []}, 'keep')
 
-" Modes: {{{2
+" Modes {{{2
 
 " n      Normal
 " no     Operator-pending
@@ -61,7 +71,7 @@ call extend(g:statusline.modes, {
       \   't': 'TERMINAL',
       \ }, 'keep')
 
-" Symbols: {{{2
+" Symbols {{{2
 
 " https://github.com/ryanoasis/nerd-fonts
 call extend(g:statusline.symbols, {
@@ -74,33 +84,33 @@ call extend(g:statusline.symbols, {
 " Lock: nr2char(0x1F512)
 " |- nr2char(0x251C)
 
-" Types: {{{2
+" States {{{2
 
-call extend(g:statusline.types, {
+call extend(g:statusline.states, {
       \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler'],
+      \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
-      \ 'help': [' Help ', 'sep', '%<', 'file', '%=', 'ruler'],
-      \ 'quickfix': ['quickfix', 'sep', '%<', '%{exists("w:quickfix_title") ? " " . w:quickfix_title : ""}', '%=', 'filetype', 'ruler'],
-      \ 'netrw': [' Netrw ', 'sep', 'branch', '%<', ' %f ', '%=', 'netrw', 'ruler'],
-      \ 'plug': ['buffer', '%<', '%=', 'filetype', 'ruler'],
+      \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
+      \ 'netrw': ['branch', '%<', 'file', '%=', 'netrw', 'ruler'],
+      \ 'gundo': ['buffer', '%=', 'filetype', 'ruler'],
+      \ 'plug': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'scratch': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
-      \ 'gundo': ['buffer', '%=', 'ruler'],
       \ }, 'keep')
 
-" Items: {{{2
+" Items {{{2
 
 let g:statusline.items = {
       \   'mode': {
       \     'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \     'surround': ' ',
       \     'minwidth': 20,
-      \     'suffix': 'separator'
+      \     'suffix': '|',
       \   },
       \   'branch': {
       \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
       \     'surround': ' ',
       \     'minwidth': 60,
-      \     'suffix': 'separator'
+      \     'suffix': '|',
       \   },
       \   'buffer': {
       \     'string': '%{g:statusline.bufname(expand("%"))}',
@@ -118,40 +128,46 @@ let g:statusline.items = {
       \     'function': 'StatuslineQuickfix',
       \     'surround': ' ',
       \   },
+      \   'quickfix_title': {
+      \     'string': '%{exists("w:quickfix_title") ? w:quickfix_title : ""}',
+      \     'surround': ' ',
+      \   },
       \   'trailing': {
       \     'string': '',
       \     'surround': ' ',
-      \     'highlight': 'WarnMsg'
+      \     'highlight': 'WarnMsg',
       \   },
       \   'errors': {
       \     'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
       \     'surround': ' ',
-      \     'highlight': 'ErrorMsg'
+      \     'highlight': 'ErrorMsg',
       \   },
-      \   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fileencoding) ? &fileencoding : &encoding}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': 'separator'},
+      \   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fileencoding) ? &fileencoding : &encoding}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': '|'},
       \   'filetype': {
       \     'string': '%{strlen(&filetype) ? &filetype : "no ft"}',
       \     'surround': ' ',
       \     'minwidth': 80,
-      \     'suffix': 'separator'
+      \     'suffix': '|',
       \   },
       \   'netrw': {
       \     'string': '%{g:netrw_sort_by}[%{(g:netrw_sort_direction =~ "n") ? "+" : "-"}]',
       \     'surround': ' ',
       \     'minwidth': 80,
-      \     'suffix': 'separator'
+      \     'suffix': '|',
       \   },
       \   'ruler': {
       \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
       \     'surround': ' ',
-      \     'minwidth': 40
+      \     'minwidth': 40,
       \   },
-      \   'sep': {
+      \   '|': {
       \     'string': get(g:statusline.symbols, 'separator'),
       \   },
       \ }
 
 " Functions: {{{1
+"
+" Flags {{{2
 
 function! StatuslineFlags() abort
   let flags = []
@@ -176,6 +192,8 @@ function! StatuslineFlags() abort
   return join(flags, ',')
 endfunction
 
+" Quickfix {{{2
+
 function StatuslineQuickfix() abort
   let title = '%f'
 
@@ -195,7 +213,7 @@ function! g:statusline.apply(...) abort dict
   " if !empty(&l:statusline)
   "   echom 'Existing local statusline: ' . &l:stl
   " endif
-  let items = a:0 ? get(g:statusline.types, a:1, []) : []
+  let items = a:0 ? get(g:statusline.states, a:1, []) : []
   let &l:statusline = self.build(items)
 endfunction
 
@@ -207,7 +225,7 @@ function! g:statusline.active() abort dict
   return winnr() == self.current_winnr
 endfunction
 
-" Highlight: {{{2
+" Highlight {{{2
 
 function! g:statusline.colors() abort dict
   " Initialize colors
@@ -239,14 +257,14 @@ function! g:statusline.highlight(...) abort dict
   endif
 endfunction
 
-" Build: {{{2
+" Build {{{2
 
 function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
   " let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline_map', {}))
   " call extend(stl, self.components, 'keep')
   let line = ''
-  let items = a:0 && len(a:1) ? a:1 : g:statusline.types.default
+  let items = a:0 && len(a:1) ? a:1 : g:statusline.states.default
   " let items = a:0 && len(a:1) ? a:1 : self.default
   " let items = a:0 && len(a:1) ? a:1 : range(0, len(self.items) - 1)
   for key in items
@@ -321,10 +339,10 @@ augroup StatuslineType
   autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
         \ | call statusline.apply('commandline')
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
-  " Help buffer
-  autocmd FileType help call statusline.apply('help')
   "  QuickFixCmdPre, QuickFixCmdPost / BufReadPost quickfix
   autocmd FileType qf call statusline.apply('quickfix')
+  " Help buffer
+  autocmd FileType help call statusline.apply('help')
   " Netrw
   autocmd FileType netrw call statusline.apply('netrw')
   " Vim Plug

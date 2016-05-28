@@ -45,9 +45,9 @@ let g:syntastic_loc_list_height = 5
 " %E{...} - hide the text in the brackets unless there are errors
 " %W{...} - hide the text in the brackets unless there are warnings
 " %B{...} - hide unless there are both warnings AND errors
-let g:syntastic_stl_format = '%E{Err %fe #%e}'
+let g:syntastic_stl_format = '%E{Err: %fe (%e)}'
 let g:syntastic_stl_format.= '%B{, }'
-let g:syntastic_stl_format.= '%W{Warn %fw #%w}'
+let g:syntastic_stl_format.= '%W{Warn: %fw (%w)}'
 
 " Symbols
 "let g:syntastic_error_symbol = "✗" " ☠

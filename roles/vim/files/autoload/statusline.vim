@@ -1,16 +1,4 @@
-" Vim statusline
-
-" https://github.com/itchyny/lightline.vim
-" https://github.com/tpope/vim-flagship
-" https://github.com/vim-airline/vim-airline
-" https://gist.github.com/suderman/1229444
-
-if get(g:, 'loaded_statusline', 0) || &cp
-  finish
-endif
-let g:loaded_statusline = 1
-
-" Utils: {{{1
+" Vim statusline utils
 
 function! statusline#parse(item) abort
   if type(a:item) == type(0) && a:item == 0
@@ -63,7 +51,12 @@ endfunction
 
 function! statusline#symbol(dict, key) abort
   let s = get(a:dict, a:key, '')
-  let s = get(g:statusline.symbols, s, s)
+
+  if has_key(g:statusline.states, s)
+    let s = get(g:statusline.states, s, s)
+  else
+    let s = get(g:statusline.symbols, s, s)
+  endif
 
   return s
 endfunction
@@ -99,8 +92,8 @@ function! statusline#build()
 
   " Overrides
   if exists('g:loaded_gundo')
-    let g:gundo_tree_statusline = g:statusline.build(g:statusline.types.gundo)
-    let g:gundo_preview_statusline = g:statusline.build(g:statusline.types.gundo)
+    let g:gundo_tree_statusline = g:statusline.build(g:statusline.states.gundo)
+    let g:gundo_preview_statusline = g:statusline.build(g:statusline.states.gundo)
   endif
 
   return g:statusline.build()
