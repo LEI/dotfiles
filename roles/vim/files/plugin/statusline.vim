@@ -4,6 +4,7 @@
 " https://github.com/tpope/vim-flagship
 " https://github.com/vim-airline/vim-airline
 " https://gist.github.com/suderman/1229444
+" https://github.com/millermedeiros/vim-statline
 
 if &cp || get(g:, 'loaded_statusline', 0)
   finish
@@ -71,7 +72,7 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'errors', 'filetype', 'ruler'],
+      \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'filetype', 'ruler', 'spaces', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
@@ -119,14 +120,6 @@ let g:statusline.items = {
       \     'string': '%{g:statusline.bufname(expand("%"))}',
       \     'surround': ' ',
       \   },
-      \   'file': {
-      \     'string': '%f',
-      \     'surround': ' ',
-      \   },
-      \   'flags': {
-      \     'string': '%{StatuslineFlags()}',
-      \     'surround': ['[', '] '],
-      \   },
       \   'quickfix': {
       \     'function': 'StatuslineQuickfix',
       \     'surround': ' ',
@@ -135,10 +128,18 @@ let g:statusline.items = {
       \     'string': '%{exists("w:quickfix_title") ? w:quickfix_title : ""}',
       \     'surround': ' ',
       \   },
-      \   'trailing': {
-      \     'string': '',
+      \   'file': {
+      \     'string': '%f',
+      \     'prefix': ' ',
+      \   },
+      \   'flags': {
+      \     'string': '%{StatuslineFlags()}',
+      \     'surround': [' [', ']'],
+      \   },
+      \   'spaces': {
+      \     'string': '%{StatuslineIndent()}%{StatuslineTrailing()}',
       \     'surround': ' ',
-      \     'highlight': 'WarnMsg',
+      \     'highlight': 'WarningMsg',
       \   },
       \   'errors': {
       \     'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
@@ -164,7 +165,7 @@ let g:statusline.items = {
       \     'minwidth': 80,
       \   },
       \   'ruler': {
-      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
+      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%)%4.(%{cursor#position()}%P%)' : '',
       \     'surround': ' ',
       \     'minwidth': 40,
       \   },
@@ -172,16 +173,6 @@ let g:statusline.items = {
       \     'string': get(g:statusline.symbols, 'separator'),
       \   },
       \ }
-
-" https://github.com/junegunn/dotfiles/blob/master/vimrc
-" %P == All ? StatuslinePos()
-let s:braille = split('"⠉⠒⠤⣀', '\zs')
-function! StatuslinePos() abort
-  let len = len(s:braille)
-  let [cur, max] = [line('.'), line('$')]
-  let pos  = min([len * (cur - 1) / max([1, max - 1]), len - 1])
-  return s:braille[pos]
-endfunction
 
 " Functions: {{{1
 "
@@ -222,6 +213,39 @@ function StatuslineQuickfix() abort
   endif
 
   return title
+endfunction
+
+" Whitespace {{{2
+
+function! StatuslineIndent()
+  if !exists('b:statusline_indent')
+    let b:statusline_indent = ''
+    if !&modifiable
+      return b:statusline_indent
+    endif
+    let tabs = search('^\t', 'nw') != 0
+    " Find spaces that arent used as alignment in the first indent column
+    let spaces = search('^ \{' . &ts . ',}[^\t]', 'nw') != 0
+    if tabs && spaces
+      " Spaces and tabs are used to indent
+      let b:statusline_indent = 'mixed'
+    elseif (spaces && !&et) || (tabs && &et)
+      " 'expandtab' option is set wrong
+      let b:statusline_indent = '&et'
+    endif
+  endif
+  return b:statusline_indent
+endfunction
+
+function! StatuslineTrailing()
+  if !exists('b:statusline_trailing')
+    if search('\s\+$', 'nw') != 0
+      let b:statusline_trailing = '[\s]'
+    else
+      let b:statusline_trailing = ''
+    endif
+  endif
+  return b:statusline_trailing
 endfunction
 
 " Helpers {{{2
@@ -339,16 +363,18 @@ endfunction
 " Auto Commands {{{1
 " TODO doautocmd User?
 
-augroup StatuslineInit
+" for nr in winnr('$') call setwinvar(nr, '&stl', stl)
+" autocmd VimEnter * call statusline.apply() " | redrawstatus
+" autocmd VimResized * redrawstatus
+
+augroup StatuslineBuffer
   autocmd!
-  " Build the default statusline once
-  " for nr in winnr('$') call setwinvar(nr, '&stl', stl)
-  " autocmd VimEnter * call statusline.apply() " | redrawstatus
   " Update current window number
   autocmd BufAdd,BufEnter,WinEnter * let g:statusline.current_winnr = winnr()
   " Redraw directly after saving
   autocmd BufWritePost * redrawstatus
-  " autocmd VimResized * redrawstatus
+  " Update whitespace warnings
+  autocmd BufWritePost,CursorHold * unlet! b:statusline_trailing | unlet! b:statusline_indent
 augroup END
 
 augroup StatuslineType

@@ -31,4 +31,7 @@ reload() {
   # exec $SHELL -l
 
   source "$HOME/.bashrc"
+
+  # Reload readline
+  # bind -f ~/.inputrc
 }

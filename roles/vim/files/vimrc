@@ -64,48 +64,16 @@ if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j
 endif
 
-" Tell vim to remember certain things when we exit
-"  '10  :  marks will be remembered for up to 10 previously edited files
-"  "100 :  will save up to 100 lines for each register
-"  :20  :  up to 20 lines of command-line history will be remembered
-"  %    :  saves and restores the buffer list
-"  n... :  where to save the viminfo files
-"set viminfo='10,\"100,:20,%,n~/.viminfo
-
-if !empty(&viminfo)
-  set viminfo^=!
-endif
-
-" Do not capture all global options
-set sessionoptions-=options
-
-" Disable swapfiles and backups
-set noswapfile
-set nobackup
-set nowritebackup
-
-" Keep undo history across sessions, by storing in file.
-if has('persistent_undo')
-  if !isdirectory(expand('~').'/.vim/backups')
-    silent !mkdir ~/.vim/backups > /dev/null 2>&1
-  endif
-  set undodir=~/.vim/backups
-  set undofile
-endif
-
 "set binary
 "set noeol
 
-set modeline
-set modelines=2
+" Do not scan included files (ctags?)
+set complete-=i
 
-" Enable per-directory .vimrc files and disable unsafe commands in them
-set exrc
-set secure
-
-"set complete-=i
+" Disable octal format for number processing using CTRL-A
 set nrformats-=octal
 
+" Keep the cursor one the same column if possible
 set nostartofline
 
 " Modified buffers can persist in the background
@@ -114,11 +82,52 @@ set hidden
 " Don't redraw while executing macros
 set lazyredraw
 
+" Escape fix?
 set timeout
-" Wait for macros
-set timeoutlen=1200
-" Make Escape work faster
-set ttimeoutlen=50
+set timeoutlen=1000
+" set ttimeout
+set ttimeoutlen=10
+
+" Do not capture all global options
+" set sessionoptions-=options
+
+" Allow setting some options at the beginning and end of the file
+set modeline
+" Number of lines checked for set commands
+set modelines=2
+
+" Enable per-directory '.vimrc' file
+set exrc
+" Disable autocmd, shell and write commands in the current directory '.vimrc'
+set secure
+
+" Backups {{{1
+
+" Tell vim to remember certain things when we exit
+"  '10  :  marks will be remembered for up to 10 previously edited files
+"  "100 :  will save up to 100 lines for each register
+"  :20  :  up to 20 lines of command-line history will be remembered
+"  %    :  saves and restores the buffer list
+"  n... :  where to save the viminfo files
+"set viminfo='10,\"100,:20,%,n~/.viminfo
+if !empty(&viminfo)
+  set viminfo^=!
+endif
+
+" Disable swapfiles and backups
+set noswapfile
+set nobackup
+set nowritebackup
+
+" Keep undo history across sessions, by storing in file.
+if has('persistent_undo')
+  let g:vim_backups = expand('~') . '/.vim/backups'
+  if !isdirectory(vim_backups)
+    execute 'silent !mkdir ' . vim_backups . ' > /dev/null 2>&1'
+  endif
+  let &undodir = vim_backups
+  set undofile
+endif
 
 " Interface {{{1
 
@@ -130,6 +139,9 @@ set esckeys
 
 " Set the window title
 set title
+
+" Highlight current line
+set cursorline
 
 " set showtabline=2
 
@@ -223,7 +235,7 @@ set nowrap
 " Break lines at convenient points (soft wrap)
 set linebreak
 
-set textwidth=79
+" set textwidth=79
 
 " Show line breaks (0x08627)
 let &showbreak=nr2char(0x21AA)
@@ -270,18 +282,24 @@ endif
 
 set gdefault
 
-" Highlight search results
+" Highlight previous search matches
 set hlsearch
-" Search act like in modern browsers
+
+" Show matches while typing
 set incsearch
 
-" Ignore case when searching
+" Ignore case in search patterns
 set ignorecase
-" Try to be smart about cases
+
+" Do not ignore case when the pattern contains upper case characters
 set smartcase
 
-" Turn magic on for regular expressions
+" Changes the special characters that can be used in search patterns
 set magic
+
+" Clear highlighted search results
+nnoremap <Space> :nohlsearch<CR>
+" noremap <Leader><Space> :nohlsearch<CR>
 
 " Terminal {{{1
 
@@ -330,39 +348,14 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-function! DayTime(...)
-  let l:sunrise = a:0 > 0 ? a:1 : 7
-  let l:sunset = a:0 > 1 ? a:2 : 20
-  let l:hour = strftime('%H')
-  return l:hour > l:sunrise && l:hour < l:sunset
-endfunction
-
-function! SetBackground()
-  if !exists('*strftime')
-    let l:background = has('gui_running') ? 'light' : 'dark'
-  elseif DayTime()
-    let l:background = 'light'
-  else
-    let l:background = 'dark'
-  endif
-  if &background != l:background
-    let &background = l:background
-  endif
-endfunction
-
-function! SetColors()
-  call SetBackground()
-  try
-    " let g:solarized_termtrans = 1
-    colorscheme solarized
-    call togglebg#map("<F5>")
-  catch /E185:/
-    colorscheme default
-  endtry
-endfunction
-
-" autocmd VimEnter *
-call SetColors()
+call background#set()
+try
+  " let g:solarized_termtrans = 1
+  colorscheme solarized
+  call togglebg#map("<F5>")
+catch /E185:/
+  colorscheme default
+endtry
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
@@ -414,44 +407,10 @@ command! -nargs=* Wrap setlocal wrap linebreak nolist
 command! En set spelllang=en
 command! Fr set spelllang=fr
 
-" Auto commands {{{1
-
-" Show cursor line on active window only
-set cursorline
-augroup HideCursorline
-  autocmd!
-  autocmd WinEnter * set cursorline
-  autocmd WinLeave * set nocursorline
-augroup END
-
-augroup VimReload
-  autocmd!
-  autocmd BufWritePost $MYVIMRC nested source %
-augroup END
-
-" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
-"if !has('gui_running')
-"  augroup FastEscape
-"    autocmd!
-"    autocmd InsertEnter * set timeoutlen=0
-"    autocmd InsertLeave * set timeoutlen=1000
-"  augroup END
-"endif
-
 " Key mappings {{{1
 
 " Change leader
 let g:mapleader = "\<Space>"
-
-" Do not use arrows
-" nnoremap <up> <nop>
-" nnoremap <down> <nop>
-" nnoremap <left> <nop>
-" nnoremap <right> <nop>
-" inoremap <up> <nop>
-" inoremap <down> <nop>
-" inoremap <left> <nop>
-" inoremap <right> <nop>
 
 " Move vertically on wrapped lines
 nnoremap j gj
@@ -469,8 +428,8 @@ noremap <Tab> ;
 noremap ; :normal n.<CR>
 " ; ? nnoremap Q :normal n.<CR>
 
-" Edit in the same directory as the current file
-cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
+" Yank from the cursor to the end of the line
+map Y y$
 
 " Edit in window
 noremap <Leader>ew :e %%
@@ -485,14 +444,8 @@ noremap <Leader>et :tabe %%
 noremap <Leader>q :q<CR>
 " Save a file
 noremap <Leader>w :w<CR>
-" Save as root
+" Save as root (or use :SudoWrite)
 noremap <Leader>W :w !sudo tee % > /dev/null<CR>
-
-" Visually select the whole buffer
-noremap <Leader>a <Esc>ggVG
-
-" Clear highlighted search results
-noremap <Leader><Space> :noh<CR>
 
 " Remove trailing whitespaces (see TrimWhitespace())
 " noremap <Leader><BS> :%s/\s\+$//e<CR>
@@ -505,8 +458,39 @@ noremap <Leader><Space> :noh<CR>
 " noremap <Leader>l :!clear && git log -p %<CR>
 " noremap <Leader>d :!clear && git diff %<CR>
 
-" Open .vimrc in a new split
+" Edit '.vimrc' in a new split
 nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
+
+" Do not use arrows
+" nnoremap <up> <nop>
+" nnoremap <down> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" inoremap <up> <nop>
+" inoremap <down> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
+
+" Visually select the whole buffer (use :% to operate on the entire file)
+" noremap <Leader>a <Esc>ggVG
+nmap gA ggVG
+
+" Vimcast #26 Bubbling text
+" Cf. settings/unimpaired.vim
+
+" Visually select the text that was last edited/pasted
+nmap gV `[v`]
+
+" Bubble single lines
+nmap <C-Up> ddkP
+nmap <C-Down> ddp
+" Bubble multiple lines
+vmap <C-Up> xkP`[V`]
+vmap <C-Down> xp`[V`]
+
+" Edit in the same directory as the current file
+" cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
 
 " 1}}}
 
