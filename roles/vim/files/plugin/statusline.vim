@@ -106,14 +106,14 @@ let g:statusline.items = {
       \   'mode': {
       \     'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \     'surround': ' ',
-      \     'minwidth': 20,
       \     'suffix': '|',
+      \     'minwidth': 20,
       \   },
       \   'branch': {
       \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
       \     'surround': ' ',
-      \     'minwidth': 60,
       \     'suffix': '|',
+      \     'minwidth': 60,
       \   },
       \   'buffer': {
       \     'string': '%{g:statusline.bufname(expand("%"))}',
@@ -145,18 +145,23 @@ let g:statusline.items = {
       \     'surround': ' ',
       \     'highlight': 'ErrorMsg',
       \   },
-      \   'fileinfo': {'string': '%{&fileformat}[%{strlen(&fileencoding) ? &fileencoding : &encoding}%{exists("+bomb") && &bomb ? ",B" : ""}]', 'surround': ' ', 'minwidth': 100, 'suffix': '|'},
+      \   'fileinfo': {
+      \     'string': '%{&fileformat}[%{strlen(&fileencoding) ? &fileencoding : &encoding}%{exists("+bomb") && &bomb ? ",B" : ""}]',
+      \     'surround': ' ',
+      \     'suffix': '|',
+      \     'minwidth': 100
+      \   },
       \   'filetype': {
       \     'string': '%{strlen(&filetype) ? &filetype : "no ft"}',
       \     'surround': ' ',
-      \     'minwidth': 80,
       \     'suffix': '|',
+      \     'minwidth': 80,
       \   },
       \   'netrw': {
       \     'string': '%{g:netrw_sort_by}[%{(g:netrw_sort_direction =~ "n") ? "+" : "-"}]',
       \     'surround': ' ',
-      \     'minwidth': 80,
       \     'suffix': '|',
+      \     'minwidth': 80,
       \   },
       \   'ruler': {
       \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%) %P' : '',
@@ -167,6 +172,16 @@ let g:statusline.items = {
       \     'string': get(g:statusline.symbols, 'separator'),
       \   },
       \ }
+
+" https://github.com/junegunn/dotfiles/blob/master/vimrc
+" %P == All ? StatuslinePos()
+let s:braille = split('"⠉⠒⠤⣀', '\zs')
+function! StatuslinePos() abort
+  let len = len(s:braille)
+  let [cur, max] = [line('.'), line('$')]
+  let pos  = min([len * (cur - 1) / max([1, max - 1]), len - 1])
+  return s:braille[pos]
+endfunction
 
 " Functions: {{{1
 "
