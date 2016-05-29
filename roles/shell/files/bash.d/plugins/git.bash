@@ -1,7 +1,14 @@
 # Git
 
-alias g="git"
 # More aliases in ~/.gitconfig
+# alias g="git"
+g() {
+  if [[ $# -gt 0 ]]; then
+    git "$@"
+  else
+    git status
+  fi
+}
 
 # Try to source git completion if there is no _git function
 if ! hash _git 2>/dev/null; then

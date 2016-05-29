@@ -11,14 +11,17 @@
 " https://github.com/mathiasbynens/dotfiles/blob/master/.vimrc
 " https://github.com/tpope/vim-sensible/blob/master/plugin/sensible.vim"
 " https://github.com/lukaszkorecki/DotVim/blob/master/vimrc
+" https://github.com/wsdjeg/DotFiles/tree/master/config/nvim/config
 
 " Plugins {{{1
 
 " Already set by .vimrc presence
 set nocompatible
 
-" Source Vim Plug
-runtime plug.vim
+" runtime plug.vim
+if filereadable(expand('~/.vim/plug.vim'))
+  source ~/.vim/plug.vim
+endif
 
 " Load matchit.vim, but only if a newer version isn't installed
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
@@ -40,6 +43,9 @@ endif
 
 " Reload unmodified files when changes are detected outside
 set autoread
+
+" Automatically :write before running commands
+" set autowrite
 
 "if has('path_extra')
 ""  setglobal tags-=./tags tags-=./tags; tags^=./tags;
@@ -64,11 +70,20 @@ if v:version > 703 || v:version == 703 && has("patch541")
   set formatoptions+=j
 endif
 
-"set binary
-"set noeol
+" Use one space, not two, after punctuation
+" set nojoinspaces
+
+" set binary
+" set noeol
 
 " Do not scan included files (ctags?)
 set complete-=i
+
+" Autocompete with dictionnary words when spell check is on
+set complete+=kspell
+
+" Always use vertical diffs
+set diffopt+=vertical
 
 " Disable octal format for number processing using CTRL-A
 set nrformats-=octal
@@ -121,7 +136,7 @@ set nowritebackup
 
 " Keep undo history across sessions, by storing in file.
 if has('persistent_undo')
-  let g:vim_backups = expand('~') . '/.vim/backups'
+  let g:vim_backups = expand('~/.vim/backups')
   if !isdirectory(vim_backups)
     execute 'silent !mkdir ' . vim_backups . ' > /dev/null 2>&1'
   endif
@@ -158,9 +173,11 @@ set laststatus=2
 " if strlen(&stl) == 0
 set statusline=%!statusline#build()
 
-" Statusline completion
-" set wildmode=full
+" Tab completion
 set wildmenu
+" will insert tab at beginning of line,
+" will use completion if not at beginning
+set wildmode=list:longest,list:full
 
 " Height of the command bar
 set cmdheight=1
@@ -190,7 +207,10 @@ set noshowmatch
 " HTML brackets
 set matchpairs+=<:>
 
-" Natural new split focus
+" Treat <li> and <p> tags like the block tags they are
+" let g:html_indent_tags = 'li\|p'
+
+" Open new split panes to right and bottom, which feels more natural
 set splitbelow
 set splitright
 
@@ -202,6 +222,8 @@ set visualbell
 set t_vb=
 
 " Indentation {{{1
+
+" shiftround?
 
 " set sw=4 sts=4 ts=4 et
 function! SetTabSize(...)
@@ -297,10 +319,6 @@ set smartcase
 " Changes the special characters that can be used in search patterns
 set magic
 
-" Clear highlighted search results
-nnoremap <Space> :nohlsearch<CR>
-" noremap <Leader><Space> :nohlsearch<CR>
-
 " Terminal {{{1
 
 if has("mouse")
@@ -335,7 +353,7 @@ endif
 " Colors {{{1
 
 " Enable syntax highlighting
-if has('syntax')
+if has('syntax') && (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
   syntax enable
 endif
 
@@ -431,6 +449,13 @@ noremap ; :normal n.<CR>
 " Yank from the cursor to the end of the line
 map Y y$
 
+" Clear highlighted search results
+nnoremap <Space> :nohlsearch<CR>
+" noremap <Leader><Space> :nohlsearch<CR>
+
+" Switch between the last two files
+nnoremap <Leader><Leader> <C-^>
+
 " Edit in window
 noremap <Leader>ew :e %%
 " Edit in split
@@ -488,10 +513,21 @@ nmap <C-Down> ddp
 vmap <C-Up> xkP`[V`]
 vmap <C-Down> xp`[V`]
 
+" Remap C-Left and C-Right?
+" noremap <Tab> v>
+" noremap <S-Tab> v<
+" vnoremap <Tab> >gv
+" vnoremap <S-Tab> <gv
+
 " Edit in the same directory as the current file
 " cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
 
-" 1}}}
+" Local config {{{1
 
+if filereadable(expand('~/.vimrc.local'))
+  source ~/.vimrc.local
+endif
+
+" 1}}}
 " vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2

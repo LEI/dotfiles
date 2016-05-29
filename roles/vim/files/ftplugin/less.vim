@@ -1,0 +1,3 @@
+" Less
+
+setlocal iskeyword+=-

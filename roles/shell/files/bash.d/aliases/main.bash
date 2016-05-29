@@ -3,15 +3,21 @@
 alias h="history"
 alias j="jobs"
 
-# alias mkd="mkdir -p" # Cf. functions/main.bash
-alias rd="rmdir"
+# Prompt before overwrite and explain what is being done
+alias mv="mv -iv"
+alias cp="cp -iv"
 
-# TODO -v ?
-alias cp="cp -i"
-alias ln='ln -i'
+# Prompt to remove destinations and print name of each linked file
+alias ln='ln -iv'
+
+# Display removed files
+alias rm='rm -v' # -I: prompt once, less intrusive -i (not on osx?)
+
+# Make parent directories as needed
 alias mkdir="mkdir -p"
-alias mv="mv -i"
-# alias rm="rm -I" # Interactive prompt (not on osx?)
+
+# Remove directory
+alias rd="rmdir"
 
 # Always enable colored 'grep' output
 # Note: 'GREP_OPTIONS="--color=auto"' is deprecated, hence the alias usage.
@@ -57,6 +63,9 @@ alias d="cd ~/Documents/Dropbox"
 alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
 alias p="cd ~/projects"
+
+# Pretty print the path
+alias path='echo $PATH | tr -s ":" "\n"'
 
 # Enable aliases to be sudo'ed
 # (( UID != 0 ))

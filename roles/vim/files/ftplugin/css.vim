@@ -1,0 +1,3 @@
+" CSS
+
+setlocal iskeyword+=-

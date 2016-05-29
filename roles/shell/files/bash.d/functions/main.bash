@@ -6,10 +6,12 @@ has() {
   hash "$1" 2>/dev/null
 }
 
+# Make a directory and change into it
 mkd() {
-  mkdir -p "$1" && cd -- "$_"
+  mkdir -p "$1" && cd "$_"
 }
 
+# Move files in trash to be removed
 del() {
   local trash="/tmp/.trash"
   mkdir -p "$trash" && mv "$*" "$trash"

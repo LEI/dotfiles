@@ -19,6 +19,9 @@ run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digi
 if-shell 'test "$TMUX_VERSION_INT" -{{ compare }} "{{ version }}"' 'source-file {{ tmux_path }}/versions/{{ file | basename }}'
 {% endfor %}
 
+# Local configuration
+if-shell '[ -f ~/.tmux.conf.local ]' 'source ~/.tmux.conf.local'
+
 # Tmux Plugin Manager
 set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ tmux_plugin_manager_path }}'
 
