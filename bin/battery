@@ -50,40 +50,43 @@ battery_charge() {
         else
           BATT_CONNECTED=0
         fi
-        BATT_PCT=$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)
+        BATT_PCT="$(pmset -g batt | grep -o '[0-9]*%' | tr -d %)"
       else
         while read key value; do
           case $key in
             "MaxCapacity")
-              maxcap=$value;;
+              maxcap="$value"
+              ;;
             "CurrentCapacity")
-              curcap=$value;;
+              curcap="$value"
+              ;;
             "ExternalConnected")
-              if [ $value == "No" ]; then
+              if [[ $value == "No" ]]; then
                 BATT_CONNECTED=0
               else
                 BATT_CONNECTED=1
               fi
               ;;
           esac
-          if [[ -n "$maxcap" && -n $curcap ]]; then
+          if [[ -n "$maxcap" && -n "$curcap" ]]; then
             BATT_PCT=$(( 100 * curcap / maxcap))
           fi
         done < <(ioreg -n AppleSmartBattery -r | grep -o '"[^"]*" = [^ ]*' | sed -e 's/= //g' -e 's/"//g' | sort)
       fi
       ;;
     "Linux")
+      [[ ! -d $battery_path ]] && exit 1
       battery_state=$(cat $battery_path/status)
       battery_full=$battery_path/charge_full
       battery_current=$battery_path/charge_now
-      if [ $battery_state == 'Discharging' ]; then
+      if [[ "$battery_state" == 'Discharging' ]]; then
         BATT_CONNECTED=0
       else
         BATT_CONNECTED=1
       fi
       now=$(cat $battery_current)
       full=$(cat $battery_full)
-      BATT_PCT=$((100 * $now / $full))
+      [[ -n "$now" ]] && [[ "$now" -ge 0 ]] && BATT_PCT=$((100 * $now / $full))
       ;;
   esac
   [[ -z "$BATT_PCT" ]] && exit 1
@@ -105,7 +108,7 @@ apply_colors() {
     if ((output_tmux)); then
       COLOR="#[fg=$good_color]"
     else
-      COLOR=$good_color
+      COLOR="$good_color"
     fi
 
   # Yellow
@@ -113,7 +116,7 @@ apply_colors() {
     if ((output_tmux)); then
       COLOR="#[fg=$middle_color]"
     else
-      COLOR=$middle_color
+      COLOR="$middle_color"
     fi
 
   # Red
@@ -121,7 +124,7 @@ apply_colors() {
     if ((output_tmux)); then
       COLOR="#[fg=$warn_color]"
     else
-      COLOR=$warn_color
+      COLOR="$warn_color"
     fi
   fi
 }
@@ -131,7 +134,7 @@ print_status() {
   # if ((BATT_CONNECTED)); then GRAPH="^" # "⚡"
   if hash spark 2>/dev/null; then
     sparks=$(spark 0 ${BATT_PCT} 100)
-    GRAPH=${sparks:1:1}
+    GRAPH="${sparks:1:1}"
   else
     ascii=1
   fi
@@ -163,13 +166,13 @@ while getopts ":f:g:m:w:tab:p" opt; do
       battery_format="$OPTARG"
       ;;
     g)
-      good_color=$OPTARG
+      good_color="$OPTARG"
       ;;
     m)
-      middle_color=$OPTARG
+      middle_color="$OPTARG"
       ;;
     w)
-      warn_color=$OPTARG
+      warn_color="$OPTARG"
       ;;
     t)
       output_tmux=1
@@ -185,11 +188,11 @@ while getopts ":f:g:m:w:tab:p" opt; do
       pmset_on=1
       ;;
     b)
-      if [ -d $OPTARG ]; then
-        battery_path=$OPTARG
+      if [[ -d "$OPTARG" ]]; then
+        battery_path="$OPTARG"
       else
         >&2 echo "Battery not found, trying to use default path..."
-        if [ ! -d $battery_path ]; then
+        if [[ ! -d "$battery_path" ]]; then
           >&2 echo "Default battery path is also unreachable"
           exit 1
         fi
