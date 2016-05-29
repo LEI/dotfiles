@@ -72,7 +72,7 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'filetype', 'ruler', 'spaces', 'errors'],
+      \ 'default': ['mode', 'branch', '%<', 'file', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
@@ -136,7 +136,7 @@ let g:statusline.items = {
       \     'string': '%{StatuslineFlags()}',
       \     'surround': [' [', ']'],
       \   },
-      \   'spaces': {
+      \   'warnings': {
       \     'string': '%{StatuslineIndent()}%{StatuslineTrailing()}',
       \     'surround': ' ',
       \     'highlight': 'WarningMsg',
