@@ -36,10 +36,9 @@ vim_plugins:
   # - Shougo/dein.vim
   - altercation/vim-colors-solarized
   - tpope/vim-commentary
-  # - tpope/vim-dispatch
+  - tpope/vim-dispatch
   - tpope/vim-endwise
   - tpope/vim-eunuch
-  # - tpope/vim-flagship
   - tpope/vim-fugitive
   # - tpope/vim-git
   # - tpope/vim-haml
@@ -54,10 +53,9 @@ vim_plugins:
   - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
   - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
   - airblade/vim-gitgutter
-  # - scrooloose/syntastic
-  - neomake/neomake
-  - ynkdir/vim-vimlparser # used by vint?
-  # - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
+  - scrooloose/syntastic
+  # - neomake/neomake
+  - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
   - { repo: StanAngeloff/php.vim, opts: { for: php } }
   - { repo: pangloss/vim-javascript, opts: { for: javascript } }
   - kylef/apiblueprint.vim

@@ -545,3 +545,7 @@ nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " 1}}}
 " vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
+
+if err
+
+enif

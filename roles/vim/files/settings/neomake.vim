@@ -30,7 +30,7 @@ augroup NeomakeCheck
   autocmd!
   " BufWinEnter / BufReadPost -> https://github.com/neomake/neomake/issues/408
   " TODO clear loclist on leave
-  autocmd VimEnter,BufWritePost * Neomake
+  autocmd BufWritePost * Neomake
   " Hide check message on :wq
   autocmd VimLeave * let g:neomake_verbose = 0
 augroup END
