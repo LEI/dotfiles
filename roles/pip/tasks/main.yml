@@ -5,6 +5,8 @@
     version: "{{ item.version | default(omit) }}"
     state: "{{ item.state | default(pip_state) }}"
     extra_args: "{{ item.extra_args | default(omit) }}"
+    # extra_args: "{{ pip_default_args + ' ' + item.extra_args | default(pip_default_args) }}"
+    # umask: 0022 # Ensure other users can use it
     # chdir:
     # requirements:
   with_items: "{{ pip_packages }}"
