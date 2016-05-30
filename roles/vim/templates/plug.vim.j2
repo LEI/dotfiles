@@ -17,7 +17,7 @@ function! YCMInstall(info)
   endif
 endfunction
 
-autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
+" autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
 
 call plug#begin('{{ vim_plugin_path }}')
 {% macro plug(plugin) -%}
