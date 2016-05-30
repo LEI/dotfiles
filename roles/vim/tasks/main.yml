@@ -1,4 +1,12 @@
 ---
+- name: Ensure ~/.vimrc is sourcing ~/.vim/init.vim
+  lineinfile:
+    dest: "{{ dot_home }}/.vimrc"
+    line: "source {{ dot_home }}/.vim/init.vim"
+    backup: yes
+    create: yes
+    state: present
+
 - name: "Make sure {{ vim_plugin_path }} exists"
   file:
     path: "{{ vim_plugin_path }}"

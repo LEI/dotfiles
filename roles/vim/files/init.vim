@@ -16,7 +16,7 @@
 " Plugins {{{1
 
 " Already set by .vimrc presence
-set nocompatible
+" set nocompatible
 
 " runtime plug.vim
 if filereadable(expand('~/.vim/plug.vim'))
@@ -24,18 +24,20 @@ if filereadable(expand('~/.vim/plug.vim'))
 endif
 
 " Load matchit.vim, but only if a newer version isn't installed
-if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
+if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &runtimepath) ==# ''
   runtime macros/matchit.vim
 endif
 
 " General {{{1
 
-if has("autocmd")
+if has('autocmd')
   " Enable filetype detection
   filetype plugin indent on
 endif
 
-set encoding=utf-8 " fileencoding?
+if &encoding ==# 'latin1' && has('gui_running')
+  set encoding=utf-8
+endif
 
 if &history < 1000
   set history=1000
@@ -60,13 +62,13 @@ if &tabpagemax < 50
 endif
 
 " Use Unix as the standard file type
-set ffs=unix,dos,mac
+set fileformats=unix,dos,mac
 
 " Use system clipboard
 set clipboard=unnamed
 
 " Delete comment character when joining commented lines
-if v:version > 703 || v:version == 703 && has("patch541")
+if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
 endif
 
@@ -103,9 +105,6 @@ set timeoutlen=1000
 " set ttimeout
 set ttimeoutlen=10
 
-" Do not capture all global options
-" set sessionoptions-=options
-
 " Allow setting some options at the beginning and end of the file
 set modeline
 " Number of lines checked for set commands
@@ -117,6 +116,9 @@ set exrc
 set secure
 
 " Backups {{{1
+
+" Do not capture all global options
+set sessionoptions-=options
 
 " Tell vim to remember certain things when we exit
 "  '10  :  marks will be remembered for up to 10 previously edited files
@@ -137,10 +139,10 @@ set nowritebackup
 " Keep undo history across sessions, by storing in file.
 if has('persistent_undo')
   let g:vim_backups = expand('~/.vim/backups')
-  if !isdirectory(vim_backups)
-    execute 'silent !mkdir ' . vim_backups . ' > /dev/null 2>&1'
+  if !isdirectory(g:vim_backups)
+    execute 'silent !mkdir ' . g:vim_backups . ' > /dev/null 2>&1'
   endif
-  let &undodir = vim_backups
+  let &undodir = g:vim_backups
   set undofile
 endif
 
@@ -173,6 +175,8 @@ set laststatus=2
 " if strlen(&stl) == 0
 set statusline=%!statusline#build()
 
+set display+=lastline
+
 " Invoke completion on <Tab> in commande line mode
 set wildmenu
 
@@ -197,7 +201,7 @@ set showcmd
 set number
 
 " Use relative line numbers
-if exists("&relativenumber")
+if exists('&relativenumber')
   set relativenumber
 endif
 
@@ -232,16 +236,16 @@ set t_vb=
 
 " set sw=4 sts=4 ts=4 et
 function! SetTabSize(...)
-  let tabsize = a:0 ? a:1 : 4
+  let l:tabsize = a:0 ? a:1 : 4
   " Indent commands
- let &shiftwidth = tabsize
+ let &shiftwidth = l:tabsize
   " Set the number of columns for a tab
-  let &softtabstop = tabsize
+  let &softtabstop = l:tabsize
   " Visual width of a tabulation
-  let &tabstop = tabsize
+  let &tabstop = l:tabsize
 endfunction
 
-if !exists("g:loaded_sleuth")
+if !exists('g:loaded_sleuth')
   " Use spaces instead of tabs
   set expandtab
   call SetTabSize()
@@ -292,7 +296,7 @@ set nofoldenable
 
 " Start scrolling before the window border
 if !&scrolloff
-  set scrolloff=3
+  set scrolloff=1
 endif
 
 if !&sidescrolloff
@@ -302,8 +306,6 @@ endif
 if !&sidescroll
   set sidescroll=1
 endif
-
-"set display+=lastline
 
 " Search {{{1
 
@@ -326,24 +328,23 @@ set magic
 
 " Terminal {{{1
 
-if has("mouse")
+if has('mouse')
   set mouse+=a
 endif
 
-" Fix mouse inside screen and tmux (e.g. drag splits)
-if &term =~ '^screen' || strlen($TMUX) > 0
-    set ttymouse=xterm2
-endif
-
-" Fast terminal connection
 if !has('nvim')
+  " Fix mouse inside screen and tmux (e.g. drag splits)
+  if &term =~# '^screen' || strlen($TMUX) > 0
+      set ttymouse=xterm2
+  endif
+" Fast terminal connection
   set ttyfast
 endif
 
 " FIXME: Graphical issues if not xterm-256color (currently set by tmux)
 " set term=$TERM screen-256color xterm-256color
 
-if &term =~ '256color'
+if &term =~# '256color'
   " Disable Background Color Erase (BCE) so that color schemes
   " work properly when Vim is used inside tmux and GNU screen.
   " See also http://snk.tuxfamily.org/log/vim-256color-bce.html
@@ -351,14 +352,14 @@ if &term =~ '256color'
 endif
 
 " " Allow color schemes to do bright colors without forcing bold
-" if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-"   set t_Co=16
-" endif
+if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+  set t_Co=16
+endif
 
 " Colors {{{1
 
 " Enable syntax highlighting
-if has('syntax') && (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
+if has('syntax') && (&t_Co > 2 || has('gui_running')) && !exists('syntax_on')
   syntax enable
 endif
 
@@ -375,7 +376,7 @@ call background#set()
 try
   " let g:solarized_termtrans = 1
   colorscheme solarized
-  call togglebg#map("<F5>")
+  call togglebg#map('<F5>')
 catch /E185:/
   colorscheme default
 endtry
@@ -454,9 +455,50 @@ noremap ; :normal n.<CR>
 " Yank from the cursor to the end of the line
 map Y y$
 
+" Visually select the whole buffer (use :% to operate on the entire file)
+" noremap <Leader>a <Esc>ggVG
+nmap gA ggVG
+
+" Vimcast #26 Bubbling text
+" Cf. settings/unimpaired.vim
+
+" Visually select the text that was last edited/pasted
+nmap gV `[v`]
+
+" Bubble single lines
+nmap <C-Up> ddkP
+nmap <C-Down> ddp
+" Bubble multiple lines
+vmap <C-Up> xkP`[V`]
+vmap <C-Down> xp`[V`]
+
+" Remap C-Left and C-Right?
+" noremap <Tab> v>
+" noremap <S-Tab> v<
+" vnoremap <Tab> >gv
+" vnoremap <S-Tab> <gv
+
+" Edit in the same directory as the current file
+" cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
+
 " Clear highlighted search results
 nnoremap <Space> :nohlsearch<CR>
 " noremap <Leader><Space> :nohlsearch<CR>
+
+" Start new undoable edit in insert mode instead of deleting all entered
+" characters in the current line
+" inoremap <C-U> <C-G>u<C-U>
+
+" Do not use arrows
+" nnoremap <up> <nop>
+" nnoremap <down> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" inoremap <up> <nop>
+" inoremap <down> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
 
 " Switch between the last two files
 nnoremap <Leader><Leader> <C-^>
@@ -491,48 +533,15 @@ noremap <Leader>W :w !sudo tee % > /dev/null<CR>
 " Edit '.vimrc' in a new split
 nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
-" Do not use arrows
-" nnoremap <up> <nop>
-" nnoremap <down> <nop>
-" nnoremap <left> <nop>
-" nnoremap <right> <nop>
-" inoremap <up> <nop>
-" inoremap <down> <nop>
-" inoremap <left> <nop>
-" inoremap <right> <nop>
+" Runtime {{{1
 
-" Visually select the whole buffer (use :% to operate on the entire file)
-" noremap <Leader>a <Esc>ggVG
-nmap gA ggVG
+" if filereadable(expand('~/.vimrc.local'))
+"   source ~/.vimrc.local
+" endif
 
-" Vimcast #26 Bubbling text
-" Cf. settings/unimpaired.vim
-
-" Visually select the text that was last edited/pasted
-nmap gV `[v`]
-
-" Bubble single lines
-nmap <C-Up> ddkP
-nmap <C-Down> ddp
-" Bubble multiple lines
-vmap <C-Up> xkP`[V`]
-vmap <C-Down> xp`[V`]
-
-" Remap C-Left and C-Right?
-" noremap <Tab> v>
-" noremap <S-Tab> v<
-" vnoremap <Tab> >gv
-" vnoremap <S-Tab> <gv
-
-" Edit in the same directory as the current file
-" cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
-cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
-
-" Local config {{{1
-
-if filereadable(expand('~/.vimrc.local'))
-  source ~/.vimrc.local
-endif
+" if has('nvim')
+"   runtime neo.vim
+" endif
 
 " 1}}}
 " vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2

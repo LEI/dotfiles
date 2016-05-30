@@ -5,9 +5,6 @@
 "let g:ctrlp_working_path_mode = 0
 "let g:ctrlp_match_window_reversed = 0
 
-" Exclude .gitignore paths
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
-
 "let g:ctrlp_buffer_func = { 'enter': 'BrightHighlightOn', 'exit':  'BrightHighlightOff', }
 "function! BrightHighlightOn()
 "  hi CursorLine ctermbg=3
@@ -27,4 +24,7 @@ if executable('ag')
 
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
+else
+  " Exclude .gitignore paths
+  let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
 endif

@@ -6,7 +6,7 @@
 " https://gist.github.com/suderman/1229444
 " https://github.com/millermedeiros/vim-statline
 
-if &cp || get(g:, 'loaded_statusline', 0)
+if &compatible || get(g:, 'loaded_statusline', 0)
   finish
 endif
 let g:loaded_statusline = 1
@@ -56,6 +56,7 @@ call extend(g:statusline.modes, {
 " Symbols {{{2
 
 " https://github.com/ryanoasis/nerd-fonts
+" TODO: sign-define?
 call extend(g:statusline.symbols, {
       \   'branch': nr2char(0xE0A0) . ' ',
       \   'key': nr2char(0x1F511) . ' ',
@@ -142,7 +143,7 @@ let g:statusline.items = {
       \     'highlight': 'WarningMsg',
       \   },
       \   'errors': {
-      \     'string': '%{exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
+      \     'string': '%{exists("*neomake#Make") ? neomake#statusline#QflistStatus("qf: ") . neomake#statusline#LoclistStatus() : exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
       \     'surround': ' ',
       \     'highlight': 'ErrorMsg',
       \   },
@@ -177,40 +178,40 @@ let g:statusline.items = {
 " Flags {{{2
 
 function! StatuslineFlags() abort
-  let flags = []
+  let l:flags = []
 
   " elseif &buftype != 'nofile' && &filetype !~ 'help\|vim-plug' " netrw, qf...
-  if &buftype == 'help'
-    call add(flags, 'H')
+  if &buftype ==# 'help'
+    call add(l:flags, 'H')
   else
     if &previewwindow
-      call add(flags, 'PRV')
+      call add(l:flags, 'PRV')
     endif
     if &readonly
-      call add(flags, 'RO')
+      call add(l:flags, 'RO')
     endif
     if &modified
-      call add(flags, '+')
+      call add(l:flags, '+')
     elseif !&modifiable
-      call add(flags, '-')
+      call add(l:flags, '-')
     endif
   endif
 
-  return join(flags, ',')
+  return join(l:flags, ',')
 endfunction
 
 " Quickfix {{{2
 
 function StatuslineQuickfix() abort
-  let title = '%f'
+  let l:title = '%f'
 
   if len(getloclist(0))
-    let title = "Location List"
+    let l:title = 'Location List'
   elseif len(getqflist())
-    let title = "Quickfix List"
+    let l:title = 'Quickfix List'
   endif
 
-  return title
+  return l:title
 endfunction
 
 " Whitespace {{{2
@@ -221,13 +222,13 @@ function! StatuslineIndent()
     if !&modifiable
       return b:statusline_indent
     endif
-    let tabs = search('^\t', 'nw') != 0
+    let l:tabs = search('^\t', 'nw') != 0
     " Find spaces that arent used as alignment in the first indent column
-    let spaces = search('^ \{' . &ts . ',}[^\t]', 'nw') != 0
-    if tabs && spaces
+    let l:spaces = search('^ \{' . &tabstop . ',}[^\t]', 'nw') != 0
+    if l:tabs && l:spaces
       " Spaces and tabs are used to indent
       let b:statusline_indent = 'mixed'
-    elseif (spaces && !&et) || (tabs && &et)
+    elseif (l:spaces && !&expandtab) || (l:tabs && &expandtab)
       " 'expandtab' option is set wrong
       let b:statusline_indent = '&et'
     endif
@@ -253,8 +254,8 @@ function! g:statusline.apply(...) abort dict
   " if !empty(&l:statusline)
   "   echom 'Existing local statusline: ' . &l:stl
   " endif
-  let items = a:0 ? get(g:statusline.states, a:1, []) : []
-  let &l:statusline = self.build(items)
+  let l:items = a:0 ? get(g:statusline.states, a:1, []) : []
+  let &l:statusline = self.build(l:items)
 endfunction
 
 function! g:statusline.active() abort dict
@@ -269,7 +270,7 @@ endfunction
 
 function! g:statusline.colors() abort dict
   " Initialize colors
-  if &background == 'dark'
+  if &background ==# 'dark'
     highlight StatusLineInsert ctermfg=0 ctermbg=2
     highlight StatusLineReplace ctermfg=0 ctermbg=9
   else
@@ -281,13 +282,13 @@ endfunction
 function! g:statusline.highlight(...) abort dict
   let l:mode = a:0 ? a:1 : ''
 
-  if l:mode == 'i'
+  if l:mode ==# 'i'
     " Insert mode
     highlight! link StatusLine StatusLineInsert
-  elseif l:mode == 'r'
+  elseif l:mode ==# 'r'
     " Replace mode
     highlight! link StatusLine StatusLineReplace
-  elseif l:mode == 'v'
+  elseif l:mode ==# 'v'
     " Virtual replace mode
     highlight! link StatusLine StatusLineReplace
   elseif strlen(l:mode) > 0
@@ -303,61 +304,61 @@ function! g:statusline.build(...) abort dict
   " echom "STL " . strftime('%H:%M:%S')
   " let stl = a:0 ? a:1 : get(b:, 'statusline', get(w:, 'statusline_map', {}))
   " call extend(stl, self.components, 'keep')
-  let line = ''
-  let items = a:0 && len(a:1) ? a:1 : g:statusline.states.default
+  let l:line = ''
+  let l:items = a:0 && len(a:1) ? a:1 : g:statusline.states.default
   " let items = a:0 && len(a:1) ? a:1 : self.default
   " let items = a:0 && len(a:1) ? a:1 : range(0, len(self.items) - 1)
-  for key in items
-    if has_key(g:statusline.items, key)
-      let item = g:statusline.items[key]
-      if type(item) == type({}) && has_key(item, 'function')
-        let item.string = {item.function}()
+  for l:key in l:items
+    if has_key(g:statusline.items, l:key)
+      let l:item = g:statusline.items[l:key]
+      if type(l:item) == type({}) && has_key(l:item, 'function')
+        let l:item.string = {l:item.function}()
       endif
-      if type(item) == type('') && strlen(item)
-        let line.= item
-      elseif type(item) == type({}) && has_key(item, 'string') && strlen(item.string)
-        let str = statusline#parse(item.string)
-        if strlen(str)
-          let str = statusline#truncate(str, get(item, 'minwidth', 0))
-          let str = statusline#surround(str, get(item, 'surround', ''))
-          let str = statusline#symbol(item, 'prefix') . str . statusline#symbol(item, 'suffix')
-          let str = statusline#wrap(str, get(item, 'wrap', 1))
-          let str = statusline#highlight(str, get(item, 'highlight', ''))
-          let line.= str
+      if type(l:item) == type('') && strlen(l:item)
+        let l:line.= l:item
+      elseif type(l:item) == type({}) && has_key(l:item, 'string') && strlen(l:item.string)
+        let l:str = statusline#parse(l:item.string)
+        if strlen(l:str)
+          let l:str = statusline#truncate(l:str, get(l:item, 'minwidth', 0))
+          let l:str = statusline#surround(l:str, get(l:item, 'surround', ''))
+          let l:str = statusline#symbol(l:item, 'prefix') . l:str . statusline#symbol(l:item, 'suffix')
+          let l:str = statusline#wrap(l:str, get(l:item, 'wrap', 1))
+          let l:str = statusline#highlight(l:str, get(l:item, 'highlight', ''))
+          let l:line.= l:str
         endif
       else
-        echoerr 'Invalid item: ' . key
+        echoerr 'Invalid item: ' . l:key
       endif
-    elseif strlen(key)
-      let line.= key
+    elseif strlen(l:key)
+      let l:line.= l:key
       continue
     else
-      echoerr 'Invalid key: ' . key
+      echoerr 'Invalid key: ' . l:key
       continue
     endif
-    unlet item
+    unlet l:item
   endfor
 
-  return line
+  return l:line
 endfunction
 
 " Format buffer name
 function! g:statusline.bufname(string) abort dict
-  let name = a:string
+  let l:name = a:string
 
-  let brackets_pattern = '\[\([^\]]\+\)\]'
+  let l:brackets_pattern = '\[\([^\]]\+\)\]'
   " __Gundo_Preview__ ...
-  let underscores_pattern = '__\(\w\+\)__'
-  if name =~ brackets_pattern
+  let l:underscores_pattern = '__\(\w\+\)__'
+  if l:name =~ l:brackets_pattern
     " Remove surrounding brackets
     " Uppercase matched string: \U\1\E
-    let name = substitute(name, brackets_pattern, '\1', '')
-  elseif name =~ underscores_pattern
-    let name = substitute(name, underscores_pattern, '\1', '')
-    let name = substitute(name, '_', ' ', 'g')
+    let l:name = substitute(l:name, l:brackets_pattern, '\1', '')
+  elseif l:name =~ l:underscores_pattern
+    let l:name = substitute(l:name, l:underscores_pattern, '\1', '')
+    let l:name = substitute(l:name, '_', ' ', 'g')
   endif
 
-  return name
+  return l:name
 endfunction
 
 " Auto Commands {{{1
@@ -384,7 +385,8 @@ augroup StatuslineType
         \ | call statusline.apply('commandline')
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
   "  QuickFixCmdPre, QuickFixCmdPost / BufReadPost quickfix
-  autocmd FileType qf call statusline.apply('quickfix')
+  " autocmd FileType qf call statusline.apply('quickfix')
+  autocmd BufReadPost quickfix call statusline.apply('quickfix')
   " Help buffer
   autocmd FileType help call statusline.apply('help')
   " Netrw
