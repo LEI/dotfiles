@@ -52,8 +52,8 @@ endfunction
 function! statusline#symbol(dict, key) abort
   let s = get(a:dict, a:key, '')
 
-  if has_key(g:statusline.states, s)
-    let s = get(g:statusline.states, s, s)
+  if has_key(g:statusline.items, s)
+    let s = get(g:statusline.items, s, s)
   else
     let s = get(g:statusline.symbols, s, s)
   endif

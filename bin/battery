@@ -36,7 +36,7 @@ setDefaults() {
   connected_color="0;37"
   connected=0
   battery_path=/sys/class/power_supply/BAT0
-  battery_format="%s%%"
+  battery_format=" %s%%"
 }
 
 setDefaults
@@ -162,9 +162,9 @@ print_status() {
 # Read args
 while getopts ":f:g:m:w:tab:p" opt; do
   case $opt in
-    f)
-      battery_format="$OPTARG"
-      ;;
+    # f)
+    #   battery_format="$OPTARG"
+    #   ;;
     g)
       good_color="$OPTARG"
       ;;

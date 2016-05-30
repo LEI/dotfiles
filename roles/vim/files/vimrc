@@ -173,11 +173,16 @@ set laststatus=2
 " if strlen(&stl) == 0
 set statusline=%!statusline#build()
 
-" Tab completion
+" Invoke completion on <Tab> in commande line mode
 set wildmenu
-" will insert tab at beginning of line,
-" will use completion if not at beginning
-set wildmode=list:longest,list:full
+
+" Complete longest common string, then each full match
+set wildmode=longest,full
+
+" Use <Left> and <Right> keys to move the cursor
+" instead of selecting a different match:
+cnoremap <Left> <Space><BS><Left>
+cnoremap <Right> <Space><BS><Right>
 
 " Height of the command bar
 set cmdheight=1

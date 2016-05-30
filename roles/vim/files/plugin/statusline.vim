@@ -165,13 +165,11 @@ let g:statusline.items = {
       \     'minwidth': 80,
       \   },
       \   'ruler': {
-      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%)%4.(%{cursor#position()}%P%)' : '',
+      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%)%4.( %P%)' : '',
       \     'surround': ' ',
       \     'minwidth': 40,
       \   },
-      \   '|': {
-      \     'string': get(g:statusline.symbols, 'separator'),
-      \   },
+      \   '|': get(g:statusline.symbols, 'separator'),
       \ }
 
 " Functions: {{{1
@@ -312,10 +310,12 @@ function! g:statusline.build(...) abort dict
   for key in items
     if has_key(g:statusline.items, key)
       let item = g:statusline.items[key]
-      if has_key(item, 'function')
+      if type(item) == type({}) && has_key(item, 'function')
         let item.string = {item.function}()
       endif
-      if has_key(item, 'string') && strlen(item.string)
+      if type(item) == type('') && strlen(item)
+        let line.= item
+      elseif type(item) == type({}) && has_key(item, 'string') && strlen(item.string)
         let str = statusline#parse(item.string)
         if strlen(str)
           let str = statusline#truncate(str, get(item, 'minwidth', 0))
