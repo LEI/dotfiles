@@ -51,6 +51,7 @@ load() {
     if [[ -d "$path" ]]; then
       load $path/*
     elif [[ -f "$path" ]]; then
+      # echo >&2 "Loaded: $path"
       source "$path"
     else
       echo >&2 "No such file or directory: $path"
