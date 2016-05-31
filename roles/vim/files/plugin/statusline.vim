@@ -329,19 +329,24 @@ function! g:statusline.build(...) abort dict
       if type(l:item) == type({}) && has_key(l:item, 'function')
         let l:item.string = {l:item.function}()
       endif
-      if type(l:item) == type('') && strlen(l:item)
-        let l:line.= l:item
-      elseif type(l:item) == type({}) && has_key(l:item, 'string') && strlen(l:item.string)
-        let l:str = statusline#parse(l:item.string)
-        if strlen(l:str)
-          let l:str = statusline#truncate(l:str, get(l:item, 'minwidth', 0))
-          let l:str = statusline#surround(l:str, get(l:item, 'surround', ''))
-          let l:str = statusline#symbol(l:item, 'prefix') . l:str . statusline#symbol(l:item, 'suffix')
-          let l:str = statusline#wrap(l:str, get(l:item, 'wrap', 1))
-          let l:str = statusline#highlight(l:str, get(l:item, 'highlight', ''))
-          let l:line.= l:str
+      if type(l:item) == type('')
+        if strlen(l:item)
+          let l:line.= l:item
+        endif
+      elseif type(l:item) == type({}) && has_key(l:item, 'string')
+        if strlen(l:item.string)
+          let l:str = statusline#parse(l:item.string)
+          if strlen(l:str)
+            let l:str = statusline#truncate(l:str, get(l:item, 'minwidth', 0))
+            let l:str = statusline#surround(l:str, get(l:item, 'surround', ''))
+            let l:str = statusline#symbol(l:item, 'prefix') . l:str . statusline#symbol(l:item, 'suffix')
+            let l:str = statusline#wrap(l:str, get(l:item, 'wrap', 1))
+            let l:str = statusline#highlight(l:str, get(l:item, 'highlight', ''))
+            let l:line.= l:str
+          endif
         endif
       else
+        " echo l:item
         echoerr 'Invalid item: ' . l:key
       endif
     elseif strlen(l:key)
