@@ -6,9 +6,10 @@
 
 ## TODO
 
+- [ ] Ansible install script
 - [ ] Bash aliases & completion: bash-doc/examples
 - [ ] Bash color escape function (fg, bg)
-- [ ] Linux install ansible bin/dot
+- [ ] Conditional lists (e.g. append packages, ignore plugin)
 - [ ] OS X (osa)scripts and Terminal settings
 - [ ] Use regex with lineinfile or ini_file module when possible
 - [ ] Xresources rxvt, xinitrc
