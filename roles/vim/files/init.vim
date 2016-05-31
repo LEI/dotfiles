@@ -275,6 +275,10 @@ let &showbreak=nr2char(0x21AA)
 " let &fillchars='vert:|,fold:-,stl:x,stlnc:y'
 
 " Show invisible character (highlighted with NonText and SpecialKey)
+" Vim: eol:$
+" Nvim: tab:>\ ,trail:-,nbsp:+
+" set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+
 set list
 let &listchars = 'tab:' . nr2char(0x25B8) . ' '
 let &listchars.= ',trail:' . nr2char(0x00B7)
@@ -533,6 +537,10 @@ noremap <Leader>W :w !sudo tee % > /dev/null<CR>
 " Edit '.vimrc' in a new split
 nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
+" Abbreviations {{{1
+
+iabbrev pyhton python
+
 " Runtime {{{1
 
 " if filereadable(expand('~/.vimrc.local'))
@@ -545,7 +553,3 @@ nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " 1}}}
 " vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
-
-if err
-
-enif

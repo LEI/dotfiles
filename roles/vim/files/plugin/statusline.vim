@@ -143,7 +143,7 @@ let g:statusline.items = {
       \     'highlight': 'WarningMsg',
       \   },
       \   'errors': {
-      \     'string': '%{exists("*neomake#Make") ? neomake#statusline#QflistStatus("qf: ") . neomake#statusline#LoclistStatus() : exists("g:loaded_syntastic_plugin") ? SyntasticStatuslineFlag() : ""}',
+      \     'string': '%{StatuslineErrors()}',
       \     'surround': ' ',
       \     'highlight': 'ErrorMsg',
       \   },
@@ -207,11 +207,26 @@ function StatuslineQuickfix() abort
 
   if len(getloclist(0))
     let l:title = 'Location List'
-  elseif len(getqflist())
+  elseif len(getqflist()) >= 0
     let l:title = 'Quickfix List'
   endif
 
   return l:title
+endfunction
+
+" Errors {{{2
+
+function StatuslineErrors() abort
+  let l:str = ''
+
+  if exists('*neomake#Make')
+    let l:str = neomake#statusline#QflistStatus('qf: ')
+    let l:str.= neomake#statusline#LoclistStatus()
+  elseif exists('g:loaded_syntastic_plugin')
+    let l:str = SyntasticStatuslineFlag()
+  endif
+
+  return l:str
 endfunction
 
 " Whitespace {{{2
@@ -384,9 +399,9 @@ augroup StatuslineType
   autocmd CmdWinEnter * let g:statusline.current_winnr = winnr()
         \ | call statusline.apply('commandline')
   autocmd CmdWinLeave * let g:statusline.current_winnr = winnr('#')
-  "  QuickFixCmdPre, QuickFixCmdPost / BufReadPost quickfix
-  " autocmd FileType qf call statusline.apply('quickfix')
-  autocmd BufReadPost quickfix call statusline.apply('quickfix')
+  "  QuickFixCmdPre, QuickFixCmdPost / BufReadPost quickfix (works in nvim)
+  " autocmd BufReadPost quickfix call statusline.apply('quickfix')
+  autocmd FileType qf call statusline.apply('quickfix')
   " Help buffer
   autocmd FileType help call statusline.apply('help')
   " Netrw

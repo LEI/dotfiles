@@ -17,7 +17,7 @@ pip_packages:
   - { name: pip, extra_args: --upgrade }
   - bashate
   - pygments
-  - vim-vint
+  # - vim-vint
 
 ruby_gems:
   - bundler
@@ -31,6 +31,7 @@ tmux_plugins:
   # - tmux-plugins/tmux-cpu
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
+
 
 vim_plugins:
   # - Shougo/dein.vim
@@ -48,11 +49,12 @@ vim_plugins:
   # - tpope/vim-tbone
   - tpope/vim-unimpaired
   - tpope/vim-vinegar
+  - airblade/vim-gitgutter
   - ctrlpvim/ctrlp.vim
   - sjl/gundo.vim
+  # - ternjs/tern_for_vim
   - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
   - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
-  - airblade/vim-gitgutter
   - scrooloose/syntastic
   # - neomake/neomake
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }

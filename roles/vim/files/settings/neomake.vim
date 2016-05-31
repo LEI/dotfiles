@@ -1,8 +1,10 @@
 " Neomake
 
+" let g:neomake_verbose = 3
+
 " Open the loclist or quickfix list when adding entries (default: 0)
 " 2: preserve the cursor position when the window is opened
-" let g:neomake_open_list = 2
+let g:neomake_open_list = 2
 
 " Height of the list opened by neomake (default: 10)
 let g:neomake_list_height = 5
@@ -30,10 +32,17 @@ augroup NeomakeCheck
   autocmd!
   " BufWinEnter / BufReadPost -> https://github.com/neomake/neomake/issues/408
   " TODO clear loclist on leave
-  autocmd BufWritePost * Neomake
+  autocmd BufWinEnter * call s:Neomake()
+  autocmd BufWritePost * call s:Neomake()
   " Hide check message on :wq
   autocmd VimLeave * let g:neomake_verbose = 0
 augroup END
+
+function! s:Neomake()
+  if exists(':Neomake')
+    Neomake
+  endif
+endfunction
 
 " autocmd BufWritePost,BufEnter * call neomake#Make(1, [], function('s:NeomakeCallback'))
 " function! s:NeomakeCallback(options)
