@@ -4,8 +4,8 @@
 pacman_packages:
   - base-devel
   - ca-certificates
-  # - the_silver_searcher # Conflicting with silver-searcher-git
-  # - ack / ag / pt?
+  # - the_silver_searcher # Conflicting with silver-searcher-git - ack / ag / pt?
+  - xclip
 
 # Arch User Repository
 yaourt_packages: []
@@ -26,6 +26,8 @@ ruby_packages:
 
 ruby_gems: []
 
-# vim_packages:
-#   - vim # clang,llvm?
-# yaourt: vim-youcompleteme-git
+vim_packages:
+  # - vim # clang,llvm?
+  # yaourt: vim-youcompleteme-git
+  - neovim
+  - python-neovim

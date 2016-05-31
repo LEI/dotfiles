@@ -15,7 +15,9 @@ npm_packages:
   # - localtunnel
 
 pip_packages:
-  - { name: pip, extra_args: --upgrade }
+  # Update pip
+  - { name: pip, extra_args: --upgrade } # Debian: sudo
+  # Python packages
   - bashate
   - pygments
   # - vim-vint
