@@ -449,6 +449,13 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+" if has('nvim')
+"  nmap <BS> <C-w>h
+" endif
+" https://github.com/neovim/neovim/issues/2048#issuecomment-78045837
+" Note: OSX terminfo maps <C-h> to backspace: kbs=^H -> kbs=\177(ascii del)
+" infocmp $TERM | sed 's/kbs=^[hH]/kbs=\\177/' > $TERM.ti
+" tic $TERM.ti
 
 " Repeat latest f, t, F or T [count] times
 noremap <Tab> ;
