@@ -1,6 +1,6 @@
 " Whitespaces
 
-" TODO count & warn?
+" TODO count & Warn()
 
 " Remove trailing whitespaces and preserve cursor position
 " exe "normal mz"

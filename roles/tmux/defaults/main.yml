@@ -1,8 +1,8 @@
 ---
 tmux_conf: yes
 tmux_directory: .tmux
+tmux_path: "$HOME/{{ tmux_directory }}"
 tmux_colors: tmux-solarized-dark
-tmux_path: "{{ dot_home }}/{{ tmux_directory }}"
 tmux_plugin_manager: yes
 tmux_plugin_manager_path: "{{ tmux_path }}/plugins"
 tmux_plugin_install: yes

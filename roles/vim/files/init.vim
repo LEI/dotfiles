@@ -544,10 +544,6 @@ noremap <Leader>W :w !sudo tee % > /dev/null<CR>
 " Edit '.vimrc' in a new split
 nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
-" Abbreviations {{{1
-
-iabbrev pyhton python
-
 " Runtime {{{1
 
 " if filereadable(expand('~/.vimrc.local'))

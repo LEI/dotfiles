@@ -8,7 +8,7 @@ source-file {{ tmux_path }}/colors/{{ tmux_colors }}.conf
 source-file {{ tmux_path }}/settings/{{ file | basename }}
 {% endfor %}
 
-# Expecting 2 digits in Tmux version output $(tmux -V | cut -d " " -f2)
+# Expecting 2 digits in version output $(tmux -V | cut -d " " -f2)
 run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digit:])"'
 
 # Load options targeting specific versions
@@ -20,7 +20,7 @@ if-shell 'test "$TMUX_VERSION_INT" -{{ compare }} "{{ version }}"' 'source-file 
 {% endfor %}
 
 # Local configuration
-if-shell '[ -f ~/.tmux.conf.local ]' 'source ~/.tmux.conf.local'
+if-shell '[[ -f ~/.tmux.conf.local ]]' 'source ~/.tmux.conf.local'
 
 # Tmux Plugin Manager
 set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ tmux_plugin_manager_path }}'

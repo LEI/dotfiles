@@ -16,7 +16,7 @@ npm_packages:
 
 pip_packages:
   # Update pip
-  - { name: pip, extra_args: --upgrade } # Debian: sudo
+  - { name: pip, extra_args: --upgrade } # TODO Debian sudo
   # Python packages
   - bashate
   - pygments
@@ -30,43 +30,67 @@ ruby_gems:
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
+
   # - nhdaly/tmux-scroll-copy-mode
   # - tmux-plugins/tmux-cpu
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
 
-
+# https://github.com/skwp/dotfiles
 vim_plugins:
   # - Shougo/dein.vim
+
+  # Appearance
   - altercation/vim-colors-solarized
+  # - Yggdroot/indentLine
+
+  # Completion
+  - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
+  - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
+
+  # Git
+  - airblade/vim-gitgutter
+  - tpope/vim-fugitive
+  # - tpope/vim-git
+
+  # Improvements
+  - AndrewRadev/splitjoin.vim
   - tpope/vim-commentary
   - tpope/vim-dispatch
   - tpope/vim-endwise
   - tpope/vim-eunuch
-  - tpope/vim-fugitive
-  # - tpope/vim-git
-  # - tpope/vim-haml
   - tpope/vim-repeat
-  - tpope/vim-sleuth
   - tpope/vim-surround
-  # - tpope/vim-tbone
   - tpope/vim-unimpaired
   - tpope/vim-vinegar
-  - airblade/vim-gitgutter
-  - ctrlpvim/ctrlp.vim
   - sjl/gundo.vim
-  # - ternjs/tern_for_vim
-  - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
-  - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
+  # - { repo: godlygeek/tabular, opts: { on: Tab } }
+
+  # Search
+  - ctrlpvim/ctrlp.vim
+  # - rking/ag.vim
+
+  # Settings
+  - tpope/vim-sleuth
+  # - editorconfig/editorconfig-vim
+
+  # Syntax
   - scrooloose/syntastic
   # - neomake/neomake
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
+  # - Glench/Vim-Jinja2-Syntax
+  # - tpope/vim-haml
   - { repo: StanAngeloff/php.vim, opts: { for: php } }
   - { repo: pangloss/vim-javascript, opts: { for: javascript } }
-  - kylef/apiblueprint.vim
+  # - ternjs/tern_for_vim
   - digitaltoad/vim-jade
+  - kylef/apiblueprint.vim
   - keith/tmux.vim
-  # - Glench/Vim-Jinja2-Syntax
-  # - editorconfig/editorconfig-vim
-  # - { repo: godlygeek/tabular, opts: { on: Tab } }
-  # - Yggdroot/indentLine
+
+  # Text objects
+  # - kana/vim-textobj-user
+  # https://github.com/skwp/dotfiles/blob/master/vim/vundles/textobjects.vundle
+
+  # Tmux
+  # - tpope/vim-tbone
+  # - christoomey/vim-tmux-navigator
