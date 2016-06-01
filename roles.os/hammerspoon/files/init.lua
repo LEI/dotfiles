@@ -39,7 +39,12 @@ hs.hints.style = "vimperator"
 hs.hotkey.bind(mash, ",", hs.hints.windowHints)
 
 hs.hotkey.bind(mash, "R", hs.reload)
-hs.hotkey.bind(mash, "C", hs.toggleConsole)
+-- hs.hotkey.bind(mash, "C", hs.toggleConsole)
+
+-- Color picker
+hs.hotkey.bind(mash, "C", function()
+    hs.osascript.applescript("choose color")
+end)
 
 -- Lock
 -- hs.hotkey.bind(hyper, "L", hs.caffeinate.startScreensaver)
