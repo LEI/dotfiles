@@ -35,9 +35,8 @@ if has('autocmd')
   filetype plugin indent on
 endif
 
-if &encoding ==# 'latin1' && has('gui_running')
-  set encoding=utf-8
-endif
+" if &encoding ==# 'latin1' && has('gui_running')?
+set encoding=utf-8
 
 if &history < 1000
   set history=1000
@@ -83,9 +82,6 @@ set complete-=i
 
 " Autocompete with dictionnary words when spell check is on
 set complete+=kspell
-
-" Always use vertical diffs
-set diffopt+=vertical
 
 " Disable octal format for number processing using CTRL-A
 set nrformats-=octal
@@ -145,6 +141,11 @@ if has('persistent_undo')
   let &undodir = g:vim_backups
   set undofile
 endif
+
+" Diff {{{1
+
+" Always use vertical diffs
+set diffopt+=vertical
 
 " Interface {{{1
 
