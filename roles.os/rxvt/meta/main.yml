@@ -4,6 +4,13 @@ dependencies:
   - role: pacman-yaourt
     pacman_yaourt_packages:
       - rxvt-unicode
+    # when: "ansible_os_family == 'Archlinux'"
+
+  # Requires X
+  # - role: packages
+  #   packages:
+  #     - rxvt-unicode
+  #   when: "os in ['Windows']"
 
   - role: symlink
     dot_roles_dir: roles.os
