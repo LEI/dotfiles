@@ -1,23 +1,37 @@
 " Whitespaces
+" http://vimcasts.org/episodes/tidying-whitespace/
 
-" TODO count & Warn()
-
-" Remove trailing whitespaces and preserve cursor position
-" exe "normal mz"
-" exe "normal `z"
-function! <SID>StripTrailingWhitespaces()
-  let line = line('.')
-  let col = col('.')
-
-  %s/\s\+$//e
-
-  call cursor(line, col)
+function! Preserve(command)
+  " Preparation: save last search, and cursor position
+  let _s=@/
+  let l = line(".")
+  let c = col(".")
+  " Do the business
+  execute a:command
+  " Clean up: restore previous search history and cursor position
+  let @/=_s
+  call cursor(l, c)
 endfunction
 
-augroup RemoveWitespace
+" nmap _$ :call Preserve("%s/\\s\\+$//e")<CR>
+" nmap _= :call Preserve("normal gg=G")<CR>
+
+augroup Witespaces
   autocmd!
-  autocmd BufWritePre * call <SID>StripTrailingWhitespaces()
+  autocmd BufWritePre *.js,*.php,*.py call Preserve("%s/\\s\\+$//e")<CR>
 augroup END
+
+" TODO count & Warn() trailing?
+" exe "normal mz"
+" exe "normal `z"
+" function! <SID>StripTrailingWhitespaces()
+"   let line = line('.')
+"   let col = col('.')
+
+"   %s/\s\+$//e
+
+"   call cursor(line, col)
+" endfunction
 
 " Highlight trailing witespaces in red
 " highlight ExtraWhitespace ctermbg=red guibg=red
