@@ -70,12 +70,7 @@ set clipboard=unnamed
 if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
 endif
-
-" Use one space, not two, after punctuation
-" set nojoinspaces
-
-" set binary
-" set noeol
+" TODO fo+=t when wrap is on (after ft)
 
 " Do not scan included files (ctags?)
 set complete-=i
@@ -86,7 +81,7 @@ set complete+=kspell
 " Disable octal format for number processing using CTRL-A
 set nrformats-=octal
 
-" Keep the cursor one the same column if possible
+" Keep the cursor on the same column if possible
 set nostartofline
 
 " Modified buffers can persist in the background
@@ -95,16 +90,22 @@ set hidden
 " Don't redraw while executing macros
 set lazyredraw
 
+" Allow setting some options at the beginning and end of the file
+set modeline
+" Number of lines checked for set commands
+set modelines=2
+
 " Escape fix?
 set timeout
 set timeoutlen=1000
 " set ttimeout
 set ttimeoutlen=10
 
-" Allow setting some options at the beginning and end of the file
-set modeline
-" Number of lines checked for set commands
-set modelines=2
+" Use one space, not two, after punctuation
+" set nojoinspaces
+
+" set binary
+" set noeol
 
 " Enable per-directory '.vimrc' file
 set exrc
