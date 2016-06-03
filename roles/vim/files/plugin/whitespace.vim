@@ -13,8 +13,8 @@ function! Preserve(command)
   call cursor(l, c)
 endfunction
 
-" nmap _$ :call Preserve("%s/\\s\\+$//e")<CR>
-" nmap _= :call Preserve("normal gg=G")<CR>
+nmap _$ :call Preserve("%s/\\s\\+$//e")<CR>
+nmap _= :call Preserve("normal gg=G")<CR>
 
 augroup Witespaces
   autocmd!
