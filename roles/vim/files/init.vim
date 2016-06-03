@@ -261,16 +261,12 @@ set smartindent
 " Make <Tab> insert indents instead of tabs at the beginning of a line
 set smarttab
 
-" Don't wrap lines by default (see ftplugin)
+" Don't wrap lines by default (changed in ftplugin)
 set nowrap
-
-" Break lines at convenient points (soft wrap)
-set linebreak
-
 " set textwidth=79
 
-" Show line breaks (0x08627)
-let &showbreak=nr2char(0x21AA)
+" Show line breaks (arrows: 0x21AA or 0x08627)
+let &showbreak = nr2char(0x2026) " Ellipsis
 
 " set fillchars+=stl:\ ,stlnc:\
 " let &fillchars='vert:|,fold:-,stl:x,stlnc:y'
@@ -429,7 +425,7 @@ endtry
 
 " Commands {{{1
 
-" Enable soft wrap with ':Wrap'
+" Enable soft wrap (break lines without breaking words)
 command! -nargs=* Wrap setlocal wrap linebreak nolist
 
 " Quick spell lang switch
