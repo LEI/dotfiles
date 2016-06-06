@@ -13,7 +13,8 @@
 - [ ] OS X (osa)scripts and Terminal settings
 - [ ] Use regex with lineinfile or ini_file module when possible
 - [ ] Xresources rxvt, xinitrc
-- [ ] npm: editorconfig, tern-project?
+- [ ] npm role files: editorconfig, tern-project?
+- [ ] [PGP/GPG](https://github.com/drduh/OS-X-Security-and-Privacy-Guide#pgpgpg)
 - [ ] vim before/after, YCM arch, MarkMargin
 - [ ] virtualenv, nvm, rvm/rbenv...
 

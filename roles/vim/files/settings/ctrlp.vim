@@ -14,12 +14,14 @@
 "  hi CursorLine ctermbg=10
 "endfunction
 
-" Use The Silver Searcher in CtrlP
 " https://github.com/ggreer/the_silver_searcher
 " https://github.com/thoughtbot/dotfiles/blob/master/vimrc
 if executable('ag')
-  let g:ctrlp_user_command = 'ag -Q -l --nocolor --hidden -g "" %s'
-
+  " Use The Silver Searcher in CtrlP for listing files, fast and respects
+  " .gitignore and .agignore, ignores hidden files by default
+  let g:ctrlp_user_command = 'ag --nogroup --nocolor --files-with-matches --hidden --ignore .git -g "" --literal %s'
+  " --ignore-case
+  " Disable per-session caching
   let g:ctrlp_use_caching = 0
 else
   " Exclude .gitignore paths

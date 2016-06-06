@@ -50,7 +50,7 @@ homebrew_packages:
 cask_apps:
   # - bettertouchtool
   # - dropbox
-  - firefox
+  - firefox # https://github.com/TheCreeper/PrivacyFox
   - font-hack
   - google-chrome
   - little-snitch
@@ -144,6 +144,12 @@ osx_defaults:
 
   # Disable the sound effects on boot
   # sudo nvram SystemAudioVolume=" "
+
+  # https://github.com/drduh/OS-X-Security-and-Privacy-Guide
+  SystemConfiguration:
+
+    # Captive portal
+    Active: {domain: /Library/Preferences/SystemConfiguration/com.apple.captive.control, type: bool, value: true}
 
   # # SSD Tweaks ############################################################
 

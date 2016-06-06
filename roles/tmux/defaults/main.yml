@@ -1,17 +1,19 @@
 ---
+# Configuration
 tmux_conf: yes
 tmux_directory: .tmux
 tmux_path: "$HOME/{{ tmux_directory }}"
 tmux_colors: tmux-solarized-dark
-tmux_plugin_manager: yes
-tmux_plugin_manager_path: "{{ tmux_path }}/plugins"
-tmux_plugin_install: yes
 
+# Plugins
+tmux_plugin_manager_path: "{{ dot_home }}/{{ tmux_directory }}/plugins"
+tmux_plugin_manager: yes
+tmux_plugin_install: yes
+tmux_plugins: []
 # set -g @plugin 'tmux-plugins/tmux-sensible'
 # set -g @plugin 'github_username/plugin_name'
 # set -g @plugin 'git@github.com/user/plugin'
 # set -g @plugin 'git@bitbucket.com/user/plugin'
-tmux_plugins: []
 
 # Y U NO {{ !role_path }}
 tmux_role_path: ../roles/tmux
