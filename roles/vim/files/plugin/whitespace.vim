@@ -1,8 +1,11 @@
 " Whitespaces
 " http://vimcasts.org/episodes/tidying-whitespace/
+" https://github.com/bronson/vim-trailing-whitespace
 
+" Error detected while processing BufWritePre Auto commands for "*.js":
+" E488: Trailing characters
 function! Preserve(command)
-  " Preparation: save last search, and cursor position
+  " Save last search and cursor position
   let _s=@/
   let l = line(".")
   let c = col(".")
@@ -18,7 +21,7 @@ nmap _= :call Preserve("normal gg=G")<CR>
 
 augroup Witespaces
   autocmd!
-  autocmd BufWritePre *.js,*.php,*.py call Preserve("%s/\\s\\+$//e")<CR>
+  autocmd BufWritePre *.js,*.php,*.py call Preserve("%s/\\s\\+$//e")
 augroup END
 
 " TODO count & Warn() trailing?
