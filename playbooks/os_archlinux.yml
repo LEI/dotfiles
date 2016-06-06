@@ -20,6 +20,6 @@
       tags: [yaourt]
       pacman_yaourt_packages: "{{ yaourt_packages }}"
 
-    # Install and configure rxvt
+    # Install rxvt-unicode and symlink ~/.Xresources
     - role: rxvt
       tags: [rxvt, terminal]

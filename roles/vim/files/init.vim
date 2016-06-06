@@ -35,9 +35,8 @@ if has('autocmd')
   filetype plugin indent on
 endif
 
-if &encoding ==# 'latin1' && has('gui_running')
-  set encoding=utf-8
-endif
+" if &encoding ==# 'latin1' && has('gui_running')?
+set encoding=utf-8
 
 if &history < 1000
   set history=1000
@@ -71,12 +70,7 @@ set clipboard=unnamed
 if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
 endif
-
-" Use one space, not two, after punctuation
-" set nojoinspaces
-
-" set binary
-" set noeol
+" TODO fo+=t when wrap is on (after ft)
 
 " Do not scan included files (ctags?)
 set complete-=i
@@ -84,13 +78,10 @@ set complete-=i
 " Autocompete with dictionnary words when spell check is on
 set complete+=kspell
 
-" Always use vertical diffs
-set diffopt+=vertical
-
 " Disable octal format for number processing using CTRL-A
 set nrformats-=octal
 
-" Keep the cursor one the same column if possible
+" Keep the cursor on the same column if possible
 set nostartofline
 
 " Modified buffers can persist in the background
@@ -99,16 +90,22 @@ set hidden
 " Don't redraw while executing macros
 set lazyredraw
 
+" Allow setting some options at the beginning and end of the file
+set modeline
+" Number of lines checked for set commands
+set modelines=2
+
 " Escape fix?
 set timeout
 set timeoutlen=1000
 " set ttimeout
 set ttimeoutlen=10
 
-" Allow setting some options at the beginning and end of the file
-set modeline
-" Number of lines checked for set commands
-set modelines=2
+" Use one space, not two, after punctuation
+" set nojoinspaces
+
+" set binary
+" set noeol
 
 " Enable per-directory '.vimrc' file
 set exrc
@@ -145,6 +142,11 @@ if has('persistent_undo')
   let &undodir = g:vim_backups
   set undofile
 endif
+
+" Diff {{{1
+
+" Always use vertical diffs
+set diffopt+=vertical
 
 " Interface {{{1
 
@@ -260,16 +262,12 @@ set smartindent
 " Make <Tab> insert indents instead of tabs at the beginning of a line
 set smarttab
 
-" Don't wrap lines by default (see ftplugin)
+" Don't wrap lines by default (changed in ftplugin)
 set nowrap
-
-" Break lines at convenient points (soft wrap)
-set linebreak
-
 " set textwidth=79
 
-" Show line breaks (0x08627)
-let &showbreak=nr2char(0x21AA)
+" Show line breaks (arrows: 0x21AA or 0x08627)
+let &showbreak = nr2char(0x2026) " Ellipsis
 
 " set fillchars+=stl:\ ,stlnc:\
 " let &fillchars='vert:|,fold:-,stl:x,stlnc:y'
@@ -428,7 +426,7 @@ endtry
 
 " Commands {{{1
 
-" Enable soft wrap with ':Wrap'
+" Enable soft wrap (break lines without breaking words)
 command! -nargs=* Wrap setlocal wrap linebreak nolist
 
 " Quick spell lang switch

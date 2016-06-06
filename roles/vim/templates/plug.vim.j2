@@ -17,8 +17,6 @@ function! YCMInstall(info)
   endif
 endfunction
 
-" autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
-
 call plug#begin('{{ vim_plugin_path }}')
 {% macro plug(plugin) -%}
 Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
@@ -32,23 +30,29 @@ Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | reg
 " Add plugins to &runtimepath
 call plug#end()
 
-" function! YCMEnable()
-"   if !exists('g:loaded_youcompleteme')
-"     call plug#load('YouCompleteMe')
-"   endif
-"   if exists('g:loaded_youcompleteme')
-"     call youcompleteme#Enable()
-"   endif
-" endfunction
+" autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
+" command! YCM call YCMEnable()
+function! YCMEnable()
+  if !exists('g:loaded_youcompleteme')
+    call plug#load('YouCompleteMe')
+  endif
+  if exists('g:loaded_youcompleteme')
+    call youcompleteme#Enable()
+  endif
+endfunction
 
-" function! SyntasticEnable()
-"   if !exists('g:loaded_syntastic_plugin')
-"     call plug#load('syntastic')
-"   endif
-" endfunction
+function! SyntasticEnable()
+  if !exists('g:loaded_syntastic_plugin')
+    call plug#load('syntastic')
+  endif
+endfunction
 
-" augroup VimPlug
-"   autocmd!
-"   autocmd VimEnter * call LoadPlug() | autocmd! VimPlug
-" augroup END
+function! s:VimPlug()
+  call YCMEnable()
+  call SyntasticEnable()
+endfunction
 
+augroup VimPlug
+  autocmd!
+  autocmd VimEnter * redrawstatus | call s:VimPlug() | autocmd! VimPlug
+augroup END

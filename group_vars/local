@@ -26,11 +26,10 @@ ruby_gems:
   - bundler
   # - compass
 
-  # TODO MacOSX reattach to user namespace (pbcopy)
+# MacOSX reattach to user namespace (pbcopy) / xclip
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
-
   # - nhdaly/tmux-scroll-copy-mode
   # - tmux-plugins/tmux-cpu
   # - tmux-plugins/tmux-battery
@@ -45,8 +44,14 @@ vim_plugins:
   # - Yggdroot/indentLine
 
   # Completion
-  - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall') } }
+  - { repo: Valloric/YouCompleteMe, opts: { do: function('YCMInstall'), "on": [] } }
   - { repo: SirVer/ultisnips, plug: ['honza/vim-snippets'] }
+  # opts: { "on": [] }
+  # augroup LoadYCM
+  #   autocmd!
+  #   autocmd VimEnter * call plug#load('YouCompleteMe', 'ultisnips')
+  #                      \| call youcompleteme#Enable() | autocmd! LoadYCM
+  # augroup END
 
   # Git
   - airblade/vim-gitgutter
@@ -75,7 +80,7 @@ vim_plugins:
   # - editorconfig/editorconfig-vim
 
   # Syntax
-  - scrooloose/syntastic
+  - { repo: scrooloose/syntastic, opts: { "on": [] } }
   # - neomake/neomake
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
   # - Glench/Vim-Jinja2-Syntax
