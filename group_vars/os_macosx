@@ -12,12 +12,13 @@ homebrew_taps:
 
 homebrew_packages:
   - bash
-  # - bash-completion2?
+  - bash-completion # 2?
   - cmake
   # - ctags
   - coreutils
   - { name: curl, install_options: ['with-openssl'] }
   - diffutils # gnu-diff gnu-indent gnu-tar gnu-which...
+  # - duti # Default file handlers manager
   - { name: findutils, install_options: ['with-default-names'] }
   - { name: gnu-sed, install_options: ['with-default-names'] }
   - gnutls
@@ -27,7 +28,7 @@ homebrew_packages:
   # - gzip
   - { name: imagemagick, install_options: ['with-webp'] }
   # - less
-  - lua
+  - lua # with-completion
   - luajit
   # - lynx
   - moreutils
@@ -42,15 +43,19 @@ homebrew_packages:
   # - ssh-copy-id
   - the_silver_searcher
   - tree
-  # - upzip
+  # - unzip
   # - watch
   - wget
+  # - wireshark
   - youtube-dl
 
+# FF
+# https://github.com/TheCreeper/PrivacyFox
+# https://b.agilob.net/better-security-privacy-and-anonymity-in-firefox
 cask_apps:
   # - bettertouchtool
   # - dropbox
-  - firefox # https://github.com/TheCreeper/PrivacyFox
+  - firefox
   - font-hack
   - google-chrome
   - little-snitch

@@ -1,3 +1,9 @@
+Host *
+  PasswordAuthentication no
+  ChallengeResponseAuthentication no
+  HashKnownHosts yes
+  UseRoaming no
+
 {% for item in ssh_config %}
 Host {{ item.name }}
   HostName {{ item.host }}
