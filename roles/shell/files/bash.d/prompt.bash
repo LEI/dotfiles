@@ -88,6 +88,15 @@ __prompt_string() {
 }
 
 __prompt_git() {
+  local exit=$?
+  local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
+    --is-bare-repository --is-inside-work-tree \
+    --short HEAD 2>/dev/null)"
+  local rev_parse_exit="$?"
+  if [[ -z "$repo_info" ]]; then
+    return $exit
+  fi
+
   local file line branch_line dirty=0
   while IFS= read -r -d '' line; do
     file=${line:0:2}
@@ -111,6 +120,19 @@ __prompt_git() {
   else
     branch_color="green"
   fi
+
+  local behind ahead var pattern
+  for var in {ahead,behind}; do
+    pattern='(\[|[[:space:]])'${var}'[[:space:]]+([[:digit:]])(,|\])'
+    if [[ "$branch_line" =~ $pattern ]]; then
+      if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
+        # ${!var}="${BASH_REMATCH[2]}"
+        declare "${var}"="${BASH_REMATCH[2]}"
+      fi
+    fi
+  done
+  [[ -n "$behind" ]] && flag+="<"
+  [[ -n "$ahead" ]] && flag+=">"
 
   local printf_format=" on %s%s"
   printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}"
