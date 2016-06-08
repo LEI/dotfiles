@@ -1,6 +1,9 @@
 # https://github.com/necolas/dotfiles
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_prompt
 # https://github.com/demure/dotfiles/blob/master/subbash/prompt
+# https://wiki.archlinux.org/index.php/Bash/Prompt_customization
+# https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
+# https://github.com/magicmonty/bash-git-prompt/blob/master/gitstatus.sh
 
 __prompt_command() {
   local exit=$?
@@ -72,7 +75,8 @@ __prompt_string() {
   p+='\[${reset}\]'
 
   # Git status
-  p+='$(__prompt_git " on " "%s" "\[${white}\]%s\[${reset}\]")'
+  # p+='$(__prompt_git " on " "%s" "\[${white}\]%s\[${reset}\]")'
+  p+='$(__prompt_git)'
 
   p+='\n'
 
@@ -83,10 +87,52 @@ __prompt_string() {
   printf "%s" "$p"
 }
 
-# https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
-# https://github.com/magicmonty/bash-git-prompt/blob/master/gitstatus.sh
-# https://wiki.archlinux.org/index.php/Bash/Prompt_customization
 __prompt_git() {
+  local file line branch_line dirty=0
+  while IFS= read -r -d '' line; do
+    file=${line:0:2}
+    case $file in
+      \#\#) branch_line="${line#\#\# }" ;;
+      *) ((dirty++)) ;;
+    esac
+  done < <(git status -z --porcelain --branch) 2>/dev/null
+
+  local branch="${branch_line%\.\.\.*}"
+  branch="${branch##* }"
+
+  local flag branch_color
+  if [[ "$dirty" -gt 0 ]]; then
+    flag="*"
+    if [[ "$branch" == "master" ]]; then
+      branch_color="red"
+    else
+      branch_color="orange"
+    fi
+  else
+    branch_color="green"
+  fi
+
+  local printf_format=" on %s%s"
+  printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}"
+}
+
+# p+='$([[ -n $(git branch 2> /dev/null) ]] && echo " on ")\[${white}\]$(parse_git_branch)\[${reset}\]'
+# parse_git_dirty() {
+#   [[ $(git status 2> /dev/null | tail -n1) != *"working directory clean"* ]] && echo "*"
+# }
+# parse_git_branch() {
+#   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+# }
+
+# PROMPT_SYMBOL_DIRTY="✘"
+# PROMPT_SYMBOL_CLEAN="✔"
+# PROMPT_SYMBOL_ADDED="✚"
+# PROMPT_SYMBOL_MODIFIED="✹"
+# PROMPT_SYMBOL_DELETED="✖"
+# PROMPT_SYMBOL_RENAMED="➜"
+# PROMPT_SYMBOL_UNMERGED="═"
+# PROMPT_SYMBOL_UNTRACKED="✭"
+custom_prompt_git() {
   local exit=$?
   local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
     --is-bare-repository --is-inside-work-tree \
