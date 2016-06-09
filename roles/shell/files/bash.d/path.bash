@@ -30,3 +30,8 @@ if hash ruby 2>/dev/null; then
   GEM_HOME="$(ruby -e 'print Gem.user_dir')"
   pathmunge "$GEM_HOME/bin" after
 fi
+
+if hash go 2>/dev/null; then
+  export GOPATH="$HOME/go"
+  pathmunge "$GOPATH/bin" after
+fi
