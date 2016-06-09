@@ -380,7 +380,8 @@ try
   colorscheme solarized
   call togglebg#map('<F5>')
 catch /E185:/
-  colorscheme default
+  " Default color scheme
+  colorscheme desert
 endtry
 
 " Hide line number background

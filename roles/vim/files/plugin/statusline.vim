@@ -73,11 +73,11 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', 'branch', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
+      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'branch', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
-      \ 'netrw': ['branch', '%<', 'file', '%=', 'netrw', 'ruler'],
+      \ 'netrw': ['%<', 'file', 'branch', '%=', 'netrw', 'ruler'],
       \ 'gundo': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'plug': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'scratch': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
@@ -111,12 +111,6 @@ let g:statusline.items = {
       \     'suffix': '|',
       \     'minwidth': 20,
       \   },
-      \   'branch': {
-      \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
-      \     'surround': ' ',
-      \     'suffix': '|',
-      \     'minwidth': 60,
-      \   },
       \   'buffer': {
       \     'string': '%{g:statusline.bufname(expand("%"))}',
       \     'surround': ' ',
@@ -131,11 +125,16 @@ let g:statusline.items = {
       \   },
       \   'file': {
       \     'string': '%f',
-      \     'prefix': ' ',
+      \     'surround': ' ',
+      \   },
+      \   'branch': {
+      \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
+      \     'surround': '[',
+      \     'minwidth': 60,
       \   },
       \   'flags': {
       \     'string': '%{StatuslineFlags()}',
-      \     'surround': [' [', ']'],
+      \     'surround': '[',
       \   },
       \   'warnings': {
       \     'string': '%{StatuslineIndent()}%{StatuslineTrailing()}',

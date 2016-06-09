@@ -40,10 +40,11 @@ __prompt_string() {
   p+='\[\e]2;\w\a\]'
 
   # Right align the time
+  # p+='\[$(tput sc; __prompt_right "\t"; tput rc)\]'
+
   # printf "%*(%T)T\r" "$width"
   # p+='\[$(tput sc; printf "%*s\r" "$width" "$(date +%T)"; tput rc)\]'
   # p+='\[$(tput sc; printf "%*s" "$width" "\t"; tput rc)\]'
-  # p+='\[$(tput sc; __prompt_right "\t"; tput rc)\]'
 
   # Highlight the user when logged in as root
   if [[ "${USER}" = "root" ]]; then
@@ -134,7 +135,7 @@ __prompt_git() {
   [[ -n "$behind" ]] && flag+="<"
   [[ -n "$ahead" ]] && flag+=">"
 
-  local printf_format=" on %s%s"
+  local printf_format="${1:- on %s%s}"
   printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}"
 }
 
