@@ -132,11 +132,13 @@ __prompt_git() {
       fi
     fi
   done
-  [[ -n "$behind" ]] && flag+="<"
-  [[ -n "$ahead" ]] && flag+=">"
+
+  local diff=
+  [[ -n "$behind" ]] && diff+="<"
+  [[ -n "$ahead" ]] && diff+=">"
 
   local printf_format="${1:- on %s%s}"
-  printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}"
+  printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}$diff"
 }
 
 # p+='$([[ -n $(git branch 2> /dev/null) ]] && echo " on ")\[${white}\]$(parse_git_branch)\[${reset}\]'
