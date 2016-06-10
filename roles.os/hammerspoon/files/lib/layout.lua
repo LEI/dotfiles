@@ -17,6 +17,7 @@ function applyWindowLayout()
         -- {"Finder", nil, screens[1]:name(), hs.layout.center, nil, nil},
         {"Terminal", nil, screens[1]:name(), nil, nil, screens[1]:fullFrame()},
         {"Google Chrome", nil, screens[2]:name(), hs.layout.maximized, nil, nil},
+        {"Google Chrome", "Postman", screens[2]:name(), hs.layout.center, nil, nil},
         {"Firefox", nil, screens[2]:name(), hs.layout.maximized, nil, nil},
         {"Sequel Pro", nil, screens[2]:name(), hs.layout.center, nil, nil},
         {"Skype", nil, screens[2]:name(), hs.layout.left50, nil, nil },
