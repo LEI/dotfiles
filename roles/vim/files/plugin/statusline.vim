@@ -77,7 +77,7 @@ call extend(g:statusline.states, {
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
-      \ 'netrw': ['%<', 'file', 'branch', '%=', 'netrw', 'ruler'],
+      \ 'netrw': ['filetype', '%<', 'file', 'branch', '%=', 'netrw', 'ruler'],
       \ 'gundo': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'plug': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'scratch': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
