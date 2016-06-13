@@ -98,29 +98,20 @@ __prompt_git() {
     return $exit
   fi
 
-  local file line branch_line dirty=0
+  local file line branch_line count=0
   while IFS= read -r -d '' line; do
     file=${line:0:2}
     case $file in
       \#\#) branch_line="${line#\#\# }" ;;
-      *) ((dirty++)) ;;
+      *) ((count++)) ;;
+      # ?M) ((changed++)) ;;
+      # ?A) ((added++)) ;;
+      # ?D) ((deleted++)) ;;
+      # U?) ((updated++)) ;;
+      # \?\?) ((untracked++)) ;;
+      # *) ((staged++)) ;;
     esac
   done < <(git status -z --porcelain --branch) 2>/dev/null
-
-  local branch="${branch_line%\.\.\.*}"
-  branch="${branch##* }"
-
-  local flag branch_color
-  if [[ "$dirty" -gt 0 ]]; then
-    flag="*"
-    if [[ "$branch" == "master" ]]; then
-      branch_color="red"
-    else
-      branch_color="orange"
-    fi
-  else
-    branch_color="green"
-  fi
 
   local behind ahead var pattern
   for var in {ahead,behind}; do
@@ -136,6 +127,23 @@ __prompt_git() {
   local diff=
   [[ -n "$behind" ]] && diff+="<"
   [[ -n "$ahead" ]] && diff+=">"
+
+  local branch="${branch_line%\.\.\.*}"
+  branch="${branch##* }"
+
+  local flag branch_color
+  if [[ "$count" -gt 0 ]]; then
+    flag="*"
+    if [[ "$branch" == "master" ]]; then
+      branch_color="red"
+    else
+      branch_color="orange"
+    fi
+  elif [[ -n "$ahead" ]] || [[ -n "$behind" ]]; then
+    branch_color="yellow"
+  else
+    branch_color="green"
+  fi
 
   local printf_format="${1:- on %s%s}"
   printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}$diff"
@@ -157,7 +165,7 @@ __prompt_git() {
 # PROMPT_SYMBOL_RENAMED="➜"
 # PROMPT_SYMBOL_UNMERGED="═"
 # PROMPT_SYMBOL_UNTRACKED="✭"
-custom_prompt_git() {
+___prompt_git() {
   local exit=$?
   local repo_info="$(git rev-parse --git-dir --is-inside-git-dir \
     --is-bare-repository --is-inside-work-tree \
