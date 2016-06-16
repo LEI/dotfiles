@@ -35,8 +35,9 @@ if has('autocmd')
   filetype plugin indent on
 endif
 
-" if &encoding ==# 'latin1' && has('gui_running')?
-set encoding=utf-8
+if &encoding ==# 'latin1' && has('gui_running')
+  set encoding=utf-8
+endif
 
 if &history < 1000
   set history=1000
@@ -191,7 +192,7 @@ cnoremap <Left> <Space><BS><Left>
 cnoremap <Right> <Space><BS><Right>
 
 " Height of the command bar
-set cmdheight=1
+set cmdheight=2
 
 " Display current mode
 set noshowmode
