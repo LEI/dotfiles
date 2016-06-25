@@ -1,9 +1,5 @@
 ---
-- name: "{{ item.key }}"
-  set_fact:
-    app: "{{ item }}"
-
-- name: "Write {{ item.key }} defaults"
+- name: "Write {{ app.key }} defaults"
   osx_defaults:
     key: "{{ item.key }}" # Required
     domain: "{{ item.value.domain | default(omit) }}" # Default: NSGlobalDomain

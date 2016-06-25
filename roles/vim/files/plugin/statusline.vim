@@ -6,9 +6,9 @@
 " https://gist.github.com/suderman/1229444
 " https://github.com/millermedeiros/vim-statline
 
-if &compatible || get(g:, 'loaded_statusline', 0)
-  finish
-endif
+" if &compatible || get(g:, 'loaded_statusline', 0)
+"   finish
+" endif
 let g:loaded_statusline = 1
 
 " Variables: {{{1
@@ -73,11 +73,11 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'branch', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
+      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'flags', '%=', 'branch', 'filetype', 'ruler', 'warnings', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
-      \ 'netrw': ['filetype', '%<', 'file', 'branch', '%=', 'netrw', 'ruler'],
+      \ 'netrw': ['filetype', '%<', 'file', '%=', 'branch', 'netrw', 'ruler'],
       \ 'gundo': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'plug': ['buffer', '%=', 'filetype', 'ruler'],
       \ 'scratch': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
@@ -129,7 +129,8 @@ let g:statusline.items = {
       \   },
       \   'branch': {
       \     'string': '%{exists("*fugitive#head") ? fugitive#head(7) : ""}',
-      \     'surround': '[',
+      \     'surround': ' ',
+      \     'suffix': '|',
       \     'minwidth': 60,
       \   },
       \   'flags': {

@@ -42,7 +42,7 @@ ansible_vault() {
 }
 
 ansible_install() {
-  local os=$(uname -o)
+  local os=$(uname -s) # -o Cygwin?
 
   case $os in
     Darwin)
@@ -99,7 +99,7 @@ ansible_install() {
     fi
 
     # Install ansible, cryptography and their dependencies
-    su_do pip install -r "$DOT_REQUIREMENTS/pip.txt"
+    su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
   fi
 }
 

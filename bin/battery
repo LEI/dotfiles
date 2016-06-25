@@ -96,15 +96,15 @@ battery_charge() {
 # Apply the correct color to the battery status prompt
 apply_colors() {
 
-#   if ((BATT_CONNECTED)); then
-#     if ((output_tmux)); then
-#       COLOR="#[fg=$connected_color]"
-#     else
-#       COLOR=$connected_color
-#     fi
+  if ((BATT_CONNECTED)); then
+    if ((output_tmux)); then
+      COLOR="#[fg=$connected_color]"
+    else
+      COLOR="$connected_color"
+    fi
 
   # Green
-  if [[ $BATT_PCT -ge 75 ]]; then
+  elif [[ $BATT_PCT -ge 75 ]]; then
     if ((output_tmux)); then
       COLOR="#[fg=$good_color]"
     else
@@ -179,7 +179,7 @@ while getopts ":f:g:m:w:tab:p" opt; do
       good_color="green"
       middle_color="yellow"
       warn_color="red"
-      connected_color="white"
+      connected_color="none" # white
       ;;
     a)
       ascii=1

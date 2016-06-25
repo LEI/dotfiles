@@ -95,6 +95,7 @@ ruby_packages:
   - ruby
 
 vim_packages:
+  # neovim (tap neovim/neovim)
   - name: vim
     # Homebrew install options
     install_options:
@@ -622,7 +623,8 @@ osx_defaults:
     FindOnPageMatchesWordStartsOnly: {domain: com.apple.Safari, type: bool, value: false}
 
     # Remove useless icons from Safari's bookmarks bar
-    ProxiesInBookmarksBar: {domain: com.apple.Safari, type: array, value: []}
+    # FIXME: Expected value to be an array?
+    #ProxiesInBookmarksBar: {domain: com.apple.Safari, type: array, value: []}
 
     # Enable the Develop menu and the Web Inspector in Safari
     IncludeDevelopMenu: {domain: com.apple.Safari, type: bool, value: true}
@@ -709,7 +711,8 @@ osx_defaults:
   Terminal:
 
     # Only use UTF-8 in Terminal.app
-    StringEncodings: {domain: com.apple.terminal, type: array, value: ["4"]}
+    # FIXME: Expected value to be an array?
+    #StringEncodings: {domain: com.apple.terminal, type: array, value: ["4"]}
 
     # Enable "focus follows mouse" for Terminal.app and all X11 apps
     # i.e. hover over a window and start typing in it without clicking first
