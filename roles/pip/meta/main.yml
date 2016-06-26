@@ -1,0 +1,7 @@
+---
+dependencies:
+
+  - role: package
+    packages:
+      - python-pip
+    when: "ansible_os_family in ['Archlinux']"
