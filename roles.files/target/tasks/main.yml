@@ -1,4 +1,6 @@
 ---
+# TODO check destination directory exists
+
 - name: "Initialize facts"
   set_fact:
     # Parsed dict
