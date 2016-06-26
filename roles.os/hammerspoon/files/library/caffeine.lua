@@ -1,15 +1,15 @@
 -- Caffeine
--- github.com/cmsj/hammerspoon-config/blob/master/init.lua
+-- https://github.com/cmsj/hammerspoon-config/blob/master/init.lua
+-- http://jimmygreen.deviantart.com/art/Retina-Caffeine-menubar-icons-350451587
 
 local caffeine = hs.menubar.new()
 
 function setCaffeineDisplay(state)
-    local result
+    local icon = "caffeinIcon"
     if state then
-        caffeine:setIcon("img/caffeine-on.pdf")
-    else
-        caffeine:setIcon("img/caffeine-off.pdf")
+        icon = icon .. "Active"
     end
+    caffeine:setIcon("resources/" .. icon .. ".tiff")
 end
 
 function caffeineClicked()

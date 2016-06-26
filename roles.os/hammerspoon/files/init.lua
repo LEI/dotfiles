@@ -13,18 +13,18 @@ hs.window.animationDuration = 0
 -- local hostname = hs.host.localizedName()
 
 -- Core
-require "lib/utils"
-require "lib/autoreload"
-require "lib/window"
-require "lib/layout"
-require "lib/grid"
+require "library/utils"
+require "library/autoreload"
+require "library/window"
+require "library/layout"
+require "library/grid"
 
 -- Menubar
-require "lib/caffeine"
-require "lib/volumes" -- image:setSize!
+require "library/caffeine"
+require "library/volumes" -- image:setSize!
 
 -- Applications
-require "lib/redshift"
+require "library/redshift"
 
 -- Bindings
 -- github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/window.lua
