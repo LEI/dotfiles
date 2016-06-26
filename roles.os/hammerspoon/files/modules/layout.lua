@@ -2,17 +2,16 @@
 
 hs.layout.center = {0.1, 0.1, 0.8, 0.8}
 
-local lastCount = nil
-function applyWindowLayout()
+local function applyWindowLayout()
     local screens = hs.screen.allScreens()
-    local count = #screens
 
-    if count ~= lastCount then
-        if count == 1 then
+    if #screens ~= lastCount then
+        if #screens == 1 then
             screens[2] = screens[1]
         end
     end
 
+    -- screens[2] -> attempt to index a nil value (field '?')
     local windowLayout = {
         -- {"Finder", nil, screens[1]:name(), hs.layout.center, nil, nil},
         {"Terminal", nil, screens[1]:name(), nil, nil, screens[1]:fullFrame()},
@@ -25,13 +24,8 @@ function applyWindowLayout()
     }
 
     hs.layout.apply(windowLayout)
-    lastCount = count
+    lastCount = #screens
 end
-
-local screenWatcher = hs.screen.watcher.new(applyWindowLayout)
-screenWatcher:start()
-
-applyWindowLayout()
 
 --[[function applicationWatcher(appName, eventType, appObject)
     if (eventType == hs.application.watcher.activated) then
@@ -46,3 +40,12 @@ end
 
 local appWatcher = hs.application.watcher.new(applicationWatcher)
 appWatcher:start()--]]
+
+return {
+    init = function()
+        local screenWatcher = hs.screen.watcher.new(applyWindowLayout)
+        screenWatcher:start()
+
+        applyWindowLayout()
+    end
+}

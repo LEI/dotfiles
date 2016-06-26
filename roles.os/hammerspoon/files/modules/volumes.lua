@@ -41,3 +41,6 @@ volumes.watcher = hs.fs.volume.new(volumesMenu):start()
 volumesMenu()
 
 -- return volumes
+return {
+    init = nil
+}

@@ -20,3 +20,7 @@ if caffeine then
     caffeine:setClickCallback(caffeineClicked)
     setCaffeineDisplay(hs.caffeinate.get("displayIdle"))
 end
+
+return {
+    init = nil
+}

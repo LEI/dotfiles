@@ -25,3 +25,7 @@ hs.timer.doAfter(1, function()
 
     hs.redshift.start(3600, times.sunset, times.sunrise)
 end)
+
+return {
+    init = nil
+}

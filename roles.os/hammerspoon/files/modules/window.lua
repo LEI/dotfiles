@@ -81,3 +81,7 @@ function hs.window.downRight(win)
     f.h = f.h / 2
     win:setFrame(f)
 end
+
+return {
+    init = nil
+}

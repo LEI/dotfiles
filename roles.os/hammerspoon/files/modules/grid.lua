@@ -40,3 +40,7 @@ hs.grid.ui.fontName = 'Lucida Grande'
 -- Booleans
 -- Show non-grid keybindings in the center of the grid
 hs.grid.ui.showExtraKeys = true
+
+return {
+    init = nil
+}

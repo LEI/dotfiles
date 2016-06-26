@@ -12,3 +12,7 @@ end
 function focusedWin()
     return hs.window.focusedWindow()
 end
+
+return {
+    init = nil
+}

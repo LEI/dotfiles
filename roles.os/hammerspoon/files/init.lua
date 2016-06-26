@@ -1,4 +1,5 @@
 -- Hammerspoon configuration
+-- https://github.com/tstirrat/hammerspoon-config/blob/master/init.lua
 
 hs.autoLaunch(true)
 hs.automaticallyCheckForUpdates(true)
@@ -12,25 +13,54 @@ hs.window.animationDuration = 0
 
 -- local hostname = hs.host.localizedName()
 
--- Core
-require "library/utils"
-require "library/autoreload"
-require "library/window"
-require "library/layout"
-require "library/grid"
-
--- Menubar
-require "library/caffeine"
-require "library/volumes" -- image:setSize!
-
--- Applications
-require "library/redshift"
-
 -- Bindings
 -- github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/window.lua
 mash = {"cmd", "ctrl"}
 super = {"cmd", "alt", "ctrl"}
 hyper = {"shift", "cmd", "alt", "ctrl"}
+
+import = require("utils/import")
+import.clear_cache()
+
+config = import("config")
+
+function config:get(key_path, default)
+    local root = self
+    for part in string.gmatch(key_path, "[^\\.]+") do
+        root = root[part]
+        if root == nil then
+            return default
+        end
+    end
+    return root
+end
+
+local modules = {}
+
+for _, v in ipairs(config.modules) do
+    local module_name = "modules/" .. v
+    local module = import(module_name)
+
+    if type(module.init) == "function" then
+        module.init()
+    end
+
+    table.insert(modules, module)
+end
+
+
+local buf = {}
+
+if hs.wasLoaded == nil then
+    hs.wasLoaded = true
+    table.insert(buf, "Hammerspoon loaded: ")
+else
+    table.insert(buf, "Hammerspoon re-loaded: ")
+end
+
+table.insert(buf, #modules .. " modules")
+
+hs.alert.show(table.concat(buf))
 
 -- Hints
 -- hs.hints.fontSize = 16
@@ -38,7 +68,6 @@ hyper = {"shift", "cmd", "alt", "ctrl"}
 hs.hints.style = "vimperator"
 hs.hotkey.bind(mash, ",", hs.hints.windowHints)
 
-hs.hotkey.bind(mash, "R", hs.reload)
 -- hs.hotkey.bind(mash, "C", hs.toggleConsole)
 
 -- Color picker
@@ -48,6 +77,26 @@ end)
 
 -- Lock
 -- hs.hotkey.bind(hyper, "L", hs.caffeinate.startScreensaver)
+
+--[[ hs.hotkey.bind(mash, "T", function()
+    hs.applescript.applescript([[
+        tell application "System Preferences"
+            activate
+        end tell
+
+        tell application "System Events"
+            tell process "System Preferences"
+                click menu item "General" of menu "View" of menu bar 1
+                delay 2
+                click checkbox 1 of row 1 of table 1 of scroll area 1 of group 1
+            end tell
+        end tell
+
+        tell application "System Preferences"
+            quit
+        end tell
+    ] )
+end) --]]
 
 hs.hotkey.bind(mash, "G", hs.grid.toggleShow)
 
@@ -211,16 +260,3 @@ hs.hotkey.bind(super, "Left", hs.window.focusWindowWest)
 -- hs.hotkey.bind(hyper, "Right", hs.window.moveOneScreenEast)
 -- hs.hotkey.bind(hyper, "Down", hs.window.moveOneScreenSouth)
 -- hs.hotkey.bind(hyper, "Left", hs.window.moveOneScreenWest)
-
-local msg = {""}
-local wasLoaded = #hs.console.getHistory()
-
-if wasLoaded == 0 then
-    -- Add an empty command in the history
-    hs.console.setHistory({""})
-    table.insert(msg, "Loaded")
-else
-    table.insert(msg, "Re-loaded")
-end
-
-hs.alert(table.concat(msg))
