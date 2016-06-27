@@ -11,11 +11,11 @@
 # docs.ansible.com/ansible/osx_defaults_module.html
 - name: Setup defaults
   include: defaults.yml
-  # vars: # using set_fact instead to notify handlers
-  #   app: "{{ item }}"
-  with_dict: "{{ osx_defaults }}"
   loop_control:
     loop_var: app
+  # vars:
+  #   app: "{{ item }}"
+  with_dict: "{{ osx_defaults }}"
   register: osx_defaults_write
 
 - name: Restart defaults server

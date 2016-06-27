@@ -1,4 +1,7 @@
 ---
+# - set_fact:
+#     app: "{{ item }}"
+
 - name: "Write {{ app.key }} defaults"
   osx_defaults:
     key: "{{ item.key }}" # Required
