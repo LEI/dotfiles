@@ -1,0 +1,12 @@
+---
+dependencies:
+
+  - role: package
+    packages:
+      - i3
+
+  - role: symlink
+    dot_roles_dir: roles.os
+    dot_files:
+      i3:
+        dest: .config/i3

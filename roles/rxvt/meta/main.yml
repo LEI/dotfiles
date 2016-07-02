@@ -13,7 +13,7 @@ dependencies:
   #   when: "os in ['Windows']"
 
   - role: symlink
-    dot_roles_dir: roles.os
+    # dot_roles_dir: roles.os
     dot_files:
       rxvt:
         prefix: .
