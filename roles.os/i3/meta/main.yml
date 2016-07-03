@@ -5,6 +5,7 @@ dependencies:
     packages:
       - i3
       - rofi
+      - scrot
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
@@ -20,3 +21,6 @@ dependencies:
         src: "{{ dot_roles_dir }}/i3/files"
         pattern: "*.conf"
         prefix: .
+      xresources:
+        src: "{{ dot_roles_dir }}/i3/files/Xresources.d"
+        dest: .Xresources.d
