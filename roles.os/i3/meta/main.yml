@@ -4,9 +4,19 @@ dependencies:
   - role: package
     packages:
       - i3
+      - rofi
+
+  - role: pacman-yaourt
+    pacman_yaourt_packages:
+      - i3blocks
 
   - role: symlink
     dot_roles_dir: roles.os
     dot_files:
       i3:
         dest: .config/i3
+        pattern: "config"
+      home:
+        src: "{{ dot_roles_dir }}/i3/files"
+        pattern: "*.conf"
+        prefix: .
