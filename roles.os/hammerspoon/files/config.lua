@@ -29,15 +29,16 @@ config.bindings = {
 
     -- Console
     -- hs.hotkey.bind(mash, "C", hs.toggleConsole)
-
-    -- Force paste
-    { mods = alt, key = "V", fn = function()
-        hs.eventtap.keyStrokes(hs.pasteboard.getContents())
-    end },
+    { mods = super, key = "C", fn = hs.toggleConsole },
 
     -- Color picker
     { mods = mash, key = "C", fn = function()
         hs.osascript.applescript("choose color")
+    end },
+
+    -- Force paste
+    { mods = alt, key = "V", fn = function()
+        hs.eventtap.keyStrokes(hs.pasteboard.getContents())
     end },
 
     -- Maximize focused window
