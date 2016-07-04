@@ -187,6 +187,26 @@ config.bindings = {
     -- hs.hotkey.bind(hyper, "Right", hs.window.moveOneScreenEast)
     -- hs.hotkey.bind(hyper, "Down", hs.window.moveOneScreenSouth)
     -- hs.hotkey.bind(hyper, "Left", hs.window.moveOneScreenWest)
+
+    { mods = mash, key = "T", fn = function()
+        hs.applescript.applescript([[
+            tell application "System Preferences"
+                activate
+            end tell
+
+            tell application "System Events"
+                tell process "System Preferences"
+                    click menu item "General" of menu "View" of menu bar 1
+                    delay 2
+                    # click checkbox 1 of row 1 of table 1 of scroll area 1 of group 1
+                end tell
+            end tell
+
+            #tell application "System Preferences"
+            #    quit
+            #end tell
+        ]])
+    end },
 }
 
 config.apps = {

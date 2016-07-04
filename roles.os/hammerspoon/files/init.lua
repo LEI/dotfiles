@@ -67,24 +67,3 @@ end
 table.insert(buf, #modules .. " modules")
 
 hs.alert.show("Hammerspoon " .. table.concat(buf))
-
---[[ hs.hotkey.bind(mash, "T", function()
-    hs.applescript.applescript([[
-        tell application "System Preferences"
-            activate
-        end tell
-
-        tell application "System Events"
-            tell process "System Preferences"
-                click menu item "General" of menu "View" of menu bar 1
-                delay 2
-                click checkbox 1 of row 1 of table 1 of scroll area 1 of group 1
-            end tell
-        end tell
-
-        tell application "System Preferences"
-            quit
-        end tell
-    ] )
-end) --]]
-
