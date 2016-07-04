@@ -9,7 +9,7 @@ function setCaffeineDisplay(state)
     if state then
         icon = icon .. "Active"
     end
-    caffeine:setIcon("resources/" .. icon .. ".tiff")
+    caffeine:setIcon("assets/" .. icon .. ".tiff")
 end
 
 function caffeineClicked()

@@ -35,7 +35,7 @@ hs.grid.ui.cellStrokeWidth = 5
 hs.grid.ui.highlightStrokeWidth = 5 -- default: 30
 
 -- Strings
-hs.grid.ui.fontName = 'Lucida Grande'
+hs.grid.ui.fontName = Helvetica -- 'Lucida Grande'
 
 -- Booleans
 -- Show non-grid keybindings in the center of the grid

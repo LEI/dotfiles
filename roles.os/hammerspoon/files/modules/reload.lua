@@ -26,7 +26,5 @@ return {
         -- os.getenv("HOME") .. "/.hammerspoon/"
         cfgWatcher = hs.pathwatcher.new(hs.configdir, reloadConfig)
         cfgWatcher:start()
-
-        hs.hotkey.bind(mash, "R", hs.reload)
     end
 }

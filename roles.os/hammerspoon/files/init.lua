@@ -1,20 +1,26 @@
 -- Hammerspoon configuration
 -- https://github.com/tstirrat/hammerspoon-config/blob/master/init.lua
+-- https://github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/window.lua
+-- https://github.com/szymonkaliski/Dotfiles/blob/master/Dotfiles/hammerspoon/init.lua
 
+-- Settings
 hs.autoLaunch(true)
 hs.automaticallyCheckForUpdates(true)
 hs.consoleOnTop(true)
 hs.dockIcon(false)
 hs.menuIcon(false)
+hs.window.animationDuration = 0.05
 
--- General
-
-hs.window.animationDuration = 0
+-- Hints
+-- hs.hints.fontName = Helvetica
+-- hs.hints.fontSize = 16
+-- hs.hints.showTitleThresh = 10
+hs.hints.style = "vimperator"
 
 -- local hostname = hs.host.localizedName()
 
 -- Bindings
--- github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/window.lua
+alt = {"cmd", "alt"}
 mash = {"cmd", "ctrl"}
 super = {"cmd", "alt", "ctrl"}
 hyper = {"shift", "cmd", "alt", "ctrl"}
@@ -37,46 +43,36 @@ end
 
 local modules = {}
 
-for _, v in ipairs(config.modules) do
-    local module_name = "modules/" .. v
-    local module = import(module_name)
+-- for _, v in ipairs(config.modules) do end
+hs.fnutils.each(config.modules, function(module_name)
+    local module_path = "modules/" .. module_name
+    local module = import(module_path)
 
     if type(module.init) == "function" then
         module.init()
     end
 
     table.insert(modules, module)
-end
-
+end)
 
 local buf = {}
 
 if hs.wasLoaded == nil then
     hs.wasLoaded = true
-    table.insert(buf, "Hammerspoon loaded: ")
+    table.insert(buf, "loaded: ")
 else
-    table.insert(buf, "Hammerspoon re-loaded: ")
+    table.insert(buf, "reloaded: ")
 end
 
 table.insert(buf, #modules .. " modules")
 
-hs.alert.show(table.concat(buf))
-
--- Hints
--- hs.hints.fontSize = 16
--- hs.hints.showTitleThresh = 10
-hs.hints.style = "vimperator"
-hs.hotkey.bind(mash, ",", hs.hints.windowHints)
+hs.alert.show("Hammerspoon " .. table.concat(buf))
 
 -- hs.hotkey.bind(mash, "C", hs.toggleConsole)
 
--- Color picker
-hs.hotkey.bind(mash, "C", function()
-    hs.osascript.applescript("choose color")
-end)
-
 -- Lock
 -- hs.hotkey.bind(hyper, "L", hs.caffeinate.startScreensaver)
+
 
 --[[ hs.hotkey.bind(mash, "T", function()
     hs.applescript.applescript([[
@@ -98,8 +94,6 @@ end)
     ] )
 end) --]]
 
-hs.hotkey.bind(mash, "G", hs.grid.toggleShow)
-
 -- Bring all Finder windows forward when one gets activated (desktop is a finder)
 --[[function applicationWatcher(appName, eventType, appObject)
     if (eventType == hs.application.watcher.activated) then
@@ -111,12 +105,6 @@ end
 
 local appWatcher = hs.application.watcher.new(applicationWatcher)
 appWatcher:start()--]]
-
--- Maximize focused window
-hs.hotkey.bind(mash, "M", function()
-    local win = focusedWin()
-    win:toggleMaximize()
-end)
 
 -- Window resizing using vim movement keys
 --      k
