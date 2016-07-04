@@ -5,6 +5,7 @@ local config = {}
 config.modules = {
     "utils",
     "bindings",
+    "application",
     "reload",
     "window",
     "layout",
@@ -185,6 +186,13 @@ config.bindings = {
     -- hs.hotkey.bind(hyper, "Right", hs.window.moveOneScreenEast)
     -- hs.hotkey.bind(hyper, "Down", hs.window.moveOneScreenSouth)
     -- hs.hotkey.bind(hyper, "Left", hs.window.moveOneScreenWest)
+}
+
+config.apps = {
+    -- Bring all Finder windows forward when one gets activated (desktop is a finder)
+    { name = "Finder", fn = function(appObject)
+        appObject:selectMenuItem({"Window", "Bring All to Front"})
+    end },
 }
 
 return config
