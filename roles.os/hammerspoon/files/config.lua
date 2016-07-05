@@ -194,17 +194,21 @@ config.bindings = {
                 activate
             end tell
 
-            tell application "System Events"
-                tell process "System Preferences"
-                    click menu item "General" of menu "View" of menu bar 1
-                    delay 2
-                    # click checkbox 1 of row 1 of table 1 of scroll area 1 of group 1
-                end tell
+            tell application "System Events" to tell process "System Preferences"
+                delay 2
+                click menu item "General" of menu "View" of menu bar 1
+                delay 1
+                # click checkbox 1 of window 1
+                click checkbox "Use dark menu bar and Dock" of group 1
+                # if value of checkbox "Use dark menu bar and Dock" of group 1 of tab group 1 is 0 then
+                #    click checkbox "Use dark menu bar and Dock" of group 1 of tab group 1
+                # end if
+                # click checkbox 1 of row 1 of table 1 of scroll area 1 of group 1
             end tell
 
-            #tell application "System Preferences"
-            #    quit
-            #end tell
+            # tell application "System Preferences"
+            #     quit
+            # end tell
         ]])
     end },
 }
