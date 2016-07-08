@@ -50,6 +50,16 @@ hs.fnutils.each(config.modules, function(module_name)
 
     if type(module.init) == "function" then
         module.init()
+    elseif type(module.init) ~= "nil" then
+        hs.alert.show("Unknown init type: " .. type(module.bind))
+    end
+
+    if type(module.bind) == "function" then
+        module.bind()
+    elseif type(module.bind) == "table" then
+        table.insert(config.bindings, module.bind)
+    elseif type(module.bind) ~= "nil" then
+        hs.alert.show("Unknown bind type: " .. type(module.bind))
     end
 
     table.insert(modules, module)

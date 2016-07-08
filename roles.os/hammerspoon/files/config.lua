@@ -3,13 +3,12 @@
 local config = {}
 
 config.modules = {
-    "utils",
-    "bindings",
     "application",
     "reload",
     "window",
     "layout",
     "grid",
+    "bindings",
     -- Menubar
     "caffeine",
     "volumes",
@@ -17,12 +16,13 @@ config.modules = {
     "redshift",
 }
 
+local focusedWin = hs.window.focusedWindow
 local moveStep = 10
 
 config.bindings = {
-    { mods = mash, key = "R", fn = hs.reload },
+    -- { mods = mash, key = "R", fn = hs.reload },
+    -- { mods = mash, key = "G", fn = hs.grid.toggleShow },
     { mods = mash, key = ",", fn = hs.hints.windowHints },
-    { mods = mash, key = "G", fn = hs.grid.toggleShow },
 
     -- Lock
     -- hs.hotkey.bind(hyper, "L", hs.caffeinate.startScreensaver

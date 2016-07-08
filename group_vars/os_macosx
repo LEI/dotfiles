@@ -60,7 +60,10 @@ cask_apps:
   - font-hack
   - gimp
   - google-chrome
+  # - google-chrome-canary
+  - lastpass
   - little-snitch
+  # - opera
   # - robomongo
   # - sequel-pro
   # - skype
@@ -493,7 +496,8 @@ osx_defaults:
     mouse-over-hilite-stack: {domain: com.apple.dock, type: bool, value: true}
 
     # Set the icon size of Dock items
-    tilesize: {domain: com.apple.dock, type: float, value: 48}
+    # FIXME int/float?
+    # tilesize: {domain: com.apple.dock, type: int, value: 48}
 
     # Change minimize/maximize window effect
     mineffect: {domain: com.apple.dock, value: "scale"}

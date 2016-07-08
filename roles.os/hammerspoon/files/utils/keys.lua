@@ -1,6 +1,6 @@
--- Utilities
+-- List keys
 
-function keys(t)
+local function keys(t)
     local keys={}
     for k, v in pairs(t) do
         table.insert(keys, k)
@@ -9,10 +9,4 @@ function keys(t)
     return keys
 end
 
-function focusedWin()
-    return hs.window.focusedWindow()
-end
-
-return {
-    init = nil
-}
+return keys

@@ -2,6 +2,7 @@
 -- github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/volumes.lua
 
 -- local std = require "hs.stdlib"
+keys = import("utils/keys")
 
 local volumes = {}
 local fmt = string.format

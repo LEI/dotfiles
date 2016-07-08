@@ -1,10 +1,6 @@
 -- https://github.com/tstirrat/hammerspoon-config/blob/master/utils/import.lua
 -- A convenience function that loads a file, reloading it each time this function is called. Searches
 -- LUA_PATH like require does, but uses dofile to do the loading, making sure not to cache anything.
---
--- Useful for our purposes, where we'll have additional files that we want to be reloaded each time hs.reload
--- is called.
-local fs = require 'hs.fs'
 
 local import = {}
 
@@ -40,7 +36,7 @@ function import.import(name)
 
     for path in string.gmatch(package.path, "[^;]+") do
         local file = path:gsub("?", name)
-        local attr = fs.attributes(file, "mode")
+        local attr = hs.fs.attributes(file, "mode")
 
         if attr == "file" then
             local module = dofile(file)

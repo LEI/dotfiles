@@ -82,6 +82,10 @@ function hs.window.downRight(win)
     win:setFrame(f)
 end
 
+-- function hs.window.moveUpLeft(win)
+--     local f = win:
+-- end
+
 return {
     init = nil
 }

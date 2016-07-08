@@ -22,6 +22,7 @@ local function reloadConfig(files)
 end
 
 return {
+    bind = { mods = mash, key = "R", fn = hs.reload },
     init = function()
         -- os.getenv("HOME") .. "/.hammerspoon/"
         cfgWatcher = hs.pathwatcher.new(hs.configdir, reloadConfig)
