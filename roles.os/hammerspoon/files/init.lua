@@ -19,12 +19,6 @@ hs.hints.style = "vimperator"
 
 -- local hostname = hs.host.localizedName()
 
--- Bindings
-alt = {"cmd", "alt"}
-mash = {"cmd", "ctrl"}
-super = {"cmd", "alt", "ctrl"}
-hyper = {"shift", "cmd", "alt", "ctrl"}
-
 import = require("utils/import")
 import.clear_cache()
 
@@ -40,6 +34,13 @@ function config:get(key_path, default)
     end
     return root
 end
+
+-- Binding modifiers
+-- for _, v in pairs(config.keys) do _G[_] = v end
+alt = {"cmd", "alt"}
+mash = {"cmd", "ctrl"}
+super = {"cmd", "alt", "ctrl"}
+hyper = {"shift", "cmd", "alt", "ctrl"}
 
 local modules = {}
 
