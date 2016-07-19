@@ -25,19 +25,21 @@ main() {
   # Inventory file defined in ansible.cfg
 
   # Run the main playbook
-  ansible-playbook "$DOT_PLAYBOOK" "$@"
+  ansible-playbook "$DOT_PLAYBOOK" "$@" --vault-password-file "$ANSIBLE_VAULT_PASSWORD_FILE"
 }
 
 ansible_vault() {
-  # Export the vault file path
+  # Vault file path
   if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
-    export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
+    # export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
+    ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
   fi
 
   # Create the vault file if it does not exists
   if [[ ! -f "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
     local vault_pass=$(prompt "Vault password?")
     echo "$vault_pass" >> $ANSIBLE_VAULT_PASSWORD_FILE
+    chmod 0600 "$ANSIBLE_VAULT_PASSWORD_FILE"
   fi
 }
 

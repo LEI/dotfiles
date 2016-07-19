@@ -57,7 +57,9 @@ hs.fnutils.each(config.modules, function(module_name)
     if type(module.bind) == "function" then
         module.bind()
     elseif type(module.bind) == "table" then
-        table.insert(config.bindings, module.bind)
+        hs.fnutils.each(module.bind, function(binding)
+            table.insert(config.bindings, binding)
+        end)
     elseif type(module.bind) ~= "nil" then
         hs.alert.show("Unknown bind type: " .. type(module.bind))
     end
