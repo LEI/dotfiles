@@ -59,6 +59,9 @@ hs.fnutils.each(config.modules, function(module_name)
         module.bind()
     elseif type(module.bind) == "table" then
         hs.fnutils.each(module.bind, function(binding)
+            -- if type(binding.fn) == "string" then
+            --     binding.fn = _G[binding.fn]
+            -- end
             table.insert(config.bindings, binding)
         end)
     elseif type(module.bind) ~= "nil" then

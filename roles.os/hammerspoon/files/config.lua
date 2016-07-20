@@ -3,12 +3,15 @@
 local config = {}
 
 config.modules = {
+    -- Applications
     "application",
     "redshift",
     "caffeine",
     "volumes",
-    "reload",
+    -- Extensions
     "window",
+    -- Settings
+    "reload",
     "layout",
     "grid",
 }
