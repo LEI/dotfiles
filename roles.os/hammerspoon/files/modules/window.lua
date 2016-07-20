@@ -8,7 +8,7 @@ function hs.window.screenFrame(win)
 end
 
 local frameCache = {}
-function hs.window.toggleMaximize(win)
+local function toggleMaximize(win)
     -- Fix hidden windows?
     if frameCache[win:id()] then
         win:setFrame(frameCache[win:id()])
@@ -22,6 +22,10 @@ function hs.window.toggleMaximize(win)
         -- else
         -- end
     end
+end
+hs.window.toggleMaximize = function()
+    local win = hs.window.focusedWindow()
+    toggleMaximize(win)
 end
 
 function hs.window.up(win)
@@ -87,5 +91,10 @@ end
 -- end
 
 return {
-    init = nil
+    bind = {
+        -- Maximize focused window
+        { mods = mash, key = "M", fn = hs.window.toggleMaximize },
+    },
+    init = function()
+    end
 }

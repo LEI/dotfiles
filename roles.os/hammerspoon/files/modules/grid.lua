@@ -1,16 +1,5 @@
 -- Grid
 
-if hs.keycodes.currentLayout() == "French" then
-    hs.grid.HINTS = {
-        { "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10" },
-        { "&", "é", '"', "'", "(", "§", "è", "!", "ç", "à" },
-        -- { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" },
-        { "A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P" },
-        { "Q", "S", "D", "F", "G", "H", "J", "K", "L", "M" },
-        { "W", "X", "C", "V", "B", "N", ",", ";", ":", "=" },
-    }
-end
-
 local margins = {w=0,h=0}
 hs.grid.setMargins(margins)
 
@@ -35,7 +24,7 @@ hs.grid.ui.cellStrokeWidth = 5
 hs.grid.ui.highlightStrokeWidth = 5 -- default: 30
 
 -- Strings
-hs.grid.ui.fontName = Helvetica -- 'Lucida Grande'
+hs.grid.ui.fontName = "Helvetica" -- "Lucida Grande"
 
 -- Booleans
 -- Show non-grid keybindings in the center of the grid
@@ -43,11 +32,25 @@ hs.grid.ui.showExtraKeys = true
 
 return {
     bind = {
-        { mods = mash, key = "G", fn = hs.grid.toggleShow },
-        -- { mods = mash, key = "M", fn = hs.grid.maximizeWindow },
-        -- { mods = mash, key = "J", fn = hs.grid.pushWindowDown },
         -- https://github.com/Linell/hammerspoon-config/blob/master/init.lua
+        -- Toggle grid
+        { mods = mash, key = "G", fn = hs.grid.toggleShow },
+        -- -- Left half
+        -- { mods = mash, key = "H", fn = hs.grid.pushWindowLeft },
+        -- -- Bottom half
+        -- { mods = mash, key = "J", fn = hs.grid.pushWindowDown },
+        -- -- Top half
+        -- { mods = mash, key = "K", fn = hs.grid.pushWindowUp },
+        -- -- Right half
+        -- { mods = mash, key = "L", fn = hs.grid.pushWindowRight },
     },
     init = function()
+        for name,layout in pairs(config.grid.hints) do
+            if string.find(hs.keycodes.currentLayout(), name) then
+                hs.grid.HINTS = layout
+            end
+        end
+        -- Change grid size
+        hs.grid.setGrid(config.grid.geometry, config.grid.screen, config.grid.frame)
     end
 }

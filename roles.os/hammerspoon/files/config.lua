@@ -4,21 +4,36 @@ local config = {}
 
 config.modules = {
     "application",
+    "redshift",
+    "caffeine",
+    "volumes",
     "reload",
     "window",
     "layout",
     "grid",
-    "bindings",
-    -- Menubar
-    "caffeine",
-    "volumes",
-    -- Applications
-    "redshift",
 }
 
-local focusedWin = hs.window.focusedWindow
-local moveStep = 10
+config.apps = {
+    -- Bring all Finder windows forward when one gets activated (desktop is a finder)
+    { name = "Finder", fn = function(appObject)
+        appObject:selectMenuItem({"Window", "Bring All to Front"})
+    end },
+}
 
+config.grid = {
+    geometry = "4x4",
+    hints = {
+        French = {
+            { "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10" },
+            { "&", "é", '"', "'", "(", "§", "è", "!", "ç", "à" },
+            { "A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P" },
+            { "Q", "S", "D", "F", "G", "H", "J", "K", "L", "M" },
+            { "W", "X", "C", "V", "B", "N", ",", ";", ":", "=" },
+        },
+    },
+}
+
+local moveStep = 10
 config.bindings = {
     -- { mods = mash, key = "R", fn = hs.reload },
     -- { mods = mash, key = "G", fn = hs.grid.toggleShow },
@@ -28,11 +43,10 @@ config.bindings = {
     -- hs.hotkey.bind(hyper, "L", hs.caffeinate.startScreensaver
 
     -- Console
-    -- hs.hotkey.bind(mash, "C", hs.toggleConsole)
-    { mods = super, key = "C", fn = hs.toggleConsole },
+    { mods = mash, key = "C", fn = hs.toggleConsole },
 
     -- Color picker
-    { mods = mash, key = "C", fn = function()
+    { mods = super, key = "C", fn = function()
         hs.osascript.applescript("choose color")
     end },
 
@@ -41,64 +55,61 @@ config.bindings = {
         hs.eventtap.keyStrokes(hs.pasteboard.getContents())
     end },
 
-    -- Maximize focused window
-    { mods = mash, key = "M", fn = function()
-        local win = focusedWin()
-        win:toggleMaximize()
-    end },
+    -- local win = hs.window.focusedWindow()
+    -- win:toggleMaximize()
 
     -- Window resizing using vim movement keys
     --      k
     --  h       l
     --      j
 
-    -- github.com/rtoshiro/hammerspoon-init/blob/master/init.lua
+    -- https://github.com/rtoshiro/hammerspoon-init/blob/master/init.lua
 
     -- Top half
     { mods = mash, key = "K", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:up()
     end },
 
     -- Right half
     { mods = mash, key = "L", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:right()
     end },
 
     -- Bottom half
     { mods = mash, key = "J", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:down()
     end },
 
     -- Left half
     { mods = mash, key = "H", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:left()
     end },
 
     -- Top right corner
     { mods = super, key = "K", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:upRight()
     end },
 
     -- Bottom right corner
     { mods = super, key = "L", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:downRight()
     end },
 
     -- Bottom left corner
     { mods = super, key = "J", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:downLeft()
     end },
 
     -- Top left corner
     { mods = super, key = "H", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         win:upLeft()
     end },
 
@@ -108,7 +119,7 @@ config.bindings = {
     --  b   j   n
 
     { mods = hyper, key = "Y", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x - moveStep
@@ -117,7 +128,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "K", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.y = f.y - moveStep
@@ -125,7 +136,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "U", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x + moveStep
@@ -134,7 +145,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "H", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x - moveStep
@@ -142,7 +153,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "L", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x + moveStep
@@ -150,7 +161,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "B", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x - moveStep
@@ -159,7 +170,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "J", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.y = f.y + moveStep
@@ -167,7 +178,7 @@ config.bindings = {
     end },
 
     { mods = hyper, key = "N", fn = function()
-        local win = focusedWin()
+        local win = hs.window.focusedWindow()
         local f = win:frame()
 
         f.x = f.x + moveStep
@@ -210,13 +221,6 @@ config.bindings = {
             #     quit
             # end tell
         ]])
-    end },
-}
-
-config.apps = {
-    -- Bring all Finder windows forward when one gets activated (desktop is a finder)
-    { name = "Finder", fn = function(appObject)
-        appObject:selectMenuItem({"Window", "Bring All to Front"})
     end },
 }
 

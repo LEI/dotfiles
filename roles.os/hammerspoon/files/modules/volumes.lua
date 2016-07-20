@@ -1,5 +1,5 @@
 -- Manage removable volumes
--- github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/volumes.lua
+-- https://github.com/heptal/dotfiles/blob/master/roles/hammerspoon/files/volumes.lua
 
 -- local std = require "hs.stdlib"
 keys = import("utils/keys")

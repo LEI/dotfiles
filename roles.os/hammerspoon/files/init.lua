@@ -29,6 +29,7 @@ super = {"cmd", "alt", "ctrl"}
 hyper = {"shift", "cmd", "alt", "ctrl"}
 
 config = import("config")
+-- local log = hs.logger.new('init','debug')
 
 function config:get(key_path, default)
     local root = self
@@ -65,6 +66,11 @@ hs.fnutils.each(config.modules, function(module_name)
     end
 
     table.insert(modules, module)
+end)
+
+-- Apply key bindings
+hs.fnutils.each(config.bindings, function (bind)
+    hs.hotkey.bind(bind.mods, bind.key, bind.fn)
 end)
 
 local buf = {}
