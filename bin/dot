@@ -15,7 +15,9 @@ main() {
     ansible_install
   fi
 
-  ansible_vault
+  local vault=
+  local vault_file=$(ansible_vault)
+  [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
 
   # Ansible root directory
   cd "$DOT_ROOT"
@@ -25,22 +27,26 @@ main() {
   # Inventory file defined in ansible.cfg
 
   # Run the main playbook
-  ansible-playbook "$DOT_PLAYBOOK" "$@" --vault-password-file "$ANSIBLE_VAULT_PASSWORD_FILE"
+  echo $vault
+  ansible-playbook "$DOT_PLAYBOOK" "$vault" "$@"
 }
 
 ansible_vault() {
+  local file=
   # Vault file path
   if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
     # export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
-    ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
+    file="$HOME/.vault_pass.txt"
   fi
 
   # Create the vault file if it does not exists
-  if [[ ! -f "$ANSIBLE_VAULT_PASSWORD_FILE" ]]; then
+  if [[ -n "$file" ]] && [[ ! -f "$file" ]]; then
     local vault_pass=$(prompt "Vault password?")
-    echo "$vault_pass" >> $ANSIBLE_VAULT_PASSWORD_FILE
-    chmod 0600 "$ANSIBLE_VAULT_PASSWORD_FILE"
+    echo "$vault_pass" >> $file
+    chmod 0600 "$file"
   fi
+
+  [[ -f "$file" ]] && echo "$file"
 }
 
 ansible_install() {
