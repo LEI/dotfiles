@@ -27,7 +27,6 @@ main() {
   # Inventory file defined in ansible.cfg
 
   # Run the main playbook
-  echo $vault
   ansible-playbook "$DOT_PLAYBOOK" "$vault" "$@"
 }
 
