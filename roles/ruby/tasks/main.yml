@@ -6,4 +6,4 @@
     state: "{{ item.state | default(ruby_gems_state) }}"
     # user_install:
   with_items: "{{ ruby_gems }}"
-  when: ruby_gems_install
+  when: "ruby_gems_install"

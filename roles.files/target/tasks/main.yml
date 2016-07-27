@@ -55,6 +55,12 @@
   register: dot_stats
   no_log: "{{ dot_no_log }}"
 
+- name: Ensure destination exist
+  file:
+    path: "{{ item.value.dest }}"
+    state: directory
+  with_dict: "{{ dot_files_paths }}"
+
 # Final target list
 - name: "Gather {{ dot_files_dir }} stats"
   set_fact:

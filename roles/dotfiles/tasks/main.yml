@@ -1,0 +1,47 @@
+---
+# - name: Symlink
+#   set_fact:
+#     dot_paths: "{{ dot_paths | default([]) + [{
+#         'name': item.name | default(item),
+#         'src': dot_root + '/' + item.src + '/' + (item.pattern | default('*')) if item.src is defined else dot_root + '/' + (item.dir | default('roles')) + '/' + (item.name | default(item)) + '/' + (item.role_dir | default('files')) + '/' + (item.pattern | default('*')),
+#         'dest': dot_home + '/' + item.dest if item.dest is defined else dot_home + '/' + (item.name | default(item)) + '/' + (item.prefix | default('')),
+#         'paths': lookup('fileglob', dot_root + '/' + item.src + '/' + (item.pattern | default('*')) if item.src is defined else dot_root + '/' + (item.dir | default('roles')) + '/' + (item.name | default(item)) + '/' + (item.role_dir | default('files')) + '/' + (item.pattern | default('*'))),
+#       }] }}"
+#   with_items: "{{ paths }}"
+
+# - debug:
+#     msg: "{{ lookup('dotfile', 'ruby/files', '*', {'dest': 'rc', 'prefix': 'tmux-'}) }}"
+# - fail:
+
+- name: Prepare
+  set_fact:
+    dot_paths: >
+      {{ dot_paths | default([]) + [
+        {
+          'state': 'template' if item.template is defined else item.state | default('link'),
+          'items': lookup('dotfile',
+            item.src if item.src is defined else item.path if item.path is defined else item.name | default(item) + '/' + item.dir | default('templates' if item.template is defined or item.state is defined and item.state == 'template' else 'files'),
+            item.pattern | default('*'),
+            {
+              'dest': item.dest | default(false),
+              'prefix': item.prefix | default(''),
+              'substring': item.substring | default('.j2'),
+              },
+            wantlist=True),
+        }
+      ]}}
+  with_items: "{{ paths }}"
+  # with_fileglob: "{{ dot_paths | map(attribute='src') | list }}"
+
+- name: Action
+  action: "{{ 'file' if item.0.state in ['link','touch','absent','present'] else item.0.state }}"
+  args:
+    src: "{{ item.1.path}}"
+    dest: "{{ item.1.dest }}"
+    state: "{{ item.0.state if item.0.state != 'template' else omit }}"
+    # backup: "{{ 'yes' if dot_backup_enable and dot_backup_templates else 'no' }}"
+    # force: yes
+  with_subelements:
+      - "{{ dot_paths }}"
+      - items
+  # when: "item.0.state in ['template']"

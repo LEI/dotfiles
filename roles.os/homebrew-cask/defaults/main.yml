@@ -1,6 +1,6 @@
 ---
 homebrew_cask_install: yes
-homebrew_cask_state: present
+homebrew_cask_state: "{{ packages_state | default('present') }}"
 homebrew_cask_appdir: /Applications
 homebrew_cask_cleanup: yes
 # Cf. group_vars/os_macosx
