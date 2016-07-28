@@ -15,5 +15,5 @@ dependencies:
         prefix: .
         pattern: "Xresources"
       - name: xcolors
-        src: "{{ dot_root }}/roles/xresources/files/Xresources.d"
+        src: roles/xresources/files/Xresources.d
         dest: .Xresources.d

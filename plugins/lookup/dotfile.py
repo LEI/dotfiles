@@ -11,11 +11,12 @@ from ansible.errors import AnsibleError, AnsibleFileNotFound
 
 class LookupModule(LookupBase):
 
-    homedir = os.path.expanduser("~")
+    userdir = os.path.expanduser("~")
 
     def run(self, terms, variables=None, **kwargs):
 
-        basedir = self.get_basedir(variables)
+        self.homedir = variables['ansible_env']['HOME']
+        self.basedir = self.get_basedir(variables)
 
         # if len(terms) >= 0:
         args = terms[0].split(',')
@@ -24,17 +25,17 @@ class LookupModule(LookupBase):
         else:
             role_path = self.get_role_path(args, variables)
 
-        exists = True
-        try:
-            stat = os.stat(role_path)
-        except OSError, e:
-            exists = False
-            # if e.errno == errno.ENOENT:
+        # exists = True
+        # try:
+        #     stat = os.stat(role_path)
+        # except OSError, e:
+        #     exists = False
+        #     # if e.errno == errno.ENOENT:
 
-        if len(role_path) > 0 and exists == True:
+        if len(role_path) > 0: # and exists == True:
             path = role_path
-        else:
-            raise AnsibleError("Not found: role_path '%s'" % role_path)
+        # else:
+        #     raise AnsibleError("Not found: role_path '%s'" % role_path)
 
         search = []
         if len(terms) >= 2:
@@ -62,8 +63,11 @@ class LookupModule(LookupBase):
 
             paths = []
             for g in globbed:
-                st = self.get_stat(g)
+                st = self.get_stat(g, variables)
                 if st['exists'] == True:
+                    if self.userdir != self.homedir and '/templates/' not in st['path']:
+                        # Fake remote lookup
+                        st['path'] = st['path'].replace(self.userdir, self.homedir)
                     basename = os.path.basename(st['path'])
                     st['dest'] = self.get_dest(basename, params)
                 paths.append(st)
@@ -90,7 +94,7 @@ class LookupModule(LookupBase):
 
         return os.path.join(dest, name)
 
-    def get_stat(self, path):
+    def get_stat(self, path, variables):
         follow = False
 
         try:
@@ -118,11 +122,9 @@ class LookupModule(LookupBase):
         # Inventory file must be at the root
         root = variables['inventory_dir']
 
-        basedir = self.get_basedir(variables)
-
         default_roles_directory = 'roles'
 
-        roles_path, role_name = os.path.split(basedir)
+        roles_path, role_name = os.path.split(self.basedir)
 
         if len(terms) >= 1:
             role_name = terms[0]

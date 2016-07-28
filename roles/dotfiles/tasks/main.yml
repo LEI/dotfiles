@@ -16,6 +16,8 @@
 - name: Init
   set_fact:
     dot_paths: []
+    dot_paths_dest: []
+    # role_dir:
 
 - name: Prepare
   set_fact:
@@ -24,10 +26,12 @@
         {
           'state': 'template' if item.template is defined and item.template else item.state | default('link'),
           'items': lookup('dotfile',
-            item.src if item.src is defined else item.name | default(item.name | default(item)) + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files') + ',' + (item.role_dir if item.role_dir is defined else ''),
+            dot_root + '/' + item.src if item.src is defined else item.name | default(item.name | default(item))
+              + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files')
+              + ',' + (item.role_dir if item.role_dir is defined else role_dir | default('')),
             item.pattern | default('*'),
             {
-              'dest': item.dest | default(false),
+              'dest': item.dest | default(''),
               'prefix': item.prefix | default(''),
               'substr': item.substr | default('.j2'),
               },
@@ -37,14 +41,29 @@
   with_items: "{{ paths }}"
   # with_fileglob: "{{ dot_paths | map(attribute='src') | list }}"
 
+- set_fact:
+    dot_paths_dest: "{{ dot_paths_dest + [item.dest | dirname] }}"
+  with_flattened:
+    - "{{ dot_paths | map(attribute='items') | list }}"
+  # no_log: true
+
+- name: Check destination
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items: "{{ dot_paths_dest | unique }}"
+  # with_subelements:
+  #     - "{{ dot_paths }}"
+  #     - items
+
 - name: Action
   action: "{{ 'file' if item.0.state in ['link','touch','absent','present'] else item.0.state }}"
   args:
-    src: "{{ item.1.path}}"
+    src: "{{ item.1.path }}"
     dest: "{{ item.1.dest }}"
-    state: "{{ item.0.state if item.0.state != 'template' else omit }}"
+    state: "{{ item.0.state if item.0.state not in ['template'] else omit }}"
     # backup: "{{ 'yes' if dot_backup_enable and dot_backup_templates else 'no' }}"
-    # force: yes
+    # force: "{{ 'yes' if item.0.state not in ['template'] else 'no' }}"
   with_subelements:
       - "{{ dot_paths }}"
       - items

@@ -14,7 +14,7 @@
   always_run: yes # Even in check mode
 
 - name: Register node and npm version
-  set_facts:
-    node_installed: "{{ node_version_result != 0 and npm_version_result != 0 }}"
-    node_version: "{{ node_version_result.stdout if node_version_result.rc != 0 else false }}"
-    npm_version: "{{ npm_version_result.stdout if npm_version_result.rc != 0 else false }}"
+  set_fact:
+    node_installed: "{{ node_version_result.rc == 0 and npm_version_result.rc == 0 }}"
+    node_installed_version: "{{ node_version_result.stdout if node_version_result.stdout is defined and node_version_result.rc != 0 else false }}"
+    npm_installed_version: "{{ npm_version_result.stdout if node_version_result.stdout is defined and npm_version_result.rc != 0 else false }}"

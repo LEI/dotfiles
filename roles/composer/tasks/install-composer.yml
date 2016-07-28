@@ -22,6 +22,7 @@
     dest: "{{ tmp_dir }}composer-installer.php"
     mode: 0755
     checksum: "sha384:{{ lookup('file', tmp_dir + 'composer-installer.sig') }}"
+  # check mode: lookup fails
 
 - name: Run Composer installer
   shell: "{{ php_executable }} composer-installer.php --install-dir={{ composer_bin_path }} --filename=composer {% if composer_version != '' %} --version={{ composer_version }}{% endif %}"

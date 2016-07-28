@@ -4,8 +4,11 @@
   gather_facts: yes
 
   # pre_tasks:
-
-  #   - name: Update dotfiles repository
+  #   - name: Ensure git is installed
+  #     package:
+  #       name: "{{ 'git-core' if ansible_distribution == 'Debian' else 'git' }}"
+  #     become: "{{ 'yes' if ansible_distribution in ['Archlinux', 'Debian'] else 'no' }}"
+  #   - name: Clone dotfiles repository
   #     tags: ['repo']
   #     git:
   #       repo: "{{ dot_repo }}"

@@ -4,7 +4,7 @@ dependencies:
   - role: dotfiles
     paths:
       - name: bin
-        src: "{{ dot_root }}/bin"
+        src: bin
         dest: bin
       - name: shell
         prefix: .

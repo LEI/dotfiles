@@ -12,17 +12,16 @@ dependencies:
       - i3blocks
 
   - role: dotfiles
+    role_dir: roles.os
     paths:
       - name: i3
         role_dir: roles.os
         dest: .config/i3
         pattern: "config"
       - name: home
-        # role_dir: roles.os
-        src: "{{ dot_root }}/roles.os/i3/files"
+        role_dir: roles.os
         pattern: "*.conf"
         prefix: .
       - name: xresources
-        # role_dir: roles.os
-        src: "{{ dot_root }}/roles.os/i3/files/Xresources.d"
+        src: roles.os/i3/files/Xresources.d
         dest: .Xresources.d
