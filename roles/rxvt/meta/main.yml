@@ -12,8 +12,7 @@ dependencies:
   #     - rxvt-unicode
   #   when: "os in ['Windows']"
 
-  - role: symlink
-    # dot_roles_dir: roles.os
-    dot_files:
-      rxvt:
+  - role: dotfiles
+    paths:
+      - name: rxvt
         dest: .Xresources.d

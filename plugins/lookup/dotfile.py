@@ -19,7 +19,7 @@ class LookupModule(LookupBase):
 
         # if len(terms) >= 0:
         args = terms[0].split(',')
-        if args[0].startswith(os.sep):
+        if len(args) >= 1 and args[0].startswith(os.sep):
             role_path = args[0]
         else:
             role_path = self.get_role_path(args, variables)
@@ -45,7 +45,7 @@ class LookupModule(LookupBase):
         params = {
             'dest': False,
             'prefix': False,
-            'replace': False,
+            'substr': False,
             }
 
         if len(terms) >= 3:
@@ -75,7 +75,7 @@ class LookupModule(LookupBase):
     def get_dest(self, name, params):
         dest = params['dest']
         prefix = params['prefix']
-        substring = params['substring']
+        substr = params['substr']
 
         if dest and len(dest) > 0:
             if not dest.startswith(self.homedir):
@@ -85,8 +85,8 @@ class LookupModule(LookupBase):
 
         if prefix and len(prefix) > 0:
             name = prefix + name
-        if substring and len(substring) > 0:
-            name = name.replace(substring, '')
+        if substr and len(substr) > 0:
+            name = name.replace(substr, '')
 
         return os.path.join(dest, name)
 
@@ -102,7 +102,7 @@ class LookupModule(LookupBase):
             d = {
                 'exists': True,
                 'path': path,
-                'mode': "%04o" % S_IMODE(st.st_mode),
+                # 'mode': "%04o" % S_IMODE(st.st_mode),
                 'isdir': S_ISDIR(st.st_mode),
                 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
                 }
@@ -139,11 +139,11 @@ class LookupModule(LookupBase):
             roles_basename = os.path.basename(roles_path)
 
         if roles_basename != roles_directory:
-            role_basedir = os.path.join(os.path.dirname(roles_path), roles_directory)
+            role_path = os.path.join(os.path.dirname(roles_path), roles_directory)
         else:
-            role_basedir = roles_path
+            role_path = roles_path
 
-        role_path = os.path.join(role_basedir, role_name)
+        role_path = os.path.join(role_path, role_name)
 
         # Append extra arguments as directories
         if len(terms) >= 3:

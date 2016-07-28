@@ -1,11 +1,19 @@
 ---
 dependencies:
 
-  - role: symlink
-    dot_files:
-      xresources:
+  # - role: symlink
+  #   dot_files:
+  #     xresources:
+  #       prefix: .
+  #       pattern: "Xresources"
+  #     xcolors:
+  #       src: "roles/xresources/files/Xresources.d"
+  #       dest: .Xresources.d
+  - role: dotfiles
+    paths:
+      - name: xresources
         prefix: .
         pattern: "Xresources"
-      xcolors:
+      - name: xcolors
         src: "roles/xresources/files/Xresources.d"
         dest: .Xresources.d

@@ -11,16 +11,18 @@ dependencies:
     pacman_yaourt_packages:
       - i3blocks
 
-  - role: symlink
-    dot_roles_dir: roles.os
-    dot_files:
-      i3:
+  - role: dotfiles
+    paths:
+      - name: i3
+        role_dir: roles.os
         dest: .config/i3
         pattern: "config"
-      home:
-        src: "{{ dot_roles_dir }}/i3/files"
+      - name: home
+        # role_dir: roles.os
+        src: "{{ dot_root }}/roles.os/i3/files"
         pattern: "*.conf"
         prefix: .
-      xresources:
-        src: "{{ dot_roles_dir }}/i3/files/Xresources.d"
+      - name: xresources
+        # role_dir: roles.os
+        src: "{{ dot_root }}/roles.os/i3/files/Xresources.d"
         dest: .Xresources.d

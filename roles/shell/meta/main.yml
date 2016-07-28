@@ -1,16 +1,12 @@
 ---
 dependencies:
 
-  - role: symlink
-    dot_files:
-
-      bin:
-        # ~/.dotfiles/bin
-        src: bin
-        # ~/bin
+  - role: dotfiles
+    paths:
+      - name: bin
+        src: "{{ dot_root }}/bin"
         dest: bin
-
-      shell:
+      - name: shell
         prefix: .
 
   - role: get-url

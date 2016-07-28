@@ -15,12 +15,10 @@ dependencies:
   # Download and execute the installer on nodejs.org
   # Add '/cygdrive/c/Program Files/nodejs' to $PATH
 
-  - role: template
-    dot_files:
-      npm:
+  - role: dotfiles
+    paths:
+      - name: npm
         prefix: .
-
-  - role: symlink
-    dot_files:
-      npm:
+      - name: npm
         prefix: .
+        template: yes

@@ -9,4 +9,4 @@ homebrew_install: yes
 homebrew_cleanup: yes
 
 homebrew_taps: []
-homebrew_taps_state: "{{ packages_state | default('present') }}"
+homebrew_taps_state: present

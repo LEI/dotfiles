@@ -5,12 +5,10 @@ dependencies:
     packages:
       - "{{ 'git-core' if ansible_distribution == 'Debian' else 'git' }}"
 
-  - role: symlink
-    dot_files:
-      git:
+  - role: dotfiles
+    paths:
+      - name: git
         prefix: .
-
-  - role: template
-    dot_files:
-      git:
+      - name: git
         prefix: .
+        template: yes

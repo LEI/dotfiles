@@ -10,15 +10,5 @@ dependencies:
 
   - role: dotfiles
     paths:
-      - ruby
       - name: ruby
         prefix: .
-      - name: shell
-        prefix: .
-      - name: vim
-        dest: .vim
-        state: template
-        pattern: "*.vimrc"
-      - name: bin
-        src: "{{ dot_root }}/bin"
-        dest: bin

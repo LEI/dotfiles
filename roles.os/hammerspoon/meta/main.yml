@@ -6,8 +6,8 @@ dependencies:
       - hammerspoon
     # when: "ansible_os_family == 'Darwin'"
 
-  - role: symlink
-    dot_roles_dir: roles.os
-    dot_files:
-      hammerspoon:
+  - role: dotfiles
+    paths:
+      - name: hammerspoon
+        role_dir: roles.os
         dest: .hammerspoon

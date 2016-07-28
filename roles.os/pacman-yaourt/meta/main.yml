@@ -4,8 +4,8 @@ dependencies:
     packages:
       - yaourt
 
-  - role: symlink
-    dot_roles_dir: roles.os
-    dot_files:
-      pacman-yaourt:
+  - role: dotfiles
+    paths:
+      - name: pacman-yaourt
+        role_dir: roles.os
         prefix: .

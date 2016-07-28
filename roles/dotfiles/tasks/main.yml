@@ -10,22 +10,26 @@
 #   with_items: "{{ paths }}"
 
 # - debug:
-#     msg: "{{ lookup('dotfile', 'ruby/files', '*', {'dest': 'rc', 'prefix': 'tmux-'}) }}"
+#     msg: "{{ lookup('dotfile', 'ruby/files,roles.test', '*', {'dest': 'rc', 'prefix': 'tmux-'}) }}"
 # - fail:
+
+- name: Init
+  set_fact:
+    dot_paths: []
 
 - name: Prepare
   set_fact:
     dot_paths: >
-      {{ dot_paths | default([]) + [
+      {{ dot_paths + [
         {
-          'state': 'template' if item.template is defined else item.state | default('link'),
+          'state': 'template' if item.template is defined and item.template else item.state | default('link'),
           'items': lookup('dotfile',
-            item.src if item.src is defined else item.path if item.path is defined else item.name | default(item) + '/' + item.dir | default('templates' if item.template is defined or item.state is defined and item.state == 'template' else 'files'),
+            item.src if item.src is defined else item.name | default(item.name | default(item)) + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files') + ',' + (item.role_dir if item.role_dir is defined else ''),
             item.pattern | default('*'),
             {
               'dest': item.dest | default(false),
               'prefix': item.prefix | default(''),
-              'substring': item.substring | default('.j2'),
+              'substr': item.substr | default('.j2'),
               },
             wantlist=True),
         }
