@@ -12,9 +12,10 @@ lon = 2.349014
 localhost
 
 [local:vars]
+# ansible_host=localhost
 ansible_connection=local
-# Archlinux uses python3 by default
-# ansible_python_interpreter=python2
+; # Archlinux uses python3 by default
+; ansible_python_interpreter=python2
 
 # [remote]
 # homestead
