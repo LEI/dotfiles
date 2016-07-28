@@ -4,12 +4,14 @@
   register: node_version_result
   changed_when: node_version_result.rc != 0
   failed_when: false
+  always_run: yes # Even in check mode
 
 - name: Check if npm is installed
   command: npm --version
   register: npm_version_result
   changed_when: npm_version_result.rc != 0
   failed_when: false
+  always_run: yes # Even in check mode
 
 - name: Register node and npm version
   set_facts:

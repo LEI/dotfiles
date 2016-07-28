@@ -3,10 +3,11 @@
 # github.com/osxstrap/ansible-osx-php
 
 - name: Check if Composer is installed
-  command: composer --version
+  shell: composer --version
+  register: composer_version_result
   changed_when: composer_version_result.rc != 0
   failed_when: false
-  register: composer_version_result
+  always_run: yes # Even in check mode
 
 - include: install-composer.yml
   when: composer_version_result.rc != 0 or composer_force_install
