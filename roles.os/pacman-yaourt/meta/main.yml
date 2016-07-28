@@ -5,7 +5,7 @@ dependencies:
       - yaourt
 
   - role: dotfiles
+    role_dir: roles.os
     paths:
       - name: pacman-yaourt
-        role_dir: roles.os
         prefix: .

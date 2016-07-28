@@ -2,7 +2,7 @@
 dependencies:
 
   - role: dotfiles
+    role_dir: roles.os
     paths:
       - name: cygwin
-        role_dir: roles.os
         prefix: .

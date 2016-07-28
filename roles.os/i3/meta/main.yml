@@ -15,11 +15,9 @@ dependencies:
     role_dir: roles.os
     paths:
       - name: i3
-        role_dir: roles.os
         dest: .config/i3
         pattern: "config"
       - name: home
-        role_dir: roles.os
         pattern: "*.conf"
         prefix: .
       - name: xresources
