@@ -12,7 +12,7 @@ localhost
 [local:vars]
 ansible_connection=local
 # Archlinux uses python3 by default
-# ansible_python_interpreter=python2
+ansible_python_interpreter=python2
 
 # [remote]
 # homestead
