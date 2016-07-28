@@ -1,8 +1,8 @@
 ---
 dependencies:
 
-  - role: symlink
-    dot_roles_dir: roles.os
-    dot_files:
-      cygwin:
+  - role: dotfiles
+    paths:
+      - name: cygwin
+        role_dir: roles.os
         prefix: .
