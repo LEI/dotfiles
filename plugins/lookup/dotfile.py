@@ -59,7 +59,10 @@ class LookupModule(LookupBase):
             term_file = os.path.basename(term)
             # dwimmed_path = self._loader.path_dwim_relative(basedir, 'files', os.path.dirname(term))
             # dwimmed_path = self.find_file_in_search_path(variables, 'files', os.path.dirname(term))
-            globbed = glob.glob(os.path.join(os.path.dirname(term), term_file))
+            p = os.path.join(os.path.dirname(term), term_file)
+            globbed = glob.glob(p)
+            # if len(globbed) == 0:
+            #     raise AnsibleFileNotFound("%s" % p)
 
             paths = []
             for g in globbed:

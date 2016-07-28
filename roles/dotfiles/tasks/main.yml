@@ -26,7 +26,7 @@
         {
           'state': 'template' if item.template is defined and item.template else item.state | default('link'),
           'items': lookup('dotfile',
-            dot_root + '/' + item.src if item.src is defined else item.name | default(item.name | default(item))
+            dot_local_dir + '/' + item.src if item.src is defined else item.name | default(item.name | default(item))
               + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files')
               + ',' + (item.role_dir if item.role_dir is defined else role_dir | default('')),
             item.pattern | default('*'),
