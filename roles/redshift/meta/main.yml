@@ -1,0 +1,10 @@
+---
+dependencies:
+
+  - role: package
+    packages: "{{ redshift_packages }}"
+
+  - role: dotfiles
+    paths:
+      - name: redshift
+        dest: .config

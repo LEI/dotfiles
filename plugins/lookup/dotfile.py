@@ -62,11 +62,11 @@ class LookupModule(LookupBase):
 
             paths = []
             for g in globbed:
-                o = self.get_stat(g)
-                if o['exists'] == True:
-                    basename = os.path.basename(o['path'])
-                    o['dest'] = self.get_dest(basename,  params)
-                paths.append(o)
+                st = self.get_stat(g)
+                if st['exists'] == True:
+                    basename = os.path.basename(st['path'])
+                    st['dest'] = self.get_dest(basename, params)
+                paths.append(st)
 
             ret.extend(p for p in paths if p['exists'] == True) # if os.path.isfile(g))
 
@@ -103,8 +103,8 @@ class LookupModule(LookupBase):
                 'exists': True,
                 'path': path,
                 # 'mode': "%04o" % S_IMODE(st.st_mode),
-                'isdir': S_ISDIR(st.st_mode),
-                'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
+                # 'isdir': S_ISDIR(st.st_mode),
+                # 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
                 }
         except OSError, e:
             d = { 'exists': False }
