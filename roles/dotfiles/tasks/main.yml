@@ -10,36 +10,28 @@
       - touch
 
 - name: Prepare
+  vars:
+    name: "{{ item.name | default(item) }}"
+    dir: "{{ item.role_dir if item.role_dir is defined else role_dir | default('') }}"
+    type: "{{ item.dir | default('templates' if item.template is defined and item.template else 'files') }}"
+    action: "{{ 'template' if item.template is defined and item.template else item.state | default('link') }}"
   set_fact:
-    # dot_paths: >
-    #   {{ dot_paths + [
-    #     {
-    #       'state': 'template' if item.template is defined and item.template else item.state | default('link'),
-    #       'items': lookup('dotfile',
-    #         dot_local_dir + '/' + item.src if item.src is defined else item.name | default(item.name | default(item))
-    #           + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files')
-    #           + ',' + (item.role_dir if item.role_dir is defined else role_dir | default('')),
-    #         item.pattern | default('*'),
-    #         {
-    #           'dest': item.dest | default(''),
-    #           'prefix': item.prefix | default(''),
-    #           'substr': item.substr | default('.j2'),
-    #           },
-    #         wantlist=True),
-    #     }
-    #   ]}}
     dot_paths: >
-      {{ dot_paths + lookup('dotfile',
-        dot_local_dir + '/' + item.src if item.src is defined else item.name | default(item.name | default(item))
-          + '/' + item.dir | default('templates' if item.template is defined and item.template else 'files')
-          + ',' + (item.role_dir if item.role_dir is defined else role_dir | default('')),
-        item.pattern | default('*'), {
-          'dest': item.dest | default(''),
-          'prefix': item.prefix | default(''),
-          'substr': item.substr | default('.j2'),
-        }, wantlist=True
-      ) | map('combine', {
-        'state': 'template' if item.template is defined and item.template else item.state | default('link'),
+      {{ dot_paths +
+        lookup('dotfile',
+          (
+            dot_local_dir + '/' + item.src if item.src is defined else 
+            name + '/' + type if '/' not in name else name
+          ) + ',' + dir,
+          item.pattern | default('*'), {
+            'dest': item.dest | default(''),
+            'prefix': item.prefix | default(''),
+            'substr': item.substr | default('.j2'),
+          },
+          wantlist=True
+        )
+      | map('combine', {
+        'state': action,
       }) | list }}
   with_items: "{{ paths }}"
   # with_fileglob: "{{ dot_paths | map(attribute='src') | list }}"

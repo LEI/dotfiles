@@ -20,10 +20,10 @@ class LookupModule(LookupBase):
 
         # if len(terms) >= 0:
         args = terms[0].split(',')
-        if len(args) >= 1 and args[0].startswith(os.sep):
-            role_path = args[0]
-        else:
-            role_path = self.get_role_path(args, variables)
+        # if len(args) == 1 and args[0].startswith(os.sep):
+        #     role_path = args[0]
+        # else:
+        role_path = self.get_role_path(args, variables)
 
         # exists = True
         # try:
@@ -74,9 +74,12 @@ class LookupModule(LookupBase):
                         st['path'] = st['path'].replace(self.userdir, self.homedir)
                     basename = os.path.basename(st['path'])
                     st['dest'] = self.get_dest(basename, params)
+                    if 'exists' in st: del st['exists']
                 paths.append(st)
 
-            ret.extend(p for p in paths if p['exists'] == True) # if os.path.isfile(g))
+            ret.extend(p for p in paths)
+            # if p['exists'] == True
+            # if os.path.isfile(g)
 
         return ret
 
@@ -114,7 +117,7 @@ class LookupModule(LookupBase):
                 # 'isdir': S_ISDIR(st.st_mode),
                 # 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
                 }
-        except OSError, e:
+        except e: # OSError?
             d = { 'exists': False }
             # if e.errno == errno.ENOENT: # Does not exists
                 # raise AnsibleFileNotFound("could not locate file in lookup: %s" % g)
@@ -148,6 +151,8 @@ class LookupModule(LookupBase):
             role_path = os.path.join(os.path.dirname(roles_path), roles_directory)
         else:
             role_path = roles_path
+
+        # if role_name.find(os.sep):
 
         role_path = os.path.join(role_path, role_name)
 
