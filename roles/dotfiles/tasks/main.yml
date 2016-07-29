@@ -54,7 +54,7 @@
 - name: Action
   action: "{{ 'file' if item.state in dot_states else item.state }}"
   args:
-    src: "{{ item.path }}"
+    src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     state: "{{ item.state if item.state not in ['template'] else omit }}"
   with_items: "{{ dot_paths }}"

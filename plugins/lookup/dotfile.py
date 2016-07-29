@@ -62,28 +62,35 @@ class LookupModule(LookupBase):
             p = os.path.join(os.path.dirname(term), term_file)
             globbed = glob.glob(p)
 
-            if len(globbed) == 0:
-                raise AnsibleFileNotFound("Not found: %s" % p)
+            # if len(globbed) == 0:
 
-            paths = []
+            files = []
+            notfound = []
             for g in globbed:
                 st = self.get_stat(g, variables)
                 if st['exists'] == True:
+                    # Fake remote lookup, unless the template module is used
                     if self.userdir != self.homedir and '/templates/' not in st['path']:
-                        # Fake remote lookup
                         st['path'] = st['path'].replace(self.userdir, self.homedir)
                     basename = os.path.basename(st['path'])
-                    st['dest'] = self.get_dest(basename, params)
-                    if 'exists' in st: del st['exists']
-                paths.append(st)
+                    # if 'exists' in st: del st['exists']
+                    item = {
+                        'src': st['path'],
+                        'dest': self.get_dest_path(basename, params),
+                    }
+                    files.append(item)
+                else:
+                    notfound.append(st['path'])
+            if len(notfound) > 0:
+                raise AnsibleFileNotFound("Not found: " + ", ".join(notfound))
 
-            ret.extend(p for p in paths)
+            ret.extend(i for i in files)
             # if p['exists'] == True
             # if os.path.isfile(g)
 
         return ret
 
-    def get_dest(self, name, params):
+    def get_dest_path(self, name, params):
         dest = params['dest']
         prefix = params['prefix']
         substr = params['substr']
@@ -100,29 +107,6 @@ class LookupModule(LookupBase):
             name = name.replace(substr, '')
 
         return os.path.join(dest, name)
-
-    def get_stat(self, path, variables):
-        follow = False
-
-        try:
-            if follow:
-                st = os.stat(path)
-            else:
-                st = os.lstat(path)
-
-            d = {
-                'exists': True,
-                'path': path,
-                # 'mode': "%04o" % S_IMODE(st.st_mode),
-                # 'isdir': S_ISDIR(st.st_mode),
-                # 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
-                }
-        except e: # OSError?
-            d = { 'exists': False }
-            # if e.errno == errno.ENOENT: # Does not exists
-                # raise AnsibleFileNotFound("could not locate file in lookup: %s" % g)
-
-        return d
 
     def get_role_path(self, terms, variables):
 
@@ -162,3 +146,26 @@ class LookupModule(LookupBase):
                 role_path = os.path.join(role_path, term)
 
         return role_path
+
+    def get_stat(self, path, variables):
+        follow = False
+
+        try:
+            if follow:
+                st = os.stat(path)
+            else:
+                st = os.lstat(path)
+
+            d = {
+                'exists': True,
+                'path': path,
+                # 'mode': "%04o" % S_IMODE(st.st_mode),
+                # 'isdir': S_ISDIR(st.st_mode),
+                # 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
+                }
+        except e: # OSError?
+            d = { 'exists': False }
+            # if e.errno == errno.ENOENT: # Does not exists
+                # raise AnsibleFileNotFound("could not locate file in lookup: %s" % g)
+
+        return d
