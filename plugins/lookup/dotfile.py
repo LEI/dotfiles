@@ -61,8 +61,9 @@ class LookupModule(LookupBase):
             # dwimmed_path = self.find_file_in_search_path(variables, 'files', os.path.dirname(term))
             p = os.path.join(os.path.dirname(term), term_file)
             globbed = glob.glob(p)
-            # if len(globbed) == 0:
-            #     raise AnsibleFileNotFound("%s" % p)
+
+            if len(globbed) == 0:
+                raise AnsibleFileNotFound("Not found: %s" % p)
 
             paths = []
             for g in globbed:
