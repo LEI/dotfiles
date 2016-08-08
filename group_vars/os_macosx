@@ -191,10 +191,10 @@ osx_defaults:
     # Disable window animations and Get Info animations
     DisableAllAnimations: {domain: com.apple.finder, type: bool, value: true}
 
-    # Set Desktop as the default location for new Finder windows
+    # Set the default location for new Finder windows
     # For other paths, use 'PfLo' and 'file:///full/path/here/'
-    NewWindowTarget: {domain: com.apple.finder, value: "PfDe"}
-    NewWindowTargetPath: {domain: com.apple.finder, value: "file://{{ ansible_env.HOME }}/Desktop/"}
+    NewWindowTarget: {domain: com.apple.finder, value: "PfLo"} # PfDe
+    NewWindowTargetPath: {domain: com.apple.finder, value: "file://{{ ansible_env.HOME }}/"}
 
     # Show icons for hard drives, servers, and removable media on the desktop
     ShowExternalHardDrivesOnDesktop: {domain: com.apple.finder, type: bool, value: true}
