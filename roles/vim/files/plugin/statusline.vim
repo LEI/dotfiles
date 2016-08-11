@@ -6,9 +6,9 @@
 " https://gist.github.com/suderman/1229444
 " https://github.com/millermedeiros/vim-statline
 
-" if &compatible || get(g:, 'loaded_statusline', 0)
-"   finish
-" endif
+if &compatible || get(g:, 'loaded_statusline', 0)
+  finish
+endif
 let g:loaded_statusline = 1
 
 " Variables: {{{1

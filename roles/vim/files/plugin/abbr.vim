@@ -2,7 +2,7 @@
 
 " FIXME remove space (BS?)
 abbr cl! console.log( )<Left><Left>
+"abbr vd! var_dump( )<Left><Left>
 
-" Inser mode only
-
+" Insert mode
 iabbrev pyhton python
