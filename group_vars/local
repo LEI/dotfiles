@@ -14,6 +14,9 @@ npm_packages:
   - jshint
   # - localtunnel
 
+go_packages:
+  - go
+
 pip_packages:
   # Update pip
   - { name: pip, extra_args: --upgrade } # TODO Debian sudo
