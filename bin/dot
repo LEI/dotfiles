@@ -61,14 +61,17 @@ ansible_install() {
       # Install ansible with homebrew? (pip installs 2.0)
       ;;
     Linux)
-      die "TODO: detect linux package manager"
 
       # pip cryptography on raspbian ->
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
-
-      # Debian/Ubuntu:
-      # sudo apt-get install python-setuptools # Installed in requirements?
-      # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
+      if has apt-get; then
+        # Debian/Ubuntu:
+        # sudo apt-get install python-setuptools # Installed in requirements?
+        # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
+        su_do apt-get install python-setuptools
+      else
+        die "Unkown package manager"
+      fi
 
       # Fedora/CentOS:
       # sudo yum install gcc libffi-devel openssl-devel python-devel
