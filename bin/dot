@@ -11,9 +11,11 @@ DOT_REQUIREMENTS="$DOT_ROOT/requirements"
 DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
 
 main() {
-  if [[ "$1" == "!install" ]]; then
-    shift
-    ansible_install
+  if [[ $? -gt 0 ]]; then
+    if [[ "$1" == "--force-install" ]]; then
+      shift
+      ansible_install
+    fi
   fi
 
   if ! has ansible; then
@@ -75,10 +77,10 @@ ansible_install() {
         # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
         su_do apt-get install python-setuptools
       elif has pacman; then
-        # Archlinux:
+        # Archlinux: (requires sudo, git)
         # http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
         su_do pacman -Syu --noconfirm
-        su_do pacman -S git python2 ansible --noconfirm # git python2-setuptools --noconfirm
+        su_do pacman -S git python2 python2-setuptools python2-cryptography python2-pip ansible --noconfirm
         # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       else
         die "Unkown package manager"
