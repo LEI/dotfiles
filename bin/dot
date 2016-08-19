@@ -73,7 +73,7 @@ ansible_install() {
         # Archlinux:
         # http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
         su_do pacman -Syu --noconfirm
-        su_do pacman -S ansible --noconfirm # git python2-setuptools --noconfirm
+        su_do pacman -S git python2 ansible --noconfirm # git python2-setuptools --noconfirm
         # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       else
         die "Unkown package manager"
