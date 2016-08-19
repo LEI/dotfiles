@@ -69,6 +69,12 @@ ansible_install() {
         # sudo apt-get install python-setuptools # Installed in requirements?
         # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
         su_do apt-get install python-setuptools
+      elif has pacman; then
+        # Archlinux:
+        # http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
+        su_do pacman -Syu --noconfirm
+        su_do pacman -S ansible --noconfirm # git python2-setuptools --noconfirm
+        # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
       else
         die "Unkown package manager"
       fi
@@ -76,12 +82,6 @@ ansible_install() {
       # Fedora/CentOS:
       # sudo yum install gcc libffi-devel openssl-devel python-devel
 
-      # if has pacman; then
-      #   # Archlinux: http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
-      #   su_do pacman -Syu --noconfirm
-      #   su_do pacman -S ansible --noconfirm # git python2-setuptools --noconfirm
-      #   # python2 / python2-crypto / python2-cryptography / pyhton2-packaging / python2-pip
-      # fi
       ;;
     Cygwin)
       # https://github.com/grlee/ansible-galaxy.ansible-init/blob/develop/files/setup.sh
