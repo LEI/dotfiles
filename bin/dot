@@ -11,6 +11,11 @@ DOT_REQUIREMENTS="$DOT_ROOT/requirements"
 DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
 
 main() {
+  if [[ "$1" == "!install" ]]; then
+    shift
+    ansible_install
+  fi
+
   if ! has ansible; then
     ansible_install
   fi
