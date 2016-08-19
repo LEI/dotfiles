@@ -11,6 +11,10 @@ DOT_REQUIREMENTS="$DOT_ROOT/requirements"
 DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
 
 run_playbook() {
+  # if [[ $? -gt 0 ]]; then
+  #   [[ "$1" == "--force-install" ]] && shift \
+  #     && ansible_install
+  # fi
   if ! has ansible; then
     ansible_install
   fi
@@ -174,12 +178,5 @@ die() {
   error "$@"
   exit 1
 }
-
-if [[ $? -gt 0 ]]; then
-  if [[ "$1" == "--force-install" ]]; then
-    shift
-    ansible_install
-  fi
-fi
 
 [[ "$0" == "$BASH_SOURCE" ]] && time run_playbook "$@"
