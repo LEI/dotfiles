@@ -21,7 +21,6 @@ dependencies:
       - name: i3
         dest: .config/i3
         pattern: "*.conf"
-        prefix: .
       - name: i3/files/Xresources.d
         # src: roles/i3/files/Xresources.d
         dest: .Xresources.d
