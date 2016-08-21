@@ -69,7 +69,7 @@ bindsym $mod+Shift+q kill
 # bindsym $mod+d exec dmenu_run
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 bindsym $mod+d exec rofi -show run -lines 3 -eh 2 -width 100 -padding 440 -bw 0 -font "System San Fransisco Display 18"
-# -opacity "85" -bc "$base01" -bg "$base01" -fg "$base03" -hlbg "$base01" -hlfg "$base07" 
+# -opacity "85" -bc "$base01" -bg "$base01" -fg "$base03" -hlbg "$base01" -hlfg "$base07"
 
 # Change focus
 bindsym $mod+h focus left
@@ -190,8 +190,9 @@ client.urgent           $base02 $base08 $base00 $base0F
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        status_command i3status --config ~/.i3status.conf
-        # status_command i3blocks # Not available on Arch ARM
+        # i3blocks is not available on Arch ARM
+        # status_command i3blocks -c ~/.config/i3/blocks.conf
+        status_command i3status --config ~/.config/i3/status.conf
         position bottom
         # strip_workspace_numbers yes
         # height 25
