@@ -1,5 +1,8 @@
 #!/bin/bash
 # http://code.stapelberg.de/git/i3status/tree/contrib/measure-net-speed.bash
+# ip addr
+# find /sys/devices -name network_interface
+
 # Public Domain
 # (someone claimed the next lines would be useful for…
 #  people. So here goes: © 2012 Stefan Breunig
