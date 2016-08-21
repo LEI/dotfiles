@@ -3,13 +3,14 @@ dependencies:
 
   - role: package
     packages:
-      - i3
-      - rofi
-      - scrot
+      - i3 # window manager
+      - rofi # window switcher
+      - scrot # screenshot utility
+      # - gtk-theme-arc #-git
 
-  - role: pacman-yaourt
-    pacman_yaourt_packages:
-      - i3blocks
+  # - role: pacman-yaourt
+  #   pacman_yaourt_packages:
+  #     - i3blocks
 
   - role: dotfiles
     paths:
