@@ -45,12 +45,13 @@ return {
         -- { mods = mash, key = "L", fn = hs.grid.pushWindowRight },
     },
     init = function()
+        -- Grid size
+        hs.grid.setGrid(config.grid.geometry, config.grid.screen, config.grid.frame)
+        -- Hint layout
         for name,layout in pairs(config.grid.hints) do
             if string.find(hs.keycodes.currentLayout(), name) then
                 hs.grid.HINTS = layout
             end
         end
-        -- Change grid size
-        hs.grid.setGrid(config.grid.geometry, config.grid.screen, config.grid.frame)
     end
 }
