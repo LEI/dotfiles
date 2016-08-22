@@ -1,80 +1,115 @@
-#!/bin/bash
-# http://code.stapelberg.de/git/i3status/tree/contrib/measure-net-speed.bash
-# (ip addr)
-# find /sys/devices -name network_interface
+#!/bin/sh
+# Copyright (c) 2014 Zhong Jianxin <azuwis@gmail.com>
 
-# Public Domain
-# (someone claimed the next lines would be useful for…
-#  people. So here goes: © 2012 Stefan Breunig
-#  stefan+measure-net-speed@mathphys.fsk.uni-heidelberg.de)
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 
-# path to store the old results in
-path="/dev/shm/measure-net-speed"
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 
-# grabbing data for each adapter. 
-# You can find the paths to your adapters using
-#  find /sys/devices -name statistics
-# If you have more (or less) than two adapters, simply adjust the script here
-# and in the next block. 
-# eth0="/sys/devices/pci0000:00/0000:00:19.0/net/eth0/statistics"
-# wlan0="/sys/devices/pci0000:00/0000:00:1c.1/0000:03:00.0/net/wlan0/statistics"
-eth0="/sys/class/net/eth0/statistics"
-wlan0="/sys/class/net/eth0/statistics"
-read eth0_rx < "${eth0}/rx_bytes"
-read eth0_tx < "${eth0}/tx_bytes"
-read wlan0_rx < "${wlan0}/rx_bytes"
-read wlan0_tx < "${wlan0}/tx_bytes"
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
-# get time and sum of rx/tx for combined display
-time=$(date +%s)
-rx=$(( $eth0_rx + $wlan0_rx ))
-tx=$(( $eth0_tx + $wlan0_tx ))
+# Thank Stefan Breunig for the original implementation, see
+# contrib/measure-net-speed.bash.
 
-# write current data if file does not exist. Do not exit, this will cause
-# problems if this file is sourced instead of executed as another process.
-if ! [[ -f "${path}" ]]; then
-  echo "${time} ${rx} ${tx}" > "${path}"
-  chmod 0666 "${path}"
+# i3status.conf should contain:
+# general {
+#   output_format = i3bar
+# }
+
+# i3 config looks like this:
+# bar {
+#   status_command exec /usr/share/doc/i3status/contrib/net-speed
+# }
+
+# Single interface
+#ifaces="eth0"
+
+# Multiple interfaces
+#ifaces="eth0 wlan0"
+
+# Auto detect
+ifaces=$(ls /sys/class/net | grep -E '^(eth|wlan)')
+
+# Interval must be the same as in i3status.conf
+#interval=5
+
+if [ -z "$XDG_CONFIG_HOME" ]; then
+  XDG_CONFIG_HOME="${HOME}/.config"
 fi
 
-# read previous state and update data storage
-read old < "${path}"
-echo "${time} ${rx} ${tx}" > "${path}"
-
-# parse old data and calc time passed
-old=(${old//;/ })
-time_diff=$(( $time - ${old[0]} ))
-
-# sanity check: has a positive amount of time passed
-if [[ "${time_diff}" -gt 0 ]]; then
-  # calc bytes transferred, and their rate in byte/s
-  rx_diff=$(( $rx - ${old[1]} ))
-  tx_diff=$(( $tx - ${old[2]} ))
-  rx_rate=$(( $rx_diff / $time_diff ))
-  tx_rate=$(( $tx_diff / $time_diff ))
-
-  # shift by 10 bytes to get KiB/s. If the value is larger than
-  # 1024^2 = 1048576, then display MiB/s instead (simply cut off  
-  # the last two digits of KiB/s). Since the values only give an  
-  # rough estimate anyway, this improper rounding is negligible.
-
-  # incoming
-  rx_kib=$(( $rx_rate >> 10 ))
-  if [[ "$rx_rate" -gt 1048576 ]]; then
-    echo -n "${rx_kib:0:-3}.${rx_kib: -3:-2} M↓"
-  else
-    echo -n "${rx_kib} K↓"
-  fi
-
-  echo -n "  "
-
-  # outgoing
-  tx_kib=$(( $tx_rate >> 10 ))
-  if [[ "$tx_rate" -gt 1048576 ]]; then
-    echo -n "${tx_kib:0:-3}.${tx_kib: -3:-2} M↑"
-  else
-    echo -n "${tx_kib} K↑"
-  fi
+# Auto detect
+if [ -f "${XDG_CONFIG_HOME}/i3status/config" ]; then
+  i3status_conf="${XDG_CONFIG_HOME}/i3status/config"
+elif [ -f ~/.i3status.conf ]; then
+  i3status_conf=~/.i3status.conf
 else
-  echo -n " ? "
+  i3status_conf="/etc/i3status.conf"
 fi
+
+if [ -f "$i3status_conf" ]; then
+  interval=$(grep -o '^[[:space:]]*interval[[:space:]]*=[[:space:]]*[[:digit:]]\+' $i3status_conf | grep -o '[[:digit:]]\+')
+fi
+
+if [ x"$interval" = x ]; then
+  interval=5
+fi
+
+last_rx=0
+last_tx=0
+rate=""
+
+readable() {
+    local byte=$1
+    local kib=$(( byte >> 10 ))
+    if [ "$kib" -gt 1024 ]; then
+        local mib_int=$(( kib >> 10 ))
+        local mib_dec=$(( kib % 1024 * 976 / 10000 ))
+        if [ "$mib_dec" -lt 10 ]; then
+            mib_dec="0${mib_dec}"
+        fi
+        echo "${mib_int}.${mib_dec}M"
+    else
+        echo "${kib}K"
+    fi
+}
+
+update_rate() {
+    local rx=0
+    local tx=0
+    for iface in $ifaces; do
+        local tmp_rx
+        local tmp_tx
+        local stat="/sys/class/net/${iface}/statistics"
+        read tmp_rx < "${stat}/rx_bytes"
+        read tmp_tx < "${stat}/tx_bytes"
+        rx=$(( rx + tmp_rx ))
+        tx=$(( tx + tmp_tx ))
+    done
+    rate="$(readable $(( (rx - last_rx) / interval )))↓ $(readable $(( (tx - last_tx) / interval )))↑"
+    last_rx=$rx
+    last_tx=$tx
+}
+
+# while :; do
+    update_rate
+    echo "$rate"
+#     sleep "$interval"
+# done
+
+# i3status | (read line && echo "$line" && read line && echo "$line" && read line && echo "$line" && update_rate && while :
+# do
+#     read line
+#     update_rate
+#     echo ",[{\"full_text\":\"${rate}\" },${line#,\[}" || exit 1
+# done)
