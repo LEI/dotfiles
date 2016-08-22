@@ -9,15 +9,16 @@ pacman_packages:
   - imagemagick
   # - lxappearance
   # - the_silver_searcher # Conflicting with silver-searcher-git - ack / ag / pt?
-  - ttf-hack
+  - ttf-hack # console font
   - unzip
   - xclip
 
-# i3
-# xorg-xinit
+# TODO xorg-xinit
 
 # Arch User Repository
 yaourt_packages: []
+  # - google-chrome
+  # - system-san-fransisco-font-git # system font
 
 node_packages:
   - nodejs

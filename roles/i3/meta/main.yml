@@ -3,13 +3,15 @@ dependencies:
 
   - role: package
     packages:
-      - i3
-      - rofi
-      - scrot
+      - i3 # window manager
+      - rofi # window switcher
+      - scrot # screenshot utility
+      # - gtk-theme-arc #-git
 
-  - role: pacman-yaourt
-    pacman_yaourt_packages:
-      - i3blocks
+  # - role: pacman-yaourt
+  #   pacman_yaourt_packages:
+  #     - i3blocks
+  #     - ttf-font-awesome
 
   - role: dotfiles
     paths:
@@ -17,8 +19,8 @@ dependencies:
         dest: .config/i3
         pattern: "config"
       - name: i3
+        dest: .config/i3
         pattern: "*.conf"
-        prefix: .
       - name: i3/files/Xresources.d
         # src: roles/i3/files/Xresources.d
         dest: .Xresources.d
