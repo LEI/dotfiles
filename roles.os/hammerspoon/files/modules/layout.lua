@@ -21,6 +21,7 @@ local function applyWindowLayout()
         {"Sequel Pro", nil, screens[2]:name(), hs.layout.center, nil, nil},
         {"Skype", nil, screens[2]:name(), hs.layout.left50, nil, nil },
         {"Mail", nil, screens[2]:name(), hs.layout.right50, nil, nil },
+        {"Slack", nil, screens[2]:name(), hs.layout.center, nil, nil },
     }
 
     hs.layout.apply(windowLayout)
