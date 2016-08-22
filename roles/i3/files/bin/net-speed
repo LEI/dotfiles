@@ -1,13 +1,12 @@
 #!/bin/bash
 # http://code.stapelberg.de/git/i3status/tree/contrib/measure-net-speed.bash
-# ip addr
+# (ip addr)
 # find /sys/devices -name network_interface
 
 # Public Domain
 # (someone claimed the next lines would be useful for…
 #  people. So here goes: © 2012 Stefan Breunig
 #  stefan+measure-net-speed@mathphys.fsk.uni-heidelberg.de)
-
 
 # path to store the old results in
 path="/dev/shm/measure-net-speed"
@@ -17,8 +16,10 @@ path="/dev/shm/measure-net-speed"
 #  find /sys/devices -name statistics
 # If you have more (or less) than two adapters, simply adjust the script here
 # and in the next block. 
-eth0="/sys/devices/pci0000:00/0000:00:19.0/net/eth0/statistics"
-wlan0="/sys/devices/pci0000:00/0000:00:1c.1/0000:03:00.0/net/wlan0/statistics"
+# eth0="/sys/devices/pci0000:00/0000:00:19.0/net/eth0/statistics"
+# wlan0="/sys/devices/pci0000:00/0000:00:1c.1/0000:03:00.0/net/wlan0/statistics"
+eth0="/sys/class/net/eth0/statistics"
+wlan0="/sys/class/net/eth0/statistics"
 read eth0_rx < "${eth0}/rx_bytes"
 read eth0_tx < "${eth0}/tx_bytes"
 read wlan0_rx < "${wlan0}/rx_bytes"

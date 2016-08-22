@@ -115,6 +115,11 @@ bindsym $mod+Shift+space floating toggle
 # Change focus between tiling / floating windows
 bindsym $mod+space focus mode_toggle
 
+# Borders
+# bindsym $mod+t border normal
+# bindsym $mod+y border 1pixel
+# bindsym $mod+u border none
+
 # Focus the parent container
 bindsym $mod+a focus parent
 
@@ -192,7 +197,7 @@ client.urgent           $base02 $base08 $base00 $base0F
 bar {
         # i3blocks is not available on Arch ARM
         # status_command i3blocks -c ~/.config/i3/blocks.conf
-        status_command i3status --config ~/.config/i3/status.conf
+        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
         position bottom
         # strip_workspace_numbers yes
         # height 25

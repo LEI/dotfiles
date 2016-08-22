@@ -17,10 +17,10 @@ dependencies:
     paths:
       - name: i3
         dest: .config/i3
-        pattern: "config"
-      - name: i3
-        dest: .config/i3
-        pattern: "*.conf"
+        pattern: 
+          - bin
+          - config
+          - "*.conf"
       - name: i3/files/Xresources.d
         # src: roles/i3/files/Xresources.d
         dest: .Xresources.d
