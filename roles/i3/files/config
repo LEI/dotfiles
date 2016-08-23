@@ -22,16 +22,22 @@ set $base0D #97bbf7
 set $base0E #c0b7f9
 set $base0F #fcc09e
 
-set $workspace1 "1: "
-set $workspace2 "2: "
-set $workspace3 "3: "
-set $workspace4 "4: "
-set $workspace5 "5: "
-set $workspace6 "6: "
-set $workspace7 "7: "
-set $workspace8 "8: "
-set $workspace9 "9: "
-set $workspace10 "10: ♪"
+# Firefox
+set $workspace1 "1  "
+# Terminal
+set $workspace2 "2  "
+# </>
+set $workspace3 "3  "
+set $workspace4 "4  "
+set $workspace5 "5  "
+set $workspace6 "6  "
+set $workspace7 "7  "
+# Video
+set $workspace8 "8  "
+# Skype
+set $workspace9 "9  "
+# Music
+set $workspace10 "10  ♪
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below
@@ -201,7 +207,8 @@ bar {
         # tray_output primary
         # tray_padding 10
         colors {
-                separator $base02 # 03
+                separator $base02
+                # sep $base03
                 background $base01
                 statusline $base05
                 #                  border  bg      text
@@ -228,3 +235,5 @@ assign [class="Skype"] $workspace9
 
 # Startup
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1680x980
+# exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
+exec --no-startup-id i3-msg 'workspace 2; exec urxvt -e tmux; workspace 1'
