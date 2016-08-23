@@ -192,7 +192,7 @@ client.urgent           $base02 $base08 $base00 $base0F
 # status_command i3blocks -c ~/.config/i3/blocks.conf
 bar {
         position bottom
-        separator_symbol " │ "
+        separator_symbol "│"
         status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
         # binding_mode_indicator yes
         # bindsym button4 nop
@@ -201,7 +201,7 @@ bar {
         # tray_output primary
         # tray_padding 10
         colors {
-                separator $base03
+                separator $base02 # 03
                 background $base01
                 statusline $base05
                 #                  border  bg      text

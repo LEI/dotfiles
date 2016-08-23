@@ -1,9 +1,45 @@
 #!/bin/sh
 
+# json() {
+#   local arr="$@"
+#   # while read a b
+#   # arr=("${arr[@]}" "$a" "$b")
+#   # local i=0
+#   local len="${#arr[@]}"
+#   str="{"
+#   for i in "${!arr[@]}"
+#   do
+#     echo $i ${arr[$i]}
+#     # Skip values
+#     if [[ "$(($i % 2))" -ne 0 ]]
+#     then
+#       # i=$(($i + 1))
+#       continue
+#     fi
+#     # key: value
+#     str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
+#     # Add separator in needed
+#     [[ "$i" -lt "$(($len - 2))" ]] && str+=","
+#     # i=$(($i + 1))
+#   done
+#   str+="}"
+#   echo "$str"
+# }
+
+escape() {
+  echo "\"${1}\":\"${2}\""
+}
+
 i3status "$@" | while :
 do
   read line
+  str=
+
+  # Network speed
   net=$(~/.config/i3/bin/net-speed)
-  net="[{ \"full_text\": \"${net}\" },"
-  echo "${line/[/$net}" || exit 1
+  # net="[{ \"full_text\": \"${net}\" },"
+  str+="{ $(escape "full_text" "$net") }"
+
+  prepend="[${str},"
+  echo "${line/[/$prepend}" || exit 1
 done
