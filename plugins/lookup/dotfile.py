@@ -37,11 +37,16 @@ class LookupModule(LookupBase):
         # else:
         #     raise AnsibleError("Not found: role_path '%s'" % role_path)
 
-        search = []
-        if len(terms) >= 2:
-            search.append(terms[1]) # [1:]
+        if len(terms) < 2:
+            search= ['*']
         else:
-            search.append(['*'])
+            search = []
+            # search.append(terms[1]) # [1:]
+            pattern = terms[1]
+            if isinstance(pattern, basestring):
+                search.append(pattern)
+            else:
+                search = pattern
 
         params = {
             'dest': False,

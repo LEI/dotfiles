@@ -1,0 +1,9 @@
+#!/bin/sh
+
+i3status "$@" | while :
+do
+  read line
+  net=$(~/.config/i3/bin/net-speed)
+  net="[{ \"full_text\": \"${net}\" },"
+  echo "${line/[/$net}" || exit 1
+done
