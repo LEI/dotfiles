@@ -191,12 +191,15 @@ client.urgent           $base02 $base08 $base00 $base0F
 # i3blocks is not available on Arch ARM
 # status_command i3blocks -c ~/.config/i3/blocks.conf
 bar {
-        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
         position bottom
-        # strip_workspace_numbers yes
-        # height 25
+        separator_symbol " │ "
+        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
+        # binding_mode_indicator yes
         # bindsym button4 nop
         # bindsym button5 nop
+        # strip_workspace_numbers yes
+        # tray_output primary
+        # tray_padding 10
         colors {
                 separator $base03
                 background $base01
@@ -213,7 +216,7 @@ bar {
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [title="Preferences$"] floating enable
-#for_window [class="(?i)mplayer"] floating enable
+for_window [class="(?i)mplayer"] floating enable
 
 for_window [class="Lxappearance"] floating enable
 for_window [class="Pavucontrol"] floating enable
