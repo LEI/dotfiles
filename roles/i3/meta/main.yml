@@ -9,6 +9,7 @@ dependencies:
       - xorg-xinit
       - xorg-server
       - xorg-server-utils
+      # - gnome-themes-standard
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
@@ -17,6 +18,7 @@ dependencies:
       # - gtk-theme-arc
       - ttf-font-awesome
       - system-san-francisco-font-git
+      - arc-firefox-theme
 
   - role: dotfiles
     paths:
