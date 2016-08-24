@@ -1,5 +1,5 @@
 # i3 v4 configuration file
-#
+
 # http://i3wm.org/docs/userguide.html
 # https://github.com/Airblader/dotfiles-manjaro
 
@@ -187,7 +187,6 @@ mode "resize" {
 }
 
 # Window colors
-#                       border  bg      text    indicator
 client.focused          $base01 $base01 $base07 $base0F
 client.focused_inactive $base02 $base02 $base03 $base0F
 client.unfocused        $base02 $base02 $base03 $base0F
@@ -198,19 +197,18 @@ client.urgent           $base02 $base08 $base00 $base0F
 # i3blocks is not available on Arch ARM
 # status_command i3blocks -c ~/.config/i3/blocks.conf
 bar {
-        position bottom
-        separator_symbol "│"
-        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
         # binding_mode_indicator yes
         # bindsym button4 nop
         # bindsym button5 nop
+        position bottom
+        separator_symbol "│"
+        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
         # strip_workspace_numbers yes
         # tray_output primary
         # tray_padding 10
         colors {
-                separator $base02
-                # sep $base03
                 background $base01
+                separator $base02
                 statusline $base05
                 #                  border  bg      text
                 focused_workspace  $base01 $base01 $base07
@@ -237,4 +235,5 @@ assign [class="Skype"] $workspace9
 # Startup
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1680x980
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
-exec --no-startup-id i3-msg 'workspace $workspace2; exec urxvt -e tmux; workspace $workspace1'
+exec --no-startup-id redshift-gtk
+exec --no-startup-id i3-msg 'workspace $workspace2; exec urxvt; workspace $workspace1'

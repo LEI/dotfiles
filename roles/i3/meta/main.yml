@@ -9,8 +9,8 @@ dependencies:
       - ttf-hack
       - xorg-xinit
       - xorg-server
-      - xorg-server-utils
-      # - gnome-themes-standard
+      # - xorg-server-utils
+      # - gnome-themes-standard # (gtk warning)
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
