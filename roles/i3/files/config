@@ -68,7 +68,8 @@ bindsym $mod+Shift+q kill
 # Window switcher
 # bindsym $mod+d exec dmenu_run
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-bindsym $mod+d exec rofi -show run -lines 3 -eh 2 -width 100 -padding 300 -bw 0 -font "System San Fransisco Display 18"
+# bindsym $mod+d exec rofi -show run -lines 3 -eh 2 -width 100 -padding 300 -bw 0 -font "System San Fransisco Display 18"
+bindsym $mod+d exec rofi -show run
 # -separator-style solid
 
 # -opacity "85" -bc "$base01" -bg "$base01" -fg "$base03" -hlbg "$base01" -hlfg "$base07"
