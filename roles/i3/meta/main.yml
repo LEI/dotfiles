@@ -11,10 +11,11 @@ dependencies:
       - xorg-server
       - xorg-server-utils
 
-  # - role: pacman-yaourt
-  #   pacman_yaourt_packages:
-  #     - i3blocks
-  #     - ttf-font-awesome
+  - role: pacman-yaourt
+    pacman_yaourt_packages:
+      # - i3blocks
+      - ttf-font-awesome
+      - system-san-fransisco-font-git
 
   - role: dotfiles
     paths:
