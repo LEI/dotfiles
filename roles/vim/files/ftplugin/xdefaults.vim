@@ -1,0 +1,3 @@
+" Xresources
+
+setlocal commentstring=!\ %s

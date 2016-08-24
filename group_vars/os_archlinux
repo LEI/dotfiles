@@ -7,17 +7,16 @@ pacman_packages:
   - cmake
   - firefox
   - imagemagick
-  # - lxappearance
-  # - the_silver_searcher # Conflicting with silver-searcher-git - ack / ag / pt?
+  - lxappearance
   - unzip
   - xclip
 
-# TODO xorg-xinit
+  # Conflicting with silver-searcher-git
+  # - the_silver_searcher - ack / ag / pt?
 
 # Arch User Repository
 yaourt_packages: []
   # - google-chrome
-  # - system-san-fransisco-font-git # system font
 
 node_packages:
   - nodejs

@@ -1,0 +1,3 @@
+" INI
+
+setlocal commentstring=#\ %s
