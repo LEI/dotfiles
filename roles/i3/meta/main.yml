@@ -6,7 +6,6 @@ dependencies:
       - i3 # window manager
       - rofi # window switcher
       - scrot # screenshot utility
-      # - gtk-theme-arc #-git
       - xorg-xinit
       - xorg-server
       - xorg-server-utils
@@ -14,6 +13,8 @@ dependencies:
   - role: pacman-yaourt
     pacman_yaourt_packages:
       # - i3blocks
+      # - arc-icon-theme
+      # - gtk-theme-arc
       - ttf-font-awesome
       - system-san-francisco-font-git
 
