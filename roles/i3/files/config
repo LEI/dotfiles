@@ -236,4 +236,4 @@ assign [class="Skype"] $workspace9
 # Startup
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1680x980
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
-exec --no-startup-id i3-msg 'workspace 2; exec urxvt -e tmux; workspace 1'
+exec --no-startup-id i3-msg 'workspace $workspace2; exec urxvt -e tmux; workspace $workspace1'
