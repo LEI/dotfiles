@@ -1,5 +1,11 @@
 ---
 dependencies:
+  # - role: ini_block
+  #   /etc/pacman.conf:
+  #     [archlinuxfr]
+  #     SigLevel = Never
+  #     Server = http://repo.archlinux.fr/$arch
+
   - role: package
     packages:
       - yaourt

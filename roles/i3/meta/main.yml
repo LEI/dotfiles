@@ -7,6 +7,9 @@ dependencies:
       - rofi # window switcher
       - scrot # screenshot utility
       # - gtk-theme-arc #-git
+      - xorg-xinit
+      - xorg-server
+      - xorg-server-utils
 
   # - role: pacman-yaourt
   #   pacman_yaourt_packages:
