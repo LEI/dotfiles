@@ -2,24 +2,12 @@
 dependencies:
 
   - role: package
-    packages:
-      - i3 # window manager
-      - rofi # window switcher
-      - scrot # screenshot utility
-      - ttf-hack
-      - xorg-xinit
-      - xorg-server
-      # - xorg-server-utils
-      # - gnome-themes-standard # (gtk warning)
+    packages: "{{ i3_packages }}"
 
-  - role: pacman-yaourt
-    pacman_yaourt_packages:
-      # - i3blocks
-      - arc-firefox-theme
-      - arc-icon-theme
-      - gtk-theme-arc
-      - system-san-francisco-font-git
-      - ttf-font-awesome
+  # - role: pacman-yaourt
+  #   pacman_yaourt_packages:
+  #     - i3blocks # Not available on ALARM
+  #   when: "{{ ansible_os_family == 'Archlinux' }}"
 
   - role: dotfiles
     paths:

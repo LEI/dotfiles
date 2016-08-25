@@ -7,7 +7,7 @@ pacman_packages:
   - cmake
   - firefox
   - imagemagick
-  - lxappearance
+  - lxappearance # gnome-themes-standard
   - unzip
   # - vlc - qt4
   - xclip
@@ -17,7 +17,9 @@ pacman_packages:
   # - the_silver_searcher - ack / ag / pt?
 
 # Arch User Repository
-yaourt_packages: []
+yaourt_packages:
+  - system-san-francisco-font-git
+  - ttf-font-awesome
   # - google-chrome
 
 node_packages:
@@ -41,3 +43,12 @@ vim_packages:
   # yaourt: vim-youcompleteme-git
   - neovim
   - python-neovim
+
+i3_packages:
+  - i3 # window manager
+  - rofi # window switcher
+  - scrot # screenshot utility
+  - ttf-hack
+  - xorg-xinit
+  - xorg-server
+    # - xorg-server-utils

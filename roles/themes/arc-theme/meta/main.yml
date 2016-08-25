@@ -1,0 +1,9 @@
+---
+dependencies:
+
+  - role: pacman-yaourt
+    pacman_yaourt_packages:
+      - arc-firefox-theme
+      - arc-icon-theme
+      - gtk-theme-arc
+    when: "{{ ansible_os_family == 'Archlinux' }}"

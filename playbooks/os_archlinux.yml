@@ -23,6 +23,9 @@
     - role: i3
       tags: [i3, wm]
 
+    # Gtk, icons & Firefox
+    - role: arc-theme
+
     # Install rxvt-unicode and symlink ~/.Xresources
     - role: rxvt
       tags: [rxvt, terminal]
@@ -30,6 +33,5 @@
     - role: xresources
       tags: [x]
 
-    # TODO location, autostart
-    - role: redshift
+    - role: redshift # location, autostart?
       tags: [redshift]
