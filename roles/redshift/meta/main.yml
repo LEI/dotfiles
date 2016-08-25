@@ -4,10 +4,11 @@ dependencies:
   - role: package
     packages: "{{ redshift_packages }}"
 
-  # - role: pacman-yaourt
-  #   pacman_yaourt_packages:
-  #     - redshift
-  #     - redshift-gtk
+  - role: pacman-yaourt
+    pacman_yaourt_packages:
+      # - redshift
+      - redshift-gtk
+    when: ansible_os_family == 'Archlinux'
 
   - role: dotfiles
     paths:
