@@ -8,6 +8,7 @@ pacman_packages:
   - firefox
   - imagemagick
   - lxappearance # gnome-themes-standard
+  - ttf-hack
   - unzip
   # - vlc - qt4
   - xclip
@@ -46,10 +47,10 @@ vim_packages:
 
 i3_packages:
   - compton # composite manager
+  - feh # background manager & image viewer
   - i3 # window manager
   - rofi # window switcher
   - scrot # screenshot utility
-  - ttf-hack
   - xorg-xinit
   - xorg-server
     # - xorg-server-utils
