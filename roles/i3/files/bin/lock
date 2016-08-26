@@ -2,12 +2,8 @@
 
 screen="/tmp/screen.png"
 scrot $screen
-
-# convert $screen -blur 2x2 $screen
-convert $screen -scale 10% -scale 1000% $screen
-
+convert $screen -blur 2x2 $screen # -scale 10% -scale 1000% $screen
 # [[ -f $1 ]] && convert $screen $1 -gravity center -composite -matte $screen
 # dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
-
-i3lock --no-unlock-indicator --image $screen
+i3lock --image $screen # --no-unlock-indicator
 rm $screen
