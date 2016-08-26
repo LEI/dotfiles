@@ -5,6 +5,10 @@
 if [[ -d "$HOME/bin" ]]; then
   pathmunge "$HOME/bin" after
 fi
+j
+if [[ -d "/usr/local/sbin" ]]; then
+  pathmunge "/usr/local/sbin" before
+fi
 
 # Composer packages
 if hash composer 2>/dev/null; then
