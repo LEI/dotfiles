@@ -29,13 +29,6 @@
 
 ## TODO
 
-- [ ] Ansible install script
-- [ ] Bash aliases & completion: bash-doc/examples
-- [ ] Bash color escape function (fg, bg)
-- [ ] Conditional lists (e.g. append packages, ignore plugin)
-- [ ] OS X (osa)scripts and Terminal settings
-- [ ] Use regex with lineinfile or ini file module when possible
-- [ ] npm role files: editorconfig, tern-project?
-- [ ] [PGP/GPG](https://github.com/drduh/OS-X-Security-and-Privacy-Guide#pgpgpg)
-- [ ] vim before/after, YCM arch, MarkMargin
+- [ ] Ansible install, roles subdirs, conditional lists (e.g. append packages, ignore plugin)
+- [ ] Bash aliases & completion: bash-doc/examples, color escape function (fg, bg), zsh/bash-it...
 - [ ] virtualenv, nvm, rvm/rbenv...
