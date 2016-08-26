@@ -1,9 +1,14 @@
 #!/bin/bash
 
-screen="/tmp/screen.png"
-scrot $screen
-convert $screen -blur 2x2 $screen # -scale 10% -scale 1000% $screen
-# [[ -f $1 ]] && convert $screen $1 -gravity center -composite -matte $screen
+tmpbg="/tmp/screen.png"
+icon="$HOME/.config/i3/lock/icon.png"
+
+[[ "$?" -gt 0 ]] && icon="$1"
+
+scrot $tmpbg
+convert $tmpbg -blur 2x2 $tmpbg
+# convert $tmpbg -scale 10% -scale 1000% $tmpbg
+[[ -f "$icon" ]] && convert $tmpbg $icon -gravity center -composite -matte $tmpbg
 # dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
-i3lock --image $screen --no-unlock-indicator --show-failed-attempts
-rm $screen
+i3lock --image $tmpbg # --no-unlock-indicator # --show-failed-attempts
+rm $tmpbg # mktemp?
