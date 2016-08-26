@@ -2,6 +2,10 @@
 
 # http://i3wm.org/docs/userguide.html
 # https://github.com/Airblader/dotfiles-manjaro
+# https://gist.github.com/viking/5851049
+
+set $config ~/.config/i3
+set $font System San Fransisco
 
 set $mod Mod1
 
@@ -23,11 +27,11 @@ set $base0E #c0b7f9
 set $base0F #fcc09e
 
 # Firefox
-set $workspace1 "1 "
+set $workspace1 "1 "
 # Terminal
-set $workspace2 "2 "
-# </>
-set $workspace3 "3 "
+set $workspace2 "2 "
+# </> 
+set $workspace3 "3 "
 set $workspace4 "4 "
 set $workspace5 "5 "
 set $workspace6 "6 "
@@ -41,7 +45,7 @@ set $workspace10 "10 ♪
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below
-font pango:System San Fransisco Display 10
+font pango:$font Display 10
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango)
@@ -59,8 +63,10 @@ floating_modifier $mod
 
 # Start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
-set $locked_img /tmp/locked.png
-bindsym Control+$mod+l exec scrot /tmp/screen.png && convert /tmp/screen.png -blur 2x2 /tmp/screen2.png && i3lock -i /tmp/screen2.png
+
+# Lock screen
+bindsym Control+$mod+l exec $config/bin/lock
+# exec scrot /tmp/screen.png && convert /tmp/screen.png -blur 2x2 /tmp/screen2.png && i3lock --image /tmp/screen2.png
 
 # Kill focused window
 bindsym $mod+Shift+q kill
@@ -69,7 +75,7 @@ bindsym $mod+Shift+q kill
 # bindsym $mod+d exec dmenu_run
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 bindsym $mod+d exec rofi -show run -config ~/.Xresources.d/rofi
-# bindsym $mod+d exec rofi -show run -lines 3 -eh 2 -width 100 -padding 300 -bw 0 -font "System San Fransisco Display 18"
+# bindsym $mod+d exec rofi -show run -lines 3 -eh 2 -width 100 -padding 300 -bw 0 -font "$font 18"
 # -opacity "85" -bc "$base01" -bg "$base01" -fg "$base03" -hlbg "$base01" -hlfg "$base07"
 
 # Change focus
@@ -195,14 +201,14 @@ client.urgent           $base02 $base08 $base00 $base0F
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 # i3blocks is not available on Arch ARM
-# status_command i3blocks -c ~/.config/i3/blocks.conf
+# status_command i3blocks -c $config/blocks.conf
 bar {
         # binding_mode_indicator yes
         # bindsym button4 nop
         # bindsym button5 nop
         position bottom
         separator_symbol "│"
-        status_command ~/.config/i3/bin/i3status --config ~/.config/i3/status.conf
+        status_command $config/bin/i3status --config $config/status.conf
         # strip_workspace_numbers yes
         # tray_output primary
         # tray_padding 10
@@ -229,12 +235,13 @@ for_window [class="Pavucontrol"] floating enable
 for_window [class="Thunar"] floating enable
 
 # Application workspaces
-assign [class="Firefox"] $workspace1
+assign [class="Firefox"] $workspace2
 assign [class="Skype"] $workspace9
 
 # Startup
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1680x980
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
-exec --no-startup-id compton -b --config ~/.config/i3/compton.conf
+exec --no-startup-id compton -b --config $config/compton.conf
 # exec --no-startup-id redshift #-gtk
-exec --no-startup-id i3-msg 'workspace $workspace2; exec urxvt; workspace $workspace1'
+exec --no-startup-id i3-msg "exec i3-sensible-terminal" # -e 'tmux'
+# exec --no-startup-id i3-msg "workspace $workspace2; exec firefox; workspace $workspace1"

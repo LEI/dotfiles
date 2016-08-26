@@ -49,8 +49,13 @@ i3_packages:
   - compton # composite manager
   - feh # background manager & image viewer
   - i3 # window manager
+  # - libnotify
   - rofi # window switcher
   - scrot # screenshot utility
   - xorg-xinit
   - xorg-server
     # - xorg-server-utils
+
+i3_yaourt_packages: []
+  # - i3lock-color # Conflicts with i3lock
+  # - i3blocks # Not available on ALARM
