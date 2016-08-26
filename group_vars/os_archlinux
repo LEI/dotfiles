@@ -55,6 +55,6 @@ i3_packages:
   - xorg-server
     # - xorg-server-utils
 
-i3_yaourt_packages:
-  - i3lock-color
+i3_yaourt_packages: []
+  # - i3lock-color # Conflicts with i3lock
   # - i3blocks # Not available on ALARM
