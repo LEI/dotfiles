@@ -83,6 +83,7 @@ vim_plugins:
   # - editorconfig/editorconfig-vim
 
   # Syntax
+  # TODO https://github.com/sheerun/vim-polyglot
   - { repo: scrooloose/syntastic, opts: { "on": [] } }
   # - neomake/neomake
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
