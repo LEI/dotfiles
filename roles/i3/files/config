@@ -23,11 +23,11 @@ set $base0E #c0b7f9
 set $base0F #fcc09e
 
 # Firefox
-set $workspace1 "1 "
+set $workspace1 "1 "
 # Terminal
-set $workspace2 "2 "
-# </>
-set $workspace3 "3 "
+set $workspace2 "2 "
+# </> 
+set $workspace3 "3 "
 set $workspace4 "4 "
 set $workspace5 "5 "
 set $workspace6 "6 "
@@ -229,7 +229,7 @@ for_window [class="Pavucontrol"] floating enable
 for_window [class="Thunar"] floating enable
 
 # Application workspaces
-assign [class="Firefox"] $workspace1
+assign [class="Firefox"] $workspace2
 assign [class="Skype"] $workspace9
 
 # Startup
@@ -237,4 +237,5 @@ assign [class="Skype"] $workspace9
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
 exec --no-startup-id compton -b --config ~/.config/i3/compton.conf
 # exec --no-startup-id redshift #-gtk
-exec --no-startup-id i3-msg 'workspace $workspace2; exec urxvt; workspace $workspace1'
+exec --no-startup-id i3-msg "exec urxvt"
+# exec --no-startup-id i3-msg "workspace $workspace2; exec firefox; workspace $workspace1"
