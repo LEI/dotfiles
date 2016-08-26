@@ -65,7 +65,7 @@ floating_modifier $mod
 bindsym $mod+Return exec i3-sensible-terminal
 
 # Lock screen
-bindsym Control+$mod+l exec "$config/bin/lock"
+bindsym Control+$mod+l exec $config/bin/lock
 # exec scrot /tmp/screen.png && convert /tmp/screen.png -blur 2x2 /tmp/screen2.png && i3lock --image /tmp/screen2.png
 
 # Kill focused window
