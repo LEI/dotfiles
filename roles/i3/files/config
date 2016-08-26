@@ -237,5 +237,5 @@ assign [class="Skype"] $workspace9
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
 exec --no-startup-id compton -b --config ~/.config/i3/compton.conf
 # exec --no-startup-id redshift #-gtk
-exec --no-startup-id i3-msg "exec urxvt"
+exec --no-startup-id i3-msg "exec urxvt -e cd .dotfiles && git pull"
 # exec --no-startup-id i3-msg "workspace $workspace2; exec firefox; workspace $workspace1"
