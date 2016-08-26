@@ -2,6 +2,7 @@
 
 # http://i3wm.org/docs/userguide.html
 # https://github.com/Airblader/dotfiles-manjaro
+# https://gist.github.com/viking/5851049
 
 set $mod Mod1
 
@@ -59,8 +60,11 @@ floating_modifier $mod
 
 # Start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
-set $locked_img /tmp/locked.png
-bindsym Control+$mod+l exec scrot /tmp/screen.png && convert /tmp/screen.png -blur 2x2 /tmp/screen2.png && i3lock -i /tmp/screen2.png
+
+# Lock screen
+# set $locked_img /tmp/locked.png
+# bindsym Control+$mod+l exec scrot /tmp/screen.png && convert /tmp/screen.png -blur 2x2 /tmp/screen2.png && i3lock --image /tmp/screen2.png
+bindsym Control+$mod+l exec lock -g
 
 # Kill focused window
 bindsym $mod+Shift+q kill
@@ -237,5 +241,5 @@ assign [class="Skype"] $workspace9
 # exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
 exec --no-startup-id compton -b --config ~/.config/i3/compton.conf
 # exec --no-startup-id redshift #-gtk
-exec --no-startup-id i3-msg "exec urxvt" # -e tmux
+exec --no-startup-id i3-msg "exec i3-sensible-terminal" # -e 'tmux'
 # exec --no-startup-id i3-msg "workspace $workspace2; exec firefox; workspace $workspace1"
