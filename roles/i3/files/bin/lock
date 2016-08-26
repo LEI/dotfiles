@@ -1,45 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
-# json() {
-#   local arr="$@"
-#   # while read a b
-#   # arr=("${arr[@]}" "$a" "$b")
-#   # local i=0
-#   local len="${#arr[@]}"
-#   str="{"
-#   for i in "${!arr[@]}"
-#   do
-#     echo $i ${arr[$i]}
-#     # Skip values
-#     if [[ "$(($i % 2))" -ne 0 ]]
-#     then
-#       # i=$(($i + 1))
-#       continue
-#     fi
-#     # key: value
-#     str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
-#     # Add separator in needed
-#     [[ "$i" -lt "$(($len - 2))" ]] && str+=","
-#     # i=$(($i + 1))
-#   done
-#   str+="}"
-#   echo "$str"
-# }
+screen="/tmp/screen.png"
+scrot $screen
 
-escape() {
-  echo "\"${1}\":\"${2}\""
-}
+# convert $screen -blur 2x2 $screen
+convert $screen -scale 10% -scale 1000% $screen
 
-i3status "$@" | while :
-do
-  read line
-  str=
+# [[ -f $1 ]] && convert $screen $1 -gravity center -composite -matte $screen
+# dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
 
-  # Network speed
-  net=$(~/.config/i3/bin/net-speed)
-  # net="[{ \"full_text\": \"${net}\" },"
-  str+="{ $(escape "full_text" "$net") }"
-
-  prepend="[${str},"
-  echo "${line/[/$prepend}" || exit 1
-done
+i3lock --no-unlock-indicator --image $screen
+rm $screen
