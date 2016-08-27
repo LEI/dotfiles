@@ -3,6 +3,7 @@ dependencies:
 
   - role: package
     packages: "{{ rxvt_packages }}"
+    when: os in ['Debian', 'Windows']
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
