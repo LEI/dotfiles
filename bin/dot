@@ -70,9 +70,8 @@ ansible_install() {
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
       if has apt-get; then
         # Debian/Ubuntu:
-        # sudo apt-get install python-setuptools # Installed in requirements?
         # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
-        su_do apt-get install python-setuptools
+        su_do apt-get install python-setuptools # apt-transport-https ansible(1.7?)
       elif has pacman; then
         # Archlinux: (requires sudo, git)
         # http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh

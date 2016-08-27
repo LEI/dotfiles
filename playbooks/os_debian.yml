@@ -14,3 +14,12 @@
     - role: package
       tags: [pkg]
       packages: "{{ apt_packages }}"
+
+    - role: i3
+      tags: [i3, wm]
+
+    - role: rxvt
+      tags: [rxvt, terminal]
+
+    - role: xresources
+      tags: [x]

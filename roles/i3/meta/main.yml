@@ -11,7 +11,7 @@ dependencies:
   - role: dotfiles
     paths:
       - name: i3
-        dest: .config/i3
+        dest: "{{ i3_config_path | default('.config/i3') }}"
         pattern:
           - bin
           - config

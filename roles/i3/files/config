@@ -207,7 +207,7 @@ bar {
         # bindsym button4 nop
         # bindsym button5 nop
         position bottom
-        separator_symbol "│"
+        #separator_symbol "│"
         status_command $config/bin/i3status --config $config/status.conf
         # strip_workspace_numbers yes
         # tray_output primary
