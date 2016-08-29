@@ -2,7 +2,7 @@
 
 on_click_event() {
   button=$(echo "$@" | i3cat decode button)
-  [[ "$button" != 1 ]] && return
+  [[ "$button" != "1" ]] && return
 
   name=$(echo "$@" | i3cat decode name)
   instance=$(echo "$@" | i3cat decode instance)
