@@ -31,7 +31,7 @@ do
   read line
 
   [[ -z "$line" ]] && continue
-  [[ "$line" == '[' ]] && echo "$line"
+  [[ "$line" == '[' ]] && echo "$line" && continue
   [[ "$line" == '{"version":1}' ]] && line='{"version":1,"click_events":true}'
 
   append=
