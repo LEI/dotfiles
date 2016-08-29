@@ -32,7 +32,6 @@ do
 
   [[ -z "$line" ]] && continue
   [[ "$line" == '{"version":1}' ]] && line='{"version":1,"click_events":true}'
-  echo "$line" >> ~/.i3debug
 
   append=
   prepend=
@@ -57,5 +56,6 @@ do
     line="${line/[/$prepend}"
   fi
 
+  echo "$line" >> ~/.i3debug
   echo "${line}" || exit 1
 done
