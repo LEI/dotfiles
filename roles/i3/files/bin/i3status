@@ -30,7 +30,7 @@ i3status "$@" | while :
 do
   read line
 
-  [[ -z "$line" ]] && continue
+  [[ "$line" == '[' ]] || [[ -z "$line" ]] && continue
   [[ "$line" == '{"version":1}' ]] && line='{"version":1,"click_events":true}'
 
   append=
@@ -42,7 +42,7 @@ do
   prepend+="{\"full_text\":\"$net\"}"
   # prepend+="$(json "name" "networkspeed" "full_text" "$net")"
 
-  append+="{\"name\":\"calendar\",\"full_text\":\"$(date)\",\"click_events\":true}"
+  append+="{\"name\":\"calendar\",\"full_text\":\"$(date)\"}" # ,\"click_events\":true}"
 
   if [[ -n "$append" ]]
   then
