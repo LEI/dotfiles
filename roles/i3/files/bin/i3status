@@ -30,7 +30,8 @@ i3status "$@" | while :
 do
   read line
 
-  [[ "$line" == '[' ]] || [[ -z "$line" ]] && continue
+  [[ -z "$line" ]] && continue
+  [[ "$line" == '[' ]] && echo "$line"
   [[ "$line" == '{"version":1}' ]] && line='{"version":1,"click_events":true}'
 
   append=
