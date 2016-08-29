@@ -213,7 +213,7 @@ bar {
         # status_command i3blocks -c $config/blocks.conf
         # status_command i3status --config $config/status.conf
         # status_command $config/bin/i3status --config $config/status.conf
-        status_command i3cat -cmd-file $config/bin/i3cat -- --config $config/status.conf
+        status_command i3cat -cmd-file $config/i3cat.conf
 
         # strip_workspace_numbers yes
         # tray_output primary
