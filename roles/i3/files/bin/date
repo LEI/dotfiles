@@ -16,7 +16,7 @@ do
 done
 
 # Read stdin from JSON click events
-cat | while real line
+cat | while read line
 do
   on_click_event "$line"
 done
