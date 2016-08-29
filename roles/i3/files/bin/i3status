@@ -43,7 +43,7 @@ do
   prepend+="{\"full_text\":\"$net\"}"
   # prepend+="$(json "name" "networkspeed" "full_text" "$net")"
 
-  append+="{\"name\":\"calendar\",\"full_text\":\"$(date)\"}" # ,\"click_events\":true}"
+  # append+="{\"name\":\"calendar\",\"full_text\":\"$(date)\"}" # ,\"click_events\":true}"
 
   if [[ -n "$append" ]]
   then
