@@ -9,6 +9,7 @@ pacman_packages:
   - imagemagick
   - lxappearance # gnome-themes-standard
   - ttf-hack
+  # - transmission-cli # remote/gtk/qt
   - unzip
   # - vlc - qt4
   - xclip
@@ -46,12 +47,14 @@ vim_packages:
   - python-neovim
 
 i3_packages:
+  - alsa-utils # gnome-alsamixer / pavucontrol (PulseAudio)
   - compton # composite manager
   - feh # background manager & image viewer
   - i3 # window manager
   # - libnotify
   - rofi # window switcher
   - scrot # screenshot utility
+  - thunar # file explorer
   - xorg-xinit
   - xorg-server
     # - xorg-server-utils

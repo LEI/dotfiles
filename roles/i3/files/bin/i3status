@@ -1,44 +1,22 @@
 #!/bin/bash
 
-escape() {
-  echo "\"${1}\":\"${2}\""
-}
-
-json() {
-  local arr=("$@")
-  local len="${#arr[@]}"
-
-  str="{"
-  for i in "${!arr[@]}"
-  do
-    # Skip values
-    [[ "$(($i % 2))" -ne 0 ]] && continue
-
-    # Build key/value pair
-    # str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
-    str+="$(escape "${arr[$i]}" "${arr[$(($i + 1))]}")"
-
-    # Add separator if needed
-    [[ "$i" -lt "$(($len - 2))" ]] && str+=","
-  done
-  str+="}"
-
-  echo "$str"
-}
-
 i3status "$@" | while :
 do
   read line
+
+  [[ -z "$line" ]] && continue
+  echo "$line" >> ~/.i3.debug
+
   append=
   prepend=
 
   # Network speed
   net=$(~/.config/i3/bin/net-speed)
-  # net="[{ \"full_text\": \"${net}\" },"
-  # str+="{ $(escape "full_text" "$net") }"
-  prepend+="$(json "name" "networkspeed" "full_text" "$net")"
 
-  append+="$(json "name" "calendar" "full_text" "$(date)" "click_events" "true")"
+  prepend+="{ \"full_text\": \"$net\" }"
+  # prepend+="$(json "name" "networkspeed" "full_text" "$net")"
+
+  append+="{ \"name\": \"calendar\", \"full_text\": \"$(date)\", \"click_events\": true }"
 
   if [[ -n "$append" ]]
   then
@@ -54,3 +32,29 @@ do
 
   echo "${line}" || exit 1
 done
+
+# escape() {
+#   echo "\"${1}\":\"${2}\""
+# }
+
+# json() {
+#   local arr=("$@")
+#   local len="${#arr[@]}"
+
+#   str="{"
+#   for i in "${!arr[@]}"
+#   do
+#     # Skip values
+#     [[ "$(($i % 2))" -ne 0 ]] && continue
+
+#     # Build key/value pair
+#     # str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
+#     str+="$(escape "${arr[$i]}" "${arr[$(($i + 1))]}")"
+
+#     # Add separator if needed
+#     [[ "$i" -lt "$(($len - 2))" ]] && str+=","
+#   done
+#   str+="}"
+
+#   echo "$str"
+# }
