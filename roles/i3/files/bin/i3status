@@ -38,7 +38,7 @@ do
   # str+="{ $(escape "full_text" "$net") }"
   prepend+="$(json "full_text" "$net")"
 
-  append+="$(json "full_text" "$date" "color" "#00ff00")"
+  append+="$(json "full_text" "$(date)" "color" "#00ff00")"
 
   if [[ -n "$append" ]]
   then
