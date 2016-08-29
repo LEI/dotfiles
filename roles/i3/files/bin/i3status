@@ -36,9 +36,9 @@ do
   net=$(~/.config/i3/bin/net-speed)
   # net="[{ \"full_text\": \"${net}\" },"
   # str+="{ $(escape "full_text" "$net") }"
-  prepend+="$(json "full_text" "$net")"
+  prepend+="$(json "name" "networkspeed" "full_text" "$net")"
 
-  append+="$(json "full_text" "$(date)" "click_events" "true")"
+  append+="$(json "name" "calendar" "full_text" "$(date)" "click_events" "true")"
 
   if [[ -n "$append" ]]
   then
