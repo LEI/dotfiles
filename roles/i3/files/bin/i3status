@@ -31,6 +31,7 @@ do
   read line
 
   [[ -z "$line" ]] && continue
+  [[ "$line" == '{"version":1}' ]] && line='{"version":1,"click_events":true}'
   echo "$line" >> ~/.i3debug
 
   append=
