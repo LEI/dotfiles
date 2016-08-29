@@ -29,17 +29,28 @@ json() {
 i3status "$@" | while :
 do
   read line
-  str=
+  append=
+  prepend=
 
   # Network speed
   net=$(~/.config/i3/bin/net-speed)
   # net="[{ \"full_text\": \"${net}\" },"
   # str+="{ $(escape "full_text" "$net") }"
-  str+="$(json "full_text" "$net")"
+  prepend+="$(json "full_text" "$net")"
 
-  prepend="[${str},"
-  append=",{\"full_text\":\"test\"}]"
-  line="${line/[/$prepend}"
-  line="${line/]/$append}"
+  append+="$(json "full_text" "$date" "color" "#00ff00")"
+
+  if [[ -n "$append" ]]
+  then
+    append=",${append}]"
+    line="${line/]/$append}"
+  fi
+
+  if [[ -n "$prepend" ]]
+  then
+    prepend="[${prepend},"
+    line="${line/[/$prepend}"
+  fi
+
   echo "${line}" || exit 1
 done
