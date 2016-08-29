@@ -1,38 +1,5 @@
 #!/bin/bash
 
-i3status "$@" | while :
-do
-  read line
-
-  [[ -z "$line" ]] && continue
-  echo "$line" >> ~/.i3.debug
-
-  append=
-  prepend=
-
-  # Network speed
-  net=$(~/.config/i3/bin/net-speed)
-
-  prepend+="{ \"full_text\": \"$net\" }"
-  # prepend+="$(json "name" "networkspeed" "full_text" "$net")"
-
-  append+="{ \"name\": \"calendar\", \"full_text\": \"$(date)\", \"click_events\": true }"
-
-  if [[ -n "$append" ]]
-  then
-    append=",${append}]"
-    line="${line/]/$append}"
-  fi
-
-  if [[ -n "$prepend" ]]
-  then
-    prepend="[${prepend},"
-    line="${line/[/$prepend}"
-  fi
-
-  echo "${line}" || exit 1
-done
-
 # escape() {
 #   echo "\"${1}\":\"${2}\""
 # }
@@ -58,3 +25,36 @@ done
 
 #   echo "$str"
 # }
+
+i3status "$@" | while :
+do
+  read line
+
+  [[ -z "$line" ]] && continue
+  echo "$line" >> ~/.i3debug
+
+  append=
+  prepend=
+
+  # Network speed
+  net=$(~/.config/i3/bin/net-speed)
+
+  prepend+="{\"full_text\":\"$net\"}"
+  # prepend+="$(json "name" "networkspeed" "full_text" "$net")"
+
+  append+="{\"name\":\"calendar\",\"full_text\":\"$(date)\",\"click_events\":true}"
+
+  if [[ -n "$append" ]]
+  then
+    append=",${append}]"
+    line="${line/]/$append}"
+  fi
+
+  if [[ -n "$prepend" ]]
+  then
+    prepend="[${prepend},"
+    line="${line/[/$prepend}"
+  fi
+
+  echo "${line}" || exit 1
+done
