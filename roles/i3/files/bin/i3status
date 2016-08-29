@@ -1,33 +1,29 @@
 #!/bin/bash
 
-# json() {
-#   local arr="$@"
-#   # while read a b
-#   # arr=("${arr[@]}" "$a" "$b")
-#   # local i=0
-#   local len="${#arr[@]}"
-#   str="{"
-#   for i in "${!arr[@]}"
-#   do
-#     echo $i ${arr[$i]}
-#     # Skip values
-#     if [[ "$(($i % 2))" -ne 0 ]]
-#     then
-#       # i=$(($i + 1))
-#       continue
-#     fi
-#     # key: value
-#     str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
-#     # Add separator in needed
-#     [[ "$i" -lt "$(($len - 2))" ]] && str+=","
-#     # i=$(($i + 1))
-#   done
-#   str+="}"
-#   echo "$str"
-# }
-
 escape() {
   echo "\"${1}\":\"${2}\""
+}
+
+json() {
+  local arr=("$@")
+  local len="${#arr[@]}"
+
+  str="{"
+  for i in "${!arr[@]}"
+  do
+    # Skip values
+    [[ "$(($i % 2))" -ne 0 ]] && continue
+
+    # Build key/value pair
+    # str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
+    str+="$(escape "${arr[$i]}" "${arr[$(($i + 1))]}")"
+
+    # Add separator if needed
+    [[ "$i" -lt "$(($len - 2))" ]] && str+=","
+  done
+  str+="}"
+
+  echo "$str"
 }
 
 i3status "$@" | while :
@@ -38,8 +34,12 @@ do
   # Network speed
   net=$(~/.config/i3/bin/net-speed)
   # net="[{ \"full_text\": \"${net}\" },"
-  str+="{ $(escape "full_text" "$net") }"
+  # str+="{ $(escape "full_text" "$net") }"
+  str+="$(json "full_text" "$net")"
 
   prepend="[${str},"
-  echo "${line/[/$prepend}" || exit 1
+  append=",{\"full_text\":\"test\"}]"
+  line="${line/[/$prepend}"
+  line="${line/]/$append}"
+  echo "${line}" || exit 1
 done
