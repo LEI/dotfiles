@@ -70,6 +70,7 @@ bindsym Control+$mod+l exec $config/bin/lock
 
 # Kill focused window
 bindsym $mod+Shift+q kill
+bindsym Control+$mod+Shift+q kill
 
 # Window switcher
 # bindsym $mod+d exec dmenu_run
