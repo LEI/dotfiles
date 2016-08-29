@@ -1,5 +1,9 @@
 #!/bin/bash
 
+has() {
+  hash "$@" 2>/dev/null
+}
+
 on_click_event() {
   button=$(echo "$@" | i3cat decode button)
   [[ "$button" != 1 ]] && return
@@ -10,15 +14,23 @@ on_click_event() {
   echo "Click $name:$instance" >> ~/.i3debug
 
   case "$name" in
+    disk_info)
+      has thunar && thunar "$instance"
+      ;;
+    # volume)
+    #   alsamixer
+    #   ;;
     tztime)
-      if hash gsimplecal 2>/dev/null; then
-        gsimplecal
-      fi
+      case "$instance" in
+        date)
+          has gsimplecal && gsimplecal
+          ;;
+      esac
       ;;
   esac
 }
 
-i3status --config $HOME/.config/i3/status.conf &
+i3status "$@" &
 
 # (while :; do
 #   i3cat encode --name date --instance calendar "$(date)"
