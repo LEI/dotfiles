@@ -1,45 +1,43 @@
 #!/bin/bash
 
-# json() {
-#   local arr="$@"
-#   # while read a b
-#   # arr=("${arr[@]}" "$a" "$b")
-#   # local i=0
-#   local len="${#arr[@]}"
-#   str="{"
-#   for i in "${!arr[@]}"
-#   do
-#     echo $i ${arr[$i]}
-#     # Skip values
-#     if [[ "$(($i % 2))" -ne 0 ]]
-#     then
-#       # i=$(($i + 1))
-#       continue
-#     fi
-#     # key: value
-#     str+="\"${arr[$i]}\":\"${arr[$(($i + 1))]}\""
-#     # Add separator in needed
-#     [[ "$i" -lt "$(($len - 2))" ]] && str+=","
-#     # i=$(($i + 1))
-#   done
-#   str+="}"
-#   echo "$str"
-# }
-
-escape() {
-  echo "\"${1}\":\"${2}\""
+has() {
+  hash "$@" 2>/dev/null
 }
 
-i3status "$@" | while :
+on_click_event() {
+  button=$(echo "$@" | i3cat decode button)
+  [[ "$button" != 1 ]] && return
+
+  name=$(echo "$@" | i3cat decode name)
+  instance=$(echo "$@" | i3cat decode instance)
+
+  echo "Click $name:$instance" >> ~/.i3debug
+
+  case "$name" in
+    disk_info)
+      has thunar && thunar "$instance"
+      ;;
+    # volume)
+    #   alsamixer
+    #   ;;
+    tztime)
+      case "$instance" in
+        date)
+          has gsimplecal && gsimplecal
+          ;;
+      esac
+      ;;
+  esac
+}
+
+i3status "$@" &
+
+# (while :; do
+#   i3cat encode --name date --instance calendar "$(date)"
+# done) &
+
+# Read stdin from JSON click events
+cat | while read line
 do
-  read line
-  str=
-
-  # Network speed
-  net=$(~/.config/i3/bin/net-speed)
-  # net="[{ \"full_text\": \"${net}\" },"
-  str+="{ $(escape "full_text" "$net") }"
-
-  prepend="[${str},"
-  echo "${line/[/$prepend}" || exit 1
+  on_click_event "$line"
 done

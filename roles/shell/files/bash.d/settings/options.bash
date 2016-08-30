@@ -14,5 +14,14 @@ for option in autocd globstar; do
 done
 unset option
 
-# Check the window size after each command and updat LINE and COLUMNS
+# Check the window size after each command and update LINE and COLUMNS
 shopt -s checkwinsize
+
+# Allow regular expressions
+shopt -s extglob
+
+# Ctrl-D
+if [[ "$IGNOREEOF" -lt 10 ]]
+then
+  export IGNOREEOF=10
+fi

@@ -39,7 +39,7 @@
 #ifaces="eth0 wlan0"
 
 # Auto detect
-ifaces=$(ls /sys/class/net | grep -E '^(eth|wlan)')
+ifaces=$(ls /sys/class/net | grep -E '^(eth|wlan|enp)')
 
 # Interval must be the same as in i3status.conf
 #interval=5
@@ -101,11 +101,12 @@ update_rate() {
     last_tx=$tx
 }
 
-# while :; do
+while :; do
     update_rate
-    echo "$rate"
-#     sleep "$interval"
-# done
+    # echo "$rate"
+    i3cat encode --name "network" --instance "speed" "$rate"
+    sleep "$interval"
+done
 
 # i3status | (read line && echo "$line" && read line && echo "$line" && read line && echo "$line" && update_rate && while :
 # do

@@ -7,7 +7,7 @@ dependencies:
     # when: "ansible_os_family == 'Darwin'"
 
   - role: dotfiles
-    role_dir: roles.os
+    role_dir: roles/system
     paths:
       - name: hammerspoon
         dest: .hammerspoon

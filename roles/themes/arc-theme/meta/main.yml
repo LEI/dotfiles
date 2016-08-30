@@ -6,4 +6,5 @@ dependencies:
       - arc-firefox-theme
       - arc-icon-theme
       - gtk-theme-arc
+      # - vlc-arc-dark-git
     when: "{{ ansible_os_family == 'Archlinux' }}"

@@ -15,7 +15,8 @@ run_playbook() {
   #   [[ "$1" == "--force-install" ]] && shift \
   #     && ansible_install
   # fi
-  if ! has ansible; then
+  if ! has ansible
+  then
     ansible_install
   fi
 
@@ -37,13 +38,15 @@ run_playbook() {
 ansible_vault() {
   local file=
   # Vault file path
-  if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]; then
+  if [[ -z "${ANSIBLE_VAULT_PASSWORD_FILE:-}" ]]
+  then
     # export ANSIBLE_VAULT_PASSWORD_FILE="$HOME/.vault_pass.txt"
     file="$HOME/.vault_pass.txt"
   fi
 
   # Create the vault file if it does not exists
-  if [[ -n "$file" ]] && [[ ! -f "$file" ]]; then
+  if [[ -n "$file" ]] && [[ ! -f "$file" ]]
+  then
     local vault_pass=$(prompt "Vault password?")
     echo "$vault_pass" >> $file
     chmod 0600 "$file"
@@ -58,7 +61,8 @@ ansible_install() {
   case $os in
     Darwin)
       # If /usr/bin/gcc is absent
-      if ! has gcc; then
+      if ! has gcc
+      then
         # Install Xcode
         _do "xcode-select --install"
       fi
@@ -68,11 +72,13 @@ ansible_install() {
 
       # pip cryptography on raspbian ->
       # ERROR! Unexpected Exception: 'EntryPoint' object has no attribute 'resolve'
-      if has apt-get; then
+      if has apt-get
+      then
         # Debian/Ubuntu:
         # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
         su_do apt-get install python-setuptools # apt-transport-https ansible(1.7?)
-      elif has pacman; then
+      elif has pacman
+      then
         # Archlinux: (requires sudo, git)
         # http://github.com/palazzem/hanzo/blob/master/bin/bootstrap.sh
         su_do pacman -Syu --noconfirm
@@ -107,8 +113,10 @@ ansible_install() {
   esac
 
   # If Ansible is still not present
-  if ! has ansible; then
-    if ! has pip; then
+  if ! has ansible
+  then
+    if ! has pip
+    then
       # Install python package manager
       su_do easy_install pip
     fi
@@ -125,7 +133,8 @@ has() {
   # Test if the program can be executed
   hash $cmd 2>/dev/null
 
-  if [[ $? != 0 ]]; then
+  if [[ $? != 0 ]]
+  then
     # Display warning
     error "! $cmd is not installed"
   fi
@@ -134,7 +143,8 @@ has() {
 _do() {
   local cmd="$@"
 
-  if has $cmd; then
+  if has $cmd
+  then
     log "› $cmd"
     # Execute the command
     $cmd
@@ -155,7 +165,8 @@ prompt() {
   local a=
   read -e -r -s a
 
-  if [[ -n "$a" ]]; then
+  if [[ -n "$a" ]]
+  then
     # Echo answer
     printf "%s" "$a"
   else

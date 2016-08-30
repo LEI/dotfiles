@@ -7,10 +7,12 @@ pacman_packages:
   - cmake
   - firefox
   - imagemagick
-  - lxappearance # gnome-themes-standard
+  - lxappearance # gnome-themes-standard / gtk3
+  - mlocate # Run 'updatedb'
+  # - mpv (vlc # Requires qt4)
   - ttf-hack
+  # - transmission-cli # remote/gtk/qt
   - unzip
-  # - vlc - qt4
   - xclip
   - youtube-dl
 
@@ -46,16 +48,20 @@ vim_packages:
   - python-neovim
 
 i3_packages:
+  - alsa-utils # gnome-alsamixer / pavucontrol (PulseAudio)
   - compton # composite manager
   - feh # background manager & image viewer
   - i3 # window manager
   # - libnotify
   - rofi # window switcher
   - scrot # screenshot utility
+  - thunar # file explorer (vifm)
   - xorg-xinit
   - xorg-server
-    # - xorg-server-utils
+  # - xorg-server-utils
+  - qt4
 
-i3_yaourt_packages: []
+i3_yaourt_packages:
+  - i3cat-git # Requires go
   # - i3lock-color # Conflicts with i3lock
   # - i3blocks # Not available on ALARM

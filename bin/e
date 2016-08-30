@@ -6,12 +6,14 @@
 # e: opens the current directory in your editor
 # e /usr/local: opens the specified directory in your editor
 
-if [[ -z "$EDITOR" ]]; then
+if [[ -z "$EDITOR" ]]
+then
   echo "\$EDITOR is undefined"
   exit 1
 fi
 
-if [[ "$#" -eq 0 ]] ; then
+if [[ "$#" -eq 0 ]]
+then
   exec $EDITOR .
 else
   exec $EDITOR "$@"

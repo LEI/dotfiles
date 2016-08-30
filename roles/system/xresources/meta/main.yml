@@ -1,0 +1,11 @@
+---
+dependencies:
+
+  - role: dotfiles
+    role_dir: roles/system
+    paths:
+      - name: xresources
+        prefix: .
+        pattern: "Xresources"
+      - name: xresources/files/Xresources.d
+        dest: .Xresources.d

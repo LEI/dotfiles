@@ -26,3 +26,7 @@
     # Install ruby gems
     - role: ruby
       tags: [ruby, gem]
+
+    # Install go lang
+    - role: go
+      tags: [go]
