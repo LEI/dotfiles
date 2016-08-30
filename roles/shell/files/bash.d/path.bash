@@ -37,6 +37,7 @@ fi
 
 # Go packages
 if hash go 2>/dev/null; then
-  export GOPATH="$HOME/go"
-  pathmunge "$GOPATH/bin" after
+  # export GOPATH="$HOME/Projects"
+  export GOROOT="$HOME/go"
+  pathmunge "$GOROOT/bin" after
 fi
