@@ -7,8 +7,9 @@ pacman_packages:
   - cmake
   - firefox
   - imagemagick
-  - lxappearance # gnome-themes-standard
-  - mlocate # 'updatedb'
+  - lxappearance # gnome-themes-standard / gtk3
+  - mlocate # Run 'updatedb'
+  # - mpv (vlc # Requires qt4)
   - ttf-hack
   # - transmission-cli # remote/gtk/qt
   - unzip
@@ -55,7 +56,6 @@ i3_packages:
   - rofi # window switcher
   - scrot # screenshot utility
   - thunar # file explorer (vifm)
-  # - vlc # Requires qt4
   - xorg-xinit
   - xorg-server
   # - xorg-server-utils
