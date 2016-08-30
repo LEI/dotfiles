@@ -31,10 +31,11 @@ fi
 
 # Ruby gems
 if hash ruby 2>/dev/null; then
-  GEM_HOME="$(ruby -e 'print Gem.user_dir')"
+  export GEM_HOME="$(ruby -e 'print Gem.user_dir')" # GEM_PATH, BUNDLE_PATH
   pathmunge "$GEM_HOME/bin" after
 fi
 
+# Go packages
 if hash go 2>/dev/null; then
   export GOPATH="$HOME/go"
   pathmunge "$GOPATH/bin" after
