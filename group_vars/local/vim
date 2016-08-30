@@ -1,47 +1,8 @@
 ---
 # vi: ft=yaml
 
-# Examples:
-# - laravel/laravel
-# - name: phpunit/phpunit
-# - { name: phpunit/phpunit, release: "4.7.*" }
-composer_packages: []
-
-# NodeJS modules
-npm_packages:
-  - bower
-  - gulp
-  - jshint
-  # - localtunnel
-
-go_packages:
-  - go
-
-pip_packages:
-  # Update pip
-  - { name: pip, extra_args: --upgrade } # TODO Debian sudo
-  # Python packages
-  - bashate
-  - pygments
-  # - vim-vint
-
-ruby_gems:
-  - bundler
-  # - compass
-
-rxvt_packages:
-  - rxvt-unicode
-
-# MacOSX reattach to user namespace (pbcopy) / xclip
-tmux_plugins:
-  - tmux-plugins/tpm
-  - tmux-plugins/tmux-resurrect
-  # - nhdaly/tmux-scroll-copy-mode
-  # - tmux-plugins/tmux-cpu
-  # - tmux-plugins/tmux-battery
-  # - thewtex/tmux-mem-cpu-load
-
 # https://github.com/skwp/dotfiles
+
 vim_plugins:
   # - Shougo/dein.vim
 
