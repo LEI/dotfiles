@@ -254,7 +254,7 @@ endfunction
 function! StatuslineTrailing()
   if !exists('b:statusline_trailing')
     if search('\s\+$', 'nw') != 0
-      let b:statusline_trailing = '[\s]'
+      let b:statusline_trailing = '\s$'
     else
       let b:statusline_trailing = ''
     endif

@@ -69,8 +69,7 @@ alias path='echo $PATH | tr -s ":" "\n"'
 
 # Enable aliases to be sudo'ed
 # (( UID != 0 ))
-# FIXME sudo: command: command not found
-alias sudo="sudo "
+alias sudo="sudo"
 
 # Get week number
 alias week="date +%V"
