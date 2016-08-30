@@ -28,6 +28,9 @@ if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &runtimepath) =
   runtime macros/matchit.vim
 endif
 
+" Arch
+" set rtp^=/usr/share/vim/vimfiles
+
 " General {{{1
 
 if has('autocmd')

@@ -12,7 +12,6 @@ pacman_packages:
   - ttf-hack
   # - transmission-cli # remote/gtk/qt
   - unzip
-  # - vlc - qt4
   - xclip
   - youtube-dl
 
@@ -55,10 +54,12 @@ i3_packages:
   # - libnotify
   - rofi # window switcher
   - scrot # screenshot utility
-  - thunar # file explorer
+  - thunar # file explorer (vifm)
+  # - vlc # Requires qt4
   - xorg-xinit
   - xorg-server
-    # - xorg-server-utils
+  # - xorg-server-utils
+  - qt4
 
 i3_yaourt_packages:
   - i3cat-git # Requires go
