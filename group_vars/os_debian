@@ -29,19 +29,20 @@ ruby_packages:
 go_packages:
   - golang
 
-# TODO /etc/apt/source.list (backports, experimental, stretch...)
 vim_packages:
   - vim-nox
   # - vim-addon-manager
   # - vim-youcompleteme
   # - liblua
 
-# i3_config_path: .i3 # .config/i3
 i3_packages:
   - i3
   # - i3blocks
-  - compton
-  - firefox
+  # - i3cat
+  - compton-
+  - firefox-est
   - fonts-font-awesome
   - fonts-hack-ttf
   # - rofi # stretch (testing)
+  # - scrot
+  # - xorg...
