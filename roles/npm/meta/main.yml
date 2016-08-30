@@ -7,9 +7,9 @@ dependencies:
     when: node_packages | length > 0
     # and ansible_os_family in ['Archlinux', 'Darwin']
 
-  # Debian/RedHat
-  - role: node
-    when: "ansible_os_family == 'Debian'"
+  # # Debian/RedHat
+  # - role: node
+  #   when: "ansible_os_family == 'Debian'"
 
   # Windows
   # Download and execute the installer on nodejs.org
