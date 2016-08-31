@@ -14,8 +14,8 @@
     - role: composer
       tags: [composer, php]
 
-    # Install NodeJS and npm packages
-    - role: npm
+    # Install node and npm
+    - role: nodejs
       tags: [npm, node, js]
 
     # - role: pyhton?
