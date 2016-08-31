@@ -208,8 +208,9 @@ bar {
         # binding_mode_indicator yes
         # bindsym button4 nop
         # bindsym button5 nop
+        # font pango:$font, FontAwesome 10
         position bottom
-        #separator_symbol "│"
+        separator_symbol "│"
 
         # status_command i3blocks -c $config/i3blocks.conf
         # status_command i3status --config $config/i3status.conf
