@@ -23,11 +23,10 @@ Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | reg
 {%- endmacro %}
 
 {% for plugin in vim_plugins %}
-{# if plugin.repo | default(plugin) not in vim_ignore_plugins #}
-{% if not vim_ignore_plugins | select('match', plugin.repo | default(plugin)) | list %}
+{# if not vim_ignore_plugins | select('match', plugin.repo | default(plugin)) | list #}
+{% if plugin.repo | default(plugin) in vim_ignore_plugins %}" {% endif %}
 {{ plug(plugin) }}{% if plugin.plug is defined %}{% for p in plugin.plug %} | {{ plug(p) }}{% endfor %}{% endif %}
 
-{% endif %}
 {% endfor %}
 
 " Add plugins to &runtimepath
