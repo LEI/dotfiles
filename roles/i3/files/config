@@ -3,11 +3,9 @@
 # http://i3wm.org/docs/userguide.html
 # https://github.com/Airblader/dotfiles-manjaro
 # https://gist.github.com/viking/5851049
-# ssh -L 5901:127.0.0.1:5901 -N -f -l $u $i -p $p
 
 set $config ~/.config/i3
-set $font System San Fransisco
-#Display
+set $font System San Fransisco Display
 
 set $mod Mod4
 
