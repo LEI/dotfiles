@@ -105,7 +105,7 @@ update_rate() {
     update_rate
     # echo "$rate"
     i3cat encode --name "network" --instance "speed" "$rate"
-#     sleep "$interval"
+    # sleep "$interval"
 # done
 
 # i3status | (read line && echo "$line" && read line && echo "$line" && read line && echo "$line" && update_rate && while :
