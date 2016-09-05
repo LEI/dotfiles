@@ -22,7 +22,8 @@ run_playbook() {
 
   local vault=
   local vault_file=$(ansible_vault)
-  [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
+  # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
+  [[ -n "$vault_file" ]] && vault="--vault-password-file $vault_file"
 
   # Ansible root directory
   cd "$DOT_ROOT"
@@ -47,9 +48,9 @@ ansible_vault() {
   # Create the vault file if it does not exists
   if [[ -n "$file" ]] && [[ ! -f "$file" ]]
   then
-    local vault_pass=$(prompt "Vault password?")
-    echo "$vault_pass" >> $file
-    chmod 0600 "$file"
+    local vault_pass=$(prompt "Vault password?" | base64)
+    echo -e "#!/usr/bin/env bash\necho \""$vault_pass"\" | base64 --decode" >> $file
+    chmod 700 "$file"
   fi
 
   [[ -f "$file" ]] && echo "$file"
