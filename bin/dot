@@ -76,7 +76,8 @@ ansible_install() {
       then
         # Debian/Ubuntu:
         # sudo apt-get install build-essential libffi-dev libssl-dev python-dev
-        su_do apt-get install build-essential python-setuptools # apt-transport-https ansible(1.7?)
+        su_do apt-get install build-essential python-setuptools
+        su_do apt-get install apt-transport-https ansible
       elif has pacman
       then
         # Archlinux: (requires sudo, git)
@@ -115,15 +116,16 @@ ansible_install() {
   # If Ansible is still not present
   if ! has ansible
   then
-    if ! has pip
-    then
-      # Install python package manager
-      su_do easy_install pip
-    fi
+    exit 1
+    # if ! has pip
+    # then
+    #   # Install python package manager
+    #   su_do easy_install pip
+    # fi
 
-    # Install dependencies
-    # su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
-    su_do pip install ansible
+    # # Install dependencies
+    # # su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
+    # su_do pip install ansible
   fi
 }
 
