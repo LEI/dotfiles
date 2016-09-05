@@ -4,9 +4,10 @@
 git_credential_helper: osxkeychain
 
 homebrew_taps:
+  - homebrew/completions
   - homebrew/dupes
   - homebrew/homebrew-php
-#   - caskroom/cask
+  # - caskroom/cask
   - caskroom/fonts
   - caskroom/versions
 
@@ -50,6 +51,11 @@ homebrew_packages:
   - wget
   # - wireshark
   - youtube-dl
+
+  # - brew-cask-completion
+  - composer-completion
+  - pip-completion
+  - vagrant-completion
 
 # FF
 # https://github.com/TheCreeper/PrivacyFox
