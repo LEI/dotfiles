@@ -11,6 +11,7 @@ DOT_REQUIREMENTS="$DOT_ROOT/requirements"
 DOT_PLAYBOOK="$DOT_ROOT/playbook.yml"
 
 run_playbook() {
+  local args="$@"
   # if [[ $? -gt 0 ]]; then
   #   [[ "$1" == "--force-install" ]] && shift \
   #     && ansible_install
@@ -21,9 +22,13 @@ run_playbook() {
   fi
 
   local vault=
-  local vault_file=$(ansible_vault)
-  # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
-  [[ -n "$vault_file" ]] && vault="--vault-password-file $vault_file"
+  local ask="* --ask-vault-pass *"
+  if [[ " ${args[@]} " != $ask ]]
+  then
+    local vault_file=$(ansible_vault)
+    # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
+    [[ -n "$vault_file" ]] && vault="--vault-password-file $vault_file"
+  fi
 
   # Ansible root directory
   cd "$DOT_ROOT"
@@ -33,7 +38,7 @@ run_playbook() {
   # Inventory file defined in ansible.cfg
 
   # Run the main playbook
-  ansible-playbook "$DOT_PLAYBOOK" $vault "$@"
+  ansible-playbook "$DOT_PLAYBOOK" $vault ${args[@]}
 }
 
 ansible_vault() {
