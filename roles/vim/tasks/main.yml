@@ -4,6 +4,7 @@
     path: "{{ item.path }}"
     state: "{{ item.state }}"
   with_items: "{{ vim_files }}"
+  when: "{{ item.when | default(true) }}"
 
 - name: Source vimrc from ~/.vim/init.vim
   lineinfile:

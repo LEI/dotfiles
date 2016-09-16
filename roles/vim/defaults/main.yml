@@ -22,7 +22,8 @@ vim_files:
     state: directory
     # follow: true # autoload is a symlink
   - path: "{{ nvim_init }}"
-    state: "{{ 'file' if nvim_present else omit }}" # FIXME?
+    state: file
+    when: "{{ nvim_present }}"
 
 nvim_init: "{{ dot_home }}/.vim/init.vim }}"
 nvim_present: "{{ 'nvim' in vim_packages or 'neovim' in vim_packages }}"
