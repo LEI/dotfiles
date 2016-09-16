@@ -17,4 +17,4 @@ dependencies:
         template: yes
       - name: vim
         dest: .vim
-        # pattern: "{{ 'vimrc' if vim_minimal else omit }}"
+        # pattern: "{{ 'vimrc' if not vim_extras else omit }}"

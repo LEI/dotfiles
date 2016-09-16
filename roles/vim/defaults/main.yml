@@ -15,7 +15,7 @@ vim_ignore_plugins: []
 vim_dir: "{{ dot_home }}/.vim"
 vim_rc: "{{ vim_dir }}/vimrc"
 vim_extra_config: "{{ vim_dir }}/config.vim"
-vim_minimal: no
+vim_extras: yes
 
 vim_files:
   - path: "{{ vim_plugins_path }}"
