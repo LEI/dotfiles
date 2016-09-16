@@ -5,10 +5,12 @@
 
 vim_plugins:
   - altercation/vim-colors-solarized
+  - ctrlpvim/ctrlp.vim
+  # - rking/ag.vim
+  # - editorconfig/editorconfig-vim
+  - tpope/vim-sleuth
   - tpope/vim-surround
   - tpope/vim-vinegar
-  - tpope/vim-sleuth
-  # - editorconfig/editorconfig-vim
 
 vim_extra_plugins:
   # - Shougo/dein.vim
@@ -41,10 +43,6 @@ vim_extra_plugins:
   - tpope/vim-unimpaired
   - sjl/gundo.vim
   # - { repo: godlygeek/tabular, opts: { on: Tab } }
-
-  # Search
-  - ctrlpvim/ctrlp.vim
-  # - rking/ag.vim
 
   # Syntax
   # TODO https://github.com/sheerun/vim-polyglot
