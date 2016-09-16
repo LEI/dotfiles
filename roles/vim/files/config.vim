@@ -317,61 +317,8 @@ set smartcase
 " Changes the special characters that can be used in search patterns
 set magic
 
-" Terminal {{{1
 
-if has('mouse')
-  set mouse+=a
-endif
-
-if !has('nvim')
-  " Fix mouse inside screen and tmux (e.g. drag splits)
-  if &term =~# '^screen' || strlen($TMUX) > 0
-      set ttymouse=xterm2
-  endif
-" Fast terminal connection
-  set ttyfast
-endif
-
-" FIXME: Graphical issues if not xterm-256color (currently set by tmux)
-" set term=$TERM screen-256color xterm-256color
-
-if &term =~# '256color'
-  " Disable Background Color Erase (BCE) so that color schemes
-  " work properly when Vim is used inside tmux and GNU screen.
-  " See also http://snk.tuxfamily.org/log/vim-256color-bce.html
-  set t_ut=
-endif
-
-" " Allow color schemes to do bright colors without forcing bold
-if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
-  set t_Co=16
-endif
-
-" Colors {{{1
-
-" Enable syntax highlighting
-if has('syntax') && (&t_Co > 2 || has('gui_running')) && !exists('syntax_on')
-  syntax enable
-endif
-
-set synmaxcol=500
-
-if exists('+colorcolumn')
-  " set colorcolumn=80
-  " Relative to textwidth
-  set colorcolumn=+1
-  "let &colorcolumn=join(range(1,80),",")
-endif
-
-call background#set()
-try
-  " let g:solarized_termtrans = 1
-  colorscheme solarized
-  call togglebg#map('<F5>')
-catch /E185:/
-  " Default color scheme
-  colorscheme desert
-endtry
+" Colors {{1
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
