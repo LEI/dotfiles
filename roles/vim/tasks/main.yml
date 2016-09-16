@@ -1,24 +1,18 @@
 ---
-- name: Neovim
+- name: Check vim files
   file:
-    path: "{{ vim_init_path }}"
-    state: file
-  when: "{{ nvim_present }}"
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+  with_items: "{{ vim_files }}"
 
 - name: Source vimrc from ~/.vim/init.vim
   lineinfile:
-    dest: "{{ dot_home }}/.vimrc"
-    line: "source {{ dot_home }}/.vim/init.vim"
+    dest: "{{ vim_rc }}"
+    line: "source {{ nvim_init }}"
     backup: yes
     create: yes
     state: present
   when: "{{ nvim_present }}"
-
-- name: "Make sure {{ vim_plugins_path }} exists"
-  file:
-    path: "{{ vim_plugins_path }}"
-    state: directory
-    # follow: true # autoload is a symlink
 
 - name: Download vim-plug
   get_url:

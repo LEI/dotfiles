@@ -17,6 +17,13 @@ vim_rc: "{{ vim_dir }}/vimrc"
 vim_extra_config: "{{ vim_dir }}/config.vim"
 vim_minimal: no
 
+vim_files:
+  - path: "{{ vim_plugins_path }}"
+    state: directory
+    # follow: true # autoload is a symlink
+  - path: "{{ nvim_init }}"
+    state: "{{ 'file' if nvim_present else omit }}" # FIXME?
+
 nvim_init: "{{ dot_home }}/.vim/init.vim }}"
 nvim_present: "{{ 'nvim' in vim_packages or 'neovim' in vim_packages }}"
 
@@ -31,13 +38,12 @@ vim_plug_force: no
 # Directory where the plugins will be downloaded
 vim_plugins_path: "{{ vim_dir }}/plugged"
 
-# FIXME Vim Warning:
+# Vim Warning:
 # Output is not to a terminal / Input is not from a terminal
 # -E -s -V +'source {{ dot_home }}/.vim/plug.vim' < /dev/tty
 # "silent" is required or vim hangs on YCM installation
 # YCM: ./install.py --tern-completer
-# "vim -u NONE +'source {{ dot_home }}/.vim/plug.vim' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
-vim_plug_cmd: "vim -E -s -u '{{ vim_dir }}/plug.vim' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
+vim_plug_cmd: "vim -E -s -u NONE +'source {{ vim_dir }}/plug.vim' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
 
 # vim_dein_repo: https://github.com/Shougo/dein.vim
 # vim_dein_path: "{{ vim_plugins_path }}/repos/github.com/Shougo/dein.vim"
