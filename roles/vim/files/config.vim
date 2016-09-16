@@ -13,21 +13,6 @@
 " https://github.com/lukaszkorecki/DotVim/blob/master/vimrc
 " https://github.com/wsdjeg/DotFiles/tree/master/config/nvim/config
 
-" Plugins {{{1
-
-" Already set by .vimrc presence
-" set nocompatible
-
-" runtime plug.vim
-if filereadable(expand('~/.vim/plug.vim'))
-  source ~/.vim/plug.vim
-endif
-
-" Load matchit.vim, but only if a newer version isn't installed
-if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &runtimepath) ==# ''
-  runtime macros/matchit.vim
-endif
-
 " Arch
 " set rtp^=/usr/share/vim/vimfiles
 

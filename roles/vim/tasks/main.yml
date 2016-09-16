@@ -1,49 +1,47 @@
 ---
-- name: Ensure ~/.vimrc is sourcing ~/.vim/init.vim
+- name: Neovim
+  file:
+    path: "{{ vim_init_path }}"
+    state: file
+  when: "{{ nvim_present }}"
+
+- name: Source vimrc from ~/.vim/init.vim
   lineinfile:
     dest: "{{ dot_home }}/.vimrc"
     line: "source {{ dot_home }}/.vim/init.vim"
     backup: yes
     create: yes
     state: present
+  when: "{{ nvim_present }}"
 
-- name: "Make sure {{ vim_plugin_path }} exists"
+- name: "Make sure {{ vim_plugins_path }} exists"
   file:
-    path: "{{ vim_plugin_path }}"
+    path: "{{ vim_plugins_path }}"
     state: directory
     # follow: true # autoload is a symlink
-
-# - name: Clone dein
-#   git:
-#     repo: "{{ vim_plugin_manager_repo }}"
-#     # https://github.com/Shougo/dein.vim/blob/master/bin/installer.sh
-#     dest: "{{ vim_plugin_manager_path }}"
 
 - name: Download vim-plug
   get_url:
     url: "{{ vim_plug_url }}"
-    dest: "{{ dot_home }}/{{ vim_plug_path }}/{{ vim_plug_file }}"
+    dest: "{{ vim_plug_file }}"
   tags: vim-plug
+ 
+# - name: Clone dein
+#   git:
+#     repo: "{{ vim_dein_repo }}"
+#     # https://github.com/Shougo/dein.vim/blob/master/bin/installer.sh
+#     dest: "{{ vim_dein_path }}"
 
 # https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
-- name: Install vim plugins
-  vars:
-    # FIXME Vim Warning:
-    # Output is not to a terminal / Input is not from a terminal
-    # -E -s -V +'source {{ dot_home }}/.vim/plug.vimrc' < /dev/tty
-    # "silent" is required or vim hangs on YCM installation
-    # YCM: ./install.py --tern-completer
-    plug_install:  "vim -E -s -u '{{ dot_home }}/.vim/plug.vimrc' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
-    # plug_install:  "vim -u NONE +'source {{ dot_home }}/.vim/plug.vimrc' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
-  shell: "{{ plug_install }}"
+- name: "Install vim {{ vim_plugins | length }} plugins"
+  shell: "{{ vim_plug_cmd }}"
   args:
-    # TODO better presence check
-    creates: "{{ false if vim_plug_force else vim_plugin_path + '/*' }}"
+    creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
+  ignore_errors: yes
   register: vim_plug_output
   # failed_when: vim_plug_output.rc != 0
   when: vim_plug_install # and vim_plug_template.changed
   tags: vim-plug
-  ignore_errors: yes
 
-# - debug: var=vim_plug_output
+- debug: var=vim_plug_output

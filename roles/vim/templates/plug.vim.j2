@@ -17,11 +17,16 @@ function! YCMInstall(info)
   endif
 endfunction
 
-call plug#begin('{{ vim_plugin_path }}')
+{% if not vim_minimal_install %}
+let g:vim_config = '{{ vim_extra_config }}'
+{% endif %}
+
+call plug#begin('{{ vim_plugins_path }}')
+
 {% macro plug(plugin) -%}
 Plug '{{ plugin.repo | default(plugin) }}'{{ ', ' + (plugin.opts | to_json | regex_replace('"', '\'') | regex_replace('\'(function)(.*)\'(,|})', '\\1\\2\\3')) if plugin.opts is defined else '' }}
 {%- endmacro %}
-
+{% if not vim_minimal_install %}{% set vim_plugins = vim_plugins + vim_extra_plugins %}{% endif %}
 {% for plugin in vim_plugins %}
 {# if not vim_ignore_plugins | select('match', plugin.repo | default(plugin)) | list #}
 {% if plugin.repo | default(plugin) in vim_ignore_plugins %}" {% endif %}

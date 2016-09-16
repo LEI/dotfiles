@@ -1,10 +1,17 @@
-"
-" Minimal vimrc
-"
+" Base configuration
+" vim: et sts=2 sw=2 ts=2
 
 set nocompatible
 
-runtime plug.vimrc
+" runtime plug.vim
+if filereadable(expand('~/.vim/plug.vim'))
+  source ~/.vim/plug.vim
+endif
+
+" Load matchit.vim, but only if a newer version isn't installed
+if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &runtimepath) ==# ''
+  runtime macros/matchit.vim
+endif
 
 if has("autocmd")
   " Enable filetype detection
@@ -73,4 +80,6 @@ set backspace=indent,eol,start
 " set modeline
 " set modelines=2
 
-" vim: et sts=2 sw=2 ts=2
+if exists('g:vim_config') && filereadable(expand(g:vim_config))
+  source g:vim_config
+endif
