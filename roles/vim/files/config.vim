@@ -18,21 +18,9 @@
 
 " General {{{1
 
-if has('autocmd')
-  " Enable filetype detection
-  filetype plugin indent on
-endif
-
 if &encoding ==# 'latin1' && has('gui_running')
   set encoding=utf-8
 endif
-
-if &history < 1000
-  set history=1000
-endif
-
-" Reload unmodified files when changes are detected outside
-set autoread
 
 " Automatically :write before running commands
 " set autowrite
@@ -45,22 +33,6 @@ set autoread
 "  set shell=/bin/bash
 "endif
 
-if &tabpagemax < 50
-  set tabpagemax=50
-endif
-
-" Use Unix as the standard file type
-set fileformats=unix,dos,mac
-
-" Use system clipboard
-set clipboard=unnamed
-
-" Delete comment character when joining commented lines
-if v:version > 703 || v:version == 703 && has('patch541')
-  set formatoptions+=j
-endif
-" TODO fo+=t when wrap is on (after ft)
-
 " Do not scan included files (ctags?)
 set complete-=i
 
@@ -69,20 +41,6 @@ set complete+=kspell
 
 " Disable octal format for number processing using CTRL-A
 set nrformats-=octal
-
-" Keep the cursor on the same column if possible
-set nostartofline
-
-" Modified buffers can persist in the background
-set hidden
-
-" Don't redraw while executing macros
-set lazyredraw
-
-" Allow setting some options at the beginning and end of the file
-set modeline
-" Number of lines checked for set commands
-set modelines=2
 
 " Escape fix?
 set timeout
@@ -101,37 +59,6 @@ set exrc
 " Disable autocmd, shell and write commands in the current directory '.vimrc'
 set secure
 
-" Backups {{{1
-
-" Do not capture all global options
-set sessionoptions-=options
-
-" Tell vim to remember certain things when we exit
-"  '10  :  marks will be remembered for up to 10 previously edited files
-"  "100 :  will save up to 100 lines for each register
-"  :20  :  up to 20 lines of command-line history will be remembered
-"  %    :  saves and restores the buffer list
-"  n... :  where to save the viminfo files
-"set viminfo='10,\"100,:20,%,n~/.viminfo
-if !empty(&viminfo)
-  set viminfo^=!
-endif
-
-" Disable swapfiles and backups
-set noswapfile
-set nobackup
-set nowritebackup
-
-" Keep undo history across sessions, by storing in file.
-if has('persistent_undo')
-  let g:vim_backups = expand('~/.vim/backups')
-  if !isdirectory(g:vim_backups)
-    execute 'silent !mkdir ' . g:vim_backups . ' > /dev/null 2>&1'
-  endif
-  let &undodir = g:vim_backups
-  set undofile
-endif
-
 " Diff {{{1
 
 " Always use vertical diffs
@@ -139,62 +66,14 @@ set diffopt+=vertical
 
 " Interface {{{1
 
-" Normal backspace in insert mode
-set backspace=indent,eol,start
-
-" Recognize escape immediately
-set esckeys
-
-" Set the window title
-set title
-
-" Highlight current line
-set cursorline
-
 " set showtabline=2
 
 " set guioptions-=e
-
-" Always show current position
-set ruler
-
-" set rulerformat=%-14(%l,%c%V%)\ %P
-
-" Always show the status line
-set laststatus=2
-
-" if strlen(&stl) == 0
-set statusline=%!statusline#build()
-
-set display+=lastline
-
-" Invoke completion on <Tab> in commande line mode
-set wildmenu
-
-" Complete longest common string, then each full match
-set wildmode=longest,full
 
 " Use <Left> and <Right> keys to move the cursor
 " instead of selecting a different match:
 cnoremap <Left> <Space><BS><Left>
 cnoremap <Right> <Space><BS><Right>
-
-" Height of the command bar
-set cmdheight=2
-
-" Display current mode
-set noshowmode
-
-" Display incomplete commands
-set showcmd
-
-" Line numbers
-set number
-
-" Use relative line numbers
-if exists('&relativenumber')
-  set relativenumber
-endif
 
 " Disable cursor blinking
 "set guicursor=a:blinkon0
@@ -210,46 +89,7 @@ set matchpairs+=<:>
 " Treat <li> and <p> tags like the block tags they are
 " let g:html_indent_tags = 'li\|p'
 
-" Open new split panes to right and bottom, which feels more natural
-set splitbelow
-set splitright
-
-" Shorter messages
-set shortmess=atI
-
-set noerrorbells
-set visualbell
-set t_vb=
-
 " Indentation {{{1
-
-" shiftround?
-
-" set sw=4 sts=4 ts=4 et
-function! SetTabSize(...)
-  let l:tabsize = a:0 ? a:1 : 4
-  " Indent commands
- let &shiftwidth = l:tabsize
-  " Set the number of columns for a tab
-  let &softtabstop = l:tabsize
-  " Visual width of a tabulation
-  let &tabstop = l:tabsize
-endfunction
-
-if !exists('g:loaded_sleuth')
-  " Use spaces instead of tabs
-  set expandtab
-  call SetTabSize()
-endif
-
-" Copy ident from curreent line when starting a new line
-set autoindent
-
-" Smart autoindenting when starting a new line
-set smartindent
-
-" Make <Tab> insert indents instead of tabs at the beginning of a line
-set smarttab
 
 " Don't wrap lines by default (changed in ftplugin)
 set nowrap
@@ -297,25 +137,6 @@ endif
 if !&sidescroll
   set sidescroll=1
 endif
-
-" Search {{{1
-
-set gdefault
-
-" Highlight previous search matches
-set hlsearch
-
-" Show matches while typing
-set incsearch
-
-" Ignore case in search patterns
-set ignorecase
-
-" Do not ignore case when the pattern contains upper case characters
-set smartcase
-
-" Changes the special characters that can be used in search patterns
-set magic
 
 
 " Colors {{1

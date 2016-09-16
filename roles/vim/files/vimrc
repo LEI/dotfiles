@@ -22,22 +22,30 @@ if &history < 1000
   set history=1000
 endif
 
-" Disable swapfiles and backups
-set noswapfile
-set nobackup
-set nowritebackup
-
-" Keep undo history across sessions, by storing in file.
-if has('persistent_undo') && !isdirectory(expand('~').'/.vim/backups')
-  silent !mkdir ~/.vim/backups > /dev/null 2>&1
-  set undodir=~/.vim/backups
-  set undofile
+if &tabpagemax < 50
+  set tabpagemax=50
 endif
 
-if !has('nvim')
-  " Fast terminal connection
-  set ttyfast
+" Reload unmodified files when changes are detected outside
+set autoread
+
+" Modified buffers can persist in the background
+set hidden
+
+" Don't redraw while executing macros
+set lazyredraw
+
+" Use Unix as the standard file type
+set fileformats=unix,dos,mac
+
+" Use system clipboard
+set clipboard=unnamed
+
+" Delete comment character when joining commented lines
+if v:version > 703 || v:version == 703 && has('patch541')
+  set formatoptions+=j
 endif
+" TODO fo+=t when wrap is on (after ft)
 
 " Enable per-directory .vimrc files and disable unsafe commands in them
 set exrc
@@ -49,37 +57,153 @@ set hidden
 " Don't redraw while executing macros
 set lazyredraw
 
-" Enable syntax highlighting
-if has('syntax')
-  syntax enable
-endif
+" Normal backspace in insert mode
+set backspace=indent,eol,start
 
+" Recognize escape immediately
+set esckeys
+
+" Keep the cursor on the same column if possible
+set nostartofline
+
+" Allow setting some options at the beginning and end of the file
+set modeline
+" Number of lines checked for set commands
+set modelines=2
+
+" Interface {{{1
+
+" Set the window title
+set title
+
+" Line numbers
 set number
 
-" set cursorline
+" Use relative line numbers
+if exists('&relativenumber')
+  set relativenumber
+endif
+
+" Highlight current line
+set cursorline
+
+" Always show current position
+"set rulerformat=%-14(%l,%c%V%)\ %P
+set ruler
 
 " Always show the status line
 set laststatus=2
 
-" Display current mode
-set showmode
+" Height of the command bar
+set cmdheight=2
+
+" Current mode in status line
+set noshowmode
 
 " Display incomplete commands
 set showcmd
 
-" Height of the command bar
-set cmdheight=1
+" if strlen(&stl) == 0
+set statusline=%!statusline#build()
 
-" Always show current position
-set ruler
-"set rulerformat=%l,%c%V%=%P
+set display+=lastline
 
-" Allow backspace in insert mode
-set backspace=indent,eol,start
+" Invoke completion on <Tab> in commande line mode
+set wildmenu
 
-" set modeline
-" set modelines=2
+" Complete longest common string, then each full match
+set wildmode=longest,full
 
+" Open new split panes to right and bottom, which feels more natural
+set splitbelow
+set splitright
+
+" Shorter messages
+set shortmess=atI
+
+set noerrorbells
+set visualbell
+set t_vb=
+
+" Indentation {{{1
+
+" shiftround?
+
+" set sw=4 sts=4 ts=4 et
+function! SetTabSize(...)
+  let l:tabsize = a:0 ? a:1 : 4
+  " Indent commands
+ let &shiftwidth = l:tabsize
+  " Set the number of columns for a tab
+  let &softtabstop = l:tabsize
+  " Visual width of a tabulation
+  let &tabstop = l:tabsize
+endfunction
+
+if !exists('g:loaded_sleuth')
+  " Use spaces instead of tabs
+  set expandtab
+  call SetTabSize()
+endif
+
+" Copy ident from curreent line when starting a new line
+set autoindent
+
+" Smart autoindenting when starting a new line
+set smartindent
+
+" Make <Tab> insert indents instead of tabs at the beginning of a line
+set smarttab
+
+" Search {{{1
+
+set gdefault
+
+" Highlight previous search matches
+set hlsearch
+
+" Show matches while typing
+set incsearch
+
+" Ignore case in search patterns
+set ignorecase
+
+" Do not ignore case when the pattern contains upper case characters
+set smartcase
+
+" Changes the special characters that can be used in search patterns
+set magic
+
+" Backups {{{1
+
+" Do not capture all global options
+set sessionoptions-=options
+
+" Tell vim to remember certain things when we exit
+"  '10  :  marks will be remembered for up to 10 previously edited files
+"  "100 :  will save up to 100 lines for each register
+"  :20  :  up to 20 lines of command-line history will be remembered
+"  %    :  saves and restores the buffer list
+"  n... :  where to save the viminfo files
+"set viminfo='10,\"100,:20,%,n~/.viminfo
+if !empty(&viminfo)
+  set viminfo^=!
+endif
+
+" Disable swapfiles and backups
+set noswapfile
+set nobackup
+set nowritebackup
+
+" Keep undo history across sessions, by storing in file.
+if has('persistent_undo')
+  let g:vim_backups = expand('~/.vim/backups')
+  if !isdirectory(g:vim_backups)
+    execute 'silent !mkdir ' . g:vim_backups . ' > /dev/null 2>&1'
+  endif
+  let &undodir = g:vim_backups
+  set undofile
+endif
 " Terminal {{{1
 
 if has('mouse')
@@ -113,7 +237,8 @@ endif
 " Colors {{{1
 
 " Enable syntax highlighting
-if has('syntax') && (&t_Co > 2 || has('gui_running')) && !exists('syntax_on')
+"if has('syntax') && (&t_Co > 2 || has('gui_running')) && !exists('syntax_on')
+if has('syntax')
   syntax enable
 endif
 
@@ -136,7 +261,7 @@ catch /E185:/
   colorscheme desert
 endtry
 
-" 1}}
+" 1}}}
 
 if exists('g:vim_config') && filereadable(expand(g:vim_config))
   exec 'source ' . g:vim_config
