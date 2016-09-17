@@ -8,12 +8,12 @@
 
 - name: Source vimrc from ~/.vim/init.vim
   lineinfile:
-    dest: "{{ vim_rc }}"
-    line: "source {{ nvim_init }}"
+    dest: "{{ nvim_init }}"
+    line: "source {{ vim_rc }}"
     backup: yes
     create: yes
     state: present
-  when: "{{ nvim_present }}"
+  when: "{{ nvim_install }}"
 
 - name: Download vim-plug
   get_url:

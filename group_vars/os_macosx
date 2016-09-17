@@ -10,6 +10,7 @@ homebrew_taps:
   # - caskroom/cask
   - caskroom/fonts
   - caskroom/versions
+  # - neovim/neovim
 
 homebrew_packages:
   - bash
@@ -105,7 +106,7 @@ ruby_packages:
   - ruby
 
 vim_packages:
-  # neovim (tap neovim/neovim) and pip install neovim
+  - neovim # tap neovim/neovim & pip install neovim
   - name: vim
     # Homebrew install options
     install_options:

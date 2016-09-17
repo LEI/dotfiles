@@ -12,21 +12,22 @@ vim_plugins: []
 vim_extra_plugins: []
 vim_ignore_plugins: []
 
+vim_files:
+  - path: "{{ vim_plugins_path }}"
+    state: directory
+    # follow: true
+  - path: "{{ nvim_init }}"
+    state: touch
+    when: "{{ nvim_install }}"
+
 vim_dir: "{{ dot_home }}/.vim"
 vim_rc: "{{ vim_dir }}/vimrc"
 vim_extra_config: "{{ vim_dir }}/config.vim"
 vim_extras: yes
 
-vim_files:
-  - path: "{{ vim_plugins_path }}"
-    state: directory
-    # follow: true # autoload is a symlink
-  - path: "{{ nvim_init }}"
-    state: file
-    when: "{{ nvim_present }}"
-
-nvim_init: "{{ dot_home }}/.vim/init.vim }}"
-nvim_present: "{{ 'nvim' in vim_packages or 'neovim' in vim_packages }}"
+# 'nvim' in vim_packages or 'neovim' in vim_packages 
+nvim_install: no
+nvim_init: "{{ dot_home }}/.vim/init.vim"
 
 # https://github.com/junegunn/vim-plug
 vim_plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
