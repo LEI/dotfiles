@@ -20,6 +20,7 @@
 
     - role: arc-theme
       # when: "{{ gtk_theme == 'arc' }}" # FIXME
+      tags: [arc]
 
     - role: rxvt
       tags: [rxvt, terminal]
