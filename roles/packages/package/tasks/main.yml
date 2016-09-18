@@ -3,6 +3,10 @@
   package:
     name: "{{ item.name | default(item) }}"
     state: "{{ item.state | default(packages_state) }}"
+
+    # Apt module options
+    default_release: "{{ item.default_release | default(omit) }}"
+
     # Homebrew module options
     # role_brew_install_options
     install_options: "{{
@@ -10,9 +14,11 @@
       item.install_options is defined and
       item.install_options | length > 0 else omit
     }}"
+
     # https://github.com/transcode-open/apt-cyg
     # https://github.com/naokirin/ansible-apt-cyg-module
     use: "{{ 'auto' if os != 'Windows' else 'apt_cyg' }}"
+
   with_items: "{{ packages }}"
   # ansible_os_family
   become: "{{ 'yes' if os in ['Archlinux', 'Debian'] else 'no' }}"
