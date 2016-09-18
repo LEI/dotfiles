@@ -11,13 +11,18 @@ then
   [[ "$?" -gt 0 ]] && icon="$1"
 
   scrot $tmpbg
-  if 
-  convert $tmpbg -blur 2x2 $tmpbg
-  # convert $tmpbg -scale 10% -scale 1000% $tmpbg
-  [[ -f "$icon" ]] && convert $tmpbg $icon -gravity center -composite -matte $tmpbg
+  if has convert
+  then
+    convert $tmpbg -blur 2x2 $tmpbg
+    # convert $tmpbg -scale 10% -scale 1000% $tmpbg
+    [[ -f "$icon" ]] && convert $tmpbg $icon -gravity center -composite -matte $tmpbg
+  fi
   # dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
   i3lock --image $tmpbg # --no-unlock-indicator # --show-failed-attempts
   rm $tmpbg # mktemp?
 elif has slock
+then
   slock
+else
+  exit 1
 fi
