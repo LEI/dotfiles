@@ -4,10 +4,9 @@ has() {
   hash "$1" 2>/dev/null
 }
 
-if has i3lock
-then
-  tmpbg="/tmp/screen.png"
-  icon="$HOME/.config/i3/lock/icon.png"
+i3blur() {
+  local tmpbg="/tmp/screen.png"
+  local icon="$HOME/.config/i3/lock/icon.png"
   [[ "$?" -gt 0 ]] && icon="$1"
 
   scrot $tmpbg
@@ -20,6 +19,11 @@ then
   # dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
   i3lock --image $tmpbg # --no-unlock-indicator # --show-failed-attempts
   rm $tmpbg # mktemp?
+}
+
+if has i3lock
+then
+  i3blur "$@"
 elif has slock
 then
   slock
