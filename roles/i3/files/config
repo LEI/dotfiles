@@ -247,7 +247,10 @@ assign [class="Skype"] $workspace9
 
 # Startup
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1680x980
-exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg # --scale
+
+# exec_always --no-startup-id feh --scale ~/Pictures/wallpaper.jpg
+exec_always --no-startup-id feh --bg-fill ~/.wallpaper/*
+
 exec --no-startup-id compton -b --config $config/compton.conf
 # exec --no-startup-id redshift #-gtk
 exec --no-startup-id i3-msg "exec i3-sensible-terminal" # -e 'tmux'
