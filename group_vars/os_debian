@@ -34,6 +34,8 @@ ruby_packages:
   - ruby
   - ruby-dev
 
+ruby_gems: []
+
 go_packages:
   - golang
 
@@ -50,6 +52,7 @@ i3_packages:
   # - fonts-dejavu
   - fonts-font-awesome
   - { name: fonts-hack-ttf, default_release: testing }
+  - fonts-roboto
   - i3 # -t testing
   # - i3blocks
   # - i3cat
