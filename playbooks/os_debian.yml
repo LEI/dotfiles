@@ -17,10 +17,7 @@
 
     - role: i3
       tags: [i3, wm]
-
-    - role: arc-theme
-      # when: "{{ gtk_theme == 'arc' }}" # FIXME
-      tags: [arc]
+      gtk_theme: arc
 
     - role: rxvt
       tags: [rxvt, terminal]

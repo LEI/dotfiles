@@ -12,6 +12,7 @@ dependencies:
       - gnome-themes-standard
     when: "{{ ansible_os_family == 'Archlinux' }}"
 
+    # gtk, icons & firefox
   - role: pacman-yaourt
     pacman_yaourt_packages:
       - arc-firefox-theme

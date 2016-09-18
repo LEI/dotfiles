@@ -8,6 +8,9 @@ dependencies:
     pacman_yaourt_packages: "{{ i3_yaourt_packages }}"
     when: "{{ ansible_os_family == 'Archlinux' }}"
 
+  - role: arc-theme
+    when: "{{ gtk_theme == 'arc' }}"
+
   - role: dotfiles
     paths:
       - name: i3
