@@ -2,7 +2,7 @@
 - name: Clone Arc icon theme
   git:
     repo: https://github.com/horst3180/arc-icon-theme
-    dest: "{{ tmp_dir }}"
+    dest: "{{ tmp_dir }}/arc-icon-theme"
     depth: 1
 
 - name: Copy icons
