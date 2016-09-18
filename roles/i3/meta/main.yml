@@ -6,7 +6,7 @@ dependencies:
 
   - role: pacman-yaourt
     pacman_yaourt_packages: "{{ i3_yaourt_packages }}"
-    when: "{{ ansible_os_family == 'Archlinux' }}"
+    when: ansible_os_family == 'Archlinux'
 
   - role: dotfiles
     paths:
