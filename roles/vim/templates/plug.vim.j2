@@ -57,8 +57,8 @@ endfunction
 function! s:VimPlug()
   if &ft != 'gitcommit'
     call YCMEnable()
+    call SyntasticEnable()
   endif
-  call SyntasticEnable()
 endfunction
 
 augroup VimPlug
