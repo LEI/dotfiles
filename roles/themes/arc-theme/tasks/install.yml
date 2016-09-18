@@ -7,5 +7,6 @@
 
 - name: Copy icons
   copy:
-    remote_src: "{{ tmp_dir }}/arc-icon-theme/Arc"
-    dest: "{{ ansible_env.HOME }}/.icons"
+    remote_src: yes
+    src: "{{ tmp_dir }}/arc-icon-theme/Arc"
+    dest: "{{ ansible_env.HOME }}/.icons/"
