@@ -1,14 +1,23 @@
 #!/bin/bash
 
-tmpbg="/tmp/screen.png"
-icon="$HOME/.config/i3/lock/icon.png"
+has() {
+  hash "$1" 2>/dev/null
+}
 
-[[ "$?" -gt 0 ]] && icon="$1"
+if has i3lock
+then
+  tmpbg="/tmp/screen.png"
+  icon="$HOME/.config/i3/lock/icon.png"
+  [[ "$?" -gt 0 ]] && icon="$1"
 
-scrot $tmpbg
-convert $tmpbg -blur 2x2 $tmpbg
-# convert $tmpbg -scale 10% -scale 1000% $tmpbg
-[[ -f "$icon" ]] && convert $tmpbg $icon -gravity center -composite -matte $tmpbg
-# dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
-i3lock --image $tmpbg # --no-unlock-indicator # --show-failed-attempts
-rm $tmpbg # mktemp?
+  scrot $tmpbg
+  if 
+  convert $tmpbg -blur 2x2 $tmpbg
+  # convert $tmpbg -scale 10% -scale 1000% $tmpbg
+  [[ -f "$icon" ]] && convert $tmpbg $icon -gravity center -composite -matte $tmpbg
+  # dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop
+  i3lock --image $tmpbg # --no-unlock-indicator # --show-failed-attempts
+  rm $tmpbg # mktemp?
+elif has slock
+  slock
+fi
