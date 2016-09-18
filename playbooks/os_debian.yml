@@ -15,11 +15,11 @@
       tags: [pkg]
       packages: "{{ apt_packages }}"
 
-    # - role: i3
-    #   tags: [i3, wm]
+    - role: i3
+      tags: [i3, wm]
 
-    # - role: rxvt
-    #   tags: [rxvt, terminal]
+    - role: rxvt
+      tags: [rxvt, terminal]
 
-    # - role: xresources
-    #   tags: [x]
+    - role: xresources
+      tags: [x]
