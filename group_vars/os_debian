@@ -59,7 +59,6 @@ i3_packages:
   - { name: rofi, default_release: testing }
   - scrot
   # - suckless-tools
-  # - x11-xserver-utils
-  - xinit
   - xserver-xorg
-  - xserver-xorg-video-fbdev
+  # - xserver-xorg-video-fbdev
+  - xbase-clients # xinit, x11-xserver-utils...
