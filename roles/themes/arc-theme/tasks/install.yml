@@ -2,10 +2,10 @@
 - name: Clone Arc icon theme
   git:
     repo: https://github.com/horst3180/arc-icon-theme
-    dest: "{{ ansible_env.TMP_DIR }}"
+    dest: "{{ tmp_dir }}"
     depth: 1
 
 - name: Copy icons
   copy:
-    remote_src: "{{ ansible_env.TMP_DIR }}/arc-icon-theme/Arc"
+    remote_src: "{{ tmp_dir }}/arc-icon-theme/Arc"
     dest: "{{ ansible_env.HOME }}/.icons"
