@@ -53,8 +53,8 @@ i3_packages:
   - fonts-font-awesome
   - { name: fonts-hack-ttf, default_release: testing }
   - fonts-roboto
-  - i3 # -t testing
-  # - i3blocks
+  - { name: i3, default_release: testing }
+  - i3blocks
   # - i3cat
   - { name: rofi, default_release: testing }
   - scrot
