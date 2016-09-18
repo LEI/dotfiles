@@ -49,11 +49,11 @@ i3_packages:
   # - firefox-esr
   # - fonts-dejavu
   - fonts-font-awesome
-  - fonts-hack-ttf
+  - { name: fonts-hack-ttf, default_release: testing }
   - i3 # -t testing
   # - i3blocks
   # - i3cat
-  - rofi # -t testing
+  - { name: rofi, default_release: testing }
   - scrot
   # - suckless-tools
   # - x11-xserver-utils
