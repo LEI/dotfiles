@@ -5,7 +5,7 @@ dependencies:
     packages:
       - gnome-themes-standard
       - arc-theme
-    when: "{{ ansible_os_family == 'Debian' }}"
+    when: "{{ ansible_os_family != 'Archlinux' }}"
 
   - role: packages
     packages:
