@@ -55,7 +55,7 @@ function! SyntasticEnable()
 endfunction
 
 function! s:VimPlug()
-  if &ft != 'gitcommit'
+  if &filetype != 'gitcommit'
     call YCMEnable()
     call SyntasticEnable()
   endif
