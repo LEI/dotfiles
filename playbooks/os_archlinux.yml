@@ -22,7 +22,9 @@
 
     - role: i3
       tags: [i3, wm]
-      gtk_theme: arc
+
+    # Gtk, icons & Firefox
+    - role: arc-theme
 
     # Install rxvt-unicode and symlink ~/.Xresources
     - role: rxvt
