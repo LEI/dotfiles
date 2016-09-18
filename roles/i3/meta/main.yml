@@ -9,7 +9,7 @@ dependencies:
     when: ansible_os_family == 'Archlinux'
 
   - role: arc-theme
-    when: gtk_theme is defined and gtk_theme == 'arc'
+    when: gtk_theme == 'arc'
 
   - role: dotfiles
     paths:
