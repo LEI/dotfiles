@@ -6,7 +6,10 @@
 
   roles:
 
-    # Shell dotfiles
+    # - role: ssh
+    #   tags: [ssh]
+
+    # Bash
     - role: shell
       tags: [bash, bin, shell]
 
@@ -18,9 +21,6 @@
     - role: vim
       tags: [vim]
 
-    # - role: ssh
-    #   tags: [ssh]
-
     # IRC
-    - role: weechat
-      tags: [weechat, irc]
+    # - role: weechat
+    #   tags: [weechat, irc]
