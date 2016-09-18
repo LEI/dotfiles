@@ -211,8 +211,8 @@ bar {
         position bottom
         separator_symbol "│"
 
-        status_command i3blocks -c $config/i3blocks.conf
-        # status_command i3status --config $config/i3status.conf
+        # status_command i3blocks -c $config/i3blocks.conf
+        status_command i3status --config $config/i3status.conf
         # status_command $config/bin/i3status --config $config/i3status.conf
         # status_command i3cat -cmd-file $config/i3cat.conf -header-clickevents=true
 
