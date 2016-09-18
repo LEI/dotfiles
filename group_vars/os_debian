@@ -50,15 +50,14 @@ i3_packages:
   - feh
   # - firefox-esr
   # - fonts-dejavu
-  - fonts-font-awesome
+  - { name: fonts-font-awesome, default_release: testing }
   - { name: fonts-hack-ttf, default_release: testing }
   - fonts-roboto
   - { name: i3, default_release: testing }
-  - i3blocks
-  # - i3cat
+  - { name: i3status, default_release: testing } # i3blocks, i3cat
   - { name: rofi, default_release: testing }
   - scrot
   # - suckless-tools
+  - xbase-clients # xinit x11-xserver-utils xrdb ...
   - xserver-xorg
   # - xserver-xorg-video-fbdev
-  - xbase-clients # xinit, x11-xserver-utils...
