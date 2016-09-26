@@ -70,11 +70,6 @@ set diffopt+=vertical
 
 " set guioptions-=e
 
-" Use <Left> and <Right> keys to move the cursor
-" instead of selecting a different match:
-cnoremap <Left> <Space><BS><Left>
-cnoremap <Right> <Space><BS><Right>
-
 " Disable cursor blinking
 "set guicursor=a:blinkon0
 
@@ -88,12 +83,6 @@ set matchpairs+=<:>
 
 " Treat <li> and <p> tags like the block tags they are
 " let g:html_indent_tags = 'li\|p'
-
-" Indentation {{{1
-
-" Don't wrap lines by default (changed in ftplugin)
-set nowrap
-" set textwidth=79
 
 " Show line breaks (arrows: 0x21AA or 0x08627)
 let &showbreak = nr2char(0x2026) " Ellipsis
@@ -139,7 +128,7 @@ if !&sidescroll
 endif
 
 
-" Colors {{1
+" Colors {{{1
 
 " Hide line number background
 "highlight LineNr ctermbg=none guibg=none
@@ -244,6 +233,11 @@ vmap <C-Down> xp`[V`]
 " noremap <S-Tab> v<
 " vnoremap <Tab> >gv
 " vnoremap <S-Tab> <gv
+
+" Use <Left> and <Right> keys to move the cursor
+" instead of selecting a different match:
+cnoremap <Left> <Space><BS><Left>
+cnoremap <Right> <Space><BS><Right>
 
 " Edit in the same directory as the current file
 " cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'

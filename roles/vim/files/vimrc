@@ -155,6 +155,11 @@ set smartindent
 " Make <Tab> insert indents instead of tabs at the beginning of a line
 set smarttab
 
+" Don't wrap lines
+set nowrap
+
+" set textwidth=79
+
 " Search {{{1
 
 set gdefault
@@ -251,14 +256,12 @@ if exists('+colorcolumn')
   "let &colorcolumn=join(range(1,80),",")
 endif
 
-call background#set()
 try
-  " let g:solarized_termtrans = 1
+  call background#set()
   colorscheme solarized
   call togglebg#map('<F5>')
 catch /E185:/
-  " Default color scheme
-  colorscheme desert
+  "colorscheme desert
 endtry
 
 " 1}}}
