@@ -94,7 +94,7 @@ ansible_install() {
       elif has yum
       then
         # CentOS, RHEL... (install the epel-release RPM if needed)
-        su_do yum install epel-release ansible
+        su_do yum install -y epel-release ansible
       else
         die "Unkown package manager"
       fi
