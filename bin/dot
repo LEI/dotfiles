@@ -91,6 +91,10 @@ ansible_install() {
         su_do pacman -Syu --noconfirm
         su_do pacman -S git python2 python2-setuptools python2-pip ansible --noconfirm
         # python2-crypto / python2-cryptography / pyhton2-packaging
+      elif has yum
+      then
+        # CentOS, RHEL... (install the epel-release RPM if needed)
+        su_do yum install ansible
       else
         die "Unkown package manager"
       fi
