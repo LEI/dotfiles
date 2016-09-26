@@ -1,0 +1,10 @@
+---
+- name: CentOS roles
+  hosts: os_centos
+  gather_facts: no
+  tags: [centos]
+
+  roles: []
+
+    # - role: yum
+    #   tags: [yum]
