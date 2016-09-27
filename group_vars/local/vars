@@ -17,6 +17,9 @@ npm_packages:
 go_packages:
   - go
 
+python_packages:
+  - python-pip # Archlinux, Debian, RedHat
+
 pip_packages:
   # Update pip
   - { name: pip, extra_args: --upgrade } # TODO Debian sudo
