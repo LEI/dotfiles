@@ -28,7 +28,7 @@
   shell: "{{ php_executable }} composer-installer.php --install-dir={{ composer_bin_path }} --filename=composer {% if composer_version != '' %} --version={{ composer_version }}{% endif %}"
   args:
     chdir: "{{ tmp_dir }}"
-  become: "{{ 'yes' if ansible_os_family == 'Archlinux' or ansible_os_family == 'Debian' else 'no' }}"
+  become: "{{ 'yes' if ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
 
 # - name: Move Composer to be accessed globally
 #   shell: "mv {{ tmp_dir }}composer.phar {{ composer_path }}"
