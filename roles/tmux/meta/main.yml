@@ -2,9 +2,7 @@
 dependencies:
 
   - role: package
-    packages:
-      - tmux
-  #   when: "ansible_os_family == 'Debian'"
+    packages: "{{ tmux_packages }}"
 
   # - role: brew
   #   packages:
