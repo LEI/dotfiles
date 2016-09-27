@@ -58,7 +58,7 @@
   args:
     removes: "{{ item.dest }}"
     creates: "{{ item.dest }}.{{ backup_ext }}"
-  when: item.state == 'link' and item.dest_link != item.src
+  when: item.state == 'link' and item.dest_link is defined and item.dest_link != item.src
   with_items: "{{ dot_paths }}"
 
 - name: Action
