@@ -83,6 +83,7 @@ class LookupModule(LookupBase):
                         'src': st['path'],
                         'dest': self.get_dest_path(basename, params),
                     }
+                    item['stat'] = self.get_stat(item['dest'], variables)
                     files.append(item)
                 else:
                     notfound.append(st['path'])
@@ -166,7 +167,7 @@ class LookupModule(LookupBase):
                 'path': path,
                 # 'mode': "%04o" % S_IMODE(st.st_mode),
                 # 'isdir': S_ISDIR(st.st_mode),
-                # 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
+                'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
                 }
         except e: # OSError?
             d = { 'exists': False }
