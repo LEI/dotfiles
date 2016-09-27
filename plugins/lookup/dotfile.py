@@ -170,7 +170,7 @@ class LookupModule(LookupBase):
                 # 'isdir': S_ISDIR(st.st_mode),
                 'link': os.path.realpath(path) if S_ISLNK(st.st_mode) else False,
                 }
-        except e: # OSError?
+        except OSError, e:
             d = { 'exists': False }
             # if e.errno == errno.ENOENT: # Does not exists
                 # raise AnsibleFileNotFound("could not locate file in lookup: %s" % g)
