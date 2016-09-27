@@ -42,7 +42,7 @@
         msg:
           groups: "{{ group_names | to_nice_json }}"
           os: "{{ os }}"
-      # when: log_enable is defined and log_enable
+      when: log_enable is defined and log_enable
 
     # - name: "Include OS vars"
     #   include_vars: "{{ item }}"

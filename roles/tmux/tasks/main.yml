@@ -54,6 +54,7 @@
 - name: "Install {{ tmux_plugins | length }} tmux plugins"
   shell: "{{ tmux_plugin_manager_path }}/tpm/bin/install_plugins"
   environment:
+    # LOCALE: C
     TMUX_PLUGIN_MANAGER_PATH: "{{ tmux_plugin_manager_path }}"
   args:
     # if tmux_plugins | length > 0 else false
