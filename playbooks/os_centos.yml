@@ -7,7 +7,7 @@
   roles:
 
     - role: yum
-      tags: [yum, pkg]
+      tags: [yum]
 
     - role: package
       tags: [pkg]
