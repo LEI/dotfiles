@@ -85,7 +85,7 @@ class LookupModule(LookupBase):
                         'src': st['path'],
                         'dest': dest,
                     }
-                    if dest_st['exists']:
+                    if dest_st['exists'] and dest_st['link'] != st['path']:
                         item['dest_link'] = dest_st['link']
                     files.append(item)
                 else:
