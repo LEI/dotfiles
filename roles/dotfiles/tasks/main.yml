@@ -42,7 +42,7 @@
 #     - "{{ dot_paths | map(attribute='items') | list }}"
 #   # no_log: true
 
-- name: Check destination
+- name: Check parent directory
   file:
     path: "{{ item }}"
     state: directory
@@ -51,8 +51,17 @@
   #     - "{{ dot_paths }}"
   #     - items
 
-- debug:
-    var: dot_paths
+- name: Check destination files
+  vars:
+    backup_ext: "{{ dot_backup_ext | default(ansible_date_time.date + '@' + ansible_date_time.time + '~') }}"
+  command: "mv {{ item.dest }} {{ item.dest }}.{{ backup_ext }}"
+  args:
+    removes: "{{ item.dest }}"
+    creates: "{{ item.dest }}.{{ backup_ext }}"
+  when: item.state = 'link' and item.dest_stat.exists
+    and item.dest_stat.link is defined
+    and item.dest_stat.link != item.src
+  with_items: "{{ dot_paths }}"
 
 - name: Action
   action: "{{ 'file' if item.state in dot_states else item.state }}"
