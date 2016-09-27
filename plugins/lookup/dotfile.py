@@ -79,11 +79,12 @@ class LookupModule(LookupBase):
                         st['path'] = st['path'].replace(self.userdir, self.homedir)
                     basename = os.path.basename(st['path'])
                     dest = self.get_dest_path(basename, params)
+                    dest_st = self.get_stat(dest, variables)
                     # if 'exists' in st: del st['exists']
                     item = {
                         'src': st['path'],
                         'dest': dest,
-                        'dest_stat': self.get_stat(dest, variables)
+                        'dest_link': dest_st['link'] if dest_st['exists'] else False,
                     }
                     files.append(item)
                 else:
