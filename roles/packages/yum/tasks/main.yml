@@ -1,7 +1,7 @@
 ---
 - name: Update yum packages
   yum:
-    name: *
+    name: "*"
     state: latest
     update_cache: yes
   when: packages_update
