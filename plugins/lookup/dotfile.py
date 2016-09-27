@@ -78,12 +78,13 @@ class LookupModule(LookupBase):
                     if self.userdir != self.homedir and '/templates/' not in st['path']:
                         st['path'] = st['path'].replace(self.userdir, self.homedir)
                     basename = os.path.basename(st['path'])
+                    dest = self.get_dest_path(basename, params)
                     # if 'exists' in st: del st['exists']
                     item = {
                         'src': st['path'],
-                        'dest': self.get_dest_path(basename, params),
+                        'dest': dest,
+                        'dest_stat': self.get_stat(dest, variables)
                     }
-                    item['stat'] = self.get_stat(item['dest'], variables)
                     files.append(item)
                 else:
                     notfound.append(st['path'])
