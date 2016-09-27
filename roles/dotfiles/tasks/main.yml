@@ -51,6 +51,9 @@
   #     - "{{ dot_paths }}"
   #     - items
 
+- debug:
+    var: dot_paths
+
 - name: Action
   action: "{{ 'file' if item.state in dot_states else item.state }}"
   args:
