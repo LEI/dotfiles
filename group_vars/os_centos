@@ -1,0 +1,25 @@
+---
+# vi: ft=yaml
+
+yum_packages: []
+  # - epel-release
+  - curl
+  - wget
+
+node_packages:
+  - nodejs
+
+php_packages:
+  - php
+
+ruby_packages:
+  - ruby
+
+ruby_gems: []
+
+go_packages: []
+
+vim_packages:
+  - vim
+
+i3_packages: []

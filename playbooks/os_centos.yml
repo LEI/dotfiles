@@ -1,6 +1,6 @@
 ---
 - name: CentOS roles
-  hosts: os_redhat
+  hosts: os_centos
   gather_facts: no
   tags: [rhel, centos]
 
