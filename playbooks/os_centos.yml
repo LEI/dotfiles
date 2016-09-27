@@ -8,3 +8,7 @@
 
     - role: yum
       tags: [yum, pkg]
+
+    - role: package
+      tags: [pkg]
+      packages: "{{ yum_packages }}"
