@@ -5,6 +5,7 @@ dependencies:
     packages: "{{ htop_packages }}"
 
   - role: dotfiles
+    roles_dir: roles/sytem
     paths:
       - name: htop
         dest: .config/htop
