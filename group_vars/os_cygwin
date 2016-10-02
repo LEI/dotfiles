@@ -22,6 +22,8 @@ cygwin_packages:
   - tree
   - wget
 
+go_packages: []
+
 php_packages:
   - php
   - php-json
@@ -29,7 +31,7 @@ php_packages:
   - php-iconv # or 'php-mbstring'
 
 python_packages:
-  - python-setuptools # easy_install pip
+  - python-setuptools # TODO easy_install pip
 
 ruby_packages:
   - ruby

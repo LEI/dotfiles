@@ -27,3 +27,4 @@
 
     - role: htop
       tags: [htop]
+      when: os not in ['Windows']
