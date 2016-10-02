@@ -36,6 +36,8 @@
   with_items: "{{ paths }}"
   # with_fileglob: "{{ dot_paths | map(attribute='src') | list }}"
 
+- debug:
+    var: dot_paths
 # - set_fact:
 #     dot_paths_dest: "{{ dot_paths_dest + [item.dest | dirname] }}"
 #   with_flattened:
