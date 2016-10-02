@@ -26,7 +26,7 @@ vim_extra_config: "{{ vim_dir }}/config.vim"
 vim_extras: yes
 
 # 'nvim' in vim_packages or 'neovim' in vim_packages 
-nvim_install: "{{ neovim_install | default('no') }}"
+nvim_install: "{{ neovim_install | default(false) }}"
 nvim_init: "{{ dot_home }}/.vim/init.vim"
 
 # https://github.com/junegunn/vim-plug
