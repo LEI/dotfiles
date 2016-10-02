@@ -30,8 +30,9 @@ class LookupModule(LookupBase):
             stat = os.stat(role_path)
         except OSError, e:
             # exists = False
-            if e.errno == errno.ENOENT: # Does not exists
-                raise AnsibleFileNotFound("could not locate file in lookup: %s" % g)
+            # if e.errno == errno.ENOENT:
+            if e.errno == 2:
+                raise AnsibleFileNotFound("No such file or directory: %s" % role_path)
 
         if len(role_path) > 0: # and exists == True:
             path = role_path
