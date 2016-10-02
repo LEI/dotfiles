@@ -1,0 +1,10 @@
+---
+dependencies:
+
+  - role: package
+    packages: "{{ htop_packages }}"
+
+  - role: dotfiles
+    paths:
+      - name: htop
+        dest: .config/htop
