@@ -390,8 +390,8 @@ osx_defaults:
     # Disable automatic termination of inactive apps
     NSDisableAutomaticTermination: {type: bool, value: true}
 
-    # Disable the crash reporter FIXME
-    # DialogType: {domain: com.apple.CrashReporter, value: "none"}
+    # Disable the crash reporter
+    DialogType: {domain: com.apple.CrashReporter, value: "none"}
 
     # Set Help Viewer windows to non-floating mode
     DevMode: {domain: com.apple.helpviewer, type: bool, value: true}

@@ -17,10 +17,10 @@ config.modules = {
 }
 
 config.apps = {
-    -- Bring all Finder windows forward when one gets activated (desktop is a finder)
-    { name = "Finder", fn = function(appObject)
-        appObject:selectMenuItem({"Window", "Bring All to Front"})
-    end },
+    -- -- Bring all Finder windows forward when one gets activated (desktop is a finder)
+    -- { name = "Finder", fn = function(appObject)
+    --     appObject:selectMenuItem({"Window", "Bring All to Front"})
+    -- end },
 }
 
 config.grid = {
