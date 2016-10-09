@@ -6,10 +6,10 @@ dependencies:
 
   - role: pacman-yaourt
     pacman_yaourt_packages: "{{ i3_yaourt_packages }}"
-    when: "{{ ansible_os_family == 'Archlinux' }}"
+    when: ansible_os_family == 'Archlinux'
 
   - role: arc-theme
-    when: "{{ gtk_theme == 'arc' }}"
+    when: gtk_theme == 'arc'
 
   - role: dotfiles
     paths:
@@ -24,3 +24,6 @@ dependencies:
         dest: .Xresources.d
       - name: i3/files/wallpaper
         dest: .wallpaper
+
+  - role: xresources
+    tags: [x]
