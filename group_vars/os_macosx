@@ -7,6 +7,7 @@ homebrew_taps:
   - homebrew/completions
   - homebrew/dupes
   - homebrew/homebrew-php
+  # - homebrew/x11
   # - caskroom/cask
   - caskroom/fonts
   - caskroom/versions
@@ -85,7 +86,7 @@ cask_apps:
   - vagrant
   - virtualbox
   - vlc
-  # - quartz
+  # - xquartz
 
 cask_options:
   # Remap Caps Lock to Escape
@@ -108,6 +109,9 @@ python_packages: []
 
 ruby_packages:
   - ruby
+
+# rxvt_packages:
+#   - rxvt-unicode # tap homebrew/x11, cask xquartz
 
 vim_packages:
   - neovim # tap neovim/neovim & pip install neovim

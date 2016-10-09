@@ -3,12 +3,17 @@ dependencies:
 
   - role: package
     packages: "{{ rxvt_packages }}"
-    when: os in ['Debian', 'Windows']
+    # when: os in ['Debian', 'Windows']
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
       - rxvt-unicode
     when: ansible_os_family == 'Archlinux'
+
+  - role: homebrew-cask
+    homebrew_cask_apps:
+      - xquartz
+    when: ansible_os_family == 'Darwin'
 
   - role: dotfiles
     paths:
