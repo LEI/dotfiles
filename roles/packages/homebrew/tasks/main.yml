@@ -23,12 +23,6 @@
   homebrew: upgrade_all=yes
   when: packages_upgrade
 
-- name: Ensure Homebrew taps are present
-  homebrew_tap:
-    tap: "{{ item }}"
-    state: "{{ homebrew_taps_state }}"
-  with_items: "{{ homebrew_taps }}"
-
 - name: Cleanup Homebrew
   shell: brew cleanup
   register: cleanup

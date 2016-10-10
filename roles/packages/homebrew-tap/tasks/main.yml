@@ -1,0 +1,7 @@
+---
+
+- name: Homebrew taps
+  homebrew_tap:
+    tap: "{{ item }}"
+    state: "{{ homebrew_taps_state }}"
+  with_items: "{{ homebrew_taps }}"
