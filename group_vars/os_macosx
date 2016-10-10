@@ -6,8 +6,6 @@ git_credential_helper: osxkeychain
 homebrew_taps:
   - homebrew/completions
   - homebrew/dupes
-  - homebrew/homebrew-php
-  # - homebrew/x11
   # - caskroom/cask
   - caskroom/fonts
   - caskroom/versions
@@ -103,15 +101,18 @@ node_packages:
   - node
 
 php_packages:
-  - php55
+  - homebrew/homebrew-php/php70
 
 python_packages: []
 
 ruby_packages:
   - ruby
 
+rxvt_packages:
+  - homebrew/x11/rxvt-unicode
+
 vim_packages:
-  - neovim # tap neovim/neovim & pip install neovim
+  # - neovim/neovim/neovim # pip install neovim
   - name: vim
     # Homebrew install options
     install_options:
