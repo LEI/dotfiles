@@ -146,8 +146,18 @@ ansible_install() {
 arg() {
   local arg="$1"
   local pattern="* $arg *"
+
+  # Match the argument
   [[ " ${args[@]} " = $pattern ]]
-  args="${args[@]/$arg}"
+  local rc=$?
+
+  if [[ $rc -eq 0 ]]
+  then
+    # Remove if found
+    args="${args[@]/$arg/}"
+  fi
+
+  return $rc
 }
 
 has() {
