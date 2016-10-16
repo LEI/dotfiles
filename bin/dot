@@ -16,9 +16,13 @@ run_playbook() {
   #   [[ "$1" == "--force-install" ]] && shift \
   #     && ansible_install
   # fi
+
   if ! has ansible
   then
     ansible_install
+  elif arg "--force-install"
+  then
+    ansible_install true
   fi
 
   local vault=
@@ -39,6 +43,13 @@ run_playbook() {
 
   # Run the main playbook
   ansible-playbook "$DOT_PLAYBOOK" $vault ${args[@]}
+}
+
+arg() {
+  local arg="$1"
+  local pattern="* $arg *"
+  [[ " ${args[@]} " = $pattern ]]
+  args="${args[@]/$arg}"
 }
 
 ansible_vault() {
@@ -62,6 +73,7 @@ ansible_vault() {
 }
 
 ansible_install() {
+  local force="$1"
   local os=$(uname -s) # -o Cygwin?
 
   case $os in
@@ -125,7 +137,7 @@ ansible_install() {
   esac
 
   # If Ansible is still not present
-  if ! has ansible
+  if ! has ansible || [[ -n "$force" ]]
   then
     if ! has pip
     then
