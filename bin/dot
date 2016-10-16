@@ -45,13 +45,6 @@ run_playbook() {
   ansible-playbook "$DOT_PLAYBOOK" $vault ${args[@]}
 }
 
-arg() {
-  local arg="$1"
-  local pattern="* $arg *"
-  [[ " ${args[@]} " = $pattern ]]
-  args="${args[@]/$arg}"
-}
-
 ansible_vault() {
   local file=
   # Vault file path
@@ -148,6 +141,13 @@ ansible_install() {
     # Install dependencies
     su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
   fi
+}
+
+arg() {
+  local arg="$1"
+  local pattern="* $arg *"
+  [[ " ${args[@]} " = $pattern ]]
+  args="${args[@]/$arg}"
 }
 
 has() {
