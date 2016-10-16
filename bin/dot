@@ -20,14 +20,13 @@ run_playbook() {
   if ! has ansible
   then
     ansible_install
-  elif arg "--force-install"
+  elif rm_arg "--force-install"
   then
     ansible_install true
   fi
 
   local vault=
-  local ask="* --ask-vault-pass *"
-  if [[ " ${args[@]} " != $ask ]]
+  if ! arg "--ask-vault-pass"
   then
     local vault_file=$(ansible_vault)
     # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
@@ -149,6 +148,12 @@ arg() {
 
   # Match the argument
   [[ " ${args[@]} " = $pattern ]]
+}
+
+rm_arg() {
+  local arg="$1"
+
+  arg "$@"
   local rc=$?
 
   if [[ $rc -eq 0 ]]
