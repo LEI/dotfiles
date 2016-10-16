@@ -26,10 +26,7 @@
 
     # Install rxvt-unicode and symlink ~/.Xresources
     - role: rxvt
-      tags: [rxvt, terminal]
-
-    - role: xresources
-      tags: [x]
+      tags: [rxvt]
 
     - role: redshift # location, autostart?
       tags: [redshift]

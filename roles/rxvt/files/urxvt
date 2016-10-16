@@ -1,7 +1,8 @@
 ! URxvt
 ! vi: ft=xdefaults
 
-!URxvt.termName: rxvt-256color
+! URxvt*termName: screen-256color
+! URxvt.termName: rxvt-256color
 URxvt.saveLines: 10000
 URxvt.scrollBar: false
 ! URxvt.borderless: true
@@ -13,12 +14,14 @@ URxvt*scrollWithBuffer: true
 ! Scroll back to the bottom on keypress
 URxvt*scrollTtyKeypress: true
 
+! https://github.com/muennich/urxvt-perls
+
 ! Clickable URLs
 URxvt.perl-ext-common: default,matcher
 URxvt.url-launcher: /usr/bin/firefox
 URxvt.matcher.button: 1
 
 ! Font
-! URxvt.font: xft:DejaVu Sans Mono:size=10
+! URxvt.font: xft:DejaVu Sans Mono:size=9
 URxvt.font: xft:Hack:size=10
-!URxvt.letterSpace: -0.6
+URxvt.letterSpace: -1

@@ -1,9 +1,14 @@
 ---
 dependencies:
 
+  - role: homebrew-cask
+    homebrew_cask_apps:
+      - xquartz
+    when: ansible_os_family == 'Darwin'
+
   - role: package
     packages: "{{ rxvt_packages }}"
-    when: os in ['Debian', 'Windows']
+    # when: os in ['Debian', 'Windows']
 
   - role: pacman-yaourt
     pacman_yaourt_packages:
@@ -14,3 +19,6 @@ dependencies:
     paths:
       - name: rxvt
         dest: .Xresources.d
+
+  - role: xresources
+    tags: [x]

@@ -7,10 +7,8 @@ pacman_packages:
   - cmake
   - firefox
   - imagemagick
-  - lxappearance # gnome-themes-standard / gtk3
   - mlocate # Run 'updatedb'
   # - mpv (vlc # Requires qt4)
-  - ttf-hack
   # - transmission-cli # remote/gtk/qt
   - unzip
   - youtube-dl
@@ -19,11 +17,8 @@ pacman_packages:
   # - the_silver_searcher - ack / ag / pt?
 
 # Arch User Repository
-yaourt_packages:
+yaourt_packages: []
   # - google-chrome
-  # - system-san-francisco-font-git
-  - ttf-font-awesome
-  - ttf-roboto
 
 node_packages:
   - nodejs
@@ -56,9 +51,12 @@ i3_packages:
   - feh # background manager & image viewer
   - i3 # window manager
   # - libnotify
+  - lxappearance # gnome-themes-standard / gtk3
   - rofi # window switcher
   - scrot # screenshot utility
   - thunar # file explorer (vifm)
+  # - ttf-droid
+  - ttf-hack
   - xautolock # -time 10 -locker slock
   - xclip
   # - xsel
@@ -71,3 +69,6 @@ i3_yaourt_packages:
   - i3cat-git # Requires go
   # - i3lock-color # Conflicts with i3lock
   - i3blocks # Not available on ARM
+  # - system-san-francisco-font-git
+  - ttf-font-awesome
+  - ttf-roboto

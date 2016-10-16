@@ -16,14 +16,17 @@ run_playbook() {
   #   [[ "$1" == "--force-install" ]] && shift \
   #     && ansible_install
   # fi
+
   if ! has ansible
   then
     ansible_install
+  elif rm_arg "--force-install"
+  then
+    ansible_install true
   fi
 
   local vault=
-  local ask="* --ask-vault-pass *"
-  if [[ " ${args[@]} " != $ask ]]
+  if ! arg "--ask-vault-pass"
   then
     local vault_file=$(ansible_vault)
     # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
@@ -62,6 +65,7 @@ ansible_vault() {
 }
 
 ansible_install() {
+  local force="$1"
   local os=$(uname -s) # -o Cygwin?
 
   case $os in
@@ -125,7 +129,7 @@ ansible_install() {
   esac
 
   # If Ansible is still not present
-  if ! has ansible
+  if ! has ansible || [[ -n "$force" ]]
   then
     if ! has pip
     then
@@ -136,6 +140,29 @@ ansible_install() {
     # Install dependencies
     su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
   fi
+}
+
+arg() {
+  local arg="$1"
+  local pattern="* $arg *"
+
+  # Match the argument
+  [[ " ${args[@]} " = $pattern ]]
+}
+
+rm_arg() {
+  local arg="$1"
+
+  arg "$@"
+  local rc=$?
+
+  if [[ $rc -eq 0 ]]
+  then
+    # Remove if found
+    args="${args[@]/$arg/}"
+  fi
+
+  return $rc
 }
 
 has() {

@@ -1,0 +1,6 @@
+! ~/.Xresources
+! {{ ansible_managed }}
+
+{% for file in xresources_files %}
+#include "{{ file }}"
+{% endfor %}

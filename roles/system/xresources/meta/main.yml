@@ -6,6 +6,7 @@ dependencies:
     paths:
       - name: xresources
         prefix: .
-        pattern: "Xresources"
+        pattern: "*.j2" # "Xresources"
+        template: yes
       - name: xresources/files/Xresources.d
         dest: .Xresources.d
