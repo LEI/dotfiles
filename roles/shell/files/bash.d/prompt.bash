@@ -98,11 +98,12 @@ __prompt_git() {
     return $exit
   fi
 
-  local file line branch_line count=0
+  local file line ref count=0
   while IFS= read -r -d '' line; do
     file=${line:0:2}
     case $file in
-      \#\#) branch_line="${line#\#\# }" ;;
+      # master...origin/master
+      \#\#) ref="${line#\#\# }" ;;
       *) ((count++)) ;;
       # ?M) ((changed++)) ;;
       # ?A) ((added++)) ;;
@@ -116,7 +117,7 @@ __prompt_git() {
   local behind ahead var pattern
   for var in {ahead,behind}; do
     pattern='(\[|[[:space:]])'${var}'[[:space:]]+([[:digit:]])(,|\])'
-    if [[ "$branch_line" =~ $pattern ]]; then
+    if [[ "$ref" =~ $pattern ]]; then
       if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]; then
         # ${!var}="${BASH_REMATCH[2]}"
         declare "${var}"="${BASH_REMATCH[2]}"
@@ -129,12 +130,12 @@ __prompt_git() {
   [[ -n "$ahead" ]] && diff+=">"
 
   local branch=
-  if [[ $branch_line =~ "(no branch)" ]]
+  local short_sha="${repo_info##*$'\n'}"
+  if [[ $ref =~ "HEAD (no branch)" ]]
   then
-    # Short sha
-    branch="${repo_info##*$'\n'}"
+    branch="$short_sha"
   else
-    branch="${branch_line%\.\.\.*}"
+    branch="${ref%\.\.\.*}"
     branch="${branch##* }"
   fi
 
