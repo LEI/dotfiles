@@ -105,13 +105,13 @@ __prompt_git() {
   fi
   local short_sha="${repo_info##*$'\n'}"
 
-  local file line ref count=0
+  local line=
+  local branch_info=
+  local count=0
   while IFS= read -r -d '' line
   do
-    file=${line:0:2}
-    case $file in
-      ## master...origin/master
-      \#\#) ref="${line#\#\# }" ;;
+    case "${line:0:2}" in
+      \#\#) branch_info="${line#\#\# }" ;;
       *) ((count++)) ;;
       # ?M) ((changed++)) ;;
       # ?A) ((added++)) ;;
@@ -122,11 +122,14 @@ __prompt_git() {
     esac
   done < <(git status -z --porcelain --branch) 2>/dev/null
 
-  local behind ahead var pattern
+  local behind ahead
+  local pattern=
+  local var=
   for var in {ahead,behind}
   do
+    ## [ahead x, behind y]
     pattern='(\[|[[:space:]])'${var}'[[:space:]]+([[:digit:]])(,|\])'
-    if [[ "$ref" =~ $pattern ]]
+    if [[ "$branch_info" =~ $pattern ]]
     then
       if [[ "${#BASH_REMATCH[@]}" -ge 2 ]]
       then
@@ -140,17 +143,22 @@ __prompt_git() {
   [[ -n "$behind" ]] && diff+="<"
   [[ -n "$ahead" ]] && diff+=">"
 
-  local branch="$ref"
-  if [[ $ref =~ "..." ]]
+  local branch=
+  ## master...origin/master
+  if [[ $branch_info =~ "..." ]]
   then
-    branch="${ref%\.\.\.*}"
+    branch="${branch_info%\.\.\.*}"
     branch="${branch##* }"
-  elif [[ $ref =~ "HEAD (no branch)" ]]
+  elif [[ $branch_info =~ "HEAD (no branch)" ]]
   then
     branch="$short_sha"
+  else
+    branch="$branch_info"
   fi
 
-  local flag branch_color
+  local flag=
+  local flag_color="white"
+  local branch_color=
   if [[ "$count" -gt 0 ]]
   then
     flag="*"
@@ -168,7 +176,7 @@ __prompt_git() {
   fi
 
   local printf_format="${1:- on %s%s}"
-  printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${white}$flag${reset}$diff"
+  printf -- "${printf_format}" "${!branch_color}$branch${reset}" "${!flag_color}$flag${reset}$diff"
 }
 
 # p+='$([[ -n $(git branch 2> /dev/null) ]] && echo " on ")\[${white}\]$(parse_git_branch)\[${reset}\]'

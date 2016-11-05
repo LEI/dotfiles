@@ -1,0 +1,8 @@
+---
+- name: "Insert/update {{ blocks | length }} blocks"
+  blockinfile:
+    dest: "{{ item.dest }}"
+    backup: "{{ item.backup | default(blockinfile_backup) }}"
+    create: "{{ item.create | default(blockinfile_create) }}"
+    block: "{{ item.block }}"
+  with_items: "{{ blocks }}"

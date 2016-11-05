@@ -1,7 +1,3 @@
-#
-# ~/.bashrc
-#
-
 # https://github.com/mathiasbynens/dotfiles/blob/master/.bash_profile
 # https://github.com/mathiasbynens/dotfiles/blob/master/.functions
 # https://github.com/Bash-it/bash-it/blob/master/bash_it.sh
