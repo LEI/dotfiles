@@ -110,7 +110,7 @@ __prompt_git() {
   do
     file=${line:0:2}
     case $file in
-      # master...origin/master
+      ## master...origin/master
       \#\#) ref="${line#\#\# }" ;;
       *) ((count++)) ;;
       # ?M) ((changed++)) ;;
