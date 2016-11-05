@@ -12,6 +12,22 @@ vim_plugins: []
 vim_extra_plugins: []
 vim_ignore_plugins: []
 
+vim_dir: "{{ dot_home }}/.vim"
+vim_rc: "{{ vim_dir }}/vimrc"
+vim_extra_config: "{{ vim_dir }}/config.vim"
+vim_extras: yes
+
+# 'nvim' in vim_packages or 'neovim' in vim_packages
+nvim_install: "{{ neovim_install | default(false) }}"
+nvim_init: "{{ dot_home }}/.vim/init.vim"
+
+# Directory where the plugins will be downloaded
+vim_plugins_path: "{{ vim_dir }}/plugged"
+# Runs :PlugInstall inside vim
+vim_plug_install: yes
+# Install plugins even if ~/.vim/plugged already exists
+vim_plug_force: no
+
 vim_lines:
   # Source vimrc from ~/.vim/init.vim
   - dest: "{{ nvim_init }}"
@@ -36,22 +52,6 @@ vim_files:
   # - path: "{{ nvim_init }}"
   #   state: touch
   #   when: "{{ nvim_install }}"
-
-vim_dir: "{{ dot_home }}/.vim"
-vim_rc: "{{ vim_dir }}/vimrc"
-vim_extra_config: "{{ vim_dir }}/config.vim"
-vim_extras: yes
-
-# 'nvim' in vim_packages or 'neovim' in vim_packages
-nvim_install: "{{ neovim_install | default(false) }}"
-nvim_init: "{{ dot_home }}/.vim/init.vim"
-
-# Directory where the plugins will be downloaded
-vim_plugins_path: "{{ vim_dir }}/plugged"
-# Runs :PlugInstall inside vim
-vim_plug_install: yes
-# Install plugins even if ~/.vim/plugged already exists
-vim_plug_force: no
 
 # Vim Warning:
 # Output is not to a terminal / Input is not from a terminal

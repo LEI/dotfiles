@@ -24,7 +24,8 @@ function! s:AddJinjaSyntax()
 endfunction
 
 " BufReadPost is too soon?
-autocmd BufWinEnter *.jinja2,*.j2,*.jinja call <SID>AddJinjaSyntax()
+"autocmd BufWinEnter *.jinja2,*.j2,*.jinja call <SID>AddJinjaSyntax()
+
 
 " http://vim.wikia.com/wiki/Filetype.vim
 " http://stackoverflow.com/a/8414460
