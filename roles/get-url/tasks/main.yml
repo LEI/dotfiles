@@ -1,7 +1,8 @@
 ---
 - name: "Download {{ files | length }} files"
   get_url:
-    url: "{{ item.value.url | default(item.value) }}"
-    dest: "{{ ansible_env.HOME }}/{{ item.value.dest + '/' + item.key if item.value.dest is defined else item.key }}"
-    mode: "{{ item.value.mode | default(omit) }}"
-  with_dict: "{{ files }}"
+    url: "{{ item.url }}"
+    # dest: "{{ ansible_env.HOME }}/{{ item.value.dest + '/' + item.key if item.value.dest is defined else item.key }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items: "{{ files }}"

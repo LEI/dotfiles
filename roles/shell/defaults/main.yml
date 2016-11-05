@@ -13,13 +13,10 @@ bash_blocks:
         [[ -n "$PS1" ]] && source ~/.bashrc
       fi
 
-
-bash_files:
-  spark:
-    url: "https://raw.githubusercontent.com/holman/spark/master/spark"
-    dest: bin
+bash_urls:
+  - url: "https://raw.githubusercontent.com/holman/spark/master/spark"
+    dest: "{{ dot_home }}/bin/spark"
     # mode: u=rwx,g=rx,o=rx
     mode: u+x # 0755
-  # git-prompt.bash:
-  #   url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
-  #   dest: .bash.d/library
+  # - url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
+  #   dest: "{{ bash_dir }}/library"

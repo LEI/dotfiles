@@ -9,6 +9,13 @@ dependencies:
   #     - vim-youcompleteme-git
   #   when: "ansible_os_family == 'Archlinux'"
 
+  - role: line-in-file
+    lines: "{{ vim_lines }}"
+
+  - role: get-url
+    files: "{{ vim_urls }}"
+    tags: vim-plug
+
   - role: dotfiles
     paths:
       - name: vim

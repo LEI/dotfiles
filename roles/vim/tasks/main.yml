@@ -6,27 +6,6 @@
   with_items: "{{ vim_files }}"
   when: "{{ item.when | default(true) }}"
 
-- name: Source vimrc from ~/.vim/init.vim
-  lineinfile:
-    dest: "{{ nvim_init }}"
-    line: "source {{ vim_rc }}"
-    backup: yes
-    create: yes
-    state: present
-  when: "{{ nvim_install }}"
-
-- name: Download vim-plug
-  get_url:
-    url: "{{ vim_plug_url }}"
-    dest: "{{ vim_plug_file }}"
-  tags: vim-plug
- 
-# - name: Clone dein
-#   git:
-#     repo: "{{ vim_dein_repo }}"
-#     # https://github.com/Shougo/dein.vim/blob/master/bin/installer.sh
-#     dest: "{{ vim_dein_path }}"
-
 # https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
 - name: "Install vim {{ vim_plugins | length }} plugins"

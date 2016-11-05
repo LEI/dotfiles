@@ -12,33 +12,46 @@ vim_plugins: []
 vim_extra_plugins: []
 vim_ignore_plugins: []
 
+vim_lines:
+  # Source vimrc from ~/.vim/init.vim
+  - dest: "{{ nvim_init }}"
+    line: "source {{ vim_rc }}"
+    when: "{{ nvim_install }}"
+
+vim_urls:
+  # Download vim-plug
+  - url: "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+    dest: "{{ vim_dir }}/autoload/plug.vim"
+
+# - name: Clone dein
+#   git:
+#     repo: "{{ vim_dein_repo }}"
+#     # https://github.com/Shougo/dein.vim/blob/master/bin/installer.sh
+#     dest: "{{ vim_dein_path }}"
+
 vim_files:
   - path: "{{ vim_plugins_path }}"
     state: directory
     # follow: true
-  - path: "{{ nvim_init }}"
-    state: touch
-    when: "{{ nvim_install }}"
+  # - path: "{{ nvim_init }}"
+  #   state: touch
+  #   when: "{{ nvim_install }}"
 
 vim_dir: "{{ dot_home }}/.vim"
 vim_rc: "{{ vim_dir }}/vimrc"
 vim_extra_config: "{{ vim_dir }}/config.vim"
 vim_extras: yes
 
-# 'nvim' in vim_packages or 'neovim' in vim_packages 
+# 'nvim' in vim_packages or 'neovim' in vim_packages
 nvim_install: "{{ neovim_install | default(false) }}"
 nvim_init: "{{ dot_home }}/.vim/init.vim"
 
-# https://github.com/junegunn/vim-plug
-vim_plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-# Vim Plug path
-vim_plug_file: "{{ vim_dir }}/autoload/plug.vim"
+# Directory where the plugins will be downloaded
+vim_plugins_path: "{{ vim_dir }}/plugged"
 # Runs :PlugInstall inside vim
 vim_plug_install: yes
 # Install plugins even if ~/.vim/plugged already exists
 vim_plug_force: no
-# Directory where the plugins will be downloaded
-vim_plugins_path: "{{ vim_dir }}/plugged"
 
 # Vim Warning:
 # Output is not to a terminal / Input is not from a terminal
