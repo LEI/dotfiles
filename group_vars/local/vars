@@ -14,8 +14,6 @@ composer_packages: []
 #   - go
 
 pip_packages:
-  # Update pip
-  - { name: pip, extra_args: --upgrade } # TODO Debian sudo
   # Python packages
   - bashate
   - pygments

@@ -3,5 +3,9 @@ pip_install: yes
 pip_upgrade: yes
 pip_state: present
 pip_packages: []
+pip_base_packages:
+  - name: pip
+    extra_args: --upgrade
+    when: "{{ pip_upgrade }}"
 pip_default_args: "{{ '--user python' if ansible_os_family in ['Darwin'] else '' }}"
 # pyhton_packages: []

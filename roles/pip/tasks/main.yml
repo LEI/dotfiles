@@ -9,7 +9,8 @@
     # umask: 0022 # Ensure other users can use it
     # chdir:
     # requirements:
-  with_items: "{{ pip_packages }}"
-  when: pip_install
+  # TODO sudo on debian?
+  with_items: "{{ pip_base_packages + pip_packages }}"
+  when: "{{ pip_install and item.when | default(pip_install) }}"
   become: "{{ 'yes' if ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
   # sudo required on arch, but only needed for 'pip' on debian?
