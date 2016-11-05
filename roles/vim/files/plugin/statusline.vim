@@ -73,7 +73,7 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'flags', '%=', 'branch', 'filetype', 'ruler', 'warnings', 'errors'],
+      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'branch', 'file', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
@@ -109,8 +109,8 @@ let g:statusline.items = {
       \   'mode': {
       \     'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
       \     'surround': ' ',
+      \     'suffix': '|',
       \     'minwidth': 20,
-      \     'highlight': 'StatusLineMode',
       \   },
       \   'buffer': {
       \     'string': '%{g:statusline.bufname(expand("%"))}',
