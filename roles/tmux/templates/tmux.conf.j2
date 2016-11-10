@@ -29,7 +29,7 @@ set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ tmux_plugin_manager_path }}'
 set -g @plugin '{{ plugin }}'
 {% endfor %}
 
-{% for option in tmux_plugins_options %}
+{% for option in tmux_options %}
 set -g @{{ option }}
 {% endfor %}
 
