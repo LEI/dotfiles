@@ -10,6 +10,9 @@ dependencies:
   #     # - reattach-to-user-namespace
   #   when: "ansible_os_family == 'Darwin'"
 
+  - role: line-in-file
+    lines: "{{ tmux_lines }}"
+
   - role: dotfiles
     paths:
       - name: tmux

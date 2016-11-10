@@ -34,3 +34,7 @@ tmux_plugins:
   # - tmux-plugins/tmux-cpu
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
+
+tmux_plugins_options:
+  - resurrect-strategy-vim 'session'
+  - resurrect-strategy-nvim 'session'

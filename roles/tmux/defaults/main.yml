@@ -8,11 +8,16 @@ tmux_directory: .tmux
 tmux_path: "$HOME/{{ tmux_directory }}"
 tmux_colors: tmux-solarized-dark
 
+tmux_lines:
+  - dest: "{{ dot_home }}/.tmux.conf"
+    line: "source {{ tmux_path }}/tmux.conf"
+
 # Plugins
 tmux_plugin_manager_path: "{{ dot_home }}/{{ tmux_directory }}/plugins"
 tmux_plugin_manager: yes
 tmux_plugin_install: yes
 tmux_plugins: []
+tmux_plugins_options: []
 # set -g @plugin 'tmux-plugins/tmux-sensible'
 # set -g @plugin 'github_username/plugin_name'
 # set -g @plugin 'git@github.com/user/plugin'

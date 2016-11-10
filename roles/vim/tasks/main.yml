@@ -8,10 +8,10 @@
 
 # https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
-- name: "Install vim {{ vim_plugins | length }} plugins"
+- name: "Install vim plugins"
   shell: "{{ vim_plug_cmd }}"
-  args:
-    creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
+  # args:
+  #   creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
   ignore_errors: yes
   register: vim_plug_output
   # failed_when: vim_plug_output.rc != 0

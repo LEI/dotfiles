@@ -15,25 +15,25 @@
 
 # https://github.com/alexanderjeurissen/dotfiles
 
-- name: Ensure ~/.tmux.conf exists
-  copy:
-    content: ""
-    dest: "{{ dot_home }}/.tmux.conf"
-    force: no
-  when: tmux_conf
+# - name: Ensure ~/.tmux.conf exists
+#   copy:
+#     content: ""
+#     dest: "{{ dot_home }}/.tmux.conf"
+#     force: no
+#   when: tmux_conf
 
-- name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
-  lineinfile:
-    dest: "{{ dot_home }}/.tmux.conf"
-    line: "source {{ tmux_path }}/tmux.conf"
-    backup: yes
-    create: yes
-    state: present
-  # become: yes
-  # become_user: "{{ item }}"
-  # when: item in home_dirs.stdout_lines
-  # with_items: "{{ tmux_users }}"
-  when: tmux_conf
+# - name: Ensure ~/.tmux.conf is sourcing ~/.tmux/tmux.conf
+#   lineinfile:
+#     dest: "{{ dot_home }}/.tmux.conf"
+#     line: "source {{ tmux_path }}/tmux.conf"
+#     backup: yes
+#     create: yes
+#     state: present
+#   # become: yes
+#   # become_user: "{{ item }}"
+#   # when: item in home_dirs.stdout_lines
+#   # with_items: "{{ tmux_users }}"
+#   when: tmux_conf
 
 - name: Ensure .tmux/plugins directory exists
   file:
@@ -41,7 +41,7 @@
     state: directory
     follow: true
   when: tmux_conf and tmux_plugin_manager
-  tags: [tpm]
+  tags: tpm
 
 - name: Clone tmux plugin manager
   git:
