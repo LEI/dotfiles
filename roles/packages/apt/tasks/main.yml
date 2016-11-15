@@ -1,6 +1,7 @@
 ---
-# TODO add testing to /etc/apt/sources.list*
-# & update pin priority?
+# TODO:
+# - /etc/apt/sources.list
+# - /etc/apt/preferences
 
 - name: Update apt cache
   apt:
