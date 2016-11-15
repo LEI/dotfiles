@@ -14,7 +14,7 @@
   #   creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
   ignore_errors: yes
   register: vim_plug_output
-  failed_when: false # vim_plug_output.rc != 0
+  # failed_when: vim_plug_output.rc != 0
   when: vim_plug_install # and vim_plug_template.changed
   tags: vim-plug
 
