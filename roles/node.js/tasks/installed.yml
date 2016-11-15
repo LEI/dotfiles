@@ -4,14 +4,16 @@
   register: node_version_result
   changed_when: node_version_result.rc != 0
   failed_when: false
-  always_run: yes # Even in check mode
+  check_mode: no # ansible >= 2.2
+  # always_run: yes
 
 - name: Check if npm is installed
   command: npm --version
   register: npm_version_result
   changed_when: npm_version_result.rc != 0
   failed_when: false
-  always_run: yes # Even in check mode
+  check_mode: no # ansible >= 2.2
+  # always_run: yes
 
 - name: Register node and npm version
   set_fact:
