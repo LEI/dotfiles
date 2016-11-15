@@ -4,7 +4,7 @@
     repo: https://github.com/horst3180/arc-icon-theme
     dest: "{{ tmp_dir }}arc-icon-theme"
     depth: 1
-    # force: yes
+    # force: yes # Fails in ansible 2.2
 
 - name: Copy to ~/.icons
   command: "mv {{ tmp_dir }}arc-icon-theme/Arc {{ ansible_env.HOME }}/.icons/"
