@@ -106,7 +106,7 @@ ansible_install() {
         su_do yum install -y epel-release
         su_do yum install -y ansible
       else
-        die "Unkown package manager"
+        die "Unknown package manager"
       fi
 
       # Fedora/CentOS:
