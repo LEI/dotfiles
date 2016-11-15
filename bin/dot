@@ -70,7 +70,7 @@ ansible_vault() {
 }
 
 ansible_install() {
-  local force="$1"
+  local force="${1:-}"
   local os=$(uname -s) # -o Cygwin?
 
   case $os in
