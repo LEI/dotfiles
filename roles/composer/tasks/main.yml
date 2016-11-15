@@ -7,7 +7,8 @@
   register: composer_version_result
   changed_when: composer_version_result.rc != 0
   failed_when: false
-  always_run: yes # Even in check mode
+  check_mode: no
+  # always_run: yes # Even in check mode
 
 - include: install-composer.yml
   when: composer_version_result.rc != 0 or composer_force_install
