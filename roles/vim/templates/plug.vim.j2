@@ -42,9 +42,13 @@ call plug#end()
 function! YCMEnable()
   if !exists('g:loaded_youcompleteme')
     call plug#load('YouCompleteMe')
+  else
+    echom "YCM is already loaded"
   endif
   if exists('g:loaded_youcompleteme')
     call youcompleteme#Enable()
+  else
+    echom "YCM was not loaded"
   endif
 endfunction
 

@@ -1,16 +1,18 @@
 ---
 - name: "Install {{ pip_packages | length }} packages"
-  pip:
+  vars:
     name: "{{ item.name | default(item) }}"
+  pip:
+    name: "{{ name }}"
     version: "{{ item.version | default(omit) }}"
     state: "{{ item.state | default(pip_state) }}"
     #extra_args: "{{ item.extra_args | default(omit) }}"
-    extra_args: "{{ pip_default_args + ' ' + item.extra_args if item.extra_args is defined else pip_default_args }}"
+    extra_args: "{{ omit if name == 'pip' else pip_default_args + ' ' + item.extra_args if item.extra_args is defined else pip_default_args }}"
     # umask: 0022 # Ensure other users can use it
     # chdir:
     # requirements:
   # TODO sudo on debian?
   with_items: "{{ pip_base_packages + pip_packages }}"
   when: "{{ pip_install and item.when | default(pip_install) }}"
-  become: "{{ 'yes' if ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
+  become: "{{ 'yes' if item.become is defined and item.become or ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
   # sudo required on arch, but only needed for 'pip' on debian?

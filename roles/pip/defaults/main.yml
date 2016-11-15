@@ -5,7 +5,8 @@ pip_state: present
 pip_packages: []
 pip_base_packages:
   - name: pip
-    extra_args: --upgrade
+    state: latest
     when: "{{ pip_upgrade }}"
+    # extra_args: --upgrade
 pip_default_args: "{{ '--user python' if ansible_os_family in ['Darwin'] else '' }}"
-# pyhton_packages: []
+python_packages: []
