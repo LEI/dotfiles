@@ -25,9 +25,4 @@ then
   tmux_opts="-d $tmux_opts -t IRC"
 fi
 
-if [ -n "$tmux_cmd" ]
-then
-  cmd="$tmux_cmd $tmux_opts \"$opts $iii\""
-  echo "$cmd"
-  tmux $cmd
-fi
+tmux $tmux_cmd "$tmux_opts" "\"$opts $iii\""
