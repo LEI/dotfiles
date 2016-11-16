@@ -6,10 +6,11 @@
 # spawns iii.sh in a tmux session named IRC with the channel as title
 # accepts all env vars iii.sh accepts plus 't' which sets the terminal
 
+iii="~/irc/bin/iii"
+
 ## collect options from env - all opts to iii.sh should be set here
 opts="TERM="${t:-rxvt-unicode}" m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
 
-iii="~/irc/bin/iii"
 ## spawn a new tmux window named <channel> in a tmux session named IRC
 if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then tmux new-session -s IRC -n "${c:-$s}" "$opts $iii"
