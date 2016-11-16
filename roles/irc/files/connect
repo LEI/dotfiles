@@ -5,10 +5,6 @@
 
 [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
 
-cat $ircdir/autojoin
-
-type freenode
-
 # Some privacy please, thanks
 chmod 700 "$ircdir"
 chmod 600 "$ircdir"/*/ident &>/dev/null
