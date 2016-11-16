@@ -26,6 +26,6 @@ fi
 
 if [ -n "$tmux_cmd" ]
 then
-  echo $tmux_cmd "$tmux_opts" -- "$opts $iii"
-  tmux $tmux_cmd "$tmux_opts" -- "$opts $iii"
+  echo $tmux_cmd "$tmux_opts" "\"$opts $iii\""
+  tmux $tmux_cmd "$tmux_opts" "\"$opts $iii\""
 fi
