@@ -21,10 +21,6 @@
     - role: vim
       tags: [vim]
 
-    # IRC
-    - role: irc
-      tags: [irc]
-
     - role: htop
       tags: [htop]
       when: os not in ['Windows']

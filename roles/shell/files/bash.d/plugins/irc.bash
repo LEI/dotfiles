@@ -1,15 +1,45 @@
 # IRC
 
-IRC="weechat"
-# alias weechat="irc"
+ircbin="${ircbin:-$HOME/irc/bin}"
+
+# Server info functions
+freenode() {
+  server="irc.freenode.net"
+  channels="#foo" #bar
+}
 
 irc() {
-  if [[ -n "$TMUX" ]]
+  networks="${1:-freenode}"
+
+  local connect="$ircbin/connect"
+  local tmiii="$ircbin/tmiii"
+  if [[ ! -e "$tmiii" ]] || [[ ! -e "$connect" ]]
   then
-    TERM=screen-256color "$IRC" "$@"
-  else
-    "$IRC" "$@"
+    if has weechat
+    then
+      IRC="weechat"
+      [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
+      return
+    fi
+    return 1
   fi
+
+  # if [[ -z "$(ps -A | grep $connect)" ]]
+  # then
+    networks="$networks" "$connect"
+  # fi
+
+  local opts= hist=50
+  for network in $networks
+  do
+    unset server channels
+    "$network"
+    for channel in $channels
+    do
+      opts="h=$hist n=$server c=$channel"
+      env $opts "$tmiii"
+    done
+  done
 }
 
 # irc() {

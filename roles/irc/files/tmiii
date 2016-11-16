@@ -8,17 +8,21 @@
 
 iii="~/irc/bin/iii"
 
+# Session name
 session="IRC"
-name="${c:-$s}"
+# Window name
+name="\"${c:-$s}\""
 
 ## collect options from env - all opts to iii.sh should be set here
-opts="TERM="${t:-rxvt-unicode}" m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
+opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
+# TERM="${t:-rxvt-unicode}"
 
 ## spawn a new tmux window named <channel> in a tmux session named IRC
 if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
   if [ -n "$TMUX" ]
   then
+    echo tmux new-session -d -s "$session" -n "$name" "$opts $iii"
     tmux new-session -d -s "$session" -n "$name" "$opts $iii"
   else
     tmux new-session -s "$session" -n "$name" "$opts $iii"
