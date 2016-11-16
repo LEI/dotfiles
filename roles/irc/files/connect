@@ -3,9 +3,11 @@
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
-echo $ircdir $nick
-
 [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
+
+cat $ircdir/autojoin
+
+type freenode
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
