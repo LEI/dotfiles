@@ -3,6 +3,8 @@
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
+echo $ircdir $nick
+
 [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
 
 # Some privacy please, thanks
