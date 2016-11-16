@@ -39,12 +39,12 @@ irc() {
   for network in $networks
   do
     unset server channels
+    echo $noautojoin $network 
     if [[ -z "$noautojoin" ]]
     then
       "$network"
       "$connect"
     else
-      echo "server=$noautojoin channels=$channels" "$connect"
       env "server=$noautojoin channels=$channels" "$connect"
     fi
     for channel in $channels
