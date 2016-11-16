@@ -12,9 +12,9 @@
   register: osx_pref_output
   # notify: "{{ 'killall ' + item.notify | default(omit) }}"
 
-- name: Restart defaults server
-  command: killall cfprefsd
-  # when: osx_pref_output.changed
+# - name: Restart defaults server
+#   command: killall cfprefsd
+#   when: osx_pref_output.changed
 
 # TODO: idempotent (changed?)
 # - name: Setup system

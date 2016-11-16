@@ -57,7 +57,7 @@ vim_files:
 # -E -s -V +'source {{ dot_home }}/.vim/plug.vim' < /dev/tty
 # "silent" is required or vim hangs on YCM installation
 # YCM: ./install.py --tern-completer
-vim_plug_cmd: "vim -E -s -u NONE +'source {{ vim_dir }}/plug.vim' -N +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
+vim_plug_cmd: "vim -E -s -N -u NONE +'source {{ vim_dir }}/plug.vim' +'silent PlugInstall{{ '!' if vim_plug_force else '' }}' +qall"
 
 # vim_dein_repo: https://github.com/Shougo/dein.vim
 # vim_dein_path: "{{ vim_plugins_path }}/repos/github.com/Shougo/dein.vim"

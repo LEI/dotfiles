@@ -189,6 +189,11 @@ osx_prefs:
   #   value: true
   #   domain: com.googlecode.iterm2
 
+  # When performing a search, search the current folder by default
+  - key: FXDefaultSearchScope
+    value: "SCcf"
+    domain: com.apple.finder
+
 # FIXME sinstance() arg 2 must be a class, type, or tuple of classes and types
 # https://github.com/ansible/ansible-modules-extras/issues/1742
 # https://github.com/herrbischoff/awesome-osx-command-line
