@@ -5,6 +5,8 @@ ircbin="${ircbin:-$ircdir/bin}"
 
 [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
 
+type freenode
+
 irc() {
   networks="${1:-freenode}"
 
