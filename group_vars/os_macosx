@@ -161,6 +161,34 @@ osx_system:
   # Set the timezone; see 'sudo systemsetup -listtimezones' for other values
   timezone: "{{ timezone }}"
 
+
+osx_prefs:
+  # Captive portal
+  - key: Active
+    value: true
+    domain: /Library/Preferences/SystemConfiguration/com.apple.captive.control
+    notify: SystemConfiguration
+
+  # Only use UTF-8 in Terminal.app
+  - key: StringEncodings
+    value: ["4"]
+    domain: com.apple.terminal
+
+  # Enable "focus follows mouse" for Terminal.app and all X11 apps
+  # i.e. hover over a window and start typing in it without clicking first
+  - key: FocusFollowMouse
+    value: true
+    domain: com.apple.terminal
+
+  - key: wm_ffm
+    value: true
+    domain: org.x.X11
+
+  # Don't display the annoying prompt when quitting iTerm
+  # - key: PromptOnQuit
+  #   value: true
+  #   domain: com.googlecode.iterm2
+
 # FIXME sinstance() arg 2 must be a class, type, or tuple of classes and types
 # https://github.com/ansible/ansible-modules-extras/issues/1742
 # https://github.com/herrbischoff/awesome-osx-command-line
