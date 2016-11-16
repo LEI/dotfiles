@@ -18,11 +18,12 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
-  networks="${1:-}"
-  if [[ -n "$networks" ]]
+  local server="${1:-}"
+  if [[ -n "$server" ]]
   then
+    networks=("$server")
     shift
-    channels="$@"
+    channels=("$@")
   else
     [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
       echo "Not found: $ircdir/autojoin"
