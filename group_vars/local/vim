@@ -31,33 +31,36 @@ vim_extra_plugins:
   # augroup END
 
   # Git
-  - airblade/vim-gitgutter
+  # - airblade/vim-gitgutter
   - tpope/vim-fugitive
+  - shumphrey/fugitive-gitlab.vim
   # - tpope/vim-git
 
   # Improvements
   - AndrewRadev/splitjoin.vim
+  # - tpope/vim-abolish
   - tpope/vim-dispatch
   - tpope/vim-eunuch
+  - tpope/vim-obsession
   - tpope/vim-repeat
   - tpope/vim-unimpaired
   - sjl/gundo.vim
   # - { repo: godlygeek/tabular, opts: { on: Tab } }
 
   # Syntax
-  # TODO https://github.com/sheerun/vim-polyglot
+  - sheerun/vim-polyglot
   - { repo: scrooloose/syntastic, opts: { "on": [] } }
   # - neomake/neomake
   - { repo: syngan/vim-vimlint, plug: ['ynkdir/vim-vimlparser'] }
   # - Glench/Vim-Jinja2-Syntax
   # - tpope/vim-haml
-  - { repo: StanAngeloff/php.vim, opts: { for: php } }
-  - { repo: pangloss/vim-javascript, opts: { for: javascript } }
+  # - { repo: StanAngeloff/php.vim, opts: { for: php } }
+  # - { repo: pangloss/vim-javascript, opts: { for: javascript } }
   # - ternjs/tern_for_vim
-  - jwalton512/vim-blade
+  # - jwalton512/vim-blade
   - digitaltoad/vim-jade
   - kylef/apiblueprint.vim
-  - keith/tmux.vim
+  # - keith/tmux.vim
   # - PotatoesMaster/i3-vim-syntax
 
   # Text objects

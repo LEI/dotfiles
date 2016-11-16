@@ -8,7 +8,6 @@ dependencies:
   #   pacman_yaourt_packages:
   #     - vim-youcompleteme-git
   #   when: "ansible_os_family == 'Archlinux'"
-
   - role: dotfiles
     paths:
       - name: vim
@@ -18,3 +17,11 @@ dependencies:
       - name: vim
         dest: .vim
         # pattern: "{{ 'vimrc' if not vim_extras else omit }}"
+
+  - role: line-in-file
+    lines: "{{ vim_lines }}"
+
+  - role: get-url
+    files: "{{ vim_urls }}"
+    tags: vim-plug
+

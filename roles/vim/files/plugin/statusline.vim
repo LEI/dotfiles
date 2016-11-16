@@ -73,7 +73,7 @@ call extend(g:statusline.symbols, {
 " %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
 call extend(g:statusline.states, {
-      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'file', 'flags', '%=', 'branch', 'filetype', 'ruler', 'warnings', 'errors'],
+      \ 'default': ['mode', '%<%{exists("w:statusline_title") ? w:statusline_title . " " : ""}', 'branch', 'file', 'flags', '%=', 'filetype', 'ruler', 'warnings', 'errors'],
       \ 'help': [' HELP ', '|', '%<', 'file', '%=', 'ruler'],
       \ 'commandline': ['mode', '%<', 'buffer', 'flags', '%=', 'ruler'],
       \ 'quickfix': ['quickfix', '|', '%<', 'quickfix_title', '%=', 'filetype', 'ruler'],
@@ -104,6 +104,7 @@ call extend(g:statusline.states, {
 " %(    Start of item group (%-35. width and alignement of a section)
 " %)    End of item group
 
+let g:statusline.rulerformat = &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%)%4.( %P%)' : ''
 let g:statusline.items = {
       \   'mode': {
       \     'string': '%{g:statusline.active() ? get(g:statusline.modes, mode(), mode()) . (&paste ? " PASTE" : "") : "------"}',
@@ -166,7 +167,7 @@ let g:statusline.items = {
       \     'minwidth': 80,
       \   },
       \   'ruler': {
-      \     'string': &ruler ? strlen(&rulerformat) ? &rulerformat : '%-14.(%l,%c%V/%L%)%4.( %P%)' : '',
+      \     'string': get(g:statusline, 'rulerformat'),
       \     'surround': ' ',
       \     'minwidth': 40,
       \   },
@@ -283,31 +284,49 @@ endfunction
 
 " Highlight {{{2
 
+" %{g:statusline.active() ? g:statusline.set(mode()) : ""}
+function! g:statusline.set(...) abort dict
+  let l:mode = a:0 ? a:1 : mode()
+
+  if l:mode == 'n'
+    highlight! link StatusLineMode StatusLineNormal
+  elseif l:mode == 'i'
+    highlight! link StatusLineMode StatusLineInsert
+  elseif l:mode == 'R'
+    highlight! link StatusLineMode StatusLineReplace
+  elseif l:mode == 'v' || l:mode == 'V' || l:mode == '^V'
+    highlight! link StatusLineMode StatusLineVisual
+  endif
+
+  return ''
+endfunction
+
 function! g:statusline.colors() abort dict
   " Initialize colors
   if &background ==# 'dark'
+    highlight StatusLineNormal ctermfg=0 ctermbg=4
     highlight StatusLineInsert ctermfg=0 ctermbg=2
     highlight StatusLineReplace ctermfg=0 ctermbg=9
+    highlight StatusLineVisual ctermfg=0 ctermbg=5
   else
+    highlight StatusLineNormal ctermfg=7 ctermbg=4
     highlight StatusLineInsert ctermfg=7 ctermbg=2
     highlight StatusLineReplace ctermfg=7 ctermbg=9
+    highlight StatusLineVisual ctermfg=7 ctermbg=5
   endif
 endfunction
 
 function! g:statusline.highlight(...) abort dict
-  let l:mode = a:0 ? a:1 : ''
+  let l:insertmode = a:0 ? a:1 : ''
 
-  if l:mode ==# 'i'
-    " Insert mode
+  if l:insertmode ==# 'i' " Insert mode
     highlight! link StatusLine StatusLineInsert
-  elseif l:mode ==# 'r'
-    " Replace mode
+  elseif l:insertmode ==# 'r' " Replace mode
     highlight! link StatusLine StatusLineReplace
-  elseif l:mode ==# 'v'
-    " Virtual replace mode
+  elseif l:insertmode ==# 'v' " Virtual replace mode
     highlight! link StatusLine StatusLineReplace
-  elseif strlen(l:mode) > 0
-    echoerr 'Unknown mode: ' . l:mode
+  elseif strlen(l:insertmode) > 0
+    echoerr 'Unknown mode: ' . l:insertmode
   else
     highlight link StatusLine NONE
   endif
@@ -421,7 +440,8 @@ augroup StatuslineHighlight
   autocmd!
   " Create the highlight groups on startup and when the colorscheme changes
   autocmd VimEnter,ColorScheme * call statusline.colors()
-  " Update the highlight group in insert and replace modes
+  " Update the highlight group
+  autocmd VimEnter * call statusline.highlight()
   autocmd InsertEnter * call statusline.highlight(v:insertmode)
   autocmd InsertChange * call statusline.highlight(v:insertmode)
   autocmd InsertLeave * call statusline.highlight() | redrawstatus

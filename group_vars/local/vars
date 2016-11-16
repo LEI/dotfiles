@@ -13,10 +13,8 @@ composer_packages: []
 # go_packages:
 #   - go
 
+# Python packages
 pip_packages:
-  # Update pip
-  - { name: pip, extra_args: --upgrade } # TODO Debian sudo
-  # Python packages
   - bashate
   - pygments
   # - vim-vint
@@ -32,7 +30,17 @@ ruby_gems:
 tmux_plugins:
   - tmux-plugins/tpm
   - tmux-plugins/tmux-resurrect
+  # - tmux-plugins/tmux-continuum
+  # - tmux-plugins/tmux-sessionist
+  # - tmux-plugins/vim-tmux-focus-events
   # - nhdaly/tmux-scroll-copy-mode
   # - tmux-plugins/tmux-cpu
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
+
+tmux_options:
+  - resurrect-capture-pane-contents 'on'
+  # vi vim nvim emacs man less more tail top htop irssi mutt
+  - resurrect-processes 'ssh'
+  - resurrect-strategy-vim 'session'
+  - resurrect-strategy-nvim 'session'

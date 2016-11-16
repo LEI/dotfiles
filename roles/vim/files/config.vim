@@ -296,10 +296,6 @@ nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
 
 " Runtime {{{1
 
-" if filereadable(expand('~/.vimrc.local'))
-"   source ~/.vimrc.local
-" endif
-
 " if has('nvim')
 "   runtime neo.vim
 " endif

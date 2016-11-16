@@ -25,12 +25,17 @@ run_playbook() {
     ansible_install true
   fi
 
-  local vault=
   if ! arg "--ask-vault-pass"
   then
-    local vault_file=$(ansible_vault)
-    # [[ -n "$vault_file" ]] && vault="--vault-password-file=$vault_file"
-    [[ -n "$vault_file" ]] && vault="--vault-password-file $vault_file"
+    local vault_file="$(ansible_vault)"
+    [[ -n "$vault_file" ]] && args+=("--vault-password-file $vault_file")
+  fi
+
+  if rm_arg "--debug"
+  then
+    # Check mode (dry run)
+    args+=("--check")
+    args+=("--diff")
   fi
 
   # Ansible root directory
@@ -41,7 +46,7 @@ run_playbook() {
   # Inventory file defined in ansible.cfg
 
   # Run the main playbook
-  ansible-playbook "$DOT_PLAYBOOK" $vault ${args[@]}
+  ansible-playbook "$DOT_PLAYBOOK" ${args[@]}
 }
 
 ansible_vault() {
@@ -65,7 +70,7 @@ ansible_vault() {
 }
 
 ansible_install() {
-  local force="$1"
+  local force="${1:-}"
   local os=$(uname -s) # -o Cygwin?
 
   case $os in
@@ -86,7 +91,7 @@ ansible_install() {
       then
         # Debian/Ubuntu:
         su_do apt-get install -y build-essential python-setuptools
-        # gcc make... libffi-dev libssl-dev python-dev
+        su_do apt-get install -y libffi-dev libssl-dev # gcc make... python-dev
         # apt-transport-https ansible (1.7)
       elif has pacman
       then
@@ -101,7 +106,7 @@ ansible_install() {
         su_do yum install -y epel-release
         su_do yum install -y ansible
       else
-        die "Unkown package manager"
+        die "Unknown package manager"
       fi
 
       # Fedora/CentOS:
@@ -159,7 +164,7 @@ rm_arg() {
   if [[ $rc -eq 0 ]]
   then
     # Remove if found
-    args="${args[@]/$arg/}"
+    args="${args/$arg/}"
   fi
 
   return $rc

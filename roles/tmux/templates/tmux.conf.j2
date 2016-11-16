@@ -29,5 +29,9 @@ set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ tmux_plugin_manager_path }}'
 set -g @plugin '{{ plugin }}'
 {% endfor %}
 
+{% for option in tmux_options %}
+set -g @{{ option }}
+{% endfor %}
+
 # Keep this line at the very bottom of tmux.conf
 run '{{ tmux_plugin_manager_path }}/tpm/tpm'

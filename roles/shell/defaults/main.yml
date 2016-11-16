@@ -1,10 +1,23 @@
 ---
-bash_download:
-  spark:
-    url: "https://raw.githubusercontent.com/holman/spark/master/spark"
-    dest: bin
+bash_dirname: .bash.d
+bash_dir: "{{ dot_home }}/{{ bash_dirname }}"
+
+bash_blocks:
+  # Source ~/.bash.d/init.bash from ~/.bashrc
+  - dest: "{{ dot_home }}/.bashrc"
+    block: |
+      source "$HOME/{{ bash_dirname }}/init.bash"
+  # Source ~/.bashrc from ~/.bash_profile
+  - dest: "{{ dot_home }}/.bash_profile"
+    block: |
+      if [[ -f ~/.bashrc ]] && [[ -r ~/.bashrc ]]; then
+        [[ -n "$PS1" ]] && source ~/.bashrc
+      fi
+
+bash_urls:
+  - url: "https://raw.githubusercontent.com/holman/spark/master/spark"
+    dest: "{{ dot_home }}/bin/spark"
     # mode: u=rwx,g=rx,o=rx
     mode: u+x # 0755
-  # git-prompt.bash:
-  #   url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
-  #   dest: .bash.d/library
+  # - url: "https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh"
+  #   dest: "{{ bash_dir }}/library"

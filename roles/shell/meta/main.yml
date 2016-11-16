@@ -9,5 +9,8 @@ dependencies:
       - name: shell
         prefix: .
 
+  - role: block-in-file
+    blocks: "{{ bash_blocks }}"
+
   - role: get-url
-    files: "{{ bash_download }}"
+    files: "{{ bash_urls }}"

@@ -269,3 +269,7 @@ endtry
 if exists('g:vim_config') && filereadable(expand(g:vim_config))
   exec 'source ' . g:vim_config
 endif
+
+if filereadable(expand('~/.vimrc.local'))
+  source ~/.vimrc.local
+endif
