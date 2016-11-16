@@ -8,6 +8,9 @@
 
 iii="~/irc/bin/iii"
 
+session="IRC"
+name="${c:-$s}"
+
 ## collect options from env - all opts to iii.sh should be set here
 opts="TERM="${t:-rxvt-unicode}" m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
 
@@ -16,13 +19,13 @@ if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
   if [ -n "$TMUX" ]
   then
-    tmux new-session -d -s IRC -n "${c:-$s}" "$opts $iii"
+    tmux new-session -d -s "$session" -n "$name" "$opts $iii"
   else
-    tmux new-session -s IRC -n "${c:-$s}" "$opts $iii"
+    tmux new-session -s "$session" -n "$name" "$opts $iii"
   fi
-elif ! tmux list-windows -t IRC | awk -v r=1 -v m="${c:-$s}" '$2 ~ "^"m"[*!-]*$" { exit r=0 } END { exit r }'
+elif ! tmux list-windows -t IRC | awk -v r=1 -v m="$name" '$2 ~ "^"m"[*!-]*$" { exit r=0 } END { exit r }'
 then
-  tmux new-window -t IRC -n "${c:-$s}" -d "$opts $iii"
+  tmux new-window -t "$session" -n "$name" -d "$opts $iii"
 fi
 
 # #TERM="${t:-rxvt-unicode}"
