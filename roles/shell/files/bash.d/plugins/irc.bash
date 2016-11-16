@@ -30,12 +30,9 @@ irc() {
     }
   fi
 
-  if [[ -z "$(pgrep ii)" ]]
+  if [[ -n "$(pgrep ii)" ]]
   then
-    "$connect"
-  else
     echo 'Warning: ii already running, kill $(ps aux | awk '/connect/')'
-    return 1
   fi
 
   local opts= hist=50
@@ -43,6 +40,7 @@ irc() {
   do
     unset server channels
     "$network"
+    "$connect"
     for channel in $channels
     do
       opts="h=$hist n=$server c=$channel"
