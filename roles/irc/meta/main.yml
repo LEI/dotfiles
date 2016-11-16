@@ -1,0 +1,10 @@
+---
+dependencies:
+
+  - role: package
+    packages: "{{ irc_packages }}"
+
+  - role: dotfiles
+    paths:
+      - name: bin
+        dest: irc/bin
