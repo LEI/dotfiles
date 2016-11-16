@@ -17,10 +17,10 @@ if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
   [ -n "$TMUX" ] && tmux_opts="-d $tmux_opts"
   tmux_opts="-s IRC $tmux_opts"
-  echo tmux new-session "$tmux_opts" "$opts $iii"
+  tmux new-session "$tmux_opts" "\'$opts $iii\'"
 elif ! tmux list-windows -t IRC | awk -v r=1 -v m="${c:-$s}" '$2 ~ "^"m"[*!-]*$" { exit r=0 } END { exit r }'
 then
   tmux_opts="-t IRC -d $tmux_opts"
-  tmux new-window "$tmux_opts" "$opts $iii"
+  tmux new-window "$tmux_opts" "\'$opts $iii\'"
 fi
 
