@@ -1,6 +1,9 @@
 # IRC
 
-ircbin="${ircbin:-$HOME/irc/bin}"
+ircdir="$HOME/irc"
+ircbin="${ircbin:-$ircdir/bin}"
+
+[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
 
 # Server info functions
 freenode() {
@@ -24,6 +27,7 @@ irc() {
     return 1
   fi
 
+  # pgrep ii
   # if [[ -z "$(ps -A | grep $connect)" ]]
   # then
     networks="$networks" "$connect"

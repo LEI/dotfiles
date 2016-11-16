@@ -3,19 +3,7 @@
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
-# # Server info functions
-# freenode() {
-#   server='irc.freenode.net'
-#   channels="#foo #bar"
-# }
-
-# oftc() {
-#   server='irc.oftc.net'
-#   channels="#xyz #abc"
-# }
-
-# # These match the functions above
-# networks="freenode oftc"
+[ -f "$ircdir/autojoin" ] && source "$ircdir/autojoin"
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
