@@ -15,6 +15,7 @@ opts="TERM="${t:-rxvt-unicode}" m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s"
 if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
   [ -n "$TMUX" ] && opts="-d $opts"
+  echo "TMUX $TMUX / opts $opts"
   tmux new-session -s IRC -n "${c:-$s}" "$opts $iii"
 elif ! tmux list-windows -t IRC | awk -v r=1 -v m="${c:-$s}" '$2 ~ "^"m"[*!-]*$" { exit r=0 } END { exit r }'
 then
