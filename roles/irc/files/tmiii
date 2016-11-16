@@ -15,12 +15,13 @@ tmux_opts=
 ## spawn a new tmux window named <channel> in a tmux session named IRC
 if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
-  tmux_cmd="new-session -s IRC"
-  [ -n "$TMUX" ] && tmux_opts="-d $tmux_opts"
+  tmux_cmd="new-session"
+  [ -n "$TMUX" ] && tmux_cmd="$tmux_cmd -d"
+  tmux_opts="-s IRC $tmux_opts"
 elif ! tmux list-windows -t IRC | awk -v r=1 -v m="${c:-$s}" '$2 ~ "^"m"[*!-]*$" { exit r=0 } END { exit r }'
 then
-  tmux_cmd="new-window -t IRC"
-  tmux_opts="-d $tmux_opts"
+  tmux_cmd="new-window"
+  tmux_opts="-t IRC -d $tmux_opts"
 fi
 
 tmux_opts="$tmux_opts -n \"${c:-$s}\""
