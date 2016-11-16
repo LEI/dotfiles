@@ -3,7 +3,9 @@
 ircdir="$HOME/irc"
 ircbin="${ircbin:-$ircdir/bin}"
 
-[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
+[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
+  echo "Not found: $ircdir/autojoin"
+}
 
 irc() {
   networks="${1:-freenode}"
