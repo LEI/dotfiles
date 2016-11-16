@@ -3,9 +3,7 @@
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
-if [ -f "$ircdir/autojoin" ]
-then source "$ircdir/autojoin"
-fi
+[ -f "$ircdir/autojoin" ] && . "$ircdir/autojoin"
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
