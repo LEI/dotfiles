@@ -5,12 +5,6 @@ ircbin="${ircbin:-$ircdir/bin}"
 
 [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
 
-# Server info functions
-freenode() {
-  server="irc.freenode.net"
-  channels="#foo" #bar
-}
-
 irc() {
   networks="${1:-freenode}"
 
