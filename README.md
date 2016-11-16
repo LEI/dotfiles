@@ -26,6 +26,7 @@
 - [osxc](https://github.com/osxc)
 - [workstation](https://github.com/jtimberman/workstation-chef-repo)
 - [boxen](https://github.com/boxen/our-boxen)
+- [kitchenplan](https://github.com/kitchenplan/kitchenplan)
 
 ## TODO
 
