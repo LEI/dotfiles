@@ -9,7 +9,8 @@
 iii="~/irc/bin/iii"
 
 ## collect options from env - all opts to iii.sh should be set here
-opts="TERM="${t:-rxvt-unicode}" m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
+#TERM="${t:-rxvt-unicode}"
+opts="m=\"$m\" h=\"$h\" p=\"$p\" n=\"$n\" l=\"$l\" i=\"$i\" s=\"$s\" c=\"$c\""
 tmux_opts="-n \"${c:-$s}\""
 
 ## spawn a new tmux window named <channel> in a tmux session named IRC
