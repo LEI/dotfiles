@@ -4,7 +4,10 @@
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
-[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
+if [[ -z "${networks:-}" ]]
+then
+  [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
+fi
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"

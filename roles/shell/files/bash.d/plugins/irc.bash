@@ -1,33 +1,41 @@
 # IRC
 
+# if [[ ! -e "$connect" ]] || [[ ! -e "$tmiii" ]]
+# then
+#   if has weechat
+#   then
+#     IRC="weechat"
+#     [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
+#     return
+#   fi
+#   return 1
+# fi
+
 ircdir="$HOME/irc"
 ircbin="${ircbin:-$ircdir/bin}"
 
-[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
-  echo "Not found: $ircdir/autojoin"
-}
-
 irc() {
-  networks="${1:-freenode}"
-
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
-  if [[ ! -e "$tmiii" ]] || [[ ! -e "$connect" ]]
+
+  networks="${1:-}"
+  if [[ -n "$networks" ]]
   then
-    if has weechat
-    then
-      IRC="weechat"
-      [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
-      return
-    fi
-    return 1
+    shift
+    channels="$@"
+  else
+    [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
+      echo "Not found: $ircdir/autojoin"
+    }
   fi
 
-  # pgrep ii
-  # if [[ -z "$(ps -A | grep $connect)" ]]
-  # then
-    networks="$networks" "$connect"
-  # fi
+  if [[ -z "$(pgrep ii)" ]]
+  then
+    "$connect"
+  else
+    echo 'Warning: ii already running, kill $(ps aux | awk '/connect/')'
+    return 1
+  fi
 
   local opts= hist=50
   for network in $networks
