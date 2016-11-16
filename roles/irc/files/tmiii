@@ -22,7 +22,6 @@ if ! tmux list-sessions | awk -v r=1 '$1 == "IRC:" { exit r=0 } END { exit r }'
 then
   if [ -n "$TMUX" ]
   then
-    echo tmux new-session -d -s "$session" -n "$name" "$opts $iii"
     tmux new-session -d -s "$session" -n "$name" "$opts $iii"
   else
     tmux new-session -s "$session" -n "$name" "$opts $iii"

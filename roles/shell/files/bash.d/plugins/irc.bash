@@ -42,10 +42,11 @@ irc() {
     if [[ -z "$noautojoin" ]]
     then
       "$network"
+      "$connect"
     else
-      server="$noautojoin"
+      echo "server=$noautojoin channels=$channels" "$connect"
+      env "server=$noautojoin channels=$channels" "$connect"
     fi
-    "$connect"
     for channel in $channels
     do
       opts="h=$hist n=$server c=$channel"
