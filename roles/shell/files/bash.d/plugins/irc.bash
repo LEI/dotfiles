@@ -18,10 +18,10 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
-  local serv="${1:-}"
-  if [[ -n "$serv" ]]
+  local noautojoin="${1:-}"
+  if [[ -n "$noautojoin" ]]
   then
-    networks="$serv"
+    networks="$noautojoin"
     shift
     channels="$@"
   else
@@ -39,7 +39,12 @@ irc() {
   for network in $networks
   do
     unset server channels
-    "$network"
+    if [[ -z "$noautojoin" ]]
+    then
+      "$network"
+    else
+      server="$noautojoin"
+    fi
     "$connect"
     for channel in $channels
     do
