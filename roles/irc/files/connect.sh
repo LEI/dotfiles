@@ -1,21 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 
-[[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin"
+[ -f "$ircdir/autojoin" ] && . "$ircdir/autojoin"
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
 chmod 600 "$ircdir"/*/ident &>/dev/null
 
-for network in $networks
-do
+for network in $networks; do
   unset server channels port
   "$network" # Set the appropriate vars
 
-  while true
-  do
+  while true; do
     # Cleanup
     rm -f "$ircdir/$server/in"
 
@@ -28,7 +26,7 @@ do
     while ! test -p "$ircdir/$server/in"; do sleep .3; done
 
     # Auth to services
-    if [[ -e "$ircdir/$server/ident" ]]
+    if [ -e "$ircdir/$server/ident" ]
     then printf "/j nickserv identify %s\n" "$(cat "$ircdir/$server/ident")" > "$ircdir/$server/in"
     fi && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
 
@@ -39,3 +37,4 @@ do
     wait "$pid"
   done &
 done
+
