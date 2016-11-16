@@ -23,10 +23,10 @@ then
   tmux_opts="$tmux_opts -d"
 fi
 
-tmux_opts="$tmux_opts -n \'${c:-$s}\'"
+tmux_opts="$tmux_opts -n \"${c:-$s}\""
 
 if [ -n "$tmux_cmd" ]
 then
-  echo $tmux_cmd "$tmux_opts" "\'$opts $iii\'"
-  tmux $tmux_cmd "$tmux_opts" "\'$opts $iii\'"
+  echo $tmux_cmd "$tmux_opts" "\"$opts $iii\""
+  tmux $tmux_cmd "$tmux_opts" "\"$opts $iii\""
 fi
