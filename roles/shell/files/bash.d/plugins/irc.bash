@@ -17,22 +17,15 @@ ircbin="${ircbin:-$ircdir/bin}"
 custom_network() {
   server="$1"
   shift
-  channels=("$@")
+  channels="$@"
 }
 
 irc() {
   # local args=("$@")
   local connect="$ircbin/connect"
-  local tmiii="$ircbin/tmiii"
+  local iii="$ircbin/iii"
+  has tmux && iii="$ircbin/tmiii"
 
-  # local n="${1:-}"
-  # if [[ -n "$n" ]]
-  # then
-  #   networks="$n"
-  #   server="$n"
-  #   shift
-  #   channels="$@"
-  # fi
   if [[ "$#" -gt 0 ]]
   then
     networks="custom_network"
@@ -59,11 +52,12 @@ irc() {
     fi
 
     local opts="h=$hist n=$server"
-    [[ -z "$channels" ]] && env $opts "$tmiii"
+    # [[ -z "$channels" ]] &&
+    env $opts "$iii"
     for channel in $channels
     do
       opts+=" c=$channel"
-      env $opts "$tmiii"
+      env $opts "$iii"
     done
   done
 }
