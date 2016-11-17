@@ -18,7 +18,6 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
-  echo "$1"
   local n="${1:-}"
   if [[ -n "$n" ]]
   then
@@ -32,10 +31,6 @@ irc() {
     }
   fi
 
-  echo "noautojoin $noautojoin"
-  echo "network $network"
-  echo "server $server"
-
   if [[ -n "$(pgrep ii)" ]]
   then
     echo 'Warning: ii already running, kill $(ps aux | awk '/connect/')'
@@ -45,12 +40,12 @@ irc() {
   for network in $networks
   do
     unset server channels
-    if [[ -z "$noautojoin" ]]
+    if [[ -z "$n" ]]
     then
       "$network"
       "$connect"
     else
-      env "server=$noautojoin channels=$channels" "$connect"
+      env "server=$n channels=$channels" "$connect"
     fi
     for channel in $channels
     do
