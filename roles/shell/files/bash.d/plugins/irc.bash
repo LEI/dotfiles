@@ -18,6 +18,7 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
+  echo "$1"
   local n="${1:-}"
   if [[ -n "$n" ]]
   then
