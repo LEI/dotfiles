@@ -1,16 +1,5 @@
 # IRC
 
-# if [[ ! -e "$connect" ]] || [[ ! -e "$tmiii" ]]
-# then
-#   if has weechat
-#   then
-#     IRC="weechat"
-#     [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
-#     return
-#   fi
-#   return 1
-# fi
-
 ircdir="$HOME/irc"
 ircbin="${ircbin:-$ircdir/bin}"
 
@@ -21,10 +10,19 @@ custom_network() {
 }
 
 irc() {
-  # local args=("$@")
+  # Parse arguments
+  case "$@" in
+    -n" "*) # nick
+      shift
+      n="$1"
+      shift
+      ;;
+  esac
+  local args=("$@")
   local connect="$ircbin/connect"
   local iii="$ircbin/iii"
   has tmux && iii="$ircbin/tmiii"
+  [[ -e "$iii" ]] || echo "Not found: $iii" && return 1
 
   if [[ "$#" -gt 0 ]]
   then
@@ -40,7 +38,7 @@ irc() {
   do
     unset server channels
 
-    "$network" "$@"
+    "$network" "${args[@]}"
     local pattern="connect\s$server" #.*${channels[@]}
     local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
     if [[ -z "$ps" ]]
@@ -75,3 +73,8 @@ irc() {
 #   fi
 #   ${args[@]} "$IRC" "$@"
 # }
+
+weechat() {
+  IRC="weechat"
+  [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
+}

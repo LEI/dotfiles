@@ -17,12 +17,14 @@ chmod 600 "$ircdir"/*/ident &>/dev/null
 
 if [[ "$#" -gt 0 ]]
 then
-  server="${1}"
+  server="$1"
   shift
   channels="$@"
 else
-  : "${server:=irc.freenode.net}"
-  : "${channels:=}"
+  echo "No server specified"
+  exit 1
+  # : "${server:=irc.freenode.net}"
+  # : "${channels:=}"
 fi
 
 while true

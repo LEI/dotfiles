@@ -19,18 +19,12 @@
 join_channel() {
   channel="$1"
   # Send join command
-  printf "/j %s\n" "$channel" > "$i/$s/in"
+  # printf "/j %s\n" "$channel" > "$i/$s/in"
   # Open in a new tmux window
   opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
   if [ -n "$TMUX" ]
   then env $opts "$i/bin/tmiii"
   fi # TODO $i/bin/iii when outside tmux?
-}
-
-leave_channel() {
-  channel="$1"
-  printf "/part %s\n" "$channel" > "$i/$s/$c/in"
-  # tmux kill-pane?
 }
 
 [ "$1" != '-r' ] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
@@ -160,6 +154,9 @@ while IFS= read -r input; do
     /names)
       input="/names $c"
       ;;
+    /part)
+      input="/part $c"
+      ;;
     /op" "*)
       input="/j chanserv op $c $args"
       ;;
@@ -178,17 +175,12 @@ while IFS= read -r input; do
     /t|/topic)
       input="/topic $c"
       ;;
-    /j" "*) #|/join" "*)
+    /j" "*|/join" "*)
       for chan in "$args"
       do
 	join_channel "$chan"
       done
-      input=
       ;;
-    # /part|/part" "*)
-    #   # chan="${input
-    #   leave_channel
-    #   ;;
     # /wait" "*)
     #   # input="/wait $args"
     #   sleep $args
