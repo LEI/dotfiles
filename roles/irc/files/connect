@@ -27,7 +27,7 @@ while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  # rm -f "$ircdir/$server/**/in"
+  rm -f "$ircdir/$server/**/in"
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
@@ -43,8 +43,12 @@ do
   fi && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
 
   sleep 10
-  # FIXME wait
-  # while ! test -p "$ircdir/$server/nickserv/in"; do sleep .3; done
+  # nickserv="$ircdir/$server/nickserv"
+  # while lsof "$nickserv/in"
+  # do
+  #   read -r line < "$nickserv/in"
+  #   printf "%s\n" "$line"
+  # done
 
   # Join channels
   printf "/j %s\n" $channels > "$ircdir/$server/in"

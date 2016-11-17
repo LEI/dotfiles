@@ -14,6 +14,7 @@
 : "${w:=120}"               # max characters per mesg - fold after limit
 : "${h:=20}"                # lines from history
 : "${p:=1}"                 # prefity - colors and special patterns
+# : "${l:=3}"		    # highlight color when nick is mentioned
 
 # rlopts="--no-warnings" # Darwin fix
 # brewgetoptpath="/usr/local/opt/gnu-getopt/bin"

@@ -35,7 +35,7 @@ irc() {
     }
   fi
 
-  local hist=50
+  local hist=50 nick="${n:=$USER}"
   for network in $networks
   do
     unset server channels
@@ -45,13 +45,13 @@ irc() {
     local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
     if [[ -z "$ps" ]]
     then
-      "$connect" "$server" "$channels"
+      USER="$nick" "$connect" "$server" "$channels"
     else
       # echo "Warning: already running, pkill ii or kill -9 \$(ps -A ux | awk '/$pattern/ {print \$2}')"
       printf "/j %s\n" $channels > "$ircdir/$server/in"
     fi
 
-    local opts="h=$hist n=$server"
+    local opts="h=$hist n=$nick s=$server"
     # [[ -z "$channels" ]] &&
     env $opts "$iii"
     for channel in $channels

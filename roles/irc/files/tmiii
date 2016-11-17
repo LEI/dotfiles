@@ -31,7 +31,7 @@ go_to_window() {
 # Session name
 session="IRC"
 # Window name cannot contain dots
-window="${c:-$n}" # c:-$s
+window="${c:-$s}"
 window=${window//./․} # One dot leader (U+2024)
 # window=${window#irc.} # window=${window%.net}
 # window=${window//./\\.}
