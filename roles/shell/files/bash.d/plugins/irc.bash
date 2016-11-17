@@ -35,7 +35,7 @@ irc() {
     }
   fi
 
-  local hist=50 nick="${n:=$USER}"
+  local hist= nick="${n:=$USER}"
   for network in $networks
   do
     unset server channels

@@ -12,6 +12,8 @@ chmod 600 "$ircdir"/*/ident &>/dev/null
 # do
 #   unset server channels port
 #   "$network" # Set the appropriate vars
+#   ...
+# done
 
 if [[ "$#" -gt 0 ]]
 then
@@ -27,7 +29,7 @@ while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  rm -f "$ircdir/$server/**/in"
+  rm -f "$ircdir/$server/*/{in,out}"
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
@@ -56,5 +58,3 @@ do
   # If connection is lost reconnect
   wait "$pid"
 done &
-
-# done
