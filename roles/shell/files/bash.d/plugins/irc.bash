@@ -18,10 +18,11 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
-  local noautojoin="${1:-}"
-  if [[ -n "$noautojoin" ]]
+  local n="${1:-}"
+  if [[ -n "$n" ]]
   then
-    networks="$noautojoin"
+    networks="$n"
+    server="$n"
     shift
     channels="$@"
   else
@@ -29,6 +30,10 @@ irc() {
       echo "Not found: $ircdir/autojoin"
     }
   fi
+
+  echo "noautojoin $noautojoin"
+  echo "network $network"
+  echo "server $server"
 
   if [[ -n "$(pgrep ii)" ]]
   then
@@ -39,7 +44,6 @@ irc() {
   for network in $networks
   do
     unset server channels
-    echo $noautojoin $network 
     if [[ -z "$noautojoin" ]]
     then
       "$network"
