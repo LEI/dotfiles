@@ -6,7 +6,7 @@ ircbin="${ircbin:-$ircdir/bin}"
 custom_network() {
   server="$1"
   shift
-  channels="$@"
+  channels=("$@")
 }
 
 irc() {
@@ -22,7 +22,10 @@ irc() {
   local connect="$ircbin/connect"
   local iii="$ircbin/iii"
   has tmux && iii="$ircbin/tmiii"
-  [[ -e "$iii" ]] || echo "Not found: $iii" && return 1
+  [[ -e "$iii" ]] || {
+    echo "Not found: $iii"
+    return 1
+  }
 
   if [[ "$#" -gt 0 ]]
   then

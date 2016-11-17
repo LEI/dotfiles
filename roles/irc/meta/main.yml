@@ -7,4 +7,8 @@ dependencies:
   - role: dotfiles
     paths:
       - name: irc
+        dest: irc
+        pattern: "*.j2"
+        template: yes
+      - name: irc/files/bin
         dest: irc/bin
