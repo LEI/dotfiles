@@ -14,7 +14,14 @@
 ircdir="$HOME/irc"
 ircbin="${ircbin:-$ircdir/bin}"
 
+custom_network() {
+  server="$1"
+  shift
+  channels=("$@")
+}
+
 irc() {
+  # local args=("$@")
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
@@ -26,25 +33,36 @@ irc() {
   #   shift
   #   channels="$@"
   # fi
-  [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
-    echo "Not found: $ircdir/autojoin"
-  }
+  if [[ "$#" -gt 0 ]]
+  then
+    networks="custom_network"
+  else
+    [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
+      echo "Not found: $ircdir/autojoin"
+    }
+  fi
 
-  local opts= hist=50
+  local hist=50
   for network in $networks
   do
     unset server channels
 
-    "$network"
-    if [[ -n "$(pgrep ii)" ]]
+    "$network" "$@"
+    local pattern="connect\s$server" #.*${channels[@]}
+    local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
+    if [[ -z "$ps" ]]
     then
-      echo "Warning: ii already running, kill \$(ps aux | awk '/connect/ {print \$2}')"
+      "$connect" "$server" "$channels"
+    else
+      # echo "Warning: already running, pkill ii or kill -9 \$(ps -A ux | awk '/$pattern/ {print \$2}')"
+      printf "/j %s\n" $channels > "$ircdir/$server/in"
     fi
-    "$connect"
 
+    local opts="h=$hist n=$server"
+    [[ -z "$channels" ]] && env $opts "$tmiii"
     for channel in $channels
     do
-      opts="h=$hist n=$server c=$channel"
+      opts+=" c=$channel"
       env $opts "$tmiii"
     done
   done

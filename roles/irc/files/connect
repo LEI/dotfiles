@@ -13,6 +13,16 @@ chmod 600 "$ircdir"/*/ident &>/dev/null
 #   unset server channels port
 #   "$network" # Set the appropriate vars
 
+if [[ "$#" -gt 0 ]]
+then
+  server="${1}"
+  shift
+  channels="$@"
+else
+  : "${server:=irc.freenode.net}"
+  : "${channels:=}"
+fi
+
 while true
 do
   # Cleanup
