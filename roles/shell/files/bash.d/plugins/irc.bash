@@ -18,35 +18,30 @@ irc() {
   local connect="$ircbin/connect"
   local tmiii="$ircbin/tmiii"
 
-  local n="${1:-}"
-  if [[ -n "$n" ]]
-  then
-    networks="$n"
-    server="$n"
-    shift
-    channels="$@"
-  else
-    [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
-      echo "Not found: $ircdir/autojoin"
-    }
-  fi
-
-  if [[ -n "$(pgrep ii)" ]]
-  then
-    echo 'Warning: ii already running, kill $(ps aux | awk '/connect/')'
-  fi
+  # local n="${1:-}"
+  # if [[ -n "$n" ]]
+  # then
+  #   networks="$n"
+  #   server="$n"
+  #   shift
+  #   channels="$@"
+  # fi
+  [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
+    echo "Not found: $ircdir/autojoin"
+  }
 
   local opts= hist=50
   for network in $networks
   do
     unset server channels
-    if [[ -z "$n" ]]
+
+    "$network"
+    if [[ -n "$(pgrep ii)" ]]
     then
-      "$network"
-      "$connect"
-    else
-      env "server=$n channels=$channels" "$connect"
+      echo "Warning: ii already running, kill \$(ps aux | awk '/connect/ {print \$2}')"
     fi
+    "$connect"
+
     for channel in $channels
     do
       opts="h=$hist n=$server c=$channel"
