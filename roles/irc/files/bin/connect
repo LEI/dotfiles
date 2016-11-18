@@ -22,20 +22,25 @@ then
   channels="$@"
 else
   echo "No server specified"
+  # echo "Usage: connect [-n nick] server[:port] [channels]"
   exit 1
   # : "${server:=irc.freenode.net}"
   # : "${channels:=}"
 fi
+# if [[ "$server" =~ .*:[0-9]+ ]]
+# then
+#   port="${server#*:}"
+#   server="${server%%:*}"
+# fi
 
 while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  rm -f "$ircdir/$server/*/{in,out}"
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
-  ii -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
+  ii -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" -e ssl &
   pid="$!"
 
   # Wait for the connection

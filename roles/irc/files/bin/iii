@@ -16,18 +16,16 @@
 : "${p:=1}"                 # prefity - colors and special patterns
 : "${l:=}"		    # highlight color when nick is mentioned
 
-join_channel() {
+tmux_open() {
   channel="$1"
-  # Send join command
   # printf "/j %s\n" "$channel" > "$i/$s/in"
-  # Open in a new tmux window
   opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
-  if [ -n "$TMUX" ]
+  if [[ -n "$TMUX" ]]
   then env $opts "$i/bin/tmiii"
   fi # TODO $i/bin/iii when outside tmux?
 }
 
-[ "$1" != '-r' ] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
+[[ "$1" != '-r' ]] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
 
 infile="$i/$s/$c/in"
 outfile="$i/$s/$c/out"
@@ -47,8 +45,8 @@ eu="$(tput rmul; tput sgr0)"
 si="$(tput sitm; tput setaf 13)"
 ei="$(tput ritm; tput sgr0)"
 
-[ -p "$infile"  ] || exit 1
-[ -e "$outfile" ] || { touch "$outfile" || exit 1; }
+[[ -p "$infile"  ]] || exit 1
+[[ -e "$outfile" ]] || { touch "$outfile" || exit 1; }
 
 tail -f -n "$h" "$outfile" | while IFS= read -r line
 do
@@ -65,7 +63,7 @@ do
   case "$nick" in -!-) ;; *) tput bel ;; esac
 
   # prettify
-  if [ "$p" -ne 0 ]
+  if [[ "$p" -ne 0 ]]
   then
     unset clrdate clrnick clrsepr clrmesg tmpnick
 
@@ -88,14 +86,14 @@ do
   fi
 
   # handle CTCP messages
-  if [ "${line#}" != "${line}" ]
+  if [[ "${line#}" != "${line}" ]]
   then
     line="${line#}"
     line="${line%}"
     ctcp="${line%% *}"
     line="${line#* }"
 
-    if [ "$ctcp" != 'ACTION' ]
+    if [[ "$ctcp" != 'ACTION' ]]
     then line="${clrnick}[CTCP:${ctcp}]${clrmesg} ${line}"
     else line="${clrnick}${nick}${clrmesg} ${line}" nick="*"
     fi
@@ -103,10 +101,10 @@ do
 
   # fold lines breaking on spaces if message is greater than 'w' chars or does not fit
   mw="$(($(tput cols) - ${#date} - ${#time} - $m - 5))"
-  [ "$mw" -gt "$w" ] && mw="$w"
+  [[ "$mw" -gt "$w" ]] && mw="$w"
   printf '%s\n' "$line" | fold -s -w "$mw" | while IFS= read -r mesg; \
   do
-    [ "$p" -gt 1 ] && mesg="$(echo "$mesg" | sed \
+    [[ "$p" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([/][[:alnum:][:punct:]]\+[/]\)\([[:punct:][:space:]]\|$\),\1${si}\2${ei}\3,g" \
@@ -130,6 +128,7 @@ mark() { printf '%s -!- %.*s\n' "$(date +"%F %R")" "$w" "${bar}${bar}" >>"$outfi
 
 while IFS= read -r input; do
   args="${input##* }"
+  cmd=
   case "$input" in
     '')
       continue
@@ -142,14 +141,14 @@ while IFS= read -r input; do
       mark
       break
       ;;
-    :q|/leave)
+    :q) # close|leave
       break
       ;;
     /wi" "*)
-      input="/j nickserv info ${input#/wi}"
+      input="/j nickserv info $args"
       ;;
     /me" "*)
-      input="ACTION${input#/me}"
+      input="ACTION $args"
       ;;
     /names)
       input="/names $c"
@@ -178,14 +177,18 @@ while IFS= read -r input; do
     /j" "*|/join" "*)
       for chan in "$args"
       do
-	join_channel "$chan"
+	tmux_open "$chan"
       done
       ;;
+    # /quit)
+    #   cmd="break"
+    #   ;;
     # /wait" "*)
     #   # input="/wait $args"
     #   sleep $args
     #   input=
     #   ;;
   esac
-  [ -n "$input" ] && printf '%s\n' "$input"
+  [[ -n "$input" ]] && printf '%s\n' "$input"
+  [[ -n "$cmd" ]] && "$cmd"
 done >"$infile"
