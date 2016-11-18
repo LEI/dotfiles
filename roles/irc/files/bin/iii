@@ -18,7 +18,7 @@
 
 tmux_open() {
   channel="$1"
-  # printf "/j %s\n" "$channel" > "$i/$s/in"
+  printf "/j %s\n" "$channel" > "$i/$s/in"
   opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
   if [[ -n "$TMUX" ]]
   then env $opts "$i/bin/tmiii"
@@ -126,8 +126,9 @@ stty -echonl -echo
 bar="--------------------------------------------------------------------------------"
 mark() { printf '%s -!- %.*s\n' "$(date +"%F %R")" "$w" "${bar}${bar}" >>"$outfile"; }
 
+# declare -a args
 while IFS= read -r input; do
-  args="${input##* }"
+  args="${input#* }"
   cmd=
   case "$input" in
     '')
@@ -141,7 +142,7 @@ while IFS= read -r input; do
       mark
       break
       ;;
-    :q) # close|leave
+    :q) # close
       break
       ;;
     /wi" "*)
@@ -152,10 +153,6 @@ while IFS= read -r input; do
       ;;
     /names)
       input="/names $c"
-      ;;
-    /part)
-      input="/part $c"
-      cmd="break"
       ;;
     /op" "*)
       input="/j chanserv op $c $args"
@@ -176,13 +173,18 @@ while IFS= read -r input; do
       input="/topic $c"
       ;;
     /j" "*|/join" "*)
-      for chan in "$args"
-      do
-	tmux_open "$chan"
+      read -a channels <<<$args
+      for channel in "${channels[@]}"
+      do tmux_open "$channel"
       done
+      input=
+      ;;
+    /part|/leave)
+      input="/part $c"
+      cmd="break"
       ;;
     # /quit)
-    #   cmd="break"
+    #   cmd="break" # TODO kill auto reconnect
     #   ;;
     # /wait" "*)
     #   # input="/wait $args"
@@ -193,3 +195,5 @@ while IFS= read -r input; do
   [[ -n "$input" ]] && printf '%s\n' "$input"
   [[ -n "$cmd" ]] && "$cmd"
 done >"$infile"
+
+# read w8

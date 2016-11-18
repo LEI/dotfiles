@@ -19,7 +19,7 @@ if [[ "$#" -gt 0 ]]
 then
   server="$1"
   shift
-  channels="$@"
+  channels=("$@")
 else
   echo "No server specified"
   # echo "Usage: connect [-n nick] server[:port] [channels]"
@@ -33,29 +33,36 @@ do
   # Cleanup
   rm -f "$ircdir/$server/in"
 
+  # Flush
+  rm -f "$ircdir/$server/out"
+  rm -f $ircdir/$server/**/{in,out}
+
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
   ii -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" -e ssl &
   pid="$!"
 
   # Wait for the connection
-  while ! test -p "$ircdir/$server/in"; do sleep .3; done
+  while ! test -p "$ircdir/$server/in"
+  do sleep .3; done
 
   # Auth to services
   if [[ -e "$ircdir/$server/ident" ]]
-  then printf "/j nickserv identify %s\n" "$(cat "$ircdir/$server/ident")" > "$ircdir/$server/in"
-  fi && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
+  then
+    printf "/j nickserv identify %s\n" "$(cat "$ircdir/$server/ident")" > "$ircdir/$server/in" \
+    && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
 
-  sleep 10
-  # nickserv="$ircdir/$server/nickserv"
-  # while lsof "$nickserv/in"
-  # do
-  #   read -r line < "$nickserv/in"
-  #   printf "%s\n" "$line"
-  # done
+    # Wait for NickServ identification
+    while ! test -f "$ircdir/$server/nickserv/out"
+    do sleep .3; done
+
+    (tail -f "$ircdir/$server/nickserv/out" & echo $! >&3) 3>tpid | while read line
+    do case "$line" in *identified*$nick*) kill $(<tpid) ;; esac
+    done
+  fi
 
   # Join channels
-  printf "/j %s\n" $channels > "$ircdir/$server/in"
+  printf "/j %s\n" "${channels[@]}" > "$ircdir/$server/in"
 
   # If connection is lost reconnect
   wait "$pid"
