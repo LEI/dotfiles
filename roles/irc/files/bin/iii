@@ -142,7 +142,7 @@ while IFS= read -r input; do
       mark
       break
       ;;
-    :q) # close
+    :q)
       break
       ;;
     /wi" "*)
@@ -184,11 +184,10 @@ while IFS= read -r input; do
       cmd="break"
       ;;
     # /quit)
-    #   cmd="break" # TODO kill auto reconnect
+    #   cmd="break" # TODO kill server reconnect
     #   ;;
     # /wait" "*)
-    #   # input="/wait $args"
-    #   sleep $args
+    #   sleep "$args"
     #   input=
     #   ;;
   esac
