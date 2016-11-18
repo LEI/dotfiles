@@ -36,12 +36,18 @@ irc() {
     }
   fi
 
-  local hist= nick="${n:=$USER}"
   for network in $networks
   do
-    unset server channels
-
+    local hist= nick="${n:=$USER}"
+    unset server port channels
     "$network" "${args[@]}"
+
+    if [[ "$server" =~ .*:[0-9]+ ]]
+    then
+      port="${server#*:}"
+      server="${server%%:*}"
+    fi
+
     local pattern="connect\s$server" #.*${channels[@]}
     local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
     if [[ -z "$ps" ]]
@@ -52,7 +58,7 @@ irc() {
       printf "/j %s\n" $channels > "$ircdir/$server/in"
     fi
 
-    local opts="h=$hist n=$nick s=$server"
+    local opts="h=$hist n=$nick s=$server p=$port"
     # [[ -z "$channels" ]] &&
     env $opts "$iii"
     for channel in $channels

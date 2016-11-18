@@ -6,7 +6,7 @@
 # spawns iii.sh in a tmux session named IRC with the channel as title
 # accepts all env vars iii.sh accepts plus 't' which sets the terminal
 
-iii="~/irc/bin/iii"
+iii="$HOME/irc/bin/iii"
 
 in_tmux() {
   [[ -n "$TMUX" ]]
@@ -40,7 +40,7 @@ window=${window//./․} # One dot leader (U+2024)
 opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
 # TERM="${t:-rxvt-unicode}"
 
-## spawn a new tmux window named <channel> in a tmux session named IRC
+# Spawn a new tmux window named <channel> in a tmux session named IRC
 if ! has_session "$session"
 then
   if in_tmux

@@ -27,11 +27,6 @@ else
   # : "${server:=irc.freenode.net}"
   # : "${channels:=}"
 fi
-# if [[ "$server" =~ .*:[0-9]+ ]]
-# then
-#   port="${server#*:}"
-#   server="${server%%:*}"
-# fi
 
 while true
 do
