@@ -18,7 +18,6 @@
 
 tmux_open() {
   channel="$1"
-  printf "/j %s\n" "$channel" > "$i/$s/in"
   opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
   if [[ -n "$TMUX" ]]
   then env $opts "$i/bin/tmiii"
@@ -151,6 +150,8 @@ while IFS= read -r input; do
     /me" "*)
       input="ACTION $args"
       ;;
+    # /n|/nick)
+    #   ;;
     /names)
       input="/names $c"
       ;;
@@ -172,14 +173,26 @@ while IFS= read -r input; do
     /t|/topic)
       input="/topic $c"
       ;;
-    /j" "*|/join" "*)
+    /msg" "*)
+      name="${args%% *}"
+      msg="${args#* }"
+      printf '%s\n' "$name $msg" > "$i/$s/in"
+      tmux_open "$name"
+      input=
+      ;;
+    /j" "*|/join" "*) # FIXME /j nickname msg
       read -a channels <<<$args
       for channel in "${channels[@]}"
-      do tmux_open "$channel"
+      do
+	printf "/j %s\n" "$channel" > "$i/$s/in"
+	tmux_open "$channel"
       done
       input=
       ;;
-    /part|/leave)
+    # /l|/leave)
+    #   cmd="break"
+    #   ;;
+    /part)
       input="/part $c"
       cmd="break"
       ;;
@@ -192,7 +205,7 @@ while IFS= read -r input; do
     #   ;;
   esac
   [[ -n "$input" ]] && printf '%s\n' "$input"
-  [[ -n "$cmd" ]] && "$cmd"
+  [[ -n "$cmd" ]] && $cmd
 done >"$infile"
 
 # read w8
