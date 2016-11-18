@@ -38,7 +38,7 @@ irc() {
 
   for network in $networks
   do
-    local hist= nick="${n:=$USER}"
+    local hist= nick="${n:=$USER}" # l=sb r=eb
     unset server port channels
     "$network" "${args[@]}"
 
@@ -53,7 +53,7 @@ irc() {
     if [[ -z "$ps" ]]
     then
       USER="$nick" "$connect" "$server" "${channels[@]}" # & wait "$!"
-      sleep 1
+      # sleep 1
       # # Wait for NickServ identification
       # while ! test -f "$ircdir/$server/nickserv/out"
       # do sleep .3; done
@@ -63,12 +63,14 @@ irc() {
       # done
     elif [[ -n "$channels" ]]
     then
-      echo "Warning: connect already running" # pkill ii or kill -9 \$(ps -A ux | awk '/$pattern/ {print \$2}')
+      echo "Warning: connect already running for $server" # pkill ii or kill -9 \$(ps -A ux | awk '/$pattern/ {print \$2}')
       printf "/j %s\n" "${channels[@]}" > "$ircdir/$server/in"
     fi
 
-    local opts="h=$hist n=$nick s=$server p=$port"
+    local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
     # [[ -z "$channels" ]] &&
+    # while ! test -f "$ircdir/$server/out"
+    # do sleep .3; done
     env $opts "$iii"
     for channel in "${channels[@]}"
     do
@@ -96,5 +98,10 @@ irc() {
 
 weechat() {
   IRC="weechat"
-  [[ -n "$TMUX" ]] && TERM=screen-256color "$IRC" "$@" || "$IRC" "$@"
+  if [[ -n "$TMUX" ]]
+  then
+    TERM=screen-256color "$IRC" "$@"
+  else
+    "$IRC" "$@"
+  fi
 }

@@ -61,8 +61,9 @@ do
     done
   fi
 
-  # Join channels
-  printf "/j %s\n" "${channels[@]}" > "$ircdir/$server/in"
+  if [[ -n "$channels" ]]
+  then printf "/j %s\n" "${channels[@]}" > "$ircdir/$server/in"
+  fi # Join channels
 
   # If connection is lost reconnect
   wait "$pid"

@@ -14,11 +14,12 @@
 : "${w:=120}"               # max characters per mesg - fold after limit
 : "${h:=20}"                # lines from history
 : "${p:=1}"                 # prefity - colors and special patterns
-: "${l:=}"		    # highlight color when nick is mentioned
+# : "${l:=}" # $(tput bold)}"		    # highlight color when nick is mentioned
+# : "${r:=}" # $(tput sgr0)}"		    # reset highlight color
 
 tmux_open() {
-  channel="$1"
-  opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
+  channel="$1" # l="${l}" r="${r}"
+  opts="m="${m}" h="${h}" p="${p}" n="${n}" i="${i}" s="${s}" c="$channel""
   if [[ -n "$TMUX" ]]
   then env $opts "$i/bin/tmiii"
   fi # TODO $i/bin/iii when outside tmux?
@@ -34,7 +35,7 @@ sepr='|'
 reset="$(tput sgr0)"
 #dark="$(tput setaf 8)"
 dark="$(tput setaf 10)" # Solarized
-highlight="$(tput setaf 3)"
+# highlight="$(tput setaf 3)"
 
 # markup
 sb="$(tput bold; tput setaf 9)"
@@ -59,7 +60,7 @@ do
   nick="${nick#<}" nick="${nick%>}"
 
   # do not notify of server messages
-  case "$nick" in -!-) ;; *) tput bel ;; esac
+  # case "$nick" in -!-) ;; *) tput bel ;; esac
 
   # prettify
   if [[ "$p" -ne 0 ]]
@@ -67,7 +68,7 @@ do
     unset clrdate clrnick clrsepr clrmesg tmpnick
 
     clrdate="$dark"
-    case "$line" in *"$n"*) clrdate="${l:-$highlight}" ;; esac
+    # case "$line" in *"$n"*) clrdate="${l:-$highlight}" ;; esac
 
     tmpnick="${nick%[_12]}"
     clrnick="$(printf '(%d ^ %d + %d + %d)' "${#tmpnick}" "'${tmpnick}" "'${tmpnick#?}" "'${tmpnick#??}")"
@@ -81,7 +82,9 @@ do
     clrmesg="$reset"
 
     # dark color for special nicks
-    case "$nick" in -!-) clrnick="$dark" clrmesg="$dark";; esac
+    case "$nick" in -!-) clrnick="$dark" clrmesg="$dark" ;; esac
+    # case "$line" in *"$n"*) line="${line//$n/${l}${n}${r}}" ;; esac
+    # case "$line" in *"$n"*) tput bel ;; esac
   fi
 
   # handle CTCP messages
@@ -176,18 +179,19 @@ while IFS= read -r input; do
     /msg" "*)
       name="${args%% *}"
       msg="${args#* }"
-      printf '%s\n' "$name $msg" > "$i/$s/in"
-      tmux_open "$name"
-      input=
+      # printf '%s\n' "$name $msg" > "$i/$s/in"
+      [[ -n "$name" ]] && cmd="tmux_open $name"
+      input="/j $name $msg"
       ;;
     /j" "*|/join" "*) # FIXME /j nickname msg
-      read -a channels <<<$args
-      for channel in "${channels[@]}"
-      do
-	printf "/j %s\n" "$channel" > "$i/$s/in"
-	tmux_open "$channel"
-      done
-      input=
+      cmd="tmux_open ${args%% *}"
+      # read -a channels <<<$args
+      # for channel in "${channels[@]}"
+      # do
+	# printf "/j %s\n" "$channel" > "$i/$s/in"
+	# tmux_open "$channel"
+      # done
+      # input=
       ;;
     # /l|/leave)
     #   cmd="break"
@@ -197,7 +201,8 @@ while IFS= read -r input; do
       cmd="break"
       ;;
     # /quit)
-    #   cmd="break" # TODO kill server reconnect
+    #   # TODO register pid of the server instance
+    #   cmd="break"
     #   ;;
     # /wait" "*)
     #   sleep "$args"
