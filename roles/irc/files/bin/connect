@@ -35,7 +35,8 @@ do
 
   # Flush
   rm -f "$ircdir/$server/out"
-  rm -f $ircdir/$server/**/{in,out}
+  # shopt -s globstar #2> /dev/null
+  rm -f $ircdir/$server/*/{in,out}
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
@@ -57,7 +58,7 @@ do
     do sleep .3; done
 
     (tail -f "$ircdir/$server/nickserv/out" & echo $! >&3) 3>tpid | while read line
-    do case "$line" in *identified*$nick*) kill $(<tpid) ;; esac
+    do case "$line" in *identified*$nick*) kill $(<tpid) ;; *) sleep .3 ;; esac
     done
   fi
 

@@ -48,29 +48,23 @@ irc() {
       server="${server%%:*}"
     fi
 
+    local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
+
     local pattern="connect\s$server" #.*${channels[@]}
     local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
     if [[ -z "$ps" ]]
     then
       USER="$nick" "$connect" "$server" "${channels[@]}" # & wait "$!"
-      # sleep 1
-      # # Wait for NickServ identification
-      # while ! test -f "$ircdir/$server/nickserv/out"
-      # do sleep .3; done
-
-      # (tail -f "$ircdir/$server/nickserv/out" & echo $! >&3) 3>tpid | while read line
-      # do case "$line" in *identified*$nick*) kill $(<tpid) ;; esac
-      # done
+      sleep 1
     elif [[ -n "$channels" ]]
     then
       echo "Warning: connect already running for $server" # pkill ii or kill -9 \$(ps -A ux | awk '/$pattern/ {print \$2}')
       printf "/j %s\n" "${channels[@]}" > "$ircdir/$server/in"
     fi
 
-    local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
     # [[ -z "$channels" ]] &&
-    # while ! test -f "$ircdir/$server/out"
-    # do sleep .3; done
+    while ! test -p "$ircdir/$server/in"
+    do sleep .3; done
     env $opts "$iii"
     for channel in "${channels[@]}"
     do

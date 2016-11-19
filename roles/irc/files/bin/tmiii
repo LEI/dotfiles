@@ -24,7 +24,7 @@ go_to_window() {
   local session="$1" window="$2"
   local cmd="attach-session"
   in_tmux && cmd="switch-client"
-  echo tmux "$cmd" -t "$session" \; select-window -t "$session":"$window" >> ~/tmi.txt
+  # echo tmux "$cmd" -t "$session" \; select-window -t "$session":"$window" >> ~/tmi.txt
   tmux "$cmd" -t "$session" \; select-window -t "$session":"$window" #.
 }
 
@@ -44,24 +44,24 @@ window="${c:-$s}"
 window=${window//./․} # One dot leader (U+2024)
 # window="$(echo "$window" | tr '[:upper:]' '[:lower:]')"
 
-echo "TMIII $session:$window -> $opts $iii" >> ~/tmi.txt
+# echo "TMIII $session:$window -> $opts $iii" >> ~/tmi.txt
 
 # Spawn a new tmux window named <channel> in a tmux session named IRC
 if ! has_session "$session"
 then
-  echo "no session named $session" >> ~/tmi.txt
+  # echo "no session named $session" >> ~/tmi.txt
   if in_tmux
   then
-    echo tmux new-session -d -s "$session" -n "$window" "$opts $iii" >> ~/tmi.txt
-    tmux new-session -d -s "$session" -n "$window" "$opts $iii"
+    # echo tmux new-session -d -s "$session" -n "$window" "$opts $iii" >> ~/tmi.txt
+    tmux new-session -s "$session" -n "$window" -d "$opts $iii"
     go_to_window "$session" "$window"
   else
     tmux new-session -s "$session" -n "$window" "$opts $iii"
   fi
 elif ! has_window "$session" "$window"
 then
-  echo "no names named $names" >> ~/tmi.txt
-  echo tmux new-window -t "$session" -n "$window" -d "$opts $iii" >> ~/tmi.txt
+  # echo "no window named $names" >> ~/tmi.txt
+  # echo tmux new-window -t "$session" -n "$window" -d "$opts $iii" >> ~/tmi.txt
   tmux new-window -t "$session" -n "$window" -d "$opts $iii"
   if in_tmux
   then
