@@ -35,6 +35,9 @@ sepr='|'
 reset="$(tput sgr0)"
 # dark="$(tput setaf 8)"
 dark="$(tput setaf 10)" # Solarized
+red="$(tput setaf 1)"
+green="$(tput setaf 2)"
+blue="$(tput setaf 4)"
 # highlight="$(tput setaf 3)"
 
 # markup
@@ -54,10 +57,25 @@ do
 
   date="${line%% *}" line="${line#* }"
   time="${line%% *}" line="${line#* }"
-  nick="${line%% *}" line="${line#* }"
-
-  # strip '<nick>' to 'nick'
-  nick="${nick#<}" nick="${nick%>}"
+  case "$line" in
+    "<"*">"*)
+      nick="${line%% *}" line="${line#* }"
+      nick="${nick#<}" nick="${nick%>}"
+      ;;
+    "-!- "*)
+      case "$line" in
+	*" changed nick to "*|*" changed mode"*) nick="-~-" ;;
+	*" has joined $c"*) nick="-+-" ;;
+	*" has quit "*|*" has left $c"*) nick="---" ;;
+	*) nick="${line%% *}"
+      esac
+      line="${line#* }"
+      ;;
+    "#"*" "*) nick="${line%% *}" line="${line#* }" ;;
+    "="*|"-"*|"${line%% *}") nick="${line:0:1}" && line="${line:1}" ;;
+    *) nick= ;;
+    # *) nick="${line%% *}" line="${line#* }" ;;
+  esac
 
   # do not notify of server messages
   # case "$nick" in -!-) ;; *) tput bel ;; esac
@@ -81,8 +99,12 @@ do
     clrsepr="$dark"
     clrmesg="$reset"
 
-    # dark color for special nicks
-    case "$nick" in -!-) clrnick="$dark" clrmesg="$dark" ;; esac
+    case "$nick" in
+      -!-) clrmesg="$dark" clrnick="$dark" ;;
+      -~-) clrmesg="$dark" clrnick="$blue" nick="${nick:1:1}" ;;
+      -+-) clrmesg="$dark" clrnick="$green" nick="${nick:1:1}" ;;
+      ---) clrmesg="$dark" clrnick="$red" nick="${nick:1:1}" ;;
+    esac
     # case "$line" in *"$n"*) line="${line//$n/${l}${n}${r}}" ;; esac
     # case "$line" in *"$n"*) tput bel ;; esac
   fi
@@ -102,7 +124,8 @@ do
   fi
 
   # fold lines breaking on spaces if message is greater than 'w' chars or does not fit
-  mw="$(($(tput cols) - ${#date} - ${#time} - $m - 5))"
+  cols="$(tput cols)"
+  mw="$(($cols - ${#date} - ${#time} - $m - 5))"
   [[ "$mw" -gt "$w" ]] && mw="$w"
   printf '%s\n' "$line" | fold -s -w "$mw" | while IFS= read -r mesg; \
   do
@@ -130,8 +153,8 @@ mark() { printf '%s -!- %.*s\n' "$(date +"%F %R")" "$w" "${bar}${bar}" >>"$outfi
 
 # declare -a args
 while IFS= read -r input; do
+  unset args cmd
   args="${input#* }"
-  cmd=
   case "$input" in
     '')
       continue
@@ -176,17 +199,13 @@ while IFS= read -r input; do
     /t|/topic)
       input="/topic $c"
       ;;
-    /msg" "*)
-      name="${args%% *}"
-      msg="${args#* }"
-      # printf '%s\n' "$name $msg" > "$i/$s/in"
-      [[ -n "$name" ]] && cmd="tmux_open $name"
-      input="/j $name $msg"
-      ;;
-    /j" "*|/join" "*) # FIXME /j nickname msg
+    /j" "*|/join" "*|/msg" "*)
+      # ChanServ, NickServ...
       name="$(echo "${args%% *}" | tr '[:upper:]' '[:lower:]')"
-      msg="${args#* }"
-      cmd="tmux_open $name $msg"
+      [[ "$args" = *\ * ]] && msg="${args#* }"
+      [[ -n "$name" ]] && cmd="tmux_open $name"
+      input="/j $name"
+      [[ -n "$msg" ]] && input+=" $msg"
       # read -a channels <<<$args
       # for channel in "${channels[@]}"
       # do
@@ -199,9 +218,14 @@ while IFS= read -r input; do
     #   cmd="break"
     #   ;;
     /part)
-      input="/part $c"
+      # No such channel
+      case "$c" in chanserv|nickserv) input= ;; *) input="/part $c" ;; esac
       cmd="break"
       ;;
+    # /clear)
+    #   echo "" > "$outfile"
+    #   input=
+    #   ;;
     # /quit)
     #   # TODO register pid of the server instance
     #   cmd="break"
@@ -212,7 +236,7 @@ while IFS= read -r input; do
     #   ;;
   esac
   [[ -n "$input" ]] && printf '%s\n' "$input"
-  [[ -n "$cmd" ]] && $cmd
+  [[ -n "$cmd" ]] && $cmd # &?
 done >"$infile"
 
 # read w8
