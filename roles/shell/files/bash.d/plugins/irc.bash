@@ -75,22 +75,17 @@ irc() {
       [[ -n "$channels" ]] && printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
     fi
 
-    # Notify
-    local notifiii="$ircdir/bin/notifiii"
-    if has inotifywait && [[ -x "$notifiii" ]]
-    then
-      local notifps="$(ps -A ux | awk '/\/notifiii/ {print $2}')"
-      if [[ -z "$notifps" ]]
-      then
-        echo "env $opts $notifiii" >> ~/tmi.txt
-        env $opts "$notifiii" &
-        # notifpid="$!" # TODO kill pid
-      else
-        echo "NOTIFPS $notifps" >> ~/tmi.txt
-      fi
-    else
-      echo "NOTIFIII $notifiii" >> ~/tmi.txt
-    fi
+    # # Notify
+    # local notifiii="$ircdir/bin/notifiii"
+    # if has inotifywait && [[ -x "$notifiii" ]]
+    # then
+    #   local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
+    #   if [[ -z "$notifps" ]]
+    #   then
+    #     env $opts "$notifiii" &
+    #     # notifpid="$!" # TODO kill pid
+    #   fi
+    # fi
 
     while ! test -p "$ircdir/$server/in"
     do sleep .3; done

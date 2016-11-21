@@ -13,7 +13,7 @@ iii="$i/bin/tmiii"
 trap 'kill -TERM -0' EXIT
 
 # &>/dev/null
-inotifywait -m --exclude "/in$" --format "%w %f" -e modify -r "$i" | \
+inotifywait -m --exclude "/in$|/nickserv/out$" --format "%w %f" -e modify -r "$i" | \
   while read -r path f; do
     # ignore notifications files other than 'out'
     [[ "$f" != "out" ]] && continue
