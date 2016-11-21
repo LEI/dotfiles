@@ -12,7 +12,6 @@ iii="$i/bin/tmiii"
 
 trap 'kill -TERM -0' EXIT
 
-# &>/dev/null
 inotifywait -m --exclude "/in$|/nickserv/out$" --format "%w %f" -e modify -r "$i" | \
   while read -r path f; do
     # ignore notifications files other than 'out'
@@ -37,6 +36,7 @@ inotifywait -m --exclude "/in$|/nickserv/out$" --format "%w %f" -e modify -r "$i
     opts="m="${m}" h="${h}" p="${p}" n="${n}" l="${l}" r="${r}" i="${i}" s="${s}" c="${c}" goto=false"
 
     # Spawn a new tmux window
+    echo env $opts "$iii" >> ~/tmi.txt
     env $opts "$iii"
 
     # ## spawn a new urxvt terminal with IRC-<channel> class name

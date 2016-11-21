@@ -201,12 +201,13 @@ while IFS= read -r input; do
       input="/topic $c"
       ;;
     /j" "*|/join" "*|/msg" "*)
+      input="${input/\/msg /\/j }"
       # ChanServ, NickServ...
       name="$(echo "${args%% *}" | tr '[:upper:]' '[:lower:]')"
-      [[ "$args" = *\ * ]] && msg="${args#* }"
       [[ -n "$name" ]] && cmd="tmux_open $name"
-      input="/j $name"
-      [[ -n "$msg" ]] && input+=" $msg"
+      # input="/j $name"
+      # [[ "$args" = *\ * ]] && msg="${args#* }" && input+=" $msg"
+
       # read -a channels <<<$args
       # for channel in "${channels[@]}"
       # do

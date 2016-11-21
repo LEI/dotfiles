@@ -61,40 +61,41 @@ irc() {
 
     local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
 
-    local pattern="connect\s$server" #.*${channels[@]}
-    local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
-    if [[ -z "$ps" ]]
-    then
-      [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
-      local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
-      env $conopts "$connect" "${channels[@]}" # & wait "$!"
-      sleep 1
-    elif [[ -n "$channels" ]]
-    then
-      echo "Warning: connect already running for $server"
-      [[ -n "$channels" ]] && printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
+    # local pattern="connect\s$server" #.*${channels[@]}
+    # local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
+    # if [[ -z "$ps" ]]
+    # connectpid="$!"
+    # echo "$connectpid" > "/tmp/$server.pid"
+    # sleep 1 # wait "$connectpid"
+    # echo "Warning: connect already running for $server"
+
+    # Connect to the server
+    [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
+    local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
+    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" # &>/dev/null
+    sleep 1
+
+    # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
+    local notifiii="$ircdir/bin/notifiii"
+    if [[ -x "$notifiii" ]] && has inotifywait
+    then setlock -nX "/tmp/notifiii.lockfile" env $opts "$notifiii" &>/dev/null &
     fi
 
-    # # Notify
-    # local notifiii="$ircdir/bin/notifiii"
-    # if has inotifywait && [[ -x "$notifiii" ]]
-    # then
-    #   local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
-    #   if [[ -z "$notifps" ]]
-    #   then
-    #     env $opts "$notifiii" &
-    #     # notifpid="$!" # TODO kill pid
-    #   fi
-    # fi
-
+    # while ! test -f "$ircdir/$server/out"
+    # echo "Waiting for $server..."
     while ! test -p "$ircdir/$server/in"
     do sleep .3; done
-    env $opts "$iii"
 
+    env $opts "$iii"
+    # serverpid="$!"
+
+    # Join channels
     if [[ -n "$channels" ]]
     then
+      # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
       for channel in "${channels[@]}"
       do
+        # echo "Waiting for $server $channel..."
         while ! test -f "$ircdir/$server/$channel/out"
         do sleep .3; done
         local chanopts="$opts c=$channel"
@@ -102,7 +103,6 @@ irc() {
       done
     fi
   done
-  # [[ -n "${notifpid:-}" ]] && kill "$notifpid"
 }
 
 # irc() {
