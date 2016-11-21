@@ -49,7 +49,7 @@ irc() {
 
   for network in $networks
   do
-    local hist= nick="${n:=$USER}" # l=sb r=eb
+    local hist=100 nick="${n:=$USER}" # l=sb r=eb
     unset server port channels
     "$network" "${args[@]}" # Set the appropriate vars
 
@@ -72,7 +72,7 @@ irc() {
     # Connect to the server
     [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
     local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
-    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" # &>/dev/null
+    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" &>/dev/null
     sleep 1
 
     # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
