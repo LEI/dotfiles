@@ -3,31 +3,28 @@
 
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
-: "${ssl:=}"
+: "${pass:=}" # Password environment variable name
+: "${name:=}" # Full name
+: "${server:=}"
+: "${port:=6697}" # 6667
+: "${secure:=ssl}"
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
 chmod 600 "$ircdir"/*/ident &>/dev/null
 
-# for network in $networks
-# do
-#   unset server channels port
-#   "$network" # Set the appropriate vars
-#   ...
-# done
+[[ -z "$server" ]] && echo "Invalid server: $server"
 
 if [[ "$#" -gt 0 ]]
-then
-  server="$1"
-  shift
-  channels=("$@")
-else
-  echo "No server specified"
-  # echo "Usage: connect [-n nick] server[:port] [channels]"
-  exit 1
-  # : "${server:=irc.freenode.net}"
-  # : "${channels:=}"
+then channels=("$@")
 fi
+
+# else
+#   echo "No server specified"
+#   # echo "Usage: connect [-n nick] server[:port] [channels]"
+#   exit 1
+# : "${server:=irc.freenode.net}"
+# : "${channels:=}"
 
 while true
 do
@@ -39,8 +36,8 @@ do
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
-  [[ "$ssl" -gt 0 ]] && ssl="-e ssl"
-  ii -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" "$ssl" &
+  # -k "$pass" -f "$name"
+  ii -i "$ircdir" -n "$nick" -s "$server" -p "$port" -e "$secure" &
   pid="$!"
 
   # Wait for the connection

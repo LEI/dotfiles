@@ -60,7 +60,7 @@ window="${c:-$s}"
 # Replace dots with 'one dot leader' (U+2024)
 window="${window//./․}"
 
-echo "$session:$window -> $opts $iii" >> ~/tmi.txt
+# echo "$session:$window -> $opts $iii" >> ~/tmi.txt
 
 # Spawn a new tmux window named <channel> in a tmux session named IRC
 if ! has_session "$session"

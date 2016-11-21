@@ -9,7 +9,7 @@ custom_network() {
 }
 
 kirc() {
-  local ps="$(ps ux -A | awk '/\/bin\/connect|notifii[i]/ {print $2}')"
+  local ps="$(ps ux -A | awk '/\/bin\/connect|bash.*\/bin\/iii|notifii[i]/ {print $2}')"
   if [[ -n "$ps" ]]
   then kill -9 $ps; pkill ii
   fi
@@ -17,11 +17,13 @@ kirc() {
 
 irc() {
   # Parse arguments
+  local secure=1
   while true
   do
     case "$@" in
       -n\ *) shift; n="$1"; shift ;;
-      --ssl\ *) shift; secure=1 ;;
+      --no-ssl\ *) shift; secure=0 ;;
+      -*) echo "Invalid argument: $1"; return 1 ;;
       *) break ;;
     esac
   done
@@ -47,9 +49,9 @@ irc() {
 
   for network in $networks
   do
-    local hist= nick="${n:=$USER}" ssl="${secure-:}" # l=sb r=eb
+    local hist= nick="${n:=$USER}" # l=sb r=eb
     unset server port channels
-    "$network" "${args[@]}"
+    "$network" "${args[@]}" # Set the appropriate vars
 
     if [[ "$server" =~ .*:[0-9]+ ]]
     then
@@ -63,7 +65,9 @@ irc() {
     local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
     if [[ -z "$ps" ]]
     then
-      USER="$nick" ssl="$ssl" "$connect" "$server" "${channels[@]}" # & wait "$!"
+      [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
+      local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
+      env $conopts "$connect" "${channels[@]}" # & wait "$!"
       sleep 1
     elif [[ -n "$channels" ]]
     then
@@ -73,14 +77,19 @@ irc() {
 
     # Notify
     local notifiii="$ircdir/bin/notifiii"
-    if [[ -x "$notifiii" ]]
+    if has inotifywait && [[ -x "$notifiii" ]]
     then
-      local notifps="$(ps -A ux | awk '/[notifii[i]/ {print $2}')"
+      local notifps="$(ps -A ux | awk '/\/notifiii/ {print $2}')"
       if [[ -z "$notifps" ]]
       then
-        env $opts "$notifiii" &>/dev/null &
+        echo "env $opts $notifiii" >> ~/tmi.txt
+        env $opts "$notifiii" &
         # notifpid="$!" # TODO kill pid
+      else
+        echo "NOTIFPS $notifps" >> ~/tmi.txt
       fi
+    else
+      echo "NOTIFIII $notifiii" >> ~/tmi.txt
     fi
 
     while ! test -p "$ircdir/$server/in"

@@ -57,23 +57,24 @@ do
 
   date="${line%% *}" line="${line#* }"
   time="${line%% *}" line="${line#* }"
+  nick="${line%% *}"
   case "$line" in
     "<"*">"*)
-      nick="${line%% *}" line="${line#* }"
-      nick="${nick#<}" nick="${nick%>}"
+      line="${line#* }"
+      nick="${nick#<}"
+      nick="${nick%>}"
       ;;
     "-!- "*)
       case "$line" in
 	*" changed nick to "*|*" changed mode"*) nick="-~-" ;;
 	*" has joined $c"*) nick="-+-" ;;
 	*" has quit "*|*" has left $c"*) nick="---" ;;
-	*) nick="${line%% *}"
       esac
       line="${line#* }"
       ;;
-    "#"*" "*) nick="${line%% *}" line="${line#* }" ;;
-    "="*|"-"*|"${line%% *}") nick="${line:0:1}" && line="${line:1}" ;;
-    *) nick= ;;
+    "#"*" "*) line="${line#* }" ;;
+    "="*|"-"*) nick="${line:0:1}" && line="${line:1}" ;;
+    *|"$nick") nick= ;;
     # *) nick="${line%% *}" line="${line#* }" ;;
   esac
 
