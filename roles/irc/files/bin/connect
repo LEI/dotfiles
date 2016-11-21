@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# kill $(ps aux | awk '/connect/ {print $2}')
 
 : "${ircdir:=$HOME/irc}"
 : "${nick:=$USER}"
 : "${pass:=}" # Password environment variable name
 : "${name:=}" # Full name
-: "${server:=}"
+: "${server:=}" # irc.freenode.net
 : "${port:=6697}" # 6667
 : "${secure:=ssl}"
 
@@ -30,7 +29,7 @@ while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  # rm -f $ircdir/$server/**/{in,out}
+  rm -f $ircdir/$server/**/{in,out}
   # rm -rf "$ircdir/$server/nickserv"
 
   # Connect to network -- password is set through the env var synonym to the network name
@@ -53,12 +52,13 @@ do
 	while ! test -f "$ircdir/$server/nickserv/out"
 	do sleep .3; done
 
-	(tail -f "$ircdir/$server/nickserv/out" & echo $! >&3) 3>tpid | while read line
-	do case "$line" in *identified*$nick*) kill $(<tpid) ;; *) sleep .3 ;; esac
-  done
+	echo "Waiting for NickServ identification..."
+	(tail -f "$ircdir/$server/nickserv/out" & echo $! >/tmp/tpid) | while read line
+	do case "$line" in *identified*$nick*) kill $(</tmp/tpid) ;; *) sleep .3 ;; esac
+	done
   fi
 
-  # Join channels
+  # echo "Joining ${channels[@]}..."
   if [[ -n "$channels" ]]
   then printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
   fi
