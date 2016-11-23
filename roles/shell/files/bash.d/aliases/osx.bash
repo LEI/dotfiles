@@ -7,8 +7,8 @@ alias updatesystem='sudo softwareupdate -i -a'
 alias updatebrew='brew update; brew upgrade; brew cleanup'
 # Node packages
 alias updatenpm='npm install npm -g; npm update -g'
-# Ruby gems -n /usr/local/bin
-alias updateruby='sudo gem update --system; sudo gem update'
+# Ruby gems
+alias updateruby='sudo gem update --system -n /usr/local/bin; sudo gem update -n /usr/local/bin'
 
 # Canonical hex dump; some systems have this symlinked
 command -v hd > /dev/null || alias hd="hexdump -C"
