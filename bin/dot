@@ -28,7 +28,10 @@ run_playbook() {
   if ! arg "--ask-vault-pass"
   then
     local vault_file="$(ansible_vault)"
-    [[ -n "$vault_file" ]] && args+=("--vault-password-file $vault_file")
+    if [[ -n "$vault_file" ]] && [[ -f "$vault_file" ]]
+    then chmod 600 "$vault_file" &>/dev/null
+      args+=("--vault-password-file $vault_file")
+    fi
   fi
 
   if rm_arg "--debug"
@@ -63,7 +66,6 @@ ansible_vault() {
   then
     local vault_pass=$(prompt "Vault password?" | base64)
     echo -e "#!/usr/bin/env bash\necho \""$vault_pass"\" | base64 --decode" >> $file
-    chmod 700 "$file"
   fi
 
   [[ -f "$file" ]] && echo "$file"
