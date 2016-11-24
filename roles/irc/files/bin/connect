@@ -29,7 +29,7 @@ while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  rm -f $ircdir/$server/**/{in,out}
+  # rm -f $ircdir/$server/**/{in,out}
   # rm -rf "$ircdir/$server/nickserv"
 
   # Connect to network -- password is set through the env var synonym to the network name

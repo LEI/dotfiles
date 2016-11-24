@@ -61,18 +61,10 @@ irc() {
 
     local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
 
-    # local pattern="connect\s$server" #.*${channels[@]}
-    # local ps="$(ps -A ux | awk "/$pattern/ {print \$2}")"
-    # if [[ -z "$ps" ]]
-    # connectpid="$!"
-    # echo "$connectpid" > "/tmp/$server.pid"
-    # sleep 1 # wait "$connectpid"
-    # echo "Warning: connect already running for $server"
-
     # Connect to the server
     [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
     local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
-    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" &>/dev/null
+    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" &>/dev/null &
     sleep 1
 
     # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
@@ -93,7 +85,7 @@ irc() {
     if [[ -n "$channels" ]]
     then
       # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
-      for channel in "${channels[@]}"
+      for channel in $channels # ${channels[@]}
       do
         # echo "Waiting for $server $channel..."
         while ! test -f "$ircdir/$server/$channel/out"
