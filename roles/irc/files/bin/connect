@@ -12,31 +12,38 @@
 chmod 700 "$ircdir"
 chmod 600 "$ircdir"/*/ident &>/dev/null
 
-[[ -z "$server" ]] && echo "Invalid server: $server"
-
+# echo "Usage: connect [-n nick] server[:port] [channels]"
+# : "${server:=irc.freenode.net}"
+# : "${channels:=}"
+  # server="$1"
+  # shift
+# elif [[ -z "$server" ]]
+# then echo "Invalid server" && exit 1
 if [[ "$#" -gt 0 ]]
 then channels=("$@")
 fi
-
-# else
-#   echo "No server specified"
-#   # echo "Usage: connect [-n nick] server[:port] [channels]"
-#   exit 1
-# : "${server:=irc.freenode.net}"
-# : "${channels:=}"
 
 while true
 do
   # Cleanup
   rm -f "$ircdir/$server/in"
-  # rm -f $ircdir/$server/**/{in,out}
-  # rm -rf "$ircdir/$server/nickserv"
+  rm -f "$ircdir/$server/{in,out}"
+  rm -f "$ircdir/$server/**/in"
+  # tail out?
 
   # Connect to network -- password is set through the env var synonym to the network name
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
   # -k "$pass" -f "$name"
   ii -i "$ircdir" -n "$nick" -s "$server" -p "$port" -e "$secure" &
   pid="$!"
+
+  # pidfile="/tmp/$nick@$server:$port.pid"
+  # if [[ $? -eq 0 ]]
+  # then echo "$pid" > "$pidfile"
+  # elif [[ -f "$pidfile" ]]
+  # then pkill -F "$pidfile" && rm "$pidfile"
+  # else echo "ii error ($pidfile: No such file)" >&2 
+  # fi
 
   # Wait for the connection
   while ! test -p "$ircdir/$server/in"

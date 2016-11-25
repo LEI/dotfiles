@@ -1,85 +1,95 @@
 # IRC
 
-ircdir="$HOME/irc"
+ircdir="${ircdir:-$HOME/irc}"
 
-custom_network() {
-  server="$1"
+irc_network() {
+  if [[ "$1" == *"@"* ]]
+  then nick="${1%%@*}" server="${1#*@}"
+  else server="$1"
+  fi
   shift
   channels=("$@")
 }
 
-kirc() {
+irc_kill() {
   local ps="$(ps ux -A | awk '/\/bin\/connect|bash.*\/bin\/iii|notifii[i]/ {print $2}')"
   if [[ -n "$ps" ]]
-  then kill -9 $ps; pkill ii
+  then kill -9 $ps; pkill ii; pkill inotifywait
   fi
 }
 
+# declare -A irc_servers=()
+# irc_add() { local host="$1" pid="$2" irc_servers["$host"]="$pid" }
+# irc_list() { echo "${irc_servers[@]}" }
+
 irc() {
+  if [[ -d "$ircdir" ]]
+  then cd "$ircdir"
+  else die "$ircdir: No such directory"
+  fi
+
+  local iii="$ircdir/bin/iii"
+  has tmux && iii="$ircdir/bin/tmiii"
+  local connect="$ircdir/bin/connect"
+  if ! executable "$iii" || ! executable "$connect"
+  then return 1
+  fi
+
   # Parse arguments
   local secure=1
   while true
   do
     case "$@" in
-      -n\ *) shift; n="$1"; shift ;;
+      # -n\ *) shift; n="$1"; shift ;;
       --no-ssl\ *) shift; secure=0 ;;
-      -*) echo "Invalid argument: $1"; return 1 ;;
+      -*) die "$1: Invalid argument" ;;
       *) break ;;
     esac
   done
 
   local args=("$@")
-  local connect="$ircdir/bin/connect"
-
-  local iii="$ircdir/bin/iii"
-  has tmux && iii="$ircdir/bin/tmiii"
-  [[ -e "$iii" ]] || {
-    echo "Not found: $iii"
-    return 1
-  }
-
   if [[ "$#" -gt 0 ]]
-  then
-    networks="custom_network"
-  else
-    [[ -f "$ircdir/autojoin" ]] && source "$ircdir/autojoin" || {
-      echo "Not found: $ircdir/autojoin"
-    }
+  then networks="irc_network"
+  elif [[ -f "$ircdir/autojoin" ]]
+  then source "$ircdir/autojoin"
+  else die "$ircdir/autojoin: No such file"
   fi
 
   for network in $networks
-  do
+  do unset server port channels nick ssl
     local hist=100 nick="${n:=$USER}" # l=sb r=eb
-    unset server port channels
     "$network" "${args[@]}" # Set the appropriate vars
-
     if [[ "$server" =~ .*:[0-9]+ ]]
-    then
-      port="${server#*:}"
-      server="${server%%:*}"
+    then port="${server#*:}" server="${server%%:*}"
     fi
 
     local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
+    local lock="$nick@$server:$port"
 
     # Connect to the server
     [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
-    local conopts="nick="$nick" server="$server" port="$port" secure="$ssl""
-    setlock -nX "/tmp/$server.lockfile" env $conopts "$connect" "${channels[@]}" &>/dev/null &
+    local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
+    # while read line <&3
+    # do echo "test: $line" > ~/test.log
+    # done < <(setlock -nX "/tmp/$server.lockfile" nohup env $connectopts "$connect" "${channels[@]}") &
+    setlock -nX "/tmp/$lock.lockfile" nohup env $connectopts "$connect" "${channels[@]}" &
+    # local connectpid="$!"
     sleep 1
 
     # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
     local notifiii="$ircdir/bin/notifiii"
     if [[ -x "$notifiii" ]] && has inotifywait
-    then setlock -nX "/tmp/notifiii.lockfile" env $opts "$notifiii" &>/dev/null &
+    then setlock -nX "/tmp/$lock.notifiii.lockfile" nohup env $opts "$notifiii" &
     fi
 
     # while ! test -f "$ircdir/$server/out"
-    # echo "Waiting for $server..."
+    log "Waiting for $server..."
     while ! test -p "$ircdir/$server/in"
     do sleep .3; done
 
     env $opts "$iii"
-    # serverpid="$!"
+    local serverpid="$!"
+    # wait "$serverpid" && echo "$serverpid -> $(jobs -l)" &
 
     # Join channels
     if [[ -n "$channels" ]]
@@ -87,14 +97,25 @@ irc() {
       # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
       for channel in $channels # ${channels[@]}
       do
-        # echo "Waiting for $server $channel..."
+        log "Waiting for $channel@$server..."
         while ! test -f "$ircdir/$server/$channel/out"
         do sleep .3; done
         local chanopts="$opts c=$channel"
-        env $chanopts "$iii"
+        env $chanopts "$iii" # &
       done
     fi
   done
+}
+
+executable() {
+  local path="$1"
+  if [[ ! -e "$path" ]]
+  then error "$path: No such file"
+  elif [[ ! -x "$path" ]]
+  then error "$path: Not executable"
+  else return 0
+  fi
+  return 1
 }
 
 # irc() {

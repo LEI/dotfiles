@@ -55,6 +55,10 @@ else
 fi
 
 # Window name
+# if [[ -n "$c" ]]
+# then window="$c"
+# else window="$s"
+# fi
 window="${c:-$s}"
 # window=${window//./\\.} # Cannot contain dots
 # Replace dots with 'one dot leader' (U+2024)
