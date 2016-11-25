@@ -7,6 +7,9 @@
 : "${server:=}" # irc.freenode.net
 : "${port:=6697}" # 6667
 : "${secure:=ssl}"
+: "${cleanup:=1}"
+
+lock="$nick@$server:$port"
 
 # Some privacy please, thanks
 chmod 700 "$ircdir"
@@ -25,25 +28,25 @@ fi
 
 while true
 do
-  # Cleanup
-  rm -f "$ircdir/$server/in"
-  rm -f "$ircdir/$server/{in,out}"
-  rm -f "$ircdir/$server/**/in"
-  # tail out?
+  # pid="$$"
+  # echo "$pid" > "$pidfile"
 
-  # Connect to network -- password is set through the env var synonym to the network name
+  # if [[ -f "$pidfile" ]]
+  # then pkill -F "$pidfile" && rm "$pidfile"
+  # else echo "ii error ($pidfile: No such file)" >&2
+  # fi
+
+  # Cleanup
+  if [[ "$cleanup" -gt 0 ]]
+  then rm -f "$ircdir/$server/**/{in,out}"
+  else rm -f "$ircdir/$server/in"
+  fi
+
+  # Connect to network
   # iim -i "$ircdir" -n "$nick" -k "$network" -s "$server" -p "${port:-6667}" &
   # -k "$pass" -f "$name"
   ii -i "$ircdir" -n "$nick" -s "$server" -p "$port" -e "$secure" &
-  pid="$!"
-
-  # pidfile="/tmp/$nick@$server:$port.pid"
-  # if [[ $? -eq 0 ]]
-  # then echo "$pid" > "$pidfile"
-  # elif [[ -f "$pidfile" ]]
-  # then pkill -F "$pidfile" && rm "$pidfile"
-  # else echo "ii error ($pidfile: No such file)" >&2 
-  # fi
+  iipid="$!"
 
   # Wait for the connection
   while ! test -p "$ircdir/$server/in"
@@ -52,17 +55,17 @@ do
   # Auth to services
   if [[ -e "$ircdir/$server/ident" ]] # && [[ ! -d "$ircdir/$server/nickserv" ]]
   then
-	printf "/j nickserv identify %s\n" "$(cat "$ircdir/$server/ident")" > "$ircdir/$server/in" \
-	  && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
+    printf "/j nickserv identify %s\n" "$(cat "$ircdir/$server/ident")" > "$ircdir/$server/in" \
+      && rm -f "$ircdir/$server/nickserv/out" # Clean that up - ident passwd is in there
 
-	# Wait for NickServ identification
-	while ! test -f "$ircdir/$server/nickserv/out"
-	do sleep .3; done
+    # Wait for NickServ identification
+    while ! test -f "$ircdir/$server/nickserv/out"
+    do sleep .3; done
 
-	echo "Waiting for NickServ identification..."
-	(tail -f "$ircdir/$server/nickserv/out" & echo $! >/tmp/tpid) | while read line
-	do case "$line" in *identified*$nick*) kill $(</tmp/tpid) ;; *) sleep .3 ;; esac
-	done
+    echo "Waiting for NickServ identification..."
+    (tail -f "$ircdir/$server/nickserv/out" & echo $! >/tmp/tpid) | while read line
+    do case "$line" in *identified*$nick*) kill $(</tmp/tpid) ;; *) sleep .3 ;; esac
+    done
   fi
 
   # echo "Joining ${channels[@]}..."
@@ -71,5 +74,5 @@ do
   fi
 
   # If connection is lost reconnect
-  wait "$pid"
+  wait "$iipid"
 done &

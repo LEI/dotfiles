@@ -6,14 +6,14 @@
 # and spawns tmiii.sh or a new urxvt terminal with the chanel that had activity
 
 i="${1:-$HOME/irc}"
-echo IRCDIR $i
 GREP_OPTIONS=""
 
 iii="$i/bin/tmiii"
 
 trap 'kill -TERM -0' EXIT
 
-inotifywait -m --exclude "/in$" --format "%w %f" -e modify -r "$i" | \
+# nohup
+nohup inotifywait -m --exclude "/in$|/nickserv/out$" --format "%w %f" -e modify -r "$i" | \
   while read -r path f; do
     # ignore notifications files other than 'out'
     [[ "$f" != "out" ]] && continue

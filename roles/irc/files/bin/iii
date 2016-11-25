@@ -9,11 +9,12 @@
 : "${n:=$USER}"             # the user's nickname
 : "${i:=$HOME/irc}"         # root irc dir
 : "${s:=irc.freenode.net}"  # server
+: "${p:=}"                  # port
 : "${c:=""}"                # channel
 : "${m:=12}"                # max nick lenght
 : "${w:=120}"               # max characters per mesg - fold after limit
 : "${h:=20}"                # lines from history
-: "${p:=1}"                 # prefity - colors and special patterns
+: "${pretty:=1}"                 # prefity - colors and special patterns
 # : "${l:=}" # $(tput bold)}"		    # highlight color when nick is mentioned
 # : "${r:=}" # $(tput sgr0)}"		    # reset highlight color
 
@@ -27,6 +28,7 @@ tmux_open() {
 
 [[ "$1" != '-r' ]] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
 
+pidfile="/tmp/$n@$s:$p.pid"
 infile="$i/$s/$c/in"
 outfile="$i/$s/$c/out"
 sepr='|'
@@ -82,7 +84,7 @@ do
   # case "$nick" in -!-) ;; *) tput bel ;; esac
 
   # prettify
-  if [[ "$p" -ne 0 ]]
+  if [[ "$pretty" -ne 0 ]]
   then
     unset clrdate clrnick clrsepr clrmesg tmpnick
 
@@ -130,7 +132,7 @@ do
   [[ "$mw" -gt "$w" ]] && mw="$w"
   printf '%s\n' "$line" | fold -s -w "$mw" | while IFS= read -r mesg; \
   do
-    [[ "$p" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
+    [[ "$pretty" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([/][[:alnum:][:punct:]]\+[/]\)\([[:punct:][:space:]]\|$\),\1${si}\2${ei}\3,g" \
@@ -228,10 +230,18 @@ while IFS= read -r input; do
     #   echo "" > "$outfile"
     #   input=
     #   ;;
+
     # /quit)
-    #   # TODO register pid of the server instance
-    #   cmd="break"
+    #   if [[ -f "$pidfile" ]]
+    #   then # pkill -P -F "$pidfile" && rm "$pidfile" && cmd="break"
+	# while read pid
+	# do kill "$pid"
+	# done < <(cat "$pidfile")
+	# rm "$pidfile" && cmd="break"
+    #   else input=
+    #   fi
     #   ;;
+
     # /wait" "*)
     #   sleep "$args"
     #   input=

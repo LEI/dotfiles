@@ -12,9 +12,9 @@ irc_network() {
 }
 
 irc_kill() {
-  local ps="$(ps ux -A | awk '/\/bin\/connect|bash.*\/bin\/iii|notifii[i]/ {print $2}')"
+  local ps="$(ps ux -A | awk '/bash.*\/bin\/connect|ii [-]|notifii[i]/ {print $2}')"
   if [[ -n "$ps" ]]
-  then kill -9 $ps; pkill ii; pkill inotifywait
+  then kill $ps; pkill ii # pkill inotifywait
   fi
 }
 
@@ -23,10 +23,10 @@ irc_kill() {
 # irc_list() { echo "${irc_servers[@]}" }
 
 irc() {
-  if [[ -d "$ircdir" ]]
-  then cd "$ircdir"
-  else die "$ircdir: No such directory"
-  fi
+  # if [[ -d "$ircdir" ]]
+  # then cd "$ircdir"
+  # else die "$ircdir: No such directory"
+  # fi
 
   local iii="$ircdir/bin/iii"
   has tmux && iii="$ircdir/bin/tmiii"
@@ -65,21 +65,25 @@ irc() {
 
     local opts="h="$hist" n="$nick" s="$server" p="$port"" # l="$l" r="$r"
     local lock="$nick@$server:$port"
+    local pidfile="/tmp/$lock.pid"
 
     # Connect to the server
     [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
     local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
-    # while read line <&3
-    # do echo "test: $line" > ~/test.log
+    # while read line <&3; do echo "test: $line" > ~/test.log
     # done < <(setlock -nX "/tmp/$server.lockfile" nohup env $connectopts "$connect" "${channels[@]}") &
-    setlock -nX "/tmp/$lock.lockfile" nohup env $connectopts "$connect" "${channels[@]}" &
-    # local connectpid="$!"
+    setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}" > "$ircdir/$server/connect.log" & disown
+    [[ "$?" -eq 0 ]] && echo "$!" > "$pidfile"
+
+    # if [[ -n "$(pgrep -F "$pidfile")" ]]; then pkill -F "$pidfile"; fi
+    # [[ ! -f "$pidfile" ]] || [[ "$pid" != "$(cat "$pidfile")" ]]
     sleep 1
 
     # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
     local notifiii="$ircdir/bin/notifiii"
     if [[ -x "$notifiii" ]] && has inotifywait
-    then setlock -nX "/tmp/$lock.notifiii.lockfile" nohup env $opts "$notifiii" &
+    then setlock -nX "/var/lock/$lock.notifiii.lock" nohup env $opts "$notifiii" > "$ircdir/$server/notify.log" & disown
+      [[ "$?" -eq 0 ]] && echo "$!" >> "$pidfile"
     fi
 
     # while ! test -f "$ircdir/$server/out"
@@ -88,7 +92,7 @@ irc() {
     do sleep .3; done
 
     env $opts "$iii"
-    local serverpid="$!"
+    # local serverpid="$!"
     # wait "$serverpid" && echo "$serverpid -> $(jobs -l)" &
 
     # Join channels
@@ -100,7 +104,7 @@ irc() {
         log "Waiting for $channel@$server..."
         while ! test -f "$ircdir/$server/$channel/out"
         do sleep .3; done
-        local chanopts="$opts c=$channel"
+        local chanopts="$opts c=$channel goto=false"
         env $chanopts "$iii" # &
       done
     fi
