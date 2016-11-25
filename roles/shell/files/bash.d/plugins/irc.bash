@@ -68,6 +68,7 @@ irc() {
     local pidfile="/tmp/$lock.pid"
 
     # Connect to the server
+    log "Connecting to $server"
     [[ "$secure" -gt 0 ]] || [[ -n "$ssl" ]] && ssl="ssl"
     local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
     # while read line <&3; do echo "test: $line" > ~/test.log
@@ -87,7 +88,6 @@ irc() {
     fi
 
     # while ! test -f "$ircdir/$server/out"
-    log "Waiting for $server..."
     while ! test -p "$ircdir/$server/in"
     do sleep .3; done
 
@@ -101,7 +101,7 @@ irc() {
       # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
       for channel in $channels # ${channels[@]}
       do
-        log "Waiting for $channel@$server..."
+        log "Joining $channel@$server..."
         while ! test -f "$ircdir/$server/$channel/out"
         do sleep .3; done
         local chanopts="$opts c=$channel goto=false"

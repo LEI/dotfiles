@@ -61,8 +61,7 @@ do
     # Wait for NickServ identification
     while ! test -f "$ircdir/$server/nickserv/out"
     do sleep .3; done
-
-    echo "Waiting for NickServ identification..."
+    # echo "Waiting for NickServ..."
     (tail -f "$ircdir/$server/nickserv/out" & echo $! >/tmp/tpid) | while read line
     do case "$line" in *identified*$nick*) kill $(</tmp/tpid) ;; *) sleep .3 ;; esac
     done
