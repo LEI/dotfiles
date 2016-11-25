@@ -23,10 +23,10 @@ irc_kill() {
 # irc_list() { echo "${irc_servers[@]}" }
 
 irc() {
-  # if [[ -d "$ircdir" ]]
-  # then cd "$ircdir"
-  # else die "$ircdir: No such directory"
-  # fi
+  if [[ ! -d "$ircdir" ]]
+  then die "$ircdir: No such directory"
+  # else cd "$ircdir"
+  fi
 
   local iii="$ircdir/bin/iii"
   has tmux && iii="$ircdir/bin/tmiii"
@@ -121,6 +121,18 @@ executable() {
   fi
   return 1
 }
+
+# # http://www.kfirlavi.com/blog/2012/11/06/elegant-locking-of-bash-program/
+# lock() {
+#   local prefix="$1"
+#   local fd="${2:-1337}"
+#   local lockfile="/var/lock/$prefix.lock"
+#   eval "exec $fd>$lockfile"
+#   if flock -n "$fd"
+#   then return 0
+#   else return 1
+#   fi
+# }
 
 # irc() {
 #   local IRC="~/irc/bin/iii"
