@@ -38,7 +38,11 @@ do
 
   # Cleanup
   if [[ "$cleanup" -gt 0 ]]
-  then rm -f "$ircdir/$server/**/{in,out}"
+  then # rm -f "$ircdir/$server/**/{in,out}"
+    #rm -f $ircdir/$server{/,*/}{in,out}
+    rm -f $ircdir/$server/{in,out,*.log}
+    rm -f $ircdir/$server/*/{in,out}
+    rmdir --ignore-fail-on-non-empty "$ircdir/$server/*"
   else rm -f "$ircdir/$server/in"
   fi
 
@@ -61,6 +65,7 @@ do
     # Wait for NickServ identification
     while ! test -f "$ircdir/$server/nickserv/out"
     do sleep .3; done
+
     # echo "Waiting for NickServ..."
     (tail -f "$ircdir/$server/nickserv/out" & echo $! >/tmp/tpid) | while read line
     do case "$line" in *identified*$nick*) kill $(</tmp/tpid) ;; *) sleep .3 ;; esac

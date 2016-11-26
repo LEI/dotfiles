@@ -12,7 +12,7 @@ irc_network() {
 }
 
 irc_kill() {
-  local ps="$(ps ux -A | awk '/bash.*\/bin\/connect|ii [-]|notifii[i]/ {print $2}')"
+  local ps="$(ps ux -A | awk '/[ba]sh.*(connect|notifi)|ii [-]/ {print $2}')"
   if [[ -n "$ps" ]]
   then kill $ps; pkill ii # pkill inotifywait
   fi
@@ -76,8 +76,7 @@ irc() {
     local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
     # while read line <&3; do echo "test: $line" > ~/test.log
     # done < <(setlock -nX "/tmp/$server.lockfile" nohup env $connectopts "$connect" "${channels[@]}") &
-    log "setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}""
-    setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}" > "$ircdir/$server/connect.log" & disown
+    setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}" >> "$ircdir/$server/connect.log" & disown
     [[ "$?" -eq 0 ]] && echo "$!" > "$pidfile"
 
     # if [[ -n "$(pgrep -F "$pidfile")" ]]; then pkill -F "$pidfile"; fi
@@ -87,7 +86,7 @@ irc() {
     # Notify # local notifps="$(ps -A ux | awk '/notifii[i]/ {print $2}')"
     local notifiii="$ircdir/bin/notifiii"
     if [[ -x "$notifiii" ]] && has inotifywait
-    then setlock -nX "/var/lock/$lock.notifiii.lock" nohup env $opts "$notifiii" > "$ircdir/$server/notify.log" & disown
+    then setlock -nX "/var/lock/$lock.notifiii.lock" nohup env $opts "$notifiii" >> "$ircdir/$server/notify.log" & disown
       [[ "$?" -eq 0 ]] && echo "$!" >> "$pidfile"
     fi
 
@@ -103,7 +102,7 @@ irc() {
     if [[ -n "$channels" ]]
     then
       # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
-      for channel in "${channels[@]}"
+      for channel in $channels # "${channels[@]}"
       do
         log "Joining $channel@$server..."
         while ! test -f "$ircdir/$server/$channel/out"
