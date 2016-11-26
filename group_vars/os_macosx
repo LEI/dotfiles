@@ -4,7 +4,9 @@
 git_credential_helper: osxkeychain
 
 homebrew_taps:
+  # - homebrew/binary
   - homebrew/completions
+  - homebrew/core
   - homebrew/dupes
   # - caskroom/cask
   - caskroom/fonts
@@ -92,11 +94,12 @@ cask_options:
   # System Preferences > Keyboard > Modifier Keys
   # Caps Lock Key -> No Action
   - name: seil
-    bin: /Applications/Seil.app/Contents/Library/bin
-    opt:
+    dir: /Applications/Seil.app/Contents/Library/bin
+    args:
       - set enable_capslock 1
       # Escape (53), F19 (80)
       - set keycode_capslock 53
+    # when: < macOS Sierra
 
 node_packages:
   - node

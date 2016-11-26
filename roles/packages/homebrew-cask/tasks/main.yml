@@ -17,8 +17,9 @@
 - name: Configure Homebrew Cask apps
   command: "./{{ item.0.name }} {{ item.1 }}"
   args:
-    chdir: "{{ item.0.bin }}"
+    chdir: "{{ item.0.dir }}"
   with_subelements:
     - "{{ homebrew_cask_options }}"
-    - opt
-  changed_when: false
+    - args
+  # changed_when: false
+  when: "{{ item.0.when | default(omit) }}"
