@@ -61,10 +61,11 @@ do
   time="${line%% *}" line="${line#* }"
   nick="${line%% *}"
   case "$line" in
-    "<"*">"*) tput bel
+    "<"*">"*)
       line="${line#* }"
       nick="${nick#<}"
       nick="${nick%>}"
+      case "$line" in *"$n"*) tput bel ;; esac
       ;;
     "-!- "*)
       case "$line" in
