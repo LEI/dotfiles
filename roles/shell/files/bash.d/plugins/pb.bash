@@ -45,7 +45,7 @@ arg() {
 pb() {
   local args="$@"
   local url="$PB_PROVIDER"
-  local opts="$PB_DEFAULT_OPTS"
+  local opts=("$PB_DEFAULT_OPTS")
   local file private p sunset vanity uuid # Parameters
   local update remove # Actions
   while true # [[ -n "$args" ]]
@@ -57,7 +57,6 @@ pb() {
     case "$args" in
       -f*) arg f file || return $? ;;
       -h|--help) echo "https://github.com/HalosGhost/pbpst/blob/master/doc/pbpst.rst"; return 1 ;;
-      # -p*) private=true; args="${args/-p/-}"; args= ;;
       -p*) arg p || return $?; private="$p" ;;
       -R*) arg R || return $?; remove="$R" ;;
       -U*) arg U || return $?; update="$U" ;;
@@ -72,21 +71,20 @@ pb() {
   case true in
     $update)
       [[ -n "$uuid" ]] && url+="/$uuid" || error "Missing uuid"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
-      [[ -n "$private" ]] && opts+=" -F p=1"
+      [[ -n "$sunset" ]] && opts+=("-F sunset=$sunset")
+      [[ -n "$private" ]] && opts+=("-F p=1")
       ;;
     $remove)
       [[ -n "$uuid" ]] && url+="/$uuid" || error "Missing uuid"
       ;;
     *) # Create
       [[ -n "$vanity" ]] && url+="/~$vanity"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
-      [[ -n "$private" ]] && opts+=" -F p=1"
+      [[ -n "$sunset" ]] && opts+=("-F sunset=$sunset")
+      [[ -n "$private" ]] && opts+=("-F p=1")
       ;;
   esac
 
-  
-  echo curl $opts -F "c=@${file:--}" $url
+  echo curl ${opts[@]} -F "c=@${file:--}" $url
 }
 
 pb_update() {
