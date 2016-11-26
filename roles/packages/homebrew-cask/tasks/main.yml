@@ -22,4 +22,4 @@
     - "{{ homebrew_cask_options }}"
     - args
   # changed_when: false
-  when: "{{ item.0.when | default(omit) }}"
+  # when: "{{ item.0.when | default(true) }}"
