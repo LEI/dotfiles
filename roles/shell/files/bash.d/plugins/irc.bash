@@ -24,7 +24,8 @@ irc_kill() {
 
 irc() {
   if [[ ! -d "$ircdir" ]]
-  then die "$ircdir: No such directory"
+  then error "$ircdir: No such directory"
+    return 1
   # else cd "$ircdir"
   fi
 
@@ -42,7 +43,8 @@ irc() {
     case "$@" in
       # -n\ *) shift; n="$1"; shift ;;
       --no-ssl\ *) shift; secure=0 ;;
-      -*) die "$1: Invalid argument" ;;
+      -*) error "$1: Invalid argument"
+        return 1 ;;
       *) break ;;
     esac
   done
@@ -52,7 +54,8 @@ irc() {
   then networks="irc_network"
   elif [[ -f "$ircdir/autojoin" ]]
   then source "$ircdir/autojoin"
-  else die "$ircdir/autojoin: No such file"
+  else error "$ircdir/autojoin: No such file"
+    return 1
   fi
 
   for network in $networks
@@ -73,6 +76,7 @@ irc() {
     local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
     # while read line <&3; do echo "test: $line" > ~/test.log
     # done < <(setlock -nX "/tmp/$server.lockfile" nohup env $connectopts "$connect" "${channels[@]}") &
+    log "setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}""
     setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}" > "$ircdir/$server/connect.log" & disown
     [[ "$?" -eq 0 ]] && echo "$!" > "$pidfile"
 
@@ -99,7 +103,7 @@ irc() {
     if [[ -n "$channels" ]]
     then
       # printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
-      for channel in $channels # ${channels[@]}
+      for channel in "${channels[@]}"
       do
         log "Joining $channel@$server..."
         while ! test -f "$ircdir/$server/$channel/out"

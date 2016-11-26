@@ -14,7 +14,7 @@
 : "${m:=12}"                # max nick lenght
 : "${w:=120}"               # max characters per mesg - fold after limit
 : "${h:=20}"                # lines from history
-: "${pretty:=1}"                 # prefity - colors and special patterns
+: "${prettify:=1}"                 # prefity - colors and special patterns
 # : "${l:=}" # $(tput bold)}"		    # highlight color when nick is mentioned
 # : "${r:=}" # $(tput sgr0)}"		    # reset highlight color
 
@@ -61,16 +61,16 @@ do
   time="${line%% *}" line="${line#* }"
   nick="${line%% *}"
   case "$line" in
-    "<"*">"*)
+    "<"*">"*) tput bel
       line="${line#* }"
       nick="${nick#<}"
       nick="${nick%>}"
       ;;
     "-!- "*)
       case "$line" in
-	*" changed nick to "*|*" changed mode"*) nick="-~-" ;;
 	*" has joined $c"*) nick="-+-" ;;
 	*" has quit "*|*" has left $c"*) nick="---" ;;
+	*" changed nick to "*|*" changed mode"*|*" changed topic to "*) nick="-~-" ;;
       esac
       line="${line#* }"
       ;;
@@ -80,11 +80,7 @@ do
     # *) nick="${line%% *}" line="${line#* }" ;;
   esac
 
-  # do not notify of server messages
-  # case "$nick" in -!-) ;; *) tput bel ;; esac
-
-  # prettify
-  if [[ "$pretty" -ne 0 ]]
+  if [[ "$prettify" -ne 0 ]]
   then
     unset clrdate clrnick clrsepr clrmesg tmpnick
 
@@ -132,7 +128,7 @@ do
   [[ "$mw" -gt "$w" ]] && mw="$w"
   printf '%s\n' "$line" | fold -s -w "$mw" | while IFS= read -r mesg; \
   do
-    [[ "$pretty" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
+    [[ "$prettify" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([/][[:alnum:][:punct:]]\+[/]\)\([[:punct:][:space:]]\|$\),\1${si}\2${ei}\3,g" \
