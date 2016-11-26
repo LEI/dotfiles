@@ -37,3 +37,17 @@ reload() {
   # Reload readline
   # bind -f ~/.inputrc
 }
+
+log() {
+  printf "%s\n" "$*"
+}
+
+error() {
+  >&2 log "$@"
+  return 1
+}
+
+die() {
+  error "$@"
+  exit 1
+}

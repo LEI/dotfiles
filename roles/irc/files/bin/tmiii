@@ -6,8 +6,6 @@
 # spawns iii.sh in a tmux session named IRC with the channel as title
 # accepts all env vars iii.sh accepts plus 't' which sets the terminal
 
-iii="~/irc/bin/iii"
-
 in_tmux() {
   [[ -n "$TMUX" ]]
 }
@@ -23,35 +21,67 @@ has_window() {
 }
 
 go_to_window() {
-  local session="$1" window="$2" cmd="attach-session"
-  in_tmux && cmd="switch-client"
-  tmux "$cmd" -t "$session" \; select-window -t "$session":"$window"
+  if [[ "${goto:-true}" == true ]]
+  then
+    local session="$1" window="$2"
+    local cmd="attach-session"
+    in_tmux && cmd="switch-client"
+    # echo tmux "$cmd" -t "$session" \; select-window -t "$session":"$window" >> ~/tmi.txt
+    tmux "$cmd" -t "$session" \; select-window -t "$session":"$window" #.
+  fi
 }
 
-# Session name
-session="IRC"
-# Window name cannot contain dots
-window="${c:-$s}"
-window=${window//./․} # One dot leader (U+2024)
-# window=${window#irc.} # window=${window%.net}
-# window=${window//./\\.}
+iii="$HOME/irc/bin/iii"
 
-## collect options from env - all opts to iii.sh should be set here
-opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$c""
+# Collect options from env - all opts to iii.sh should be set here
+opts="m="${m}" h="${h}" p="${p}" n="${n}" l="${l}" r="${r}" i="${i}" s="${s}" c="${c}""
 # TERM="${t:-rxvt-unicode}"
 
-## spawn a new tmux window named <channel> in a tmux session named IRC
+# Session name
+if [[ -n "$s" ]]
+then
+  session="${s}"
+  # Trim ^[irc.], [.net]$
+  session="${session#irc.}"
+  session="${session%.net}"
+  # Replace dots with dashes
+  session="${session//./-}"
+  session="${session//:/_}"
+  # To upper case
+  session="$(echo "$session" | tr '[:lower:]' '[:upper:]')"
+  # TODO Prefix IRC/?
+else
+  session="IRC"
+fi
+
+# Window name
+# if [[ -n "$c" ]]
+# then window="$c"
+# else window="$s"
+# fi
+window="${c:-$s}"
+# window=${window//./\\.} # Cannot contain dots
+# Replace dots with 'one dot leader' (U+2024)
+window="${window//./․}"
+
+# TODO right pane /names
+
+# Spawn a new tmux window named <channel> in a tmux session named IRC
 if ! has_session "$session"
 then
+  # echo "no session named $session" >> ~/tmi.txt
   if in_tmux
   then
-    tmux new-session -d -s "$session" -n "$window" "$opts $iii"
+    # echo tmux new-session -d -s "$session" -n "$window" "$opts $iii" >> ~/tmi.txt
+    tmux new-session -s "$session" -n "$window" -d "$opts $iii"
     go_to_window "$session" "$window"
   else
     tmux new-session -s "$session" -n "$window" "$opts $iii"
   fi
 elif ! has_window "$session" "$window"
 then
+  # echo "no window named $window" >> ~/tmi.txt
+  # echo tmux new-window -t "$session" -n "$window" -d "$opts $iii" >> ~/tmi.txt
   tmux new-window -t "$session" -n "$window" -d "$opts $iii"
   if in_tmux
   then

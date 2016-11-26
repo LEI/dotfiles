@@ -34,6 +34,12 @@ if hash ruby 2>/dev/null; then
   export GEM_HOME="$(ruby -e 'print Gem.user_dir')" # GEM_PATH, BUNDLE_PATH
   pathmunge "$GEM_HOME/bin" after
 fi
+if hash rbenv 2>/dev/null; then
+  # eval "$(rbenv init -)"
+  # -> rbenv rehash
+  export RBENV_SHELL=bash
+  pathmunge "$HOME/.rbenv/shims"
+fi
 
 # Go packages
 if hash go 2>/dev/null; then

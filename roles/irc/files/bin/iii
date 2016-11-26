@@ -9,35 +9,38 @@
 : "${n:=$USER}"             # the user's nickname
 : "${i:=$HOME/irc}"         # root irc dir
 : "${s:=irc.freenode.net}"  # server
+: "${p:=}"                  # port
 : "${c:=""}"                # channel
 : "${m:=12}"                # max nick lenght
 : "${w:=120}"               # max characters per mesg - fold after limit
 : "${h:=20}"                # lines from history
-: "${p:=1}"                 # prefity - colors and special patterns
-: "${l:=}"		    # highlight color when nick is mentioned
+: "${prettify:=1}"                 # prefity - colors and special patterns
+# : "${l:=}" # $(tput bold)}"		    # highlight color when nick is mentioned
+# : "${r:=}" # $(tput sgr0)}"		    # reset highlight color
 
-join_channel() {
-  channel="$1"
-  # Send join command
-  # printf "/j %s\n" "$channel" > "$i/$s/in"
-  # Open in a new tmux window
-  opts="m="$m" h="$h" p="$p" n="$n" l="$l" i="$i" s="$s" c="$channel""
-  if [ -n "$TMUX" ]
+tmux_open() {
+  channel="$1" # l="${l}" r="${r}"
+  opts="m="${m}" h="${h}" p="${p}" n="${n}" i="${i}" s="${s}" c="$channel""
+  if [[ -n "$TMUX" ]]
   then env $opts "$i/bin/tmiii"
   fi # TODO $i/bin/iii when outside tmux?
 }
 
-[ "$1" != '-r' ] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
+[[ "$1" != '-r' ]] && exec rlwrap -a -r -S "${c:-$s}> " -pGREEN "$0" -r
 
+pidfile="/tmp/$n@$s:$p.pid"
 infile="$i/$s/$c/in"
 outfile="$i/$s/$c/out"
 sepr='|'
 
 # colors
 reset="$(tput sgr0)"
-#dark="$(tput setaf 8)"
+# dark="$(tput setaf 8)"
 dark="$(tput setaf 10)" # Solarized
-highlight="$(tput setaf 3)"
+red="$(tput setaf 1)"
+green="$(tput setaf 2)"
+blue="$(tput setaf 4)"
+# highlight="$(tput setaf 3)"
 
 # markup
 sb="$(tput bold; tput setaf 9)"
@@ -47,8 +50,8 @@ eu="$(tput rmul; tput sgr0)"
 si="$(tput sitm; tput setaf 13)"
 ei="$(tput ritm; tput sgr0)"
 
-[ -p "$infile"  ] || exit 1
-[ -e "$outfile" ] || { touch "$outfile" || exit 1; }
+[[ -p "$infile"  ]] || exit 1
+[[ -e "$outfile" ]] || { touch "$outfile" || exit 1; }
 
 tail -f -n "$h" "$outfile" | while IFS= read -r line
 do
@@ -56,21 +59,33 @@ do
 
   date="${line%% *}" line="${line#* }"
   time="${line%% *}" line="${line#* }"
-  nick="${line%% *}" line="${line#* }"
+  nick="${line%% *}"
+  case "$line" in
+    "<"*">"*) tput bel
+      line="${line#* }"
+      nick="${nick#<}"
+      nick="${nick%>}"
+      ;;
+    "-!- "*)
+      case "$line" in
+	*" has joined $c"*) nick="-+-" ;;
+	*" has quit "*|*" has left $c"*) nick="---" ;;
+	*" changed nick to "*|*" changed mode"*|*" changed topic to "*) nick="-~-" ;;
+      esac
+      line="${line#* }"
+      ;;
+    "#"*" "*) line="${line#* }" ;;
+    "="*|"-"*) nick="${line:0:1}" && line="${line:1}" ;;
+    *|"$nick") nick= ;;
+    # *) nick="${line%% *}" line="${line#* }" ;;
+  esac
 
-  # strip '<nick>' to 'nick'
-  nick="${nick#<}" nick="${nick%>}"
-
-  # do not notify of server messages
-  case "$nick" in -!-) ;; *) tput bel ;; esac
-
-  # prettify
-  if [ "$p" -ne 0 ]
+  if [[ "$prettify" -ne 0 ]]
   then
     unset clrdate clrnick clrsepr clrmesg tmpnick
 
     clrdate="$dark"
-    case "$line" in *"$n"*) clrdate="${l:-$highlight}" ;; esac
+    # case "$line" in *"$n"*) clrdate="${l:-$highlight}" ;; esac
 
     tmpnick="${nick%[_12]}"
     clrnick="$(printf '(%d ^ %d + %d + %d)' "${#tmpnick}" "'${tmpnick}" "'${tmpnick#?}" "'${tmpnick#??}")"
@@ -83,30 +98,37 @@ do
     clrsepr="$dark"
     clrmesg="$reset"
 
-    # dark color for special nicks
-    case "$nick" in -!-) clrnick="$dark" clrmesg="$dark";; esac
+    case "$nick" in
+      -!-) clrmesg="$dark" clrnick="$dark" ;;
+      -~-) clrmesg="$dark" clrnick="$blue" nick="${nick:1:1}" ;;
+      -+-) clrmesg="$dark" clrnick="$green" nick="${nick:1:1}" ;;
+      ---) clrmesg="$dark" clrnick="$red" nick="${nick:1:1}" ;;
+    esac
+    # case "$line" in *"$n"*) line="${line//$n/${l}${n}${r}}" ;; esac
+    # case "$line" in *"$n"*) tput bel ;; esac
   fi
 
   # handle CTCP messages
-  if [ "${line#}" != "${line}" ]
+  if [[ "${line#}" != "${line}" ]]
   then
     line="${line#}"
     line="${line%}"
     ctcp="${line%% *}"
     line="${line#* }"
 
-    if [ "$ctcp" != 'ACTION' ]
+    if [[ "$ctcp" != 'ACTION' ]]
     then line="${clrnick}[CTCP:${ctcp}]${clrmesg} ${line}"
     else line="${clrnick}${nick}${clrmesg} ${line}" nick="*"
     fi
   fi
 
   # fold lines breaking on spaces if message is greater than 'w' chars or does not fit
-  mw="$(($(tput cols) - ${#date} - ${#time} - $m - 5))"
-  [ "$mw" -gt "$w" ] && mw="$w"
+  cols="$(tput cols)"
+  mw="$(($cols - ${#date} - ${#time} - $m - 5))"
+  [[ "$mw" -gt "$w" ]] && mw="$w"
   printf '%s\n' "$line" | fold -s -w "$mw" | while IFS= read -r mesg; \
   do
-    [ "$p" -gt 1 ] && mesg="$(echo "$mesg" | sed \
+    [[ "$prettify" -gt 1 ]] && mesg="$(echo "$mesg" | sed \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([_][[:alnum:][:punct:]]\+[_]\)\([[:punct:][:space:]]\|$\),\1${su}\2${eu}\3,g" \
       -e "s,\(^\|[[:space:]][[:punct:]]*\)\([/][[:alnum:][:punct:]]\+[/]\)\([[:punct:][:space:]]\|$\),\1${si}\2${ei}\3,g" \
@@ -128,8 +150,10 @@ stty -echonl -echo
 bar="--------------------------------------------------------------------------------"
 mark() { printf '%s -!- %.*s\n' "$(date +"%F %R")" "$w" "${bar}${bar}" >>"$outfile"; }
 
+# declare -a args
 while IFS= read -r input; do
-  args="${input##* }"
+  unset args cmd
+  args="${input#* }"
   case "$input" in
     '')
       continue
@@ -142,20 +166,19 @@ while IFS= read -r input; do
       mark
       break
       ;;
-    :q|/leave)
+    :q)
       break
       ;;
     /wi" "*)
-      input="/j nickserv info ${input#/wi}"
+      input="/j nickserv info $args"
       ;;
     /me" "*)
-      input="ACTION${input#/me}"
+      input="ACTION $args"
       ;;
+    # /n|/nick)
+    #   ;;
     /names)
       input="/names $c"
-      ;;
-    /part)
-      input="/part $c"
       ;;
     /op" "*)
       input="/j chanserv op $c $args"
@@ -175,17 +198,53 @@ while IFS= read -r input; do
     /t|/topic)
       input="/topic $c"
       ;;
-    /j" "*|/join" "*)
-      for chan in "$args"
-      do
-	join_channel "$chan"
-      done
+    /j" "*|/join" "*|/msg" "*)
+      input="${input/\/msg /\/j }"
+      # ChanServ, NickServ...
+      name="$(echo "${args%% *}" | tr '[:upper:]' '[:lower:]')"
+      [[ -n "$name" ]] && cmd="tmux_open $name"
+      # input="/j $name"
+      # [[ "$args" = *\ * ]] && msg="${args#* }" && input+=" $msg"
+
+      # read -a channels <<<$args
+      # for channel in "${channels[@]}"
+      # do
+	# printf "/j %s\n" "$channel" > "$i/$s/in"
+	# tmux_open "$channel"
+      # done
+      # input=
       ;;
+    # /l|/leave)
+    #   cmd="break"
+    #   ;;
+    /part)
+      # No such channel
+      case "$c" in chanserv|nickserv) input= ;; *) input="/part $c" ;; esac
+      cmd="break"
+      ;;
+    # /clear)
+    #   echo "" > "$outfile"
+    #   input=
+    #   ;;
+
+    # /quit)
+    #   if [[ -f "$pidfile" ]]
+    #   then # pkill -P -F "$pidfile" && rm "$pidfile" && cmd="break"
+	# while read pid
+	# do kill "$pid"
+	# done < <(cat "$pidfile")
+	# rm "$pidfile" && cmd="break"
+    #   else input=
+    #   fi
+    #   ;;
+
     # /wait" "*)
-    #   # input="/wait $args"
-    #   sleep $args
+    #   sleep "$args"
     #   input=
     #   ;;
   esac
-  [ -n "$input" ] && printf '%s\n' "$input"
+  [[ -n "$input" ]] && printf '%s\n' "$input"
+  [[ -n "$cmd" ]] && $cmd # &?
 done >"$infile"
+
+# read w8
