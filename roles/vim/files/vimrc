@@ -1,5 +1,5 @@
 " Base configuration
-" vim: et sts=2 sw=2 ts=2
+" vim: foldenable foldmethod=marker et sts=2 sw=2 ts=2
 
 set nocompatible
 
@@ -264,7 +264,121 @@ catch /E185:/
   "colorscheme desert
 endtry
 
-" 1}}}
+" Key mappings {{{1
+
+" Change leader
+let g:mapleader = "\<Space>"
+
+" Move vertically on wrapped lines
+nnoremap j gj
+nnoremap k gk
+
+" Quicker split navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+" if has('nvim')
+"  nmap <BS> <C-w>h
+" endif
+" https://github.com/neovim/neovim/issues/2048#issuecomment-78045837
+" Note: OSX terminfo maps <C-h> to backspace: kbs=^H -> kbs=\177(ascii del)
+" infocmp $TERM | sed 's/kbs=^[hH]/kbs=\\177/' > $TERM.ti
+" tic $TERM.ti
+
+" Repeat latest f, t, F or T [count] times
+noremap <Tab> ;
+" Repeat last command on next match
+noremap ; :normal n.<CR>
+" ; ? nnoremap Q :normal n.<CR>
+
+" Yank from the cursor to the end of the line
+map Y y$
+
+" Visually select the whole buffer (use :% to operate on the entire file)
+" noremap <Leader>a <Esc>ggVG
+nmap gA ggVG
+
+" Vimcast #26 Bubbling text
+" Cf. settings/unimpaired.vim
+
+" Visually select the text that was last edited/pasted
+nmap gV `[v`]
+
+" Bubble single lines
+nmap <C-Up> ddkP
+nmap <C-Down> ddp
+" Bubble multiple lines
+vmap <C-Up> xkP`[V`]
+vmap <C-Down> xp`[V`]
+
+" Remap C-Left and C-Right?
+" noremap <Tab> v>
+" noremap <S-Tab> v<
+" vnoremap <Tab> >gv
+" vnoremap <S-Tab> <gv
+
+" Use <Left> and <Right> keys to move the cursor
+" instead of selecting a different match:
+cnoremap <Left> <Space><BS><Left>
+cnoremap <Right> <Space><BS><Right>
+
+" Edit in the same directory as the current file
+" cnoremap <expr> %% getcmdtype() == ':' ? expand('%:h').'/' : '%%'
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
+
+" Clear highlighted search results
+nnoremap <Space> :nohlsearch<CR>
+" noremap <Leader><Space> :nohlsearch<CR>
+
+" Start new undoable edit in insert mode instead of deleting all entered
+" characters in the current line
+" inoremap <C-U> <C-G>u<C-U>
+
+" Do not use arrows
+" nnoremap <up> <nop>
+" nnoremap <down> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" inoremap <up> <nop>
+" inoremap <down> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
+
+" Switch between the last two files
+nnoremap <Leader><Leader> <C-^>
+
+" Edit in window
+noremap <Leader>ew :e %%
+" Edit in split
+noremap <Leader>es :sp %%
+" Edit in vertical split
+noremap <Leader>ev :vsp %%
+" Edit in tab
+noremap <Leader>et :tabe %%
+
+" Quicker quit
+noremap <Leader>q :q<CR>
+" Save a file
+noremap <Leader>w :w<CR>
+" Save as root (or use :SudoWrite)
+noremap <Leader>W :w !sudo tee % > /dev/null<CR>
+
+" Remove trailing whitespaces (see TrimWhitespace())
+" noremap <Leader><BS> :%s/\s\+$//e<CR>
+
+" Sort css properties
+" nnoremap <Leader>S ?{<CR>jV/^\s*\}?$<CR>k:sort<CR>:noh<CR>
+
+" Git shortcuts
+" noremap <Leader>b :Gblame<cr>
+" noremap <Leader>l :!clear && git log -p %<CR>
+" noremap <Leader>d :!clear && git diff %<CR>
+
+" Edit '.vimrc' in a new split
+nnoremap <Leader>rc <C-w><C-v><C-l>:e $MYVIMRC<CR>
+
+" }}}
 
 if exists('g:vim_config') && filereadable(expand(g:vim_config))
   exec 'source ' . g:vim_config
