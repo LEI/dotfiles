@@ -11,10 +11,8 @@ arg() {
   local pattern="-$a([a-z]*)*"
   local arg_var="${2:-}" # Variable name
   local next arg
-  [[ -n "$arg_var" ]] && echo arg_var $arg_var
   if [[ $args =~ $pattern ]]
   then next="${BASH_REMATCH[1]}" arg="${args#-* }" arg="${arg%% *}"
-    echo "next: $next, a: $a, args: $args"
     if [[ -n "$arg_var" ]]
     then
       if [[ -n "$arg" ]] && [[ "$arg" == -* ]]
@@ -28,16 +26,14 @@ arg() {
       then args="${args/-$a* $arg/-$next}" # $arg}"
       else args="${args#-$a $arg}" # args="${args#* }"
       fi
-      echo eval "$arg_var=$arg"
     else
-      echo eval "$a=true"
       eval "$a=true"
       args="${args#-$a}"
       [[ -n "$next" ]] && args="-$args"
       # then args="${args/-$a/-}"
       # else args="${args#-$a}"
     fi
-    echo ">>> next: $next, a: $a, args: $args"
+    # echo ">>> next: $next, a: $a, args: $args"
   else error "$args: Not matching /$pattern/"; return 1
   fi
 }
@@ -49,9 +45,8 @@ pb() {
   local file private p sunset vanity uuid # Parameters
   local update remove # Actions
   while true # [[ -n "$args" ]]
-  do local a= next= arg= pattern=
-    local p= R= U=
-    echo ARGS \'$args\'
+  do local a= next= arg= pattern= p= R= U=
+    # echo ARGS \'$args\'
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
     case "$args" in
