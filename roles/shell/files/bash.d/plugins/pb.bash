@@ -33,7 +33,6 @@ arg() {
       # then args="${args/-$a/-}"
       # else args="${args#-$a}"
     fi
-    # echo ">>> next: $next, a: $a, args: $args"
   else error "$args: Not matching /$pattern/"; return 1
   fi
 }
@@ -41,11 +40,12 @@ arg() {
 pb() {
   local args="$@"
   local url="$PB_PROVIDER"
-  local opts=("$PB_DEFAULT_OPTS")
+  local opts="$PB_DEFAULT_OPTS"
   local file private p sunset vanity uuid # Parameters
   local update remove # Actions
   while true # [[ -n "$args" ]]
-  do local a= next= arg= pattern= p= R= U=
+  do local a= next= arg= pattern=
+    local p= R= U=
     # echo ARGS \'$args\'
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
@@ -66,16 +66,16 @@ pb() {
   case true in
     $update)
       [[ -n "$uuid" ]] && url+="/$uuid" || error "Missing uuid"
-      [[ -n "$sunset" ]] && opts+=("-F sunset=$sunset")
-      [[ -n "$private" ]] && opts+=("-F p=1")
+      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
+      [[ -n "$private" ]] && opts+=" -F p=1"
       ;;
     $remove)
       [[ -n "$uuid" ]] && url+="/$uuid" || error "Missing uuid"
       ;;
     *) # Create
       [[ -n "$vanity" ]] && url+="/~$vanity"
-      [[ -n "$sunset" ]] && opts+=("-F sunset=$sunset")
-      [[ -n "$private" ]] && opts+=("-F p=1")
+      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
+      [[ -n "$private" ]] && opts+=" -F p=1"
       ;;
   esac
 
