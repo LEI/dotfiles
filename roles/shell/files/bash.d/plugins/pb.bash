@@ -88,8 +88,8 @@ pb() {
       -f*|--file*) arg "f|file" file || return $? ;;
       -u*|--uuid*) arg "u|uuid" uuid || return $? ;;
       -v*|--vanity*) arg "v|vanity" vanity || return $? ;;
-      -x*|--sunset*) arg "x|sunset" sunset || return $? ;;
-      --handler*) arg "handler" handler || return $? ;;
+      -x*|--sunset*) arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" || return $? ;;
+      --handler*) arg "handler" handler || return $? ;; # r,t
       # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
       # -*) pberr "illegal option ${args%% *}"; return 1 ;;
       *) pberr "illegal option -- $args"; return 1 break ;;
@@ -113,7 +113,7 @@ pb() {
       then pberr "illegal option -- uuid"; return 1
       fi
       [[ -n "$private" ]] && opts+=" -F p=1"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$(get_seconds $sunset)"
+      [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
       [[ -n "$vanity" ]] && url+="/~$vanity"
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}" # -e -f TODO
       ;;
@@ -125,7 +125,7 @@ pb() {
       else url+="/$uuid"
       fi
       [[ -n "$private" ]] && opts+=" -F p=1"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$(get_seconds $sunset)"
+      [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
       ;;
     $remove) method="DELETE"
@@ -160,11 +160,8 @@ pb() {
   local curl_opts="$PB_CURL_OPTS $opts"
   if [[ -n "$handler" ]]
   then url+="?$handler=1"
-  # elif [[ -n "$terminal" ]]
-  # then url+="?t=1"
   fi
 
-  # echo curl ${opts[@]} $url >&2
   if [[ -n "$debug" ]]
   then >&2 echo curl $curl_opts $url
   else curl $curl_opts $url
