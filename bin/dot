@@ -30,7 +30,7 @@ run_playbook() {
     local vault_file="$(ansible_vault)"
     if [[ -n "$vault_file" ]]
     then
-      args+=("--vault-password-file $vault_file")
+      args+=("--vault-password-file "$vault_file"")
       chmod 700 "$vault_file" &>/dev/null
     fi
   fi
@@ -83,7 +83,12 @@ ansible_install() {
         # Install Xcode
         _do "xcode-select --install"
       fi
-      # Install ansible with homebrew? (pip installs 2.0)
+      # Install ansible with homebrew?
+      if ! has ansible || [[ -n "$force" ]]
+      then ! has pip && _do easy_install pip
+        # Install dependencies
+        _do pip install --user python -r "$DOT_REQUIREMENTS/pip.txt"
+      fi
       ;;
     Linux)
 
@@ -114,39 +119,33 @@ ansible_install() {
       # Fedora/CentOS:
       # sudo yum install gcc libffi-devel openssl-devel python-devel
 
+      # If Ansible is still not present
+      if ! has ansible || [[ -n "$force" ]]
+      then ! has pip && su_do easy_install pip
+        # Install dependencies
+        su_do pip install -r "$DOT_REQUIREMENTS/pip.txt"
+      fi
       ;;
-    Cygwin)
+    CYGWIN*) # uname -o = Cygwin
       # https://github.com/grlee/ansible-galaxy.ansible-init/blob/develop/files/setup.sh
-      # if ! has apt-cyg; then
-      #   lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
-      #   install apt-cyg /bin
-      # fi
-      # apt-cyg install git python-{crypto,jinja2,six,yaml}
-      # ANSIBLE="$HOME/ansible"
-      # git clone --depth 1 git://github.com/ansible/ansible "$ANSIBLE"
-      # cd ~/ansible
-      # git submodule update --init lib/ansible/modules/{core,extras}
-      # PATH="$PATH:$ANSIBLE/bin"
-      # PYTHONPATH="$ANSIBLE/lib"
-      # ANSIBLE_LIBRARY="$ANSIBLE/library"
+      if ! has apt-cyg; then
+        echo 'lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg'
+        echo 'install apt-cyg /bin'
+      fi
+      echo '
+            apt-cyg install git python-{crypto,jinja2,six,yaml}
+            ANSIBLE="$HOME/ansible"
+            git clone --depth 1 git://github.com/ansible/ansible "$ANSIBLE"
+            cd ~/ansible
+            git submodule update --init lib/ansible/modules/{core,extras}
+            PATH="$PATH:$ANSIBLE/bin"
+            PYTHONPATH="$ANSIBLE/lib"
+            ANSIBLE_LIBRARY="$ANSIBLE/library"'
       ;;
     *)
       die "Unsupported platform: $os"
       ;;
   esac
-
-  # If Ansible is still not present
-  if ! has ansible || [[ -n "$force" ]]
-  then
-    if ! has pip
-    then
-      # Install python package manager
-      su_do easy_install pip
-    fi
-
-    # Install dependencies
-    su_do pip install -r "$DOT_REQUIREMENTS/pip.txt" # --user python
-  fi
 }
 
 arg() {
