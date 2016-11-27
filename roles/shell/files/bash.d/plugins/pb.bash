@@ -12,23 +12,23 @@ arg() {
   local arg_var="${2:-}" # Variable name
   if [[ $args =~ $pattern ]]
   then next="${BASH_REMATCH[1]}" arg="${args#-* }" arg="${arg%% *}"
-    if [[ -n "$arg_var" ]]
+    if [[ -n "$arg_var" ]] && [[ "$arg_var" != "bool" ]]
     then
       if [[ -n "$arg" ]] && [[ "$arg" == -* ]]
       then error "-$a: Missing argument value (found: '$arg')"; return 1
       fi
       if [[ -n "$arg" ]] && [[ "$args" != "$arg"* ]]
       then eval "$arg_var="$arg"" # If a value is found
-        # echo "DEBUG eval $arg_var=$arg" >&2
+        # echo "-> eval $arg_var=$arg ($a)" >&2
       else error "-$a: Missing argument value"; return 1
       fi
       if [[ -n "$next" ]]
       then args="${args/-$a* $arg/-$next}" # $arg}"
       else args="${args#-$a $arg}" # args="${args#* }"
       fi
-    else
-      eval "$a=true"
-      # echo "DEBUG eval $a=true" >&2
+    else # eval "$a=true"
+      eval "${arg_var:-a}=true"
+      # echo "-> eval ${arg_var:-a}=true ($a)" >&2
       args="${args#-$a}"
       if [[ -n "$next" ]]
       then args="-$args"
@@ -45,11 +45,10 @@ pb() {
   local url="$PB_PROVIDER"
   local opts=""
   local create remove shorten update # Actions
-  local private file render uuid vanity sunset # Parameters
+  local private file handler uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
   do
-    local C= R= S= U=
-    local p= f= r= u= v= x=
+    local bool= f= u= v= x=
     # echo "DEBUG ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
@@ -57,24 +56,27 @@ pb() {
       -h*|--help*) error "Usage: pb [-CRSUpfruvx]"
         error "create [f], remove <u>, shorten <<<, update <u>..."
         return 1 ;;
-      -C*) arg C && create="$C" || return $? ;;
-      -R*) arg R && remove="$R" || return $? ;;
-      -S*) arg S && shorten="$S" || return $? ;;
-      -U*) arg U && update="$U" || return $? ;;
-      -p*) arg p && private="$p" || return $? ;;
+      -C*) arg C bool && create="$bool" || return $? ;;
+      -R*) arg R bool && remove="$bool" || return $? ;;
+      -S*) arg S bool && shorten="$bool" || return $? ;;
+      -U*) arg U bool && update="$bool" || return $? ;;
+      -p*) arg p bool && private="$bool" || return $? ;;
+      -d*) arg d bool && debug="$bool" || return $? ;;
       -f*) arg f file || return $? ;;
-      -r*) arg r render || return $? ;;
       -u*) arg u uuid || return $? ;;
       -v*) arg v vanity || return $? ;;
       -x*) arg x sunset || return $? ;;
+      # -handler*) arg -handler handler || return $? ;;
+      --handler\ *) args="${args#--handler }" handler="${args%% *}" args="${args#$handler }" ;;
       -*) error "${args%% *}: Invalid argument"; return 1 ;;
       '') break ;;
       *) echo "$args: Not matched!"; break ;;
     esac
   done
 
-  # printf "%s\n" "create:$create,remove:$remove,shorten:$shorten,update:$update" >&2
-  # printf "%s\n" "priv:$private,file:$f,uuid:$u,vanity:$v,sunset:$x" >&2
+  #[[ -n "$debug" ]] &&
+  printf "%s\n" "create:$create,remove:$remove,shorten:$shorten,update:$update" >&2
+  printf "%s\n" "priv:$private,file:$f,uuid:$u,vanity:$v,sunset:$x" >&2
 
   if [[ -z "$create$update$remove$shorten" ]]
   then error "$@: Missing action"; return 1
@@ -119,14 +121,17 @@ pb() {
   esac
 
   local curl_opts="$PB_CURL_OPTS $opts"
-  if [[ -n "$render" ]]
-  then url+="?r=1"
+  if [[ -n "$handler" ]]
+  then url+="?$handler=1"
   # elif [[ -n "$terminal" ]]
   # then url+="?t=1"
   fi
 
   # echo curl ${opts[@]} $url >&2
-  curl $curl_opts $url
+  if [[ -n "$debug" ]]
+  then echo curl $curl_opts $url
+  else curl $curl_opts $url
+  fi
 }
 
 # Copy the url of the uploaded paste
@@ -139,7 +144,7 @@ pbx() {
   then copy="pbcopy" # -pboard general
   else error "$(uname -s): No clipboard manager found"; return 1
   fi
-  local opts="-h r $@" # ?r=1
+  local opts="--handler r $@" # ?r=1
   local curl_opts="$PB_CURL_OPTS -s -w %{redirect_url} -o /dev/stderr"
   PB_CURL_OPTS="$curl_opts" pb $opts | "$copy"
   # curl -sF "c=@${1:--}" -w "%{redirect_url}" 'http://ptpb.pw/?r=1' -o /dev/stderr | "$copy"
