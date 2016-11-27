@@ -30,7 +30,7 @@ run_playbook() {
     local vault_file="$(ansible_vault)"
     if [[ -n "$vault_file" ]]
     then
-      args+=("--vault-password-file $vault_file")
+      args+=("--vault-password-file "$vault_file"")
       chmod 700 "$vault_file" &>/dev/null
     fi
   fi
