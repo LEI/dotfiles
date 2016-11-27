@@ -55,7 +55,7 @@ usage() {
   then pberr "$err"; e=1
   fi
   >&2 printf "%s\n" "Usage: pb [opts]"
-  >&2 printf "          %s\t%s\n" \
+  >&2 printf "          %-24s%s\n" \
     "[ --help | --debug ]" "" "$@"
   exit $e
 }
@@ -63,20 +63,20 @@ usage() {
 full_usage() {
   usage "$1" \
     "-P, --provider" "Default: $PB_PROVIDER" \
-    "--handler" "Choices: r, t" \
-    "" "" \
-    "-ll, --list-lexers" "" \
-    "-ls, --list-styles" "" \
-    "-lf, --list-formats" "" \
     "-C, --create" "Required: file or stdin" \
     "-U, --update" "Required: uuid" \
     "-R, --remove" "Required: uuid" \
     "-S, --shorten" "Required: file or stdin" \
-    "" "" \
-    "-p, --private" "Boolean" \
+    "-G, --get" "$ curl -X GET $PB_PROVIDER" \
+    "-lf, --list-formats" "$ pb --get lf" \
+    "-ll, --list-lexers" "$ pb --get l" \
+    "-ls, --list-styles" "$ pb --get ls" \
+    "-r, --render" "GET handler (?r=1)" \
+    "-t, --term" "GET handler (?t=1)" \
+    "-p, --private" "(?p=1)" \
     "-f, --file" "File path or content" \
     "-u, --uuid" "" \
-    "-v, --vanity" "" \
+    "-v, --vanity" "Prefixed with ~" \
     "-x, --sunset" "Example: 1m3s"
 }
 
@@ -89,18 +89,20 @@ pb() {
   local method create update remove shorten # Actions
   local debug private file handler uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
-  do local bool= get=0
+  do local u= bool= get=0
     # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
     case "$args" in
       ''|--\ *) break ;;
       -h*|--help*) full_usage ;;
+      -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
       -P*|--provider*) _arg "P|provider" provider ;;
       -C*|--create*) _arg "C|create" bool && create="$bool" ;;
       -U*|--update*) _arg "U|update" bool && update="$bool" ;;
       -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
       -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;;
+      -G*|--get*) _arg "G|get" u && get+=1 && url+="/$u" ;;
       -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
       -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
       -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
@@ -111,18 +113,17 @@ pb() {
       -u*|--uuid*) _arg "u|uuid" uuid ;;
       -v*|--vanity*) _arg "v|vanity" vanity ;;
       -x*|--sunset*) _arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" ;;
-      -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
       # --handler*) _arg "handler" handler ;; # r,t
       # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
       # -*) usage "illegal option ${args%% *}" ;;
       *) arg="${args#-}"; usage "illegal option -- ${arg#-}" ;;
     esac
   done
-  if [[ -n "$debug" ]]
-  then
-    printf "ACTION %s\n" "create:$create, remove:$remove, shorten:$shorten, update:$update, get:$get" >&2
-    printf "PARAM %s\n" "priv:$private, file:$file, uuid:$uuid, vanity:$vanity, sunset:$sunset" >&2
-  fi
+  # if [[ -n "$debug" ]]
+  # then
+  #   printf "ACTION %s\n" "create:$create, remove:$remove, shorten:$shorten, update:$update, get:$get" >&2
+  #   printf "PARAM %s\n" "priv:$private, file:$file, uuid:$uuid, vanity:$vanity, sunset:$sunset" >&2
+  # fi
   # Check arguments
   if [[ "$get" -gt 1 ]]
   then usage "invalid action -ll -ls -lf"
