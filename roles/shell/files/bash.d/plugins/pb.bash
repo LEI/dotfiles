@@ -45,23 +45,23 @@ pb() {
   local url="$PB_PROVIDER"
   local opts=""
   local create remove shorten update # Actions
-  local private file handler uuid vanity sunset # Parameters
+  local private file render uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
   do
     local C= R= S= U=
-    local p= f= h= u= v= x=
+    local p= f= r= u= v= x=
     # echo "DEBUG ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
     case "$args" in
-      -h|--help) echo "Usage:"; return 1 ;;
+      -h*|--help*) echo "Usage: pb -CRSUpfruvx" >&2; return 1 ;;
       -C*) arg C && create="$C" || return $? ;;
       -R*) arg R && remove="$R" || return $? ;;
       -S*) arg S && shorten="$S" || return $? ;;
       -U*) arg U && update="$U" || return $? ;;
       -p*) arg p && private="$p" || return $? ;;
       -f*) arg f file || return $? ;;
-      -h*) arg h handler || return $? ;;
+      -r*) arg r render || return $? ;;
       -u*) arg u uuid || return $? ;;
       -v*) arg v vanity || return $? ;;
       -x*) arg x sunset || return $? ;;
@@ -117,7 +117,7 @@ pb() {
   esac
 
   [[ -n "$PB_CURL_OPTS" ]] && opts="$PB_CURL_OPTS $opts"
-  [[ -n "$handler" ]] && url+="?$handler=1"
+  [[ -n "$render" ]] && url+="?r=1"
 
   # echo curl ${opts[@]} $url >&2
   curl ${opts[@]} $url
@@ -155,9 +155,9 @@ pbx() {
 }
 
 # Encrypt file with GPG symetric cipher
-pbg() { # Always pbx -Cf "$file" ?
-  gpg -o - -c "$file" | pbx $@
-} # Decrypt with curl <pasteurl> | gpg -d
+pbg() { # Decrypt with curl <pasteurl> | gpg -d
+  gpg -o - -c "$file" | pbx -C # $@
+}
 
 # Capture screenshot
 pbs () {
