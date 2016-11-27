@@ -6,16 +6,17 @@
   with_items: "{{ vim_files }}"
   when: "{{ item.when | default(true) }}"
 
-# https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
-# https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
-- name: "Install vim plugins"
-  shell: "{{ vim_plug_cmd }}"
-  # args:
-  #   creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
-  ignore_errors: yes
-  register: vim_plug_output
-  # failed_when: vim_plug_output.rc != 0
-  when: vim_plug_install # and vim_plug_template.changed
-  tags: vim-plug
+# # https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
+# # https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin
+# - name: "Install vim plugins"
+#   command: "{{ vim_plug_cmd }}"
+#   # args:
+#   #   creates: "{{ false if vim_plug_force else vim_plugins_path + '/*' }}"
+#   ignore_errors: yes
+#   register: vim_plug_output
+#   # failed_when: vim_plug_output.rc != 0
+#   when: vim_plug_install # and vim_plug_template.changed
+#   tags: vim-plug
 
+# - command: stty sane
 # - debug: var=vim_plug_output
