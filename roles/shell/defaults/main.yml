@@ -2,6 +2,14 @@
 bash_dirname: .bash.d
 bash_dir: "{{ dot_home }}/{{ bash_dirname }}"
 
+# TODO #!/usr/bin/env bash for OS X
+# bash_lines:
+#   # Source ~/.bash.d/init.bash from ~/.bashrc
+#   - dest: "{{ dot_home }}/.bashrc"
+#     line: source "$HOME/{{ bash_dirname }}/init.bash"
+#   # Source ~/.bashrc from ~/.bash_profile
+#   - dest: "{{ dot_home }}/.bash_profile"
+#     line: [[ -f ~/.bashrc ]] && [[ -r ~/.bashrc ]] && [[ -n "$PS1" ]] && source ~/.bashrc
 bash_blocks:
   # Source ~/.bash.d/init.bash from ~/.bashrc
   - dest: "{{ dot_home }}/.bashrc"
