@@ -54,7 +54,9 @@ pb() {
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
     case "$args" in
-      -h*|--help*) echo "Usage: pb -CRSUpfruvx" >&2; return 1 ;;
+      -h*|--help*) error "Usage: pb [-CRSUpfruvx]"
+        error "create [f], remove <u>, shorten <<<, update <u>..."
+        return 1 ;;
       -C*) arg C && create="$C" || return $? ;;
       -R*) arg R && remove="$R" || return $? ;;
       -S*) arg S && shorten="$S" || return $? ;;
@@ -75,7 +77,7 @@ pb() {
   # printf "%s\n" "priv:$private,file:$f,uuid:$u,vanity:$v,sunset:$x" >&2
 
   if [[ -z "$create$update$remove$shorten" ]]
-  then error "$@: Missing action (-Create, -Remove, -Shorten, -Update)"; return 1
+  then error "$@: Missing action"; return 1
   elif [[ "$create$update$remove$shorten" != true ]]
   then error "$@: Invalid action"; return 1
   fi
