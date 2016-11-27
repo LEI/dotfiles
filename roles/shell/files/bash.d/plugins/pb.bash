@@ -154,10 +154,10 @@ pbx() {
   # curl -sF "c=@${1:--}" -w "%{redirect_url}" 'http://ptpb.pw/?r=1' -o /dev/stderr | "$copy"
 }
 
-# Encrypt file with GPG symetric cipher, decrypt with curl <pasteurl> | gpg -d
+# Encrypt file with GPG symetric cipher
 pbg() { # Always pbx -Cf "$file" ?
   gpg -o - -c "$file" | pbx $@
-}
+} # Decrypt with curl <pasteurl> | gpg -d
 
 # Capture screenshot
 pbs () {
