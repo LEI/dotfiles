@@ -14,10 +14,10 @@ shopt -s extglob
 # Copy the url of the uploaded paste
 pbx() {
   local copy
-  if has xsel
+  if hash xsel 2>/dev/null
   then copy="xsel -l /dev/null -b"
-  # elif has xclip / xclipboard
-  elif has pbcopy
+  # elif xclip[board]
+  elif hash pbcopy 2>/dev/null
   then copy="pbcopy" # -pboard general
   else error "pbx: No clipboard manager found ($(uname -s))"; return 1
   fi
@@ -60,24 +60,29 @@ usage() {
   exit $e
 }
 
+# GET /f GET /s GET /l GET /lf GET /ls
+# GET /<id> GET /<id>/<lexer> GET /<id>/<lexer>/<formatter> GET /<handler>/<id>
+# POST /<handler> POST / POST /<vanity> POST /u
+# PUT /<uuid>
+# DELETE /<uuid>
 full_usage() {
   usage "$1" \
-    "-P, --provider" "Default: $PB_PROVIDER" \
-    "-C, --create" "Required: file or stdin" \
-    "-U, --update" "Required: uuid" \
-    "-R, --remove" "Required: uuid" \
-    "-S, --shorten" "Required: file or stdin" \
-    "-G, --get" "$ curl -X GET $PB_PROVIDER" \
-    "-lf, --list-formats" "$ pb --get lf" \
-    "-ll, --list-lexers" "$ pb --get l" \
-    "-ls, --list-styles" "$ pb --get ls" \
-    "-r, --render" "GET handler (?r=1)" \
-    "-t, --term" "GET handler (?t=1)" \
-    "-p, --private" "(?p=1)" \
-    "-f, --file" "File path or content" \
-    "-u, --uuid" "" \
-    "-v, --vanity" "Prefixed with ~" \
-    "-x, --sunset" "Example: 1m3s"
+    "-P, --provider <host>" "Default host: $PB_PROVIDER" \
+    "-C, --create" "Create a paste (required: file or stdin)" \
+    "-U, --update" "Update a paste (required: uuid)" \
+    "-R, --remove" "Remove a paste (required: uuid)" \
+    "-S, --shorten" "Create a redirect <<< <url>" \
+    "-G, --get <params>" "Arbitrary GET request" \
+    "-lf, --list-formats" "Equivalent to (-G lf)" \
+    "-ll, --list-lexers" "Pygments lexer used for syntax highlighting (-G l)" \
+    "-ls, --list-styles" "Equivalent to (-G ls)" \
+    "-p, --private" "The paste can only be retrieved by knowledge of its sha1 hexdigest (-C)" \
+    "-f, --file [path]" "Content of the paste (-CUS)" \
+    "-u, --uuid <uuid>" "Shared secret allowing modification (-UR)" \
+    "-v, --vanity <name>" "Use <name> as a custom id, prefixed with '~' (-C)" \
+    "-x, --sunset <time>" "Set the paste to expire automatically in <time>" \
+    "-r, --render" "Render a ReStructuredText or Markdown paste to HTML (-CU)" \
+    "-t, --term" "Handle Asciinema videos (-CU)"
 }
 
 pb() {
@@ -89,7 +94,7 @@ pb() {
   local method create update remove shorten # Actions
   local debug private file handler uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
-  do local u= bool= get=0
+  do local params= bool= get=0
     # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
@@ -97,12 +102,12 @@ pb() {
       ''|--\ *) break ;;
       -h*|--help*) full_usage ;;
       -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
-      -P*|--provider*) _arg "P|provider" provider ;;
+      -P*|--provider*) _arg "P|provider" provider && url="$provider" ;;
       -C*|--create*) _arg "C|create" bool && create="$bool" ;;
       -U*|--update*) _arg "U|update" bool && update="$bool" ;;
       -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
-      -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;;
-      -G*|--get*) _arg "G|get" u && get+=1 && url+="/$u" ;;
+      -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;; # TODO no file input?
+      -G*|--get*) _arg "G|get" params && get+=1 && url+="/$params" ;;
       -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
       -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
       -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
@@ -144,7 +149,7 @@ pb() {
       [[ -n "$private" ]] && opts+=" -F p=1"
       [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
       [[ -n "$vanity" ]] && url+="/~$vanity"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}" # -e -f TODO
+      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}" # -e -f TODO check stdin?
       ;;
     $update) method="PUT"
       if [[ -n "$vanity" ]]
