@@ -118,27 +118,16 @@ pb() {
     *) error "$@: Invalid action"; return 1 ;;
   esac
 
-  [[ -n "$PB_CURL_OPTS" ]] && opts="$PB_CURL_OPTS $opts"
-  [[ -n "$render" ]] && url+="?r=1"
+  local curl_opts="$PB_CURL_OPTS $opts"
+  if [[ -n "$render" ]]
+  then url+="?r=1"
+  # elif [[ -n "$terminal" ]]
+  # then url+="?t=1"
+  fi
 
   # echo curl ${opts[@]} $url >&2
-  curl ${opts[@]} $url
+  curl $curl_opts $url
 }
-
-# pb_update() {
-#   local file="${1:-}"
-#   local uuid="${1:-}"
-#   local opts="-X PUT ${3:-}"
-#   pb "$file" "$opts"
-#   curl ${opts[@]} -F "c=@${file:--}" "http://ptpb.pw/$uuid"
-# }
-
-# pb_delete() {
-#   local uuid="${1:-}"; shift
-#   local file="${1:-}"; shift
-#   local opts=("-X PUT" "$@")
-#   curl ${opts[@]} -F "c=@${file:--}" "$PBPROVIDER/$uuid"
-# }
 
 # Copy the url of the uploaded paste
 pbx() {
