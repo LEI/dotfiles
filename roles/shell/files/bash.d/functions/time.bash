@@ -10,7 +10,7 @@ uz() {
 
 # Parse a duration string: 0Y0M0w0d0h1m0s -> 60
 get_seconds() {
-  local in=$1 ou=
+  local in="$1" ou=
   local r= f=
   while [[ -n "$in" ]]
   do
@@ -18,7 +18,7 @@ get_seconds() {
     f=${in%"$r"}
     case $f in
       Y) ou=$ou",31536000 " ;; # Year: 60 * 60 * 24 * 365
-      M) ou=$ou",2678400 " ;; # Month: 60 * 60 * 24 * 31
+      M) ou=$ou",2592000 " ;; # Month: 60 * 60 * 24 * 30
       w) ou=$ou",604800 " ;; # week: 60 * 60 * 24 * 7
       d) ou=$ou",86400 " ;; # day: 60 * 60 * 24
       h) ou=$ou",3600 " ;; # hour: 60 * 60
@@ -33,6 +33,8 @@ get_seconds() {
   do
     num=$(uz "${p%,*}")
     times=${p#*,}
+    # If there is no unit, default to seconds
+    [[ "$times" == "$p" ]] && times=1
     seconds=$((seconds+times*num))
   done
   printf "%s\n" "$seconds"
