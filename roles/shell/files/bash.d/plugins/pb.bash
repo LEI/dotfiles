@@ -5,33 +5,41 @@
 PB_PROVIDER="https://ptpb.pw"
 PB_CURL_OPTS=""
 
+shopt -s extglob
+
 # local args="$@"
 arg() {
-  local a="$1" # Short argument name
-  local next arg pattern="-$a([a-z]*)*"
-  local arg_var="${2:-}" # Variable name
+  local a="$1" # Argument name
+  local prefix next arg pattern="(-|--)($a)([a-z]*)*" # ( |=)
+  local var="${2:-}" # Variable name
   if [[ $args =~ $pattern ]]
-  then next="${BASH_REMATCH[1]}" arg="${args#-* }" arg="${arg%% *}"
-    if [[ -n "$arg_var" ]] && [[ "$arg_var" != "bool" ]]
+  then # >&2 printf "MATCH %s\n" "${BASH_REMATCH[@]}"
+    prefix="${BASH_REMATCH[1]}"
+    a="${BASH_REMATCH[2]}"
+    next="${BASH_REMATCH[3]}"
+    sep=" " # ${BASH_REMATCH[4]}}
+    arg="${args#${prefix}*${sep}}" arg="${arg%%${sep}*}"
+    if [[ -n "$var" ]] && [[ "$var" != "bool" ]]
     then
-      if [[ -n "$arg" ]] && [[ "$arg" == -* ]]
-      then error "-$a: Missing argument value (found: '$arg')"; return 1
+      if [[ -n "$arg" ]] && [[ "$arg" == ${prefix}* ]]
+      then error "${prefix}$a: Missing argument value (found: '$arg')"; return 1
       fi
       if [[ -n "$arg" ]] && [[ "$args" != "$arg"* ]]
-      then eval "$arg_var="$arg"" # If a value is found
-        # echo "-> eval $arg_var=$arg ($a)" >&2
-      else error "-$a: Missing argument value"; return 1
+      then eval "$var="$arg"" # If a value is found
+        # echo "-> eval $var=$arg ($a)" >&2
+      else error "${prefix}$a: Missing argument value"; return 1
       fi
       if [[ -n "$next" ]]
-      then args="${args/-$a* $arg/-$next}" # $arg}"
-      else args="${args#-$a $arg}" # args="${args#* }"
+      then args="${args/${prefix}$a*${sep}$arg/${prefix}$next}" # $arg}"
+      else args="${args#${prefix}$a${sep}$arg}" # args="${args#* }"
       fi
     else # eval "$a=true"
-      eval "${arg_var:-a}=true"
-      # echo "-> eval ${arg_var:-a}=true ($a)" >&2
-      args="${args#-$a}"
+      eval "${var:-a}=true"
+      # echo "-> eval ${var:-a}=true ($a)" >&2
+      args="${args#${prefix}$a}"
       if [[ -n "$next" ]]
-      then args="-$args"
+      then args="${prefix}$args"
+      else args="${args#$sep}"
       fi
       # then args="${args/-$a/-}"
       # else args="${args#-$a}"
@@ -40,43 +48,60 @@ arg() {
   fi
 }
 
+larg() {
+  local arg="$1"
+  local sep="${2:- }"
+  args="${args#--$arg$sep}"
+  eval "$arg="${args%% *}""
+  args="${args#${!arg}}"
+}
+
 pb() {
   local args="$@"
   local url="$PB_PROVIDER"
   local opts=""
   local create remove shorten update # Actions
-  local private file handler uuid vanity sunset # Parameters
+  local debug private file handler uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
-  do
-    local bool= f= u= v= x=
-    # echo "DEBUG ARGS -> '$args'" >&2
+  do local bool= # f= u= v= x=
+    # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
     case "$args" in
       -h*|--help*) error "Usage: pb [-CRSUpfruvx]"
         error "create [f], remove <u>, shorten <<<, update <u>..."
         return 1 ;;
+      -d*|--debug*) arg "d|debug" bool && debug="$bool" || return $? ;;
+      -p*) arg p bool && private="$bool" || return $? ;;
       -C*) arg C bool && create="$bool" || return $? ;;
       -R*) arg R bool && remove="$bool" || return $? ;;
       -S*) arg S bool && shorten="$bool" || return $? ;;
       -U*) arg U bool && update="$bool" || return $? ;;
-      -p*) arg p bool && private="$bool" || return $? ;;
-      -d*) arg d bool && debug="$bool" || return $? ;;
       -f*) arg f file || return $? ;;
+      --file\ *) larg file || return $? ;;
+      --file=*) larg file = || return $? ;;
       -u*) arg u uuid || return $? ;;
+      --uuid\ *) larg uuid || return $? ;;
+      --uuid=*) larg uuid = || return $? ;;
       -v*) arg v vanity || return $? ;;
+      --vanity\ *) larg vanity || return $? ;;
+      --vanity=*) larg vanity = || return $? ;;
       -x*) arg x sunset || return $? ;;
+      --sunset\ *) larg sunset || return $? ;;
+      --sunset=*) larg sunset = || return $? ;;
       # -handler*) arg -handler handler || return $? ;;
-      --handler\ *) args="${args#--handler }" handler="${args%% *}" args="${args#$handler }" ;;
+      --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
       -*) error "${args%% *}: Invalid argument"; return 1 ;;
       '') break ;;
       *) echo "$args: Not matched!"; break ;;
     esac
   done
 
-  #[[ -n "$debug" ]] &&
-  printf "%s\n" "create:$create,remove:$remove,shorten:$shorten,update:$update" >&2
-  printf "%s\n" "priv:$private,file:$f,uuid:$u,vanity:$v,sunset:$x" >&2
+  # if [[ -n "$debug" ]]
+  # then
+  #   printf "ACTION %s\n" "create:$create, remove:$remove, shorten:$shorten, update:$update" >&2
+  #   printf "PARAM %s\n" "priv:$private, file:$file, uuid:$uuid, vanity:$vanity, sunset:$sunset" >&2
+  # fi
 
   if [[ -z "$create$update$remove$shorten" ]]
   then error "$@: Missing action"; return 1
@@ -130,7 +155,7 @@ pb() {
   # echo curl ${opts[@]} $url >&2
   if [[ -n "$debug" ]]
   then echo curl $curl_opts $url
-  else curl $curl_opts $url
+  # else curl $curl_opts $url
   fi
 }
 
@@ -144,7 +169,7 @@ pbx() {
   then copy="pbcopy" # -pboard general
   else error "$(uname -s): No clipboard manager found"; return 1
   fi
-  local opts="--handler r $@" # ?r=1
+  local opts="--handler=r $@" # ?r=1
   local curl_opts="$PB_CURL_OPTS -s -w %{redirect_url} -o /dev/stderr"
   PB_CURL_OPTS="$curl_opts" pb $opts | "$copy"
   # curl -sF "c=@${1:--}" -w "%{redirect_url}" 'http://ptpb.pw/?r=1' -o /dev/stderr | "$copy"
