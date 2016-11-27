@@ -68,11 +68,13 @@ arg() {
 pb() {
   local args="$@"
   local url="$PB_PROVIDER"
-  local opts=""
+  local opts="$PB_CURL_OPTS"
+
+  # Gather arguments
   local method create update remove shorten # Actions
   local debug private file handler uuid vanity sunset # Parameters
   while [[ -n "$args" ]]
-  do local bool= # f= u= v= x=
+  do local bool=
     # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
     # Trim leading and trailing [[:spaces:]]
     args="${args# }" args="${args% }"
@@ -80,32 +82,36 @@ pb() {
       ''|--\ *) break ;;
       -h*|--help*) pberr; return 1 ;;
       -d*|--debug*) arg "d|debug" bool && debug="$bool" || return $? ;;
+      -C*|--create*) arg "C|create" bool && create="$bool" || return $? ;;
+      -U*|--update*) arg "U|update" bool && update="$bool" || return $? ;;
+      -R*|--remove*) arg "R|remove" bool && remove="$bool" || return $? ;;
+      -S*|--shorten*) arg "S|shorten" bool && shorten="$bool" || return $? ;;
+      -P*|--provider*) arg "P|provider" provider || return $? ;;
       -p*|--private*) arg "p|private" bool && private="$bool" || return $? ;;
-      -C*) arg C bool && create="$bool" || return $? ;;
-      -U*) arg U bool && update="$bool" || return $? ;;
-      -R*) arg R bool && remove="$bool" || return $? ;;
-      -S*) arg S bool && shorten="$bool" || return $? ;;
       -f*|--file*) arg "f|file" file || return $? ;;
       -u*|--uuid*) arg "u|uuid" uuid || return $? ;;
       -v*|--vanity*) arg "v|vanity" vanity || return $? ;;
       -x*|--sunset*) arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" || return $? ;;
+      -ll*|--list-lexers*) arg "ll|list-lexers" bool && get="$bool" && url+="/l" || return $? ;;
+      -ls*|--list-styles*) arg "ls|list-styles" bool && get="$bool" && url+="/ls" || return $? ;;
+      -lf*|--list-formats*) arg "lf|list-formats" bool && get="$bool" && url+="/lf" || return $? ;;
       --handler*) arg "handler" handler || return $? ;; # r,t
       # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
       # -*) pberr "illegal option ${args%% *}"; return 1 ;;
       *) pberr "illegal option -- $args"; return 1 break ;;
     esac
   done
-
   # if [[ -n "$debug" ]]
   # then
   #   printf "ACTION %s\n" "create:$create, remove:$remove, shorten:$shorten, update:$update" >&2
   #   printf "PARAM %s\n" "priv:$private, file:$file, uuid:$uuid, vanity:$vanity, sunset:$sunset" >&2
   # fi
 
-  if [[ -z "$create$update$remove$shorten" ]]
-  then pberr "missing option -CURS"; return 1
-  elif [[ "$create$update$remove$shorten" != true ]]
-  then pberr "illegal action -CURS"; return 1
+  # Check arguments
+  if [[ -z "$create$update$remove$shorten$get" ]]
+  then pberr "missing action -C -U -R -S -ll -ls -lf"; return 1
+  elif [[ "$create$update$remove$shorten$get" != true ]]
+  then pberr "illegal action -C -U -R -S -ll -ls -lf"; return 1
   fi
   case true in
     $create) # POST
@@ -129,16 +135,28 @@ pb() {
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
       ;;
     $remove) method="DELETE"
-      if [[ -n "$private$file$vanity$sunset" ]]
-      then pberr "illegal option -- p|f|v|s"; return 1
+      if [[ -n "$private" ]]
+      then pberr "illegal option -- private"; return 1
+      elif [[ -n "$file" ]]
+      then pberr "illegal option -- file"; return 1
+      elif [[ -n "$vanity" ]]
+      then pberr "illegal option -- vanity"; return 1
+      elif [[ -n "$sunset" ]]
+      then pberr "illegal option -- sunset"; return 1
       elif [[ -z "$uuid" ]]
       then pberr "missing option -- uuid"; return 1
       else url+="/$uuid"
       fi
       ;;
     $shorten) # POST
-      if [[ -n "$private$uuid$vanity$sunset" ]]
-      then pberr "illegal option -- p|u|v|s"; return 1
+      if [[ -n "$private" ]]
+      then pberr "illegal option -- private"; return 1
+      elif [[ -n "$uuid" ]]
+      then pberr "illegal option -- uuid"; return 1
+      elif [[ -n "$vanity" ]]
+      then pberr "illegal option -- vanity"; return 1
+      elif [[ -n "$sunset" ]]
+      then pberr "illegal option -- sunset"; return 1
       # elif [[ -z "$link" ]]
       # then pberr "-S: Invalid arguments (missing link)"; return 1
       else url+="/u" # <<< $link
@@ -147,26 +165,37 @@ pb() {
       # opts+=" -F c=@-"
       # opts+=" -F "c=$file""
       ;;
+    $get) method="GET"
+      if [[ -n "$private" ]]
+      then pberr "illegal option -- private"; return 1
+      elif [[ -n "$file" ]]
+      then pberr "illegal option -- file"; return 1
+      elif [[ -n "$uuid" ]]
+      then pberr "illegal option -- uuid"; return 1
+      elif [[ -n "$vanity" ]]
+      then pberr "illegal option -- vanity"; return 1
+      elif [[ -n "$sunset" ]]
+      then pberr "illegal option -- sunset"; return 1
+      # else url+="/" # <<< $link
+      fi
+       ;;
     *) pberr "illegal action -- $@"; return 1 ;;
   esac
-
-  # if [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]]
-  # then pberr "--sunset: Must be a number"; return 1
-  # else sunset="$(get_seconds $sunset)"
-  # fi
-
   [[ -n "$file" ]] && opts+=" -F "c=$file""
   [[ -n "$method" ]] && opts+=" -X $method"
-  local curl_opts="$PB_CURL_OPTS $opts"
   if [[ -n "$handler" ]]
   then url+="?$handler=1"
   fi
 
-  if [[ -n "$debug" ]]
-  then >&2 echo curl $curl_opts $url
-  else curl $curl_opts $url
+  # Execute or debug
+  if [[ -z "$debug" ]]
+  then curl $opts $url
+  else >&2 echo curl $opts $url
   fi
 }
+
+# pbget() {
+# }
 
 pberr() {
   [[ -n "${1:-}" ]] && error "pb: $1"
