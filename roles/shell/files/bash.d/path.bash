@@ -11,6 +11,7 @@ if [[ -d "/usr/local/sbin" ]]; then
 fi
 
 # Composer packages
+# FIXME PHP temp directory (/var/folders/x_/x/T) does not exist or is not writable to Composer. Set sys_temp_dir in your php.ini
 if hash composer 2>/dev/null; then
   # pathmunge "$(composer config -g home)/$(composer config -g bin-dir)" after
   COMPOSER_HOME="$(composer config -g home)" # ~/.composer

@@ -4,26 +4,24 @@
 
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-# read -d '' PB_ARGS <<"EOF"
-# EOF
-PB_ARGS=("bool,h|help" \
-"bool,d|debug" \
-"string,P|provider" \
-"bool,C|create" \
-"bool,U|update" \
-"bool,R|remove" \
-"bool,S|shorten" \
-"string,G|get" \
-"bool,lf|list-formats" \
-"bool,ll|list-lexers" \
-"bool,ls|list-styles" \
-"bool,r|render" \
-"bool,t|term" \
-"string,f|file" \
-"bool,p|private" \
-"string,u|uuid" \
-"string,v|vanity" \
-"duration,x|sunset")
+PB_ARGS=("bool,h|help_*" \
+  "bool,d|debug_*" \
+  "string,P|provider_*+" \
+  "bool,C|create_C" \
+  "bool,U|update_Uu" \
+  "bool,R|remove_Ru" \
+  "bool,S|shorten_S" \
+  "string,G|get_G" \
+  "bool,lf|list-formats_lf" \
+  "bool,ll|list-lexers_ll" \
+  "bool,ls|list-styles_ls" \
+  "bool,r|render_C|U" \
+  "bool,t|term_C|U" \
+  "string,f|file_C|U|S+" \
+  "bool,p|private_C" \
+  "string,u|uuid_U|R+" \
+  "string,v|vanity_C+" \
+  "duration,x|sunset_C|U+")
 
 set -e
 set -o pipefail
@@ -125,17 +123,17 @@ pb() {
       # declare "${k}=${v}"
     elif [[ -z "$k" ]] && [[ -n "$v" ]]
     then args+=("$v")
-    else >&2 printf "%s\n" "Missing key or value: ${k}:${v}"; return 1
+    else >&2 printf "k:%s\tv:%s\n" "${k}" "${v}"; return 1
     fi
-  done < <(parse ${PB_ARGS[@]} "$@") || usage
+  done < <(parse ${PB_ARGS[@]} "$@") && echo $? || usage
 
-  # if [[ -n "$debug" ]]
-  # then
+  if [[ -n "$debug" ]]
+  then
     for i in help create remove shorten update get
     do if [[ -n "${!i}" ]]; then printf "ACTION: %s\n" "$i"; fi; done
     for i in debug provider list_formats list_lexers list_styles render term file private uuid vanity sunset
     do if [[ -n "${!i}" ]]; then printf "%s: %s\n" "$i" "${!i}"; fi; done
-  # fi
+  fi
 
   # while [[ -n "$args" ]]
   # do local params= bool= get=0
