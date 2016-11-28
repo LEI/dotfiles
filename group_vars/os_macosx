@@ -117,10 +117,22 @@ php_packages:
 
 python_packages: []
 
+pip_packages:
+  - bashate
+  # - pygments
+  # - vim-vint
+  - neovim
+
 ruby_packages:
   # - ruby # Used by Vim?
   - rbenv
   # - ruby-build
+  - neovim
+
+ruby_gems:
+  - bundler
+  # - compass
+  - neovim
 
 rxvt_packages:
   - homebrew/x11/rxvt-unicode

@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+shopt -s extglob
+
+parse() {
+  local types="bool|string"
+  local arg_pattern="($types),([a-zA-Z|\|\-]+)"
+  local patterns=() args=()
+
+  while [[ $# -ne 0 ]]
+  do
+    if [[ $1 =~ $arg_pattern ]]
+    then patterns+=("$1"); shift
+    elif [[ $1 =~ $types,* ]]
+    then >&2 printf "%s\n" "parse: invalid arg spec -- $1"; exit 1
+    else break
+    fi
+  done
+
+  local len=$#
+  while [[ $# -ne 0 ]] && [[ "$len" -gt 0 ]]
+  do
+    local p= t= name=
+    for p in "${patterns[@]}"
+    do local pre= key= next= sep= val=
+      t="${p%,*}"; p="${p#*,}" name="${p##*|}"
+      p="(-|--)($p)+([a-zA-Z]+|-)?( |=)?(.*)"
+      # echo "[[ $1 =~ $p ]]"
+      if [[ $1 =~ $p ]]
+      then
+        # if [[ "${BASH_REMATCH[1]:0:1}" == "${BASH_REMATCH[1]:1:1}" ]]
+        # then pre="--"
+        # elif [[ "${BASH_REMATCH[1]:0:1}" ]]
+        # then pre="-"
+        # fi
+        pre="${BASH_REMATCH[1]}"
+        key="${BASH_REMATCH[2]##*-}"
+        next="${BASH_REMATCH[3]:-}"
+        sep="${BASH_REMATCH[4]:-}"
+        val="${BASH_REMATCH[5]:-}"
+        # echo "PRE: $pre" "KEY: $key" "NEXT: $next" "SEP: '$sep'"
+        case $t in
+          bool)
+            if [[ -z "$val" ]]
+            then val=true; shift
+            else >&2 printf "%s\n" "error: switch '$pre$key' does not require a value, got '$val'"; exit 1
+            fi
+            ;;
+          string)
+            if [[ -n "$val" ]]
+            then shift
+            elif [[ $# -gt 1 ]]
+            then val="$2"; shift; shift
+            else >&2 printf "%s\n" "parse: switch '$pre$key' requires a value"; exit 1
+            fi
+            ;;
+          *) >&2 echo "NO TYPE $1"; break ;;
+        esac
+        if [[ -n "$next" ]]
+        then set -- "$pre$next" "${@:1:1}" "${@:2}"
+        fi
+        # echo "PRE: $pre" "KEY: $key" "NEXT: $next" "SEP: '$sep', VAL: $val"
+        # args+=("$name" "$val")
+        printf "%s:%s\n" "$name" "$val"
+        len=$#
+      else # Extra arguments
+        len=$((len -1)) # ((len--))
+        if [[ "$len" -eq 0 ]]
+        then printf ":%s\n" "$@"
+        fi
+      fi
+    done
+    # >&2 echo "last: $last / name: $name / next: $next"
+    # if [[ -z "$next" ]] && [[ -n "$name" ]] || [[ "$last" == "$name" ]]
+    # then >&2 echo "NO MATCH $1"; shift
+    # fi
+  done
+  # printf "%s\n" "ARGZ $@"
+  # echo "pre: $pre"
+  # if [[ -n "$1" ]] && [[ "$1" != -* ]]
+  # then echo "remaining $1"; break
+  # fi
+
+  # echo "args: ${args[@]}"
+
+  # printf "%s:%s\n" "${args[@]}"
+  # &>3 printf "%s\n" "$@"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && parse "$@"

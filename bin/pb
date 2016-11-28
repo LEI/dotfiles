@@ -9,6 +9,7 @@ PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
 
 set -e
+set -o pipefail
 shopt -s extglob
 
 # Copy the url of the uploaded paste
@@ -48,15 +49,16 @@ pbs () {
 }
 
 usage() {
-  local err="${1:-}" e=0
-  shift
-  local msg="$@"
+  local err="${1:-}" e=$? msg=
   if [[ -n "$err" ]]
   then pberr "$err"; e=1
   fi
+  if [[ $# -gt 1 ]]
+  then shift; msg="$@"
+  fi
   >&2 printf "%s\n" "Usage: pb [opts]"
   >&2 printf "          %-24s%s\n" \
-    "[ --help | --debug ]" "" "$@"
+    "[ --help | --debug ]" "" "$msg"
   exit $e
 }
 
@@ -86,54 +88,101 @@ full_usage() {
 }
 
 pb() {
-  args="$@"
+  local args=()
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
 
   # Gather arguments
   local method create update remove shorten # Actions
-  local debug private file handler uuid vanity sunset # Parameters
-  while [[ -n "$args" ]]
-  do local params= bool= get=0
-    # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
-    # Trim leading and trailing [[:spaces:]]
-    args="${args# }" args="${args% }"
-    case "$args" in
-      ''|--\ *) break ;;
-      -h*|--help*) full_usage ;;
-      -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
-      -P*|--provider*) _arg "P|provider" provider && url="$provider" ;;
-      -C*|--create*) _arg "C|create" bool && create="$bool" ;;
-      -U*|--update*) _arg "U|update" bool && update="$bool" ;;
-      -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
-      -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;; # TODO no file input?
-      -G*|--get*) _arg "G|get" params && get+=1 && url+="/$params" ;;
-      -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
-      -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
-      -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
-      -r*|--render*) _arg "t|term" bool && handler=r ;; # r,t
-      -t*|--term*) _arg "t|term" bool && handler=t ;; # r,t
-      -f*|--file*) _arg "f|file" file ;;
-      -p*|--private*) _arg "p|private" bool && private="$bool" ;;
-      -u*|--uuid*) _arg "u|uuid" uuid ;;
-      -v*|--vanity*) _arg "v|vanity" vanity ;;
-      -x*|--sunset*) _arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" ;;
-      # --handler*) _arg "handler" handler ;; # r,t
-      # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
-      # -*) usage "illegal option ${args%% *}" ;;
-      *) arg="${args#-}"; usage "illegal option -- ${arg#-}" ;;
-    esac
-  done
+  local help debug provider list_formats list_lexers list_styles render term
+  local private file uuid vanity sunset # Parameters
+
+  # exec 3<> /tmp/ret
+
+  local k v
+  while IFS=: read -r k v
+  do
+    if [[ -n "$k" ]] && [[ -n "$v" ]]
+    then k="${k/-/_}"
+      eval "$k=\"$v\""
+      # declare "${k}=${v}"
+    elif [[ -z "$k" ]] && [[ -n "$v" ]]
+    then args+=("$v")
+    else >&2 printf "%s\n" "Missing key or value: ${k}:${v}"
+    fi
+  done < <(parse \
+    "bool,h|help" \
+    "bool,d|debug" \
+    "string,P|provider" \
+    "bool,C|create" \
+    "bool,U|update" \
+    "bool,R|remove" \
+    "bool,S|shorten" \
+    "string,G|get" \
+    "bool,lf|list-formats" \
+    "bool,ll|list-lexers" \
+    "bool,ls|list-styles" \
+    "bool,r|render" \
+    "bool,t|term" \
+    "string,f|file" \
+    "bool,p|private" \
+    "string,u|uuid" \
+    "string,v|vanity" \
+    "string,x|sunset" \
+    "$@") || usage
+  # echo $?
+
   # if [[ -n "$debug" ]]
   # then
-  #   printf "ACTION %s\n" "create:$create, remove:$remove, shorten:$shorten, update:$update, get:$get" >&2
-  #   printf "PARAM %s\n" "priv:$private, file:$file, uuid:$uuid, vanity:$vanity, sunset:$sunset" >&2
+    for i in help create remove shorten update get
+    do if [[ -n "${!i}" ]]; then printf "ACTION: %s\n" "$i"; fi; done
+    for i in debug provider list_formats list_lexers list_styles render term file private uuid vanity sunset
+    do if [[ -n "${!i}" ]]; then printf "%s: %s\n" "$i" "${!i}"; fi; done
   # fi
+
+  # while [[ -n "$args" ]]
+  # do local params= bool= get=0
+  #   # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
+  #   # Trim leading and trailing [[:spaces:]]
+  #   args="${args# }" args="${args% }"
+  #   case "$args" in
+  #     ''|--\ *) break ;;
+  #     -h*|--help*) full_usage ;;
+  #     -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
+  #     -P*|--provider*) _arg "P|provider" provider && url="$provider" ;;
+  #     -C*|--create*) _arg "C|create" bool && create="$bool" ;;
+  #     -U*|--update*) _arg "U|update" bool && update="$bool" ;;
+  #     -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
+  #     -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;; # TODO no file input?
+  #     -G*|--get*) _arg "G|get" params && get+=1 && url+="/$params" ;;
+  #     -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
+  #     -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
+  #     -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
+  #     -r*|--render*) _arg "t|term" bool && handler=r ;; # r,t
+  #     -t*|--term*) _arg "t|term" bool && handler=t ;; # r,t
+  #     -f*|--file*) _arg "f|file" file ;;
+  #     -p*|--private*) _arg "p|private" bool && private="$bool" ;;
+  #     -u*|--uuid*) _arg "u|uuid" uuid ;;
+  #     -v*|--vanity*) _arg "v|vanity" vanity ;;
+  #     -x*|--sunset*) _arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" ;;
+  #     # --handler*) _arg "handler" handler ;; # r,t
+  #     # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
+  #     # -*) usage "illegal option ${args%% *}" ;;
+  #     *) arg="${args#-}"; usage "illegal option -- ${arg#-}" ;;
+  #   esac
+  # done
+
   # Check arguments
+  [[ -n "$args" ]] && usage "extra args: ${args[@]}"
+  [[ -n "$provider" ]] && url="$provider"
+  [[ -n "$render" ]] && url+="/r"
+  [[ -n "$term" ]] && url+="/t"
+  [[ -n "$sunset" ]] && sunset="$(get_seconds "$sunset")"
+
   if [[ "$get" -gt 1 ]]
   then usage "invalid action -ll -ls -lf"
   elif [[ "$get" -eq 1 ]]
-  then get=true
+  then url+="/$get"; get=true
   else get=
   fi
   if [[ -z "$create$update$remove$shorten$get" ]]
