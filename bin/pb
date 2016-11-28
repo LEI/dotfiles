@@ -2,11 +2,28 @@
 # http://ptpb.pw/#shell-functions
 # https://github.com/HalosGhost/pbpst
 
-# get_seconds
-source "${BASH_DIR:-$HOME/.bash.d}/functions/time.bash"
-
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
+# read -d '' PB_ARGS <<"EOF"
+# EOF
+PB_ARGS=("bool,h|help" \
+"bool,d|debug" \
+"string,P|provider" \
+"bool,C|create" \
+"bool,U|update" \
+"bool,R|remove" \
+"bool,S|shorten" \
+"string,G|get" \
+"bool,lf|list-formats" \
+"bool,ll|list-lexers" \
+"bool,ls|list-styles" \
+"bool,r|render" \
+"bool,t|term" \
+"string,f|file" \
+"bool,p|private" \
+"string,u|uuid" \
+"string,v|vanity" \
+"duration,x|sunset")
 
 set -e
 set -o pipefail
@@ -108,29 +125,9 @@ pb() {
       # declare "${k}=${v}"
     elif [[ -z "$k" ]] && [[ -n "$v" ]]
     then args+=("$v")
-    else >&2 printf "%s\n" "Missing key or value: ${k}:${v}"
+    else >&2 printf "%s\n" "Missing key or value: ${k}:${v}"; return 1
     fi
-  done < <(parse \
-    "bool,h|help" \
-    "bool,d|debug" \
-    "string,P|provider" \
-    "bool,C|create" \
-    "bool,U|update" \
-    "bool,R|remove" \
-    "bool,S|shorten" \
-    "string,G|get" \
-    "bool,lf|list-formats" \
-    "bool,ll|list-lexers" \
-    "bool,ls|list-styles" \
-    "bool,r|render" \
-    "bool,t|term" \
-    "string,f|file" \
-    "bool,p|private" \
-    "string,u|uuid" \
-    "string,v|vanity" \
-    "string,x|sunset" \
-    "$@") || usage
-  # echo $?
+  done < <(parse ${PB_ARGS[@]} "$@") || usage
 
   # if [[ -n "$debug" ]]
   # then
@@ -177,7 +174,7 @@ pb() {
   [[ -n "$provider" ]] && url="$provider"
   [[ -n "$render" ]] && url+="/r"
   [[ -n "$term" ]] && url+="/t"
-  [[ -n "$sunset" ]] && sunset="$(get_seconds "$sunset")"
+  # [[ -n "$sunset" ]] && sunset="$(get_seconds "$sunset")"
 
   if [[ "$get" -gt 1 ]]
   then usage "invalid action -ll -ls -lf"
