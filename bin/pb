@@ -64,16 +64,15 @@ pbs () {
 }
 
 usage() {
-  local err="${1:-}" e=$? msg=
+  local e=$?
+  local err="${1:-}"
+  [[ $# -gt 1 ]] && shift
   if [[ -n "$err" ]]
   then pberr "$err"; e=1
   fi
-  if [[ $# -gt 1 ]]
-  then shift; msg="$@"
-  fi
   >&2 printf "%s\n" "Usage: pb [opts]"
   >&2 printf "          %-24s%s\n" \
-    "[ --help | --debug ]" "" "$msg"
+    "[ --help | --debug ]" "$@"
   exit $e
 }
 
@@ -83,7 +82,7 @@ usage() {
 # PUT /<uuid>
 # DELETE /<uuid>
 full_usage() {
-  usage "$1" \
+  usage "$1" "" \
     "-P, --provider <host>" "Default host: $PB_PROVIDER" \
     "-C, --create" "Create a paste (required: file or stdin)" \
     "-U, --update" "Update a paste (required: uuid)" \
@@ -116,7 +115,7 @@ pb() {
 
   local k v
   while IFS=: read -r k v
-  do
+  do # echo >&2 "$k => $v"
     if [[ -n "$k" ]] && [[ -n "$v" ]]
     then k="${k/-/_}"
       eval "$k=\"$v\""
@@ -125,7 +124,9 @@ pb() {
     then args+=("$v")
     else >&2 printf "k:%s\tv:%s\n" "${k}" "${v}"; return 1
     fi
-  done < <(parse ${PB_ARGS[@]} "$@") && echo $? || usage
+  done < <(parse ${PB_ARGS[@]} "$@" && echo $? >/tmp/pb || echo $? >/tmp/pb) #|| usage
+  read -r ret < /tmp/pb
+  [[ "$ret" -ne 0 ]] && usage
 
   if [[ -n "$debug" ]]
   then
@@ -169,6 +170,7 @@ pb() {
 
   # Check arguments
   [[ -n "$args" ]] && usage "extra args: ${args[@]}"
+  [[ -n "$help" ]] && full_usage
   [[ -n "$provider" ]] && url="$provider"
   [[ -n "$render" ]] && url+="/r"
   [[ -n "$term" ]] && url+="/t"
