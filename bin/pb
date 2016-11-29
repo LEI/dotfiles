@@ -7,21 +7,21 @@ PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
 PB_ARGS=("bool,h|help" \
   "bool,d|debug" \
   "string,P|provider,+" \
-  "bool,C|create,C" \
-  "bool,U|update,U&u" \
-  "bool,R|remove,R&u" \
-  "bool,S|shorten,S" \
-  "string,G|get,G+" \
-  "bool,lf|list-formats,lf" \
-  "bool,ll|list-lexers,ll" \
-  "bool,ls|list-styles,ls" \
-  "bool,r|render,C|U" \
-  "bool,t|term,C|U" \
-  "string,f|file,C|U|S+" \
-  "bool,p|private,C" \
-  "string,u|uuid,U|R+" \
-  "string,v|vanity,C+" \
-  "duration,x|sunset,C|U+")
+  "bool,C|create,C|-create&!u|-uuid" \
+  "bool,U|update,U|-update&u|-uuid" \
+  "bool,R|remove,R|-remove&u|-uuid" \
+  "bool,S|shorten,S|-shorten" \
+  "string,G|get,G|-get+" \
+  "bool,lf|list-formats,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
+  "bool,ll|list-lexers,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
+  "bool,ls|list-styles,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
+  "bool,r|render,C|-create|U|-update" \
+  "bool,t|term,C|-create|U|-update" \
+  "string,f|file,C|-create|U|-update|S|-shorten+" \
+  "bool,p|private,C|-create" \
+  "string,u|uuid,U|-update|R|-remove+" \
+  "string,v|vanity,C|-create+" \
+  "duration,x|sunset,C|-create|U|-update+")
 PB_DESC=("This"
   "Print curl command instead of executing it" \
   "Pastebin host, default: $PB_PROVIDER" \

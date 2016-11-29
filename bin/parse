@@ -12,7 +12,7 @@ parse() {
   local args=(${PARSE_ARGS[@]})
   local true="true"
   if [[ -z "$args" ]] || [[ $# -eq 0 ]]
-  then >&2 printf "%s\n" "error: missing arguments"
+  then >&2 printf "%s\n" "parse: missing arguments"
     return 1
   fi
   while [[ $# -ne 0 ]]
@@ -24,8 +24,9 @@ parse() {
       [[ "$type" != "$func" ]] && type="${type%@*}" || func=
       local p="${a#*,}"
       p="${p%%,*}"
-      local name="${p##*|}"
-      name="${name/-/_}"
+      local long="${p##*|}"
+      local short="${p%%|*}"
+      local name="${long/-/_}"
       local spec="${a##*,}"
       # local func="${a##*@}"
       # if [[ "$a" != "$func" ]]
@@ -36,7 +37,7 @@ parse() {
       # for v in type spec func p spec; do printf "%s: %s\n" "$v" "${!v}"; done
 
       # local pattern="^(-${p%|*}|--${p#*|})([a-zA-Z-]*)( |=)?(.*)$"
-      local pattern="^(-${p%|*}|--${p#*|})([a-zA-Z-]*)?( |=)?(.*)$"
+      local pattern="^(-${short}|--${long})([a-zA-Z]*)?( |=)?(.*)$"
       if [[ $1 =~ $pattern ]]
       then # >&2 printf "MATCH '%s'\n" "${BASH_REMATCH[@]}"
         # >&2 printf "%s\t=~\t%s\n" "'$1'" "$pattern"
@@ -48,27 +49,79 @@ parse() {
         local val="${BASH_REMATCH[4]}"
         if [[ -n "$key" ]]
         then
-          # >&2 echo "Args: $@ (1:$1,2:$2,3:$3)"
-
           # If short key, look for extra arguments
           if [[ "$1" != "--"* ]] && [[ -n "$next" ]]
           then
-            set -- "${@:1:1}" "$key" "${@:2}"
-            set -- "${@:2:1}" "-$next$sep$val" "${@:3}"
-            # if [[ "$spec" == *+ ]]
-            # then
-            #   set -- "${@:1:1}" "-$next$sep$val" "${@:2}"
-            #   set -- "${@:2:1}" "$key" "${@:3}"
+            if [[ "$spec" == *+ ]]
+            then # Re-order arguments
+              set -- "${@:1:1}" "-$next$sep$val" "${@:2}"
+              set -- "${@:2:1}" "$key" "${@:3}"
+              continue
+            else # Split short arguments
+              set -- "${@:1:1}" "$key" "${@:2}"
+              set -- "${@:2:1}" "-$next$sep$val" "${@:3}"
+            fi
+          fi
+          local s _s _spec="${spec%+}"
+          if [[ -n "$spec" ]]
+          then
+            while IFS=$'&' read -ra _s
+            do
+              for s in "${_s[@]}"
+              do local check
+                if [[ "$s" == !* ]]
+                then check="absent"; s="${s#!}" #; pattern="($s!)"
+                else check="present" #; pattern="($s)"
+                fi
+                pattern="-([a-zA-Z]*)+($s)"
+
+                # >&2 echo "[[ ${_args[@]} =~ $pattern ]] /// $p"
+
+                if [[ ! ${_args[@]} =~ $pattern ]] && [[ "$check" == "present" ]]
+                then # s="${BASH_REMATCH[1]:--$s}"
+                  >&2 printf "%s\n" "parse: invalid argument $key (${s} should be $check)"
+                  return 1
+                elif [[ ${_args[@]} =~ $pattern ]] && [[ "$check" == "absent" ]]
+                then s="${BASH_REMATCH[2]:--$s}"
+                  >&2 printf "%s\n" "parse: invalid argument $key (-${s##*|} should be $check)"
+                  return 1
+                fi
+                # if [[ ${_args[@]} =~ $pattern ]] #&& [[ "$check" == "present" ]]
+                # then
+                #   if [[ -n "${BASH_REMATCH[1]}" ]]
+                #   then
+                #     # set -- "${@:1:1}" "$key" "${@:2}"
+                #     # set -- "${@:2:1}" "-$next$sep$val" "${@:3}"
+                #     # _args="${_args/-${BASH_REMATCH[1]}/-${BASH_REMATCH[1]} -}"
+                #     # set -- "${@/-${BASH_REMATCH[1]}/-${BASH_REMATCH[1]} -}"
+                #     >&2 echo ">>>> ${_args[@]}"
+                #   fi
+                # else >&2 echo "args: ${_args[@]}"
+                #   >&2 printf "%s\n" "parse: invalid argument $key ($s should be $check)"
+                #   return 1
+                # fi
+              done
+            done <<< "$_spec"
+            # if [[ "$spec" = *"&"* ]]
+            # then echo >&2 "S2 ${spec##*&}"
+            # fi
+            # spec="${spec%%&*}"
+            # >&2 printf "%s\n" "DONE: $name$sep$val (->$next) [$spec]"
+            # pattern="-([a-zA-Z]+)*($spec)"
+            # if [[ ! $_args =~ $pattern ]]
+            # # then >&2 printf "=> %s\n" "${BASH_REMATCH[@]}"
+            # then >&2 printf "%s\n" "parse: switch '$name' invalid -- $spec /$pattern/"
+            # # else >&2 printf "%s\n" "/$pattern/"
             # fi
           fi
 
           # if [[ "$type" == bool ]] && [[ -n "$val" ]]
-          # then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"; return 1
+          # then >&2 printf "%s\n" "parse: switch '$name' does not require a value -- $val"; return 1
           # elif [[ "$type" != bool ]] && [[ -z "$val" ]] && [[ $# -gt 1 ]]
           # then shift; val="$1"
           # fi
           # if [[ "$type" != bool ]] && [[ -z "$val" ]]
-          # then >&2 printf "%s\n" "error: switch '$name' requires a $type -- $val"; return 1
+          # then >&2 printf "%s\n" "parse: switch '$name' requires a $type -- $val"; return 1
           # elif [[ "$type" == bool ]]
           # then val="$true"
           # fi
@@ -90,23 +143,20 @@ parse() {
             bool)
               val="$true"
               # if [[ -n "$val" ]] # && [[ "$val" != "$true" ]]
-              # then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"
+              # then >&2 printf "%s\n" "parse: switch '$long' does not require a value -- $val"
               #   return 1
               # else val="$true"
               # fi
               ;;
             string)
               if [[ -z "$val" ]]
-              then >&2 printf "%s\n" "error: switch '$name' requires a $type -- $val"
+              then >&2 printf "%s\n" "parse: invalid $type $key (got '$val')"
                 return 1
               fi
               ;;
             number)
-              if [[ -z "$val" ]]
-              then >&2 printf "%s\n" "error: switch '$name' requires a $type -- $val"
-                return 1
-              elif [[ ! $val =~ ^-?[0-9]+$ ]]
-              then >&2 printf "%s\n" "parse: switch '$name' requires a number"
+              if [[ -z "$val" ]] || [[ ! $val =~ ^-?[0-9]+$ ]]
+              then >&2 printf "%s\n" "parse: invalid $type $key (got '$val')"
                 return 1
               fi
               ;;
@@ -114,10 +164,10 @@ parse() {
 
           # Check value specification
           if [[ "$spec" == *+ ]] && [[ -z "$val" ]]
-          then >&2 printf "%s\n" "parse: switch '$name' requires a value"
+          then >&2 printf "%s\n" "parse: invalid $key requires a $type"
             return 1
           elif [[ "$spec" != *+ ]] && [[ -n "$val" ]] && [[ "$type" != bool ]]
-          then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"
+          then >&2 printf "%s\n" "parse: invalid $key does not require a value (got '$val', expecting $type)"
             return 1
           fi
 
@@ -138,17 +188,6 @@ parse() {
         fi
       fi
     done
-
-    # spec="${spec%+}"
-    # if [[ -n "$spec" ]]
-    # then
-    #   pattern="-([a-zA-Z]+)*(${spec%%&*})"
-    #   if [[ ! $_args =~ $pattern ]]
-    #   # then >&2 printf "=> %s\n" "${BASH_REMATCH[@]}"
-    #   then >&2 printf "%s\n" "error: switch '$name' invalid -- $spec /$pattern/"
-    #   # else >&2 printf "%s\n" "/$pattern/"
-    #   fi
-    # fi
   done
 }
 
