@@ -8,6 +8,61 @@ shopt -s extglob
 source "${BASH_DIR:-$HOME/.bash.d}/functions/time.bash"
 
 parse() {
+  while [[ $# -ne 0 ]]
+  do
+    local a=
+    for a in ${PARSE_ARGS[@]}
+    do
+      local type="${a%%,*}"
+      local func="${type##*@}"
+      [[ "$type" != "$func" ]] && type="${type%@*}" || func=
+      local p="${a#*,}"
+      p="${p%%,*}"
+      local spec="${a##*,}"
+      # local func="${a##*@}"
+      # if [[ "$a" != "$func" ]]
+      # then spec="${a%%@}"
+      # else func=
+      # fi
+
+      local pattern="(-${p%|*}|--${p#*|})( |=)?(.*)" # ([a-zA-Z-])
+      # >&2 printf "%s\t=~\t%s\n" "'$1'" "$pattern"
+      if [[ $1 =~ $pattern ]]
+      then
+        local name="${BASH_REMATCH[1]##*-}"
+        local sep="${BASH_REMATCH[2]}"
+        local val="${BASH_REMATCH[3]}"
+        # >&2 printf "MATCH '%s'\n" "${BASH_REMATCH[@]}"
+        if [[ -n "$name" ]]
+        then
+          # echo "MATCH $name -> 1($1) 2($2) $val"
+          if [[ "$type" == bool ]] && [[ -n "$val" ]]
+          then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"; return 1
+          elif [[ "$type" != bool ]] && [[ -z "$val" ]] && [[ $# -gt 1 ]]
+          then shift; val="$1"
+          fi
+          if [[ "$type" != bool ]] && [[ -z "$val" ]]
+          then >&2 printf "%s\n" "error: switch '$name' requires a $type -- $val"; return 1
+          fi
+          if [[ -n "$func" ]] && hash "${func%%* }" 2>/dev/null
+          then val="$($func "$val")"
+          fi
+          printf "%s:%s\n" "${name}" "${val}"
+          shift
+          break
+        else >&2 echo "Empty match?"
+          return 1
+        fi
+        # if [[ -n "$next" ]]
+        # then set -- "$pre$next" "${@:1:1}" "${@:2}"
+        # fi
+      fi
+      # for v in type spec func; do printf "%s: %s\n" "$v" "${!v}"; done
+    done
+  done
+}
+
+_parse() {
   local types="bool|string|number|duration"
   local arg_pattern="($types),([a-zA-Z|\|\-]+)"
   local patterns=()
