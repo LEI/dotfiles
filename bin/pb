@@ -4,24 +4,24 @@
 
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-PB_ARGS=("bool,h|help_*" \
-  "bool,d|debug_*" \
-  "string,P|provider_*+" \
-  "bool,C|create_C" \
-  "bool,U|update_Uu" \
-  "bool,R|remove_Ru" \
-  "bool,S|shorten_S" \
-  "string,G|get_G" \
-  "bool,lf|list-formats_lf" \
-  "bool,ll|list-lexers_ll" \
-  "bool,ls|list-styles_ls" \
-  "bool,r|render_C|U" \
-  "bool,t|term_C|U" \
-  "string,f|file_C|U|S+" \
-  "bool,p|private_C" \
-  "string,u|uuid_U|R+" \
-  "string,v|vanity_C+" \
-  "duration,x|sunset_C|U+")
+PB_ARGS=("bool,h|help,*" \
+  "bool,d|debug,*" \
+  "string,P|provider,*+" \
+  "bool,C|create,C" \
+  "bool,U|update,Uu" \
+  "bool,R|remove,Ru" \
+  "bool,S|shorten,S" \
+  "string,G|get,G+" \
+  "bool,lf|list-formats,lf" \
+  "bool,ll|list-lexers,ll" \
+  "bool,ls|list-styles,ls" \
+  "bool,r|render,C|U" \
+  "bool,t|term,C|U" \
+  "string,f|file,C|U|S+" \
+  "bool,p|private,C" \
+  "string,u|uuid,U|R+" \
+  "string,v|vanity,C+" \
+  "duration,x|sunset,C|U+")
 
 set -e
 set -o pipefail
@@ -37,7 +37,7 @@ pbx() {
   then copy="pbcopy" # -pboard general
   else error "pbx: No clipboard manager found ($(uname -s))"; return 1
   fi
-  local opts="--handler=r $@" # ?r=1
+  local opts="--render $@" # --handler=r $@" # ?r=1
   local curl_opts="$PB_CURL_OPTS -s -w %{redirect_url} -o /dev/stderr"
   PB_CURL_OPTS="$curl_opts" pb $opts | "$copy"
   # curl -sF "c=@${1:--}" -w "%{redirect_url}" 'http://ptpb.pw/?r=1' -o /dev/stderr | "$copy"
@@ -102,216 +102,280 @@ full_usage() {
 }
 
 pb() {
-  local args=()
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
+  local args=
+  args="$(PARSE_ARGS="${PB_ARGS[@]}" parse "$@")" || return 1
+  local arg=
+  for arg in ${args[@]}
+  do declare ${arg%%=*}="${arg#*=}"
+  done
+  [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
 
-  # Gather arguments
-  local method create update remove shorten # Actions
-  local help debug provider list_formats list_lexers list_styles render term
-  local private file uuid vanity sunset # Parameters
+  # for v in type get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
 
-  # exec 3<> /tmp/ret
+  # local method get create update remove shorten list_formats list_lexerslist_styles # Actions
+  # local help debug provider render term file private uuid vanity sunset # Parameters
 
-  local k v
-  while IFS=: read -r k v
-  do # echo >&2 "$k => $v"
-    if [[ -n "$k" ]] && [[ -n "$v" ]]
-    then k="${k/-/_}"
-      eval "$k=\"$v\""
-      # declare "${k}=${v}"
-    elif [[ -z "$k" ]] && [[ -n "$v" ]]
-    then args+=("$v")
-    else >&2 printf "k:%s\tv:%s\n" "${k}" "${v}"; return 1
-    fi
-  done < <(parse ${PB_ARGS[@]} "$@" && echo $? >/tmp/pb || echo $? >/tmp/pb) #|| usage
-  read -r ret < /tmp/pb
-  [[ "$ret" -ne 0 ]] && usage
-
-  if [[ -n "$debug" ]]
-  then
-    for i in help create remove shorten update get
-    do if [[ -n "${!i}" ]]; then printf "ACTION: %s\n" "$i"; fi; done
-    for i in debug provider list_formats list_lexers list_styles render term file private uuid vanity sunset
-    do if [[ -n "${!i}" ]]; then printf "%s: %s\n" "$i" "${!i}"; fi; done
-  fi
-
-  # while [[ -n "$args" ]]
-  # do local params= bool= get=0
-  #   # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
-  #   # Trim leading and trailing [[:spaces:]]
-  #   args="${args# }" args="${args% }"
-  #   case "$args" in
-  #     ''|--\ *) break ;;
-  #     -h*|--help*) full_usage ;;
-  #     -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
-  #     -P*|--provider*) _arg "P|provider" provider && url="$provider" ;;
-  #     -C*|--create*) _arg "C|create" bool && create="$bool" ;;
-  #     -U*|--update*) _arg "U|update" bool && update="$bool" ;;
-  #     -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
-  #     -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;; # TODO no file input?
-  #     -G*|--get*) _arg "G|get" params && get+=1 && url+="/$params" ;;
-  #     -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
-  #     -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
-  #     -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
-  #     -r*|--render*) _arg "t|term" bool && handler=r ;; # r,t
-  #     -t*|--term*) _arg "t|term" bool && handler=t ;; # r,t
-  #     -f*|--file*) _arg "f|file" file ;;
-  #     -p*|--private*) _arg "p|private" bool && private="$bool" ;;
-  #     -u*|--uuid*) _arg "u|uuid" uuid ;;
-  #     -v*|--vanity*) _arg "v|vanity" vanity ;;
-  #     -x*|--sunset*) _arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" ;;
-  #     # --handler*) _arg "handler" handler ;; # r,t
-  #     # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
-  #     # -*) usage "illegal option ${args%% *}" ;;
-  #     *) arg="${args#-}"; usage "illegal option -- ${arg#-}" ;;
-  #   esac
-  # done
-
-  # Check arguments
-  [[ -n "$args" ]] && usage "extra args: ${args[@]}"
-  [[ -n "$help" ]] && full_usage
   [[ -n "$provider" ]] && url="$provider"
-  [[ -n "$render" ]] && url+="/r"
-  [[ -n "$term" ]] && url+="/t"
-  # [[ -n "$sunset" ]] && sunset="$(get_seconds "$sunset")"
 
-  if [[ "$get" -gt 1 ]]
-  then usage "invalid action -ll -ls -lf"
-  elif [[ "$get" -eq 1 ]]
+  if [[ -n "$get" ]] && [[ "$get" != true ]]
   then url+="/$get"; get=true
-  else get=
-  fi
-  if [[ -z "$create$update$remove$shorten$get" ]]
-  then usage "missing action -C -U -R -S"
-  elif [[ "$create$update$remove$shorten$get" != true ]]
-  then usage "invalid action -C -U -R -S"
   fi
   case true in
+    $list_formats) get=true; url+="/lf" ;;
+    $list_lexers) get=true; url+="/l" ;;
+    $list_styles) get=true; url+="/ls" ;;
+  esac
+  case true in
+    $get) method="GET"
+      ;;
     $create) # POST
-      if [[ -n "$uuid" ]]
-      then usage "illegal option -- uuid"
-      fi
       [[ -n "$private" ]] && opts+=" -F p=1"
-      [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
+      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
       [[ -n "$vanity" ]] && url+="/~$vanity"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}" # -e -f TODO check stdin?
+      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+      [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
     $update) method="PUT"
-      if [[ -n "$vanity" ]]
-      then usage "illegal option -- vanity"
-      elif [[ -z "$uuid" ]]
-      then usage "missing option -- uuid"
-      else url+="/$uuid"
-      fi
-      [[ -n "$private" ]] && opts+=" -F p=1"
-      [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
+      url+="/$uuid"
+      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+      [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
     $remove) method="DELETE"
-      if [[ -n "$private" ]]
-      then usage "illegal option -- private"
-      elif [[ -n "$file" ]]
-      then usage "illegal option -- file"
-      elif [[ -n "$vanity" ]]
-      then usage "illegal option -- vanity"
-      elif [[ -n "$sunset" ]]
-      then usage "illegal option -- sunset"
-      elif [[ -z "$uuid" ]]
-      then usage "missing option -- uuid"
-      else url+="/$uuid"
-      fi
+      url+="/$uuid"
       ;;
     $shorten) # POST
-      if [[ -n "$private" ]]
-      then usage "illegal option -- private"
-      elif [[ -n "$uuid" ]]
-      then usage "illegal option -- uuid"
-      elif [[ -n "$vanity" ]]
-      then usage "illegal option -- vanity"
-      elif [[ -n "$sunset" ]]
-      then usage "illegal option -- sunset"
-      # elif [[ -z "$link" ]]
-      # then usage "-S: Invalid arguments (missing link)"
-      else url+="/u" # <<< $link
-      fi
+      url+="/u"
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      # opts+=" -F c=@-"
-      # opts+=" -F "c=$file""
+      [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
-    $get) method="GET"
-      if [[ -n "$private" ]]
-      then usage "illegal option -- private"
-      elif [[ -n "$file" ]]
-      then usage "illegal option -- file"
-      elif [[ -n "$uuid" ]]
-      then usage "illegal option -- uuid"
-      elif [[ -n "$vanity" ]]
-      then usage "illegal option -- vanity"
-      elif [[ -n "$sunset" ]]
-      then usage "illegal option -- sunset"
-      # else url+="/" # <<< $link
-      fi
-       ;;
-    *) usage "illegal action -- $@" ;;
   esac
-  [[ -n "$file" ]] && opts+=" -F "c=$file""
+
+  # Handler
+  [[ -n "$render" ]] && url+="?r=1"
+  [[ -n "$term" ]] && url+="?t=1"
+
   [[ -n "$method" ]] && opts+=" -X $method"
-  if [[ -n "$handler" ]]
-  then url+="?$handler=1"
-  fi
 
   # Execute or debug
   if [[ -z "$debug" ]]
-  then curl $opts $url
+  then echo curl $opts $url
   else >&2 echo curl $opts $url
   fi
 }
 
-_arg() {
-  local a="$1" # Argument name
-  local prefix next arg pattern="(-|--)($a)*([a-zA-Z]|-)?( |=)*" # ( |=)
-  local var="${2:-}" # Variable name
-  if [[ $args =~ $pattern ]]
-  then # >&2 printf "MATCH %s\n" "${BASH_REMATCH[@]}"
-    prefix="${BASH_REMATCH[1]}"
-    a="${BASH_REMATCH[2]}"
-    next="${BASH_REMATCH[3]}"
-    sep="${BASH_REMATCH[4]:- }"
-    # >&2 echo "B4 arg: $arg, args: $args"
-    arg="${args#${prefix}*${sep}}" arg="${args%% -*}" # arg="${arg%%${prefix}*}" # arg="${arg%%${sep}*}"
-    if [[ -n "$var" ]] && [[ "$var" != "bool" ]]
-    then
-      arg="${arg#${prefix}${a}${sep}}"
-      # >&2 echo "arg: $arg, args: $args"
-      if [[ -n "$arg" ]] && [[ "$arg" == ${prefix}* ]]
-      then usage "missing value -- $a" "found: $arg"
-      fi
-      if [[ -n "$arg" ]] && [[ "$args" != "$arg"* ]]
-      then
-        # >&2 echo "$a -> eval $var=\"$arg\""
-        eval $var=\"$arg\"
-      else usage "missing value -- $a" # "${prefix}$a: Missing argument value"
-      fi
-      # >&2 echo "prefix: $prefix, a: $a, sep: $sep, arg: $arg, next: '$next'"
-      if [[ -n "$next" ]]
-      then args="${args/${prefix}$a*${sep}$arg/${prefix}$next}" # $arg}"
-      else args="${args#${prefix}$a${sep}$arg}" # args="${args#* }"
-      fi
-    else
-      # >&2 echo "$a -> eval ${var:-a}=true"
-      eval "${var:-a}=true"
-      args="${args#${prefix}$a}"
-      if [[ -n "$next" ]]
-      then args="${prefix}$args"
-      else args="${args#$sep}"
-      fi
-      # then args="${args/-$a/-}"
-      # else args="${args#-$a}"
-    fi
-  else usage "illegal option -- $args (not matching /$pattern/)"
-  fi
-}
+# pb() {
+#   local url="$PB_PROVIDER"
+#   local opts="$PB_CURL_OPTS"
+#   local args=
+
+#   # Gather arguments
+#   local method create update remove shorten # Actions
+#   local help debug provider list_formats list_lexers list_styles render term
+#   local private file uuid vanity sunset # Parameters
+
+#   # exec 3<> /tmp/ret
+#   local k v
+#   while IFS=: read -r k v
+#   do # echo >&2 "$k => $v"
+#     if [[ -n "$k" ]] && [[ -n "$v" ]]
+#     then k="${k/-/_}"
+#       eval "$k=\"$v\""
+#       # declare "${k}=${v}"
+#     elif [[ -z "$k" ]] && [[ -n "$v" ]]
+#     then args+=("$v")
+#     else >&2 printf "k:%s\tv:%s\n" "${k}" "${v}"; return 1
+#     fi
+#   done < <(parse ${PB_ARGS[@]} "$@" && echo $? >/tmp/pb || echo $? >/tmp/pb) #|| usage
+#   # read -r ret < /tmp/pb
+#   # [[ "$ret" -ne 0 ]] && usage
+
+#   if [[ -n "$debug" ]]
+#   then
+#     for i in help create remove shorten update get
+#     do if [[ -n "${!i}" ]]; then printf "ACTION: %s\n" "$i"; fi; done
+#     for i in debug provider list_formats list_lexers list_styles render term file private uuid vanity sunset
+#     do if [[ -n "${!i}" ]]; then printf "%s: %s\n" "$i" "${!i}"; fi; done
+#   fi
+
+#   # while [[ -n "$args" ]]
+#   # do local params= bool= get=0
+#   #   # [[ -n "$debug" ]] || [[ "$args" == *"-d"* ]] && echo "ARGS -> '$args'" >&2
+#   #   # Trim leading and trailing [[:spaces:]]
+#   #   args="${args# }" args="${args% }"
+#   #   case "$args" in
+#   #     ''|--\ *) break ;;
+#   #     -h*|--help*) full_usage ;;
+#   #     -d*|--debug*) _arg "d|debug" bool && debug="$bool" ;;
+#   #     -P*|--provider*) _arg "P|provider" provider && url="$provider" ;;
+#   #     -C*|--create*) _arg "C|create" bool && create="$bool" ;;
+#   #     -U*|--update*) _arg "U|update" bool && update="$bool" ;;
+#   #     -R*|--remove*) _arg "R|remove" bool && remove="$bool" ;;
+#   #     -S*|--shorten*) _arg "S|shorten" bool && shorten="$bool" ;; # TODO no file input?
+#   #     -G*|--get*) _arg "G|get" params && get+=1 && url+="/$params" ;;
+#   #     -lf*|--list-formats*) _arg "lf|list-formats" bool && get+=1 && url+="/lf" ;;
+#   #     -ll*|--list-lexers*) _arg "ll|list-lexers" bool && get+=1 && url+="/l" ;;
+#   #     -ls*|--list-styles*) _arg "ls|list-styles" bool && get+=1 && url+="/ls" ;;
+#   #     -r*|--render*) _arg "t|term" bool && handler=r ;; # r,t
+#   #     -t*|--term*) _arg "t|term" bool && handler=t ;; # r,t
+#   #     -f*|--file*) _arg "f|file" file ;;
+#   #     -p*|--private*) _arg "p|private" bool && private="$bool" ;;
+#   #     -u*|--uuid*) _arg "u|uuid" uuid ;;
+#   #     -v*|--vanity*) _arg "v|vanity" vanity ;;
+#   #     -x*|--sunset*) _arg "x|sunset" sunset && sunset="$(get_seconds "$sunset")" ;;
+#   #     # --handler*) _arg "handler" handler ;; # r,t
+#   #     # --handler=*) args="${args#--handler=}" handler="${args%% *}" args="${args#$handler}" ;;
+#   #     # -*) usage "illegal option ${args%% *}" ;;
+#   #     *) arg="${args#-}"; usage "illegal option -- ${arg#-}" ;;
+#   #   esac
+#   # done
+
+#   # Check arguments
+#   [[ -n "$args" ]] && usage "extra args: ${args[@]}"
+#   [[ -n "$help" ]] && full_usage
+#   [[ -n "$provider" ]] && url="$provider"
+#   [[ -n "$render" ]] && url+="/r"
+#   [[ -n "$term" ]] && url+="/t"
+#   # [[ -n "$sunset" ]] && sunset="$(get_seconds "$sunset")"
+
+#   if [[ "$get" -gt 1 ]]
+#   then usage "invalid action -ll -ls -lf"
+#   elif [[ "$get" -eq 1 ]]
+#   then url+="/$get"; get=true
+#   else get=
+#   fi
+#   if [[ -z "$create$update$remove$shorten$get" ]]
+#   then usage "missing action -C -U -R -S"
+#   elif [[ "$create$update$remove$shorten$get" != true ]]
+#   then usage "invalid action -C -U -R -S"
+#   fi
+#   case true in
+#     $create) # POST
+#       if [[ -n "$uuid" ]]
+#       then usage "illegal option -- uuid"
+#       fi
+#       [[ -n "$private" ]] && opts+=" -F p=1"
+#       [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
+#       [[ -n "$vanity" ]] && url+="/~$vanity"
+#       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}" # -e -f TODO check stdin?
+#       ;;
+#     $update) method="PUT"
+#       if [[ -n "$vanity" ]]
+#       then usage "illegal option -- vanity"
+#       elif [[ -z "$uuid" ]]
+#       then usage "missing option -- uuid"
+#       else url+="/$uuid"
+#       fi
+#       [[ -n "$private" ]] && opts+=" -F p=1"
+#       [[ -n "$sunset" ]] && [[ "$sunset" -gt 0 ]] && opts+=" -F sunset=$sunset"
+#       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+#       ;;
+#     $remove) method="DELETE"
+#       if [[ -n "$private" ]]
+#       then usage "illegal option -- private"
+#       elif [[ -n "$file" ]]
+#       then usage "illegal option -- file"
+#       elif [[ -n "$vanity" ]]
+#       then usage "illegal option -- vanity"
+#       elif [[ -n "$sunset" ]]
+#       then usage "illegal option -- sunset"
+#       elif [[ -z "$uuid" ]]
+#       then usage "missing option -- uuid"
+#       else url+="/$uuid"
+#       fi
+#       ;;
+#     $shorten) # POST
+#       if [[ -n "$private" ]]
+#       then usage "illegal option -- private"
+#       elif [[ -n "$uuid" ]]
+#       then usage "illegal option -- uuid"
+#       elif [[ -n "$vanity" ]]
+#       then usage "illegal option -- vanity"
+#       elif [[ -n "$sunset" ]]
+#       then usage "illegal option -- sunset"
+#       # elif [[ -z "$link" ]]
+#       # then usage "-S: Invalid arguments (missing link)"
+#       else url+="/u" # <<< $link
+#       fi
+#       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+#       # opts+=" -F c=@-"
+#       # opts+=" -F "c=$file""
+#       ;;
+#     $get) method="GET"
+#       if [[ -n "$private" ]]
+#       then usage "illegal option -- private"
+#       elif [[ -n "$file" ]]
+#       then usage "illegal option -- file"
+#       elif [[ -n "$uuid" ]]
+#       then usage "illegal option -- uuid"
+#       elif [[ -n "$vanity" ]]
+#       then usage "illegal option -- vanity"
+#       elif [[ -n "$sunset" ]]
+#       then usage "illegal option -- sunset"
+#       # else url+="/" # <<< $link
+#       fi
+#        ;;
+#     *) usage "illegal action -- $@" ;;
+#   esac
+#   [[ -n "$file" ]] && opts+=" -F "c=$file""
+#   [[ -n "$method" ]] && opts+=" -X $method"
+#   if [[ -n "$handler" ]]
+#   then url+="?$handler=1"
+#   fi
+
+#   # Execute or debug
+#   if [[ -z "$debug" ]]
+#   then curl $opts $url
+#   else >&2 echo curl $opts $url
+#   fi
+# }
+
+# _arg() {
+#   local a="$1" # Argument name
+#   local prefix next arg pattern="(-|--)($a)*([a-zA-Z]|-)?( |=)*" # ( |=)
+#   local var="${2:-}" # Variable name
+#   if [[ $args =~ $pattern ]]
+#   then # >&2 printf "MATCH %s\n" "${BASH_REMATCH[@]}"
+#     prefix="${BASH_REMATCH[1]}"
+#     a="${BASH_REMATCH[2]}"
+#     next="${BASH_REMATCH[3]}"
+#     sep="${BASH_REMATCH[4]:- }"
+#     # >&2 echo "B4 arg: $arg, args: $args"
+#     arg="${args#${prefix}*${sep}}" arg="${args%% -*}" # arg="${arg%%${prefix}*}" # arg="${arg%%${sep}*}"
+#     if [[ -n "$var" ]] && [[ "$var" != "bool" ]]
+#     then
+#       arg="${arg#${prefix}${a}${sep}}"
+#       # >&2 echo "arg: $arg, args: $args"
+#       if [[ -n "$arg" ]] && [[ "$arg" == ${prefix}* ]]
+#       then usage "missing value -- $a" "found: $arg"
+#       fi
+#       if [[ -n "$arg" ]] && [[ "$args" != "$arg"* ]]
+#       then
+#         # >&2 echo "$a -> eval $var=\"$arg\""
+#         eval $var=\"$arg\"
+#       else usage "missing value -- $a" # "${prefix}$a: Missing argument value"
+#       fi
+#       # >&2 echo "prefix: $prefix, a: $a, sep: $sep, arg: $arg, next: '$next'"
+#       if [[ -n "$next" ]]
+#       then args="${args/${prefix}$a*${sep}$arg/${prefix}$next}" # $arg}"
+#       else args="${args#${prefix}$a${sep}$arg}" # args="${args#* }"
+#       fi
+#     else
+#       # >&2 echo "$a -> eval ${var:-a}=true"
+#       eval "${var:-a}=true"
+#       args="${args#${prefix}$a}"
+#       if [[ -n "$next" ]]
+#       then args="${prefix}$args"
+#       else args="${args#$sep}"
+#       fi
+#       # then args="${args/-$a/-}"
+#       # else args="${args#-$a}"
+#     fi
+#   else usage "illegal option -- $args (not matching /$pattern/)"
+#   fi
+# }
 
 # larg() {
 #   local arg="$1"

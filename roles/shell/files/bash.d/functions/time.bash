@@ -8,8 +8,13 @@ uz() {
   fi
 }
 
-# Parse a duration string: 0Y0M0w0d0h1m0s -> 60
+# Parse a duration string
 get_seconds() {
+  if [[ $# -eq 0 ]] || [[ -z "$1" ]]
+  then >&2 printf "%s\n" "get_seconds: requires a value"; return 1
+  elif [[ ! $1 =~ ^-?([0-9]+[smhdwMY])+$ ]]
+  then >&2 printf "%s\n" "get_seconds: requires a valid duration"; return 1
+  fi
   local in="$1" ou=
   local r= f=
   while [[ -n "$in" ]]
