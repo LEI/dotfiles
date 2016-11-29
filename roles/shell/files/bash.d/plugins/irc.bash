@@ -8,7 +8,7 @@ irc_network() {
   else server="$1"
   fi
   shift
-  channels=("$@")
+  channels="$@"
 }
 
 irc_kill() {
@@ -76,7 +76,7 @@ irc() {
     local connectopts="icrdir="$ircdir" nick="$nick" server="$server" port="$port" secure="$ssl""
     # while read line <&3; do echo "test: $line" > ~/test.log
     # done < <(setlock -nX "/tmp/$server.lockfile" nohup env $connectopts "$connect" "${channels[@]}") &
-    setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" "${channels[@]}" >> "$ircdir/$server/connect.log" & disown
+    setlock -nX "/var/lock/$lock.connect.lock" nohup env $connectopts "$connect" $channels >> "$ircdir/$server/connect.log" & disown
     [[ "$?" -eq 0 ]] && echo "$!" > "$pidfile"
 
     # if [[ -n "$(pgrep -F "$pidfile")" ]]; then pkill -F "$pidfile"; fi
