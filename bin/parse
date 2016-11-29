@@ -17,7 +17,7 @@ parse() {
   fi
   while [[ $# -ne 0 ]]
   do local a max="${#args[@]}"
-    for a in ${args[@]}
+    for a in "${args[@]}"
     do
       local type="${a%%,*}"
       local func="${type##*@}"
@@ -49,13 +49,17 @@ parse() {
         if [[ -n "$key" ]]
         then
           # >&2 echo "Args: $@ (1:$1,2:$2,3:$3)"
-          # >&2 echo "shift '$next' ? $@ ($name=$val)"
 
           # If short key, look for extra arguments
           if [[ "$1" != "--"* ]] && [[ -n "$next" ]]
           then
             set -- "${@:1:1}" "$key" "${@:2}"
             set -- "${@:2:1}" "-$next$sep$val" "${@:3}"
+            # if [[ "$spec" == *+ ]]
+            # then
+            #   set -- "${@:1:1}" "-$next$sep$val" "${@:2}"
+            #   set -- "${@:2:1}" "$key" "${@:3}"
+            # fi
           fi
 
           # if [[ "$type" == bool ]] && [[ -n "$val" ]]
@@ -117,8 +121,6 @@ parse() {
             return 1
           fi
 
-          >&2 printf "%s\n" "$name $sep $val ($spec)"
-
           # Output
           printf "%s=%s\n" "${name}" "${val}"
 
@@ -131,11 +133,22 @@ parse() {
         max=$((max - 1))
         if [[ "$max" -eq 0 ]]
         then a="${_args/${1#-}*/${1#-}}"
-          >&2 printf "%s\n" "parse: illegal option -- ${a##* }"
+          >&2 printf "%s\n" "parse: invalid argument -- ${a##* }"
           return 1
         fi
       fi
     done
+
+    # spec="${spec%+}"
+    # if [[ -n "$spec" ]]
+    # then
+    #   pattern="-([a-zA-Z]+)*(${spec%%&*})"
+    #   if [[ ! $_args =~ $pattern ]]
+    #   # then >&2 printf "=> %s\n" "${BASH_REMATCH[@]}"
+    #   then >&2 printf "%s\n" "error: switch '$name' invalid -- $spec /$pattern/"
+    #   # else >&2 printf "%s\n" "/$pattern/"
+    #   fi
+    # fi
   done
 }
 

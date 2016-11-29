@@ -4,12 +4,12 @@
 
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-PB_ARGS=("bool,h|help,*" \
-  "bool,d|debug,*" \
-  "string,P|provider,*+" \
+PB_ARGS=("bool,h|help" \
+  "bool,d|debug" \
+  "string,P|provider,+" \
   "bool,C|create,C" \
-  "bool,U|update,Uu" \
-  "bool,R|remove,Ru" \
+  "bool,U|update,U&u" \
+  "bool,R|remove,R&u" \
   "bool,S|shorten,S" \
   "string,G|get,G+" \
   "bool,lf|list-formats,lf" \
@@ -22,6 +22,24 @@ PB_ARGS=("bool,h|help,*" \
   "string,u|uuid,U|R+" \
   "string,v|vanity,C+" \
   "duration,x|sunset,C|U+")
+PB_DESC=("This"
+  "Print curl command instead of executing it" \
+  "Pastebin host, default: $PB_PROVIDER" \
+  "Create a new paste (required: file)" \
+  "Update an existing paste (required: uuid)" \
+  "Remove a paste (required: uuid)" \
+  "Create a redirect url (required: file <<<)" \
+  "Arbitrary GET request" \
+  "(-G lf)" \
+  "Pygments lexer used for syntax highlighting (-G l)" \
+  "(-G ls)" \
+  "Render a ReStructuredText or Markdown paste to HTML (-CU)" \
+  "Handle Asciinema videos (-CU)" \
+  "Content of the paste (-CUS)" \
+  "The paste can only be retrieved by knowledge of its sha1 hexdigest (-C)" \
+  "Shared secret allowing modification (-UR)" \
+  "Custom id, prefixed with '~' (-C)" \
+  "Set the paste to expire automatically (-CU)")
 
 set -e
 set -o pipefail
@@ -71,8 +89,8 @@ usage() {
   then pberr "$err"; e=1
   fi
   >&2 printf "%s\n" "Usage: pb [opts]"
-  >&2 printf "          %-24s%s\n" \
-    "[ --help | --debug ]" "$@"
+  >&2 printf "          %-24s%s\n" "[--version] [--help] [--debug]" "$@"
+    # "[ --help | --debug ]" "$@"
   exit $e
 }
 
@@ -82,37 +100,29 @@ usage() {
 # PUT /<uuid>
 # DELETE /<uuid>
 full_usage() {
-  usage "$1" "" \
-    "-P, --provider <host>" "Default host: $PB_PROVIDER" \
-    "-C, --create" "Create a paste (required: file or stdin)" \
-    "-U, --update" "Update a paste (required: uuid)" \
-    "-R, --remove" "Remove a paste (required: uuid)" \
-    "-S, --shorten" "Create a redirect <<< <url>" \
-    "-G, --get <params>" "Arbitrary GET request" \
-    "-lf, --list-formats" "Equivalent to (-G lf)" \
-    "-ll, --list-lexers" "Pygments lexer used for syntax highlighting (-G l)" \
-    "-ls, --list-styles" "Equivalent to (-G ls)" \
-    "-p, --private" "The paste can only be retrieved by knowledge of its sha1 hexdigest (-C)" \
-    "-f, --file [path]" "Content of the paste (-CUS)" \
-    "-u, --uuid <uuid>" "Shared secret allowing modification (-UR)" \
-    "-v, --vanity <name>" "Use <name> as a custom id, prefixed with '~' (-C)" \
-    "-x, --sunset <time>" "Set the paste to expire automatically in <time>" \
-    "-r, --render" "Render a ReStructuredText or Markdown paste to HTML (-CU)" \
-    "-t, --term" "Handle Asciinema videos (-CU)"
+  local i desc=()
+  for ((i=1; i<${#PB_ARGS[@]}; i++))
+  do
+    arg="${PB_ARGS[i]}"; arg="${arg#*,}"; arg="${arg%%,*}"
+    arg="-${arg/|/, --}"
+    desc+=("$arg")
+    desc+=("${PB_DESC[i]}")
+  done
+  usage "$1" "" "${desc[@]}"
 }
 
 pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
-  local args=
-  args="$(PARSE_ARGS="${PB_ARGS[@]}" parse "$@")" || return 1
-  local arg=
-  for arg in ${args[@]}
-  do declare ${arg%%=*}="${arg#*=}"
-  done
-  # [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
+  local args args
 
-  # for v in type get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
+  args=("$(PARSE_ARGS="${PB_ARGS[@]}" parse "$@")") || return 1
+  while read -r arg
+  do declare ${arg%%=*}="${arg#*=}"
+  done <<< "${args[@]}"
+
+  [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
+  # for v in help get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
 
   # local method get create update remove shorten list_formats list_lexerslist_styles # Actions
   # local help debug provider render term file private uuid vanity sunset # Parameters
@@ -122,7 +132,9 @@ pb() {
   if [[ -n "$get" ]] && [[ "$get" != true ]]
   then url+="/$get"; get=true
   fi
+  # [[ -n "$file" ]] && [[ ! -f "$file" ]] # Used as a string!
   case true in
+    $help) full_usage ;;
     $list_formats) get=true; url+="/lf" ;;
     $list_lexers) get=true; url+="/l" ;;
     $list_styles) get=true; url+="/ls" ;;
