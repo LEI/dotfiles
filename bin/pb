@@ -110,7 +110,7 @@ pb() {
   for arg in ${args[@]}
   do declare ${arg%%=*}="${arg#*=}"
   done
-  [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
+  # [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
 
   # for v in type get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
 

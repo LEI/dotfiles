@@ -84,11 +84,12 @@ parse() {
           # Check value
           case "$type" in
             bool)
-              if [[ -n "$val" ]] # && [[ "$val" != "$true" ]]
-              then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"
-                return 1
-              else val="$true"
-              fi
+              val="$true"
+              # if [[ -n "$val" ]] # && [[ "$val" != "$true" ]]
+              # then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"
+              #   return 1
+              # else val="$true"
+              # fi
               ;;
             string)
               if [[ -z "$val" ]]
@@ -115,6 +116,8 @@ parse() {
           then >&2 printf "%s\n" "error: switch '$name' does not require a value -- $val"
             return 1
           fi
+
+          >&2 printf "%s\n" "$name $sep $val ($spec)"
 
           # Output
           printf "%s=%s\n" "${name}" "${val}"
