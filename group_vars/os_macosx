@@ -36,6 +36,7 @@ homebrew_packages:
   - luajit
   # - lynx
   - moreutils
+  # - mosh # cask?
   - nmap
   - openssl
   - openssh
@@ -115,13 +116,21 @@ php_packages:
   # - php70-mcrypt
   # - php70-xdebug
 
-python_packages: []
+python_packages:
+  - python
+  - python3
 
+pip_state: latest
 pip_packages:
   - bashate
   # - pygments
   # - vim-vint
-  - neovim
+  - neovim # - pip3 install neovim?
+  # - name: pip
+  #   # when: "{{ pip_upgrade }}"
+  #   executable: pip3
+  # - name: neovim
+  #   executable: /usr/local/bin/pip3
 
 ruby_packages:
   # - ruby # Used by Vim?
