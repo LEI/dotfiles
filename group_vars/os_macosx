@@ -148,7 +148,7 @@ rxvt_packages:
 
 nvim_install: yes
 vim_packages:
-  # - neovim/neovim/neovim # pip install neovim
+  - neovim/neovim/neovim
   - name: vim
     # Homebrew install options
     install_options:
@@ -159,13 +159,13 @@ vim_packages:
       - with-python
       # - with-pyhton3
 
-weechat_packages:
-  - name: weechat
-    install_options:
-      - with-lua
-      - with-perl
-      - with-python
-      - with-ruby
+# weechat_packages:
+#   - name: weechat
+#     install_options:
+#       - with-lua
+#       - with-perl
+#       - with-python
+#       - with-ruby
 
 # Ask password after this delay
 osx_lock_delay: 0
