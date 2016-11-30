@@ -6,22 +6,22 @@ PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
 PB_ARGS=("bool,h|help" \
   "bool,d|debug" \
-  "string,P|provider,+" \
-  "bool,C|create,C|-create&!u|-uuid" \
-  "bool,U|update,U|-update&u|-uuid" \
-  "bool,R|remove,R|-remove&u|-uuid" \
-  "bool,S|shorten,S|-shorten" \
-  "string,G|get,G|-get+" \
-  "bool,lf|list-formats,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
-  "bool,ll|list-lexers,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
-  "bool,ls|list-styles,!C|-create|U|-update|R|-remove|S|-shorten|G|-get" \
-  "bool,r|render,C|-create|U|-update" \
-  "bool,t|term,C|-create|U|-update" \
-  "string,f|file,C|-create|U|-update|S|-shorten+" \
+  "string,P|provider," \
+  "bool,C|create,C|-create&!u|-uuid&!U|-update|R|-remove|S|-shorten|G|-get" \
+  "bool,U|update,U|-update&u|-uuid&!C|-create|R|-remove|S|-shorten|G|-get" \
+  "bool,R|remove,R|-remove&u|-uuid&!C|-create|U|-update|S|-shorten|G|-get" \
+  "string,S|shorten,S|-shorten&!C|-create|U|-update|R|-remove||G|-get" \
+  "string,G|get,G|-get&!C|-create|U|-update|R|-remove|S|-shorten" \
+  "bool,lf|list-formats,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|ll|-list-lexers|ls|-list-styles" \
+  "bool,ll|list-lexers,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|lf|-list-formats|ls|-list-styles" \
+  "bool,ls|list-styles,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|lf|-list-formats|ll|-list-lexers" \
+  "bool,r|render,C|-create|U|-update,!t|term" \
+  "bool,t|term,C|-create|U|-update,!r|render" \
+  "string,f|file,C|-create|U|-update" \
   "bool,p|private,C|-create" \
-  "string,u|uuid,U|-update|R|-remove+" \
-  "string,v|vanity,C|-create+" \
-  "duration,x|sunset,C|-create|U|-update+")
+  "string,u|uuid,U|-update|R|-remove" \
+  "string,v|vanity,C|-create" \
+  "duration,x|sunset,C|-create|U|-update")
 PB_DESC=("This"
   "Print curl command instead of executing it" \
   "Pastebin host, default: $PB_PROVIDER" \
@@ -128,11 +128,10 @@ pb() {
   # local help debug provider render term file private uuid vanity sunset # Parameters
 
   [[ -n "$provider" ]] && url="$provider"
-
-  if [[ -n "$get" ]] && [[ "$get" != true ]]
-  then url+="/$get"; get=true
-  fi
   # [[ -n "$file" ]] && [[ ! -f "$file" ]] # Used as a string!
+  [[ -n "$shorten" ]] && [[ "$shorten" != true ]] && file="$shorten" && shorten=true
+  [[ -n "$get" ]] && [[ "$get" != true ]] && url+="/$get" && get=true
+
   case true in
     $help) full_usage ;;
     $list_formats) get=true; url+="/lf" ;;
