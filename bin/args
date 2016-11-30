@@ -5,8 +5,9 @@ set -e
 set -o pipefail
 shopt -s extglob
 
-# get_seconds
-source ${BASH_DIR:-$HOME/.bash.d}/functions/{utils,time}.bash
+for f in functions/{time,utils}
+do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
+done
 
 err() {
   die "${0##*/}: $@"
@@ -19,7 +20,7 @@ parse_args() {
   for a in "$@"
   do # log "arg -> $a"
     case "$a" in
-      -) err "invalid argument -" ;;
+      -|'') err "invalid argument -" ;;
       --) break ;;
       -*) [[ "$next" -eq 1 ]] && err "invalid ${type:-argument}: $arg requires a value, found $a"
         local pre="-${a%%-*}"
@@ -29,7 +30,7 @@ parse_args() {
           local type next=0
           local req="${p##*:}"
           if [[ "$req" == *+* ]]
-          then type="${req##*+}" req="${req%+*}"; next=1;
+          then type="${req##*+}"; req="${req%+*}"; next=1;
           fi
           p="${p%:*}"
           local short="${p%|*}"
@@ -47,7 +48,10 @@ parse_args() {
       *)
         local val=
         case "$type" in
-          ''|string) val="$a"; shift ;;
+          '') val="$a"; shift ;;
+          string) [[ -n "$a" ]] || err "invalid $type: $a"; val="$a"; shift ;;
+          number) [[ $a =~ ^-?[0-9]+$ ]] || err "invalid $type: $a"; val="$a"; shift ;;
+          duration) val="$(get_seconds "$a")" || err "invalid $type: $a"; shift ;;
           *) err "invalid type: $type" ;;
         esac
         ;;
@@ -56,9 +60,9 @@ parse_args() {
     if [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 1 ]]
     then continue
     elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 1 ]]
-    then log "$name=$val"; unset arg next val
+    then log "${name//-/_}=$val"; unset arg next val
     elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
-    then log "$name=true"; unset arg next
+    then log "${name//-/_}=true"; unset arg next
     # elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
     # then err "invalid ${type:-argument}: $a requires a value, found $1"
     elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 0 ]]
@@ -67,12 +71,15 @@ parse_args() {
     # then err "invalid ${type:-argument}: $a"
     else err "invalid argument: $a"
     fi
-    # shift
+
+    # if [[ -n "$req" ]]
+    # then log "$a requires $req"
+    # fi
   done
 
   # log "arg:$arg" "val:$val" "next:$next" "name:$name"
   if [[ "$next" -eq 1 ]]
-  then err "missing ${type:-argument} for --$long"
+  then err "missing ${type:-argument} for ${long:-$a}" #$long"
   fi
 
   return $?

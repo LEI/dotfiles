@@ -4,24 +4,24 @@
 
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-PB_ARGS=("bool,h|help" \
-  "bool,d|debug" \
-  "string,P|provider," \
-  "bool,C|create,C|-create&!u|-uuid&!U|-update|R|-remove|S|-shorten|G|-get" \
-  "bool,U|update,U|-update&u|-uuid&!C|-create|R|-remove|S|-shorten|G|-get" \
-  "bool,R|remove,R|-remove&u|-uuid&!C|-create|U|-update|S|-shorten|G|-get" \
-  "string,S|shorten,S|-shorten&!C|-create|U|-update|R|-remove||G|-get" \
-  "string,G|get,G|-get&!C|-create|U|-update|R|-remove|S|-shorten" \
-  "bool,lf|list-formats,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|ll|-list-lexers|ls|-list-styles" \
-  "bool,ll|list-lexers,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|lf|-list-formats|ls|-list-styles" \
-  "bool,ls|list-styles,!C|-create|U|-update|R|-remove|S|-shorten|G|-get|lf|-list-formats|ll|-list-lexers" \
-  "bool,r|render,C|-create|U|-update,!t|term" \
-  "bool,t|term,C|-create|U|-update,!r|render" \
-  "string,f|file,C|-create|U|-update" \
-  "bool,p|private,C|-create" \
-  "string,u|uuid,U|-update|R|-remove" \
-  "string,v|vanity,C|-create" \
-  "duration,x|sunset,C|-create|U|-update")
+PB_ARGS=("h|help" \
+  "d|debug" \
+  "P|provider:+string" \
+  "C|create:!uuid" \
+  "U|update:uuid" \
+  "R|remove:uuid" \
+  "S|shorten:+" \
+  "G|get:+" \
+  "lf|list-formats" \
+  "ll|list-lexers" \
+  "ls|list-styles" \
+  "r|render:create|update!term" \
+  "t|term:create|update!render" \
+  "f|file:create|update" \
+  "p|private:create" \
+  "u|uuid:update|remove+string" \
+  "v|vanity:create" \
+  "x|sunset:create|update+duration")
 PB_DESC=("This"
   "Print curl command instead of executing it" \
   "Pastebin host, default: $PB_PROVIDER" \
@@ -103,7 +103,8 @@ full_usage() {
   local i desc=()
   for ((i=1; i<${#PB_ARGS[@]}; i++))
   do
-    arg="${PB_ARGS[i]}"; arg="${arg#*,}"; arg="${arg%%,*}"
+    arg="${PB_ARGS[i]}" #; arg="${arg#*,}"; arg="${arg%%,*}"
+    arg="${arg%%:*}"
     arg="-${arg/|/, --}"
     desc+=("$arg")
     desc+=("${PB_DESC[i]}")
@@ -116,7 +117,7 @@ pb() {
   local opts="$PB_CURL_OPTS"
   local args args
 
-  args=("$(PARSE_ARGS="${PB_ARGS[@]}" parse "$@")") || return 1
+  args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
   while read -r arg
   do declare ${arg%%=*}="${arg#*=}"
   done <<< "${args[@]}"
