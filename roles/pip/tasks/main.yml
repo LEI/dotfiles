@@ -8,6 +8,7 @@
     state: "{{ item.state | default(pip_state) }}"
     #extra_args: "{{ item.extra_args | default(omit) }}"
     extra_args: "{{ omit if name == 'pip' else pip_default_args + ' ' + item.extra_args if item.extra_args is defined else pip_default_args }}"
+    executable: "{{ item.executable | default(omit) }}"
     # umask: 0022 # Ensure other users can use it
     # chdir:
     # requirements:

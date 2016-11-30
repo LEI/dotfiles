@@ -23,7 +23,7 @@ chmod 600 "$ircdir"/*/ident &>/dev/null
 # elif [[ -z "$server" ]]
 # then echo "Invalid server" && exit 1
 if [[ "$#" -gt 0 ]]
-then channels=("$@")
+then channels="$@"
 fi
 
 while true
@@ -74,7 +74,7 @@ do
 
   # echo "Joining ${channels[@]}..."
   if [[ -n "$channels" ]]
-  then printf "/j %s\n" ${channels[@]} > "$ircdir/$server/in"
+  then printf "/j %s\n" $channels > "$ircdir/$server/in"
   fi
 
   # If connection is lost reconnect
