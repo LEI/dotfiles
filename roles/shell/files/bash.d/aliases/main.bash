@@ -1,7 +1,14 @@
 # https://github.com/mathiasbynens/dotfiles/blob/master/.aliases
 
+# Enable aliases to be sudo'ed
+# (( UID != 0 ))
+alias sudo="sudo"
+
 alias h="history"
 alias j="jobs"
+
+# Search command history
+alias hist="history | grep"
 
 # Prompt before overwrite and explain what is being done
 alias mv="mv -iv"
@@ -67,10 +74,6 @@ alias p="cd ~/projects"
 # Pretty print the path
 alias path='echo $PATH | tr -s ":" "\n"'
 
-# Enable aliases to be sudo'ed
-# (( UID != 0 ))
-alias sudo="sudo"
-
 # Get week number
 alias week="date +%V"
 
@@ -101,6 +104,7 @@ for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
   alias "$method"="lwp-request -m '$method'"
 done
 
+# ip addr show?
 alias ip-public="dig +short myip.opendns.com @resolver1.opendns.com" # OS X
 alias ip-local="ipconfig getifaddr en0"
 alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
