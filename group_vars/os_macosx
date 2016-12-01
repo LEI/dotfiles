@@ -14,8 +14,6 @@ homebrew_taps:
   # - neovim/neovim
 
 homebrew_packages:
-  - bash
-  - bash-completion # 2?
   - cmake
   # - ctags
   - coreutils
@@ -101,6 +99,10 @@ cask_options:
       # Escape (53), F19 (80)
       - set keycode_capslock 53
     # when: < macOS Sierra
+
+bash_packages:
+  - bash
+  - bash-completion # 2?
 
 node_packages:
   - node

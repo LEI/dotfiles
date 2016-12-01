@@ -1,6 +1,9 @@
 ---
 dependencies:
 
+  - role: package
+    packages: "{{ bash_packages }}"
+
   - role: dotfiles
     paths:
       - name: bin
