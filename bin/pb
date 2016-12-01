@@ -7,8 +7,8 @@ PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
 PB_ARGS=("h|help" \
   "d|debug" \
   "P|provider:+string" \
-  "C|create:!uuid" \
-  "U|update:uuid" \
+  "C|create:file!uuid" \
+  "U|update:file&uuid" \
   "R|remove:uuid" \
   "S|shorten:+" \
   "G|get:+" \
@@ -17,7 +17,7 @@ PB_ARGS=("h|help" \
   "ls|list-styles" \
   "r|render:create|update!term" \
   "t|term:create|update!render" \
-  "f|file:create|update" \
+  "f|file:create|update-" \
   "p|private:create" \
   "u|uuid:update|remove+string" \
   "v|vanity:create" \
@@ -117,6 +117,7 @@ pb() {
   local opts="$PB_CURL_OPTS"
   local args args
 
+  # [[ -t 0 ]] && in=1 || in=
   args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
   while read -r arg
   do declare ${arg%%=*}="${arg#*=}"
@@ -132,6 +133,10 @@ pb() {
   # [[ -n "$file" ]] && [[ ! -f "$file" ]] # Used as a string!
   [[ -n "$shorten" ]] && [[ "$shorten" != true ]] && file="$shorten" && shorten=true
   [[ -n "$get" ]] && [[ "$get" != true ]] && url+="/$get" && get=true
+
+  # if [[ -n "$file" ]] && [[ -t 0 ]]
+  # then
+  # fi
 
   case true in
     $help) full_usage ;;

@@ -29,17 +29,20 @@ parse_args() {
         do
           local type next=0
           local req="${p##*:}"
+          if [[ "$req" == *- ]]
+          then type="stdin"; req="${res%-*}";
+            # [[ -t 0 ]] && val="@-" || next=1
+          fi
           if [[ "$req" == *+* ]]
-          then type="${req##*+}"; req="${req%+*}"; next=1;
+          then type="${req#*+}"; req="${req%+*}"; next=1
           fi
           p="${p%:*}"
           local short="${p%|*}"
           local name="${p#*|}"
           local ptn="(-$short|--$name)" #($pre)*([a-zA-Z]+)?(=)"
           if [[ $a =~ $ptn ]]
-          then
+          then arg="$a"
             # parsed+=("$p")
-            arg="$a"
             shift
             break
           fi
@@ -52,6 +55,7 @@ parse_args() {
           string) [[ -n "$a" ]] || err "invalid $type: $a"; val="$a"; shift ;;
           number) [[ $a =~ ^-?[0-9]+$ ]] || err "invalid $type: $a"; val="$a"; shift ;;
           duration) val="$(get_seconds "$a")" || err "invalid $type: $a"; shift ;;
+          stdin) [[ -n "$a" ]] && [[ -t 0 ]] && err "invalid input $name: $a"; val="$a"; shift ;;
           *) err "invalid type: $type" ;;
         esac
         ;;
@@ -77,7 +81,7 @@ parse_args() {
     # fi
   done
 
-  # log "arg:$arg" "val:$val" "next:$next" "name:$name"
+  # error "arg:$arg" "val:$val" "next:$next" "name:$name" "type:$type"
   if [[ "$next" -eq 1 ]]
   then err "missing ${type:-argument} for ${long:-$a}" #$long"
   fi
