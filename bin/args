@@ -16,13 +16,14 @@ err() {
 parse_args() {
   local args=(${PARSE_ARGS[@]})
   local parsed=()
-  local a arg
-  for a in "$@"
-  do # log "arg -> $a"
-    case "$a" in
+  local arg
+  # for a in "$@"
+  while [[ $# -ne 0 ]]
+  do
+    case "$1" in
       -|'') err "invalid argument -" ;;
       --) break ;;
-      -*) [[ "$next" -eq 1 ]] && err "invalid ${type:-argument}: $arg requires a value, found $a"
+      -*) [[ "$next" -eq 1 ]] && err "invalid ${type:-argument}: $arg requires a value, found $1"
         local pre="-${a%%-*}"
         local p
         for p in "${args[@]}"
@@ -30,8 +31,7 @@ parse_args() {
           local type next=0
           local req="${p##*:}"
           if [[ "$req" == *- ]]
-          then type="stdin"; req="${res%-*}";
-            # [[ -t 0 ]] && val="@-" || next=1
+          then type="stdin"; req="${req%-*}"; next=1
           fi
           if [[ "$req" == *+* ]]
           then type="${req#*+}"; req="${req%+*}"; next=1
@@ -40,25 +40,33 @@ parse_args() {
           local short="${p%|*}"
           local name="${p#*|}"
           local ptn="(-$short|--$name)" #($pre)*([a-zA-Z]+)?(=)"
-          if [[ $a =~ $ptn ]]
-          then arg="$a"
+          if [[ $1 =~ $ptn ]]
+          then arg="$1"
+            local varname="${name//-/_}"
             # parsed+=("$p")
             # TODO while $2 if next 1
-            # if [[ -n "$next" ]]
-            # then
-            #   while [[ $# -ne 0 ]] && [[ "$1" != -* ]]
-            #   do
-            #     val+="$1"
-            #     shift
-            #   done
-            # else
-              shift
-            # fi
+              # >&2 log "$a NEXT $next"
+            if [[ "$next" -eq 1 ]]
+            then
+              # >&2 log "???? $# / $1 / $2 ($type) "
+              # if [[ $# -gt 1 ]] && [[ "$type" == "stdin" ]] && [[ -f "$2" ]]
+              # then log "$varname=@$2"
+              # elif [[ "$type" == "stdin" ]] && [[ -z "$2" ]]
+              # then log "$varname=@-" # [[ -t 0 ]]
+              if [[ $# -gt 1 ]] && [[ -n "$2" ]] && [[ "$2" != -* ]]
+              then log "$varname=$2"
+              # elif [[ "$type" != "stdin" ]]
+              else err "Unexpected value ($name,$1) $2 [$#]"
+              fi
+              shift # key
+            else log "$varname=1"
+            fi
+            shift # key or value
             break
           fi
         done
         ;;
-      *) err "$a?"
+      *) err "$1? [$@] $#"
         # local val=
         # case "$type" in
         #   '') val="$a"; shift ;;
@@ -90,10 +98,9 @@ parse_args() {
     # fi
   done
 
-  # error "arg:$arg" "val:$val" "next:$next" "name:$name" "type:$type"
-  if [[ "$next" -eq 1 ]]
-  then err "missing ${type:-argument} for ${long:-$a}" #$long"
-  fi
+  # if [[ "$next" -eq 1 ]]
+  # then err "missing ${type:-argument} for ${long:-$a}" #$long"
+  # fi
 
   return $?
 

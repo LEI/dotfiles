@@ -119,6 +119,7 @@ pb() {
 
   # [[ -t 0 ]] && in=0 || in=
   args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
+  # echo "${args[@]}"
   while read -r arg
   do [[ "$arg" == *=* ]] && declare ${arg%%=*}="${arg#*=}" || return 1
   done <<< "${args[@]}"

@@ -127,12 +127,12 @@ pip_packages:
   - bashate
   # - pygments
   # - vim-vint
-  - neovim # - pip3 install neovim?
-  # - name: pip
-  #   # when: "{{ pip_upgrade }}"
+  - neovim
+  - name: pip
+    executable: pip3
+    when: "{{ pip_upgrade }}"
+  # - name: neovim # FIXME matching distribution found for python
   #   executable: pip3
-  # - name: neovim
-  #   executable: /usr/local/bin/pip3
 
 ruby_packages:
   # - ruby # Used by Vim?
