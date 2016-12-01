@@ -117,10 +117,10 @@ pb() {
   local opts="$PB_CURL_OPTS"
   local args args
 
-  # [[ -t 0 ]] && in=1 || in=
+  # [[ -t 0 ]] && in=0 || in=
   args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
   while read -r arg
-  do declare ${arg%%=*}="${arg#*=}"
+  do [[ "$arg" == *=* ]] && declare ${arg%%=*}="${arg#*=}" || return 1
   done <<< "${args[@]}"
 
   [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"

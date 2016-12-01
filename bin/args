@@ -44,7 +44,16 @@ parse_args() {
           then arg="$a"
             # parsed+=("$p")
             # TODO while $2 if next 1
-            shift
+            # if [[ -n "$next" ]]
+            # then
+            #   while [[ $# -ne 0 ]] && [[ "$1" != -* ]]
+            #   do
+            #     val+="$1"
+            #     shift
+            #   done
+            # else
+              shift
+            # fi
             break
           fi
         done
