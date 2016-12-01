@@ -43,38 +43,38 @@ parse_args() {
           if [[ $a =~ $ptn ]]
           then arg="$a"
             # parsed+=("$p")
+            # TODO while $2 if next 1
             shift
             break
           fi
         done
         ;;
-      *)
-        local val=
-        case "$type" in
-          '') val="$a"; shift ;;
-          string) [[ -n "$a" ]] || err "invalid $type: $a"; val="$a"; shift ;;
-          number) [[ $a =~ ^-?[0-9]+$ ]] || err "invalid $type: $a"; val="$a"; shift ;;
-          duration) val="$(get_seconds "$a")" || err "invalid $type: $a"; shift ;;
-          stdin) [[ -n "$a" ]] && [[ -t 0 ]] && err "invalid input $name: $a"; val="$a"; shift ;;
-          *) err "invalid type: $type" ;;
-        esac
+      *) err "$a?"
+        # local val=
+        # case "$type" in
+        #   '') val="$a"; shift ;;
+        #   string) [[ -n "$a" ]] || err "invalid $type: $a"; val="$a"; shift ;;
+        #   number) [[ $a =~ ^-?[0-9]+$ ]] || err "invalid $type: $a"; val="$a"; shift ;;
+        #   duration) val="$(get_seconds "$a")" || err "invalid $type: $a"; shift ;;
+        #   stdin) [[ -n "$a" ]] && [[ -t 0 ]] && err "invalid input $name: $a"; val="$a"; shift ;;
+        #   *) err "invalid type: $type" ;;
+        # esac
         ;;
     esac
-    # TODO unset name,type?
-    if [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 1 ]]
-    then continue
-    elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 1 ]]
-    then log "${name//-/_}=$val"; unset arg next val
-    elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
-    then log "${name//-/_}=true"; unset arg next
+    # if [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 1 ]]
+    # then continue
+    # elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 1 ]]
+    # then log "${name//-/_}=$val"; unset arg next val
     # elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
-    # then err "invalid ${type:-argument}: $a requires a value, found $1"
-    elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 0 ]]
-    then err "invalid ${type:-argument}: $a does not require a value, found $val"
-    # elif [[ "$next" -ne 1 ]] && [[ $# -gt 0 ]]
-    # then err "invalid ${type:-argument}: $a"
-    else err "invalid argument: $a"
-    fi
+    # then log "${name//-/_}=true"; unset arg next
+    # # elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
+    # # then err "invalid ${type:-argument}: $a requires a value, found $1"
+    # elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 0 ]]
+    # then err "invalid ${type:-argument}: $a does not require a value, found $val"
+    # # elif [[ "$next" -ne 1 ]] && [[ $# -gt 0 ]]
+    # # then err "invalid ${type:-argument}: $a"
+    # else err "invalid argument: $a"
+    # fi
 
     # if [[ -n "$req" ]]
     # then log "$a requires $req"
