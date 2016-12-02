@@ -19,5 +19,9 @@ dependencies:
         dest: .tmux
       - name: tmux
         dest: .tmux
-        pattern: "*.conf.j2" # tmux|tmux-{{ os | lower }}
+        pattern: "tmux.conf.j2"
+        template: yes
+      - name: tmux
+        dest: .tmux
+        pattern: "{{ os | lower}}.conf.j2"
         template: yes

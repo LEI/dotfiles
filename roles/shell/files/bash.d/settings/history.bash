@@ -1,10 +1,15 @@
 # Bash history
 
+# Double check all expansions before submitting a command
+# shopt -s histverify histreedit
+
 # Append to the Bash history file, rather than overwriting it
 shopt -s histappend
 
-# Erase duplicates (or 'ignoredups'?)
+# Erase duplicates
 HISTCONTROL=${HISTCONTROL:-erasedups}
+# HISTCONTROL=ignoredups:erasedups
+# PROMPT_COMMAND="history -a;history -c;history -r;$PROMPT_COMMAND"
 
 # History size
 HISTSIZE=${HISTSIZE:-10000}
