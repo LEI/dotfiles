@@ -20,7 +20,7 @@
       {{ dot_paths +
         lookup('dotfile',
           (
-            dot_local_dir + '/' + item.src if item.src is defined else 
+            dot_local_dir + '/' + item.src if item.src is defined else
             name + '/' + type if '/' not in name else name
           ) + ',' + dir,
           item.pattern | default('*'), {

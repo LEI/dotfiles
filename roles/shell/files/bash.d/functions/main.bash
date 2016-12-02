@@ -1,8 +1,11 @@
 # General functions
 # https://github.com/Bash-it/bash-it/blob/master/plugins/available/base.plugin.bash
 
-# Make a directory and change into it
 mkd() {
+  mkdir -p "$1"
+}
+
+mcd() {
   mkdir -p "$1" && cd "$_"
 }
 
@@ -10,6 +13,13 @@ mkd() {
 del() {
   local trash="/tmp/.trash"
   mkdir -p "$trash" && mv "$*" "$trash"
+}
+
+if ! hash pager 2>/dev/null
+then pager() { "${PAGER:-less}"; }
+fi
+dif() {
+  diff --side-by-side "$@" | pager
 }
 
 # Preview markdown

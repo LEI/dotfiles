@@ -7,9 +7,6 @@ alias sudo="sudo"
 alias h="history"
 alias j="jobs"
 
-# Search command history
-alias hist="history | grep"
-
 # Prompt before overwrite and explain what is being done
 alias mv="mv -iv"
 alias cp="cp -iv"
@@ -31,6 +28,9 @@ alias rd="rmdir"
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
+
+# Search command history
+alias hgrep="history | grep"
 
 # Detect which 'ls' flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU
@@ -66,11 +66,6 @@ alias .....="cd ../../../.."
 alias ~="cd ~" # 'cd' is probably faster to type though
 alias -- -="cd -"
 
-alias d="cd ~/Documents/Dropbox"
-alias dl="cd ~/Downloads"
-alias dt="cd ~/Desktop"
-alias p="cd ~/projects"
-
 # Pretty print the path
 alias path='echo $PATH | tr -s ":" "\n"'
 
@@ -103,6 +98,13 @@ alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v exten
 for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
   alias "$method"="lwp-request -m '$method'"
 done
+unset method
+
+# Quick cd
+for dir in d:Documents/Dropbox dl:Downloads dt:Desktop p:Projects; do
+  alias "${dir%%:*}"="cd ~/${dir#*:}"
+done
+unset dir
 
 # ip addr show?
 alias ip-public="dig +short myip.opendns.com @resolver1.opendns.com" # OS X

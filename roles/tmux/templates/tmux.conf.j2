@@ -8,6 +8,7 @@ source-file {{ tmux_path }}/colors/{{ tmux_colors }}.conf
 source-file {{ tmux_path }}/settings/{{ file | basename }}
 {% endfor %}
 
+{# TODO | version_compare https://docs.ansible.com/ansible/playbooks_tests.html#id4 #}
 # Expecting 2 digits in version output $(tmux -V | cut -d " " -f2)
 run-shell 'tmux set-environment -g "TMUX_VERSION_INT" "$(tmux -V | tr -dC [:digit:])"'
 
