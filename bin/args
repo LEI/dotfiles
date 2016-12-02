@@ -48,9 +48,9 @@ parse_args() {
               # >&2 log "$a NEXT $next"
             if [[ "$next" -eq 1 ]]
             then
-              # >&2 log "???? $# / $1 / $2 ($type) "
-              # if [[ $# -gt 1 ]] && [[ "$type" == "stdin" ]] && [[ -f "$2" ]]
-              # then log "$varname=@$2"
+                # >&2 log "???? $# / $1 / $2 ($type) "
+                # if [[ $# -gt 1 ]] && [[ "$type" == "stdin" ]] && [[ -f "$2" ]]
+                # then log "$varname=@$2"
               # elif [[ "$type" == "stdin" ]] && [[ -z "$2" ]]
               # then log "$varname=@-" # [[ -t 0 ]]
               if [[ $# -gt 1 ]] && [[ -n "$2" ]] && [[ "$2" != -* ]]

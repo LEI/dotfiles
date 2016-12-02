@@ -1,12 +1,12 @@
 ---
 pip_install: yes
 pip_upgrade: yes
-pip_state: present
+pip_state: present # 'latest' if pip_upgrade else 'present'
 pip_packages: []
 pip_base_packages:
   - name: pip
-    state: latest
+    state: latest # --upgrade
     when: "{{ pip_upgrade }}"
-    # extra_args: --upgrade
-pip_default_args: "{{ '--user python' if ansible_os_family in ['Darwin'] else '' }}"
+pip2_args: "{{ '--user python' if ansible_os_family in ['Darwin'] else '' }}"
+pip3_args: # '--no-cache-dir' if ansible_os_family in ['Darwin'] else ''
 python_packages: []

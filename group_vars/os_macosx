@@ -128,10 +128,13 @@ pip_packages:
   # - pygments
   # - vim-vint
   - neovim
-  - name: pip
-    executable: pip3
-    when: "{{ pip_upgrade }}"
-  # - name: neovim # FIXME matching distribution found for python
+
+  # - name: pip#3 # Permission denied / sudo: a password is required
+  #   # Could not find a version that satisfies the requirement pip3 (from versions: )
+  #   # No matching distribution found for pip3
+  #   executable: pip3
+  #   # become: yes
+  - name: neovim # FIXME matching distribution found for python
     executable: pip3
 
 ruby_packages:

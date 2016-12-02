@@ -2,18 +2,21 @@
 - name: "Install {{ pip_packages | length }} packages"
   vars:
     name: "{{ item.name | default(item) }}"
+    bin: "{{ item.executable | default(omit) }}"
+    default_args: "{{ pip3_args if bin | match('.*pip3') else pip2_args }}"
+    extra_args: "{{ default_args + ' ' + item.extra_args | default(default_args) }}"
   pip:
     name: "{{ name }}"
     version: "{{ item.version | default(omit) }}"
     state: "{{ item.state | default(pip_state) }}"
-    #extra_args: "{{ item.extra_args | default(omit) }}"
-    extra_args: "{{ omit if name | match('pip.*') else pip_default_args + ' ' + item.extra_args if item.extra_args is defined else pip_default_args }}"
-    executable: "{{ item.executable | default(omit) }}"
+    executable: "{{ bin }}"
+    extra_args: "{{ extra_args }}" # omit if name | match('pip') else
     # umask: 0022 # Ensure other users can use it
     # chdir:
     # requirements:
   # TODO sudo on debian?
   with_items: "{{ pip_base_packages + pip_packages }}"
   when: "{{ pip_install and item.when | default(pip_install) }}"
-  become: "{{ 'yes' if item.become is defined and item.become or ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
+  become: "{{ item.become | default(bin | match('.*pip3') and name | match('pip3.*') or ansible_os_family in ['Archlinux', 'Debian', 'RedHat']) }}"
+  # become: "{{ 'yes' if item.become is defined and item.become or ansible_os_family in ['Archlinux', 'Debian', 'RedHat'] else 'no' }}"
   # sudo required on arch, but only needed for 'pip' on debian?
