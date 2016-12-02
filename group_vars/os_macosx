@@ -132,7 +132,7 @@ pip_packages:
     executable: pip3
     when: "{{ pip_upgrade }}"
   # - name: neovim # FIXME matching distribution found for python
-  #   executable: pip3
+    executable: pip3
 
 ruby_packages:
   # - ruby # Used by Vim?
