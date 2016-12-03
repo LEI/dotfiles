@@ -4,24 +4,25 @@
 
 PB_CURL_OPTS=
 PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-PB_ARGS=("h|help" \
+PB_ARGS=("pb=0.1" \
+  "h|help" \
   "d|debug" \
   "P|provider:+string" \
-  "C|create:file!uuid" \
-  "U|update:file&uuid" \
+  "C|create:file,!uuid" \
+  "U|update:file,&uuid" \
   "R|remove:uuid" \
   "S|shorten:+" \
   "G|get:+" \
   "lf|list-formats" \
   "ll|list-lexers" \
   "ls|list-styles" \
-  "r|render:create|update!term" \
-  "t|term:create|update!render" \
-  "f|file:create|update-" \
+  "r|render:create,|update,!term" \
+  "t|term:create,|update,!render" \
+  "f|file:create,|update-" \
   "p|private:create" \
-  "u|uuid:update|remove+string" \
+  "u|uuid:update,|remove+string" \
   "v|vanity:create" \
-  "x|sunset:create|update+duration")
+  "x|sunset:create,|update+duration")
 PB_DESC=("This"
   "Print curl command instead of executing it" \
   "Pastebin host, default: $PB_PROVIDER" \
@@ -101,6 +102,7 @@ usage() {
 # DELETE /<uuid>
 full_usage() {
   local i desc=()
+  # local cmd="${PB_ARGS[@]:0:1}"
   for ((i=1; i<${#PB_ARGS[@]}; i++))
   do
     arg="${PB_ARGS[i]}" #; arg="${arg#*,}"; arg="${arg%%,*}"
@@ -121,7 +123,12 @@ pb() {
   args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
   # echo "${args[@]}"
   while read -r arg
-  do [[ "$arg" == *=* ]] && declare ${arg%%=*}="${arg#*=}" || return 1
+  do
+    case "$arg" in
+      ''|=*) usage "missing action -CURS" ;;
+      *=*) declare ${arg%%=*}="${arg#*=}" || return 1 ;;
+      *) pberr "Unable to parse '$arg'" ;;
+    esac
   done <<< "${args[@]}"
 
   [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
@@ -132,20 +139,20 @@ pb() {
 
   [[ -n "$provider" ]] && url="$provider"
   # [[ -n "$file" ]] && [[ ! -f "$file" ]] # Used as a string!
-  [[ -n "$shorten" ]] && [[ "$shorten" != true ]] && file="$shorten" && shorten=true
-  [[ -n "$get" ]] && [[ "$get" != true ]] && url+="/$get" && get=true
+  [[ -n "$shorten" ]] && [[ "$shorten" != 1 ]] && file="$shorten" && shorten=1
+  [[ -n "$get" ]] && [[ "$get" != 1 ]] && url+="/$get" && get=1
 
   # if [[ -n "$file" ]] && [[ -t 0 ]]
   # then
   # fi
 
-  case true in
+  case 1 in
     $help) full_usage ;;
-    $list_formats) get=true; url+="/lf" ;;
-    $list_lexers) get=true; url+="/l" ;;
-    $list_styles) get=true; url+="/ls" ;;
+    $list_formats) get=1; url+="/lf" ;;
+    $list_lexers) get=1; url+="/l" ;;
+    $list_styles) get=1; url+="/ls" ;;
   esac
-  case true in
+  case 1 in
     $get) method="GET"
       ;;
     $create) # POST
@@ -169,6 +176,7 @@ pb() {
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
       [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
+    *) usage "missing action in $@" ;;
   esac
 
   # Handler

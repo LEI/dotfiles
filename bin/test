@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+input="--create --file example"
+parsed=("create=1" "file!uuid" "file=@example" "create|update")
+
+# echo "${parsed[@]}"
+for ((i=0; i<${#parsed[@]}; i+=2))
+do
+  arg="${parsed[i]}"
+  req="${parsed[i+1]}"
+  if [[ -n "$req" ]]
+  then
+    echo "$arg requires $req"
+    # pattern="(--"
+    # if [[ $input =~ $pattern ]]
+    # then
+    #   echo "${BASH_REMATCH[@]}"
+    # fi
+    # while IFS=$'|&!' read -r r
+    # do
+    # done <<< "$req"
+  fi
+done
