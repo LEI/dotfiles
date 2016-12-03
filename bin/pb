@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # http://ptpb.pw/#shell-functions
+# https://github.com/ptpb/pb
 # https://github.com/HalosGhost/pbpst
 
-PB_CURL_OPTS=
+PB_CURL_OPTS="${PB_CURL_OPTS:-}"
 PB_PROVIDER="https://ptpb.pw"
 PB_ARGS=("h|help" \
   "d|debug" \
@@ -53,7 +54,7 @@ usage() {
   then pberr "$err"; e=1
   fi
   >&2 printf "%s\n" "Usage: pb [-CURSG] [--help] [--debug]"
-  >&2 printf "          %-24s%s\n" "" "$@"
+  >&2 printf "          %-24s%s\n" "$@"
   exit $e
 }
 
@@ -72,7 +73,7 @@ full_usage() {
     desc+=("$arg")
     desc+=("${d}")
   done
-  usage "$1" "" "${desc[@]}"
+  usage "$1" "${desc[@]}"
 }
 
 pb() {

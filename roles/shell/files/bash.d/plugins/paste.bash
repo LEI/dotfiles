@@ -29,12 +29,12 @@ pbs () {
   local win="${1:-root}"
   local tmp=/tmp/$$.png
   gm import -window $win $tmp
-  pbx $tmp
+  pbx -C $tmp
 }
 
 # Record terminal
 pbs () {
   local tmp=/tmp/$$.json
   asciinema rec $tmp
-  pbx $tmp
+  pbx -C $tmp
 }
