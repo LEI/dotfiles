@@ -3,15 +3,14 @@
 # https://github.com/HalosGhost/pbpst
 
 PB_CURL_OPTS=
-PB_PROVIDER="https://ptpb.pw" #-CRUShdpfuvx
-PB_ARGS=("pb=0.1" \
-  "h|help" \
+PB_PROVIDER="https://ptpb.pw"
+PB_ARGS=("h|help" \
   "d|debug" \
   "P|provider:+string" \
   "C|create:file,!uuid" \
   "U|update:file,&uuid" \
   "R|remove:uuid" \
-  "S|shorten:+" \
+  "S|shorten:-" \
   "G|get:+" \
   "lf|list-formats" \
   "ll|list-lexers" \
@@ -23,93 +22,55 @@ PB_ARGS=("pb=0.1" \
   "u|uuid:update,|remove+string" \
   "v|vanity:create" \
   "x|sunset:create,|update+duration")
-PB_DESC=("This"
+PB_DESC=("This" \
   "Print curl command instead of executing it" \
-  "Pastebin host, default: $PB_PROVIDER" \
+  "host> Pastebin host, default: $PB_PROVIDER" \
   "Create a new paste (required: file)" \
   "Update an existing paste (required: uuid)" \
   "Remove a paste (required: uuid)" \
-  "Create a redirect url (required: file <<<)" \
-  "Arbitrary GET request" \
-  "(-G lf)" \
-  "Pygments lexer used for syntax highlighting (-G l)" \
-  "(-G ls)" \
+  "<url> > Create a redirect url" \
+  "<url> > Arbitrary GET request" \
+  "List available formats, equivalent to -G lf" \
+  "List pygments lexers used for syntax highlighting, equivalent to -G l" \
+  "List available themes, equivalent to -G ls" \
   "Render a ReStructuredText or Markdown paste to HTML (-CU)" \
   "Handle Asciinema videos (-CU)" \
-  "Content of the paste (-CUS)" \
+  "[content] > Content or path of the paste (-CUS)" \
   "The paste can only be retrieved by knowledge of its sha1 hexdigest (-C)" \
-  "Shared secret allowing modification (-UR)" \
-  "Custom id, prefixed with '~' (-C)" \
-  "Set the paste to expire automatically (-CU)")
+  "<id> Shared secret allowing modification (-UR)" \
+  "<name> > Custom id, prefixed with '~' (-C)" \
+  "<duration> > Set the paste to expire automatically (-CU)")
 
 set -e
 set -o pipefail
 shopt -s extglob
 
-# Copy the url of the uploaded paste
-pbx() {
-  local copy
-  if hash xsel 2>/dev/null
-  then copy="xsel -l /dev/null -b"
-  # elif xclip[board]
-  elif hash pbcopy 2>/dev/null
-  then copy="pbcopy" # -pboard general
-  else error "pbx: No clipboard manager found ($(uname -s))"; return 1
-  fi
-  local opts="--render $@" # --handler=r $@" # ?r=1
-  local curl_opts="$PB_CURL_OPTS -s -w %{redirect_url} -o /dev/stderr"
-  PB_CURL_OPTS="$curl_opts" pb $opts | "$copy"
-  # curl -sF "c=@${1:--}" -w "%{redirect_url}" 'http://ptpb.pw/?r=1' -o /dev/stderr | "$copy"
-}
-
-# Encrypt file with GPG symetric cipher
-pbg() { # Decrypt with curl <pasteurl> | gpg -d
-  gpg -o - -c "$1" | pbx -C # $@
-}
-
-# Capture screenshot
-pbs () {
-  local win="${1:-root}"
-  local tmp=/tmp/$$.png
-  gm import -window $win $tmp
-  pbx $tmp
-}
-
-# Record terminal
-pbs () {
-  local tmp=/tmp/$$.json
-  asciinema rec $tmp
-  pbx $tmp
-}
-
 usage() {
   local e=$?
   local err="${1:-}"
-  [[ $# -gt 1 ]] && shift
+  [[ $# -ge 1 ]] && shift
   if [[ -n "$err" ]]
   then pberr "$err"; e=1
   fi
-  >&2 printf "%s\n" "Usage: pb [opts]"
-  >&2 printf "          %-24s%s\n" "[--version] [--help] [--debug]" "$@"
-    # "[ --help | --debug ]" "$@"
+  >&2 printf "%s\n" "Usage: pb [-CURSG] [--help] [--debug]"
+  >&2 printf "          %-24s%s\n" "" "$@"
   exit $e
 }
 
-# GET /f GET /s GET /l GET /lf GET /ls
-# GET /<id> GET /<id>/<lexer> GET /<id>/<lexer>/<formatter> GET /<handler>/<id>
-# POST /<handler> POST / POST /<vanity> POST /u
-# PUT /<uuid>
-# DELETE /<uuid>
 full_usage() {
+  local args=("${PB_ARGS[@]}")
   local i desc=()
   # local cmd="${PB_ARGS[@]:0:1}"
-  for ((i=1; i<${#PB_ARGS[@]}; i++))
+  for ((i=0; i<${#args[@]}; i++))
   do
-    arg="${PB_ARGS[i]}" #; arg="${arg#*,}"; arg="${arg%%,*}"
+    local v="${PB_DESC[i]%% > *}"
+    local d="${PB_DESC[i]#* > }"
+    local arg="${args[i]}" #; arg="${arg#*,}"; arg="${arg%%,*}"
     arg="${arg%%:*}"
     arg="-${arg/|/, --}"
+    [[ "${v}" != "${d}" ]] && arg+=" ${v}"
     desc+=("$arg")
-    desc+=("${PB_DESC[i]}")
+    desc+=("${d}")
   done
   usage "$1" "" "${desc[@]}"
 }
@@ -125,15 +86,16 @@ pb() {
   while read -r arg
   do
     case "$arg" in
-      ''|=*) usage "missing action -CURS" ;;
+      '') pberr "no default action" ;;
+      =*) usage "invalid argument '$arg'" ;;
       *=*) declare ${arg%%=*}="${arg#*=}" || return 1 ;;
-      *) pberr "Unable to parse '$arg'" ;;
+      *) pberr "invalid option '$arg'" ;;
     esac
   done <<< "${args[@]}"
 
-  [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
-  # for v in help get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
+  # [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
 
+  # for v in help get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
   # local method get create update remove shorten list_formats list_lexerslist_styles # Actions
   # local help debug provider render term file private uuid vanity sunset # Parameters
 
@@ -146,12 +108,29 @@ pb() {
   # then
   # fi
 
+  local action="$help$create$update$remove$shorten$get$list_formats$list_lexers$list_styles"
+  if [[ -z "$action" ]]
+  then usage "missing action"
+  elif [[ "$action" -gt 1 ]]
+  then usage "conflicting action"
+  fi
+
+  if [[ "$render$term" -gt 1 ]]
+  then usage "conflicting handler"
+  fi
+
   case 1 in
     $help) full_usage ;;
     $list_formats) get=1; url+="/lf" ;;
     $list_lexers) get=1; url+="/l" ;;
     $list_styles) get=1; url+="/ls" ;;
   esac
+
+  # GET /f GET /s GET /l GET /lf GET /ls
+  # GET /<id> GET /<id>/<lexer> GET /<id>/<lexer>/<formatter> GET /<handler>/<id>
+  # POST /<handler> POST / POST /<vanity> POST /u
+  # PUT /<uuid>
+  # DELETE /<uuid>
   case 1 in
     $get) method="GET"
       ;;
@@ -187,7 +166,7 @@ pb() {
 
   # Execute or debug
   if [[ -z "$debug" ]]
-  then echo curl $opts $url
+  then curl $opts $url
   else >&2 echo curl $opts $url
   fi
 }

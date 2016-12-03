@@ -1,23 +1,44 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-input="--create --file example"
-parsed=("create=1" "file!uuid" "file=@example" "create|update")
+export \
+    g_1='create remove' \
+    g_2='modify';
 
-# echo "${parsed[@]}"
-for ((i=0; i<${#parsed[@]}; i+=2))
-do
-  arg="${parsed[i]}"
-  req="${parsed[i+1]}"
-  if [[ -n "$req" ]]
-  then
-    echo "$arg requires $req"
-    # pattern="(--"
-    # if [[ $input =~ $pattern ]]
-    # then
-    #   echo "${BASH_REMATCH[@]}"
-    # fi
-    # while IFS=$'|&!' read -r r
-    # do
-    # done <<< "$req"
-  fi
-done
+myscript () {
+    # setup cmd; declare functions
+    for i in "${!g_@}"; do
+        typeset -n j=$i;
+        for k in ${j}; do
+            #danger
+            . /dev/fd/0 <<< "function ${k} () {
+                readonly action_${!j}=$k 2>/dev/null || {
+                    echo error: use only one cmd of: ${j} 1>&2;
+                    exit 1; 
+                };
+            }";
+        done;
+    done;
+
+    # setup options
+    :;
+    
+    # parse args
+    typeset -a actions;
+    for a; do
+        if
+            typeset -F "$a" 1>/dev/null 2>&1;
+        then
+            "$a" && {
+                actions+=("$a");
+                unset -f a;
+            };
+        else
+            echo unkown cmd ... 2>&1;
+            exit 1;
+        fi;
+    done;
+
+    echo "$actions";
+};
+
+echo 'myscript' create modify remove;

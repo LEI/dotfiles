@@ -14,8 +14,8 @@ err() {
 }
 
 parse_args() {
-  local cmd=(${PARSE_ARGS[@]:0:1})
-  local args=(${PARSE_ARGS[@]:1})
+  # local cmd=(${PARSE_ARGS[@]:0:1})
+  local args=(${PARSE_ARGS[@]})
   local parsed=()
   while [[ $# -ne 0 ]]
   do
@@ -23,7 +23,7 @@ parse_args() {
       -|'') err "invalid argument -" ;;
       --) break ;;
       -*) [[ "$next" -eq 1 ]] && err "illegal option $1"
-        local pre="-${a%%-*}"
+        local pre="-${1%%-*}"
         local p
         for p in "${args[@]}"
         do
@@ -48,11 +48,10 @@ parse_args() {
             local arg="${BASH_REMATCH[1]}"
             local extra="${BASH_REMATCH[2]}"
             # >&2 printf "MATCH %s\n" "${BASH_REMATCH[@]}"
-            if [[ "$arg" == "--"* ]] && [[ -n "$extra" ]]
-            then err "$arg: illegal option"
-            elif [[ "$arg" == "-"* ]] && [[ -n "$extra" ]]
+            if [[ "$1" == "--"* ]] && [[ "$arg" == "-$short" ]] && [[ -n "$extra" ]]
+            then err "illegal option $1"
+            elif [[ "$1" == "-"* ]] && [[ -n "$extra" ]]
             then set -- "$arg" "-$extra" "${@:2}"
-              # >&2 echo "NEXT:$next => $@"
               # if [[ "$next" -eq 1 ]]
               # then echo >&2 "THEN" "-$arg" "${@:2:1}" "-$extra" "${@:3}"
               #   set -- "-$arg" "${@:2:1}" "-$extra" "${@:3}"
@@ -60,32 +59,39 @@ parse_args() {
               #   set -- "-$arg" "-$extra" "${@:2}"
               # fi
             elif [[ -n "$extra" ]]
-            then err "invalid option $arg"
+            then err "invalid option $arg ($extra)"
             fi
             local varname="${name//-/_}"
-            local res=
+            local val=
             if [[ "$next" -eq 1 ]]
             then
               if [[ "$type" == "stdin" ]]
               then
                 if [[ $# -gt 1 ]] && [[ "$2" != -* ]]
-                then [[ -f "$2" ]] && res="$varname=@$2" || res="$varname=$2"; shift
-                else res="$varname=@-"; next=0 # [[ -t 0 ]]
+                then [[ -f "$2" ]] && val="@$2" || val="$2"; next=0; shift
+                else val="@-"; next=0 # [[ -t 0 ]]
                 fi
               elif [[ $# -gt 1 ]] && [[ -n "$2" ]] && [[ "$2" != -* ]]
-              then res="$varname=$2"; shift
+              then val="$2"; next=0; shift
               elif  [[ -n "$2" ]]
               then err "$1: $name requires a ${type:-value}, found: $2"
               else err "$1: $name requires a ${type:-value}"
               fi
-            else res="$varname=1"
+            else val="1" # boolean
             fi
             shift # key or value
-            parsed+=("$res" "${req:-}")
-            printf "%s\n" "$res"
+
+            case "$type" in
+              ''|stdin|string) [[ -n "$val" ]] || err "$val: invalid $name $type" ;;
+              duration) val="$(get_seconds "$val")" || err "$val: invalid $name $type" ;;
+              number) [[ $val =~ ^-?[0-9]+$ ]] || err "$val: invalid $name $type" ;;
+              *) err "invalid type $type ($val)"
+            esac
+            parsed+=("$varname=$val" "${req:-}")
+            printf "%s\n" "$varname=$val"
             break
           fi
-          # >&2 echo "did not break /$p/ $@"
+          # >&2 echo "did not break $arg /$p/ $@"
         done
         if [[ -z "$arg" ]]
         then err "illegal option $1"
@@ -95,26 +101,6 @@ parse_args() {
         ;;
     esac
   done
-
-# declare -A cant_go=([create]=remove,delete,shred); declare -A cant_tbl=();add_cant() { [[ ${cant_tbl[$2,len]} ]] ||
-# 2016-12-03 14:58         resh | cant_tbl[$2,len]=0;cant_tbl[$2,${cant_tbl[$2,len]}]=$1;((cant_tbl[$2,len] ++));};add_cant_row(){ local param=$1 with
-# 2016-12-03 14:58         resh | w;IFS=, read -ra with;for w in "${with[@]}"; do add_cant "$w" "$param"; done;};for p in "${!cant_go[@]}";do
-# 2016-12-03 14:58         resh | add_cant_row "$p" <<<"${cant_go[$p]}";done;declare -p cant_tbl
-# 2016-12-03 14:58        shbot | resh: declare -A cant_tbl=([create,len]="3" [create,0]="remove" [create,1]="delete" [create,2]="shred" )
-
-# declare -A cant_t=([create,len]="1" [create,0]="remove")
-# in_cant_t(){
-#   local len=${cant_t[$1,len]} i;[[ $len ]] || {false;return;}
-#   for ((i=0;i<len;i++)); do [[ ${cant_t[$prm,$i]} == "$vs" ]]&&{ true;return;};done;false;
-# }
-# vldt(){
-#   local a=$1;shift;local b
-#   for b;do if in_cant_t "$a" "$b";then echo "$a cnt go wth $b";fi;done;
-# }
-# set -- create delete
-# for ((i=1;i<=$#;i++))
-# do vldt "${!i}" "${@: i+1}"
-# done
 
   # local i requires
   # for ((i=0; i<${#parsed[@]}; i+=2))
@@ -135,6 +121,26 @@ parse_args() {
   #   done <<< ${parsed[i+1]}
   # done
 }
+
+# declare -A cant_go=([create]=remove,delete,shred); declare -A cant_tbl=();add_cant() { [[ ${cant_tbl[$2,len]} ]] ||
+# cant_tbl[$2,len]=0;cant_tbl[$2,${cant_tbl[$2,len]}]=$1;((cant_tbl[$2,len] ++));};add_cant_row(){ local param=$1 with
+# w;IFS=, read -ra with;for w in "${with[@]}"; do add_cant "$w" "$param"; done;};for p in "${!cant_go[@]}";do
+# add_cant_row "$p" <<<"${cant_go[$p]}";done;declare -p cant_tbl
+# declare -A cant_tbl=([create,len]="3" [create,0]="remove" [create,1]="delete" [create,2]="shred" )
+
+# declare -A cant_t=([create,len]="1" [create,0]="remove")
+# in_cant_t(){
+#   local len=${cant_t[$1,len]} i;[[ $len ]] || {false;return;}
+#   for ((i=0;i<len;i++)); do [[ ${cant_t[$prm,$i]} == "$vs" ]]&&{ true;return;};done;false;
+# }
+# vldt(){
+#   local a=$1;shift;local b
+#   for b;do if in_cant_t "$a" "$b";then echo "$a cnt go wth $b";fi;done;
+# }
+# set -- create delete
+# for ((i=1;i<=$#;i++))
+# do vldt "${!i}" "${@: i+1}"
+# done
 
 ___parse_args() {
         # local val=
