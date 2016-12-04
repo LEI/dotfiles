@@ -23,6 +23,8 @@ PB_ARGS=("h|help" \
   "u|uuid:update,|remove+string" \
   "v|vanity:create" \
   "x|sunset:create,|update+duration")
+  # "f|format:+string" \
+  # "l|line:+number" \
 PB_DESC=("This" \
   "Print curl command instead of executing it" \
   "host> Pastebin host, default: $PB_PROVIDER" \
@@ -53,7 +55,7 @@ usage() {
   if [[ -n "$err" ]]
   then pberr "$err"; e=1
   fi
-  >&2 printf "%s\n" "Usage: pb [-CURSG] [--help] [--debug]"
+  >&2 printf "%s\n" "Usage: pb <operation> [options]"
   >&2 printf "          %-24s%s\n" "$@"
   exit $e
 }
@@ -79,20 +81,30 @@ full_usage() {
 pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
-  local args args
 
-  # [[ -t 0 ]] && in=0 || in=
-  args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
-  # echo "${args[@]}"
-  while read -r arg
+  local arg argstring="df:h"
+  while getargs "$argstring" arg "$@"
   do
     case "$arg" in
-      '') pberr "no default action" ;;
-      =*) usage "invalid argument '$arg'" ;;
-      *=*) declare ${arg%%=*}="${arg#*=}" || return 1 ;;
-      *) pberr "invalid option '$arg'" ;;
+      *) printf "%s\n" "arg -> $arg" ;;
     esac
-  done <<< "${args[@]}"
+    sleep 0.1
+  done
+
+  return $?
+
+  # [[ -t 0 ]] && in=0 || in=
+  # args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
+  # # echo "${args[@]}"
+  # while read -r arg
+  # do
+  #   case "$arg" in
+  #     '') pberr "no default action" ;;
+  #     =*) usage "invalid argument '$arg'" ;;
+  #     *=*) declare ${arg%%=*}="${arg#*=}" || return 1 ;;
+  #     *) pberr "invalid option '$arg'" ;;
+  #   esac
+  # done <<< "${args[@]}"
 
   # [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
 
