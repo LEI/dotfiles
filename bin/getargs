@@ -10,7 +10,7 @@ for f in functions/{time,utils}
 do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
 done
 
-arrange_opts() {
+arrange_args() {
   local s="|"
   local flags args str="$1"
   shift
@@ -58,6 +58,18 @@ arrange_opts() {
   ARR=("${flags[@]}" "${args[@]}")
 }
 
+unique_args() {
+  local i found=
+  for i in "$@"
+  do local v="arg_$i"
+    if [[ -n "${!v}" ]]
+    then [[ -n "$found" ]] \
+      && err "$i: action already defined ($found)" && return 1 \
+      || found="$i"
+    fi
+  done
+}
+
 getargs() {
   # GETARGS=("${GETARGS[@]}")
   local ARR
@@ -68,7 +80,7 @@ getargs() {
   # set -- "${ARGS[@]}" spaces??
 
   # Split and order short options
-  arrange_opts "$str" "$@"
+  arrange_args "$str" "$@"
   set -- "${ARR[@]}"
 
   while [[ $# -ne 0 ]]
@@ -109,6 +121,44 @@ getargs() {
     # export ARGVAL="$value"
     shift
   done
+
+  local unique="$GETARGS_UNIQ"
+  if [[ -n "$uniq" ]] && ! unique_args $uniq
+  then return 1
+  fi
+
+  local flags="$GETARGS_FLAGS"
+  if [[ -n "$flags" ]]
+  then
+    for a in $flags
+    do local v="arg_$a"
+      if [[ "${!v}" -ne 0 ]] && [[ ! "${!v}" -ge 0 ]]
+      then err "flag $a should be greater or equal to 0 or 1"; return 1
+      fi
+    done
+  fi
+
+  local flags="$GETARGS_OPTS"
+  if [[ -n "$flags" ]]
+  then
+    for a in $flags
+    do local v="arg_$a"
+      if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
+      then err "option $a should be greater or equal to 0"; return 1
+      fi
+    done
+  fi
+
+  # local args="$GETARGS_ARGS"
+  # if [[ -n "$args" ]]
+  # then
+  #   for a in $args
+  #   do local v="arg_$a"
+  #     if [[ -z "${!v}" ]]
+  #     then err "argument $a should have a value"; return 1
+  #     fi
+  #   done
+  # fi
 
   # printf "%s\n" "${args[@]}"
 

@@ -63,24 +63,16 @@ full_usage() {
   usage "$1" "${desc[@]}"
 }
 
-unique() {
-  local i found=
-  for i in "$@"
-  do local a="pb_$i"
-    if [[ -n "${!a}" ]]
-    then [[ -n "$found" ]] \
-      && pberr "$i: action already defined ($found)" \
-      || found="$i"
-    fi
-  done
-}
-
 pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
 
   # export GETARGS=("$@")
   # while getargs "$PB_ARGS" "$@" # TODO $opt
+  export GETARGS_UNIQ="help create update remove list"
+  export GETARGS_FLAGS="debug"
+  export GETARGS_OPTS="render term private"
+  export GETARGS_ARGS="provider shorten get file uuid vanity sunset"
   while read -r arg
   do local a="pb_${arg%%=*}"
     if [[ -z "$arg" ]]
@@ -92,38 +84,28 @@ pb() {
   done < <(getargs "$PB_ARGS" "$@")
 
   for a in ${!pb_*}
-  do printf "%s > %s\n" "${a}" "${!a}"
+  do printf "%s \t %s\n" "${a}" "${!a}"
   done
 
-  local actions="help create update remove list"
-  local bools="render term private"
-  local flags="debug"
-  local args="provider shorten get file uuid vanity sunset"
+  # for a in $actions $bools
+  # do local v="pb_$a"
+  #   if [[ -n "${!v}" ]]
+  #   then
+  #     if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
+  #     then pberr "boolean $a should be equal to 0 or 1 (boolean)"; return 1
+  #     fi
+  #   fi
+  # done
 
-  printf "%s\n" $actions
-  if ! unique $actions
-  then echo "not uniq"
-  fi
-
-  for a in $actions $bools
-  do local v="pb_$a"
-    if [[ -n "${!v}" ]]
-    then
-      if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
-      then pberr "boolean $a should be equal to 0 or 1 (boolean)"; return 1
-      fi
-    fi
-  done
-
-  for a in $flags
-  do local v="pb_$a"
-    if [[ -n "${!v}" ]]
-    then
-      if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -lt 1 ]]
-      then pberr "boolean $a should be greater or equal to 0 (flag)"; return 1
-      fi
-    fi
-  done
+  # for a in $flags
+  # do local v="pb_$a"
+  #   if [[ -n "${!v}" ]]
+  #   then
+  #     if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -lt 1 ]]
+  #     then pberr "boolean $a should be greater or equal to 0 (flag)"; return 1
+  #     fi
+  #   fi
+  # done
 
   # for a in $args
   # do local v="pb_$a"
