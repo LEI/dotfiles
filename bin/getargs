@@ -80,22 +80,31 @@ getargs() {
     fi
     local name=
     local value=
-    if [[ "$str" == *"$s$a:$s"* ]]
-    then value="$2"; shift
+    if [[ "$str" == *"$s$a:$s"* ]] # && [[ $# -gt 1 ]]
+    then
       if [[ "$long" -ne 1 ]]
       then name="${str#*$s$a:$s}"; name="${name%%:$s*}"
       else name="$1"
       fi
+      name="${name//-/_}"
+      value="$2"; shift
     elif [[ "$str" == *"$s$a$s"* ]]
     then
       if [[ "$long" -ne 1 ]]
       then name="${str#*$s$a$s}"; name="${name%%$s*}"
       else name="$1"
       fi
-      value="\$((\$getarg_${name//-/_}+1))"
+      name="${name//-/_}"
+      local v="arg_$name"
+      declare ${v}="$((${!v:-0}+1))"
+      value="${!v:-1}"
+      # value="$((${!v:-0} + 1))"
     else err "$1: extra argument"
     fi
-    printf "getarg_%s=%s\n" "${name//-/_}" "$value"
+    while [[ "$name" == "_"* ]]
+    do name="${name#_}"
+    done
+    printf "%s=%s\n" "$name" "$value"
     # export ARG="${var//-/_}"
     # export ARGVAL="$value"
     shift
