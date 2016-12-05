@@ -5,24 +5,8 @@
 
 PB_CURL_OPTS="${PB_CURL_OPTS:-}"
 PB_PROVIDER="https://ptpb.pw"
-PB_ARGS=("h|help" \
-  "d|debug" \
-  "P|provider:+string" \
-  "C|create:file,!uuid" \
-  "U|update:file,&uuid" \
-  "R|remove:uuid" \
-  "S|shorten:-" \
-  "G|get:+" \
-  "lf|list-formats" \
-  "ll|list-lexers" \
-  "ls|list-styles" \
-  "r|render:create,|update,!term" \
-  "t|term:create,|update,!render" \
-  "f|file:create,|update-" \
-  "p|private:create" \
-  "u|uuid:update,|remove+string" \
-  "v|vanity:create" \
-  "x|sunset:create,|update+duration")
+# "h|d|P:|C|U|R|S:|G:|lf|ll|ls|r|t|f:|p|u|v|x"
+PB_ARGS="h|help,d|debug,P:|provider:,C|create,U|update,R|remove,S:|shorten:,G:|get:,L:|list:,r|render,t|term,f:|file:,p|private,u:|uuid:,v:|vanity:,x:|sunset:"
   # "f|format:+string" \
   # "l|line:+number" \
 PB_DESC=("This" \
@@ -82,14 +66,14 @@ pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
 
-  local arg argstring="df:h"
-  while getargs "$argstring" arg "$@"
-  do
+  # export GETARGS=("$@")
+  while getargs "$PB_ARGS" "$@" # read -r arg
+  do # TODO $opt
     case "$arg" in
-      *) printf "%s\n" "arg -> $arg" ;;
+      *) printf "%s\n" "$arg" ;;
     esac
     sleep 0.1
-  done
+  done # < <(getargs "$argstring" "$@")
 
   return $?
 
