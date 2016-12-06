@@ -5,7 +5,9 @@ dependencies:
     packages: "{{ htop_packages }}"
 
   - role: dotfiles
-    role_dir: roles/system
     paths:
       - name: htop
         dest: .config/htop
+
+galaxy_info:
+  galaxy_tags: system
