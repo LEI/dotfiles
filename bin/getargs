@@ -63,9 +63,11 @@ unique_args() {
   for i in "$@"
   do local v="arg_$i"
     if [[ -n "${!v}" ]]
-    then [[ -n "$found" ]] \
-      && err "$i: action already defined ($found)" && return 1 \
-      || found="$i"
+    then
+      if [[ -n "$found" ]]
+      then err "$i: action already defined ($found)"; return 1
+      else found="$i"
+      fi
     fi
   done
 }
@@ -122,47 +124,51 @@ getargs() {
     shift
   done
 
-  local unique="$GETARGS_UNIQ"
-  if [[ -n "$uniq" ]] && ! unique_args $uniq
-  then return 1
+  # Actions
+  local uniq="$GETARGS_UNIQ"
+  if [[ -n "$uniq" ]]
+  # then return 1
+  then unique_args $uniq || return 1
   fi
 
-  local flags="$GETARGS_FLAGS"
-  if [[ -n "$flags" ]]
+  # Increment
+  local flag="$GETARGS_FLAG"
+  if [[ -n "$flag" ]]
   then
-    for a in $flags
+    for a in $flag
     do local v="arg_$a"
       if [[ "${!v}" -ne 0 ]] && [[ ! "${!v}" -ge 0 ]]
-      then err "flag $a should be greater or equal to 0 or 1"; return 1
+      then err "flag $a should be greater or equal to 0"; return 1
       fi
     done
   fi
 
-  local flags="$GETARGS_OPTS"
-  if [[ -n "$flags" ]]
+  # Boolean
+  local bool="$GETARGS_BOOL"
+  if [[ -n "$bool" ]]
   then
-    for a in $flags
+    for a in $bool
     do local v="arg_$a"
       if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
-      then err "option $a should be greater or equal to 0"; return 1
+      then err "option $a should be equal to 0 or 1"; return 1
       fi
     done
   fi
 
-  # local args="$GETARGS_ARGS"
-  # if [[ -n "$args" ]]
+  # local opts="$GETARGS_OPTS"
+  # if [[ -n "$opts" ]]
   # then
-  #   for a in $args
+  #   for a in $opts
   #   do local v="arg_$a"
-  #     if [[ -z "${!v}" ]]
-  #     then err "argument $a should have a value"; return 1
+  #     if [[ -z "${!v:-undefined}" ]] && [[ -z "${!v}" ]]
+  #     then err "argument $a should have a value (${!v:-})"; return 1
   #     fi
   #   done
   # fi
 
   # printf "%s\n" "${args[@]}"
 
-  return 1 # $?
+  # return 1 # $?
 }
 
 err() {

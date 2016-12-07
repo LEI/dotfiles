@@ -69,50 +69,47 @@ pb() {
 
   # export GETARGS=("$@")
   # while getargs "$PB_ARGS" "$@" # TODO $opt
-  export GETARGS_UNIQ="help create update remove list"
-  export GETARGS_FLAGS="debug"
-  export GETARGS_OPTS="render term private"
-  export GETARGS_ARGS="provider shorten get file uuid vanity sunset"
+  export GETARGS_UNIQ="help create update remove shorten get list"
+  export GETARGS_FLAG="debug"
+  export GETARGS_BOOL="render term private"
+  # export GETARGS_OPTS="provider shorten get file uuid vanity sunset"
   while read -r arg
   do local a="pb_${arg%%=*}"
     if [[ -z "$arg" ]]
     then pberr "missing argument '$arg'"; return 1
-    elif [[ -n "${!a}" ]]
-    then pberr "already defined '${arg%%=*}'"; return 1
+    elif [[ -n "${!a}" ]] && [[ "${arg%%=*}" != *"$GETARGS_FLAG"* ]] # && [[ ! "${arg#*=}" -gt "${!a}" ]]
+    then pberr "already defined '${arg%%=*}=${arg#*=}' (${!a})"; return 1
     fi
     declare $a="${arg#*=}" || return 1
-  done < <(getargs "$PB_ARGS" "$@")
-
-  for a in ${!pb_*}
-  do printf "%s \t %s\n" "${a}" "${!a}"
-  done
-
-  # for a in $actions $bools
-  # do local v="pb_$a"
-  #   if [[ -n "${!v}" ]]
-  #   then
-  #     if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
-  #     then pberr "boolean $a should be equal to 0 or 1 (boolean)"; return 1
-  #     fi
-  #   fi
+  done < <(getargs "$PB_ARGS" "$@" && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| usage
+  # done < <(getargs "$PB_ARGS" "$@") # || exit $?
+  read -r ret < /tmp/pb
+  [[ "$ret" -ne 0 ]] && usage
+  # for a in ${!pb_*}
+  # do printf "%s \t %s\n" "${a}" "${!a}"
   # done
 
-  # for a in $flags
-  # do local v="pb_$a"
-  #   if [[ -n "${!v}" ]]
-  #   then
-  #     if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -lt 1 ]]
-  #     then pberr "boolean $a should be greater or equal to 0 (flag)"; return 1
-  #     fi
-  #   fi
-  # done
-
-  # for a in $args
-  # do local v="pb_$a"
-  #   if [[ -z "${!v}" ]]
-  #   then pberr "$a should have a value (argument)"; return 1
-  #   fi
-  # done
+  local method
+  case 1 in
+    $pb_help) full_usage ;;
+    $pb_create)
+      ;;
+    $pb_update) method="PUT"
+      ;;
+    $pb_remove) method="DELETE"
+      # url+="/$pb_uuid"
+      ;;
+    $pb_list) method="GET"
+      case "$pb_list" in
+        formats) url+="/lf" ;;
+        lexers) url+="/l" ;;
+        styles) url+="/ls" ;;
+      esac
+      ;;
+    $pb_get) method="GET"
+      url+="/$pb_get"
+      ;;
+  esac
 
   return $?
 
