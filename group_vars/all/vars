@@ -13,6 +13,7 @@ dot_local_dir: "{{ inventory_dir }}" # "{{ lookup('env', 'HOME') }}" "{{ hostvar
 tmp_dir: "{{ ansible_env.TMPDIR | default('/tmp/') }}"
 
 os: "{{ ansible_os_family }}"
+arch: "{{ ansible_architecture }}"
 
 # Options
 # dot_backup_enable: yes

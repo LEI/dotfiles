@@ -15,12 +15,14 @@
       tags: [pkg]
       packages: "{{ apt_packages }}"
 
+    - role: irc
+      tags: [irc]
+
     - role: i3
       tags: [i3, wm]
       gtk_theme: arc
+      when: arch not in ['armv6l']
 
     - role: rxvt
       tags: [rxvt]
-
-    - role: irc
-      tags: [irc]
+      when: not ansible_architecture | match('armv.*')
