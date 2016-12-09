@@ -106,11 +106,11 @@ pb() {
 
   while read -r arg
   do local a="pb_${arg%%=*}"
-    # if [[ -z "$arg" ]]
-    # then pb_err "missing argument '$arg'"; return 1
+    if [[ -z "$arg" ]]
+    then pb_err "missing argument '$arg'"; return 1
     # elif [[ -n "${!a}" ]] && [[ "${arg%%=*}" != *"$GETARGS_FLAG"* ]] # && [[ ! "${arg#*=}" -gt "${!a}" ]]
     # then pb_err "already defined '${arg%%=*}=${arg#*=}' (${!a})"; return 1
-    # fi
+    fi
     declare $a="${arg#*=}" || return 1
   done < <(GETARGS="$PB_ARGS" GETUNIQ="$PB_ACTIONS" getargs "$@" \
     && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| usage
