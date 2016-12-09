@@ -18,20 +18,20 @@ arrange_args() {
   while [[ $# -ne 0 ]]; do # echo "> $1"
     case "$1" in
       --) args+=("$@"); break ;;
-      --*)
-        if [[ $str == *"$s${1#--}:$s"* ]]
+      --*) local flag="${1#--}"
+        if [[ $str == *"$s${flag}:$s"* ]]
         then
           if [[ $# -gt 1 ]]
           then flags+=("$1" "$2"); shift
           else err "$1: requires a value"
           fi
-        elif [[ $str == *"$s${1#--}$s"* ]]
+        elif [[ $str == *"$s${flag}$s"* ]] || [[ $str == *"$s${flag}+$s"* ]]
         then args+=("$1")
-        else err "illegal option -- $1" # -$flag
+        else err "illegal option $1" # -- $flag
         fi
         ;;
       -*) local flag="${1: -1}"
-        if [[ $str == *"$s$flag:$s"* ]]
+        if [[ $str == *"$s${flag}:$s"* ]]
         then
           if [[ "${#1}" -gt 2 ]] && [[ "${1:0:-1}" != "-" ]]
           then set -- "${1:0:-1}" "-$flag" "${@:2}"; continue
@@ -39,13 +39,16 @@ arrange_args() {
           then flags+=("$1" "$2"); shift
           else err "-$flag: requires a value"
           fi
-        elif [[ "$str" == *"$s$flag$s"* ]] && [[ "$1" != "-$flag" ]]
+        elif [[ "$str" == *"$s${flag}$s"* ]] || [[ "$str" == *"$s${flag}+$s"* ]]
+          # && [[ "$1" != "-$flag" ]]
         then
           if [[ "${#1}" -gt 2 ]] && [[ "${1:0:-1}" != "-" ]]
           then set -- "-$flag" "${1:0:-1}" "${@:2}"; continue
-          else flags+=("-$flag" "${1:0:-1}")
+          elif [[ "$1" != "-$flag" ]]
+          then flags+=("-$flag" "${1:0:-1}")
+          else flags+=("$1")
           fi
-        elif [[ "$str" == *"$s$flag$s"* ]]
+        elif [[ "$str" == *"$s${flag}$s"* ]]
         then flags+=("$1")
         else err "illegal option -- $1" # -$flag
         fi
@@ -65,18 +68,29 @@ unique_args() {
     if [[ -n "${!v}" ]]
     then
       if [[ -n "$found" ]]
-      then err "$i: action already defined ($found)"; return 1
+      then err "$found: $i is already present"; return 1
       else found="$i"
       fi
     fi
   done
 }
 
+long_arg() {
+  local arg="$1"
+  local sep="$2"
+  local opt="$3"
+  local str="$4"
+  local long="${str#*$s$arg$opt$s}"
+  printf "%s\n" "${long%%$opt$sep*}"
+}
+
 getargs() {
   # GETARGS=("${GETARGS[@]}")
   local ARR
   local s="|"
-  local str="$s${1//,/$s}$s"; shift
+  # local str="$s${1//,/$s}$s"; shift
+  local str="$s${GETARGS//$'\n'/$s}$s"
+
   # local var="$1"; shift
   # local args="$@" # BASH_ARGV
   # set -- "${ARGS[@]}" spaces??
@@ -94,27 +108,43 @@ getargs() {
     fi
     local name=
     local value=
-    if [[ "$str" == *"$s$a:$s"* ]] # && [[ $# -gt 1 ]]
-    then
-      if [[ "$long" -ne 1 ]]
-      then name="${str#*$s$a:$s}"; name="${name%%:$s*}"
-      else name="$1"
-      fi
-      name="${name//-/_}"
-      value="$2"; shift
-    elif [[ "$str" == *"$s$a$s"* ]]
-    then
-      if [[ "$long" -ne 1 ]]
-      then name="${str#*$s$a$s}"; name="${name%%$s*}"
-      else name="$1"
-      fi
-      name="${name//-/_}"
-      local v="arg_$name"
-      declare ${v}="$((${!v:-0}+1))"
-      value="${!v:-1}"
-      # value="$((${!v:-0} + 1))"
-    else err "$1: extra argument"
-    fi
+    case "$str" in
+      *"$s$a:$s"*) # && [[ $# -gt 1 ]]
+        if [[ "$long" -ne 1 ]]
+        then name="$(long_arg "$a" "$s" ":" "$str")" # ${str#*$s$a:$s}"; name="${name%%:$s*}
+        else name="$1"
+        fi
+        name="${name//-/_}"
+        local v="arg_$name"
+        [[ -n "${!v}" ]] && err "$name already declared: $1 ${!v}"
+        declare ${v}="$2"
+        shift
+        value="${!v}"
+        ;;
+      *"$s$a+$s"*)
+        if [[ "$long" -ne 1 ]]
+        then name="$(long_arg "$a" "$s" "+" "$str")"
+        else name="$1"
+        fi
+        name="${name//-/_}"
+        local v="arg_$name"
+        declare ${v}="$((${!v:-0}+1))"
+        value="${!v:-1}"
+        # value="$((${!v:-0} + 1))"
+        ;;
+      *"$s$a$s"*)
+        if [[ "$long" -ne 1 ]]
+        then name="$(long_arg "$a" "$s" "" "$str")"
+        else name="$1"
+        fi
+        name="${name//-/_}"
+        local v="arg_$name"
+        [[ -n "${!v}" ]] && err "$name already declared: $1"
+        declare ${v}=1
+        value="${!v}"
+        ;;
+      *) err "$1: extra argument (@ $@)" ;;
+    esac
     while [[ "$name" == "_"* ]]
     do name="${name#_}"
     done
@@ -125,35 +155,33 @@ getargs() {
   done
 
   # Actions
-  local uniq="$GETARGS_UNIQ"
-  if [[ -n "$uniq" ]]
-  # then return 1
-  then unique_args $uniq || return 1
+  if [[ -n "$GETUNIQ" ]]
+  then unique_args $GETUNIQ || return 1
   fi
 
-  # Increment
-  local flag="$GETARGS_FLAG"
-  if [[ -n "$flag" ]]
-  then
-    for a in $flag
-    do local v="arg_$a"
-      if [[ "${!v}" -ne 0 ]] && [[ ! "${!v}" -ge 0 ]]
-      then err "flag $a should be greater or equal to 0"; return 1
-      fi
-    done
-  fi
+  # # Increment
+  # local flag="$GETARGS_FLAG"
+  # if [[ -n "$flag" ]]
+  # then
+  #   for a in $flag
+  #   do local v="arg_$a"
+  #     if [[ "${!v}" -ne 0 ]] && [[ ! "${!v}" -ge 0 ]]
+  #     then err "flag $a should be greater or equal to 0"; return 1
+  #     fi
+  #   done
+  # fi
 
-  # Boolean
-  local bool="$GETARGS_BOOL"
-  if [[ -n "$bool" ]]
-  then
-    for a in $bool
-    do local v="arg_$a"
-      if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
-      then err "option $a should be equal to 0 or 1"; return 1
-      fi
-    done
-  fi
+  # # Boolean
+  # local bool="$GETARGS_BOOL"
+  # if [[ -n "$bool" ]]
+  # then
+  #   for a in $bool
+  #   do local v="arg_$a"
+  #     if [[ "${!v}" -ne 0 ]] && [[ "${!v}" -ne 1 ]]
+  #     then err "option $a should be equal to 0 or 1"; return 1
+  #     fi
+  #   done
+  # fi
 
   # local opts="$GETARGS_OPTS"
   # if [[ -n "$opts" ]]

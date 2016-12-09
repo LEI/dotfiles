@@ -3,10 +3,30 @@
 # https://github.com/ptpb/pb
 # https://github.com/HalosGhost/pbpst
 
+for f in functions/{time,utils}
+do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
+done
+
 PB_CURL_OPTS="${PB_CURL_OPTS:-}"
 PB_PROVIDER="https://ptpb.pw"
 # "h|d|P:|C|U|R|S:|G:|lf|ll|ls|r|t|f:|p|u|v|x"
-PB_ARGS="h|help,d|debug,P:|provider:,C|create,U|update,R|remove,S:|shorten:,G:|get:,L:|list:,r|render,t|term,f:|file:,p|private,u:|uuid:,v:|vanity:,x:|sunset:"
+PB_ACTIONS="help create update remove shorten get list"
+PB_ARGS="h|help
+d+|debug+
+P:|provider:
+C|create
+U|update
+R|remove
+S:|shorten:
+G:|get:
+L:|list:
+r|render
+t|term
+f:|file:
+p|private
+u:|uuid:
+v:|vanity:
+x:|sunset:"
 # v|verbose
 # f:|format:
 # l:|line:
@@ -38,7 +58,7 @@ usage() {
   local err="${1:-}"
   [[ $# -ge 1 ]] && shift
   if [[ -n "$err" ]]
-  then pberr "$err"; e=1
+  then pb_err "$err"; e=1
   fi
   >&2 printf "%s\n" "Usage: pb <operation> [options]"
   >&2 printf "          %-24s%s\n" "$@"
@@ -63,55 +83,82 @@ full_usage() {
   usage "$1" "${desc[@]}"
 }
 
+pb_err() {
+  [[ -n "${1:-}" ]] && >&2 printf "%s\n" "pb: $1"
+}
+
+pb_true() {
+  [[ -n "${1:-}" ]] && [[ "$1" -eq 1 ]]
+}
+
+pb_file() {
+  local f="${1:-}"
+  [[ -f "$f" ]] || [[ -L "$f" ]] || [[ -z "$f" ]] && printf "%s\n" "@${f:--}"
+}
+
+pb_duration() {
+  [[ -n "$1" ]] && printf "%s\n" "$(get_seconds "$1")" || pb_err "invalid duration"
+}
+
 pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
 
-  # export GETARGS=("$@")
-  # while getargs "$PB_ARGS" "$@" # TODO $opt
-  export GETARGS_UNIQ="help create update remove shorten get list"
-  export GETARGS_FLAG="debug"
-  export GETARGS_BOOL="render term private"
-  # export GETARGS_OPTS="provider shorten get file uuid vanity sunset"
   while read -r arg
   do local a="pb_${arg%%=*}"
-    if [[ -z "$arg" ]]
-    then pberr "missing argument '$arg'"; return 1
-    elif [[ -n "${!a}" ]] && [[ "${arg%%=*}" != *"$GETARGS_FLAG"* ]] # && [[ ! "${arg#*=}" -gt "${!a}" ]]
-    then pberr "already defined '${arg%%=*}=${arg#*=}' (${!a})"; return 1
-    fi
+    # if [[ -z "$arg" ]]
+    # then pb_err "missing argument '$arg'"; return 1
+    # elif [[ -n "${!a}" ]] && [[ "${arg%%=*}" != *"$GETARGS_FLAG"* ]] # && [[ ! "${arg#*=}" -gt "${!a}" ]]
+    # then pb_err "already defined '${arg%%=*}=${arg#*=}' (${!a})"; return 1
+    # fi
     declare $a="${arg#*=}" || return 1
-  done < <(getargs "$PB_ARGS" "$@" && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| usage
+  done < <(GETARGS="$PB_ARGS" GETUNIQ="$PB_ACTIONS" getargs "$@" \
+    && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| usage
   # done < <(getargs "$PB_ARGS" "$@") # || exit $?
   read -r ret < /tmp/pb
   [[ "$ret" -ne 0 ]] && usage
-  # for a in ${!pb_*}
-  # do printf "%s \t %s\n" "${a}" "${!a}"
-  # done
+
+  for a in ${!pb_*}
+  do printf "%s \t %s\n" "${a}" "${!a}"
+  done
+
+  [[ -n "$pb_provider" ]] && url="$pb_provider"
+  [[ -n "$pb_shorten" ]] && file="$pb_shorten" && pb_shorten=1
 
   local method
   case 1 in
     $pb_help) full_usage ;;
     $pb_create)
+      pb_true "$pb_private" && opts+=" -F p=1"
+      [[ -n "$pb_vanity" ]] && url+="/~$pb_vanity"
+      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
       ;;
     $pb_update) method="PUT"
+      url+="/$pb_uuid"
+      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
       ;;
     $pb_remove) method="DELETE"
-      # url+="/$pb_uuid"
+      url+="/$pb_uuid"
       ;;
-    $pb_list) method="GET"
-      case "$pb_list" in
-        formats) url+="/lf" ;;
-        lexers) url+="/l" ;;
-        styles) url+="/ls" ;;
-      esac
+    $pb_shorten)
+      url+="/u"
+      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+      [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
     $pb_get) method="GET"
       url+="/$pb_get"
       ;;
+    $pb_list) method="GET"
+      case "$pb_list" in
+        f|formats) url+="/lf" ;;
+        l|lexers) url+="/l" ;;
+        s|styles) url+="/ls" ;;
+        *) usage "invalid list: $pb_list" ;;
+      esac
+      ;;
   esac
-
-  return $?
 
   # [[ -t 0 ]] && in=0 || in=
   # args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
@@ -119,87 +166,85 @@ pb() {
   # while read -r arg
   # do
   #   case "$arg" in
-  #     '') pberr "no default action" ;;
+  #     '') pb_err "no default action" ;;
   #     =*) usage "invalid argument '$arg'" ;;
   #     *=*) declare ${arg%%=*}="${arg#*=}" || return 1 ;;
-  #     *) pberr "invalid option '$arg'" ;;
+  #     *) pb_err "invalid option '$arg'" ;;
   #   esac
   # done <<< "${args[@]}"
-
   # [[ -n "$debug" ]] && >&2 printf "%s\n" "${args[@]}"
-
   # for v in help get create update remove shorten; do printf "%s=%s\n" "$v" "${!v}"; done
   # local method get create update remove shorten list_formats list_lexerslist_styles # Actions
   # local help debug provider render term file private uuid vanity sunset # Parameters
 
-  [[ -n "$provider" ]] && url="$provider"
+  # [[ -n "$provider" ]] && url="$provider"
   # [[ -n "$file" ]] && [[ ! -f "$file" ]] # Used as a string!
-  [[ -n "$shorten" ]] && [[ "$shorten" != 1 ]] && file="$shorten" && shorten=1
-  [[ -n "$get" ]] && [[ "$get" != 1 ]] && url+="/$get" && get=1
+  # [[ -n "$shorten" ]] && [[ "$shorten" != 1 ]] && file="$shorten" && shorten=1
+  # [[ -n "$get" ]] && [[ "$get" != 1 ]] && url+="/$get" && get=1
 
   # if [[ -n "$file" ]] && [[ -t 0 ]]
   # then
   # fi
 
-  local action="$help$create$update$remove$shorten$get$list_formats$list_lexers$list_styles"
-  if [[ -z "$action" ]]
-  then usage "missing action"
-  elif [[ "$action" -gt 1 ]]
-  then usage "conflicting action"
-  fi
+  # local action="$help$create$update$remove$shorten$get$list_formats$list_lexers$list_styles"
+  # if [[ -z "$action" ]]
+  # then usage "missing action"
+  # elif [[ "$action" -gt 1 ]]
+  # then usage "conflicting action"
+  # fi
 
-  if [[ "$render$term" -gt 1 ]]
-  then usage "conflicting handler"
-  fi
+  # if [[ "$render$term" -gt 1 ]]
+  # then usage "conflicting handler"
+  # fi
 
-  case 1 in
-    $help) full_usage ;;
-    $list_formats) get=1; url+="/lf" ;;
-    $list_lexers) get=1; url+="/l" ;;
-    $list_styles) get=1; url+="/ls" ;;
-  esac
+  # case 1 in
+  #   $help) full_usage ;;
+  #   $list_formats) get=1; url+="/lf" ;;
+  #   $list_lexers) get=1; url+="/l" ;;
+  #   $list_styles) get=1; url+="/ls" ;;
+  # esac
 
   # GET /f GET /s GET /l GET /lf GET /ls
   # GET /<id> GET /<id>/<lexer> GET /<id>/<lexer>/<formatter> GET /<handler>/<id>
   # POST /<handler> POST / POST /<vanity> POST /u
   # PUT /<uuid>
   # DELETE /<uuid>
-  case 1 in
-    $get) method="GET"
-      ;;
-    $create) # POST
-      [[ -n "$private" ]] && opts+=" -F p=1"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
-      [[ -n "$vanity" ]] && url+="/~$vanity"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      [[ -n "$file" ]] && opts+=" -F "c=$file""
-      ;;
-    $update) method="PUT"
-      url+="/$uuid"
-      [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      [[ -n "$file" ]] && opts+=" -F "c=$file""
-      ;;
-    $remove) method="DELETE"
-      url+="/$uuid"
-      ;;
-    $shorten) # POST
-      url+="/u"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      [[ -n "$file" ]] && opts+=" -F "c=$file""
-      ;;
-    *) usage "missing action in $@" ;;
-  esac
+  # case 1 in
+  #   $get) method="GET"
+  #     ;;
+  #   $create) # POST
+  #     [[ -n "$private" ]] && opts+=" -F p=1"
+  #     [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
+  #     [[ -n "$vanity" ]] && url+="/~$vanity"
+  #     [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+  #     [[ -n "$file" ]] && opts+=" -F "c=$file""
+  #     ;;
+  #   $update) method="PUT"
+  #     url+="/$uuid"
+  #     [[ -n "$sunset" ]] && opts+=" -F sunset=$sunset"
+  #     [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+  #     [[ -n "$file" ]] && opts+=" -F "c=$file""
+  #     ;;
+  #   $remove) method="DELETE"
+  #     url+="/$uuid"
+  #     ;;
+  #   $shorten) # POST
+  #     url+="/u"
+  #     [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+  #     [[ -n "$file" ]] && opts+=" -F "c=$file""
+  #     ;;
+  #   *) usage "missing action in $@" ;;
+  # esac
 
   # Handler
-  [[ -n "$render" ]] && url+="?r=1"
-  [[ -n "$term" ]] && url+="?t=1"
+  [[ -n "$pb_render" ]]  && [[ "$pb_term" -eq 1 ]] && url+="?r=1"
+  [[ -n "$pb_term" ]] && [[ "$pb_term" -eq 1 ]] && url+="?t=1"
 
   [[ -n "$method" ]] && opts+=" -X $method"
 
   # Execute or debug
-  if [[ -z "$debug" ]]
-  then curl $opts $url
+  if [[ -z "$pb_debug" ]]
+  then echo curl $opts $url
   else >&2 echo curl $opts $url
   fi
 }
@@ -422,9 +467,5 @@ pb() {
 #   eval "$arg="${args%% *}""
 #   args="${args#${!arg}}"
 # }
-
-pberr() {
-  [[ -n "${1:-}" ]] && >&2 printf "%s\n" "pb: $1"
-}
 
 [[ "$0" == "$BASH_SOURCE" ]] && pb "$@" # "${args[@]}"
