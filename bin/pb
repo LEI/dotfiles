@@ -100,12 +100,24 @@ pb_duration() {
   [[ -n "$1" ]] && printf "%s\n" "$(get_seconds "$1")" || pb_err "invalid duration"
 }
 
+pb_empty() {
+  local i
+  for i in "$@"
+  do local a="pb_$i"
+    if [[ -n "${!a}" ]] && [[ "${!a}" != "0" ]]
+    then pb_err "'$i' cannot be used with this action"
+      return 1
+    fi
+  done
+}
+
 pb() {
   local url="$PB_PROVIDER"
   local opts="$PB_CURL_OPTS"
 
   while read -r arg
-  do local a="pb_${arg%%=*}"
+  do
+    local a="pb_${arg%%=*}"
     if [[ -z "$arg" ]]
     then pb_err "missing argument '$arg'"; return 1
     # elif [[ -n "${!a}" ]] && [[ "${arg%%=*}" != *"$GETARGS_FLAG"* ]] # && [[ ! "${arg#*=}" -gt "${!a}" ]]
@@ -118,9 +130,12 @@ pb() {
   read -r ret < /tmp/pb
   [[ "$ret" -ne 0 ]] && usage
 
-  for a in ${!pb_*}
-  do printf "%s \t %s\n" "${a}" "${!a}"
-  done
+  if [[ "$pb_debug" -gt 1 ]]
+  then
+    for a in ${!pb_*}
+    do printf "%s \t %s\n" "${a}" "${!a}"
+    done
+  fi
 
   [[ -n "$pb_provider" ]] && url="$pb_provider"
   [[ -n "$pb_shorten" ]] && file="$pb_shorten" && pb_shorten=1
@@ -129,6 +144,7 @@ pb() {
   case 1 in
     $pb_help) full_usage ;;
     $pb_create)
+      pb_empty "uuid" || return 1
       pb_true "$pb_private" && opts+=" -F p=1"
       [[ -n "$pb_vanity" ]] && url+="/~$pb_vanity"
       [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
@@ -140,6 +156,7 @@ pb() {
       pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
       ;;
     $pb_remove) method="DELETE"
+      pb_empty "file" "vanity" "sunset" || return 1
       url+="/$pb_uuid"
       ;;
     $pb_shorten)
