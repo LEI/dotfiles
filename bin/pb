@@ -93,7 +93,12 @@ pb_true() {
 
 pb_file() {
   local f="${1:-}"
-  [[ -f "$f" ]] || [[ -L "$f" ]] || [[ -z "$f" ]] && printf "%s\n" "@${f:--}"
+  # FIXME
+  # local file=
+  # echo >&2 "FILE $f"
+  # [[ -f "$f" ]] || [[ -L "$f" ]] || [[ -z "$f" ]] && file="@${f:--}"
+  # [[ -n "$f" ]] && 
+  # printf "%s\n" "$file"
 }
 
 pb_duration() {
@@ -139,12 +144,13 @@ pb() {
 
   [[ -n "$pb_provider" ]] && url="$pb_provider"
   [[ -n "$pb_shorten" ]] && file="$pb_shorten" && pb_shorten=1
+  [[ -n "$pb_get" ]] && url+="/$pb_get" && pb_get=1
 
   local method
   case 1 in
     $pb_help) full_usage ;;
     $pb_create)
-      pb_empty "uuid" || return 1
+      pb_empty uuid || return 1
       pb_true "$pb_private" && opts+=" -F p=1"
       [[ -n "$pb_vanity" ]] && url+="/~$pb_vanity"
       [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
@@ -156,18 +162,20 @@ pb() {
       pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
       ;;
     $pb_remove) method="DELETE"
-      pb_empty "file" "vanity" "sunset" || return 1
+      pb_empty file vanity sunset || return 1
       url+="/$pb_uuid"
       ;;
     $pb_shorten)
+      pb_empty uuid
       url+="/u"
       [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
       [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
     $pb_get) method="GET"
-      url+="/$pb_get"
+      pb_empty file uuid vanity sunset
       ;;
     $pb_list) method="GET"
+      pb_empty file uuid vanity sunset
       case "$pb_list" in
         f|formats) url+="/lf" ;;
         l|lexers) url+="/l" ;;
