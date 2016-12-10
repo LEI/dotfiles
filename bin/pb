@@ -7,7 +7,7 @@ for f in functions/{time,utils}
 do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
 done
 
-PB_CURL_OPTS="${PB_CURL_OPTS:-}"
+PB_CURL_OPTS="${PB_CURL_OPTS:--s}"
 PB_PROVIDER="https://ptpb.pw"
 # "h|d|P:|C|U|R|S:|G:|lf|ll|ls|r|t|f:|p|u|v|x"
 PB_ACTIONS="help create update remove shorten get list"
@@ -53,7 +53,7 @@ set -e
 set -o pipefail
 shopt -s extglob
 
-usage() {
+pb_usage() {
   local e=$?
   local err="${1:-}"
   [[ $# -ge 1 ]] && shift
@@ -80,7 +80,7 @@ full_usage() {
     desc+=("$arg")
     desc+=("${d}")
   done
-  usage "$1" "${desc[@]}"
+  pb_usage "$1" "${desc[@]}"
 }
 
 pb_err() {
@@ -93,12 +93,14 @@ pb_true() {
 
 pb_file() {
   local f="${1:-}"
-  # FIXME
-  # local file=
-  # echo >&2 "FILE $f"
-  # [[ -f "$f" ]] || [[ -L "$f" ]] || [[ -z "$f" ]] && file="@${f:--}"
-  # [[ -n "$f" ]] && 
-  # printf "%s\n" "$file"
+  #[[ -f "$f" ]] || [[ -L "$f" ]] || [[ -z "$f" ]] && file="@${f:--}"
+  #[[ -n "$f" ]] && [[ -z "$file" ]] && file="$f"
+  if [[ -f "$f" ]] || [[ -L "$f" ]] || ([[ -z "$f" ]] && [[ ! -t 0 ]])
+  then f="@${f:--}"
+  elif [[ -z "$f" ]]
+  then pb_err "file: missing option and empty stdin"; return 1
+  fi
+  printf "%s\n" "$f"
 }
 
 pb_duration() {
@@ -130,17 +132,22 @@ pb() {
     fi
     declare $a="${arg#*=}" || return 1
   done < <(GETARGS="$PB_ARGS" GETUNIQ="$PB_ACTIONS" getargs "$@" \
-    && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| usage
+    && echo $? > /tmp/pb || echo $? > /tmp/pb) #|| pb_usage
   # done < <(getargs "$PB_ARGS" "$@") # || exit $?
   read -r ret < /tmp/pb
-  [[ "$ret" -ne 0 ]] && usage
+  [[ "$ret" -ne 0 ]] && pb_usage
 
   if [[ "$pb_debug" -gt 1 ]]
-  then
-    for a in ${!pb_*}
-    do printf "%s \t %s\n" "${a}" "${!a}"
-    done
+  then for a in ${!pb_*}; do printf "%s \t %s\n" "${a}" "${!a}"; done
   fi
+
+  case "$pb_list" in
+    ''|0) ;;
+    f|formats) pb_get="lf" ;;
+    l|lexers) pb_get="l" ;;
+    s|styles) pb_get="ls" ;;
+    *) pb_usage "invalid list: $pb_list" ;;
+  esac
 
   [[ -n "$pb_provider" ]] && url="$pb_provider"
   [[ -n "$pb_shorten" ]] && file="$pb_shorten" && pb_shorten=1
@@ -154,12 +161,12 @@ pb() {
       pb_true "$pb_private" && opts+=" -F p=1"
       [[ -n "$pb_vanity" ]] && url+="/~$pb_vanity"
       [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
-      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
       ;;
     $pb_update) method="PUT"
       url+="/$pb_uuid"
       [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
-      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file""
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
       ;;
     $pb_remove) method="DELETE"
       pb_empty file vanity sunset || return 1
@@ -168,22 +175,26 @@ pb() {
     $pb_shorten)
       pb_empty uuid
       url+="/u"
-      [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      [[ -n "$file" ]] && opts+=" -F "c=$file""
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
+      # [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
+      # [[ -n "$file" ]] && opts+=" -F "c=$file""
       ;;
     $pb_get) method="GET"
       pb_empty file uuid vanity sunset
       ;;
-    $pb_list) method="GET"
-      pb_empty file uuid vanity sunset
-      case "$pb_list" in
-        f|formats) url+="/lf" ;;
-        l|lexers) url+="/l" ;;
-        s|styles) url+="/ls" ;;
-        *) usage "invalid list: $pb_list" ;;
-      esac
-      ;;
   esac
+
+  # Handler
+  [[ -n "$pb_render" ]]  && [[ "$pb_term" -eq 1 ]] && url+="?r=1"
+  [[ -n "$pb_term" ]] && [[ "$pb_term" -eq 1 ]] && url+="?t=1"
+
+  [[ -n "$method" ]] && opts+=" -X $method"
+
+  # Execute or debug
+  if [[ -z "$pb_debug" ]]
+  then curl $opts $url
+  else >&2 echo curl $opts $url
+  fi
 
   # [[ -t 0 ]] && in=0 || in=
   # args=("$(PARSE_ARGS="${PB_ARGS[@]}" args "$@")") || return 1
@@ -260,18 +271,6 @@ pb() {
   #     ;;
   #   *) usage "missing action in $@" ;;
   # esac
-
-  # Handler
-  [[ -n "$pb_render" ]]  && [[ "$pb_term" -eq 1 ]] && url+="?r=1"
-  [[ -n "$pb_term" ]] && [[ "$pb_term" -eq 1 ]] && url+="?t=1"
-
-  [[ -n "$method" ]] && opts+=" -X $method"
-
-  # Execute or debug
-  if [[ -z "$pb_debug" ]]
-  then echo curl $opts $url
-  else >&2 echo curl $opts $url
-  fi
 }
 
 # pb() {

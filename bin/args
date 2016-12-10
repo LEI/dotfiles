@@ -1,364 +1,76 @@
 #!/usr/bin/env bash
-# Parse arguments
 
-set -e
-set -o pipefail
-shopt -s extglob
+# First attempt with "while read"
 
-for f in functions/{time,utils}
-do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
-done
+_contains() {
+  local ret=1
+  local i n="$NEEDLE"
+  for i in "$@"
+  do
+    if [[ "$i" == *"$n"* ]]
+    then # Doesn't work: export FIRSTWORD="${i%% *}"
+      printf "%s\n" "$i"
+      ret=0
+    fi
+  done
 
-err() {
-  die "${0##*/}: $@"
+  return $ret
 }
 
-parse_args() {
-  # local cmd=(${PARSE_ARGS[@]:0:1})
-  local args=(${PARSE_ARGS[@]})
-  local parsed=()
+_main() {
+  [[ -z "$NEEDLE" ]] && return 1
+
+  local var
+  while read -r var
+  do printf "%s\n" "$var /^$FIRSTWORD/"
+  done < <(_contains "$@" \
+    && echo $? > /tmp/ret \
+    || echo $? > /tmp/ret)
+
+  read -r ret < /tmp/ret
+  return $ret
+}
+
+# Reversed exit status with a while loop?
+
+contains() {
+  COUNT="${COUNT:-0}"
+  local n="$1" # Needle
+  shift
+  local v="$1" # Variable name
+  shift
+
+  shift $COUNT
+  # [[ "$COUNT" -gt 0 ]] && set -- "${@:$(($COUNT+1))}"
+
   while [[ $# -ne 0 ]]
   do
-    case "$1" in
-      -|'') err "invalid argument -" ;;
-      --) break ;;
-      -*) [[ "$next" -eq 1 ]] && err "illegal option $1"
-        local pre="-${1%%-*}"
-        local p
-        for p in "${args[@]}"
-        do
-          local type next=0
-          local req="${p#*:}"
-          [[ "$p" == "$req" ]] && unset req
-          if [[ "$req" == *- ]]
-          then type="stdin"; req="${req%-*}"; next=1
-          fi
-          if [[ "$req" == *+* ]]
-          then type="${req#*+}"; req="${req%+*}"; next=1
-          fi
-          p="${p%%:*}"
-          local short="${p%|*}"
-          local name="${p#*|}"
-          local ptn="(-$short|--$name)([a-zA-Z]+)?" #($pre)*([a-zA-Z]+)?(=)"
-          if [[ $1 =~ $ptn ]]
-          then
-            # >&2 echo "[[ $1 =~ $ptn ]]"
-            # >&2 echo "$short,$name req $req ($next)"
-            # local prefix="${BASH_REMATCH[1]}"
-            local arg="${BASH_REMATCH[1]}"
-            local extra="${BASH_REMATCH[2]}"
-            # >&2 printf "MATCH %s\n" "${BASH_REMATCH[@]}"
-            if [[ "$1" == "--"* ]] && [[ "$arg" == "-$short" ]] && [[ -n "$extra" ]]
-            then err "illegal option $1"
-            elif [[ "$1" == "-"* ]] && [[ -n "$extra" ]]
-            then set -- "$arg" "-$extra" "${@:2}"
-              # if [[ "$next" -eq 1 ]]
-              # then echo >&2 "THEN" "-$arg" "${@:2:1}" "-$extra" "${@:3}"
-              #   set -- "-$arg" "${@:2:1}" "-$extra" "${@:3}"
-              # else echo >&2 "ELSE" "-$arg" "-$extra" "${@:2}"
-              #   set -- "-$arg" "-$extra" "${@:2}"
-              # fi
-            elif [[ -n "$extra" ]]
-            then err "invalid option $arg ($extra)"
-            fi
-            local varname="${name//-/_}"
-            local val=
-            if [[ "$next" -eq 1 ]]
-            then
-              if [[ "$type" == "stdin" ]]
-              then
-                if [[ $# -gt 1 ]] && [[ "$2" != -* ]]
-                then [[ -f "$2" ]] && val="@$2" || val="$2"; next=0; shift
-                else val="@-"; next=0 # [[ -t 0 ]]
-                fi
-              elif [[ $# -gt 1 ]] && [[ -n "$2" ]] && [[ "$2" != -* ]]
-              then val="$2"; next=0; shift
-              elif  [[ -n "$2" ]]
-              then err "$1: $name requires a ${type:-value}, found: $2"
-              else err "$1: $name requires a ${type:-value}"
-              fi
-            else val="1" # boolean
-            fi
-            shift # key or value
-
-            case "$type" in
-              ''|stdin|string) [[ -n "$val" ]] || err "$val: invalid $name $type" ;;
-              duration) val="$(get_seconds "$val")" || err "$val: invalid $name $type" ;;
-              number) [[ $val =~ ^-?[0-9]+$ ]] || err "$val: invalid $name $type" ;;
-              *) err "invalid type $type ($val)"
-            esac
-            parsed+=("$varname=$val" "${req:-}")
-            printf "%s\n" "$varname=$val"
-            break
-          fi
-          # >&2 echo "did not break $arg /$p/ $@"
-        done
-        if [[ -z "$arg" ]]
-        then err "illegal option $1"
-        fi
-        ;;
-      *) err "$1? [$@] $#"
-        ;;
-    esac
+    COUNT=$(($COUNT + 1))
+    if [[ "$1" == *"$n"* ]]
+    then
+      eval "$v=\"$1\""
+      FIRSTWORD="${1%% *}"
+      return 0 # Loop again?
+    fi
+    shift
   done
 
-  # local i requires
-  # for ((i=0; i<${#parsed[@]}; i+=2))
-  # do
-  #   arg="${parsed[i]}"
-  #   echo >&2 ">>>>>>>>>>>>>>>>>> $arg ${parsed[i+1]}"
-  #   while IFS=$',' read -r req
-  #   do
-  #     if [[ -n "$req" ]]
-  #     then
-  #       case "$req" in
-  #         \&*) >&2 log "$arg AND $r" ;;
-  #         \|*) >&2 log "$arg OR $r" ;;
-  #         \!*) >&2 log "$arg NOT $r" ;;
-  #         *) >&2 log "$arg /$req/"; req= ;;
-  #       esac
-  #     fi
-  #   done <<< ${parsed[i+1]}
-  # done
+  return 1 # Stop main while loop
 }
 
-# declare -A cant_go=([create]=remove,delete,shred); declare -A cant_tbl=();add_cant() { [[ ${cant_tbl[$2,len]} ]] ||
-# cant_tbl[$2,len]=0;cant_tbl[$2,${cant_tbl[$2,len]}]=$1;((cant_tbl[$2,len] ++));};add_cant_row(){ local param=$1 with
-# w;IFS=, read -ra with;for w in "${with[@]}"; do add_cant "$w" "$param"; done;};for p in "${!cant_go[@]}";do
-# add_cant_row "$p" <<<"${cant_go[$p]}";done;declare -p cant_tbl
-# declare -A cant_tbl=([create,len]="3" [create,0]="remove" [create,1]="delete" [create,2]="shred" )
+main() {
+  [[ -z "$NEEDLE" ]] && return 1
 
-# declare -A cant_t=([create,len]="1" [create,0]="remove")
-# in_cant_t(){
-#   local len=${cant_t[$1,len]} i;[[ $len ]] || {false;return;}
-#   for ((i=0;i<len;i++)); do [[ ${cant_t[$prm,$i]} == "$vs" ]]&&{ true;return;};done;false;
-# }
-# vldt(){
-#   local a=$1;shift;local b
-#   for b;do if in_cant_t "$a" "$b";then echo "$a cnt go wth $b";fi;done;
-# }
-# set -- create delete
-# for ((i=1;i<=$#;i++))
-# do vldt "${!i}" "${@: i+1}"
-# done
-
-___parse_args() {
-        # local val=
-        # case "$type" in
-        #   '') val="$a"; shift ;;
-        #   string) [[ -n "$a" ]] || err "invalid $type: $a"; val="$a"; shift ;;
-        #   number) [[ $a =~ ^-?[0-9]+$ ]] || err "invalid $type: $a"; val="$a"; shift ;;
-        #   duration) val="$(get_seconds "$a")" || err "invalid $type: $a"; shift ;;
-        #   stdin) [[ -n "$a" ]] && [[ -t 0 ]] && err "invalid input $name: $a"; val="$a"; shift ;;
-        #   *) err "invalid type: $type" ;;
-        # esac
-    # if [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 1 ]]
-    # then continue
-    # elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 1 ]]
-    # then log "${name//-/_}=$val"; unset arg next val
-    # elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
-    # then log "${name//-/_}=true"; unset arg next
-    # # elif [[ -n "$arg" ]] && [[ -z "$val" ]] && [[ "$next" -eq 0 ]]
-    # # then err "invalid ${type:-argument}: $a requires a value, found $1"
-    # elif [[ -n "$arg" ]] && [[ -n "$val" ]] && [[ "$next" -eq 0 ]]
-    # then err "invalid ${type:-argument}: $a does not require a value, found $val"
-    # # elif [[ "$next" -ne 1 ]] && [[ $# -gt 0 ]]
-    # # then err "invalid ${type:-argument}: $a"
-    # else err "invalid argument: $a"
-    # fi
-
-    # if [[ -n "$req" ]]
-    # then >&2 log "$arg  1:$1 2:$2 requires /$req/ in ${parsed[@]}"
-    # fi
-
-  local _args="$@"
-  local args=(${PARSE_ARGS[@]})
-  local true="true"
-  if [[ -z "$args" ]] || [[ $# -eq 0 ]]
-  then >&2 printf "%s\n" "parse: missing arguments"
-    return 1
-  fi
-  local a len="${#args[@]}"
-  while [[ $# -ne 0 ]]
-  do local a max="$len"
-    >&2 echo MAX $max
-    for a in "${args[@]}"
-    do
-      local type="${a%%,*}"
-      local func="${type##*@}"
-      [[ "$type" != "$func" ]] && type="${type%@*}" || func=
-      local p="${a#*,}"
-      p="${p%%,*}"
-      local long="${p##*|}"
-      local short="${p%%|*}"
-      local name="${long//-/_}"
-      local spec="${a##*,}"
-      # local func="${a##*@}"
-      # if [[ "$a" != "$func" ]]
-      # then spec="${a%%@}"
-      # else func=
-      # fi
-
-      # for v in type spec func p spec; do printf "%s: %s\n" "$v" "${!v}"; done
-
-      # local pattern="^(-${p%|*}|--${p#*|})([a-zA-Z-]*)( |=)?(.*)$"
-      local pattern="^(-${short}|--${long})([a-zA-Z]*)?( |=)?(.*)$"
-      if [[ $1 =~ $pattern ]]
-      then >&2 printf "MATCH '%s'\n" "${BASH_REMATCH[@]}"
-        # >&2 printf "%s\t=~\t%s\n" "'$1'" "$pattern"
-        # [[ "${1:0:1}" == "${1:1:1}" ]] && prefix="--" || prefix="-"
-        # local prefix="${BASH_REMATCH[1]}"
-        local key="${BASH_REMATCH[1]}" ##*-}"
-        local next="${BASH_REMATCH[2]}"
-        local sep="${BASH_REMATCH[3]}"
-        local val="${BASH_REMATCH[4]}"
-        if [[ -n "$key" ]]
-        then
-          # If short key, look for extra arguments
-          if [[ "$1" != "--"* ]] && [[ -n "$next" ]]
-          then
-            if [[ "$type" == "bool" ]] && [[ -n "$val" ]]
-            then
-              set -- "${@:1:1}" "-$next" "${@:2}"
-              set -- "${@:2:1}" "$key${sep}$val" "${@:3}"
-              continue # Reset loop
-            else
-              # >&2 echo "${@:1:1}" "$key" "${@:2}"
-              # >&2 echo "${@:2:1}" "-$next$sep$val" "${@:3}"
-              set -- "${@:1:1}" "$key" "${@:2}"
-              set -- "${@:2:1}" "-$next${sep}$val" "${@:3}"
-            fi
-          # elif [[ "$type" != "bool" ]] && [[ -n "$next" ]]
-          # then >&2 printf "%s\n" "parse: invalid argument ${name} ${key} requires a value ${next}" ##*|
-          fi
-          >&2 echo "=> $@"
-          if [[ -n "$spec" ]]
-          then
-            local s _s
-            while IFS=$'&' read -ra _s
-            do
-              for s in "${_s[@]}"
-              do local check
-                if [[ "$s" == !* ]]
-                then check=0 s="${s#!}" #; pattern="($s!)"
-                else check=1 #; pattern="($s)"
-                fi
-                pattern="-([a-zA-Z]*)+($s)(a-zA-Z]*)*"
-                # >&2 echo -e "$key => $check /$s/" # ${_args[@]}
-                if [[ ! ${_args[@]} =~ $pattern ]] && [[ "$check" -gt 0 ]]
-                then msg="requires" # s="${BASH_REMATCH[1]:--$s}"
-                elif [[ ${_args[@]} =~ $pattern ]] && [[ "$check" -eq 0 ]]
-                then msg="cannot be used with" # s="${BASH_REMATCH[2]:--$s}"
-                fi
-                # s="${s/${short}|-${long}/}"
-                # [[ "${s##*]}" != "${s%|*}" ]] && s="${s%|*} or ${s##*|}"
-                s="${s//[a-zA-Z]|-/--}"
-                s="[ ${s//|/ ] | [ } ]"
-                if [[ -n "$msg" ]]
-                then >&2 printf "%s\n" "parse: invalid argument ${name} ${key} ${msg}: ${s}" ##*|
-                  return 1
-                fi
-                # if [[ ${_args[@]} =~ $pattern ]] #&& [[ "$check" == "present" ]]
-                # then
-                #   if [[ -n "${BASH_REMATCH[1]}" ]]
-                #   then
-                #     # set -- "${@:1:1}" "$key" "${@:2}"
-                #     # set -- "${@:2:1}" "-$next$sep$val" "${@:3}"
-                #     # _args="${_args/-${BASH_REMATCH[1]}/-${BASH_REMATCH[1]} -}"
-                #     # set -- "${@/-${BASH_REMATCH[1]}/-${BASH_REMATCH[1]} -}"
-                #     >&2 echo ">>>> ${_args[@]}"
-                #   fi
-                # else >&2 echo "args: ${_args[@]}"
-                #   >&2 printf "%s\n" "parse: invalid argument $key ($s should be $check)"
-                #   return 1
-                # fi
-              done
-            done <<< "$spec"
-            # if [[ "$spec" = *"&"* ]]
-            # then echo >&2 "S2 ${spec##*&}"
-            # fi
-            # spec="${spec%%&*}"
-            # >&2 printf "%s\n" "DONE: $name$sep$val (->$next) [$spec]"
-            # pattern="-([a-zA-Z]+)*($spec)"
-            # if [[ ! $_args =~ $pattern ]]
-            # # then >&2 printf "=> %s\n" "${BASH_REMATCH[@]}"
-            # then >&2 printf "%s\n" "parse: switch '$name' invalid -- $spec /$pattern/"
-            # # else >&2 printf "%s\n" "/$pattern/"
-            # fi
-          fi
-
-          # if [[ "$type" == bool ]] && [[ -n "$val" ]]
-          # then >&2 printf "%s\n" "parse: switch '$name' does not require a value -- $val"; return 1
-          # elif [[ "$type" != bool ]] && [[ -z "$val" ]] && [[ $# -gt 1 ]]
-          # then shift; val="$1"
-          # fi
-          # if [[ "$type" != bool ]] && [[ -z "$val" ]]
-          # then >&2 printf "%s\n" "parse: switch '$name' requires a $type -- $val"; return 1
-          # elif [[ "$type" == bool ]]
-          # then val="$true"
-          # fi
-          # Update type
-          case "$type" in
-            duration) type="number"; func="${func:-get_seconds}" ;;
-          esac
-          # Get value
-          case "$type" in
-            # bool) val="$true" ;;
-            string|number) [[ -z "$val" ]] && [[ $# -gt 1 ]] && shift && val="$1" ;;
-          esac
-          # Transform value
-          if [[ -n "$func" ]] && hash "${func%%* }" 2>/dev/null
-          then val="$($func "$val")" || return 1
-          fi
-          # Check value
-          case "$type" in
-            bool)
-              if [[ -n "$val" ]]
-              then >&2 printf "%s\n" "parse: invalid $key does not require a value (got '$val')"
-                return 1
-              fi
-              val="$true"
-              # if [[ -n "$val" ]] # && [[ "$val" != "$true" ]]
-              # then >&2 printf "%s\n" "parse: switch '$long' does not require a value -- $val"
-              #   return 1
-              # else val="$true"
-              # fi
-              ;;
-            string)
-              if [[ -z "$val" ]]
-              then >&2 printf "%s\n" "parse: invalid $type $key: $val"
-                return 1
-              fi
-              ;;
-            number)
-              if [[ -z "$val" ]] || [[ ! $val =~ ^-?[0-9]+$ ]]
-              then >&2 printf "%s\n" "parse: invalid $type $key: $val"
-                return 1
-              fi
-              ;;
-            *) >&2 printf "%s\n" "parse: invalid type: $type"
-              return 1
-              ;;
-          esac
-
-          # Output # TODO check dupes?
-          printf "%s=%s\n" "${name}" "${val}"
-
-          shift
-          break
-        else >&2 printf "%s\n" "parse: illegal option -- $1"
-          return 1
-        fi
-      else # >&2 echo "MAX: $max"
-        max=$((max - 1))
-        if [[ "$max" -le 0 ]]
-        then a="${_args/${1#-}*/${1#-}}"
-          >&2 printf "%s\n" "parse: invalid argument -- ${a##* }"
-          return 1
-        fi
-      fi
-    done
+  while contains "$NEEDLE" var "$@" # || return?
+  do # Use $var and others predefined variables here
+    printf "%s\n" "$var /^$FIRSTWORD/"
   done
+
+  # $? -> always 0
 }
 
-[[ "$0" == "$BASH_SOURCE" ]] && parse_args "$@"
+# NEEDLE="test"
+# main "this is a test" "and another test"
+# main "that one should fail"
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

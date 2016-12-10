@@ -21,6 +21,11 @@ arrange_args() {
       --*) local flag="${1#--}"
         if [[ $str == *"$s${flag}:$s"* ]]
         then
+          if [[ "${2:0:1}" == "-" ]] && [[ "$str" == *"$s${2:1:1}:$s"* ]]
+          then err "missing value for $1"
+          elif [[ "${2:0:2}" == "--" ]] && [[ "$str" == *"$s${2:2}:$s"* ]]
+          then err "missing value for $1"
+          fi
           if [[ $# -gt 1 ]]
           then flags+=("$1" "$2"); shift
           else err "$1: requires a value"
@@ -34,7 +39,13 @@ arrange_args() {
         if [[ $str == *"$s${flag}:$s"* ]]
         then
           if [[ "${#1}" -gt 2 ]] && [[ "${1:0:-1}" != "-" ]]
-          then set -- "${1:0:-1}" "-$flag" "${@:2}"; continue
+          then 
+            if [[ "${2:0:1}" == "-" ]] && [[ "$str" == *"$s${2:1:1}:$s"* ]]
+            then err "missing value for -$flag"
+            elif [[ "${2:0:2}" == "--" ]] && [[ "$str" == *"$s${2:2}:$s"* ]]
+            then err "missing value for -$flag"
+            fi
+            set -- "${1:0:-1}" "-$flag" "${@:2}"; continue
           elif [[ $# -gt 1 ]]
           then flags+=("$1" "$2"); shift
           else err "-$flag: requires a value"
@@ -50,7 +61,7 @@ arrange_args() {
           fi
         elif [[ "$str" == *"$s${flag}$s"* ]]
         then flags+=("$1")
-        else err "illegal option -- $1" # -$flag
+        else err "illegal option $1" # -$flag
         fi
         ;;
       *) args+=("$1") ;;
@@ -98,6 +109,7 @@ getargs() {
   # Split and order short options
   arrange_args "$str" "$@"
   set -- "${ARR[@]}"
+  # echo >&2 "getargs: $@"
 
   while [[ $# -ne 0 ]]
   do
@@ -143,12 +155,11 @@ getargs() {
         declare ${v}=1
         value="${!v}"
         ;;
-      *) err "$1: extra argument (@ $@)" ;;
+      *) err "$1: extra argument" ;;
     esac
-    while [[ "$name" == "_"* ]]
-    do name="${name#_}"
-    done
-    printf "%s=%s\n" "$name" "$value"
+    [[ -z "$value" ]] || [[ "$value" == "-"* ]] && err "$value: invalid value"
+    while [[ "$name" == "_"* ]]; do name="${name#_}"; done
+    [[ -n "$name" ]] && printf "%s=%s\n" "$name" "$value"
     # export ARG="${var//-/_}"
     # export ARGVAL="$value"
     shift
