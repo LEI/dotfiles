@@ -7,7 +7,7 @@ for f in functions/{time,utils}
 do source "${BASH_DIR:-$HOME/.bash.d}/$f.bash"
 done
 
-PB_CURL_OPTS="${PB_CURL_OPTS:--s}"
+# PB_CURL_OPTS="${PB_CURL_OPTS:--s}"
 PB_PROVIDER="https://ptpb.pw"
 # "h|d|P:|C|U|R|S:|G:|lf|ll|ls|r|t|f:|p|u|v|x"
 PB_ACTIONS="help create update remove shorten get list"
@@ -20,6 +20,7 @@ R|remove
 S:|shorten:
 G:|get:
 L:|list:
+j|json
 r|render
 t|term
 f:|file:
@@ -28,7 +29,6 @@ u:|uuid:
 v:|vanity:
 x:|sunset:"
 # v|verbose
-# f:|format:
 # l:|line:
 PB_DESC=("This" \
   "Print curl command instead of executing it" \
@@ -39,6 +39,7 @@ PB_DESC=("This" \
   "<url> > Create a redirect url" \
   "<url> > Arbitrary GET request" \
   "formats|lexers|styles" \
+  "Header Accept & Content-Type" \
   "Render a ReStructuredText or Markdown paste to HTML (-CU)" \
   "Handle Asciinema videos (-CU)" \
   "content> Content or path of the paste (-CUS)" \
@@ -118,7 +119,7 @@ pb_empty() {
 
 pb() {
   local url="$PB_PROVIDER"
-  local opts="$PB_CURL_OPTS"
+  local opts=("${PB_CURL_OPTS:--s}")
 
   while read -r arg
   do
@@ -135,6 +136,7 @@ pb() {
   read -r ret < /tmp/pb
   [[ "$ret" -ne 0 ]] && pb_usage
 
+  pb_debug="${pb_debug:-0}"
   if [[ "$pb_debug" -gt 1 ]]
   then for a in ${!pb_*}; do printf "%s \t %s\n" "${a}" "${!a}"; done
   fi
@@ -154,28 +156,28 @@ pb() {
   local method
   case 1 in
     $pb_help) full_usage ;;
-    $pb_create)
+    $pb_create) # POST
       pb_empty uuid || return 1
-      pb_true "$pb_private" && opts+=" -F p=1"
+      pb_true "$pb_private" && opts+=("-F p=1")
       [[ -n "$pb_vanity" ]] && url+="/~$pb_vanity"
-      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
-      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
+      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=("-F sunset=$pb_sunset")
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=("-F "c=$pb_file"") || return 1
       ;;
     $pb_update) method="PUT"
       url+="/$pb_uuid"
-      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=" -F sunset=$pb_sunset"
-      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
+      [[ -n "$pb_sunset" ]] && pb_sunset="$(pb_duration "$pb_sunset")" && opts+=("-F sunset=$pb_sunset")
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=("-F "c=$pb_file"") || return 1
       ;;
     $pb_remove) method="DELETE"
       pb_empty file vanity sunset || return 1
       url+="/$pb_uuid"
       ;;
-    $pb_shorten)
+    $pb_shorten) # POST
       pb_empty uuid
       url+="/u"
-      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=" -F "c=$pb_file"" || return 1
+      pb_file="$(pb_file "$pb_file")" && [[ -n "$pb_file" ]] && opts+=("-F "c=$pb_file"") || return 1
       # [[ -f "$file" ]] || [[ -z "$file" ]] && file="@${file:--}"
-      # [[ -n "$file" ]] && opts+=" -F "c=$file""
+      # [[ -n "$file" ]] && opts+=("-F "c=$file"")
       ;;
     $pb_get) method="GET"
       pb_empty file uuid vanity sunset
@@ -186,13 +188,17 @@ pb() {
   [[ -n "$pb_render" ]]  && [[ "$pb_term" -eq 1 ]] && url+="?r=1"
   [[ -n "$pb_term" ]] && [[ "$pb_term" -eq 1 ]] && url+="?t=1"
 
-  [[ -n "$method" ]] && opts+=" -X $method"
+  if [[ -n "$pb_json" ]] && [[ "$pb_json" -ne 0 ]]
+  then opts+=("--header "Accept:application/json"")
+  fi
 
-  # Execute or debug
-  if [[ -z "$pb_debug" ]]
-  then curl $opts $url
+  [[ -n "$method" ]] && opts+=("--request "$method"")
+
+  [[ "$pb_debug" -ne 0 ]] && >&2 echo curl ${opts[@]} $url
+
+  if [[ "$pb_debug" -le 1 ]]
+  then curl ${opts[@]} $url
     # [[ $? -ne 0 ]] && pb_err "curl: $?"
-  else >&2 echo curl $opts $url
   fi
 
   # [[ -t 0 ]] && in=0 || in=
