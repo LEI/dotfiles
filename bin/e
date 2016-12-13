@@ -8,13 +8,11 @@
 
 if [[ -z "$EDITOR" ]]
 then
-  echo "\$EDITOR is undefined"
+  printf "%s\n" "EDITOR is undefined"
   exit 1
 fi
 
-if [[ "$#" -eq 0 ]]
-then
-  exec $EDITOR .
-else
-  exec $EDITOR "$@"
+if [[ "$#" -ne 0 ]]
+then exec $EDITOR "$@"
+else exec $EDITOR .
 fi
