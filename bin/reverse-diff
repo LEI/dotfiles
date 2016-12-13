@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Compare 2 files and output common lines
+
+err() {
+  >&2 printf "$0: %s\n" "$@"
+  exit 1
+}
+main() {
+  if [[ $# -ne 2 ]]
+  then error
+  elif [[ -z "$1" ]] || [[ -z "$2" ]]
+  then error
+  fi
+  comm -1 -2 <(sort "$1") <(sort "$2")
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

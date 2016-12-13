@@ -54,11 +54,6 @@ set ttimeoutlen=10
 " set binary
 " set noeol
 
-" Enable per-directory '.vimrc' file
-set exrc
-" Disable autocmd, shell and write commands in the current directory '.vimrc'
-set secure
-
 " Diff {{{1
 
 " Always use vertical diffs
