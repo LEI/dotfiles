@@ -9,8 +9,7 @@
 #   become: yes
 
 - name: Ensure Homebrew is installed
-  shell: "ruby -e `curl -fsSL {{ homebrew_install_script }}`"
-  # command: "ruby -e '{{ item }}'"
+  shell: "ruby -e '$(curl -fsSL {{ homebrew_install_script }})'"
   args:
     # executable: "/usr/bin/ruby"
     # executable: "/usr/bin/env bash"
@@ -18,7 +17,6 @@
     creates: "{{ homebrew_install_path }}/{{ homebrew_creates }}"
     # creates: "{{ homebrew_install_path }}/bin/brew"
   when: homebrew_install
-  # with_url: "{{ homebrew_install_script }}"
 
 - name: Homebrew taps
   homebrew_tap:
