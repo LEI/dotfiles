@@ -9,7 +9,7 @@
 #   become: yes
 
 - name: Ensure Homebrew is installed
-  command: "ruby -e \"$(curl -fsSL {{ homebrew_install_script }})\""
+  command: "ruby -e '$(curl -fsSL {{ homebrew_install_script }})'"
   args:
     executable: "/bin/bash"
     # executable: "/usr/bin/env bash"
