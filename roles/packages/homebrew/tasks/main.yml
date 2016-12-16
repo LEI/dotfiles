@@ -11,7 +11,7 @@
 - name: Ensure Homebrew is installed
   command: "ruby -e \"$(curl -fsSL {{ homebrew_install_script }})\""
   args:
-    executable: "/usr/bin/env bash"
+    # executable: "/usr/bin/env bash"
     creates: "{{ homebrew_install_path }}/{{ homebrew_creates }}"
     # creates: "{{ homebrew_install_path }}/bin/brew"
   when: homebrew_install
