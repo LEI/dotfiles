@@ -15,6 +15,12 @@
     # creates: "{{ homebrew_install_path }}/bin/brew"
   when: homebrew_install
 
+- name: Homebrew taps
+  homebrew_tap:
+    tap: "{{ item }}"
+    state: "{{ homebrew_taps_state }}"
+  with_items: "{{ homebrew_taps }}"
+
 - name: Update Homebrew
   homebrew: update_homebrew=yes
   when: packages_update
