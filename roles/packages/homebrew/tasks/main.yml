@@ -13,7 +13,7 @@
   args:
     # executable: "/usr/bin/ruby"
     # executable: "/usr/bin/env bash"
-    executable: "/bin/bash"
+    # executable: "/bin/bash"
     creates: "{{ homebrew_install_path }}/{{ homebrew_creates }}"
     # creates: "{{ homebrew_install_path }}/bin/brew"
   when: homebrew_install
