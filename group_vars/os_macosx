@@ -89,21 +89,21 @@ cask_apps:
   - vlc
   # - xquartz
 
-# cask_options:
-#   # Remap Caps Lock to Escape
-#   # System Preferences > Keyboard > Modifier Keys
-#   # Caps Lock Key -> No Action
-#   - name: seil
-#     dir: /Applications/Seil.app/Contents/Library/bin
-#     args:
-#       - set enable_capslock 1
-#       # Escape (53), F19 (80)
-#       - set keycode_capslock 53
-#     # when: < macOS Sierra
+#  # Remap Caps Lock to Escape
+#  # System Preferences > Keyboard > Modifier Keys
+#  # Caps Lock Key -> No Action
+#  - name: seil
+#    dir: /Applications/Seil.app/Contents/Library/bin
+#    args:
+#      - set enable_capslock 1
+#      # Escape (53), F19 (80)
+#      - set keycode_capslock 53
+#    # when: < macOS Sierra
 
 bash_packages:
   - bash
-  - bash-completion2
+  - bash-completion
+  # - homebrew/versions/bash-completion2
 
 node_packages:
   - node
@@ -532,10 +532,10 @@ osx_defaults:
     ApplePressAndHoldEnable: {type: bool, value: false}
 
     # Set a shorter delay until key repeat
-    InitialKeyRepeat: {type: int, value: 12}
+    InitialKeyRepeat: {type: float, value: 12}
 
     # Set a blazingly fast keyboard repeat rate
-    KeyRepeat: {type: int, value: 0}
+    KeyRepeat: {type: float, value: 1.5}
 
     # Set language and text formats
     # Note: if you're in the US, replace 'EUR' with 'USD', 'Centimeters' with

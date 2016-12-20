@@ -24,8 +24,8 @@
     # Homebrew Cask applications
     - role: homebrew-cask
       tags: [cask]
-      homebrew_cask_apps: "{{ cask_apps }}"
-      homebrew_cask_options: "{{ cask_options }}"
+      homebrew_cask_apps: "{{ cask_apps | default([]) }}"
+      homebrew_cask_options: "{{ cask_options | default([]) }}"
 
     # Hammerspoon
     - role: hammerspoon

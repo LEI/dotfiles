@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-if-shell 'hash "reattach-to-user-namespace" 2>/dev/null' 'set-option -g default-command "reattach-to-user-namespace -l {{ shell | default('bash') }}"'
+if-shell 'hash "reattach-to-user-namespace" 2>/dev/null' 'set-option -g default-command "reattach-to-user-namespace -l {{ shell | default('$SHELL') }}"'
 
 # https://github.com/tmux-plugins/tmux-yank/blob/master/yank.tmux
 # https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard/blob/master/Usage.md
