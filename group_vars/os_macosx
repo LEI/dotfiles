@@ -88,17 +88,17 @@ cask_apps:
   - vlc
   # - xquartz
 
-cask_options:
-  # Remap Caps Lock to Escape
-  # System Preferences > Keyboard > Modifier Keys
-  # Caps Lock Key -> No Action
-  - name: seil
-    dir: /Applications/Seil.app/Contents/Library/bin
-    args:
-      - set enable_capslock 1
-      # Escape (53), F19 (80)
-      - set keycode_capslock 53
-    # when: < macOS Sierra
+# cask_options:
+#   # Remap Caps Lock to Escape
+#   # System Preferences > Keyboard > Modifier Keys
+#   # Caps Lock Key -> No Action
+#   - name: seil
+#     dir: /Applications/Seil.app/Contents/Library/bin
+#     args:
+#       - set enable_capslock 1
+#       # Escape (53), F19 (80)
+#       - set keycode_capslock 53
+#     # when: < macOS Sierra
 
 bash_packages:
   - bash
