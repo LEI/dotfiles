@@ -39,7 +39,7 @@ homebrew_packages:
   - openssl
   - openssh
   - patchutils
-  - reattach-to-user-namespace
+  - { name: reattach-to-user-namespace, install_options: ['--with-wrap-pbcopy-and-pbpaste'] }
   # - rename
   # - rbenv
   # - rsync
