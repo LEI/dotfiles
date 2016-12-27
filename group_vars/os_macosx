@@ -142,8 +142,8 @@ pip_packages:
     executable: pip3
 
 ruby_packages:
-  # - ruby # Used by Vim?
   - rbenv
+  # - ruby
   # - ruby-build
   - neovim
 
@@ -161,12 +161,14 @@ vim_packages:
   - name: vim
     # Homebrew install options
     install_options:
-      - with-cscope
+      # - with-cscope
       - with-lua
       - with-luajit
       - with-override-system-vi
       - with-python
       # - with-pyhton3
+      # - with-custom-python
+      # - with-custom-ruby
 
 # weechat_packages:
 #   - name: weechat
