@@ -1,6 +1,7 @@
 " Syntastic
 
 " Specific syntax checkers
+let g:syntastic_go_checkers = ['go']
 let g:syntastic_javascript_checkers = ['jshint']
 
 " https://github.com/scrooloose/syntastic/wiki/VimL:---vimlint#checker-options
