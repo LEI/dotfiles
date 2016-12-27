@@ -1,7 +1,7 @@
 ---
 # vi: ft=yaml
 
-os_release: "{{ 'macOS' if ansible_distribution_release | version_compare('16', '>=') else 'MacOSX' }}"
+release: "{{ 'macOS' if ansible_distribution_release | version_compare('16', '>=') else 'MacOSX' }}"
 
 git_credential_helper: osxkeychain
 
@@ -73,7 +73,7 @@ cask_apps:
   - google-chrome
   # - google-chrome-canary
   - gpgtools
-  - { name: karabiner-elements, when: os_release == 'macOS' }
+  - { name: karabiner-elements, when: release == 'macOS' }
   - lastpass
   - little-snitch
   # - opera
@@ -91,16 +91,17 @@ cask_apps:
   - vlc
   # - xquartz
 
-# Remap Caps Lock to Escape
-# System Preferences > Keyboard > Modifier Keys
-# Caps Lock Key -> No Action
-- name: seil
-  dir: /Applications/Seil.app/Contents/Library/bin
-  args:
-    - set enable_capslock 1
-    # Escape (53), F19 (80)
-    - set keycode_capslock 53
-  when: os_release == 'MacOSX'
+cask_options:
+  # Remap Caps Lock to Escape
+  # System Preferences > Keyboard > Modifier Keys
+  # Caps Lock Key -> No Action
+  - name: seil
+    dir: /Applications/Seil.app/Contents/Library/bin
+    args:
+      - set enable_capslock 1
+        # Escape (53), F19 (80)
+      - set keycode_capslock 53
+    when: release == 'MacOSX'
 
 bash_packages:
   - bash

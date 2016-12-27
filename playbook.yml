@@ -39,14 +39,9 @@
 
     - name: "OS {{ ansible_os_family }}" # ansible_model
       vars:
-        os: "{{ os }}"
-        rel: "{{ os_release }}"
         dist: "{{ ansible_distribution }} {{ ansible_distribution_release | default(ansible_distribution_version) }}"
       debug: # inventory_hostname
-        var:
-          - os
-          - rel
-          - dist
+        var: dist # os, os_relase
 
     # - name: "Include OS vars"
     #   include_vars: "{{ item }}"
