@@ -41,6 +41,8 @@ then
   export GEM_HOME="$(ruby -e 'print Gem.user_dir')" # GEM_PATH, BUNDLE_PATH
   pathmunge "$GEM_HOME/bin" after
 fi
+
+# Ruby env
 if hash rbenv 2>/dev/null && [[ -z "${RBENV_SHIMS:-}" ]]
 then # eval "$(rbenv init -)"
   export RBENV_SHELL=bash
