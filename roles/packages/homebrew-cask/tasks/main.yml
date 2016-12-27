@@ -6,7 +6,7 @@
   environment:
     HOMEBREW_CASK_OPTS: "--appdir={{ homebrew_cask_appdir }}"
   with_items: "{{ homebrew_cask_apps }}"
-  when: homebrew_cask_install
+  when: "{{ item.when | default(homebrew_cask_install) }}"
 
 - name: Cleanup Homebrew Cask apps
   shell: brew cask cleanup

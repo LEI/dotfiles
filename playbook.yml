@@ -24,13 +24,6 @@
 
   tasks:
 
-    - name: "Distribution {{ ansible_os_family }}" # ansible_model
-      vars:
-        os: "{{ ansible_distribution }} {{ ansible_distribution_release | default(ansible_distribution_version) }}"
-      debug: # inventory_hostname
-        var: os
-      tags: [distro]
-
     - name: "Group hosts by OS"
       # MacOSX -> os_macosx
       # CYGWIN_NT-6.1 -> os_cygwin
@@ -43,6 +36,17 @@
           groups: "{{ group_names | to_nice_json }}"
           os: "{{ os }}"
       when: log_enable is defined and log_enable
+
+    - name: "OS {{ ansible_os_family }}" # ansible_model
+      vars:
+        os: "{{ os }}"
+        rel: "{{ os_release }}"
+        dist: "{{ ansible_distribution }} {{ ansible_distribution_release | default(ansible_distribution_version) }}"
+      debug: # inventory_hostname
+        var:
+          - os
+          - rel
+          - dist
 
     # - name: "Include OS vars"
     #   include_vars: "{{ item }}"
