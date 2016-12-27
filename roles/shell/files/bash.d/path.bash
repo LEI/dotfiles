@@ -5,7 +5,7 @@
 if [[ -d "$HOME/bin" ]]; then
   pathmunge "$HOME/bin" after
 fi
-j
+
 if [[ -d "/usr/local/sbin" ]]; then
   pathmunge "/usr/local/sbin" before
 fi
@@ -14,8 +14,8 @@ fi
 # FIXME PHP temp directory (/var/folders/x_/x/T) does not exist or is not writable to Composer. Set sys_temp_dir in your php.ini
 if hash composer 2>/dev/null; then
   # pathmunge "$(composer config -g home)/$(composer config -g bin-dir)" after
-  COMPOSER_HOME="$(composer config -g home)" # ~/.composer
-  COMPOSER_BIN_DIR="$(composer config -g bin-dir)" # vendor/bin
+  COMPOSER_HOME="$(composer config -g home 2>/dev/null)" # ~/.composer
+  COMPOSER_BIN_DIR="$(composer config -g bin-dir 2>/dev/null)" # vendor/bin
   if [[ -d "$COMPOSER_HOME/$COMPOSER_BIN_DIR" ]]; then
     pathmunge "$COMPOSER_HOME/$COMPOSER_BIN_DIR" after
   fi

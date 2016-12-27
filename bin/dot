@@ -85,7 +85,7 @@ ansible_install() {
       fi
       # Install ansible with homebrew?
       if ! has ansible || [[ -n "$force" ]]
-      then ! has pip && _do easy_install pip
+      then ! has pip && su_do easy_install pip
         # Install dependencies
         _do pip install --user python -r "$DOT_REQUIREMENTS/pip.txt"
       fi

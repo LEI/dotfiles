@@ -9,7 +9,7 @@ local function watch(name, fn)
         end
     end
 end
---
+
 return {
     init = function()
         hs.fnutils.each(config.apps, function(app)

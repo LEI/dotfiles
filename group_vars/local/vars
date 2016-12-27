@@ -33,9 +33,9 @@ tmux_plugins:
   # - tmux-plugins/tmux-battery
   # - thewtex/tmux-mem-cpu-load
 
-tmux_options:
-  - resurrect-capture-pane-contents 'on'
-  # vi vim nvim emacs man less more tail top htop irssi mutt
-  - resurrect-processes 'ssh'
-  - resurrect-strategy-vim 'session'
-  - resurrect-strategy-nvim 'session'
+# tmux_options:
+#   - resurrect-capture-pane-contents 'on'
+#   # vi vim nvim emacs man less more tail top htop irssi mutt
+#   - resurrect-processes 'ssh'
+#   - resurrect-strategy-vim 'session'
+#   - resurrect-strategy-nvim 'session'
