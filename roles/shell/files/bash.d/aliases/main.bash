@@ -101,7 +101,7 @@ done
 unset method
 
 # Quick cd
-for dir in d:Documents/Dropbox dl:Downloads dt:Desktop p:Projects; do
+for dir in dl:Downloads dt:Desktop p:Projects; do # d:Documents/Dropbox
   alias "${dir%%:*}"="cd ~/${dir#*:}"
 done
 unset dir
