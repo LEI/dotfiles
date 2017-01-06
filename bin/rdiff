@@ -20,10 +20,10 @@ main() {
   then log "usage: ${0##*/} file1 file2"
   elif [[ $# -ne 2 ]] || [[ -z "$1" ]] || [[ -z "$2" ]]
   then error "invalid arguments"
-  elif ! exists "$1"
-  then error "$1: no such file"
-  elif ! exists "$2"
-  then error "$2: no such file"
+  # elif ! exists "$1"
+  # then error "$1: no such file"
+  # elif ! exists "$2"
+  # then error "$2: no such file"
   else comm -1 -2 <(sort "$1") <(sort "$2")
   fi # grep -F -x -f ?
 }
