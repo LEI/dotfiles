@@ -6,4 +6,4 @@ else EDITOR="vim -f"
 fi
 
 export EDITOR
-export VISUAL"$EDITOR"
+export VISUAL="$EDITOR"
