@@ -119,7 +119,7 @@ pb_empty() {
 
 pb() {
   local url="$PB_PROVIDER"
-  local opts=("${PB_CURL_OPTS:--s}")
+  local opts=("${PB_CURL_OPTS:--s}") # --silent
 
   while read -r arg
   do
@@ -185,7 +185,7 @@ pb() {
   esac
 
   # Handler
-  [[ -n "$pb_render" ]]  && [[ "$pb_term" -eq 1 ]] && url+="?r=1"
+  [[ -n "$pb_render" ]]  && [[ "$pb_render" -eq 1 ]] && url+="?r=1"
   [[ -n "$pb_term" ]] && [[ "$pb_term" -eq 1 ]] && url+="?t=1"
 
   if [[ -n "$pb_json" ]] && [[ "$pb_json" -ne 0 ]]
