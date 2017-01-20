@@ -1,12 +1,15 @@
 " Syntastic
 
 " Specific syntax checkers
+"
 " https://github.com/fatih/vim-go#using-with-syntasti://github.com/fatih/vim-go#using-with-syntastic
 let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
 let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
 " let g:go_list_type = "quickfix"
 
-let g:syntastic_javascript_checkers = ['jshint']
+let g:syntastic_javascript_checkers = ['jshint', 'standard']
+"autocmd bufwritepost *.js silent !standard --fix %
+"set autoread
 
 " https://github.com/scrooloose/syntastic/wiki/VimL:---vimlint#checker-options
 " Ignore undefined variable (unlet before continue in for E706)
