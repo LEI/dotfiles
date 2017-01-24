@@ -21,6 +21,9 @@
   # Pull in remote changes for the current repository and all its submodules
   p = !"git pull; git submodule foreach git pull origin master"
 
+  # List branches sorted by last modification
+  b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
+
   # Clone a repository including all submodules
   c = clone --recursive
 
@@ -46,6 +49,9 @@
 
   # Remove the old tag with this name and tag the latest commit with it.
   retag = "!r() { git tag -d $1 && git push origin :refs/tags/$1 && git tag $1; }; r"
+
+  # Find files
+  f = "!git ls-files | grep -i"
 
   # Find branches containing commit
   fb = "!f() { git branch -a --contains $1; }; f"
@@ -80,6 +86,19 @@
       git branch -D pr/$1 && \
       git commit --amend -m \"$(git log -1 --pretty=%B)\n\nCloses #$1.\"; \
     fi \
+  }; f"
+
+  # sha-1 = rev-parse HEAD
+  hash = rev-parse --short --quiet HEAD # SHA-1
+  # repo = "!basename $(git rev-parse --show-toplevel)"
+  # git branch --points-at HEAD | awk '{print $NF}'
+  currentBranch = symbolic-ref --short HEAD
+  currentTag = tag --points-at HEAD
+
+  zip = "!f() { \
+    declare tag=\"$(git currentTag)\"; \
+    declare name=\"$(git currentBranch)-${tag:-$(git hash)}\"; \
+    git archive --format=zip -o $name.zip HEAD; \
   }; f"
 
 [hub]
