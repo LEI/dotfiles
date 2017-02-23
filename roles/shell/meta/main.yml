@@ -9,11 +9,11 @@ dependencies:
       - name: bin
         src: bin
         dest: bin
-      - name: shell
-        prefix: .
+      # - name: shell
+      #   prefix: .
 
-  - role: block-in-file
-    blocks: "{{ bash_blocks }}"
+  # - role: block-in-file
+  #   blocks: "{{ bash_blocks }}"
 
   - role: get-url
     files: "{{ bash_urls }}"

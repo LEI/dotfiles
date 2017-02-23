@@ -6,10 +6,10 @@ dependencies:
       - hammerspoon
     # when: "ansible_os_family == 'Darwin'"
 
-  - role: dotfiles
-    paths:
-      - name: hammerspoon
-        dest: .hammerspoon
+  # - role: dotfiles
+  #   paths:
+  #     - name: hammerspoon
+  #       dest: .hammerspoon
 
 galaxy_info:
   galaxy_tags: system

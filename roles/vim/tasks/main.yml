@@ -1,10 +1,10 @@
 ---
-- name: Check vim files
-  file:
-    path: "{{ item.path }}"
-    state: "{{ item.state }}"
-  with_items: "{{ vim_files }}"
-  when: "{{ item.when | default(true) }}"
+# - name: Check vim files
+#   file:
+#     path: "{{ item.path }}"
+#     state: "{{ item.state }}"
+#   with_items: "{{ vim_files }}"
+#   when: "{{ item.when | default(true) }}"
 
 # # https://github.com/junegunn/vim-plug#pluginstall-and-plugupdate
 # # https://stackoverflow.com/questions/33672491/how-to-use-ansible-to-provision-vim-vundle-plugin

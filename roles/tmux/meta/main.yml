@@ -10,18 +10,18 @@ dependencies:
   #     # - reattach-to-user-namespace
   #   when: "ansible_os_family == 'Darwin'"
 
-  - role: line-in-file
-    lines: "{{ tmux_lines }}"
+  # - role: line-in-file
+  #   lines: "{{ tmux_lines }}"
 
-  - role: dotfiles
-    paths:
-      - name: tmux
-        dest: .tmux
-      - name: tmux
-        dest: .tmux
-        pattern: "tmux.conf.j2"
-        template: yes
-      - name: tmux
-        dest: .tmux
-        pattern: "{{ os | lower}}.conf.j2"
-        template: yes
+  # - role: dotfiles
+  #   paths:
+  #     - name: tmux
+  #       dest: .tmux
+  #     - name: tmux
+  #       dest: .tmux
+  #       pattern: "tmux.conf.j2"
+  #       template: yes
+  #     - name: tmux
+  #       dest: .tmux
+  #       pattern: "{{ os | lower}}.conf.j2"
+  #       template: yes
