@@ -2,7 +2,7 @@
 
 ## Install
 
-    bin/dot
+    ./bootstrap
 
 ## Links
 

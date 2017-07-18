@@ -97,9 +97,13 @@ ansible_install() {
       if has apt-get
       then
         # Debian/Ubuntu:
-        su_do apt-get install -y build-essential python-setuptools
-        su_do apt-get install -y libffi-dev libssl-dev # gcc make... python-dev
+        su_do apt-get install -yq build-essential python-setuptools python-dev libffi-dev libssl-dev
+        # gcc make... python-dev
         # apt-transport-https ansible (1.7)
+        if ! has aptitude
+        then
+          su_do apt-get install -yq aptitude
+        fi
       elif has pacman
       then
         # Archlinux: (requires sudo, git)

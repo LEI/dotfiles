@@ -24,18 +24,24 @@
 
   tasks:
 
-    - name: "Group hosts by OS"
+    - name: "Group hosts by distribution"
       # MacOSX -> os_macosx
       # CYGWIN_NT-6.1 -> os_cygwin
-      group_by: key=os_{{ ansible_distribution | lower | regex_replace('^([a-zA-Z]+)[\s|-|_](.*)$', '\\1') }}
+      group_by:
+        key: os_{{ ansible_distribution | lower | regex_replace('^([a-zA-Z]+)[\s|-|_](.*)$', '\\1') }}
+      tags: [always]
+
+    - name: "Group hosts by family"
+      group_by:
+        key: os_{{ ansible_os_family | lower }}
       tags: [always]
 
     - name: Group names
       debug:
         msg:
-          groups: "{{ group_names | to_nice_json }}"
+          groups: "{{ group_names }}"
           os: "{{ os }}"
-      when: log_enable is defined and log_enable
+      # when: log_enable is defined and log_enable
 
     - name: "OS {{ ansible_os_family }}" # ansible_model
       vars:

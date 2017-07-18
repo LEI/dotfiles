@@ -18,11 +18,11 @@
     - role: irc
       tags: [irc]
 
-    - role: i3
-      tags: [i3, wm]
-      gtk_theme: arc
-      when: arch not in ['armv6l']
+    # - role: i3
+    #   tags: [i3, wm]
+    #   gtk_theme: arc
+    #   when: arch not in ['armv6l']
 
-    - role: rxvt
-      tags: [rxvt]
-      when: not ansible_architecture | match('armv.*')
+    # - role: rxvt
+    #   tags: [rxvt]
+    #   when: not ansible_architecture | match('armv.*')
