@@ -17,3 +17,6 @@ dependencies:
 
   - role: get-url
     files: "{{ bash_urls }}"
+
+  - role: dot
+    dot_role: bash

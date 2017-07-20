@@ -1,0 +1,12 @@
+---
+
+- name: Install dot binary
+  command: go get {{ dot_repo_path }}
+  args:
+    creates: "{{ ansible_env.GOPATH }}/src/{{ dot_repo_path }}"
+  # TODO config file (.dot.yml)
+
+- name: Execute dot
+  command: dot "{{ dot_action }}" "{{ dot_role }}"
+  # environment: "{{ dot_environment }}"
+  when: dot_role is defined
