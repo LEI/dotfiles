@@ -116,7 +116,7 @@
 
 [core]
 
-  editor = vim
+  editor = $EDITOR
 
   # Use custom '.gitignore' and '.gitattributes'
   excludesfile = ~/.gitignore
@@ -153,11 +153,6 @@
 
   # Automatically correct and execute mistyped commands after 1 second
   autocorrect = 10
-
-[merge]
-
-  # Include summaries of merged commits in newly created merge commit messages
-  log = true
 
 [merge]
 

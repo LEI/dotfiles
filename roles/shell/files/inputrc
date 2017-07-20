@@ -7,6 +7,9 @@
 # Make Tab autocomplete regardless of filename case
 set completion-ignore-case on
 
+# Apply similar insensitivity between hyphens and underscores
+#set completion-map-case on
+
 # List all matches in case multiple possible completions are possible
 set show-all-if-ambiguous on
 
@@ -28,7 +31,7 @@ set match-hidden-files off
 set page-completions off
 
 # If there are more than 200 possible completions for a word, ask to show them all
-set completion-query-items 200
+set completion-query-items 420
 
 # Show extra file information when completing, like `ls -F` does
 set visible-stats on
