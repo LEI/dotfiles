@@ -5,12 +5,12 @@ dependencies:
     packages:
       # - gnome-themes-standard
       - arc-theme
-    when: "{{ ansible_os_family == 'Debian' }}"
+    when: ansible_os_family == 'Debian'
 
   # - role: package
   #   packages:
   #     - gnome-themes-standard
-  #   when: "{{ ansible_os_family == 'Archlinux' }}"
+  #   when: ansible_os_family == 'Archlinux'
 
     # gtk, icons & firefox
   - role: pacman-yaourt
@@ -19,4 +19,4 @@ dependencies:
       - arc-icon-theme
       - gtk-theme-arc
       # - vlc-arc-dark-git
-    when: "{{ ansible_os_family == 'Archlinux' }}"
+    when: ansible_os_family == 'Archlinux'
