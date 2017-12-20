@@ -31,7 +31,7 @@ bower_components
 # Vim
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
-Session.vim
+Session*.vim
 .netrwhist
 *~
 *.swp
@@ -60,7 +60,7 @@ Session.vim
 # Logs and databases
 logs
 *.log
-*.sql
+# *.sql
 *.sqlite
 
 # System files

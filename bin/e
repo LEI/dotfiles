@@ -12,7 +12,8 @@ then
   exit 1
 fi
 
-if [[ "$#" -ne 0 ]]
-then exec $EDITOR "$@"
-else exec $EDITOR .
+if [[ "$#" -ne 0 ]] || [[ ! -t 0 ]]; then
+  exec $EDITOR "$@"
+else
+  exec $EDITOR .
 fi
