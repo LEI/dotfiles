@@ -1,0 +1,90 @@
+---
+git:
+  host: github.com
+  # user: LEI
+  # scheme: https
+
+roles:
+
+  - "sh:LEI/dot-sh"
+
+  - name: bash
+    url: LEI/dot-bash
+    depends: ["sh"]
+
+  - name: zsh
+    url: LEI/dot-zsh
+    depends: ["sh"]
+    disabled: true
+
+  - name: gpg
+    url: LEI/dot-gpg
+
+  - name: git
+    url: LEI/dot-git
+    depends: ["gpg"]
+
+  - name: node
+    url: LEI/dot-node
+    depends: ["gpg"]
+
+  - name: php
+    url: LEI/dot-php
+    os: ["!android"]
+
+  - name: python
+    url: LEI/dot-python
+
+  - name: ruby
+    url: LEI/dot-ruby
+
+  # - name: rust
+  #   url: LEI/dot-rust
+  #   os: ["!alpine", "!android"]
+
+  - name: vim
+    url: LEI/dot-vim
+    depends: ["bash", "git"]
+    # node, python, ruby
+
+  - name: tmux
+    url: LEI/dot-tmux
+    depends: ["git"]
+
+  - name: termux
+    url: LEI/dot-termux
+    os: ["android"]
+
+  - name: osx
+    url: LEI/dot-osx
+    os: ["darwin"]
+
+  - name: hammerspoon
+    url: LEI/dot-hammerspoon
+    os: ["darwin"]
+
+  - name: mutt
+    url: LEI/dot-mutt
+    os: ["darwin"]
+    depends: ["gpg"]
+
+  - name: arch
+    url: LEI/dot-arch
+    os: ["arch"]
+
+  - name: i3
+    url: LEI/dot-i3
+    os: ["arch"]
+    depends: ["arch"]
+
+  - name: rxvt
+    url: LEI/dot-rxvt
+    os: ["arch"]
+    depends: ["i3"]
+
+  - name: htop
+    url: LEI/dot-htop
+
+  - name: usql
+    url: LEI/dot-usql
+    os: ["darwin"]
