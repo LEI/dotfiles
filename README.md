@@ -3,8 +3,12 @@
 ## Install
 
 ```bash
-curl -sSL https://git.io/dotfiles.config -o $HOME/.dotrc.yml
-curl -sSL https://git.io/dot.lei.sh | sh
+sudo apt-get install -y curl git
+
+curl -sSL https://git.io/dotfiles.config -o "$HOME/.dotrc.yml"
+
+curl -sSL https://git.io/dot.lei.sh | sudo sh
+
 dot install
 ```
 
