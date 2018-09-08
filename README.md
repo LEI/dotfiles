@@ -4,7 +4,7 @@
 
 ```bash
 curl -sSL https://git.io/dotfiles.config -o $HOME/.dotrc.yml
-curl -sSL https://git.io/lei.dot.sh | sh
+curl -sSL https://git.io/dot.lei.sh | sh
 dot install
 ```
 
