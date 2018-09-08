@@ -4,6 +4,32 @@ git:
   # user: LEI
   # scheme: https
 
+# OS roles
+platforms:
+
+  android:
+    - name: termux
+      url: LEI/dot-termux
+
+  arch:
+    - name: arch
+      url: LEI/dot-arch
+
+    - name: i3
+      url: LEI/dot-i3
+      depends: ["arch"]
+
+    - name: rxvt
+      url: LEI/dot-rxvt
+      depends: ["i3"]
+
+  darwin:
+    - name: osx
+      url: LEI/dot-osx
+
+    - name: hammerspoon
+      url: LEI/dot-hammerspoon
+
 roles:
 
   - "sh:LEI/dot-sh"
@@ -51,36 +77,10 @@ roles:
     url: LEI/dot-tmux
     depends: ["git"]
 
-  - name: termux
-    url: LEI/dot-termux
-    os: ["android"]
-
-  - name: osx
-    url: LEI/dot-osx
-    os: ["darwin"]
-
-  - name: hammerspoon
-    url: LEI/dot-hammerspoon
-    os: ["darwin"]
-
   - name: mutt
     url: LEI/dot-mutt
     os: ["darwin"]
     depends: ["gpg"]
-
-  - name: arch
-    url: LEI/dot-arch
-    os: ["arch"]
-
-  - name: i3
-    url: LEI/dot-i3
-    os: ["arch"]
-    depends: ["arch"]
-
-  - name: rxvt
-    url: LEI/dot-rxvt
-    os: ["arch"]
-    depends: ["i3"]
 
   - name: htop
     url: LEI/dot-htop
