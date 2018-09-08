@@ -1,3 +1,0 @@
-" SCSS
-
-setlocal iskeyword+=-

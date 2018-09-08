@@ -1,2 +1,0 @@
----
-# vim_install_options: "{{ hostvars[inventory_hostname][(ansible_os_family | lower) + '_vim_install_options'] | default([]) }}"

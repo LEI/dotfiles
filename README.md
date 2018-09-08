@@ -1,11 +1,16 @@
-# Ansible dotfiles
+# dotfiles
 
 ## Install
 
-    ./bootstrap
+```bash
+curl -sSL https://git.io/dotfiles.config -o $HOME/.dotrc.yml
+curl -sSL https://git.io/lei.dot.sh | sh
+dot install
+```
 
 ## Links
 
+- [LEI/dot](https://github.com/LEI/dot)
 - [Github does dotfiles](https://dotfiles.github.io/)
 - [Awesome dotfiles](https://github.com/webpro/awesome-dotfiles)
 
@@ -27,9 +32,3 @@
 - [workstation](https://github.com/jtimberman/workstation-chef-repo)
 - [boxen](https://github.com/boxen/our-boxen)
 - [kitchenplan](https://github.com/kitchenplan/kitchenplan)
-
-## TODO
-
-- [ ] Ansible install, roles subdirs, conditional lists (e.g. append packages, ignore plugin)
-- [ ] Bash aliases & completion: bash-doc/examples, color escape function (fg, bg), zsh/bash-it...
-- [ ] virtualenv, nvm...

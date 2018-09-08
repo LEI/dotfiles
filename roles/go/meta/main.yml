@@ -1,9 +1,0 @@
----
-dependencies:
-
-  - role: package
-    packages: "{{ go_packages | default(['go']) }}"
-    # FIXME local/vars > os_vars
-
-galaxy_info:
-  galaxy_tags: language

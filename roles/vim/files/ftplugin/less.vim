@@ -1,3 +1,0 @@
-" Less
-
-setlocal iskeyword+=-

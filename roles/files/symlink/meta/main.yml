@@ -1,9 +1,0 @@
----
-# allow_duplicates: yes
-
-dependencies:
-
-  - role: target
-    dot_files_dir: files
-    dot_files_paths: {}
-    when: dot_files | length > 0

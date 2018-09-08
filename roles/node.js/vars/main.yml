@@ -1,3 +1,0 @@
----
-node_debian_repo_version: "{{ node_version if '4' not in node_version else '4.x' }}"
-node_rhel_rpm_dir: "{{ 'pub' if node_version == 0.10 else 'pub_' + node_version }}"

@@ -1,8 +1,0 @@
----
-xresources_path: "{{ ansible_env.HOME }}/.Xresources"
-xresources_directory: "{{ ansible_env.HOME }}/.Xresources.d"
-xresources_theme: solarized-dark
-xresources_defaults:
-  - "{{ xresources_directory + '/colors/' + xresources_theme }}"
-xresources_files: "{{ xresources_defaults + lookup('fileglob', xresources_directory + '/*', wantlist=True) }}"
-# map | regex_replace(xresources_directory, '.Xresources.d')

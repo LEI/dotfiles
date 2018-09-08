@@ -1,5 +1,0 @@
----
-- name: Update package list (setup.ini)
-  apt_cyg:
-    update: yes
-  when: packages_update

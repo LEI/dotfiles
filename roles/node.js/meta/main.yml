@@ -1,7 +1,0 @@
----
-dependencies:
-
-  - role: package
-    packages:
-      - apt-transport-https
-    when: ansible_os_family == 'Debian'

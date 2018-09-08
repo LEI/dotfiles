@@ -1,8 +1,0 @@
----
-# # Source relative to dot_root, destination relative to dot_home
-# - name: Symlink items
-#   file:
-#     src: "{{ dot_root }}/{{ paths.src + '/' if paths.src }}{{ item.src|default(item) }}"
-#     dest: "{{ dot_home }}/{{ paths.dst + '/' if paths.dst }}{{ paths.prefix|default('') }}{{ item.dst|default(item) }}"
-#     state: link
-#   with_items: "{{ symlinks }}"
