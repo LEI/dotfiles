@@ -5,7 +5,8 @@
 ### Debian
 
 ```sh
-sudo apt-get install -y ca-certificates curl git
+sudo apt-get update -yq
+sudo apt-get install -yyq ca-certificates curl git
 curl -sSL https://git.io/dot.lei.sh | sudo sh
 ```
 
@@ -15,10 +16,11 @@ curl -sSL https://git.io/dot.lei.sh | sudo sh
 brew install git lei/dot/dot
 ```
 
-## Configuration file
+## Usage
 
 ```sh
 curl -sSL https://git.io/dotfiles.config -o "$HOME/.dotrc.yml"
+dot install --https --packages --sync
 ```
 
 ## Links
