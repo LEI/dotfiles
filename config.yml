@@ -17,7 +17,7 @@ platforms:
 
     - name: i3
       url: LEI/dot-i3
-      depends: ["arch"]
+      depends: ["arch", "debian"]
 
     - name: rxvt
       url: LEI/dot-rxvt
@@ -41,7 +41,7 @@ roles:
   - name: zsh
     url: LEI/dot-zsh
     depends: ["sh"]
-    disabled: true
+    # disabled: true
 
   - name: gpg
     url: LEI/dot-gpg
