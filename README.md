@@ -2,14 +2,23 @@
 
 ## Install
 
-```bash
-sudo apt-get install -y curl git
+### Debian
 
-curl -sSL https://git.io/dotfiles.config -o "$HOME/.dotrc.yml"
-
+```sh
+sudo apt-get install -y ca-certificates curl git
 curl -sSL https://git.io/dot.lei.sh | sudo sh
+```
 
-dot install
+### macOS
+
+```sh
+brew install git lei/dot/dot
+```
+
+## Configuration file
+
+```sh
+curl -sSL https://git.io/dotfiles.config -o "$HOME/.dotrc.yml"
 ```
 
 ## Links
