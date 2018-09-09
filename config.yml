@@ -15,14 +15,6 @@ platforms:
     - name: arch
       url: LEI/dot-arch
 
-    - name: i3
-      url: LEI/dot-i3
-      depends: ["arch", "debian"]
-
-    - name: rxvt
-      url: LEI/dot-rxvt
-      depends: ["i3"]
-
   darwin:
     - name: osx
       url: LEI/dot-osx
@@ -88,3 +80,13 @@ roles:
   - name: usql
     url: LEI/dot-usql
     os: ["darwin"]
+
+  - name: i3
+    url: LEI/dot-i3
+    depends: ["arch"]
+    os: ["archlinux", "debian"]
+
+  - name: rxvt
+    url: LEI/dot-rxvt
+    depends: ["i3"]
+    os: ["archlinux", "debian"]
