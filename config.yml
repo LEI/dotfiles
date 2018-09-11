@@ -83,10 +83,10 @@ roles:
 
   - name: i3
     url: LEI/dot-i3
-    depends: ["arch"]
+    # depends: ["arch"]
     os: ["archlinux", "debian"]
 
   - name: rxvt
     url: LEI/dot-rxvt
-    depends: ["i3"]
+    # depends: ["i3"]
     os: ["archlinux", "debian"]
