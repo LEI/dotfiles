@@ -44,7 +44,7 @@ roles:
     url: LEI/dot-zsh
     depends: ["sh"]
     os: ["archlinux", "darwin"]
-    disabled: true
+    # disabled: true
 
   - name: gpg
     url: LEI/dot-gpg
