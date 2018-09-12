@@ -40,11 +40,11 @@ roles:
     url: LEI/dot-bash
     depends: ["sh"]
 
-  - name: zsh
-    url: LEI/dot-zsh
-    depends: ["sh"]
-    os: ["archlinux", "darwin"]
-    # disabled: true
+  # - name: zsh
+  #   url: LEI/dot-zsh
+  #   depends: ["sh"]
+  #   os: ["archlinux", "darwin"]
+  #   # disabled: true
 
   - name: gpg
     url: LEI/dot-gpg
