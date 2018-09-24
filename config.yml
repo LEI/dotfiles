@@ -76,7 +76,7 @@ roles:
     os: ["darwin"] # ["!alpine", "!android"]
 
   - name: alacritty
-    # url: LEI/dot-alacritty
+    url: LEI/dot-alacritty
     os: ["darwin"]
     depends: ["rust"]
 
