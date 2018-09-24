@@ -1,4 +1,6 @@
 ---
+# https://github.com/lra/mackup/tree/master/mackup/applications
+
 git:
   host: github.com
   # user: LEI
@@ -31,6 +33,8 @@ platforms:
 
     - name: hammerspoon
       url: LEI/dot-hammerspoon
+
+    # https://koekeishiya.github.io/chunkwm/ (chunkwmrc, skhdrc...)
 
 roles:
 
@@ -67,13 +71,18 @@ roles:
   - name: ruby
     url: LEI/dot-ruby
 
-  # - name: rust
-  #   url: LEI/dot-rust
-  #   os: ["!alpine", "!android"]
+  - name: rust
+    url: LEI/dot-rust
+    os: ["darwin"] # ["!alpine", "!android"]
+
+  - name: alacritty
+    # url: LEI/dot-alacritty
+    os: ["darwin"]
+    depends: ["rust"]
 
   - name: vim
     url: LEI/dot-vim
-    depends: ["bash", "git"]
+    # depends: ["bash", "git"]
     # node, python, ruby
 
   - name: tmux
