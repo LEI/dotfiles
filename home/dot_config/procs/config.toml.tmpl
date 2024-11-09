@@ -1,0 +1,5 @@
+{{- if ne (output "sh" "-c" "command -v procs || true") "" -}}
+# https://github.com/dalance/procs#configuration
+
+{{ output "procs" "--gen-config" -}}
+{{- end -}}

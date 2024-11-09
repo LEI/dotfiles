@@ -1,0 +1,8 @@
+# {{- if eq .osid "android" }}
+# https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
+MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
+
+mise() {
+  proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$MISE_BIN" "$@"
+}
+# {{- end }}

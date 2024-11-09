@@ -1,0 +1,13 @@
+{{- $osid := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $osid = "darwin" -}}
+{{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
+{{- $osid = "alpine" -}}
+{{- else if eq (get .chezmoi.osRelease "idLike") "arch" }}
+{{- $osid = "arch" -}}
+{{- else if eq (env "HOME") "/data/data/com.termux/files/home" }}
+{{- $osid = "android" -}}
+{{- else }}
+{{- $osid = get .chezmoi.osRelease "idLike" | default (get .chezmoi.osRelease "id" | default .chezmoi.os) }}
+{{- end }}
+{{- $osid -}}

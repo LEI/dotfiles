@@ -1,0 +1,101 @@
+#!/bin/sh
+
+# TODO: ensure up to date
+# and install tools for perl (Neovim::Ext cpan module),
+# python (uv and pynvim), neovim-ruby-host (gem install neovim)
+
+# https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
+
+# {{- if .features.node }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# if ! command -v node >/dev/null && command -v mise >/dev/null; then
+#   PATH="$PATH:$HOME/.local/share/mise/shims"
+# fi
+if command -v mise >/dev/null; then
+  if ! command -v jq >/dev/null; then
+    PATH="$PATH:$HOME/.local/share/mise/shims"
+  fi
+  # Use global node
+  INSTALL_PATH="$(mise list node --installed --json --quiet | jq --compact-output --raw-output 'last | .install_path')"
+  PATH="$INSTALL_PATH/bin:$PATH"
+fi
+
+echo >&2 "node $(node --version)"
+
+# npm config set --global audit=false fund=false
+
+cmd npm install --global --quiet npm@latest
+
+if ! command -v pnpm >/dev/null; then
+  cmd npm install --global --quiet pnpm@latest
+fi
+
+if ! command -v yarn >/dev/null; then
+  cmd npm install --global --quiet yarn@latest
+fi
+
+# {{- if .features.ai }}
+if ! command -v claude >/dev/null; then
+  cmd npm install --global --quiet @anthropic-ai/claude-code
+fi
+
+if ! command -v codex >/dev/null; then
+  cmd npm install --global --quiet @openai/codex
+fi
+# {{- end }}
+
+# NOTE: eslint is broken in vscode-extracted-language-server@4.10
+# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+if ! command -v vscode-eslint-language-server >/dev/null; then
+  cmd npm install --global --quiet vscode-langservers-extracted@4.8
+fi
+
+# {{- if .features.neovim }}
+if ! command -v neovim-node-host >/dev/null; then
+  cmd npm install --global --quiet neovim
+fi
+
+# cmd nvim --headless +MasonUpdate +qa
+
+if ! command -v bash-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall bashls" +qa
+fi
+
+if ! command -v prettier >/dev/null; then
+  cmd nvim --headless "+MasonInstall prettier" +qa
+fi
+
+if ! command -v typescript-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall ts_ls" +qa
+fi
+
+if ! command -v yaml-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall yamlls" +qa
+fi
+# {{- else }}
+if ! command -v bash-language-server >/dev/null; then
+  cmd npm install --global --quiet bash-language-server
+fi
+
+if ! command -v prettier >/dev/null; then
+  cmd npm install --global --quiet prettier
+fi
+
+# {{- if .features.sql }}
+if ! command -v sql-language-server >/dev/null; then
+  cmd npm install --global --quiet sql-language-server
+fi
+# {{- end }}
+
+if ! command -v typescript-language-server >/dev/null; then
+  cmd npm install --global --quiet typescript typescript-language-server
+fi
+
+if ! command -v yaml-language-server >/dev/null; then
+  cmd npm install --global --quiet yaml-language-server@next
+fi
+# {{- end }}
+# {{- end }}

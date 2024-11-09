@@ -1,0 +1,21 @@
+background-opacity = 0.8
+# fullscreen = true
+# gtk-titlebar = false
+maximize = true
+scrollback-limit = 90000000
+theme = "tokyonight_night"
+# theme = "tokyonight-storm"
+
+# {{- if eq .chezmoi.os "darwin" }}
+font-size = 11
+# https://github.com/ghostty-org/ghostty/discussions/3642
+# fullscreen = true
+# macos-non-native-fullscreen = visible-menu
+
+# https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
+macos-option-as-alt = left
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+# {{- else }}
+font-size = 9
+# {{- end }}

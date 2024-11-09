@@ -1,0 +1,47 @@
+---
+repos:
+  # https://github.com/gitleaks/gitleaks#pre-commit
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.25.1
+    hooks:
+      - id: gitleaks
+        name: gitleaks # Detect hardcoded secrets
+        language: system
+        stages:
+          - pre-commit
+
+  # https://pre-commit.com/hooks.html
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # https://github.com/koalaman/shellcheck-precommit
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        args:
+          - --exclude=SC2148
+          - --severity=warning
+        entry: shellcheck
+        language: system
+        stages:
+          - pre-commit
+
+  # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args:
+          - --strict
+          - --config-file=.yamllint.yaml
+        # Use yamlfmt installed on the system instead of building with Go
+        language: system
+        stages:
+          - pre-commit
