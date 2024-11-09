@@ -1,0 +1,30 @@
+---
+# https://github.com/chezmoi/dotfiles/blob/master/.github/workflows/ci.yaml
+name: ci
+
+on: # yamllint disable-line rule:truthy
+  push:
+  pull_request:
+
+jobs:
+  clone-and-install:
+    runs-on: ${{ matrix.os }}
+    container:
+      image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}
+      env:
+        CODESPACES: true
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./script/bootstrap
+      - name: chezmoi data
+        run: '"$HOME/.local/bin/chezmoi" data'
+    strategy:
+      matrix:
+        # https://github.com/actions/runner-images/tree/main/images
+        os: [ubuntu-latest]
+        # https://hub.docker.com/r/microsoft/vscode-devcontainers
+        # https://mcr.microsoft.com/v2/vscode/devcontainers/base/tags/list
+        image:
+          - base:alpine
+          # - base:debian
+          # - base:ubuntu

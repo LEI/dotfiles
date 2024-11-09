@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+# TODO: https://docs.brew.sh/Homebrew-on-Linux
+
+set -eu
+
+# {{- $packages := concat .basePackages (get .packages .osid ) | join " " }}
+packages="{{ $packages }}"
+
+echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
+echo >&2 "Installing packages: $packages"
+
+set -x
+
+# {{- if eq .chezmoi.os "darwin" }}
+# https://docs.brew.sh/Installation#unattended-installation
+export NONINTERACTIVE=1
+# brew update --quiet
+# brew upgrade --quiet
+# shellcheck disable=SC2086
+brew install --quiet $packages
+# {{- else if eq .osid "alpine" }}
+sudo apk update --quiet
+# {{- if .upgrade }}
+sudo apk upgrade --quiet
+# {{- end }}
+# shellcheck disable=SC2086
+sudo apk add --quiet $packages
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+# {{- if .upgrade }}
+# sudo pacman --sync --needed --noconfirm --quiet --upgrade
+# {{- end }}
+# shellcheck disable=SC2086
+sudo pacman --sync --needed --noconfirm --quiet $packages
+# {{- else if eq .osid "debian" }} Debian/Ubuntu
+# https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update --quiet >/dev/null
+# {{- if .upgrade }}
+sudo -E apt-get upgrade --quiet --yes # >/dev/null
+# {{- end }}
+# shellcheck disable=SC2086
+sudo -E apt-get install --quiet --yes $packages # >/dev/null
+# {{- else if eq .osid "fedora" }}
+# TODO: packages="$packages gpg"
+# {{- else if eq .osid "android" }}
+# TODO: termux-setup-package-manager, termux-setup-storage
+# TERM=xterm temux-change-repo # apt edit-sources
+# cat /data/data/com.termux/files/usr/etc/apt/sources.list
+# apt-get update --quiet >/dev/null
+# apt-get upgrade --quiet --yes # >/dev/null
+pkg update --quiet
+# {{- if .upgrade }}
+pkg upgrade --quiet --yes
+# {{- end }}
+
+# shellcheck disable=SC2086
+apt-get install --quiet --yes $packages >/dev/null
+# {{- end }}
+
+# {{- if and .codespaces (eq .osid "debian") }}
+selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
+if [ "${selected_editor##*/}" = nano ]; then
+  if [ -x /usr/bin/vim.basic ]; then
+    sudo update-alternatives --set editor /usr/bin/vim.basic
+  elif [ -x /usr/bin/vim.tiny ]; then
+    sudo update-alternatives --set editor /usr/bin/vim.tiny
+  fi
+fi
+# {{- end }}
+
+set +x
+
+echo >&2 "Installed packages"

@@ -1,0 +1,57 @@
+[settings]
+{{- if eq .osid "alpine" }}
+# FIXME(alpine): platform error (failed to install with ubi)
+disable_backends = ["ubi"]
+{{- end }}
+
+[tools]
+
+{{- if ne .osid "alpine" }}
+# FIXME: failed to install asdf:https://gitlab.com/wt0f/asdf-bat@0.25.0
+bat = "latest"
+{{- end }}
+
+bottom = "latest"
+# chezmoi = "latest"
+direnv = "latest"
+# fd = "latest" # NOTE: install hangs on alpine
+
+{{- if .features.git }}
+ghq = "latest"
+{{- end }}
+
+{{- if .features.go }}
+go = "latest"
+{{- end }}
+
+jq = "latest"
+
+{{- if .features.git }}
+lazygit = "latest"
+{{- end }}
+
+{{- if .features.node }}
+{{- if ne .osid "android" }}
+# FIXME(termux): hangs terminal "No such file or directory (os error 2)"
+# ~/.local/share/mise/installs/node/23.11.0/bin/node -v
+node = "latest"
+{{- end }}
+{{- end }}
+
+ripgrep = "latest"
+
+{{- if ne .osid "alpine" }}
+# FIXME(alpine): .rs syntax error (failed to install with aqua)
+shellcheck = "latest"
+{{- end }}
+
+shfmt = "latest"
+
+{{- if ne .osid "android" }}
+# FIXME(termux): installs but "cannot execute: required file not found"
+starship = "latest"
+{{- end }}
+
+usage = "latest"
+yq = "latest"
+zoxide = "latest"
