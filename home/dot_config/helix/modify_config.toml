@@ -1,0 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+{{ includeTemplate "append-block.tmpl" (dict
+	"chezmoi" .chezmoi
+	"contents" (includeTemplate "dot_config/helix/config.yaml" | fromYaml | toToml)
+) -}}

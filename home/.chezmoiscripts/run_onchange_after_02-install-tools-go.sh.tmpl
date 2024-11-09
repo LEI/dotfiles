@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# {{- if .features.go }}
+set -eu
+
+if ! command -v go >/dev/null && command -v mise >/dev/null; then
+  # mise use --global --quiet go@latest
+  PATH="$PATH:$HOME/.local/share/mise/shims"
+fi
+
+set -x
+
+if ! command -v gopls >/dev/null; then
+  go install golang.org/x/tools/gopls@latest >/dev/null # LSP
+fi
+if ! command -v dlv >/dev/null; then
+  go install github.com/go-delve/delve/cmd/dlv@latest >/dev/null # Debugger
+fi
+if ! command -v goimports >/dev/null; then
+  go install golang.org/x/tools/cmd/goimports@latest >/dev/null # Formatter
+fi
+if ! command -v golangci-lint-langserver >/dev/null; then
+  go install github.com/nametake/golangci-lint-langserver@latest >/dev/null # Linter
+fi
+if ! command -v golangci-lint >/dev/null; then
+  go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest >/dev/null # Linter cli
+fi
+# {{- end }}
