@@ -1,0 +1,35 @@
+// keybinds {
+//     normal clear-defaults=true {
+//         bind "Ctrl a" { SwitchToMode "Tmux"; }
+//         // https://github.com/zellij-org/zellij/issues/2345#issuecomment-2383114419
+//         bind "Ctrl q" { SwitchToMode "Locked"; }
+//     }
+//     locked {
+//         bind "Ctrl q" { SwitchToMode "Normal"; }
+//     }
+//     // shared_except "tmux" {
+//     //     bind "Ctrl a" { SwitchToMode "Tmux"; }
+//     // }
+//     tmux {
+//         // bind "Ctrl a" { Write 2; SwitchToMode "Normal"; }
+//         // https://github.com/zellij-org/zellij/issues/2345#issuecomment-2492158745
+//         bind "Ctrl a" { Write 1; }
+//         unbind "Ctrl b"
+//     }
+// }
+
+default_layout "compact"
+copy_command "xclip -selection clipboard" // x11
+// copy_command "wl-copy" // wayland
+// copy_command "pbcopy" // osx
+copy_clipboard "primary" // Default: system
+pane_frames false
+scrollback_lines_to_serialize 0
+scroll_buffer_size 100000 // Default 10000
+simplified_ui true
+theme "tokyo-night-storm"
+ui {
+    pane_frames {
+        hide_session_name true
+    }
+}

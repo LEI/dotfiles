@@ -1,0 +1,72 @@
+#!/bin/sh
+
+set -eu
+
+# https://docs.atuin.sh/guide/installation/
+
+# ble.sh or bash-preexec is required for atuin in bash
+# https://docs.atuin.sh/guide/installation/
+if [ ! -f ~/.local/share/blesh/ble.sh ]; then
+  echo >&2 "Installing ble.sh"
+  # curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+  URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
+  curl -LSsf "$URL" | tar xJf - -C "$TMPDIR"
+  bash "$TMPDIR/ble-nightly/ble.sh" --install ~/.local/share
+  # echo 'source ~/.local/share/blesh/ble.sh' >>~/.bashrc
+  echo >&2 "Installing ble.sh"
+fi
+
+if command -v atuin >/dev/null && atuin --version; then
+  echo >&2 'Already installed {{ output "sh" "-c" "command -v atuin || true" }}'
+  exit
+fi
+
+echo >&2 "Installing atuin"
+
+# {{- if eq .chezmoi.os "darwin" }}
+export NONINTERACTIVE=1
+
+set -x
+
+brew install --quiet atuin
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+
+set -x
+
+sudo pacman --sync --needed --noconfirm --quiet atuin
+# {{- else }}
+# # Ensure cargo is available
+# # shellcheck disable=SC1090
+# . ~/.cargo/env
+# # Requires build-essential on Debian
+# cargo install --quiet atuin
+# https://github.com/atuinsh/atuin/releases
+ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
+OS=unknown-linux
+NAME="atuin-$ARCH-$OS"
+if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+  NAME="$NAME-musl"
+else
+  NAME="$NAME-gnu"
+fi
+URL="https://github.com/atuinsh/atuin/releases/download/v18.5.0/$NAME.tar.gz"
+OUT="$TMPDIR/$NAME.tar.gz"
+BIN="$TMPDIR/$NAME/atuin"
+
+BIN_DIR="$HOME/.local/bin"
+if [ ! -d "$BIN_DIR" ]; then
+  echo >&2 "Creating directory: $BIN_DIR"
+  mkdir -p "$BIN_DIR"
+fi
+
+set -x
+
+curl -LSfs "$URL" -o "$OUT"
+tar -xzf "$OUT" -C "$TMPDIR"
+mv "$BIN" "$BIN_DIR/atuin"
+chmod +x "$BIN_DIR/atuin"
+# {{- end }}
+
+set +x
+
+echo >&2 "Installed atuin"

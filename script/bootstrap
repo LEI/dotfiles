@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# https://github.com/chezmoi/dotfiles/blob/master/install.sh
+# https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles
+
+set -eux
+
+BIN_DIR="$HOME/.local/bin"
+PATH="$PATH:$BIN_DIR"
+
+# if ! chezmoi="$(command -v chezmoi)"; then
+#   echo "Installing chezmoi to '${BIN_DIR}/chezmoi'" >&2
+#   if command -v curl >/dev/null; then
+#     chezmoi_install_script="$(curl -fsSL https://chezmoi.io/get)"
+#   elif command -v wget >/dev/null; then
+#     chezmoi_install_script="$(wget -qO- https://chezmoi.io/get)"
+#   else
+#     echo "To install chezmoi, you must have curl or wget installed." >&2
+#     exit 1
+#   fi
+#   sh -c "${chezmoi_install_script}" -- -b "${BIN_DIR}"
+#   unset chezmoi_install_script BIN_DIR
+# fi
+
+if [ "${CODESPACES:-}" = "true" ]; then
+  # POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
+  script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
+  if [ ! -d "$script_dir" ]; then
+    echo >&2 "Missing source directory: $script_dir"
+    exit 1
+  fi
+  # set -- init --apply --source="$script_dir"
+  # NOTE: the bootstrap script is in a subdirectory
+  set -- init --apply --source="$(dirname script_dir)"
+else
+  if [ $# -eq 0 ]; then
+    echo >&2 "Missing user name or repository (chezmoi init user)"
+    exit 1
+  fi
+  set -- init --apply "$@"
+fi
+
+# https://github.com/twpayne/chezmoi/releases
+# TODO: NAME="chezmoi_${VERSION}_${OS}_${ARCH}.{apk,deb}"
+if ! chezmoi="$(command -v chezmoi)"; then
+  chezmoi="$BIN_DIR/chezmoi"
+  echo >&2 "Installing chezmoi to $chezmoi"
+  VERSION=2.62.2
+  OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # "$CHEZMOI_OS"
+  # ARCH='{{ .chezmoi.arch }}'
+  ARCH=amd64
+  # grep -F libc "$(which ldd)"
+  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+    ARCH="$ARCH-musl"
+  fi
+  # case "$(uname -m)" in
+  # x86_84) ARCH=amd64 ;;
+  # esac
+
+  # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}glibc{{ else }}musl{{ end }}'
+  # NAME="chezmoi_${VERSION}_${OS}-${LIB}_${ARCH}"
+  # OUT="$TMPDIR/$NAME.tar.gz"
+  # BIN="$TMPDIR/$NAME/chezmoi"
+  # URL="https://github.com/twpayne/chezmoi/releases/download/v$VERSION/$NAME.tar.gz"
+  # curl -LSfs "$URL" -o "$OUT"
+  # tar -xzf "$OUT" -C "$TMPDIR"
+  # sudo mv "$BIN" "$BIN_DIR/chezmoi"
+  # sudo chmod +x "$BIN_DIR/chezmoi"
+
+  # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}{{ else }}-musl{{ end }}'
+  NAME="chezmoi-$OS-$ARCH"
+  URL="https://github.com/twpayne/chezmoi/releases/download/v$VERSION/$NAME"
+  if [ ! -d "$BIN_DIR" ]; then
+    echo >&2 "Creating directory: $BIN_DIR"
+    mkdir -p "$BIN_DIR"
+  fi
+  echo >&2 "Downloading file: $URL"
+  if command -v curl >/dev/null; then
+    curl -LSfs "$URL" -o "$chezmoi"
+  else
+    wget -q "$URL" -O "$chezmoi"
+  fi
+  chmod +x "$chezmoi"
+  echo >&2 "Installed chezmoi"
+fi
+
+echo "Running 'chezmoi $*'" >&2
+# exec: replace current process with chezmoi
+exec "$chezmoi" "$@"

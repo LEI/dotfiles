@@ -1,0 +1,65 @@
+# https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
+
+{{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
+{{- $codespaces := env "CODESPACES" | not | not -}}
+{{- $interactive := stdinIsATTY -}}
+
+{{- $name := "Your Name" -}}
+{{- $email := "your@email.com" -}}
+
+{{- if hasKey . "name" -}}
+{{-   $name = .name -}}
+{{- else if (env "GIT_CONFIG_USER_NAME") -}}
+{{-   $name = env "GIT_CONFIG_USER_NAME" -}}
+{{- else if $interactive -}}
+{{-   $name = promptString "name" $name -}}
+{{- end -}}
+
+{{- if hasKey . "email" -}}
+{{-   $email = .email -}}
+{{- else if (env "GIT_CONFIG_USER_EMAIL") -}}
+{{-   $email = env "GIT_CONFIG_USER_EMAIL" -}}
+{{- else if $interactive -}}
+{{-   $email = promptString "email" $email -}}
+{{- end -}}
+
+{{- if $interactive -}}
+{{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
+{{- end -}}
+
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) }}
+{{- $osid := includeTemplate "osid.tmpl" (dict "chezmoi" .chezmoi) }}
+{{- $features := includeTemplate "features.tmpl" (dict
+  "chezmoi" .chezmoi
+  "codespaces" $codespaces
+  "osid" $osid
+) }}
+
+sourceDir: {{ .chezmoi.sourceDir | quote }}
+
+data:
+  codespaces: {{ $codespaces }}
+
+  email: {{ $email | quote }}
+  name: {{ $name | quote }}
+
+  chassisType: {{ $chassisType | quote }}
+  features: {{ $features }}
+  osid: {{ $osid }}
+
+env: {}
+
+scriptEnv:
+  # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
+  TMPDIR: {{ env "TMPDIR" | default "/tmp" | quote }}
+{{- if eq $osid "darwin" }}
+  HOMEBREW_NO_ANALYTICS: "1"
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_ENV_HINTS: "1"
+  NONINTERACTIVE: "1"
+{{- else if eq $osid "debian" }}
+  DEBIAN_FRONTEND: noninteractive
+{{- end }}
+
+# Files and directories not group writeable
+# umask: 0o022

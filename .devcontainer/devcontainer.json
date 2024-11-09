@@ -1,0 +1,11 @@
+{
+  // https://github.com/devcontainers/images/blob/main/src/base-ubuntu/.devcontainer/devcontainer.json
+  // https://github.com/devcontainers/images/blob/main/src/universal/.devcontainer/devcontainer.json
+  // https://containers.dev/implementors/spec/
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:debian",
+  // ln -s /workspaces/dotfiles ~/.local/share/chezmoi
+  "containerEnv": {},
+  "remoteEnv": {
+    "CHEZMOI_SOURCE_PATH": "/workspaces/dotfiles"
+  }
+}

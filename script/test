@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $- = *i* ]]; then
+  INTERACTIVE=true
+else
+  INTERACTIVE=false
+fi
+DEBUG="${DEBUG:-false}"
+DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$INTERACTIVE}"
+
+ARGS="${ARGS:-} --env=GITHUB_TOKEN=$GITHUB_TOKEN"
+REMOVE="${REMOVE:-false}"
+if [ "$REMOVE" = true ]; then
+  ARGS="$ARGS --rm"
+fi
+
+# shellcheck disable=SC2016
+TEST_SCRIPT='$HOME/.local/share/chezmoi/script/test'
+if [ "$DEBUG" = true ]; then
+  TEST_SCRIPT="$TEST_SCRIPT; bash -l || sh -l"
+elif [ "$DEBUG_ON_ERROR" = true ]; then
+  TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
+fi
+
+TEST_MOUNT='set -x; ./script/bootstrap --no-tty && '"$TEST_SCRIPT"
+# TEST_MOUNT='set -x; ./script/bootstrap --no-tty --apply=false && apk add --quiet bash && '"$TEST_SCRIPT"
+# shellcheck disable=SC2016
+TEST_CLONE='set -x; GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME" && '"$TEST_SCRIPT"
+
+main() {
+  case "${1:-}" in
+  "")
+    set -x
+    bash --version | head -n1
+    # nu --version
+    # mise --version
+    # mise ls
+    # FIXME: PATH="$PATH:$HOME/.local/.bin"
+    chezmoi=chezmoi
+    if ! command -v $chezmoi >/dev/null && test -x "$HOME/.local/bin/chezmoi"; then
+      chezmoi="$HOME/.local/bin/chezmoi"
+    fi
+    $chezmoi status
+    $chezmoi diff --exclude=scripts
+    ;;
+  alpine) test_alpine ;;
+  macos) test_macos ;;
+  termux) test_termux ;;
+  esac
+}
+
+# Alpine
+test_alpine() {
+  # shellcheck disable=SC2086
+  podman run -it --name=alpine $ARGS \
+    --volume="$HOME/.local/share/chezmoi:/root/.local/share/chezmoi" \
+    --workdir=/root/.local/share/chezmoi \
+    alpine:latest \
+    sh -c "$TEST_MOUNT"
+}
+
+# macOS
+# Arch: sudo pacman -S xorg-xhost && xhost +
+# Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
+test_macos() {
+  podman run -it --name=macos --device=/dev/kvm -p=50922:10022 \
+    -v=/tmp/.X11-unix:/tmp/.X11-unix \
+    -e="DISPLAY=:0" docker.io/sickcodes/docker-osx:sequoia
+}
+
+# Termux
+test_termux() {
+  # shellcheck disable=SC2086
+  podman run -it --name=termux $ARGS \
+    docker.io/termux/termux-docker:x86_64 \
+    sh -c "$TEST_CLONE"
+}
+
+main "$@"

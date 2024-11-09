@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+# TODO: https://docs.brew.sh/Homebrew-on-Linux
+
+set -eu
+
+# {{- $packages := concat .basePackages (get .packages .osid ) | join " " }}
+packages="{{ $packages }}"
+
+echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
+echo >&2 "Installing packages: $packages"
+
+set -x
+
+if ! command -v sudo >/dev/null; then
+  if [ "$(id -u)" = 0 ]; then
+    apk update --quiet
+    apk add --quiet sudo
+  elif [ "$HOME" = /data/data/com.termux/files/home ]; then
+    apt-get update --quiet >/dev/null
+    apt-get install --quiet --yes sudo >/dev/null
+  fi
+fi
+
+# {{- if eq .chezmoi.os "darwin" }}
+# https://docs.brew.sh/Installation#unattended-installation
+export NONINTERACTIVE=1
+# brew update --quiet
+# brew upgrade --quiet
+# shellcheck disable=SC2086
+brew install --quiet $packages
+# {{- else if eq .osid "alpine" }}
+sudo apk update --quiet
+sudo apk upgrade --quiet
+# shellcheck disable=SC2086
+sudo apk add --quiet $packages
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+# sudo pacman --sync --needed --noconfirm --quiet --upgrade
+# shellcheck disable=SC2086
+sudo pacman --sync --needed --noconfirm --quiet $packages
+# {{- else if eq .osid "debian" }} Debian/Ubuntu
+# https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update --quiet >/dev/null
+sudo apt-get upgrade --quiet --yes # >/dev/null
+# shellcheck disable=SC2086
+sudo apt-get install --quiet --yes $packages >/dev/null
+# {{- else if eq .osid "fedora" }}
+# TODO: packages="$packages gpg"
+# {{- else if eq .osid "android" }}
+# TODO: termux-setup-package-manager, termux-setup-storage
+# apt-get update --quiet >/dev/null
+# apt-get upgrade --quiet --yes # >/dev/null
+pkg update --quiet
+pkg upgrade --quiet --yes
+
+# shellcheck disable=SC2086
+apt-get install --quiet --yes $packages >/dev/null
+# {{- end }}
+
+set +x
+
+echo >&2 "Installed packages"

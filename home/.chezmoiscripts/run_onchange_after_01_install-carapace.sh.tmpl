@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# Alternatives:
+# https://github.com/nushell/nu_scripts/tree/main/custom-completions
+# https://github.com/sigoden/argc-completions
+
+set -eu
+
+if command -v carapace >/dev/null && carapace --version; then
+  echo >&2 'Already installed {{ output "sh" "-c" "command -v carapace || true" }}'
+  exit
+fi
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+VERSION="$(get_release "carapace-sh/carapace-bin")"
+OS="$CHEZMOI_OS"
+if [ "$HOME" = /data/data/com.termux/files/home ]; then
+  OS=termux
+fi
+ARCH="{{ .chezmoi.arch }}"
+BASE_URL="https://github.com/carapace-sh/carapace-bin/releases/download/$VERSION"
+NAME="carapace-bin_${VERSION#v}_${OS}_${ARCH}"
+
+echo >&2 "Installing carapace"
+
+# {{- if eq .chezmoi.os "darwin" }}
+export NONINTERACTIVE=1
+
+set -x
+
+brew install --quiet carapace
+# {{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
+set -x
+
+curl -LSfs "$BASE_URL/$NAME.apk" -o "$TMPDIR/carapace.apk"
+sudo apk add --allow-untrusted --quiet "$TMPDIR"/carapace.apk
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+set -x
+
+sudo yay --sync --needed --noconfirm --quiet carapace-bin
+# {{- else if eq .osid "debian" }} Debian/Ubuntu
+export DEBIAN_FRONTEND=noninteractive
+
+set -x
+
+curl -LSfs "$BASE_URL/$NAME.deb" -o "$TMPDIR/carapace.deb"
+sudo apt-get install --quiet --yes "$TMPDIR"/carapace.deb
+# {{- else }}
+# https://github.com/carapace-sh/carapace-bin/releases
+URL="$BASE_URL/$NAME.tar.gz"
+OUT="$TMPDIR/$NAME.tar.gz"
+BIN="$TMPDIR/carapace"
+
+BIN_DIR="$HOME/.local/bin"
+if [ ! -d "$BIN_DIR" ]; then
+  echo >&2 "Creating directory: $BIN_DIR"
+  mkdir -p "$BIN_DIR"
+fi
+
+set -x
+
+curl -LSfs "$URL" -o "$OUT"
+tar -xzf "$OUT" -C "$TMPDIR"
+mv "$BIN" "$BIN_DIR/carapace"
+chmod +x "$BIN_DIR/carapace"
+# {{- end }}
+
+set +x
+
+echo >&2 "Installed carapace"

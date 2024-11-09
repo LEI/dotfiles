@@ -1,0 +1,20 @@
+---
+# https://github.com/chezmoi/dotfiles/blob/master/.github/workflows/ci.yaml
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  clone-and-install:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+      env:
+        CODESPACES: true
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./script/bootstrap
+      - name: chezmoi data
+        run: '"$HOME/.local/bin/chezmoi" data'

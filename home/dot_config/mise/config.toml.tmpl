@@ -1,0 +1,28 @@
+[tools]
+bottom = "latest"
+# chezmoi = "latest"
+direnv = "latest"
+ghq = "latest"
+go = "latest"
+jq = "latest"
+ripgrep = "latest"
+shfmt = "latest"
+
+# FIXME: platform error on alpine (failed to install with ubi)
+{{- if ne .osid "alpine" }}
+bat = "latest"
+fd = "latest"
+{{- if ne .osid "android" }}
+# FIXME: hangs terminal on termux "No such file or directory (os error 2)"
+# ~/.local/share/mise/installs/node/23.11.0/bin/node -v
+node = "latest"
+{{- end }}
+shellcheck = "latest"
+{{- if ne .osid "android" }}
+# FIXME: installs on termux but "cannot execute: required file not found"
+starship = "latest"
+{{- end }}
+usage = "latest"
+yq = "latest"
+zoxide = "latest"
+{{- end }}

@@ -1,0 +1,80 @@
+# https://www.chezmoi.io/reference/special-files/chezmoiignore/
+
+{{- if ne .email "firstname.lastname@company.com" }}
+# Ignore .company-directory unless configured with a company email
+.company-directory # note that the pattern is not dot_company-directory
+{{- end }}
+
+{{- if ne .email "me@home.org" }}
+.personal-file
+{{- end }}
+
+{{- if eq .osid "arch" }}
+# Archlinux/Manjaro
+.inputrc
+{{- end }}
+
+{{- if not .features.bash }}
+.bashrc
+.config/bash/
+{{- end }}
+
+{{- if not .features.zsh }}
+.config/zsh/
+.zshrc
+{{- end }}
+
+{{- if and (not .features.bash) (not .features.zsh) }}
+.config/sh/
+{{- end }}
+
+{{- if not .features.ghostty }}
+.chezmoiscripts/*_install-ghostty.sh
+.config/ghostty/
+{{- end }}
+
+{{- if not .features.git }}
+.config/git/
+# FIXME: mod.nu.tmpl loops on source directory
+# .config/nushell/modules/git.nu
+# NOTE: feature should be named "git-config"
+# .config/sh/plugins/git.sh
+.gitconfig
+{{- end }}
+
+{{- if not .features.go }}
+.chezmoiscripts/*_install-go-tools.sh
+{{- end }}
+
+{{- if not .features.helix }}
+.chezmoiscripts/*_install-helix.sh
+.config/helix/
+{{- end }}
+
+{{- if not .features.mise }}
+.chezmoiscripts/*_install-mise.sh
+.config/mise/
+.config/sh/plugins/mise.sh
+{{- end }}
+
+{{- if not .features.node }}
+.chezmoiscripts/*_install-node-tools.sh
+.npmrc
+{{- end }}
+
+{{- if not .features.nushell }}
+.chezmoiscripts/*_install-nushell.sh
+.chezmoiscripts/*.nu
+.config/nushell/
+{{- end }}
+
+{{- if not .features.rust }}
+.chezmoiscripts/*_install-rust-tools.sh
+{{- end }}
+
+{{- if not .features.sql }}
+# TODO: .chezmoiscripts/*_install-sql-tools.sh
+{{- end }}
+
+# TODO: use .chezmoidata/packages.yaml
+.chezmoiscripts/darwin-install-packages.sh
