@@ -1,0 +1,20 @@
+---
+policies:
+  - type: commit
+    spec:
+      header:
+        length: 89
+        imperative: true
+        case: lower
+        invalidLastCharacters: .
+      gpg:
+        required: true
+      spellcheck:
+        locale: US
+      conventional:
+        types:
+          - ci
+          - type
+        scopes:
+          - scope
+        descriptionLength: 72

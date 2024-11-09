@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -eu
+
+if command -v nu >/dev/null && nu --version; then
+  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v nu || true" }}
+  exit
+fi
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+echo >&2 "Installing nushell"
+
+# {{- if eq .chezmoi.os "darwin" }}
+export NONINTERACTIVE=1
+cmd brew install --quiet nushell
+# {{- else if eq .osid "alpine" }}
+cmd sudo apk add --quiet nushell
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+cmd sudo pacman --sync --needed --noconfirm --quiet nushell
+# {{- else if eq .osid "debian" }} Debian/Ubuntu
+export DEBIAN_FRONTEND=noninteractive
+if [ ! -f /etc/apt/trusted.gpg.d/fury-nushell.gpg ]; then
+  cmd curl -fsSL https://apt.fury.io/nushell/gpg.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/fury-nushell.gpg
+fi
+if [ ! -f /etc/apt/sources.list.d/fury.list ]; then
+  echo "deb https://apt.fury.io/nushell/ /" | cmd sudo tee /etc/apt/sources.list.d/fury.list
+  cmd sudo apt-get update --quiet >/dev/null
+fi
+cmd sudo -E apt-get install --quiet --yes nushell >/dev/null
+if [ -n "${USER:-}" ] && [ -d "$HOME/.config/nushell" ]; then
+  cmd sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
+fi
+# {{- else if eq .osid "android" }}
+cmd apt-get install --quiet --yes nushell >/dev/null
+# {{- else }}
+err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
+# {{- end }}
+
+echo >&2 "Installed nushell"

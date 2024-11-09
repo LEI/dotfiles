@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
+
+# {{- if .features.rust }}
+set -eu
+
+if command -v cargo >/dev/null && cargo --version; then
+  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v cargo || true" }}
+  exit
+fi
+
+echo >&2 "Installing rust"
+
+if [ "$CHEZMOI_ARCH" = "amd64" ]; then
+  ARCH=x86_64
+else
+  ARCH="$CHEZMOI_ARCH"
+fi
+if [ "$CHEZMOI_OS" = darwin ]; then
+  OS=darwin
+else
+  OS=unknown-linux
+fi
+NAME="$ARCH-$OS"
+if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+  NAME="$NAME-musl"
+else
+  NAME="$NAME-gnu"
+fi
+
+BIN_DIR="$HOME/.local/bin"
+if [ ! -d "$BIN_DIR" ]; then
+  echo >&2 "Creating directory: $BIN_DIR"
+  mkdir -p "$BIN_DIR"
+fi
+
+BIN="$BIN_DIR/rustup-init"
+
+set -x
+
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+#   | sh -s -- --component rust-analyzer --quiet -y
+
+curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$BIN"
+chmod +x "$BIN"
+"$BIN" --component rust-analyzer --no-modify-path --quiet -y
+
+# rustup component add rust-analyzer
+
+# if ! command -v cargo >/dev/null; then
+#   source ~/.cargo/env
+# fi
+
+# if ! command -v taplo >/dev/null; then
+#   source "$HOME/.cargo/env"
+#   cargo install taplo-cli --locked --features lsp --quiet
+# fi
+
+set +x
+
+echo >&2 "Installed rust"
+# {{- end }}

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
+
+# {{- if .features.node }}
+set -eu
+
+if ! command -v node >/dev/null && command -v mise >/dev/null; then
+  # mise use --global --quiet node@latest
+  PATH="$PATH:$HOME/.local/share/mise/shims"
+fi
+
+set -x
+
+# npm config set --global audit=false fund=false
+npm install --global --quiet npm@latest
+
+if ! command -v bash-language-server >/dev/null; then
+  npm install --global --quiet bash-language-server
+fi
+
+# @microsoft/compose-language-service
+# dockerfile-language-server-nodejs
+# helm-ls
+
+if ! command -v prettier >/dev/null; then
+  npm install --global --quiet prettier
+fi
+
+# {{- if .features.sql }}
+if ! command -v sql-language-server >/dev/null; then
+  npm install --global --quiet sql-language-server
+fi
+# {{- end }}
+
+if ! command -v typescript-language-server >/dev/null; then
+  npm install --global --quiet typescript typescript-language-server
+fi
+
+# vscode-{css,eslint,html,json,markdown}-language-server
+if ! command -v vscode-eslint-language-server >/dev/null; then
+  # NOTE: eslint is broken in vscode-extracted-language-server@4.10
+  # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+  npm install --global --quiet vscode-langservers-extracted@4.8
+fi
+
+if ! command -v yaml-language-server >/dev/null; then
+  npm install --global --quiet yaml-language-server@next
+fi
+# {{- end }}

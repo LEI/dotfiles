@@ -1,0 +1,25 @@
+---
+# https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
+
+.config/nushell/functions/extract.nu:
+  type: file
+  url: https://raw.githubusercontent.com/nushell/nu_scripts/refs/heads/main/modules/data_extraction/ultimate_extractor.nu
+  refreshPeriod: 168h
+
+# ~/nu_scripts/themes/nu-themes
+.config/nushell/themes/tokyo-storm.nu:
+  type: file
+  url: https://raw.githubusercontent.com/nushell/nu_scripts/refs/heads/main/themes/nu-themes/tokyo-storm.nu
+  refreshPeriod: 168h
+
+# Include a single file from a URL
+# .vim/autoload/plug.vim:
+#   type: file
+#   url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+#   refreshPeriod: 168h
+
+# Include a subdirectory from a git repository
+# .vim/pack/alker0/chezmoi.vim:
+#     type: git-repo
+#     url: https://github.com/alker0/chezmoi.vim.git
+#     refreshPeriod: 168h

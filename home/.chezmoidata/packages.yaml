@@ -1,0 +1,56 @@
+---
+# TODO: filter based on enabled features
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+basePackages:
+  - curl
+  - git
+  - neovim
+  - tmux
+  - vim
+packages:
+  alpine:
+    - bash
+    - gpg
+    - gzip
+    - tar
+    - topgrade
+    - xz
+    # - build-base
+    # - linux-headers
+    # - python3
+    # Tools
+    - bat
+    # - fd
+    # - nodejs
+    # - npm
+    - shellcheck
+    # - starship
+    # - yq
+    # - zoxide
+  android:
+    - gnupg
+    - sudo
+    - proot
+    - topgrade
+    - which
+    # Tools
+    - nodejs
+    - starship
+  arch: # Archlinux/Manjaro
+    - gnu-netcat
+    - gnupg
+    - topgrade
+  darwin:
+    # brews:
+    - git
+    - gpg
+    - topgrade
+    # casks:
+    #   - google-chrome
+    # tools: []
+  debian: # Debian/Ubuntu
+    - apt-utils
+    - build-essential
+    - gpg
+    # TODO: topgrade
+    # https://github.com/topgrade-rs/topgrade/issues/897

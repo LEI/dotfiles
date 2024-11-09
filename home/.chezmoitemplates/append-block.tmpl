@@ -1,0 +1,6 @@
+{{- $suffix := printf "%s/%s" (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile -}}
+{{- .chezmoi.stdin | replaceAllRegex "(?s)\n?### START.*?\n(.*)### END.*?\n" "" }}
+### START {{ $suffix }}
+
+{{ .contents }}
+### END {{ $suffix }}

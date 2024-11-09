@@ -1,0 +1,102 @@
+# https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
+
+{{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
+{{- $codespaces := env "CODESPACES" | not | not -}}
+{{- $interactive := stdinIsATTY -}}
+
+{{- $name := env "USER" -}}
+{{- $email := "" -}}
+{{- $accessToken := "" -}}
+
+{{- if hasKey . "name" -}}
+{{-   $name = .name -}}
+{{- else if (env "GIT_CONFIG_USER_NAME") -}}
+{{-   $name = env "GIT_CONFIG_USER_NAME" -}}
+{{- else if $interactive -}}
+{{-   $name = promptString "name" $name -}}
+{{- end -}}
+
+{{- if hasKey . "email" -}}
+{{-   $email = .email -}}
+{{- else if (env "GIT_CONFIG_USER_EMAIL") -}}
+{{-   $email = env "GIT_CONFIG_USER_EMAIL" -}}
+{{- else if $interactive -}}
+{{-   $email = promptString "email" $email -}}
+{{- end -}}
+
+{{- if hasKey . "accessToken" -}}
+{{-   $accessToken = .accessToken -}}
+{{- else if (env "BWS_ACCESS_TOKEN") -}}
+{{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
+{{- else if $interactive -}}
+{{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
+{{- end -}}
+
+{{- if $interactive -}}
+{{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
+{{- end -}}
+
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) }}
+{{- $osid := includeTemplate "osid.tmpl" (dict "chezmoi" .chezmoi) }}
+{{- $features := includeTemplate "features.tmpl" (dict
+  "chezmoi" .chezmoi
+  "codespaces" $codespaces
+  "osid" $osid
+) }}
+
+# https://www.chezmoi.io/user-guide/encryption/age/
+# encryption: age
+# age:
+#   identity: {{ env "HOME" }}/key.txt
+#   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
+
+# https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
+hooks:
+  read-source-state:
+    pre:
+      command: "{{ .chezmoi.sourceDir }}/.install-password-manager.sh"
+
+sourceDir: {{ .chezmoi.sourceDir | quote }}
+
+data:
+  accessToken: {{ $accessToken | default "" }}
+  codespaces: {{ $codespaces }}
+
+  email: {{ $email | quote }}
+  name: {{ $name | quote }}
+
+  # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
+  {{ if $accessToken -}}
+  github:
+    email: {{ (bitwardenSecrets "e09174a4-fc98-4106-96ca-b2d30180def3" $accessToken).value }}
+    # user: {{ env "GITHUB_USERNAME" }}
+  gitlab:
+    email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
+  {{- end }}
+
+  chassisType: {{ $chassisType | quote }}
+  features: {{ $features }}
+  osid: {{ $osid }}
+
+  # Upgrade system packages
+  upgrade: {{ eq (env "UPGRADE") "true" }}
+
+# diff:
+#   exclude: ["scripts"]
+
+env: {}
+
+scriptEnv:
+  # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
+  TMPDIR: {{ env "TMPDIR" | default "/tmp" | quote }}
+{{- if eq .chezmoi.os "darwin" }}
+  HOMEBREW_NO_ANALYTICS: "1"
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_ENV_HINTS: "1"
+  NONINTERACTIVE: "1"
+{{- else if eq $osid "debian" }}
+  DEBIAN_FRONTEND: noninteractive
+{{- end }}
+
+# Files and directories not group writeable
+# umask: 0o022
