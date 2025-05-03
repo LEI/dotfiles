@@ -10,6 +10,8 @@ to clone using SSH:
 
 ```bash
 GITHUB_USERNAME=LEI
+GITHUB_TOKEN=
+chezmoi secret keyring set --service=github --user=$GITHUB_USERNAME --value=$GITHUB_TOKEN
 chezmoi init --apply --interactive git@github.com:$GITHUB_USERNAME/dotfiles.git
 ```
 

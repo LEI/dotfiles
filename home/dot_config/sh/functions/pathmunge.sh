@@ -7,7 +7,15 @@ pathmunge() {
   # It should even be removed if it allows to change the position
   # of existing directories in PATH (before/after)
   case ":$PATH:" in
-  *:"$1":*) return 2 ;;
+  *:"$1":*)
+    # Force replacement
+    if [ "${3:-}" = replace ]; then
+      PATH="${PATH//:$1/}"
+      PATH="${PATH//$1:/}"
+    else
+      return 2
+    fi
+    ;;
   esac
   # Bash: [[ $PATH =~ (^|:)$p($|:) ]]
   # Add the new directory to the beginning or to the end of PATH

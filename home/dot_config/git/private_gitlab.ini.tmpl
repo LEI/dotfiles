@@ -1,0 +1,9 @@
+{{ if (get . "gitlab") -}}
+[user]
+    name = {{ get .gitlab "name" | default .name | quote }}
+    email = {{ .gitlab.email | quote }}
+    signingkey = {{ output "sh" "-c" (printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" .gitlab.email) | quote }}
+
+[commit]
+    gpgsign = true
+{{- end }}

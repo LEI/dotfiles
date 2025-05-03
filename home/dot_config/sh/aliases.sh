@@ -30,9 +30,17 @@ alias o=open
 
 # TODO: termux-open
 if ! hash open 2>/dev/null; then
-  if [ -f /proc/version ] && grep -q Microsoft /proc/version; then
-    alias open=explorer.exe
-  else
+  # and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft")
+  if [ -f /proc/version ] && grep -iq microsoft /proc/version; then
+    if [ -f /mnt/c/Windows/explorer.exe ]; then
+      # TODO: add /mnt/c/Windows to PATH
+      alias open=/mnt/c/Windows/explorer.exe
+    else
+      alias open=explorer.exe
+    fi
+  elif hash xdg-open 2>/dev/null; then
     alias open=xdg-open
+  elif hash code 2>/dev/null; then
+    alias open=code
   fi
 fi

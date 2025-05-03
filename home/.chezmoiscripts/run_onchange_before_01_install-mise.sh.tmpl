@@ -9,6 +9,7 @@ set -eu
 
 BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
+MISE_CONFIG="$HOME/.config/mise/config.toml"
 
 # {{- if eq .chezmoi.os "darwin" }}
 OS=macos
@@ -55,14 +56,27 @@ if ! command -v mise >/dev/null || ! mise --version >/dev/null; then
   echo >&2 "Installed mise"
 else
   echo >&2 'Already installed {{ output "sh" "-c" "command -v mise || true" }}'
+  # {{- if has .osid (list "alpine" "darwin") }}
+  if [ "$(which mise)" = /usr/bin/mise ]; then
+    sudo mise self-update --quiet --yes
+  # else
+  #   # TODO: skip if mise is installed via a package manager
+  #   mise self-update --quiet --yes
+  fi
+  # {{- end }}
 fi
 
 # {{- if eq .osid "android" }}
 # {{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osid" .osid) }}
 # {{- end }}
 
+if [ ! -f "$MISE_CONFIG" ]; then
+  if [ ! -d "$HOME/.config/mise" ]; then
+    mkdir "$HOME/.config/mise"
+  fi
+  base64="{{ includeTemplate "dot_config/mise/config.toml.tmpl" . | b64enc }}"
+  echo "$base64" | base64 -d >"$MISE_CONFIG"
+fi
 echo >&2 "Installing tools"
-set -x
-mise install --quiet
-set +x
+mise install --quiet || mise install --verboe
 echo >&2 "Installed tools"

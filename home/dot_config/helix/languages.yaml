@@ -1,29 +1,34 @@
+---
 # TODO:
-# markdown: prettier --parser markdown
 # python: sh -c "black --quiet - | isort -"
 # rust: rustfmt --emit-stdout
 # just: just --fmt --unstable
-# json/yaml: lsp if possible or prettier/yamlfmt
 language:
-  - auto-format: true
-    name: bash
+  - name: bash
+    auto-format: true
     formatter:
-      args: ["-i", "2"]
       command: shfmt
+      args: ["-i", "2"]
     # indent:
     #   tab-width: 4
     #   unit: "    "
-  - auto-format: true
-    name: go
+  - name: go
+    auto-format: true
     formatter:
       command: goimports
-  # - name: json
-  #   config:
-  #     provideFormatter: true
-  #     json:
-  #       keepLines:
-  #         enable: true
-
+  - name: json
+    # config:
+    #   provideFormatter: true
+    #   json:
+    #     keepLines:
+    #       enable: true
+    formatter:
+      command: prettier
+      args: [--parser, json]
+  - name: jsonc
+    formatter:
+      command: prettier
+      args: [--parser, jsonc]
   # # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
   # # formatter: { command: "stylua", args: ["--search-parent-directories", "--stdin-filepath", "{}", "-"] }
   # - name: lua
@@ -31,7 +36,11 @@ language:
   #     args: ["-"]
   #     command: stylua
   #   auto-format: true
-
+  - name: markdown
+    auto-format: true
+    formatter:
+      command: prettier
+      args: [--parser, markdown]
   # - auto-format: true
   #   name: sql
   #   formatter:
@@ -98,6 +107,11 @@ language:
     formatter:
       args: [fmt, "-"]
       command: taplo
+  - name: yaml
+    auto-format: true
+    formatter:
+      command: prettier
+      args: ["--parser", "yaml"]
 language-server:
   # gopls:
   #   config:
@@ -118,7 +132,7 @@ language-server:
           - "!reference sequence"
         validation: true
         format:
-          enable: true
+          enable: false
         json:
           schemaDownload:
             enable: true

@@ -5,7 +5,7 @@
 {{-   else }}
 {{-     $chassisType = "desktop" }}
 {{-   end }}
-{{- else if and (eq .chezmoi.os "linux") (ne (output "sh" "-c" "hostnamectl --json=short 2>/dev/null || true") "") }}
+{{- else if and (eq .chezmoi.os "linux") (output "sh" "-c" "hostnamectl --json=short 2>/dev/null || true") }}
 {{-   $chassisType = (output "hostnamectl" "--json=short" | mustFromJson).Chassis }}
 {{- else if eq .chezmoi.os "linux" }}
 {{-   $chassisType = printf "unknown-%s" (get .chezmoi.osRelease "id" | default .chezmoi.os) }}

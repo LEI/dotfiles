@@ -5,6 +5,7 @@ get_release() {
   alias="latest"
   url="https://github.com/$repo/releases/$alias"
   # shellcheck disable=SC1083
-  tag="$(curl -s -w %{redirect_url} "$url")"
-  echo "${tag##*/}"
+  redirect_url="$(curl -s -w %{redirect_url} "$url")"
+  tag="${redirect_url##*/}"
+  echo "$tag"
 }

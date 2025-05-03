@@ -30,7 +30,7 @@ export NONINTERACTIVE=1
 set -x
 
 brew install --quiet carapace
-# {{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
+# {{- else if eq .osid "alpine" }}
 set -x
 
 curl -LSfs "$BASE_URL/$NAME.apk" -o "$TMPDIR/carapace.apk"
@@ -45,7 +45,7 @@ export DEBIAN_FRONTEND=noninteractive
 set -x
 
 curl -LSfs "$BASE_URL/$NAME.deb" -o "$TMPDIR/carapace.deb"
-sudo apt-get install --quiet --yes "$TMPDIR"/carapace.deb
+sudo -E apt-get install --quiet --yes "$TMPDIR"/carapace.deb
 # {{- else }}
 # https://github.com/carapace-sh/carapace-bin/releases
 URL="$BASE_URL/$NAME.tar.gz"

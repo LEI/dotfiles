@@ -11,24 +11,33 @@ log info "Installing zellij"
 
 # {{- if eq .chezmoi.os "darwin" }}
 brew install --quiet zellij
-# {{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
-apk add --quiet zellij
+# {{- else if eq .osid "alpine" }}
+sudo apk add --quiet zellij
 # {{- else if eq .osid "arch" }} Archlinux/Manjaro
 sudo pacman --sync --needed --noconfirm --quiet zellij
 # {{- else if eq .osid "android" }}
 apt-get install --quiet --yes zellij # out>/dev/null
 # {{- else }}
-let kernel = ^uname --kernel-name
-let os = match $kernel {
-  "Linux" => "unknown-linux"
-  _ => $kernel,
+def get_release [repo: string] {
+  let alias = "latest"
+  let url = $"https://github.com/($repo)/releases/($alias)"
+  let redirect_url = ^curl -s -w '%{redirect_url}' $url
+  let tag = $redirect_url | split row "/" | last
+  $tag
 }
-let arch = ^uname --hardware-platform
-let version = "0.42.2"
+
+let arch = ^uname -m
+let kernel_name = ^uname -s | str downcase
+let os = match ($kernel_name) {
+  linux => "unknown-linux",
+  _ => $kernel_name,
+}
+let tag = get_release "zellij-org/zellij"
 let name = $"zellij-($arch)-($os)-musl"
 let out = $"($env.TMPDIR)/($name).tar.gz"
-let archive = $"https://github.com/zellij-org/zellij/releases/download/v($version)/($name).tar.gz"
-# let checksum = $"https://github.com/zellij-org/zellij/releases/download/v($version)/($name).sha256sum"
+let archive = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).tar.gz"
+# let checksum = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).sha256sum"
+log info $"Downloading ($archive)"
 curl -LSfs $archive -o $out
 tar -xzf $out -C $env.TMPDIR
 chmod +x $"($env.TMPDIR)/zellij"

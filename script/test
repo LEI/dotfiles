@@ -2,16 +2,17 @@
 
 set -euo pipefail
 
-if [[ $- = *i* ]]; then
-  INTERACTIVE=true
-else
-  INTERACTIVE=false
-fi
+# if [[ $- = *i* ]]; then
+#   INTERACTIVE=true
+# else
+#   INTERACTIVE=false
+# fi
 DEBUG="${DEBUG:-false}"
-DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$INTERACTIVE}"
+# DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$INTERACTIVE}"
+DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-true}"
 
-ARGS="${ARGS:-} --env=GITHUB_TOKEN=$GITHUB_TOKEN"
-REMOVE="${REMOVE:-false}"
+ARGS="${ARGS:-} --env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
+REMOVE="${REMOVE:-true}"
 if [ "$REMOVE" = true ]; then
   ARGS="$ARGS --rm"
 fi
@@ -24,58 +25,98 @@ elif [ "$DEBUG_ON_ERROR" = true ]; then
   TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
 fi
 
-TEST_MOUNT='set -x; ./script/bootstrap --no-tty && '"$TEST_SCRIPT"
-# TEST_MOUNT='set -x; ./script/bootstrap --no-tty --apply=false && apk add --quiet bash && '"$TEST_SCRIPT"
+TEST_MOUNT='./script/bootstrap --no-tty && '"$TEST_SCRIPT"
+# TEST_MOUNT='./script/bootstrap --no-tty --apply=false && apk add --quiet bash && '"$TEST_SCRIPT"
 # shellcheck disable=SC2016
-TEST_CLONE='set -x; GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME" && '"$TEST_SCRIPT"
+TEST_CLONE='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME" && '"$TEST_SCRIPT"
 
 main() {
-  case "${1:-}" in
+  local name=${1:-}
+  case "$name" in
   "")
     set -x
     bash --version | head -n1
     # nu --version
     # mise --version
     # mise ls
-    # FIXME: PATH="$PATH:$HOME/.local/.bin"
+    export PATH="$HOME/.local/bin:$PATH"
     chezmoi=chezmoi
-    if ! command -v $chezmoi >/dev/null && test -x "$HOME/.local/bin/chezmoi"; then
-      chezmoi="$HOME/.local/bin/chezmoi"
+    out="$($chezmoi diff --exclude=scripts)"
+    if [ "$out" != "" ]; then
+      echo >&2 "Expected empty diff without scripts: $out"
+      exit 1
     fi
-    $chezmoi status
-    $chezmoi diff --exclude=scripts
+    $chezmoi apply
+    out="$($chezmoi diff)"
+    if [ "$out" != "" ]; then
+      echo >&2 "Expected empty diff: $out"
+      exit 1
+    fi
+    out="$($chezmoi status)"
+    if [ "$out" != "" ]; then
+      echo >&2 "Expected empty status: $out"
+      exit 1
+    fi
     ;;
-  alpine) test_alpine ;;
-  macos) test_macos ;;
-  termux) test_termux ;;
+  alpine) test_alpine "$@" ;;
+  debian | ubuntu)
+    if [ "$name" = "ubuntu" ]; then
+      # Configure tdata
+      ARGS="$ARGS --env=TZ=${TZ:-Etc/UTC}"
+    fi
+    test_debian "$@"
+    ;;
+  macos) test_macos "$@" ;;
+  android | termux) test_clone "$@" ;;
   esac
 }
 
-# Alpine
 test_alpine() {
+  local prepare="apk update --quiet && apk upgrade --quiet && apk add --quiet bash curl sudo" # unzip
+  ARGS="-it --name=alpine $ARGS"
   # shellcheck disable=SC2086
-  podman run -it --name=alpine $ARGS \
+  podman run $ARGS \
     --volume="$HOME/.local/share/chezmoi:/root/.local/share/chezmoi" \
     --workdir=/root/.local/share/chezmoi \
     alpine:latest \
-    sh -c "$TEST_MOUNT"
+    sh -ixc "($prepare) || exit 1; $TEST_MOUNT"
+}
+
+# Debian/Ubuntu
+test_debian() {
+  local name="${1:-debian}"
+  local tag="${2:-latest}"
+  local packages="ca-certificates curl locales sudo unzip"
+  local prepare="apt-get update --quiet && apt-get upgrade --quiet --yes && apt-get install --quiet --yes $packages"
+  ARGS="-it --name=$name $ARGS"
+  # shellcheck disable=SC2086
+  podman run $ARGS \
+    --env=DEBIAN_FRONTEND=noninteractive \
+    --volume="$HOME/.local/share/chezmoi:/root/.local/share/chezmoi" \
+    --workdir=/root/.local/share/chezmoi \
+    "$name:$tag" \
+    sh -ixc "($prepare) || exit 1; $TEST_MOUNT"
 }
 
 # macOS
-# Arch: sudo pacman -S xorg-xhost && xhost +
-# Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
 test_macos() {
-  podman run -it --name=macos --device=/dev/kvm -p=50922:10022 \
+  # Arch: sudo pacman -S xorg-xhost && xhost +
+  # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
+  ARGS="-it --name=macos $ARGS"
+  # shellcheck disable=SC2086
+  podman run $ARGS \
+    --env=NONINTERACTIVE=1 \
+    --device=/dev/kvm -p=50922:10022 \
     -v=/tmp/.X11-unix:/tmp/.X11-unix \
     -e="DISPLAY=:0" docker.io/sickcodes/docker-osx:sequoia
 }
 
-# Termux
-test_termux() {
+test_clone() {
+  local name="${1:-termux}"
+  local image="${2:-docker.io/termux/termux-docker:x86_64}"
+  ARGS="-it --name=$name $ARGS"
   # shellcheck disable=SC2086
-  podman run -it --name=termux $ARGS \
-    docker.io/termux/termux-docker:x86_64 \
-    sh -c "$TEST_CLONE"
+  podman run $ARGS "$image" sh -ixc "$TEST_CLONE"
 }
 
 main "$@"

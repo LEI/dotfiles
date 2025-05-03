@@ -54,7 +54,7 @@
 {{- if not .features.mise }}
 .chezmoiscripts/*_install-mise.sh
 .config/mise/
-.config/sh/plugins/mise.sh
+# .config/sh/plugins/mise.sh
 {{- end }}
 
 {{- if not .features.node }}

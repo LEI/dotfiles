@@ -4,8 +4,9 @@
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
 
-{{- $name := "Your Name" -}}
-{{- $email := "your@email.com" -}}
+{{- $name := env "USER" -}}
+{{- $email := "" -}}
+{{- $accessToken := "" -}}
 
 {{- if hasKey . "name" -}}
 {{-   $name = .name -}}
@@ -23,6 +24,14 @@
 {{-   $email = promptString "email" $email -}}
 {{- end -}}
 
+{{- if hasKey . "accessToken" -}}
+{{-   $accessToken = .accessToken -}}
+{{- else if (env "BWS_ACCESS_TOKEN") -}}
+{{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
+{{- else if $interactive -}}
+{{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
+{{- end -}}
+
 {{- if $interactive -}}
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
@@ -35,13 +44,35 @@
   "osid" $osid
 ) }}
 
+# https://www.chezmoi.io/user-guide/encryption/age/
+# encryption: age
+# age:
+#   identity: {{ env "HOME" }}/key.txt
+#   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
+
+# https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
+hooks:
+  read-source-state:
+    pre:
+      command: "{{ .chezmoi.sourceDir }}/.install-password-manager.sh"
+
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
+  accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
 
   email: {{ $email | quote }}
   name: {{ $name | quote }}
+
+  # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
+  {{ if $accessToken -}}
+  github:
+    email: {{ (bitwardenSecrets "e09174a4-fc98-4106-96ca-b2d30180def3" $accessToken).value }}
+    # user: {{ env "GITHUB_USERNAME" }}
+  gitlab:
+    email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
+  {{- end }}
 
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}

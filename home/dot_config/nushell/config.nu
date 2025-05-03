@@ -50,8 +50,8 @@ $env.config.completions.external = {
     completer: $external_completer
 }
 
-$env.config.buffer_editor = $env.EDITOR
-$env.config.edit_mode = "emacs" # or "vi"
+$env.config.buffer_editor = $env.EDITOR? | default "vi"
+$env.config.edit_mode = "vi" # or "emacs"
 $env.config.history.max_size = 5_000_000
 $env.config.show_banner = false
 $env.config.table.mode = "none"

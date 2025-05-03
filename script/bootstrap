@@ -3,7 +3,7 @@
 # https://github.com/chezmoi/dotfiles/blob/master/install.sh
 # https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles
 
-set -eux
+set -eu
 
 BIN_DIR="$HOME/.local/bin"
 PATH="$PATH:$BIN_DIR"

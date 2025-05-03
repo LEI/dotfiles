@@ -11,29 +11,33 @@ main() {
     done
   fi
 
-  # Source functions and plugins
-  if [ -d "$HOME/.config/sh" ]; then
+  # Source functions (pathmunge)
+  if [ -d "$HOME/.config/sh/functions" ]; then
     for file in "$HOME/.config/sh/functions"/*.sh; do
       # shellcheck disable=SC1090
       source "$file"
     done
-    # Only source plugins if a command exists with the same name
+  fi
+
+  # if [ -d "$HOME/bin ]; then
+  #   pathmunge "$HOME/bin before
+  # fi
+
+  if [ -d "$HOME/.local/bin" ]; then
+    pathmunge "$HOME/.local/bin" before replace
+  fi
+
+  # Source plugins after updating PATH
+  if [ -d "$HOME/.config/sh/plugins" ]; then
     for file in "$HOME/.config/sh/plugins"/*.sh; do
       name="${file##*/}"
       name="${name%.sh}"
+      # Only source if a command exists with the same name
       if command -v "$name" >/dev/null; then
         # shellcheck disable=SC1090
         source "$file"
       fi
     done
-  fi
-
-  # if [ -d "$HOME/bin ]; then
-  #   pathmunge "$HOME/bin after
-  # fi
-
-  if [ -d "$HOME/.local/bin" ]; then
-    pathmunge "$HOME/.local/bin" after
   fi
 
   # Must be first to ensure tools are available
@@ -64,9 +68,9 @@ main() {
     echo >&2 "Command 'zoxide' not found"
   fi
 
-  if [ -f ~/.local/share/blesh/ble.sh ]; then
-    # shellcheck disable=SC1090
-    source ~/.local/share/blesh/ble.sh
+  if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$HOME/.local/share/blesh/ble.sh" --noattach --rcfile "$HOME/.config/blesh/config.sh"
   fi
   # Must be after starship to preserve PROMPT_COMMAND?
   if command -v atuin >/dev/null; then
@@ -84,6 +88,11 @@ main() {
   if [ -f "$HOME/.${shell}rc.local" ]; then
     # shellcheck disable=SC1090
     source "$HOME/.${shell}rc.local"
+  fi
+
+  # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
+  if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+    [[ ! ${BLE_VERSION-} ]] || ble-attach
   fi
 }
 

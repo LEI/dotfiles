@@ -17,11 +17,16 @@ if (which hx) != [] {
     $env.EDITOR = "hx"
 } else if (which nvim) != [] {
     $env.EDITOR = "nvim"
-} else if ($env.EDITOR == "") {
-    log warning "EDITOR not found, falling back to vi"
+} else if (which vim) != [] {
+    $env.EDITOR = "vim"
+} else if (which code) != [] {
+    $env.EDITOR = "code"
+} else if "EDITOR" not-in $env or $env.EDITOR == "" {
+    log warning "EDITOR not found"
     $env.EDITOR = "vi"
 }
-if $env.VISUAL == "" {
+
+if "VISUAL" not-in $env or $env.VISUAL == "" {
     $env.VISUAL = $env.EDITOR
 }
 

@@ -22,6 +22,10 @@ fi
 # dockerfile-language-server-nodejs
 # helm-ls
 
+if ! command -v prettier >/dev/null; then
+  npm install --global --quiet prettier
+fi
+
 # {{- if .features.sql }}
 if ! command -v sql-language-server >/dev/null; then
   npm install --global --quiet sql-language-server

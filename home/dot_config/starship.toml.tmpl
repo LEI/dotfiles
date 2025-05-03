@@ -1,0 +1,18 @@
+# https://starship.rs/config/
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+[kubernetes]
+disabled = false
+
+# [package]
+# disabled = true
+
+{{ if ne (output "sh" "-c" "command -v starship || true") "" -}}
+# https://starship.rs/presets/plain-text
+{{ output "starship" "preset" "plain-text-symbols" }}
+{{- end }}

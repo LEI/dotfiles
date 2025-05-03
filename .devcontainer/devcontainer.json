@@ -1,11 +1,22 @@
 {
-  // https://github.com/devcontainers/images/blob/main/src/base-ubuntu/.devcontainer/devcontainer.json
-  // https://github.com/devcontainers/images/blob/main/src/universal/.devcontainer/devcontainer.json
   // https://containers.dev/implementors/spec/
-  "image": "mcr.microsoft.com/vscode/devcontainers/base:debian",
-  // ln -s /workspaces/dotfiles ~/.local/share/chezmoi
+  // https://hub.docker.com/r/microsoft/vscode-devcontainers
+  // https://github.com/devcontainers/images/blob/main/src/universal/.devcontainer/devcontainer.json
+  // https://github.com/devcontainers/images/blob/main/src/base-ubuntu/.devcontainer/devcontainer.json
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:debian", // alpine, debian or ubuntu
   "containerEnv": {},
-  "remoteEnv": {
-    "CHEZMOI_SOURCE_PATH": "/workspaces/dotfiles"
-  }
+  "remoteEnv": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "uname -a",
+
+  // Replace when using a ptrace-based debugger like C++, Go, and Rust
+  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+
+  // Set `remoteUser` to `root` to connect as root instead
+  // More info: https://aka.ms/vscode-remote/containers/non-root.
+  // "remoteUser": "vscode",
 }

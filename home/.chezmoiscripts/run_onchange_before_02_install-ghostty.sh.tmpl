@@ -27,13 +27,22 @@ export DEBIAN_FRONTEND=noninteractive
 
 set -x
 
-echo 'deb http://download.opensuse.org/repositories/home:/clayrisser:/bookworm/Debian_12/ /' |
-  sudo tee /etc/apt/sources.list.d/home:clayrisser:bookworm.list
-curl -fsSL https://download.opensuse.org/repositories/home:clayrisser:bookworm/Debian_12/Release.key |
+VERSION_CODENAME="$(
+  . /etc/os-release
+  echo "$VERSION_CODENAME"
+)"
+VERSION_ID="$(
+  . /etc/os-release
+  echo "$VERSION_ID"
+)"
+version_path="$VERSION_CODENAME/Debian_$VERSION_ID"
+echo "deb http://download.opensuse.org/repositories/home:/clayrisser:/$version_path/ /" |
+  sudo tee "/etc/apt/sources.list.d/home:clayrisser:$VERSION_CODENAME.list"
+curl -fsSL "https://download.opensuse.org/repositories/home:clayrisser:$version_path/Release.key" |
   gpg --dearmor |
-  sudo tee /etc/apt/trusted.gpg.d/home_clayrisser_bookworm.gpg >/dev/null
+  sudo tee "/etc/apt/trusted.gpg.d/home_clayrisser_$VERSION_CODENAME.gpg" >/dev/null
 sudo apt-get update --quiet >/dev/null
-sudo apt-get install --quiet --yes ghostty >/dev/null
+sudo -E apt-get install --quiet --yes ghostty >/dev/null
 # {{- else if eq (get .chezmoi.osRelease "id") "ubuntu" }}
 # https://github.com/mkasberg/ghostty-ubuntu
 export DEBIAN_FRONTEND=noninteractive
@@ -41,7 +50,11 @@ export DEBIAN_FRONTEND=noninteractive
 set -x
 
 ARCH="{{ .chezmoi.arch }}"
-URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.1.3-0-ppa2/ghostty_1.1.3-0.ppa2_${ARCH}_bookworm.deb"
+VERSION_ID="$(
+  . /etc/os-release
+  echo "$VERSION_ID"
+)"
+URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.1.3-0-ppa2/ghostty_1.1.3-0.ppa2_${ARCH}_$VERSION_ID.deb"
 curl -LSfs "$URL" -o "$TMPDIR/ghostty.deb"
 sudo apt-get install --quiet --yes "$TMPDIR/ghostty.deb"
 # {{- else }}

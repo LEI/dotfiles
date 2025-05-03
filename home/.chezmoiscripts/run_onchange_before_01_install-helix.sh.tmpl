@@ -16,16 +16,26 @@ set -x
 # {{- if eq .chezmoi.os "darwin" }}
 export NONINTERACTIVE=1
 brew install --quiet helix
-# {{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
+# {{- else if eq .osid "alpine" }}
 sudo apk add --quiet helix tree-sitter-grammars
 # {{- else if eq .osid "arch" }}
 sudo pacman --sync --needed --noconfirm --quiet helix
-# {{- else if eq .osid "debian" }}
+# {{- else if eq (get .chezmoi.osRelease "id") "debian" }}
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install --quiet --yes software-properties-common >/dev/null
-sudo add-apt-repository --yes ppa:maveonair/helix-editor
+# https://docs.helix-editor.com/install.html#pre-built-binaries
+VERSION="25.01.1"
+NAME="helix-$VERSION-x86_64-linux"
+URL="https://github.com/helix-editor/helix/releases/download/$VERSION/$NAME.tar.xz"
+BIN="$TMPDIR/$NAME/hx"
+curl -LSsf "$URL" | tar xJf - -C "$TMPDIR"
+mv "$BIN" "$HOME/.local/bin"
+mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
+# {{- else if eq (get .chezmoi.osRelease "id") "ubuntu" }}
+export DEBIAN_FRONTEND=noninteractive
+sudo -E apt-get install --quiet --yes software-properties-common >/dev/null
+sudo -E add-apt-repository --yes ppa:maveonair/helix-editor
 sudo apt-get update --quiet >/dev/null
-sudo apt-get install --quiet --yes helix >/dev/null
+sudo -E apt-get install --quiet --yes helix >/dev/null
 sudo update-alternatives --set editor /usr/bin/hx
 # {{- else if eq .osid "android" }}
 apt-get install --quiet --yes helix helix-grammars >/dev/null

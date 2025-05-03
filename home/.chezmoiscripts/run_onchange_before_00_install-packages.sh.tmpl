@@ -13,15 +13,22 @@ echo >&2 "Installing packages: $packages"
 
 set -x
 
+# {{- if has .osid (list "alpine" "android" "debian") }}
 if ! command -v sudo >/dev/null; then
-  if [ "$(id -u)" = 0 ]; then
-    apk update --quiet
-    apk add --quiet sudo
-  elif [ "$HOME" = /data/data/com.termux/files/home ]; then
-    apt-get update --quiet >/dev/null
-    apt-get install --quiet --yes sudo >/dev/null
-  fi
+  # {{- if eq .osid "alpine" }}
+  # [ "$(id -u)" = 0 ]
+  apk update --quiet
+  apk add --quiet sudo
+  # {{- else if has .osid (list "android" "debian") }}
+  # [ "$HOME" = /data/data/com.termux/files/home ]
+  apt-get update --quiet >/dev/null
+  apt-get install --quiet --yes sudo >/dev/null
+  # {{- else }}
+  echo >&2 "sudo must be installed"
+  exit 1
+  # {{- end }}
 fi
+# {{- end }}
 
 # {{- if eq .chezmoi.os "darwin" }}
 # https://docs.brew.sh/Installation#unattended-installation
@@ -43,9 +50,9 @@ sudo pacman --sync --needed --noconfirm --quiet $packages
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update --quiet >/dev/null
-sudo apt-get upgrade --quiet --yes # >/dev/null
+sudo -E apt-get upgrade --quiet --yes # >/dev/null
 # shellcheck disable=SC2086
-sudo apt-get install --quiet --yes $packages >/dev/null
+sudo -E apt-get install --quiet --yes $packages # >/dev/null
 # {{- else if eq .osid "fedora" }}
 # TODO: packages="$packages gpg"
 # {{- else if eq .osid "android" }}
@@ -57,6 +64,17 @@ pkg upgrade --quiet --yes
 
 # shellcheck disable=SC2086
 apt-get install --quiet --yes $packages >/dev/null
+# {{- end }}
+
+# {{- if and .codespaces (eq .osid "debian") }}
+selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
+if [ "${selected_editor##*/}" = nano ]; then
+  if [ -x /usr/bin/vim.basic ]; then
+    sudo update-alternatives --set editor /usr/bin/vim.basic
+  elif [ -x /usr/bin/vim.tiny ]; then
+    sudo update-alternatives --set editor /usr/bin/vim.tiny
+  fi
+fi
 # {{- end }}
 
 set +x
