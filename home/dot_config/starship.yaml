@@ -11,7 +11,10 @@ add_newline: true
 gcloud:
   disabled: true
 
+# {{- if eq .osid "darwin" }}
 kubernetes:
   disabled: false
+# {{- end }}
+
 # package:
 #   disabled: true
