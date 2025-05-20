@@ -33,7 +33,7 @@
   "rust" true
 ) -}}
 
-{{- else if eq .osid "darwin" }}
+{{- else if eq .chezmoi.os "darwin" }}
 
 {{- /* macOS */ -}}
 {{- $features = mergeOverwrite $features (dict
