@@ -16,12 +16,12 @@ alias free="free --human"
 alias grep="grep --color=auto"
 
 # {{- if .features.nushell }}
-if ! hash l 2>/dev/null; then
-  if type l >/dev/null; then
-    unalias l
-  fi
-  l() { nu --commands "l $*" --login; }
-fi
+# if ! hash l 2>/dev/null; then
+#   if type l >/dev/null; then
+#     unalias l
+#   fi
+#   l() { nu --commands "l $*" --login; }
+# fi
 # {{- end }}
 
 # List all files with colors, human-readable sizes and long format

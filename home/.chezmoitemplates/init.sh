@@ -27,7 +27,14 @@ main() {
     pathmunge "$HOME/.local/bin" before replace
   fi
 
-  # Source plugins after updating PATH
+  # Must be first to ensure tools are available
+  if command -v mise >/dev/null; then
+    eval "$(mise activate "$shell")"
+  else
+    echo >&2 "Command 'mise' not found"
+  fi
+
+  # Source plugins after updating PATH and activating mise
   if [ -d "$HOME/.config/sh/plugins" ]; then
     for file in "$HOME/.config/sh/plugins"/*.sh; do
       name="${file##*/}"
@@ -38,13 +45,6 @@ main() {
         source "$file"
       fi
     done
-  fi
-
-  # Must be first to ensure tools are available
-  if command -v mise >/dev/null; then
-    eval "$(mise activate "$shell")"
-  else
-    echo >&2 "Command 'mise' not found"
   fi
 
   # {{- if ne .osid "android" }}

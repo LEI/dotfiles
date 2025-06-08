@@ -45,14 +45,3 @@ repos:
         language: system
         stages:
           - pre-commit
-
-  # # pre-commit install --hook-type commit-msg
-  # # https://github.com/siderolabs/conform
-  # - repo: https://github.com/siderolabs/conform
-  #   rev: v0.1.0-alpha.30
-  #   hooks:
-  #     - id: conform
-  #       name: conform
-  #       language: system
-  #       stages:
-  #         - commit-msg

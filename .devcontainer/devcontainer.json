@@ -10,7 +10,7 @@
   "features": {
     "ghcr.io/devcontainer-community/devcontainer-features/chezmoi.io:1": {},
     // "ghcr.io/devcontainers-extra/features/mise:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     // "ghcr.io/devcontainers/features/go:1": {},
     // "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
@@ -19,7 +19,7 @@
     // "ghcr.io/rio/features/chezmoi:1": {},
     // "ghcr.io/roul/devcontainer-features/bitwarden-cli:1": {},
     "ghcr.io/roul/devcontainer-features/bitwarden-secrets-manager:1": {},
-    "ghcr.io/roul/devcontainer-features/mise:1": {},
+    "ghcr.io/roul/devcontainer-features/mise:1": {}
     // "ghcr.io/roul/devcontainer-features/mise-{golang,node,python,ruby,rust}:1": {},
     // "ghcr.io/tailscale/codespace/tailscale": {},
   },
@@ -28,35 +28,37 @@
     "codespaces": {
       "repositories": {
         "*": {
-          "permissions": "read-all",
+          "permissions": "read-all"
         },
         "lei/vscode-settings": {
-          "permissions": "write-all",
-        },
-      },
+          "permissions": "write-all"
+        }
+      }
     },
     "vscode": {
       "extensions": [
         "github.copilot",
         // "ms-azuretools.vscode-containers",
         // "vscodevim.vim",
-        "zokugun.sync-settings",
+        "zokugun.sync-settings"
       ],
       "settings": {
         "editor.formatOnSave": true,
         "redhat.telemetry.enabled": false,
         "syncSettings.ignoredExtensions": [
           "GitHub.codespaces",
-          "GitHub.github-vscode-theme",
-        ],
+          "GitHub.github-vscode-theme"
+        ]
         // "[typescript]": {
         //   "editor.defaultFormatter": "esbenp.prettier-vscode",
         // },
-      },
-    },
+      }
+    }
   },
 
-  "containerEnv": {},
+  "containerEnv": {
+    // "GITHUB_TOKEN": "",
+  },
   "remoteEnv": {
     // https://code.visualstudio.com/remote/advancedcontainers/environment-variables
     // "PATH": "${containerEnv:PATH}:/home/vscode/.local/share/mise/shims",
@@ -66,7 +68,10 @@
   "forwardPorts": [],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "uname -a",
+  // "postCreateCommand": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then gh auth login --hostname=github.com --git-protocol=https --web; export GITHUB_TOKEN=\"$(gh auth token)\"; chezmoi init --apply --source=.; fi",
+  "postCreateCommand": {
+    "chezmoi": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then bash -c \"set -euo pipefail; read -p 'GitHub token: ' -s GITHUB_TOKEN; export GITHUB_TOKEN; chezmoi init --apply --source=.\"; fi"
+  }
 
   // Replace when using a ptrace-based debugger like C++, Go, and Rust
   // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
@@ -79,5 +84,5 @@
 
   // Set `remoteUser` to `root` to connect as root instead
   // More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "vscode",
+  // "remoteUser": "vscode",
 }

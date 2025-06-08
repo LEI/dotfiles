@@ -11,41 +11,57 @@
 
 {{- /* Termux */ -}}
 {{- $features = mergeOverwrite $features (dict
+  "neovim" true
+  "vim" true
 ) -}}
 
 {{- else if eq .osid "arch" }}
 
 {{- /* Archlinux/Manjaro */ -}}
 {{- $features = mergeOverwrite $features (dict
+  "ai" true
+  "docker" true
   "ghostty" true
   "go" true
   "kube" true
+  "neovim" true
   "node" true
+  "php" true
   "rust" true
+  "vim" true
 ) -}}
 
 {{- else if eq .osid "debian" }}
 
 {{- /* Debian/Ubuntu */ -}}
 {{- $features = mergeOverwrite $features (dict
+  "docker" false
   "ghostty" true
   "go" true
   "kube" true
+  "neovim" true
   "node" true
+  "php" true
   "rust" true
+  "vim" true
 ) -}}
 
 {{- else if eq .chezmoi.os "darwin" }}
 
 {{- /* macOS */ -}}
 {{- $features = mergeOverwrite $features (dict
+  "ai" true
   "bash" false
+  "docker" true
   "ghostty" true
   "git" false
   "go" true
   "kube" true
+  "neovim" true
   "node" true
+  "php" true
   "rust" true
+  "vim" true
   "zsh" false
 ) -}}
 
@@ -55,9 +71,24 @@
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
   "go" false
-  "helix" false
+  "helix" true
+  "neovim" false
   "node" false
   "rust" false
+  "vim" true
+) -}}
+{{- end }}
+
+{{- if .devContainer }}
+{{- $features = mergeOverwrite $features (dict
+  "ghostty" false
+  "go" false
+  "helix" true
+  "kube" false
+  "neovim" false
+  "node" false
+  "rust" false
+  "vim" false
 ) -}}
 {{- end }}
 

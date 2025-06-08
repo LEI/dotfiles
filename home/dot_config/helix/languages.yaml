@@ -17,25 +17,40 @@ language:
     formatter:
       command: goimports
   - name: json
+    auto-format: true
     # config:
     #   provideFormatter: true
     #   json:
     #     keepLines:
     #       enable: true
-    formatter:
-      command: prettier
-      args: [--parser, json]
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, json]
   - name: jsonc
+    auto-format: true
+    file-types:
+      - jsonc
+      - glob: bun.lock
+      - glob: "{t,j}sconfig.json"
+      - glob: devcontainer.json
+      - glob: .vscode/*.json
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, jsonc]
+  - name: json5
+    auto-format: true
+    # file-types:
+    #   - json5
+    language-servers: ["vscode-json-language-server"]
+  - name: lua
+    auto-format: true
     formatter:
-      command: prettier
-      args: [--parser, jsonc]
-  # # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
-  # # formatter: { command: "stylua", args: ["--search-parent-directories", "--stdin-filepath", "{}", "-"] }
-  # - name: lua
-  #   formatter:
-  #     args: ["-"]
-  #     command: stylua
-  #   auto-format: true
+      command: stylua
+      args:
+        - "-"
+        # - --search-parent-directories
+        # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
+        # - --stdin-filepath={}
   - name: markdown
     auto-format: true
     formatter:
@@ -109,9 +124,9 @@ language:
       command: taplo
   - name: yaml
     auto-format: true
-    formatter:
-      command: prettier
-      args: ["--parser", "yaml"]
+    # formatter:
+    #   command: prettier
+    #   args: ["--parser", "yaml"]
 language-server:
   # gopls:
   #   config:
@@ -132,7 +147,7 @@ language-server:
           - "!reference sequence"
         validation: true
         format:
-          enable: false
+          enable: true # Replaces with prettier/yamlfmt
         json:
           schemaDownload:
             enable: true

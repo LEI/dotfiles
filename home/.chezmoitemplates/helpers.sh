@@ -51,7 +51,8 @@ install_archive() {
 
   archive="${2##*/}"
   name="${4:-${bin##*/}}"
-  out="$TMPDIR/$archive"
+  dir="${5:-${TMPDIR:-/tmp}}"
+  out="$dir/$archive"
 
   bindir="$HOME/.local/bin"
   if [ ! -d "$bindir" ]; then
@@ -59,17 +60,15 @@ install_archive() {
     mkdir -p "$bindir"
   fi
 
-  # set -x
-
   log "Downloading: $url"
   curl -LSfs "$url" -o "$out"
   log "Extracting: $out"
   # shellcheck disable=SC2059
-  eval "$(printf "$format" "$out" "$TMPDIR")"
-  log "Executable: $TMPDIR/$bin"
-  chmod +x "$TMPDIR/$bin"
+  eval "$(printf "$format" "$out" "$dir")"
+  log "Executable: $dir/$bin"
+  chmod +x "$dir/$bin"
   log "Moving to: $bindir/$name"
-  mv "$TMPDIR/$bin" "$bindir/$name"
+  mv "$dir/$bin" "$bindir/$name"
 }
 
 install_tar_gz() {

@@ -1,0 +1,101 @@
+return {
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    opts = {},
+  },
+  {
+    'iamcco/markdown-preview.nvim',
+    tag = 'v0.0.10',
+    -- build = function() vim.fn["mkdp#util#install"]() end,
+    build = 'cd app && yarn install --frozen-lockfile',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    ft = { 'markdown' },
+    keys = {
+      { '<leader>mp', '<cmd>MarkdownPreview<cr>', desc = 'Markdown Preview' },
+      { '<leader>ms', '<cmd>MarkdownPreviewStop<cr>', desc = 'Markdown Preview Stop' },
+      { '<leader>mt', '<cmd>MarkdownPreviewToggle<cr>', desc = 'Markdown Preview Toggle' },
+    },
+    init = function()
+      vim.g.mkdp_filetypes = { 'markdown' }
+      require('which-key').add({
+        { '<leader>m', group = 'markdown' },
+      })
+    end,
+  },
+  {
+    'stevearc/oil.nvim',
+    version = '2.15.0',
+    cmd = 'Oil',
+    opts = {
+      delete_to_trash = false,
+      keymaps = {
+        ['g?'] = { 'actions.show_help', mode = 'n' },
+        ['<CR>'] = 'actions.select',
+        -- ['<C-s>'] = { 'actions.select', opts = { vertical = true } },
+        -- ['<C-h>'] = { 'actions.select', opts = { horizontal = true } },
+        -- ['<C-t>'] = { 'actions.select', opts = { tab = true } },
+        ['<C-p>'] = 'actions.preview',
+        ['<C-c>'] = { 'actions.close', mode = 'n' },
+        -- ['<C-l>'] = 'actions.refresh',
+        ['-'] = { 'actions.parent', mode = 'n' },
+        ['_'] = { 'actions.open_cwd', mode = 'n' },
+        ['`'] = { 'actions.cd', mode = 'n' },
+        ['~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
+        ['gs'] = { 'actions.change_sort', mode = 'n' },
+        ['gx'] = 'actions.open_external',
+        ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
+        ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
+      },
+      use_default_keymaps = false,
+      view_options = {
+        show_hidden = true,
+      },
+    },
+    keys = {
+      { '<leader>O', '<cmd>Oil<cr>', desc = 'Oil' },
+    },
+  },
+  {
+    'nvim-treesitter/nvim-treesitter',
+    tag = 'v0.10.0',
+    branch = 'master',
+    lazy = false,
+    build = ':TSUpdate',
+    opts = {
+      auto_install = true,
+      -- ensure_installed = 'all',
+      ensure_installed = {
+        'angular',
+        'bash',
+        'c',
+        'help',
+        'html',
+        'javascript',
+        'json',
+        'jsonc',
+        'lua',
+        'markdown',
+        'markdown_inline',
+        'python',
+        'query',
+        'regex',
+        'tsx',
+        'typescript',
+        'vim',
+        'vimdoc',
+        'yaml',
+      },
+      highlight = {
+        enable = true,
+      },
+    },
+  },
+  {
+    'folke/ts-comments.nvim',
+    tag = 'v1.5.0',
+    opts = {},
+    event = 'VeryLazy',
+    enabled = vim.fn.has('nvim-0.10.0') == 1,
+  },
+}

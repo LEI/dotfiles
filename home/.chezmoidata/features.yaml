@@ -1,16 +1,21 @@
 ---
 # See ../.chezmoitemplates/features.tmpl
 baseFeatures:
+  ai: false
   bash: true
+  docker: false
   ghostty: false
   git: true
   go: false
   helix: true
   kube: true
   mise: true
+  neovim: false
   node: false
   nushell: true
+  php: false
   # pueue: true
   rust: false
   sql: false
+  vim: false
   zsh: true

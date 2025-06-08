@@ -14,6 +14,11 @@ bat = "latest"
 bottom = "latest"
 # chezmoi = "latest"
 direnv = "latest"
+
+{{- if .features.docker }}
+lazydocker = "latest"
+{{- end }}
+
 # fd = "latest" # NOTE: install hangs on alpine
 
 {{- if .features.git }}
@@ -38,14 +43,22 @@ node = "latest"
 {{- end }}
 {{- end }}
 
+# TODO: install system packages
+# {{- if .features.php }}
+# # Arch: re2c postgresql-libs libzip
+# php = "latest"
+# {{- end }}
+
 ripgrep = "latest"
 
-{{- if ne .osid "alpine" }}
+{{- if and (ne .osid "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
 shellcheck = "latest"
 {{- end }}
 
+# {{- if not .features.neovim }}
 shfmt = "latest"
+{{- end }}
 
 {{- if ne .osid "android" }}
 # FIXME(termux): installs but "cannot execute: required file not found"
