@@ -22,25 +22,25 @@ export alias free = free --human
 # Color matches
 export alias grep = grep --color=auto
 
-export def l [
-    --all (-a), # List hidden files
-    --no-highlight (-n) = true, # Find without marking with ascii code (TODO: detect interactive)
-    --ignore-case (-i) = true, # Find case-insensitive regex mode; equivalent to (?i)
-    --recursive (-r) = true, # List files in directories
-    ...terms: string, # Terms to search
-] {
-    let pattern = if $recursive { "**/*" } else { "*" } | into glob
-    let list = ls --all=$all $pattern
-    if ($terms | is-empty) {
-        return ($list
-        | get name
-        | str join "\n")
-    }
-    $list
-    | get name
-    | find --ignore-case=$ignore_case --no-highlight=$no_highlight ...$terms
-    | str join "\n"
-}
+# export def l [
+#     --all (-a), # List hidden files
+#     --no-highlight (-n) = true, # Find without marking with ascii code (TODO: detect interactive)
+#     --ignore-case (-i) = true, # Find case-insensitive regex mode; equivalent to (?i)
+#     --recursive (-r) = true, # List files in directories
+#     ...terms: string, # Terms to search
+# ] {
+#     let pattern = if $recursive { "**/*" } else { "*" } | into glob
+#     let list = ls --all=$all $pattern
+#     if ($terms | is-empty) {
+#         return ($list
+#         | get name
+#         | str join "\n")
+#     }
+#     $list
+#     | get name
+#     | find --ignore-case=$ignore_case --no-highlight=$no_highlight ...$terms
+#     | str join "\n"
+# }
 
 # List all files with colors, human-readable sizes and long format
 export alias la = ls --all --long
