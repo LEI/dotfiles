@@ -1,0 +1,3 @@
+{{- $settings := includeTemplate "dot_config/Code/User/.settings.json" | fromJson -}}
+{{- $mcp := includeTemplate "dot_config/Code/User/mcp.json" | fromJson -}}
+{{- $settings | setValueAtPath "mcp" $mcp | toPrettyJson -}}

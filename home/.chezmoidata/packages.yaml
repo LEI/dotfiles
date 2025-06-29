@@ -4,8 +4,9 @@
 basePackages:
   - curl
   - git
-  - neovim
+  # - neovim
   - tmux
+  # TODO: only install if requested
   - vim
 packages:
   alpine:

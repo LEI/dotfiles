@@ -1,0 +1,127 @@
+---
+neovim:
+  plugins:
+    autopairs:
+      repo: windwp/nvim-autopairs
+      # refreshPeriod: 5m
+
+    # aerial:
+    #   repo: stevearc/aerial.nvim
+    #   # TODO: force git-repo type and clone one a specific tag
+    #   # tag: stable # v2.5.0
+
+    cmp-lsp:
+      repo: hrsh7th/cmp-nvim-lsp
+    cmp-buffer:
+      repo: hrsh7th/cmp-buffer
+    cmp-path:
+      repo: hrsh7th/cmp-path
+    cmp-cmdline:
+      repo: hrsh7th/cmp-cmdline
+    cmp:
+      repo: hrsh7th/nvim-cmp
+      tag: v0.0.2
+
+    dadbod:
+      repo: tpope/vim-dadbod
+      tag: v1.4
+    dadbod-ui:
+      repo: kristijanhusak/vim-dadbod-ui
+    dadbod-completion:
+      repo: kristijanhusak/vim-dadbod-completion
+
+    dap:
+      # url: https://codeberg.org/mfussenegger/nvim-dap
+      repo: mfussenegger/nvim-dap
+      tag: 0.10.0
+    nio:
+      repo: nvim-neotest/nvim-nio
+      tag: v1.10.1
+    dap-ui:
+      repo: rcarriga/nvim-dap-ui
+      tag: v4.0.0
+
+    eunuch:
+      repo: tpope/vim-eunuch
+      tag: v1.3
+    fugitive:
+      repo: tpope/vim-fugitive
+      tag: v3.7
+    gitsigns:
+      repo: lewis6991/gitsigns.nvim
+      tag: v1.0.2
+
+    fidget:
+      repo: j-hui/fidget.nvim
+    lsp-format:
+      repo: lukas-reineke/lsp-format.nvim
+
+    # bufferline:
+    #   repo: akinsho/bufferline.nvim
+    #   tag: v4.9.1
+    lualine:
+      repo: nvim-lualine/lualine.nvim
+
+    mcphub:
+      repo: ravitemer/mcphub.nvim
+      tag: v5.11.0
+
+    mason:
+      repo: mason-org/mason.nvim
+    mason-tool-installer:
+      repo: WhoIsSethDaniel/mason-tool-installer.nvim
+    nvim-lspconfig:
+      repo: neovim/nvim-lspconfig
+    mason-lspconfig:
+      repo: mason-org/mason-lspconfig.nvim
+
+    oil:
+      repo: stevearc/oil.nvim
+
+    # Alternative: https://github.com/jeffkreeftmeijer/neovim-sensible
+    sensible:
+      repo: tpope/vim-sensible
+
+    sleuth:
+      repo: tpope/vim-sleuth
+
+    nui:
+      repo: MunifTanjim/nui.nvim
+    plenary:
+      repo: nvim-lua/plenary.nvim
+
+    # Depends on plenary, nui
+    telescope:
+      repo: nvim-telescope/telescope.nvim
+
+    tokyonight:
+      repo: folke/tokyonight.nvim
+    treesitter:
+      repo: nvim-treesitter/nvim-treesitter
+    trouble:
+      repo: folke/trouble.nvim
+      tag: v3.7.1
+
+    # Alternative: https://github.com/debugloop/telescope-undo.nvim
+    undotree:
+      repo: mbbill/undotree
+
+    which-key:
+      repo: folke/which-key.nvim
+
+    # Depends on: plenary, nui
+    avante:
+      repo: yetone/avante.nvim
+      tag: v0.0.25
+
+    codecompanion:
+      repo: olimorris/codecompanion.nvim
+      tag: v17.4.0
+    # copilot:
+    #   repo: github/copilot.vim
+    copilot-lua:
+      repo: zbirenbaum/copilot.lua
+    copilot-lualine:
+      repo: AndreM222/copilot-lualine
+    windsurf:
+      repo: Exafunction/windsurf.vim

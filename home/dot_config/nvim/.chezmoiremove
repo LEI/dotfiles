@@ -1,0 +1,4 @@
+# pack/nvim/start/*
+# {{ range $name, $plugin := .neovim.plugins -}}
+# !pack/nvim/start/{{ $name }}
+# {{ end -}}

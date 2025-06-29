@@ -1,22 +1,86 @@
 #!/bin/sh
 
+# TODO: ensure up to date and instal tools for perl, python, ruby...
 # https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
 
 # {{- if .features.node }}
 set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v node >/dev/null && command -v mise >/dev/null; then
   # mise use --global --quiet node@latest
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
-set -x
+# FIXME: changes if current directory uses another version
+# Command: output "sh" "-c" "command -v node || true" | trim
+echo >&2 "node $(node --version)"
 
 # npm config set --global audit=false fund=false
-npm install --global --quiet npm@latest
+cmd npm install --global --quiet npm@latest # pnpm@latest yarn@latest
+
+# {{- if .features.ai }}
+if ! command -v claude >/dev/null; then
+  cmd npm install --global --quiet @anthropic-ai/claude-code
+fi
+
+if ! command -v codex >/dev/null; then
+  cmd npm install --global --quiet @openai/codex
+fi
+
+if ! command -v mcp-hub >/dev/null; then
+  cmd npm install --global --quiet mcp-hub
+fi
+# {{- end }}
+
+# {{- if .features.neovim }}
+if ! command -v neovim-node-host >/dev/null; then
+  cmd npm install --global --quiet neovim
+fi
+
+# cmd nvim --headless +MasonUpdate +qa
 
 if ! command -v bash-language-server >/dev/null; then
-  npm install --global --quiet bash-language-server
+  cmd nvim --headless "+MasonInstall bashls" +qa
+fi
+
+if ! command -v prettier >/dev/null; then
+  cmd nvim --headless "+MasonInstall prettier" +qa
+fi
+
+# {{- if .features.sql }}
+if ! command -v sql-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall sqlls" +qa
+fi
+# {{- end }}
+
+if ! command -v typescript-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall ts_ls" +qa
+fi
+
+if ! command -v vscode-css-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall cssls" +qa
+fi
+
+if ! command -v vscode-eslint-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall eslint" +qa
+fi
+
+if ! command -v vscode-html-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall html" +qa
+fi
+
+if ! command -v vscode-json-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall jsonls" +qa
+fi
+
+if ! command -v yaml-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall yamlls" +qa
+fi
+# {{- else }}
+if ! command -v bash-language-server >/dev/null; then
+  cmd npm install --global --quiet bash-language-server
 fi
 
 # @microsoft/compose-language-service
@@ -24,27 +88,30 @@ fi
 # helm-ls
 
 if ! command -v prettier >/dev/null; then
-  npm install --global --quiet prettier
+  cmd npm install --global --quiet prettier
 fi
 
 # {{- if .features.sql }}
 if ! command -v sql-language-server >/dev/null; then
-  npm install --global --quiet sql-language-server
+  cmd npm install --global --quiet sql-language-server
 fi
 # {{- end }}
 
 if ! command -v typescript-language-server >/dev/null; then
-  npm install --global --quiet typescript typescript-language-server
+  cmd npm install --global --quiet typescript typescript-language-server
 fi
 
-# vscode-{css,eslint,html,json,markdown}-language-server
-if ! command -v vscode-eslint-language-server >/dev/null; then
+if ! command -v vscode-css-language-server >/dev/null ||
+  ! command -v vscode-eslint-language-server >/dev/null ||
+  ! command -v vscode-html-language-server >/dev/null ||
+  ! command -v vscode-json-language-server >/dev/null; then
   # NOTE: eslint is broken in vscode-extracted-language-server@4.10
   # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
-  npm install --global --quiet vscode-langservers-extracted@4.8
+  cmd npm install --global --quiet vscode-langservers-extracted@4.8
 fi
 
 if ! command -v yaml-language-server >/dev/null; then
-  npm install --global --quiet yaml-language-server@next
+  cmd npm install --global --quiet yaml-language-server@next
 fi
+# {{- end }}
 # {{- end }}

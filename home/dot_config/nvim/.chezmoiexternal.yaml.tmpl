@@ -1,0 +1,31 @@
+---
+{{ $baseURL := "https://github.com" -}}
+{{ range $name, $plugin := .neovim.plugins -}}
+{{ if ne (get $plugin "tag") "" -}}
+{{ $base := get $plugin "url" | default (printf "%s/%s" $baseURL $plugin.repo) -}}
+{{ $url := printf "%s/archive/refs/tags/%s.tar.gz" $base $plugin.tag -}}
+pack/nvim/start/{{ $name }}:
+  type: archive
+  url: {{ $url | quote }}
+  exact: {{ get $plugin "exact" | default true }}
+  stripComponents: {{ get $plugin "stripComponents" | default 1 }}
+  refreshPeriod: {{ get $plugin "refreshPeriod" | default 0 }}
+{{ else -}}
+{{ $base := get $plugin "url" | default (printf "%s/%s" $baseURL $plugin.repo) -}}
+{{ $url := printf "%s.git" $base -}}
+pack/nvim/start/{{ $name }}:
+  type: git-repo
+  url: {{ $url | quote }}
+  refreshPeriod: {{ get $plugin "refreshPeriod" | default "168h" }}
+  clone:
+    args:
+      {{ if ne (get $plugin "branch") "" -}}
+      - --branch={{ $plugin.branch }}
+      {{ end -}}
+      - --depth=1
+  pull:
+    args:
+      - --depth=1
+      # - --tags=
+{{ end -}}
+{{ end -}}

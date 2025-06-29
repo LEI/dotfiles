@@ -29,13 +29,16 @@ language:
     formatter:
       command: prettier
       args: [--parser, jsonc]
-  # # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
-  # # formatter: { command: "stylua", args: ["--search-parent-directories", "--stdin-filepath", "{}", "-"] }
-  # - name: lua
-  #   formatter:
-  #     args: ["-"]
-  #     command: stylua
-  #   auto-format: true
+  - name: lua
+    # formatter:
+    #   command: stylua
+    #   args:
+    #     - "-"
+    #     # - --search-parent-directories
+    #     # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
+    #     # - --stdin-filepath={}
+    # NOTE: use https://luals.github.io/wiki/formatter/
+    auto-format: true
   - name: markdown
     auto-format: true
     formatter:

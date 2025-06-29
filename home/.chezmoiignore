@@ -63,6 +63,12 @@
 # .config/sh/plugins/mise.sh
 {{- end }}
 
+{{- if not .features.neovim }}
+.config/nvim/
+# TODO: pack/vim
+.vim/pack/nvim/
+{{- end }}
+
 {{- if not .features.node }}
 .chezmoiscripts/*-install-tools-node.sh
 .npmrc
@@ -83,9 +89,32 @@
 # TODO: .chezmoiscripts/*-install-tools-sql.sh
 {{- end }}
 
-{{- if not .codespaces }}
-.vscode-remote/
+{{- if not .features.vim }}
+.config/vim/
+.vim/
 {{- end }}
 
 # TODO: use .chezmoidata/packages.yaml
 .chezmoiscripts/darwin-install-packages.sh
+
+{{ if .codespaces -}}
+.config/Code/
+.config/VSCodium/
+.config/Void/
+.void-editor/
+{{ else -}}
+.vscode-remote/
+{{ end -}}
+
+{{ if eq .chezmoi.os "darwin" -}}
+{{ else if eq .chezmoi.os "linux" -}}
+{{- else if eq .chezmoi.os "windows" }}
+.config/
+.install-password-manager.sh
+.void-editor/
+{{ else -}}
+.config/Code/
+.config/VSCodium/
+.config/Void/
+.void-editor/
+{{ end -}}
