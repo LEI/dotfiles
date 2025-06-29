@@ -39,7 +39,7 @@ if ! command -v goimports >/dev/null; then
 fi
 
 if ! command -v golangci-lint-langserver >/dev/null; then
-  cmd nvim --headless "+MasonInstall golangci_lint_ls" +qa
+  cmd nvim --headless "+MasonInstall golangci-lint-langserver" +qa
 fi
 
 if ! command -v golangci-lint >/dev/null; then

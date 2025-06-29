@@ -18,6 +18,7 @@ wk.add({
   { 'gh',           '0',                    desc = 'Go to line start', mode = { 'n', 'v' } },
   { 'gl',           '$',                    desc = 'Go to line end',   mode = { 'n', 'v' } },
 
+  -- TODO: Reflow (gw/gq)
   { '<backspace>o', ':edit $MYVIMRC<cr>',   desc = 'Edit config' },
   { '<backspace>r', ':source $MYVIMRC<cr>', desc = 'Reload config' },
   { '<backspace>s', ':\'<\'>sort<cr>',      desc = 'Sort lines',       mode = { 'v' } },

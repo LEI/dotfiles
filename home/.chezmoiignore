@@ -64,6 +64,7 @@
 {{- end }}
 
 {{- if not .features.neovim }}
+.chezmoiscripts/*-install-neovim.sh
 .config/nvim/
 {{- end }}
 

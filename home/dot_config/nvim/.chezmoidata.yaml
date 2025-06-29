@@ -94,8 +94,15 @@ neovim:
     telescope:
       repo: nvim-telescope/telescope.nvim
 
-    tokyonight:
-      repo: folke/tokyonight.nvim
+    catppuccin:
+      repo: catppuccin/nvim
+      tag: v1.10.0
+    # rose-pine:
+    #   repo: rose-pine/neovim
+    #   tag: v3.0.2
+    # tokyonight:
+    #   repo: folke/tokyonight.nvim
+
     treesitter:
       repo: nvim-treesitter/nvim-treesitter
     trouble:
@@ -108,15 +115,21 @@ neovim:
 
     which-key:
       repo: folke/which-key.nvim
+      # nvim: ">=0.9.4"
 
     # Depends on: plenary, nui
     avante:
       repo: yetone/avante.nvim
       tag: v0.0.25
+      # nvim: ">=0.10"
 
+    render-markdown:
+      repo: MeanderingProgrammer/render-markdown.nvim
+      tag: v8.5.0
     codecompanion:
       repo: olimorris/codecompanion.nvim
       tag: v17.4.0
+
     # copilot:
     #   repo: github/copilot.vim
     copilot-lua:

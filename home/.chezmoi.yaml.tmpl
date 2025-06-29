@@ -2,6 +2,7 @@
 
 {{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
+{{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
 
 {{- $name := env "USER" -}}
@@ -41,6 +42,7 @@
 {{- $features := includeTemplate "features.tmpl" (dict
   "chezmoi" .chezmoi
   "codespaces" $codespaces
+  "devContainer" $devContainer
   "osid" $osid
 ) }}
 
@@ -61,6 +63,7 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 data:
   accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
+  devContainer: {{ $devContainer }}
 
   email: {{ $email | quote }}
   name: {{ $name | quote }}

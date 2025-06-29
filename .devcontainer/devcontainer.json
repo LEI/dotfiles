@@ -53,7 +53,9 @@
       },
     },
   },
-  "containerEnv": {},
+  "containerEnv": {
+    // "GITHUB_TOKEN": "",
+  },
   "remoteEnv": {
     // https://code.visualstudio.com/remote/advancedcontainers/environment-variables
     // "PATH": "${containerEnv:PATH}:/home/vscode/.local/share/mise/shims",
@@ -61,7 +63,10 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "if [ \"$CODESPACES\" != true ]; then chezmoi init --apply --source=.; fi",
+  // "postCreateCommand": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then gh auth login --hostname=github.com --git-protocol=https --web; export GITHUB_TOKEN=\"$(gh auth token)\"; chezmoi init --apply --source=.; fi",
+  "postCreateCommand": {
+    "chezmoi": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then bash -c \"set -euo pipefail; read -p 'GitHub token: ' -s GITHUB_TOKEN; export GITHUB_TOKEN; chezmoi init --apply --source=.\"; fi",
+  },
   // Replace when using a ptrace-based debugger like C++, Go, and Rust
   // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
   // https://tailscale.com/kb/1160/github-codespaces
@@ -71,5 +76,5 @@
   // "runArgs": ["--device=/dev/net/tun"],
   // Set `remoteUser` to `root` to connect as root instead
   // More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "vscode",
+  // "remoteUser": "vscode",
 }

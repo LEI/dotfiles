@@ -1,6 +1,15 @@
 ---
 vim:
   plugins:
+    airline:
+      repo: vim-airline/vim-airline
+      tag: v0.11
+    catppuccin:
+      repo: catppuccin/vim
+
+    commentary:
+      repo: tpope/vim-commentary
+
     dadbod:
       repo: tpope/vim-dadbod
       tag: v1.4
@@ -15,44 +24,16 @@ vim:
     fugitive:
       repo: tpope/vim-fugitive
       tag: v3.7
-    # gitsigns:
-    #   repo: lewis6991/gitsigns.nvim
-    #   tag: v1.0.2
 
-    # fidget:
-    #   repo: j-hui/fidget.nvim
-    # lsp-format:
-    #   repo: lukas-reineke/lsp-format.nvim
+    polyglot:
+      repo: sheerun/vim-polyglot
+      tag: v4.17.0
 
-    # mcphub:
-    #   repo: ravitemer/mcphub.nvim
-    #   tag: v5.11.0
-
-    oil:
-      repo: stevearc/oil.nvim
-
-    # Alternative: https://github.com/jeffkreeftmeijer/neovim-sensible
     sensible:
       repo: tpope/vim-sensible
 
     sleuth:
       repo: tpope/vim-sleuth
 
-    # nui:
-    #   repo: MunifTanjim/nui.nvim
-    # plenary:
-    #   repo: nvim-lua/plenary.nvim
-
-    # tokyonight:
-    #   repo: folke/tokyonight.nvim
-    # treesitter:
-    #   repo: nvim-treesitter/nvim-treesitter
-    # trouble:
-    #   repo: folke/trouble.nvim
-    #   tag: v3.7.1
-
     undotree:
       repo: mbbill/undotree
-
-    # which-key:
-    #   repo: folke/which-key.nvim

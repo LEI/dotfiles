@@ -33,10 +33,15 @@ cmp.setup({
       end
     end,
   }),
+  -- TODO: sources per filetype
+  -- per_filetype = {
+  --   codecompanion = { "codecompanion" },
+  -- }
   sources = cmp.config.sources({
     -- https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources
     -- { name = 'codeium' },
     { name = 'nvim_lsp' },
+    { name = 'render-markdown' },
   }, {
     { name = 'buffer' },
   })

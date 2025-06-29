@@ -69,11 +69,24 @@
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
   "go" false
-  "helix" false
+  "helix" true
   "neovim" false
   "node" false
   "rust" false
   "vim" true
+) -}}
+{{- end }}
+
+{{- if .devContainer }}
+{{- $features = mergeOverwrite $features (dict
+  "ghostty" false
+  "go" false
+  "helix" true
+  "kube" false
+  "neovim" false
+  "node" false
+  "rust" false
+  "vim" false
 ) -}}
 {{- end }}
 

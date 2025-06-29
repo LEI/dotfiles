@@ -52,5 +52,10 @@ packages:
     - apt-utils
     - build-essential
     - gpg
+
+    # Debian devcontainer
+    - python3
+    - python3-venv
+
     # TODO: topgrade
     # https://github.com/topgrade-rs/topgrade/issues/897

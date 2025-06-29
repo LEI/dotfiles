@@ -91,6 +91,8 @@ test_local() {
   direnv export bash # "${SHELL##*/}"
   # ghostty --version | head -n1
   hx --version
+  nvim --version | head -n1
+  vim --version | head -n1
   set +x
 }
 

@@ -1,5 +1,34 @@
-local enabled = 'copilot'
-local home = vim.fn.expand('$HOME')
+local enabled = {
+  -- avante = true,
+  codecompanion = true,
+  codeium = false,
+  copilot = false,
+  copilot_lua = true
+}
+local filetypes = {
+  javascript = true,
+  lua = true,
+
+  rust = true,
+  sh = function()
+    -- Disable for .env files
+    return not string.match(vim.fs.basename(vim.api.nvim_buf_get_name(0)), '^%.env.*')
+  end,
+  typescript = true,
+  vim = true,
+
+  -- yaml = false,
+  -- markdown = false,
+  -- help = false,
+  -- gitcommit = false,
+  -- gitrebase = false,
+  -- hgcommit = false,
+  -- svn = false,
+  -- cvs = false,
+  -- ['.'] = false,
+  ['*'] = false,
+}
+-- local home = vim.fn.expand('$HOME')
 local wk = require('which-key')
 
 -- Alternatives:
@@ -59,7 +88,7 @@ require('mcphub').setup({
 vim.opt.laststatus = 3
 
 -- https://github.com/yetone/avante.nvim#default-setup-configuration
-if enabled == 'avante' then
+if enabled.avante then
   require('avante').setup({
     -- provider = 'claude',
     -- providers = {
@@ -99,7 +128,19 @@ if enabled == 'avante' then
 end
 
 -- https://github.com/olimorris/codecompanion.nvim
-if enabled == 'codecompanion' then
+-- https://codecompanion.olimorris.dev/installation.html#additional-plugins
+-- Alternative: https://github.com/OXY2DEV/markview.nvim
+if enabled.codecompanion then
+  -- https://github.com/MeanderingProgrammer/render-markdown.nvim
+  -- :TSInstall markdown markdown_inline
+  require('render-markdown').setup({
+    completions = { lsp = { enabled = true } },
+    file_types = { 'markdown', 'codecompanion' },
+    only_render_image_at_cursor = true,
+    preset = 'none', -- none, obsidian, lazy
+  })
+  -- https://github.com/echasnovski/mini.diff
+  -- https://github.com/hakonharnes/img-clip.nvim
   require('codecompanion').setup({
     -- https://ravitemer.github.io/mcphub.nvim/extensions/codecompanion.html
     extensions = {
@@ -127,10 +168,9 @@ if enabled == 'codecompanion' then
   })
 end
 
--- TODO: lazy load
 -- https://github.com/zbirenbaum/copilot.lua
 -- :Copilot auth
-if enabled == 'copilot' then
+if enabled.copilot_lua then
   vim.api.nvim_create_autocmd('InsertEnter', {
     once = true,
     callback = function(opts)
@@ -140,28 +180,7 @@ if enabled == 'copilot' then
         -- workspace_folders = {
         --   vim.fn.expand('$HOME') .. '/src/*/*',
         -- },
-        filetypes = {
-          javascript = true,
-          lua = true,
-
-          rust = true,
-          sh = function()
-            -- Disable for .env files
-            return not string.match(vim.fs.basename(vim.api.nvim_buf_get_name(0)), '^%.env.*')
-          end,
-          typescript = true,
-
-          -- yaml = false,
-          -- markdown = false,
-          -- help = false,
-          -- gitcommit = false,
-          -- gitrebase = false,
-          -- hgcommit = false,
-          -- svn = false,
-          -- cvs = false,
-          -- ['.'] = false,
-          ['*'] = false,
-        },
+        filetypes = filetypes,
         suggestion = {
           auto_trigger = true,
           keymap = {
@@ -178,17 +197,18 @@ if enabled == 'copilot' then
   })
 end
 
+-- NOTE: replaced with copilot.lua
 -- https://github.com/github/copilot.vim
 -- :Copilot setup
-vim.g.copilot_enabled = false -- enabled == 'copilot'
+vim.g.copilot_enabled = enabled.copilot
 -- vim.g.copilot_filetypes = {}
 
 -- https://github.com/Exafunction/windsurf.vim
 -- :Codeium Auth
-vim.g.codeium_enabled = enabled == 'codeium'
+vim.g.codeium_enabled = enabled.codeium
 -- vim.g.codeium_filetypes_disabled_by_default = true
 -- vim.g.codeium_filetypes = {}
-if enabled == 'codeium' then
+if enabled.codeium then
   wk.add({
     {
       '<leader>C',

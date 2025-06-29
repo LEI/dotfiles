@@ -3,11 +3,21 @@ if not vim.fn.has('nvim-0.8') then
 end
 
 vim.g.mapleader = ' '
+vim.g.localmapleader = ' '
 
 -- vim.o.background = 'dark'
+
 vim.opt.clipboard:append({ 'unnamedplus' })
--- vim.opt.opt_global = true
+-- TODO: Color colmn relative to textwidth
+
+-- Reverse global flag (always apply to all, except if /g)
+vim.opt.gdefault = true
+
+-- Ignore case in search patterns
+vim.opt.ignorecase = true
+
 vim.opt.relativenumber = true
+
 -- vim.opt.termguicolors = true
 
 -- https://github.com/tpope/vim-sleuth
@@ -25,10 +35,6 @@ vim.opt.relativenumber = true
 vim.opt.undofile = true
 -- vim.opt.undodir = vim.fn.stdpath('config') .. '/undo//'
 
--- https://github.com/folke/tokyonight.nvim
--- vim.cmd [[colorscheme tokyonight]]
-vim.cmd.colorscheme('tokyonight-storm')
-
 -- TODO: .config/vim/ftdetect?
 vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
   pattern = { 'devcontainer.json', '.vscode/*.json' },
@@ -36,3 +42,15 @@ vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
     vim.bo.filetype = 'jsonc'
   end,
 })
+
+-- https://github.com/folke/tokyonight.nvim
+-- vim.cmd [[colorscheme tokyonight]]
+local theme = 'catppuccin-macchiato'
+-- local theme = 'rose-pine'
+-- local theme = 'tokyonight-storm'
+vim.cmd.colorscheme(theme)
+
+local local_vimrc = vim.fn.expand('~/.vimrc.local')
+if vim.fn.filereadable(local_vimrc) == 1 then
+  vim.cmd('source ' .. local_vimrc)
+end

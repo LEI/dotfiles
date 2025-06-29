@@ -1,0 +1,6 @@
+{{ if eq (get . "cleanup" | not | not) true -}}
+pack/vim/start/*
+{{ range $name, $plugin := .vim.plugins -}}
+!pack/vim/start/{{ $name }}
+{{ end -}}
+{{ end -}}
