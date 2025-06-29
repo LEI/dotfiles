@@ -5,14 +5,23 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+# NOTE: use global go
+cd /tmp
+
 if ! command -v go >/dev/null && command -v mise >/dev/null; then
   # mise use --global --quiet go@latest
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
-# Command: {{ output "sh" "-c" "command -v go || true" | trim }}
+# Command: {{ output "sh" "-c" "command -v go || true" | replace "\n" " " | trim }}
 # echo >&2 "Version: $(go version)"
 go version
+
+# {{ output "sh" "-c" "gopls version || true" | replace "\n" " " | trim }}
+# {{ output "sh" "-c" "dlv version || true" | replace "\n" " " | trim }}
+# {{ output "sh" "-c" "command -v goimports || true" | replace "\n" " " | trim }}
+# {{ output "sh" "-c" "command -v golangci-lint-langserver || true" | replace "\n" " " | trim }}
+# {{ output "sh" "-c" "golangci-lint --version || true" | replace "\n" " " | trim }}
 
 # {{- if .features.neovim }}
 # cmd nvim --headless +MasonUpdate +qa

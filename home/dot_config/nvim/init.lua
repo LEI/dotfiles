@@ -1,4 +1,6 @@
-local theme = 'tokyonight-storm'
+if not vim.fn.has('nvim-0.8') then
+  assert(false, 'nvim-0.8 required')
+end
 
 vim.g.mapleader = ' '
 
@@ -25,4 +27,12 @@ vim.opt.undofile = true
 
 -- https://github.com/folke/tokyonight.nvim
 -- vim.cmd [[colorscheme tokyonight]]
-vim.cmd.colorscheme(theme)
+vim.cmd.colorscheme('tokyonight-storm')
+
+-- TODO: .config/vim/ftdetect?
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+  pattern = 'devcontainer.json',
+  callback = function()
+    vim.bo.filetype = 'jsonc'
+  end,
+})

@@ -17,18 +17,31 @@ language:
     formatter:
       command: goimports
   - name: json
+    auto-format: true
     # config:
     #   provideFormatter: true
     #   json:
     #     keepLines:
     #       enable: true
-    formatter:
-      command: prettier
-      args: [--parser, json]
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, json]
   - name: jsonc
-    formatter:
-      command: prettier
-      args: [--parser, jsonc]
+    auto-format: true
+    file-types:
+      - jsonc
+      - glob: bun.lock
+      - glob: "{t,j}sconfig.json"
+      - glob: devcontainer.json
+      - glob: .vscode/*.json
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, jsonc]
+  - name: json5
+    auto-format: true
+    # file-types:
+    #   - json5
+    language-servers: ["vscode-json-language-server"]
   - name: lua
     # formatter:
     #   command: stylua
@@ -112,9 +125,9 @@ language:
       command: taplo
   - name: yaml
     auto-format: true
-    formatter:
-      command: prettier
-      args: ["--parser", "yaml"]
+    # formatter:
+    #   command: prettier
+    #   args: ["--parser", "yaml"]
 language-server:
   # gopls:
   #   config:
@@ -135,7 +148,7 @@ language-server:
           - "!reference sequence"
         validation: true
         format:
-          enable: false
+          enable: true # Replaces with prettier/yamlfmt
         json:
           schemaDownload:
             enable: true

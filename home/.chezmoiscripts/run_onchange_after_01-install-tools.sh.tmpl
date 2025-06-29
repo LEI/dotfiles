@@ -10,8 +10,7 @@ set -eu
 # {{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osid" .osid) }}
 # {{- end }}
 
-# set -x
-
+# Mise: {{ output "sh" "-c" "mise --version || true" | replace "\n" " " | trim }}
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
 
 log "Installing tools"

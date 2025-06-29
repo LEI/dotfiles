@@ -9,16 +9,37 @@ local wk = require('which-key')
 
 -- https://github.com/ravitemer/mcphub.nvim
 -- https://ravitemer.github.io/mcphub.nvim/configuration.html
+
+-- TODO: add helper to exec and capture the output of an external command
+local node_json_cmd = 'mise list node --installed --json --quiet | jq --compact-output --raw-output last'
+local node_json_result = vim.api.nvim_exec2('!' .. node_json_cmd, { output = true, })
+local node_json = vim.split(node_json_result.output, '\n')[3]
+local success, node_info = pcall(vim.json.decode, node_json)
+local npx = 'npx'
+if success then
+  -- local node_version = node_info.version
+  local node_install_path = node_info.install_path
+  npx = node_install_path .. '/bin/npx'
+else
+  print('Failed to decode node info: ' .. node_json)
+end
+
+-- TODO: run once on plugin nstall or update and check node >=20
+-- local node_install_path = home .. '/.local/share/mise/installs/node/' .. node_version
+-- local npm = node_install_path .. '/bin/npm'
+-- local cmd = 'command -v mcp-hub >/dev/null || ' .. npm .. ' install --global --quiet mcp-hub@latest'
+-- vim.fn.jobstart({ 'sh', '-c', cmd }, { detach = false })
+
 require('mcphub').setup({
   auto_approve = false,
   auto_toggle_mcp_servers = true,
 
-  -- TODO(lazy): build = 'bundled_build.lua',
-  -- NOTE: use global node >=20 (ignore current working directory .tool-versions)
-  -- npm install -g mcp-hub@latest
-  cmd = home .. '/.local/share/mise/installs/node/24.2.0/bin/npx', -- 'node',
-  cmdArgs = { '-y', 'mcp-hub' },                                   -- { '/path/to/mcp-hub/src/utils/cli.js' },
-  use_bundled_binary = false,
+  use_bundled_binary = true,
+
+  -- cmd = 'node',
+  -- cmdArgs = { '/path/to/mcp-hub/src/utils/cli.js' },
+  cmd = npx,
+  cmdArgs = { '-y', 'mcp-hub@latest' },
 
   -- config = vim.fn.expand('~/.config/mcphub/servers.json'),
   -- port = 37373,

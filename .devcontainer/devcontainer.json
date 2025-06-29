@@ -5,7 +5,6 @@
   // https://github.com/devcontainers/images/blob/main/src/base-ubuntu/.devcontainer/devcontainer.json
   "image": "mcr.microsoft.com/vscode/devcontainers/base:debian", // alpine, debian or ubuntu
   // "image": "mcr.microsoft.com/devcontainers/universal:2",
-
   // https://containers.dev/features
   "features": {
     "ghcr.io/devcontainer-community/devcontainer-features/chezmoi.io:1": {},
@@ -23,7 +22,6 @@
     // "ghcr.io/roul/devcontainer-features/mise-{golang,node,python,ruby,rust}:1": {},
     // "ghcr.io/tailscale/codespace/tailscale": {},
   },
-
   "customizations": {
     "codespaces": {
       "repositories": {
@@ -55,28 +53,22 @@
       },
     },
   },
-
   "containerEnv": {},
   "remoteEnv": {
     // https://code.visualstudio.com/remote/advancedcontainers/environment-variables
     // "PATH": "${containerEnv:PATH}:/home/vscode/.local/share/mise/shims",
   },
-
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [],
-
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "uname -a",
-
   // Replace when using a ptrace-based debugger like C++, Go, and Rust
   // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-
   // https://tailscale.com/kb/1160/github-codespaces
   // https://login.tailscale.com/admin/settings/keys
   // https://github.com/settings/codespaces/secrets/new
   // tailscale up --accept-routes --auth-key=$TS_AUTH_KEY
   // "runArgs": ["--device=/dev/net/tun"],
-
   // Set `remoteUser` to `root` to connect as root instead
   // More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "vscode",

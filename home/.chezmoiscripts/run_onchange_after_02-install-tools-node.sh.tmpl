@@ -8,17 +8,31 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+# NOTE: use global node
+cd /tmp
+
 if ! command -v node >/dev/null && command -v mise >/dev/null; then
   # mise use --global --quiet node@latest
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
+# npm="$(mise list node --installed --json --quiet | jq --raw-output 'last | .install_path')/bin/npm"
+
 # FIXME: changes if current directory uses another version
-# Command: output "sh" "-c" "command -v node || true" | trim
+# Command: output "sh" "-c" "command -v node || true" | replace "\n" " " | trim
 echo >&2 "node $(node --version)"
 
 # npm config set --global audit=false fund=false
-cmd npm install --global --quiet npm@latest # pnpm@latest yarn@latest
+
+cmd npm install --global --quiet npm@latest
+
+if ! command -v pnpm >/dev/null; then
+  cmd npm install --global --quiet pnpm@latest
+fi
+
+if ! command -v yarn >/dev/null; then
+  cmd npm install --global --quiet yarn@latest
+fi
 
 # {{- if .features.ai }}
 if ! command -v claude >/dev/null; then
@@ -29,9 +43,9 @@ if ! command -v codex >/dev/null; then
   cmd npm install --global --quiet @openai/codex
 fi
 
-if ! command -v mcp-hub >/dev/null; then
-  cmd npm install --global --quiet mcp-hub
-fi
+# if ! command -v mcp-hub >/dev/null; then
+#   cmd npm install --global --quiet mcp-hub
+# fi
 # {{- end }}
 
 # {{- if .features.neovim }}

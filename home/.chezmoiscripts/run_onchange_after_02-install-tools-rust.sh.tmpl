@@ -7,6 +7,9 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+# NOTE: use global cargo
+cd /tmp
+
 if command -v cargo >/dev/null && cargo --version; then
   echo >&2 "Already installed" # {{ output "sh" "-c" "command -v cargo || true" }}
 else
@@ -53,13 +56,15 @@ else
   echo >&2 "Installed cargo"
 fi
 
-# Command: {{ output "sh" "-c" "command -v rustc || true" | trim }}
+# Command: {{ output "sh" "-c" "command -v rustc || true" | replace "\n" " " | trim }}
 # echo >&2 "Version: $(rustc --version)"
 # rustc --version
 
 if ! command -v cargo >/dev/null; then
   cmd . ~/.cargo/env
 fi
+
+# Taplo: {{ output "sh" "-c" "taplo --version || true" | replace "\n" " " | trim }}
 
 # {{- if .features.neovim }}
 # cmd nvim --headless +MasonUpdate +qa

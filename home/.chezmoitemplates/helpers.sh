@@ -59,8 +59,6 @@ install_archive() {
     mkdir -p "$bindir"
   fi
 
-  # set -x
-
   log "Downloading: $url"
   curl -LSfs "$url" -o "$out"
   log "Extracting: $out"

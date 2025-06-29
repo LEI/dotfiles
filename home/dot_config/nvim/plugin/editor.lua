@@ -10,7 +10,7 @@ require('oil').setup({
 -- https://github.com/nvim-lua/plenary.nvim
 -- https://github.com/nvim-telescope/telescope.nvim
 
--- https://github.com/windwp/nvim-autopairs²
+-- https://github.com/windwp/nvim-autopairs
 require('nvim-autopairs').setup()
 
 -- https://github.com/nvim-treesitter/nvim-treesitter
