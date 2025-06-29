@@ -61,7 +61,7 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "[ \"$CODESPACES\" == true ] || chezmoi init --apply --source=.",
+  "postCreateCommand": "if [ \"$CODESPACES\" != true ]; then chezmoi init --apply --source=.; fi",
   // Replace when using a ptrace-based debugger like C++, Go, and Rust
   // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
   // https://tailscale.com/kb/1160/github-codespaces

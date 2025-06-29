@@ -65,8 +65,6 @@
 
 {{- if not .features.neovim }}
 .config/nvim/
-# TODO: pack/vim
-.vim/pack/nvim/
 {{- end }}
 
 {{- if not .features.node }}
@@ -91,7 +89,7 @@
 
 {{- if not .features.vim }}
 .config/vim/
-.vim/
+# .vim/
 {{- end }}
 
 # TODO: use .chezmoidata/packages.yaml
