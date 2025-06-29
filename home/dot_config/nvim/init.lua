@@ -31,7 +31,7 @@ vim.cmd.colorscheme('tokyonight-storm')
 
 -- TODO: .config/vim/ftdetect?
 vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-  pattern = 'devcontainer.json',
+  pattern = { 'devcontainer.json', '.vscode/*.json' },
   callback = function()
     vim.bo.filetype = 'jsonc'
   end,

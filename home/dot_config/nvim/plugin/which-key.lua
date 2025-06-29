@@ -7,22 +7,20 @@ wk.setup({
 
 -- TODO: remap <leader>r (Rename symbol) to reload (or <backspace>r)
 wk.add({
-  { '<Esc>',        '<C-\\><C-n>',          desc = 'Escape terminal',               mode = 't',         noremap = true },
+  { '<C-h>',        '<C-w>h',               desc = 'Left window',      mode = { 'n', 'v' } },
+  { '<C-j>',        '<C-w>j',               desc = 'Up window',        mode = { 'n', 'v' } },
+  { '<C-k>',        '<C-w>k',               desc = 'Down window',      mode = { 'n', 'v' } },
+  { '<C-l>',        '<C-w>l',               desc = 'Right window',     mode = { 'n', 'v' } },
 
-  { '<C-h>',        '<C-w>h',               desc = 'Left window',                   mode = { 'n', 'v' } },
-  { '<C-j>',        '<C-w>j',               desc = 'Up window',                     mode = { 'n', 'v' } },
-  { '<C-k>',        '<C-w>k',               desc = 'Down window',                   mode = { 'n', 'v' } },
-  { '<C-l>',        '<C-w>l',               desc = 'Right window',                  mode = { 'n', 'v' } },
+  { 'U',            ':redo<cr>',            desc = 'Redo',             mode = { 'n', 'v' } },
+  { 'ge',           'G',                    desc = 'Go to last line',  mode = { 'n', 'v' } },
+  { 'gs',           '^',                    desc = 'First non-blank',  mode = { 'n', 'v' } },
+  { 'gh',           '0',                    desc = 'Go to line start', mode = { 'n', 'v' } },
+  { 'gl',           '$',                    desc = 'Go to line end',   mode = { 'n', 'v' } },
 
-  { 'U',            ':redo<cr>',            desc = 'Redo',                          mode = { 'n', 'v' } },
-  { 'ge',           'G',                    desc = 'Go to last line',               mode = { 'n', 'v' } },
-  { 'gs',           '^',                    desc = 'Go to first non-blank in line', mode = { 'n', 'v' } },
-  { 'gh',           '0',                    desc = 'Go to line start',              mode = { 'n', 'v' } },
-  { 'gl',           '$',                    desc = 'Go to line end',                mode = { 'n', 'v' } },
-
-  { '<backspace>o', ':open $MYVIMRC<cr>',   desc = 'Open config' },
+  { '<backspace>o', ':edit $MYVIMRC<cr>',   desc = 'Edit config' },
   { '<backspace>r', ':source $MYVIMRC<cr>', desc = 'Reload config' },
-  { '<backspace>s', ':\'<\'>sort<cr>',      desc = 'Sort lines',                    mode = { 'v' } },
+  { '<backspace>s', ':\'<\'>sort<cr>',      desc = 'Sort lines',       mode = { 'v' } },
 
   {
     '<leader>\'',
@@ -42,7 +40,7 @@ wk.add({
     -- https://github.com/nvim-telescope/telescope.nvim/issues/2201
     -- '<cmd>Telescope find_files search_dirs={"%:h"}<cr>', -- vim.fn.expand("%:h")
     '<cmd>Oil<cr>',
-    desc = 'Open parent directory',
+    desc = 'Open parent directory (Oil)',
     mode = { 'n', 'v' },
   },
   -- Alternate file or last accessed/modified file
@@ -59,13 +57,13 @@ wk.add({
       return require('which-key.extras').expand.buf()
     end
   },
-  { '<leader>H', '<cmd>MCPHub<cr>',              desc = 'MCPHub',    mode = { 'n', 'v' } },
-  { '<leader>h', '<cmd>Telescope help_tags<cr>', desc = 'Help tags', mode = { 'n', 'v' } },
-  { '<leader>M', '<cmd>Mason<cr>',               desc = 'Mason',     mode = { 'n', 'v' } },
-  { '<leader>O', '<cmd>Oil<cr>',                 desc = 'Oil',       mode = { 'n', 'v' } },
+  { '<leader>H', '<cmd>MCPHub<cr>',              desc = 'MCPHub',                mode = { 'n', 'v' } },
+  { '<leader>h', '<cmd>Telescope help_tags<cr>', desc = 'Help tags (Telescope)', mode = { 'n', 'v' } },
+  { '<leader>M', '<cmd>Mason<cr>',               desc = 'Mason',                 mode = { 'n', 'v' } },
+  { '<leader>O', '<cmd>Oil<cr>',                 desc = 'Oil',                   mode = { 'n', 'v' } },
   -- { '<leader>S', '<cmd>AerialToggle!<cr>', desc = 'Toggle symbols', mode = { 'n', 'v' } },
-  { '<leader>T', '<cmd>Telescope<cr>',           desc = 'Telescope', mode = { 'n', 'v' } },
-  { '<leader>U', '<cmd>UndotreeToggle<cr>',      desc = 'Undo tree', mode = { 'n', 'v' } },
+  { '<leader>T', '<cmd>Telescope<cr>',           desc = 'Telescope',             mode = { 'n', 'v' } },
+  { '<leader>U', '<cmd>UndotreeToggle<cr>',      desc = 'Undo tree',             mode = { 'n', 'v' } },
 
   {
     '<leader>s',
@@ -95,8 +93,8 @@ wk.add({
   },
 
 
-  { '<leader>D', '<cmd>Telescope diagnostics<cr>',         desc = 'Workspace diagnostics', mode = { 'n', 'v' } },
-  { '<leader>d', '<cmd>Telescope diagnostics bufnr=0<cr>', desc = 'Diagnostics',           mode = { 'n', 'v' } },
+  { '<leader>D', '<cmd>Telescope diagnostics<cr>',         desc = 'Workspace diagnostics (Telescope)', mode = { 'n', 'v' } },
+  { '<leader>d', '<cmd>Telescope diagnostics bufnr=0<cr>', desc = 'Diagnostics (Telescope)',           mode = { 'n', 'v' } },
   {
     '<leader>E',
     -- TODO: depth=1
@@ -207,4 +205,6 @@ wk.add({
   -- gt: window top
   -- gc: comment/uncomment
   -- gb: window bottom
+
+  { '<Esc>', '<C-\\><C-n>',               desc = 'Escape terminal',       mode = 't', noremap = true },
 })
