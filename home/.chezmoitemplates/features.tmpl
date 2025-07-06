@@ -12,7 +12,9 @@
 {{- /* Termux */ -}}
 {{- $features = mergeOverwrite $features (dict
   "neovim" true
+  "tmux" true
   "vim" true
+  "zellij" true
 ) -}}
 
 {{- else if eq .osid "arch" }}
@@ -28,7 +30,9 @@
   "node" true
   "php" true
   "rust" true
+  "tmux" true
   "vim" true
+  "zellij" true
 ) -}}
 
 {{- else if eq .osid "debian" }}
@@ -43,7 +47,9 @@
   "node" true
   "php" true
   "rust" true
+  "tmux" true
   "vim" true
+  "zellij" true
 ) -}}
 
 {{- else if eq .chezmoi.os "darwin" }}
@@ -61,7 +67,9 @@
   "node" true
   "php" true
   "rust" true
+  "tmux" true
   "vim" true
+  "zellij" true
   "zsh" false
 ) -}}
 

@@ -21,7 +21,7 @@ cmd sudo pacman --sync --needed --noconfirm --quiet procs
 # {{- else if eq .osid "debian" }} Debian/Ubuntu
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release dalance/procs)"
-ARCH="$(uname -m)"                            # aarch64, x86_64
+ARCH="$(uname -m)" # aarch64, x86_64
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # linux, mac, windows
 NAME="procs-$VERSION-$ARCH-$OS.zip"
 URL="https://github.com/dalance/procs/releases/download/$VERSION/$NAME"

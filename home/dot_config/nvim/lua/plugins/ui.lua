@@ -9,6 +9,10 @@ vim.g.diagnostic_signs = {
 }
 
 vim.diagnostic.config({
+  float = {
+    source = true, -- 'if_many',
+  },
+  severity_sort = true,
   signs = {
     text = vim.g.diagnostic_signs,
     -- linehl = {
@@ -18,6 +22,10 @@ vim.diagnostic.config({
     --   [vim.diagnostic.severity.WARN] = 'WarningMsg',
     -- },
   },
+  virtual_text = {
+    source = 'if_many',
+    prefix = '●',
+  },
 })
 
 local display_dir = vim.fn.getcwd() -- vim.fn.fnamemodify('.', ':~')
@@ -25,8 +33,6 @@ local display_dir = vim.fn.getcwd() -- vim.fn.fnamemodify('.', ':~')
 local dashboard = {
   enabled = true,
   preset = { header = 'Neovim' },
-  -- example = 'advanced',
-  -- example = 'compact_files',
   sections = {
     -- { section = 'header', padding = 1 },
     { section = 'startup', padding = 1 },
@@ -145,143 +151,13 @@ local dashboard = {
         }, cmd)
       end, cmds)
     end,
-    ]]
-    --
+    --]]
   },
 }
 
 -- local function lualine_winbar_filename()
 --   return vim.fn.expand('%:t')
 -- end
-
-local lualine_sections = {
-  lualine_a = {
-    {
-      'mode',
-      fmt = function(str)
-        return str:sub(1, 3)
-      end,
-    },
-  },
-  lualine_b = {
-    {
-      'branch',
-      -- color = '',
-      -- icon = '',
-    },
-    {
-      'diff',
-      -- colored = false,
-      -- symbols = {
-      --   added = '+',
-      --   modified = '~',
-      --   removed = '-',
-      -- },
-    },
-  },
-  lualine_c = {
-    { 'filename', path = 1 },
-    function()
-      if not package.loaded['package-info'] then
-        return ''
-      end
-      return require('package-info').get_status()
-    end,
-    -- 'trouble',
-    -- {
-    --   troubleStatusline.get,
-    --   -- cond = troubleStatusline.has,
-    --   fmt = function(str)
-    --     return '(' .. str .. ')'
-    --   end,
-    -- },
-  },
-  lualine_x = {
-    -- stylua: ignore
-    {
-      function() return '  ' .. require('dap').status() end,
-      cond = function() return package.loaded.dap and require('dap').status() ~= '' end,
-      color = function() return { fg = Snacks.util.color('Debug') } end,
-    },
-    {
-      -- FIXME: lazy load
-      'mcphub',
-      -- cond = function()
-      --   return vim.g.mcphub -- and not not package.loaded.mcphub
-      -- end,
-    },
-    {
-      'codecompanion',
-      cond = function()
-        return vim.g.ai.codecompanion
-      end,
-      fmt = function(str)
-        return str ~= '' and str or '{c}' -- 'CodeCompanion OFF'
-      end,
-    },
-    {
-      'codeium#GetStatusString',
-      cond = function()
-        return vim.g.ai.windsurf
-      end,
-      fmt = function(str)
-        return str and str ~= '' and str or '{w}' -- 'Windsurf OFF'
-      end,
-    },
-    {
-      'copilot',
-      cond = function()
-        return vim.g.ai.copilot_lua
-      end,
-      fmt = function(str)
-        return str and str ~= '' and str or '{}' -- 'Copilot OFF'
-      end,
-    },
-    'lsp-status',
-    'nvim-lint',
-    function()
-      if not package.loaded.conform then
-        return ''
-      end
-      local info = require('conform').list_formatters_to_run()
-      local result = {}
-      for index, item in pairs(info) do
-        result[index] = item.name .. (item.available and ' ●' or ' ○') -- item.command
-      end
-      return table.concat(result, ' ')
-    end,
-    {
-      'diagnostics',
-      -- always_visible = true,
-      symbols = {
-        error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR],
-        warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN],
-        info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO],
-        hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT],
-      },
-    },
-    'progress',
-    'location',
-    {
-      'encoding',
-      cond = function()
-        return vim.o.encoding ~= 'utf-8'
-      end,
-      show_bom = true,
-    },
-    {
-      'fileformat',
-      -- fmt = function(str) return str == 'unix' and 'LF' or str end,
-    },
-    'filetype',
-  },
-  lualine_y = {
-    -- 'progress',
-  },
-  lualine_z = {
-    -- 'location',
-  },
-}
 
 local function ghq_picker()
   local cmd = 'ghq list --full-path'
@@ -321,6 +197,17 @@ local function neovim_news()
       conceallevel = 3,
     },
   })
+end
+
+-- Terminal Mappings
+-- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/util.lua
+local function term_nav(dir)
+  ---@param self snacks.terminal
+  return function(self)
+    return self:is_floating() and '<c-' .. dir .. '>' or vim.schedule(function()
+      vim.cmd.wincmd(dir)
+    end)
+  end
 end
 
 -- https://github.com/stevearc/aerial.nvim
@@ -381,7 +268,7 @@ return {
     },
     -- stylua: ignore
     keys = {
-      -- { '<leader>gh', '', desc = '+hunks' },
+      -- { '<leader>gh', desc = '+hunks' },
       { '<leader>gh', '<cmd>Gitsigns setqflist<cr>', desc = 'Git hunks (QF list)' },
       { ')h', '<cmd>Gitsigns next_hunk<cr>', desc = 'Next hunk', mode = { 'n', 'v' } },
       { '(h', '<cmd>Gitsigns prev_hunk<cr>', desc = 'Next hunk', mode = { 'n', 'v' } },
@@ -426,6 +313,157 @@ return {
         always_show_tabline = false,
         globalstatus = false,
       },
+      sections = {
+        lualine_a = {
+          {
+            'mode',
+            fmt = function(str)
+              return str:sub(1, 3)
+            end,
+          },
+        },
+        lualine_b = {
+          {
+            'branch',
+            -- color = '',
+            -- icon = '',
+          },
+          {
+            'diff',
+            -- colored = false,
+            -- symbols = {
+            --   added = '+',
+            --   modified = '~',
+            --   removed = '-',
+            -- },
+          },
+        },
+        lualine_c = {
+          { 'filename', path = 1 },
+          function()
+            if not package.loaded['package-info'] then
+              return ''
+            end
+            return require('package-info').get_status()
+          end,
+          -- 'trouble',
+          -- {
+          --   troubleStatusline.get,
+          --   -- cond = troubleStatusline.has,
+          --   fmt = function(str)
+          --     return '(' .. str .. ')'
+          --   end,
+          -- },
+        },
+        lualine_x = {
+          {
+            'overseer',
+            label = '', -- Prefix for task counts
+            colored = true, -- Color the task icons and counts
+            symbols = {
+              ['CANCELED'] = ' ',
+              ['FAILURE'] = '󰅚 ',
+              ['SUCCESS'] = '󰄴 ',
+              ['RUNNING'] = '󰑮 ',
+            },
+            unique = false, -- Unique-ify non-running task count by name
+            name = nil, -- List of task names to search for
+            name_not = false, -- When true, invert the name search
+            status = nil, -- List of task statuses to display
+            status_not = false, -- When true, invert the status search
+          },
+          -- 'nvim_treesitter#statusline(90)',
+          -- stylua: ignore
+          {
+            function() return '  ' .. require('dap').status() end,
+            cond = function() return package.loaded.dap and require('dap').status() ~= '' end,
+            color = function() return { fg = Snacks.util.color('Debug') } end,
+          },
+          -- stylua: ignore
+          {
+            require('lazy.status').updates,
+            cond = require('lazy.status').has_updates,
+            color = function() return { fg = Snacks.util.color('Special') } end,
+          },
+          {
+            -- FIXME: lazy load
+            'mcphub',
+            cond = function()
+              return package.loaded.mcphub and vim.bo.filetype == 'codecompanion'
+            end,
+          },
+          {
+            'codecompanion',
+            cond = function()
+              return vim.g.ai.codecompanion
+            end,
+            -- fmt = function(str)
+            --   return str ~= '' and str or '{c}' -- 'CodeCompanion OFF'
+            -- end,
+          },
+          {
+            'codeium#GetStatusString',
+            cond = function()
+              return vim.g.ai.windsurf
+            end,
+            -- fmt = function(str)
+            --   return str and str ~= '' and str or '{w}' -- 'Windsurf OFF'
+            -- end,
+          },
+          {
+            'copilot',
+            cond = function()
+              return vim.g.ai.copilot_lua
+            end,
+            -- fmt = function(str)
+            --   return str and str ~= '' and str or '{}' -- 'Copilot OFF'
+            -- end,
+          },
+          'lsp-status',
+          'nvim-lint',
+          function()
+            if not package.loaded.conform then
+              return ''
+            end
+            local info = require('conform').list_formatters_to_run()
+            local result = {}
+            for index, item in pairs(info) do
+              result[index] = item.name .. (item.available and ' ●' or ' ○') -- item.command
+            end
+            return table.concat(result, ' ')
+          end,
+          {
+            'diagnostics',
+            -- always_visible = true,
+            symbols = {
+              error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR],
+              warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN],
+              info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO],
+              hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT],
+            },
+          },
+          'progress',
+          'location',
+          {
+            'encoding',
+            cond = function()
+              return vim.o.encoding ~= 'utf-8'
+            end,
+            show_bom = true,
+          },
+          {
+            'fileformat',
+            -- fmt = function(str) return str == 'unix' and 'LF' or str end,
+          },
+          'filetype',
+        },
+        lualine_y = {
+          -- 'progress',
+        },
+        lualine_z = {
+          -- 'location',
+        },
+      },
       tabline = {
         -- lualine_a = { 'buffers' },
         -- lualine_b = { 'branch' },
@@ -433,7 +471,23 @@ return {
           'buffers',
           -- 'filename',
         },
-        -- lualine_x = {},
+        lualine_x = {
+          function()
+            -- if not package.loaded.persistence then
+            --   return ''
+            -- end
+            -- FIXME: expensive call and flickers cursor
+            -- local current = require('persistence').current()
+            -- if not current then
+            --   return ''
+            -- end
+            -- local parts = vim.fn.split(current, '/')
+            -- local file = parts[#parts]:gsub('%%', '/')
+            -- local path = file:sub(1, -5) -- Trim ".vim"
+            local path = '.'
+            return vim.fn.fnamemodify(path, ':~')
+          end,
+        },
         -- lualine_y = {},
         lualine_z = { 'tabs' },
       },
@@ -452,9 +506,8 @@ return {
 
       -- https://github.com/nvim-lualine/lualine.nvim#available-extensions
       extensions = {
-        -- 'aerial',
-        -- 'assistant',
         'fugitive',
+        'lazy',
         'mason',
         'nvim-dap-ui',
         'oil',
@@ -463,21 +516,30 @@ return {
       },
     },
     config = function(_, opts)
+      -- FIXME: deep clone to not insert in inactive sections
+      opts.inactive_sections = vim.tbl_deep_extend('keep', {
+        lualine_b = { 'branch' },
+      }, opts.sections)
+
+      -- TODO: per buffer and show only on active
       -- local trouble = require('trouble')
-      -- local troubleStatusline = trouble.statusline({
-      --   mode = 'lsp_document_symbols', -- 'diagnostics',
+      -- local symbols = trouble.statusline({
+      --   mode = 'symbols',
       --   groups = {},
       --   title = false,
       --   filter = { range = true },
       --   format = '{kind_icon}{symbol.name:Normal}',
-      --   -- The following line is needed to fix the background color
-      --   -- Set it to the lualine section you want to use
       --   hl_group = 'lualine_c_normal',
       -- })
-      opts.sections = lualine_sections
-      opts.inactive_sections = vim.tbl_deep_extend('keep', {
-        lualine_b = { 'branch' },
-      }, lualine_sections)
+      -- table.insert(opts.sections.lualine_c, {
+      --   symbols and symbols.get,
+      --   cond = function()
+      --     return vim.b.trouble_lualine ~= false and symbols.has()
+      --   end,
+      -- })
+
+      table.insert(opts.sections.lualine_x, 1, Snacks.profiler.status())
+
       local showtabline = vim.opt.showtabline
       require('lualine').setup(opts)
       vim.opt.showtabline = showtabline
@@ -490,13 +552,7 @@ return {
     -- branch = 'main',
     tag = 'v2.22.0',
     dependencies = {
-      {
-        'echasnovski/mini.icons',
-        tag = 'v0.16.0',
-        opts = {
-          -- style = 'ascii', -- Default: glyph
-        },
-      },
+      'echasnovski/mini.icons',
       -- {
       --   'nvim-tree/nvim-web-devicons',
       --   tag = 'v0.100',
@@ -533,17 +589,28 @@ return {
         top_down = false,
         refresh = 1000, -- Refresh at most every second (default: 50ms)
       },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        -- NOTE: maximize with meta-m
+        -- https://github.com/LazyVim/LazyVim/discussions/5765
+        -- https://github.com/folke/snacks.nvim/issues/1217#issuecomment-2661465574
+        formatters = { file = { truncate = vim.o.columns <= 80 and 40 or 300 } },
+      },
       quickfile = { enabled = true },
       scope = { enabled = false },
       scroll = { enabled = false },
       statuscolumn = { enabled = true },
+      terminal = {
+        win = {
+          keys = {
+            nav_h = { '<C-h>', term_nav('h'), desc = 'Go to Left Window', expr = true, mode = 't' },
+            nav_j = { '<C-j>', term_nav('j'), desc = 'Go to Lower Window', expr = true, mode = 't' },
+            nav_k = { '<C-k>', term_nav('k'), desc = 'Go to Upper Window', expr = true, mode = 't' },
+            nav_l = { '<C-l>', term_nav('l'), desc = 'Go to Right Window', expr = true, mode = 't' },
+          },
+        },
+      },
       words = { enabled = true },
-      -- styles = {
-      --   notification = {
-      --     -- wo = { wrap = true } -- Wrap notifications
-      --   },
-      -- },
     },
     -- stylua: ignore
     keys = {
@@ -558,8 +625,10 @@ return {
       { '<leader>br', function() Snacks.rename.rename_file() end, desc = 'Rename file' },
 
       -- Explore
-      { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Explore current buffer\'s directory' },
-      { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Explore root directory' },
+      -- { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Explore current buffer\'s directory' },
+      -- { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Explore root directory' },
+      { '<leader>E', function() Snacks.picker.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
+      { '<leader>e', function() Snacks.picker.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Find
       { '-', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true, }) end, desc = 'Find in buffer directory' },
@@ -586,7 +655,7 @@ return {
       { '<leader>s\'', function() Snacks.picker.registers() end, desc = 'Registers' },
       { '<leader>s/', function() Snacks.picker.search_history() end, desc = 'Search history' },
       { '<leader>sa', function() Snacks.picker.autocmds() end, desc = 'Autocmds' },
-      { '<leader>sb', function() Snacks.picker.grep_buffers() end, desc = 'Search buffers' },
+      { '<leader>sb', function() Snacks.picker.grep_buffers() end, desc = 'Grep buffers' },
       { '<leader>s:', function() Snacks.picker.command_history() end, desc = 'Command history' },
       -- { '<leader>sC', function() Snacks.picker.files({ cwd = vim.fn.stdpath('config'), hidden = true }) end, desc = 'Find Config File' },
       { '<leader>sc', function() Snacks.picker.commands() end, desc = 'Commands' },
@@ -612,7 +681,7 @@ return {
       { '<leader>su', function() Snacks.picker.undo() end, desc = 'Undo history' },
       { '<leader>sw', function() Snacks.picker.grep_word() end, desc = 'Visual selection or word', mode = { 'n', 'x' } },
       { '<leader>sz', function() Snacks.picker.zoxide() end, desc = 'Zoxide picker' },
-      { '<leader>s.',  function() Snacks.scratch.select() end, desc = 'Select scratch buffer' },
+      { '<leader>s.', function() Snacks.scratch.select() end, desc = 'Select scratch buffer' },
 
       -- LSP
       { 'gd', function() Snacks.picker.lsp_definitions() end, desc = 'Goto Definition' },
@@ -621,34 +690,56 @@ return {
       { 'gI', function() Snacks.picker.lsp_implementations() end, desc = 'Goto Implementation' },
       { 'gy', function() Snacks.picker.lsp_type_definitions() end, desc = 'Goto T[y]pe Definition' },
       { '<leader>l', '', desc = '+lsp' },
+      { '<leader>lc', function() Snacks.picker.lsp_config() end, desc = 'Search LSP configurations' },
       { '<leader>ls', function() Snacks.picker.lsp_symbols() end, desc = 'LSP Symbols' },
       { '<leader>lS', function() Snacks.picker.lsp_workspace_symbols() end, desc = 'LSP Workspace Symbols' },
 
-      {
-        'T', -- '<leader>T',
-        -- '<cmd>belowright split | resize 20 | terminal<cr>i',
-        '<cmd>Terminal<cr>',
-        desc = 'Terminal',
-      },
+      { '<leader>T', '<cmd>Terminal<cr>', desc = 'Terminal' },
 
       { '<leader>n', function() Snacks.picker.notifications() end, desc = 'Notification picker' },
-      { '<leader>N',  function() Snacks.notifier.show_history() end, desc = 'Notification history' },
+      { '<leader>N', function() Snacks.notifier.show_history() end, desc = 'Notification history' },
 
-      { '<leader>u', '', desc = '+ui/toggle' },
+      { '<leader>u', '', desc = '+ui' },
       { '<leader>uC', function() Snacks.picker.colorschemes() end, desc = 'Colorschemes' },
       { '<leader>un', function() Snacks.notifier.hide() end, desc = 'Dismiss All Notifications' },
-      { '<leader>uZ',  function() Snacks.zen.zoom() end, desc = 'Toggle zoom' },
-      { '<leader>uz',  function() Snacks.zen() end, desc = 'Toggle zen mode' },
-      { '<leader>.',  function() Snacks.scratch() end, desc = 'Toggle scratch buffer' },
+      { '<leader>uZ', function() Snacks.zen.zoom() end, desc = 'Toggle zoom' },
+      { '<leader>uz', function() Snacks.zen() end, desc = 'Toggle zen mode' },
+      { '<leader>.', function() Snacks.scratch() end, desc = 'Toggle scratch buffer' },
 
       { '<c-/>',      function() Snacks.terminal() end, desc = 'Toggle Terminal' },
       { '<c-_>',      function() Snacks.terminal() end, desc = 'which_key_ignore' },
       { ']]',         function() Snacks.words.jump(vim.v.count1) end, desc = 'Next Reference', mode = { 'n', 't' } },
       { '[[',         function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev Reference', mode = { 'n', 't' } },
-      { '<leader>o', '', desc = '+open' },
-      { '<leader>oD', '<cmd>Dashboard<cr>', desc = 'Dashboard' },
-      { '<leader>oN', '<cmd>NeovimNews<cr>', desc = 'Neovim News' },
+
+      { '<backspace>o', '', desc = '+open' },
+      { '<backspace>oD', '<cmd>Dashboard<cr>', desc = 'Dashboard' },
+      { '<backspace>oN', '<cmd>NeovimNews<cr>', desc = 'Neovim News' },
+
+      { '<leader>P', '', desc = '+profiler' },
+      { '<leader>Ps', function() Snacks.profiler.scratch() end, desc = 'Profiler Scratch Bufer' },
     },
+    -- config = function(_, opts)
+    --   local snacks = require('snacks')
+    --
+    --   -- https://www.lazyvim.org/extras/util/chezmoi#snacksnvim-optional
+    --   local chezmoi_entry = {
+    --     icon = ' ',
+    --     key = 'c',
+    --     desc = 'Config',
+    --     action = chezmoi_picker,
+    --   }
+    --   local config_index
+    --   for i = #opts.dashboard.preset.keys, 1, -1 do
+    --     if opts.dashboard.preset.keys[i].key == 'c' then
+    --       table.remove(opts.dashboard.preset.keys, i)
+    --       config_index = i
+    --       break
+    --     end
+    --   end
+    --   table.insert(opts.dashboard.preset.keys, config_index, chezmoi_entry)
+    --
+    --   snacks.setup(opts)
+    -- end,
     init = function()
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
@@ -680,51 +771,101 @@ return {
           Snacks.toggle.inlay_hints():map('<leader>uh')
           Snacks.toggle.indent():map('<leader>ug')
           Snacks.toggle.dim():map('<leader>uD')
+
+          -- Toggle the profiler
+          Snacks.toggle.profiler():map('<leader>Pp')
+          -- Toggle the profiler highlights
+          Snacks.toggle.profiler_highlights():map('<leader>Ph')
         end,
       })
 
-      -- LSP status notification
-      vim.api.nvim_create_autocmd('LspProgress', {
-        ---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
-        callback = function(ev)
-          vim.notify(vim.lsp.status(), 'info', {
-            id = 'lsp_progress',
-            title = 'LSP Progress',
-            opts = function(notif)
-              notif.icon = ' '
-                .. (
-                  ev.data.params.value.kind == 'end' and vim.g.config.signs.done
-                  or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % spinner_len + 1]
-                )
-            end,
-          })
-        end,
-      })
+      -- Simple LSP progress
+      -- vim.api.nvim_create_autocmd('LspProgress', {
+      --   ---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
+      --   callback = function(ev)
+      --     vim.notify(vim.lsp.status(), 'info', {
+      --       id = 'lsp_progress',
+      --       title = 'LSP Progress',
+      --       opts = function(notif)
+      --         notif.icon = ' '
+      --           .. (
+      --             ev.data.params.value.kind == 'end' and vim.g.config.signs.done
+      --             or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % spinner_len + 1]
+      --           )
+      --       end,
+      --     })
+      --   end,
+      -- })
 
-      -- https://github.com/folke/snacks.nvim/blob/main/docs/rename.md#oilnvim
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'OilActionsPost',
-        callback = function(event)
-          if event.data.actions.type == 'move' then
-            Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
-          end
-        end,
-      })
+      -- Advanced LSP progress
+      -- ---@type table<number, {token:lsp.ProgressToken, msg:string, done:boolean}[]>
+      -- local progress = vim.defaulttable()
+      -- vim.api.nvim_create_autocmd('LspProgress', {
+      --   ---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
+      --   callback = function(ev)
+      --     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+      --     local value = ev.data.params.value --[[@as {percentage?: number, title?: string, message?: string, kind: "begin" | "report" | "end"}]]
+      --     if not client or type(value) ~= 'table' then
+      --       return
+      --     end
+      --     local p = progress[client.id]
+      --
+      --     for i = 1, #p + 1 do
+      --       if i == #p + 1 or p[i].token == ev.data.params.token then
+      --         p[i] = {
+      --           token = ev.data.params.token,
+      --           msg = ('[%3d%%] %s%s'):format(
+      --             value.kind == 'end' and 100 or value.percentage or 100,
+      --             value.title or '',
+      --             value.message and (' **%s**'):format(value.message) or ''
+      --           ),
+      --           done = value.kind == 'end',
+      --         }
+      --         break
+      --       end
+      --     end
+      --
+      --     local msg = {} ---@type string[]
+      --     progress[client.id] = vim.tbl_filter(function(v)
+      --       return table.insert(msg, v.msg) or not v.done
+      --     end, p)
+      --
+      --     local spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
+      --     vim.notify(table.concat(msg, '\n'), 'info', {
+      --       id = 'lsp_progress',
+      --       title = client.name,
+      --       opts = function(notif)
+      --         notif.icon = #progress[client.id] == 0 and ' '
+      --           or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % spinner_len + 1]
+      --       end,
+      --     })
+      --   end,
+      -- })
+      --
+      -- -- https://github.com/folke/snacks.nvim/blob/main/docs/rename.md#oilnvim
+      -- vim.api.nvim_create_autocmd('User', {
+      --   pattern = 'OilActionsPost',
+      --   callback = function(event)
+      --     if event.data.actions.type == 'move' then
+      --       Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
+      --     end
+      --   end,
+      -- })
 
       -- Custom commands
       vim.api.nvim_create_user_command('Dashboard', function()
         Snacks.dashboard.open()
       end, { desc = 'Open dashboard (snacks)' })
 
-      vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news' })
+      vim.api.nvim_create_user_command('Find', function()
+        Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true })
+      end, { desc = 'Find files (snacks)' })
+
+      vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })
 
       vim.api.nvim_create_user_command('Terminal', function()
         Snacks.terminal()
       end, { desc = 'Toggle terminal (snacks)' })
-
-      vim.api.nvim_create_user_command('Find', function()
-        Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true })
-      end, { desc = 'Find files (snacks)' })
     end,
   },
 

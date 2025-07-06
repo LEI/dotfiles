@@ -1,17 +1,38 @@
 -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/lsp/init.lua
--- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/extras/formatting/prettier.lua
 -- https://github.com/stevearc/dotfiles/blob/master/.config/nvim/lua/plugins/format.lua
 
 local prettier = {
   -- 'prettierd',
   'prettier',
+  lsp_format = 'prefer',
   -- stop_after_first = true,
+}
+
+-- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/extras/formatting/prettier.lua
+local prettier_filetypes = {
+  'css',
+  'graphql',
+  'handlebars',
+  'html',
+  'javascript',
+  'javascriptreact',
+  'json',
+  'jsonc',
+  'less',
+  'markdown',
+  'markdown.mdx',
+  'scss',
+  'typescript',
+  'typescriptreact',
+  'vue',
+  'yaml',
 }
 
 return {
   {
     -- Alternative: nvimtools/none-ls.nvim + lukas-reineke/lsp-format.nvim
     'stevearc/conform.nvim',
+    enabled = vim.fn.has('nvim-0.10') == 1,
     tag = 'v9.0.0',
     dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim' },
     cmd = {
@@ -82,11 +103,7 @@ return {
         -- },
       },
       formatters_by_ft = {
-        css = prettier,
-        html = prettier,
-        json = prettier,
         json5 = prettier,
-        jsonc = prettier,
         lua = { 'stylua' },
         -- python = { 'isort', 'black' },
         -- WARN: intelphense causes indentation conflicts
@@ -106,7 +123,7 @@ return {
           'sql_formatter',
         },
       },
-      log_level = vim.log.levels.TRACE,
+      -- log_level = vim.log.levels.TRACE,
       notify_no_formatters = true,
       notify_on_error = true,
     },
@@ -117,6 +134,12 @@ return {
         local defaults = conform.get_formatter_config(name)
         local extended = vim.tbl_deep_extend('keep', extra, defaults)
         opts.formatters[name] = extended
+      end
+      opts.formatters_by_ft = opts.formatters_by_ft or {}
+      for _, ft in ipairs(prettier_filetypes) do
+        opts.formatters_by_ft[ft] = opts.formatters_by_ft[ft] or {}
+        table.insert(opts.formatters_by_ft[ft], 'prettier')
+        opts.formatters_by_ft[ft].lsp_format = prettier.lsp_format
       end
       conform.setup(opts)
 
@@ -140,7 +163,6 @@ return {
         require('conform').format(options)
       end, { bang = true, range = true })
 
-      -- Toggle format on save
       vim.api.nvim_create_user_command('FormatDisable', function(args)
         if args.bang then
           -- FormatDisable! will disable formatting just for this buffer

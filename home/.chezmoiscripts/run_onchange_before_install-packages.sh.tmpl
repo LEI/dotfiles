@@ -5,7 +5,7 @@
 
 set -eu
 
-# {{- $packages := concat .basePackages (get .packages .osid ) | join " " }}
+# {{- $packages := concat (get .packages "common" | default (list)) (get .packages .osid ) | join " " }}
 packages="{{ $packages }}"
 
 echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"

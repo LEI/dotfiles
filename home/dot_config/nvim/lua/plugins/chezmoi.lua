@@ -29,13 +29,21 @@ local function chezmoi_picker()
         args = { '--watch' },
       })
     end,
-    formatters = { file = { truncate = 80 } },
+    -- formatters = { file = { truncate = 80 } },
     -- win = { preview = { title = '{preview}' } },
   }
   Snacks.picker.pick(opts)
 end
 
 return {
+  {
+    -- highlighting for chezmoi files template files
+    'alker0/chezmoi.vim',
+    init = function()
+      vim.g['chezmoi#use_tmp_buffer'] = 1
+      vim.g['chezmoi#source_dir_path'] = vim.g.home .. '/.local/share/chezmoi'
+    end,
+  },
   {
     'xvzc/chezmoi.nvim',
     dependencies = {
@@ -46,16 +54,31 @@ return {
     keys = {
       { '<leader>sC', chezmoi_picker, desc = 'Search dotfiles (chezmoi)' },
     },
-    opts = {},
+    opts = {
+      edit = {
+        watch = false,
+        force = false,
+      },
+      notification = {
+        on_open = true,
+        on_apply = true,
+        on_watch = false,
+      },
+    },
     init = function(_, opts)
       vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
-        pattern = {
-          vim.g.home .. '/.dotfiles/home',
-          vim.g.home .. '/.local/share/chezmoi/home/*',
-          vim.g.home .. '/src/*/*/dotfiles/home',
-        },
+        pattern = { vim.g.home .. '/.local/share/chezmoi/*' },
         callback = function(ev)
           local bufnr = ev.buf
+
+          if
+            vim.bo[bufnr].filetype == 'gitcommit'
+            or vim.bo[bufnr].filetype == 'gitrebase'
+            or vim.bo[bufnr].filetype == 'diff'
+          then
+            return
+          end
+
           local edit_watch = function()
             require('chezmoi.commands.__edit').watch(bufnr)
           end
@@ -65,29 +88,10 @@ return {
       vim.api.nvim_create_user_command('ChezmoiFind', chezmoi_picker, { desc = 'Search dotfiles (chezmoi)' })
     end,
   },
-  -- {
-  --   'folke/snacks.nvim',
-  --   optional = true,
-  --   opts = function(_, opts)
-  --     local chezmoi_entry = {
-  --       icon = ' ',
-  --       key = 'c',
-  --       desc = 'Config',
-  --       action = chezmoi_picker,
-  --     }
-  --     local config_index
-  --     for i = #opts.dashboard.preset.keys, 1, -1 do
-  --       if opts.dashboard.preset.keys[i].key == 'c' then
-  --         table.remove(opts.dashboard.preset.keys, i)
-  --         config_index = i
-  --         break
-  --       end
-  --     end
-  --     table.insert(opts.dashboard.preset.keys, config_index, chezmoi_entry)
-  --   end,
-  -- },
   {
     'echasnovski/mini.icons',
+    tag = 'v0.16.0',
+    lazy = true,
     opts = {
       file = {
         ['.chezmoiignore'] = { glyph = '', hl = 'MiniIconsGrey' },
@@ -102,6 +106,7 @@ return {
         ['yaml.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
         ['zsh.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
       },
+      -- style = 'ascii', -- Default: glyph
     },
   },
 }

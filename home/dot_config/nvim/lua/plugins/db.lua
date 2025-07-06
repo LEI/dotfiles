@@ -19,7 +19,7 @@ return {
       'DBUIToggle',
     },
     keys = {
-      { '<leader>D', '<cmd>DBUIToggle<cr>', desc = 'Dadbod UI (DBUI)', mode = { 'n', 'v' } },
+      { '<leader>OB', '<cmd>DBUIToggle<cr>', desc = 'Dadbod UI (DBUI)', mode = { 'n', 'v' } },
     },
     init = function()
       -- vim.g.db_ui_auto_execute_table_helpers = 1

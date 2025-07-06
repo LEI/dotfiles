@@ -1,11 +1,88 @@
 return {
   {
-    -- Alternative: echasnovski/mini.pairs
-    'windwp/nvim-autopairs',
+    'm4xshen/hardtime.nvim',
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    event = 'VeryLazy',
+    cmd = 'Hardtime',
+    keys = {
+      { '<backspace>h', '', desc = '+hardtime' },
+      { '<backspace>hd', '<cmd>Hardtime disable', desc = 'Disable hardtime' },
+      { '<backspace>he', '<cmd>Hardtime enable', desc = 'Enable hardtime' },
+      { '<backspace>hr', '<cmd>Hardtime report', desc = 'Report hardtime' },
+      { '<backspace>ht', '<cmd>Hardtime toggle', desc = 'Toggle hardtime' },
+    },
+    opts = {
+      disable_mouse = false,
+      disabled_filetypes = {
+        lazy = true,
+        snacks_picker_input = true,
+        -- snacks_picker_list = true,
+        -- ['dapui*'] = false,
+      },
+      disabled_keys = {
+        -- ['<Up>'] = false, -- Allow <Up> key
+        -- ['<Space>'] = { 'n', 'x' }, -- Disable <Space> key in normal and visual mode
+      },
+      restriction_mode = 'hint', -- Default: block
+    },
+  },
+  {
+    'folke/flash.nvim',
+    enabled = vim.fn.has('nvim-0.8') == 1,
+    tag = 'v2.1.0',
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
+      { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash treesitter' },
+      -- { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote flash' },
+      -- { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter search' },
+      { '<c-s>', mode = { 'c' }, function() require('flash').toggle() end, desc = 'Toggle Flash search' },
+    },
+  },
+
+  -- { 'tpope/vim-dotenv', tag = 'v1.0', cmd = 'Dotenv' },
+  {
+    'tpope/vim-eunuch',
+    tag = 'v1.3',
+    event = 'CmdlineEnter',
+    init = function()
+      -- FIXME: <SNR>51_EunuchNewLine
+      -- https://github.com/tpope/vim-eunuch/issues/95
+      vim.g.eunuch_no_maps = 1
+    end,
+  },
+  { 'tpope/vim-fugitive', tag = 'v3.7', cmd = 'Git' },
+  { 'tpope/vim-sleuth', version = '2.0.0', event = 'VeryLazy' },
+  -- { 'tpope/vim-repeat', version = 'v1.2', event = 'VeryLazy' },
+  {
+    'echasnovski/mini.ai',
+    tag = 'v0.16.0',
+    event = 'InsertEnter',
+  },
+  {
+    'echasnovski/mini.move',
+    tag = 'v0.16.0',
+    event = 'InsertEnter',
+  },
+
+  -- Alternative: kylechui/nvim-surround
+  { 'tpope/vim-surround', tag = 'v2.2', event = 'VeryLazy' },
+  -- :h MiniSurround-vim-surround-config
+  -- { 'echasnovski/mini.surround', tag = 'v0.16.0', event = 'InsertEnter' },
+
+  {
+    -- Alternative: 'windwp/nvim-autopairs',
+    'echasnovski/mini.pairs',
+    tag = 'v0.16.0',
     event = 'InsertEnter',
     opts = {},
   },
-  -- monaqa/dial.nvim
+  {
+    'monaqa/dial.nvim',
+    tag = 'v0.4.0',
+    keys = { '<C-a>', { '<C-x>', mode = 'n' } },
+  },
   {
     'iamcco/markdown-preview.nvim',
     tag = 'v0.0.10',
@@ -21,7 +98,7 @@ return {
       -- vim.g.mkdp_filetypes = { 'markdown' }
       vim.api.nvim_create_autocmd({ 'FileType' }, {
         pattern = { 'markdown' },
-        once = true,
+        -- once = true,
         callback = function()
           require('which-key').add({
             { '<leader>m', group = 'markdown', buffer = 0 },
@@ -93,16 +170,17 @@ return {
   {
     'nvim-treesitter/nvim-treesitter',
     tag = 'v0.10.0',
-    branch = 'master',
+    -- branch = 'master',
     lazy = false,
     build = ':TSUpdate',
     opts = {
       auto_install = true,
-      -- ensure_installed = 'all',
       ensure_installed = {
         'angular',
         'bash',
         'c',
+        'dockerfile',
+        'hcl',
         'help',
         'html',
         'javascript',
@@ -111,6 +189,7 @@ return {
         'lua',
         'markdown',
         'markdown_inline',
+        'norg',
         'python',
         'query',
         'regex',
@@ -124,13 +203,136 @@ return {
         enable = true,
       },
     },
+    init = function()
+      vim.opt.foldenable = false
+      -- vim.wo.foldlevel = 99
+      -- vim.wo.conceallevel = 2
+      if vim.fn.has('nvim-0.10') == 1 then
+        vim.opt.smoothscroll = true
+        vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        vim.opt.foldmethod = 'expr'
+        vim.opt.foldtext = ''
+      else
+        vim.opt.foldmethod = 'indent'
+        vim.opt.foldtext = 'v:lua.vim.treesitter.foldexpr()'
+      end
+    end,
+  },
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    tag = 'v1.0.0',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    cmd = 'TSContext',
+    keys = {
+      -- { '[c', function() require('treesitter-context').go_to_context(vim.v.count1) end, desc = 'Go to context', mode = 'n' },
+    },
+    opts = function()
+      local tsc = require('treesitter-context')
+      Snacks.toggle({
+        name = 'Treesitter Context',
+        get = tsc.enabled,
+        set = function(state)
+          if state then
+            tsc.enable()
+          else
+            tsc.disable()
+          end
+        end,
+      }):map('<leader>ut')
+      return {
+        mode = 'cursor', -- cursor, topline
+        max_lines = 3,
+      }
+    end,
+  },
+  -- {
+  --   -- select, move, swap, and peek
+  --   'nvim-treesitter/nvim-treesitter-textobjects',
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  --   event = 'VeryLazy',
+  -- },
+  -- echasnovski/mini.comment
+  -- options = {
+  --   custom_commentstring = function()
+  --     return require('ts_context_commentstring').calculate_commentstring() or vim.bo.commentstring
+  --   end,
+  -- },
+  {
+    'JoosepAlviste/nvim-ts-context-commentstring',
+    enabled = vim.fn.has('nvim-0.10') == 1,
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    event = 'VeryLazy',
+    opts = {
+      enable_autocmd = false,
+    },
+    init = function()
+      local get_option = vim.filetype.get_option
+      vim.filetype.get_option = function(filetype, option)
+        return option == 'commentstring' and require('ts_context_commentstring.internal').calculate_commentstring()
+          or get_option(filetype, option)
+      end
+    end,
   },
   {
     'folke/ts-comments.nvim',
+    enabled = false, -- vim.fn.has('nvim-0.10') == 1,
     tag = 'v1.5.0',
     opts = {},
     event = 'VeryLazy',
-    enabled = vim.fn.has('nvim-0.10.0') == 1,
   },
-  -- gbprod/yanky.nvim
+  {
+    'danymat/neogen',
+    version = '2.20.0',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    cmd = 'Neogen',
+    keys = {
+      {
+        '<leader>cn',
+        function()
+          require('neogen').generate()
+        end,
+        desc = 'Generate annotations (neogen)',
+      },
+    },
+    opts = {},
+  },
+  {
+    'gbprod/yanky.nvim',
+    tag = 'v2.0.0',
+    dependencies = { 'folke/snacks.nvim' },
+    cmd = 'YankyRingHistory',
+    -- event = 'VeryLazy',
+    keys = {
+      {
+        '<leader>pp',
+        function()
+          -- TODO: snacks picker
+          -- require('telescope').extensions.yank_history.yank_history({})
+          vim.cmd('YankyRingHistory')
+        end,
+        mode = { 'n', 'x' },
+        desc = 'Open Yank History',
+      },
+      { 'y', '<Plug>(YankyYank)', mode = { 'n', 'x' }, desc = 'Yank Text' },
+      { 'p', '<Plug>(YankyPutAfter)', mode = { 'n', 'x' }, desc = 'Put Text After Cursor' },
+      { 'P', '<Plug>(YankyPutBefore)', mode = { 'n', 'x' }, desc = 'Put Text Before Cursor' },
+      { 'gp', '<Plug>(YankyGPutAfter)', mode = { 'n', 'x' }, desc = 'Put Text After Selection' },
+      { 'gP', '<Plug>(YankyGPutBefore)', mode = { 'n', 'x' }, desc = 'Put Text Before Selection' },
+      { '[y', '<Plug>(YankyCycleForward)', desc = 'Cycle Forward Through Yank History' },
+      { ']y', '<Plug>(YankyCycleBackward)', desc = 'Cycle Backward Through Yank History' },
+      { ']p', '<Plug>(YankyPutIndentAfterLinewise)', desc = 'Put Indented After Cursor (Linewise)' },
+      { '[p', '<Plug>(YankyPutIndentBeforeLinewise)', desc = 'Put Indented Before Cursor (Linewise)' },
+      { ']P', '<Plug>(YankyPutIndentAfterLinewise)', desc = 'Put Indented After Cursor (Linewise)' },
+      { '[P', '<Plug>(YankyPutIndentBeforeLinewise)', desc = 'Put Indented Before Cursor (Linewise)' },
+      { '>p', '<Plug>(YankyPutIndentAfterShiftRight)', desc = 'Put and Indent Right' },
+      { '<p', '<Plug>(YankyPutIndentAfterShiftLeft)', desc = 'Put and Indent Left' },
+      { '>P', '<Plug>(YankyPutIndentBeforeShiftRight)', desc = 'Put Before and Indent Right' },
+      { '<P', '<Plug>(YankyPutIndentBeforeShiftLeft)', desc = 'Put Before and Indent Left' },
+      { '=p', '<Plug>(YankyPutAfterFilter)', desc = 'Put After Applying a Filter' },
+      { '=P', '<Plug>(YankyPutBeforeFilter)', desc = 'Put Before Applying a Filter' },
+    },
+    opts = {
+      highlight = { timer = 150 },
+    },
+  },
 }

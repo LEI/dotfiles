@@ -1,38 +1,69 @@
 -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/init.lua
 return {
-  -- { 'tpope/vim-dotenv', tag = 'v1.0', cmd = 'Dotenv' },
-  { 'tpope/vim-eunuch', tag = 'v1.3', event = 'CmdlineEnter' },
-  { 'tpope/vim-fugitive', tag = 'v3.7', cmd = 'Git' },
   { 'tpope/vim-sensible', version = '2.0.0', lazy = false },
-  { 'tpope/vim-sleuth', version = '2.0.0', event = 'VeryLazy' },
-  { 'tpope/vim-surround', tag = 'v2.2', event = 'VeryLazy' },
-
-  -- Libraries
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
   { 'nvim-lua/plenary.nvim', tag = 'v0.1.4', lazy = true },
   { 'nvim-neotest/nvim-nio', tag = 'v1.10.1', lazy = true },
-
-  -- Util
   {
     'folke/persistence.nvim',
     tag = 'v3.1.0',
     event = 'BufReadPre',
     opts = {
       -- dir = vim.fn.stdpath('state') .. '/sessions/',
-      need = 3, -- Set to 0 to always save
+      need = 2, -- Set to 0 to always save
       branch = true, -- Use git branch to save session
     },
     -- stylua: ignore
     keys = {
       { '<leader>S', '', desc = '+session' },
-      { '<leader>SS', function() require('persistence').stop() end, desc = 'Stop persistence' },
       { '<leader>Sl', function() require('persistence').load({ last = true }) end, desc = 'Restore last session' },
+      { '<leader>Sq', function() require('persistence').stop() end, desc = 'Stop persistence' },
       { '<leader>Sr', function() require('persistence').load() end, desc = 'Restore session' },
       { '<leader>Ss', function() require('persistence').select() end,desc = 'Select session' },
     },
     init = function()
       -- vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,terminal'
-      vim.opt.sessionoptions = 'buffers,curdir,folds,help,tabpages,winsize,terminal'
+      vim.opt.sessionoptions = { 'buffers', 'curdir', 'folds', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' }
+      vim.api.nvim_create_user_command('Restore', function()
+        require('persistence').load()
+      end, { desc = 'Load last session' })
     end,
+  },
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    tag = 'v8.5.0',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'echasnovski/mini.icons',
+    },
+    ft = 'markdown',
+    opts = {
+      completions = { lsp = { enabled = true } },
+      file_types = { 'markdown', 'codecompanion', 'Avante' },
+      html = { comment = { conceal = false } },
+      link = { enabled = false },
+      only_render_image_at_cursor = true,
+      preset = 'lazy',
+    },
+  },
+  {
+    'HakonHarnes/img-clip.nvim',
+    tag = 'v0.6.0',
+    cmd = 'PasteImage',
+    keys = {
+      { '<leader>pi', '<cmd>PasteImage<cr>', desc = 'Paste image from system clipboard' },
+    },
+    opts = {
+      -- Recommended settings
+      default = {
+        embed_image_as_base64 = false,
+        prompt_for_file_name = false,
+        drag_and_drop = {
+          insert_mode = true,
+        },
+        -- Required for Windows users
+        use_absolute_path = true,
+      },
+    },
   },
 }

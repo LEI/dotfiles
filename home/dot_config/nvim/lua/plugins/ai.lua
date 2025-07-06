@@ -1,3 +1,7 @@
+if not vim.g.features.ai then
+  return {}
+end
+
 vim.g.ai = {
   avante = false,
   codecompanion = true,
@@ -52,8 +56,6 @@ vim.g.copilot_enabled = vim.g.ai.copilot
 -- https://github.com/ravitemer/mcphub.nvim
 -- https://ravitemer.github.io/mcphub.nvim/configuration.html
 
--- TODO: ensure node version is >=20 for copilot.lua
--- home .. '/.config/nvm/versions/node/v20.0.1/bin/node',
 local node_prefix = vim.g.config.node.prefix or ''
 
 return {
@@ -64,9 +66,9 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    build = node_prefix .. 'npm install --global mcp-hub@latest',
+    -- build = node_prefix .. 'npm install --global mcp-hub@^3.7.0',
     -- build = 'bundled_build.lua',
-    cmd = { 'MCPHub' },
+    cmd = 'MCPHub',
     keys = {
       { '<leader>H', '<cmd>MCPHub<cr>', desc = 'MCPHub', mode = { 'n', 'v' } },
     },
@@ -96,17 +98,26 @@ return {
   },
 
   {
-    -- Requires nvim >= 0.10
-    -- TODO: run make on install or update
-    -- require('img-clip').setup()
-    -- require('render-markdown').setup()
     'yetone/avante.nvim',
-    enabled = vim.g.ai.avante,
+    enabled = vim.g.ai.avante and vim.fn.has('nvim-0.10'),
     tag = 'v0.0.25',
     dependencies = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
+
+      'echasnovski/mini.icons', -- or nvim-tree/nvim-web-devicons
+      'folke/snacks.nvim', -- for input provider snacks
+      -- 'zbirenbaum/copilot.lua', -- for providers='copilot'
+      'HakonHarnes/img-clip.nvim', -- for image pasting
+      'MeanderingProgrammer/render-markdown.nvim',
     },
+    build = function()
+      if vim.fn.has('win32') == 1 then
+        return 'powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false'
+      else
+        return 'make'
+      end
+    end,
     cmd = { 'Avante', 'AvanteChat', 'AvanteToggle' },
     keys = {
       {
@@ -151,21 +162,12 @@ return {
     enabled = vim.g.ai.codecompanion,
     tag = 'v17.5.0',
     dependencies = {
-      {
-        'nvim-treesitter/nvim-treesitter',
-        -- https://codecompanion.olimorris.dev/installation.html#additional-plugins
-        -- Alternative: https://github.com/OXY2DEV/markview.nvim
-        'MeanderingProgrammer/render-markdown.nvim',
-        tag = 'v8.5.0',
-        opts = {
-          completions = { lsp = { enabled = true } },
-          file_types = { 'markdown', 'codecompanion' },
-          only_render_image_at_cursor = true,
-          preset = 'none', -- none, obsidian, lazy
-        },
-      },
-      -- https://github.com/echasnovski/mini.diff
-      -- https://github.com/hakonharnes/img-clip.nvim
+      'nvim-treesitter/nvim-treesitter',
+      -- 'echasnovski/mini.diff',
+      'HakonHarnes/img-clip.nvim',
+      -- https://codecompanion.olimorris.dev/installation.html#additional-plugins
+      -- Alternative: https://github.com/OXY2DEV/markview.nvim
+      'MeanderingProgrammer/render-markdown.nvim',
     },
     -- build = ':TSInstall markdown markdown_inline',
     cmd = { 'CodeCompanion', 'CodeCompanionActions', 'CodeCompanionChat', 'CodeCompanionCmd' },
@@ -211,13 +213,14 @@ return {
     enabled = vim.g.ai.copilot_lua,
     -- tag = '1.338.0',
     dependencies = { 'AndreM222/copilot-lualine' },
-    cmd = {
-      'Copilot',
-      -- 'CopilotToggle',
-    },
+    cmd = 'Copilot',
     -- event = 'InsertEnter',
     keys = {
-      -- { '<leader>ct', '<cmd>CopilotToggle<cr>', desc = 'Toggle Copilot suggestion auto-trigger', mode = { 'n', 'v' } },
+      { '<leader>c', '', desc = '+copilot' },
+      { '<leader>cp', '<cmd>Copilot panel<cr>', desc = 'Copilot panel', mode = { 'n', 'v' } },
+      { '<leader>cs', '<cmd>Copilot status<cr>', desc = 'Copilot status' },
+      { '<leader>cT', '<cmd>Copilot suggestion toggle_auto_trigger<cr>', desc = 'Copilot toggle auto-trigger' },
+      { '<leader>ct', '<cmd>Copilot toggle<cr>', desc = 'Copilot toggle' },
     },
     config = function()
       local copilot = require('copilot')
@@ -229,12 +232,15 @@ return {
         -- },
         filetypes = filetypes,
         should_attach = function(_, bufname)
-          return bufname ~= nil
-            and not bufname:match('.env')
-            and not (bufname:match('.local') or bufname:match('local.'))
+          -- vim.print('Should attach: ' .. bufname)
+          if bufname == nil or bufname:match('.env') then
+            return false
+          end
+          local basename = vim.fs.basename(bufname)
+          return not (basename:match('.local') or basename:match('local.'))
         end,
         suggestion = {
-          auto_trigger = true,
+          auto_trigger = false,
           keymap = {
             accept = '<M-l>',
             accept_word = false,
@@ -245,7 +251,6 @@ return {
           },
         },
       })
-      -- vim.api.nvim_create_user_command('CopilotToggle', require('copilot.suggestion').toggle_auto_trigger, { desc = 'Toggle Copilot suggestion auto-trigger' })
     end,
   },
 
@@ -256,7 +261,7 @@ return {
     cmd = { 'Codeium' },
     keys = {
       {
-        '<leader>W',
+        '<leader>C',
         '<cmd>Codeium Chat<cr>',
         desc = 'Codeium Chat',
         mode = { 'n', 'v' },

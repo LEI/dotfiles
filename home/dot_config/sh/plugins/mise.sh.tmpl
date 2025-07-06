@@ -6,3 +6,5 @@ mise() {
   proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$MISE_BIN" "$@"
 }
 # {{- end }}
+
+export MISE_NODE_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/.default-npm-packages"

@@ -41,10 +41,8 @@ return {
 
       { '<leader>d', '', desc = '+debug' },
       { '<leader>dq', '<cmd>DapTerminate<cr>', desc = 'DAP Terminate' },
-      -- <leader>b
-      { '<leader>db', '<cmd>DapToggleBreakpoint<cr>', desc = 'DAP Toggle Breakpoint' },
-      -- <leader>B
-      { '<leader>dr', '<cmd>DapToggleRepl<cr>', desc = 'DAP Toggle REPL' },
+      { '<leader>db', '<cmd>DapToggleBreakpoint<cr>', desc = 'DAP Toggle Breakpoint' }, -- <leader>b
+      { '<leader>dr', '<cmd>DapToggleRepl<cr>', desc = 'DAP Toggle REPL' }, -- <leader>B
       {
         '<leader>dl', -- <leader>lp
         function()
@@ -94,6 +92,10 @@ return {
       vim.fn.sign_define('DapLogPoint', { text = 'L', texthl = 'ErrorMsg' })
       vim.fn.sign_define('DapStopped', { text = vim.g.config.signs.pending, texthl = 'ErrorMsg' })
       vim.fn.sign_define('DapBreakpointRejected', { text = 'R', texthl = 'ErrorMsg' })
+      vim.api.nvim_create_user_command('DAP', function()
+        vim.cmd('DapToggleBreakpoint')
+        vim.cmd('DapContinue')
+      end, { desc = 'DAP toogle breakpoint and continue' })
     end,
     --[[ config = function(_, opts)
       local dap = require('dap')

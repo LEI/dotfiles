@@ -18,6 +18,17 @@ return {
     name = 'rose-pine',
   },
   {
+    'EdenEast/nightfox.nvim',
+    tag = 'v3.10.0',
+    lazy = true,
+    opts = {
+      options = {
+        dim_inactive = true,
+        -- transparent = true,
+      },
+    },
+  },
+  {
     'catppuccin/nvim',
     tag = 'v1.10.0',
     lazy = true,

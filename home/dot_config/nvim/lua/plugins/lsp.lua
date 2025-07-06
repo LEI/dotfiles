@@ -35,22 +35,23 @@ return {
     'neovim/nvim-lspconfig',
     tag = 'v2.3.0',
     lazy = true,
+    --[[
     config = function()
-      -- Use global node for vscode-extracted-language-server
+      -- TODO: use global node for vscode-extracted-language-server
       local node_prefix = vim.g.config.node.prefix or ''
       local custom_settings = {
         cssls = {
           -- capabilities = vim.lsp.protocol.make_client_capabilities(),
-          cmd = { node_prefix .. 'vscode-css-language-server', '--stdio' },
+          -- cmd = { 'vscode-css-language-server', '--stdio' },
         },
         eslint = {
           cmd = { node_prefix .. 'vscode-eslint-language-server', '--stdio' },
         },
         html = {
-          cmd = { node_prefix .. 'vscode-html-language-server', '--stdio' },
+          -- cmd = { 'vscode-html-language-server', '--stdio' },
         },
         jsonls = {
-          cmd = { node_prefix .. 'vscode-json-language-server', '--stdio' },
+          -- cmd = { 'vscode-json-language-server', '--stdio' },
         },
       }
 
@@ -61,6 +62,7 @@ return {
         server.setup(vim.tbl_deep_extend('keep', settings, defaults))
       end
     end,
+    --]]
   },
   {
     'adoyle-h/lsp-toggle.nvim',
@@ -69,10 +71,30 @@ return {
       'neovim/nvim-lspconfig',
       -- 'telescope.nvim',
     },
-    cmd = { 'ToggleLSP', 'ToggleNullLSP' },
+    -- cmd = 'ToggleLSP',
+    keys = {
+      { '<leader>lt', '<cmd>ToggleLSP<cr>', desc = 'Toggle LSP' },
+    },
     opts = {
-      create_cmds = true,
+      create_cmds = false,
       telescope = false,
     },
+    init = function()
+      local name = 'ToggleLSP'
+      vim.api.nvim_create_user_command(name, function()
+        local ext = require('lsp-toggle.lsp')
+        local items = ext.command()
+        vim.ui.select(items, {
+          prompt = name,
+          format_item = function(item)
+            return item.text
+          end,
+        }, function(selection)
+          if selection then
+            ext.onSubmit(selection)
+          end
+        end)
+      end, { desc = 'Disable/Enable LSP for current buffer' })
+    end,
   },
 }

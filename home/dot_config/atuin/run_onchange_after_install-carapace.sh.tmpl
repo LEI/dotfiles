@@ -37,7 +37,7 @@ cmd sudo yay --sync --needed --noconfirm --quiet carapace-bin
 # {{- else if eq .osid "debian" }} Debian/Ubuntu
 export DEBIAN_FRONTEND=noninteractive
 cmd curl -LSfs "$BASE_URL/$NAME.deb" -o "$TMPDIR/carapace.deb"
-cmd sudo -E apt-get install --quiet --yes "$TMPDIR"/carapace.deb
+cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
 # {{- else }}
 # https://github.com/carapace-sh/carapace-bin/releases
 URL="$BASE_URL/$NAME.tar.gz"

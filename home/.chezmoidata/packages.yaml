@@ -1,19 +1,14 @@
 ---
-# TODO: filter based on enabled features
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
-basePackages:
-  - curl
-  - git
-  # - neovim
-  - tmux
-  # - vim
 packages:
+  common:
+    - curl
+    - git
   alpine:
     - bash
     - gpg
     - gzip
     - tar
-    - topgrade
     - xz
     # - build-base
     # - linux-headers
@@ -23,7 +18,7 @@ packages:
     # - fd
     # - nodejs
     # - npm
-    - shellcheck
+    # - shellcheck
     # - starship
     # - yq
     # - zoxide
@@ -31,7 +26,6 @@ packages:
     - gnupg
     - sudo
     - proot
-    - topgrade
     - which
     # Tools
     - nodejs
@@ -39,12 +33,9 @@ packages:
   arch: # Archlinux/Manjaro
     - gnu-netcat
     - gnupg
-    - topgrade
   darwin:
     # brews:
-    - git
     - gpg
-    - topgrade
     # casks:
     #   - google-chrome
     # tools: []
@@ -56,9 +47,3 @@ packages:
     # Debian devcontainer
     - python3
     - python3-venv
-
-    # TODO: topgrade
-    # https://github.com/topgrade-rs/topgrade/issues/897
-# php:
-#   packages:
-#     arch:

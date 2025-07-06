@@ -10,15 +10,11 @@ return {
       'VeryLazy',
     },
     config = function()
+      local common = {}
       local lint = require('lint')
-      -- NOTE: node >=20 is required for cspell
-      -- lint.linters.cspell = require('lint.util').wrap(lint.linters.cspell, function(diagnostic)
-      --   diagnostic.severity = vim.diagnostic.severity.HINT
-      --   return diagnostic
-      -- end)
       lint.linters_by_ft = {
         dockerfile = { 'hadolint' },
-        -- markdown = { 'vale' },
+        markdown = { 'markdownlint' },
         mysql = { 'sqlfluff' },
         php = { 'phpcs' }, -- 'php',
         plsql = { 'sqlfluff' },
@@ -26,21 +22,42 @@ return {
         yaml = { 'yamllint' },
         ['*'] = {},
       }
-      -- for ft in pairs(lint.linters_by_ft) do
-      --   table.insert(lint.linters_by_ft[ft], 'cspell')
-      -- end
+      for _, linter in pairs(lint.linters_by_ft) do
+        for _, l in ipairs(common) do
+          if not vim.tbl_contains(linter, l) then
+            table.insert(linter, l)
+          end
+        end
+      end
       local callback = function()
         lint.try_lint()
-        -- lint.try_lint('cspell')
       end
       local events = { 'BufEnter', 'BufWritePost', 'InsertLeave', 'VimEnter' }
       vim.api.nvim_create_autocmd(events, { callback = callback })
       vim.api.nvim_create_user_command('Lint', callback, { desc = 'Lint buffer' })
       vim.api.nvim_create_user_command('LintInfo', function()
-        local available = table.concat(lint.linters_by_ft[vim.bo.filetype] or lint.linters_by_ft['*'], ', ')
-        local running = table.concat(lint.get_running(), '\n')
-        vim.notify('Linters: ' .. available, vim.log.levels.INFO, { title = 'nvim-lint' })
-        vim.notify('Running: ' .. running, vim.log.levels.INFO, { title = 'nvim-lint' })
+        local available = lint.linters_by_ft[vim.bo.filetype] or lint.linters_by_ft['*']
+        local running = lint.get_running()
+        local text = 'nvim-lint\n'
+          .. '\n'
+          .. #available
+          .. ' available:\n'
+          .. table.concat(available, '\n')
+          .. (#available > 0 and '\n' or '')
+          .. '\n'
+          .. #running
+          .. ' running:\n'
+          .. table.concat(running, '\n')
+          .. (#running > 0 and '\n' or '')
+        Snacks.win({
+          text = text,
+          -- width = 0.8,
+          -- height = 0.8,
+          bo = {
+            modifiable = false,
+            readonly = true,
+          },
+        })
       end, {})
     end,
   },

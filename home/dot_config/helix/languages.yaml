@@ -32,6 +32,7 @@ language:
       - jsonc
       - glob: bun.lock
       - glob: "{t,j}sconfig.json"
+      - glob: cspell.json
       - glob: devcontainer.json
       - glob: .vscode/*.json
     # formatter:

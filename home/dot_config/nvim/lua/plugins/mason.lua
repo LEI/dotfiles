@@ -74,20 +74,21 @@ return {
 
         -- Tools
         'gitui',
+        'kulala-fmt',
       },
       integrations = {
-        ['mason-lspconfig'] = true,
+        ['mason-lspconfig'] = false,
         ['mason-null-ls'] = false,
         ['mason-nvim-dap'] = false,
       },
       run_on_start = false,
     },
     init = function()
-      vim.api.nvim_create_autocmd('CursorHold', {
-        callback = function()
-          vim.cmd('MasonToolsInstall')
-        end,
-      })
+      -- vim.api.nvim_create_autocmd('CursorHold', {
+      --   callback = function()
+      --     vim.cmd('MasonToolsInstall')
+      --   end,
+      -- })
     end,
   },
 
@@ -100,7 +101,8 @@ return {
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
     },
-    lazy = true,
+    event = 'VeryLazy',
+    -- lazy = true,
     opts = {
       automatic_enable = true, -- { exclude = {} },
       -- automatic_enable = {
@@ -113,6 +115,7 @@ return {
       ensure_installed = {
         'angularls',
         'ansiblels',
+        'cspell_ls',
         'docker_compose_language_service',
         'dockerls',
         'gh_actions_ls', -- gh-actions-language-server
@@ -137,11 +140,11 @@ return {
         -- Node
         'bashls',
 
-        -- TODO: use global vscode ls
-        -- 'cssls',
-        -- 'eslint',
-        -- 'html',
-        -- 'jsonls',
+        -- TODO: use global vscode ls (install-tools-node.sh)
+        'cssls',
+        'eslint',
+        'html',
+        'jsonls',
 
         'ts_ls',
         'yamlls',
@@ -155,6 +158,28 @@ return {
       -- TODO: folke/neoconf.nvim or tamago324/nlsp-settings.nvim
       local schemastore = require('schemastore')
       local lsp_settings = {
+        cspell_ls = {
+          cmd = {
+            'cspell-lsp',
+            -- TODO: allow override per project
+            '--config=~/.config/cspell/cspell.json',
+            '--stdio',
+          },
+          filetypes = {
+            -- 'css',
+            -- 'gitcommit',
+            -- 'go',
+            -- 'html',
+            -- 'js',
+            -- 'json',
+            -- 'lua',
+            'markdown',
+            'plaintext',
+            -- 'rust',
+            -- 'ts',
+            -- 'yaml',
+          },
+        },
         intelephense = {
           settings = {
             files = { maxSize = 1000000 }, -- 1MB
@@ -203,26 +228,33 @@ return {
             },
           },
         },
+        tofu_ls = {
+          filetypes = { 'opentofu', 'opentofu-vars', 'terraform', 'terraform-vars' },
+        },
+        -- TODO: https://www.lazyvim.org/extras/lang/typescript
         ts_ls = {
           on_attach = function(client, bufnr)
-            -- TODO: only if eslint_ls is available in the buffer
-            local has_eslint = false
-            local get_lsp_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
-            local clients = get_lsp_clients({ bufnr = bufnr })
-            for _, c in ipairs(clients) do
-              if c.name == 'eslint' then
-                has_eslint = true
-                break
+            local function on_attach()
+              local clients = vim.lsp.get_clients({ bufnr = bufnr })
+              local eslint_is_attached = false
+              for _, c in pairs(clients) do
+                if c.name == 'eslint' then
+                  eslint_is_attached = true
+                  break
+                end
               end
+              client.server_capabilities.documentFormattingProvider = not eslint_is_attached
+              client.server_capabilities.documentRangeFormattingProvider = not eslint_is_attached
             end
-            if has_eslint then
-              client.server_capabilities.documentFormattingProvider = false
-              client.server_capabilities.documentRangeFormattingProvider = false
-            end
+            vim.api.nvim_create_autocmd('LspAttach', {
+              buffer = bufnr,
+              callback = on_attach,
+            })
           end,
         },
         yamlls = {
           settings = {
+            redhat = { telemetry = { enabled = false } },
             yaml = {
               schemaStore = {
                 -- You must disable built-in schemaStore support if you want to use
@@ -242,6 +274,48 @@ return {
       end
     end,
   },
+  --[[
+  -- https://github.com/LazyVim/LazyVim/discussions/1621
+  {
+    'someone-stole-my-name/yaml-companion.nvim',
+    dependencies = {
+      'neovim/nvim-lspconfig',
+      'nvim-lua/plenary.nvim',
+      -- 'nvim-telescope/telescope.nvim',
+    },
+    ft = 'yaml',
+    keys = {
+      {
+        '<leader>sY',
+        function()
+          local schema = require('yaml-companion').get_buf_schema(0)
+          -- if schema.result[1].name == 'none' then
+          --   return ''
+          -- end
+          vim.print(schema.result[1].name)
+        end,
+        desc = 'Get YAML Schema',
+      },
+      {
+        '<leader>sy',
+        function()
+          require('yaml-companion').open_ui_select()
+        end,
+        desc = 'Select YAML Schema',
+      },
+    },
+    opts = {
+      builtin_matchers = {
+        kubernetes = { enabled = true },
+      },
+    },
+    config = function(_, opts)
+      local cfg = require('yaml-companion').setup(opts)
+      require('lspconfig').yamlls.setup(cfg)
+      -- require('telescope').load_extension('yaml_schema')
+    end,
+  },
+  --]]
 
   -- DAP
   {

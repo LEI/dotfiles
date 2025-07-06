@@ -35,6 +35,10 @@ jq = "latest"
 lazygit = "latest"
 {{- end }}
 
+{{- if .features.kube }}
+kubectl = "latest"
+{{- end }}
+
 {{- if .features.node }}
 {{- if ne .osid "android" }}
 # FIXME(termux): hangs terminal "No such file or directory (os error 2)"
@@ -53,11 +57,11 @@ ripgrep = "latest"
 
 {{- if and (ne .osid "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
-shellcheck = "latest"
+# shellcheck = "latest"
 {{- end }}
 
 # {{- if not .features.neovim }}
-shfmt = "latest"
+# shfmt = "latest"
 {{- end }}
 
 {{- if ne .osid "android" }}
