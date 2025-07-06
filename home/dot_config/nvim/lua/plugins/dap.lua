@@ -41,10 +41,8 @@ return {
 
       { '<leader>d', '', desc = '+debug' },
       { '<leader>dq', '<cmd>DapTerminate<cr>', desc = 'DAP Terminate' },
-      -- <leader>b
-      { '<leader>db', '<cmd>DapToggleBreakpoint<cr>', desc = 'DAP Toggle Breakpoint' },
-      -- <leader>B
-      { '<leader>dr', '<cmd>DapToggleRepl<cr>', desc = 'DAP Toggle REPL' },
+      { '<leader>db', '<cmd>DapToggleBreakpoint<cr>', desc = 'DAP Toggle Breakpoint' }, -- <leader>b
+      { '<leader>dr', '<cmd>DapToggleRepl<cr>', desc = 'DAP Toggle REPL' }, -- <leader>B
       {
         '<leader>dl', -- <leader>lp
         function()

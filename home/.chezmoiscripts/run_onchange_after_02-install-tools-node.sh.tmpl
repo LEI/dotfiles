@@ -23,6 +23,7 @@ if command -v mise >/dev/null; then
   PATH="$INSTALL_PATH/bin:$PATH"
 fi
 
+# Node: {{ output "sh" "-c" "mise list node --global --installed | awk '/^node / {print $2}'" }}
 echo >&2 "node $(node --version)"
 
 # npm config set --global audit=false fund=false
@@ -30,14 +31,23 @@ echo >&2 "node $(node --version)"
 cmd npm install --global --quiet npm@latest
 
 if ! command -v pnpm >/dev/null; then
-  cmd npm install --global --quiet pnpm@latest
+  cmd npm install --global --quiet pnpm # @latest
 fi
 
 if ! command -v yarn >/dev/null; then
-  cmd npm install --global --quiet yarn@latest
+  cmd npm install --global --quiet yarn # @latest
 fi
 
+if ! command -v devcontainer >/dev/null; then
+  cmd npm install -g @devcontainers/cli
+fi
+
+
 # {{- if .features.ai }}
+if ! command -v mcp-hub >/dev/null; then
+  cmd npm install --global --quiet mcp-hub@3.7.0
+fi
+
 if ! command -v claude >/dev/null; then
   cmd npm install --global --quiet @anthropic-ai/claude-code
 fi
@@ -45,13 +55,17 @@ fi
 if ! command -v codex >/dev/null; then
   cmd npm install --global --quiet @openai/codex
 fi
+
+# if ! command -v opencode >/dev/null; then
+#   cmd npm install --global --quiet opencode-ai
+# fi
 # {{- end }}
 
 # NOTE: eslint is broken in vscode-extracted-language-server@4.10
 # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
-if ! command -v vscode-eslint-language-server >/dev/null; then
-  cmd npm install --global --quiet vscode-langservers-extracted@4.8
-fi
+# if ! command -v vscode-eslint-language-server >/dev/null; then
+#   cmd npm install --global --quiet vscode-langservers-extracted@4.8
+# fi
 
 # {{- if .features.neovim }}
 if ! command -v neovim-node-host >/dev/null; then

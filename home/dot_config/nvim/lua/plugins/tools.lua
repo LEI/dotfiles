@@ -1,16 +1,58 @@
 return {
-  -- Search and replace
-  -- Alternative: nvim-pack/nvim-spectre
   {
+    -- Alternative: nvim-pack/nvim-spectre
     'MagicDuck/grug-far.nvim',
     cmd = { 'GrugFar', 'GrugFarWithin' },
     keys = {
-      { '<leader>G', '<cmd>GrugFar<cr>', desc = 'GrugFar' },
+      { '<leader>G', '<cmd>GrugFar<cr>', desc = 'Search and replace (GrugFar)' },
     },
     opts = {},
   },
 
-  -- Task runner: stevearc/overseer.nvim, tpope/vim-dispatch
+  -- jbyuki/venn.nvim
+  {
+    -- Alternatives: nvim-orgmode/orgmode, zk-org/zk
+    'nvim-neorg/neorg',
+    enabled = false,
+    tag = 'v9.3.0',
+    -- build = ':TSInstall norg',
+    dependencies = {
+      { 'nvim-neorg/lua-utils.nvim', lazy = true },
+      { 'pysan3/pathlib.nvim', lazy = true },
+    },
+    cmd = 'Neorg', -- :Neorg workspace notes
+    ft = 'norg',
+    keys = {
+      { '<leader>W', '<cmd>Neorg workspace notes<cr>', desc = 'Open notes workspace (Neorg)' },
+      { '<leader>P', '<cmd>Neorg presenter start<cr>', desc = 'Start presentation (Neorg)' },
+
+      -- neorg.presenter.next-page - go to next page
+      -- neorg.presenter.previous-page - go to previous page
+      -- neorg.presenter.close - close presentation view
+    },
+    opts = {
+      load = {
+        ['core.defaults'] = {},
+        ['core.concealer'] = {},
+        ['core.dirman'] = {
+          config = {
+            workspaces = {
+              notes = '~/notes',
+            },
+            default_workspace = 'notes',
+          },
+        },
+        ['core.journal'] = { config = { strategy = 'flat' } },
+        ['core.keybinds'] = { config = { default_keybinds = true } },
+        ['core.presenter'] = { config = { ['zen_mode'] = 'zen-mode' } },
+      },
+    },
+    -- vim.wo.foldlevel = 99
+    -- vim.wo.conceallevel = 2
+  },
+
+  -- stevearc/overseer.nvim
+  -- tpope/vim-dispatch
 
   {
     'vuki656/package-info.nvim',

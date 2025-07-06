@@ -74,6 +74,7 @@ return {
 
         -- Tools
         'gitui',
+        'kulala-fmt',
       },
       integrations = {
         ['mason-lspconfig'] = true,
@@ -83,11 +84,11 @@ return {
       run_on_start = false,
     },
     init = function()
-      vim.api.nvim_create_autocmd('CursorHold', {
-        callback = function()
-          vim.cmd('MasonToolsInstall')
-        end,
-      })
+      -- vim.api.nvim_create_autocmd('CursorHold', {
+      --   callback = function()
+      --     vim.cmd('MasonToolsInstall')
+      --   end,
+      -- })
     end,
   },
 
@@ -137,11 +138,11 @@ return {
         -- Node
         'bashls',
 
-        -- TODO: use global vscode ls
-        -- 'cssls',
-        -- 'eslint',
-        -- 'html',
-        -- 'jsonls',
+        -- TODO: use global vscode ls (install-tools-node.sh)
+        'cssls',
+        'eslint',
+        'html',
+        'jsonls',
 
         'ts_ls',
         'yamlls',
@@ -206,19 +207,19 @@ return {
         ts_ls = {
           on_attach = function(client, bufnr)
             -- TODO: only if eslint_ls is available in the buffer
-            local has_eslint = false
-            local get_lsp_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
-            local clients = get_lsp_clients({ bufnr = bufnr })
-            for _, c in ipairs(clients) do
-              if c.name == 'eslint' then
-                has_eslint = true
-                break
-              end
-            end
-            if has_eslint then
-              client.server_capabilities.documentFormattingProvider = false
-              client.server_capabilities.documentRangeFormattingProvider = false
-            end
+            -- local has_eslint = false
+            -- local get_lsp_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+            -- local clients = get_lsp_clients({ bufnr = bufnr })
+            -- for _, c in ipairs(clients) do
+            --   if c.name == 'eslint' then
+            --     has_eslint = true
+            --     break
+            --   end
+            -- end
+            -- if has_eslint then
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+            -- end
           end,
         },
         yamlls = {

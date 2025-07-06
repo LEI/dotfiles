@@ -12,7 +12,7 @@ return {
       'UndotreeToggle',
     },
     keys = {
-      { '<leader>U', '<cmd>UndotreeToggle<cr>', desc = 'Undotree toggle' },
+      { '<leader>U', '<cmd>UndotreeToggle<cr>', desc = 'Toggle undo tree' },
     },
   },
 }

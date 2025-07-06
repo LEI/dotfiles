@@ -6,6 +6,7 @@ let g:mapleader=' '
 let g:localmapleader=' '
 
 set clipboard+=unnamedplus
+" set cmdheight=2
 if has('syntax') && exists('+colorcolumn')
   set colorcolumn=+1 " Color column relative to textwidth
 endif
@@ -19,6 +20,17 @@ set smartcase " Case sensitive when the search contains upper case characters
 if has('termguicolors')
   set termguicolors
 endif
+
+" Window
+if has('windows')
+  set splitbelow " Split windows below the current window
+  set splitright " Split windows right of the current window
+  set winminheight=0 " Minimal height of a window when it's not the current one
+  " if &tabpagemax < 50
+  "   set tabpagemax=50 " Maximum number of tab pages to be opened
+  " endif
+endif
+
 set wrapscan " Searches wrap around the end of the file
 
 " Cursor
