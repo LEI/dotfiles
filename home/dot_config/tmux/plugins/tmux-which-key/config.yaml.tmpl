@@ -7,7 +7,7 @@ keybindings:
 title:
   style: align=centre,bold
   prefix: tmux
-  prefix_style: fg=green,align=centre,bold
+  prefix_style: fg=default,align=left # fg=green,align=centre,bold
 position:
   x: R
   y: W # P
@@ -31,91 +31,37 @@ macros:
   #     - display "#{log_info} Switching session"
   #     - "send-prefix; send-keys g"
 items:
-  - name: Run
-    key: ":" # space
-    command: command-prompt
-  - name: Last window
-    key: a # tab
-    command: last-window
-  - name: Last pane
-    key: space # "`"
-    command: last-pane
-  - name: Copy
-    key: c
-    menu:
-      - name: Copy
-        key: c
-        command: copy-mode
-      - name: List buffers
-        key: "#"
-        command: list-buffers
+  - name: List keys
+    key: "?"
+    command: list-keys -N
   - separator: true
 
-  # - name: Goto session
-  #   key: g
-  #   # command: goto-session
-  #   command: 'display "#{log_info} Switching session"; run-shell "$HOME/.config/tmux/plugins/tmux-sessionist/scripts/goto_session.sh"'
+  # - name: Run
+  #   key: ":" # space
+  #   command: command-prompt
+  # - name: Last window
+  #   key: a # tab
+  #   command: last-window
+  # - name: Last pane
+  #   key: space # "`"
+  #   command: last-pane
+  # - name: Copy
+  #   key: c
+  #   menu:
+  #     - name: Copy
+  #       key: c
+  #       command: copy-mode
+  #     - name: List buffers
+  #       key: "#"
+  #       command: list-buffers
+  # - separator: true
 
-  # - name: Reload config
-  #   key: r
-  #   macro: reload-config
-
-  # TODO: move 0-9 to Windows group
-  {{- $keys := (dict "bind" list "ctrl" list "meta" list "shift" list "other" list) }}
-  {{- range output "sh" "-c" "tmux list-keys -N || true" | trim | splitList "\n" }}
-  {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
-  {{- $prefix := index $parts 0 }}
-  {{- if and (eq $prefix "C-a") (gt (len $parts) 1) }}
-  {{- $key := index $parts 1 }}
-  {{- $note := slice $parts 2 | join " " -}}
-
-  {{- if has $key (list "'") }}
-  # {{ substr 0 2 $key }}
-  # - name: {{ $note | quote }}
-  #   key: {{ index $parts 1 | quote }}
-  #   command: ""
-  {{- continue }}
-  {{- end }}
-
-  {{- $dict := dict
-    "name" $note
-    "key" $key
-    "command" (output "sh" "-c" (printf "tmux list-keys -T prefix '%s' | cut -d ' ' -f5-" ($key | replaceAllRegex ";" "\\;")) | trim)
-  -}}
-
-  {{- if eq (len $key) 1 }}
-  {{- set $keys "bind" (append $keys.bind $dict) }}
-  {{- else if eq (substr 0 2 $key) "C-" }}
-  {{- set $keys "ctrl" (append $keys.ctrl $dict) }}
-  {{- else if eq (substr 0 2 $key) "M-" }}
-  {{- set $keys "meta" (append $keys.meta $dict) }}
-  {{- else if eq (substr 0 2 $key) "S-" }}
-  {{- set $keys "shift" (append $keys.shift $dict) }}
-  {{- else }}
-  {{- set $keys "other" (append $keys.other $dict) }}
-  {{- end }}
-
-  {{- end }}
-  {{- end }}
-
-  {{- range $group, $items := $keys }}
-  {{- if eq (len $items) 0 }}
-  {{- continue }}
-  {{- end }}
-  - name: +{{ $group }}
-    key: {{ $group }}
-    menu:
-      {{- range $items }}
-      - name: {{ .name | quote }}
-        key: {{ .key | quote }}
-        command: {{ .command | quote }}
-      {{- end }}
-  {{- end }}
-
+  # {{ $keys := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}
+  # {{ includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (dict "keys" $keys) | indent 2 }}
   - separator: true
 
   - name: +Windows
-    key: w
+    key: W
     menu:
       - name: Last
         key: tab
@@ -155,6 +101,10 @@ items:
           - name: Vertical main
             key: V
             command: selectl main-vertical
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_windows}"
       - name: Split horizontal
         key: /
         command: "splitw -h -c #{pane_current_path}"
@@ -176,8 +126,12 @@ items:
       - name: Kill
         key: X
         command: 'confirm -p "Kill window #W? (y/n)" killw'
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
   - name: +Panes
-    key: p
+    key: ²
     menu:
       - name: Last
         key: tab
@@ -237,6 +191,10 @@ items:
             key: L
             command: resizep -R 10
             transient: true
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_panes}"
       - name: Swap left
         key: H
         command: swapp -t "{left-of}"
@@ -268,6 +226,10 @@ items:
       - name: Kill
         key: X
         command: 'confirm -p "Kill pane #P? (y/n)" killp'
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
   - name: +Buffers
     key: b
     menu:
@@ -280,8 +242,12 @@ items:
       - name: Paste
         key: p
         command: pasteb
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
   - name: +Sessions
-    key: s
+    key: M-s
     menu:
       - name: Choose
         key: s
@@ -292,8 +258,12 @@ items:
       - name: Rename
         key: r
         command: rename
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
   - name: +Client
-    key: C
+    key: M-C
     menu:
       - name: Choose
         key: c
@@ -323,6 +293,10 @@ items:
           - name: Clean
             key: c
             command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/clean_plugins
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_client}"
       - name: Detach
         key: D
         command: detach
@@ -330,19 +304,44 @@ items:
         key: Z
         command: suspendc
       - separator: true
+      - name: Goto session
+        key: g
+        # command: goto-session
+        command: 'display "#{log_info} Switching session"; run-shell "$HOME/.config/tmux/plugins/tmux-sessionist/scripts/goto_session.sh"'
       # - name: Reload config
       #   key: r
       #   macro: reload-config
       - name: Customize
         key: ","
         command: customize-mode -Z
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  # - name: Time
+  #   key: T
+  #   command: clock-mode
+  # - name: Show messages
+  #   key: "~"
+  #   command: show-messages
+  # - name: +Keys
+  #   key: "?"
+  #   command: list-keys -N
   - separator: true
-  - name: Time
-    key: T
-    command: clock-mode
-  - name: Show messages
-    key: "~"
-    command: show-messages
-  - name: +Keys
-    key: "?"
-    command: list-keys -N
+
+  - name: +Keys (short)
+    key: h
+    menu:
+      # {{ includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "max" 1) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Keys (long)
+    key: l
+    menu:
+      # {{ includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "min" 2) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root

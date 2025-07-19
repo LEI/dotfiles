@@ -75,6 +75,7 @@ return {
             vim.bo[bufnr].filetype == 'gitcommit'
             or vim.bo[bufnr].filetype == 'gitrebase'
             or vim.bo[bufnr].filetype == 'diff'
+            or vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t'):match('^%.chezmoi')
           then
             return
           end

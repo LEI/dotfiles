@@ -1,0 +1,14 @@
+# tmux-which-key config
+# TODO: parse other conf (local and includes)
+{{- $lines := include "dot_config/tmux/tmux.conf" | splitList "\n" }}
+{{ $keys := get . "keys" | default list }}
+{{ range $lines }}
+{{- if not (hasPrefix "bind" .) }}{{ continue }}{{ end }}
+{{- $parts := . | splitList " " }}
+{{- if lt (len $parts) 4 }}{{ continue }}{{ end }}
+{{- if ne (index $parts 1) "-N" }}{{ continue }}{{ end }}
+{{- $key := . | replaceAllRegex "bind -N '[^']+' ([^ ]+).*" "${1}" }}
+{{- $keys = append $keys $key }}
+{{- end }}
+# keys: {{ $keys }}
+{{ includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "include" $keys) }}
