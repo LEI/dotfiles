@@ -127,7 +127,14 @@ return {
     lazy = false,
     cmd = 'Oil',
     opts = {
-      delete_to_trash = false,
+      columns = {
+        'icon',
+        -- 'permissions',
+        -- 'size',
+        -- 'mtime',
+      },
+      default_file_exporer = true,
+      delete_to_trash = true,
       keymaps = {
         ['g?'] = { 'actions.show_help', mode = 'n' },
         ['<CR>'] = 'actions.select',
@@ -136,7 +143,7 @@ return {
         -- ['<C-t>'] = { 'actions.select', opts = { tab = true } },
         ['<C-p>'] = 'actions.preview',
         ['<C-c>'] = { 'actions.close', mode = 'n' },
-        -- ['<C-l>'] = 'actions.refresh',
+        ['<M-l>'] = 'actions.refresh', -- Default: C-l
         ['-'] = { 'actions.parent', mode = 'n' },
         ['_'] = { 'actions.open_cwd', mode = 'n' },
         ['`'] = { 'actions.cd', mode = 'n' },
@@ -146,14 +153,18 @@ return {
         ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
         ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
       },
+      -- skip_confirm_for_simple_edits = true,
       use_default_keymaps = false,
       view_options = {
         show_hidden = true,
       },
+      watch_for_changes = true,
     },
     keys = {
       { '-', '<cmd>Oil<cr>', desc = 'Explore buffer directory' },
-      -- { '<leader>O', '<cmd>Oil<cr>', desc = 'Oil file explorer' },
+      { '<leader>OO', '<cmd>Oil<cr>', desc = 'Open file explorer (oil)' },
+
+      { '<leader>OT', '<cmd>Oil --trash /<cr>', desc = 'Open system trash (oil)' },
     },
     init = function()
       vim.g.loaded_netrw = 1

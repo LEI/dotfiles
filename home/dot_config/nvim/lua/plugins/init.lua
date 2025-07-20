@@ -1,4 +1,6 @@
 -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/init.lua
+local sessions_dir = vim.fn.stdpath('state') .. '/sessions/'
+
 return {
   { 'tpope/vim-sensible', version = '2.0.0', lazy = false },
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
@@ -9,8 +11,8 @@ return {
     tag = 'v3.1.0',
     event = 'BufReadPre',
     opts = {
-      -- dir = vim.fn.stdpath('state') .. '/sessions/',
-      need = 3, -- Set to 0 to always save
+      dir = sessions_dir,
+      need = 1, -- Set to 0 to always save
       branch = false, -- Use git branch to save session
     },
     -- stylua: ignore
@@ -25,8 +27,33 @@ return {
       -- vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,terminal'
       vim.opt.sessionoptions = { 'buffers', 'curdir', 'folds', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' }
       vim.api.nvim_create_user_command('Restore', function()
-        require('persistence').load()
+        require('persistence').load({ last = false })
       end, { desc = 'Load last session' })
+
+      -- NOTE: #vim.v.argv == 2 (nvim --embed)
+      -- TODO: do not persist if a session already exists in a running instance
+      -- to prevent overriding existing sessions when opening a single file
+      if #vim.v.argv > 2 and (vim.fn.filereadable(sessions_dir .. vim.fn.getcwd():gsub('/', '%%') .. '.vim') == 1) then
+        require('persistence').stop()
+        local msg = 'Stopped persistence: session already exists, started with arguments: '
+          .. table.concat(vim.v.argv, ' ')
+        vim.notify(msg, vim.log.levels.WARN)
+      end
+
+      -- -- Remove buffers whose files are located outside of cwd
+      -- -- https://github.com/folke/persistence.nvim/issues/43
+      -- vim.api.nvim_create_autocmd('User', {
+      --   pattern = 'PersistenceSavePre',
+      --   callback = function()
+      --     local cwd = vim.fn.getcwd() .. '/'
+      --     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      --       local bufpath = vim.api.nvim_buf_get_name(buf) .. '/'
+      --       if not bufpath:match('^' .. vim.pesc(cwd)) then
+      --         vim.api.nvim_buf_delete(buf, {})
+      --       end
+      --     end
+      --   end,
+      -- })
     end,
   },
   {

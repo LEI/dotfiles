@@ -35,32 +35,32 @@ return {
     'neovim/nvim-lspconfig',
     tag = 'v2.3.0',
     lazy = true,
-    -- init = function()
-    --   local lspconfig = require('lspconfig')
-    --   -- TODO: use global node for vscode-extracted-language-server
-    --   local node_prefix = vim.g.config.node.prefix or ''
-    --   local custom_settings = {
-    --     cssls = {
-    --       -- capabilities = vim.lsp.protocol.make_client_capabilities(),
-    --       -- cmd = { 'vscode-css-language-server', '--stdio' },
-    --     },
-    --     eslint = {
-    --       cmd = { node_prefix .. 'vscode-eslint-language-server', '--stdio' },
-    --     },
-    --     html = {
-    --       -- cmd = { 'vscode-html-language-server', '--stdio' },
-    --     },
-    --     jsonls = {
-    --       -- cmd = { 'vscode-json-language-server', '--stdio' },
-    --     },
-    --   }
-    --
-    --   for name, settings in pairs(custom_settings) do
-    --     local defaults = require('lspconfig.configs.' .. name)
-    --     local server = lspconfig[name]
-    --     server.setup(vim.tbl_deep_extend('keep', settings, defaults))
-    --   end
-    -- end,
+    init = function()
+      -- local lspconfig = require('lspconfig')
+      -- -- TODO: use global node for vscode-extracted-language-server
+      -- local node_prefix = vim.g.config.node.prefix or ''
+      -- local custom_settings = {
+      --   cssls = {
+      --     -- capabilities = vim.lsp.protocol.make_client_capabilities(),
+      --     -- cmd = { 'vscode-css-language-server', '--stdio' },
+      --   },
+      --   eslint = {
+      --     cmd = { node_prefix .. 'vscode-eslint-language-server', '--stdio' },
+      --   },
+      --   html = {
+      --     -- cmd = { 'vscode-html-language-server', '--stdio' },
+      --   },
+      --   jsonls = {
+      --     -- cmd = { 'vscode-json-language-server', '--stdio' },
+      --   },
+      -- }
+      --
+      -- for name, settings in pairs(custom_settings) do
+      --   local defaults = require('lspconfig.configs.' .. name)
+      --   local server = lspconfig[name]
+      --   server.setup(vim.tbl_deep_extend('keep', settings, defaults))
+      -- end
+    end,
   },
   {
     'adoyle-h/lsp-toggle.nvim',

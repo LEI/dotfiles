@@ -3,7 +3,7 @@ return {
   {
     'echasnovski/mini.hipatterns',
     version = 'v0.16.0',
-    event = 'BufEnter',
+    event = 'VeryLazy',
     opts = function()
       local hi = require('mini.hipatterns')
       return {
