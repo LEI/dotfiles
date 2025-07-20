@@ -35,9 +35,11 @@ echo >&2 "Installing mise"
 # {{- if eq .chezmoi.os "darwin" }}
 export NONINTERACTIVE=1
 brew install --quiet mise
-# {{- else if eq (get .chezmoi.osRelease "id") "alpine" }}
-sudo apk add --quiet mise
 # {{- else }}
+# {{- if eq (get .chezmoi.osRelease "id") "alpine" }}
+# FIXME: scripts order
+sudo apk add --quiet xz
+# {{- end }}
 if [ ! -d "$BIN_DIR" ]; then
   echo >&2 "Creating directory: $BIN_DIR"
   mkdir -p "$BIN_DIR"
