@@ -1,3 +1,6 @@
 # shellcheck disable=all
 {{- /* chezmoi:modify-template */ -}}
-{{- .chezmoi.stdin | replaceAllRegex "== \"gitlab.com\"" "!= \"\"" -}}
+{{- .chezmoi.stdin
+  | replaceAllRegex "# shellcheck disable=all" ""
+  | replaceAllRegex "== \"gitlab.com\"" "!= \"\""
+-}}
