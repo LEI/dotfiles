@@ -69,6 +69,9 @@ set smartindent
 " Repeat last command on next match
 noremap ; :normal n.<cr>
 
+" Repeat last command in visual mode
+vnoremap . :normal.<cr>
+
 " Split navigation shortcuts
 nnoremap <C-H> <C-W>h
 nnoremap <C-J> <C-W>j

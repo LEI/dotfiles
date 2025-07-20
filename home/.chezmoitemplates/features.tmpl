@@ -1,5 +1,5 @@
 {{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
-{{- $features := $data.baseFeatures -}}
+{{- $features := $data.features -}}
 
 {{- if eq .osid "alpine" }}
 

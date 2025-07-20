@@ -1,6 +1,6 @@
 ---
 # See ../.chezmoitemplates/features.tmpl
-baseFeatures:
+features:
   ai: false
   bash: true
   docker: false
@@ -8,7 +8,7 @@ baseFeatures:
   git: true
   go: false
   helix: true
-  kube: true
+  kube: false
   mise: true
   neovim: false
   node: false

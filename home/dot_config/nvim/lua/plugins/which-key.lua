@@ -8,7 +8,8 @@ return {
       preset = 'helix',
     },
     keys = {
-      { ';', ':normal n.<cr>', desc = 'Repeat last command', mode = 'n', noremap = true }, -- on next match
+      { ';', ':normal n.<cr>', desc = 'Repeat last command on next match', mode = 'n', noremap = true },
+      { '.', ':normal.<cr>', desc = 'Repeat last command', mode = 'v', noremap = true },
 
       -- WARN: breaks 'gn', use wk.add instead
       -- { 'g', '', desc = '+goto' },

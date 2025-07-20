@@ -162,13 +162,15 @@ return {
     },
     keys = {
       { '-', '<cmd>Oil<cr>', desc = 'Explore buffer directory' },
-      { '<leader>OO', '<cmd>Oil<cr>', desc = 'Open file explorer (oil)' },
-
-      { '<leader>OT', '<cmd>Oil --trash /<cr>', desc = 'Open system trash (oil)' },
+      { '<leader>OO', '<cmd>Oil<cr>', desc = 'Open file explorer' },
+      { '<leader>OT', '<cmd>Trash<cr>', desc = 'Open system trash' },
     },
     init = function()
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
+      vim.api.nvim_create_user_command('Trash', function()
+        vim.cmd('Oil --trash /')
+      end, { desc = 'Open system trash' })
     end,
   },
   {
