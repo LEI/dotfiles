@@ -27,18 +27,20 @@ return {
       -- vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,terminal'
       vim.opt.sessionoptions = { 'buffers', 'curdir', 'folds', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' }
       vim.api.nvim_create_user_command('Restore', function()
-        require('persistence').load({ last = false })
-      end, { desc = 'Load last session' })
+        require('persistence').load()
+      end, { desc = 'Restore session' })
+      vim.api.nvim_create_user_command('RestoreLast', function()
+        require('persistence').load({ last = true })
+      end, { desc = 'Restore last session' })
 
       -- NOTE: #vim.v.argv == 2 (nvim --embed)
       -- TODO: do not persist if a session already exists in a running instance
       -- to prevent overriding existing sessions when opening a single file
-      if #vim.v.argv > 2 and (vim.fn.filereadable(sessions_dir .. vim.fn.getcwd():gsub('/', '%%') .. '.vim') == 1) then
-        require('persistence').stop()
-        local msg = 'Stopped persistence: session already exists, started with arguments: '
-          .. table.concat(vim.v.argv, ' ')
-        vim.notify(msg, vim.log.levels.WARN)
-      end
+
+      -- require('persistence').stop()
+      -- local msg = 'Stopped persistence: session already exists, started with arguments: '
+      --   .. table.concat(vim.v.argv, ' ')
+      -- vim.notify(msg, vim.log.levels.WARN)
 
       -- -- Remove buffers whose files are located outside of cwd
       -- -- https://github.com/folke/persistence.nvim/issues/43
@@ -54,6 +56,26 @@ return {
       --     end
       --   end,
       -- })
+
+      -- Always restore session if one exists
+      -- https://github.com/folke/persistence.nvim/issues/13
+      vim.api.nvim_create_autocmd('VimEnter', {
+        nested = true,
+        group = vim.api.nvim_create_augroup('Restore', { clear = true }),
+        callback = function()
+          local cwd = vim.fn.getcwd()
+          local has_args = vim.fn.argc() > 0 or vim.g.started_with_stdin
+          local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
+          local session_exists = vim.fn.filereadable(session_file) == 1
+          if not has_args and session_exists then
+            vim.notify('Loading session: ' .. vim.fn.fnamemodify(cwd, ':~'))
+            require('persistence').load()
+          elseif has_args and session_exists then
+            vim.notify('Stopping persistence (session exists)', vim.log.levels.WARN)
+            require('persistence').stop()
+          end
+        end,
+      })
     end,
   },
   {

@@ -213,12 +213,13 @@ return {
         --   debug = ' ',
         --   trace = ' ',
         -- },
-        margin = { top = 0, right = 2, bottom = 2 },
+        margin = { top = 0, right = 0, bottom = 1 },
         padding = true,
         style = 'minimal', -- compact, fancy, minimal
         timeout = 5000,
         top_down = false,
         refresh = 1000, -- Refresh at most every second (default: 50ms)
+        width = { min = 40, max = 0.4 },
       },
       picker = {
         enabled = true,

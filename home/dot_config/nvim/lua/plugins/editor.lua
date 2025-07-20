@@ -6,10 +6,10 @@ return {
     cmd = 'Hardtime',
     keys = {
       { '<backspace>h', '', desc = '+hardtime' },
-      { '<backspace>hd', '<cmd>Hardtime disable', desc = 'Disable hardtime' },
-      { '<backspace>he', '<cmd>Hardtime enable', desc = 'Enable hardtime' },
-      { '<backspace>hr', '<cmd>Hardtime report', desc = 'Report hardtime' },
-      { '<backspace>ht', '<cmd>Hardtime toggle', desc = 'Toggle hardtime' },
+      { '<backspace>hd', '<cmd>Hardtime disable<cr>', desc = 'Disable hardtime' },
+      { '<backspace>he', '<cmd>Hardtime enable<cr>', desc = 'Enable hardtime' },
+      { '<backspace>hr', '<cmd>Hardtime report<cr>', desc = 'Report hardtime' },
+      { '<backspace>ht', '<cmd>Hardtime toggle<cr>', desc = 'Toggle hardtime' },
     },
     opts = {
       disable_mouse = false,
@@ -77,7 +77,7 @@ return {
     tag = 'v0.16.0',
     event = 'VeryLazy',
     opts = {
-      modes = { insert = true, command = true, terminal = false },
+      modes = { insert = true, command = false, terminal = false },
       -- skip autopair when next character is one of these
       skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
       -- skip autopair when the cursor is inside these treesitter nodes

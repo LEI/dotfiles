@@ -151,7 +151,16 @@ return {
       })
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(args)
-          -- local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+          if vim.b[args.buf].attached_wk then
+            return
+          end
+          local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+          -- vim.notify(
+          --   'Attached: ' .. client.name .. ' (' .. client.id .. ') to buffer ' .. args.buf,
+          --   vim.log.levels.TRACE,
+          --   { title = 'LSP' }
+          -- )
+          vim.b[args.buf].attached_wk = true
           -- stylua: ignore
           wk.add({
             -- client.server_capabilities.codeActionProvider

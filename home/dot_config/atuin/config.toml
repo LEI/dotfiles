@@ -2,18 +2,15 @@
 auto_sync = false
 common_subcommands = [
   "apt",
-  # "c",
   "cargo",
-  "chezmoi",
   "composer",
-  # "d",
   "dnf",
   "docker",
-  # "g",
+  "gh",
   "git",
+  "glab",
   "go",
   "ip",
-  # "k",
   "kubectl",
   "nix",
   "nmcli",
@@ -25,6 +22,17 @@ common_subcommands = [
   "systemctl",
   "tmux",
   "yarn",
+
+  # "c",
+  "chezmoi",
+  # "d",
+  # "g",
+  # "k",
+
+  "just",
+  "make",
+  "mise",
+  "task",
 ]
 # enter_accept = true
 inline_height = 0
