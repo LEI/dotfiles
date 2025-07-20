@@ -1,7 +1,5 @@
-# Generated keys (tmux list-keys -N)
-# NOTE: this is fully applied only on the second run, when tmux config is up to date
 {{- $keys := list }}
-{{- range output "sh" "-c" "tmux list-keys -N || true" | trim | splitList "\n" | sortAlpha }}
+{{- range (get . "names") }}
 {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
 {{- $prefix := index $parts 0 }}
 
@@ -23,14 +21,11 @@
 {{- continue }}
 {{- end }}
 
-{{- $command := "" }}
-{{- $output := output "sh" "-c" (printf "tmux list-keys -T prefix '%s' | cut -d ' ' -f5-" ($key | replaceAllRegex ";" "\\;")) | trim }}
-{{- if contains "'" $output }}
+{{- $command := get (get $ "map") ($key | replaceAllRegex ";" "\\;") }}
+{{- if contains "'" $command }}
 # FIXME(single quote breaks menu commands): {{ . }}
 {{- $note = printf "-%s (%s)" $note $key }}
-{{- $command = $output | replaceAllRegex "'" "" }}
-{{- else }}
-{{- $command = $output }}
+{{- $command = $command | replaceAllRegex "'" "" }}
 {{- end }}
 
 {{- $dict := dict
