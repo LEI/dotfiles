@@ -203,9 +203,9 @@ return {
         'vimdoc',
         'yaml',
       },
-      highlight = {
-        enable = true,
-      },
+      -- highlight = { enable = true },
+      -- indent = { enable = true },
+      -- sync_install = true,
     },
     init = function()
       vim.opt.foldenable = false
@@ -220,6 +220,10 @@ return {
         vim.opt.foldmethod = 'indent'
         vim.opt.foldtext = 'v:lua.vim.treesitter.foldexpr()'
       end
+    end,
+    config = function(_, opts)
+      local configs = require('nvim-treesitter.configs')
+      configs.setup(opts)
     end,
   },
   {

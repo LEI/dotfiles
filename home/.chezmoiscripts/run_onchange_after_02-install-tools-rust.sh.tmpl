@@ -2,7 +2,6 @@
 
 # https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
 
-# {{- if .features.rust }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -64,23 +63,11 @@ if ! command -v cargo >/dev/null; then
   cmd . ~/.cargo/env
 fi
 
-# Taplo: {{ output "sh" "-c" "taplo --version || true" | replace "\n" " " | trim }}
-
-# {{- if .features.neovim }}
-# cmd nvim --headless +MasonUpdate +qa
-
-if ! command -v rust-analyzer >/dev/null; then
-  cmd nvim --headless "+MasonInstall rust_analyzer" +qa
-fi
-
-if ! command -v taplo >/dev/null; then
-  cmd nvim --headless "+MasonInstall taplo" +qa
-fi
-# {{- else }}
+# {{- if not .features.neovim }}
 # rustup component add rust-analyzer
 
+# Taplo: {{ output "sh" "-c" "taplo --version || true" | replace "\n" " " | trim }}
 if ! command -v taplo >/dev/null; then
   cmd cargo install taplo-cli --locked --features lsp --quiet
 fi
-# {{- end }}
 # {{- end }}

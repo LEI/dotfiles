@@ -6,7 +6,6 @@
 
 # https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
 
-{{- if .features.node }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -29,24 +28,3 @@ echo >&2 "node $(node --version)"
 # npm config set --global audit=false fund=false
 
 # cmd npm install --global --quiet npm@latest
-
-{{- if .features.neovim }}
-# cmd nvim --headless +MasonUpdate +qa
-
-if ! command -v bash-language-server >/dev/null; then
-  cmd nvim --headless "+MasonInstall bashls" +qa
-fi
-
-if ! command -v prettier >/dev/null; then
-  cmd nvim --headless "+MasonInstall prettier" +qa
-fi
-
-if ! command -v typescript-language-server >/dev/null; then
-  cmd nvim --headless "+MasonInstall ts_ls" +qa
-fi
-
-if ! command -v yaml-language-server >/dev/null; then
-  cmd nvim --headless "+MasonInstall yamlls" +qa
-fi
-{{- end }}
-{{- end }}
