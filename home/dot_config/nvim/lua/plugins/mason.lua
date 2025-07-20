@@ -120,7 +120,7 @@ return {
         'docker_compose_language_service',
         'dockerls',
         'gh_actions_ls', -- gh-actions-language-server
-        'gitlab_ci_ls',
+        'gitlab_ci_ls', -- Requires cargo
         'helm_ls',
         'intelephense',
         'lua_ls',

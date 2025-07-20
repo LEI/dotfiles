@@ -36,6 +36,11 @@ main() {
     echo >&2 "Command 'mise' not found"
   fi
 
+  if [ -f ~/.cargo/env ]; then
+    # shellcheck disable=SC1090
+    source ~/.cargo/env
+  fi
+
   # Source plugins after updating PATH and activating mise
   if [ -d "$HOME/.config/sh/plugins" ]; then
     for file in "$HOME/.config/sh/plugins"/*.sh; do
