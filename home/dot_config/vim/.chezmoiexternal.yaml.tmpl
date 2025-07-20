@@ -1,0 +1,5 @@
+{{- includeTemplate "external-packages.tmpl" (dict
+  "chezmoi" .chezmoi
+  "baseDir" "pack/chezmoi/start"
+  "packages" .vim.plugins
+) -}}

@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# TODO: ensure up to date
+# and install tools for perl (Neovim::Ext cpan module),
+# python (uv and pynvim), neovim-ruby-host (gem install neovim)
+
+# https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
+
+{{- if .features.node }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# if ! command -v node >/dev/null && command -v mise >/dev/null; then
+#   PATH="$PATH:$HOME/.local/share/mise/shims"
+# fi
+if command -v mise >/dev/null; then
+  if ! command -v jq >/dev/null; then
+    PATH="$PATH:$HOME/.local/share/mise/shims"
+  fi
+  # Use global node
+  INSTALL_PATH="$(mise list node --installed --json --quiet | jq --compact-output --raw-output 'last | .install_path')"
+  PATH="$INSTALL_PATH/bin:$PATH"
+fi
+
+# Node: {{ output "sh" "-c" "mise list node --global --installed | awk '/^node / {print $2}'" }}
+echo >&2 "node $(node --version)"
+
+# npm config set --global audit=false fund=false
+
+# cmd npm install --global --quiet npm@latest
+
+{{- if .features.neovim }}
+# cmd nvim --headless +MasonUpdate +qa
+
+if ! command -v bash-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall bashls" +qa
+fi
+
+if ! command -v prettier >/dev/null; then
+  cmd nvim --headless "+MasonInstall prettier" +qa
+fi
+
+if ! command -v typescript-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall ts_ls" +qa
+fi
+
+if ! command -v yaml-language-server >/dev/null; then
+  cmd nvim --headless "+MasonInstall yamlls" +qa
+fi
+{{- end }}
+{{- end }}

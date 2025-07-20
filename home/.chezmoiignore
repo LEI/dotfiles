@@ -1,0 +1,140 @@
+# https://www.chezmoi.io/reference/special-files/chezmoiignore/
+
+{{- if ne .email "firstname.lastname@company.com" }}
+# Ignore .company-directory unless configured with a company email
+.company-directory # note that the pattern is not dot_company-directory
+{{- end }}
+
+{{- if ne .email "me@home.org" }}
+.personal-file
+{{- end }}
+
+{{- if eq .osid "arch" }}
+# Archlinux/Manjaro
+.inputrc
+{{- end }}
+
+{{- if not .features.bash }}
+.bashrc
+.config/bash/
+{{- end }}
+
+{{- if not .features.zsh }}
+.config/zsh/
+.zshrc
+{{- end }}
+
+{{- if and (not .features.bash) (not .features.zsh) }}
+.config/sh/
+{{- end }}
+
+{{- if not .features.docker }}
+.config/sh/plugins/docker.sh
+bin/d
+{{- end }}
+
+{{- if not .features.ghostty }}
+.config/ghostty/
+{{- end }}
+
+{{- if not .features.git }}
+.config/git/
+.config/lazygit/
+# FIXME: mod.nu.tmpl loops on source directory
+# .config/nushell/modules/git.nu
+# NOTE: feature should be named "git-config"
+# .config/sh/plugins/git.sh
+.gitconfig
+bin/g
+{{- end }}
+
+{{- if not .features.go }}
+.chezmoiscripts/*-install-tools-go.sh
+{{- end }}
+
+{{- if not .features.helix }}
+.config/helix/
+{{- end }}
+
+{{- if not .features.kube }}
+# .chezmoiscripts/*-install-tools-kubectl.sh
+.config/krew/
+.config/sh/plugins/kubectl.sh
+bin/k
+{{- end }}
+
+{{- if not .features.mise }}
+# .chezmoiscripts/*-install-tools-*.sh
+.chezmoiscripts/*-install-tools.sh
+.config/mise/
+# .config/sh/plugins/mise.sh
+{{- end }}
+
+{{- if not .features.neovim }}
+.chezmoiscripts/*-install-neovim.sh
+.config/nvim/
+.local/share/nvim
+{{- end }}
+
+{{- if not .features.node }}
+.chezmoiscripts/*-install-tools-node.sh
+.npmrc
+{{- end }}
+
+{{- if not .features.nushell }}
+# .chezmoiscripts/*.nu
+# .config/*/*.nu
+.config/nushell/
+*.nu
+{{- end }}
+
+{{- if not .features.rust }}
+.chezmoiscripts/*-install-tools-rust.sh
+{{- end }}
+
+{{- if not .features.sql }}
+# TODO: .chezmoiscripts/*-install-tools-sql.sh
+{{- end }}
+
+{{- if not .features.tmux }}
+.config/tmux/
+bin/t
+{{- end }}
+
+{{- if not .features.topgrade }}
+.config/topgrade/
+{{- end }}
+
+{{- if not .features.vim }}
+.config/vim/
+# .vim/
+{{- end }}
+
+{{- if not .features.zellij }}
+.config/zellij/
+{{- end }}
+
+# TODO: use .chezmoidata/packages.yaml
+.chezmoiscripts/darwin-install-packages.sh
+
+{{ if .codespaces -}}
+.config/Code/
+.config/VSCodium/
+.config/Void/
+.void-editor/
+{{ else -}}
+.vscode-remote/
+{{ end -}}
+
+{{ if eq .chezmoi.os "darwin" -}}
+{{ else if eq .chezmoi.os "linux" -}}
+{{- else if eq .chezmoi.os "windows" }}
+.config/
+.install-password-manager.sh
+.void-editor/
+{{ else -}}
+.config/Code/
+.config/VSCodium/
+.config/Void/
+.void-editor/
+{{ end -}}

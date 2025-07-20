@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -eq 0 ]; then
+  if command -v k9s >/dev/null; then
+    k9s --all-namespaces # --command=context
+  else
+    kubectl config get-contexts
+  fi
+else
+  kubectl "$@"
+fi

@@ -1,0 +1,24 @@
+# npm
+pnpm
+yarn
+{{- if .features.ai }}
+mcp-hub@^3.7.0
+@anthropic-ai/claude-code
+@openai/codex
+# opencode-ai
+{{- end }}
+# NOTE: eslint is broken in vscode-extracted-language-server@4.10
+# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+# vscode-langservers-extracted@4.9
+{{- if .features.neovim }}
+neovim
+{{- else }}
+bash-language-server
+prettier
+{{- if .features.sql }}
+sql-language-server
+{{- end }}
+typescript
+typescript-language-server
+yaml-language-server@next
+{{- end }}

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Alternatives:
+# https://github.com/nushell/nu_scripts/tree/main/custom-completions
+# https://github.com/sigoden/argc-completions
+
+set -eu
+
+if command -v carapace >/dev/null && carapace --version; then
+  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v carapace || true" }}
+  exit
+fi
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# {{- if ne .chezmoi.os "darwin" }}
+VERSION="$(get_release carapace-sh/carapace-bin)"
+OS="$CHEZMOI_OS"
+if [ "$OSID" = android ]; then
+  OS=termux
+fi
+ARCH="$CHEZMOI_ARCH"
+BASE_URL="https://github.com/carapace-sh/carapace-bin/releases/download/$VERSION"
+NAME="carapace-bin_${VERSION#v}_${OS}_${ARCH}"
+# {{- end }}
+
+echo >&2 "Installing carapace"
+
+# {{- if eq .chezmoi.os "darwin" }}
+export NONINTERACTIVE=1
+cmd brew install --quiet carapace
+# {{- else if eq .osid "alpine" }}
+cmd curl -LSfs "$BASE_URL/$NAME.apk" -o "$TMPDIR/carapace.apk"
+cmd sudo apk add --allow-untrusted --quiet "$TMPDIR"/carapace.apk
+# {{- else if eq .osid "arch" }} Archlinux/Manjaro
+cmd sudo yay --sync --needed --noconfirm --quiet carapace-bin
+# {{- else if eq .osid "debian" }} Debian/Ubuntu
+export DEBIAN_FRONTEND=noninteractive
+cmd curl -LSfs "$BASE_URL/$NAME.deb" -o "$TMPDIR/carapace.deb"
+cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
+# {{- else }}
+# https://github.com/carapace-sh/carapace-bin/releases
+URL="$BASE_URL/$NAME.tar.gz"
+install_tar_gz "$URL" carapace
+# {{- end }}
+
+echo >&2 "Installed carapace"

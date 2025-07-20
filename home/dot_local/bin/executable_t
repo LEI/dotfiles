@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Attach to an existing session or create a new session
+
+set -eu
+
+if [ $# -ne 0 ]; then
+  if [ "$*" = "-u NONE" ]; then
+    set -- -f/dev/null -Ltmp # lsk
+  fi
+  tmux "$@"
+elif [ -n "${TMUX:-}" ]; then
+  tmux ls
+else
+  tmux attach || tmux new-session
+fi

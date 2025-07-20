@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -eq 0 ]; then
+  chezmoi status
+else
+  chezmoi "$@"
+fi

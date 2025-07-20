@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# https://mise.jdx.dev/installing-mise.html
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# {{- if eq .osid "android" }}
+# {{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osid" .osid) }}
+# {{- end }}
+
+# Mise: {{ output "sh" "-c" "mise --version || true" | replace "\n" " " | trim }}
+# config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
+
+log "Installing tools"
+
+# {{- if has .osid (list "alpine") }}
+# mise settings set disable_backends ubi
+# {{- end }}
+
+cmd timeout 5m mise install --quiet --yes || cmd timeout 5m mise install --verbose --yes
+
+log "Installed tools"

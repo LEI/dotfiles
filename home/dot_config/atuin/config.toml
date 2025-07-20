@@ -1,0 +1,39 @@
+# TODO: https://docs.atuin.sh/self-hosting/server-setup/
+auto_sync = false
+common_subcommands = [
+  "apt",
+  # "c",
+  "cargo",
+  "chezmoi",
+  "composer",
+  # "d",
+  "dnf",
+  "docker",
+  # "g",
+  "git",
+  "go",
+  "ip",
+  # "k",
+  "kubectl",
+  "nix",
+  "nmcli",
+  "npm",
+  "pecl",
+  "pnpm",
+  "podman",
+  "port",
+  "systemctl",
+  "tmux",
+  "yarn",
+]
+enter_accept = true
+inline_height = 0
+keymap_mode = "vim-insert"
+prefers_reduced_motion = true # NO_MOTION
+show_preview = true
+update_check = false
+
+[dotfiles]
+enabled = true
+# atuin dotfiles alias set e editor
+# atuin dotfiles alias set z zoxide
