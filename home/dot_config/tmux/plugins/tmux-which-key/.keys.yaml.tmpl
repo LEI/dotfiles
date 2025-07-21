@@ -1,4 +1,5 @@
 {{- $keys := list }}
+{{- $map := get . "map" }}
 {{- range (get . "names") }}
 {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
 {{- $prefix := index $parts 0 }}
@@ -16,16 +17,24 @@
 {{- continue }}
 {{- end }}
 
-{{- if or (has $key (get $ "exclude" | default (list "'"))) (or (lt (len $key) (get $ "min" | default 1)) (gt (len $key) (get $ "max" | default (len $key)))) }}
-# Excluded: {{ . }}
+{{- if has $key (get $ "exclude" | default (list "'")) }}
+# Excluded key: {{ . }}
 {{- continue }}
 {{- end }}
 
-{{- $command := get (get $ "map") ($key | replaceAllRegex ";" "\\;") }}
-{{- if contains "'" $command }}
-# FIXME(single quote breaks menu commands): {{ . }}
+{{- if or (lt (len $key) (get $ "min" | default 1)) (gt (len $key) (get $ "max" | default (len $key))) }}
+# Excluded length: {{ . }}
+{{- continue }}
+{{- end }}
+
+{{- $escapedKey := $key | replaceAllRegex "([;#$%{}~])" "\\${1}" }}
+{{- $command := get $map $escapedKey }}
+{{- if eq $command "" }}
+# FIXME(mapping not found, try escaping key): {{ . }}
 {{- $note = printf "-%s (%s)" $note $key }}
-{{- $command = $command | replaceAllRegex "'" "" }}
+{{- $command = printf "display-message \"Mapping not found, try escaping: %s\"" $escapedKey }}
+{{- else if contains "'" $command }}
+{{- $command = $command | replaceAllRegex "'" "\\\\\"" }}
 {{- end }}
 
 {{- $dict := dict
