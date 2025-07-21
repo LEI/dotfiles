@@ -6,11 +6,31 @@ vim.opt.clipboard:append({ 'unnamedplus' })
 
 -- vim.opt.cmdheight = 2
 
+-- Confirm to save changes before exiting modified buffer
+vim.opt.confirm = true
+
+vim.opt.fillchars = {
+  foldopen = '',
+  foldclose = '',
+  fold = ' ',
+  foldsep = ' ',
+  diff = '╱',
+  eob = ' ',
+}
 -- Reverse global flag (always apply to all, except if /g)
 vim.opt.gdefault = true
 
+-- vim.opt.formatoptions = 'jcroqlnt' -- tcqj
+-- vim.opt.grepformat = '%f:%l:%c:%m'
+-- vim.opt.grepprg = 'rg --vimgrep'
+
 -- Ignore case in search patterns
 vim.opt.ignorecase = true
+
+-- Preview incremental substitute
+vim.opt.inccommand = 'nosplit'
+
+vim.opt.jumpoptions = 'view'
 
 -- Always show the status line (3 = only the last windows)
 vim.opt.laststatus = 2
@@ -43,10 +63,24 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.signcolumn = 'yes'
 
+-- Popup blend
+vim.opt.pumblend = 10
+-- Maximum number of entries in a popup
+vim.opt.pumheight = 10
+
 -- Case sensitive when the search contains upper case characters
 vim.opt.smartcase = true
 
+vim.opt.spelllang = { 'en', 'fr' }
+
+vim.opt.splitkeep = 'screen'
+
 vim.opt.termguicolors = true
+
+-- Lower than default (1000) to quickly trigger which-key
+vim.opt.timeoutlen = vim.g.vscode and 1000 or 300
+
+vim.opt.virtualedit = 'block'
 
 -- Always show the window bar
 -- vim.opt.winbar = ' %t'
@@ -55,11 +89,17 @@ vim.opt.termguicolors = true
 if vim.fn.has('windows') then
   vim.opt.splitbelow = true -- Split windows below the current window
   vim.opt.splitright = true -- Split windows right of the current window
+  vim.opt.winminwidth = 5 -- Minimum window width
   vim.opt.winminheight = 0 -- Minimal height of node_version window when it's not the current one
   -- if vim.opt.tabpagemax < 50 then
   --   vim.opt.tabpagemax = 50 -- Maximum number of tab pages to be opened
   -- end
 end
+
+-- Disable line wrap
+vim.opt.wrap = false
+-- Wrap lines at convenient points
+vim.opt.linebreak = true
 
 -- Searches wrap around the end of the file
 vim.opt.wrapscan = true

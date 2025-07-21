@@ -143,7 +143,7 @@ local function grep_picker()
       input = {
         keys = {
           ['<c-c>'] = { 'close', mode = { 'n', 'i' } },
-          ['i'] = { 'clear_search', mode = { 'n' } },
+          ['<backspace>'] = { 'clear_search', mode = { 'n' } },
         },
       },
     },
@@ -297,7 +297,7 @@ return {
         win = {
           input = {
             keys = {
-              ['<c-s>'] = { 'flash', mode = { 'n', 'i' } },
+              ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
               ['s'] = { 'flash' },
               -- ['<a-c>'] = {
               --   'toggle_cwd',
@@ -333,6 +333,7 @@ return {
       { '<leader>\'', function() Snacks.picker.resume() end, desc = 'Resume last picker' },
       { '<leader>,', function() Snacks.picker.buffers() end, desc = 'Select buffer' },
       { '<leader>/', grep_picker, desc = 'Grep' },
+      { '<leader>\\', function() Snacks.picker.grep({ hidden = true, }) end, desc = 'Grep' },
       { '<leader>:', function() Snacks.picker.command_history() end, desc = 'Command history' },
 
       -- Buffer
