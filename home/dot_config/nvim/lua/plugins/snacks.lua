@@ -125,6 +125,39 @@ local dashboard = {
   },
 }
 
+local function grep_picker()
+  local search = vim.fn.getreg('/'):gsub('^\\V', '')
+  Snacks.picker.grep({
+    hidden = true,
+    search = search,
+    actions = {
+      -- Clear input placeholder on insert
+      clear_search = function(picker)
+        if picker.input.filter.search == search then
+          vim.cmd('normal! dd')
+        end
+        vim.cmd.startinsert()
+      end,
+    },
+    win = {
+      input = {
+        keys = {
+          ['<c-c>'] = { 'close', mode = { 'n', 'i' } },
+          ['i'] = { 'clear_search', mode = { 'n' } },
+        },
+      },
+    },
+    -- Start in normal mode
+    on_show = function(picker)
+      -- local buffer = picker.input.filter.current_buf
+      local search = picker.input.filter.search
+      if search ~= '' then
+        vim.cmd.stopinsert()
+      end
+    end,
+  })
+end
+
 local function ghq_picker()
   local cmd = 'ghq list --full-path'
   local list = vim.fn.system(cmd)
@@ -256,6 +289,7 @@ return {
           --   p:set_cwd(current == root and cwd or root)
           --   p:find()
           -- end,
+          -- require("trouble.sources.snacks").actions,
           trouble_open = function(...)
             return require('trouble.sources.snacks').actions.trouble_open.action(...)
           end,
@@ -263,13 +297,13 @@ return {
         win = {
           input = {
             keys = {
-              ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
+              ['<c-s>'] = { 'flash', mode = { 'n', 'i' } },
               ['s'] = { 'flash' },
               -- ['<a-c>'] = {
               --   'toggle_cwd',
               --   mode = { 'n', 'i' },
               -- },
-              ['<a-t>'] = {
+              ['<c-t>'] = {
                 'trouble_open',
                 mode = { 'n', 'i' },
               },
@@ -298,15 +332,7 @@ return {
       -- { '<leader><space>', function() Snacks.picker.smart() end, desc = 'Smart Find Files' },
       { '<leader>\'', function() Snacks.picker.resume() end, desc = 'Resume last picker' },
       { '<leader>,', function() Snacks.picker.buffers() end, desc = 'Select buffer' },
-      { '<leader>/', function() Snacks.picker.grep({
-        debug = { scores = true },
-        hidden = true,
-        search = vim.fn.getreg('/'),
-        -- on_show = function (picker)
-        --   local search = picker.input.filter.search
-        --   if search ~= '' then vim.cmd.stopinsert() end
-        -- end
-      }) end, desc = 'Grep' },
+      { '<leader>/', grep_picker, desc = 'Grep' },
       { '<leader>:', function() Snacks.picker.command_history() end, desc = 'Command history' },
 
       -- Buffer
