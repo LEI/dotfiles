@@ -44,6 +44,10 @@ packages:
     - build-essential
     - gpg
 
+    # Cargo gitlab-ci-ls
+    - pkg-config
+    - libssl-dev # openssl-devel on Fedora
+
     # Debian devcontainer
     - python3
     - python3-venv

@@ -40,7 +40,7 @@ repos:
       - id: yamllint
         args:
           - --strict
-          - --config-file=.yamllint.yaml
+          - --config-file=home/dot_config/yamllint/config
         # Use yamlfmt installed on the system instead of building with Go
         language: system
         stages:
