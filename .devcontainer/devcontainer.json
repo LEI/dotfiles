@@ -11,15 +11,15 @@
     "ghcr.io/devcontainer-community/devcontainer-features/chezmoi.io:1": {},
     // "ghcr.io/devcontainers-extra/features/mise:1": {},
     // "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
     // "ghcr.io/devcontainers/features/go:1": {},
     // "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
     // "ghcr.io/devcontainers/features/node:1": {}, // nvm
     // "ghcr.io/devcontainers/features/rust:1": {},
     // "ghcr.io/rio/features/chezmoi:1": {},
     // "ghcr.io/roul/devcontainer-features/bitwarden-cli:1": {},
-    "ghcr.io/roul/devcontainer-features/bitwarden-secrets-manager:1": {},
-    "ghcr.io/roul/devcontainer-features/mise:1": {}
+    // "ghcr.io/roul/devcontainer-features/bitwarden-secrets-manager:1": {}
+    // "ghcr.io/roul/devcontainer-features/mise:1": {}
     // "ghcr.io/roul/devcontainer-features/mise-{golang,node,python,ruby,rust}:1": {},
     // "ghcr.io/tailscale/codespace/tailscale": {},
   },
@@ -31,7 +31,7 @@
           "permissions": "read-all"
         },
         "lei/vscode-settings": {
-          "permissions": "write-all"
+          "permissions": "read-all"
         }
       }
     },
@@ -44,11 +44,11 @@
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "redhat.telemetry.enabled": false,
-        "syncSettings.ignoredExtensions": [
-          "GitHub.codespaces",
-          "GitHub.github-vscode-theme"
-        ]
+        "redhat.telemetry.enabled": false
+        // "syncSettings.ignoredExtensions": [
+        //   "GitHub.codespaces",
+        //   "GitHub.github-vscode-theme"
+        // ],
         // "[typescript]": {
         //   "editor.defaultFormatter": "esbenp.prettier-vscode",
         // },

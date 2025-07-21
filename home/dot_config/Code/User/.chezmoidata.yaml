@@ -1,0 +1,5 @@
+---
+extraPackages:
+  visual-studio-code:
+    enabled: "{{ and .features.vscode (not .headless) }}"
+    type: cask

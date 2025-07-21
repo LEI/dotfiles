@@ -1,4 +1,4 @@
-background-opacity = 0.8
+background-opacity = 0.75
 
 # cursor-style = "block"
 # cursor-style-blink = false
@@ -11,11 +11,15 @@ scrollback-limit = 90000000
 theme = "tokyonight_night"
 # theme = "tokyonight-storm"
 
-{{- if eq .chezmoi.os "darwin" }}
+# font-feature = -calt, -liga, -dlig
+{{- if eq .os "darwin" }}
 font-size = 11
+
 # https://github.com/ghostty-org/ghostty/discussions/3642
 # fullscreen = true
 # macos-non-native-fullscreen = visible-menu
+
+# window-save-state = "always"
 
 # https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
 macos-option-as-alt = left

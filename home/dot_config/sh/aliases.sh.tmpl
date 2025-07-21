@@ -4,7 +4,7 @@
 # alias sudo="sudo "
 
 # Confirm before overwriting
-alias cp="cp --interactive"
+alias cp="cp -i" # --interactive
 
 # Print sizes in powers of 1024
 alias df="df -h" # --human-readable
@@ -15,45 +15,133 @@ alias free="free --human"
 # Color matches
 alias grep="grep --color=auto"
 
-# {{- if .features.nushell }}
-# if ! hash l 2>/dev/null; then
-#   if type l >/dev/null; then
-#     unalias l
-#   fi
-#   l() { nu --commands "l $*" --login; }
-# fi
-# {{- end }}
-
 # List all files with colors, human-readable sizes and long format
 alias la="ls -ahl --color=auto"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
+{{- if eq .chezmoi.os "darwin" }}
+
 # Reload the shell (i.e. invoke as a login shell)
 alias reload='exec ${SHELL} -l'
+{{- else }}
 
-if command -v bat >/dev/null; then
-  alias cat=bat
-fi
-# alias e=editor
-alias v=vim
-alias nv=nvim
+alias reload='exec ${SHELL} -i'
+{{- end }}
 
+{{- if lookPath "bat" }}
+alias cat=bat
+{{- else if lookPath "batcat" }}
+alias cat=batcat
+{{- end }}
+
+{{- if lookPath "eza" }}
+alias ls=eza
+{{- else if lookPath "gls" }}
+# export LS_COLORS="$(vivid generate tokyonight-storm)"
+alias ls="gls --color"
+{{- end }}
+
+# NOTE: see carapace specs
 # TODO: termux-open
-alias o=open
+# alias o=open
 if ! hash open 2>/dev/null; then
-  # and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft")
-  if [ -f /proc/version ] && grep -iq microsoft /proc/version; then
-    if [ -f /mnt/c/Windows/explorer.exe ]; then
-      # TODO: add /mnt/c/Windows to PATH
-      alias open=/mnt/c/Windows/explorer.exe
-    else
-      alias open=explorer.exe
-    fi
-  elif hash xdg-open 2>/dev/null; then
+  {{- if .wsl }}
+  # [ -f /proc/version ] && grep -iq microsoft /proc/version
+  if [ -f /mnt/c/Windows/explorer.exe ]; then
+    # TODO: add /mnt/c/Windows to PATH
+    alias open=/mnt/c/Windows/explorer.exe
+  else
+    alias open=explorer.exe
+  fi
+  {{- else }}
+  if hash xdg-open 2>/dev/null; then
     alias open=xdg-open
   elif hash code 2>/dev/null; then
     alias open=code
   fi
+  {{- end }}
 fi
+
+{{- if .features.ai }}
+
+if command -v claude >/dev/null; then
+  _claude() { if [ $# -eq 0 ]; then claude --resume; else claude "$@"; fi }
+  alias claude=_claude
+fi
+if command -v crush >/dev/null; then
+  _crush() { if [ $# -eq 0 ]; then crush --continue; else crush "$@"; fi }
+  alias crush=_crush
+fi
+{{- end }}
+
+{{- if and .features.docker }}
+
+if command -v lazydocker >/dev/null; then
+  alias D=lazydocker
+elif command -v oxker >/dev/null; then
+  alias D=oxker
+fi
+
+if command -v podman-tui >/dev/null; then
+  alias P=podman-tui
+fi
+{{- end }}
+
+{{- if and .features.git }}
+
+if command -v lazygit >/dev/null; then
+  alias G=lazygit
+fi
+
+if command -v podman-tui >/dev/null; then
+  alias P=podman-tui
+fi
+{{- end }}
+
+{{- if lookPath "lazyjournal" }}
+
+if command -v lazyjournal >/dev/null; then
+  alias J=lazyjournal
+fi
+{{- end }}
+
+{{- if and .features.kube }}
+
+if command -v k9s >/dev/null; then
+  alias K="k9s --all-namespaces"
+fi
+
+if command -v kubecolor >/dev/null; then
+  alias kubectl=kubecolor
+fi
+{{- end }}
+
+{{- if or .features.neovim .features.vim }}
+
+if command -v nvim >/dev/null; then
+  alias dbui="nvim +DBUI"
+elif command -v vim >/dev/null; then
+  alias dbui="vim +DBUI"
+fi
+{{- end }}
+
+{{- if .features.python }}
+
+if ! hash recover 2>/dev/null; then
+  {{- if lookPath "recoverpy" }}
+  alias recover="sudo recoverpy"
+  {{- else if lookPath "uvx" }}
+  alias recover="sudo uvx recoverpy"
+  {{- else if lookPath "pipx" }}
+  alias recover="sudo pipx run recoverpy"
+  {{- else }}
+  alias recover="sudo recoverpy"
+  {{- end }}
+fi
+{{- end }}
+
+{{- if lookPath "tmux" }}
+alias tmux="TERM=tmux-256color tmux"
+{{- end }}

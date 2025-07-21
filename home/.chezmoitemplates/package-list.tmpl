@@ -1,0 +1,52 @@
+{{- $defaultType := get . "defaultType" -}}
+{{- $packageType := get . "packageType" }}
+{{- $packages := output "chezmoi" "execute-template" "--refresh-externals=never" "--" (.packages | toYaml | replaceAllRegex "\\\\\"" "\"" | replaceAllRegex "\\\\n" "") | fromYaml }}
+{{- $output := list }}
+{{- range $packageName, $pkg := $packages }}
+
+{{-   if eq $pkg nil }}
+{{-     $pkg = dict "name" $packageName }}
+{{-   end }}
+
+{{-   if and (kindIs "map" $pkg) (get $pkg "name") }}
+{{-     $packageName = get $pkg "name" }}
+{{-   else if kindIs "string" $pkg }}
+{{-     $packageName = $pkg }}
+{{-     $pkg = dict "name" $packageName }}
+{{-   end }}
+
+{{-   $nameOverwrite := get $pkg "nameOverwrite" }}
+{{-   if and $nameOverwrite (get $nameOverwrite $.osID) }}
+{{-     $packageName = get $nameOverwrite $.osID }}
+{{-   else if and $nameOverwrite (get $nameOverwrite $.osIDLike) }}
+{{-     $packageName = get $nameOverwrite $.osIDLike }}
+{{-   end }}
+
+{{-   $type := get $pkg "type" }}
+{{-   if eq $type nil "" "<no value>" }}
+{{-     $type = $defaultType }}
+{{-   end }}
+{{-   if and $packageType $type }}
+{{-     if and $type (ne $packageType $type) }}
+{{- /* warnf "Excluded package type (and): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-       continue }}
+{{-     end }}
+{{-   else if or $packageType $type }}
+{{- /* warnf "Excluded package type (or): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-     continue }}
+{{-   end }}
+
+{{-   $enabled := get $pkg "enabled" }}
+{{-   if and $enabled (ne $enabled "") (ne $enabled "true") }}
+{{- /* warnf "Disabled package: %s" $packageName */ -}}
+{{-     continue }}
+{{-   end }}
+
+{{-   if ne $packageType "mas" }}
+{{-     $output = append $output $packageName }}
+{{-   else }}
+{{-     $output = append $output (dict "name" $packageName "id" $pkg.id) }}
+{{-   end }}
+
+{{- end }}
+{{- $output | toJson -}}

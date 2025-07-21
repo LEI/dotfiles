@@ -1,0 +1,6 @@
+---
+extraPackages:
+  bash:
+    enabled: '{{ and .features.bash (eq .osIDLike "alpine" "darwin") }}'
+  bash-completion:
+    enabled: '{{ and .features.bash (eq .osIDLike "alpine" "darwin") }}'

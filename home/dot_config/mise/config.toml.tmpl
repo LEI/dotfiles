@@ -1,27 +1,38 @@
 [settings]
-{{- if eq .osid "alpine" }}
+{{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
 disable_backends = ["ubi"]
+{{- end }}
+idiomatic_version_file_enable_tools = ["node", "go"]
+
+{{- if .features.goss }}
+[tasks.goss-validate]
+dir = "~/.config/goss"
+run = "goss --vars=vars.yaml validate"
 {{- end }}
 
 [tools]
 
-{{- if ne .osid "alpine" }}
-# FIXME: failed to install asdf:https://gitlab.com/wt0f/asdf-bat@0.25.0
-bat = "latest"
+{{- if eq .osIDLike "debian" }}
+bottom = "latest"
 {{- end }}
 
-bottom = "latest"
 # chezmoi = "latest"
-direnv = "latest"
+# direnv = "latest"
 
-{{- if .features.docker }}
+{{- if or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)) }}
+eza = "latest"
+{{- end }}
+
+{{- if and .features.docker (not (eq .osIDLike "arch" "darwin")) }}
 lazydocker = "latest"
 {{- end }}
 
-# fd = "latest" # NOTE: install hangs on alpine
+{{- if eq .osIDLike "debian" }}
+fd = "latest"
+{{- end }}
 
-{{- if .features.git }}
+{{- if and .features.git (eq .osIDLike "alpine" "debian" "fedora") }}
 ghq = "latest"
 {{- end }}
 
@@ -29,9 +40,9 @@ ghq = "latest"
 go = "latest"
 {{- end }}
 
-jq = "latest"
+# jq = "latest"
 
-{{- if .features.git }}
+{{- if and .features.git (not (eq .osIDLike "alpine" "arch" "darwin" "windows")) }}
 lazygit = "latest"
 {{- end }}
 
@@ -39,12 +50,11 @@ lazygit = "latest"
 kubectl = "latest"
 {{- end }}
 
-{{- if .features.node }}
-{{- if ne .osid "android" }}
+{{- if and (.features.node) (not (eq .osID "alpine" "android")) }}
 # FIXME(termux): hangs terminal "No such file or directory (os error 2)"
 # ~/.local/share/mise/installs/node/23.11.0/bin/node -v
+# NOTE: install from system packages on alpine to avoid building from source
 node = "latest"
-{{- end }}
 {{- end }}
 
 # TODO: install system packages
@@ -53,22 +63,50 @@ node = "latest"
 # php = "latest"
 # {{- end }}
 
-ripgrep = "latest"
+{{- if .features.python }}
+# python = "latest"
+{{- end }}
 
-{{- if and (ne .osid "alpine") (not .features.neovim) }}
+# ripgrep = "latest"
+
+{{- if .features.ruby }}
+# ruby = "latest"
+{{- end }}
+
+{{- if and (ne .osID "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
-# shellcheck = "latest"
+shellcheck = "latest"
+shfmt = "latest"
 {{- end }}
 
 # {{- if not .features.neovim }}
 # shfmt = "latest"
 {{- end }}
 
-{{- if ne .osid "android" }}
+{{- if .features.rust }}
+# Default profile adds rust-docs, rustfmt and clippy
+# rust = {
+#   version = "latest",
+#   components = "rust-analyzer,
+#   rust-src,llvm-tools", profile = "minimal",
+# }
+{{- end }}
+
+{{- if eq .osIDLike "alpine" "debian" "fedora" }}
 # FIXME(termux): installs but "cannot execute: required file not found"
 starship = "latest"
 {{- end }}
 
+{{- if and .features.git (eq .osIDLike "alpine" "arch" "debian" "fedora" "windows") }}
+prek = "latest"
+{{- end }}
+
 usage = "latest"
+
+{{- if or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)) }}
 yq = "latest"
+{{- end }}
+
+{{- if and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) }}
 zoxide = "latest"
+{{- end }}

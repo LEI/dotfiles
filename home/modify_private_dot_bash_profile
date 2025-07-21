@@ -1,0 +1,8 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "block-in-file.tmpl" (dict
+  "chezmoi" .chezmoi
+  "contents" (printf "%s\n%s\n"
+    "[ \"${BENCH:-}\" = true ] && echo >&2 \"Loaded .bash_profile ($-)\""
+    (eq .os "darwin" | ternary "[[ -f ~/.bashrc ]] && source ~/.bashrc" "")
+  )
+) -}}

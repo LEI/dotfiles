@@ -34,8 +34,10 @@ map('n', '[b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
 map('n', ']b', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
 -- map('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
 -- map('n', '<leader>`', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
--- map('n', '<leader>bd', function() Snacks.bufdelete() end, { desc = 'Delete Buffer' })
--- map('n', '<leader>bo', function() Snacks.bufdelete.other() end, { desc = 'Delete Other Buffers' })
+if not Snacks then
+  map('n', '<leader>bd', '<cmd>:bd<cr>', { desc = 'Delete Buffer' })
+  map('n', '<leader>bo', '<cmd>:%bd|e#<cr>', { desc = 'Delete Other Buffers' })
+end
 map('n', '<leader>bD', '<cmd>:bd<cr>', { desc = 'Delete Buffer and Window' })
 
 -- Clear search and stop snippet on escape
@@ -73,23 +75,49 @@ map('i', ';', ';<c-g>u')
 --keywordprg
 map('n', '<leader>K', '<cmd>norm! K<cr>', { desc = 'Keywordprg' })
 
--- Better indenting
-map('v', '<', '<gv')
-map('v', '>', '>gv')
+-- { ';', ':normal n.<cr>', desc = 'Repeat last command on next match', mode = 'n', noremap = true },
+map('n', ';', ':normal n.<cr>')
+-- { '.', ':normal.<cr>', desc = 'Repeat last command', mode = 'v', noremap = true },
+map('v', '.', ':normal.<cr>')
+
+-- Keep visual mode after indenting
+-- map('v', '<', '<gv')
+-- map('v', '>', '>gv')
 
 -- Commenting
 map('n', 'gco', 'o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Below' })
 map('n', 'gcO', 'O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Above' })
 
+-- Location list
+map('n', '<leader>xl', function()
+  local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = 'Location List' })
+
+-- Quickfix list
+map('n', '<leader>xq', function()
+  local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = 'Quickfix List' })
+
+map('n', '[q', '<cmd>cprev<cr>', { desc = 'Previous quickfix' })
+map('n', ']q', '<cmd>cnext<cr>', { desc = 'Next quickfix' })
+
 -- Quit
 -- map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
 
 -- Highlights under cursor
-map('n', '<leader>ui', vim.show_pos, { desc = 'Inspect Pos' })
+map('n', '<leader>ui', function()
+  vim.show_pos()
+end, { desc = 'Inspect pos' })
 map('n', '<leader>uI', function()
   vim.treesitter.inspect_tree()
   vim.api.nvim_input('I')
-end, { desc = 'Inspect Tree' })
+end, { desc = 'Inspect tree' })
 
 -- Terminal Mappings
 map('t', '<C-/>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
@@ -98,9 +126,9 @@ map('t', '<c-_>', '<cmd>close<cr>', { desc = 'which_key_ignore' })
 -- Windows
 map('n', '<leader>-', '<C-W>s', { desc = 'Split Window Below', remap = true })
 map('n', '<leader>|', '<C-W>v', { desc = 'Split Window Right', remap = true })
-map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
-Snacks.toggle.zoom():map('<leader>wm'):map('<leader>uZ')
-Snacks.toggle.zen():map('<leader>uz')
+-- map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
+-- Snacks.toggle.zoom():map('<leader>wm'):map('<leader>uZ')
+-- Snacks.toggle.zen():map('<leader>uz')
 
 -- Tabs
 map('n', '<leader><tab>l', '<cmd>tablast<cr>', { desc = 'Last Tab' })
@@ -120,6 +148,21 @@ if vim.fn.has('nvim-0.11') == 0 then
     return vim.snippet.active({ direction = -1 }) and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
   end, { expr = true, desc = 'Jump Previous' })
 end
+
+-- local diagnostic_goto = function(next, severity)
+--   local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+--   severity = severity and vim.diagnostic.severity[severity] or nil
+--   return function()
+--     go({ severity = severity })
+--   end
+-- end
+-- map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line Diagnostics' })
+-- map('n', ']d', diagnostic_goto(true), { desc = 'Next Diagnostic' })
+-- map('n', '[d', diagnostic_goto(false), { desc = 'Prev Diagnostic' })
+-- map('n', ']e', diagnostic_goto(true, 'ERROR'), { desc = 'Next Error' })
+-- map('n', '[e', diagnostic_goto(false, 'ERROR'), { desc = 'Prev Error' })
+-- map('n', ']w', diagnostic_goto(true, 'WARN'), { desc = 'Next Warning' })
+-- map('n', '[w', diagnostic_goto(false, 'WARN'), { desc = 'Prev Warning' })
 
 -- Refresh buffer
 map('n', '<M-l>', '<cmd>edit<cr>', { desc = 'Refresh buffer' })

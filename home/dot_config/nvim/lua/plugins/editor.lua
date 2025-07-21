@@ -1,6 +1,7 @@
 return {
   {
     'm4xshen/hardtime.nvim',
+    -- enabled = false,
     dependencies = { 'MunifTanjim/nui.nvim' },
     event = 'VeryLazy',
     cmd = 'Hardtime',
@@ -28,13 +29,23 @@ return {
   },
   {
     'folke/flash.nvim',
-    enabled = vim.fn.has('nvim-0.8') == 1,
+    -- enabled = false, -- vim.fn.has('nvim-0.8') == 1,
     tag = 'v2.1.0',
-    opts = {},
+    opts = {
+      modes = {
+        char = {
+          jump_labels = true,
+        },
+        -- keys = { 'f', 'F', 't', 'T', ';', ',' }, -- TODO: { [';'] = 'L', [','] = H }
+      },
+    },
     -- stylua: ignore
     keys = {
-      { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
-      { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash treesitter' },
+      'f', 'F', 't', 'T',
+      -- ';',
+      ',',
+      -- { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
+      -- { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash treesitter' },
       -- { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote flash' },
       -- { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter search' },
       { '<c-s>', mode = { 'c' }, function() require('flash').toggle() end, desc = 'Toggle Flash search' },
@@ -90,14 +101,9 @@ return {
     },
   },
   {
-    'monaqa/dial.nvim',
-    tag = 'v0.4.0',
-    keys = { '<C-a>', { '<C-x>', mode = 'n' } },
-  },
-  {
     'iamcco/markdown-preview.nvim',
     tag = 'v0.0.10',
-    -- build = function() vim.fn["mkdp#util#install"]() end,
+    -- build = function() vim.fn['mkdp#util#install']() end,
     build = 'cd app && yarn install --frozen-lockfile',
     cmd = {
       'MarkdownPreview',
@@ -122,63 +128,16 @@ return {
     end,
   },
   {
-    'stevearc/oil.nvim',
-    version = '2.15.0',
-    lazy = false,
-    cmd = 'Oil',
-    opts = {
-      columns = {
-        'icon',
-        -- 'permissions',
-        -- 'size',
-        -- 'mtime',
-      },
-      default_file_exporer = true,
-      delete_to_trash = true,
-      keymaps = {
-        ['g?'] = { 'actions.show_help', mode = 'n' },
-        ['<CR>'] = 'actions.select',
-        -- ['<C-s>'] = { 'actions.select', opts = { vertical = true } },
-        -- ['<C-h>'] = { 'actions.select', opts = { horizontal = true } },
-        -- ['<C-t>'] = { 'actions.select', opts = { tab = true } },
-        ['<C-p>'] = 'actions.preview',
-        ['<C-c>'] = { 'actions.close', mode = 'n' },
-        ['<M-l>'] = 'actions.refresh', -- Default: C-l
-        ['-'] = { 'actions.parent', mode = 'n' },
-        ['_'] = { 'actions.open_cwd', mode = 'n' },
-        ['`'] = { 'actions.cd', mode = 'n' },
-        ['~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
-        ['gs'] = { 'actions.change_sort', mode = 'n' },
-        ['gx'] = 'actions.open_external',
-        ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
-        ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
-      },
-      -- skip_confirm_for_simple_edits = true,
-      use_default_keymaps = false,
-      view_options = {
-        show_hidden = true,
-      },
-      watch_for_changes = true,
-    },
-    keys = {
-      { '-', '<cmd>Oil<cr>', desc = 'Explore buffer directory' },
-      { '<leader>OO', '<cmd>Oil<cr>', desc = 'Open file explorer' },
-      { '<leader>OT', '<cmd>Trash<cr>', desc = 'Open system trash' },
-    },
-    init = function()
-      vim.g.loaded_netrw = 1
-      vim.g.loaded_netrwPlugin = 1
-      vim.api.nvim_create_user_command('Trash', function()
-        vim.cmd('Oil --trash /')
-      end, { desc = 'Open system trash' })
-    end,
-  },
-  {
     'nvim-treesitter/nvim-treesitter',
     tag = 'v0.10.0',
+    dependencies = {
+      'RRethy/nvim-treesitter-endwise',
+    },
     -- branch = 'master',
-    lazy = false,
+    -- lazy = false,
     build = ':TSUpdate',
+    cmd = { 'TSInstall', 'TSInstallInfo', 'TSInstallSync', 'TSUpdate', 'TSUpdateSync' },
+    event = 'BufEnter',
     opts = {
       auto_install = true,
       ensure_installed = {
@@ -187,7 +146,8 @@ return {
         'c',
         'dockerfile',
         'hcl',
-        'help',
+        -- https://github.com/LazyVim/LazyVim/issues/524
+        -- 'help',
         'html',
         'javascript',
         'json',
@@ -195,7 +155,7 @@ return {
         'lua',
         'markdown',
         'markdown_inline',
-        'norg',
+        -- 'norg',
         'python',
         'query',
         'regex',
@@ -205,13 +165,14 @@ return {
         'vimdoc',
         'yaml',
       },
-      -- highlight = { enable = true },
-      -- indent = { enable = true },
+
+      highlight = { enable = true },
+      indent = { enable = true },
       -- sync_install = true,
     },
     init = function()
       vim.opt.foldenable = false
-      -- vim.wo.foldlevel = 99
+      vim.opt.foldlevel = 99
       -- vim.wo.conceallevel = 2
       if vim.fn.has('nvim-0.10') == 1 then
         vim.opt.smoothscroll = true
@@ -285,16 +246,18 @@ return {
   },
   {
     'folke/ts-comments.nvim',
-    enabled = false, -- vim.fn.has('nvim-0.10') == 1,
+    enabled = vim.fn.has('nvim-0.10') == 1,
     tag = 'v1.5.0',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     opts = {},
     event = 'VeryLazy',
   },
   {
-    'windwp/nvim-ts-autotag',
+    -- WARN: 'windwp/nvim-ts-autotag' breaks dot repeat
+    -- https://github.com/windwp/nvim-ts-autotag/issues/166#issuecomment-3138305359
+    'tronikelis/ts-autotag.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    event = 'InsertEnter',
+    event = 'InsertEnter', -- 'VeryLazy',
     opts = {},
   },
   {

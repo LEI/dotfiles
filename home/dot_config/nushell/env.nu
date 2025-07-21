@@ -8,6 +8,16 @@ const config_dir = $nu.default-config-dir | path expand
 # $env.path ++= ["~/.local/bin"]
 path add "~/.local/bin"
 
+if (which mise) == [] {
+    log warning "Command 'mise' not found"
+}
+let mise_path = $config_dir | path join mise.nu
+^mise activate nu | save $mise_path --force
+
+$env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+mkdir ~/.cache/carapace
+carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
+
 # path add ($env.CARGO_HOME | path join "bin")
 const cargo_path = "~/.cargo/env.nu" | path expand
 # const cargo_path = ($nu.home-path | path join .cargo/env.nu)
@@ -30,7 +40,9 @@ if "VISUAL" not-in $env or $env.VISUAL == "" {
     $env.VISUAL = $env.EDITOR
 }
 
-# mkdir ~/.local/share/atuin/ # init.nu
+# TODO: share_dir
+# mkdir ~/.local/share/atuin/
+# atuin init nu | save ~/.local/share/atuin/init.nu
 if (which atuin) != [] {
     atuin init --disable-up-arrow nu | save ($config_dir | path join atuin.nu) --force
 }

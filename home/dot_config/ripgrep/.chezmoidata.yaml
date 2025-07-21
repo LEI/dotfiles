@@ -1,0 +1,10 @@
+---
+extraPackages:
+  ripgrep:
+    nameOverwrite:
+      windows: burntsushi.ripgrep.msvc
+  ripgrep-all:
+    enabled: '{{ eq .osIDLike "arch" "darwin" }}'
+    # nameOverwrite:
+    #   darwin: rga
+    type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'

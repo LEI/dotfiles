@@ -11,6 +11,7 @@ return {
   },
   {
     'folke/lazydev.nvim',
+    enabled = vim.fn.has('nvim-0.10') == 1,
     version = '1.9.0',
     ft = 'lua',
     cmd = 'LazyDev',

@@ -1,0 +1,59 @@
+---
+extraPackages:
+  gh:
+    enabled: >
+      {{ and .features.git (not (or
+        (eq .osIDLike "alpine")
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      )) }}
+    nameOverwrite:
+      arch: github-cli
+      windows: GitHub.cli
+    type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+  ghq:
+    enabled: '{{ and .features.git (not (eq .osIDLike "alpine" "debian" "fedora")) }}'
+    nameOverwrite:
+      windows: x-motemen.ghq
+  git:
+    enabled: "{{ .features.git }}"
+    nameOverwrite:
+      windows: Git.Git
+    type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+  git-absorb:
+    enabled: '{{ and .features.git (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))) }}'
+    nameOverwrite:
+      windows: tummychow.git-absorb
+    type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+  # git-cal:
+  git-extras:
+    enabled: '{{ and .features.git (not (eq .osIDLike "alpine" "windows")) }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # git-lfs:
+  # git-sizer:
+  # gitui:
+  #   enabled: '{{ and (ne .osIDLike "debian") }}'
+  #   nameOverwrite:
+  #     windows: stephandilly.gitui
+  #   type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+  glab:
+    enabled: >
+      {{ and .features.git (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 12))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      )) }}
+    nameOverwrite:
+      windows: GLab.GLab
+    type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+  lazygit:
+    enabled: '{{ and .features.git (eq .osIDLike "alpine" "arch" "darwin" "windows") }}'
+    nameOverwrite:
+      windows: JesseDuffield.lazygit
+  prek: # pre-commit
+    enabled: '{{ and .features.git (not (eq .osIDLike "alpine" "arch" "debian" "fedora" "windows")) }}'
+ghExtensions:
+  - dlvhdr/gh-dash
+  - { name: github/gh-copilot, enabled: "{{ .features.ai }}" }
+  - meiji163/gh-notify # Requires fzf
+  - gennaro-tedesco/gh-f
+  - gennaro-tedesco/gh-s

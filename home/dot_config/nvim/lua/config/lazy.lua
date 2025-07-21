@@ -28,23 +28,61 @@ require('lazy').setup({
     version = '*',
   },
   spec = {
-    { import = 'plugins' },
-    -- { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- { import = "lazyvim.plugins.extras.coding.copilot" },
+    -- { import = 'plugins' },
+
+    -- { 'LazyVim/LazyVim', import = 'lazyvim.plugins' },
+    -- { import = 'lazyvim.plugins.extras.coding.copilot' },
+
+    { import = 'plugins/ai' },
+    { import = 'plugins/chezmoi' },
+    { import = 'plugins/colorscheme' },
+    { import = 'plugins/completion' },
+    { import = 'plugins/dap' },
+    { import = 'plugins/db' },
+    { import = 'plugins/editor' },
+    { import = 'plugins/extras' },
+    { import = 'plugins/format' },
+    { import = 'plugins/init' },
+    { import = 'plugins/languages' },
+    { import = 'plugins/lint' },
+    { import = 'plugins/lsp' },
+    { import = 'plugins/lualine' },
+    { import = 'plugins/mason' },
+    { import = 'plugins/oil' },
+    { import = 'plugins/persistence' },
+    { import = 'plugins/rest' },
+    { import = 'plugins/snacks' },
+    { import = 'plugins/test' },
+    { import = 'plugins/tools' },
+    { import = 'plugins/ui' },
+    { import = 'plugins/undo' },
+    { import = 'plugins/util' },
+    { import = 'plugins/which-key' },
   },
-  checker = { enabled = true },
-  change_detection = {
-    -- automatically check for config file changes and reload the ui
+  checker = {
     enabled = true,
-    notify = true, -- get a notification when changes are found
+    check_pinned = false,
+    -- TODO: { 'LEI/lazy.nvim', branch = 'feat/check-tags' },
+    -- https://github.com/folke/lazy.nvim/issues/1729
+    -- check_tags = true,
   },
-  -- dev = {
-  --   path = '~/projects',
-  --   patterns = {},
-  --   fallback = false,
-  -- },
+  change_detection = {
+    -- Automatically check for config file changes and reload the ui
+    enabled = true,
+    -- Get a notification when changes are found
+    notify = true,
+  },
+  dev = {
+    -- path = '~/projects',
+    path = function(plugin)
+      local path = plugin.url:gsub('^https://', ''):gsub('.git$', '')
+      return '~/src/' .. path
+    end,
+    patterns = {},
+    fallback = false,
+  },
   install = {
-    colorscheme = { vim.g.config.colorscheme },
+    colorscheme = { vim.g.config.theme.colorscheme },
     missing = true,
   },
   ui = {

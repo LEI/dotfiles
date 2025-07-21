@@ -1,0 +1,8 @@
+---
+extraPackages:
+  vscodium:
+    enabled: "{{ and .features.vscodium (not .headless) }}"
+    type: cask
+  # vscodium@insiders:
+  #   enabled: "{{ and .features.vscodium (not .headless) }}"
+  #   type: cask

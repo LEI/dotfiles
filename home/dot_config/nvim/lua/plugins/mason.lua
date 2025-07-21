@@ -1,9 +1,140 @@
 local mason_packages_dir = vim.g.home .. '/.local/share/nvim/mason/packages'
 
+local function has_cargo()
+  return vim.fn.executable('cargo') == 1
+end
+
+local function has_go()
+  return vim.fn.executable('go') == 1
+end
+
+local function has_php()
+  return vim.fn.executable('php') == 1
+end
+
+-- TODO: do not install if already present, e.g. installed from source
+local mason_tools = {
+  -- Formatters
+  'golangci-lint',
+  'phpcbf',
+  -- 'pgformatter',
+  'prettier',
+  'prettierd',
+  'shfmt',
+  -- 'sleek',
+  'sql-formatter',
+  -- 'sqlfluff',
+  -- 'sqlfmt',
+  'stylua',
+  'yamlfmt',
+
+  -- Linters
+  -- 'actionlint',
+  -- 'codespell',
+  -- 'commitlint',
+  -- 'cspell',
+  -- 'gitleaks',
+  -- 'gitlint',
+  'goimports',
+  { 'hadolint', version = 'v2.12.0' },
+  'markdownlint',
+  -- 'phpactor',
+  'phpcs',
+  'shellcheck',
+  'sqlfluff',
+  -- 'vale',
+  'yamllint',
+
+  -- Tools
+  'gitui',
+  'kulala-fmt',
+}
+
+local mason_lsp = {
+  -- LSP
+  'angularls', -- 'angular-language-server',
+  'ansiblels', -- 'ansible-language-server',
+  'cspell_ls', -- 'cspell-lsp',
+  'docker_compose_language_service', -- 'docker-compose-language-service',
+  'dockerls', -- 'dockerfile-language-server',
+  'gh_actions_ls', -- 'gh-actions-language-server',
+  { 'gitlab_ci_ls', condition = has_cargo }, -- 'gitlab-ci-ls',
+  'helm_ls', -- 'helm-ls',
+  { 'intelephense', condition = has_php },
+  'lua_ls', -- 'lua-language-server',
+  'marksman', -- '',
+  'nginx_language_server', -- 'nginx-language-server',
+  'postgres_lsp', -- 'postgrestools',
+  -- 'sqlls', -- '',
+  'tailwindcss', -- 'tailwindcss-language-server',
+  'tofu_ls', -- 'tofu-ls', -- 'terraformls', -- 'terraformls-ls',
+  -- 'vale_ls', -- 'vale-ls',
+  'vimls', -- 'vim-language-server',
+
+  -- Go
+  { 'golangci_lint_ls', condition = has_go }, -- 'golangci-lint-langserver',
+  { 'gopls', condition = has_go },
+  -- { 'sqls', condition = has_go },
+
+  -- Node
+  'bashls', -- 'bash-language-server',
+
+  -- TODO: use global vscode ls if installed
+  'cssls', -- 'css-lsp',
+  'eslint', -- 'eslint-lsp',
+  'html', -- 'html-lsp',
+  'jsonls', -- 'json-lsp',
+
+  {
+    'ts_ls',
+    condition = function()
+      return vim.g.features.node
+    end,
+  }, -- 'typescript-language-server',
+  'yamlls', -- 'yaml-language-server',
+
+  -- Rust
+  {
+    'rust_analyzer',
+    condition = function()
+      return vim.g.features.rust
+    end,
+  }, -- 'rust-analyzer',
+  'taplo',
+}
+
+local mason_dap = {
+  'bash', -- bash-debug-adapter
+  -- 'chrome', -- chrome-debug-adapter
+  -- 'codelldb', -- codelldb
+  -- 'coreclr', -- netcoredbg
+  'cppdbg', -- cpptools
+  -- 'dart', -- dart-debug-adapter
+  'delve', -- delve
+  -- 'elixir', -- elixir-ls
+  -- 'erlang', -- erlang-debugger
+  'firefox', -- firefox-debug-adapter
+  -- 'haskell', -- haskell-debug-adapter
+  -- 'javadbg', -- java-debug-adapter
+  -- 'javatest', -- java-test
+  'js', -- js-debug-adapter
+  -- 'kotlin', -- kotlin-debug-adapter
+  -- 'mock', -- mockdebug
+  -- 'node2', -- node-debug2-adapter
+  'php', -- php-debug-adapter
+  -- 'puppet', -- puppet-editor-services
+  'python', -- debugpy
+}
+
+for _, name in pairs(mason_lsp) do
+  table.insert(mason_tools, name)
+end
+
 return {
   {
     'mason-org/mason.nvim',
-    tag = 'v2.0.0',
+    -- tag = 'v2.0.1',
+    version = 'v2.x',
     cmd = {
       'Mason',
       'MasonInstall',
@@ -31,7 +162,12 @@ return {
 
   {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
-    dependencies = { 'mason-org/mason.nvim' },
+    dependencies = {
+      'mason-org/mason.nvim',
+
+      -- 'mason-org/mason-lspconfig.nvim',
+      -- 'neovim/nvim-lspconfig',
+    },
     cmd = {
       'MasonToolsClean',
       'MasonToolsInstall',
@@ -41,47 +177,13 @@ return {
     },
     event = 'VeryLazy',
     opts = {
-      ensure_installed = {
-        -- Formatters
-        'golangci-lint',
-        'phpcbf',
-        -- 'pgformatter',
-        'prettier',
-        'prettierd',
-        'shfmt',
-        -- 'sleek',
-        'sql-formatter',
-        -- 'sqlfluff',
-        -- 'sqlfmt',
-        'stylua',
-        'yamlfmt',
-
-        -- Linters
-        -- 'actionlint',
-        -- 'codespell',
-        -- 'commitlint',
-        -- 'cspell',
-        -- 'gitleaks',
-        -- 'gitlint',
-        'goimports',
-        { 'hadolint', version = 'v2.12.0' },
-        -- 'markdownlint',
-        -- 'phpactor',
-        'phpcs',
-        'shellcheck',
-        'sqlfluff',
-        'yamllint',
-
-        -- Tools
-        'gitui',
-        'kulala-fmt',
-      },
+      ensure_installed = mason_tools,
       integrations = {
-        ['mason-lspconfig'] = false,
+        ['mason-lspconfig'] = true,
         ['mason-null-ls'] = false,
         ['mason-nvim-dap'] = false,
       },
-      run_on_start = false,
+      run_on_start = true,
     },
     init = function()
       -- vim.api.nvim_create_autocmd('CursorHold', {
@@ -95,65 +197,29 @@ return {
   -- LSP
   {
     'mason-org/mason-lspconfig.nvim',
-    tag = 'v2.0.0',
+    -- branch = 'main',
+    -- tag = 'v2.1.0',
+    version = 'v2.x',
     dependencies = {
       'mason-org/mason.nvim',
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
       'saghen/blink.cmp',
+      -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
+    },
+    cmd = {
+      'LspInfo',
+      'LspInstall',
+      'LspLog',
+      -- 'LspRestart',
+      'LspStart',
+      -- 'LspStop',
+      'LspUninstall',
     },
     event = 'VeryLazy',
-    -- lazy = true,
     opts = {
       automatic_enable = true, -- { exclude = {} },
-      -- automatic_enable = {
-      --   'cssls',
-      --   'eslint',
-      --   'html',
-      --   'jsonls',
-      -- },
-      -- TODO: exclude if already present, e.g. installed from source
-      ensure_installed = {
-        'angularls',
-        'ansiblels',
-        'cspell_ls',
-        'docker_compose_language_service',
-        'dockerls',
-        'gh_actions_ls', -- gh-actions-language-server
-        'gitlab_ci_ls', -- Requires cargo
-        'helm_ls',
-        'intelephense',
-        'lua_ls',
-        'marksman',
-        'nginx_language_server',
-        'postgres_lsp', -- postgrestools
-        -- 'sqlls',
-        'tailwindcss',
-        'tofu_ls', -- 'terraformls',
-        -- 'vale',
-        'vimls',
-
-        -- Go
-        'golangci_lint_ls', -- golangci-lint-langserver
-        'gopls',
-        -- 'sqls',
-
-        -- Node
-        'bashls',
-
-        -- TODO: use global vscode ls (install-tools-node.sh)
-        'cssls',
-        'eslint',
-        'html',
-        'jsonls',
-
-        'ts_ls',
-        'yamlls',
-
-        -- Rust
-        'rust_analyzer',
-        'taplo',
-      },
+      -- ensure_installed = {},
     },
     init = function()
       -- https://www.lazyvim.org/plugins/lsp
@@ -179,121 +245,123 @@ return {
       -- vim.lsp.config('*', { capabilities = capabilities })
 
       -- TODO: folke/neoconf.nvim or tamago324/nlsp-settings.nvim
-      local schemastore = require('schemastore')
-      local lsp_settings = {
-        cspell_ls = {
-          cmd = {
-            'cspell-lsp',
-            -- TODO: allow override per project
-            '--config=~/.config/cspell/cspell.json',
-            '--stdio',
-          },
-          filetypes = {
-            -- 'css',
-            -- 'gitcommit',
-            -- 'go',
-            -- 'html',
-            -- 'js',
-            -- 'json',
-            -- 'lua',
-            'markdown',
-            'plaintext',
-            -- 'rust',
-            -- 'ts',
-            -- 'yaml',
-          },
-        },
-        intelephense = {
-          settings = {
-            files = { maxSize = 1000000 }, -- 1MB
-            intelephense = {
-              telemetry = {
-                enabled = false,
-              },
+      if vim.lsp.config then
+        local schemastore = require('schemastore')
+        local lsp_settings = {
+          cspell_ls = {
+            cmd = {
+              'cspell-lsp',
+              -- TODO: allow override per project
+              '--config=~/.config/cspell/cspell.json',
+              '--stdio',
+            },
+            filetypes = {
+              -- 'css',
+              -- 'gitcommit',
+              -- 'go',
+              -- 'html',
+              -- 'js',
+              -- 'json',
+              -- 'lua',
+              'markdown',
+              'plaintext',
+              -- 'rust',
+              -- 'ts',
+              -- 'yaml',
             },
           },
-        },
-        jsonls = {
-          init_options = {
-            provideFormatter = false,
-          },
-          settings = {
-            json = {
-              schemas = schemastore.json.schemas(),
-              validate = { enable = true },
-            },
-          },
-        },
-        -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
-        lua_ls = {
-          settings = {
-            Lua = {
-              -- diagnostics = {
-              --   globals = { 'vim' },
-              -- },
-              runtime = {
-                -- Tell the language server which version of Lua you're using (most
-                -- likely LuaJIT in the case of Neovim)
-                version = 'LuaJIT',
-                -- Tell the language server how to find Lua modules same way as Neovim
-                -- (see `:h lua-module-load`)
-                path = {
-                  'lua/?.lua',
-                  'lua/?/init.lua',
-                },
-              },
-              workspace = {
-                checkThirdParty = false,
-                library = {
-                  vim.env.VIMRUNTIME,
+          intelephense = {
+            settings = {
+              files = { maxSize = 1000000 }, -- 1MB
+              intelephense = {
+                telemetry = {
+                  enabled = false,
                 },
               },
             },
           },
-        },
-        tofu_ls = {
-          filetypes = { 'opentofu', 'opentofu-vars', 'terraform', 'terraform-vars' },
-        },
-        -- TODO: https://www.lazyvim.org/extras/lang/typescript
-        ts_ls = {
-          on_attach = function(client, bufnr)
-            local function on_attach()
-              local clients = vim.lsp.get_clients({ bufnr = bufnr })
-              local eslint_is_attached = false
-              for _, c in pairs(clients) do
-                if c.name == 'eslint' then
-                  eslint_is_attached = true
-                  break
+          jsonls = {
+            init_options = {
+              provideFormatter = false,
+            },
+            settings = {
+              json = {
+                schemas = schemastore.json.schemas(),
+                validate = { enable = true },
+              },
+            },
+          },
+          -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
+          lua_ls = {
+            settings = {
+              Lua = {
+                -- diagnostics = {
+                --   globals = { 'vim' },
+                -- },
+                runtime = {
+                  -- Tell the language server which version of Lua you're using (most
+                  -- likely LuaJIT in the case of Neovim)
+                  version = 'LuaJIT',
+                  -- Tell the language server how to find Lua modules same way as Neovim
+                  -- (see `:h lua-module-load`)
+                  path = {
+                    'lua/?.lua',
+                    'lua/?/init.lua',
+                  },
+                },
+                workspace = {
+                  checkThirdParty = false,
+                  library = {
+                    vim.env.VIMRUNTIME,
+                  },
+                },
+              },
+            },
+          },
+          tofu_ls = {
+            filetypes = { 'opentofu', 'opentofu-vars', 'terraform', 'terraform-vars' },
+          },
+          -- TODO: https://www.lazyvim.org/extras/lang/typescript
+          ts_ls = {
+            on_attach = function(client, bufnr)
+              local function on_attach()
+                local clients = vim.lsp.get_clients({ bufnr = bufnr })
+                local eslint_is_attached = false
+                for _, c in pairs(clients) do
+                  if c.name == 'eslint' then
+                    eslint_is_attached = true
+                    break
+                  end
                 end
+                client.server_capabilities.documentFormattingProvider = not eslint_is_attached
+                client.server_capabilities.documentRangeFormattingProvider = not eslint_is_attached
               end
-              client.server_capabilities.documentFormattingProvider = not eslint_is_attached
-              client.server_capabilities.documentRangeFormattingProvider = not eslint_is_attached
-            end
-            vim.api.nvim_create_autocmd('LspAttach', {
-              buffer = bufnr,
-              callback = on_attach,
-            })
-          end,
-        },
-        yamlls = {
-          settings = {
-            redhat = { telemetry = { enabled = false } },
-            yaml = {
-              schemaStore = {
-                -- You must disable built-in schemaStore support if you want to use
-                -- this plugin and its advanced options like `ignore`.
-                enable = false,
-                -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-                url = '',
+              vim.api.nvim_create_autocmd('LspAttach', {
+                buffer = bufnr,
+                callback = on_attach,
+              })
+            end,
+          },
+          yamlls = {
+            settings = {
+              redhat = { telemetry = { enabled = false } },
+              yaml = {
+                schemaStore = {
+                  -- You must disable built-in schemaStore support if you want to use
+                  -- this plugin and its advanced options like `ignore`.
+                  enable = false,
+                  -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+                  url = '',
+                },
+                schemas = schemastore.yaml.schemas(),
               },
-              schemas = schemastore.yaml.schemas(),
             },
           },
-        },
-      }
+        }
 
-      for name, settings in pairs(lsp_settings) do
-        vim.lsp.config(name, settings)
+        for name, settings in pairs(lsp_settings) do
+          vim.lsp.config(name, settings)
+        end
       end
 
       -- https://neovim.io/doc/user/lsp.html#lsp-attach
@@ -385,28 +453,7 @@ return {
     },
     opts = {
       -- https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/source.lua
-      ensure_installed = {
-        'bash', -- bash-debug-adapter
-        -- 'chrome', -- chrome-debug-adapter
-        -- 'codelldb', -- codelldb
-        -- 'coreclr', -- netcoredbg
-        'cppdbg', -- cpptools
-        -- 'dart', -- dart-debug-adapter
-        'delve', -- delve
-        -- 'elixir', -- elixir-ls
-        -- 'erlang', -- erlang-debugger
-        'firefox', -- firefox-debug-adapter
-        -- 'haskell', -- haskell-debug-adapter
-        -- 'javadbg', -- java-debug-adapter
-        -- 'javatest', -- java-test
-        'js', -- js-debug-adapter
-        -- 'kotlin', -- kotlin-debug-adapter
-        -- 'mock', -- mockdebug
-        -- 'node2', -- node-debug2-adapter
-        'php', -- php-debug-adapter
-        -- 'puppet', -- puppet-editor-services
-        'python', -- debugpy
-      },
+      ensure_installed = mason_dap,
       automatic_installation = true,
       handlers = {
         function(config)

@@ -94,7 +94,7 @@ return {
         end,
       }):map('<leader>uG')
       return {
-        current_line_blame = false, -- Snacks.git.blame_line()
+        current_line_blame = true,
       }
     end,
   },

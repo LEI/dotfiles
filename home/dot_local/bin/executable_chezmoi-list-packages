@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -eu
+
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+TMPDIR="${TMPDIR:-/tmp}"
+diff=difft
+
+# TODO: trim tap prefix and split on space
+packages="$(chezmoi execute-template '{{ includeTemplate "os-packages.tmpl" . }}' "$@")"
+extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
+if [ -n "$extra_key" ]; then
+  extra="$(chezmoi execute-template '{{ includeTemplate "os-packages.tmpl" (mergeOverwrite . (dict "packageType" "'"$extra_key"'")) }}' "$@")"
+fi
+if [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
+  extra_installed="$(pacman -Qqm)"
+  pacman -Qq | grep -vx "$extra_installed" | sort >$TMPDIR/installed-packages.txt
+  echo "$extra_installed" | sort >$TMPDIR/installed-extra.txt
+elif [ "$OS" = "darwin" ]; then
+  brew list --install-on-request | sort >$TMPDIR/installed-packages.txt
+  brew list --cask | sort >$TMPDIR/installed-extra.txt
+fi
+echo "Packages:"
+# printf "%s\n%s" "$packages" "$extra" | sort >$TMPDIR/packages.txt
+echo "$packages" | sort >$TMPDIR/packages.txt
+$diff $TMPDIR/packages.txt $TMPDIR/installed-packages.txt
+if [ -n "${extra:-}" ]; then
+  echo "Extras:"
+  echo "$extra" | sort >$TMPDIR/extra.txt
+  $diff $TMPDIR/extra.txt $TMPDIR/installed-extra.txt
+fi

@@ -1,0 +1,46 @@
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $scoopPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "scoop")) | fromJson -}}
+
+# Set-PSDebug -Trace 1
+
+echo "Scoop: {{ lookPath "scoop" }}"
+
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+{{- if .upgrade }}
+scoop update *
+{{- end }}
+
+scoop install {{ $scoopPackages | sortAlpha | join " " }}
+
+echo "Winget: {{ lookPath "winget" }}"
+
+{{- if .upgrade }}
+# echo "winget update --disable-interactivity --silent"
+# winget update --disable-interactivity --silent
+
+winget upgrade --all --disable-interactivity --silent
+{{- end }}
+
+# winget install --disable-interactivity --silent --source=winget --id=$id
+
+# winget export --output=winget.json
+{{ $jsonPackages := list -}}
+{{- range $packages | sortAlpha -}}
+{{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
+{{- end -}}
+{{- $json := dict
+  "$schema" "https://aka.ms/winget-packages.schema.2.0.json"
+  "CreationDate" "2025-08-21T00:00:35.334-00:00"
+  "Sources" (list (dict "Packages" $jsonPackages "SourceDetails" (dict
+    "Argument" "https://cdn.winget.microsoft.com/cache"
+    "Identifier" "Microsoft.Winget.Source_8wekyb3d8bbwe"
+    "Name" "winget"
+    "Type" "Microsoft.PreIndexed.Package"
+  )))
+ "WinGetVersion" "1.11.430"
+-}}
+'{{ $json | toJson }}' | Out-File -FilePath winget.json -Encoding utf8
+winget import --import-file=winget.json --accept-package-agreements --accept-source-agreements --disable-interactivity
+if(!$?) { Exit $LASTEXITCODE }

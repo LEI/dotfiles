@@ -1,5 +1,5 @@
-{{- if ne (output "sh" "-c" "command -v procs || true") "" -}}
+{{- if lookPath "procs" -}}
 # https://github.com/dalance/procs#configuration
 
-{{ output "procs" "--gen-config" -}}
+{{ output "procs" "--gen-config" | fromToml | toToml }}
 {{- end -}}

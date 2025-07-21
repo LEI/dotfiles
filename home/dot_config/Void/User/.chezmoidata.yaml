@@ -1,0 +1,5 @@
+---
+extraPackages:
+  void:
+    enabled: "{{ and .features.void (not .headless) }}"
+    type: cask

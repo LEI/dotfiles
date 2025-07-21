@@ -1,23 +1,15 @@
-#!{{ if eq .osid "android" }}/data/data/com.termux/files{{ end }}/usr/bin/env nu
+#!{{ if eq .osID "android" }}/data/data/com.termux/files{{ end }}/usr/bin/env nu
 
 use std/log
 
-if (which zellij) != [] and (^zellij --version) != "" {
-  log info "Already installed zellij"
+if (which zellij) != [] { # and (^zellij --version) != ""
+  log info "Already installed: {{ output .sh "-c" "command -v zellij || echo zellij" | trim }}"
+  zellij --version
   exit
 }
 
 log info "Installing zellij"
 
-# {{- if eq .chezmoi.os "darwin" }}
-brew install --quiet zellij
-# {{- else if eq .osid "alpine" }}
-sudo apk add --quiet zellij
-# {{- else if eq .osid "arch" }} Archlinux/Manjaro
-sudo pacman --sync --needed --noconfirm --quiet zellij
-# {{- else if eq .osid "android" }}
-apt-get install --quiet --yes zellij # out>/dev/null
-# {{- else }}
 def get_release [repo: string] {
   let alias = "latest"
   let url = $"https://github.com/($repo)/releases/($alias)"
@@ -42,6 +34,5 @@ curl -LSfs $archive -o $out
 tar -xzf $out -C $env.TMPDIR
 chmod +x $"($env.TMPDIR)/zellij"
 mv $"($env.TMPDIR)/zellij" $"($env.HOME)/.local/bin/zellij"
-# {{- end }}
 
 log info "Installed zellij"

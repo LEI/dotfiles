@@ -2,6 +2,71 @@
 --   return vim.fn.expand('%:t')
 -- end
 
+-- https://github.com/ravitemer/mcphub.nvim/blob/main/doc/extensions/lualine.md
+local mcphub = {
+  function()
+    -- Check if MCPHub is loaded
+    if not vim.g.loaded_mcphub then
+      return '󰐻 -'
+    end
+
+    local count = vim.g.mcphub_servers_count or 0
+    local status = vim.g.mcphub_status or 'stopped'
+    local executing = vim.g.mcphub_executing
+
+    -- Show "-" when stopped
+    if status == 'stopped' then
+      return '󰐻 -'
+    end
+
+    -- Show spinner when executing, starting, or restarting
+    if executing or status == 'starting' or status == 'restarting' then
+      local frames = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
+      local frame = math.floor(vim.loop.now() / 100) % #frames + 1
+      return '󰐻 ' .. frames[frame]
+    end
+
+    return '󰐻 ' .. count
+  end,
+  color = function()
+    if not vim.g.loaded_mcphub then
+      return { fg = '#6c7086' } -- Gray for not loaded
+    end
+
+    local status = vim.g.mcphub_status or 'stopped'
+    if status == 'ready' or status == 'restarted' then
+      return { fg = '#50fa7b' } -- Green for connected
+    elseif status == 'starting' or status == 'restarting' then
+      return { fg = '#ffb86c' } -- Orange for connecting
+    else
+      return { fg = '#ff5555' } -- Red for error/stopped
+    end
+  end,
+  cond = function()
+    return package.loaded.mcphub and vim.bo.filetype == 'codecompanion'
+  end,
+}
+
+-- https://github.com/nvim-lualine/lualine.nvim/blob/master/lua/lualine/extensions/oil.lua
+local oil_extension = {
+  sections = {
+    lualine_c = {
+      function()
+        local ok, oil = pcall(require, 'oil')
+        if not ok then
+          return ''
+        end
+        local dir = oil.get_current_dir()
+        if not dir then
+          return ''
+        end
+        return vim.fn.fnamemodify(dir, ':~:.')
+      end,
+    },
+  },
+  filetypes = { 'oil' },
+}
+
 return {
   {
     'nvim-lualine/lualine.nvim',
@@ -89,26 +154,20 @@ return {
           -- stylua: ignore
           {
             function() return '  ' .. require('dap').status() end,
-            cond = function() return package.loaded.dap and require('dap').status() ~= '' end,
-            color = function() return { fg = Snacks.util.color('Debug') } end,
+            cond = function() return Snacks and package.loaded.dap and require('dap').status() ~= '' end,
+            color = function() return { fg = Snacks and Snacks.util.color('Debug') } end,
           },
           -- stylua: ignore
           {
             require('lazy.status').updates,
             cond = require('lazy.status').has_updates,
-            color = function() return { fg = Snacks.util.color('Special') } end,
+            color = function() return { fg = Snacks and Snacks.util.color('Special') } end,
           },
-          {
-            -- FIXME: lazy load
-            'mcphub',
-            cond = function()
-              return package.loaded.mcphub and vim.bo.filetype == 'codecompanion'
-            end,
-          },
+          mcphub,
           {
             'codecompanion',
             cond = function()
-              return vim.g.ai.codecompanion
+              return vim.g.ai and vim.g.ai.codecompanion
             end,
             -- fmt = function(str)
             --   return str ~= '' and str or '{c}' -- 'CodeCompanion OFF'
@@ -117,7 +176,7 @@ return {
           {
             'codeium#GetStatusString',
             cond = function()
-              return vim.g.ai.windsurf
+              return vim.g.ai and vim.g.ai.windsurf
             end,
             -- fmt = function(str)
             --   return str and str ~= '' and str or '{w}' -- 'Windsurf OFF'
@@ -126,7 +185,7 @@ return {
           {
             'copilot',
             cond = function()
-              return vim.g.ai.copilot_lua
+              return vim.g.ai and vim.g.ai.copilot_lua
             end,
             -- fmt = function(str)
             --   return str and str ~= '' and str or '{}' -- 'Copilot OFF'
@@ -225,8 +284,8 @@ return {
         'man',
         'mason',
         'nvim-dap-ui',
-        -- 'oil',
-        'overseer',
+        oil_extension, -- 'oil',
+        -- 'overseer',
         'quickfix',
         'trouble',
       },
@@ -254,7 +313,9 @@ return {
       --   end,
       -- })
 
-      table.insert(opts.sections.lualine_x, 1, Snacks.profiler.status())
+      if Snacks then
+        table.insert(opts.sections.lualine_x, 1, Snacks.profiler.status())
+      end
 
       local showtabline = vim.opt.showtabline
       require('lualine').setup(opts)

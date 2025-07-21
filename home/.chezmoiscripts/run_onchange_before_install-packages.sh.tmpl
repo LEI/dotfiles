@@ -5,71 +5,109 @@
 
 set -eu
 
-# {{- $packages := concat (get .packages "common" | default (list)) (get .packages .osid ) | join " " }}
-packages="{{ $packages }}"
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+
+packages="{{ $packages | sortAlpha | join " " }}"
+
+echo >&2 "OS: $CHEZMOI_OS"
+echo >&2 "OS ID: {{ .osID }}"
+echo >&2 "OS ID like: {{ .osIDLike }}"
+echo >&2 "OS version: {{ .osVersion }}"
 echo >&2 "Installing packages: $packages"
 
-set -x
-
-# {{- if eq .chezmoi.os "darwin" }}
-# https://docs.brew.sh/Installation#unattended-installation
-export NONINTERACTIVE=1
-# brew update --quiet
-# brew upgrade --quiet
+{{- if eq .osID "alpine" }}
+cmd sudo apk update --quiet
+{{- if .upgrade }}
+cmd sudo apk upgrade --quiet
+{{- end }}
 # shellcheck disable=SC2086
-brew install --quiet $packages
-# {{- else if eq .osid "alpine" }}
-sudo apk update --quiet
-# {{- if .upgrade }}
-sudo apk upgrade --quiet
-# {{- end }}
+cmd sudo apk add --quiet $packages
+{{- else if eq .osIDLike "arch" }}
+{{- if .upgrade }}
+cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
+{{- end }}
 # shellcheck disable=SC2086
-sudo apk add --quiet $packages
-# {{- else if eq .osid "arch" }} Archlinux/Manjaro
-# {{- if .upgrade }}
-# sudo pacman --sync --needed --noconfirm --quiet --upgrade
-# {{- end }}
-# shellcheck disable=SC2086
-sudo pacman --sync --needed --noconfirm --quiet $packages
-# {{- else if eq .osid "debian" }} Debian/Ubuntu
+cmd sudo pacman --sync --needed --noconfirm --quiet $packages
+if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  TMPDIR="${TMPDIR:-/tmp}"
+  if [ ! -d $TMPDIR/yay-bin ]; then
+    cmd sudo -u "$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
+  fi
+  cmd cd $TMPDIR/yay-bin
+  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
+  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+  # fi
+  cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
+fi
+{{ $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
+aur_packages="{{ $aurPackages | sortAlpha | join " " }}"
+if command -v yay >/dev/null; then
+  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
+{{- else if eq .osIDLike "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update --quiet >/dev/null
-# {{- if .upgrade }}
-sudo -E apt-get upgrade --quiet --yes # >/dev/null
-# {{- end }}
+cmd sudo apt-get update --quiet >/dev/null
+{{- if .upgrade }}
+cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
+{{- end }}
 # shellcheck disable=SC2086
-sudo -E apt-get install --quiet --yes $packages # >/dev/null
-# {{- else if eq .osid "fedora" }}
-# TODO: packages="$packages gpg"
-# {{- else if eq .osid "android" }}
-# TODO: termux-setup-package-manager, termux-setup-storage
+cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
+{{- else if eq .osID "fedora" }}
+cmd sudo dnf update --assumeyes --quiet
+{{- if .upgrade }}
+cmd sudo dnf upgrade --assumeyes --quiet
+{{- end }}
+cmd sudo dnf install --assumeyes --quiet $packages
+{{- else if eq .osID "android" }}
+# https://github.com/termux/termux-packages/blob/master/scripts/setup-termux.sh
+if [ ! -d "$HOME/storage/shared" ]; then
+  termux-setup-storage
+fi
+if [ -z "$TERMUX_APP_PACKAGE_MANAGER" ]; then
+  termux-setup-package-manager
+fi
 # TERM=xterm temux-change-repo # apt edit-sources
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
-# apt-get update --quiet >/dev/null
-# apt-get upgrade --quiet --yes # >/dev/null
-pkg update --quiet
-# {{- if .upgrade }}
-pkg upgrade --quiet --yes
-# {{- end }}
+# cmd apt-get update --quiet >/dev/null
+cmd pkg update --quiet
+{{- if .upgrade }}
+# cmd apt-get upgrade --quiet --yes # >/dev/null
+cmd pkg upgrade --quiet --yes
+{{- end }}
+if [ "$TERMUX_APP_PACKAGE_MANAGER" = apt ]; then
+  # shellcheck disable=SC2086
+  cmd apt-get install --quiet --yes $packages >/dev/null
+elif [ "$TERMUX_APP_PACKAGE_MANAGER" = pacman ]; then
+  # shellcheck disable=SC2086
+  cmd pacman --sync --needed --noconfirm --quiet $packages
+else
+  echo >&2 "Error: no package manager defined"
+  exit 1
+fi
+{{- else }}
+echo >&2 "Package manager not found: {{ .osID }}"
+exit 1
+{{- end }}
 
-# shellcheck disable=SC2086
-apt-get install --quiet --yes $packages >/dev/null
-# {{- end }}
-
-# {{- if and .codespaces (eq .osid "debian") }}
+{{- if and .codespaces (eq .osIDLike "debian") }}
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
 if [ "${selected_editor##*/}" = nano ]; then
   if [ -x /usr/bin/vim.basic ]; then
-    sudo update-alternatives --set editor /usr/bin/vim.basic
+    cmd sudo update-alternatives --set editor /usr/bin/vim.basic
   elif [ -x /usr/bin/vim.tiny ]; then
-    sudo update-alternatives --set editor /usr/bin/vim.tiny
+    cmd sudo update-alternatives --set editor /usr/bin/vim.tiny
   fi
 fi
-# {{- end }}
-
-set +x
+{{- end }}
 
 echo >&2 "Installed packages"

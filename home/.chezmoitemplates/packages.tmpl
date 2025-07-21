@@ -1,0 +1,64 @@
+{{- $defaultType := get . "defaultType" | default (get .packageManagerMap .osIDLike) -}}
+{{- $packageType := get . "packageType" | default $defaultType -}}
+{{- $packages := list -}}
+
+{{- $commonPackages := .commonPackages -}}
+{{- $commonPackages := includeTemplate "package-list.tmpl" (dict
+  "chezmoi" .chezmoi
+  "defaultType" $defaultType
+  "features" .features
+  "os" .os
+  "osID" .osID
+  "osIDLike" .osIDLike
+  "packageType" $packageType
+  "packages" $commonPackages
+) | fromJson -}}
+{{- $packages = concat $packages (without $commonPackages "") -}}
+
+{{- $extraPackages := includeTemplate "package-list.tmpl" (dict
+  "chezmoi" .chezmoi
+  "defaultType" $defaultType
+  "features" .features
+  "os" .os
+  "osID" .osID
+  "osIDLike" .osIDLike
+  "packageType" $packageType
+  "packages" .extraPackages
+) | fromJson -}}
+{{- $packages = concat $packages (without $extraPackages "") -}}
+
+{{- $osPackages := get (get .packages .osIDLike) $packageType -}}
+{{- if $osPackages -}}
+{{- $osPackages := includeTemplate "package-list.tmpl" (dict
+  "chezmoi" .chezmoi
+  "defaultType" $packageType
+  "features" .features
+  "os" .os
+  "osID" .osID
+  "osIDLike" .osIDLike
+  "packageType" $packageType
+  "packages" $osPackages
+) | fromJson -}}
+{{- $packages = concat $packages (without $osPackages "") -}}
+{{- end -}}
+
+{{- if and .features.python (not $packageType) }}
+{{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
+{{-   range $name := without $pythonPackages "" -}}
+{{-     if eq (substr 0 1 $name) "#" -}}
+{{-       continue -}}
+{{-     end -}}
+{{-     if ne $.osID "darwin" -}}
+{{-       $prefix := "python" -}}
+{{-       if eq $.osID "alpine" -}}
+{{-         $prefix = "py3" -}}
+{{-       else if eq $.osIDLike "debian" "fedora" -}}
+{{-         $prefix = "python3" -}}
+{{-       end -}}
+{{-       $name = printf "%s-%s" $prefix $name -}}
+{{-     end -}}
+{{-     $packages = append $packages $name -}}
+{{-   end -}}
+{{- end }}
+
+{{- $packages | default list | toJson -}}

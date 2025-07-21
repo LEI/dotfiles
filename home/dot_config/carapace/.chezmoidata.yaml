@@ -1,0 +1,7 @@
+---
+extraPackages:
+  carapace:
+    enabled: '{{ eq .osIDLike "darwin" "arch" }}'
+    nameOverwrite:
+      arch: carapace-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

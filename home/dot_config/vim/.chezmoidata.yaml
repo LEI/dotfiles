@@ -1,4 +1,15 @@
 ---
+extraPackages:
+  # macvim:
+  #   enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
+  macvim-app:
+    enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  vim:
+    enabled: "{{ and .features.vim }}"
+    nameOverwrite:
+      windows: vim.vim
+    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
 vim:
   plugins:
     airline:
@@ -19,6 +30,9 @@ vim:
     dadbod-completion:
       repo: kristijanhusak/vim-dadbod-completion
 
+    endwise:
+      repo: tpope/vim-endwise
+      tag: v1.3
     eunuch:
       repo: tpope/vim-eunuch
       tag: v1.3

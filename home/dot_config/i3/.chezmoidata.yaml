@@ -1,0 +1,10 @@
+---
+extraPackages:
+  i3-wm:
+    enabled: "{{ .features.i3 }}"
+  # i3lock: # xss-lock
+  #   enabled: '{{ .features.i3 }}'
+  # i3status:
+  #   enabled: '{{ .features.i3 }}'
+  rofi: # dmenu
+    enabled: "{{ .features.i3 }}"
