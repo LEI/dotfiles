@@ -1,14 +1,18 @@
-if not vim.fn.has('nvim-0.8') then
+if vim.fn.has('nvim-0.8') == 0 then
+  vim.opt.loadplugins = false
+  -- vim.opt.runtimepath = ''
   assert(false, 'nvim-0.8 required')
+  return 1 -- vim.fn.finish()
 end
 
 require('config.init')
 require('config.options')
 require('config.autocmds')
 require('config.lazy')
+require('config.commands')
 require('config.keymaps')
 
-vim.cmd.colorscheme(vim.g.config.colorscheme)
+vim.cmd('colorscheme ' .. vim.g.config.theme.colorscheme)
 
 local local_vimrc = vim.fn.expand('~/.vimrc.local')
 if vim.fn.filereadable(local_vimrc) == 1 then

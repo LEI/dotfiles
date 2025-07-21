@@ -1,0 +1,125 @@
+#!/bin/sh
+
+# https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# NOTE: use global cargo
+cd /tmp
+
+if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
+  cmd . ~/.cargo/env
+fi
+
+if command -v cargo; then
+  echo >&2 "Already installed"
+  cmd cargo --version
+else
+  echo >&2 "Installing cargo"
+
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
+    ARCH=x86_64
+  else
+    ARCH="$CHEZMOI_ARCH"
+  fi
+  if [ "$CHEZMOI_OS" = darwin ]; then
+    OS=darwin
+  else
+    OS=unknown-linux
+  fi
+  NAME="$ARCH-$OS"
+  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)" 2>/dev/null; then
+    NAME="$NAME-musl"
+  else
+    NAME="$NAME-gnu"
+  fi
+
+  BIN_DIR="$HOME/.local/bin"
+  if [ ! -d "$BIN_DIR" ]; then
+    echo >&2 "Creating directory: $BIN_DIR"
+    mkdir -p "$BIN_DIR"
+  fi
+
+  RUSTUP_INIT="$BIN_DIR/rustup-init"
+
+  # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  #   | sh -s -- --component rust-analyzer --quiet -y
+
+  cmd curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
+  cmd chmod +x "$RUSTUP_INIT"
+  # {{- if .features.neovim }}
+  RUSTUP_INIT_ARGS=""
+  # {{- else }}
+  RUSTUP_INIT_ARGS="--component rust-analyzer"
+  # {{- end }}
+  # shellcheck disable=SC2086
+  cmd "$RUSTUP_INIT" $RUSTUP_INIT_ARGS --no-modify-path --quiet -y
+
+  echo >&2 "Installed cargo"
+fi
+
+# cmd rustc --version
+
+# {{- if not .features.neovim }}
+# cmd rustup component add rust-analyzer
+# {{- end }}
+
+if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
+  cmd . ~/.cargo/env
+fi
+
+if ! command -v cargo-binstall >/dev/null; then
+  # cmd cargo install --quiet cargo-binstall
+  # https://github.com/cargo-bins/cargo-binstall#manually
+  echo >&2 "Installing cargo-binstall"
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
+    ARCH=x86_64
+  else
+    ARCH="$CHEZMOI_ARCH"
+  fi
+  if [ "$CHEZMOI_OS" = darwin ]; then
+    OS=apple-darwin
+  elif [ "$CHEZMOI_OS" = linux ]; then
+    OS=unknown-linux-musl
+  elif [ "$CHEZMOI_OS" = windows ]; then
+    OS=pc-windows-msvc
+  fi
+  NAME="cargo-binstall"
+  if [ "$CHEZMOI_OS" = linux ]; then
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.tgz"
+    install_tar_gz "$URL" cargo-binstall
+  else
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.zip"
+    install_zip "$URL" cargo-binstall
+  fi
+  echo >&2 "Installed cargo-binstall"
+fi
+
+packages=""
+
+if ! command -v cargo-binstall >/dev/null; then
+  packages="$packages cargo-binstall"
+fi
+
+if ! command -v cargo-install-update >/dev/null; then
+  packages="$packages cargo-update"
+fi
+
+# {{- if eq .osID "debian" }}
+# TODO: https://github.com/skim-rs/skim#shell-completions
+if ! command -v sk >/dev/null; then
+  packages="$packages skim"
+fi
+# {{- end }}
+
+# {{- if not .features.neovim }}
+if ! command -v taplo >/dev/null; then
+  cmd cargo install taplo-cli --locked --features lsp --quiet
+fi
+# {{- end }}
+
+if [ -n "$packages" ]; then
+  cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages
+fi

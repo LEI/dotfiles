@@ -1,0 +1,35 @@
+{{- range $account := get .mail "accounts" | default list }}
+{{- if eq (substr 0 3 $account.name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+{{- if ne $account.format "notmuch" -}}
+{{-   continue -}}
+{{- end -}}
+{{- $inbox := get $account "inbox" | default "INBOX" -}}
+
+IMAPAccount {{ $account.name }}-imap
+Host {{ $account.imap_hostname | quote }}
+Port {{ get $account "imap_port" | default 993 }}
+User {{ $account.address | quote }}
+PassCmd "bw get password {{ $account.address }}"
+TLSType IMAPS
+
+MaildirStore {{ $account.name }}-maildir
+Path ~/Mail/{{ $account.name }}/
+INBOX ~/Mail/{{ $account.name }}/{{ $inbox }}
+SubFolders Verbatim
+
+IMAPStore {{ $account.name }}-imap
+Account {{ $account.name }}-imap
+
+Channel {{ $account.name }}
+Far :{{ $account.name }}-imap: # {{ $inbox }}
+Near :{{ $account.name }}-maildir: # {{ $inbox }}
+Patterns * # {{ $inbox }} Archive Sent Junk Drafts
+Create Near # Both
+SyncState *
+# Uncomment this when you're confident, because it deletes deleted mails on
+# your IMAP server.
+# Expunge Both
+
+{{ end -}}

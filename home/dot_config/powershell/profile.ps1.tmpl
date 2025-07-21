@@ -1,0 +1,32 @@
+# https://github.com/twpayne/dotfiles/blob/master/home/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+
+# $env:Path += ";$env:UserProfile\.local\bin"
+$env:XDG_CONFIG_HOME = "$HOME\.config"
+# $env:PATH="$env:USERPROFILE\.local\bin;$env:PATH"
+# $env:PATH="$env:USERPROFILE\scoop\shims;$env:PATH"
+# $env:PATH="$env:APPDATA\Python\Python39\Scripts;$env:PATH"
+
+Set-Alias -Name g -Value git
+
+# https://mise.jdx.dev/getting-started.html#activate-mise
+$shimPath = "$env:USERPROFILE\AppData\Local\mise\shims"
+$currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$newPath = $currentPath + ";" + $shimPath
+[Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+
+# # create profile if it doesn't already exist
+# if (-not (Test-Path $profile)) { New-Item $profile -Force }
+# # open the profile
+# Invoke-Item $profile
+
+# https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/creating-profiles?view=powershell-7.5
+if ($PSVersionTable.PSVersion.ToString() -ge '7.2.0') {
+# https://direnv.net/docs/hook.html#PowerShell
+  Invoke-Expression "$(direnv hook pwsh)"
+}
+
+# https://github.com/starship/starship#step-2-set-up-your-shell-to-use-starship
+Invoke-Expression (&starship init powershell)
+
+# https://github.com/ajeetdsouza/zoxide#installation
+Invoke-Expression (& { (zoxide init powershell | Out-String) })

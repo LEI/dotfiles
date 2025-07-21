@@ -2,7 +2,8 @@
 return {
   'mistweaverco/kulala.nvim',
   enabled = vim.fn.has('nvim-0.10') == 1,
-  tag = 'v5.3.1',
+  -- tag = 'v5.3.3',
+  version = 'v5.x',
   keys = {
     { '<leader>R', '', desc = '+rest' },
     { '<leader>Rs', desc = 'Send request' },

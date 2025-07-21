@@ -1,0 +1,7 @@
+---
+extraPackages:
+  eza: # chaqchase/lla
+    condition: not (or (eq .osID "debian" "fedora") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
+    nameOverwrite:
+      windows: eza-community.eza
+    type: eq .osIDLike "windows" | ternary "winget" nil

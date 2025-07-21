@@ -1,0 +1,7 @@
+---
+extraPackages:
+  meli:
+    condition: .features.mail
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  w3m:
+    condition: .features.mail

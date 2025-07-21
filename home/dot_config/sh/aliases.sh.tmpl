@@ -4,7 +4,7 @@
 # alias sudo="sudo "
 
 # Confirm before overwriting
-alias cp="cp --interactive"
+alias cp="cp -i" # --interactive
 
 # Print sizes in powers of 1024
 alias df="df -h" # --human-readable
@@ -15,15 +15,6 @@ alias free="free --human"
 # Color matches
 alias grep="grep --color=auto"
 
-# {{- if .features.nushell }}
-# if ! hash l 2>/dev/null; then
-#   if type l >/dev/null; then
-#     unalias l
-#   fi
-#   l() { nu --commands "l $*" --login; }
-# fi
-# {{- end }}
-
 # List all files with colors, human-readable sizes and long format
 alias la="ls -ahl --color=auto"
 
@@ -33,27 +24,46 @@ alias path='echo -e ${PATH//:/\\n}'
 # Reload the shell (i.e. invoke as a login shell)
 alias reload='exec ${SHELL} -l'
 
-if command -v bat >/dev/null; then
-  alias cat=bat
-fi
-# alias e=editor
-alias v=vim
-alias nv=nvim
+{{- if lookPath "bat" }}
+alias cat=bat
+{{- else if lookPath "batcat" }}
+alias cat=batcat
+{{- end }}
+
+{{- if lookPath "eza" }}
+alias ls=eza
+{{- end }}
 
 # TODO: termux-open
 alias o=open
 if ! hash open 2>/dev/null; then
-  # and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft")
-  if [ -f /proc/version ] && grep -iq microsoft /proc/version; then
-    if [ -f /mnt/c/Windows/explorer.exe ]; then
-      # TODO: add /mnt/c/Windows to PATH
-      alias open=/mnt/c/Windows/explorer.exe
-    else
-      alias open=explorer.exe
-    fi
-  elif hash xdg-open 2>/dev/null; then
+  {{- if .wsl }}
+  # [ -f /proc/version ] && grep -iq microsoft /proc/version
+  if [ -f /mnt/c/Windows/explorer.exe ]; then
+    # TODO: add /mnt/c/Windows to PATH
+    alias open=/mnt/c/Windows/explorer.exe
+  else
+    alias open=explorer.exe
+  fi
+  {{- else }}
+  if hash xdg-open 2>/dev/null; then
     alias open=xdg-open
   elif hash code 2>/dev/null; then
     alias open=code
   fi
+  {{- end }}
 fi
+
+{{- if .features.python }}
+if ! hash recover 2>/dev/null; then
+  {{- if lookPath "recoverpy" }}
+  alias recover="sudo recoverpy"
+  {{- else if lookPath "uvx" }}
+  alias recover="sudo uvx recoverpy"
+  {{- else if lookPath "pipx" }}
+  alias recover="sudo pipx run recoverpy"
+  {{- else }}
+  alias recover="sudo recoverpy"
+  {{- end }}
+fi
+{{- end }}

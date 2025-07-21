@@ -1,12 +1,10 @@
 # https://github.com/sharkdp/bat#configuration-file
 
-# Set the theme to "TwoDark"
-# --theme="TwoDark"
-{{- if eq .chezmoi.os "darwin" }}
+# --theme=TwoDark
+# --theme=ansi
+{{- if eq .os "darwin" }}
 --theme=auto:system
 {{- end }}
---theme-dark=default
---theme-light=GitHub
 
 # Show line numbers, Git modifications and file header (but no grid)
 --style="numbers,changes,header"

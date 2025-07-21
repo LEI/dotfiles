@@ -1,0 +1,52 @@
+{{- $defaultType := get . "defaultType" -}}
+{{- $packageType := get . "packageType" }}
+{{- $packages := list }}
+{{- range $packageName, $pkg := .packages }}
+
+{{-   if eq $pkg nil }}
+{{-     $pkg = dict "name" $packageName }}
+{{-   end }}
+
+{{-   if and (kindIs "map" $pkg) (get $pkg "name") }}
+{{-     $packageName = get $pkg "name" }}
+{{-   else if kindIs "string" $pkg }}
+{{-     $packageName = $pkg }}
+{{-     $pkg = dict "name" $packageName }}
+{{-   end }}
+
+{{-   $nameOverwrite := get $pkg "nameOverwrite" }}
+{{-   if and $nameOverwrite (get $nameOverwrite $.osID) }}
+{{-     $packageName = get $nameOverwrite $.osID }}
+{{-   else if and $nameOverwrite (get $nameOverwrite $.osIDLike) }}
+{{-     $packageName = get $nameOverwrite $.osIDLike }}
+{{-   end }}
+
+{{-   $typeExpression := get $pkg "type" }}
+{{-   $type := $defaultType }}
+{{-   if $typeExpression }}
+{{-     $type = output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ %s }}" $typeExpression) | trim }}
+{{-     if eq $type "<no value>" }}
+{{-       $type = $defaultType }}
+{{-     end }}
+{{-   end }}
+{{-   if and $packageType $type }}
+{{-     if and $type (ne $packageType $type) }}
+{{-       continue }}
+{{-     end }}
+{{-   else if or $packageType $type }}
+{{-     continue }}
+{{-   end }}
+
+{{-   $condition := get $pkg "condition" | default nil }}
+{{-   if and $condition (ne (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ %s }}" $condition) | trim) "true") }}
+{{-     continue }}
+{{-   end }}
+
+{{-   if ne $packageType "mas" }}
+{{-     $packages = append $packages $packageName }}
+{{-   else }}
+{{-     $packages = append $packages (dict "name" $packageName "id" $pkg.id) }}
+{{-   end }}
+
+{{- end }}
+{{- $packages | toJson -}}

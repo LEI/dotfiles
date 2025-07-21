@@ -54,15 +54,32 @@ items:
   #     - name: List buffers
   #       key: "#"
   #       command: list-buffers
-  # - separator: true
+  - separator: true
 
   # NOTE: this is fully applied only on the second run, when tmux config is up to date
-  # {{- $names := output "sh" "-c" "tmux list-keys -N || true" | trim | splitList "\n" | sortAlpha }}
-  # {{- $list := output "sh" "-c" "tmux list-keys -T prefix | sed -e 's/^bind-key \\(-r \\|   \\)-T prefix //' || true" | splitList "\n" }}
-  # {{- $map := dict }}
-  # {{- range $list }}{{ $parts := . | splitList " " }}{{ if lt (len $parts) 2 }}{{ continue }}{{ end }}{{ $key := index $parts 0 }}{{ $command := join " " (slice $parts 1) | trim }}{{ $map = merge $map (dict $key $command) }}{{ end }}
+
+  # {{- $keys := includeTemplate "tmux-list-keys.tmpl" (dict "group" "prefix" "sh" .sh) | fromJson }}
+
+  - name: +Keys (short)
+    key: h
+    menu:
+      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "exclude" (list "'" "0" "1" "2" "3" "4" "5" "6" "7" "8" "9") "max" 1 "map" $keys.map "names" $keys.names) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Keys (long)
+    key: l
+    menu:
+      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "min" 2 "map" $keys.map "names" $keys.names "sh" .sh) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - separator: true
+
   # {{- $include := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}
-  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (dict "include" $include "map" $map "names" $names) | indent 2 }}
+  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (mergeOverwrite . (dict "include" $include "map" $keys.map "names" $keys.names "sh" .sh)) | indent 2 }}
   - separator: true
 
   - name: +Windows
@@ -136,7 +153,7 @@ items:
         key: BSpace
         command: show-wk-menu-root
   - name: +Panes
-    key: ²
+    key: C-P
     menu:
       - name: Last
         key: tab
@@ -291,13 +308,13 @@ items:
         menu:
           - name: Install
             key: i
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/install_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/install_plugins
           - name: Update
             key: u
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/update_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/update_plugins
           - name: Clean
             key: c
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/clean_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/clean_plugins
           - separator: true
           - name: Back
             key: BSpace
@@ -333,20 +350,6 @@ items:
   #   key: "?"
   #   command: list-keys -N
   - separator: true
-
-  - name: +Keys (short)
-    key: h
-    menu:
-      # {{- `\n` }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "map" $map "max" 1 "names" $names) | indent 6 }}
-      - separator: true
-      - name: Back
-        key: BSpace
-        command: show-wk-menu-root
-  - name: +Keys (long)
-    key: l
-    menu:
-      # {{- `\n` }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "map" $map "min" 2 "names" $names) | indent 6 }}
-      - separator: true
-      - name: Back
-        key: BSpace
-        command: show-wk-menu-root
+  - name: -Back (BSpace)
+    key: BSpace
+    command: show-wk-menu-root

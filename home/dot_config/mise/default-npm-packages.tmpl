@@ -1,0 +1,28 @@
+# npm
+pnpm
+yarn
+{{- if .features.ai }}
+mcp-hub@4.2.0
+{{- if not (eq .osIDLike "arch" "darwin" "windows") }}
+@anthropic-ai/claude-code
+{{- if eq .osIDLike "windows" }}
+@openai/codex
+{{- end }}
+opencode-ai
+{{- end }}
+{{- end }}
+runme
+{{- if .features.neovim }}
+neovim
+{{- else }}
+bash-language-server
+prettier
+{{- if .features.sql }}
+sql-language-server
+{{- end }}
+typescript
+typescript-language-server
+# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+vscode-langservers-extracted@4.8
+yaml-language-server@next
+{{- end }}

@@ -1,0 +1,6 @@
+---
+extraPackages:
+  bash:
+    condition: and .features.bash (eq .osIDLike "alpine" "darwin")
+  bash-completion:
+    condition: and .features.bash (eq .osIDLike "alpine" "darwin")

@@ -1,0 +1,5 @@
+{{- $packages := list -}}
+{{- range $pkg := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $packages = concat $packages ($pkg | replaceAllRegex "[\\w@-]+/" "" | splitList " ") -}}
+{{- end -}}
+{{- $packages | join "\n" -}}

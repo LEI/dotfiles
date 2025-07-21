@@ -2,8 +2,49 @@
 
 set -eu
 
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+diff=difft
+
+# TODO: trim tap prefix and split on space
+list_packages() {
+  packages="$(chezmoi execute-template '{{ includeTemplate "os-packages.tmpl" . }}' "$@")"
+  extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
+  if [ -n "$extra_key" ]; then
+    extra="$(chezmoi execute-template '{{ includeTemplate "os-packages.tmpl" (mergeOverwrite . (dict "packageType" "'"$extra_key"'")) }}' "$@")"
+  fi
+  if [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
+    extra_installed="$(pacman -Qqm)"
+    pacman -Qq | grep -vx "$extra_installed" | sort >/tmp/installed-packages.txt
+    echo "$extra_installed" | sort >/tmp/installed-extra.txt
+  elif [ "$OS" = "darwin" ]; then
+    brew list --install-on-request | sort >/tmp/installed-packages.txt
+    brew list --cask | sort >/tmp/installed-extra.txt
+  fi
+  echo "Packages:"
+  # printf "%s\n%s" "$packages" "$extra" | sort >/tmp/packages.txt
+  echo "$packages" | sort >/tmp/packages.txt
+  $diff /tmp/packages.txt /tmp/installed-packages.txt
+  if [ -n "${extra:-}" ]; then
+    echo "Extras:"
+    echo "$extra" | sort >/tmp/extra.txt
+    $diff /tmp/extra.txt /tmp/installed-extra.txt
+  fi
+}
+
 if [ $# -eq 0 ]; then
   chezmoi status
 else
-  chezmoi "$@"
+  # https://github.com/twpayne/chezmoi/issues/3626
+  case "$1" in
+  a) shift && chezmoi apply --verbose "$@" ;;
+  d) shift && chezmoi diff "$@" ;;
+  e) shift && chezmoi execute-template "$@" ;;
+  i) shift && chezmoi init "$@" ;;
+  m) shift && chezmoi managed "$@" ;;
+  s) shift && chezmoi status "$@" ;;
+  u) shift && chezmoi unmanaged "$@" ;;
+  v) shift && chezmoi verify "$@" ;;
+  list-packages) shift && list_packages "$@" ;;
+  *) chezmoi "$@" ;;
+  esac
 fi

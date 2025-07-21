@@ -1,0 +1,6 @@
+---
+extraPackages:
+  ripgrep:
+    nameOverwrite:
+      windows: burntsushi.ripgrep.msvc
+    # type: eq .osIDLike "windows" | ternary "winget" nil

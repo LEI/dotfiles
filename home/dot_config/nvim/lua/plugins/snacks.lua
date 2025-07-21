@@ -1,129 +1,158 @@
 local display_dir = vim.fn.getcwd() -- vim.fn.fnamemodify('.', ':~')
 ---@type snacks.Config.dashboard
-local dashboard = {
-  enabled = true,
-  preset = { header = 'Neovim' },
-  sections = {
-    -- { section = 'header', padding = 1 },
-    { section = 'startup', padding = 1 },
-    {
-      section = 'keys',
-      padding = 1,
-    },
-
-    { title = 'Recent files', padding = 1 }, -- MRU
-    { section = 'recent_files', limit = 8, padding = 1 },
-
-    { title = 'Current directory ', file = display_dir, padding = 1 }, -- MRU
-    { section = 'recent_files', cwd = true, limit = 8, padding = 1 },
-
-    { title = 'Projects', padding = 1 },
-    { section = 'projects', padding = 1 },
-
-    { pane = 2, section = 'terminal', cmd = 'echo -n "$(hostname): $(date)"', height = 1, padding = 1 },
-    -- { pane = 2, file = display_dir, padding = 1 },
-    {
-      pane = 2,
-      desc = 'Startup time',
-      icon = '⧗ ', -- ⧖
-      -- padding = 1,
-      key = 'S',
-      action = function()
-        vim.cmd('vertical StartupTime')
-      end,
-    },
-
-    {
-      pane = 2,
-      icon = ' ',
-      desc = 'Open directory ',
-      file = display_dir,
-      -- padding = 1,
-      key = 'o',
-      action = function()
-        -- vim.cmd('silent !command -v open >/dev/null && open . || xdg-open .')
-        if vim.fn.system('command -v open') ~= '' then
-          vim.fn.system('open .')
-        elseif vim.fn.system('command -v xdg-open') ~= '' then
-          vim.fn.system('xdg-open .')
-        else
-          vim.notify('No command to open directory', vim.log.levels.ERROR)
-        end
-      end,
-    },
-    {
-      pane = 2,
-      icon = ' ',
-      desc = 'Browse repository',
-      -- padding = 1,
-      key = 'b',
-      action = function()
-        Snacks.gitbrowse()
-      end,
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-    },
-    { pane = 2, title = ' ', padding = 0 },
-
-    {
-      pane = 2,
-      icon = ' ',
-      title = 'Git remote',
-      section = 'terminal',
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-      cmd = 'echo && git remote --verbose',
-      height = 3,
-      padding = 1,
-      ttl = 5 * 60,
-      indent = 3,
-    },
-
-    {
-      pane = 2,
-      icon = ' ',
-      title = 'Git status',
-      section = 'terminal',
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-      cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
-      -- height = 28,
-      padding = 1,
-      ttl = 5 * 60,
-      indent = 3,
-    },
-
-    -- { pane = 2, title = ' ', padding = 1 },
-
-    --[[
-    function()
-      local in_git = Snacks.git.get_root() ~= nil
-      -- stylua: ignore
-      local cmds = {
-        -- { cmd = 'git --no-pager diff --stat -B -M -C', height = 1 },
-        { icon = ' ', title = 'Git diff', cmd = 'git --no-pager diff --stat -B -M -C', height = 10 },
-        -- gh ext install meiji163/gh-notify
-        { title = 'Notifications', cmd = 'gh notify -s -a -n1', action = function() vim.ui.open('https://github.com/notifications') end, key = 'n', icon = ' ', height = 3, enabled = true },
-        { title = 'Open issues', cmd = 'gh issue list -L 3', key = 'i', action = function() vim.fn.jobstart('gh issue list --web', { detach = true }) end, icon = ' ', height = 3 },
-        { icon = ' ', title = 'Open PRs', cmd = 'gh pr list -L 3', key = 'P', action = function() vim.fn.jobstart('gh pr list --web', { detach = true }) end, height = 3 },
-      }
-      return vim.tbl_map(function(cmd)
-        return vim.tbl_extend('force', {
-          pane = 2,
-          section = 'terminal',
-          enabled = in_git,
-          padding = 1,
-          ttl = 5 * 60,
-          indent = 3,
-        }, cmd)
-      end, cmds)
-    end,
-    --]]
+local dashboard_sections = {
+  -- { section = 'header', padding = 1 },
+  { section = 'startup', padding = 1 },
+  {
+    section = 'keys',
+    padding = 1,
   },
+
+  { title = 'Recent files', padding = 1 }, -- MRU
+  { section = 'recent_files', limit = 8, padding = 1 },
+
+  { title = 'Current directory ', file = display_dir, padding = 1 }, -- MRU
+  { section = 'recent_files', cwd = true, limit = 8, padding = 1 },
+
+  { title = 'Projects', padding = 1 },
+  { section = 'projects', padding = 1 },
+
+  { pane = 2, section = 'terminal', cmd = 'echo -n "$(hostname): $(date)"', height = 1, padding = 1 },
+  -- { pane = 2, file = display_dir, padding = 1 },
+  {
+    pane = 2,
+    desc = 'Startup time',
+    icon = '⧗ ', -- ⧖
+    -- padding = 1,
+    key = 'S',
+    action = function()
+      vim.cmd('vertical StartupTime')
+    end,
+  },
+
+  {
+    pane = 2,
+    icon = ' ',
+    desc = 'Open directory ',
+    file = display_dir,
+    -- padding = 1,
+    key = 'o',
+    action = function()
+      -- vim.cmd('silent !command -v open >/dev/null && open . || xdg-open .')
+      if vim.fn.system('command -v open') ~= '' then
+        vim.fn.system('open .')
+      elseif vim.fn.system('command -v xdg-open') ~= '' then
+        vim.fn.system('xdg-open .')
+      else
+        vim.notify('No command to open directory', vim.log.levels.ERROR)
+      end
+    end,
+  },
+  {
+    pane = 2,
+    icon = ' ',
+    desc = 'Browse repository',
+    -- padding = 1,
+    key = 'b',
+    action = function()
+      Snacks.gitbrowse()
+    end,
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+  },
+  { pane = 2, title = ' ', padding = 0 },
+
+  {
+    pane = 2,
+    icon = ' ',
+    title = 'Git remote',
+    section = 'terminal',
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+    cmd = 'echo && git remote --verbose',
+    height = 3,
+    padding = 1,
+    ttl = 5 * 60,
+    indent = 3,
+  },
+
+  {
+    pane = 2,
+    icon = ' ',
+    title = 'Git status',
+    section = 'terminal',
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+    cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
+    -- height = 28,
+    padding = 1,
+    ttl = 5 * 60,
+    indent = 3,
+  },
+
+  -- { pane = 2, title = ' ', padding = 1 },
+
+  --[[
+  function()
+    local in_git = Snacks.git.get_root() ~= nil
+    -- stylua: ignore
+    local cmds = {
+      -- { cmd = 'git --no-pager diff --stat -B -M -C', height = 1 },
+      { icon = ' ', title = 'Git diff', cmd = 'git --no-pager diff --stat -B -M -C', height = 10 },
+      -- gh ext install meiji163/gh-notify
+      { title = 'Notifications', cmd = 'gh notify -s -a -n1', action = function() vim.ui.open('https://github.com/notifications') end, key = 'n', icon = ' ', height = 3, enabled = true },
+      { title = 'Open issues', cmd = 'gh issue list -L 3', key = 'i', action = function() vim.fn.jobstart('gh issue list --web', { detach = true }) end, icon = ' ', height = 3 },
+      { icon = ' ', title = 'Open PRs', cmd = 'gh pr list -L 3', key = 'P', action = function() vim.fn.jobstart('gh pr list --web', { detach = true }) end, height = 3 },
+    }
+    return vim.tbl_map(function(cmd)
+      return vim.tbl_extend('force', {
+        pane = 2,
+        section = 'terminal',
+        enabled = in_git,
+        padding = 1,
+        ttl = 5 * 60,
+        indent = 3,
+      }, cmd)
+    end, cmds)
+  end,
+    --]]
+  -- { pane = 2, section = 'terminal', cmd = 'curl -s https://wttr.in/?0A' },
 }
+
+local function grep_picker()
+  local search = vim.fn.getreg('/'):gsub('^\\V', '')
+  Snacks.picker.grep({
+    hidden = true,
+    search = search,
+    actions = {
+      -- Clear input placeholder on insert
+      clear_search = function(picker)
+        if picker.input.filter.search == search then
+          vim.cmd('normal! dd')
+        end
+        vim.cmd.startinsert()
+      end,
+    },
+    win = {
+      input = {
+        keys = {
+          ['<c-c>'] = { 'close', mode = { 'n', 'i' } },
+          ['<backspace>'] = { 'clear_search', mode = { 'n' } },
+        },
+      },
+    },
+    -- Start in normal mode
+    on_show = function(picker)
+      -- local buffer = picker.input.filter.current_buf
+      if picker.input.filter.search ~= '' then
+        vim.cmd.stopinsert()
+      end
+    end,
+  })
+end
 
 local function ghq_picker()
   local cmd = 'ghq list --full-path'
@@ -199,8 +228,15 @@ return {
     opts = {
       animate = { enabled = false },
       bigfile = { enabled = true },
-      dashboard = dashboard,
-      explorer = { enabled = false, replace_netrw = true },
+      dashboard = {
+        enabled = true,
+        preset = { header = 'Neovim' },
+        sections = dashboard_sections,
+      },
+      explorer = {
+        enabled = vim.g.config.explorer == 'snacks',
+        replace_netrw = false, -- true,
+      },
       indent = { enabled = false },
       input = { enabled = true },
       notifier = {
@@ -223,6 +259,10 @@ return {
       },
       picker = {
         enabled = true,
+
+        -- Always open in current buffer
+        -- https://github.com/folke/snacks.nvim/issues/1984
+        main = { file = false },
 
         -- NOTE: maximize with meta-m
         -- https://github.com/LazyVim/LazyVim/discussions/5765
@@ -256,6 +296,7 @@ return {
           --   p:set_cwd(current == root and cwd or root)
           --   p:find()
           -- end,
+          -- require("trouble.sources.snacks").actions,
           trouble_open = function(...)
             return require('trouble.sources.snacks').actions.trouble_open.action(...)
           end,
@@ -264,12 +305,11 @@ return {
           input = {
             keys = {
               ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
-              ['s'] = { 'flash' },
               -- ['<a-c>'] = {
               --   'toggle_cwd',
               --   mode = { 'n', 'i' },
               -- },
-              ['<a-t>'] = {
+              ['<c-t>'] = {
                 'trouble_open',
                 mode = { 'n', 'i' },
               },
@@ -298,30 +338,34 @@ return {
       -- { '<leader><space>', function() Snacks.picker.smart() end, desc = 'Smart Find Files' },
       { '<leader>\'', function() Snacks.picker.resume() end, desc = 'Resume last picker' },
       { '<leader>,', function() Snacks.picker.buffers() end, desc = 'Select buffer' },
-      { '<leader>/', function() Snacks.picker.grep({
-        debug = { scores = true },
-        hidden = true,
-        search = vim.fn.getreg('/'),
-        -- on_show = function (picker)
-        --   local search = picker.input.filter.search
-        --   if search ~= '' then vim.cmd.stopinsert() end
-        -- end
-      }) end, desc = 'Grep' },
+      { '<leader>/', grep_picker, desc = 'Grep' },
+      { '<leader>\\', function() Snacks.picker.grep({ hidden = true, }) end, desc = 'Grep' },
       { '<leader>:', function() Snacks.picker.command_history() end, desc = 'Command history' },
 
       -- Buffer
       { '<leader>bd', function() Snacks.bufdelete() end, desc = 'Delete buffer' },
+      { '<leader>bo', function() Snacks.bufdelete.other() end, desc = 'Delete other buffers' },
       { '<leader>br', function() Snacks.rename.rename_file() end, desc = 'Rename file' },
 
       -- Explore
-      -- { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
-      -- { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
+      { '<leader>E', function()
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.explorer({ cwd = cwd, hidden = true })
+      end, desc = 'Find in buffer directory' },
+      { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Find
       -- { '-', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
       -- { '<leader>F', function() Snacks.picker.files({ cwd = vim.fn.getcwd(), hidden = true }) end, desc = 'Find in current directory' }, -- Open file explorer at current directory
-      -- FIXME: open in current buffer even if nofile (help, oil...)
-      { '<leader>F', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
+      -- NOTE: does not open in current buffer for some filetypes (help, oil...)
+      { '<leader>F', function()
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.picker.files({
+          cwd = cwd,
+          hidden = true,
+          title = 'Files in ' .. vim.fn.fnamemodify(cwd, ':~:.'),
+        })
+      end, desc = 'Find in buffer directory' },
       { '<leader>f', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Git
@@ -336,7 +380,14 @@ return {
 
       { '<leader>gB', function() Snacks.gitbrowse() end, desc = 'Git browse', mode = { 'n', 'v' } },
       { '<leader>gG', function() Snacks.terminal({ 'gitui' }, { cwd = vim.fn.getcwd() }) end, desc = 'Open GitUI' },
+
+      -- FIXME: C-{j,k}
       { '<leader>gL', function() Snacks.lazygit() end, desc = 'Open Lazygit' },
+      -- { '<leader>gg', function() Snacks.lazygit( { cwd = LazyVim.root.git() }) end, { desc = 'Lazygit (Root Dir)' } },
+      -- { '<leader>gG', function() Snacks.lazygit() end, { desc = 'Lazygit (cwd)' } },
+      -- { '<leader>gf', function() Snacks.picker.git_log_file() end, { desc = 'Git Current File History' } },
+      -- { '<leader>gl', function() Snacks.picker.git_log({ cwd = LazyVim.root.git() }) end, { desc = 'Git Log' } },
+      -- { '<leader>gL', function() Snacks.picker.git_log() end, { desc = 'Git Log (cwd)' } },
 
       -- Grep/search
       { '<leader>s', '', desc = '+search' }, -- grep/picker
@@ -392,8 +443,8 @@ return {
       { '<backspace>oD', '<cmd>Dashboard<cr>', desc = 'Dashboard' },
       { '<backspace>oN', '<cmd>NeovimNews<cr>', desc = 'Neovim News' },
 
-      { '<leader>P', '', desc = '+profiler' },
-      { '<leader>Ps', function() Snacks.profiler.scratch() end, desc = 'Profiler Scratch Bufer' },
+      { '<backspace>p', '', desc = '+profiler' },
+      { '<backspace>ps', function() Snacks.profiler.scratch() end, desc = 'Profiler Scratch Bufer' },
     },
     -- config = function(_, opts)
     --   local snacks = require('snacks')
@@ -418,9 +469,6 @@ return {
     --   snacks.setup(opts)
     -- end,
     init = function()
-      -- vim.g.loaded_netrw = 1
-      -- vim.g.loaded_netrwPlugin = 1
-
       vim.api.nvim_create_autocmd('User', {
         pattern = 'VeryLazy',
         callback = function()
@@ -450,9 +498,9 @@ return {
           Snacks.toggle.dim():map('<leader>uD')
 
           -- Toggle the profiler
-          Snacks.toggle.profiler():map('<leader>Pp')
+          Snacks.toggle.profiler():map('<backspace>pp')
           -- Toggle the profiler highlights
-          Snacks.toggle.profiler_highlights():map('<leader>Ph')
+          Snacks.toggle.profiler_highlights():map('<backspace>ph')
         end,
       })
 
@@ -535,7 +583,8 @@ return {
       end, { desc = 'Open dashboard (snacks)' })
 
       vim.api.nvim_create_user_command('Find', function()
-        Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true })
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.picker.files({ cwd = cwd, hidden = true })
       end, { desc = 'Find files (snacks)' })
 
       vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })

@@ -5,5 +5,8 @@ set -eu
 if [ $# -eq 0 ]; then
   docker ps --all
 else
-  docker "$@"
+  case "$1" in
+  c) shift && docker compose "$@" ;;
+  *) docker "$@" ;;
+  esac
 fi

@@ -2,10 +2,16 @@
 local sessions_dir = vim.fn.stdpath('state') .. '/sessions/'
 
 return {
+  { 'folke/lazy.nvim', dev = true },
   { 'tpope/vim-sensible', version = '2.0.0', lazy = false },
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
   { 'nvim-lua/plenary.nvim', tag = 'v0.1.4', lazy = true },
-  { 'nvim-neotest/nvim-nio', tag = 'v1.10.1', lazy = true },
+  {
+    'nvim-neotest/nvim-nio',
+    -- tag = 'v1.10.1',
+    version = 'v1.x',
+    lazy = true,
+  },
   {
     'folke/persistence.nvim',
     tag = 'v3.1.0',
@@ -24,8 +30,20 @@ return {
       { '<leader>Ss', function() require('persistence').select() end,desc = 'Select session' },
     },
     init = function()
-      -- vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,terminal'
-      vim.opt.sessionoptions = { 'buffers', 'curdir', 'folds', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' }
+      vim.opt.sessionoptions = {
+        'blank',
+        'buffers',
+        'curdir',
+        'folds',
+        'globals',
+        'help',
+        -- 'localoptions',
+        -- 'options',
+        'skiprtp',
+        'tabpages',
+        'terminal',
+        'winsize',
+      }
       vim.api.nvim_create_user_command('Restore', function()
         require('persistence').load()
       end, { desc = 'Restore session' })
@@ -61,10 +79,11 @@ return {
       -- https://github.com/folke/persistence.nvim/issues/13
       vim.api.nvim_create_autocmd('VimEnter', {
         nested = true,
-        group = vim.api.nvim_create_augroup('Restore', { clear = true }),
+        group = vim.api.nvim_create_augroup('RestoreSession', { clear = true }),
         callback = function()
           local cwd = vim.fn.getcwd()
-          local has_args = vim.fn.argc() > 0 or vim.g.started_with_stdin
+          -- vim.fn.argc(): number of files in the argument list
+          local has_args = (#vim.v.argv > 2) -- FIXME: or vim.g.started_with_stdin
           local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
           local session_exists = vim.fn.filereadable(session_file) == 1
           if not has_args and session_exists then
@@ -80,13 +99,15 @@ return {
   },
   {
     'MeanderingProgrammer/render-markdown.nvim',
-    tag = 'v8.5.0',
+    -- tag = 'v8.6.0',
+    version = 'v8.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       'echasnovski/mini.icons',
     },
     ft = 'markdown',
     opts = {
+      code = { enabled = false }, -- FIXME: conceal_delimiters = false
       completions = { lsp = { enabled = true } },
       file_types = { 'markdown', 'codecompanion', 'Avante' },
       html = { comment = { conceal = false } },

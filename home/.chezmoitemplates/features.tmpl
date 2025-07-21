@@ -1,103 +1,180 @@
-{{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
-{{- $features := $data.features -}}
-
-{{- if eq .osid "alpine" }}
-
-{{- /* Alpine */ -}}
-{{- $features = mergeOverwrite $features (dict
+{{- $features := (dict
+  "ai" false
+  "atuin" false
+  "bash" true
+  "docker" false
+  "ghostty" false
+  "git" true
+  "go" false
+  "goss" false
+  "helix" .glibc231
+  "kube" false
+  "mail" false
+  "mise" true
+  "neovim" false
+  "node" false
+  "nushell" true
+  "php" false
+  "python" false
+  "ruby" false
+  "rust" false
+  "sql" false
+  "tmux" false
+  "tofu" false
+  "topgrade" true
+  "vim" false
+  "void" false
+  "vscode" false
+  "vscodium" false
+  "zellij" false
+  "zsh" false
 ) -}}
 
-{{- else if eq .osid "android" }}
-
-{{- /* Termux */ -}}
+{{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
-  "neovim" true
-  "tmux" true
-  "vim" true
-  "zellij" true
+  "atuin" true
+  "bash" true
+  "docker" (ne (or (lookPath "docker") (lookPath "podman")) "")
+  "git" true
+  "helix" true
+  "kube" (ne (lookPath "kubectl") "")
+  "nushell" true
+  "python" true
+  "tofu" (ne (lookPath "tofu") "")
+  "ruby" true
+  "topgrade" true
 ) -}}
+{{- end }}
 
-{{- else if eq .osid "arch" }}
-
-{{- /* Archlinux/Manjaro */ -}}
+{{- if or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname) -}}
 {{- $features = mergeOverwrite $features (dict
   "ai" true
-  "docker" true
-  "ghostty" true
-  "go" true
-  "kube" true
-  "neovim" true
-  "node" true
-  "php" true
-  "rust" true
-  "tmux" true
-  "vim" true
-  "zellij" true
 ) -}}
+{{- end }}
 
-{{- else if eq .osid "debian" }}
-
-{{- /* Debian/Ubuntu */ -}}
+{{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
   "docker" false
-  "ghostty" true
-  "go" true
-  "kube" true
+  "go" false
+  "kube" false
+  "neovim" false
+  "node" false
+  "rust" false
+  "tmux" false
+  "vim" false
+  "zellij" false
+) -}}
+{{- else if eq .osID "android" }}
+{{- $features = mergeOverwrite $features (dict
+  "docker" false
+  "kube" false
   "neovim" true
-  "node" true
-  "php" true
-  "rust" true
   "tmux" true
   "vim" true
   "zellij" true
 ) -}}
-
-{{- else if eq .chezmoi.os "darwin" }}
-
-{{- /* macOS */ -}}
+{{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
-  "ai" true
-  "bash" false
   "docker" true
   "ghostty" true
-  "git" false
   "go" true
+  "goss" true
   "kube" true
+  "mail" (not (empty .accessToken))
   "neovim" true
   "node" true
   "php" true
   "rust" true
+  "sql" true
+  "tmux" true
+  "vim" true
+  "void" true
+  "vscode" true
+  "vscodium" true
+  "zellij" true
+  "zsh" true
+) -}}
+{{- else if eq .osIDLike "debian" }}
+{{- $features = mergeOverwrite $features (dict
+  "atuin" (not .glibc231)
+  "docker" false
+  "ghostty" (not .glibc231)
+  "go" true
+  "helix" (not .glibc231)
+  "kube" false
+  "neovim" true
+  "node" true
+  "php" true
+  "rust" true
+  "sql" true
+  "tmux" true
+  "topgrade" (not .glibc231)
+  "vim" true
+  "zellij" true
+) -}}
+{{- else if eq .os "darwin" }}
+{{- $features = mergeOverwrite $features (dict
+  "bash" true
+  "docker" true
+  "ghostty" true
+  "git" true
+  "go" true
+  "kube" true
+  "mail" false
+  "neovim" true
+  "node" true
+  "php" true
+  "rust" true
+  "sql" true
   "tmux" true
   "vim" true
   "zellij" true
   "zsh" false
 ) -}}
-
-{{- end }}
-
-{{- if .codespaces }}
+{{- else if eq .osIDLike "fedora" }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" false
-  "go" false
-  "helix" true
-  "neovim" false
-  "node" false
-  "rust" false
+  "docker" true
+  "ghostty" true
+  "go" true
+  "goss" true
+  "kube" true
+  "mail" false
+  "neovim" true
+  "node" true
+  "rust" true
+  "sql" true
+  "tmux" true
+  "vim" true
+  "zellij" true
+  "zsh" true
+) -}}
+{{- else if eq .os "windows" }}
+{{- $features = mergeOverwrite $features (dict
+  "docker" false
+  "kube" false
+  "neovim" true
   "vim" true
 ) -}}
 {{- end }}
 
-{{- if .devContainer }}
+{{- if or .codespaces .devContainer .ephemeral .headless }}
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
   "go" false
-  "helix" true
-  "kube" false
+  "helix" false
   "neovim" false
   "node" false
   "rust" false
+  "tmux" false
   "vim" false
+  "zellij" false
 ) -}}
 {{- end }}
+
+{{- range $name, $default := $features }}
+{{- $key := upper (printf "FEATURE_%s" $name) -}}
+{{- $value := includeTemplate "env.tmpl" (dict "key" $key "default" $default) | fromJson -}}
+{{- $_ := set $features $name $value -}}
+{{- end -}}
 
 {{- $features | toJson -}}

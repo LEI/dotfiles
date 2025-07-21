@@ -10,8 +10,8 @@ tags
 *.retry
 
 # Composer
-; vendor
 composer.phar
+vendor
 
 # Node
 npm-debug.log*
@@ -33,6 +33,9 @@ Session*.vim
 .netrwhist
 *~
 *.swp
+
+# VSCode
+.vscode
 
 # Compiled source
 *.com

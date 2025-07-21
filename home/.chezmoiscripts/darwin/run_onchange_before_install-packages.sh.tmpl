@@ -1,0 +1,38 @@
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $caskPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "cask")) | fromJson -}}
+{{- $masPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "mas")) | fromJson -}}
+{{- $vscodePackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson -}}
+
+#!/bin/sh
+
+set -eu
+
+# https://docs.brew.sh/Installation#unattended-installation
+export NONINTERACTIVE=1
+
+set -x
+
+brew update --quiet
+
+{{- if .upgrade }}
+
+brew upgrade --quiet
+{{- end }}
+
+brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
+{{- range $packages | sortAlpha }}
+{{- if contains "/" . }}
+tap {{ . | replaceAllRegex "/[\\w@-]+$" "" | quote }}
+{{- end }}
+brew {{ . | quote }}
+{{- end }}
+{{- range $caskPackages | sortAlpha }}
+cask {{ . | quote }}
+{{- end }}
+{{- range $masPackages }}
+mas {{ .name | quote }}, id: {{ .id }}
+{{- end }}
+{{- range $vscodePackages | sortAlpha }}
+vscode {{ . | quote }}
+{{- end }}
+EOF

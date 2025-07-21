@@ -1,20 +1,14 @@
-HISTSIZE=100000
-HISTFILESIZE=200000
-HISTCONTROL="erasedups:ignoreboth"
-HISTTIMEFORMAT="%F %T "
+HISTCONTROL=ignorespace:ignoredups:erasedups
+# HISTFILE="$HOME/.config/bash/history"
+HISTFILESIZE=-1
+HISTSIZE=-1
+# HISTTIMEFORMAT="%F %T "
+HISTTIMEFORMAT='%Y-%m-%d:%H:%M '
 
-if command -v hx >/dev/null; then
-  EDITOR=hx
-elif command -v nvim >/dev/null; then
-  EDITOR=nvim
-elif command -v vim >/dev/null; then
-  EDITOR=vim
-elif command -v code >/dev/null; then
-  EDITOR=code
-else
-  echo >&2 "WARN: EDITOR not found"
-  EDITOR="${EDITOR:-vi}"
-fi
-
-export EDITOR
-export VISUAL="${VISUAL:-$EDITOR}"
+# PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+function _setAndReloadHistory {
+  builtin history -a
+  builtin history -c
+  builtin history -r
+}
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; } _setAndReloadHistory"

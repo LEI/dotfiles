@@ -1,0 +1,11 @@
+---
+extraPackages:
+  tmux:
+  nowplaying-cli:
+    condition: and .features.tmux (eq .osID "darwin")
+  pam-reattach:
+    condition: and .features.tmux (eq .osID "darwin")
+  playerctl:
+    condition: and .features.tmux (eq .os "linux")
+  reattach-to-user-namespace:
+    condition: and .features.tmux (eq .osID "darwin")

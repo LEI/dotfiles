@@ -204,7 +204,10 @@ return {
         pattern = 'PersistenceLoadPost',
         callback = function()
           local overseer = require('overseer')
-          overseer.load_task_bundle(get_cwd_as_name(), { ignore_missing = true })
+          overseer.load_task_bundle(get_cwd_as_name(), {
+            autostart = false,
+            ignore_missing = true,
+          })
         end,
       })
     end,

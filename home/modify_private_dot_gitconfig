@@ -2,31 +2,6 @@
 {{- .chezmoi.stdin | replaceAllRegex "(?s)### START.*?\n(.*)### END.*?\n" "" -}}
 ### START
 
-[alias]
-    ca = !git add -A && git commit -av
-    s = status --short
-
-# [core]
-#     excludesFile = .config/git/ignore
-#     attributesFile = .config/git/attributes
-
-# [include]
-#     path = .config/git/user
-
-[include]
-    path = .gitconfig.local
-
-[includeIf "gitdir:~/src/github.com/"]
-    path = .config/git/github.ini
-[includeIf "hasconfig:remote.*.url:git@github.com*/**"]
-    path = .config/git/github.ini
-
-[includeIf "gitdir:~/src/gitlab.com/"]
-    path = .config/git/gitlab.ini
-[includeIf "hasconfig:remote.*.url:git@gitlab.com*/**"]
-    path = .config/git/gitlab.ini
-
-[ghq]
-    root = ~/src
+# NOTE: replaced by dot_config/git/config
 
 ### END
