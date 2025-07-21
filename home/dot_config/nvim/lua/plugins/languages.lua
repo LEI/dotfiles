@@ -11,6 +11,7 @@ return {
   },
   {
     'folke/lazydev.nvim',
+    enabled = vim.fn.has('nvim-0.10') == 1,
     version = '1.9.0',
     ft = 'lua',
     cmd = 'LazyDev',
@@ -23,6 +24,14 @@ return {
         'nvim-dap-ui',
       },
     },
+  },
+  {
+    'ricardoramirezr/blade-nav.nvim',
+    dependencies = {
+      'saghen/blink.cmp',
+    },
+    ft = { 'blade', 'php' },
+    opts = {},
   },
   -- { 'lervag/vimtex', tag = 'v2.16' },
 }

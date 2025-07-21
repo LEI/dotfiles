@@ -1,0 +1,4 @@
+---
+extraPackages:
+  k9s:
+    enabled: '{{ and .features.kube (ne .osIDLike "debian") }}'

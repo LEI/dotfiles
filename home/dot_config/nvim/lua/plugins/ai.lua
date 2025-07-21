@@ -4,6 +4,7 @@ end
 
 vim.g.ai = {
   avante = false,
+  claude = false,
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
@@ -62,11 +63,12 @@ return {
   {
     'ravitemer/mcphub.nvim',
     enabled = vim.g.ai.mcphub,
-    tag = 'v5.11.0',
+    -- tag = 'v6.2.0',
+    version = 'v6.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    -- build = node_prefix .. 'npm install --global mcp-hub@^3.7.0',
+    -- build = node_prefix .. 'npm install --global mcp-hub@4.2.0',
     -- build = 'bundled_build.lua',
     cmd = 'MCPHub',
     keys = {
@@ -81,7 +83,6 @@ return {
       cmd = node_prefix .. 'node',
       cmdArgs = { node_prefix .. 'mcp-hub' },
 
-      -- TODO: install uv(x), setup EXA_API_KEY
       -- config = vim.fn.expand('~/.config/mcphub/servers.json'),
       -- port = 37373,
       -- server_url = 'http://localhost:37373',
@@ -100,7 +101,8 @@ return {
   {
     'yetone/avante.nvim',
     enabled = vim.g.ai.avante and vim.fn.has('nvim-0.10'),
-    tag = 'v0.0.25',
+    -- tag = 'v0.0.27',
+    version = 'v0.0.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
@@ -158,9 +160,35 @@ return {
   },
 
   {
+    'greggh/claude-code.nvim',
+    enabled = vim.g.ai.claude,
+    tag = 'v0.4.3',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    cmd = { 'ClaudeCode', 'ClaudeCodeContinue', 'ClaudeCodeResume', 'ClaudeCodeVerbose' },
+    keys = {
+      { '<leader>cC', '<cmd>ClaudeCode<cr>', desc = 'Claude Code', mode = { 'n', 'v' } },
+    },
+    opts = {
+      -- command = 'claude',
+      -- keymaps = {
+      --   toggle = {
+      --     normal = '<C-,>', -- Normal mode keymap for toggling Claude Code, false to disable
+      --     terminal = '<C-,>', -- Terminal mode keymap for toggling Claude Code, false to disable
+      --     variants = {
+      --       continue = '<leader>cC', -- Normal mode keymap for Claude Code with continue flag
+      --       verbose = '<leader>cV', -- Normal mode keymap for Claude Code with verbose flag
+      --     },
+      --   },
+      --   window_navigation = true, -- Enable window navigation keymaps (<C-h/j/k/l>)
+      --   scrolling = true, -- Enable scrolling keymaps (<C-f/b>) for page up/down
+      -- },
+    },
+  },
+  {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
-    tag = 'v17.5.0',
+    -- tag = 'v17.5.0',
+    version = 'v17.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       -- 'echasnovski/mini.diff',
@@ -204,7 +232,8 @@ return {
     -- :Copilot setup
     'github/copilot.vim',
     enabled = vim.g.ai.copilot,
-    tag = 'v1.50.0',
+    -- tag = 'v1.50.0',
+    version = 'v1.x',
   },
 
   {
@@ -212,6 +241,7 @@ return {
     'zbirenbaum/copilot.lua',
     enabled = vim.g.ai.copilot_lua,
     -- tag = '1.338.0',
+    version = '1.x',
     dependencies = { 'AndreM222/copilot-lualine' },
     cmd = 'Copilot',
     -- event = 'InsertEnter',
@@ -223,6 +253,11 @@ return {
       { '<leader>ct', '<cmd>Copilot toggle<cr>', desc = 'Copilot toggle' },
     },
     config = function()
+      -- local wk = require('which-key')
+      -- wk.add({
+      --   { '<leader>c', group = '+copilot' },
+      -- })
+
       local copilot = require('copilot')
       copilot.setup({
         -- auth_provider_url = 'https://github.com',

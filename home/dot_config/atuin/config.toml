@@ -23,12 +23,13 @@ common_subcommands = [
   "tmux",
   "yarn",
 
-  # "c",
-  "chezmoi",
-  # "d",
-  # "g",
-  # "k",
+  # https://github.com/atuinsh/atuin/issues/2458
+  "c",
+  "d",
+  "g",
+  "k",
 
+  "chezmoi",
   "just",
   "make",
   "mise",
@@ -43,5 +44,11 @@ update_check = false
 
 [dotfiles]
 enabled = true
-# atuin dotfiles alias set e editor
-# atuin dotfiles alias set c chezmoi
+
+[keys]
+# If disabled, using the up/down key won't exit the TUI when scrolled past the first/last entry.
+scroll_exits = false
+# The left arrow key will exit the TUI when scrolling before the first character
+exit_past_line_start = false
+# The right arrow key performs the same functionality as Tab and copies the selected line to the command line to be modified.
+accept_past_line_end = false

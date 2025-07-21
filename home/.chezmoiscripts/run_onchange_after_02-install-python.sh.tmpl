@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# NOTE: after install-packages.sh (system)
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{ if eq .osIDLike "darwin" "debian" -}}
+# https://docs.astral.sh/uv/getting-started/installation/
+if ! command -v uv >/dev/null; then
+  # cmd curl -LsSf https://astral.sh/uv/install.sh | sh
+  if command -v pipx >/dev/null; then
+    cmd pipx install uv
+  else
+    cmd python3 -m pip install --user --quiet uv
+  fi
+fi
+{{ end -}}
+{{- $packages := list }}
+{{- $pythonTools := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
+{{- range $name := $pythonTools -}}
+{{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
+{{-   if eq $name "" -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $packages = append $packages $name -}}
+{{- end }}
+
+packages="{{ $packages | sortAlpha | join " " }}"
+
+if [ -n "$packages" ]; then
+  for name in $packages; do
+    cmd="${name%%[*}"
+    cmd="${cmd%-cli}"
+    if command -v $cmd >/dev/null; then
+      echo >&2 "Already installed: $cmd"
+      continue
+    fi
+    cmd uv tool install --quiet $name
+    # cmd uv tool install --quiet --upgrade $name
+  done
+fi
+# {{ if lookPath "uv" | isExecutable -}}
+# {{- else if lookPath "pipx" | isExecutable }}
+# if [ -n "$packages" ]; then
+#   cmd pipx install $packages
+# fi
+# {{- else }}
+# if [ -n "$packages" ]; then
+#   cmd python -m pip install --user --quiet $packages
+# fi
+# {{- end }}

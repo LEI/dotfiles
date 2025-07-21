@@ -1,0 +1,16 @@
+---
+extraPackages:
+  claude-code:
+    enabled: '{{ and .features.ai (eq .osIDLike "arch" "darwin" "windows") }}'
+    nameOverwrite:
+      npm: "@anthropic-ai/claude-code"
+      windows: Anthropic.Claude
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+  claude-monitor:
+    enabled: "{{ .features.ai }}"
+    type: python
+  # claude:
+  #   enabled: '{{ and .features.ai (eq .osIDLike "darwin" "windows") (not .headless) }}'
+  #   nameOverwrite:
+  #     windows: Anthropic.ClaudeCode
+  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'

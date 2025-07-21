@@ -1,0 +1,132 @@
+#!/bin/sh
+
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+packages="{{ $packages | keys | sortAlpha | join " " }}"
+
+echo >&2 "OS: $CHEZMOI_OS"
+echo >&2 "OS ID: {{ .osID }}"
+echo >&2 "OS ID like: {{ .osIDLike }}"
+echo >&2 "OS version: {{ .osVersion }}"
+echo >&2 "Installing packages: $packages"
+
+{{- if eq .osID "alpine" }}
+cmd sudo apk update --quiet
+{{- if .upgrade }}
+cmd sudo apk upgrade --quiet
+{{- end }}
+# shellcheck disable=SC2086
+cmd sudo apk add --quiet $packages
+{{- else if eq .osIDLike "arch" }}
+{{- if .features.rust }}
+# if [ ! -f "$HOME/rust-toolchain" ]; then
+#   cmd echo stable >"$HOME/rust-toolchain"
+# fi
+{{- end }}
+{{- if .upgrade }}
+cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
+{{- end }}
+# shellcheck disable=SC2086
+cmd sudo pacman --sync --needed --noconfirm --quiet $packages
+if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  TMPDIR="${TMPDIR:-/tmp}"
+  if [ ! -d $TMPDIR/yay-bin ]; then
+    cmd sudo -u "$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
+  fi
+  cmd cd $TMPDIR/yay-bin
+  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
+  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+  # fi
+  cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
+fi
+
+{{- if .features.rust }}
+
+# if command -v rustup >/dev/null && ! cmd rustup default; then
+#   cmd rustup default "$(cat "$HOME/rust-toolchain")"
+#   # cmd rustup install stable
+# fi
+{{- end }}
+
+{{- $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
+aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
+
+if command -v yay >/dev/null; then
+  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
+if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+  cmd flatpak list --all
+  cmd snap list --all
+fi
+{{- else if eq .osIDLike "debian" }}
+# https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
+export DEBIAN_FRONTEND=noninteractive
+cmd sudo apt-get update --quiet >/dev/null
+{{- if .upgrade }}
+cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
+{{- end }}
+# shellcheck disable=SC2086
+cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
+{{- else if eq .osID "fedora" }}
+cmd sudo dnf update --assumeyes --quiet
+{{- if .upgrade }}
+cmd sudo dnf upgrade --assumeyes --quiet
+{{- end }}
+cmd sudo dnf install --assumeyes --quiet $packages
+{{- else if eq .osID "android" }}
+# https://github.com/termux/termux-packages/blob/master/scripts/setup-termux.sh
+if [ ! -d "$HOME/storage/shared" ]; then
+  cmd termux-setup-storage
+fi
+# TERM=xterm temux-change-repo # apt edit-sources
+# cat /data/data/com.termux/files/usr/etc/apt/sources.list
+# cmd apt-get update --quiet >/dev/null
+cmd pkg update --quiet
+{{- if .upgrade }}
+# cmd apt-get upgrade --quiet --yes # >/dev/null
+cmd pkg upgrade --quiet --yes
+{{- end }}
+cmd pkg install --quiet --yes $packages # >/dev/null
+# if [ -z "${TERMUX_APP_PACKAGE_MANAGER:-}" ]; then
+#   cmd termux-setup-package-manager
+#   TERMUX_APP_PACKAGE_MANAGER=apt
+# fi
+# if [ "$TERMUX_APP_PACKAGE_MANAGER" = apt ]; then
+#   # shellcheck disable=SC2086
+#   cmd apt-get install --quiet --yes $packages # >/dev/null
+# elif [ "$TERMUX_APP_PACKAGE_MANAGER" = pacman ]; then
+#   # shellcheck disable=SC2086
+#   cmd pacman --sync --needed --noconfirm --quiet $packages
+# else
+#   echo >&2 "Error: unknown package manager"
+#   exit 1
+# fi
+{{- else }}
+echo >&2 "Package manager not found: {{ .osID }}"
+exit 1
+{{- end }}
+
+{{- if and .codespaces (eq .osIDLike "debian") }}
+selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
+if [ "${selected_editor##*/}" = nano ]; then
+  if [ -x /usr/bin/vim.basic ]; then
+    cmd sudo update-alternatives --set editor /usr/bin/vim.basic
+  elif [ -x /usr/bin/vim.tiny ]; then
+    cmd sudo update-alternatives --set editor /usr/bin/vim.tiny
+  fi
+fi
+{{- end }}
+
+echo >&2 "Installed packages"

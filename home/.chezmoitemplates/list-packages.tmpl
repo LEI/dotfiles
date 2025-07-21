@@ -1,0 +1,9 @@
+{{- $packages := list -}}
+{{- range $name, $pkg := includeTemplate "packages.tmpl" . | fromJson -}}
+{{-   if and (kindIs "map" $pkg) (get $pkg "name") -}}
+{{-     $name = $pkg.name -}}
+{{-   end -}}
+{{-   $name = $name | replaceAllRegex "[\\w@-]+/" "" -}}
+{{-   $packages = append $packages $name -}}
+{{- end -}}
+{{- $packages | sortAlpha | uniq | join "\n" -}}

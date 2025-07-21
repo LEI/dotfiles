@@ -1,0 +1,3 @@
+{{- if get .git "work" }}
+{{- includeTemplate "git-config.tmpl" (mergeOverwrite .git.work (dict "name" .name "sh" .sh)) -}}
+{{- end }}

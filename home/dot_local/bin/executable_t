@@ -4,11 +4,19 @@
 
 set -eu
 
+export TERM=tmux-256color
+
 if [ $# -ne 0 ]; then
   if [ "$*" = "-u NONE" ]; then
     set -- -f/dev/null -Ltmp # lsk
   fi
-  tmux "$@"
+  if [ "$1" = current-config ]; then
+    tmux -Lfoo -f/dev/null start\; show -g
+  elif [ "$1" = default-config ]; then
+    tmux -Lfoo -f/dev/null start\; show -gw
+  else
+    tmux "$@"
+  fi
 elif [ -n "${TMUX:-}" ]; then
   tmux ls
 else

@@ -1,0 +1,33 @@
+# npm
+# pnpm
+# yarn
+
+{{- if .features.ai }}
+mcp-hub@4.2.0
+{{- if not (eq .osIDLike "arch" "darwin" "windows") }}
+{{- if eq .osIDLike "windows" }}
+@openai/codex
+{{- end }}
+@charmland/crush
+{{- end }}
+{{- end }}
+
+{{- if .features.neovim }}
+neovim
+{{- else }}
+bash-language-server
+prettier
+{{- if .features.sql }}
+sql-language-server
+{{- end }}
+typescript
+typescript-language-server
+# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+vscode-langservers-extracted@4.8
+yaml-language-server@next
+{{- end }}
+
+{{- $npmPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "npm")) | fromJson }}
+{{- range $npmPackages | keys | sortAlpha }}
+{{ . }}
+{{- end }}

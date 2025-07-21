@@ -1,0 +1,27 @@
+---
+extraPackages:
+  nodejs:
+    enabled: "{{ .features.node }}"
+    nameOverwrite:
+      alpine: node
+      android: node
+      arch: nodejs-lts-jod
+      darwin: node # @24
+      windows: OpenJS.NodeJS # .LTS
+    # FIXME(termux): hangs terminal "No such file or directory (os error 2)"
+    # ~/.local/share/mise/installs/node/23.11.0/bin/node -v
+    # type: '{{ eq .osIDLike "alpine" | ternary nil "mise" }}'
+  node:
+    enabled: '{{ and .features.node (ne .osIDLike "alpine") }}'
+    type: mise
+  npm:
+    enabled: '{{ and .features.node (eq .osIDLike "alpine") }}'
+  pnpm:
+    enabled: "{{ .features.node }}"
+    type: npm
+  yarn:
+    enabled: "{{ and .features.node }}"
+    type: npm
+  runme:
+    # enabled: "{{ and .features.node }}"
+    type: npm

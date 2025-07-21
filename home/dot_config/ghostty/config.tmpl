@@ -1,26 +1,42 @@
-background-opacity = 0.8
+adjust-cursor-thickness = 1
+background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75 }}
 
-# cursor-style = "block"
+# cursor-style = block
 # cursor-style-blink = false
+
+# shell-integration = none
 # shell-integration-features = no-cursor
 
 # fullscreen = true
-gtk-titlebar = false
-maximize = true
+# font-feature = -calt, -liga, -dlig
 scrollback-limit = 90000000
-theme = "tokyonight_night"
-# theme = "tokyonight-storm"
+theme = tokyonight_night
+# theme = tokyonight-storm
 
-{{- if eq .chezmoi.os "darwin" }}
-font-size = 11
+{{- if eq .os "darwin" }}
+
+font-size = 12
+
 # https://github.com/ghostty-org/ghostty/discussions/3642
 # fullscreen = true
 # macos-non-native-fullscreen = visible-menu
+# macos-titlebar-style = native
+macos-titlebar-style = transparent
+# macos-titlebar-style = tabs
+# macos-titlebar-style = hidden
+# window-decoration = client
+window-padding-x = 8
+# window-save-state = always
 
 # https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
 macos-option-as-alt = left
 keybind = alt+left=unbind
 keybind = alt+right=unbind
 {{- else }}
-font-size = 9
+
+font-size = 10
+
+gtk-titlebar = false
+maximize = true
+window-decoration = server
 {{- end }}

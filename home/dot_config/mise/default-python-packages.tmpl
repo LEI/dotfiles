@@ -1,0 +1,16 @@
+# ansible
+# euporie
+{{- if .features.sql }}
+pg_activity[psycopg]
+{{- end }}
+recoverpy
+{{ if ne (env "VT_API_KEY") "" -}}
+wtfis
+{{ end -}}
+{{ if and .features.ai .features.tmux -}}
+wut-cli
+{{ end -}}
+{{- $pythonPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "python")) | fromJson }}
+{{- range $pythonPackages | keys | sortAlpha }}
+{{ . }}
+{{- end }}

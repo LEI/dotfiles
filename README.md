@@ -30,7 +30,7 @@ wget -qO- "$URL" | sh -s -- --interactive "$GITHUB_USERNAME"
 Clone, init and apply:
 
 ```bash
-chezmoi init --apply --interactive "$GITHUB_USERNAME"
+chezmoi init --apply --interactive --verbose "$GITHUB_USERNAME"
 ```
 
 Show diff:
@@ -42,5 +42,11 @@ chezmoi diff --dry-run --verbose
 Update, init and apply:
 
 ```bash
-chezmoi update --apply --init --interactive
+chezmoi update --apply --init --interactive --verbose
+```
+
+## Development
+
+```bash
+prek install
 ```

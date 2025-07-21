@@ -1,0 +1,7 @@
+---
+extraPackages:
+  meli:
+    enabled: "{{ .features.mail }}"
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  w3m:
+    enabled: "{{ .features.mail }}"

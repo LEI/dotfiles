@@ -2,35 +2,22 @@
 
 set -eu
 
-if command -v procs >/dev/null && procs --version; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v procs || true" }}
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v procs; then
+  echo >&2 "Already installed"
+  cmd procs --version
   exit
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
-echo >&2 "Installing procs"
-
-# {{- if eq .chezmoi.os "darwin" }}
-export NONINTERACTIVE=1
-cmd brew install --quiet procs
-# {{- else if eq .osid "alpine" }}
-cmd sudo apk add --quiet procs
-# {{- else if eq .osid "arch" }} Archlinux/Manjaro
-cmd sudo pacman --sync --needed --noconfirm --quiet procs
-# {{- else if eq .osid "debian" }} Debian/Ubuntu
-export DEBIAN_FRONTEND=noninteractive
-VERSION="$(get_release dalance/procs)"
-ARCH="$(uname -m)" # aarch64, x86_64
-OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # linux, mac, windows
-NAME="procs-$VERSION-$ARCH-$OS.zip"
-URL="https://github.com/dalance/procs/releases/download/$VERSION/$NAME"
-install_zip "$URL" procs
-# cmd sudo -E apt-get install --quiet --yes procs >/dev/null
-# {{- else if eq .osid "android" }}
-cmd apt-get install --quiet --yes procs >/dev/null
-# {{- else }}
-err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
-# {{- end }}
-
-echo >&2 "Installed procs"
+{{- if eq .osIDLike "debian" }}
+# echo >&2 "Installing procs"
+# export DEBIAN_FRONTEND=noninteractive
+# VERSION="$(get_release dalance/procs)"
+# ARCH="$(uname -m)" # aarch64, x86_64
+# OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # linux, mac, windows
+# NAME="procs-$VERSION-$ARCH-$OS.zip"
+# URL="https://github.com/dalance/procs/releases/download/$VERSION/$NAME"
+# install_zip "$URL" procs
+# echo >&2 "Installed procs"
+{{- end }}

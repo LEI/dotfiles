@@ -1,5 +1,8 @@
 # https://www.chezmoi.io/reference/special-files/chezmoiignore/
 
+# NOTE: replaced by ~/.config/git/config
+.gitconfig
+
 {{- if ne .email "firstname.lastname@company.com" }}
 # Ignore .company-directory unless configured with a company email
 .company-directory # note that the pattern is not dot_company-directory
@@ -9,28 +12,56 @@
 .personal-file
 {{- end }}
 
-{{- if eq .osid "arch" }}
-# Archlinux/Manjaro
-.inputrc
+{{- if not .features.ai }}
+.claude/
+.config/claude/
+.config/mcphub/
+{{- end }}
+
+{{- if not .features.atuin }}
+.config/atuin/
 {{- end }}
 
 {{- if not .features.bash }}
+# .bash_aliases
+# .bash_profile
 .bashrc
 .config/bash/
+.config/blesh/
 {{- end }}
 
 {{- if not .features.zsh }}
 .config/zsh/
+# .zprofile
 .zshrc
 {{- end }}
 
-{{- if and (not .features.bash) (not .features.zsh) }}
+{{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
+.config/bat/
+.config/curlrc
+.config/readline/
 .config/sh/
+.config/wget/
+.local/bin/
+{{- end }}
+
+{{- if and (not .features.bash) (not .features.nushell) }}
+.config/carapace/
+{{- end }}
+
+{{- if not .features.brew }}
+.brew-aliases/
+.chezmoiscripts/*install-brew-packages.sh
+.config/homebrew/
 {{- end }}
 
 {{- if not .features.docker }}
+.config/carapace/specs/d.yaml
+.config/carapace/specs/p.yaml
+# .config/docker/
 .config/sh/plugins/docker.sh
-bin/d
+{{- if lookPath "docker" | isExecutable }}.config/carapace/specs/d.yaml{{- end }}
+{{- if lookPath "podman" | isExecutable }}.config/carapace/specs/p.yaml{{- end }}
 {{- end }}
 
 {{- if not .features.ghostty }}
@@ -38,103 +69,218 @@ bin/d
 {{- end }}
 
 {{- if not .features.git }}
+.config/carapace/specs/g.yaml
 .config/git/
 .config/lazygit/
 # FIXME: mod.nu.tmpl loops on source directory
 # .config/nushell/modules/git.nu
 # NOTE: feature should be named "git-config"
 # .config/sh/plugins/git.sh
-.gitconfig
-bin/g
+{{- if lookPath "git" | isExecutable }}.config/carapace/specs/g.yaml{{- end }}
 {{- end }}
 
 {{- if not .features.go }}
-.chezmoiscripts/*-install-tools-go.sh
+.config/mise/default-go-packages
+{{- end }}
+
+{{- if not .features.goss }}
+.config/goss/
 {{- end }}
 
 {{- if not .features.helix }}
 .config/helix/
 {{- end }}
+{{- if or (not .features.helix) (ne .osID "manjaro") }}
+.config/helix/Makefile
+{{- end }}
+
+{{- if not .features.i3 }}
+.Xresources
+.config/Kvantum/
+.config/X11/
+# .config/autostart/
+.config/environment.d/
+.config/gtk-*/
+.config/i3*/
+.config/picom/
+.config/polybar/
+.config/qt*ct/
+.config/rofi/
+.config/ulauncher/
+.config/xdg-desktop-portal
+# .local/bin/i3-*
+.local/share/applications/
+.xinitrc
+.xprofile
+{{- end }}
 
 {{- if not .features.kube }}
-# .chezmoiscripts/*-install-tools-kubectl.sh
+.config/carapace/specs/k.yaml
+.config/k9s/
 .config/krew/
+.config/kube/
 .config/sh/plugins/kubectl.sh
-bin/k
+{{- if lookPath "kubectl" | isExecutable }}.local/bin/k{{- end }}
+{{- end }}
+
+{{- if not .features.mail }}
+.config/aerc/
+.config/isync/
+.config/meli/
+.config/notmuch/
+.config/systemd/ # user/mbsync-run.*
+.local/share/applications/aerc.*
+.local/share/applications/meli.*
+{{- end }}
+
+{{- if not (or .features.git .features.mail) }}
+.gnupg/
 {{- end }}
 
 {{- if not .features.mise }}
-# .chezmoiscripts/*-install-tools-*.sh
-.chezmoiscripts/*-install-tools.sh
+# .chezmoiscripts/{*,*/*}mise-install.sh
+.chezmoiscripts/*mise-install.sh
+.chezmoiscripts/windows/*mise-install.sh
 .config/mise/
-# .config/sh/plugins/mise.sh
+.config/sh/plugins/mise.sh
 {{- end }}
 
 {{- if not .features.neovim }}
-.chezmoiscripts/*-install-neovim.sh
+.chezmoiscripts/*install-neovim.sh
+.config/carapace/specs/n.yaml
+.config/cspell/
+.config/neovide/
 .config/nvim/
+.local/bin/nvim-*
 .local/share/nvim
 {{- end }}
 
 {{- if not .features.node }}
-.chezmoiscripts/*-install-tools-node.sh
-.npmrc
+.config/mise/default-npm-packages
+.config/npm/
 {{- end }}
 
 {{- if not .features.nushell }}
-# .chezmoiscripts/*.nu
 # .config/*/*.nu
 .config/nushell/
 *.nu
 {{- end }}
 
+{{- if not .features.php }}
+{{- end }}
+
+{{- if not (lookPath "process-compose" | isExecutable) }}
+.config/carapace/specs/pc.yaml
+{{- end }}
+
+{{- if not .features.python }}
+.chezmoiscripts/*install-python.sh
+.config/mise/default-python-packages
+{{- end }}
+
+{{- if not .features.ruby }}
+.chezmoiscripts/*install-ruby.sh
+.config/gem/
+.config/mise/default-gems
+{{- end }}
+
 {{- if not .features.rust }}
-.chezmoiscripts/*-install-tools-rust.sh
+.chezmoiscripts/*install-rust.sh
+{{- end }}
+
+{{- if not .features.shpool }}
+.config/carapace/specs/s.yaml
+.config/shpool/
+.local/bin/shpool-*
+.ssh/config.s/shpool.conf
 {{- end }}
 
 {{- if not .features.sql }}
-# TODO: .chezmoiscripts/*-install-tools-sql.sh
+.config/psql/
+{{- end }}
+
+{{- if not .features.ssh }}
+.ssh/
 {{- end }}
 
 {{- if not .features.tmux }}
+.config/carapace/specs/t.yaml
 .config/tmux/
-bin/t
+{{- if lookPath "tmux" | isExecutable }}.local/bin/t{{- end }}
 {{- end }}
 
 {{- if not .features.topgrade }}
+# .config/topgrade.d/
 .config/topgrade/
 {{- end }}
 
 {{- if not .features.vim }}
+.config/carapace/specs/v.yaml
 .config/vim/
 # .vim/
+.vimrc.local
+{{- end }}
+
+{{- if not .features.void }}
+.config/Void/
+.void-editor/
+{{- end }}
+
+{{- if not .features.vscode }}
+.config/Code/
+{{- end }}
+
+# .config/Code - OSS/
+# .vscode-oss/
+{{- if not .features.vscodium }}
+.config/VSCodium/
 {{- end }}
 
 {{- if not .features.zellij }}
 .config/zellij/
 {{- end }}
 
-# TODO: use .chezmoidata/packages.yaml
-.chezmoiscripts/darwin-install-packages.sh
-
-{{ if .codespaces -}}
-.config/Code/
-.config/VSCodium/
-.config/Void/
-.void-editor/
-{{ else -}}
+{{ if not .codespaces -}}
 .vscode-remote/
 {{ end -}}
 
-{{ if eq .chezmoi.os "darwin" -}}
-{{ else if eq .chezmoi.os "linux" -}}
-{{- else if eq .chezmoi.os "windows" }}
-.config/
+{{ if or .ephemeral (eq .accessToken "") -}}
+.install-password-manager.sh
+{{ end -}}
+
+{{- if not (eq .osID "arch" "darwin") }}
+.config/lla/
+{{- end }}
+
+{{- if ne .osID "darwin" }}
+.bash_profile
+.chezmoiscripts/darwin/**
+.config/hammerspoon/
+.config/karabiner/
+.macos
+{{- end }}
+
+{{- if not (eq .os "android" "linux") }}
+.chezmoiscripts/*install-packages.sh
+# .chezmoiscripts/linux/**
+{{- end }}
+
+{{- if ne .os "linux" }}
+.hushlogin
+{{- end }}
+
+{{- if ne .osID "windows" }}
+*.ps1
+.chezmoiscripts/windows/**
+.config/winget/
+{{- if not .wsl }}
+.config/powershell/
+{{- end }}
+Documents/PowerShell/
+Documents/WindowsPowerShell/
+{{- else }}
+.config/*/*.sh
 .install-password-manager.sh
 .void-editor/
-{{ else -}}
-.config/Code/
-.config/VSCodium/
-.config/Void/
-.void-editor/
-{{ end -}}
+{,.chezmoiscripts/}*.sh
+{{- end }}

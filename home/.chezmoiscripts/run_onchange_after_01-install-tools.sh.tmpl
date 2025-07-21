@@ -1,24 +1,58 @@
 #!/bin/sh
 
-# https://mise.jdx.dev/installing-mise.html
-
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# {{- if eq .osid "android" }}
-# {{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osid" .osid) }}
-# {{- end }}
+{{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osID" .osID) }}
+{{- if eq .osID "android" }}
+# export -f mise
+{{- end }}
+# cmd mise self-update --quiet --yes
 
-# Mise: {{ output "sh" "-c" "mise --version || true" | replace "\n" " " | trim }}
+# cmd mise trust
+
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
-
 log "Installing tools"
 
-# {{- if has .osid (list "alpine") }}
+{{- if has .osID (list "alpine") }}
 # mise settings set disable_backends ubi
-# {{- end }}
+{{- end }}
 
-cmd timeout 5m mise install --quiet --yes || cmd timeout 5m mise install --verbose --yes
+mise_args="--yes"
+if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+  mise_args="$mise_args --verbose"
+fi
+cmd timeout 5m mise install $mise_args
 
 log "Installed tools"
+
+# cmd mise ls
+
+{{- $tools := list }}
+{{- if .features.ruby }}
+# default-gems: {{ includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum }}
+{{- /* $tools = append $tools "ruby" */ -}}
+{{- end }}
+
+{{- if .features.go }}
+# default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
+{{- $tools = append $tools "go" -}}
+{{- end }}
+
+{{- if and .features.node (ne .osIDLike "alpine") }}
+# default-npm-packages: {{ includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum }}
+{{- $tools = append $tools "node" -}}
+{{- end }}
+
+{{- if .features.python }}
+# default-python-packages: {{ includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum }}
+{{- /* $tools = append $tools "python" */ -}}
+{{- end }}
+
+{{- if not (empty $tools) }}
+
+cmd mise use --global $mise_args {{ $tools | sortAlpha | join " " }}
+{{- end }}
+
+# cmd mise prune # --tools

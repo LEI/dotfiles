@@ -1,0 +1,5 @@
+---
+extraPackages:
+  ghostty:
+    enabled: '{{ and .features.ghostty (not (eq .osIDLike "debian" "fedora")) (not .headless) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'

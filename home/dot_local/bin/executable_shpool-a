@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -eu
+
+cmd="$SHELL"
+
+if [ $# -eq 0 ]; then
+  if [ "$PWD" = "$HOME" ]; then
+    name="~"
+  else
+    name="$(basename "$PWD")"
+  fi
+else
+  name="$1"
+  shift
+fi
+
+# cmd="$SHELL -c 'cd $PWD && exec $SHELL -i'"
+# cmd="$SHELL -c 'cd $(zoxide query "$name" || echo "$PWD") && exec $SHELL -i'"
+cmd="$SHELL -c 'cd $(zoxide query "$name" || echo "$PWD"); nvim; $SHELL -i'"
+
+# if ! shpool list | tr '\t' ' ' | grep "^$name "; then
+#   cmd="$SHELL -c 'z $name && exec $SHELL -i'"
+# fi
+
+shpool attach --cmd="$cmd" "$name" "$@"

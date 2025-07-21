@@ -21,11 +21,11 @@
 #     }
 # }
 
-# https://github.com/nushell/nushell/issues/14504
-export def --wrapped g [...args] {
-    if $args != [] {
-        git ...$args
-    } else {
-        git status --short
-    }
-}
+# # https://github.com/nushell/nushell/issues/14504
+# export def --wrapped g [...args] {
+#     if $args != [] {
+#         git ...$args
+#     } else {
+#         git status --short
+#     }
+# }

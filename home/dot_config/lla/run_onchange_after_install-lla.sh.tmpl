@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# if ! [ -f ~/.config/lla/themes/default.toml ]; then
+#   cmd lla init
+# fi
+
+if ! [ -f ~/.config/lla/themes/tokyo_night.toml ]; then
+  cmd lla theme pull
+fi
+
+{{- if .features.rust }}
+
+# NOTE: interactive
+# cmd lla install
+
+# cmd lla update
+{{- end }}

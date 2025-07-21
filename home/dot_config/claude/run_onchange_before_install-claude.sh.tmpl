@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# https://github.com/anthropics/claude-code/issues/1455
+CLAUDE_CONFIG_DIR="$HOME/.config/claude"
+
+if [ -d "$HOME/.claude" ] && [ -d "$CLAUDE_CONFIG_DIR" ]; then
+  echo >&2 "ERR: $HOME/.claude"
+  exit 1
+fi
+
+if [ -d "$HOME/.claude" ] && ! [ -d "$CLAUDE_CONFIG_DIR" ]; then
+  cmd mv "$HOME/.claude" "$CLAUDE_CONFIG_DIR"
+  cmd ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
+fi

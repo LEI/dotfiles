@@ -1,6 +1,6 @@
 return {
   {
-    -- Alternative: nvim-pack/nvim-spectre
+    -- Alternative: nvim-pack/nvim-spectre, scooter
     'MagicDuck/grug-far.nvim',
     cmd = { 'GrugFar', 'GrugFarWithin' },
     keys = {
@@ -104,6 +104,9 @@ return {
         'mise',
         'scripts',
       },
+      components = {
+        { 'on_complete_dispose', timeout = 0 },
+      },
     },
     keys = {
       { '<leader>o', '', desc = '+overseer' },
@@ -114,6 +117,7 @@ return {
       { '<leader>ob', '<cmd>OverseerBuild<cr>', desc = 'Task builder' },
       { '<leader>ot', '<cmd>OverseerTaskAction<cr>', desc = 'Task action' },
       { '<leader>oc', '<cmd>OverseerClearCache<cr>', desc = 'Clear cache' },
+      { '<leader>ol', '<cmd>OverseerRestartLast<cr>', desc = 'Restart last' },
     },
     init = function()
       -- Restart last task
@@ -204,7 +208,10 @@ return {
         pattern = 'PersistenceLoadPost',
         callback = function()
           local overseer = require('overseer')
-          overseer.load_task_bundle(get_cwd_as_name(), { ignore_missing = true })
+          overseer.load_task_bundle(get_cwd_as_name(), {
+            autostart = false,
+            ignore_missing = true,
+          })
         end,
       })
     end,

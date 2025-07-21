@@ -1,9 +1,61 @@
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
 
-{{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
+{{- $ephemeral := env "CHEZMOI_EPHEMERAL" | not | not -}}
+{{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
+
+{{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
+{{- $binDir := joinPath $homeDir ".local" "bin" -}}
+
+{{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
+
 {{- $interactive := stdinIsATTY -}}
+{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+
+{{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
+{{- if or $ci $codespaces $devContainer -}}
+{{-   $ephemeral = true -}}
+{{-   $headless = true -}}
+{{- else if $interactive -}}
+{{-   $ephemeral = promptBoolOnce . "ephemeral" "ephemeral" -}}
+{{-   $headless = promptBoolOnce . "headless" "headless" -}}
+{{- end -}}
+
+{{- $profileChoices := list "minimal" "personal" "work" -}}
+{{- if and $interactive (not $profile) -}}
+{{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
+{{- end -}}
+
+{{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
+{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
+{{- $osVersion := get .chezmoi.osRelease "versionID" -}}
+{{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
+{{- $osID = "android" -}}
+{{- end -}}
+
+{{- $sep := ":" -}}
+{{- $sh := "sh" -}}
+{{- if eq $osID "windows" -}}
+{{- $sep = ";" -}}
+{{- $sh = "bash" -}}
+{{- end -}}
+
+# /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
+{{- $lddVersion := eq .chezmoi.os "linux" | ternary (output $sh "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
+{{- $glibc231 := le (float64 $lddVersion) 2.31 -}}
+{{- /* $glibc231 := or
+  (and (eq $osID "debian") (le (int $osVersion) 11))
+  (and (eq $osID "ubuntu") (le (float64 $osVersion) 20.04))
+*/ -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
+{{- else if eq $hostname "docker" -}}
+{{-   $hostname = output $sh "-c" "hostname 2>/dev/null || echo docker" | trim -}}
+{{- end -}}
 
 {{- $name := env "USER" -}}
 {{- $email := "" -}}
@@ -29,7 +81,7 @@
 {{-   $accessToken = .accessToken -}}
 {{- else if (env "BWS_ACCESS_TOKEN") -}}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
-{{- else if $interactive -}}
+{{- else if and $interactive -}}
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
 {{- end -}}
 
@@ -37,14 +89,23 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) }}
-{{- $osid := includeTemplate "osid.tmpl" (dict "chezmoi" .chezmoi) }}
 {{- $features := includeTemplate "features.tmpl" (dict
+  "accessToken" $accessToken
   "chezmoi" .chezmoi
   "codespaces" $codespaces
   "devContainer" $devContainer
-  "osid" $osid
-) }}
+  "ephemeral" $ephemeral
+  "glibc231" $glibc231
+  "headless" $headless
+  "hostname" $hostname
+  "os" .chezmoi.os
+  "osID" $osID
+  "osIDLike" $osIDLike
+  "osVersion" $osVersion
+  "profile" $profile
+) | fromJson -}}
+
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -52,52 +113,119 @@
 #   identity: {{ env "HOME" }}/key.txt
 #   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
 
+{{- if eq $osID "windows" }}
+interpreters:
+  sh:
+    command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
+{{- else }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
   read-source-state:
     pre:
       command: "{{ .chezmoi.sourceDir }}/.install-password-manager.sh"
+{{- end }}
 
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
-  accessToken: {{ $accessToken | default "" }}
+  accessToken: {{ $accessToken | quote }}
   codespaces: {{ $codespaces }}
   devContainer: {{ $devContainer }}
+  ephemeral: {{ $ephemeral }}
+  headless: {{ $headless }}
+  hostname: {{ $hostname | quote }}
+  profile: {{ $profile | quote }}
+  wsl: {{ $wsl }}
+
+  chassisType: {{ $chassisType | quote }}
+  features: {{ $features | toJson }}
+  os: {{ .chezmoi.os | quote }}
+  osID: {{ $osID | quote }}
+  osIDLike: {{ $osIDLike | quote }}
+  osVersion: {{ $osVersion | quote }}
+
+  glibc231: {{ $glibc231 }}
+  sh: {{ $sh | quote }}
+  symbols: false
+
+  extraPackageManagerMap:
+    arch: aur
+    darwin: cask
+    windows: scoop
+  packageManagerMap:
+    alpine: apk
+    android: termux # pkg
+    arch: pacman
+    darwin: brew
+    debian: apt
+    fedora: dnf
+    windows: winget
+
+  # Upgrade system packages
+  upgrade: {{ eq (env "UPGRADE") "true" }}
 
   email: {{ $email | quote }}
   name: {{ $name | quote }}
 
   # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
-  {{ if $accessToken -}}
-  github:
-    email: {{ (bitwardenSecrets "e09174a4-fc98-4106-96ca-b2d30180def3" $accessToken).value }}
-    # user: {{ env "GITHUB_USERNAME" }}
-  gitlab:
-    email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
-  {{- end }}
+{{- if $accessToken }}
+  git:
+{{ (bitwardenSecrets "0ecca3dd-3404-47d5-8a14-b333014a23ca" $accessToken).value | fromYaml | toYaml | indent 4 }}
+{{- if eq $profile "personal" }}
+    personal:
+{{ (bitwardenSecrets "300f9f66-dccf-4de8-8249-b3330154d542" $accessToken).value | fromYaml | toYaml | indent 6 }}
+{{- end }}
+{{- if eq $profile "work" }}
+    work:
+{{ (bitwardenSecrets "ff633e02-2cc7-4dc4-87f8-b3330154baf8" $accessToken).value | fromYaml | toYaml | indent 6 }}
+{{- end }}
 
-  chassisType: {{ $chassisType | quote }}
-  features: {{ $features }}
-  osid: {{ $osid }}
+  mail:
+    accounts:
+{{ (bitwardenSecrets "f8af12df-ee8e-4146-9272-b32f00a37b5e" $accessToken).value | fromYaml | toYaml | indent 6 }}
+    queries:
+{{ (bitwardenSecrets "76589c60-aae2-4c2f-b500-b32f00750c0a" $accessToken).value | fromYaml | toYaml | indent 6 }}
 
-  # Upgrade system packages
-  upgrade: {{ eq (env "UPGRADE") "true" }}
+{{- else }}
+  git: {}
+  mail: {}
+{{- end }}
 
-# diff:
-#   exclude: ["scripts"]
+diff:
+  # exclude:
+  #   - externals
+  #   - scripts
+{{- if lookPath "difft" | isExecutable }}
+  # https://github.com/twpayne/chezmoi/discussions/2097
+  command: difft
+  args: [--color=always, --skip-unchanged]
+  pager: cat # less
+{{- else if lookPath "delta" | isExecutable }}
+  pager: delta
+{{- else if $codespaces }}
+  # command: code
+  # args: [--wait, --diff]
+{{- end }}
 
 env: {}
 
+github:
+  refreshPeriod: 12h
+
 scriptEnv:
-  # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
-  TMPDIR: {{ env "TMPDIR" | default "/tmp" | quote }}
-{{- if eq .chezmoi.os "darwin" }}
+{{- if ne $osID "windows" }}
+  PATH: "{{ $binDir }}{{ $sep }}{{ env "PATH" | replaceAllRegex (printf "%s%s" $sep $binDir) "" }}"
+{{- end }}
+  TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
+{{- if or $features.brew (eq .chezmoi.os "darwin") }}
+  HOMEBREW_BAT: "1"
+  # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"
   HOMEBREW_NO_ENV_HINTS: "1"
   NONINTERACTIVE: "1"
-{{- else if eq $osid "debian" }}
+{{- end }}
+{{- if eq $osID "debian" }}
   DEBIAN_FRONTEND: noninteractive
 {{- end }}
 

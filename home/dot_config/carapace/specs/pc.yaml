@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: pc
+description: process-compose
+run: '$(if [ $# -eq 0 ]; then pc list; else process-compose "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([process-compose])"]
+commands:
+  - name: attach
+    aliases: [a]
+    run: "[process-compose, attach]"
+  - name: list
+    aliases: [l]
+    run: "[process-compose, list, --output=wide]"

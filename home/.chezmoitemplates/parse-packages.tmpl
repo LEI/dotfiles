@@ -1,0 +1,56 @@
+{{- $defaultType := get . "defaultType" -}}
+{{- $packageType := get . "packageType" }}
+{{- $packages := includeTemplate "eval" (.packages | toYaml | replaceAllRegex "\\\\\"" "\"" | replaceAllRegex "\\\\n" "") | fromYaml }}
+{{- $output := dict }}
+{{- range $packageName, $pkg := $packages }}
+
+{{-   if eq $pkg nil }}
+{{-     $pkg = dict }}
+{{-   end }}
+
+{{-   if and (kindIs "map" $pkg) (get $pkg "name") }}
+{{-     $packageName = get $pkg "name" }}
+{{-   else if kindIs "string" $pkg }}
+{{-     $packageName = $pkg }}
+{{-   end }}
+
+{{-   $nameOverwrite := get $pkg "nameOverwrite" }}
+{{-   if and $nameOverwrite (get $nameOverwrite $.osID) }}
+{{-     $packageName = get $nameOverwrite $.osID }}
+{{-   else if and $nameOverwrite (get $nameOverwrite $.osIDLike) }}
+{{-     $packageName = get $nameOverwrite $.osIDLike }}
+{{-   end }}
+
+{{-   $type := get $pkg "type" | trim }}
+{{-   if eq $type nil "" "nil" "null" "<no value>" }}
+{{-     $type = $defaultType }}
+{{-   end }}
+{{-   if and $packageType $type }}
+{{-     if and $type (ne $packageType $type) }}
+{{- /* warnf "Excluded package type (and): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-       continue }}
+{{-     end }}
+{{-   else if or $packageType $type }}
+{{- /* warnf "Excluded package type (or): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-     continue }}
+{{-   end }}
+
+{{-   $enabled := get $pkg "enabled" }}
+{{-   if or (and (kindIs "bool" $enabled) (ne $enabled true)) (and (kindIs "string" $enabled) (ne $enabled "true") (ne $enabled "")) }}
+{{- /* warnf "Disabled package: %s (%s)" $packageName $enabled */ -}}
+{{-     continue }}
+{{-   end }}
+
+{{-   $options := get $pkg "options" | default dict }}
+{{-   $hasSpaces := eq $packageType "mas" }}
+{{-   $pkgList := $hasSpaces | ternary (list $packageName) ($packageName | splitList " ") }}
+{{-   range $name := $pkgList }}
+{{- /*     $output = append $output (dict "name" $name "options" $options) */ -}}
+{{-     if get $output $name -}}
+{{-       warnf "Overriding pkg %s (%s -> %s)" $name (get (get $output $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $output $name (dict "options" $options) }}
+{{-   end }}
+
+{{- end }}
+{{- $output | toJson -}}

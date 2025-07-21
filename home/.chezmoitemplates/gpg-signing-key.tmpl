@@ -1,0 +1,2 @@
+{{- $cmd := printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" .email -}}
+{{- output .sh "-c" $cmd -}}

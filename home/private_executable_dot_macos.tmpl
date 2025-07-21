@@ -1,8 +1,10 @@
-{{- if eq .chezmoi.os "darwin" }}
-# Hostname: {{ output "scutil" "--get" "ComputerName" | trim }}
+{{- /* TODO: move to .chezmoiscripts/darwin/ */ -}}
+
+# Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
+# Local host name: {{ .hostname }}
 # macOS build version: {{ output "sw_vers" "--buildVersion" }}
 {{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
-{{- $timezone := env "TZ" | default (output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
+{{- $timezone := env "TZ" | default (output .sh "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
 {{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
 {{- output "curl" "-LSfs" $url
     | replaceAllRegex "Europe/Brussels" $timezone
@@ -11,5 +13,17 @@
     | replaceAllRegex "\nkillall mds" "\n# killall mds"
     | replaceAllRegex "\nsudo mdutil" "\n# sudo mdutil"
     | replaceAllRegex "(\\s*)(.*open.*HOME.*init.*)" "${1}# ${2}"
-    | replaceAllRegex "defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false" "defaults write NSGlobalDomain com.apple.swipescrolldirection -bool true" -}}
-{{- end -}}
+    | replaceAllRegex "(defaults write NSGlobalDomain com.apple.swipescrolldirection -bool )false" "${1}true"
+    | replaceAllRegex "(defaults write com.apple.dock minimize-to-application -bool )true" "${1}false" -}}
+
+defaults write org.hammerspoon.Hammerspoon MJConfigFile "~/.config/hammerspoon/init.lua"
+
+# TODO: uncomment line to enable TouchID
+# https://github.com/MikeMcQuaid/strap/blob/main/strap.sh#L174
+
+# sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
+# grep '^#\?auth' /etc/pam.d/sudo_local
+
+# https://github.com/fabianishere/pam_reattach
+# auth optional   pam_reattach.so
+# auth sufficient pam_tid.so

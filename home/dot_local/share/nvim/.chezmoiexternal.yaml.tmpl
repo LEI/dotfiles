@@ -1,5 +1,5 @@
-{{- includeTemplate "external-packages.tmpl" (dict
+{{- includeTemplate "chezmoiexternal.tmpl" (dict
   "chezmoi" .chezmoi
   "baseDir" "site/pack/chezmoi/start"
-  "packages" .neovim.plugins
+  "entries" .neovim.plugins
 ) -}}

@@ -1,0 +1,107 @@
+{{- $packages := includeTemplate "packages.tmpl"  (mergeOverwrite . (dict "packageType" "brew")) | fromJson -}}
+{{- $caskPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "cask")) | fromJson -}}
+{{- $masPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "mas")) | fromJson -}}
+{{- $vscodePackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson -}}
+
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if ne .os "darwin" }}
+
+# https://docs.brew.sh/Homebrew-on-Linux
+if ! command -v brew >/dev/null; then
+  if ! [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    echo >&2 "Installing homebrew"
+    cmd sudo mkdir -p /home/linuxbrew/.linuxbrew
+    cmd sudo chown -R "$USER:$USER" /home/linuxbrew/.linuxbrew
+    cmd git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
+    # SUDO_ASKPASS=1
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo >&2 "Installed homebrew"
+  fi
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{- end }}
+
+# https://docs.brew.sh/Installation#unattended-installation
+export NONINTERACTIVE=1
+
+cmd brew update --quiet
+
+{{- if .upgrade }}
+
+cmd brew upgrade --quiet
+{{- end }}
+
+{{- $brewPackages := dict }}
+{{- $taps := dict }}
+{{- range $name, $options := $packages }}
+{{-   $opts := "" }}
+{{-   if contains "/" $name }}
+{{-     $_ := $taps | setValueAtPath ($name | replaceAllRegex "/[\\w@-]+$" "") dict }}
+{{-   end }}
+{{-   if get $brewPackages $name -}}
+{{-     warnf "Overriding package %s (%s -> %s)" $name (get (get $brewPackages $name) "options") $options -}}
+{{-   end -}}
+{{-   $_ := set $brewPackages $name $options }}
+{{- end }}
+
+{{- $brewfile := output .sh "-c" "if test -f ~/.config/homebrew/Brewfile; then grep -v '^#' ~/.config/homebrew/Brewfile; fi" | splitList "\n" -}}
+{{- range without $brewfile "" }}
+{{-   $type := index (. | splitList " ") 0 }}
+{{-   $pattern := printf "^%s \"(.*)\",? ?(.*)$" $type }}
+{{-   $name := . | replaceAllRegex $pattern "${1}" }}
+{{-   $options := . | replaceAllRegex $pattern "${2}" }}
+{{-   if eq $type "tap" }}
+{{-     if get $taps $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $taps $name (dict "options" $options) }}
+{{-   else if eq $type "brew" }}
+{{-     if get $brewPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $brewPackages $name (dict "options" $options) }}
+{{-   else if eq $type "cask" }}
+{{-     if get $caskPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $caskPackages $name (dict "options" $options) }}
+{{-   else if eq $type "mas" }}
+{{-     if get $masPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $masPackages $name (dict "options" $options) }}
+{{-   else if eq $type "vscode" }}
+{{-     if get $vscodePackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $vscodePackages $name (dict "options" $options) }}
+{{-   end }}
+{{- end }}
+
+# if ! [ -f ~/.config/homebrew/Brewfile ]; then
+#   cmd brew bundle dump --file=~/.config/homebrew/Brewfile
+# fi
+cmd brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
+{{- $packageMap := dict
+  "tap" $taps
+  "brew" $brewPackages
+  "cask" $caskPackages
+  "mas" $masPackages
+  "vscode" $vscodePackages
+}}
+{{- range $type := list "tap" "brew" "cask" "mas" "vscode" }}
+{{-   range $name, $pkg := get $packageMap $type }}
+{{-     $opts := get $pkg "options" }}
+{{ $type }} {{ $name | quote }}
+{{-     if kindIs "map" $opts }}
+{{-       range $key, $value := $opts }}, {{ $key }}: {{ $value | toJson }}{{ end }}
+{{-     else if $opts }}, {{ $opts }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+EOF

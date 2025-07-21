@@ -1,0 +1,7 @@
+---
+extraPackages:
+  lla:
+    enabled: '{{ eq .osIDLike "arch" "darwin" }}'
+    nameOverwrite:
+      arch: lla-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

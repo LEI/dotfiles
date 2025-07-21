@@ -1,3 +1,4 @@
+# TODO: replace with carapace spec
 if ! hash zel 2>/dev/null; then
   zel() {
     if [[ $# -ne 0 ]]; then

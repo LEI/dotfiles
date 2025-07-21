@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source home/.chezmoitemplates/helpers.sh
+
+if [ $# -eq 0 ]; then
+  echo >&2 "Usage: bench <bash|chezmoi>"
+  exit 1
+fi
+
+bench="${1:-}"
+shift
+
+case "$bench" in
+bash) time cmd env BENCH=true bash -ic exit "$@" ;;
+chezmoi) time cmd chezmoi apply --debug --dry-run "$@" ;;
+*)
+  echo >&2 "bench: unknown command: $bench"
+  exit 1
+  ;;
+esac

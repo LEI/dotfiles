@@ -33,11 +33,12 @@
 return {
   {
     'neovim/nvim-lspconfig',
-    tag = 'v2.3.0',
+    -- tag = 'v2.4.0',
+    version = 'v2.x',
     lazy = true,
     init = function()
       -- local lspconfig = require('lspconfig')
-      -- -- TODO: use global node for vscode-extracted-language-server
+      -- -- TODO: use global node for vscode-langservers-extracted
       -- local node_prefix = vim.g.config.node.prefix or ''
       -- local custom_settings = {
       --   cssls = {
