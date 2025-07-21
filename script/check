@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source home/.chezmoitemplates/helpers.sh
+
+PATH="$HOME/.local/bin:$PATH"
+PATH="$PATH:$HOME/.local/share/mise/shims"
+
+check_chezmoi() {
+  # set -- --debug --verbose "$@"
+  # FIXME: template output changes after installation (starship preset, gen config...)
+  # out="$(chezmoi diff --exclude=scripts)"
+  # if [ "$out" != "" ]; then
+  #   echo >&2 "$out"
+  #   echo >&2 "Expected empty diff without scripts, see output above"
+  #   exit 1
+  # fi
+  echo >&2 "chezmoi apply $*"
+  chezmoi apply "$@"
+  echo >&2 "chezmoi diff $*"
+  out="$(chezmoi diff "$@")"
+  if [ "$out" != "" ]; then
+    echo >&2 "Expected empty diff: $out"
+    exit 1
+  fi
+  echo >&2 "chezmoi status $*"
+  out="$(chezmoi status "$@")"
+  if [ "$out" != "" ]; then
+    echo >&2 "Expected empty status: $out"
+    exit 1
+  fi
+}
+
+has_feature() {
+  local name="$1"
+  local features="$2"
+  yq ---exit-status ".$name" <<<"$features" >/dev/null 2>&1
+}
+
+check_version() {
+  echo >&2 "Checking versions..."
+
+  local features
+  features="$(chezmoi cat-config "$@" | yq .data.features)"
+
+  cmd dd --version | head -n1 # coreutils
+  # cmd grep --version | head -n1
+  cmd lsblk --version # util-linux
+
+  if has_feature atuin "$features"; then
+    cmd atuin --version
+    cmd atuin dotfiles alias list
+    # cmd atuin dotfiles alias set a atuin
+  fi
+
+  cmd bash --version | head -n1
+  cmd bat --version || cmd batcat --version
+  if command -v ble >/dev/null; then
+    cmd ble --version
+  fi
+
+  if command -v btm >/dev/null; then
+    cmd btm --version
+  fi
+  # cmd bws --version
+  cmd carapace --version
+
+  cmd direnv export bash # "${SHELL##*/}"
+
+  if command -v eza >/dev/null; then
+    cmd eza --version | head -n2 | tail -n1
+  fi
+
+  cmd fd --version
+  # cmd ghostty --version | head -n1
+  if has_feature helix "$features"; then
+    cmd hx --version
+  fi
+  cmd jq --version
+
+  if has_feature mise "$features"; then
+    cmd mise --version | head -n1
+    cmd mise ls
+  fi
+
+  if has_feature node "$features"; then
+    cmd node --version
+  fi
+
+  if has_feature nushell "$features"; then
+    cmd nu --version
+  fi
+
+  if has_feature neovim "$features"; then
+    cmd nvim --version 2>/dev/null | head -n1
+    # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
+    cmd timeout 5m nvim --headless +LazyUpdate! +qa >/dev/null # || true
+    # fi
+  fi
+
+  if has_feature python "$features"; then
+    cmd pipx --version
+    cmd uvx --version
+  fi
+
+  cmd progress --version
+  cmd rg --version | head -n1
+
+  if has_feature tmux "$features"; then
+    tmux -V 2>/dev/null
+    export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
+    cmd timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
+  fi
+
+  if cmd topgrade --version 2>/dev/null; then
+    cmd topgrade --disable=chezmoi --disable=vscode --dry-run
+    # cmd timeout 5m topgrade --disable=chezmoi
+  fi
+
+  if has_feature vim "$features"; then
+    vim --version | head -n1
+  fi
+
+  cmd yq --version
+
+  if has_feature zellij "$features"; then
+    cmd zellij --version
+  fi
+
+  cmd zoxide --version
+
+  if [ "${DEBUG:-}" = true ]; then
+    echo >&2 "DEBUG enabled"
+    bash
+  fi
+}
+
+check_chezmoi "$@"
+check_version "$@"

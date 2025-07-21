@@ -5,6 +5,11 @@
 
 set -eu
 
+case "$CHEZMOI_COMMAND" in
+apply | init | update) ;;
+*) exit ;;
+esac
+
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v sudo >/dev/null; then
@@ -19,7 +24,7 @@ if ! command -v sudo >/dev/null; then
     cmd apt-get install --quiet --yes sudo >/dev/null
     ;;
   arch | *)
-    echo >&2 "Skipping password manager: sudo must be installed"
+    echo >&2 "Skipping password manager: sudo must be installed (chezmoi $CHEZMOI_COMMAND)"
     exit
     ;;
   esac
@@ -27,8 +32,8 @@ fi
 
 # exit immediately if bws is already in $PATH
 # type bws >/dev/null 2>&1 && exit
-if command -v bws >/dev/null; then
-  # echo >&2 "Already installed: bws"
+if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
+  # echo >&2 "Already installed"
   exit
 fi
 
@@ -51,7 +56,7 @@ Linux)
     # cd "$TMPDIR/sdk-sm-bws-v$VERSION/"
     # export OPENSSL_NO_VENDOR=Y
     # cargo build -r --bin bws --quiet
-    echo >&2 "Skipping password manager on $CHEZMOI_ARCH"
+    echo >&2 "Skipping password manager on $CHEZMOI_ARCH (chezmoi $CHEZMOI_COMMAND)"
     exit 0
   fi
   OS=unknown-linux-gnu
@@ -69,7 +74,7 @@ Linux)
   esac
   ;;
 *)
-  echo >&2 "Unsupported OS"
+  echo >&2 "Unsupported OS (chezmoi $CHEZMOI_COMMAND)"
   exit 1
   ;;
 esac

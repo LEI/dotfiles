@@ -50,10 +50,18 @@ bleopt exec_exit_mark=
 # bleopt edit_marker=
 # bleopt edit_marker_error=
 
+# bleopt history_erasedups_limit=100
+bleopt history_share=1
+
+# {{- if lookPath "fzf" }}
 # Note: If you want to combine fzf-completion with bash_completion, you need to
 # load bash_completion earlier than fzf-completion.  This is required
 # regardless of whether to use ble.sh or not.
 # See https://github.com/akinomyoga/ble.sh#fzf-integration
-# source /etc/profile.d/bash_completion.sh
+# if [ -f /etc/profile.d/bash_completion.sh ]; then
+#   source /etc/profile.d/bash_completion.sh
+# fi
+
 # ble-import -d integration/fzf-completion
 # ble-import -d integration/fzf-key-bindings
+# {{- end }}

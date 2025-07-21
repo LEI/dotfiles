@@ -29,22 +29,32 @@ require('lazy').setup({
   },
   spec = {
     { import = 'plugins' },
-    -- { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- { import = "lazyvim.plugins.extras.coding.copilot" },
+    -- { 'LazyVim/LazyVim', import = 'lazyvim.plugins' },
+    -- { import = 'lazyvim.plugins.extras.coding.copilot' },
   },
-  checker = { enabled = true },
-  change_detection = {
-    -- automatically check for config file changes and reload the ui
+  checker = {
     enabled = true,
-    notify = true, -- get a notification when changes are found
+    -- https://github.com/folke/lazy.nvim/issues/1729
+    check_pinned = false,
+    -- check_tags = true,
   },
-  -- dev = {
-  --   path = '~/projects',
-  --   patterns = {},
-  --   fallback = false,
-  -- },
+  change_detection = {
+    -- Automatically check for config file changes and reload the ui
+    enabled = true,
+    -- Get a notification when changes are found
+    notify = true,
+  },
+  dev = {
+    -- path = '~/projects',
+    path = function(plugin)
+      local path = plugin.url:gsub('^https://', ''):gsub('.git$', '')
+      return '~/src/' .. path
+    end,
+    patterns = {},
+    fallback = false,
+  },
   install = {
-    colorscheme = { vim.g.config.colorscheme },
+    colorscheme = { vim.g.config.theme.colorscheme },
     missing = true,
   },
   ui = {

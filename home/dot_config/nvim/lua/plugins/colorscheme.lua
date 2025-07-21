@@ -4,11 +4,14 @@ return {
     'folke/tokyonight.nvim',
     version = '4.11.0',
     lazy = true,
-    opts = { style = 'storm' },
-    transparent = true,
-    styles = {
-      sidebars = 'transparent',
-      floats = 'transparent',
+    opts = {
+      dim_inactive = vim.g.config.theme.dim_inactive,
+      style = 'storm',
+      styles = {
+        sidebars = vim.g.config.theme.transparent and 'transparent' or 'dark',
+        floats = vim.g.config.theme.transparent and 'transparent' or 'dark',
+      },
+      transparent = vim.g.config.theme.transparent,
     },
   },
   {
@@ -16,6 +19,12 @@ return {
     tag = 'v3.0.2',
     lazy = true,
     name = 'rose-pine',
+    opts = {
+      dim_inactive_windows = vim.g.config.theme.dim_inactive,
+      styles = {
+        transparency = vim.g.config.theme.transparent,
+      },
+    },
   },
   {
     'EdenEast/nightfox.nvim',
@@ -23,14 +32,15 @@ return {
     lazy = true,
     opts = {
       options = {
-        dim_inactive = true,
-        -- transparent = true,
+        dim_inactive = vim.g.config.theme.dim_inactive,
+        transparent = vim.g.config.theme.transparent,
       },
     },
   },
   {
     'catppuccin/nvim',
-    tag = 'v1.10.0',
+    -- tag = 'v1.11.0',
+    version = 'v1.x',
     lazy = true,
     name = 'catppuccin',
     opts = {

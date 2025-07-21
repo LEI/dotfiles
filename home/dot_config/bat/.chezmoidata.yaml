@@ -1,0 +1,6 @@
+---
+extraPackages:
+  bat:
+    nameOverwrite:
+      windows: sharkdp.bat
+    type: eq .osIDLike "windows" | ternary "winget" nil

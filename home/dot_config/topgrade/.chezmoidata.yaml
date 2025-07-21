@@ -1,0 +1,9 @@
+---
+extraPackages:
+  topgrade:
+    condition: and .features.topgrade (not (eq .osIDLike "debian" "fedora"))
+    nameOverwrite:
+      arch: topgrade-bin
+      manjaro: topgrade
+      windows: topgrade-rs.topgrade
+    type: and (eq .osIDLike "arch") (ne .osID "manjaro") | ternary "aur" nil

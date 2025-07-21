@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -eu
+
+editor="${VISUAL:-${EDITOR:-/usr/bin/editor}}"
+
+if [ -z "$editor" ]; then
+  printf >&2 '%s\n' "EDITOR and VISUAL are empty or not set"
+  return 1
+fi
+
+if [ $# -ne 0 ]; then
+  $editor "$@"
+elif [ ! -t 0 ]; then
+  $editor -
+else
+  $editor .
+fi

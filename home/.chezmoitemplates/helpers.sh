@@ -1,6 +1,11 @@
 #!/bin/sh
 
-OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-$CHEZMOI_OS}}"
+# https://github.com/zyedidia/eget
+# https://github.com/devmatteini/dra
+# https://github.com/marwanhawari/stew
+# https://github.com/redraw/gh-install/blob/main/gh-install
+
+OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
 if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
   OSID=android
 fi
@@ -47,7 +52,7 @@ get_github_release() {
 install_archive() {
   format="$1"
   url="$2"
-  bin="$3" # Path to the extracted executable relative to TMDIR
+  bin="$3" # Path to the extracted executable relative to TMPDIR
 
   archive="${2##*/}"
   name="${4:-${bin##*/}}"

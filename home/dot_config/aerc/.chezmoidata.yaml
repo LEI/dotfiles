@@ -1,0 +1,8 @@
+---
+extraPackages:
+  aerc:
+    condition: .features.mail
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  # pandoc:
+  w3m:
+    condition: .features.mail

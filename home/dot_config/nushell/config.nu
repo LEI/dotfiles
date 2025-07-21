@@ -17,37 +17,37 @@ let zoxide_completer = {|spans|
     $spans | skip 1 | zoxide query -l ...$in | lines | where {|x| $x != $env.PWD}
 }
 
-let external_completer = {|spans|
-    # https://github.com/nushell/nushell/issues/8483
-    let expanded_alias = scope aliases
-    | where name == $spans.0
-    | get -i 0.expansion
-
-    let spans = if $expanded_alias != null {
-        $spans
-        | skip 1
-        | prepend ($expanded_alias | split row ' ' | take 1)
-    } else {
-        $spans
-    }
-
-    match $spans.0 {
-        # carapace completions are incorrect for nu
-        # nu => $fish_completer
-        # fish completes commits and branch names in a nicer way
-        # git => $fish_completer
-        # carapace doesn't have completions for asdf
-        # asdf => $fish_completer
-        # FIXME: use zoxide completions for zoxide commands
-        __zoxide_z | __zoxide_zi => $zoxide_completer
-        _ => $carapace_completer
-    } | do $in $spans
-}
+# let external_completer = {|spans|
+#     # https://github.com/nushell/nushell/issues/8483
+#     let expanded_alias = scope aliases
+#     | where name == $spans.0
+#     | get -i 0.expansion
+#
+#     let spans = if $expanded_alias != null {
+#         $spans
+#         | skip 1
+#         | prepend ($expanded_alias | split row ' ' | take 1)
+#     } else {
+#         $spans
+#     }
+#
+#     match $spans.0 {
+#         # carapace completions are incorrect for nu
+#         # nu => $fish_completer
+#         # fish completes commits and branch names in a nicer way
+#         # git => $fish_completer
+#         # carapace doesn't have completions for asdf
+#         # asdf => $fish_completer
+#         # FIXME: use zoxide completions for zoxide commands
+#         __zoxide_z | __zoxide_zi => $zoxide_completer
+#         _ => $carapace_completer
+#     } | do $in $spans
+# }
 
 $env.config.completions.external = {
     enable: true
     max_results: 100
-    completer: $external_completer
+    # completer: $external_completer
 }
 
 $env.config.buffer_editor = $env.EDITOR? | default "vi"
@@ -74,18 +74,18 @@ const config_dir = $nu.default-config-dir | path expand
 
 # Mise
 # https://mise.jdx.dev/installing-mise.html#nushell
-if (which mise) == [] {
-    log warning "Command 'mise' not found"
-}
-let mise_path = $config_dir | path join mise.nu
-^mise activate nu | save $mise_path --force
+use ($config_dir | path join mise.nu)
 
 # Atuin
+# source ~/.local/share/atuin/init.nu
 if (which atuin) == [] {
     log warning "Command 'atuin' not found"
 }
 const atuin_path = $config_dir | path join atuin.nu
 source (if ($atuin_path | path exists) { $atuin_path } else { null })
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#nushell
+source ~/.cache/carapace/init.nu
 
 # Starship
 # https://starship.rs/#nushell

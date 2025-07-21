@@ -1,0 +1,11 @@
+---
+extraPackages:
+  nodejs:
+    condition: and .features.node (eq .osIDLike "alpine" "android")
+    nameOverwrite:
+      windows: OpenJS.NodeJS # .LTS
+    # type: eq .osIDLike "windows" | ternary "winget" nil
+  npm:
+    condition: and .features.node (eq .osIDLike "alpine")
+    # condition: .features.node
+    # type: ne .osIDLike "alpine" | ternary "npm" nil

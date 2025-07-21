@@ -1,0 +1,3 @@
+{{- if get .git "sourcehut" }}
+{{- includeTemplate "git-config.tmpl" (mergeOverwrite .git.sourcehut (dict "name" .name "sh" .sh)) -}}
+{{- end }}

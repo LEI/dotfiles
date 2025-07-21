@@ -2,12 +2,17 @@
 
 set -eu
 
-if [ $# -eq 0 ]; then
-  if command -v k9s >/dev/null; then
-    k9s --all-namespaces # --command=context
+if [ -z "${KUBECTL_COMMAND:-}" ]; then
+  if command -v kubecolor >/dev/null; then
+    KUBECTL_COMMAND=kubecolor
   else
-    kubectl config get-contexts
+    KUBECTL_COMMAND=kubectl
   fi
+fi
+
+if [ $# -eq 0 ]; then
+  # $KUBECTL_COMMAND cluster-info
+  $KUBECTL_COMMAND config get-contexts
 else
-  kubectl "$@"
+  $KUBECTL_COMMAND "$@"
 fi

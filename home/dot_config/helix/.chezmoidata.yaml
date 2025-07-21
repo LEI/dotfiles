@@ -1,0 +1,10 @@
+---
+extraPackages:
+  helix:
+    condition: and .features.helix (ne .osIDLike "debian")
+    nameOverwrite:
+      windows: helix.helix
+    type: eq .osIDLike "windows" | ternary "winget" nil
+  helixbinhx:
+    condition: and .features.helix (eq .osID "arch") # ne .osID "manjaro"
+    type: '"aur"' # eq .osIDLike "arch" | ternary "aur" ""

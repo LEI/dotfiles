@@ -1,0 +1,4 @@
+---
+extraPackages:
+  k9s:
+    condition: and .features.kube (ne .osIDLike "debian")

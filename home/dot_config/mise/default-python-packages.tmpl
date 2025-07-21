@@ -1,0 +1,22 @@
+# ansible
+{{- if .features.ai }}
+claude-monitor
+{{- end }}
+# euporie
+{{- if .features.sql }}
+pg_activity[psycopg]
+{{- end }}
+recoverpy
+{{ if .features.tofu -}}
+tofuref
+{{ end -}}
+{{ if ne (env "VT_API_KEY") "" -}}
+wtfis
+{{ end -}}
+{{ if and .features.ai .features.tmux -}}
+wut-cli
+{{ end -}}
+{{- $uvPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "uv")) | fromJson }}
+{{- range $uvPackages }}
+{{ . }}
+{{- end }}

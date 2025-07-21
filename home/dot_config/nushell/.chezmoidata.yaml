@@ -1,0 +1,6 @@
+---
+extraPackages:
+  nushell:
+    condition: and .features.nushell (not (eq .osIDLike "debian" "fedora"))
+    nameOverwrite:
+      windows: Nushell.Nushell

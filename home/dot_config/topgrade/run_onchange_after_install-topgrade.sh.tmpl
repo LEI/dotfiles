@@ -2,23 +2,16 @@
 
 set -eu
 
-if command -v topgrade >/dev/null && topgrade --version; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v topgrade || true" }}
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v topgrade; then
+  echo >&2 'Already installed'
+  cmd topgrade --version
   exit
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
+# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
 echo >&2 "Installing topgrade"
-
-# {{- if eq .chezmoi.os "darwin" }}
-export NONINTERACTIVE=1
-cmd brew install --quiet topgrade
-# {{- else if eq .osid "alpine" }}
-cmd sudo apk add --quiet topgrade
-# {{- else if eq .osid "arch" }} Archlinux/Manjaro
-cmd sudo pacman --sync --needed --noconfirm --quiet topgrade
-# {{- else if eq .osid "debian" }} Debian/Ubuntu
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release topgrade-rs/topgrade)"
 # TODO: ARCH="$(uname -m)" # aarch64, x86_64
@@ -26,10 +19,5 @@ NAME="topgrade_${VERSION#v}-1_amd64"
 URL="https://github.com/topgrade-rs/topgrade/releases/download/$VERSION/$NAME.deb"
 cmd curl -LSfs "$URL" -o "$TMPDIR/$NAME.deb"
 cmd sudo -E apt-get install --quiet --yes "$TMPDIR/$NAME.deb"
-# {{- else if eq .osid "android" }}
-cmd apt-get install --quiet --yes topgrade >/dev/null
-# {{- else }}
-err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
-# {{- end }}
-
 echo >&2 "Installed topgrade"
+# {{- end }}

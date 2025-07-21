@@ -3,7 +3,8 @@ return {
   {
     -- Alternatives: David-Kunz/jester, klen/nvim-test, vim-test/vim-test
     'nvim-neotest/neotest',
-    tag = 'v5.8.0',
+    -- tag = 'v5.9.1',
+    version = 'v5.x',
     dependencies = {
       'nvim-neotest/nvim-nio',
       'nvim-lua/plenary.nvim',

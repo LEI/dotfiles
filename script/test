@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: https://www.chezmoi.io/reference/commands/docker/
+
 set -euo pipefail
 
 # if [[ $- = *i* ]]; then
@@ -8,14 +10,14 @@ set -euo pipefail
 #   INTERACTIVE=false
 # fi
 DEBUG="${DEBUG:-false}"
-# DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$INTERACTIVE}"
-DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-true}"
+DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$DEBUG}"
 
 PROVIDER="${PROVIDER:-podman}"
 
 # ARGS="${ARGS:-} --env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
 ARGS=() # ("$ARGS")
 ARGS+=(
+  "--env=DEBUG=$DEBUG"
   "--env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
 )
 REMOVE="${REMOVE:-true}"
@@ -23,79 +25,55 @@ if [ "$REMOVE" = true ]; then
   ARGS+=("--rm")
 fi
 
+BOOTSTRAP_SCRIPT='./script/bootstrap --no-tty --verbose'
+
+# shellcheck disable=SC2016
+CLONE_SCRIPT='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME"'
+
 # shellcheck disable=SC2016
 TEST_SCRIPT='$HOME/.local/share/chezmoi/script/test'
-if [ "$DEBUG" = true ]; then
-  TEST_SCRIPT="$TEST_SCRIPT; bash -l || sh -l"
-elif [ "$DEBUG_ON_ERROR" = true ]; then
+if [ "$DEBUG_ON_ERROR" = true ]; then
   TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
 fi
-
-TEST_MOUNT='./script/bootstrap --no-tty && '"$TEST_SCRIPT"
-# TEST_MOUNT='./script/bootstrap --no-tty --apply=false && apk add --quiet bash && '"$TEST_SCRIPT"
-# shellcheck disable=SC2016
-TEST_CLONE='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME" && '"$TEST_SCRIPT"
 
 main() {
   local name=${1:-}
   [ -n "$name" ] && shift
+  if [ "$name" = all ]; then
+    export DEBUG DEBUG_ON_ERROR REMOVE
+    set -x
+    ./script/test alpine latest "$@"
+    ./script/test archlinux base-devel "$@"
+    # for v in 12 13; do ./script/test debian $v "$@"; done
+    # for v in 20 22 24; do ./script/test ubuntu $v.04 "$@"; done
+  fi
+  local image="$name"
+  local tag=${1:-}
+  [ -n "$tag" ] && shift
+  if [ "$name" = "ubuntu" ]; then
+    ARGS+=(
+      "--env=TZ=${TZ:-Etc/UTC}"
+      "--env=USER=ubuntu"
+    )
+  elif [ "$image" == macos ]; then
+    image=docker.io/sickcodes/docker-osx
+  fi
+  if [ -n "$name" ] && [ -n "$tag" ]; then
+    image="$name:$tag"
+    set -- "test-$name-$tag" "$image" "$@"
+  elif [ -n "$name" ]; then
+    set -- "test-$name" "$image" "$@"
+  fi
   case "$name" in
-  "" | local) test_local ;;
+  "" | local) ./script/check "$@" ;;
   alpine) test_alpine "$@" ;;
-  debian | ubuntu)
-    if [ "$name" = "ubuntu" ]; then
-      # Configure tdata
-      ARGS+=(
-        "--env=TZ=${TZ:-Etc/UTC}"
-        "--env=USER=ubuntu"
-      )
-    fi
-    test_debian "test-$name" "$name:latest" "$@"
-    ;;
+  archlinux) test_archlinux "$@" ;;
+  debian | ubuntu) test_debian "$@" ;;
+  fedora) test_fedora "$@" ;;
   macos) test_macos "$@" ;;
   termux) test_clone "$@" ;;
+  *) echo >&2 "Unknown image: $image" ;;
   esac
-}
-
-test_local() {
-  PATH="$HOME/.local/bin:$PATH"
-  PATH="$PATH:$HOME/.local/share/mise/shims"
-  # FIXME: starship template changes after installation (preset)
-  # out="$(chezmoi diff --exclude=scripts)"
-  # if [ "$out" != "" ]; then
-  #   echo >&2 "$out"
-  #   echo >&2 "Expected empty diff without scripts, see output above"
-  #   exit 1
-  # fi
-  echo >&2 "chezmoi apply"
-  chezmoi apply
-  echo >&2 "chezmoi diff"
-  out="$(chezmoi diff)"
-  if [ "$out" != "" ]; then
-    echo >&2 "Expected empty diff: $out"
-    exit 1
-  fi
-  echo >&2 "chezmoi status"
-  out="$(chezmoi status)"
-  if [ "$out" != "" ]; then
-    echo >&2 "Expected empty status: $out"
-    exit 1
-  fi
-  set -x
-  bash --version # | head -n1
-  bws --version || true
-  nu --version
-  mise --version | head -n1
-  mise ls
-  atuin --version
-  ble --version || true
-  carapace --version
-  direnv export bash # "${SHELL##*/}"
-  # ghostty --version | head -n1
-  hx --version
-  # nvim --version | head -n1
-  # vim --version | head -n1
-  set +x
 }
 
 # Execute or run TEST with container ARGS
@@ -103,7 +81,7 @@ test_local() {
 container_test() {
   local name="$1"
   local image="$2"
-  if $PROVIDER ps --format="{{.Names}}" | grep -q "$name"; then
+  if $PROVIDER ps --format="{{.Names}}" | grep -qw "$name"; then
     if [ "$REMOVE" != true ]; then
       echo >&2 "Executing in running container: $name"
       $PROVIDER exec -it "$name" "${TEST[@]}"
@@ -111,7 +89,7 @@ container_test() {
     fi
     echo >&2 "Removing container: $name"
     $PROVIDER rm "$name"
-  elif $PROVIDER ps --all --format="{{.Names}}" | grep -q "$name"; then
+  elif $PROVIDER ps --all --format="{{.Names}}" | grep -qw "$name"; then
     if [ "$REMOVE" != true ]; then
       echo >&2 "Starting existing container: $name"
       $PROVIDER start "$name"
@@ -137,12 +115,36 @@ test_alpine() {
   # fi
   local prepare="apk update --quiet && apk upgrade --quiet && apk add --quiet bash curl" # sudo unzip
   ARGS+=(
+    "--env=LANG=C"
     "--env=USER=root"
     "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+  container_test "$name" "$image"
+}
+
+test_archlinux() {
+  local name="${1:-"test-archlinux"}"
+  local image="${2:-"archlinux:latest"}"
+  local user=test
+  local prepare_array=(
+    "pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+    "&& (useradd -ms /bin/bash $user || true)"
+    "&& usermod -aG wheel $user"
+    "&& sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
+    # "&& chown -R $user:$user ."
+    # "&& su $user"
+  )
+  ARGS+=(
+    "--env=LANG=C"
+    "--env=USER=$user"
+    "--name=$name"
+    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+    "--workdir=/root/.local/share/chezmoi"
+  )
+  TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
   container_test "$name" "$image"
 }
 
@@ -153,12 +155,28 @@ test_debian() {
   local packages="ca-certificates curl locales" # sudo unzip
   local prepare="apt-get update --quiet && apt-get upgrade --quiet --yes && apt-get install --quiet --yes $packages"
   ARGS+=(
-    "--name=$name"
     "--env=DEBIAN_FRONTEND=noninteractive"
+    "--env=LANG=C"
+    "--env=USER=root"
+    "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+  container_test "$name" "$image"
+}
+
+test_fedora() {
+  local name="${1:-"test-fedora"}"
+  local image="${2:-"fedora:latest"}"
+  local packages="which unzip"
+  local prepare="dnf update --assumeyes --quiet && dnf install --assumeyes --quiet $packages"
+  ARGS+=(
+    "--name=$name"
+    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+    "--workdir=/root/.local/share/chezmoi"
+  )
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
   container_test "$name" "$image"
 }
 
@@ -167,28 +185,29 @@ test_debian() {
 # https://github.com/sickcodes/Docker-OSX/issues/492
 test_macos() {
   local name="${1:-"test-macos"}"
-  local image="${2:-"docker.io/sickcodes/docker-osx:latest"}"
-  # NOTE: override all args
+  local image="${2:-"docker.io/sickcodes/docker-osx:auto"}"
   ARGS=(
-    "--name=$name"
     "--device=/dev/kvm"
+    "--env=DISPLAY=${DISPLAY:-:0.0}"
+    # "--env=GENERATE_UNIQUE=true"
+    # "--env=MASTER_PLIST_URL="
     "--env=NONINTERACTIVE=1"
-    "--env=OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber'"
+    "--env=OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
+    "--name=$name"
     "--publish=50922:10022"
+    "--volume=/tmp/.X11-unix:/tmp/.X11-unix"
   )
   # Arch: sudo pacman -S xorg-xhost && xhost +
   # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
-  # -v /tmp/.X11-unix:/tmp/.X11-unix \
-  # -e "DISPLAY=${DISPLAY:-:0.0}" \
-  $PROVIDER run -it "${ARGS[@]}" "$image"
+  container_test "$name" "$image"
 }
 
 test_clone() {
   local name="${1:-"test-termux"}"
   local image="${2:-"docker.io/termux/termux-docker:x86_64"}"
   ARGS+=("--name=$name")
-  TEST=("sh" "-ixc" "$TEST_CLONE")
-  # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$TEST_CLONE"
+  TEST=("sh" "-ixc" "$CLONE_SCRIPT && $TEST_SCRIPT")
+  # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$CLONE_SCRIPT && $TEST_SCRIPT"
   container_test "$name" "$image"
 }
 

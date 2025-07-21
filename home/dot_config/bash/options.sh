@@ -2,12 +2,15 @@
 # Use `>|` to force redirection to an existing file
 set -o noclobber
 
-main() {
-  local option
-  for option in autocd cdspell checkwinsize cmdhist dirspell extglob globstar histappend nocaseglob; do
-    shopt -s "$option" 2>/dev/null
-  done
-}
-
-main "$@"
-unset main
+shopt -s autocd
+shopt -s cdspell
+shopt -s checkwinsize
+shopt -s cmdhist
+shopt -s dirspell
+shopt -s extglob
+shopt -s globstar
+shopt -s histappend
+shopt -s histreedit
+shopt -s histverify
+# shopt -s lithist
+shopt -s nocaseglob

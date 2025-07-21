@@ -4,6 +4,8 @@
 
 set -eu
 
+export TERM=tmux-256color
+
 if [ $# -ne 0 ]; then
   if [ "$*" = "-u NONE" ]; then
     set -- -f/dev/null -Ltmp # lsk

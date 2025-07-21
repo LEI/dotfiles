@@ -4,25 +4,18 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
-
-if command -v hx >/dev/null && hx --version; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v hx || true" }}
+if command -v hx; then
+  echo >&2 "Already installed"
+  cmd hx --version
   exit
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
-echo >&2 "Installing helix"
-
-# {{- if eq .chezmoi.os "darwin" }}
-export NONINTERACTIVE=1
-cmd brew install --quiet helix
-# {{- else if eq .osid "alpine" }}
+# {{- if eq .osID "alpine" }}
 cmd sudo apk add --quiet helix tree-sitter-grammars
-# {{- else if eq .osid "arch" }}
-cmd sudo pacman --sync --needed --noconfirm --quiet helix
-# {{- else if eq (get .chezmoi.osRelease "id") "debian" }}
+# {{- else if eq .osID "android" }}
+cmd apt-get install --quiet --yes helix-grammars >/dev/null
+# {{- else if eq .osID "debian" }}
+echo >&2 "Installing helix"
 export DEBIAN_FRONTEND=noninteractive
 # https://docs.helix-editor.com/install.html#pre-built-binaries
 VERSION="$(get_release helix-editor/helix)"
@@ -37,18 +30,20 @@ mv "$BIN" "$HOME/.local/bin"
 if [ ! -d "$HOME/.config/helix" ]; then
   mkdir -p "$HOME/.config/helix"
 fi
-cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
-# {{- else if eq (get .chezmoi.osRelease "id") "ubuntu" }}
+# TODO: overwrite if needed
+if [ ! -d "$HOME/.config/helix/runtime" ]; then
+  cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
+fi
+# {{- else if eq .osID "ubuntu" }}
+# https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes software-properties-common >/dev/null
 cmd sudo -E add-apt-repository --yes ppa:maveonair/helix-editor
 cmd sudo apt-get update --quiet >/dev/null
 cmd sudo -E apt-get install --quiet --yes helix >/dev/null
 cmd sudo update-alternatives --set editor /usr/bin/hx
-# {{- else if eq .osid "android" }}
-cmd apt-get install --quiet --yes helix helix-grammars >/dev/null
-# {{- else }}
-err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
+echo >&2 "Installed helix"
 # {{- end }}
 
-echo >&2 "Installed helix"
+# cmd hx --grammar fetch
+# cmd timeout 5m hx --grammar build

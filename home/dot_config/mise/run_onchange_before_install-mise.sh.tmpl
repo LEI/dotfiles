@@ -4,10 +4,12 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
 
-# {{- if eq .chezmoi.os "darwin" }}
+# {{- if eq .os "darwin" }}
 OS=macos
 # {{- else }}
 OS=linux # "$CHEZMOI_OS"
@@ -25,18 +27,19 @@ if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
 fi
 
 # TODO: reuse in script/bootstrap
-if command -v mise >/dev/null && mise --version >/dev/null; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v mise || true" }}
+if command -v mise; then
+  echo >&2 "Already installed"
+  cmd mise --version | head -n1
   exit
 fi
 
 echo >&2 "Installing mise"
 
-# {{- if eq .chezmoi.os "darwin" }}
+# {{- if eq .os "darwin" }}
 export NONINTERACTIVE=1
 brew install --quiet mise
 # {{- else }}
-# {{- if eq (get .chezmoi.osRelease "id") "alpine" }}
+# {{- if eq .osID "alpine" }}
 # FIXME: scripts order
 sudo apk add --quiet xz
 # {{- end }}
@@ -48,7 +51,7 @@ fi
 set -x
 curl -LSfs "https://mise.jdx.dev/mise-latest-$OS-$ARCH" -o "$MISE_BIN"
 chmod +x "$MISE_BIN"
-# {{- if eq .osid "android" }}
+# {{- if eq .osID "android" }}
 # Also see home/dot_config/sh/plugins/mise.sh.tmpl
 # https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
 mkdir -p "$PREFIX/etc/tls/certs"
