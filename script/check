@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PATH="$HOME/.local/bin:$PATH"
+PATH="$PATH:$HOME/.local/share/mise/shims"
+
+check_chezmoi() {
+  # FIXME: starship template changes after installation (preset)
+  # out="$(chezmoi diff --exclude=scripts)"
+  # if [ "$out" != "" ]; then
+  #   echo >&2 "$out"
+  #   echo >&2 "Expected empty diff without scripts, see output above"
+  #   exit 1
+  # fi
+  echo >&2 "chezmoi apply"
+  chezmoi apply
+  echo >&2 "chezmoi diff"
+  out="$(chezmoi diff)"
+  if [ "$out" != "" ]; then
+    echo >&2 "Expected empty diff: $out"
+    exit 1
+  fi
+  echo >&2 "chezmoi status"
+  out="$(chezmoi status)"
+  if [ "$out" != "" ]; then
+    echo >&2 "Expected empty status: $out"
+    exit 1
+  fi
+}
+
+check_version() {
+  set -x
+
+  bash --version # | head -n1
+  # bws --version
+  # node --version
+  nu --version
+  mise --version | head -n1
+  mise ls
+  atuin --version
+  # ble --version
+  carapace --version
+  direnv export bash # "${SHELL##*/}"
+  # ghostty --version | head -n1
+  hx --version
+  # zellij --version
+  zoxide --version
+
+  # vim --version | head -n1
+  if nvim --version 2>/dev/null; then
+    # https://github.com/folke/lazy.nvim/discussions/1188
+    time nvim --headless \
+      "+Lazy! update" \
+      +MasonToolsInstallSync \
+      +LspInstallSync \
+      +TSUpdateSync \
+      +qa >/dev/null
+  fi
+  if tmux -V 2>/dev/null; then
+    time ~/.config/tmux/plugins/tpm/bin/update_plugins all
+  fi
+
+  set +x
+
+  if [ "$DEBUG" = true ]; then
+    bash
+  fi
+}
+
+check_chezmoi
+check_version

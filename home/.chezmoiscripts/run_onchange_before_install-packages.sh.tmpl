@@ -5,8 +5,8 @@
 
 set -eu
 
-# {{- $packages := concat (get .packages "common" | default (list)) (get .packages .osid ) | join " " }}
-packages="{{ $packages }}"
+{{- $packages := concat (get .packages "common" | default (list)) (get .packages .osid ) }}
+packages="{{ $packages | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
 echo >&2 "Installing packages: $packages"
