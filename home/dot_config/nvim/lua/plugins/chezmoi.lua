@@ -75,11 +75,22 @@ return {
             or vim.bo[bufnr].filetype == 'gitcommit'
             or vim.bo[bufnr].filetype == 'gitrebase'
             or vim.bo[bufnr].filetype == 'diff'
-            or vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t'):match('^%.chezmoi')
           then
             return
           end
+          local cwd = vim.fn.getcwd()
+          local file = vim.api.nvim_buf_get_name(bufnr)
+          local relative = file:gsub(cwd .. '/', '')
+          local name = vim.fn.fnamemodify(file, ':t')
+          if relative:match('^%.chezmoi') or name:match('^%.chezmoi') then
+            return
+          end
           local edit_watch = function()
+            local chezmoiroot = cwd .. '/.chezmoiroot'
+            local root = vim.fn.filereadable(chezmoiroot) == 1 and vim.fn.readfile(chezmoiroot)[1] or nil
+            if root ~= nil and not vim.startswith(relative, root) then
+              return
+            end
             require('chezmoi.commands.__edit').watch(bufnr)
           end
           vim.schedule(edit_watch)
