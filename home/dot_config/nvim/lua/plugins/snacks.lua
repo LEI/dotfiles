@@ -363,7 +363,13 @@ return {
 
       { '<leader>gB', function() Snacks.gitbrowse() end, desc = 'Git browse', mode = { 'n', 'v' } },
       { '<leader>gG', function() Snacks.terminal({ 'gitui' }, { cwd = vim.fn.getcwd() }) end, desc = 'Open GitUI' },
+
       { '<leader>gL', function() Snacks.lazygit() end, desc = 'Open Lazygit' },
+      -- { '<leader>gg', function() Snacks.lazygit( { cwd = LazyVim.root.git() }) end, { desc = 'Lazygit (Root Dir)' } },
+      -- { '<leader>gG', function() Snacks.lazygit() end, { desc = 'Lazygit (cwd)' } },
+      -- { '<leader>gf', function() Snacks.picker.git_log_file() end, { desc = 'Git Current File History' } },
+      -- { '<leader>gl', function() Snacks.picker.git_log({ cwd = LazyVim.root.git() }) end, { desc = 'Git Log' } },
+      -- { '<leader>gL', function() Snacks.picker.git_log() end, { desc = 'Git Log (cwd)' } },
 
       -- Grep/search
       { '<leader>s', '', desc = '+search' }, -- grep/picker

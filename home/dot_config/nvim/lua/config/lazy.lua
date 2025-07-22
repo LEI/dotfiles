@@ -32,11 +32,16 @@ require('lazy').setup({
     -- { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     -- { import = "lazyvim.plugins.extras.coding.copilot" },
   },
-  checker = { enabled = true },
-  change_detection = {
-    -- automatically check for config file changes and reload the ui
+  checker = {
     enabled = true,
-    notify = true, -- get a notification when changes are found
+    -- https://github.com/folke/lazy.nvim/issues/1729
+    check_pinned = true,
+  },
+  change_detection = {
+    -- Automatically check for config file changes and reload the ui
+    enabled = true,
+    -- Get a notification when changes are found
+    notify = true,
   },
   -- dev = {
   --   path = '~/projects',

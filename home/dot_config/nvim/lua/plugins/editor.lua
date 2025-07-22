@@ -40,7 +40,9 @@ return {
     },
     -- stylua: ignore
     keys = {
-      'f', 'F', 't', 'T', ';', ',',
+      'f', 'F', 't', 'T',
+      -- ';',
+      ',',
       -- { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
       -- { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash treesitter' },
       -- { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote flash' },
@@ -222,7 +224,7 @@ return {
     },
     init = function()
       vim.opt.foldenable = false
-      -- vim.wo.foldlevel = 99
+      vim.opt.foldlevel = 99
       -- vim.wo.conceallevel = 2
       if vim.fn.has('nvim-0.10') == 1 then
         vim.opt.smoothscroll = true

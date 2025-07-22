@@ -57,8 +57,8 @@ items:
   - separator: true
 
   # NOTE: this is fully applied only on the second run, when tmux config is up to date
-  # {{- $names := output "sh" "-c" "tmux list-keys -N || true" | trim | splitList "\n" | sortAlpha }}
-  # {{- $list := output "sh" "-c" "tmux list-keys -T prefix | sed -e 's/^bind-key \\(-r \\|   \\)-T prefix //' || true" | splitList "\n" }}
+  # {{- $names := output "sh" "-c" "tmux list-keys -N 2>/dev/null || true" | trim | splitList "\n" | sortAlpha }}
+  # {{- $list := output "sh" "-c" "tmux list-keys -T prefix 2>/dev/null | sed -e 's/^bind-key \\(-r \\|   \\)-T prefix //' || true" | splitList "\n" }}
   # {{- $map := dict }}
   # {{- range $list }}{{ $parts := . | splitList " " }}{{ if lt (len $parts) 2 }}{{ continue }}{{ end }}{{ $key := index $parts 0 }}{{ $command := join " " (slice $parts 1) | trim }}{{ $map = merge $map (dict $key $command) }}{{ end }}
   # {{- $include := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}

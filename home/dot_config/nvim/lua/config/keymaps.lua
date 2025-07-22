@@ -81,6 +81,25 @@ map('v', '>', '>gv')
 map('n', 'gco', 'o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Below' })
 map('n', 'gcO', 'O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Above' })
 
+-- Location list
+map('n', '<leader>xl', function()
+  local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = 'Location List' })
+
+-- Quickfix list
+map('n', '<leader>xq', function()
+  local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = 'Quickfix List' })
+
+map('n', '[q', vim.cmd.cprev, { desc = 'Previous Quickfix' })
+map('n', ']q', vim.cmd.cnext, { desc = 'Next Quickfix' })
+
 -- Quit
 -- map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
 
@@ -98,9 +117,9 @@ map('t', '<c-_>', '<cmd>close<cr>', { desc = 'which_key_ignore' })
 -- Windows
 map('n', '<leader>-', '<C-W>s', { desc = 'Split Window Below', remap = true })
 map('n', '<leader>|', '<C-W>v', { desc = 'Split Window Right', remap = true })
-map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
-Snacks.toggle.zoom():map('<leader>wm'):map('<leader>uZ')
-Snacks.toggle.zen():map('<leader>uz')
+-- map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
+-- Snacks.toggle.zoom():map('<leader>wm'):map('<leader>uZ')
+-- Snacks.toggle.zen():map('<leader>uz')
 
 -- Tabs
 map('n', '<leader><tab>l', '<cmd>tablast<cr>', { desc = 'Last Tab' })
@@ -120,6 +139,21 @@ if vim.fn.has('nvim-0.11') == 0 then
     return vim.snippet.active({ direction = -1 }) and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
   end, { expr = true, desc = 'Jump Previous' })
 end
+
+-- local diagnostic_goto = function(next, severity)
+--   local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+--   severity = severity and vim.diagnostic.severity[severity] or nil
+--   return function()
+--     go({ severity = severity })
+--   end
+-- end
+-- map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line Diagnostics' })
+-- map('n', ']d', diagnostic_goto(true), { desc = 'Next Diagnostic' })
+-- map('n', '[d', diagnostic_goto(false), { desc = 'Prev Diagnostic' })
+-- map('n', ']e', diagnostic_goto(true, 'ERROR'), { desc = 'Next Error' })
+-- map('n', '[e', diagnostic_goto(false, 'ERROR'), { desc = 'Prev Error' })
+-- map('n', ']w', diagnostic_goto(true, 'WARN'), { desc = 'Next Warning' })
+-- map('n', '[w', diagnostic_goto(false, 'WARN'), { desc = 'Prev Warning' })
 
 -- Refresh buffer
 map('n', '<M-l>', '<cmd>edit<cr>', { desc = 'Refresh buffer' })

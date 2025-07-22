@@ -1,8 +1,14 @@
 -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 
+-- vim.opt.autowrite = true
+
 -- vim.o.background = 'dark'
 
-vim.opt.clipboard:append({ 'unnamedplus' })
+-- Sync with system clipboard
+-- vim.opt.clipboard:append({ 'unnamedplus' })
+vim.opt.clipboard = vim.env.SSH_TTY and '' or 'unnamedplus'
+
+vim.opt.completeopt = 'menu,menuone,noselect'
 
 -- vim.opt.cmdheight = 2
 
