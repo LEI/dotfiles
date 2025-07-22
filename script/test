@@ -8,14 +8,14 @@ set -euo pipefail
 #   INTERACTIVE=false
 # fi
 DEBUG="${DEBUG:-false}"
-# DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$INTERACTIVE}"
-DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-true}"
+DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$DEBUG}"
 
 PROVIDER="${PROVIDER:-podman}"
 
 # ARGS="${ARGS:-} --env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
 ARGS=() # ("$ARGS")
 ARGS+=(
+  "--env=DEBUG=$DEBUG"
   "--env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
 )
 REMOVE="${REMOVE:-true}"
@@ -25,9 +25,8 @@ fi
 
 # shellcheck disable=SC2016
 TEST_SCRIPT='$HOME/.local/share/chezmoi/script/test'
-if [ "$DEBUG" = true ]; then
-  TEST_SCRIPT="$TEST_SCRIPT; bash -l || sh -l"
-elif [ "$DEBUG_ON_ERROR" = true ]; then
+
+if [ "$DEBUG_ON_ERROR" = true ]; then
   TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
 fi
 
@@ -83,19 +82,35 @@ test_local() {
   fi
   set -x
   bash --version # | head -n1
-  bws --version || true
+  # bws --version
+  # node --version
   nu --version
   mise --version | head -n1
   mise ls
   atuin --version
-  ble --version || true
+  # ble --version
   carapace --version
   direnv export bash # "${SHELL##*/}"
   # ghostty --version | head -n1
   hx --version
-  # nvim --version | head -n1
+  # zellij --version
+  zoxide --version
+
   # vim --version | head -n1
+  if nvim --version 2>/dev/null; then
+    # https://github.com/folke/lazy.nvim/discussions/1188
+    time nvim --headless "+Lazy! update" +MasonToolsInstallSync +TSUpdateSync +qa >/dev/null
+    # TODO: LspInstallSync
+  fi
+  if tmux -V 2>/dev/null; then
+    time ~/.config/tmux/plugins/tpm/scripts/install_plugins.sh tokyo-night-tmux tmux-which-key
+  fi
+
   set +x
+
+  if [ "$DEBUG" = true ]; then
+    bash
+  fi
 }
 
 # Execute or run TEST with container ARGS
@@ -137,6 +152,7 @@ test_alpine() {
   # fi
   local prepare="apk update --quiet && apk upgrade --quiet && apk add --quiet bash curl" # sudo unzip
   ARGS+=(
+    "--env=LANG=C"
     "--env=USER=root"
     "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"

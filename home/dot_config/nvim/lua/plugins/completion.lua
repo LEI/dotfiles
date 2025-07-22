@@ -83,10 +83,12 @@ return {
       fuzzy = { implementation = 'prefer_rust_with_warning' },
 
       cmdline = {
-        -- enabled = false,
+        -- FIXME: allow tab expansion (e.g. %)
+        enabled = false,
         keymap = {
           preset = 'inherit',
-          -- ['<Tab>'] = { 'show', 'accept' },
+          ['<CR>'] = { 'accept_and_enter', 'fallback' },
+          ['<Tab>'] = { 'show', 'accept' },
         },
         completion = {
           list = { selection = { preselect = false, auto_insert = true } },

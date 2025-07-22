@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v tmux >/dev/null && tmux -V; then
+  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v tmux || true" }}
+else
+  echo >&2 "Installing tmux"
+
+  {{- if eq .chezmoi.os "darwin" }}
+  export NONINTERACTIVE=1
+  cmd brew install --quiet reattach-to-user-namespace tmux
+  {{- else if eq .osid "alpine" }}
+  cmd sudo apk add --quiet tmux
+  {{- else if eq .osid "arch" }}
+  cmd sudo pacman --sync --needed --noconfirm --quiet tmux
+  {{- else if eq .osid "debian" }}
+  export DEBIAN_FRONTEND=noninteractive
+  cmd sudo -E apt-get install --quiet --yes tmux >/dev/null # xsel
+  {{- else if eq .osid "android" }}
+  cmd apt-get install --quiet --yes tmux >/dev/null
+  {{- else }}
+  err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
+  {{- end }}
+
+  echo >&2 "Installed tmux"
+fi
+
+# NOTE: clone patched plugins to avoid error on tpm install
+
+# cmd rm -fr ~/.config/tmux/plugins/tmux-which-key
+if [ ! -d ~/.config/tmux/plugins/tmux-which-key ]; then
+  cmd git clone --single-branch \
+    https://github.com/alexwforsythe/tmux-which-key.git \
+    ~/.config/tmux/plugins/tmux-which-key
+fi
+
+# cmd rm -fr ~/.config/tmux/plugins/tmux-which-key
+if [ ! -d ~/.config/tmux/plugins/tokyo-night-tmux ]; then
+  cmd git clone --branch v1.6.6 --single-branch \
+    https://github.com/janoamaral/tokyo-night-tmux.git \
+    ~/.config/tmux/plugins/tokyo-night-tmux
+fi

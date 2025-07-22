@@ -65,7 +65,7 @@ return {
         -- 'gitlint',
         'goimports',
         { 'hadolint', version = 'v2.12.0' },
-        -- 'markdownlint',
+        'markdownlint',
         -- 'phpactor',
         'phpcs',
         'shellcheck',
@@ -101,6 +101,15 @@ return {
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
       'saghen/blink.cmp',
+    },
+    cmd = {
+      'LspInfo',
+      'LspInstall',
+      'LspLog',
+      -- 'LspRestart',
+      'LspStart',
+      -- 'LspStop',
+      'LspUninstall',
     },
     event = 'VeryLazy',
     -- lazy = true,
@@ -179,121 +188,123 @@ return {
       -- vim.lsp.config('*', { capabilities = capabilities })
 
       -- TODO: folke/neoconf.nvim or tamago324/nlsp-settings.nvim
-      local schemastore = require('schemastore')
-      local lsp_settings = {
-        cspell_ls = {
-          cmd = {
-            'cspell-lsp',
-            -- TODO: allow override per project
-            '--config=~/.config/cspell/cspell.json',
-            '--stdio',
-          },
-          filetypes = {
-            -- 'css',
-            -- 'gitcommit',
-            -- 'go',
-            -- 'html',
-            -- 'js',
-            -- 'json',
-            -- 'lua',
-            'markdown',
-            'plaintext',
-            -- 'rust',
-            -- 'ts',
-            -- 'yaml',
-          },
-        },
-        intelephense = {
-          settings = {
-            files = { maxSize = 1000000 }, -- 1MB
-            intelephense = {
-              telemetry = {
-                enabled = false,
-              },
+      if vim.lsp.config then
+        local schemastore = require('schemastore')
+        local lsp_settings = {
+          cspell_ls = {
+            cmd = {
+              'cspell-lsp',
+              -- TODO: allow override per project
+              '--config=~/.config/cspell/cspell.json',
+              '--stdio',
+            },
+            filetypes = {
+              -- 'css',
+              -- 'gitcommit',
+              -- 'go',
+              -- 'html',
+              -- 'js',
+              -- 'json',
+              -- 'lua',
+              'markdown',
+              'plaintext',
+              -- 'rust',
+              -- 'ts',
+              -- 'yaml',
             },
           },
-        },
-        jsonls = {
-          init_options = {
-            provideFormatter = false,
-          },
-          settings = {
-            json = {
-              schemas = schemastore.json.schemas(),
-              validate = { enable = true },
-            },
-          },
-        },
-        -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
-        lua_ls = {
-          settings = {
-            Lua = {
-              -- diagnostics = {
-              --   globals = { 'vim' },
-              -- },
-              runtime = {
-                -- Tell the language server which version of Lua you're using (most
-                -- likely LuaJIT in the case of Neovim)
-                version = 'LuaJIT',
-                -- Tell the language server how to find Lua modules same way as Neovim
-                -- (see `:h lua-module-load`)
-                path = {
-                  'lua/?.lua',
-                  'lua/?/init.lua',
-                },
-              },
-              workspace = {
-                checkThirdParty = false,
-                library = {
-                  vim.env.VIMRUNTIME,
+          intelephense = {
+            settings = {
+              files = { maxSize = 1000000 }, -- 1MB
+              intelephense = {
+                telemetry = {
+                  enabled = false,
                 },
               },
             },
           },
-        },
-        tofu_ls = {
-          filetypes = { 'opentofu', 'opentofu-vars', 'terraform', 'terraform-vars' },
-        },
-        -- TODO: https://www.lazyvim.org/extras/lang/typescript
-        ts_ls = {
-          on_attach = function(client, bufnr)
-            local function on_attach()
-              local clients = vim.lsp.get_clients({ bufnr = bufnr })
-              local eslint_is_attached = false
-              for _, c in pairs(clients) do
-                if c.name == 'eslint' then
-                  eslint_is_attached = true
-                  break
+          jsonls = {
+            init_options = {
+              provideFormatter = false,
+            },
+            settings = {
+              json = {
+                schemas = schemastore.json.schemas(),
+                validate = { enable = true },
+              },
+            },
+          },
+          -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
+          lua_ls = {
+            settings = {
+              Lua = {
+                -- diagnostics = {
+                --   globals = { 'vim' },
+                -- },
+                runtime = {
+                  -- Tell the language server which version of Lua you're using (most
+                  -- likely LuaJIT in the case of Neovim)
+                  version = 'LuaJIT',
+                  -- Tell the language server how to find Lua modules same way as Neovim
+                  -- (see `:h lua-module-load`)
+                  path = {
+                    'lua/?.lua',
+                    'lua/?/init.lua',
+                  },
+                },
+                workspace = {
+                  checkThirdParty = false,
+                  library = {
+                    vim.env.VIMRUNTIME,
+                  },
+                },
+              },
+            },
+          },
+          tofu_ls = {
+            filetypes = { 'opentofu', 'opentofu-vars', 'terraform', 'terraform-vars' },
+          },
+          -- TODO: https://www.lazyvim.org/extras/lang/typescript
+          ts_ls = {
+            on_attach = function(client, bufnr)
+              local function on_attach()
+                local clients = vim.lsp.get_clients({ bufnr = bufnr })
+                local eslint_is_attached = false
+                for _, c in pairs(clients) do
+                  if c.name == 'eslint' then
+                    eslint_is_attached = true
+                    break
+                  end
                 end
+                client.server_capabilities.documentFormattingProvider = not eslint_is_attached
+                client.server_capabilities.documentRangeFormattingProvider = not eslint_is_attached
               end
-              client.server_capabilities.documentFormattingProvider = not eslint_is_attached
-              client.server_capabilities.documentRangeFormattingProvider = not eslint_is_attached
-            end
-            vim.api.nvim_create_autocmd('LspAttach', {
-              buffer = bufnr,
-              callback = on_attach,
-            })
-          end,
-        },
-        yamlls = {
-          settings = {
-            redhat = { telemetry = { enabled = false } },
-            yaml = {
-              schemaStore = {
-                -- You must disable built-in schemaStore support if you want to use
-                -- this plugin and its advanced options like `ignore`.
-                enable = false,
-                -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-                url = '',
+              vim.api.nvim_create_autocmd('LspAttach', {
+                buffer = bufnr,
+                callback = on_attach,
+              })
+            end,
+          },
+          yamlls = {
+            settings = {
+              redhat = { telemetry = { enabled = false } },
+              yaml = {
+                schemaStore = {
+                  -- You must disable built-in schemaStore support if you want to use
+                  -- this plugin and its advanced options like `ignore`.
+                  enable = false,
+                  -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+                  url = '',
+                },
+                schemas = schemastore.yaml.schemas(),
               },
-              schemas = schemastore.yaml.schemas(),
             },
           },
-        },
-      }
+        }
 
-      for name, settings in pairs(lsp_settings) do
-        vim.lsp.config(name, settings)
+        for name, settings in pairs(lsp_settings) do
+          vim.lsp.config(name, settings)
+        end
       end
 
       -- https://neovim.io/doc/user/lsp.html#lsp-attach

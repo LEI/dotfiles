@@ -10,6 +10,19 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+{{- if eq (get .chezmoi.osRelease "id") "alpine" }}
+# NOTE: use global node
+cd /tmp
+
+if command -v node >/dev/null && node --version; then
+  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v node || true" }}
+else
+  echo >&2 "Installing node"
+  cmd sudo apk add --quiet nodejs npm
+  echo >&2 "Installed node"
+fi
+{{- end }}
+
 # if ! command -v node >/dev/null && command -v mise >/dev/null; then
 #   PATH="$PATH:$HOME/.local/share/mise/shims"
 # fi

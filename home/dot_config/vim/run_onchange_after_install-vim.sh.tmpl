@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if command -v vim >/dev/null && vim --version; then
+if command -v vim >/dev/null && vim --version | head -n1; then
   echo >&2 "Already installed" # {{ output "sh" "-c" "command -v vim || true" }}
   exit
 fi

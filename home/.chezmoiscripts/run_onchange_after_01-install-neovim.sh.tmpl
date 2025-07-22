@@ -34,8 +34,3 @@ err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
 # {{- end }}
 
 echo >&2 "Installed neovim"
-
-# https://github.com/folke/lazy.nvim/discussions/1188
-# cmd nvim --headless "+Lazy! update" +qa
-# cmd nvim --headless "+MasonToolsInstallSync" +qa
-# cmd nvim --headless +TSUpdate +qa

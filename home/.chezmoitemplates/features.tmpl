@@ -5,6 +5,13 @@
 
 {{- /* Alpine */ -}}
 {{- $features = mergeOverwrite $features (dict
+  "go" false
+  "neovim" false
+  "node" false
+  "rust" false
+  "tmux" false
+  "vim" false
+  "zellij" false
 ) -}}
 
 {{- else if eq .osid "android" }}

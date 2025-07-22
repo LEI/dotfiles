@@ -6,17 +6,31 @@ packages:
     - git
   alpine:
     - bash
+    - build-base # gcc
     - gpg
     - gzip
     - tar
+    - xdg-utils # xdg-open
     - xz
-    # - build-base
+
+    # NOTE(ble.sh): /lib/bash/{fdflags,sleep}: No such file or directory
+    # builtin: fdflags: not a shell builtin
+    # enable: cannot open shared object /lib/bash/sleep
+
+    # Build node (mise)
+    # - g++
     # - linux-headers
-    # - python3
+    # - make
+    - python3
+
+    # Cargo gitlab-ci-ls
+    - openssl-dev
+    # https://github.com/sfackler/rust-openssl/issues/2185
+    - openssl-libs-static
+
     # Tools
     - bat
     # - fd
-    # - nodejs
     # - npm
     # - shellcheck
     # - starship
@@ -51,3 +65,5 @@ packages:
     # Debian devcontainer
     - python3
     - python3-venv
+  # fedora:
+  #   - openssl-devel

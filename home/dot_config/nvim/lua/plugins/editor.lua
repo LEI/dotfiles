@@ -192,6 +192,7 @@ return {
     -- branch = 'master',
     lazy = false,
     build = ':TSUpdate',
+    -- cmd = { 'TSInstall', 'TSInstallInfo', 'TSInstallSync', 'TSUpdate', 'TSUpdateSync' },
     opts = {
       auto_install = true,
       ensure_installed = {

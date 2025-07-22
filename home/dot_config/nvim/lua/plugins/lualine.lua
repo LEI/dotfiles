@@ -108,7 +108,7 @@ return {
           {
             'codecompanion',
             cond = function()
-              return vim.g.ai.codecompanion
+              return vim.g.ai and vim.g.ai.codecompanion
             end,
             -- fmt = function(str)
             --   return str ~= '' and str or '{c}' -- 'CodeCompanion OFF'
@@ -117,7 +117,7 @@ return {
           {
             'codeium#GetStatusString',
             cond = function()
-              return vim.g.ai.windsurf
+              return vim.g.ai and vim.g.ai.windsurf
             end,
             -- fmt = function(str)
             --   return str and str ~= '' and str or '{w}' -- 'Windsurf OFF'
@@ -126,7 +126,7 @@ return {
           {
             'copilot',
             cond = function()
-              return vim.g.ai.copilot_lua
+              return vim.g.ai and vim.g.ai.copilot_lua
             end,
             -- fmt = function(str)
             --   return str and str ~= '' and str or '{}' -- 'Copilot OFF'

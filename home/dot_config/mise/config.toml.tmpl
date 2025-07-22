@@ -39,12 +39,11 @@ lazygit = "latest"
 kubectl = "latest"
 {{- end }}
 
-{{- if .features.node }}
-{{- if ne .osid "android" }}
+{{- if and (.features.node) (not (has .osid (list "alpine" "android"))) }}
 # FIXME(termux): hangs terminal "No such file or directory (os error 2)"
 # ~/.local/share/mise/installs/node/23.11.0/bin/node -v
+# NOTE: install from system packages on alpine to avoid building from source
 node = "latest"
-{{- end }}
 {{- end }}
 
 # TODO: install system packages
