@@ -298,7 +298,6 @@ return {
           input = {
             keys = {
               ['<a-s>'] = { 'flash', mode = { 'n', 'i' } },
-              ['s'] = { 'flash' },
               -- ['<a-c>'] = {
               --   'toggle_cwd',
               --   mode = { 'n', 'i' },
