@@ -80,15 +80,19 @@ return {
           end
           local cwd = vim.fn.getcwd()
           local file = vim.api.nvim_buf_get_name(bufnr)
-          local relative = file:gsub(cwd .. '/', '')
+          local relative = file:gsub('^' .. cwd .. '/', '')
           local name = vim.fn.fnamemodify(file, ':t')
-          if relative:match('^%.chezmoi') or name:match('^%.chezmoi') then
+          local prefix = '^%.chezmoi'
+          if relative:match(prefix) or name:match(prefix) then
             return
           end
           local edit_watch = function()
             local chezmoiroot = cwd .. '/.chezmoiroot'
             local root = vim.fn.filereadable(chezmoiroot) == 1 and vim.fn.readfile(chezmoiroot)[1] or nil
             if root ~= nil and not vim.startswith(relative, root) then
+              return
+            end
+            if relative:gsub('^' .. root .. '/', ''):match(prefix) then
               return
             end
             require('chezmoi.commands.__edit').watch(bufnr)

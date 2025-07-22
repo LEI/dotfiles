@@ -10,7 +10,7 @@ set -eu
 cd /tmp
 
 if command -v cargo >/dev/null && cargo --version; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v cargo || true" }}
+  echo >&2 "Already installed: cargo" # {{ output "sh" "-c" "command -v cargo || true" }}
 else
   echo >&2 "Installing cargo"
 

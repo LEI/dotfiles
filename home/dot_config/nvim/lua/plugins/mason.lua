@@ -1,50 +1,116 @@
 local mason_packages_dir = vim.g.home .. '/.local/share/nvim/mason/packages'
-local lsp_servers = {
-  ['angularls'] = 'angular-language-server',
-  ['ansiblels'] = 'ansible-language-server',
-  ['cspell_ls'] = 'cspell-lsp',
-  ['docker_compose_language_service'] = 'docker-compose-language-service',
-  ['dockerls'] = 'dockerfile-language-server',
-  ['gh_actions_ls'] = 'gh-actions-language-server',
-  ['gitlab_ci_ls'] = 'gitlab-ci-ls', -- Requires cargo
-  ['helm_ls'] = 'helm-ls',
-  ['intelephense'] = '',
-  ['lua_ls'] = 'lua-language-server',
-  ['marksman'] = '',
-  ['nginx_language_server'] = 'nginx-language-server',
-  ['postgres_lsp'] = 'postgrestools',
-  -- ['sqlls'] = '',
-  ['tailwindcss'] = 'tailwindcss-language-server',
-  ['tofu_ls'] = 'tofu-ls', -- ['terraformls'] = 'terraformls-ls',
-  -- ['vale_ls'] = 'vale-ls',
-  ['vimls'] = 'vim-language-server',
+
+-- TODO: do not install if already present, e.g. installed from source
+local mason_tools = {
+  -- Formatters
+  'golangci-lint',
+  'phpcbf',
+  -- 'pgformatter',
+  'prettier',
+  'prettierd',
+  'shfmt',
+  -- 'sleek',
+  'sql-formatter',
+  -- 'sqlfluff',
+  -- 'sqlfmt',
+  'stylua',
+  'yamlfmt',
+
+  -- Linters
+  -- 'actionlint',
+  -- 'codespell',
+  -- 'commitlint',
+  -- 'cspell',
+  -- 'gitleaks',
+  -- 'gitlint',
+  'goimports',
+  { 'hadolint', version = 'v2.12.0' },
+  'markdownlint',
+  -- 'phpactor',
+  'phpcs',
+  'shellcheck',
+  'sqlfluff',
+  -- 'vale',
+  'yamllint',
+
+  -- Tools
+  'gitui',
+  'kulala-fmt',
+}
+
+local mason_lsp = {
+  -- LSP
+  'angularls', -- 'angular-language-server',
+  'ansiblels', -- 'ansible-language-server',
+  'cspell_ls', -- 'cspell-lsp',
+  'docker_compose_language_service', -- 'docker-compose-language-service',
+  'dockerls', -- 'dockerfile-language-server',
+  'gh_actions_ls', -- 'gh-actions-language-server',
+  'gitlab_ci_ls', -- 'gitlab-ci-ls', -- Requires cargo
+  'helm_ls', -- 'helm-ls',
+  'intelephense', -- '',
+  'lua_ls', -- 'lua-language-server',
+  'marksman', -- '',
+  'nginx_language_server', -- 'nginx-language-server',
+  'postgres_lsp', -- 'postgrestools',
+  -- 'sqlls', -- '',
+  'tailwindcss', -- 'tailwindcss-language-server',
+  'tofu_ls', -- 'tofu-ls', -- 'terraformls', -- 'terraformls-ls',
+  -- 'vale_ls', -- 'vale-ls',
+  'vimls', -- 'vim-language-server',
 
   -- Go
-  ['golangci_lint_ls'] = 'golangci-lint-langserver',
-  ['gopls'] = '',
-  -- ['sqls'] = '',
+  'golangci_lint_ls', -- 'golangci-lint-langserver',
+  {
+    'gopls',
+    condition = function()
+      return vim.fn.executable('go') == 1
+    end,
+  },
+  -- 'sqls', -- '',
 
   -- Node
-  ['bashls'] = 'bash-language-server',
+  'bashls', -- 'bash-language-server',
 
   -- TODO: use global vscode ls (install-node.sh)
-  ['cssls'] = 'css-lsp',
-  ['eslint'] = 'eslint-lsp',
-  ['html'] = 'html-lsp',
-  ['jsonls'] = 'json-lsp',
+  'cssls', -- 'css-lsp',
+  'eslint', -- 'eslint-lsp',
+  'html', -- 'html-lsp',
+  'jsonls', -- 'json-lsp',
 
-  ['ts_ls'] = 'typescript-language-server',
-  ['yamlls'] = 'yaml-language-server',
+  'ts_ls', -- 'typescript-language-server',
+  'yamlls', -- 'yaml-language-server',
 
   -- Rust
-  ['rust_analyzer'] = 'rust-analyzer',
-  ['taplo'] = '',
+  'rust_analyzer', -- 'rust-analyzer',
+  'taplo', -- '',
 }
-local lsp_names = {}
-local lsp_packages = {}
-for name, lsp in pairs(lsp_servers) do
-  table.insert(lsp_names, name)
-  table.insert(lsp_packages, (lsp ~= nil and lsp ~= '') and lsp or name)
+
+local mason_dap = {
+  'bash', -- bash-debug-adapter
+  -- 'chrome', -- chrome-debug-adapter
+  -- 'codelldb', -- codelldb
+  -- 'coreclr', -- netcoredbg
+  'cppdbg', -- cpptools
+  -- 'dart', -- dart-debug-adapter
+  'delve', -- delve
+  -- 'elixir', -- elixir-ls
+  -- 'erlang', -- erlang-debugger
+  'firefox', -- firefox-debug-adapter
+  -- 'haskell', -- haskell-debug-adapter
+  -- 'javadbg', -- java-debug-adapter
+  -- 'javatest', -- java-test
+  'js', -- js-debug-adapter
+  -- 'kotlin', -- kotlin-debug-adapter
+  -- 'mock', -- mockdebug
+  -- 'node2', -- node-debug2-adapter
+  'php', -- php-debug-adapter
+  -- 'puppet', -- puppet-editor-services
+  'python', -- debugpy
+}
+
+for _, name in pairs(mason_lsp) do
+  table.insert(mason_tools, name)
 end
 
 return {
@@ -78,7 +144,12 @@ return {
 
   {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
-    dependencies = { 'mason-org/mason.nvim' },
+    dependencies = {
+      'mason-org/mason.nvim',
+
+      -- 'mason-org/mason-lspconfig.nvim',
+      -- 'neovim/nvim-lspconfig',
+    },
     cmd = {
       'MasonToolsClean',
       'MasonToolsInstall',
@@ -88,47 +159,13 @@ return {
     },
     event = 'VeryLazy',
     opts = {
-      ensure_installed = {
-        -- Formatters
-        'golangci-lint',
-        'phpcbf',
-        -- 'pgformatter',
-        'prettier',
-        'prettierd',
-        'shfmt',
-        -- 'sleek',
-        'sql-formatter',
-        -- 'sqlfluff',
-        -- 'sqlfmt',
-        'stylua',
-        'yamlfmt',
-
-        -- Linters
-        -- 'actionlint',
-        -- 'codespell',
-        -- 'commitlint',
-        -- 'cspell',
-        -- 'gitleaks',
-        -- 'gitlint',
-        'goimports',
-        { 'hadolint', version = 'v2.12.0' },
-        'markdownlint',
-        -- 'phpactor',
-        'phpcs',
-        'shellcheck',
-        'sqlfluff',
-        'yamllint',
-
-        -- Tools
-        'gitui',
-        'kulala-fmt',
-      },
+      ensure_installed = mason_tools,
       integrations = {
-        ['mason-lspconfig'] = false,
+        ['mason-lspconfig'] = true,
         ['mason-null-ls'] = false,
         ['mason-nvim-dap'] = false,
       },
-      run_on_start = false,
+      run_on_start = true,
     },
     init = function()
       -- vim.api.nvim_create_autocmd('CursorHold', {
@@ -142,12 +179,15 @@ return {
   -- LSP
   {
     'mason-org/mason-lspconfig.nvim',
+    -- FIXME: vim.lsp.config is nil when running headless
+    -- branch = 'main',
     tag = 'v2.0.0',
     dependencies = {
       'mason-org/mason.nvim',
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
       'saghen/blink.cmp',
+      -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
     cmd = {
       'LspInfo',
@@ -159,36 +199,12 @@ return {
       'LspUninstall',
     },
     event = 'VeryLazy',
-    -- lazy = true,
     opts = {
-      automatic_enable = true, -- { exclude = {} },
-      -- automatic_enable = {
-      --   'cssls',
-      --   'eslint',
-      --   'html',
-      --   'jsonls',
-      -- },
-      -- TODO: exclude if already present, e.g. installed from source
-      ensure_installed = lsp_names,
+      -- FIXME: automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
+      automatic_enable = false, -- { exclude = {} },
+      -- ensure_installed = {},
     },
     init = function()
-      -- Custom :MasonInstall(All) for LSP servers
-      vim.api.nvim_create_user_command('LspInstallSync', function()
-        local missing_packages = {}
-        for _, lsp in ipairs(lsp_packages) do
-          local package_path = mason_packages_dir .. '/' .. lsp
-          if not vim.fn.isdirectory(package_path) then
-            table.insert(missing_packages, lsp)
-          end
-        end
-        if #missing_packages == 0 then
-          vim.notify('All LSP servers are already installed', vim.log.levels.INFO)
-          return
-        end
-        vim.notify('Installing missing LSP servers: ' .. table.concat(missing_packages, ', '), vim.log.levels.INFO)
-        vim.cmd('MasonInstall ' .. table.concat(missing_packages, ' '))
-      end, { desc = 'Install missing LSP servers' })
-
       -- https://www.lazyvim.org/plugins/lsp
       -- https://www.lazyvim.org/configuration/keymaps#lsp-keymaps
 
@@ -420,28 +436,7 @@ return {
     },
     opts = {
       -- https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/source.lua
-      ensure_installed = {
-        'bash', -- bash-debug-adapter
-        -- 'chrome', -- chrome-debug-adapter
-        -- 'codelldb', -- codelldb
-        -- 'coreclr', -- netcoredbg
-        'cppdbg', -- cpptools
-        -- 'dart', -- dart-debug-adapter
-        'delve', -- delve
-        -- 'elixir', -- elixir-ls
-        -- 'erlang', -- erlang-debugger
-        'firefox', -- firefox-debug-adapter
-        -- 'haskell', -- haskell-debug-adapter
-        -- 'javadbg', -- java-debug-adapter
-        -- 'javatest', -- java-test
-        'js', -- js-debug-adapter
-        -- 'kotlin', -- kotlin-debug-adapter
-        -- 'mock', -- mockdebug
-        -- 'node2', -- node-debug2-adapter
-        'php', -- php-debug-adapter
-        -- 'puppet', -- puppet-editor-services
-        'python', -- debugpy
-      },
+      ensure_installed = mason_dap,
       automatic_installation = true,
       handlers = {
         function(config)

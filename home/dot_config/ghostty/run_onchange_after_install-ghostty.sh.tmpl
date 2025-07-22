@@ -6,7 +6,7 @@ set -eu
 
 if command -v ghostty >/dev/null; then
   # TODO: use bash with pipefail option to run: "ghostty --version | head -n1"
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v ghostty || true" }}
+  echo >&2 "Already installed: ghostty" # {{ output "sh" "-c" "command -v ghostty || true" }}
   exit
 fi
 

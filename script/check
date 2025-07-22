@@ -49,16 +49,10 @@ check_version() {
 
   # vim --version | head -n1
   if nvim --version 2>/dev/null; then
-    # https://github.com/folke/lazy.nvim/discussions/1188
-    time nvim --headless \
-      "+Lazy! update" \
-      +MasonToolsInstallSync \
-      +LspInstallSync \
-      +TSUpdateSync \
-      +qa >/dev/null
+    nvim --headless +Update! +qa >/dev/null
   fi
   if tmux -V 2>/dev/null; then
-    time ~/.config/tmux/plugins/tpm/bin/update_plugins all
+    ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
 
   set +x
