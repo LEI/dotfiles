@@ -67,9 +67,10 @@ require('lazy').setup({
   -- },
 })
 
+-- https://github.com/folke/lazy.nvim/discussions/1188
+-- https://github.com/LazyVim/LazyVim/discussions/3679
 local get_action = function(action)
   return function(args)
-    -- https://github.com/folke/lazy.nvim/discussions/1188
     vim.print(action .. ' packages...')
     vim.cmd('Lazy' .. (args.bang and '!' or '') .. ' ' .. string.lower(action))
     vim.print(action .. ' tools...')

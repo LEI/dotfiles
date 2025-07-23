@@ -38,7 +38,10 @@ check_version() {
   nu --version
   mise --version | head -n1
   mise ls
+
   atuin --version
+  atuin dotfiles alias list
+
   # ble --version
   carapace --version
   direnv export bash # "${SHELL##*/}"

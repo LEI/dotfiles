@@ -23,12 +23,13 @@ common_subcommands = [
   "tmux",
   "yarn",
 
-  # "c",
-  "chezmoi",
-  # "d",
-  # "g",
-  # "k",
+  # https://github.com/atuinsh/atuin/issues/2458
+  "c",
+  "d",
+  "g",
+  "k",
 
+  "chezmoi",
   "just",
   "make",
   "mise",
