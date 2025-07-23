@@ -1,0 +1,15 @@
+{{- $group := get . "group" | default "prefix" }}
+
+{{- $list := output .sh "-c" (printf "tmux list-keys -T %[1]s 2>/dev/null | sed -e 's/^bind-key \\(-r \\|\\s*\\)-T %[1]s //' || true" $group) | splitList "\n" }}
+{{- $names := output .sh "-c" (printf "tmux list-keys -N -T %s 2>/dev/null || true" $group) | trim | splitList "\n" | sortAlpha }}
+
+{{- $map := dict }}
+{{- range $list }}
+  {{- $parts := . | splitList " " }}
+  {{- if lt (len $parts) 2 }}{{- continue }}{{- end }}
+  {{- $key := index $parts 0 }}
+  {{- $command := join " " (slice $parts 1) | trim }}
+  {{- $map = merge $map (dict $key $command) }}
+{{- end }}
+
+{{- dict "list" $list "names" $names "map" $map | toJson }}

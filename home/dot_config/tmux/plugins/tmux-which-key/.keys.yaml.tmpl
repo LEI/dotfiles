@@ -4,16 +4,23 @@
 {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
 {{- $prefix := index $parts 0 }}
 
-{{- if or (ne $prefix "C-a") (lt (len $parts) 3) }}
+{{- /* if or (ne $prefix "C-a") (lt (len $parts) 3) }}
 # Excluded prefix: {{ . }}
 {{- continue }}
 {{- end }}
-
 {{- $key := index $parts 1 }}
-{{- $note := slice $parts 2 | join " " -}}
+{{- $note := slice $parts 2 | join " " */ -}}
+
+{{- if lt (len $parts) 2 }}
+# Invalid length: {{ . }}
+{{- continue }}
+{{- end }}
+
+{{- $key := index $parts 0 }}
+{{- $note := slice $parts 1 | join " " | replaceAllRegex " \\+[\\w-]+$" "" -}}
 
 {{- if and (gt (get $ "include" | len | default 0) 0) (not (has $key $.include)) }}
-# Not included: {{ . }}
+# Not included({{ $key }}): {{ . }}
 {{- continue }}
 {{- end }}
 
@@ -28,9 +35,9 @@
 {{- end }}
 
 {{- $escapedKey := $key | replaceAllRegex "([;#$%{}~])" "\\${1}" }}
-{{- $command := get $map $escapedKey }}
+{{- $command := get $map ($escapedKey | replaceAllRegex "\"" "\\\"") }}
 {{- if eq $command "" }}
-# FIXME(mapping not found, try escaping key): {{ . }}
+# FIXME(mapping not found, try escaping key): {{ . }} / {{ $escapedKey | replaceAllRegex "\"" "\\\"" }}
 {{- $note = printf "-%s (%s)" $note $key }}
 {{- $command = printf "display-message \"Mapping not found, try escaping: %s\"" $escapedKey }}
 {{- else if contains "'" $command }}
