@@ -4,10 +4,16 @@
 {{- $packageName := printf "%[1]s.%[1]s" $name }}
 {{- $commonPackages = concat (slice $commonPackages 0 $index) (list $packageName) (slice $commonPackages (add $index 1)) }}
 {{- end }}{{- end }}
-{{- $packages := concat $commonPackages $osPackages }}
+{{- $packages := concat $commonPackages $osPackages -}}
+# Set-PSDebug -Trace 1
 
+echo "winget update --disable-interactivity --silent"
 winget update --all --disable-interactivity --silent
+
 {{- if .upgrade }}
+echo "winget upgrade --all --disable-interactivity --silent"
 winget upgrade --all --disable-interactivity --silent
 {{- end }}
+
+echo "winget install --disable-interactivity --silent {{ $packages | join " " }}"
 winget install --disable-interactivity --silent {{ $packages | join " " }}

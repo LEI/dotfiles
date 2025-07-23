@@ -100,9 +100,15 @@ data:
 
 env: {}
 
+{{- if eq $osid "windows" }}
+interpreters:
+  sh:
+    command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
+{{- end }}
+
 scriptEnv:
   # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
-  TMPDIR: {{ env "TMPDIR" | default "/tmp" | quote }}
+  TMPDIR: {{ env "TMPDIR" | default (env "TMP") | default "/tmp" | quote }}
 {{- if eq .chezmoi.os "darwin" }}
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"
