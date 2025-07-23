@@ -14,6 +14,12 @@
 .inputrc
 {{- end }}
 
+{{- if eq .osid "windows" }}
+{,.chezmoiscripts/}*.sh
+{{- else }}
+{,.chezmoiscripts/}*.ps1
+{{- end }}
+
 {{- if not .features.bash }}
 .bashrc
 .config/bash/

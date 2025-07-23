@@ -1,0 +1,13 @@
+{{- $commonPackages := get .packages "common" | default list }}
+{{- $osPackages := get .packages .osid | default list }}
+{{- if eq .osid "windows" }}{{- range $index, $name := $commonPackages }}
+{{- $packageName := printf "%[1]s.%[1]s" $name }}
+{{- $commonPackages = concat (slice $commonPackages 0 $index) (list $packageName) (slice $commonPackages (add $index 1)) }}
+{{- end }}{{- end }}
+{{- $packages := concat $commonPackages $osPackages }}
+
+winget update --all --disable-interactivity --silent
+{{- if .upgrade }}
+winget upgrade --all --disable-interactivity --silent
+{{- end }}
+winget install --disable-interactivity --silent {{ $packages | join " " }}
