@@ -36,6 +36,9 @@ alias reload='exec ${SHELL} -l'
 if command -v bat >/dev/null; then
   alias cat=bat
 fi
+if ! hash e 2>/dev/null; then
+  atuin dotfiles alias set e editor
+fi
 # alias e=editor
 {{- if .features.vim }}
 alias v=vim
@@ -48,16 +51,18 @@ alias nv=nvim
 alias o=open
 if ! hash open 2>/dev/null; then
   {{- if .wsl }}
-  if [ -f /proc/version ] && grep -iq microsoft /proc/version; then
-    if [ -f /mnt/c/Windows/explorer.exe ]; then
-      # TODO: add /mnt/c/Windows to PATH
-      alias open=/mnt/c/Windows/explorer.exe
-    else
-      alias open=explorer.exe
-    fi
-  el{{- end }}if hash xdg-open 2>/dev/null; then
+  # [ -f /proc/version ] && grep -iq microsoft /proc/version
+  if [ -f /mnt/c/Windows/explorer.exe ]; then
+    # TODO: add /mnt/c/Windows to PATH
+    alias open=/mnt/c/Windows/explorer.exe
+  else
+    alias open=explorer.exe
+  fi
+  {{- else }}
+  if hash xdg-open 2>/dev/null; then
     alias open=xdg-open
   elif hash code 2>/dev/null; then
     alias open=code
   fi
+  {{- end }}
 fi

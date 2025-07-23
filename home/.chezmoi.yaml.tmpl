@@ -53,11 +53,13 @@
 #   identity: {{ env "HOME" }}/key.txt
 #   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
 
+{{- if ne $osid "windows" }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
   read-source-state:
     pre:
       command: "{{ .chezmoi.sourceDir }}/.install-password-manager.sh"
+{{- end }}
 
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 

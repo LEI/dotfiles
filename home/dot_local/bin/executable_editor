@@ -11,6 +11,8 @@ fi
 
 if [ $# -ne 0 ]; then
   $editor "$@"
+elif [ ! -t 0 ]; then
+  $editor -
 else
   $editor .
 fi

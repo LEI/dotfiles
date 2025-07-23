@@ -64,6 +64,7 @@ return {
         group = vim.api.nvim_create_augroup('Restore', { clear = true }),
         callback = function()
           local cwd = vim.fn.getcwd()
+          -- FIXME: cat | nvim -
           local has_args = vim.fn.argc() > 0 or vim.g.started_with_stdin
           local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
           local session_exists = vim.fn.filereadable(session_file) == 1
