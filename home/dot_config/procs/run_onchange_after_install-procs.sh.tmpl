@@ -3,7 +3,7 @@
 set -eu
 
 if command -v procs >/dev/null && procs --version; then
-  echo >&2 "Already installed" # {{ output "sh" "-c" "command -v procs || true" }}
+  echo >&2 "Already installed: procs" # {{ output "sh" "-c" "command -v procs || true" }}
   exit
 fi
 

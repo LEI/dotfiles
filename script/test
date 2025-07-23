@@ -112,8 +112,10 @@ test_debian() {
   local packages="ca-certificates curl locales" # sudo unzip
   local prepare="apt-get update --quiet && apt-get upgrade --quiet --yes && apt-get install --quiet --yes $packages"
   ARGS+=(
-    "--name=$name"
     "--env=DEBIAN_FRONTEND=noninteractive"
+    "--env=LANG=C"
+    "--env=USER=root"
+    "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )

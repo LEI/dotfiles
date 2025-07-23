@@ -74,10 +74,8 @@ local get_action = function(action)
     vim.cmd('Lazy' .. (args.bang and '!' or '') .. ' ' .. string.lower(action))
     vim.print(action .. ' tools...')
     vim.cmd('MasonTools' .. action .. (args.bang and 'Sync' or ''))
-    if action == 'Install' then
-      vim.print(action .. ' parsers...')
-      vim.cmd('TS' .. action .. (args.bang and 'Sync' or ''))
-    end
+    vim.print(action .. ' parsers...')
+    vim.cmd('TSUpdate' .. (args.bang and 'Sync' or ''))
   end
 end
 vim.api.nvim_create_user_command('Install', get_action('Install'), { desc = 'Install', bang = true })

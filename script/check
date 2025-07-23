@@ -49,11 +49,14 @@ check_version() {
 
   # vim --version | head -n1
   if nvim --version 2>/dev/null; then
-    nvim --headless +Update! +qa >/dev/null
+    timeout 5m nvim --headless +Update! +qa >/dev/null
+    echo
   fi
   if tmux -V 2>/dev/null; then
-    ~/.config/tmux/plugins/tpm/bin/update_plugins all
+    timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
+
+  timeout 5m topgrade --disable=chezmoi --dry-run
 
   set +x
 

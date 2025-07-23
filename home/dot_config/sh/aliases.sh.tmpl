@@ -37,8 +37,12 @@ if command -v bat >/dev/null; then
   alias cat=bat
 fi
 # alias e=editor
+{{- if .features.vim }}
 alias v=vim
+{{- end }}
+{{- if .features.neovim }}
 alias nv=nvim
+{{- end }}
 
 # TODO: termux-open
 alias o=open

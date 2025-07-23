@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
 
@@ -63,11 +63,27 @@ if ! command -v cargo >/dev/null; then
   cmd . ~/.cargo/env
 fi
 
+packages=()
+
+if ! command -v cargo-update >/dev/null; then
+  packages+=("cargo-update")
+fi
+
+# {{- if eq .osid "debian" }}
+# TODO: https://github.com/skim-rs/skim#shell-completions
+# {{ output "sh" "-c" "sk --version 2>/dev/null || true" | replace "\n" " " | trim }}
+if ! command -v sk >/dev/null; then
+  packages+=("skim")
+fi
+# {{- end }}
+
 # {{- if not .features.neovim }}
 # rustup component add rust-analyzer
 
-# Taplo: {{ output "sh" "-c" "taplo --version || true" | replace "\n" " " | trim }}
+# Taplo: {{ output "sh" "-c" "taplo --version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v taplo >/dev/null; then
   cmd cargo install taplo-cli --locked --features lsp --quiet
 fi
 # {{- end }}
+
+cmd cargo install --quiet "${packages[@]}"

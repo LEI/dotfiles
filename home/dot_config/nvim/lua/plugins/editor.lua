@@ -176,8 +176,9 @@ return {
       { '<leader>OT', '<cmd>TrashOpen<cr>', desc = 'Open system trash' },
     },
     init = function()
-      vim.g.loaded_netrw = 1
-      vim.g.loaded_netrwPlugin = 1
+      -- NOTE: netrw is used to download dictionaries
+      -- vim.g.loaded_netrw = 1
+      -- vim.g.loaded_netrwPlugin = 1
       vim.api.nvim_create_user_command('Trash', function()
         vim.cmd('!trash %')
       end, { desc = 'Trash current file' })
@@ -201,7 +202,8 @@ return {
         'c',
         'dockerfile',
         'hcl',
-        'help',
+        -- https://github.com/LazyVim/LazyVim/issues/524
+        -- 'help',
         'html',
         'javascript',
         'json',
@@ -219,6 +221,7 @@ return {
         'vimdoc',
         'yaml',
       },
+
       -- highlight = { enable = true },
       -- indent = { enable = true },
       -- sync_install = true,

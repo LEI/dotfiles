@@ -9,6 +9,7 @@ packages:
     - build-base # gcc
     - gpg
     - gzip
+    - skim
     - tar
     - xdg-utils # xdg-open
     - xz
@@ -43,13 +44,17 @@ packages:
     - which
     # Tools
     - nodejs
+    - skim
     - starship
   arch: # Archlinux/Manjaro
     - gnu-netcat
     - gnupg
+    - skim
+    - yay
   darwin:
     # brews:
     - gpg
+    - sk
     # casks:
     #   - google-chrome
     # tools: []
