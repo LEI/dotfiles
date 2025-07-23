@@ -1,14 +1,21 @@
-{{ if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
+
+export NONINTERACTIVE=1
+
+set -x
+
+{{- $packages := .packages.darwin }}
+{{- if .features.neovim }}
+{{- $packages = append $packages "neovim" }}
+{{- end }}
 
 brew bundle --file=/dev/stdin <<EOF
-{{ range .packages.darwin.brews -}}
+{{ range $packages | sortAlpha -}}
 brew {{ . | quote }}
 {{ end -}}
-{{ range .packages.darwin.casks -}}
+{{ range get .packages "casks" | default list | sortAlpha -}}
 cask {{ . | quote }}
 {{ end -}}
 EOF
-{{ end -}}

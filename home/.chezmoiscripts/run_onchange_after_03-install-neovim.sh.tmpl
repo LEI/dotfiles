@@ -9,8 +9,6 @@ if command -v nvim >/dev/null && nvim --version | head -n1; then
 else
   echo >&2 "Installing neovim"
   # {{- if eq .chezmoi.os "darwin" }}
-  export NONINTERACTIVE=1
-  cmd brew install --quiet neovim
   # {{- else if eq .osid "alpine" }}
   cmd sudo apk add --quiet neovim
   # {{- else if eq .osid "arch" }}
