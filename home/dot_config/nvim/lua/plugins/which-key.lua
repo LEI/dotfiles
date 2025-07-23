@@ -155,21 +155,23 @@ return {
           if vim.b[args.buf].attached_wk then
             return
           end
-          local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+          vim.b[args.buf].attached_wk = true
+          -- local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
           -- vim.notify(
           --   'Attached: ' .. client.name .. ' (' .. client.id .. ') to buffer ' .. args.buf,
           --   vim.log.levels.TRACE,
           --   { title = 'LSP' }
           -- )
-          vim.b[args.buf].attached_wk = true
+          -- https://github.com/neovim/neovim/blob/v0.11.3/runtime/lua/vim/_defaults.lua#L194
           -- stylua: ignore
           wk.add({
+            { 'gr', '', desc = '+lsp' },
             -- client.server_capabilities.codeActionProvider
             {
-              '<leader>a',
+              '<leader>a', -- gra
               vim.lsp.buf.code_action,
               desc = 'Code Action',
-              mode = { 'n', 'v' },
+              mode = { 'n', 'v', 'x' },
             },
             -- NOTE: already mapped to 'K'
             -- client.server_capabilities.hoverProvider
@@ -181,28 +183,26 @@ return {
             -- { 'gy', vim.lsp.buf.type_definition, desc = 'Go to type definition', mode = 'n' },
 
             -- client.server_capabilities.renameProvider
-            { '<leader>lr', vim.lsp.buf.rename, desc = 'Rename', mode = 'n' },
+            -- grn { '<leader>lr', vim.lsp.buf.rename, desc = 'Rename', mode = 'n' },
 
             -- client.server_capabilities.referencesProvider
-            -- { 'gr',    vim.lsp.buf.references,      desc = 'Go to references',      mode = 'n' },
+            -- grr { 'gr',    vim.lsp.buf.references,      desc = 'Go to references',      mode = 'n' },
 
             -- client.server_capabilities.implementationProvider
-            -- { 'gi', vim.lsp.buf.implementation, desc = 'Go to implementation', mode = 'n' },
+            -- gri { 'gi', vim.lsp.buf.implementation, desc = 'Go to implementation', mode = 'n' },
 
             -- client.server_capabilities.signatureHelpProvider
-            { '<C-s>', vim.lsp.buf.signature_help, desc = 'Signature help', mode = 'i' },
+            -- <C-S> { '<C-s>', vim.lsp.buf.signature_help, desc = 'Signature help', mode = 'i' },
 
             -- Snacks
             { 'gd', function() Snacks.picker.lsp_definitions() end, desc = 'Go to definition' },
             { 'gD', function() Snacks.picker.lsp_declarations() end, desc = 'Go to declaration' },
-            -- NOTE: gr conflicts with gr{a,i,n,r} from _defaults.lua
-            { 'gr', function() Snacks.picker.lsp_references() end, nowait = true, desc = 'References' },
-            -- NOTE: gi is "go to last insert"
-            { 'gI', function() Snacks.picker.lsp_implementations() end, desc = 'Got to implementation' },
+            { 'grR', function() Snacks.picker.lsp_references() end, nowait = true, desc = 'References' },
+            { 'gI', function() Snacks.picker.lsp_implementations() end, desc = 'Go to implementation' },
             { 'gy', function() Snacks.picker.lsp_type_definitions() end, desc = 'Go to type definition' },
             { '<leader>l', '', desc = '+lsp' },
             { '<leader>lc', function() Snacks.picker.lsp_config() end, desc = 'Search LSP configurations' },
-            { '<leader>ls', function() Snacks.picker.lsp_symbols() end, desc = 'LSP symbols' },
+            { '<leader>ls', function() Snacks.picker.lsp_symbols() end, desc = 'LSP symbols' }, -- gO
             { '<leader>lS', function() Snacks.picker.lsp_workspace_symbols() end, desc = 'LSP workspace symbols' },
           })
         end,

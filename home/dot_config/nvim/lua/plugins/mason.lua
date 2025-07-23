@@ -187,7 +187,8 @@ return {
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
       'saghen/blink.cmp',
-      -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
+      -- FIXME: automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
     cmd = {
       'LspInfo',
@@ -200,8 +201,7 @@ return {
     },
     event = 'VeryLazy',
     opts = {
-      -- FIXME: automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
-      automatic_enable = false, -- { exclude = {} },
+      automatic_enable = true, -- { exclude = {} },
       -- ensure_installed = {},
     },
     init = function()
