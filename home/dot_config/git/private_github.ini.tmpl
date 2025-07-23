@@ -2,7 +2,7 @@
 [user]
     name = {{ get .github "name" | default .name | quote }}
     email = {{ .github.email | quote }}
-    signingkey = {{ output "sh" "-c" (printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" .github.email) | quote }}
+    signingkey = {{ output .sh "-c" (printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" .github.email) | quote }}
 
 [commit]
     gpgsign = true

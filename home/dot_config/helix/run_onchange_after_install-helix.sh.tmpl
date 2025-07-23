@@ -7,7 +7,7 @@ set -eu
 # https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
 
 if command -v hx >/dev/null && hx --version; then
-  echo >&2 "Already installed: hx" # {{ output "sh" "-c" "command -v hx || true" }}
+  echo >&2 "Already installed: hx" # {{ output .sh "-c" "command -v hx || true" }}
   exit
 fi
 

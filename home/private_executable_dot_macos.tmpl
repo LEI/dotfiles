@@ -2,7 +2,7 @@
 # Hostname: {{ output "scutil" "--get" "ComputerName" | trim }}
 # macOS build version: {{ output "sw_vers" "--buildVersion" }}
 {{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
-{{- $timezone := env "TZ" | default (output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
+{{- $timezone := env "TZ" | default (output .sh "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
 {{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
 {{- output "curl" "-LSfs" $url
     | replaceAllRegex "Europe/Brussels" $timezone

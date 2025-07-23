@@ -38,7 +38,6 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) }}
 {{- $osid := includeTemplate "osid.tmpl" (dict "chezmoi" .chezmoi) }}
 {{- $features := includeTemplate "features.tmpl" (dict
   "chezmoi" .chezmoi
@@ -46,6 +45,13 @@
   "devContainer" $devContainer
   "osid" $osid
 ) }}
+
+{{- $sh := "sh" -}}
+{{- if eq $osid "windows" }}
+{{- $sh = "bash" }}
+{{- end }}
+
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -84,6 +90,7 @@ data:
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}
   osid: {{ $osid }}
+  sh: {{ $sh }}
 
   # Upgrade system packages
   upgrade: {{ eq (env "UPGRADE") "true" }}

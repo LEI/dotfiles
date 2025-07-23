@@ -5,7 +5,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if command -v tmux >/dev/null && tmux -V; then
-  echo >&2 "Already installed: tmux" # {{ output "sh" "-c" "command -v tmux || true" }}
+  echo >&2 "Already installed: tmux" # {{ output .sh "-c" "command -v tmux || true" }}
 else
   echo >&2 "Installing tmux"
 

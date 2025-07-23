@@ -10,7 +10,7 @@ set -eu
 cd /tmp
 
 if command -v cargo >/dev/null && cargo --version; then
-  echo >&2 "Already installed: cargo" # {{ output "sh" "-c" "command -v cargo || true" }}
+  echo >&2 "Already installed: cargo" # {{ output .sh "-c" "command -v cargo || true" }}
 else
   echo >&2 "Installing cargo"
 
@@ -55,7 +55,7 @@ else
   echo >&2 "Installed cargo"
 fi
 
-# Command: {{ output "sh" "-c" "command -v rustc || true" | replace "\n" " " | trim }}
+# Command: {{ output .sh "-c" "command -v rustc || true" | replace "\n" " " | trim }}
 # echo >&2 "Version: $(rustc --version)"
 # rustc --version
 
@@ -71,7 +71,7 @@ fi
 
 # {{- if eq .osid "debian" }}
 # TODO: https://github.com/skim-rs/skim#shell-completions
-# {{ output "sh" "-c" "sk --version 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "sk --version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v sk >/dev/null; then
   packages+=("skim")
 fi
@@ -80,7 +80,7 @@ fi
 # {{- if not .features.neovim }}
 # rustup component add rust-analyzer
 
-# Taplo: {{ output "sh" "-c" "taplo --version 2>/dev/null || true" | replace "\n" " " | trim }}
+# Taplo: {{ output .sh "-c" "taplo --version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v taplo >/dev/null; then
   cmd cargo install taplo-cli --locked --features lsp --quiet
 fi

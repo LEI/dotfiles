@@ -15,7 +15,7 @@ set -eu
 cd /tmp
 
 if command -v node >/dev/null && node --version; then
-  echo >&2 "Already installed: node" # {{ output "sh" "-c" "command -v node || true" }}
+  echo >&2 "Already installed: node" # {{ output .sh "-c" "command -v node || true" }}
 else
   echo >&2 "Installing node"
   cmd sudo apk add --quiet nodejs npm
@@ -35,7 +35,7 @@ if command -v mise >/dev/null; then
   PATH="$INSTALL_PATH/bin:$PATH"
 fi
 
-# Node: {{ output "sh" "-c" "mise list node --global --installed | awk '/^node / {print $2}'" }}
+# Node: {{ output .sh "-c" "mise list node --global --installed | awk '/^node / {print $2}'" }}
 echo >&2 "node $(node --version)"
 
 # npm config set --global audit=false fund=false

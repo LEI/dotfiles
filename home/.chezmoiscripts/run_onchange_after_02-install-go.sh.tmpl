@@ -12,32 +12,32 @@ if ! command -v go >/dev/null && command -v mise >/dev/null; then
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
-# Command: {{ output "sh" "-c" "command -v go 2>/dev/null || true" | replace "\n" " " | trim }}
+# Command: {{ output .sh "-c" "command -v go 2>/dev/null || true" | replace "\n" " " | trim }}
 # echo >&2 "Version: $(go version)"
 go version
 
 # {{- if not .features.neovim }}
-# {{ output "sh" "-c" "gopls version 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "gopls version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v gopls >/dev/null; then
   cmd go install golang.org/x/tools/gopls@latest >/dev/null # LSP
 fi
 
-# {{ output "sh" "-c" "dlv version 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "dlv version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v dlv >/dev/null; then
   cmd go install github.com/go-delve/delve/cmd/dlv@latest >/dev/null # Debugger
 fi
 
-# {{ output "sh" "-c" "command -v goimports 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "command -v goimports 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v goimports >/dev/null; then
   cmd go install golang.org/x/tools/cmd/goimports@latest >/dev/null # Formatter
 fi
 
-# {{ output "sh" "-c" "command -v golangci-lint-langserver 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "command -v golangci-lint-langserver 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v golangci-lint-langserver >/dev/null; then
   cmd go install github.com/nametake/golangci-lint-langserver@latest >/dev/null # Linter
 fi
 
-# {{ output "sh" "-c" "golangci-lint --version 2>/dev/null || true" | replace "\n" " " | trim }}
+# {{ output .sh "-c" "golangci-lint --version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v golangci-lint >/dev/null; then
   cmd go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest >/dev/null # Linter cli
 fi

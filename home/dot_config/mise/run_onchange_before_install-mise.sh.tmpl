@@ -26,7 +26,7 @@ fi
 
 # TODO: reuse in script/bootstrap
 if command -v mise >/dev/null && mise --version >/dev/null; then
-  echo >&2 "Already installed: mise" # {{ output "sh" "-c" "command -v mise || true" }}
+  echo >&2 "Already installed: mise" # {{ output .sh "-c" "command -v mise || true" }}
   exit
 fi
 
