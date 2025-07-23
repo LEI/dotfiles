@@ -77,7 +77,7 @@ vim.opt.pumheight = 10
 -- Case sensitive when the search contains upper case characters
 vim.opt.smartcase = true
 
-vim.opt.spelllang = { 'en', 'fr' }
+-- vim.opt.spelllang = { 'en', 'fr' }
 
 vim.opt.splitkeep = 'screen'
 

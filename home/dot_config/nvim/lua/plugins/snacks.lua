@@ -233,7 +233,7 @@ return {
       animate = { enabled = false },
       bigfile = { enabled = true },
       dashboard = dashboard,
-      explorer = { enabled = false, replace_netrw = false },
+      explorer = { enabled = false, replace_netrw = true },
       indent = { enabled = false },
       input = { enabled = true },
       notifier = {
