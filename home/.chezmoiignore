@@ -32,11 +32,15 @@
 
 {{- if and (not .features.bash) (not .features.zsh) }}
 .config/sh/
+.curlrc
+.inputrc
+.wgetrc
+.local/bin/
 {{- end }}
 
 {{- if not .features.docker }}
 .config/sh/plugins/docker.sh
-bin/d
+.local/bin/d
 {{- end }}
 
 {{- if not .features.ghostty }}
@@ -51,7 +55,7 @@ bin/d
 # NOTE: feature should be named "git-config"
 # .config/sh/plugins/git.sh
 .gitconfig
-bin/g
+.local/bin/g
 {{- end }}
 
 {{- if not .features.go }}
@@ -66,7 +70,7 @@ bin/g
 # .chezmoiscripts/*-install-kubectl.sh
 .config/krew/
 .config/sh/plugins/kubectl.sh
-bin/k
+.local/bin/k
 {{- end }}
 
 {{- if not .features.mise }}
@@ -103,7 +107,7 @@ bin/k
 
 {{- if not .features.tmux }}
 .config/tmux/
-bin/t
+.local/bin/t
 {{- end }}
 
 {{- if not .features.topgrade }}
@@ -113,14 +117,12 @@ bin/t
 {{- if not .features.vim }}
 .config/vim/
 # .vim/
+.vimrc.local
 {{- end }}
 
 {{- if not .features.zellij }}
 .config/zellij/
 {{- end }}
-
-# TODO: use .chezmoidata/packages.yaml
-.chezmoiscripts/darwin-install-packages.sh
 
 {{ if .codespaces -}}
 .config/Code/
@@ -129,6 +131,12 @@ bin/t
 .void-editor/
 {{ else -}}
 .vscode-remote/
+{{ end -}}
+
+{{ if ne .chezmoi.os "darwin" -}}
+# TODO: use .chezmoidata/packages.yaml
+.chezmoiscripts/darwin-install-packages.sh
+.macos
 {{ end -}}
 
 {{ if eq .chezmoi.os "darwin" -}}
