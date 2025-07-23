@@ -1,6 +1,7 @@
 {{- $keys := list }}
 {{- $map := get . "map" }}
-{{- range (get . "names") }}
+{{- $names := get . "names" }}
+{{- range $names }}
 {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
 {{- $prefix := index $parts 0 }}
 
