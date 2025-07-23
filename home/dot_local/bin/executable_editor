@@ -4,7 +4,7 @@ set -eu
 
 editor="${VISUAL:-${EDITOR:-/usr/bin/editor}}"
 
-if [ -z "$editor" ]; then
+if [ -z "${EDITOR:-}" ]; then
   printf >&2 '%s\n' "EDITOR is empty or not set"
   return 1
 fi

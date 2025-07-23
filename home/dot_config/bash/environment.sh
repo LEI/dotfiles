@@ -3,18 +3,16 @@ HISTFILESIZE=200000
 HISTCONTROL="erasedups:ignoreboth"
 HISTTIMEFORMAT="%F %T "
 
+export EDITOR="${EDITOR:-vi -e}"
 if command -v hx >/dev/null; then
-  EDITOR=hx
+  VISUAL=hx
 elif command -v nvim >/dev/null; then
-  EDITOR=nvim
+  VISUAL=nvim
 elif command -v vim >/dev/null; then
-  EDITOR=vim
+  VISUAL=vim
 elif command -v code >/dev/null; then
-  EDITOR=code
+  VISUAL=code
 else
-  echo >&2 "WARN: EDITOR not found"
-  EDITOR="${EDITOR:-vi}"
+  VISUAL="${EDITOR##/*}"
 fi
-
-export EDITOR
-export VISUAL="${VISUAL:-$EDITOR}"
+export VISUAL
