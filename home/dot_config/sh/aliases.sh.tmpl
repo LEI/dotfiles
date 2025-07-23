@@ -47,7 +47,7 @@ alias nv=nvim
 # TODO: termux-open
 alias o=open
 if ! hash open 2>/dev/null; then
-  # and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft")
+  {{- if .wsl }}
   if [ -f /proc/version ] && grep -iq microsoft /proc/version; then
     if [ -f /mnt/c/Windows/explorer.exe ]; then
       # TODO: add /mnt/c/Windows to PATH
@@ -55,7 +55,7 @@ if ! hash open 2>/dev/null; then
     else
       alias open=explorer.exe
     fi
-  elif hash xdg-open 2>/dev/null; then
+  el{{- end }}if hash xdg-open 2>/dev/null; then
     alias open=xdg-open
   elif hash code 2>/dev/null; then
     alias open=code

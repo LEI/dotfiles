@@ -4,6 +4,7 @@
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
+{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- $name := env "USER" -}}
 {{- $email := "" -}}
@@ -64,6 +65,7 @@ data:
   accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
   devContainer: {{ $devContainer }}
+  wsl: {{ $wsl }}
 
   email: {{ $email | quote }}
   name: {{ $name | quote }}
