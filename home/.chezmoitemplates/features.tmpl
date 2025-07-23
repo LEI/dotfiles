@@ -85,25 +85,25 @@
 {{- if .codespaces }}
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
-  "go" true
+  "go" false
   "helix" true
   "kube" false
   "neovim" false
-  "node" true
-  "rust" true
-  "vim" true
+  "node" false
+  "rust" false
+  "vim" false
 ) -}}
 {{- end }}
 
 {{- if .devContainer }}
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
-  "go" true
+  "go" false
   "helix" true
   "kube" false
   "neovim" false
-  "node" true
-  "rust" true
+  "node" false
+  "rust" false
   "vim" false
 ) -}}
 {{- end }}
