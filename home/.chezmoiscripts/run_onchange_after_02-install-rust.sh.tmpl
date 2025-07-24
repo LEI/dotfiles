@@ -29,7 +29,7 @@ else
     OS=unknown-linux
   fi
   NAME="$ARCH-$OS"
-  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)" 2>/dev/null; then
     NAME="$NAME-musl"
   else
     NAME="$NAME-gnu"

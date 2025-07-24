@@ -1,35 +1,16 @@
-{{- $commonPackages := .commonPackages | default list }}
-{{- $osPackages := get .packages .osid | default list }}
-{{- $packages := list }}
+{{- $commonPackages := includeTemplate "package-list.tmpl" (dict
+  "chezmoi" .chezmoi
+  "features" .features
+  "osid" .osid
+  "packages" (.commonPackages | default list)
+) | fromJson }}
 
-{{- range $index, $pkg := $commonPackages }}
-{{-   if kindIs "string" $pkg }}
-{{-     $packages = append $packages $pkg }}
-{{-     continue }}
-{{-   end }}
-{{-   $packageName := get $pkg "name" | default $pkg }}
-{{-   if eq $.osid "windows" }}
-{{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
-{{-   end }}
-{{-   $condition := get $pkg "condition" | default nil }}
-{{-   if and (ne $condition nil) (get $.features ($condition | replaceAllRegex "^.features\\." "") | default false | not) }}
-{{-     continue }}
-{{-   end }}
-{{-   $packages = append $packages $packageName }}
-{{- end }}
+{{- $osPackages := includeTemplate "package-list.tmpl" (dict
+  "chezmoi" .chezmoi
+  "features" .features
+  "osid" .osid
+  "packages" (get .packages .osid | default list)
+) | fromJson }}
 
-{{- range $index, $pkg := $osPackages }}
-{{-   if kindIs "string" $pkg }}
-{{-     $packages = append $packages $pkg }}
-{{-     continue }}
-{{-   end }}
-{{-   $packageName := get $pkg "name" | default $pkg }}
-{{-   $condition := get $pkg "condition" | default nil }}
-{{-   if and (ne $condition nil) (get $.features ($condition | replaceAllRegex "^.features\\." "") | default false | not) }}
-{{-     continue }}
-{{-   end }}
-{{-   $packages = append $packages $packageName }}
-{{- end }}
-
-{{- /* $packages := concat $commonPackages $osPackages */ -}}
+{{- $packages := concat (without $commonPackages "") (without $osPackages "") -}}
 {{- $packages | toJson -}}

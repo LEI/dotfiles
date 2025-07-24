@@ -41,6 +41,7 @@ main() {
   case "$name" in
   "" | local) ./script/check ;;
   alpine) test_alpine "$@" ;;
+  archlinux) test_archlinux "$@" ;;
   debian | ubuntu)
     if [ "$name" = "ubuntu" ]; then
       # Configure tdata
@@ -94,6 +95,21 @@ test_alpine() {
   #   return
   # fi
   local prepare="apk update --quiet && apk upgrade --quiet && apk add --quiet bash curl" # sudo unzip
+  ARGS+=(
+    "--env=LANG=C"
+    "--env=USER=root"
+    "--name=$name"
+    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+    "--workdir=/root/.local/share/chezmoi"
+  )
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  container_test "$name" "$image"
+}
+
+test_archlinux() {
+  local name="${1:-"test-archlinux"}"
+  local image="${2:-"archlinux:latest"}"
+  local prepare="pacman -Syu --noconfirm --quiet && pacman -S --noconfirm --quiet sudo which"
   ARGS+=(
     "--env=LANG=C"
     "--env=USER=root"

@@ -72,6 +72,7 @@ return {
   },
   {
     'echasnovski/mini.move',
+    enabled = false,
     tag = 'v0.16.0',
     event = 'InsertEnter',
   },

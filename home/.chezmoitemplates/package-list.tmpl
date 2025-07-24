@@ -1,0 +1,38 @@
+{{- $packages := list }}
+
+{{- range $index, $pkg := .packages }}
+{{-   $packageName := "" }}
+{{-   if kindIs "map" $pkg }}
+{{-     $packageName = get $pkg "name" }}
+{{-   else if kindIs "string" $pkg }}
+{{-     $packageName = $pkg }}
+{{-     $pkg = dict "name" $packageName }}
+{{-   end }}
+
+{{-   if and (eq $.osid "windows") (not (contains "." $packageName)) }}
+{{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
+{{-   end }}
+
+{{-   $feature := get $pkg "feature" | default nil }}
+{{-   if and (ne $feature nil) (get $.features $feature | default false | not) }}
+{{-     continue }}
+{{-   end }}
+
+{{-   $os := get $pkg "os" | default nil }}
+{{-   if and (ne $os nil) (ne $.chezmoi.os $os) }}
+{{-     continue }}
+{{-   end }}
+
+{{-   $osReleaseID := get $pkg "osReleaseID" | default nil }}
+{{-   if and (ne $osReleaseID nil) (ne $.chezmoi.osRelease.id $osReleaseID) }}
+{{-     continue }}
+{{-   end }}
+
+{{-   $osReleaseIDLike := get $pkg "osReleaseIDLike" | default nil }}
+{{-   if and (ne $osReleaseIDLike nil) (ne $.chezmoi.osRelease.idLike $osReleaseIDLike) }}
+{{-     continue }}
+{{-   end }}
+
+{{-   $packages = append $packages $packageName }}
+{{- end }}
+{{- $packages | toJson -}}
