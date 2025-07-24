@@ -101,6 +101,7 @@ return {
   },
   {
     'monaqa/dial.nvim',
+    enabled = false,
     tag = 'v0.4.0',
     keys = { '<C-a>', { '<C-x>', mode = 'n' } },
   },
@@ -293,7 +294,7 @@ return {
   -- },
   {
     'JoosepAlviste/nvim-ts-context-commentstring',
-    -- enabled = vim.fn.has('nvim-0.10') == 1,
+    enabled = vim.fn.has('nvim-0.10') == 1,
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     event = 'VeryLazy',
     opts = {
@@ -309,7 +310,7 @@ return {
   },
   {
     'folke/ts-comments.nvim',
-    enabled = false, -- vim.fn.has('nvim-0.10') == 1,
+    enabled = vim.fn.has('nvim-0.10') == 1,
     tag = 'v1.5.0',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     opts = {},

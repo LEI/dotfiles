@@ -34,7 +34,8 @@ local function get_node_config()
 end
 
 local config = {
-  colorscheme = 'nightfox',
+  -- colorscheme = 'nightfox',
+  colorscheme = 'tokyonight',
   node = get_node_config(),
   signs = {
     done = '', -- ✓ ✔
