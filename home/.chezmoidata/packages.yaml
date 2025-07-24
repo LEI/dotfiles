@@ -1,11 +1,15 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
+  - bat
   - curl
-  - { name: eza, windows: eza-community.eza }
+  - { name: eza, windows: eza-community.eza, id: not debian }
+  - { name: fd, windows: sharkdp.fd, idLike: not debian }
   - git
   - { name: jq, windows: jqlang.jq }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
+  # - { name: shellcheck, feature: not neovim, windows: koalaman.shellcheck }
+  - { name: starship, idLike: not debian }
   - { name: yq, windows: MikeFarah.yq }
   - { name: zoxide, windows: ajeetdsouza.zoxide }
 packages:
@@ -36,37 +40,29 @@ packages:
     - openssl-dev
     # https://github.com/sfackler/rust-openssl/issues/2185
     - openssl-libs-static
-
-    # Tools
-    - bat
-    # - fd
-    # - npm
-    # - shellcheck
-    # - starship
-    # - yq
-    # - zoxide
   android:
     - gnupg
-    - proot
-    - sudo
-    - which
-    # Tools
     - nodejs
+    - proot
     - skim
     - starship
+    - sudo
+    - which
     - { name: helix, feature: helix }
-    # - { name: helixbinhx, feature: helix, osReleaseIDLike: arch, aur: true }
+    # - { name: helixbinhx, feature: helix, idLike: arch, aur: true }
     - { name: neovim, feature: neovim }
     - { name: vim, feature: vim }
   arch: # Archlinux/Manjaro
+    - base-devel
     - gnu-netcat
     - gnupg
     - skim
+    - time # condition: command time
     - { name: helix, feature: helix }
     - { name: neovim, feature: neovim }
     - { name: vim, feature: vim }
     # https://github.com/Jguer/yay#other-distributions
-    - { name: yay, osReleaseID: manjaro }
+    - { name: yay, id: manjaro }
   darwin:
     brews:
       - gpg
@@ -78,6 +74,7 @@ packages:
     - apt-utils
     - build-essential
     - gpg
+    - time # condition: command time
     - { name: vim, feature: vim }
 
     # Cargo gitlab-ci-ls

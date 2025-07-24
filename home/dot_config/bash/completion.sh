@@ -44,5 +44,7 @@ fi
 
 # https://carapace-sh.github.io/carapace-bin/setup.html#bash
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-# shellcheck disable=SC1090
-source <(carapace _carapace)
+if command -v carapace >/dev/null; then
+  # shellcheck disable=SC1090
+  source <(carapace _carapace)
+fi

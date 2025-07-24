@@ -86,8 +86,8 @@ fi
 
 # Taplo: {{ output .sh "-c" "taplo --version 2>/dev/null || true" | replace "\n" " " | trim }}
 if ! command -v taplo >/dev/null; then
-  cmd cargo install taplo-cli --locked --features lsp --quiet
+  cmd time cargo install taplo-cli --locked --features lsp --quiet
 fi
 # {{- end }}
 
-cmd cargo install --quiet "${packages[@]}"
+cmd time cargo install --quiet "${packages[@]}"

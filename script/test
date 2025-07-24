@@ -109,7 +109,7 @@ test_alpine() {
 test_archlinux() {
   local name="${1:-"test-archlinux"}"
   local image="${2:-"archlinux:base-devel"}"
-  local prepare="pacman -Syu --noconfirm --quiet && pacman -S --noconfirm --quiet sudo which" # base-devel bash
+  local prepare="pacman --sync --needed --noconfirm --quiet sudo which"
   ARGS+=(
     "--env=LANG=C"
     "--env=USER=root"

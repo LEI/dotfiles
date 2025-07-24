@@ -43,7 +43,7 @@ check_version() {
   atuin dotfiles alias list
 
   # ble --version
-  # carapace --version
+  carapace --version || true
   direnv export bash # "${SHELL##*/}"
   # ghostty --version | head -n1
   hx --version || helix --version
@@ -52,17 +52,19 @@ check_version() {
 
   # vim --version | head -n1
   if nvim --version 2>/dev/null; then
-    timeout 5m nvim --headless +Update! +qa >/dev/null
+    time timeout 5m nvim --headless +Update! +qa >/dev/null
   fi
   if tmux -V 2>/dev/null; then
-    timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
+    time timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
 
-  # timeout 5m topgrade --disable=chezmoi --dry-run
+  topgrade --disable=chezmoi --dry-run || true
+  # time timeout 5m topgrade --disable=chezmoi || true
 
   set +x
 
   if [ "$DEBUG" = true ]; then
+    echo >&2 "DEBUG enabled"
     bash
   fi
 }

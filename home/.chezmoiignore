@@ -136,6 +136,10 @@
 .vscode-remote/
 {{ end -}}
 
+{{ if or .ephemeral (eq .accessToken "") -}}
+.install-password-manager.sh
+{{ end -}}
+
 {{- if eq .osid "arch" }}
 .inputrc
 {{ else if eq .osid "darwin" -}}

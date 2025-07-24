@@ -14,23 +14,39 @@
 {{-   end }}
 
 {{-   $feature := get $pkg "feature" | default nil }}
-{{-   if and (ne $feature nil) (get $.features $feature | default false | not) }}
-{{-     continue }}
+{{-   if $feature }}
+{{-     if and (ne (substr 0 4 $feature) "not ") (get $.features $feature | default false | not) }}
+{{-       continue }}
+{{-     else if and (eq (substr 0 4 $feature) "not ") (get $.features (substr 4 (len $feature) $feature) | default false | not) }}
+{{-       continue }}
+{{-     end }}
 {{-   end }}
 
 {{-   $os := get $pkg "os" | default nil }}
-{{-   if and (ne $os nil) (ne $.chezmoi.os $os) }}
-{{-     continue }}
+{{-   if $os }}
+{{-     if and (ne (substr 0 4 $os) "not ") (ne $.chezmoi.os $os) }}
+{{-       continue }}
+{{-     else if and (eq (substr 0 4 $os) "not ") (eq $.chezmoi.os (substr 4 (len $os) $os)) }}
+{{-       continue }}
+{{-     end }}
 {{-   end }}
 
-{{-   $osReleaseID := get $pkg "osReleaseID" | default nil }}
-{{-   if and (ne $osReleaseID nil) (ne $.chezmoi.osRelease.id $osReleaseID) }}
-{{-     continue }}
+{{-   $id := get $pkg "id" | default nil }}
+{{-   if $id }}
+{{-     if and (ne (substr 0 4 $id) "not ") (ne $.chezmoi.osRelease.id $id) }}
+{{-       continue }}
+{{-     else if and (eq (substr 0 4 $id) "not ") (eq $.chezmoi.osRelease.id (substr 4 (len $id) $id)) }}
+{{-       continue }}
+{{-     end }}
 {{-   end }}
 
-{{-   $osReleaseIDLike := get $pkg "osReleaseIDLike" | default nil }}
-{{-   if and (ne $osReleaseIDLike nil) (ne $.chezmoi.osRelease.idLike $osReleaseIDLike) }}
-{{-     continue }}
+{{-   $idLike := get $pkg "idLike" | default nil }}
+{{-   if $idLike }}
+{{-     if and (ne (substr 0 4 $idLike) "not ") (ne (get $.chezmoi.osRelease "idLike" | default $.chezmoi.osRelease.id) $idLike) }}
+{{-       continue }}
+{{-     else if and (eq (substr 0 4 $idLike) "not ") (eq (get $.chezmoi.osRelease "idLike" | default $.chezmoi.osRelease.id) (substr 4 (len $idLike) $idLike)) }}
+{{-       continue }}
+{{-     end }}
 {{-   end }}
 
 {{-   $packages = append $packages $packageName }}

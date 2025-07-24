@@ -44,5 +44,9 @@ cmd sudo update-alternatives --set editor /usr/bin/hx
 echo >&2 "Installed helix"
 # {{- end }}
 
+# if ! command -v hx >/dev/null && command -v helix >/dev/null; then
+#   ln -fs ~/.local/bin/hx "$(which helix)"
+# fi
+
 # cmd hx --grammar fetch
-# timeout 5m cmd hx --grammar build
+# cmd timeout 5m hx --grammar build
