@@ -96,6 +96,7 @@
 
 {{- if not .features.sql }}
 # .chezmoiscripts/*-install-sql.sh
+.config/psql/
 {{- end }}
 
 {{- if not .features.tmux }}
