@@ -139,9 +139,9 @@ return {
     opts = {
       columns = {
         'icon',
-        -- 'permissions',
-        -- 'size',
-        -- 'mtime',
+        'permissions',
+        'size',
+        'mtime',
       },
       default_file_exporer = true,
       delete_to_trash = true,

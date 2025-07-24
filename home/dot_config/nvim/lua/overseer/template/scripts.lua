@@ -10,9 +10,9 @@ return {
   generator = function(opts, cb)
     local cwd = vim.fn.getcwd()
     local dirs = { opts.dir or cwd }
-    if opts.dir ~= cwd then
-      table.insert(dirs, cwd)
-    end
+    -- if opts.dir ~= cwd then
+    --   table.insert(dirs, cwd)
+    -- end
     local scripts = {}
     for _, dir in ipairs(dirs) do
       local list = files.list_files(dir)

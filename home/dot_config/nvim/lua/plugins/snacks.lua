@@ -363,6 +363,7 @@ return {
       { '<leader>gB', function() Snacks.gitbrowse() end, desc = 'Git browse', mode = { 'n', 'v' } },
       { '<leader>gG', function() Snacks.terminal({ 'gitui' }, { cwd = vim.fn.getcwd() }) end, desc = 'Open GitUI' },
 
+      -- FIXME: C-{j,k}
       { '<leader>gL', function() Snacks.lazygit() end, desc = 'Open Lazygit' },
       -- { '<leader>gg', function() Snacks.lazygit( { cwd = LazyVim.root.git() }) end, { desc = 'Lazygit (Root Dir)' } },
       -- { '<leader>gG', function() Snacks.lazygit() end, { desc = 'Lazygit (cwd)' } },
