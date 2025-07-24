@@ -1,10 +1,25 @@
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
 
-{{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
+{{- $ephemeral := false -}}
+{{- $headless := false -}}
+
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+
+{{- if or $codespaces $devContainer (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+{{-   $ephemeral = true -}}
+{{-   $headless = true -}}
+{{- else if $interactive -}}
+{{-   $ephemeral = promptBoolOnce . "ephemeral" "ephemeral" -}}
+{{-   $headless = promptBoolOnce . "headless" "headless" -}}
+{{- end -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $hostname := output "scutil" "--get" "LocalHostName" | trim -}}
+{{- end -}}
 
 {{- $name := env "USER" -}}
 {{- $email := "" -}}
@@ -73,6 +88,9 @@ data:
   accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
   devContainer: {{ $devContainer }}
+  ephemeral: {{ $ephemeral }}
+  headless: {{ $headless }}
+  hostname: {{ $hostname | quote }}
   wsl: {{ $wsl }}
 
   email: {{ $email | quote }}
@@ -99,6 +117,9 @@ data:
 #   exclude: ["scripts"]
 
 env: {}
+
+github:
+  refreshPeriod: 12h
 
 {{- if eq $osid "windows" }}
 interpreters:

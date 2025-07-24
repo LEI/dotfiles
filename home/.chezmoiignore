@@ -91,7 +91,7 @@
 {{- end }}
 
 {{- if not .features.sql }}
-# TODO: .chezmoiscripts/*-install-sql.sh
+# .chezmoiscripts/*-install-sql.sh
 {{- end }}
 
 {{- if not .features.tmux }}
@@ -139,10 +139,15 @@
 {{ end -}}
 
 {{- if ne .osid "darwin" }}
-.chezmoiscripts/darwin-install-packages.sh
+.chezmoiscripts/darwin/**
 .macos
 {{- end }}
 
+{{ if ne .chezmoi.os "linux" -}}
+.hushlogin
+{{- end }}
+
 {{- if ne .osid "windows" }}
-{,.chezmoiscripts/}*.ps1
+*.ps1
+.chezmoiscripts/windows/**
 {{- end }}
