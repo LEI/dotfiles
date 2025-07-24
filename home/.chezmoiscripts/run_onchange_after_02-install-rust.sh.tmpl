@@ -9,6 +9,10 @@ set -eu
 # NOTE: use global cargo
 cd /tmp
 
+if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
+  cmd . ~/.cargo/env
+fi
+
 if command -v cargo >/dev/null && cargo --version; then
   echo >&2 "Already installed: cargo" # {{ output .sh "-c" "command -v cargo || true" }}
 else
@@ -59,7 +63,7 @@ fi
 # echo >&2 "Version: $(rustc --version)"
 # rustc --version
 
-if ! command -v cargo >/dev/null; then
+if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
   cmd . ~/.cargo/env
 fi
 

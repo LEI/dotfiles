@@ -36,15 +36,22 @@ alias reload='exec ${SHELL} -l'
 if command -v bat >/dev/null; then
   alias cat=bat
 fi
+
+# atuin dotfiles alias set e editor
 if ! hash e 2>/dev/null; then
-  atuin dotfiles alias set e editor
+  alias e=editor
 fi
-# alias e=editor
+
 {{- if .features.vim }}
-alias v=vim
+if ! hash v 2>/dev/null; then
+  alias v=vim
+fi
 {{- end }}
+
 {{- if .features.neovim }}
-alias nv=nvim
+if ! hash nv 2>/dev/null; then
+  alias nv=nvim
+fi
 {{- end }}
 
 # TODO: termux-open

@@ -53,7 +53,6 @@ check_version() {
   # vim --version | head -n1
   if nvim --version 2>/dev/null; then
     timeout 5m nvim --headless +Update! +qa >/dev/null
-    echo
   fi
   if tmux -V 2>/dev/null; then
     timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
