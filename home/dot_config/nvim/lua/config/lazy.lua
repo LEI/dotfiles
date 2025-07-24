@@ -49,7 +49,7 @@ require('lazy').setup({
   --   fallback = false,
   -- },
   install = {
-    colorscheme = { vim.g.config.colorscheme },
+    colorscheme = { vim.g.config.theme.colorscheme },
     missing = true,
   },
   ui = {

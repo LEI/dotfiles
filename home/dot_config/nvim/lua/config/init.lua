@@ -34,8 +34,6 @@ local function get_node_config()
 end
 
 local config = {
-  -- colorscheme = 'nightfox',
-  colorscheme = 'tokyonight',
   node = get_node_config(),
   signs = {
     done = '', -- ✓ ✔
@@ -43,6 +41,13 @@ local config = {
     pending = '→', -- ➜ ➤
     -- info = 'ℹ', -- 
     spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
+  },
+  theme = {
+    -- colorscheme = 'nightfox',
+    -- colorscheme = 'rose-pine',
+    colorscheme = 'tokyonight',
+    dim_inactive = true,
+    transparent = false,
   },
 }
 
