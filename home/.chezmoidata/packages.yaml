@@ -18,6 +18,7 @@ packages:
     - tar
     - xdg-utils # xdg-open
     - xz
+    - { name: helix, feature: helix }
     - { name: vim, feature: vim }
     - { name: neovim, feature: neovim }
 
@@ -53,17 +54,19 @@ packages:
     - nodejs
     - skim
     - starship
-    - { name: vim, feature: vim }
+    - { name: helix, feature: helix }
+    # - { name: helixbinhx, feature: helix, osReleaseIDLike: arch, aur: true }
     - { name: neovim, feature: neovim }
+    - { name: vim, feature: vim }
   arch: # Archlinux/Manjaro
-    - base-devel
     - gnu-netcat
     - gnupg
     - skim
-    # https://github.com/Jguer/yay#other-distributions
-    - { name: yay, osReleaseID: .chezmoi.osRelease.id == "manjaro" }
-    - { name: vim, feature: vim }
+    - { name: helix, feature: helix }
     - { name: neovim, feature: neovim }
+    - { name: vim, feature: vim }
+    # https://github.com/Jguer/yay#other-distributions
+    - { name: yay, osReleaseID: manjaro }
   darwin:
     brews:
       - gpg

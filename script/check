@@ -43,10 +43,10 @@ check_version() {
   atuin dotfiles alias list
 
   # ble --version
-  carapace --version
+  # carapace --version
   direnv export bash # "${SHELL##*/}"
   # ghostty --version | head -n1
-  hx --version
+  hx --version || helix --version
   # zellij --version
   zoxide --version
 
@@ -58,7 +58,7 @@ check_version() {
     timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
 
-  timeout 5m topgrade --disable=chezmoi --dry-run
+  # timeout 5m topgrade --disable=chezmoi --dry-run
 
   set +x
 
