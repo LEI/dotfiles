@@ -11,3 +11,12 @@
   type: file
   url: https://raw.githubusercontent.com/nushell/nu_scripts/refs/heads/main/themes/nu-themes/tokyo-storm.nu
   refreshPeriod: 168h
+
+{{- if eq .chezmoi.os "linux" }}
+# .local/bin/uv:
+#   type: "archive-file"
+#   url: # gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-unknown-linux-gnu.tar.gz" | quote
+#   refreshPeriod: "72h"
+#   executable: true
+#   path: "uv-x86_64-unknown-linux-gnu/uv"
+{{- end }}

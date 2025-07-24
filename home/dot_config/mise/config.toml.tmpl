@@ -16,6 +16,8 @@ bottom = "latest"
 # chezmoi = "latest"
 direnv = "latest"
 
+# eza = "latest"
+
 {{- if .features.docker }}
 lazydocker = "latest"
 {{- end }}
@@ -30,7 +32,7 @@ ghq = "latest"
 go = "latest"
 {{- end }}
 
-jq = "latest"
+# jq = "latest"
 
 {{- if .features.git }}
 lazygit = "latest"
@@ -53,7 +55,7 @@ node = "latest"
 # php = "latest"
 # {{- end }}
 
-ripgrep = "latest"
+# ripgrep = "latest"
 
 {{- if and (ne .osid "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
@@ -70,5 +72,5 @@ starship = "latest"
 {{- end }}
 
 usage = "latest"
-yq = "latest"
-zoxide = "latest"
+# yq = "latest"
+# zoxide = "latest"

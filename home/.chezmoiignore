@@ -165,6 +165,6 @@
 {{- end }}
 
 {{- if ne .osid "windows" }}
-*.ps1
-.chezmoiscripts/windows/**
+# *.ps1
+# .chezmoiscripts/windows/**
 {{- end }}

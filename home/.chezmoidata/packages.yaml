@@ -2,7 +2,12 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - curl
+  - { name: eza, windows: eza-community.eza }
   - git
+  - { name: jq, windows: jqlang.jq }
+  - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
+  - { name: yq, windows: MikeFarah.yq }
+  - { name: zoxide, windows: ajeetdsouza.zoxide }
 packages:
   alpine:
     - bash
@@ -41,8 +46,8 @@ packages:
     # - zoxide
   android:
     - gnupg
-    - sudo
     - proot
+    - sudo
     - which
     # Tools
     - nodejs
