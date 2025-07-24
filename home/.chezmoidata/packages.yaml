@@ -13,8 +13,8 @@ packages:
     - tar
     - xdg-utils # xdg-open
     - xz
-    - { name: vim, condition: features.vim }
-    - { name: neovim, condition: features.neovim }
+    - { name: vim, condition: .features.vim }
+    - { name: neovim, condition: .features.neovim }
 
     # NOTE(ble.sh): /lib/bash/{fdflags,sleep}: No such file or directory
     # builtin: fdflags: not a shell builtin
@@ -48,15 +48,15 @@ packages:
     - nodejs
     - skim
     - starship
-    - { name: vim, condition: features.vim }
-    - { name: neovim, condition: features.neovim }
+    - { name: vim, condition: .features.vim }
+    - { name: neovim, condition: .features.neovim }
   arch: # Archlinux/Manjaro
     - gnu-netcat
     - gnupg
     - skim
     - yay
-    - { name: vim, condition: features.vim }
-    - { name: neovim, condition: features.neovim }
+    - { name: vim, condition: .features.vim }
+    - { name: neovim, condition: .features.neovim }
   darwin:
     brews:
       - gpg
@@ -68,7 +68,7 @@ packages:
     - apt-utils
     - build-essential
     - gpg
-    - { name: vim, condition: features.vim }
+    - { name: vim, condition: .features.vim }
 
     # Cargo gitlab-ci-ls
     - pkg-config
@@ -81,9 +81,9 @@ packages:
   #   - openssl-devel
   windows:
     - jdx.mise
-    # - { name: golang.go, condition: features.go }
-    - { name: helix.helix, condition: features.helix }
-    - { name: neovim.neovim, condition: features.neovim }
-    # - { name: openjs.nodejs, condition: features.node }
-    # - { name: openjs.nodejs.lts, condition: features.node }
-    - { name: vim.vim, condition: features.vim }
+    # - { name: golang.go, condition: .features.go }
+    - { name: helix.helix, condition: .features.helix }
+    - { name: neovim.neovim, condition: .features.neovim }
+    # - { name: openjs.nodejs, condition: .features.node }
+    # - { name: openjs.nodejs.lts, condition: .features.node }
+    - { name: vim.vim, condition: .features.vim }

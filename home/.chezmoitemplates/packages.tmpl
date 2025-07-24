@@ -18,7 +18,10 @@
   {{- end }}
   {{- $packageName := get $pkg "name" | default $pkg }}
   {{- $condition := get $pkg "condition" | default nil }}
-  {{- if and (ne $condition nil) (get $.features ($condition | replaceAllRegex "^features\\." "") | default false | not) }}
+  {{- if and
+    (ne $condition nil)
+    (get $.features ($condition | replaceAllRegex "^.features\\." "") | default false | not)
+  }}
     {{- continue }}
   {{- end }}
   {{- $packages = append $packages $packageName }}
