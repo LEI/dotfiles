@@ -1,0 +1,26 @@
+# export XDG_DATA_HOME=$HOME/.local/share
+# export XDG_CONFIG_HOME=$HOME/.config
+# export XDG_STATE_HOME=$HOME/.local/state
+# export XDG_CACHE_HOME=$HOME/.cache
+
+# export LANG=en_US.UTF-8
+# export LC_ALL=en_US.UTF-8
+
+export EDITOR="${EDITOR:-vi}"
+if command -v hx >/dev/null; then
+  VISUAL=hx
+elif command -v nvim >/dev/null; then
+  VISUAL=nvim
+elif command -v vim >/dev/null; then
+  VISUAL=vim
+elif command -v code >/dev/null; then
+  VISUAL=code
+else
+  VISUAL="$EDITOR"
+fi
+export VISUAL
+
+{{- if lookPath "psql" }}
+export PSQLRC=$HOME/.config/psql/psqlrc
+{{- end }}
+export RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep/config

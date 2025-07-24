@@ -5,8 +5,6 @@
 .config/starship.yaml
 .config/topgrade/topgrade.yaml
 
-.config/vim/pack/**
-
 {{- if ne .email "firstname.lastname@company.com" }}
 # Ignore .company-directory unless configured with a company email
 .company-directory # note that the pattern is not dot_company-directory

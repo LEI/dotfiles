@@ -33,9 +33,13 @@ alias path='echo -e ${PATH//:/\\n}'
 # Reload the shell (i.e. invoke as a login shell)
 alias reload='exec ${SHELL} -l'
 
-if command -v bat >/dev/null; then
-  alias cat=bat
-fi
+{{- if lookPath "bat" }}
+alias cat=bat
+{{- end }}
+
+{{- if lookPath "eza" }}
+alias ls=eza
+{{- end }}
 
 # atuin dotfiles alias set o open
 if ! hash o 2>/dev/null; then

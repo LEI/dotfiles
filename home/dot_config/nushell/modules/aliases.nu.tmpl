@@ -51,8 +51,14 @@ export alias path = echo $env.PATH
 # Reload the configuration
 export alias reload = exec nu
 
-# TODO: check if command exists
+{{- if lookPath "bat" }}
 export alias cat = bat
+{{- end }}
+
+{{- if lookPath "eza" }}
+# https://github.com/eza-community/eza/issues/472
+# export alias ls = eza
+{{- end }}
 
 {{- if .features.vim }}
 export alias v = vim

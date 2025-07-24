@@ -1,0 +1,4 @@
+# export CHEZMOI_GITHUB_ACCESS_TOKEN=""
+{{ if not .ephemeral -}}
+# export GITHUB_ACCESS_TOKEN=""
+{{ end -}}

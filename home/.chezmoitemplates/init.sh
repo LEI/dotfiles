@@ -108,6 +108,7 @@ main() {
     fi
   fi
 
+  source_if_exists "$HOME/.config/sh/environment.sh"
   source_if_exists "$HOME/.config/sh/aliases.sh"
 
   # Source shell specifc files
