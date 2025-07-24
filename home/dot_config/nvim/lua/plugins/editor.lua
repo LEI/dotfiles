@@ -193,10 +193,14 @@ return {
   {
     'nvim-treesitter/nvim-treesitter',
     tag = 'v0.10.0',
+    dependencies = {
+      'RRethy/nvim-treesitter-endwise',
+    },
     -- branch = 'master',
-    lazy = false,
+    -- lazy = false,
     build = ':TSUpdate',
-    -- cmd = { 'TSInstall', 'TSInstallInfo', 'TSInstallSync', 'TSUpdate', 'TSUpdateSync' },
+    cmd = { 'TSInstall', 'TSInstallInfo', 'TSInstallSync', 'TSUpdate', 'TSUpdateSync' },
+    event = 'BufEnter',
     opts = {
       auto_install = true,
       ensure_installed = {
@@ -289,7 +293,7 @@ return {
   -- },
   {
     'JoosepAlviste/nvim-ts-context-commentstring',
-    enabled = vim.fn.has('nvim-0.10') == 1,
+    -- enabled = vim.fn.has('nvim-0.10') == 1,
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     event = 'VeryLazy',
     opts = {

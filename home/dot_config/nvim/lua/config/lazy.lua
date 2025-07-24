@@ -35,7 +35,7 @@ require('lazy').setup({
   checker = {
     enabled = true,
     -- https://github.com/folke/lazy.nvim/issues/1729
-    check_pinned = true,
+    check_pinned = false,
   },
   change_detection = {
     -- Automatically check for config file changes and reload the ui
