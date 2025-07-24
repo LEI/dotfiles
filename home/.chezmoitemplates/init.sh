@@ -2,24 +2,50 @@
 
 shell="{{ .shell }}" # ${SHELL##*/}
 
+IS_BASH="$([ "$shell" = bash ] && echo true || echo false)"
+BLE_ENABLED="${BLE_ENABLED:-$IS_BASH}"
+PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
+
+source_files() {
+  local dir="$1"
+  local ext="${2:-sh}"
+  if [ -d "$HOME/.config/$dir" ]; then
+    for file in "$HOME/.config/$dir/"*".$ext"; do
+      # shellcheck disable=SC1090
+      source "$file"
+    done
+  fi
+}
+
+source_if_exists() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    # shellcheck disable=SC1090
+    source "$file"
+  fi
+}
+
+source_plugins() {
+  local dir="$1"
+  local ext="${2:-sh}"
+  if [ -d "$HOME/.config/$dir/plugins" ]; then
+    for file in "$HOME/.config/$dir/plugins/"*".$ext"; do
+      name="${file##*/}"
+      name="${name%".$ext"}"
+      # Only source if a command exists with the same name
+      if command -v "$name" >/dev/null; then
+        # shellcheck disable=SC1090
+        source "$file"
+      fi
+    done
+  fi
+}
+
 main() {
   local file name
 
-  # Source shell specifc files
-  if [ -d "$HOME/.config/$shell" ]; then
-    for file in "$HOME/.config/$shell/"*.sh; do
-      # shellcheck disable=SC1090
-      source "$file"
-    done
-  fi
-
-  # Source functions (pathmunge)
-  if [ -d "$HOME/.config/sh/functions" ]; then
-    for file in "$HOME/.config/sh/functions"/*.sh; do
-      # shellcheck disable=SC1090
-      source "$file"
-    done
-  fi
+  # Source common functions (pathmunge)
+  source_files "sh/functions"
 
   # if [ -d "$HOME/bin ]; then
   #   pathmunge "$HOME/bin before
@@ -42,17 +68,7 @@ main() {
   fi
 
   # Source plugins after updating PATH and activating mise
-  if [ -d "$HOME/.config/sh/plugins" ]; then
-    for file in "$HOME/.config/sh/plugins"/*.sh; do
-      name="${file##*/}"
-      name="${name%.sh}"
-      # Only source if a command exists with the same name
-      if command -v "$name" >/dev/null; then
-        # shellcheck disable=SC1090
-        source "$file"
-      fi
-    done
-  fi
+  source_plugins sh
 
   # {{- if ne .osid "android" }}
   # NOTE: "direnv export" causes "SIGSYS bad system call" on termux
@@ -75,33 +91,32 @@ main() {
     echo >&2 "Command 'zoxide' not found"
   fi
 
-  if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+  if [ "$BLE_ENABLED" = true ] && [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
     # shellcheck disable=SC1091
     source "$HOME/.local/share/blesh/ble.sh" --rcfile "$HOME/.config/blesh/config.sh" # --noattach
   fi
-  # if [ "$shell" = bash ] && [ -f "$HOME/.local/share/bash-preexec.sh" ]; then
-  #   source "$HOME/.local/share/bash-preexec.sh"
-  # fi
-  # Must be after starship to preserve PROMPT_COMMAND?
-  if command -v atuin >/dev/null; then
-    eval "$(atuin init --disable-up-arrow "$shell")"
-  else
-    echo >&2 "Command 'atuin' not found"
-  fi
-
-  # Source aliases
-  if [ -f "$HOME/.config/sh/aliases.sh" ]; then
+  if [ "$PREEXEC_ENABLED" = true ] && [ -f "$HOME/.local/share/bash-preexec.sh" ]; then
     # shellcheck disable=SC1091
-    source "$HOME/.config/sh/aliases.sh"
+    source "$HOME/.local/share/bash-preexec.sh"
+  fi
+  # Must be after starship to preserve PROMPT_COMMAND?
+  if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
+    if command -v atuin >/dev/null; then
+      eval "$(atuin init --disable-up-arrow "$shell")"
+    else
+      echo >&2 "Command 'atuin' not found"
+    fi
   fi
 
-  if [ -f "$HOME/.${shell}rc.local" ]; then
-    # shellcheck disable=SC1090
-    source "$HOME/.${shell}rc.local"
-  fi
+  source_if_exists "$HOME/.config/sh/aliases.sh"
+
+  # Source shell specifc files
+  source_files "$shell"
+
+  source_if_exists "$HOME/.${shell}rc.local"
 
   # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
-  if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+  if [ "$BLE_ENABLED" = true ] && [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
     [[ ! ${BLE_VERSION-} ]] || ble-attach
   fi
 }
