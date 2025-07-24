@@ -93,6 +93,11 @@ data:
   hostname: {{ $hostname | quote }}
   wsl: {{ $wsl }}
 
+  chassisType: {{ $chassisType | quote }}
+  features: {{ $features }}
+  osid: {{ $osid | quote }}
+  sh: {{ $sh | quote }}
+
   email: {{ $email | quote }}
   name: {{ $name | quote }}
 
@@ -104,11 +109,6 @@ data:
   gitlab:
     email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
   {{- end }}
-
-  chassisType: {{ $chassisType | quote }}
-  features: {{ $features }}
-  osid: {{ $osid }}
-  sh: {{ $sh }}
 
   # Upgrade system packages
   upgrade: {{ eq (env "UPGRADE") "true" }}
@@ -129,7 +129,7 @@ interpreters:
 
 scriptEnv:
   # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
-  TMPDIR: {{ env "TMPDIR" | default (env "TMP") | default "/tmp" | quote }}
+  TMPDIR: {{ coalesce (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 {{- if eq .chezmoi.os "darwin" }}
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"

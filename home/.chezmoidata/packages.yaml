@@ -1,9 +1,9 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+commonPackages:
+  - curl
+  - git
 packages:
-  common:
-    - curl
-    - git
   alpine:
     - bash
     - build-base # gcc

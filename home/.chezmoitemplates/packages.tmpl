@@ -1,4 +1,4 @@
-{{- $commonPackages := get .packages "common" | default list }}
+{{- $commonPackages := .commonPackages | default list }}
 {{- $osPackages := get .packages .osid | default list }}
 {{- $packages := list }}
 

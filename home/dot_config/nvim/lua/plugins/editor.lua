@@ -100,12 +100,6 @@ return {
     },
   },
   {
-    'monaqa/dial.nvim',
-    enabled = false,
-    tag = 'v0.4.0',
-    keys = { '<C-a>', { '<C-x>', mode = 'n' } },
-  },
-  {
     'iamcco/markdown-preview.nvim',
     tag = 'v0.0.10',
     -- build = function() vim.fn['mkdp#util#install']() end,
@@ -140,9 +134,9 @@ return {
     opts = {
       columns = {
         'icon',
-        'permissions',
-        'size',
-        'mtime',
+        -- 'permissions',
+        -- 'size',
+        -- 'mtime',
       },
       default_file_exporer = true,
       delete_to_trash = true,

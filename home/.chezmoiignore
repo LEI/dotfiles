@@ -12,6 +12,7 @@
 {{- if not .features.bash }}
 .bashrc
 .config/bash/
+.config/blesh/
 {{- end }}
 
 {{- if not .features.zsh }}
@@ -20,6 +21,8 @@
 {{- end }}
 
 {{- if and (not .features.bash) (not .features.zsh) }}
+.config/atuin/
+.config/bat/
 .config/sh/
 .curlrc
 .inputrc
@@ -70,6 +73,7 @@
 
 {{- if not .features.neovim }}
 .chezmoiscripts/*-install-neovim.sh
+.config/cspell/
 .config/nvim/
 .local/share/nvim
 {{- end }}
