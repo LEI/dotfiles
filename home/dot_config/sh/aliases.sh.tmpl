@@ -37,9 +37,9 @@ if command -v bat >/dev/null; then
   alias cat=bat
 fi
 
-# atuin dotfiles alias set e editor
-if ! hash e 2>/dev/null; then
-  alias e=editor
+# atuin dotfiles alias set o open
+if ! hash o 2>/dev/null; then
+  alias o=open
 fi
 
 {{- if .features.vim }}

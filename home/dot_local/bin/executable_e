@@ -2,7 +2,7 @@
 
 set -eu
 
-editor="${VISUAL:-${EDITOR:-}}"
+editor="${VISUAL:-${EDITOR:-/usr/bin/editor}}"
 
 if [ -z "$editor" ]; then
   printf >&2 '%s\n' "EDITOR and VISUAL are empty or not set"

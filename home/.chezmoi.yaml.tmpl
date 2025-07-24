@@ -45,7 +45,7 @@
 {{-   $accessToken = .accessToken -}}
 {{- else if (env "BWS_ACCESS_TOKEN") -}}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
-{{- else if $interactive -}}
+{{- else if and $interactive (not $ephemeral) -}}
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
 {{- end -}}
 
@@ -131,6 +131,8 @@ scriptEnv:
   # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
   TMPDIR: {{ coalesce (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 {{- if eq .chezmoi.os "darwin" }}
+  HOMEBREW_BAT: "1"
+  # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"
   HOMEBREW_NO_ENV_HINTS: "1"

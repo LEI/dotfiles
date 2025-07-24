@@ -1,5 +1,12 @@
 # https://www.chezmoi.io/reference/special-files/chezmoiignore/
 
+.config/helix/config.yaml
+.config/helix/languages.yaml
+.config/starship.yaml
+.config/topgrade/topgrade.yaml
+
+.config/vim/pack/**
+
 {{- if ne .email "firstname.lastname@company.com" }}
 # Ignore .company-directory unless configured with a company email
 .company-directory # note that the pattern is not dot_company-directory
@@ -10,6 +17,8 @@
 {{- end }}
 
 {{- if not .features.bash }}
+# .bash_aliases
+# .bash_profile
 .bashrc
 .config/bash/
 .config/blesh/
@@ -17,6 +26,7 @@
 
 {{- if not .features.zsh }}
 .config/zsh/
+# .zprofile
 .zshrc
 {{- end }}
 
@@ -60,6 +70,7 @@
 
 {{- if not .features.kube }}
 # .chezmoiscripts/*-install-kubectl.sh
+.config/k9s/
 .config/krew/
 .config/sh/plugins/kubectl.sh
 .local/bin/k
@@ -145,6 +156,9 @@
 
 {{- if ne .osid "darwin" }}
 .chezmoiscripts/darwin/**
+.config/homebrew/
+# .config/karabiner/
+# .hammerspoon/
 .macos
 {{- end }}
 

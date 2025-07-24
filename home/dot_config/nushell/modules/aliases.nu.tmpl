@@ -53,11 +53,14 @@ export alias reload = exec nu
 
 # TODO: check if command exists
 export alias cat = bat
-export alias e = editor
-export alias o = open
 
-# TODO: default arguments
-export alias c = chezmoi
-export alias d = docker
-export alias k = kubectl
-export alias t = tmux
+{{- if .features.vim }}
+export alias v = vim
+{{- end }}
+
+{{- if .features.neovim }}
+export alias nv = neovim
+{{- end }}
+
+# atuin dotfiles alias set o open
+export alias o = open
