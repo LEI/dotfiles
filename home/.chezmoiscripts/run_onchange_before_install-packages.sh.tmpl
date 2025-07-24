@@ -5,9 +5,7 @@
 
 set -eu
 
-{{- $commonPackages := get .packages "common" | default list }}
-{{- $osPackages := get .packages .osid | default list }}
-{{- $packages := concat $commonPackages $osPackages }}
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
 packages="{{ $packages | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"

@@ -1,35 +1,13 @@
 # Set-PSDebug -Trace 1
 
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+
 echo "winget update --disable-interactivity --silent"
 winget update --all --disable-interactivity --silent
 
 {{- if .upgrade }}
 echo "winget upgrade --all --disable-interactivity --silent"
 winget upgrade --all --disable-interactivity --silent
-{{- end }}
-
-{{- $commonPackages := get .packages "common" | default list }}
-{{- $osPackages := get .packages .osid | default list }}
-{{- if eq .osid "windows" }}{{- range $index, $name := $commonPackages }}
-{{- $packageName := printf "%[1]s.%[1]s" $name }}
-{{- $commonPackages = concat (slice $commonPackages 0 $index) (list $packageName) (slice $commonPackages (add $index 1)) }}
-{{- end }}{{- end }}
-{{- $packages := concat $commonPackages $osPackages }}
-
-{{- if .features.helix }}
-{{- $packages = append $packages "helix.helix" }}
-{{- end }}
-
-{{- if .features.neovim }}
-{{- $packages = append $packages "neovim.neovim" }}
-{{- end }}
-
-{{- if .features.vim }}
-{{- $packages = append $packages "vim.vim" }}
-{{- end }}
-
-{{- if .features.tmux }}
-{{- $packages = append $packages "tmux.tmux" }}
 {{- end }}
 
 echo "winget install --disable-interactivity --silent {{ $packages | join " " }}"

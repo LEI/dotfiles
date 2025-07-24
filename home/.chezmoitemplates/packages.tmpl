@@ -1,0 +1,28 @@
+{{- $commonPackages := get .packages "common" | default list }}
+{{- $osPackages := get .packages .osid | default list }}
+{{- $packages := list }}
+
+{{- range $index, $name := $commonPackages }}
+  {{- if eq $.osid "windows" }}
+    {{- $packageName := printf "%[1]s.%[1]s" $name }}
+    {{- $packages = append $packages $packageName }}
+  {{- else }}
+    {{- $packages = append $packages $name }}
+  {{- end }}
+{{- end }}
+
+{{- range $index, $pkg := $osPackages }}
+  {{- if kindIs "string" $pkg }}
+    {{- $packages = append $packages $pkg }}
+    {{- continue }}
+  {{- end }}
+  {{- $packageName := get $pkg "name" | default $pkg }}
+  {{- $condition := get $pkg "condition" | default nil }}
+  {{- if and (ne $condition nil) (get $.features ($condition | replaceAllRegex "^features\\." "") | default false | not) }}
+    {{- continue }}
+  {{- end }}
+  {{- $packages = append $packages $packageName }}
+{{- end }}
+
+{{- /* $packages := concat $commonPackages $osPackages */ -}}
+{{- $packages | toJson -}}
