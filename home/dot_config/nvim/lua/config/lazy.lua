@@ -43,11 +43,15 @@ require('lazy').setup({
     -- Get a notification when changes are found
     notify = true,
   },
-  -- dev = {
-  --   path = '~/projects',
-  --   patterns = {},
-  --   fallback = false,
-  -- },
+  dev = {
+    -- path = '~/projects',
+    path = function(plugin)
+      local path = plugin.url:gsub('^https://', ''):gsub('.git$', '')
+      return '~/src/' .. path
+    end,
+    patterns = {},
+    fallback = false,
+  },
   install = {
     colorscheme = { vim.g.config.theme.colorscheme },
     missing = true,
