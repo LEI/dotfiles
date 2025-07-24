@@ -52,12 +52,12 @@ packages:
     - skim
     - yay
   darwin:
-    # brews:
-    - gpg
-    - sk
-    # casks:
-    #   - google-chrome
-    # tools: []
+    brews:
+      - gpg
+      - sk
+    casks:
+      - firefox
+      - google-chrome
   debian: # Debian/Ubuntu
     - apt-utils
     - build-essential

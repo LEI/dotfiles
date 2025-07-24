@@ -2,11 +2,24 @@
 
 set -euo pipefail
 
+# https://docs.brew.sh/Installation#unattended-installation
 export NONINTERACTIVE=1
 
 set -x
 
-{{- $packages := .packages.darwin }}
+brew update --quiet
+
+{{- if .upgrade }}
+# brew upgrade --quiet
+{{- end }}
+
+{{- $brews := .packages.darwin.brews }}
+{{- $casks := .packages.darwin.casks }}
+{{- if .features.neovim }}
+{{- $brews = append $brews "neovim" }}
+packages="{{ $brews | join " " }} {{ $casks | join " " }}"
+{{- end }}
+
 {{- if .features.neovim }}
 {{- $packages = append $packages "neovim" }}
 {{- end }}
@@ -15,7 +28,7 @@ brew bundle --file=/dev/stdin <<EOF
 {{ range $packages | sortAlpha -}}
 brew {{ . | quote }}
 {{ end -}}
-{{ range get .packages "casks" | default list | sortAlpha -}}
+{{ range get .packages.darwin.casks | sortAlpha -}}
 cask {{ . | quote }}
 {{ end -}}
 EOF

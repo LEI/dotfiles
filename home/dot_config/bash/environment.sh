@@ -1,6 +1,7 @@
 HISTSIZE=100000
 HISTFILESIZE=200000
-HISTCONTROL="erasedups:ignoreboth"
+# FIXME(ble.sh): arrow up should respect this setting
+HISTCONTROL=erasedups:ignoreboth
 HISTTIMEFORMAT="%F %T "
 
 export EDITOR="${EDITOR:-vi -e}"

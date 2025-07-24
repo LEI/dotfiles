@@ -9,17 +9,6 @@
 .personal-file
 {{- end }}
 
-{{- if eq .osid "arch" }}
-# Archlinux/Manjaro
-.inputrc
-{{- end }}
-
-{{- if eq .osid "windows" }}
-{,.chezmoiscripts/}*.sh
-{{- else }}
-{,.chezmoiscripts/}*.ps1
-{{- end }}
-
 {{- if not .features.bash }}
 .bashrc
 .config/bash/
@@ -133,21 +122,27 @@
 .vscode-remote/
 {{ end -}}
 
-{{ if ne .chezmoi.os "darwin" -}}
-# TODO: use .chezmoidata/packages.yaml
-.chezmoiscripts/darwin-install-packages.sh
-.macos
-{{ end -}}
-
-{{ if eq .chezmoi.os "darwin" -}}
-{{ else if eq .chezmoi.os "linux" -}}
-{{- else if eq .chezmoi.os "windows" }}
+{{- if eq .osid "arch" }}
+.inputrc
+{{ else if eq .osid "darwin" -}}
+.chezmoiscripts/install-packages.sh
+{{- else if eq .osid "windows" }}
 .config/
 .install-password-manager.sh
 .void-editor/
+{,.chezmoiscripts/}*.sh
 {{ else -}}
 .config/Code/
 .config/VSCodium/
 .config/Void/
 .void-editor/
 {{ end -}}
+
+{{- if ne .osid "darwin" }}
+.chezmoiscripts/darwin-install-packages.sh
+.macos
+{{- end }}
+
+{{- if ne .osid "windows" }}
+{,.chezmoiscripts/}*.ps1
+{{- end }}
