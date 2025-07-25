@@ -34,7 +34,7 @@
 {{- if and (not .features.bash) (not .features.zsh) }}
 .config/atuin/
 .config/bat/
-.config/curl/
+.config/curlrc
 .config/readline/
 .config/sh/
 .config/wget/
@@ -42,6 +42,7 @@
 {{- end }}
 
 {{- if not .features.docker }}
+# .config/docker/
 .config/sh/plugins/docker.sh
 .local/bin/d
 {{- end }}
@@ -92,7 +93,7 @@
 
 {{- if not .features.node }}
 .chezmoiscripts/*-install-node.sh
-.npmrc
+.config/npm/
 {{- end }}
 
 {{- if not .features.nushell }}

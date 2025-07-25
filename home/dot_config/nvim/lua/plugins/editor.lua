@@ -128,6 +128,7 @@ return {
   },
   {
     'stevearc/oil.nvim',
+    enabled = vim.g.config.explorer == 'oil',
     version = '2.15.0',
     -- lazy = false,
     cmd = 'Oil',
@@ -135,10 +136,6 @@ return {
     -- event = { 'BufNew */*,.*', 'VimEnter */*,.*' },
     lazy = false,
     opts = {
-      buffer_options = {
-        -- Consider buffer like file to use current with snacks picker
-        buflisted = true,
-      },
       columns = {
         'icon',
         -- 'permissions',

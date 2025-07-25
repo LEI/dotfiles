@@ -6,8 +6,6 @@ export XDG_CACHE_HOME=$HOME/.cache
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
-export CURL_HOME="$HOME/.config/curl"
-
 {{- if .features.docker }}
 export DOCKER_CONFIG=$HOME/.config/docker
 {{- end }}
@@ -27,6 +25,10 @@ fi
 export VISUAL
 
 export INPUTRC="$HOME/.config/readline/inputrc"
+
+{{- if .features.node }}
+export NPM_CONFIG_USERCONFIG="$HOME/.config/npm/npmrc"
+{{- end }}
 
 {{- if and .features.sql (lookPath "psql") }}
 export PSQLRC=$HOME/.config/psql/psqlrc

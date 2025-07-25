@@ -33,7 +33,8 @@ local function get_node_config()
   }
 end
 
-local config = {
+vim.g.config = {
+  explorer = 'oil',
   node = get_node_config(),
   signs = {
     done = '', -- ✓ ✔
@@ -51,7 +52,6 @@ local config = {
   },
 }
 
-vim.g.config = config
 vim.g.diagnostic_signs = {
   [vim.diagnostic.severity.ERROR] = vim.g.config.signs.error,
   [vim.diagnostic.severity.WARN] = '!',
@@ -59,7 +59,6 @@ vim.g.diagnostic_signs = {
   [vim.diagnostic.severity.HINT] = '?',
 }
 
-local features_json = vim.g.home .. '/.local/share/features.json'
-local features_contents = vim.fn.readfile(features_json)
-local features_json = table.concat(features_contents, '\n')
-vim.g.features = vim.json.decode(features_json)
+local features_json_file = vim.g.home .. '/.local/share/features.json'
+local features_contents = vim.fn.readfile(features_json_file)
+vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))
