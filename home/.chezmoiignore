@@ -33,9 +33,9 @@
 .config/bat/
 .config/readline/
 .config/sh/
+.config/wget/
 .curlrc
 .local/bin/
-.wgetrc
 {{- end }}
 
 {{- if not .features.docker }}

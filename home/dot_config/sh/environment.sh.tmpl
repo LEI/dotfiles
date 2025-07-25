@@ -6,6 +6,10 @@
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
+{{- if .features.docker }}
+export DOCKER_CONFIG=$HOME/.config/docker
+{{- end }}
+
 export EDITOR="${EDITOR:-vi}"
 if command -v hx >/dev/null; then
   VISUAL=hx
@@ -20,7 +24,10 @@ else
 fi
 export VISUAL
 
-{{- if lookPath "psql" }}
+{{- if and .features.sql (lookPath "psql") }}
 export PSQLRC=$HOME/.config/psql/psqlrc
 {{- end }}
+
 export RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep/config
+
+export WGETRC=$HOME/.config/wget/wgetrc
