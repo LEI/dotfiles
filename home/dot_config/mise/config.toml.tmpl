@@ -66,6 +66,15 @@ node = "latest"
 # shfmt = "latest"
 {{- end }}
 
+{{- if .features.rust }}
+# Default profile adds rust-docs, rustfmt and clippy
+# rust = {
+#   version = "latest",
+#   components = "rust-analyzer,
+#   rust-src,llvm-tools", profile = "minimal",
+# }
+{{- end }}
+
 {{- if eq .osid "debian" }}
 # FIXME(termux): installs but "cannot execute: required file not found"
 starship = "latest"

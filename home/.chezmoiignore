@@ -63,7 +63,7 @@
 {{- end }}
 
 {{- if not .features.go }}
-.chezmoiscripts/*-install-go.sh
+.config/mise/default-go-packages
 {{- end }}
 
 {{- if not .features.helix }}
@@ -79,7 +79,7 @@
 {{- end }}
 
 {{- if not .features.mise }}
-.chezmoiscripts/*-install-tools.sh
+.chezmoiscripts/*-install-mise-tools.sh
 .config/mise/
 # .config/sh/plugins/mise.sh
 {{- end }}
@@ -94,6 +94,7 @@
 
 {{- if not .features.node }}
 .chezmoiscripts/*-install-node.sh
+.config/mise/default-npm-packages
 .config/npm/
 {{- end }}
 
