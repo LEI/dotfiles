@@ -345,8 +345,15 @@ return {
       -- Find
       -- { '-', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
       -- { '<leader>F', function() Snacks.picker.files({ cwd = vim.fn.getcwd(), hidden = true }) end, desc = 'Find in current directory' }, -- Open file explorer at current directory
-      -- FIXME: open in current buffer even if nofile (help, oil...)
-      { '<leader>F', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
+      -- NOTE: does not open in current buffer for some filetypes (help, oil...)
+      { '<leader>F', function()
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.picker.files({
+          cwd = cwd,
+          hidden = true,
+          title = 'Files in ' .. vim.fn.fnamemodify(cwd, ':~'),
+        })
+      end, desc = 'Find in buffer directory' },
       { '<leader>f', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Git

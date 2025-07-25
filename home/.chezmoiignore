@@ -127,16 +127,24 @@
 .vimrc.local
 {{- end }}
 
+{{- if not .features.void }}
+.config/Void/
+.void-editor/
+{{- end }}
+
+{{- if not .features.vscode }}
+.config/Code/
+{{- end }}
+
+{{- if not .features.vscodium }}
+.config/VSCodium/
+{{- end }}
+
 {{- if not .features.zellij }}
 .config/zellij/
 {{- end }}
 
-{{ if .codespaces -}}
-.config/Code/
-.config/VSCodium/
-.config/Void/
-.void-editor/
-{{ else -}}
+{{ if not .codespaces -}}
 .vscode-remote/
 {{ end -}}
 
