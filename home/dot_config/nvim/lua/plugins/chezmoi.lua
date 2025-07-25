@@ -50,7 +50,7 @@ return {
       'nvim-lua/plenary.nvim',
       'folke/snacks.nvim',
     },
-    cmd = { 'ChezmoiEdit', 'ChezmoiFind', 'ChezmoiList' },
+    cmd = { 'ChezmoiEdit', 'ChezmoiList' },
     keys = {
       { '<leader>sC', chezmoi_picker, desc = 'Search dotfiles (chezmoi)' },
     },
@@ -65,7 +65,7 @@ return {
         on_watch = false,
       },
     },
-    init = function(_, opts)
+    init = function()
       vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
         pattern = { vim.g.home .. '/.local/share/chezmoi/*' },
         callback = function(ev)
@@ -92,7 +92,7 @@ return {
             if root ~= nil and not vim.startswith(relative, root) then
               return
             end
-            if relative:gsub('^' .. root .. '/', ''):match(prefix) then
+            if root ~= nil and relative:gsub('^' .. root .. '/', ''):match(prefix) then
               return
             end
             require('chezmoi.commands.__edit').watch(bufnr)
@@ -100,7 +100,6 @@ return {
           vim.schedule(edit_watch)
         end,
       })
-      vim.api.nvim_create_user_command('ChezmoiFind', chezmoi_picker, { desc = 'Search dotfiles (chezmoi)' })
     end,
   },
   {
