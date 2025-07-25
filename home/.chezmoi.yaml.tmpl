@@ -45,7 +45,7 @@
 {{-   $accessToken = .accessToken -}}
 {{- else if (env "BWS_ACCESS_TOKEN") -}}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
-{{- else if and $interactive (not $ephemeral) -}}
+{{- else if and $interactive -}}
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
 {{- end -}}
 
@@ -58,6 +58,8 @@
   "chezmoi" .chezmoi
   "codespaces" $codespaces
   "devContainer" $devContainer
+  "ephemeral" $ephemeral
+  "headless" $headless
   "osid" $osid
 ) }}
 

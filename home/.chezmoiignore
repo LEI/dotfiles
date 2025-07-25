@@ -31,10 +31,10 @@
 {{- if and (not .features.bash) (not .features.zsh) }}
 .config/atuin/
 .config/bat/
+.config/curl/
 .config/readline/
 .config/sh/
 .config/wget/
-.curlrc
 .local/bin/
 {{- end }}
 
