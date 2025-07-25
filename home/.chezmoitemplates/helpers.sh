@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-$CHEZMOI_OS}}"
+OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
 if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
   OSID=android
 fi
