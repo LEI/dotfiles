@@ -339,7 +339,10 @@ return {
       { '<leader>br', function() Snacks.rename.rename_file() end, desc = 'Rename file' },
 
       -- Explore
-      { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
+      { '<leader>E', function()
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.explorer({ cwd = cwd, hidden = true })
+      end, desc = 'Find in buffer directory' },
       { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Find
@@ -571,7 +574,8 @@ return {
       end, { desc = 'Open dashboard (snacks)' })
 
       vim.api.nvim_create_user_command('Find', function()
-        Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true })
+        local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
+        Snacks.picker.files({ cwd = cwd, hidden = true })
       end, { desc = 'Find files (snacks)' })
 
       vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })
