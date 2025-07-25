@@ -87,6 +87,7 @@
 {{- if not .features.neovim }}
 .chezmoiscripts/*-install-neovim.sh
 .config/cspell/
+.config/mcphub/
 .config/nvim/
 .local/share/nvim
 {{- end }}
@@ -118,6 +119,7 @@
 {{- end }}
 
 {{- if not .features.topgrade }}
+# .config/topgrade.d/
 .config/topgrade/
 {{- end }}
 
