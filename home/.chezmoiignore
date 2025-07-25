@@ -31,11 +31,11 @@
 {{- if and (not .features.bash) (not .features.zsh) }}
 .config/atuin/
 .config/bat/
+.config/readline/
 .config/sh/
 .curlrc
-.inputrc
-.wgetrc
 .local/bin/
+.wgetrc
 {{- end }}
 
 {{- if not .features.docker }}
@@ -140,21 +140,12 @@
 .install-password-manager.sh
 {{ end -}}
 
-{{- if eq .osid "arch" }}
-.inputrc
-{{ else if eq .osid "darwin" -}}
-.chezmoiscripts/install-packages.sh
-{{- else if eq .osid "windows" }}
-.config/
-.install-password-manager.sh
-.void-editor/
-{,.chezmoiscripts/}*.sh
-{{ else -}}
+{{- if or (ne .osid "arch") (ne .osid "darwin") }}
 .config/Code/
 .config/VSCodium/
 .config/Void/
 .void-editor/
-{{ end -}}
+{{- end }}
 
 {{- if ne .osid "darwin" }}
 .chezmoiscripts/darwin/**
@@ -164,11 +155,17 @@
 .macos
 {{- end }}
 
-{{ if ne .chezmoi.os "linux" -}}
+{{- if ne .chezmoi.os "linux" }}
+.chezmoiscripts/install-packages.sh
 .hushlogin
 {{- end }}
 
 {{- if ne .osid "windows" }}
 *.ps1
 .chezmoiscripts/windows/**
+{{- else }}
+.config/
+.install-password-manager.sh
+.void-editor/
+{,.chezmoiscripts/}*.sh
 {{- end }}

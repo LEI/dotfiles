@@ -3,13 +3,13 @@
 commonPackages:
   - bat
   - curl
-  - { name: eza, windows: eza-community.eza, id: not debian }
+  - { name: eza, windows: eza-community.eza, id: not debian } # Ubuntu >22
   - { name: fd, windows: sharkdp.fd, idLike: not debian }
   - git
   - { name: jq, windows: jqlang.jq }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, feature: not neovim, windows: koalaman.shellcheck }
-  - { name: starship, idLike: not debian }
+  - { name: starship, idLike: not debian } # Ubuntu >22
   - { name: yq, windows: MikeFarah.yq }
   - { name: zoxide, windows: ajeetdsouza.zoxide }
 packages:
