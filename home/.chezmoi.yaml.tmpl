@@ -1,5 +1,6 @@
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
 
+{{- $dev := true -}}
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 
@@ -8,12 +9,19 @@
 {{- $interactive := stdinIsATTY -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
-{{- if or $codespaces $devContainer (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+{{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
+{{- if or $codespaces $devContainer -}}
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- else if $interactive -}}
 {{-   $ephemeral = promptBoolOnce . "ephemeral" "ephemeral" -}}
 {{-   $headless = promptBoolOnce . "headless" "headless" -}}
+{{- end -}}
+
+{{- if (env "DEV") -}}
+{{-   $dev = env "DEV" | not | not -}}
+{{- else if $interactive -}}
+{{-   $dev = promptBoolOnce . "dev" "dev" -}}
 {{- end -}}
 
 {{- $hostname := .chezmoi.hostname -}}
@@ -89,6 +97,7 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 data:
   accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
+  dev: {{ $dev }}
   devContainer: {{ $devContainer }}
   ephemeral: {{ $ephemeral }}
   headless: {{ $headless }}
@@ -98,6 +107,7 @@ data:
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}
   osid: {{ $osid | quote }}
+  osVersion: {{ get .chezmoi.osRelease "versionID" }}
   sh: {{ $sh | quote }}
 
   email: {{ $email | quote }}

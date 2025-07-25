@@ -1,9 +1,18 @@
 {{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
 {{- $features := $data.features -}}
 
-{{- if eq .osid "alpine" }}
+{{- if get . "dev" }}
+{{- $features = mergeOverwrite $features (dict
+  "bash" true
+  "git" true
+  "kube" true
+  "helix" true
+  "nushell" true
+  "topgrade" true
+) -}}
+{{- end }}
 
-{{- /* Alpine */ -}}
+{{- if eq .osid "alpine" }}
 {{- $features = mergeOverwrite $features (dict
   "go" false
   "neovim" false
@@ -13,10 +22,7 @@
   "vim" false
   "zellij" false
 ) -}}
-
 {{- else if eq .osid "android" }}
-
-{{- /* Termux */ -}}
 {{- $features = mergeOverwrite $features (dict
   "neovim" true
   "tmux" true
@@ -25,8 +31,6 @@
 ) -}}
 
 {{- else if eq .osid "arch" }}
-
-{{- /* Archlinux/Manjaro */ -}}
 {{- $features = mergeOverwrite $features (dict
   "ai" true
   "docker" true
@@ -43,10 +47,7 @@
   "zellij" true
   "zsh" true
 ) -}}
-
 {{- else if eq .osid "debian" }}
-
-{{- /* Debian/Ubuntu */ -}}
 {{- $features = mergeOverwrite $features (dict
   "docker" false
   "ghostty" true
@@ -61,10 +62,7 @@
   "vim" true
   "zellij" true
 ) -}}
-
 {{- else if eq .chezmoi.os "darwin" }}
-
-{{- /* macOS */ -}}
 {{- $features = mergeOverwrite $features (dict
   "ai" true
   "bash" false
@@ -83,10 +81,7 @@
   "zellij" true
   "zsh" false
 ) -}}
-
 {{- else if eq .chezmoi.os "windows" }}
-
-{{- /* Windows */ -}}
 {{- $features = mergeOverwrite $features (dict
 ) -}}
 
