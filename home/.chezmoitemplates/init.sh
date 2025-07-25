@@ -44,7 +44,10 @@ source_plugins() {
 main() {
   local file name
 
-  # Source common functions (pathmunge)
+  # Load environment variables before other scripts
+  # e.g. INPUTRC before ble.sh
+  source_if_exists "$HOME/.config/sh/environment.sh"
+
   source_files "sh/functions"
 
   # if [ -d "$HOME/bin ]; then
@@ -108,7 +111,6 @@ main() {
     fi
   fi
 
-  source_if_exists "$HOME/.config/sh/environment.sh"
   source_if_exists "$HOME/.config/sh/aliases.sh"
 
   # Source shell specifc files

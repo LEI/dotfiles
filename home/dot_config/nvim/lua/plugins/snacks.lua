@@ -150,8 +150,7 @@ local function grep_picker()
     -- Start in normal mode
     on_show = function(picker)
       -- local buffer = picker.input.filter.current_buf
-      local search = picker.input.filter.search
-      if search ~= '' then
+      if picker.input.filter.search ~= '' then
         vim.cmd.stopinsert()
       end
     end,
@@ -233,7 +232,7 @@ return {
       animate = { enabled = false },
       bigfile = { enabled = true },
       dashboard = dashboard,
-      explorer = { enabled = false, replace_netrw = true },
+      explorer = { enabled = true, replace_netrw = false },
       indent = { enabled = false },
       input = { enabled = true },
       notifier = {
@@ -340,8 +339,8 @@ return {
       { '<leader>br', function() Snacks.rename.rename_file() end, desc = 'Rename file' },
 
       -- Explore
-      -- { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
-      -- { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
+      { '<leader>E', function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },
+      { '<leader>e', function() Snacks.explorer({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root
 
       -- Find
       -- { '-', function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h'), hidden = true }) end, desc = 'Find in buffer directory' },

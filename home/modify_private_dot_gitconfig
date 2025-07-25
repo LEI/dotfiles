@@ -2,8 +2,11 @@
 {{- .chezmoi.stdin | replaceAllRegex "(?s)### START.*?\n(.*)### END.*?\n" "" -}}
 ### START
 
+# NOTE: replaced by dot_config/git/config
+
 [alias]
     ca = !git add -A && git commit -av
+    d = diff
     s = status --short
 
 # [core]

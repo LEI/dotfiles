@@ -1,0 +1,20 @@
+[alias]
+    ca = !git add -A && git commit -av
+    d = diff
+    s = status --short
+
+[include]
+    path = "~/.gitconfig.local"
+
+[includeIf "gitdir:~/src/github.com/"]
+    path = github.ini
+[includeIf "hasconfig:remote.*.url:git@github.com*/**"]
+    path = github.ini
+
+[includeIf "gitdir:~/src/gitlab.com/"]
+    path = gitlab.ini
+[includeIf "hasconfig:remote.*.url:git@gitlab.com*/**"]
+    path = gitlab.ini
+
+[ghq]
+    root = ~/src

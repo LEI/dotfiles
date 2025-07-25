@@ -6,7 +6,7 @@ export XDG_CACHE_HOME=$HOME/.cache
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
-# export CURL_HOME="$HOME/.config/curl"
+export CURL_HOME="$HOME/.config/curl"
 
 {{- if .features.docker }}
 export DOCKER_CONFIG=$HOME/.config/docker
@@ -22,9 +22,11 @@ elif command -v vim >/dev/null; then
 elif command -v code >/dev/null; then
   VISUAL=code
 else
-  VISUAL="$EDITOR"
+  VISUAL="${VISUAL:-EDITOR}"
 fi
 export VISUAL
+
+export INPUTRC="$HOME/.config/readline/inputrc"
 
 {{- if and .features.sql (lookPath "psql") }}
 export PSQLRC=$HOME/.config/psql/psqlrc

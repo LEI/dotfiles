@@ -72,7 +72,6 @@ return {
   },
   {
     'echasnovski/mini.move',
-    enabled = false,
     tag = 'v0.16.0',
     event = 'InsertEnter',
   },
@@ -130,9 +129,16 @@ return {
   {
     'stevearc/oil.nvim',
     version = '2.15.0',
-    lazy = false,
+    -- lazy = false,
     cmd = 'Oil',
+    -- https://github.com/stevearc/oil.nvim/issues/300
+    -- event = { 'BufNew */*,.*', 'VimEnter */*,.*' },
+    lazy = false,
     opts = {
+      buffer_options = {
+        -- Consider buffer like file to use current with snacks picker
+        buflisted = true,
+      },
       columns = {
         'icon',
         -- 'permissions',
@@ -143,6 +149,17 @@ return {
       delete_to_trash = true,
       keymaps = {
         ['g?'] = { 'actions.show_help', mode = 'n' },
+        ['gd'] = {
+          desc = 'Toggle file detail view',
+          callback = function()
+            vim.g.oil_detail = not vim.g.oil_detail
+            if vim.g.oil_detail then
+              require('oil').set_columns({ 'icon', 'permissions', 'size', 'mtime' })
+            else
+              require('oil').set_columns({ 'icon' })
+            end
+          end,
+        },
         ['<CR>'] = 'actions.select',
         -- ['<C-s>'] = { 'actions.select', opts = { vertical = true } },
         -- ['<C-h>'] = { 'actions.select', opts = { horizontal = true } },
