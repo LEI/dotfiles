@@ -9,19 +9,20 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-echo >&2 "Installing topgrade"
-
 # {{- if eq .osID "arch" }}
 # {{- if lookPath "yay" }}
+echo >&2 "Installing topgrade"
 cmd sudo yay --sync --needed --noconfirm --quiet topgrade
 # {{- else if lookPath "paru" }}
 cmd sudo paru --sync --needed --noconfirm --quiet topgrade
 # {{- else if lookPath "pamac" }}
 cmd sudo pamac install --no-confirm --quiet topgrade
 # {{- end }}
+echo >&2 "Installed topgrade"
 # {{- else if eq .osID "manjaro" }}
 #cmd sudo pacman --sync --needed --noconfirm --quiet topgrade
 # {{- else if eq .osid "debian" }} Debian/Ubuntu
+echo >&2 "Installing topgrade"
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release topgrade-rs/topgrade)"
 # TODO: ARCH="$(uname -m)" # aarch64, x86_64
@@ -29,10 +30,5 @@ NAME="topgrade_${VERSION#v}-1_amd64"
 URL="https://github.com/topgrade-rs/topgrade/releases/download/$VERSION/$NAME.deb"
 cmd curl -LSfs "$URL" -o "$TMPDIR/$NAME.deb"
 cmd sudo -E apt-get install --quiet --yes "$TMPDIR/$NAME.deb"
-# {{- else if eq .osid "android" }}
-cmd apt-get install --quiet --yes topgrade >/dev/null
-# {{- else }}
-err "Unknown OS: $CHEZMOI_OS $CHEZMOI_OS_RELEASE_ID"
-# {{- end }}
-
 echo >&2 "Installed topgrade"
+# {{- end }}

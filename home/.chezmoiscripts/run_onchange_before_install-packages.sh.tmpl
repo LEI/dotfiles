@@ -6,7 +6,6 @@
 set -eu
 
 {{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
-
 packages="{{ $packages | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
@@ -27,6 +26,15 @@ sudo apk add --quiet $packages
 {{- end }}
 # shellcheck disable=SC2086
 sudo pacman --sync --needed --noconfirm --quiet $packages
+{{- $aurPackages := includeTemplate "packages.tmpl" (merge (dict "packageType" "aur") .) | fromJson }}
+aur_packages="{{ $aurPackages | join " " }}"
+{{- if lookPath "yay" }}
+sudo yay --sync --needed --noconfirm --quiet $aur_packages
+{{- else if lookPath "paru" }}
+sudo paru --sync --needed --noconfirm --quiet $aur_packages
+{{- else if lookPath "pamac" }}
+sudo pamac install --no-confirm --quiet $aur_packages
+{{- end }}
 {{- else if eq .osid "debian" }} Debian/Ubuntu
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive

@@ -15,7 +15,9 @@ commonPackages:
   # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
   - name: starship
     condition: ne .osIDLike "debian"
-  - { name: topgrade, condition: and (ne .osID "arch") (ne .osIDLike "debian") }
+  - name: topgrade
+    condition: and (ne .osID "arch") (ne .osIDLike "debian")
+    type: eq .osID "manjaro" | ternary "aur" ""
   - name: yq
     condition: 'and (ne .osID "ubuntu") (ne .osVersion "22.04")'
     windows: MikeFarah.yq
@@ -56,7 +58,6 @@ packages:
     - sudo
     - which
     - { name: helix, condition: .features.helix }
-    # - { name: helixbinhx, condition: .features.helix, idLike: arch, aur: true }
     - { name: neovim, condition: .features.neovim }
     - { name: vim, condition: .features.vim }
   arch: # Archlinux/Manjaro
@@ -66,6 +67,9 @@ packages:
     - skim
     - time # condition: command time
     - { name: helix, condition: .features.helix }
+    - name: helixbinhx
+      condition: and .features.helix (eq .osIDLike "arch")
+      type: '"aur"'
     - { name: neovim, condition: .features.neovim }
     - { name: vim, condition: .features.vim }
     # https://github.com/Jguer/yay#other-distributions

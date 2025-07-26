@@ -1,7 +1,5 @@
+{{- $packageType := get . "packageType" }}
 {{- $packages := list }}
-{{- $osid := get .chezmoi.osRelease "id" | default .chezmoi.os }}
-{{- $idLike := get .chezmoi.osRelease "idLike" | default $osid }}
-
 {{- range $index, $pkg := .packages }}
 {{-   $packageName := "" }}
 {{-   if kindIs "map" $pkg }}
@@ -10,52 +8,24 @@
 {{-     $packageName = $pkg }}
 {{-     $pkg = dict "name" $packageName }}
 {{-   end }}
-
-{{-   if and (eq $.osid "windows") (not (contains "." $packageName)) }}
-{{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
+{{-   if $packageType }}
+{{-     $typeExpression := get $pkg "type" }}
+{{-     if $typeExpression }}
+{{-       $type := output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ %s }}" $typeExpression) | trim }}
+{{-       if and $type (ne $packageType $type) }}
+{{-         continue }}
+{{-       end }}
+{{-     else }}
+{{-       continue }}
+{{-     end }}
 {{-   end }}
-
 {{-   $condition := get $pkg "condition" | default nil }}
 {{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
 {{-     continue }}
 {{-   end }}
-
-{{-   $feature := get $pkg "feature" | default nil }}
-{{-   if $feature }}
-{{-     if and (ne (substr 0 4 $feature) "not ") (get $.features $feature | default false | not) }}
-{{-       continue }}
-{{-     else if and (eq (substr 0 4 $feature) "not ") (get $.features (substr 4 (len $feature) $feature) | default false | not) }}
-{{-       continue }}
-{{-     end }}
+{{-   if and (eq $.osID "windows") (not (contains "." $packageName)) }}
+{{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
 {{-   end }}
-
-{{-   $filterOS := get $pkg "os" | default nil }}
-{{-   if $filterOS }}
-{{-     if and (ne (substr 0 4 $filterOS) "not ") (ne $.chezmoi.os $filterOS) }}
-{{-       continue }}
-{{-     else if and (eq (substr 0 4 $filterOS) "not ") (eq $.chezmoi.os (substr 4 (len $filterOS) $filterOS)) }}
-{{-       continue }}
-{{-     end }}
-{{-   end }}
-
-{{-   $filterID := get $pkg "id" | default nil }}
-{{-   if $filterID }}
-{{-     if and (ne (substr 0 4 $filterID) "not ") (ne $osid $filterID) }}
-{{-       continue }}
-{{-     else if and (eq (substr 0 4 $filterID) "not ") (eq $osid (substr 4 (len $filterID) $filterID)) }}
-{{-       continue }}
-{{-     end }}
-{{-   end }}
-
-{{-   $filterLike := get $pkg "filterLike" | default nil }}
-{{-   if $filterLike }}
-{{-     if and (ne (substr 0 4 $filterLike) "not ") (ne $idLike $filterLike) }}
-{{-       continue }}
-{{-     else if and (eq (substr 0 4 $filterLike) "not ") (eq $idLike (substr 4 (len $filterLike) $filterLike)) }}
-{{-       continue }}
-{{-     end }}
-{{-   end }}
-
 {{-   $packages = append $packages $packageName }}
 {{- end }}
 {{- $packages | toJson -}}
