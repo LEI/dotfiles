@@ -1,7 +1,7 @@
 {{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
 {{- $features := $data.features -}}
 
-{{- if ne .profile "minimal" }}
+{{- if ne (get . "profile") "minimal" }}
 {{- $features = mergeOverwrite $features (dict
   "bash" true
   "git" true

@@ -60,22 +60,28 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $osid := includeTemplate "osid.tmpl" (dict "chezmoi" .chezmoi) }}
+{{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
+{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
+
+{{- if eq (env "HOME") "/data/data/com.termux/files/home" -}}
+{{- $osID = "android" -}}
+{{- end -}}
+
 {{- $features := includeTemplate "features.tmpl" (dict
   "chezmoi" .chezmoi
   "codespaces" $codespaces
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "headless" $headless
-  "osid" $osid
+  "osid" $osID
 ) }}
 
 {{- $sh := "sh" -}}
-{{- if eq $osid "windows" }}
+{{- if eq $osID "windows" }}
 {{- $sh = "bash" }}
 {{- end }}
 
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) }}
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -83,7 +89,7 @@
 #   identity: {{ env "HOME" }}/key.txt
 #   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
 
-{{- if ne $osid "windows" }}
+{{- if ne $osID "windows" }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
   read-source-state:
@@ -100,15 +106,15 @@ data:
   ephemeral: {{ $ephemeral }}
   headless: {{ $headless }}
   hostname: {{ $hostname | quote }}
-  profile: {{ $profile }}
+  profile: {{ $profile | quote }}
   wsl: {{ $wsl }}
 
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}
-  osid: {{ $osid | quote }}
-  # osID:
-  # osIDLike:
-  osVersion: {{ get .chezmoi.osRelease "versionID" }}
+  osid: {{ $osID | quote }}
+  # osID: {{ $osID | quote }}
+  osIDLike: {{ $osIDLike | quote }}
+  osVersion: {{ get .chezmoi.osRelease "versionID" | quote }}
   sh: {{ $sh | quote }}
 
   email: {{ $email | quote }}
@@ -134,7 +140,7 @@ env: {}
 github:
   refreshPeriod: 12h
 
-{{- if eq $osid "windows" }}
+{{- if eq $osID "windows" }}
 interpreters:
   sh:
     command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
@@ -150,7 +156,7 @@ scriptEnv:
   HOMEBREW_NO_AUTO_UPDATE: "1"
   HOMEBREW_NO_ENV_HINTS: "1"
   NONINTERACTIVE: "1"
-{{- else if eq $osid "debian" }}
+{{- else if eq $osID "debian" }}
   DEBIAN_FRONTEND: noninteractive
 {{- end }}
 
