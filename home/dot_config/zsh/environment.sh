@@ -1,3 +1,4 @@
+# HISTFILE="$HOME/.config/zsh/history"
 HISTSIZE=100000
 # shellcheck disable=SC2034
 SAVEHIST=100000

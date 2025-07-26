@@ -25,7 +25,7 @@ cmd sudo apk upgrade --quiet
 cmd sudo apk add --quiet $packages
 {{- else if eq .osid "arch" }} Archlinux/Manjaro
 {{- if .upgrade }}
-# cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
+cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo pacman --sync --needed --noconfirm --quiet $packages

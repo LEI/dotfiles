@@ -1,5 +1,5 @@
 # export GOBIN=$HOME/.local/bin
-# export GOPATH=$HOME
+# export GOPATH="$HOME/.config/go"
 # export GO111MODULE=on
 
 export GOPATH="${GOTPATH:-$HOME/go}"

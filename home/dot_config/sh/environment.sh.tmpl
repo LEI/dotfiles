@@ -1,3 +1,6 @@
+# https://github.com/b3nj5m1n/xdg-ninja/tree/main/programs
+# https://github.com/twpayne/dotfiles/blob/master/home/dot_zshrc.tmpl
+
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_STATE_HOME=$HOME/.local/state
@@ -7,7 +10,7 @@ export XDG_CACHE_HOME=$HOME/.cache
 # export LC_ALL=en_US.UTF-8
 
 {{- if .features.docker }}
-export DOCKER_CONFIG=$HOME/.config/docker
+# export DOCKER_CONFIG=$XDG_CONFIG_HOME/docker
 {{- end }}
 
 export EDITOR="${EDITOR:-vi}"
@@ -24,18 +27,18 @@ else
 fi
 export VISUAL
 
-export INPUTRC="$HOME/.config/readline/inputrc"
+export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
 
 {{- if .features.node }}
-export NPM_CONFIG_USERCONFIG="$HOME/.config/npm/npmrc"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 {{- end }}
 
 {{- if and .features.sql (lookPath "psql") }}
-export PSQLRC=$HOME/.config/psql/psqlrc
+export PSQLRC=$XDG_CONFIG_HOME/psql/psqlrc
 {{- end }}
 
-export RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep/config
+export RIPGREP_CONFIG_PATH=$XDG_CONFIG_HOME/ripgrep/config
 
-export WGETRC=$HOME/.config/wget/wgetrc
+export WGETRC=$XDG_CONFIG_HOME/wget/wgetrc
 
 # export ZDOTDIR="$XDG_CONFIG_HOME/zsh"

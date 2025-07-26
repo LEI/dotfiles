@@ -171,9 +171,9 @@
 
 {{- if ne .osid "darwin" }}
 .chezmoiscripts/darwin/**
+.config/hammerspoon/
 .config/homebrew/
-# .config/karabiner/
-# .hammerspoon/
+.config/karabiner/
 .macos
 {{- end }}
 

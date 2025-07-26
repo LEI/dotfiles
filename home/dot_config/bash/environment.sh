@@ -1,3 +1,4 @@
+# HISTFILE="$HOME/.config/bash/history"
 HISTSIZE=100000
 HISTFILESIZE=200000
 HISTCONTROL=erasedups:ignoreboth

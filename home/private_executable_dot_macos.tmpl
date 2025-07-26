@@ -14,3 +14,5 @@
     | replaceAllRegex "\nsudo mdutil" "\n# sudo mdutil"
     | replaceAllRegex "(\\s*)(.*open.*HOME.*init.*)" "${1}# ${2}"
     | replaceAllRegex "defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false" "defaults write NSGlobalDomain com.apple.swipescrolldirection -bool true" -}}
+
+defaults write org.hammerspoon.Hammerspoon MJConfigFile "~/.config/hammerspoon/init.lua"

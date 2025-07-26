@@ -83,6 +83,7 @@ packages:
     brews:
       - carapace
       - gpg
+      - { name: neovim, condition: .features.neovim }
       - { name: nowplaying-cli, condition: .features.tmux }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
