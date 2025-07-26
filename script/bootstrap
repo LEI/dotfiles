@@ -70,7 +70,7 @@ if ! chezmoi="$(command -v chezmoi)"; then
 
   # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}{{ else }}-musl{{ end }}'
   NAME="chezmoi-$OS-$ARCH"
-  URL="https://github.com/twpayne/chezmoi/releases/download/v$VERSION/$NAME"
+  URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME"
   if [ ! -d "$BIN_DIR" ]; then
     echo >&2 "Creating directory: $BIN_DIR"
     mkdir -p "$BIN_DIR"
