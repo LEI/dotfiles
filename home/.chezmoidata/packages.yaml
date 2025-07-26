@@ -5,7 +5,7 @@ commonPackages:
   - { name: bandwhich, condition: 'not (eq .osIDLike "debian" "windows")' }
   - curl
   - name: eza
-    condition: 'not (or (eq .osID "debian") (and (eq .osID "ubuntu") (eq .osVersion "22.04")))'
+    condition: 'not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22)))'
     windows: eza-community.eza
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
@@ -19,9 +19,11 @@ commonPackages:
     condition: and (ne .osID "arch") (ne .osIDLike "debian")
     type: eq .osID "manjaro" | ternary "aur" ""
   - name: yq
-    condition: 'and (ne .osID "ubuntu") (ne .osVersion "22.04")'
+    condition: 'and (ne .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22)'
     windows: MikeFarah.yq
-  - { name: zoxide, windows: ajeetdsouza.zoxide }
+  - name: zoxide
+    condition: 'and (ne .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 20)'
+    windows: ajeetdsouza.zoxide
 packages:
   alpine:
     - bash
@@ -62,6 +64,8 @@ packages:
     - { name: vim, condition: .features.vim }
   arch: # Archlinux/Manjaro
     - base-devel
+    - name: carapace-bin
+      type: '"aur"'
     - gnu-netcat
     - gnupg
     - skim
@@ -76,6 +80,7 @@ packages:
     - { name: yay, condition: eq .osIDLike "manjaro" }
   darwin:
     brews:
+      - carapace
       - gpg
       - sk
     casks:

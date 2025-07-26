@@ -2,28 +2,8 @@
 # https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
 
 {{- if .codespaces }}
+# TODO: .config/{Void,Code,VSCodium}
 .vscode-remote/User/globalStorage/zokugun.sync-settings/repository:
-  type: git-repo
-  url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
-  refreshPeriod: 168h
-{{- end }}
-
-{{- if .features.void }}
-.config/Void/User/globalStorage/zokugun.sync-settings/repository:
-  type: git-repo
-  url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
-  refreshPeriod: 168h
-{{- end }}
-
-{{- if .features.vscode }}
-.config/Code/User/globalStorage/zokugun.sync-settings/repository:
-  type: git-repo
-  url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
-  refreshPeriod: 168h
-{{- end }}
-
-{{- if .features.vscodium }}
-.config/VSCodium/User/globalStorage/zokugun.sync-settings/repository:
   type: git-repo
   url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
   refreshPeriod: 168h

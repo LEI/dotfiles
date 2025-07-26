@@ -9,17 +9,7 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# {{- if eq .osID "arch" }}
-# {{- if lookPath "yay" }}
-echo >&2 "Installing topgrade"
-cmd sudo yay --sync --needed --noconfirm --quiet topgrade
-# {{- else if lookPath "paru" }}
-cmd sudo paru --sync --needed --noconfirm --quiet topgrade
-# {{- else if lookPath "pamac" }}
-cmd sudo pamac install --no-confirm --quiet topgrade
-# {{- end }}
-echo >&2 "Installed topgrade"
-# {{- else if eq .osID "manjaro" }}
+# {{- if eq .osID "manjaro" }}
 #cmd sudo pacman --sync --needed --noconfirm --quiet topgrade
 # {{- else if eq .osid "debian" }} Debian/Ubuntu
 echo >&2 "Installing topgrade"

@@ -39,12 +39,12 @@ check_version() {
   cmd bat --version
   cmd ble --version || true
   # cmd bws --version
-  cmd carapace --version || true
+  cmd carapace --version
   cmd direnv export bash # "${SHELL##*/}"
   cmd eza --version
   cmd fd --version
   # cmd ghostty --version | head -n1
-  cmd hx --version || cmd helix --version || true
+  cmd hx --version # || cmd helix --version || true
   cmd jq --version
 
   cmd mise --version | head -n1

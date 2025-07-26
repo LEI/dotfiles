@@ -8,16 +8,14 @@
 {{-     $packageName = $pkg }}
 {{-     $pkg = dict "name" $packageName }}
 {{-   end }}
-{{-   if $packageType }}
-{{-     $typeExpression := get $pkg "type" }}
-{{-     if $typeExpression }}
-{{-       $type := output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ %s }}" $typeExpression) | trim }}
-{{-       if and $type (ne $packageType $type) }}
-{{-         continue }}
-{{-       end }}
-{{-     else }}
+{{-   $typeExpression := get $pkg "type" }}
+{{-   if and $packageType $typeExpression }}
+{{-     $type := output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ %s }}" $typeExpression) | trim }}
+{{-     if and $type (ne $packageType $type) }}
 {{-       continue }}
 {{-     end }}
+{{-   else if or $packageType $typeExpression }}
+{{-       continue }}
 {{-   end }}
 {{-   $condition := get $pkg "condition" | default nil }}
 {{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}

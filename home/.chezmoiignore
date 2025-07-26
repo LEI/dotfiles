@@ -38,6 +38,7 @@
 {{- if and (not .features.bash) (not .features.zsh) }}
 .config/atuin/
 .config/bat/
+.config/carapace/
 .config/curlrc
 .config/readline/
 .config/sh/

@@ -44,45 +44,59 @@ fi
 
 # https://github.com/twpayne/chezmoi/releases
 # TODO: NAME="chezmoi_${VERSION}_${OS}_${ARCH}.{apk,deb}"
+
+# if ! chezmoi="$(command -v chezmoi)"; then
+#   chezmoi="$BIN_DIR/chezmoi"
+#   echo >&2 "Installing chezmoi to $chezmoi"
+#   VERSION="$(get_release twpayne/chezmoi)"
+#   OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # "$CHEZMOI_OS"
+#   ARCH=amd64
+#   # grep -F libc "$(which ldd)"
+#   if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+#     ARCH="$ARCH-musl"
+#   fi
+#   # case "$(uname -m)" in
+#   # x86_84) ARCH=amd64 ;;
+#   # esac
+#
+#   # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}glibc{{ else }}musl{{ end }}'
+#   # NAME="chezmoi_${VERSION#v}_${OS}-${LIB}_${ARCH}"
+#   # OUT="$TMPDIR/$NAME.tar.gz"
+#   # BIN="$TMPDIR/$NAME/chezmoi"
+#   # URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME.tar.gz"
+#   # curl -LSfs "$URL" -o "$OUT"
+#   # tar -xzf "$OUT" -C "$TMPDIR"
+#   # sudo mv "$BIN" "$BIN_DIR/chezmoi"
+#   # sudo chmod +x "$BIN_DIR/chezmoi"
+#
+#   # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}{{ else }}-musl{{ end }}'
+#   NAME="chezmoi-$OS-$ARCH"
+#   URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME"
+#   if [ ! -d "$BIN_DIR" ]; then
+#     echo >&2 "Creating directory: $BIN_DIR"
+#     mkdir -p "$BIN_DIR"
+#   fi
+#   echo >&2 "Downloading file: $URL"
+#   if command -v curl >/dev/null; then
+#     curl -LSfs "$URL" -o "$chezmoi"
+#   else
+#     wget -q "$URL" -O "$chezmoi"
+#   fi
+#   chmod +x "$chezmoi"
+#   echo >&2 "Installed chezmoi"
+# fi
+
+# https://github.com/twpayne/dotfiles/blob/master/install.sh
 if ! chezmoi="$(command -v chezmoi)"; then
   chezmoi="$BIN_DIR/chezmoi"
-  echo >&2 "Installing chezmoi to $chezmoi"
-  VERSION="$(get_release twpayne/chezmoi)"
-  OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # "$CHEZMOI_OS"
-  ARCH=amd64
-  # grep -F libc "$(which ldd)"
-  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
-    ARCH="$ARCH-musl"
-  fi
-  # case "$(uname -m)" in
-  # x86_84) ARCH=amd64 ;;
-  # esac
-
-  # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}glibc{{ else }}musl{{ end }}'
-  # NAME="chezmoi_${VERSION#v}_${OS}-${LIB}_${ARCH}"
-  # OUT="$TMPDIR/$NAME.tar.gz"
-  # BIN="$TMPDIR/$NAME/chezmoi"
-  # URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME.tar.gz"
-  # curl -LSfs "$URL" -o "$OUT"
-  # tar -xzf "$OUT" -C "$TMPDIR"
-  # sudo mv "$BIN" "$BIN_DIR/chezmoi"
-  # sudo chmod +x "$BIN_DIR/chezmoi"
-
-  # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}{{ else }}-musl{{ end }}'
-  NAME="chezmoi-$OS-$ARCH"
-  URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME"
-  if [ ! -d "$BIN_DIR" ]; then
-    echo >&2 "Creating directory: $BIN_DIR"
-    mkdir -p "$BIN_DIR"
-  fi
-  echo >&2 "Downloading file: $URL"
-  if command -v curl >/dev/null; then
-    curl -LSfs "$URL" -o "$chezmoi"
+  if [ "$(command -v curl)" ]; then
+    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$BIN_DIR"
+  elif [ "$(command -v wget)" ]; then
+    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$BIN_DIR"
   else
-    wget -q "$URL" -O "$chezmoi"
+    echo "To install chezmoi, you must have curl or wget installed." >&2
+    exit 1
   fi
-  chmod +x "$chezmoi"
-  echo >&2 "Installed chezmoi"
 fi
 
 echo "Running 'chezmoi $*'" >&2
