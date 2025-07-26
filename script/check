@@ -74,9 +74,7 @@ check_version() {
     # cmd timeout 5m topgrade --disable=chezmoi
   fi
 
-  if cmd vim --version | head -n1; then
-    vim +Update! +qa
-  fi
+  vim --version || true | head -n1
 
   cmd yq --version
   cmd zellij --version || true

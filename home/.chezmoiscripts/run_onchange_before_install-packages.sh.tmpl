@@ -5,79 +5,80 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 {{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
 packages="{{ $packages | join " " }}"
 
-echo >&2 "OS: $CHEZMOI_OS {{ .osid }}"
+echo >&2 "OS: $CHEZMOI_OS"
+echo >&2 "OS ID: {{ .osID }}"
+echo >&2 "OS ID like: {{ .osIDLike }}"
+echo >&2 "OS version: {{ .osVersion }}"
 echo >&2 "Installing packages: $packages"
 
-set -x
-
 {{- if eq .osid "alpine" }}
-sudo apk update --quiet
+cmd sudo apk update --quiet
 {{- if .upgrade }}
-sudo apk upgrade --quiet
+cmd sudo apk upgrade --quiet
 {{- end }}
 # shellcheck disable=SC2086
-sudo apk add --quiet $packages
+cmd sudo apk add --quiet $packages
 {{- else if eq .osid "arch" }} Archlinux/Manjaro
 {{- if .upgrade }}
-# sudo pacman --sync --needed --noconfirm --quiet --upgrade
+# cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
 # shellcheck disable=SC2086
-sudo pacman --sync --needed --noconfirm --quiet $packages
+cmd sudo pacman --sync --needed --noconfirm --quiet $packages
 # if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
 #   if [ ! -d /tmp/yay-bin ]; then
-#     git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+#     cmd git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
 #   fi
-#   cd /tmp/yay-bin
-#   makepkg --install --noconfirm --syncdeps
+#   cmd cd /tmp/yay-bin
+#   cmd makepkg --install --noconfirm --syncdeps
 # fi
 {{- $aurPackages := includeTemplate "packages.tmpl" (merge (dict "packageType" "aur") .) | fromJson }}
 aur_packages="{{ $aurPackages | join " " }}"
 {{- if lookPath "yay" }}
-yay --sync --needed --noconfirm --quiet $aur_packages
+cmd yay --sync --needed --noconfirm --quiet $aur_packages
 {{- else if lookPath "paru" }}
-paru --sync --needed --noconfirm --quiet $aur_packages
+cmd paru --sync --needed --noconfirm --quiet $aur_packages
 {{- else if lookPath "pamac" }}
-pamac install --no-confirm --quiet $aur_packages
+cmd pamac install --no-confirm --quiet $aur_packages
 {{- end }}
 {{- else if eq .osid "debian" }} Debian/Ubuntu
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update --quiet >/dev/null
+cmd sudo apt-get update --quiet >/dev/null
 {{- if .upgrade }}
-sudo -E apt-get upgrade --quiet --yes # >/dev/null
+cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
 {{- end }}
 # shellcheck disable=SC2086
-sudo -E apt-get install --quiet --yes $packages # >/dev/null
+cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
 {{- else if eq .osid "fedora" }}
 # TODO: packages="$packages gpg"
 {{- else if eq .osid "android" }}
 # TODO: termux-setup-package-manager, termux-setup-storage
 # TERM=xterm temux-change-repo # apt edit-sources
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
-# apt-get update --quiet >/dev/null
-pkg update --quiet
+# cmd apt-get update --quiet >/dev/null
+cmd pkg update --quiet
 {{- if .upgrade }}
-# apt-get upgrade --quiet --yes # >/dev/null
-pkg upgrade --quiet --yes
+# cmd apt-get upgrade --quiet --yes # >/dev/null
+cmd pkg upgrade --quiet --yes
 {{- end }}
 # shellcheck disable=SC2086
-apt-get install --quiet --yes $packages >/dev/null
+cmd apt-get install --quiet --yes $packages >/dev/null
 {{- end }}
 
 {{- if and .codespaces (eq .osid "debian") }}
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
 if [ "${selected_editor##*/}" = nano ]; then
   if [ -x /usr/bin/vim.basic ]; then
-    sudo update-alternatives --set editor /usr/bin/vim.basic
+    cmd sudo update-alternatives --set editor /usr/bin/vim.basic
   elif [ -x /usr/bin/vim.tiny ]; then
-    sudo update-alternatives --set editor /usr/bin/vim.tiny
+    cmd sudo update-alternatives --set editor /usr/bin/vim.tiny
   fi
 fi
 {{- end }}
-
-set +x
 
 echo >&2 "Installed packages"

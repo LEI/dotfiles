@@ -3,6 +3,7 @@
 
 {{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
+  "docker" true
   "atuin" true
   "bash" true
   "git" true
@@ -99,6 +100,8 @@
 ) -}}
 {{- else if eq .chezmoi.os "windows" }}
 {{- $features = mergeOverwrite $features (dict
+  "docker" false
+  "kube" false
 ) -}}
 {{- end }}
 
