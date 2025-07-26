@@ -1,7 +1,7 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
-  - bat
+  - { name: bat, windows: sharkdp.bat }
   - { name: bandwhich, condition: not (eq .osIDLike "debian" "windows") }
   - curl
   - name: eza
