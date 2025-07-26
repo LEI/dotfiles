@@ -32,33 +32,32 @@ check_chezmoi() {
 }
 
 check_version() {
+  cmd atuin --version
+  # cmd atuin dotfiles alias list
+
   cmd bash --version # | head -n1
   cmd bat --version
+  cmd ble --version || true
   # cmd bws --version
+  cmd carapace --version || true
+  cmd direnv export bash # "${SHELL##*/}"
   cmd eza --version
   cmd fd --version
+  # cmd ghostty --version | head -n1
+  cmd hx --version || cmd helix --version || true
   cmd jq --version
-  cmd nu --version
-  cmd rg --version
-  cmd yq --version
-  cmd zoxide --version
 
   cmd mise --version | head -n1
   cmd mise ls
 
   # cmd node --version
+  cmd nu --version
+  cmd rg --version
+  cmd vim --version | head -n1
+  cmd yq --version
+  cmd zellij --version || true
+  cmd zoxide --version
 
-  cmd atuin --version
-  # cmd atuin dotfiles alias list
-
-  # cmd ble --version
-  cmd carapace --version || true
-  cmd direnv export bash # "${SHELL##*/}"
-  # cmd ghostty --version | head -n1
-  cmd hx --version || cmd helix --version
-  # cmd zellij --version
-
-  # cmd vim --version | head -n1
   if cmd nvim --version 2>/dev/null; then
     cmd timeout 5m nvim --headless +Update! +qa >/dev/null
   fi

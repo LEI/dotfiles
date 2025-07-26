@@ -59,10 +59,10 @@ if ! chezmoi="$(command -v chezmoi)"; then
   # esac
 
   # LIB='{{ if ne (get .chezmoi.osRelease "id") "alpine" }}glibc{{ else }}musl{{ end }}'
-  # NAME="chezmoi_${VERSION}_${OS}-${LIB}_${ARCH}"
+  # NAME="chezmoi_${VERSION#v}_${OS}-${LIB}_${ARCH}"
   # OUT="$TMPDIR/$NAME.tar.gz"
   # BIN="$TMPDIR/$NAME/chezmoi"
-  # URL="https://github.com/twpayne/chezmoi/releases/download/v$VERSION/$NAME.tar.gz"
+  # URL="https://github.com/twpayne/chezmoi/releases/download/$VERSION/$NAME.tar.gz"
   # curl -LSfs "$URL" -o "$OUT"
   # tar -xzf "$OUT" -C "$TMPDIR"
   # sudo mv "$BIN" "$BIN_DIR/chezmoi"
