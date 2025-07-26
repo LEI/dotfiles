@@ -5,6 +5,11 @@
 
 set -eu
 
+case "${CHEZMOI_COMMAND:-}" in
+apply | init | update) ;;
+*) ;;
+esac
+
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v sudo >/dev/null; then

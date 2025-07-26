@@ -75,7 +75,6 @@
 {{- end }}
 
 {{- if not .features.kube }}
-# .chezmoiscripts/*-install-kubectl.sh
 .config/k9s/
 .config/krew/
 .config/sh/plugins/kubectl.sh
@@ -102,7 +101,6 @@
 {{- end }}
 
 {{- if not .features.nushell }}
-# .chezmoiscripts/*.nu
 # .config/*/*.nu
 .config/nushell/
 *.nu
@@ -113,7 +111,6 @@
 {{- end }}
 
 {{- if not .features.sql }}
-# .chezmoiscripts/*-install-sql.sh
 .config/psql/
 {{- end }}
 

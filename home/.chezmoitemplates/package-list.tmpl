@@ -16,7 +16,7 @@
 {{-   end }}
 
 {{-   $condition := get $pkg "condition" | default nil }}
-{{-   if and $condition (eq (output "chezmoi" "execute-template" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
+{{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
 {{-     continue }}
 {{-   end }}
 
