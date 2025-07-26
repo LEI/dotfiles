@@ -1,20 +1,33 @@
+# https://github.com/twpayne/dotfiles/blob/master/home/dot_config/git/config.tmpl
+
 [alias]
-    ca = !git add -A && git commit -av
-    d = diff
-    s = status --short
+	a = add
+	b = branch
+	ca = !git add -A && git commit -av
+	co = checkout
+	cp = cherry-pick
+	d = diff
+	p = push
+	r = restore
+	ra = rebase --abort
+	rc = rebase --continue
+	ri = rebase --interactive
+	s = status --branch --short
 
 [include]
-    path = "~/.gitconfig.local"
+	path = "~/.gitconfig.local"
 
 [includeIf "gitdir:~/src/github.com/"]
-    path = github.ini
-[includeIf "hasconfig:remote.*.url:git@github.com*/**"]
-    path = github.ini
+	path = github.ini
+[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
+	path = github.ini
+[includeIf "hasconfig:remote.*.url:https://github.com/*/**"]
+	path = github.ini
 
 [includeIf "gitdir:~/src/gitlab.com/"]
-    path = gitlab.ini
+	path = gitlab.ini
 [includeIf "hasconfig:remote.*.url:git@gitlab.com*/**"]
-    path = gitlab.ini
+	path = gitlab.ini
 
 [ghq]
-    root = ~/src
+	root = ~/src

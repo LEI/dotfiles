@@ -1,31 +1,31 @@
 {{ if (get . "github") -}}
 [user]
-    name = {{ get .github "name" | default .name | quote }}
-    email = {{ .github.email | quote }}
-    signingkey = {{ output .sh "-c" (printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" .github.email) | quote }}
+	name = {{ get .github "name" | default .name | quote }}
+	email = {{ .github.email | quote }}
+	signingkey = {{ includeTemplate "gpg-signing-key.tmpl" (dict "email" .github.email "sh" .sh) | quote }}
 
 [commit]
-    gpgsign = true
+	gpgsign = true
 
 {{ if (get .github "user") -}}
 [github]
-    user = {{ .github.user | quote }}
-    token = {{ keyring "github" .github.user | quote }}
+	user = {{ .github.user | quote }}
+	token = {{ keyring "github" .github.user | quote }}
 {{- end }}
 {{- end }}
 
 # [url "git@github.com:"]
-#     insteadOf = "gh:"
-#     pushInsteadOf = "github:"
-#     pushInsteadOf = "git://github.com/"
+# 	insteadOf = "gh:"
+# 	pushInsteadOf = "github:"
+# 	pushInsteadOf = "git://github.com/"
 
 # [url "git://github.com/"]
-#     insteadOf = "github:"
+# 	insteadOf = "github:"
 
 # [url "git@gist.github.com:"]
-#     insteadOf = "gst:"
-#     pushInsteadOf = "gist:"
-#     pushInsteadOf = "git://gist.github.com/"
+# 	insteadOf = "gst:"
+# 	pushInsteadOf = "gist:"
+# 	pushInsteadOf = "git://gist.github.com/"
 
 # [url "git://gist.github.com/"]
-#     insteadOf = "gist:"
+# 	insteadOf = "gist:"
