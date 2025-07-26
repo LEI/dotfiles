@@ -24,6 +24,8 @@
 ) -}}
 {{- else if eq .osID "android" }}
 {{- $features = mergeOverwrite $features (dict
+  "docker" false
+  "kube" false
   "neovim" true
   "tmux" true
   "vim" true
@@ -44,6 +46,9 @@
   "sql" true
   "tmux" true
   "vim" true
+  "void" true
+  "vscode" true
+  "vscodium" true
   "zellij" true
   "zsh" true
 ) -}}
@@ -52,7 +57,7 @@
   "docker" false
   "ghostty" true
   "go" true
-  "kube" true
+  "kube" false
   "neovim" true
   "node" true
   "php" true
@@ -92,7 +97,6 @@
   "ghostty" false
   "go" false
   "helix" false
-  "kube" false
   "neovim" false
   "node" false
   "rust" false

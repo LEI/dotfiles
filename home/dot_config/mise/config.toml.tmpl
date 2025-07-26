@@ -63,7 +63,8 @@ node = "latest"
 
 {{- if and (ne .osID "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
-# shellcheck = "latest"
+shellcheck = "latest"
+shfmt = "latest"
 {{- end }}
 
 # {{- if not .features.neovim }}

@@ -11,8 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     container:
       image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}
-      env:
-        CODESPACES: true
+      # env:
+      #   CODESPACES: true
     steps:
       - uses: actions/checkout@v2
       - run: ./script/bootstrap

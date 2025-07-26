@@ -3,6 +3,7 @@
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 
+{{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
@@ -10,7 +11,7 @@
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
-{{- if or $codespaces $devContainer -}}
+{{- if or $ci $codespaces $devContainer -}}
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- else if $interactive -}}
@@ -19,7 +20,7 @@
 {{- end -}}
 
 {{- $profileChoices := list "minimal" "personal" "work" -}}
-{{- if not $profile -}}
+{{- if and $interactive (not $profile) -}}
 {{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
 {{- end -}}
 

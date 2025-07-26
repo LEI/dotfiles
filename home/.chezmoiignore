@@ -17,6 +17,10 @@
 .personal-file
 {{- end }}
 
+{{- if not .features.ai }}
+.config/mcphub/
+{{- end }}
+
 {{- if not .features.bash }}
 # .bash_aliases
 # .bash_profile
@@ -79,7 +83,7 @@
 {{- end }}
 
 {{- if not .features.mise }}
-.chezmoiscripts/*-install-mise-tools.sh
+.chezmoiscripts/{*,*/*}-mise-install.sh
 .config/mise/
 # .config/sh/plugins/mise.sh
 {{- end }}
@@ -87,7 +91,6 @@
 {{- if not .features.neovim }}
 .chezmoiscripts/*-install-neovim.sh
 .config/cspell/
-.config/mcphub/
 .config/nvim/
 .local/share/nvim
 {{- end }}
@@ -154,13 +157,6 @@
 {{ if or .ephemeral (eq .accessToken "") -}}
 .install-password-manager.sh
 {{ end -}}
-
-{{- if or (ne .osid "arch") (ne .osid "darwin") }}
-.config/Code/
-.config/VSCodium/
-.config/Void/
-.void-editor/
-{{- end }}
 
 {{- if ne .osid "darwin" }}
 .chezmoiscripts/darwin/**

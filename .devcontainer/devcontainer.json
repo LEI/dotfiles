@@ -29,9 +29,6 @@
       "repositories": {
         "*": {
           "permissions": "read-all"
-        },
-        "lei/vscode-settings": {
-          "permissions": "write-all"
         }
       }
     },
@@ -44,11 +41,11 @@
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "redhat.telemetry.enabled": false,
-        "syncSettings.ignoredExtensions": [
-          "GitHub.codespaces",
-          "GitHub.github-vscode-theme"
-        ]
+        "redhat.telemetry.enabled": false
+        // "syncSettings.ignoredExtensions": [
+        //   "GitHub.codespaces",
+        //   "GitHub.github-vscode-theme"
+        // ],
         // "[typescript]": {
         //   "editor.defaultFormatter": "esbenp.prettier-vscode",
         // },

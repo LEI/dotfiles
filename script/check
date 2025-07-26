@@ -53,7 +53,9 @@ check_version() {
   # cmd node --version
   cmd nu --version
   cmd rg --version
-  cmd vim --version | head -n1
+  # if cmd vim --version | head -n1; then
+  #   vim '+Update' +qa
+  # fi
   cmd yq --version
   cmd zellij --version || true
   cmd zoxide --version
