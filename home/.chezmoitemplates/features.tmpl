@@ -12,6 +12,12 @@
 ) -}}
 {{- end }}
 
+{{- if or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname) -}}
+{{- $features = mergeOverwrite $features (dict
+  "ai" true
+) -}}
+{{- end }}
+
 {{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
   "go" false
@@ -31,10 +37,8 @@
   "vim" true
   "zellij" true
 ) -}}
-
 {{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
-  "ai" true
   "docker" true
   "ghostty" true
   "go" true
@@ -69,7 +73,6 @@
 ) -}}
 {{- else if eq .chezmoi.os "darwin" }}
 {{- $features = mergeOverwrite $features (dict
-  "ai" true
   "bash" false
   "docker" true
   "ghostty" true
@@ -89,7 +92,6 @@
 {{- else if eq .chezmoi.os "windows" }}
 {{- $features = mergeOverwrite $features (dict
 ) -}}
-
 {{- end }}
 
 {{- if or .codespaces .devContainer .ephemeral .headless }}

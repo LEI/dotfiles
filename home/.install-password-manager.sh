@@ -7,7 +7,7 @@ set -eu
 
 case "$CHEZMOI_COMMAND" in
 apply | init | update) ;;
-*) return ;;
+*) exit ;;
 esac
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
