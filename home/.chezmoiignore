@@ -139,6 +139,8 @@
 .config/Code/
 {{- end }}
 
+# .config/Code - OSS/
+# .vscode-oss/
 {{- if not .features.vscodium }}
 .config/VSCodium/
 {{- end }}
