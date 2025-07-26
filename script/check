@@ -32,7 +32,8 @@ check_chezmoi() {
 }
 
 check_version() {
-  cmd atuin --version
+  # TODO: detect glibc 23.1
+  cmd atuin --version || true
   # cmd atuin dotfiles alias list
 
   cmd bash --version # | head -n1
@@ -40,11 +41,14 @@ check_version() {
   cmd ble --version || true
   # cmd bws --version
   cmd carapace --version
+
+  # chezmoi cat-config | yq .data.features
+
   cmd direnv export bash # "${SHELL##*/}"
   cmd eza --version
   cmd fd --version
   # cmd ghostty --version | head -n1
-  cmd hx --version # || cmd helix --version || true
+  cmd hx --version || true
   cmd jq --version
 
   cmd mise --version | head -n1
@@ -52,18 +56,16 @@ check_version() {
 
   # cmd node --version
   cmd nu --version
-  cmd rg --version
-  # if cmd vim --version | head -n1; then
-  #   vim '+Update' +qa
-  # fi
-  cmd yq --version
-  cmd zellij --version || true
-  cmd zoxide --version
 
-  if cmd nvim --version 2>/dev/null; then
-    cmd timeout 5m nvim --headless +Update! +qa >/dev/null
+  if cmd nvim --version 2>/dev/null | head -n1; then
+    # FIXME: Debian 11 Ubuntu 22 nvim 0.4.3
+    cmd timeout 5m nvim --headless +Update! +qa >/dev/null || true
   fi
+
+  cmd rg --version
+
   if cmd tmux -V 2>/dev/null; then
+    export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
     cmd timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
 
@@ -72,7 +74,13 @@ check_version() {
     # cmd timeout 5m topgrade --disable=chezmoi
   fi
 
-  # chezmoi cat-config | yq .data.features
+  if cmd vim --version | head -n1; then
+    vim +Update! +qa
+  fi
+
+  cmd yq --version
+  cmd zellij --version || true
+  cmd zoxide --version
 
   if [ "${DEBUG:-}" = true ]; then
     echo >&2 "DEBUG enabled"

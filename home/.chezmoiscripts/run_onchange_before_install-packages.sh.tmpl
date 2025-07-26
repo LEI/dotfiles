@@ -26,6 +26,13 @@ sudo apk add --quiet $packages
 {{- end }}
 # shellcheck disable=SC2086
 sudo pacman --sync --needed --noconfirm --quiet $packages
+# if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+#   if [ ! -d /tmp/yay-bin ]; then
+#     git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+#   fi
+#   cd /tmp/yay-bin
+#   makepkg --install --noconfirm --syncdeps
+# fi
 {{- $aurPackages := includeTemplate "packages.tmpl" (merge (dict "packageType" "aur") .) | fromJson }}
 aur_packages="{{ $aurPackages | join " " }}"
 {{- if lookPath "yay" }}

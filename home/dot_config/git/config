@@ -14,6 +14,9 @@
 	ri = rebase --interactive
 	s = status --branch --short
 
+[pull]
+	rebase = true
+
 [include]
 	path = "~/.gitconfig.local"
 

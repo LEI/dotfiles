@@ -37,8 +37,6 @@ cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
 # https://github.com/carapace-sh/carapace-bin/releases
 URL="$BASE_URL/$NAME.tar.gz"
 install_tar_gz "$URL" carapace
-# {{- else }}
-exit 1
 # {{- end }}
 
 echo >&2 "Installed carapace"

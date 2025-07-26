@@ -16,7 +16,7 @@ bottom = "latest"
 # chezmoi = "latest"
 direnv = "latest"
 
-{{- if or (eq .osID "debian") (and (eq .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22)) }}
+{{- if or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)) }}
 eza = "latest"
 {{- end }}
 
@@ -87,10 +87,10 @@ starship = "latest"
 
 usage = "latest"
 
-{{- if and (eq .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22) }}
+{{- if or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)) }}
 yq = "latest"
 {{- end }}
 
-{{- if and (eq .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 20) }}
+{{- if and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) }}
 zoxide = "latest"
 {{- end }}

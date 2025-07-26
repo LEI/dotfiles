@@ -1,5 +1,9 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- includeTemplate "block-in-file.tmpl" (dict
   "chezmoi" .chezmoi
-  "contents" (includeTemplate "init.sh" (dict "osid" .osid "shell" "zsh"))
+  "contents" (includeTemplate "init.sh" (dict
+    "features" .features
+    "osid" .osid
+    "shell" "zsh"
+  ))
 ) -}}

@@ -30,6 +30,12 @@ fi
 
 # NOTE: clone patched plugins to avoid error on tpm install
 
+if [ ! -d ~/.config/tmux/plugins/tpm ]; then
+  cmd git clone --single-branch \
+    https://github.com/tmux-plugins/tpm.git \
+    ~/.config/tmux/plugins/tpm
+fi
+
 # cmd rm -fr ~/.config/tmux/plugins/tmux-which-key
 if [ ! -d ~/.config/tmux/plugins/tmux-which-key ]; then
   cmd git clone --single-branch \

@@ -7,7 +7,8 @@ set -eu
 # https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
 
 if command -v hx >/dev/null && hx --version; then
-  echo >&2 "Already installed: hx" # {{ output .sh "-c" "command -v hx || true" }}
+  echo >&2 "Already installed: hx"
+  cmd hx --version
   exit
 fi
 
@@ -33,7 +34,10 @@ mv "$BIN" "$HOME/.local/bin"
 if [ ! -d "$HOME/.config/helix" ]; then
   mkdir -p "$HOME/.config/helix"
 fi
-cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
+# TODO: overwrite if needed
+if [ ! -d "$HOME/.config/helix/runtime" ]; then
+  cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
+fi
 # {{- else if eq (get .chezmoi.osRelease "id") "ubuntu" }}
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes software-properties-common >/dev/null

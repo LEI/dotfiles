@@ -24,9 +24,23 @@
 {{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
 {{- end -}}
 
+{{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
+{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
+{{- $osVersion := get .chezmoi.osRelease "versionID" -}}
+{{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
+{{- $osID = "android" -}}
+{{- end -}}
+
+{{- $sh := "sh" -}}
+{{- if eq $osID "windows" -}}
+{{- $sh = "bash" -}}
+{{- end -}}
+
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
-{{-   $hostname := output "scutil" "--get" "LocalHostName" | trim -}}
+{{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
+{{- else if eq $hostname "docker" -}}
+{{-   $hostname = output $sh "-c" "hostname 2>/dev/null || echo docker" | trim -}}
 {{- end -}}
 
 {{- $name := env "USER" -}}
@@ -61,14 +75,6 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
-{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
-{{- $osVersion := get .chezmoi.osRelease "versionID" -}}
-
-{{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
-{{- $osID = "android" -}}
-{{- end -}}
-
 {{- $features := includeTemplate "features.tmpl" (dict
   "chezmoi" .chezmoi
   "codespaces" $codespaces
@@ -81,11 +87,6 @@
   "osVersion" $osVersion
   "profile" $profile
 ) -}}
-
-{{- $sh := "sh" -}}
-{{- if eq $osID "windows" -}}
-{{- $sh = "bash" -}}
-{{- end -}}
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
 

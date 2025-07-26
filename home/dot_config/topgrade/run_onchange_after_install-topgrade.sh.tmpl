@@ -2,16 +2,15 @@
 
 set -eu
 
-if command -v topgrade >/dev/null && topgrade --version; then
-  echo >&2 "Already installed: topgrade" # {{ output .sh "-c" "command -v topgrade || true" }}
+if command -v topgrade >/dev/null; then
+  echo >&2 "Already installed: topgrade"
+  topgrade --version
   exit
 fi
 
+# {{- if eq .osid "debian" }} Debian/Ubuntu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# {{- if eq .osID "manjaro" }}
-#cmd sudo pacman --sync --needed --noconfirm --quiet topgrade
-# {{- else if eq .osid "debian" }} Debian/Ubuntu
 echo >&2 "Installing topgrade"
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release topgrade-rs/topgrade)"

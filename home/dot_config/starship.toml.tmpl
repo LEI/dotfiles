@@ -3,5 +3,5 @@
 {{ $config | toToml }}
 {{- else -}}
 {{- $preset := "plain-text-symbols" -}}
-{{ output "sh" "-c" (printf "starship preset %s 2>/dev/null || true" $preset) | trim | fromToml | merge $config | toToml }}
+{{ output .sh "-c" (printf "starship preset %s 2>/dev/null || true" $preset) | trim | fromToml | merge $config | toToml }}
 {{- end -}}

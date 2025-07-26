@@ -2,10 +2,10 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - bat
-  - { name: bandwhich, condition: 'not (eq .osIDLike "debian" "windows")' }
+  - { name: bandwhich, condition: not (eq .osIDLike "debian" "windows") }
   - curl
   - name: eza
-    condition: 'not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22)))'
+    condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: eza-community.eza
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
@@ -16,13 +16,13 @@ commonPackages:
   - name: starship
     condition: ne .osIDLike "debian"
   - name: topgrade
-    condition: and (ne .osID "arch") (ne .osIDLike "debian")
+    condition: ne .osIDLike "debian"
     type: eq .osID "manjaro" | ternary "aur" ""
   - name: yq
-    condition: 'and (ne .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 22)'
+    condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: MikeFarah.yq
   - name: zoxide
-    condition: 'and (ne .osID "ubuntu") (le (index (.osVersion | splitList ".") 0 | int) 20)'
+    condition: not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
     windows: ajeetdsouza.zoxide
 packages:
   alpine:

@@ -21,6 +21,10 @@
 .config/mcphub/
 {{- end }}
 
+{{- if not .features.atuin }}
+.config/atuin/
+{{- end }}
+
 {{- if not .features.bash }}
 # .bash_aliases
 # .bash_profile
@@ -35,15 +39,17 @@
 .zshrc
 {{- end }}
 
-{{- if and (not .features.bash) (not .features.zsh) }}
-.config/atuin/
+{{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
 .config/bat/
-.config/carapace/
 .config/curlrc
 .config/readline/
 .config/sh/
 .config/wget/
 .local/bin/
+{{- end }}
+
+{{- if and (not .features.bash) (not .features.nushell) }}
+.config/carapace/
 {{- end }}
 
 {{- if not .features.docker }}

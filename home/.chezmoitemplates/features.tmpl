@@ -3,6 +3,7 @@
 
 {{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
+  "atuin" true
   "bash" true
   "git" true
   "kube" true
@@ -57,10 +58,16 @@
   "zsh" true
 ) -}}
 {{- else if eq .osIDLike "debian" }}
+{{- $glibc231 := (or
+  (and (eq .osID "debian") (le (int .osVersion) 11))
+  (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+) -}}
 {{- $features = mergeOverwrite $features (dict
+  "atuin" (not $glibc231)
   "docker" false
-  "ghostty" true
+  "ghostty" (not $glibc231)
   "go" true
+  "helix" (not $glibc231)
   "kube" false
   "neovim" true
   "node" true
@@ -68,6 +75,7 @@
   "rust" true
   "sql" true
   "tmux" true
+  "topgrade" (not $glibc231)
   "vim" true
   "zellij" true
 ) -}}

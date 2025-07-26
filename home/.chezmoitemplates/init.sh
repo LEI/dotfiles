@@ -103,6 +103,7 @@ main() {
     source "$HOME/.local/share/bash-preexec.sh"
   fi
   # Must be after starship to preserve PROMPT_COMMAND?
+  # {{- if .features.atuin }}
   if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
     if command -v atuin >/dev/null; then
       eval "$(atuin init --disable-up-arrow "$shell")"
@@ -110,6 +111,7 @@ main() {
       echo >&2 "Command 'atuin' not found"
     fi
   fi
+  # {{- end }}
 
   source_if_exists "$HOME/.config/sh/aliases.sh"
 

@@ -122,15 +122,23 @@ test_alpine() {
 test_archlinux() {
   local name="${1:-"test-archlinux"}"
   local image="${2:-"archlinux:latest"}"
-  local prepare="pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+  local user=test
+  local prepare_array=(
+    "pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+    "&& useradd -ms /bin/bash $user"
+    "&& usermod -aG wheel $user"
+    "&& sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
+    # "&& chown -R $user:$user ."
+    # "&& su $user"
+  )
   ARGS+=(
     "--env=LANG=C"
-    "--env=USER=root"
+    "--env=USER=$user"
     "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $TEST_MOUNT")
   container_test "$name" "$image"
 }
 
