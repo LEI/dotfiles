@@ -2,15 +2,16 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - bat
+  # - { name: bandwhich, condition: 'ne .osid "debian"' }
   - curl
-  - { name: eza, windows: eza-community.eza, id: not debian } # Ubuntu >22
-  - { name: fd, windows: sharkdp.fd, idLike: not debian }
+  - { name: eza, windows: eza-community.eza, condition: 'ne .osid "debian"' } # Ubuntu >22
+  - { name: fd, windows: sharkdp.fd, condition: 'ne .osid "debian"' }
   - git
   - { name: jq, windows: jqlang.jq }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, feature: not neovim, windows: koalaman.shellcheck }
-  - { name: starship, idLike: not debian } # Ubuntu >22
-  - { name: yq, windows: MikeFarah.yq }
+  - { name: starship, condition: 'ne .osid "debian"' } # Ubuntu >22
+  - { name: yq, windows: MikeFarah.yq, condition: 'ne .osid "debian"' }
   - { name: zoxide, windows: ajeetdsouza.zoxide }
 packages:
   alpine:

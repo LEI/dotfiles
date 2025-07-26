@@ -1,4 +1,6 @@
 {{- $packages := list }}
+{{- $osid := get .chezmoi.osRelease "id" | default .chezmoi.os }}
+{{- $idLike := get .chezmoi.osRelease "idLike" | default $osid }}
 
 {{- range $index, $pkg := .packages }}
 {{-   $packageName := "" }}
@@ -13,6 +15,11 @@
 {{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
 {{-   end }}
 
+{{-   $condition := get $pkg "condition" | default nil }}
+{{-   if and $condition (output "chezmoi" "execute-template" (printf "{{ eq (%s) true }}" $condition)) }}
+{{-     continue }}
+{{-   end }}
+
 {{-   $feature := get $pkg "feature" | default nil }}
 {{-   if $feature }}
 {{-     if and (ne (substr 0 4 $feature) "not ") (get $.features $feature | default false | not) }}
@@ -22,29 +29,29 @@
 {{-     end }}
 {{-   end }}
 
-{{-   $os := get $pkg "os" | default nil }}
-{{-   if $os }}
-{{-     if and (ne (substr 0 4 $os) "not ") (ne $.chezmoi.os $os) }}
+{{-   $filterOS := get $pkg "os" | default nil }}
+{{-   if $filterOS }}
+{{-     if and (ne (substr 0 4 $filterOS) "not ") (ne $.chezmoi.os $filterOS) }}
 {{-       continue }}
-{{-     else if and (eq (substr 0 4 $os) "not ") (eq $.chezmoi.os (substr 4 (len $os) $os)) }}
-{{-       continue }}
-{{-     end }}
-{{-   end }}
-
-{{-   $id := get $pkg "id" | default nil }}
-{{-   if $id }}
-{{-     if and (ne (substr 0 4 $id) "not ") (ne $.chezmoi.osRelease.id $id) }}
-{{-       continue }}
-{{-     else if and (eq (substr 0 4 $id) "not ") (eq $.chezmoi.osRelease.id (substr 4 (len $id) $id)) }}
+{{-     else if and (eq (substr 0 4 $filterOS) "not ") (eq $.chezmoi.os (substr 4 (len $filterOS) $filterOS)) }}
 {{-       continue }}
 {{-     end }}
 {{-   end }}
 
-{{-   $idLike := get $pkg "idLike" | default nil }}
-{{-   if $idLike }}
-{{-     if and (ne (substr 0 4 $idLike) "not ") (ne (get $.chezmoi.osRelease "idLike" | default $.chezmoi.osRelease.id) $idLike) }}
+{{-   $filterID := get $pkg "id" | default nil }}
+{{-   if $filterID }}
+{{-     if and (ne (substr 0 4 $filterID) "not ") (ne $osid $filterID) }}
 {{-       continue }}
-{{-     else if and (eq (substr 0 4 $idLike) "not ") (eq (get $.chezmoi.osRelease "idLike" | default $.chezmoi.osRelease.id) (substr 4 (len $idLike) $idLike)) }}
+{{-     else if and (eq (substr 0 4 $filterID) "not ") (eq $osid (substr 4 (len $filterID) $filterID)) }}
+{{-       continue }}
+{{-     end }}
+{{-   end }}
+
+{{-   $filterLike := get $pkg "filterLike" | default nil }}
+{{-   if $filterLike }}
+{{-     if and (ne (substr 0 4 $filterLike) "not ") (ne $idLike $filterLike) }}
+{{-       continue }}
+{{-     else if and (eq (substr 0 4 $filterLike) "not ") (eq $idLike (substr 4 (len $filterLike) $filterLike)) }}
 {{-       continue }}
 {{-     end }}
 {{-   end }}

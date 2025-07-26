@@ -1,12 +1,12 @@
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
 
-{{- $dev := true -}}
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 {{- $interactive := stdinIsATTY -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
@@ -18,10 +18,9 @@
 {{-   $headless = promptBoolOnce . "headless" "headless" -}}
 {{- end -}}
 
-{{- if (env "DEV") -}}
-{{-   $dev = env "DEV" | not | not -}}
-{{- else if $interactive -}}
-{{-   $dev = promptBoolOnce . "dev" "dev" -}}
+{{- $profileChoices := list "minimal" "personal" "work" -}}
+{{- if not $profile -}}
+{{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
 {{- end -}}
 
 {{- $hostname := .chezmoi.hostname -}}
@@ -97,16 +96,18 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 data:
   accessToken: {{ $accessToken | default "" }}
   codespaces: {{ $codespaces }}
-  dev: {{ $dev }}
   devContainer: {{ $devContainer }}
   ephemeral: {{ $ephemeral }}
   headless: {{ $headless }}
   hostname: {{ $hostname | quote }}
+  profile: {{ $profile }}
   wsl: {{ $wsl }}
 
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}
   osid: {{ $osid | quote }}
+  # osID:
+  # osIDLike:
   osVersion: {{ get .chezmoi.osRelease "versionID" }}
   sh: {{ $sh | quote }}
 

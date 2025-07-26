@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Usage:
+# DEBUG=true REMOVE=false ./script/test archlinux base-devel
+# ./script/test debian 12
+# ./script/test ubuntu 24.04
+
 set -euo pipefail
 
 # if [[ $- = *i* ]]; then
@@ -38,6 +43,13 @@ TEST_CLONE='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_
 main() {
   local name=${1:-}
   [ -n "$name" ] && shift
+  local tag=${1:-}
+  [ -n "$tag" ] && shift
+  if [ -n "$tag" ]; then
+    set -- "test-$name-$tag" "$name:$tag" "$@"
+  else
+    set -- "test-$name" "$name" "$@"
+  fi
   case "$name" in
   "" | local) ./script/check ;;
   alpine) test_alpine "$@" ;;
@@ -50,10 +62,11 @@ main() {
         "--env=USER=ubuntu"
       )
     fi
-    test_debian "test-$name" "$name:latest" "$@"
+    test_debian "$@"
     ;;
   macos) test_macos "$@" ;;
   termux) test_clone "$@" ;;
+  *) echo >&2 "Unknown image: $name:$tag" ;;
   esac
 }
 
@@ -108,7 +121,7 @@ test_alpine() {
 
 test_archlinux() {
   local name="${1:-"test-archlinux"}"
-  local image="${2:-"archlinux:base-devel"}"
+  local image="${2:-"archlinux:latest"}"
   local prepare="pacman --sync --needed --noconfirm --quiet sudo which"
   ARGS+=(
     "--env=LANG=C"
