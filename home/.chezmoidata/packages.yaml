@@ -11,6 +11,7 @@ commonPackages:
   - git
   - { name: jq, windows: jqlang.jq }
   - { name: nushell, condition: ne .osIDLike "debian" }
+  - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
   - name: starship
@@ -82,6 +83,8 @@ packages:
     brews:
       - carapace
       - gpg
+      - { name: nowplaying-cli, condition: .features.tmux }
+      - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
     casks:
       - firefox

@@ -43,27 +43,28 @@ TEST_CLONE='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_
 main() {
   local name=${1:-}
   [ -n "$name" ] && shift
+  local image="$name"
   local tag=${1:-}
   [ -n "$tag" ] && shift
+  if [ "$name" = "ubuntu" ]; then
+    ARGS+=(
+      "--env=TZ=${TZ:-Etc/UTC}"
+      "--env=USER=ubuntu"
+    )
+  elif [ "$image" == macos ]; then
+    image=docker.io/sickcodes/docker-osx
+  fi
   if [ -n "$tag" ]; then
-    set -- "test-$name-$tag" "$name:$tag" "$@"
+    image="$name:$tag"
+    set -- "test-$name-$tag" "$image:$tag" "$@"
   else
-    set -- "test-$name" "$name" "$@"
+    set -- "test-$name" "$image" "$@"
   fi
   case "$name" in
   "" | local) ./script/check ;;
   alpine) test_alpine "$@" ;;
   archlinux) test_archlinux "$@" ;;
-  debian | ubuntu)
-    if [ "$name" = "ubuntu" ]; then
-      # Configure tdata
-      ARGS+=(
-        "--env=TZ=${TZ:-Etc/UTC}"
-        "--env=USER=ubuntu"
-      )
-    fi
-    test_debian "$@"
-    ;;
+  debian | ubuntu) test_debian "$@" ;;
   macos) test_macos "$@" ;;
   termux) test_clone "$@" ;;
   *) echo >&2 "Unknown image: $name:$tag" ;;
@@ -166,6 +167,8 @@ test_debian() {
 test_macos() {
   local name="${1:-"test-macos"}"
   local image="${2:-"docker.io/sickcodes/docker-osx:latest"}"
+  echo name: $name
+  echo image: $image
   # NOTE: override all args
   ARGS=(
     "--device=/dev/kvm"

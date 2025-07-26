@@ -1,5 +1,17 @@
 local mason_packages_dir = vim.g.home .. '/.local/share/nvim/mason/packages'
 
+local function has_cargo()
+  return vim.fn.executable('cargo') == 1
+end
+
+local function has_go()
+  return vim.fn.executable('go') == 1
+end
+
+local function has_php()
+  return vim.fn.executable('php') == 1
+end
+
 -- TODO: do not install if already present, e.g. installed from source
 local mason_tools = {
   -- Formatters
@@ -46,9 +58,9 @@ local mason_lsp = {
   'docker_compose_language_service', -- 'docker-compose-language-service',
   'dockerls', -- 'dockerfile-language-server',
   'gh_actions_ls', -- 'gh-actions-language-server',
-  'gitlab_ci_ls', -- 'gitlab-ci-ls', -- Requires cargo
+  { 'gitlab_ci_ls', condition = has_cargo }, -- 'gitlab-ci-ls',
   'helm_ls', -- 'helm-ls',
-  'intelephense', -- '',
+  { 'intelephense', condition = has_php },
   'lua_ls', -- 'lua-language-server',
   'marksman', -- '',
   'nginx_language_server', -- 'nginx-language-server',
@@ -60,14 +72,9 @@ local mason_lsp = {
   'vimls', -- 'vim-language-server',
 
   -- Go
-  'golangci_lint_ls', -- 'golangci-lint-langserver',
-  {
-    'gopls',
-    condition = function()
-      return vim.fn.executable('go') == 1
-    end,
-  },
-  -- 'sqls', -- '',
+  { 'golangci_lint_ls', condition = has_go }, -- 'golangci-lint-langserver',
+  { 'gopls', condition = has_go },
+  -- { 'sqls', condition = has_go },
 
   -- Node
   'bashls', -- 'bash-language-server',
@@ -78,12 +85,22 @@ local mason_lsp = {
   'html', -- 'html-lsp',
   'jsonls', -- 'json-lsp',
 
-  'ts_ls', -- 'typescript-language-server',
+  {
+    'ts_ls',
+    condition = function()
+      return vim.g.features.node
+    end,
+  }, -- 'typescript-language-server',
   'yamlls', -- 'yaml-language-server',
 
   -- Rust
-  'rust_analyzer', -- 'rust-analyzer',
-  'taplo', -- '',
+  {
+    'rust_analyzer',
+    condition = function()
+      return vim.g.features.rust
+    end,
+  }, -- 'rust-analyzer',
+  'taplo',
 }
 
 local mason_dap = {
@@ -179,7 +196,12 @@ return {
   -- LSP
   {
     'mason-org/mason-lspconfig.nvim',
-    -- FIXME: vim.lsp.config is nil when running headless
+    -- FIXME: vim.lsp.config is nil on alpine
+    -- https://github.com/mason-org/mason-lspconfig.nvim/blob/v2.0.0/lua/mason-lspconfig/mappings.lua#L28
+
+    -- automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
+    -- https://github.com/mason-org/mason-lspconfig.nvim/blob/main/lua/mason-lspconfig/features/automatic_enable.lua#L47
+
     -- branch = 'main',
     tag = 'v2.0.0',
     dependencies = {
@@ -187,8 +209,7 @@ return {
       'neovim/nvim-lspconfig',
       'b0o/SchemaStore.nvim',
       'saghen/blink.cmp',
-      -- FIXME: automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
+      -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
     cmd = {
       'LspInfo',

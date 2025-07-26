@@ -55,7 +55,8 @@
 {{- if not .features.docker }}
 # .config/docker/
 .config/sh/plugins/docker.sh
-.local/bin/d
+{{- if lookPath "docker" }}.local/bin/d{{- end }}
+{{- if lookPath "podman" }}.local/bin/p{{- end }}
 {{- end }}
 
 {{- if not .features.ghostty }}
@@ -70,7 +71,7 @@
 # NOTE: feature should be named "git-config"
 # .config/sh/plugins/git.sh
 .gitconfig
-.local/bin/g
+{{- if lookPath "git" }}.local/bin/g{{- end }}
 {{- end }}
 
 {{- if not .features.go }}
@@ -89,7 +90,7 @@
 .config/k9s/
 .config/krew/
 .config/sh/plugins/kubectl.sh
-.local/bin/k
+{{- if lookPath "kubectl" }}.local/bin/k{{- end }}
 {{- end }}
 
 {{- if not .features.mise }}
@@ -127,7 +128,7 @@
 
 {{- if not .features.tmux }}
 .config/tmux/
-.local/bin/t
+{{- if lookPath "tmux" }}.local/bin/t{{- end }}
 {{- end }}
 
 {{- if not .features.topgrade }}
