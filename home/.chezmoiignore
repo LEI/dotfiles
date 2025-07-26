@@ -77,6 +77,10 @@
 .config/mise/default-go-packages
 {{- end }}
 
+{{- if not .features.goss }}
+.config/goss/
+{{- end }}
+
 {{- if not .features.helix }}
 .config/helix/
 {{- end }}

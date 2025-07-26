@@ -168,11 +168,16 @@ test_macos() {
   local image="${2:-"docker.io/sickcodes/docker-osx:latest"}"
   # NOTE: override all args
   ARGS=(
-    "--name=$name"
     "--device=/dev/kvm"
     "--env=NONINTERACTIVE=1"
     "--env=OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber'"
+    "--name=$name"
     "--publish=50922:10022"
+
+    # "--env=DISPLAY=${DISPLAY:-:0.0}"
+    # "--env=GENERATE_UNIQUE=true"
+    # "--env=MASTER_PLIST_URL="
+    # "--volumes=/tmp/.X11-unix:/tmp/.X11-unix"
   )
   # Arch: sudo pacman -S xorg-xhost && xhost +
   # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix

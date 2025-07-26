@@ -3,12 +3,12 @@
 
 {{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
-  "docker" true
   "atuin" true
   "bash" true
+  "docker" true
   "git" true
-  "kube" true
   "helix" true
+  "kube" true
   "nushell" true
   "topgrade" true
 ) -}}
@@ -44,6 +44,7 @@
   "docker" true
   "ghostty" true
   "go" true
+  "goss" true
   "kube" true
   "neovim" true
   "node" true

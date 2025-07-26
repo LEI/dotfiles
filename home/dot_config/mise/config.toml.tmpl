@@ -5,6 +5,12 @@ disable_backends = ["ubi"]
 {{- end }}
 idiomatic_version_file_enable_tools = ["node", "go"]
 
+{{- if .features.goss }}
+[tasks.goss-validate]
+dir = "~/.config/goss"
+run = "goss --vars=vars.yaml validate"
+{{- end }}
+
 [tools]
 
 {{- if ne .osID "alpine" }}
