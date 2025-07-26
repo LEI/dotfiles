@@ -2,16 +2,21 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - bat
-  # - { name: bandwhich, condition: 'ne .osid "debian"' }
+  - { name: bandwhich, condition: 'not (eq .osIDLike "debian" "windows")' }
   - curl
-  - { name: eza, windows: eza-community.eza, condition: 'ne .osid "debian"' } # Ubuntu >22
-  - { name: fd, windows: sharkdp.fd, condition: 'ne .osid "debian"' }
+  - name: eza
+    condition: 'not (or (eq .osID "debian") (and (eq .osID "ubuntu") (eq .osVersion "22.04")))'
+    windows: eza-community.eza
+  - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
   - { name: jq, windows: jqlang.jq }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
-  # - { name: shellcheck, feature: not neovim, windows: koalaman.shellcheck }
-  - { name: starship, condition: 'ne .osid "debian"' } # Ubuntu >22
-  - { name: yq, windows: MikeFarah.yq, condition: 'ne .osid "debian"' }
+  # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
+  - name: starship
+    condition: ne .osIDLike "debian"
+  - name: yq
+    condition: 'and (ne .osID "ubuntu") (ne .osVersion "22.04")'
+    windows: MikeFarah.yq
   - { name: zoxide, windows: ajeetdsouza.zoxide }
 packages:
   alpine:
@@ -23,9 +28,9 @@ packages:
     - tar
     - xdg-utils # xdg-open
     - xz
-    - { name: helix, feature: helix }
-    - { name: vim, feature: vim }
-    - { name: neovim, feature: neovim }
+    - { name: helix, condition: .features.helix }
+    - { name: vim, condition: .features.vim }
+    - { name: neovim, condition: .features.neovim }
 
     # NOTE(ble.sh): /lib/bash/{fdflags,sleep}: No such file or directory
     # builtin: fdflags: not a shell builtin
@@ -46,24 +51,23 @@ packages:
     - nodejs
     - proot
     - skim
-    - starship
     - sudo
     - which
-    - { name: helix, feature: helix }
-    # - { name: helixbinhx, feature: helix, idLike: arch, aur: true }
-    - { name: neovim, feature: neovim }
-    - { name: vim, feature: vim }
+    - { name: helix, condition: .features.helix }
+    # - { name: helixbinhx, condition: .features.helix, idLike: arch, aur: true }
+    - { name: neovim, condition: .features.neovim }
+    - { name: vim, condition: .features.vim }
   arch: # Archlinux/Manjaro
     - base-devel
     - gnu-netcat
     - gnupg
     - skim
     - time # condition: command time
-    - { name: helix, feature: helix }
-    - { name: neovim, feature: neovim }
-    - { name: vim, feature: vim }
+    - { name: helix, condition: .features.helix }
+    - { name: neovim, condition: .features.neovim }
+    - { name: vim, condition: .features.vim }
     # https://github.com/Jguer/yay#other-distributions
-    - { name: yay, id: manjaro }
+    - { name: yay, condition: eq .osIDLike "manjaro" }
   darwin:
     brews:
       - gpg
@@ -76,7 +80,7 @@ packages:
     - build-essential
     - gpg
     - time # condition: command time
-    - { name: vim, feature: vim }
+    - { name: vim, condition: .features.vim }
 
     # Cargo gitlab-ci-ls
     - pkg-config
@@ -89,9 +93,9 @@ packages:
   #   - openssl-devel
   windows:
     - jdx.mise
-    # - { name: golang.go, feature: go }
-    - { name: helix.helix, feature: helix }
-    - { name: neovim.neovim, feature: neovim }
-    # - { name: openjs.nodejs, feature: node }
-    # - { name: openjs.nodejs.lts, feature: node }
-    - { name: vim.vim, feature: vim }
+    # - { name: golang.go, condition: .features.go }
+    - { name: helix.helix, condition: .features.helix }
+    - { name: neovim.neovim, condition: .features.neovim }
+    # - { name: openjs.nodejs, condition: .features.node }
+    # - { name: openjs.nodejs.lts, condition: .features.node }
+    - { name: vim.vim, condition: .features.vim }

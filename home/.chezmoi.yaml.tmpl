@@ -62,8 +62,9 @@
 
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
 {{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
+{{- $osVersion := get .chezmoi.osRelease "versionID" -}}
 
-{{- if eq (env "HOME") "/data/data/com.termux/files/home" -}}
+{{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
 {{- $osID = "android" -}}
 {{- end -}}
 
@@ -73,13 +74,16 @@
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "headless" $headless
-  "osid" $osID
-) }}
+  "osID" $osID
+  "osIDLike" $osIDLike
+  "osVersion" $osVersion
+  "profile" $profile
+) -}}
 
 {{- $sh := "sh" -}}
-{{- if eq $osID "windows" }}
-{{- $sh = "bash" }}
-{{- end }}
+{{- if eq $osID "windows" -}}
+{{- $sh = "bash" -}}
+{{- end -}}
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
 
@@ -100,7 +104,7 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
-  accessToken: {{ $accessToken | default "" }}
+  accessToken: {{ $accessToken | quote }}
   codespaces: {{ $codespaces }}
   devContainer: {{ $devContainer }}
   ephemeral: {{ $ephemeral }}
@@ -111,10 +115,10 @@ data:
 
   chassisType: {{ $chassisType | quote }}
   features: {{ $features }}
-  osid: {{ $osID | quote }}
-  # osID: {{ $osID | quote }}
+  osid: {{ $osIDLike | quote }}
+  osID: {{ $osID | quote }}
   osIDLike: {{ $osIDLike | quote }}
-  osVersion: {{ get .chezmoi.osRelease "versionID" | quote }}
+  osVersion: {{ $osVersion | quote }}
   sh: {{ $sh | quote }}
 
   email: {{ $email | quote }}

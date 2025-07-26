@@ -3,7 +3,7 @@
 # Usage:
 # DEBUG=true REMOVE=false ./script/test archlinux base-devel
 # ./script/test debian 12
-# ./script/test ubuntu 24.04
+# ./script/test ubuntu 20.04
 
 set -euo pipefail
 
@@ -122,7 +122,7 @@ test_alpine() {
 test_archlinux() {
   local name="${1:-"test-archlinux"}"
   local image="${2:-"archlinux:latest"}"
-  local prepare="pacman --sync --needed --noconfirm --quiet sudo which"
+  local prepare="pacman --sync --needed --noconfirm --quiet --refresh sudo which"
   ARGS+=(
     "--env=LANG=C"
     "--env=USER=root"

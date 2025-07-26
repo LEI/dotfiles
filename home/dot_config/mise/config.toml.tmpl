@@ -1,5 +1,5 @@
 [settings]
-{{- if eq .osid "alpine" }}
+{{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
 disable_backends = ["ubi"]
 {{- end }}
@@ -7,7 +7,7 @@ idiomatic_version_file_enable_tools = ["node", "go"]
 
 [tools]
 
-{{- if ne .osid "alpine" }}
+{{- if ne .osID "alpine" }}
 # FIXME: failed to install asdf:https://gitlab.com/wt0f/asdf-bat@0.25.0
 bat = "latest"
 {{- end }}
@@ -16,13 +16,17 @@ bottom = "latest"
 # chezmoi = "latest"
 direnv = "latest"
 
-# eza = "latest"
+{{- if or (eq .osID "debian") (and (eq .osID "ubuntu") (eq .osVersion "22.04")) }}
+eza = "latest"
+{{- end }}
 
 {{- if .features.docker }}
 lazydocker = "latest"
 {{- end }}
 
-# fd = "latest" # NOTE: install hangs on alpine
+{{- if eq .osIDLike "debian" }}
+fd = "latest"
+{{- end }}
 
 {{- if .features.git }}
 ghq = "latest"
@@ -42,7 +46,7 @@ lazygit = "latest"
 kubectl = "latest"
 {{- end }}
 
-{{- if and (.features.node) (not (eq .osid "alpine" "android")) }}
+{{- if and (.features.node) (not (eq .osID "alpine" "android")) }}
 # FIXME(termux): hangs terminal "No such file or directory (os error 2)"
 # ~/.local/share/mise/installs/node/23.11.0/bin/node -v
 # NOTE: install from system packages on alpine to avoid building from source
@@ -57,7 +61,7 @@ node = "latest"
 
 # ripgrep = "latest"
 
-{{- if and (ne .osid "alpine") (not .features.neovim) }}
+{{- if and (ne .osID "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
 # shellcheck = "latest"
 {{- end }}
@@ -75,11 +79,15 @@ node = "latest"
 # }
 {{- end }}
 
-{{- if eq .osid "debian" }}
+{{- if eq .osIDLike "debian" }}
 # FIXME(termux): installs but "cannot execute: required file not found"
 starship = "latest"
 {{- end }}
 
 usage = "latest"
-# yq = "latest"
+
+{{- if and (eq .osID "ubuntu") (eq .osVersion "22.04") }}
+yq = "latest"
+{{- end }}
+
 # zoxide = "latest"

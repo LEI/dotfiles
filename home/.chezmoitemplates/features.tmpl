@@ -1,7 +1,7 @@
 {{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
 {{- $features := $data.features -}}
 
-{{- if ne (get . "profile") "minimal" }}
+{{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
   "bash" true
   "git" true
@@ -12,7 +12,7 @@
 ) -}}
 {{- end }}
 
-{{- if eq .osid "alpine" }}
+{{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
   "go" false
   "neovim" false
@@ -22,7 +22,7 @@
   "vim" false
   "zellij" false
 ) -}}
-{{- else if eq .osid "android" }}
+{{- else if eq .osID "android" }}
 {{- $features = mergeOverwrite $features (dict
   "neovim" true
   "tmux" true
@@ -30,7 +30,7 @@
   "zellij" true
 ) -}}
 
-{{- else if eq .osid "arch" }}
+{{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
   "ai" true
   "docker" true
@@ -47,7 +47,7 @@
   "zellij" true
   "zsh" true
 ) -}}
-{{- else if eq .osid "debian" }}
+{{- else if eq .osIDLike "debian" }}
 {{- $features = mergeOverwrite $features (dict
   "docker" false
   "ghostty" true

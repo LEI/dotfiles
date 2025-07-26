@@ -16,7 +16,7 @@
 {{-   end }}
 
 {{-   $condition := get $pkg "condition" | default nil }}
-{{-   if and $condition (output "chezmoi" "execute-template" (printf "{{ eq (%s) true }}" $condition)) }}
+{{-   if and $condition (eq (output "chezmoi" "execute-template" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
 {{-     continue }}
 {{-   end }}
 

@@ -33,11 +33,20 @@ check_chezmoi() {
 
 check_version() {
   cmd bash --version # | head -n1
+  cmd bat --version
   # cmd bws --version
-  # cmd node --version
+  cmd eza --version
+  cmd fd --version
+  cmd jq --version
   cmd nu --version
+  cmd rg --version
+  cmd yq --version
+  cmd zoxide --version
+
   cmd mise --version | head -n1
   cmd mise ls
+
+  # cmd node --version
 
   cmd atuin --version
   # cmd atuin dotfiles alias list
@@ -48,7 +57,6 @@ check_version() {
   # cmd ghostty --version | head -n1
   cmd hx --version || cmd helix --version
   # cmd zellij --version
-  cmd zoxide --version
 
   # cmd vim --version | head -n1
   if cmd nvim --version 2>/dev/null; then
@@ -62,6 +70,8 @@ check_version() {
     cmd topgrade --disable=chezmoi --dry-run
     # cmd timeout 5m topgrade --disable=chezmoi
   fi
+
+  # chezmoi cat-config | yq .data.features
 
   if [ "${DEBUG:-}" = true ]; then
     echo >&2 "DEBUG enabled"

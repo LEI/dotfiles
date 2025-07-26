@@ -5,6 +5,8 @@
 
 set -eu
 
+. home/.chezmoitemplates/helpers.sh
+
 BIN_DIR="$HOME/.local/bin"
 PATH="$PATH:$BIN_DIR"
 
@@ -45,7 +47,7 @@ fi
 if ! chezmoi="$(command -v chezmoi)"; then
   chezmoi="$BIN_DIR/chezmoi"
   echo >&2 "Installing chezmoi to $chezmoi"
-  VERSION=2.62.2
+  VERSION="$(get_release twpayne/chezmoi)"
   OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # "$CHEZMOI_OS"
   ARCH=amd64
   # grep -F libc "$(which ldd)"

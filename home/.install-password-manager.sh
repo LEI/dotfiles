@@ -27,7 +27,7 @@ fi
 
 # exit immediately if bws is already in $PATH
 # type bws >/dev/null 2>&1 && exit
-if command -v bws >/dev/null; then
+if command -v bws >/dev/null || [ -f ~/.local/bin/bws ]; then
   # echo >&2 "Already installed: bws"
   exit
 fi
