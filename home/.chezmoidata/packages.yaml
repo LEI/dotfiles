@@ -10,10 +10,12 @@ commonPackages:
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
   - { name: jq, windows: jqlang.jq }
+  - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
   - name: starship
     condition: ne .osIDLike "debian"
+  - { name: topgrade, condition: and (ne .osID "arch") (ne .osIDLike "debian") }
   - name: yq
     condition: 'and (ne .osID "ubuntu") (ne .osVersion "22.04")'
     windows: MikeFarah.yq
