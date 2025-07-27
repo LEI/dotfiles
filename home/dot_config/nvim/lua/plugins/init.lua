@@ -88,6 +88,7 @@ return {
     },
     ft = 'markdown',
     opts = {
+      code = { enabled = false }, -- FIXME: conceal_delimiters = false
       completions = { lsp = { enabled = true } },
       file_types = { 'markdown', 'codecompanion', 'Avante' },
       html = { comment = { conceal = false } },
