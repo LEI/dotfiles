@@ -15,16 +15,16 @@ check_chezmoi() {
   #   echo >&2 "Expected empty diff without scripts, see output above"
   #   exit 1
   # fi
-  echo >&2 "chezmoi apply"
-  chezmoi apply
-  echo >&2 "chezmoi diff"
-  out="$(chezmoi diff)"
+  echo >&2 "chezmoi apply $*"
+  chezmoi apply "$@"
+  echo >&2 "chezmoi diff $*"
+  out="$(chezmoi diff "$@")"
   if [ "$out" != "" ]; then
     echo >&2 "Expected empty diff: $out"
     exit 1
   fi
-  echo >&2 "chezmoi status"
-  out="$(chezmoi status)"
+  echo >&2 "chezmoi status $*"
+  out="$(chezmoi status "$@")"
   if [ "$out" != "" ]; then
     echo >&2 "Expected empty status: $out"
     exit 1
@@ -39,16 +39,17 @@ check_version() {
   cmd bash --version # | head -n1
   cmd bat --version
   cmd ble --version || true
+  cmd btm --version
   # cmd bws --version
   cmd carapace --version
 
-  # chezmoi cat-config | yq .data.features
+  # chezmoi cat-config "$@" | yq .data.features
 
   cmd direnv export bash # "${SHELL##*/}"
   cmd eza --version
   cmd fd --version
   # cmd ghostty --version | head -n1
-  cmd hx --version || true
+  cmd hx --version
   cmd jq --version
 
   cmd mise --version | head -n1
@@ -86,5 +87,5 @@ check_version() {
   fi
 }
 
-check_chezmoi
-check_version
+check_chezmoi "$@"
+check_version "$@"

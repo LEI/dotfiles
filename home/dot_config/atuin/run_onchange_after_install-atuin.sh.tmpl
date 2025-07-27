@@ -14,38 +14,21 @@ set -eu
 # fi
 if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   echo >&2 "Installing ble.sh"
-  # TODO: install_tar_xs "$URL"
-  # curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
   BLE_NAME="ble-nightly"
   URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
-  curl -LSsf "$URL" | tar xJf - -C "$TMPDIR"
-  # FIXME: stty: 'standard input': Inappropriate ioctl for device
-  set -x
-  bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
-  set +x
+  cmd curl -LSsf "$URL" | cmd tar xJf - -C "$TMPDIR"
+  cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
   echo >&2 "Installed ble.sh"
 fi
 
-if command -v atuin >/dev/null && atuin --version; then
-  echo >&2 "Already installed: atuin" # {{ output .sh "-c" "command -v atuin || true" }}
+if command -v atuin >/dev/null; then
+  echo >&2 "Already installed: atuin"
+  atuin --version
   exit
 fi
 
+# {{- if not (eq .osIDLike "arch" "darwin") }}
 echo >&2 "Installing atuin"
-
-# {{- if eq .chezmoi.os "darwin" }}
-export NONINTERACTIVE=1
-
-cmd brew install --quiet atuin
-# {{- else if eq .osid "arch" }} Archlinux/Manjaro
-
-cmd sudo pacman --sync --needed --noconfirm --quiet atuin
-# {{- else }}
-# # Ensure cargo is available
-# # shellcheck disable=SC1090
-# . ~/.cargo/env
-# # Requires build-essential on Debian
-# cargo install --quiet atuin
 # https://github.com/atuinsh/atuin/releases
 ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
 OS=unknown-linux
@@ -58,8 +41,6 @@ fi
 VERSION="$(get_release atuinsh/atuin)"
 URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
 BIN="$NAME/atuin"
-
 install_tar_gz "$URL" "$BIN"
-# {{- end }}
-
 echo >&2 "Installed atuin"
+# {{- end }}

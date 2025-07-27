@@ -9,8 +9,9 @@ export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
 {{- else if eq .osid "debian" }}
 # TODO: replace with .chezmoiexternal
-if command -v nvim >/dev/null && nvim --version | head -n1; then
-  echo >&2 "Already installed: nvim" # {{ output .sh "-c" "command -v nvim || true" }}
+if command -v nvim >/dev/null; then
+  echo >&2 "Already installed: nvim"
+  nvim --version | head -n1
 else
   echo >&2 "Installing neovim"
   # NOTE: Debian 12 has nvim 0.7.2

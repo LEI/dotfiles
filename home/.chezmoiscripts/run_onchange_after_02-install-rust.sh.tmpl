@@ -13,8 +13,9 @@ if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
   cmd . ~/.cargo/env
 fi
 
-if command -v cargo >/dev/null && cargo --version; then
-  echo >&2 "Already installed: cargo" # {{ output .sh "-c" "command -v cargo || true" }}
+if command -v cargo >/dev/null; then
+  echo >&2 "Already installed: cargo"
+  cargo --version
 else
   echo >&2 "Installing cargo"
 

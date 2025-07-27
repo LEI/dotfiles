@@ -29,22 +29,25 @@ cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo pacman --sync --needed --noconfirm --quiet $packages
-# if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
-#   if [ ! -d /tmp/yay-bin ]; then
-#     cmd git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
-#   fi
-#   cmd cd /tmp/yay-bin
-#   cmd makepkg --install --noconfirm --syncdeps
-# fi
+if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  if [ ! -d /tmp/yay-bin ]; then
+    cmd sudo -u "$USER" git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+  fi
+  cmd cd /tmp/yay-bin
+  cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
+fi
 {{- $aurPackages := includeTemplate "packages.tmpl" (merge (dict "packageType" "aur") .) | fromJson }}
 aur_packages="{{ $aurPackages | join " " }}"
-{{- if lookPath "yay" }}
-cmd yay --sync --needed --noconfirm --quiet $aur_packages
-{{- else if lookPath "paru" }}
-cmd paru --sync --needed --noconfirm --quiet $aur_packages
-{{- else if lookPath "pamac" }}
-cmd pamac install --no-confirm --quiet $aur_packages
-{{- end }}
+if command -v yay >/dev/null; then
+  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
 {{- else if eq .osid "debian" }} Debian/Ubuntu
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive

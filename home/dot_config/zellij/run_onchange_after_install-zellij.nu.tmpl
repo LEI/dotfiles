@@ -2,8 +2,9 @@
 
 use std/log
 
-if (which zellij) != [] and (^zellij --version) != "" {
-  log info "Already installed: zellij" # {{ output .sh "-c" "command -v zellij || true" }}
+if (which zellij) != [] { # and (^zellij --version) != ""
+  log info "Already installed: zellij"
+  zellij --version
   exit
 }
 

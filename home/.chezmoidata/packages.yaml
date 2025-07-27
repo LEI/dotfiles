@@ -1,8 +1,12 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
+  - { name: atuin, condition: eq .osIDLike "arch" "darwin" }
   - { name: bat, windows: sharkdp.bat }
   - { name: bandwhich, condition: not (eq .osIDLike "debian" "windows") }
+  - name: bottom
+    condition: not (eq .osIDLike "debian")
+    windows: clement.bottom
   - curl
   - name: eza
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
@@ -17,8 +21,7 @@ commonPackages:
   - name: starship
     condition: ne .osIDLike "debian"
   - name: topgrade
-    condition: ne .osIDLike "debian"
-    type: eq .osID "manjaro" | ternary "aur" ""
+    condition: not (eq .osIDLike "arch" "debian")
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: MikeFarah.yq
@@ -65,17 +68,18 @@ packages:
     - { name: vim, condition: .features.vim }
   arch: # Archlinux/Manjaro
     - base-devel
-    - name: carapace-bin
-      type: '"aur"'
+    - { name: carapace-bin, type: '"aur"' }
     - gnu-netcat
     - gnupg
-    - skim
-    - time # condition: command time
     - { name: helix, condition: .features.helix }
     - name: helixbinhx
       condition: and .features.helix (eq .osIDLike "arch")
       type: '"aur"'
     - { name: neovim, condition: .features.neovim }
+    - skim
+    - time # condition: command time
+    - name: topgrade-bin
+      type: eq .osID "manjaro" | ternary "aur" ""
     - { name: vim, condition: .features.vim }
     # https://github.com/Jguer/yay#other-distributions
     - { name: yay, condition: eq .osIDLike "manjaro" }

@@ -25,8 +25,9 @@ if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
 fi
 
 # TODO: reuse in script/bootstrap
-if command -v mise >/dev/null && mise --version >/dev/null; then
-  echo >&2 "Already installed: mise" # {{ output .sh "-c" "command -v mise || true" }}
+if command -v mise >/dev/null; then
+  echo >&2 "Already installed: mise"
+  mise --version | head -n1
   exit
 fi
 

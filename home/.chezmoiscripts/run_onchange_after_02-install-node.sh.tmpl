@@ -14,8 +14,9 @@ set -eu
 # NOTE: use global node
 cd /tmp
 
-if command -v node >/dev/null && node --version; then
-  echo >&2 "Already installed: node" # {{ output .sh "-c" "command -v node || true" }}
+if command -v node >/dev/null; then
+  echo >&2 "Already installed: node"
+  node --version
 else
   echo >&2 "Installing node"
   cmd sudo apk add --quiet nodejs npm

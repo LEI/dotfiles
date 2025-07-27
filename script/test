@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# Usage:
-# DEBUG=true REMOVE=false ./script/test archlinux base-devel
-# ./script/test debian 12
-# ./script/test ubuntu 22.04
-
 set -euo pipefail
 
 # if [[ $- = *i* ]]; then
@@ -28,21 +23,28 @@ if [ "$REMOVE" = true ]; then
   ARGS+=("--rm")
 fi
 
+BOOTSTRAP_SCRIPT='./script/bootstrap --no-tty'
+
+# shellcheck disable=SC2016
+CLONE_SCRIPT='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME"'
+
 # shellcheck disable=SC2016
 TEST_SCRIPT='$HOME/.local/share/chezmoi/script/test'
-
 if [ "$DEBUG_ON_ERROR" = true ]; then
   TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
 fi
 
-TEST_MOUNT='./script/bootstrap --no-tty && '"$TEST_SCRIPT"
-# TEST_MOUNT='./script/bootstrap --no-tty --apply=false && apk add --quiet bash && '"$TEST_SCRIPT"
-# shellcheck disable=SC2016
-TEST_CLONE='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME" && '"$TEST_SCRIPT"
-
 main() {
   local name=${1:-}
   [ -n "$name" ] && shift
+  if [ "$name" = all ]; then
+    export DEBUG DEBUG_ON_ERROR REMOVE
+    set -x
+    ./script/test alpine latest "$@"
+    ./script/test archlinux base-devel "$@"
+    # for v in 10 11 12; do ./script/test debian $v "$@"; done
+    # for v in 20 22 24; do ./script/test ubuntu $v.04 "$@"; done
+  fi
   local image="$name"
   local tag=${1:-}
   [ -n "$tag" ] && shift
@@ -54,20 +56,20 @@ main() {
   elif [ "$image" == macos ]; then
     image=docker.io/sickcodes/docker-osx
   fi
-  if [ -n "$tag" ]; then
+  if [ -n "$name" ] && [ -n "$tag" ]; then
     image="$name:$tag"
-    set -- "test-$name-$tag" "$image:$tag" "$@"
-  else
+    set -- "test-$name-$tag" "$image" "$@"
+  elif [ -n "$name" ]; then
     set -- "test-$name" "$image" "$@"
   fi
   case "$name" in
-  "" | local) ./script/check ;;
+  "" | local) ./script/check "$@" ;;
   alpine) test_alpine "$@" ;;
   archlinux) test_archlinux "$@" ;;
   debian | ubuntu) test_debian "$@" ;;
   macos) test_macos "$@" ;;
   termux) test_clone "$@" ;;
-  *) echo >&2 "Unknown image: $name:$tag" ;;
+  *) echo >&2 "Unknown image: $image" ;;
   esac
 }
 
@@ -116,7 +118,7 @@ test_alpine() {
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
   container_test "$name" "$image"
 }
 
@@ -126,7 +128,7 @@ test_archlinux() {
   local user=test
   local prepare_array=(
     "pacman --sync --needed --noconfirm --quiet --refresh sudo which"
-    "&& useradd -ms /bin/bash $user"
+    "&& (useradd -ms /bin/bash $user || true)"
     "&& usermod -aG wheel $user"
     "&& sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
     # "&& chown -R $user:$user ."
@@ -139,7 +141,7 @@ test_archlinux() {
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
   container_test "$name" "$image"
 }
 
@@ -157,7 +159,7 @@ test_debian() {
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
   )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $TEST_MOUNT")
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
   container_test "$name" "$image"
 }
 
@@ -193,8 +195,8 @@ test_clone() {
   local name="${1:-"test-termux"}"
   local image="${2:-"docker.io/termux/termux-docker:x86_64"}"
   ARGS+=("--name=$name")
-  TEST=("sh" "-ixc" "$TEST_CLONE")
-  # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$TEST_CLONE"
+  TEST=("sh" "-ixc" "$CLONE_SCRIPT && $TEST_SCRIPT")
+  # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$CLONE_SCRIPT && $TEST_SCRIPT"
   container_test "$name" "$image"
 }
 

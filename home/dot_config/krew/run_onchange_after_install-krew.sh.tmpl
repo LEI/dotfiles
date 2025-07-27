@@ -6,8 +6,9 @@ set -eu
 
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
-if command -v kubectl-krew >/dev/null && kubectl-krew version | grep GitTag; then
-  echo >&2 "Already installed: kubectl-krew" # {{ output .sh "-c" "command -v kubectl-krew || true" }}
+if command -v kubectl-krew >/dev/null; then
+  echo >&2 "Already installed: kubectl-krew"
+  kubectl-krew version | grep GitTag
   exit
 fi
 

@@ -18,7 +18,10 @@ run = "goss --vars=vars.yaml validate"
 bat = "latest"
 {{- end }}
 
+{{- if eq .osIDLike "debian" }}
 bottom = "latest"
+{{- end }}
+
 # chezmoi = "latest"
 direnv = "latest"
 

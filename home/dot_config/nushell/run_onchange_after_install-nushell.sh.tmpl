@@ -2,8 +2,9 @@
 
 set -eu
 
-if command -v nu >/dev/null && nu --version; then
-  echo >&2 "Already installed: nu" # {{ output .sh "-c" "command -v nu || true" }}
+if command -v nu >/dev/null; then
+  echo >&2 "Already installed: nu"
+  nu --version
   exit
 fi
 
