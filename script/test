@@ -42,7 +42,7 @@ main() {
     set -x
     ./script/test alpine latest "$@"
     ./script/test archlinux base-devel "$@"
-    # for v in 10 11 12; do ./script/test debian $v "$@"; done
+    # for v in 12 13; do ./script/test debian $v "$@"; done
     # for v in 20 22 24; do ./script/test ubuntu $v.04 "$@"; done
   fi
   local image="$name"

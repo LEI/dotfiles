@@ -196,12 +196,6 @@ return {
   -- LSP
   {
     'mason-org/mason-lspconfig.nvim',
-    -- FIXME: vim.lsp.config is nil on alpine
-    -- https://github.com/mason-org/mason-lspconfig.nvim/blob/v2.0.0/lua/mason-lspconfig/mappings.lua#L28
-
-    -- automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
-    -- https://github.com/mason-org/mason-lspconfig.nvim/blob/main/lua/mason-lspconfig/features/automatic_enable.lua#L47
-
     -- branch = 'main',
     tag = 'v2.0.0',
     dependencies = {

@@ -31,6 +31,11 @@
 {{- $osID = "android" -}}
 {{- end -}}
 
+{{- $glibc231 := or
+  (and (eq $osID "debian") (le (int $osVersion) 11))
+  (and (eq $osID "ubuntu") (le (float64 $osVersion) 20.04))
+-}}
+
 {{- $sh := "sh" -}}
 {{- if eq $osID "windows" -}}
 {{- $sh = "bash" -}}
@@ -80,6 +85,7 @@
   "codespaces" $codespaces
   "devContainer" $devContainer
   "ephemeral" $ephemeral
+  "glibc231" $glibc231
   "headless" $headless
   "hostname" $hostname
   "osID" $osID
@@ -122,6 +128,9 @@ data:
   osID: {{ $osID | quote }}
   osIDLike: {{ $osIDLike | quote }}
   osVersion: {{ $osVersion | quote }}
+
+  # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
+  glibc231: {{ $glibc231 }}
   sh: {{ $sh | quote }}
 
   email: {{ $email | quote }}

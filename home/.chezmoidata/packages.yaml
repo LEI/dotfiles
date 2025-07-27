@@ -14,11 +14,11 @@ commonPackages:
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
   - name: helix
-    condition: and .features.helix (not (eq .osIDLike "darwin" "debian"))
+    condition: and .features.helix (ne .osIDLike "debian")
   - { name: jq, windows: jqlang.jq }
   - name: neovim
     # condition: and .features.neovim (ne .osIDLike "debian")
-    condition: .features.neovim and not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
+    condition: and .features.neovim (not .glibc231)
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }

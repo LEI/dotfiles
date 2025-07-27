@@ -31,41 +31,62 @@ check_chezmoi() {
   fi
 }
 
+has_feature() {
+  local name="$1"
+  local features="$2"
+  yq ---exit-status ".$name" <<<"$features" >/dev/null 2>&1
+}
+
 check_version() {
-  # TODO: detect glibc 23.1
-  cmd atuin --version || true
-  # cmd atuin dotfiles alias list
+  local features
+  features="$(chezmoi cat-config "$@" | yq .data.features)"
+
+  if has_feature atuin "$features"; then
+    cmd atuin --version
+    # cmd atuin dotfiles alias list
+  fi
 
   cmd bash --version # | head -n1
   cmd bat --version
-  cmd ble --version || true
+  if command -v ble >/dev/null; then
+    cmd ble --version
+  fi
   cmd btm --version
   # cmd bws --version
   cmd carapace --version
-
-  # chezmoi cat-config "$@" | yq .data.features
 
   cmd direnv export bash # "${SHELL##*/}"
   cmd eza --version
   cmd fd --version
   # cmd ghostty --version | head -n1
-  cmd hx --version
+  if has_feature helix "$features"; then
+    cmd hx --version
+  fi
   cmd jq --version
 
-  cmd mise --version | head -n1
-  cmd mise ls
-
-  # cmd node --version
-  cmd nu --version
-
-  if cmd nvim --version 2>/dev/null | head -n1; then
-    # FIXME: Debian 11 Ubuntu 22 nvim 0.4.3
-    cmd timeout 5m nvim --headless +Update! +qa >/dev/null || true
+  if has_feature mise "$features"; then
+    cmd mise --version | head -n1
+    cmd mise ls
   fi
 
-  cmd rg --version
+  if has_feature node "$features"; then
+    cmd node --version
+  fi
 
-  if cmd tmux -V 2>/dev/null; then
+  if has_feature nushell "$features"; then
+    cmd nu --version
+  fi
+
+  if has_feature neovim "$features"; then
+    cmd nvim --version 2>/dev/null | head -n1
+    # FIXME: Debian 11 Ubuntu 22 nvim 0.4.3
+    cmd timeout 5m nvim --headless +Update! +qa >/dev/null # || true
+  fi
+
+  cmd rg --version | head -n1
+
+  if has_feature tmux "$features"; then
+    tmux -V 2>/dev/null
     export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
     cmd timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
   fi
@@ -75,10 +96,16 @@ check_version() {
     # cmd timeout 5m topgrade --disable=chezmoi
   fi
 
-  # vim --version | head -n1
+  if has_feature vim "$features"; then
+    vim --version | head -n1
+  fi
 
   cmd yq --version
-  cmd zellij --version || true
+
+  if has_feature zellij "$features"; then
+    cmd zellij --version
+  fi
+
   cmd zoxide --version
 
   if [ "${DEBUG:-}" = true ]; then

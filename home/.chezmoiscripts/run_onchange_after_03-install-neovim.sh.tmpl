@@ -4,10 +4,10 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)) }}
+{{ if .glibc231 -}}
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
-{{- else if eq .osid "debian" }}
+{{ else if eq .osid "debian" -}}
 # TODO: replace with .chezmoiexternal
 if command -v nvim >/dev/null; then
   echo >&2 "Already installed: nvim"
@@ -24,6 +24,6 @@ else
   sudo mv /tmp/$NAME/share/* /usr/local/share/
   echo >&2 "Installed neovim"
 fi
-{{- end }}
+{{ end -}}
 
 cmd timeout 5m nvim --headless +Update! +qa >/dev/null

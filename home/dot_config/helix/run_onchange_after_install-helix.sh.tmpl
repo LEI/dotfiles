@@ -12,8 +12,6 @@ if command -v hx >/dev/null && hx --version; then
   exit
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
 # {{- if eq .osid "alpine" }}
 cmd sudo apk add --quiet helix tree-sitter-grammars
 # {{- else if eq .osid "android" }}

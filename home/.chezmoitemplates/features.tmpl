@@ -1,5 +1,30 @@
-{{- $data := includeTemplate ".chezmoidata/features.yaml" | fromYaml -}}
-{{- $features := $data.features -}}
+{{- $features := (dict
+  "ai" false
+  "atuin" false
+  "bash" true
+  "docker" false
+  "ghostty" false
+  "git" true
+  "go" false
+  "goss" false
+  "helix" .glibc231
+  "kube" false
+  "mise" true
+  "neovim" false
+  "node" false
+  "nushell" true
+  "php" false
+  "rust" false
+  "sql" false
+  "tmux" false
+  "topgrade" true
+  "vim" false
+  "void" false
+  "vscode" false
+  "vscodium" false
+  "zellij" false
+  "zsh" false
+) -}}
 
 {{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
@@ -60,16 +85,12 @@
   "zsh" true
 ) -}}
 {{- else if eq .osIDLike "debian" }}
-{{- $glibc231 := (or
-  (and (eq .osID "debian") (le (int .osVersion) 11))
-  (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-) -}}
 {{- $features = mergeOverwrite $features (dict
-  "atuin" (not $glibc231)
+  "atuin" (not .glibc231)
   "docker" false
-  "ghostty" (not $glibc231)
+  "ghostty" (not .glibc231)
   "go" true
-  "helix" (not $glibc231)
+  "helix" (not .glibc231)
   "kube" false
   "neovim" true
   "node" true
@@ -77,7 +98,7 @@
   "rust" true
   "sql" true
   "tmux" true
-  "topgrade" (not $glibc231)
+  "topgrade" (not .glibc231)
   "vim" true
   "zellij" true
 ) -}}
@@ -117,5 +138,11 @@
   "vim" false
 ) -}}
 {{- end }}
+
+{{- range $name, $default := $features }}
+{{- $key := upper (printf "FEATURE_%s" $name) -}}
+{{- $value := includeTemplate "env.tmpl" (dict "key" $key "default" $default) | fromJson -}}
+{{- $_ := set $features $name $value -}}
+{{- end -}}
 
 {{- $features | toJson -}}

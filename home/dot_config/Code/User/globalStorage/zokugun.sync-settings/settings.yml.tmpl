@@ -3,5 +3,5 @@ hostname: ""
 profile: {{ .headless | ternary "remote" "main" | quote }}
 repository:
   type: git
-  url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
+  url: git@github.com:lei/vscode-settings.git
   branch: main
