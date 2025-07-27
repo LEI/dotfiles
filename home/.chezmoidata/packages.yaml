@@ -13,7 +13,12 @@ commonPackages:
     windows: eza-community.eza
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
+  - name: helix
+    condition: and .features.helix (not (eq .osIDLike "darwin" "debian"))
   - { name: jq, windows: jqlang.jq }
+  - name: neovim
+    # condition: and .features.neovim (ne .osIDLike "debian")
+    condition: .features.neovim and not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
@@ -22,6 +27,8 @@ commonPackages:
     condition: ne .osIDLike "debian"
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
+  - name: vim
+    condition: .features.vim
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: MikeFarah.yq
@@ -38,9 +45,6 @@ packages:
     - tar
     - xdg-utils # xdg-open
     - xz
-    - { name: helix, condition: .features.helix }
-    - { name: vim, condition: .features.vim }
-    - { name: neovim, condition: .features.neovim }
 
     # NOTE(ble.sh): /lib/bash/{fdflags,sleep}: No such file or directory
     # builtin: fdflags: not a shell builtin
@@ -63,31 +67,24 @@ packages:
     - skim
     - sudo
     - which
-    - { name: helix, condition: .features.helix }
-    - { name: neovim, condition: .features.neovim }
-    - { name: vim, condition: .features.vim }
   arch: # Archlinux/Manjaro
     - base-devel
     - { name: carapace-bin, type: '"aur"' }
     - gnu-netcat
     - gnupg
-    - { name: helix, condition: .features.helix }
     - name: helixbinhx
       condition: and .features.helix (eq .osIDLike "arch")
       type: '"aur"'
-    - { name: neovim, condition: .features.neovim }
     - skim
     - time # condition: command time
     - name: topgrade-bin
       type: eq .osID "manjaro" | ternary "aur" ""
-    - { name: vim, condition: .features.vim }
     # https://github.com/Jguer/yay#other-distributions
     - { name: yay, condition: eq .osIDLike "manjaro" }
   darwin:
     brews:
       - carapace
       - gpg
-      - { name: neovim, condition: .features.neovim }
       - { name: nowplaying-cli, condition: .features.tmux }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
@@ -99,7 +96,6 @@ packages:
     - build-essential
     - gpg
     - time # condition: command time
-    - { name: vim, condition: .features.vim }
 
     # Cargo gitlab-ci-ls
     - pkg-config
@@ -113,8 +109,5 @@ packages:
   windows:
     - jdx.mise
     # - { name: golang.go, condition: .features.go }
-    - { name: helix.helix, condition: .features.helix }
-    - { name: neovim.neovim, condition: .features.neovim }
     # - { name: openjs.nodejs, condition: .features.node }
     # - { name: openjs.nodejs.lts, condition: .features.node }
-    - { name: vim.vim, condition: .features.vim }
