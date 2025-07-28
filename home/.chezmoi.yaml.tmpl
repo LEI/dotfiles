@@ -148,8 +148,16 @@ data:
   # Upgrade system packages
   upgrade: {{ eq (env "UPGRADE") "true" }}
 
-# diff:
-#   exclude: ["scripts"]
+diff:
+  # exclude:
+  #   - externals
+  #   - scripts
+  {{- if lookPath "delta" }}
+  page: delta
+  {{- else if .codespaces }}
+  command = "code"
+  args = ["--wait", "--diff"]
+  {{- end }}
 
 env: {}
 
