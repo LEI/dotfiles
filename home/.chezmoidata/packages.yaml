@@ -13,6 +13,7 @@ commonPackages:
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
   # - { name: glances, condition: not (eq .osIDLike "debian" "windows") }
+  - { name: gpg-tui, condition: not (eq .osIDLike "debian" "windows") }
   - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")

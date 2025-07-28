@@ -23,7 +23,7 @@ cmd sudo apk upgrade --quiet
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo apk add --quiet $packages
-{{- else if eq .osid "arch" }} Archlinux/Manjaro
+{{- else if eq .osid "arch" }}
 {{- if .upgrade }}
 cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
@@ -48,7 +48,7 @@ else
   echo >&2 "AUR package manager not found"
   exit 1
 fi
-{{- else if eq .osid "debian" }} Debian/Ubuntu
+{{- else if eq .osid "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo apt-get update --quiet >/dev/null
