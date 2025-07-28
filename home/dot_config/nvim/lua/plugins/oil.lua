@@ -2,10 +2,9 @@ return {
   {
     'stevearc/oil.nvim',
     enabled = vim.g.config.explorer == 'oil',
-    version = '2.15.0',
-    dependencies = {
-      'refractalize/oil-git-status.nvim',
-    },
+    -- https://github.com/stevearc/oil.nvim/pull/591
+    branch = 'master',
+    -- version = '2.15.0',
     -- lazy = false,
     cmd = 'Oil',
     -- https://github.com/stevearc/oil.nvim/issues/300
@@ -82,7 +81,7 @@ return {
   {
     'refractalize/oil-git-status.nvim',
     dependencies = { 'stevearc/oil.nvim' },
-    lazy = true,
+    event = { 'BufEnter oil://*', 'BufWinEnter oil://*' },
     opts = {
       show_ignored = true,
     },

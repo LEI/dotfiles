@@ -86,18 +86,14 @@ local get_action = function(action)
     vim.print(action .. ' parsers...')
     vim.cmd('TSUpdate' .. (args.bang and 'Sync' or ''))
 
-    -- NOTE: vim.lsp.config must not be nil
+    -- FIXME: vim.lsp.config may be nil when headless
     -- https://github.com/mason-org/mason-lspconfig.nvim/blob/v2.0.0/lua/mason-lspconfig/mappings.lua#L28
 
     -- automatic_enable.lua:47: attempt to call field 'enable' (a nil value)
     -- https://github.com/mason-org/mason-lspconfig.nvim/blob/main/lua/mason-lspconfig/features/automatic_enable.lua#L47
 
-    if vim.lsp.config then
-      vim.print(action .. ' tools...')
-      vim.cmd('MasonTools' .. action .. (args.bang and 'Sync' or ''))
-    else
-      vim.print('WARN: skipping tools: vim.lsp.config not ready')
-    end
+    vim.print(action .. ' tools...')
+    vim.cmd('MasonTools' .. action .. (args.bang and 'Sync' or ''))
   end
 end
 vim.api.nvim_create_user_command('Install', get_action('Install'), { desc = 'Install', bang = true })

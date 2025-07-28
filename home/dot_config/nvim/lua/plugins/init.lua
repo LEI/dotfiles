@@ -24,8 +24,18 @@ return {
       { '<leader>Ss', function() require('persistence').select() end,desc = 'Select session' },
     },
     init = function()
-      -- vim.opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,terminal'
-      vim.opt.sessionoptions = { 'buffers', 'curdir', 'folds', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' }
+      vim.opt.sessionoptions = {
+        'blank',
+        'buffers',
+        'curdir',
+        'folds',
+        'tabpages',
+        'winsize',
+        'help',
+        'globals',
+        'skiprtp',
+        'terminal',
+      }
       vim.api.nvim_create_user_command('Restore', function()
         require('persistence').load()
       end, { desc = 'Restore session' })

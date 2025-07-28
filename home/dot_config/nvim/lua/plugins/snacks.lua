@@ -256,6 +256,10 @@ return {
       picker = {
         enabled = true,
 
+        -- Always open in current buffer
+        -- https://github.com/folke/snacks.nvim/issues/1984
+        main = { file = false },
+
         -- NOTE: maximize with meta-m
         -- https://github.com/LazyVim/LazyVim/discussions/5765
         -- https://github.com/folke/snacks.nvim/issues/1217#issuecomment-2661465574
@@ -354,7 +358,7 @@ return {
         Snacks.picker.files({
           cwd = cwd,
           hidden = true,
-          title = 'Files in ' .. vim.fn.fnamemodify(cwd, ':~'),
+          title = 'Files in ' .. vim.fn.fnamemodify(cwd, ':~:.'),
         })
       end, desc = 'Find in buffer directory' },
       { '<leader>f', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find in root directory' }, -- Open file explorer in workspace root

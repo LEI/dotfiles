@@ -2,6 +2,26 @@
 --   return vim.fn.expand('%:t')
 -- end
 
+-- https://github.com/nvim-lualine/lualine.nvim/blob/master/lua/lualine/extensions/oil.lua
+local oil_extension = {
+  sections = {
+    lualine_c = {
+      function()
+        local ok, oil = pcall(require, 'oil')
+        if not ok then
+          return ''
+        end
+        local dir = oil.get_current_dir()
+        if not dir then
+          return ''
+        end
+        return vim.fn.fnamemodify(dir, ':~:.')
+      end,
+    },
+  },
+  filetypes = { 'oil' },
+}
+
 return {
   {
     'nvim-lualine/lualine.nvim',
@@ -225,7 +245,7 @@ return {
         'man',
         'mason',
         'nvim-dap-ui',
-        -- 'oil',
+        oil_extension, -- 'oil',
         'overseer',
         'quickfix',
         'trouble',
