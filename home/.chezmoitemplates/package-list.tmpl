@@ -15,7 +15,7 @@
 {{-       continue }}
 {{-     end }}
 {{-   else if or $packageType $typeExpression }}
-{{-       continue }}
+{{-     continue }}
 {{-   end }}
 {{-   $condition := get $pkg "condition" | default nil }}
 {{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}

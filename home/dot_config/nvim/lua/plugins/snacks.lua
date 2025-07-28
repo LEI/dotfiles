@@ -1,104 +1,101 @@
 local display_dir = vim.fn.getcwd() -- vim.fn.fnamemodify('.', ':~')
 ---@type snacks.Config.dashboard
-local dashboard = {
-  enabled = true,
-  preset = { header = 'Neovim' },
-  sections = {
-    -- { section = 'header', padding = 1 },
-    { section = 'startup', padding = 1 },
-    {
-      section = 'keys',
-      padding = 1,
-    },
+local dashboard_sections = {
+  -- { section = 'header', padding = 1 },
+  { section = 'startup', padding = 1 },
+  {
+    section = 'keys',
+    padding = 1,
+  },
 
-    { title = 'Recent files', padding = 1 }, -- MRU
-    { section = 'recent_files', limit = 8, padding = 1 },
+  { title = 'Recent files', padding = 1 }, -- MRU
+  { section = 'recent_files', limit = 8, padding = 1 },
 
-    { title = 'Current directory ', file = display_dir, padding = 1 }, -- MRU
-    { section = 'recent_files', cwd = true, limit = 8, padding = 1 },
+  { title = 'Current directory ', file = display_dir, padding = 1 }, -- MRU
+  { section = 'recent_files', cwd = true, limit = 8, padding = 1 },
 
-    { title = 'Projects', padding = 1 },
-    { section = 'projects', padding = 1 },
+  { title = 'Projects', padding = 1 },
+  { section = 'projects', padding = 1 },
 
-    { pane = 2, section = 'terminal', cmd = 'echo -n "$(hostname): $(date)"', height = 1, padding = 1 },
-    -- { pane = 2, file = display_dir, padding = 1 },
-    {
-      pane = 2,
-      desc = 'Startup time',
-      icon = '⧗ ', -- ⧖
-      -- padding = 1,
-      key = 'S',
-      action = function()
-        vim.cmd('vertical StartupTime')
-      end,
-    },
+  { pane = 2, section = 'terminal', cmd = 'echo -n "$(hostname): $(date)"', height = 1, padding = 1 },
+  -- { pane = 2, file = display_dir, padding = 1 },
+  {
+    pane = 2,
+    desc = 'Startup time',
+    icon = '⧗ ', -- ⧖
+    -- padding = 1,
+    key = 'S',
+    action = function()
+      vim.cmd('vertical StartupTime')
+    end,
+  },
 
-    {
-      pane = 2,
-      icon = ' ',
-      desc = 'Open directory ',
-      file = display_dir,
-      -- padding = 1,
-      key = 'o',
-      action = function()
-        -- vim.cmd('silent !command -v open >/dev/null && open . || xdg-open .')
-        if vim.fn.system('command -v open') ~= '' then
-          vim.fn.system('open .')
-        elseif vim.fn.system('command -v xdg-open') ~= '' then
-          vim.fn.system('xdg-open .')
-        else
-          vim.notify('No command to open directory', vim.log.levels.ERROR)
-        end
-      end,
-    },
-    {
-      pane = 2,
-      icon = ' ',
-      desc = 'Browse repository',
-      -- padding = 1,
-      key = 'b',
-      action = function()
-        Snacks.gitbrowse()
-      end,
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-    },
-    { pane = 2, title = ' ', padding = 0 },
+  {
+    pane = 2,
+    icon = ' ',
+    desc = 'Open directory ',
+    file = display_dir,
+    -- padding = 1,
+    key = 'o',
+    action = function()
+      -- vim.cmd('silent !command -v open >/dev/null && open . || xdg-open .')
+      if vim.fn.system('command -v open') ~= '' then
+        vim.fn.system('open .')
+      elseif vim.fn.system('command -v xdg-open') ~= '' then
+        vim.fn.system('xdg-open .')
+      else
+        vim.notify('No command to open directory', vim.log.levels.ERROR)
+      end
+    end,
+  },
+  {
+    pane = 2,
+    icon = ' ',
+    desc = 'Browse repository',
+    -- padding = 1,
+    key = 'b',
+    action = function()
+      Snacks.gitbrowse()
+    end,
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+  },
+  { pane = 2, title = ' ', padding = 0 },
 
-    {
-      pane = 2,
-      icon = ' ',
-      title = 'Git remote',
-      section = 'terminal',
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-      cmd = 'echo && git remote --verbose',
-      height = 3,
-      padding = 1,
-      ttl = 5 * 60,
-      indent = 3,
-    },
+  {
+    pane = 2,
+    icon = ' ',
+    title = 'Git remote',
+    section = 'terminal',
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+    cmd = 'echo && git remote --verbose',
+    height = 3,
+    padding = 1,
+    ttl = 5 * 60,
+    indent = 3,
+  },
 
-    {
-      pane = 2,
-      icon = ' ',
-      title = 'Git status',
-      section = 'terminal',
-      enabled = function()
-        return Snacks.git.get_root() ~= nil
-      end,
-      cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
-      -- height = 28,
-      padding = 1,
-      ttl = 5 * 60,
-      indent = 3,
-    },
+  {
+    pane = 2,
+    icon = ' ',
+    title = 'Git status',
+    section = 'terminal',
+    enabled = function()
+      return Snacks.git.get_root() ~= nil
+    end,
+    cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
+    -- height = 28,
+    padding = 1,
+    ttl = 5 * 60,
+    indent = 3,
+  },
 
-    -- { pane = 2, title = ' ', padding = 1 },
+  -- { pane = 2, title = ' ', padding = 1 },
 
-    --[[
+  --[[
     function()
       local in_git = Snacks.git.get_root() ~= nil
       -- stylua: ignore
@@ -122,7 +119,7 @@ local dashboard = {
       end, cmds)
     end,
     --]]
-  },
+  -- { pane = 2, section = 'terminal', cmd = 'curl -s https://wttr.in/?0A' },
 }
 
 local function grep_picker()
@@ -231,7 +228,11 @@ return {
     opts = {
       animate = { enabled = false },
       bigfile = { enabled = true },
-      dashboard = dashboard,
+      dashboard = {
+        enabled = true,
+        preset = { header = 'Neovim' },
+        sections = dashboard_sections,
+      },
       explorer = { enabled = vim.g.config.explorer == 'snacks', replace_netrw = true },
       indent = { enabled = false },
       input = { enabled = true },

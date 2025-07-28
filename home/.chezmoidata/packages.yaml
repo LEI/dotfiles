@@ -4,15 +4,16 @@ commonPackages:
   - { name: atuin, condition: eq .osIDLike "arch" "darwin" }
   - { name: bat, windows: sharkdp.bat }
   - { name: bandwhich, condition: not (eq .osIDLike "debian" "windows") }
-  - name: bottom
-    condition: not (eq .osIDLike "debian")
-    windows: clement.bottom
+  # - { name: below, condition: not (eq .osIDLike "arch" "debian" "windows") }
+  - { name: bottom, condition: ne .osIDLike "debian", windows: clement.bottom }
   - curl
   - name: eza
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: eza-community.eza
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
+  # - { name: glances, condition: not (eq .osIDLike "debian" "windows") }
+  - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
   - { name: jq, windows: jqlang.jq }
@@ -41,6 +42,8 @@ packages:
     - build-base # gcc
     - gpg
     - gzip
+    - { name: nodejs, condition: .features.node }
+    - { name: npm, condition: .features.node }
     - skim
     - tar
     - xdg-utils # xdg-open
@@ -54,7 +57,7 @@ packages:
     # - g++
     # - linux-headers
     # - make
-    - python3
+    - { name: python3, condition: .features.python }
 
     # Cargo gitlab-ci-ls
     - openssl-dev
@@ -62,13 +65,14 @@ packages:
     - openssl-libs-static
   android:
     - gnupg
-    - nodejs
+    - { name: nodejs, condition: .features.node }
     - proot
     - skim
     - sudo
     - which
   arch: # Archlinux/Manjaro
     - base-devel
+    # - { name: below, type: '"aur"' }
     - { name: carapace-bin, type: '"aur"' }
     - gnu-netcat
     - gnupg
@@ -102,8 +106,8 @@ packages:
     - libssl-dev # openssl-devel on Fedora
 
     # Debian devcontainer
-    - python3
-    - python3-venv
+    - { name: python3, condition: .features.python }
+    - { name: python3-venv, condition: .features.python }
   # fedora:
   #   - openssl-devel
   windows:

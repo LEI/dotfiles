@@ -79,7 +79,7 @@ local mason_lsp = {
   -- Node
   'bashls', -- 'bash-language-server',
 
-  -- TODO: use global vscode ls (install-node.sh)
+  -- TODO: use global vscode ls if installed
   'cssls', -- 'css-lsp',
   'eslint', -- 'eslint-lsp',
   'html', -- 'html-lsp',

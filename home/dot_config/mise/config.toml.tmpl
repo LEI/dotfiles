@@ -68,7 +68,15 @@ node = "latest"
 # php = "latest"
 # {{- end }}
 
+{{- if .features.python }}
+# python = "latest"
+{{- end }}
+
 # ripgrep = "latest"
+
+{{- if .features.ruby }}
+# ruby = "latest"
+{{- end }}
 
 {{- if and (ne .osID "alpine") (not .features.neovim) }}
 # FIXME(alpine): .rs syntax error (failed to install with aqua)
