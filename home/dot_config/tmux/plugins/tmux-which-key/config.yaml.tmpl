@@ -79,7 +79,7 @@ items:
   - separator: true
 
   # {{- $include := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}
-  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (dict "include" $include "map" $keys.map "names" $keys.names "sh" .sh) | indent 2 }}
+  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (mergeOverwrite . (dict "include" $include "map" $keys.map "names" $keys.names "sh" .sh)) | indent 2 }}
   - separator: true
 
   - name: +Windows

@@ -153,8 +153,8 @@ diff:
   #   - externals
   #   - scripts
   {{- if lookPath "delta" }}
-  page: delta
-  {{- else if .codespaces }}
+  pager: delta
+  {{- else if $codespaces }}
   command = "code"
   args = ["--wait", "--diff"]
   {{- end }}

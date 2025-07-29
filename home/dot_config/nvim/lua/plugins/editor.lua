@@ -154,7 +154,7 @@ return {
         'lua',
         'markdown',
         'markdown_inline',
-        'norg',
+        -- 'norg',
         'python',
         'query',
         'regex',

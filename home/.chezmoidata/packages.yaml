@@ -66,6 +66,7 @@ packages:
     - openssl-libs-static
   android:
     - gnupg
+    - less
     - { name: nodejs, condition: .features.node }
     - proot
     - skim

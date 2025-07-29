@@ -1,3 +1,4 @@
+# vi: ft=tmux
 # https://github.com/tony/tmux-config/blob/master/.tmux.conf
 
 # set-option -g allow-rename on
@@ -18,6 +19,8 @@ set-window-option -g mode-keys vi
 
 set -g default-command $SHELL
 # set -g default-terminal tmux-256color
+
+set -g remain-on-exit on
 
 # Change the default prefix binding to Ctrl-a only when not connected via SSH
 if-shell 'test -z "$SSH_TTY"' 'set -g prefix C-a; bind C-a send-prefix; unbind C-b'
@@ -119,15 +122,16 @@ set -g @plugin 'tmux-plugins/tmux-pain-control#v1.0.0'
 # set -g @plugin 'tmux-plugins/tmux-sidebar'
 
 set -g @plugin 'tmux-plugins/tmux-resurrect#v4.0.0'
-set -g @resurrect-capture-pane-contents 'on'
+# https://github.com/tmux-plugins/tmux-resurrect/issues/122
+set -g @resurrect-capture-pane-contents on
 set -g @resurrect-strategy-vim 'session'
 set -g @resurrect-strategy-nvim 'session'
 # set -g @resurrect-processes 'ssh psql mysql sqlite3'
 
 set -g @plugin 'tmux-plugins/tmux-continuum#v3.1.0'
-set -g @continuum-boot 'on'
-set -g @continuum-boot-options 'iterm,fullscreen'
-set -g @continuum-restore 'on'
+set -g @continuum-boot on
+# set -g @continuum-boot-options 'iterm,fullscreen'
+set -g @continuum-restore on
 # set -g status-right 'Continuum status: #{continuum_status}'
 
 # prefix + g: prompts for session name and switches to it. Performs 'kind-of' name completion.
