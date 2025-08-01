@@ -8,7 +8,7 @@ require('config.autocmds')
 require('config.lazy')
 require('config.keymaps')
 
-vim.cmd.colorscheme(vim.g.config.theme.colorscheme)
+vim.cmd('colorscheme ' .. vim.g.config.theme.colorscheme)
 
 local local_vimrc = vim.fn.expand('~/.vimrc.local')
 if vim.fn.filereadable(local_vimrc) == 1 then

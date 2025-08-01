@@ -66,6 +66,7 @@ packages:
     # - g++
     # - linux-headers
     # - make
+    - { name: pipx, condition: .features.python }
     - { name: python3, condition: .features.python }
 
     # Cargo gitlab-ci-ls
@@ -120,6 +121,8 @@ packages:
     - libssl-dev # openssl-devel on Fedora
 
     # Debian devcontainer
+    - name: pipx
+      condition: and .features.python (or (ne .osID "debian") (gt (int .osVersion) 11))
     - { name: python3, condition: .features.python }
     - { name: python3-venv, condition: .features.python }
   # fedora:

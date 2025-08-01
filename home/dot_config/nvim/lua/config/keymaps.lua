@@ -97,18 +97,20 @@ map('n', '<leader>xq', function()
   end
 end, { desc = 'Quickfix List' })
 
-map('n', '[q', vim.cmd.cprev, { desc = 'Previous Quickfix' })
-map('n', ']q', vim.cmd.cnext, { desc = 'Next Quickfix' })
+map('n', '[q', '<cmd>cprev<cr>', { desc = 'Previous quickfix' })
+map('n', ']q', '<cmd>cnext<cr>', { desc = 'Next quickfix' })
 
 -- Quit
 -- map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
 
 -- Highlights under cursor
-map('n', '<leader>ui', vim.show_pos, { desc = 'Inspect Pos' })
+map('n', '<leader>ui', function()
+  vim.show_pos()
+end, { desc = 'Inspect pos' })
 map('n', '<leader>uI', function()
   vim.treesitter.inspect_tree()
   vim.api.nvim_input('I')
-end, { desc = 'Inspect Tree' })
+end, { desc = 'Inspect tree' })
 
 -- Terminal Mappings
 map('t', '<C-/>', '<cmd>close<cr>', { desc = 'Hide Terminal' })

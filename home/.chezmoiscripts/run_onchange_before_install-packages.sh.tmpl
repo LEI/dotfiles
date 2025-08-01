@@ -8,6 +8,23 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 {{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+
+{{- if .features.python }}
+{{-   $pythonPackages := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
+{{-   range $name := without $pythonPackages "" -}}
+{{-     if eq (substr 0 1 $name) "#" -}}
+{{-       continue -}}
+{{-     end -}}
+{{-     $prefix := "python" -}}
+{{-     if eq $.osID "alpine" -}}
+{{-       $prefix = "py3" -}}
+{{-     else if eq $.osIDLike "debian" -}}
+{{-       $prefix = "python3" -}}
+{{-     end -}}
+{{-     $packages = append $packages (printf "%s-%s" $prefix $name) -}}
+{{-   end -}}
+{{- end }}
+
 packages="{{ $packages | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS"

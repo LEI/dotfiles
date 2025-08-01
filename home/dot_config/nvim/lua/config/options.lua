@@ -36,7 +36,8 @@ vim.opt.ignorecase = true
 -- Preview incremental substitute
 vim.opt.inccommand = 'nosplit'
 
-vim.opt.jumpoptions = 'view'
+-- FIXME: vim/_meta.lua:597: E474: Invalid argument
+-- vim.opt.jumpoptions = 'clean' -- 'view'
 
 -- Always show the status line (3 = only the last windows)
 vim.opt.laststatus = 2
@@ -77,9 +78,11 @@ vim.opt.pumheight = 10
 -- Case sensitive when the search contains upper case characters
 vim.opt.smartcase = true
 
+-- FIXME: netrw auto download
 -- vim.opt.spelllang = { 'en', 'fr' }
 
-vim.opt.splitkeep = 'screen'
+-- FIXME: vim/_meta.lua:570: Not a valid option name
+-- vim.opt.splitkeep = 'screen'
 
 vim.opt.termguicolors = true
 
