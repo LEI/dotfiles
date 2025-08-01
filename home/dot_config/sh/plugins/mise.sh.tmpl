@@ -11,3 +11,7 @@ export MISE_GO_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-go-packages"
 export MISE_NODE_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-npm-packages"
 export MISE_PYTHON_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-python-packages"
 export MISE_RUBY_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-gems"
+
+# mise list node --installed --json --quiet | jq --raw-output 'last .install_path' # /bin/
+MISE_GLOBAL_NODE_VERSION="$(mise list node --cd=/tmp --global --installed | awk '/^node / {print $2}')"
+export MISE_GLOBAL_NODE_VERSION
