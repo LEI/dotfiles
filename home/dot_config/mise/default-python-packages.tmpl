@@ -1,8 +1,10 @@
 # ansible
 # pipenv
 pipx
-uv
-
 {{- if .features.neovim }}
 pynvim
 {{- end }}
+{{- if eq .chezmoi.os "linux" }}
+recoverpy
+{{- end }}
+uv

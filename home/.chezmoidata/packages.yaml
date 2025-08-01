@@ -7,6 +7,7 @@ commonPackages:
   # - { name: below, condition: not (eq .osIDLike "arch" "debian" "windows") }
   - { name: bottom, condition: ne .osIDLike "debian", windows: clement.bottom }
   - curl
+  - { name: coreutils, condition: eq .chezmoi.os "linux" }
   - name: dust
     condition: not (eq .osIDLike "debian")
     windows: bootandy.dust
@@ -28,12 +29,14 @@ commonPackages:
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
+  - { name: progress, condition: eq .chezmoi.os "linux" }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
   - name: starship
     condition: ne .osIDLike "debian"
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
+  - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
     condition: .features.vim
   - name: yq

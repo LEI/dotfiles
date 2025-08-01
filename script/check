@@ -41,6 +41,12 @@ check_version() {
   local features
   features="$(chezmoi cat-config "$@" | yq .data.features)"
 
+  cmd dd --version | head -n1
+  cmd grep --version | head -n1
+  cmd lsblk --version
+  cmd progress --version
+  cmd recoverpy --version
+
   if has_feature atuin "$features"; then
     cmd atuin --version
     # cmd atuin dotfiles alias list

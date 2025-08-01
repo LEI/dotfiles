@@ -4,7 +4,7 @@ vim.g.tmp = os.getenv('TMPDIR') or '/tmp'
 local mise_installs = vim.g.home .. '/.local/share/mise/installs'
 
 local function get_mise_node_version()
-  local node_version = vim.env.MISE_GLOBAL_NODE_VERSION
+  local node_version = vim.env._MISE_GLOBAL_NODE_VERSION
   -- local match = vim.env.PATH:gsub('.*:' .. mise_installs .. '/node/([0-9\\.]+)/bin:.*', '%1')
   -- if match ~= vim.env.PATH then
   --   node_version = match
