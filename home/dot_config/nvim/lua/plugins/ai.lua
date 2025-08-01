@@ -3,7 +3,7 @@ if not vim.g.features.ai then
 end
 
 vim.g.ai = {
-  avante = false,
+  avante = true,
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
@@ -62,7 +62,8 @@ return {
   {
     'ravitemer/mcphub.nvim',
     enabled = vim.g.ai.mcphub,
-    tag = 'v5.11.0',
+    -- tag = 'v5.13.0',
+    version = 'v5.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
@@ -100,7 +101,8 @@ return {
   {
     'yetone/avante.nvim',
     enabled = vim.g.ai.avante and vim.fn.has('nvim-0.10'),
-    tag = 'v0.0.25',
+    -- tag = 'v0.0.27',
+    version = 'v0.0.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
@@ -160,7 +162,8 @@ return {
   {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
-    tag = 'v17.5.0',
+    -- tag = 'v17.5.0',
+    version = 'v17.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       -- 'echasnovski/mini.diff',
@@ -204,7 +207,8 @@ return {
     -- :Copilot setup
     'github/copilot.vim',
     enabled = vim.g.ai.copilot,
-    tag = 'v1.50.0',
+    -- tag = 'v1.50.0',
+    version = 'v1.x',
   },
 
   {
@@ -212,6 +216,7 @@ return {
     'zbirenbaum/copilot.lua',
     enabled = vim.g.ai.copilot_lua,
     -- tag = '1.338.0',
+    version = '1.x',
     dependencies = { 'AndreM222/copilot-lualine' },
     cmd = 'Copilot',
     -- event = 'InsertEnter',
