@@ -77,3 +77,15 @@ if ! hash open 2>/dev/null; then
   fi
   {{- end }}
 fi
+
+{{- if .features.python }}
+if ! hash recover 2>/dev/null; then
+  {{- if lookPath "recoverpy" }}
+  alias recover="recoverpy"
+  {{- else if lookPath "pipx" }}
+  alias recover="pipx run recoverpy"
+  {{- else if lookPath "uvx" }}
+  alias recover="uvx recoverpy"
+  {{- end }}
+fi
+{{- end }}

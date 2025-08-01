@@ -33,13 +33,13 @@
 {{- $features = mergeOverwrite $features (dict
   "atuin" true
   "bash" true
-  "docker" true
+  "docker" (or (lookPath "docker") (lookPath "podman") | not | not)
   "git" true
   "helix" true
-  "kube" true
+  "kube" (lookPath "kubectl" | not | not)
   "nushell" true
   "python" true
-  "tofu" true
+  "tofu" (lookPath "tofu" | not | not)
   "ruby" true
   "topgrade" true
 ) -}}
@@ -53,7 +53,9 @@
 
 {{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
+  "docker" false
   "go" false
+  "kube" false
   "neovim" false
   "node" false
   "rust" false

@@ -2,36 +2,36 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - { name: atuin, condition: eq .osIDLike "arch" "darwin" }
-  - { name: bat, windows: sharkdp.bat }
-  - { name: bandwhich, condition: not (eq .osIDLike "debian" "windows") }
-  # - { name: below, condition: not (eq .osIDLike "arch" "debian" "windows") }
-  - { name: bottom, condition: ne .osIDLike "debian", windows: clement.bottom }
+  - { name: bat }
+  - { name: bandwhich, condition: not (eq .osIDLike "debian") }
+  # - { name: below, condition: not (eq .osIDLike "arch" "debian") }
+  - { name: bottom, condition: not (eq .osIDLike "debian") }
   - curl
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
+  - name: dive
+    condition: and .features.docker (ne .osID "alpine")
   - name: dust
     condition: not (eq .osIDLike "debian")
-    windows: bootandy.dust
   - name: eza
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
-    windows: eza-community.eza
-  - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
+  - { name: fd, condition: ne .osIDLike "debian" }
   - git
-  # - { name: gdu, windows: dundee.gdu }
-  # - { name: glances, condition: not (eq .osIDLike "debian" "windows") }
-  - { name: gpg-tui, condition: not (eq .osIDLike "debian" "windows") }
+  # - { name: gdu }
+  # - { name: glances, condition: not (eq .osIDLike "debian") }
+  - { name: gpg-tui, condition: not (eq .osIDLike "debian") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
-  - { name: jq, windows: jqlang.jq }
-  - { name: lnav, condition: not (eq .osID "windows") }
+  - { name: jq }
+  - { name: lnav }
   - name: neovim
     # condition: and .features.neovim (ne .osIDLike "debian")
     condition: and .features.neovim (not .glibc231)
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
-  - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
+  - { name: procs, condition: not (eq .osIDLike "debian") }
   - { name: progress, condition: eq .chezmoi.os "linux" }
-  - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
-  # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
+  - { name: ripgrep }
+  # - { name: shellcheck, condition: .features.not neovim }
   - name: starship
     condition: ne .osIDLike "debian"
   - name: topgrade
@@ -41,10 +41,8 @@ commonPackages:
     condition: .features.vim
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
-    windows: MikeFarah.yq
   - name: zoxide
     condition: not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-    windows: ajeetdsouza.zoxide
 packages:
   alpine:
     - bash
@@ -128,7 +126,30 @@ packages:
   # fedora:
   #   - openssl-devel
   windows:
+    - atuin
+    - sharkdp.bat
+    - lement.bottom
+    - curl
+    - name: wagoodman.dive # Scoop: main/dive
+      condition: .features.docker
+    - bootandy.dust
+    - eza-community.eza
+    - git
+    - sharkdp.fd
+    # - dundee.gdu
+    - name: helix
+      condition: .features.helix
+    - jqlang.jq
     - jdx.mise
+    - name: neovim
+      condition: .features.neovim
+    - dalance.procs
+    - BurntSushi.ripgrep.MSVC
+    # - { name: koalaman.shellcheck, condition: not .features.neovim }
+    - name: vim
+      condition: .features.vim
+    - MikeFarah.yq
+    - ajeetdsouza.zoxide
     # - { name: golang.go, condition: .features.go }
     # - { name: openjs.nodejs, condition: .features.node }
     # - { name: openjs.nodejs.lts, condition: .features.node }

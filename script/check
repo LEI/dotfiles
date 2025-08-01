@@ -44,7 +44,6 @@ check_version() {
   cmd dd --version | head -n1
   # cmd grep --version | head -n1
   cmd lsblk --version
-  cmd progress --version
 
   if has_feature atuin "$features"; then
     cmd atuin --version
@@ -88,6 +87,12 @@ check_version() {
     cmd timeout 5m nvim --headless +Update! +qa >/dev/null # || true
   fi
 
+  if has_feature python "$features"; then
+    cmd pipx --version
+    cmd uvx --version
+  fi
+
+  cmd progress --version
   cmd rg --version | head -n1
 
   if has_feature tmux "$features"; then
