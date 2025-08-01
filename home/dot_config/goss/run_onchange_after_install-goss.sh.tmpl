@@ -3,7 +3,7 @@
 set -eu
 
 if command -v goss >/dev/null; then
-  echo >&2 "Already installed: goss"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v goss || echo goss" }}"
   goss --version
   exit
 fi

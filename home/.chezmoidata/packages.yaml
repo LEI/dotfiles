@@ -7,22 +7,27 @@ commonPackages:
   # - { name: below, condition: not (eq .osIDLike "arch" "debian" "windows") }
   - { name: bottom, condition: ne .osIDLike "debian", windows: clement.bottom }
   - curl
+  - name: dust
+    condition: not (eq .osIDLike "debian")
+    windows: bootandy.dust
   - name: eza
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     windows: eza-community.eza
   - { name: fd, condition: ne .osIDLike "debian", windows: sharkdp.fd }
   - git
+  # - { name: gdu, windows: dundee.gdu }
   # - { name: glances, condition: not (eq .osIDLike "debian" "windows") }
   - { name: gpg-tui, condition: not (eq .osIDLike "debian" "windows") }
-  - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
   - { name: jq, windows: jqlang.jq }
+  - { name: lnav, condition: not (eq .osID "windows") }
   - name: neovim
     # condition: and .features.neovim (ne .osIDLike "debian")
     condition: and .features.neovim (not .glibc231)
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
+  - { name: procs, condition: not (eq .osIDLike "debian" "windows") }
   - { name: ripgrep, windows: BurntSushi.ripgrep.MSVC }
   # - { name: shellcheck, condition: .features.not neovim, windows: koalaman.shellcheck }
   - name: starship
@@ -81,6 +86,9 @@ packages:
     - name: helixbinhx
       condition: and .features.helix (eq .osIDLike "arch")
       type: '"aur"'
+    - name: terraform-pug-bin
+      condition: .features.tofu
+      type: '"aur"'
     - skim
     - time # condition: command time
     - name: topgrade-bin
@@ -92,6 +100,7 @@ packages:
       - carapace
       - gpg
       - { name: nowplaying-cli, condition: .features.tmux }
+      - { name: leg100/tap/pug, condition: .features.tofu }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
     casks:

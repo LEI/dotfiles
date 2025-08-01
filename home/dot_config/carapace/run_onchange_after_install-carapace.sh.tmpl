@@ -7,7 +7,7 @@
 set -eu
 
 if command -v carapace >/dev/null; then
-  echo >&2 "Already installed: carapace"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v carapace || echo carapace" }}"
   carapace --version
   exit
 fi

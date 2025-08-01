@@ -10,7 +10,7 @@ cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
 {{ else if eq .osid "debian" -}}
 # TODO: replace with .chezmoiexternal
 if command -v nvim >/dev/null; then
-  echo >&2 "Already installed: nvim"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v nvim || echo nvim" }}"
   nvim --version | head -n1
 else
   echo >&2 "Installing neovim"

@@ -5,7 +5,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if command -v procs >/dev/null; then
-  echo >&2 "Already installed: procs"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v procs || echo procs" }}"
   cmd procs --version
   exit
 fi

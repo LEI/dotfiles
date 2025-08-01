@@ -3,7 +3,7 @@
 set -eu
 
 if command -v topgrade >/dev/null; then
-  echo >&2 "Already installed: topgrade"
+  echo >&2 'Already installed: {{ output .sh "-c" "command -v topgrade || echo topgrade" }}'
   topgrade --version
   exit
 fi

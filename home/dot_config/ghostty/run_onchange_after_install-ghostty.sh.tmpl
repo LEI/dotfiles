@@ -5,7 +5,7 @@
 set -eu
 
 if command -v ghostty >/dev/null; then
-  echo >&2 "Already installed: ghostty"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v ghostty || echo ghostty" }}"
   # TODO: use bash with pipefail option
   ghostty --version | head -n1
   exit

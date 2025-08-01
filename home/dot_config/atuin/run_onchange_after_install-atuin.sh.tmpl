@@ -22,7 +22,7 @@ if [ ! -f ~/.local/share/blesh/ble.sh ]; then
 fi
 
 if command -v atuin >/dev/null; then
-  echo >&2 "Already installed: atuin"
+  echo >&2 "Already installed: {{ output .sh "-c" "command -v atuin || echo atuin" }}"
   atuin --version
   exit
 fi

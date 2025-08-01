@@ -1,7 +1,7 @@
 {{- $config := includeTemplate "dot_config/starship.yaml" . | fromYaml -}}
-{{- if eq (output .sh "-c" "command -v starship || true") "" -}}
-{{ $config | toToml }}
-{{- else -}}
+{{- if lookPath "starship" -}}
 {{- $preset := "plain-text-symbols" -}}
 {{ output .sh "-c" (printf "starship preset %s 2>/dev/null || true" $preset) | trim | fromToml | merge $config | toToml }}
+{{- else -}}
+{{ $config | toToml }}
 {{- end -}}
