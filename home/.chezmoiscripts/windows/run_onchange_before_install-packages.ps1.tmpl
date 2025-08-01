@@ -1,7 +1,16 @@
 # Set-PSDebug -Trace 1
 
-{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+{{- $scoopPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.windows.scoop) .) | fromJson }}
+{{- $wingetPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.windows.winget) .) | fromJson }}
 
+echo "Scoop: {{ lookPath "scoop" }}"
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+echo "scoop update *"
+echo "scoop install {{ $scoopPackages | join " " }}"
+
+echo "Winget: {{ lookPath "winget" }}"
 echo "winget update --disable-interactivity --silent"
 winget update --all --disable-interactivity --silent
 
@@ -10,5 +19,5 @@ echo "winget upgrade --all --disable-interactivity --silent"
 winget upgrade --all --disable-interactivity --silent
 {{- end }}
 
-echo "winget install --disable-interactivity --silent {{ $packages | join " " }}"
-winget install --disable-interactivity --silent {{ $packages | join " " }}
+echo "winget install --disable-interactivity --silent {{ $wingetPackages | join " " }}"
+winget install --disable-interactivity --silent {{ $wingetPackages | join " " }}

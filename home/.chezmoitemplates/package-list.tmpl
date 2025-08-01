@@ -21,9 +21,6 @@
 {{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
 {{-     continue }}
 {{-   end }}
-{{-   if and (eq $.osID "windows") (not (contains "." $packageName)) }}
-{{-     $packageName = get $pkg "windows" | default (printf "%[1]s.%[1]s" $packageName) }}
-{{-   end }}
 {{-   $packages = append $packages $packageName }}
 {{- end }}
 {{- $packages | toJson -}}

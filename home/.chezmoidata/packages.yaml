@@ -126,30 +126,31 @@ packages:
   # fedora:
   #   - openssl-devel
   windows:
-    - atuin
-    - sharkdp.bat
-    - lement.bottom
-    - curl
-    - name: wagoodman.dive # Scoop: main/dive
-      condition: .features.docker
-    - bootandy.dust
-    - eza-community.eza
-    - git
-    - sharkdp.fd
-    # - dundee.gdu
-    - name: helix
-      condition: .features.helix
-    - jqlang.jq
-    - jdx.mise
-    - name: neovim
-      condition: .features.neovim
-    - dalance.procs
-    - BurntSushi.ripgrep.MSVC
-    # - { name: koalaman.shellcheck, condition: not .features.neovim }
-    - name: vim
-      condition: .features.vim
-    - MikeFarah.yq
-    - ajeetdsouza.zoxide
+    scoop:
+      # - main/dive
+      - sudo
+    winget:
+      - atuin.atuin
+      - sharkdp.bat
+      - lement.bottom
+      - curl.curl
+      - { name: wagoodman.dive, condition: .features.docker }
+      - bootandy.dust
+      - eza-community.eza
+      - git.git
+      - sharkdp.fd
+      # - dundee.gdu
+      - { name: helix.helix, condition: .features.helix }
+      - jqlang.jq
+      - jdx.mise
+      - { name: neovim.neovim, condition: .features.neovim }
+      - dalance.procs
+      - burntsushi.ripgrep.msvc
+      - topgrade-rs.topgrade
+      # - { name: koalaman.shellcheck, condition: not .features.neovim }
+      - { name: vim.vim, condition: .features.vim }
+      - mikefarah.yq
+      - ajeetdsouza.zoxide
     # - { name: golang.go, condition: .features.go }
     # - { name: openjs.nodejs, condition: .features.node }
     # - { name: openjs.nodejs.lts, condition: .features.node }
