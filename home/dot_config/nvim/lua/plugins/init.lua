@@ -2,10 +2,16 @@
 local sessions_dir = vim.fn.stdpath('state') .. '/sessions/'
 
 return {
+  { 'folke/lazy.nvim', dev = true },
   { 'tpope/vim-sensible', version = '2.0.0', lazy = false },
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
   { 'nvim-lua/plenary.nvim', tag = 'v0.1.4', lazy = true },
-  { 'nvim-neotest/nvim-nio', tag = 'v1.10.1', lazy = true },
+  {
+    'nvim-neotest/nvim-nio',
+    -- tag = 'v1.10.1',
+    version = 'v1.x',
+    lazy = true,
+  },
   {
     'folke/persistence.nvim',
     tag = 'v3.1.0',
@@ -91,7 +97,8 @@ return {
   },
   {
     'MeanderingProgrammer/render-markdown.nvim',
-    tag = 'v8.5.0',
+    -- tag = 'v8.6.0',
+    version = 'v8.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       'echasnovski/mini.icons',

@@ -39,7 +39,8 @@ return {
   },
   {
     'catppuccin/nvim',
-    tag = 'v1.10.0',
+    -- tag = 'v1.11.0',
+    version = 'v1.x',
     lazy = true,
     name = 'catppuccin',
     opts = {

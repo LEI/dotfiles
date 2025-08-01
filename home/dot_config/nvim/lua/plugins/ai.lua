@@ -3,7 +3,7 @@ if not vim.g.features.ai then
 end
 
 vim.g.ai = {
-  avante = true,
+  avante = false,
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
@@ -62,12 +62,12 @@ return {
   {
     'ravitemer/mcphub.nvim',
     enabled = vim.g.ai.mcphub,
-    -- tag = 'v5.13.0',
-    version = 'v5.x',
+    -- tag = 'v6.2.0',
+    version = 'v6.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    -- build = node_prefix .. 'npm install --global mcp-hub@^3.7.0',
+    -- build = node_prefix .. 'npm install --global mcp-hub@4.2.0',
     -- build = 'bundled_build.lua',
     cmd = 'MCPHub',
     keys = {

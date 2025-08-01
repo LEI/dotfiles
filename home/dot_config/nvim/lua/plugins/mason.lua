@@ -133,7 +133,8 @@ end
 return {
   {
     'mason-org/mason.nvim',
-    tag = 'v2.0.0',
+    -- tag = 'v2.0.1',
+    version = 'v2.x',
     cmd = {
       'Mason',
       'MasonInstall',
@@ -197,7 +198,8 @@ return {
   {
     'mason-org/mason-lspconfig.nvim',
     -- branch = 'main',
-    tag = 'v2.0.0',
+    -- tag = 'v2.1.0',
+    version = 'v2.x',
     dependencies = {
       'mason-org/mason.nvim',
       'neovim/nvim-lspconfig',

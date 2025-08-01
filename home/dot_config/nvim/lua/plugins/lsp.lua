@@ -33,7 +33,8 @@
 return {
   {
     'neovim/nvim-lspconfig',
-    tag = 'v2.3.0',
+    -- tag = 'v2.4.0',
+    version = 'v2.x',
     lazy = true,
     init = function()
       -- local lspconfig = require('lspconfig')
