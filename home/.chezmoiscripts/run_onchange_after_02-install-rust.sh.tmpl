@@ -86,22 +86,26 @@ if ! command -v cargo-binstall >/dev/null; then
   elif [ "$CHEZMOI_OS" = windows ]; then
     OS=pc-windows-msvc
   fi
-  NAME="cargo-binstall-$ARCH-$OS"
+  NAME="cargo-binstall"
   if [ "$CHEZMOI_OS" = linux ]; then
-    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME.tgz"
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.tgz"
     install_tar_gz "$URL" cargo-binstall
   else
-    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME.zip"
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.zip"
     install_zip "$URL" cargo-binstall
   fi
   echo >&2 "Installed cargo-binstall"
 fi
 
-packages="cargo-binstall"
+packages=""
 
-if ! command -v cargo-update >/dev/null; then
-  packages="$packages cargo-binstall cargo-update"
+if ! command -v cargo-binstall >/dev/null; then
+  packages="$packages cargo-binstall"
 fi
+
+# if ! command -v cargo-update >/dev/null; then
+#   packages="$packages cargo-update"
+# fi
 
 # {{- if and (lookPath "sk" | not | not) (eq .osID "debian") }}
 # TODO: https://github.com/skim-rs/skim#shell-completions
@@ -116,4 +120,6 @@ if ! command -v taplo >/dev/null; then
 fi
 # {{- end }}
 
-cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages
+if [ -n "$packages" ]; then
+  cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages
+fi

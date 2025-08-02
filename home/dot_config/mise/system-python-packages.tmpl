@@ -1,10 +1,10 @@
 pip
 # pipenv
 # pipx
-{{- if and .features.neovim }}
+{{- if .features.neovim }}
 pynvim
 {{- end }}
-{{- if ne .osIDLike "debian" }}
+{{- if not (eq .osIDLike "darwin" "debian") }}
 uv
 {{- end }}
 {{- if eq .osIDLike "alpine" "arch" }}

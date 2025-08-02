@@ -3,10 +3,12 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-{{ if and (eq .osIDLike "debian") (lookPath "uv" | not) (lookPath "pipx" | not | not) -}}
+{{ if eq .osIDLike "darwin" "debian" -}}
 # https://docs.astral.sh/uv/getting-started/installation/
-# cmd curl -LsSf https://astral.sh/uv/install.sh | sh
-cmd pipx install uv
+if ! command -v uv >/dev/null; then
+  # cmd curl -LsSf https://astral.sh/uv/install.sh | sh
+  cmd pipx install uv
+fi
 {{- end }}
 {{ $packages := list -}}
 {{- $pythonPackages := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}

@@ -143,6 +143,7 @@ packages:
       - lazyjournal
       - { name: lazysql, condition: .features.sql }
       - { name: nowplaying-cli, condition: .features.tmux }
+      - { name: pipx, condition: .features.python }
       - { name: leg100/tap/pug, condition: .features.tofu }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
