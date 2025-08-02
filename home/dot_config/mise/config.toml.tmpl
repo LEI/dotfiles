@@ -47,7 +47,7 @@ go = "latest"
 
 # jq = "latest"
 
-{{- if and .features.git (not (eq .osIDLike "arch" "darwin")) }}
+{{- if and .features.git (not (eq .osIDLike "alpine" "arch" "darwin")) }}
 lazygit = "latest"
 {{- end }}
 

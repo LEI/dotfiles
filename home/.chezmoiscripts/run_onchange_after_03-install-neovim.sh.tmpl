@@ -25,6 +25,8 @@ else
   sudo mv /tmp/$NAME/share/* /usr/local/share/
   echo >&2 "Installed neovim"
 fi
+# TODO: replace system package with latest pynvim (0.4.2 to 0.5.2)
+# cmd python3 -m pip install --user --quiet pynvim
 {{- end }}
 
 # Debian 12 has nvim 0.7.2

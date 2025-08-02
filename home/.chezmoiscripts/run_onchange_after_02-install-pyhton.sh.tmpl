@@ -19,18 +19,20 @@ cmd pipx install uv
 {{- end -}}
 packages="{{ $packages | join " " }}"
 
-{{ if lookPath "uv" | not | not -}}
 if [ -n "$packages" ]; then
   for name in $packages; do
-    cmd uv tool install --quiet $name
+    if ! command -v $name >/dev/null; then
+      cmd uv tool install --quiet $name
+    fi
   done
 fi
-{{- else if lookPath "pipx" | not | not }}
-if [ -n "$packages" ]; then
-  cmd pipx install $packages
-fi
-{{- else }}
-if [ -n "$packages" ]; then
-  cmd python -m pip install --user --quiet $packages
-fi
-{{- end }}
+# {{ if lookPath "uv" | not | not -}}
+# {{- else if lookPath "pipx" | not | not }}
+# if [ -n "$packages" ]; then
+#   cmd pipx install $packages
+# fi
+# {{- else }}
+# if [ -n "$packages" ]; then
+#   cmd python -m pip install --user --quiet $packages
+# fi
+# {{- end }}

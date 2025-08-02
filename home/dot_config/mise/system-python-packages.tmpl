@@ -1,11 +1,14 @@
-# ansible
 pip
 # pipenv
 # pipx
-{{- if .features.neovim }}
-# NOTE: outdated on debian
+{{- if and .features.neovim }}
 pynvim
 {{- end }}
 {{- if ne .osIDLike "debian" }}
 uv
+{{- end }}
+{{- if eq .osIDLike "alpine" "arch" }}
+virtualenv
+{{- else }}
+venv
 {{- end }}

@@ -77,8 +77,11 @@ packages:
     - delta
     - gpg
     - gzip
+    - { name: lazygit, condition: .features.git }
     - { name: nodejs, condition: .features.node }
     - { name: npm, condition: .features.node }
+    - { name: python3, condition: .features.python }
+    - { name: ruby, condition: .features.ruby }
     - skim
     - tar
     - xdg-utils # xdg-open
@@ -161,9 +164,8 @@ packages:
     - name: pipx
       condition: and .features.python (or (ne .osID "debian") (gt (int .osVersion) 11))
     - { name: python3, condition: .features.python }
-    - { name: python3-venv, condition: .features.python }
+    # - { name: python3-venv, condition: .features.python }
     - { name: ruby-dev, condition: .features.ruby }
-    # - { name: ruby-devel, condition: .features.ruby }
     - { name: ruby-rubygems, condition: .features.ruby }
   # fedora:
   #   - openssl-devel
