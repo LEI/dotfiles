@@ -4,8 +4,8 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if eq .osid "android" }}
-{{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osid" .osid) }}
+{{- if eq .osID "android" }}
+{{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osID" .osID) }}
 {{- end }}
 
 # Mise: {{ output .sh "-c" "mise --version || true" | replace "\n" " " | trim }}
@@ -15,7 +15,7 @@ set -eu
 
 log "Installing tools"
 
-{{- if has .osid (list "alpine") }}
+{{- if has .osID (list "alpine") }}
 # mise settings set disable_backends ubi
 {{- end }}
 

@@ -162,6 +162,9 @@ packages:
       condition: and .features.python (or (ne .osID "debian") (gt (int .osVersion) 11))
     - { name: python3, condition: .features.python }
     - { name: python3-venv, condition: .features.python }
+    - { name: ruby-dev, condition: .features.ruby }
+    # - { name: ruby-devel, condition: .features.ruby }
+    - { name: ruby-rubygems, condition: .features.ruby }
   # fedora:
   #   - openssl-devel
   windows:
@@ -191,6 +194,7 @@ packages:
       - burntsushi.ripgrep.msvc
       - topgrade-rs.topgrade
       # - { name: koalaman.shellcheck, condition: not .features.neovim }
+      - { name: astral-sh.uv, condition: .features.python }
       - { name: vim.vim, condition: .features.vim }
       - videolan.vlc
       - mikefarah.yq

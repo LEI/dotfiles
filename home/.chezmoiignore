@@ -126,6 +126,7 @@
 {{- end }}
 
 {{- if not .features.ruby }}
+.chezmoiscripts/*-install-ruby.sh
 .config/mise/default-gems
 {{- end }}
 

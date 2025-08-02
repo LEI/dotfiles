@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if .upgrade }}
+
+cmd gem update --system
+{{- end }}
+
+{{ $packages := list -}}
+{{- $pythonPackages := includeTemplate "dot_config/mise/default-gems.tmpl" . | splitList "\n" -}}
+{{- range $name := $pythonPackages -}}
+{{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
+{{-   if eq $name "" -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $packages = append $packages $name -}}
+{{- end -}}
+packages="{{ $packages | join " " }}"
+
+cmd gem install --quiet $packages

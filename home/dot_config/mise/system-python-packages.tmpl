@@ -3,6 +3,7 @@ pip
 # pipenv
 # pipx
 {{- if .features.neovim }}
+# NOTE: outdated on debian
 pynvim
 {{- end }}
 {{- if ne .osIDLike "debian" }}
