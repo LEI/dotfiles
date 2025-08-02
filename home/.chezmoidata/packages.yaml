@@ -10,12 +10,28 @@ commonPackages:
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
   - name: dive
     condition: and .features.docker (ne .osID "alpine")
+  # - duf
   - name: dust
     condition: not (eq .osIDLike "debian")
   - name: eza
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - { name: fd, condition: ne .osIDLike "debian" }
-  - git
+  - name: gh
+    condition: >
+      and .features.git (not (or
+        (eq .osIDLike "alpine" "arch")
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      ))
+  - ame: ghq
+    condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
+  - { name: git, condition: .features.git }
+  - name: glab
+    condition: >
+      and .features.git (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 12))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      ))
   # - { name: gdu }
   # - { name: glances, condition: not (eq .osIDLike "debian") }
   - { name: gpg-tui, condition: not (eq .osIDLike "debian") }
@@ -83,6 +99,7 @@ packages:
     - base-devel
     # - { name: below, type: '"aur"' }
     - { name: carapace-bin, type: '"aur"' }
+    - github-cli
     - gnu-netcat
     - gnupg
     - name: helixbinhx
@@ -137,12 +154,14 @@ packages:
       - { name: wagoodman.dive, condition: .features.docker }
       - bootandy.dust
       - eza-community.eza
-      - git.git
       - sharkdp.fd
       # - dundee.gdu
+      - github.cli
+      - git.git
+      - glab.glab
       - { name: helix.helix, condition: .features.helix }
-      - jqlang.jq
       - jdx.mise
+      - jqlang.jq
       - { name: neovim.neovim, condition: .features.neovim }
       - dalance.procs
       - burntsushi.ripgrep.msvc

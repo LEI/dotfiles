@@ -86,6 +86,8 @@ if ! hash recover 2>/dev/null; then
   alias recover="pipx run recoverpy"
   {{- else if lookPath "uvx" }}
   alias recover="uvx recoverpy"
+  {{- else }}
+  alias recover="recoverpy"
   {{- end }}
 fi
 {{- end }}
