@@ -81,13 +81,13 @@ fi
 {{- if .features.python }}
 if ! hash recover 2>/dev/null; then
   {{- if lookPath "recoverpy" }}
-  alias recover="recoverpy"
-  {{- else if lookPath "pipx" }}
-  alias recover="pipx run recoverpy"
+  alias recover="sudo recoverpy"
   {{- else if lookPath "uvx" }}
-  alias recover="uvx recoverpy"
+  alias recover="sudo uvx recoverpy"
+  {{- else if lookPath "pipx" }}
+  alias recover="sudo pipx run recoverpy"
   {{- else }}
-  alias recover="recoverpy"
+  alias recover="sudo recoverpy"
   {{- end }}
 fi
 {{- end }}

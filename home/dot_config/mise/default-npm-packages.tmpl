@@ -5,11 +5,9 @@ yarn
 mcp-hub@4.2.0
 @anthropic-ai/claude-code
 @openai/codex
-# opencode-ai
+opencode-ai
 {{- end }}
-# NOTE: eslint is broken in vscode-extracted-language-server@4.10
-# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
-# vscode-langservers-extracted@4.9
+runme
 {{- if .features.neovim }}
 neovim
 {{- else }}
@@ -20,5 +18,8 @@ sql-language-server
 {{- end }}
 typescript
 typescript-language-server
+# NOTE: eslint is broken in vscode-extracted-language-server@4.10
+# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+vscode-langservers-extracted # @4.9
 yaml-language-server@next
 {{- end }}

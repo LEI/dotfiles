@@ -29,7 +29,7 @@ direnv = "latest"
 eza = "latest"
 {{- end }}
 
-{{- if .features.docker }}
+{{- if and .features.docker (not (eq .osIDLike "arch" "darwin")) }}
 lazydocker = "latest"
 {{- end }}
 
@@ -47,7 +47,7 @@ go = "latest"
 
 # jq = "latest"
 
-{{- if .features.git }}
+{{- if and .features.git (not (eq .osIDLike "arch" "darwin")) }}
 lazygit = "latest"
 {{- end }}
 

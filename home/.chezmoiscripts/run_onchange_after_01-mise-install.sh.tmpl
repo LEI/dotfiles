@@ -25,19 +25,25 @@ log "Installed tools"
 
 # cmd mise ls
 
+tools=""
 {{- if .features.ruby }}
 # default-gems: {{ includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum }}
-# cmd mise use --global --quiet ruby@latest
+# tools="$tools ruby@latest"
 {{- end }}
 {{- if .features.go }}
 # default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
-cmd mise use --global --quiet go@latest
+tools="$tools go@latest"
 {{- end }}
 {{- if .features.node }}
 # default-npm-packages: {{ includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum }}
-cmd mise use --global --quiet node@latest
+tools="$tools node@latest"
 {{- end }}
 {{- if .features.python }}
 # default-python-packages: {{ includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum }}
-# cmd mise use --global --quiet python@latest
+# tools="$tools python@latest"
 {{- end }}
+if [ -n "$tools" ]; then
+  cmd mise use --global --quiet $tools
+fi
+
+# cmd mise prune # --tools

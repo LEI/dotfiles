@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# claude-monitor
+# euporie
+packages="recoverpy"
+
+{{ if lookPath "uv" | not | not -}}
+for name in $packages; do
+  if ! command -v $name >/dev/null; then
+    cmd uv tool install $name
+  fi
+done
+{{- else if lookPath "pipx" | not | not }}
+cmd pipx install $packages
+{{- else }}
+cmd python -m pip install --user $packages
+{{- end }}

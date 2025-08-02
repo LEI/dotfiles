@@ -2,13 +2,14 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   - { name: atuin, condition: eq .osIDLike "arch" "darwin" }
-  - { name: bat }
+  - bat
   - { name: bandwhich, condition: not (eq .osIDLike "debian") }
   # - { name: below, condition: not (eq .osIDLike "arch" "debian") }
   - { name: bottom, condition: not (eq .osIDLike "debian") }
   - curl
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
   - { name: git-delta, condition: not (eq .osIDLike "alpine" "debian") }
+  - { name: gitui, condition: not (eq .osIDLike "debian") }
   - name: dive
     condition: and .features.docker (ne .osID "alpine")
   # - duf
@@ -24,7 +25,7 @@ commonPackages:
         (and (eq .osID "debian") (le (int .osVersion) 11))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
       ))
-  - ame: ghq
+  - name: ghq
     condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
   - { name: git, condition: .features.git }
   - name: glab
@@ -33,20 +34,20 @@ commonPackages:
         (and (eq .osID "debian") (le (int .osVersion) 12))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       ))
-  # - { name: gdu }
+  # - gdu
   # - { name: glances, condition: not (eq .osIDLike "debian") }
   - { name: gpg-tui, condition: not (eq .osIDLike "debian") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
-  - { name: jq }
-  - { name: lnav }
+  - jq
+  - lnav
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: procs, condition: not (eq .osIDLike "debian") }
   - { name: progress, condition: eq .chezmoi.os "linux" }
-  - { name: ripgrep }
+  - ripgrep
   # - { name: shellcheck, condition: .features.not neovim }
   - name: starship
     condition: ne .osIDLike "debian"
@@ -102,30 +103,36 @@ packages:
       - github-cli
       - gnu-netcat
       - gnupg
-      - name: terraform-pug-bin
-        condition: .features.tofu
-        type: '"aur"'
+      - { name: lazygit, condition: .features.git }
       - skim
       - time # condition: command time
-      - { name: topgrade-bin, condition: eq .osID "manjaro" }
+      - tokei
+      - { name: topgrade, condition: eq .osID "manjaro" }
       # - { name: yay, condition: eq .osID "manjaro" }
     aur:
       # - below
       - carapace-bin
       - name: helixbinhx
         condition: and .features.helix (ne .osID "manjaro")
-      # - { name: lazysql, condition: .features.sql }
+      - { name: lazydocker-bin, condition: .features.docker }
+      - lazyjournal-bin
+      - { name: lazysql-bin, condition: .features.sql }
+      - { name: terraform-pug-bin, condition: .features.tofu }
       - { name: topgrade-bin, condition: ne .osID "manjaro" }
       # - { name: yay, condition: ne .osID "manjaro" }
   darwin:
     brews:
       - carapace
       - gpg
-      # - { name: lazysql, condition: .features.sql }
+      - { name: lazydocker, condition: .features.docker }
+      - { name: lazygit, condition: .features.git }
+      - lazyjournal
+      - { name: lazysql, condition: .features.sql }
       - { name: nowplaying-cli, condition: .features.tmux }
       - { name: leg100/tap/pug, condition: .features.tofu }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
+      - tokei
     casks:
       - firefox
       - google-chrome
@@ -163,6 +170,7 @@ packages:
       # - dundee.gdu
       - github.cli
       - git.git
+      # - stephandilly.gitui
       - glab.glab
       - { name: helix.helix, condition: .features.helix }
       - jdx.mise

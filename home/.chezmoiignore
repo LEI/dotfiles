@@ -121,6 +121,7 @@
 {{- end }}
 
 {{- if not .features.python }}
+.chezmoiscripts/*-install-python.sh
 .config/mise/default-python-packages
 {{- end }}
 
