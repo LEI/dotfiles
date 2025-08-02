@@ -81,8 +81,7 @@ vim.opt.smartcase = true
 -- FIXME: netrw auto download
 -- vim.opt.spelllang = { 'en', 'fr' }
 
--- FIXME: vim/_meta.lua:570: Not a valid option name
--- vim.opt.splitkeep = 'screen'
+vim.opt.splitkeep = 'screen'
 
 vim.opt.termguicolors = true
 

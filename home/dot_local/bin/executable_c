@@ -5,5 +5,16 @@ set -eu
 if [ $# -eq 0 ]; then
   chezmoi status
 else
-  chezmoi "$@"
+  # https://github.com/twpayne/chezmoi/issues/3626
+  case "$1" in
+  a) shift && chezmoi apply "$@" ;;
+  d) shift && chezmoi diff "$@" ;;
+  e) shift && chezmoi execute-template "$@" ;;
+  i) shift && chezmoi init "$@" ;;
+  m) shift && chezmoi managed "$@" ;;
+  s) shift && chezmoi status "$@" ;;
+  u) shift && chezmoi unmanaged "$@" ;;
+  v) shift && chezmoi verify "$@" ;;
+  *) chezmoi "$@" ;;
+  esac
 fi

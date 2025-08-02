@@ -20,7 +20,15 @@ set-window-option -g mode-keys vi
 set -g default-command $SHELL
 # set -g default-terminal tmux-256color
 
-set -g remain-on-exit on
+# set -g remain-on-exit on
+
+if "tmux show-option -s terminal-features | grep -vq ':hyperlinks$'" {
+    set -as terminal-features ",*:hyperlinks"
+}
+
+if "tmux show-option -s terminal-features | grep -vq ':Tc$'" {
+    set -ga terminal-overrides ",*-256color:Tc"
+}
 
 # Change the default prefix binding to Ctrl-a only when not connected via SSH
 if-shell 'test -z "$SSH_TTY"' 'set -g prefix C-a; bind C-a send-prefix; unbind C-b'
@@ -123,7 +131,7 @@ set -g @plugin 'tmux-plugins/tmux-pain-control#v1.0.0'
 
 set -g @plugin 'tmux-plugins/tmux-resurrect#v4.0.0'
 # https://github.com/tmux-plugins/tmux-resurrect/issues/122
-set -g @resurrect-capture-pane-contents on
+# set -g @resurrect-capture-pane-contents on
 set -g @resurrect-strategy-vim 'session'
 set -g @resurrect-strategy-nvim 'session'
 # set -g @resurrect-processes 'ssh psql mysql sqlite3'
@@ -209,8 +217,8 @@ setenv -g TMUX_PLUGIN_MANAGER_PATH "$HOME/.config/tmux/plugins/"
 # TODO: set-environment -g TMUX_PLUGIN_MANAGER_PATH '~/.local/share/tmux/plugins'
 
 if "test ! -d $HOME/.config/tmux/plugins/tpm" {
-   run "git clone https://github.com/tmux-plugins/tpm $HOME/.config/tmux/plugins/tpm \
-      && $HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+    run "git clone https://github.com/tmux-plugins/tpm $HOME/.config/tmux/plugins/tpm \
+        && $HOME/.config/tmux/plugins/tpm/bin/install_plugins"
 }
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
@@ -218,7 +226,7 @@ run "$HOME/.config/tmux/plugins/tpm/tpm"
 
 # if-shell 'test -f $HOME/.tmux.conf.local' 'source-file $HOME/.tmux.conf.local'
 if "test -f $HOME/.config/tmux/tmux.conf.local" {
-   source-file "$HOME/.config/tmux/tmux.conf.local"
+    source-file "$HOME/.config/tmux/tmux.conf.local"
 }
 
 # Annotate existing bindings

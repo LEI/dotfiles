@@ -1,6 +1,6 @@
 {{- /* NOTE: this does not parse bindings from sourced files */ -}}
 {{- $lines := includeTemplate "dot_config/tmux/tmux.conf.tmpl" . | splitList "\n" }}
-{{- $include := get . "keys" | default list }}
+{{- $include := get . "include" | default list }}
 {{- $map := get . "map" }}
 {{- $names := get . "names" }}
 

@@ -8,6 +8,7 @@ commonPackages:
   - { name: bottom, condition: not (eq .osIDLike "debian") }
   - curl
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
+  - { name: git-delta, condition: not (eq .osIDLike "alpine" "debian") }
   - name: dive
     condition: and .features.docker (ne .osID "alpine")
   # - duf
@@ -63,6 +64,7 @@ packages:
   alpine:
     - bash
     - build-base # gcc
+    - delta
     - gpg
     - gzip
     - { name: nodejs, condition: .features.node }
@@ -151,6 +153,7 @@ packages:
       - sharkdp.bat
       - lement.bottom
       - curl.curl
+      - dandavison.delta
       - { name: wagoodman.dive, condition: .features.docker }
       - bootandy.dust
       - eza-community.eza

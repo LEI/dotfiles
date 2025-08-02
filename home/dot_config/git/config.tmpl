@@ -20,6 +20,12 @@
 [include]
 	path = "~/.gitconfig.local"
 
+{{- if lookPath "delta" }}
+
+[include]
+	path = delta.ini
+{{- end }}
+
 [includeIf "gitdir:~/src/github.com/"]
 	path = github.ini
 [includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
