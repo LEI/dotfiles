@@ -29,8 +29,8 @@ require('lazy').setup({
   },
   spec = {
     { import = 'plugins' },
-    -- { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- { import = "lazyvim.plugins.extras.coding.copilot" },
+    -- { 'LazyVim/LazyVim', import = 'lazyvim.plugins' },
+    -- { import = 'lazyvim.plugins.extras.coding.copilot' },
   },
   checker = {
     enabled = true,
@@ -97,5 +97,5 @@ local get_action = function(action)
     vim.cmd('MasonTools' .. action .. (args.bang and 'Sync' or ''))
   end
 end
-vim.api.nvim_create_user_command('Install', get_action('Install'), { desc = 'Install', bang = true })
-vim.api.nvim_create_user_command('Update', get_action('Update'), { desc = 'Update', bang = true })
+vim.api.nvim_create_user_command('LazyInstall', get_action('Install'), { desc = 'Install', bang = true })
+vim.api.nvim_create_user_command('LazyUpdate', get_action('Update'), { desc = 'Update', bang = true })

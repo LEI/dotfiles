@@ -141,3 +141,16 @@ vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ':p:h'), 'p')
   end,
 })
+
+-- ftdetect/jsonc.lua
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+  pattern = {
+    -- '{t,j}sconfig.json',
+    'cspell.json',
+    'devcontainer.json',
+    '.vscode/*.json',
+  },
+  callback = function()
+    vim.bo.filetype = 'jsonc'
+  end,
+})

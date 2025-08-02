@@ -1,15 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eu
+set -euo pipefail
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+source "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# BIN_DIR="$HOME/.local/bin"
+# if [ "$PATH" != "$BIN_DIR:"* ]; then
+#   PATH="$BIN_DIR:${PATH//:$BIN_DIR/}"
+# fi
+
+check_nvim_version() {
+  command -v nvim >/dev/null && [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]
+}
 
 {{ if .glibc231 -}}
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
-{{ else if eq .osid "debian" -}}
+{{ else if eq .osIDLike "debian" -}}
 # TODO: replace with .chezmoiexternal
-if command -v nvim >/dev/null; then
+if check_nvim_version; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v nvim || echo nvim" }}"
   nvim --version | head -n1
 else
@@ -26,4 +35,8 @@ else
 fi
 {{ end -}}
 
-cmd timeout 5m nvim --headless +Update! +qa >/dev/null
+check_nvim_version
+
+cmd timeout 5m nvim --headless +LazyInstall! +qa >/dev/null
+
+echo

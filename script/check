@@ -8,6 +8,7 @@ PATH="$HOME/.local/bin:$PATH"
 PATH="$PATH:$HOME/.local/share/mise/shims"
 
 check_chezmoi() {
+  # set -- --debug --verbose "$@"
   # FIXME: starship template changes after installation (preset)
   # out="$(chezmoi diff --exclude=scripts)"
   # if [ "$out" != "" ]; then
@@ -38,6 +39,8 @@ has_feature() {
 }
 
 check_version() {
+  echo >&2 "Checking versions..."
+
   local features
   features="$(chezmoi cat-config "$@" | yq .data.features)"
 
@@ -84,7 +87,7 @@ check_version() {
   if has_feature neovim "$features"; then
     cmd nvim --version 2>/dev/null | head -n1
     # FIXME: Debian 11 Ubuntu 22 nvim 0.4.3
-    cmd timeout 5m nvim --headless +Update! +qa >/dev/null # || true
+    cmd timeout 5m nvim --headless +LazyUpdate! +qa >/dev/null # || true
   fi
 
   if has_feature python "$features"; then

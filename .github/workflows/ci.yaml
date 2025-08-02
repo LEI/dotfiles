@@ -16,6 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: ./script/bootstrap
+      - run: ./script/check
       - name: chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
     strategy:

@@ -41,8 +41,7 @@ commonPackages:
   - { name: jq }
   - { name: lnav }
   - name: neovim
-    # condition: and .features.neovim (ne .osIDLike "debian")
-    condition: and .features.neovim (not .glibc231)
+    condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
   - { name: nushell, condition: ne .osIDLike "debian" }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - { name: procs, condition: not (eq .osIDLike "debian") }

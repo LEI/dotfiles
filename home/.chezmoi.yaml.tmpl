@@ -171,7 +171,7 @@ interpreters:
 {{- end }}
 
 scriptEnv:
-  # PATH: "{{ env "PATH" }}:{{ env "HOME" }}/.local/bin"
+  PATH: "{{ env "HOME" }}/.local/bin:{{ env "PATH" }}"
   TMPDIR: {{ coalesce (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 {{- if eq .chezmoi.os "darwin" }}
   HOMEBREW_BAT: "1"
