@@ -2,9 +2,14 @@
 
 shell="{{ .shell }}" # ${SHELL##*/}
 
-IS_BASH="$([ "$shell" = bash ] && echo true || echo false)"
+if [ "$shell" = bash ]; then IS_BASH=true; else IS_BASH=false; fi
+# {{- if eq .osID "alpine" }}
+BLE_ENABLED="${BLE_ENABLED:-false}"
+PREEXEC_ENABLED=${PREEXEC_ENABLED:-$IS_BASH}
+# {{- else }}
 BLE_ENABLED="${BLE_ENABLED:-$IS_BASH}"
 PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
+# {{- end }}
 
 source_files() {
   local dir="$1"
@@ -73,7 +78,7 @@ main() {
   # Source plugins after updating PATH and activating mise
   source_plugins sh
 
-  # {{- if ne .osid "android" }}
+  # {{- if ne .osID "android" }}
   # NOTE: "direnv export" causes "SIGSYS bad system call" on termux
   if command -v direnv >/dev/null; then
     eval "$(direnv hook "$shell")"

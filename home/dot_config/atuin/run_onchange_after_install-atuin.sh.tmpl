@@ -8,10 +8,12 @@ set -eu
 
 # ble.sh or bash-preexec is required for atuin in bash
 # https://docs.atuin.sh/guide/installation/
-# if [ ! -f ~/.local/share/bash-preexec.sh ]; then
-#   curl -LSsfo ~/.local/share/bash-preexec.sh \
-#     https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-# fi
+# {{- if eq .osID "alpine" }}
+if [ ! -f ~/.local/share/bash-preexec.sh ]; then
+  curl -LSsfo ~/.local/share/bash-preexec.sh \
+    https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+fi
+# {{- else }}
 if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   echo >&2 "Installing ble.sh"
   BLE_NAME="ble-nightly"
@@ -20,6 +22,7 @@ if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
   echo >&2 "Installed ble.sh"
 fi
+# {{- end }}
 
 if command -v atuin >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v atuin || echo atuin" }}"

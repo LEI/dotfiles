@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
 
@@ -19,7 +19,7 @@ if command -v cargo >/dev/null; then
 else
   echo >&2 "Installing cargo"
 
-  if [ "$CHEZMOI_ARCH" = "amd64" ]; then
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
     ARCH=x86_64
   else
     ARCH="$CHEZMOI_ARCH"
@@ -60,32 +60,60 @@ else
   echo >&2 "Installed cargo"
 fi
 
-# echo >&2 "Version: $(rustc --version)"
-# rustc --version
+# cmd rustc --version
+
+# {{- if not .features.neovim }}
+# cmd rustup component add rust-analyzer
+# {{- end }}
 
 if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
   cmd . ~/.cargo/env
 fi
 
-packages=()
+if ! command -v cargo-binstall >/dev/null; then
+  # cmd cargo install --quiet cargo-binstall
+  # https://github.com/cargo-bins/cargo-binstall#manually
+  echo >&2 "Installing cargo-binstall"
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
+    ARCH=x86_64
+  else
+    ARCH="$CHEZMOI_ARCH"
+  fi
+  if [ "$CHEZMOI_OS" = darwin ]; then
+    OS=apple-darwin
+  elif [ "$CHEZMOI_OS" = linux ]; then
+    OS=unknown-linux-musl
+  elif [ "$CHEZMOI_OS" = windows ]; then
+    OS=pc-windows-msvc
+  fi
+  NAME="cargo-binstall-$ARCH-$OS"
+  if [ "$CHEZMOI_OS" = linux ]; then
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME.tgz"
+    install_tar_gz "$URL" cargo-binstall
+  else
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME.zip"
+    install_zip "$URL" cargo-binstall
+  fi
+  echo >&2 "Installed cargo-binstall"
+fi
+
+packages="cargo-binstall"
 
 if ! command -v cargo-update >/dev/null; then
-  packages+=("cargo-update")
+  packages="$packages cargo-binstall cargo-update"
 fi
 
 # {{- if and (lookPath "sk" | not | not) (eq .osID "debian") }}
 # TODO: https://github.com/skim-rs/skim#shell-completions
 if ! command -v sk >/dev/null; then
-  packages+=("skim")
+  packages="$packages skim"
 fi
 # {{- end }}
 
 # {{- if not .features.neovim }}
-# rustup component add rust-analyzer
-
 if ! command -v taplo >/dev/null; then
-  time cmd cargo install taplo-cli --locked --features lsp --quiet
+  cmd cargo install taplo-cli --locked --features lsp --quiet
 fi
 # {{- end }}
 
-time cmd cargo install --quiet "${packages[@]}"
+cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages

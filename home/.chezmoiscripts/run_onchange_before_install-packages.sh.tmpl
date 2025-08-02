@@ -15,7 +15,7 @@ set -eu
 {{- end -}}
 
 {{- if .features.python }}
-{{-   $pythonPackages := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
+{{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | splitList "\n" -}}
 {{-   range $name := without $pythonPackages "" -}}
 {{-     if eq (substr 0 1 $name) "#" -}}
 {{-       continue -}}

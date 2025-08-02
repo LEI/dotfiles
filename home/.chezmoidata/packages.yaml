@@ -7,6 +7,8 @@ commonPackages:
   # - { name: below, condition: not (eq .osIDLike "arch" "debian") }
   - { name: bottom, condition: not (eq .osIDLike "debian") }
   - curl
+  - name: cargo-binstall
+    condition: and .features.rust (not (eq .osIDLike "alpine" "debian"))
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
   - name: dive
     condition: and .features.docker (ne .osID "alpine")
@@ -28,7 +30,7 @@ commonPackages:
   - { name: git, condition: .features.git }
   - name: git-delta
     condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
-  - { name: gitui, condition: and .features.git (not (eq .osIDLike "debian")) }
+  - { name: gitui, condition: and .features.git (ne .osIDLike "debian") }
   - name: glab
     condition: >
       and .features.git (not (or
@@ -41,23 +43,29 @@ commonPackages:
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
   - jq
-  - { name: k9s, condition: and .features.kube (not (eq .osIDLike "debian")) }
+  - { name: k9s, condition: and .features.kube (ne .osIDLike "debian") }
   - lnav
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
   - { name: nushell, condition: ne .osIDLike "debian" }
+  - name: nvtop
+    condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
+  - name: podman-tui
+    condition: and .features.docker (not (eq .osIDLike "arch" "debian"))
   - { name: procs, condition: not (eq .osIDLike "debian") }
   - { name: progress, condition: eq .chezmoi.os "linux" }
   - ripgrep
   # - { name: shellcheck, condition: .features.not neovim }
   - name: starship
-    condition: ne .osIDLike "debian"
+    condition: not (eq .osIDLike "alpine" "debian")
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
     condition: .features.vim
+  - name: vlc
+    condition: and (not (eq .osIDLike "alpine" "debian")) (not .headless)
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - name: zoxide
@@ -119,6 +127,7 @@ packages:
       - { name: lazydocker-bin, condition: .features.docker }
       - lazyjournal-bin
       - { name: lazysql-bin, condition: .features.sql }
+      - podman-tui-bin
       - { name: terraform-pug-bin, condition: .features.tofu }
       - { name: topgrade-bin, condition: ne .osID "manjaro" }
       # - { name: yay, condition: ne .osID "manjaro" }
@@ -183,6 +192,7 @@ packages:
       - topgrade-rs.topgrade
       # - { name: koalaman.shellcheck, condition: not .features.neovim }
       - { name: vim.vim, condition: .features.vim }
+      - videolan.vlc
       - mikefarah.yq
       - ajeetdsouza.zoxide
     # - { name: golang.go, condition: .features.go }

@@ -1,0 +1,10 @@
+# ansible
+pip
+# pipenv
+# pipx
+{{- if .features.neovim }}
+pynvim
+{{- end }}
+{{- if ne .osIDLike "debian" }}
+uv
+{{- end }}

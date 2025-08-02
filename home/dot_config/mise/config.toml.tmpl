@@ -97,7 +97,7 @@ shfmt = "latest"
 # }
 {{- end }}
 
-{{- if eq .osIDLike "debian" }}
+{{- if eq .osIDLike "alpine" "debian" }}
 # FIXME(termux): installs but "cannot execute: required file not found"
 starship = "latest"
 {{- end }}

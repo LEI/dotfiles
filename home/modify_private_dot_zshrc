@@ -3,7 +3,8 @@
   "chezmoi" .chezmoi
   "contents" (includeTemplate "init.sh" (dict
     "features" .features
-    "osid" .osid
+    "osID" .osID
+    "osIDLike" .osIDLike
     "shell" "zsh"
   ))
 ) -}}
