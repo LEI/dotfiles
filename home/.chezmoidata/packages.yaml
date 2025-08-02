@@ -65,7 +65,7 @@ commonPackages:
   - name: vim
     condition: .features.vim
   - name: vlc
-    condition: and (not (eq .osIDLike "alpine" "debian")) (not .headless)
+    condition: and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless)
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - name: zoxide
@@ -150,6 +150,7 @@ packages:
     casks:
       - firefox
       - google-chrome
+      - vlc
   debian: # Debian/Ubuntu
     - apt-utils
     - build-essential

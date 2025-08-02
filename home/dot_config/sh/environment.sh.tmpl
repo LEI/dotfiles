@@ -9,6 +9,10 @@ export XDG_CACHE_HOME=$HOME/.cache
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
+if [ -z "${MANPAGER:-}" ]; then
+  export MANPAGER="less -X"
+fi
+
 {{- if .features.docker }}
 # export DOCKER_CONFIG=$XDG_CONFIG_HOME/docker
 {{- end }}
