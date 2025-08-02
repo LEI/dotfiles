@@ -1,7 +1,7 @@
 # Set-PSDebug -Trace 1
 
-{{- $scoopPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "scoop") .) | fromJson }}
-{{- $wingetPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "winget") .) | fromJson }}
+{{- $scoopPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.windows.scoop) .) | fromJson }}
+{{- $wingetPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.windows.winget) .) | fromJson }}
 
 echo "Scoop: {{ lookPath "scoop" }}"
 

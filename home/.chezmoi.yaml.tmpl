@@ -3,7 +3,8 @@
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 
-{{- $binDir := printf "%s/.local/bin" (env "HOME") -}}
+{{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
+{{- $binDir := joinPath $homeDir ".local" "bin" -}}
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
@@ -37,8 +38,10 @@
   (and (eq $osID "ubuntu") (le (float64 $osVersion) 20.04))
 -}}
 
+{{- $sep := ":" -}}
 {{- $sh := "sh" -}}
 {{- if eq $osID "windows" -}}
+{{- $sep = ";" -}}
 {{- $sh = "bash" -}}
 {{- end -}}
 
@@ -103,7 +106,12 @@
 #   identity: {{ env "HOME" }}/key.txt
 #   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
 
-{{- if ne $osID "windows" }}
+
+{{- if eq $osID "windows" }}
+interpreters:
+  sh:
+    command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
+{{- else }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
   read-source-state:
@@ -165,25 +173,21 @@ env: {}
 github:
   refreshPeriod: 12h
 
-{{- if eq $osID "windows" }}
-interpreters:
-  sh:
-    command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
-{{- end }}
-
 scriptEnv:
-  PATH: "{{ $binDir }}:{{ env "PATH" | replaceAllRegex (printf ":%s" $binDir) "" }}"
-  TMPDIR: {{ coalesce (env "TMPDIR") (env "TMP") "/tmp" | quote }}
-{{- if eq .chezmoi.os "darwin" }}
+  {{- if ne $osID "windows" }}
+  PATH: "{{ $binDir }}{{ $sep }}{{ env "PATH" | replaceAllRegex (printf "%s%s" $sep $binDir) "" }}"
+  {{- end }}
+  TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
+  {{- if eq .chezmoi.os "darwin" }}
   HOMEBREW_BAT: "1"
   # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"
   HOMEBREW_NO_ENV_HINTS: "1"
   NONINTERACTIVE: "1"
-{{- else if eq $osID "debian" }}
+  {{- else if eq $osID "debian" }}
   DEBIAN_FRONTEND: noninteractive
-{{- end }}
+  {{- end }}
 
 # Files and directories not group writeable
 # umask: 0o022
