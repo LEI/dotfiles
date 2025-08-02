@@ -106,7 +106,7 @@ check_version() {
   fi
 
   if cmd topgrade --version 2>/dev/null; then
-    cmd topgrade --disable=chezmoi --dry-run
+    cmd topgrade --disable=chezmoi --disable=vscode --dry-run
     # cmd timeout 5m topgrade --disable=chezmoi
   fi
 

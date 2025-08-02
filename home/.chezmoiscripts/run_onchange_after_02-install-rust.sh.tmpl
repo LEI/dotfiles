@@ -73,7 +73,7 @@ if ! command -v cargo-update >/dev/null; then
   packages+=("cargo-update")
 fi
 
-# {{- if eq .osid "debian" }}
+# {{- if and (lookPath "sk" | not | not) (eq .osID "debian") }}
 # TODO: https://github.com/skim-rs/skim#shell-completions
 if ! command -v sk >/dev/null; then
   packages+=("skim")
