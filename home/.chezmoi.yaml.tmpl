@@ -3,6 +3,7 @@
 {{- $ephemeral := false -}}
 {{- $headless := false -}}
 
+{{- $binDir := printf "%s/.local/bin" (env "HOME") -}}
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
@@ -171,7 +172,7 @@ interpreters:
 {{- end }}
 
 scriptEnv:
-  PATH: "{{ env "HOME" }}/.local/bin:{{ env "PATH" }}"
+  PATH: "{{ $binDir }}:{{ env "PATH" | replaceAllRegex (printf ":%s" $binDir) "" }}"
   TMPDIR: {{ coalesce (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 {{- if eq .chezmoi.os "darwin" }}
   HOMEBREW_BAT: "1"

@@ -4,15 +4,20 @@
 {{- $wingetPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.windows.winget) .) | fromJson }}
 
 echo "Scoop: {{ lookPath "scoop" }}"
+
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 # Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
-echo "scoop update *"
-echo "scoop install {{ $scoopPackages | join " " }}"
+{{- if .upgrade }}
+scoop update *
+{{- end }}
+
+scoop install {{ $scoopPackages | join " " }}
 
 echo "Winget: {{ lookPath "winget" }}"
+
 echo "winget update --disable-interactivity --silent"
-winget update --all --disable-interactivity --silent
+winget update --disable-interactivity --silent
 
 {{- if .upgrade }}
 echo "winget upgrade --all --disable-interactivity --silent"

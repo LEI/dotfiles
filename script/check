@@ -44,9 +44,9 @@ check_version() {
   local features
   features="$(chezmoi cat-config "$@" | yq .data.features)"
 
-  cmd dd --version | head -n1
+  cmd dd --version | head -n1 # coreutils
   # cmd grep --version | head -n1
-  cmd lsblk --version
+  cmd lsblk --version # util-linux
 
   if has_feature atuin "$features"; then
     cmd atuin --version
@@ -63,7 +63,7 @@ check_version() {
   cmd carapace --version
 
   cmd direnv export bash # "${SHELL##*/}"
-  cmd eza --version
+  cmd eza --version | head -n2 | tail -n1
   cmd fd --version
   # cmd ghostty --version | head -n1
   if has_feature helix "$features"; then
@@ -86,8 +86,9 @@ check_version() {
 
   if has_feature neovim "$features"; then
     cmd nvim --version 2>/dev/null | head -n1
-    # FIXME: Debian 11 Ubuntu 22 nvim 0.4.3
+    # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
     cmd timeout 5m nvim --headless +LazyUpdate! +qa >/dev/null # || true
+    # fi
   fi
 
   if has_feature python "$features"; then
