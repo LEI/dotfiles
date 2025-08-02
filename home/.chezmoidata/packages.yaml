@@ -97,28 +97,31 @@ packages:
     - sudo
     - which
   arch: # Archlinux/Manjaro
-    - base-devel
-    # - { name: below, type: '"aur"' }
-    - { name: carapace-bin, type: '"aur"' }
-    - github-cli
-    - gnu-netcat
-    - gnupg
-    - name: helixbinhx
-      condition: and .features.helix (eq .osIDLike "arch")
-      type: '"aur"'
-    - name: terraform-pug-bin
-      condition: .features.tofu
-      type: '"aur"'
-    - skim
-    - time # condition: command time
-    - name: topgrade-bin
-      type: eq .osID "manjaro" | ternary "aur" ""
-    # https://github.com/Jguer/yay#other-distributions
-    - { name: yay, condition: eq .osIDLike "manjaro" }
+    pacman:
+      - base-devel
+      - github-cli
+      - gnu-netcat
+      - gnupg
+      - name: terraform-pug-bin
+        condition: .features.tofu
+        type: '"aur"'
+      - skim
+      - time # condition: command time
+      - { name: topgrade-bin, condition: eq .osID "manjaro" }
+      # - { name: yay, condition: eq .osID "manjaro" }
+    aur:
+      # - below
+      - carapace-bin
+      - name: helixbinhx
+        condition: and .features.helix (ne .osID "manjaro")
+      # - { name: lazysql, condition: .features.sql }
+      - { name: topgrade-bin, condition: ne .osID "manjaro" }
+      # - { name: yay, condition: ne .osID "manjaro" }
   darwin:
     brews:
       - carapace
       - gpg
+      # - { name: lazysql, condition: .features.sql }
       - { name: nowplaying-cli, condition: .features.tmux }
       - { name: leg100/tap/pug, condition: .features.tofu }
       - { name: reattach-to-user-namespace, condition: .features.tmux }

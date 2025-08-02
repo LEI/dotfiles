@@ -9,7 +9,7 @@ PATH="$PATH:$HOME/.local/share/mise/shims"
 
 check_chezmoi() {
   # set -- --debug --verbose "$@"
-  # FIXME: starship template changes after installation (preset)
+  # FIXME: template output changes after installation (starship preset, gen config...)
   # out="$(chezmoi diff --exclude=scripts)"
   # if [ "$out" != "" ]; then
   #   echo >&2 "$out"

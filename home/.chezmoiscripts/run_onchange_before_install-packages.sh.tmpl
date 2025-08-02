@@ -7,7 +7,12 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
+{{- $packages := list -}}
+{{- if ne .osIDLike "arch" -}}
+{{-   $packages = includeTemplate "packages.tmpl" . | fromJson -}}
+{{- else -}}
+{{-   $packages = includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.arch.pacman) .) | fromJson }}
+{{- end -}}
 
 {{- if .features.python }}
 {{-   $pythonPackages := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
@@ -53,7 +58,7 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   cmd cd /tmp/yay-bin
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
-{{- $aurPackages := includeTemplate "packages.tmpl" (merge (dict "packageType" "aur") .) | fromJson }}
+{{- $aurPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.arch.aur) .) | fromJson }}
 aur_packages="{{ $aurPackages | join " " }}"
 if command -v yay >/dev/null; then
   cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
