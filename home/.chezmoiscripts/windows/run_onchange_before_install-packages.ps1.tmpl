@@ -16,10 +16,10 @@ scoop install {{ $scoopPackages | join " " }}
 
 echo "Winget: {{ lookPath "winget" }}"
 
-echo "winget update --disable-interactivity --silent"
-winget update --disable-interactivity --silent
-
 {{- if .upgrade }}
+# echo "winget update --disable-interactivity --silent"
+# winget update --disable-interactivity --silent
+
 echo "winget upgrade --all --disable-interactivity --silent"
 winget upgrade --all --disable-interactivity --silent
 {{- end }}
