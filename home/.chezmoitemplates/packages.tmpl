@@ -1,19 +1,25 @@
+{{- $commonPackages := .commonPackages -}}
 {{- $commonPackages := includeTemplate "package-list.tmpl" (dict
   "chezmoi" .chezmoi
   "features" .features
   "osID" .osID
   "osIDLike" .osIDLike
   "packageType" (get . "packageType")
-  "packages" (.commonPackages | default list)
+  "packages" $commonPackages
 ) | fromJson -}}
 
+{{- $key := get . "key" -}}
+{{- $packages := get .packages .osIDLike -}}
+{{- if and $key (ne $key "") -}}
+{{-   $packages = get $packages $key -}}
+{{- end -}}
 {{- $osPackages := includeTemplate "package-list.tmpl" (dict
   "chezmoi" .chezmoi
   "features" .features
   "osID" .osID
   "osIDLike" .osIDLike
   "packageType" (get . "packageType")
-  "packages" (get .packages .osid | default list)
+  "packages" $packages
 ) | fromJson -}}
 
 {{- concat (without $commonPackages "") (without $osPackages "") | toJson -}}

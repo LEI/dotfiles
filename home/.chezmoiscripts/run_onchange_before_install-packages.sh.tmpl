@@ -11,7 +11,7 @@ set -eu
 {{- if ne .osIDLike "arch" -}}
 {{-   $packages = includeTemplate "packages.tmpl" . | fromJson -}}
 {{- else -}}
-{{-   $packages = includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.arch.pacman) .) | fromJson }}
+{{-   $packages = includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "pacman") .) | fromJson -}}
 {{- end -}}
 
 {{- if .features.python }}
@@ -58,7 +58,7 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   cmd cd /tmp/yay-bin
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
-{{- $aurPackages := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.arch.aur) .) | fromJson }}
+{{ $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "aur") .) | fromJson }}
 aur_packages="{{ $aurPackages | join " " }}"
 if command -v yay >/dev/null; then
   cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages

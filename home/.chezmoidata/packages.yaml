@@ -8,8 +8,6 @@ commonPackages:
   - { name: bottom, condition: not (eq .osIDLike "debian") }
   - curl
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
-  - { name: git-delta, condition: not (eq .osIDLike "alpine" "debian") }
-  - { name: gitui, condition: not (eq .osIDLike "debian") }
   - name: dive
     condition: and .features.docker (ne .osID "alpine")
   # - duf
@@ -28,6 +26,9 @@ commonPackages:
   - name: ghq
     condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
   - { name: git, condition: .features.git }
+  - name: git-delta
+    condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
+  - { name: gitui, condition: and .features.git (not (eq .osIDLike "debian")) }
   - name: glab
     condition: >
       and .features.git (not (or
@@ -40,6 +41,7 @@ commonPackages:
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
   - jq
+  - { name: k9s, condition: and .features.kube (not (eq .osIDLike "debian")) }
   - lnav
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
@@ -100,7 +102,7 @@ packages:
   arch: # Archlinux/Manjaro
     pacman:
       - base-devel
-      - github-cli
+      - { name: github-cli, condition: .features.git }
       - gnu-netcat
       - gnupg
       - { name: lazygit, condition: .features.git }
@@ -168,10 +170,10 @@ packages:
       - eza-community.eza
       - sharkdp.fd
       # - dundee.gdu
-      - github.cli
-      - git.git
-      # - stephandilly.gitui
-      - glab.glab
+      - { name: github.cli, condition: .features.git }
+      - { name: git.git, condition: .features.git }
+      # - { name: stephandilly.gitui, condition: .features.git }
+      - { name: glab.glab, condition: .features.git }
       - { name: helix.helix, condition: .features.helix }
       - jdx.mise
       - jqlang.jq

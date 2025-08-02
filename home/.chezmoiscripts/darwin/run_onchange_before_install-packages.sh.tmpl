@@ -13,8 +13,8 @@ brew update --quiet
 brew upgrade --quiet
 {{- end }}
 
-{{- $brews := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.darwin.brews) .) | fromJson }}
-{{- $casks := includeTemplate "package-list.tmpl" (merge (dict "packages" .packages.darwin.casks) .) | fromJson }}
+{{- $brews := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "brews") .) | fromJson }}
+{{- $casks := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "casks") .) | fromJson }}
 
 brew bundle --file=/dev/stdin <<EOF
 {{ range $brews | sortAlpha -}}
