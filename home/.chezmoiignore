@@ -94,6 +94,10 @@
 {{- if lookPath "kubectl" }}.local/bin/k{{- end }}
 {{- end }}
 
+{{- if not $accessToken }}
+.config/meli/
+{{- end }}
+
 {{- if not .features.mise }}
 .chezmoiscripts/{*,*/*}-mise-install.sh
 .config/mise/
