@@ -1,0 +1,147 @@
+---
+accounts:
+  # # Setting up a Maildir account
+  # [accounts.account-name]
+  # root_mailbox = "/path/to/root/mailbox"
+  # format = "Maildir"
+  # send_mail = 'msmtp --read-recipients --read-envelope-from'
+  # #send_mail = { hostname = "smtp.example.com", port = 587, auth = { type = "auto", username = "user", password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" } }, security = { type = "STARTTLS" } }
+  # listing.index_style = "Conversations" # or [plain, threaded, compact]
+  # identity = "email@example.com"
+  # display_name = "Name"
+  # # Need to explicitly list mailboxes of interest:
+  # subscribed_mailboxes = ["INBOX", "INBOX/Sent", "INBOX/Drafts", "INBOX/Junk"]
+  #
+  # # Set mailbox-specific settings
+  # [accounts.account-name.mailboxes]
+  # "INBOX" = { rename = "Inbox" }
+  # "drafts" = { rename = "Drafts" }
+  # "foobar-devel" = { ignore = true } # don't show notifications for this mailbox
+
+  # # Setting up an mbox account
+  # mbox:
+  #   root_mailbox: /var/mail/username
+  #   format: mbox
+  #   send_mail: "false"
+  #   listing.index_style: Compact
+  #   identity: username@hostname.local
+
+  # Setting up an IMAP account
+  {{- range $key, $account := .meli }}
+  {{- $username := get $account "username" | default $key }}
+  {{- $host := index ($username | splitList "@") 1 }}
+  {{ $key }}:
+    root_mailbox: INBOX
+    format: imap
+    send_mail:
+      hostname: {{ get $account "smtp" | default (printf "smtp.%s" $host) | quote }}
+      port: {{ get $account "smtp_port" | default 587 }}
+      auth:
+        type: auto
+        username: user
+        password:
+          type: command_eval
+          value: gpg2 --no-tty -q -d ~/.passwords/user.gpg
+      security: { type: STARTTLS }
+    server_hostname: {{ get $account "imap" | default (printf "imap.%s" $host) | quote }}
+    # server_password: ""
+    server_password_command: "bw get password {{ $username }}"
+    server_username: {{ $username | quote }}
+    server_port: {{ get $account "imap_port" | default 993 | quote }} # 993: imaps, 143: STARTTLS
+    use_starttls: {{ get $account "start_tls" | default true }} # optional
+    listing:
+      index_style: Conversations
+    identity: "{{ $username }}"
+    display_name: {{ $account.name }}
+    use_oauth2: {{ get $account "use_oauth2" | default true }}
+    # Show only specific mailboxes, overriding the server's subscribed status.
+    # subscribed_mailboxes: ["INBOX", "INBOX/Sent", "INBOX/Drafts", "INBOX/Junk"]
+  {{- end }}
+
+  # # Setting up an account for an already existing notmuch database
+  # #[accounts.notmuch]
+  # #root_mailbox = "/path/to/folder" # where .notmuch/ directory is located
+  # #format = "notmuch"
+  # #send_mail = 'msmtp --read-recipients --read-envelope-from'
+  # #listing.index_style = "conversations"
+  # #identity="username@example.com"
+  # #display_name = "Name Name"
+  # #  # notmuch mailboxes are virtual, they are defined by their alias and the notmuch query that corresponds to their content.
+  # #  [accounts.notmuch.mailboxes]
+  # #  "INBOX" = {  query="tag:inbox", subscribe = true }
+  # #  "Drafts" = {  query="tag:draft", subscribe = true }
+  # #  "Sent" = {  query="from:username@example.com from:username2@example.com", subscribe = true }
+  # #
+  # # Setting up a Gmail account
+  # [accounts."gmail"]
+  # root_mailbox = '[Gmail]'
+  # format = "imap"
+  # send_mail = { hostname = "smtp.gmail.com", port = 587, auth = { type = "auto", username = "user", password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" } }, security = { type = "STARTTLS" } }
+  # server_hostname='imap.gmail.com'
+  # server_password="password"
+  # server_username="username@gmail.com"
+  # server_port="993"
+  # listing.index_style = "Conversations"
+  # identity = "username@gmail.com"
+  # display_name = "Name Name"
+  # # Gmail auto saves sent mail to Sent folder, so don't duplicate the effort:
+  # composing.store_sent_mail = false
+  #
+  # #[accounts."jmap account"]
+  # #root_mailbox = "INBOX"
+  # #format = "jmap"
+  # #send_mail = 'server_submission'
+  # #server_url="http://localhost:8080"
+  # #server_username="user@hostname.local"
+  # #server_password="changeme"
+  # #listing.index_style = "Conversations"
+  # #identity = "user@hostname.local"
+  #
+  # [pager]
+  # filter = "COLUMNS=72 /usr/local/bin/pygmentize -l email"
+  # pager_context = 0 # default, optional
+  # sticky_headers = true # default, optional
+  #
+  # [notifications]
+  # script = "notify-send"
+  # xbiff_file_path = "path" # for use with xbiff(1)
+  # play_sound = true # default, optional
+  # sound_file = "path" # optional
+  #
+  # ##shortcuts
+  # [shortcuts.composing]
+  # edit = 'e'
+  #
+  # [shortcuts.contact-list]
+  # create_contact = 'c'
+  # edit_contact = 'e'
+  #
+  # #Mail listing defaults
+  # [shortcuts.listing]
+  # prev_page = "PageUp"
+  # next_page = "PageDown"
+  # prev_mailbox = 'K'
+  # next_mailbox = 'J'
+  # prev_account = 'l'
+  # next_account = 'h'
+  # new_mail = 'm'
+  # set_seen = 'n'
+  # exit_entry = 'i'
+  #
+  # #Pager defaults
+  #
+  # [shortcuts.pager]
+  # scroll_up = 'k'
+  # scroll_down = 'j'
+  # page_up = "PageUp"
+  # page_down = "PageDown"
+  #
+  # [composing]
+  # editor_command = 'vim +/^$' # optional, by default $EDITOR is used.
+  #
+  # [pgp]
+  # auto_sign = false # always sign sent messages
+  # auto_verify_signatures = true # always verify signatures when reading signed e-mails
+  #
+  # [terminal]
+  # theme = "dark" # or "light"

@@ -152,6 +152,8 @@ data:
     # user: {{ env "GITHUB_USERNAME" }}
   gitlab:
     email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
+  meli:
+{{ (bitwardenSecrets "58d23cda-814b-4902-a7ec-b32e0050ec2b" $accessToken).value | fromJson | toYaml | indent 4 }}
   {{- end }}
 
   # Upgrade system packages

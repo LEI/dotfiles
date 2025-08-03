@@ -1,0 +1,2 @@
+{{- $config := includeTemplate "dot_config/meli/config.yaml.tmpl" . | fromYaml -}}
+{{ $config | toToml }}
