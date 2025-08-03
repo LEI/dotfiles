@@ -1,0 +1,13 @@
+{{- range $name, $account := .meli.accounts }}
+{{- if eq (substr 0 3 $name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+[{{ $name }}]
+source = imaps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:993
+outgoing = smtps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:587
+default = {{ get $account "root_mailbox" | default "INBOX" }}
+from = {{ $account.display_name }} <{{ get $account "identity" | default $account.server_username }}>
+cache-headers = true
+copy-to = Sent
+
+{{ end -}}

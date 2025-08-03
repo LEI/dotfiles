@@ -1,2 +1,107 @@
-{{- $config := includeTemplate "dot_config/meli/.config.yaml.tmpl" . | fromYaml -}}
-{{ $config | toToml }}
+{{- range $name, $account := .meli.accounts }}
+{{- if eq (substr 0 3 $name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+[accounts."{{ $name }}"]
+root_mailbox = {{ get $account "root_mailbox" | default "INBOX" | quote }}
+format = {{ get $account "root_mailbox" | default "imap" | quote }}
+server_hostname = {{ $account.server_hostname | quote }}
+server_username = {{ $account.server_username | quote }}
+server_password = {{ $account.server_password | quote }}
+# server_password_command = "get password {} | base64"
+server_port = {{ $account.server_port }}
+
+use_oauth2 = {{ get $account "use_oauth2" | default false }}
+use_starttls = {{ get $account "use_starttls" | default false }}
+use_tls = {{ get $account "use_tls" | default true }}
+
+display_name = {{ $account.display_name | quote }}
+identity = {{ get $account "identity" | default $account.server_username | quote }}
+
+# Show only specific mailboxes:
+# subscribed_mailboxes = ["INBOX", "INBOX/Sent", "INBOX/Drafts", "INBOX/Junk"]
+subscribed_mailboxes = ["*"]
+
+# compact, conversations, threaded, plain
+listing = { index_style = "threaded" }
+
+[accounts."{{ $name }}".mailboxes.INBOX]
+autoload = {{ get $account "autoload" | default false }}
+subscribe = {{ get $account "subscribe" | default false }}
+# INBOX/DRAFT
+#   alias = "Drafts"
+#   usage = "Drafts"
+# INBOX/OUTBOX
+#   alias = "Sent"
+#   usage = "Sent"
+# INBOX/QUARANTAINE
+#   alias = "Spam"
+#   usage = "Junk"
+# INBOX/TRASH
+#   alias = "Trash"
+#   usage = "Trash"
+
+[accounts."{{ $name }}".send_mail]
+hostname = {{ $account.send_mail.hostname | quote }}
+port = {{ $account.send_mail.port }}
+security = { type = {{ $account.send_mail.security.type | quote }} }
+
+[accounts."{{ $name }}".send_mail.auth]
+type = {{ $account.send_mail.auth.type | quote }}
+username = {{ $account.send_mail.auth.username | quote }}
+password = { type = "raw", value = {{ $account.send_mail.auth.password.value | quote }} }
+# password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" }
+
+{{ end -}}
+# https://git.meli-email.org/meli/meli/src/branch/master/meli/docs/samples/sample-config.toml
+# # Setting up a Maildir account
+# [accounts.account-name]
+# root_mailbox = "/path/to/root/folder"
+# format = "Maildir"
+# listing.index_style = "Compact"
+# identity="email@example.com"
+# subscribed_mailboxes = ["folder", "folder/Sent"] # or [ "*", ] for all mailboxes
+# display_name = "Name"
+#
+# # Set mailbox-specific settings
+#   [accounts.account-name.mailboxes]
+#   "INBOX" = { alias="Inbox" } #inline table
+#   "drafts" = { alias="Drafts" } #inline table
+#   [accounts.account-name.mailboxes."foobar-devel"] # or a regular table
+#     ignore = true # don't show notifications for this mailbox
+#
+# # Setting up an mbox account
+# [accounts.mbox]
+# root_mailbox = "/var/mail/username"
+# format = "mbox"
+# listing.index_style = "Compact"
+# identity="username@hostname.local"
+# composing.send_mail = { hostname = "localhost", port = 25, auth = { type = "none" }, security = { type = "none" } }
+
+# [pager]
+# filter = "COLUMNS=72 /usr/local/bin/pygmentize -l email"
+# html_filter = "w3m -I utf-8 -T text/html"
+
+# [notifications]
+# script = "notify-send"
+
+[composing]
+# # required for sending e-mail
+# send_mail = "msmtp --read-recipients --read-envelope-from"
+# #send_mail = { hostname = "smtp.example.com", port = 587, auth = { type = "auto", username = "user", password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" } }, security = { type = "STARTTLS" } }
+# editor_command = "vim +/^$"
+insert_user_agent = false
+store_sent_mail = true
+
+# [shortcuts]
+# [shortcuts.composing]
+# edit = "e"
+
+[shortcuts.listing]
+# new_mail = "m"
+# set_seen = "n"
+next_account = "L"
+prev_account = "H"
+
+[terminal]
+theme = "tokyonight" # dark, nord

@@ -1,6 +1,6 @@
 # https://meli-email.org/documentation.html#meli-themes.5_CUSTOM_THEMES
 # https://git.meli-email.org/meli/meli/src/branch/master/meli/docs/samples/themes
-[terminal.themes.dark]
+[terminal.themes.tokyonight]
 "theme_default" = { fg = "$fg", bg = "$bg", attrs = "Default" }
 "error_message" = { fg = "$red", bg = "theme_default", attrs = "theme_default" }
 "text.normal" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
@@ -80,7 +80,7 @@
 "pager.highlight_search_current" = { fg = "theme_default", bg = "NavyBlue", attrs = "Bold" }
 
 # https://github.com/folke/tokyonight.nvim/blob/main/lua/tokyonight/colors/storm.lua
-[terminal.themes.dark.color_aliases]
+[terminal.themes.tokyonight.color_aliases]
 bg = "#24283b"
 bg_dark = "#1f2335"
 bg_dark1 = "#1b1e2d"

@@ -94,6 +94,7 @@
 {{- end }}
 
 {{- if not .features.mail }}
+.config/aerc/
 .config/meli/
 {{- end }}
 
