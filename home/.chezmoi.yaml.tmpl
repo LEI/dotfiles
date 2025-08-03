@@ -85,6 +85,7 @@
 {{- end -}}
 
 {{- $features := includeTemplate "features.tmpl" (dict
+  "accessToken" $accessToken
   "chezmoi" .chezmoi
   "codespaces" $codespaces
   "devContainer" $devContainer
@@ -153,7 +154,8 @@ data:
   gitlab:
     email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
   meli:
-{{ (bitwardenSecrets "58d23cda-814b-4902-a7ec-b32e0050ec2b" $accessToken).value | fromJson | toYaml | indent 4 }}
+    accounts:
+{{ (bitwardenSecrets "58d23cda-814b-4902-a7ec-b32e0050ec2b" $accessToken).value | fromJson | toYaml | indent 6 }}
   {{- end }}
 
   # Upgrade system packages

@@ -5,7 +5,6 @@
 
 .config/helix/config.yaml
 .config/helix/languages.yaml
-.config/meli/config.yaml
 .config/starship.yaml
 .config/topgrade/topgrade.yaml
 
@@ -94,7 +93,7 @@
 {{- if lookPath "kubectl" }}.local/bin/k{{- end }}
 {{- end }}
 
-{{- if not $accessToken }}
+{{- if not .features.mail }}
 .config/meli/
 {{- end }}
 
