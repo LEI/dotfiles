@@ -33,13 +33,13 @@
 {{- $features = mergeOverwrite $features (dict
   "atuin" true
   "bash" true
-  "docker" (or (lookPath "docker") (lookPath "podman") | not | not)
+  "docker" (ne (or (lookPath "docker") (lookPath "podman")) "")
   "git" true
   "helix" true
-  "kube" (lookPath "kubectl" | not | not)
+  "kube" (ne (lookPath "kubectl") "")
   "nushell" true
   "python" true
-  "tofu" (lookPath "tofu" | not | not)
+  "tofu" (ne (lookPath "tofu") "")
   "ruby" true
   "topgrade" true
 ) -}}

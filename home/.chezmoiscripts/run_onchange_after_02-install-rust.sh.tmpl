@@ -107,7 +107,7 @@ fi
 #   packages="$packages cargo-update"
 # fi
 
-# {{- if and (lookPath "sk" | not | not) (eq .osID "debian") }}
+# {{- if eq .osID "debian" }}
 # TODO: https://github.com/skim-rs/skim#shell-completions
 if ! command -v sk >/dev/null; then
   packages="$packages skim"

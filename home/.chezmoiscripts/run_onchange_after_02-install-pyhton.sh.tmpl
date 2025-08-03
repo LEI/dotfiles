@@ -28,8 +28,8 @@ if [ -n "$packages" ]; then
     fi
   done
 fi
-# {{ if lookPath "uv" | not | not -}}
-# {{- else if lookPath "pipx" | not | not }}
+# {{ if ne (lookPath "uv") "" -}}
+# {{- else if ne (lookPath "pipx") "" }}
 # if [ -n "$packages" ]; then
 #   cmd pipx install $packages
 # fi
