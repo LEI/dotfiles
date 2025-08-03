@@ -1,0 +1,32 @@
+{{- range $name, $account := .meli.accounts }}
+{{- if eq (substr 0 3 $name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+{{- $inbox := get $account "root_mailbox" | default "INBOX" -}}
+IMAPAccount {{ $name }}-imap
+Host {{ $account.server_hostname | quote }}
+Port {{ $account.server_port }}
+User {{ $account.server_username | quote }}
+Pass {{ $account.server_password | quote }}
+# PassCmd "get password {{ $account.server_username }}"
+TLSType IMAPS
+
+MaildirStore {{ $name }}-maildir
+Path ~/Mail/{{ $name }}/
+INBOX ~/Mail/{{ $name }}/{{ $inbox }}
+SubFolders Verbatim
+
+IMAPStore {{ $name }}-imap
+Account {{ $name }}-imap
+
+Channel {{ $name }}
+Far :{{ $name }}-imap:
+Near :{{ $name }}-maildir:
+Patterns {{ $inbox }} Archive Sent Junk Drafts
+Create Near # Both
+SyncState *
+# Uncomment this when you're confident, because it deletes deleted mails on
+# your IMAP server.
+# Expunge Both
+
+{{ end -}}

@@ -95,6 +95,7 @@
 
 {{- if not .features.mail }}
 .config/aerc/
+.config/isync/
 .config/meli/
 {{- end }}
 

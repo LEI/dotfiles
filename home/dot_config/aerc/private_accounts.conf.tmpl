@@ -3,11 +3,23 @@
 {{-   continue -}}
 {{- end -}}
 [{{ $name }}]
-source = imaps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:993
+
+{{- if eq $account.format "imap" }}
+# source = imaps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:993
+{{- end }}
+
+check-mail-cmd = mbsync -c ~/.config/isync/mbsyncrc {{ $name }}
+source = maildir://~/Mail/{{ $name }}
+
 outgoing = smtps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:587
+# outgoing-cred-cmd = get password {{ $account.server_username }}
 default = {{ get $account "root_mailbox" | default "INBOX" }}
 from = {{ $account.display_name }} <{{ get $account "identity" | default $account.server_username }}>
 cache-headers = true
 copy-to = Sent
+# pgp-auto-sign = true
+# pgp-attach-key = true
+# pgp-opportunistic-encrypt = true
+# pgp-key-id = XXXXXX
 
 {{ end -}}
