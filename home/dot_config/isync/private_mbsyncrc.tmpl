@@ -16,15 +16,15 @@ TLSType IMAPS
 
 MaildirStore {{ $account.name }}-maildir
 Path ~/Mail/{{ $account.name }}/
-INBOX ~/Mail/{{ $account.name }}/INBOX # {{ $inbox }}
+INBOX ~/Mail/{{ $account.name }}/{{ $inbox }}
 SubFolders Verbatim
 
 IMAPStore {{ $account.name }}-imap
 Account {{ $account.name }}-imap
 
 Channel {{ $account.name }}
-Far :{{ $account.name }}-imap:
-Near :{{ $account.name }}-maildir:
+Far :{{ $account.name }}-imap: # {{ $inbox }}
+Near :{{ $account.name }}-maildir: # {{ $inbox }}
 Patterns * # {{ $inbox }} Archive Sent Junk Drafts
 Create Near # Both
 SyncState *

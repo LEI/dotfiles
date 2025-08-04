@@ -2,7 +2,7 @@
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-{{- $inbox := get $account "inbox" | default "INBOX" -}}
+{{- $inbox := or (get $account "inbox") "INBOX" -}}
 
 [accounts."{{ $account.name }}"]
 {{- if eq $account.format "imap" }}
@@ -17,29 +17,32 @@ use_starttls = {{ get $account "starttls" | default false }}
 use_tls = {{ get $account "tls" | default true }}
 {{- else }}
 root_mailbox = "~/Mail"
+default_mailbox = {{ $inbox | quote }}
 format = "notmuch"
 {{- end }}
 
 display_name = {{ get $account "from_name" | default .name | quote }}
 identity = {{ get $account "from_address" | default $account.address | quote }}
 
+{{- if eq $account.format "imap" }}
 # Show only specific mailboxes:
 # subscribed_mailboxes = ["INBOX", "INBOX/Sent", "INBOX/Drafts", "INBOX/Junk"]
 subscribed_mailboxes = ["*"]
-
-# compact, conversations, threaded, plain
-listing = { index_style = "threaded" }
-
+{{- else }}
 [accounts."{{ $account.name }}".mailboxes]
-# "{{ $inbox }}" = { query="tag:inbox", subscribe = true }
+{{- $cmd := printf "find ~/Mail/%[1]s -mindepth 1 -maxdepth 2 -type d ! -name cur ! -name tmp ! -name new -exec sh -c 'f=\"{}\"; echo ${f#$HOME/Mail/%[1]s/}' \\;" $account.name }}
+{{- $list := output "sh" "-c" $cmd | trim | splitList "\n" }}
+{{-   if eq (len $list) 0 }}
+"{{ $inbox }}" = { query="tag:inbox", subscribe = true }
 # "Drafts" = { query="tag:draft", subscribe = true }
 # "Sent" = { query="from:username@example.com from:username2@example.com", subscribe = true }
 # "Archives" = { query="tag:archived", subscribe = true }
 # "Archives/2019" = { query="tag:archived date:01-2019..12-2019", parent="Archives", subscribe = true }
-{{- $cmd := printf "find ~/Mail/%[1]s -mindepth 1 -maxdepth 2 -type d ! -name cur ! -name tmp ! -name new -exec sh -c 'f=\"{}\"; echo ${f#$HOME/Mail/%[1]s/}' \\;" $account.name }}
-{{- $list := output "sh" "-c" $cmd | trim | splitList "\n" }}
-{{- range $index, $directory := $list }}
-"{{ . }}" = { subscribe = true, sort_order = {{ $index }}, query = "path:/^{{ $account.name }}\\/{{ . | replaceAllRegex "/" "\\\\/" }}\\//" }
+{{-   else }}
+{{-     range $index, $directory := $list }}
+"{{ . }}" = { subscribe = true, query = "folder:{{ $account.name }}/{{ . }}" }
+{{-     end }}
+{{-   end }}
 {{- end }}
 
 # [accounts."{{ $account.name }}".mailboxes."{{ $inbox }}"]
@@ -59,6 +62,10 @@ listing = { index_style = "threaded" }
 # INBOX/TRASH
 #   alias = "Trash"
 #   usage = "Trash"
+
+[accounts."{{ $account.name }}".listing]
+index_style = "threaded" # compact, conversations, threaded, plain
+# filter = "not flags:seen"
 
 [accounts."{{ $account.name }}".send_mail]
 hostname = {{ $account.smtp_hostname | quote }}
@@ -105,9 +112,6 @@ password = { type = "command_eval", value = "bw get password {{ $account.address
 # script = "notify-send"
 
 [composing]
-# # required for sending e-mail
-# send_mail = "msmtp --read-recipients --read-envelope-from"
-# #send_mail = { hostname = "smtp.example.com", port = 587, auth = { type = "auto", username = "user", password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" } }, security = { type = "STARTTLS" } }
 # editor_command = "vim +/^$"
 insert_user_agent = false
 store_sent_mail = true

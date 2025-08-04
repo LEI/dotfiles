@@ -18,7 +18,7 @@ maildir-account-path = {{ $account.name }}
 
 outgoing = smtps://{{ $account.address | urlquery }}@{{ $account.smtp_hostname }}:{{ get $account "smtp_port" | default 587 }}
 outgoing-cred-cmd = bw get password {{ $account.address }}
-# default = {{ get $account "inbox" | default "INBOX" }}
+default = {{ get $account "inbox" | default "INBOX" }}
 from = {{ get $account "from_name" | default .name }} <{{ get $account "from_address" | default $account.address }}>
 cache-headers = true
 copy-to = Sent
