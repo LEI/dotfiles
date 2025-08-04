@@ -31,6 +31,12 @@ else
 fi
 export VISUAL
 
+export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
+
+{{- if .features.git }}
+export LG_CONFIG_FILE="$XDG_CONFIG_HOME/lazygit/theme.yml,$XDG_CONFIG_HOME/lazygit/config.yml"
+{{- end }}
+
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
 
 {{- if .features.node }}
