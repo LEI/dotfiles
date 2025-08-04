@@ -3,6 +3,7 @@
 {{-   continue -}}
 {{- end -}}
 {{- $inbox := get $account "root_mailbox" | default "INBOX" -}}
+
 IMAPAccount {{ $name }}-imap
 Host {{ $account.server_hostname | quote }}
 Port {{ $account.server_port }}
@@ -13,7 +14,7 @@ TLSType IMAPS
 
 MaildirStore {{ $name }}-maildir
 Path ~/Mail/{{ $name }}/
-INBOX ~/Mail/{{ $name }}/{{ $inbox }}
+INBOX ~/Mail/{{ $name }}/INBOX # {{ $inbox }}
 SubFolders Verbatim
 
 IMAPStore {{ $name }}-imap
@@ -22,7 +23,7 @@ Account {{ $name }}-imap
 Channel {{ $name }}
 Far :{{ $name }}-imap:
 Near :{{ $name }}-maildir:
-Patterns {{ $inbox }} Archive Sent Junk Drafts
+Patterns * # {{ $inbox }} Archive Sent Junk Drafts
 Create Near # Both
 SyncState *
 # Uncomment this when you're confident, because it deletes deleted mails on

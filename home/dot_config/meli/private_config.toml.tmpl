@@ -2,18 +2,24 @@
 {{- if eq (substr 0 3 $name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-[accounts."{{ $name }}"]
-root_mailbox = {{ get $account "root_mailbox" | default "INBOX" | quote }}
-format = {{ get $account "root_mailbox" | default "imap" | quote }}
-server_hostname = {{ $account.server_hostname | quote }}
-server_username = {{ $account.server_username | quote }}
-server_password = {{ $account.server_password | quote }}
-# server_password_command = "get password {} | base64"
-server_port = {{ $account.server_port }}
+{{- $inbox := get $account "root_mailbox" | default "INBOX" -}}
 
-use_oauth2 = {{ get $account "use_oauth2" | default false }}
-use_starttls = {{ get $account "use_starttls" | default false }}
-use_tls = {{ get $account "use_tls" | default true }}
+[accounts."{{ $name }}"]
+# root_mailbox = {{ $inbox | quote }}
+# format = {{ get $account "root_mailbox" | default "imap" | quote }}
+
+# server_hostname = {{ $account.server_hostname | quote }}
+# server_username = {{ $account.server_username | quote }}
+# server_password = {{ $account.server_password | quote }}
+# # server_password_command = "get password {} | base64"
+# server_port = {{ $account.server_port }}
+
+# use_oauth2 = {{ get $account "use_oauth2" | default false }}
+# use_starttls = {{ get $account "use_starttls" | default false }}
+# use_tls = {{ get $account "use_tls" | default true }}
+
+root_mailbox = "~/Mail"
+format = "notmuch"
 
 display_name = {{ $account.display_name | quote }}
 identity = {{ get $account "identity" | default $account.server_username | quote }}
@@ -25,9 +31,23 @@ subscribed_mailboxes = ["*"]
 # compact, conversations, threaded, plain
 listing = { index_style = "threaded" }
 
-[accounts."{{ $name }}".mailboxes.INBOX]
-autoload = {{ get $account "autoload" | default false }}
-subscribe = {{ get $account "subscribe" | default false }}
+[accounts."{{ $name }}".mailboxes]
+# "{{ $inbox }}" = { query="tag:inbox", subscribe = true }
+# "Drafts" = { query="tag:draft", subscribe = true }
+# "Sent" = { query="from:username@example.com from:username2@example.com", subscribe = true }
+# "Archives" = { query="tag:archived", subscribe = true }
+# "Archives/2019" = { query="tag:archived date:01-2019..12-2019", parent="Archives", subscribe = true }
+{{- $cmd := printf "find ~/Mail/%[1]s -mindepth 1 -maxdepth 2 -type d ! -name cur ! -name tmp ! -name new -exec sh -c 'f=\"{}\"; echo ${f#$HOME/Mail/%[1]s/}' \\;" $name }}
+{{- $list := output "sh" "-c" $cmd | trim | splitList "\n" }}
+{{- range $index, $directory := $list }}
+"{{ . }}" = { subscribe = true, sort_order = {{ $index }}, query = "path:/^{{ $name }}\\/{{ . | replaceAllRegex "/" "\\\\/" }}\\//" }
+{{- end }}
+
+# [accounts."{{ $name }}".mailboxes."{{ $inbox }}"]
+# autoload = {{ get $account "autoload" | default false }}
+# subscribe = {{ get $account "subscribe" | default false }}
+# query = "tag:inbox AND NOT tag:killed AND to:{{ $account.server_username }}"
+
 # INBOX/DRAFT
 #   alias = "Drafts"
 #   usage = "Drafts"

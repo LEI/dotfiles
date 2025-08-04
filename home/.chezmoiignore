@@ -97,6 +97,8 @@
 .config/aerc/
 .config/isync/
 .config/meli/
+.config/notmuch/
+.config/systemd/user/mbsync*
 {{- end }}
 
 {{- if not .features.mise }}

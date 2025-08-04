@@ -156,6 +156,9 @@ data:
   meli:
     accounts:
 {{ (bitwardenSecrets "58d23cda-814b-4902-a7ec-b32e0050ec2b" $accessToken).value | fromJson | toYaml | indent 6 }}
+  notmuch:
+    queries:
+{{ (bitwardenSecrets "76589c60-aae2-4c2f-b500-b32f00750c0a" $accessToken).value | fromYaml | toYaml | indent 6 }}
   {{- end }}
 
   # Upgrade system packages
