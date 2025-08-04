@@ -79,6 +79,9 @@
 
 {{- if not .features.helix }}
 .config/helix/
+{{- if ne .osID "manjaro" }}
+.config/helix/Makefile
+{{- end }}
 {{- end }}
 
 {{- if not .features.kube }}

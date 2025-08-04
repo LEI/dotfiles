@@ -308,13 +308,13 @@ items:
         menu:
           - name: Install
             key: i
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/install_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/install_plugins
           - name: Update
             key: u
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/update_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/update_plugins
           - name: Clean
             key: c
-            command: run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/clean_plugins
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/clean_plugins
           - separator: true
           - name: Back
             key: BSpace

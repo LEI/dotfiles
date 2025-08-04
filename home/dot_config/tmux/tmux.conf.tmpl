@@ -214,7 +214,6 @@ set -g @plugin 'alexwforsythe/tmux-which-key'
 
 # https://github.com/tmux-plugins/tpm/issues/105
 setenv -g TMUX_PLUGIN_MANAGER_PATH "$HOME/.config/tmux/plugins/"
-# TODO: set-environment -g TMUX_PLUGIN_MANAGER_PATH '~/.local/share/tmux/plugins'
 
 if "test ! -d $HOME/.config/tmux/plugins/tpm" {
     run "git clone https://github.com/tmux-plugins/tpm $HOME/.config/tmux/plugins/tpm \
