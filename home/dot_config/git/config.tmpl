@@ -20,7 +20,11 @@
 [include]
 	path = "~/.gitconfig.local"
 
-{{- if lookPath "delta" }}
+{{- if lookPath "difft" }}
+
+[diff]
+	external = difft
+{{- else if lookPath "delta" }}
 
 [include]
 	path = delta.ini

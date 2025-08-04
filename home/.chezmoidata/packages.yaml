@@ -10,8 +10,10 @@ commonPackages:
   - name: cargo-binstall
     condition: and .features.rust (not (eq .osIDLike "alpine" "debian"))
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
-  - name: dive
-    condition: and .features.docker (ne .osID "alpine")
+  # - name: dive
+  #   condition: and .features.docker (ne .osID "alpine")
+  - name: difftastic
+    condition: and .features.git (not (eq .osIDLike "debian"))
   # - duf
   - name: dust
     condition: not (eq .osIDLike "debian")
@@ -28,8 +30,8 @@ commonPackages:
   - name: ghq
     condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
   - { name: git, condition: .features.git }
-  - name: git-delta
-    condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
+  # - name: git-delta
+  #   condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
   - { name: gitui, condition: and .features.git (ne .osIDLike "debian") }
   - name: glab
     condition: >
@@ -76,7 +78,7 @@ packages:
   alpine:
     - bash
     - build-base # gcc
-    - delta
+    # - delta
     - gpg
     - gzip
     - { name: lazygit, condition: .features.git }
@@ -186,8 +188,8 @@ packages:
       - sharkdp.bat
       - lement.bottom
       - curl.curl
-      - dandavison.delta
-      - { name: wagoodman.dive, condition: .features.docker }
+      # - dandavison.delta
+      # - { name: wagoodman.dive, condition: .features.docker }
       - bootandy.dust
       - eza-community.eza
       - sharkdp.fd
