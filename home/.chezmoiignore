@@ -3,11 +3,6 @@
 # TODO: move to ~/.config/git/config
 .gitconfig
 
-.config/helix/config.yaml
-.config/helix/languages.yaml
-.config/starship.yaml
-.config/topgrade/topgrade.yaml
-
 {{- if ne .email "firstname.lastname@company.com" }}
 # Ignore .company-directory unless configured with a company email
 .company-directory # note that the pattern is not dot_company-directory
