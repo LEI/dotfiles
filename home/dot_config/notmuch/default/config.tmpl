@@ -1,9 +1,9 @@
 {{- $other := list -}}
-{{- range $name, $account := .meli.accounts }}
-{{- if eq (substr 0 3 $name) "out" -}}
+{{- range $account := .mail.accounts }}
+{{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-{{- $other = append $other $account.server_username -}}
+{{- $other = append $other $account.address -}}
 {{- end -}}
 
 [database]

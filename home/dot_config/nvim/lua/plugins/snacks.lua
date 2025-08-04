@@ -439,8 +439,8 @@ return {
       { '<backspace>oD', '<cmd>Dashboard<cr>', desc = 'Dashboard' },
       { '<backspace>oN', '<cmd>NeovimNews<cr>', desc = 'Neovim News' },
 
-      { '<leader>P', '', desc = '+profiler' },
-      { '<leader>Ps', function() Snacks.profiler.scratch() end, desc = 'Profiler Scratch Bufer' },
+      { '<backspace>p', '', desc = '+profiler' },
+      { '<backspace>ps', function() Snacks.profiler.scratch() end, desc = 'Profiler Scratch Bufer' },
     },
     -- config = function(_, opts)
     --   local snacks = require('snacks')
@@ -494,9 +494,9 @@ return {
           Snacks.toggle.dim():map('<leader>uD')
 
           -- Toggle the profiler
-          Snacks.toggle.profiler():map('<leader>Pp')
+          Snacks.toggle.profiler():map('<backspace>pp')
           -- Toggle the profiler highlights
-          Snacks.toggle.profiler_highlights():map('<leader>Ph')
+          Snacks.toggle.profiler_highlights():map('<backspace>ph')
         end,
       })
 

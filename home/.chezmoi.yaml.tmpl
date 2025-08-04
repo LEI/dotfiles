@@ -153,6 +153,9 @@ data:
     # user: {{ env "GITHUB_USERNAME" }}
   gitlab:
     email: {{ (bitwardenSecrets "1bb50920-4715-48a5-a0b0-b2d30180ece9" $accessToken).value }}
+  mail:
+    accounts:
+{{ (bitwardenSecrets "f8af12df-ee8e-4146-9272-b32f00a37b5e" $accessToken).value | fromYaml | toYaml | indent 6 }}
   meli:
     accounts:
 {{ (bitwardenSecrets "58d23cda-814b-4902-a7ec-b32e0050ec2b" $accessToken).value | fromJson | toYaml | indent 6 }}

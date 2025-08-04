@@ -1,24 +1,25 @@
-{{- range $name, $account := .meli.accounts }}
-{{- if eq (substr 0 3 $name) "out" -}}
+{{- range $account := .mail.accounts }}
+{{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-[{{ $name }}]
+[{{ $account.name }}]
 
 {{- if eq $account.format "imap" }}
-# source = imaps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:993
-{{- end }}
-
-check-mail-cmd = mbsync -c ~/.config/isync/mbsyncrc {{ $name }}
-# source = maildir://~/Mail/{{ $name }}
+source = imaps://{{ $account.address | urlquery }}@{{ $account.imap_hostname }}:{{ get $account "imap_port" | default 993 }}
+source-cred-cmd = bw get password {{ $account.address }}
+{{- else }}
+check-mail-cmd = mbsync -c ~/.config/isync/mbsyncrc {{ $account.name }}
+# source = maildir://~/Mail/{{ $account.name }}
 source = notmuch://~/Mail
 maildir-store = ~/Mail
-maildir-account-path = {{ $name }}
+maildir-account-path = {{ $account.name }}
 # query-map = ~/Mail/query-map.txt # inbox=tag:inbox and not tag:archived
+{{- end }}
 
-outgoing = smtps://{{ $account.server_username | urlquery }}:{{ $account.server_password }}@{{ $account.server_hostname }}:587
-# outgoing-cred-cmd = get password {{ $account.server_username }}
-# default = {{ get $account "root_mailbox" | default "INBOX" }}
-from = {{ $account.display_name }} <{{ get $account "identity" | default $account.server_username }}>
+outgoing = smtps://{{ $account.address | urlquery }}@{{ $account.smtp_hostname }}:{{ get $account "smtp_port" | default 587 }}
+outgoing-cred-cmd = bw get password {{ $account.address }}
+# default = {{ get $account "inbox" | default "INBOX" }}
+from = {{ get $account "from_name" | default .name }} <{{ get $account "from_address" | default $account.address }}>
 cache-headers = true
 copy-to = Sent
 # pgp-auto-sign = true

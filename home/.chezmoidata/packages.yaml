@@ -50,6 +50,7 @@ commonPackages:
   - { name: nushell, condition: ne .osIDLike "debian" }
   - name: nvtop
     condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
+  # - { name: pandoc, condition: .features.mail }
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - name: podman-tui
     condition: and .features.docker (not (eq .osIDLike "arch" "debian"))
@@ -66,7 +67,7 @@ commonPackages:
     condition: .features.vim
   - name: vlc
     condition: and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless)
-  - { name: w3m, condition: and .features.mail (not .headless) }
+  - { name: w3m, condition: .features.mail }
   - name: yq
     condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - name: zoxide
