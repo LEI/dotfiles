@@ -1,19 +1,34 @@
+{{- if lookPath "gh" -}}
 #!/bin/sh
 
 set -eu
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v gh >/dev/null; then
   exit
 fi
 
-extensions="
-dlvhdr/gh-dash
-github/gh-copilot
-meiji163/gh-notify
-"
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+# cmd gh auth status
+
+# cmd gh ssh-key list
+
+{{ if get . "github" -}}
+github_email="{{ .github.email }}"
+if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep "$github_email"; then
+  echo >&2 "No GPG key found for: $github_email"
+  # cmd gh gpg-key add "$key_file"
+fi
+{{- end }}
+
+extensions="{{ .ghExtensions | join " " }}"
 for name in $extensions; do
+  cmd="${name##*/}"
+  cmd="${cmd#gh-}"
+  if command -v gh "$cmd" >/dev/null; then
+    echo >&2 "Already installed: gh $cmd"
+    continue
+  fi
   cmd gh extension install "$name"
 done
+{{- end -}}

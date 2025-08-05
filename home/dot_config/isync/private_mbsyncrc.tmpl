@@ -2,7 +2,7 @@
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-{{- if eq $account.format "imap" -}}
+{{- if ne $account.format "notmuch" -}}
 {{-   continue -}}
 {{- end -}}
 {{- $inbox := get $account "inbox" | default "INBOX" -}}

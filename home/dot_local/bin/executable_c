@@ -7,7 +7,7 @@ if [ $# -eq 0 ]; then
 else
   # https://github.com/twpayne/chezmoi/issues/3626
   case "$1" in
-  a) shift && chezmoi apply "$@" ;;
+  a) shift && chezmoi apply --verbose "$@" ;;
   d) shift && chezmoi diff "$@" ;;
   e) shift && chezmoi execute-template "$@" ;;
   i) shift && chezmoi init "$@" ;;

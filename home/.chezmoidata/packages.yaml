@@ -14,15 +14,16 @@ commonPackages:
   #   condition: and .features.docker (ne .osID "alpine")
   - name: difftastic
     condition: and .features.git (not (eq .osIDLike "debian"))
-  # - dog, doggo, dstp
+  # - dog, doggo, dstp, mtr
   # - dua, dug
   # - duf, dysk
-  - name: dust # deletor, diskonaut, gdu, kondo
+  - name: dust # deletor, diskonaut, gdu, kondo, pdu
     condition: not (eq .osIDLike "debian")
   - name: eza # chaqchase/lla
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - { name: fd, condition: ne .osIDLike "debian" }
-  # - gdu
+  # - fzf
+  # - gdu, ncdu
   - name: gh
     condition: >
       and .features.git (not (or
@@ -43,7 +44,7 @@ commonPackages:
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       ))
   # - { name: glances, condition: not (eq .osIDLike "debian") }
-  - glow
+  - { name: glow, condition: not (eq .osIDLike "alpine" "debian") }
   # - gomi, gtrash
   - { name: gpg-tui, condition: not (eq .osIDLike "debian") }
   - name: helix
@@ -58,9 +59,11 @@ commonPackages:
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
   - { name: nushell, condition: ne .osIDLike "debian" }
-  - name: nvtop
+  - name: nvtop # nvitop
     condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
   # - { name: pandoc, condition: .features.mail }
+  - name: pastel
+    condition: not (eq .osIDLike "alpine" "debian")
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
   - name: podman-tui
     condition: and .features.docker (not (eq .osIDLike "arch" "debian"))
@@ -75,7 +78,7 @@ commonPackages:
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
     condition: .features.vim
-  - name: vlc
+  - name: vlc # mpv
     condition: and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless)
   - { name: w3m, condition: .features.mail }
   - name: yq
