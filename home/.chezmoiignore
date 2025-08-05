@@ -79,9 +79,9 @@
 
 {{- if not .features.helix }}
 .config/helix/
-{{- if ne .osID "manjaro" }}
-.config/helix/Makefile
 {{- end }}
+{{- if or (not .features.helix) (ne .osID "manjaro") }}
+.config/helix/Makefile
 {{- end }}
 
 {{- if not .features.kube }}
@@ -96,7 +96,7 @@
 .config/isync/
 .config/meli/
 .config/notmuch/
-.config/systemd/user/mbsync-run.*
+.config/systemd/ # user/mbsync-run.*
 .local/share/applications/aerc.*
 .local/share/applications/meli.*
 {{- end }}

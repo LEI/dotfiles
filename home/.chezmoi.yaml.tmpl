@@ -171,7 +171,11 @@ diff:
   # exclude:
   #   - externals
   #   - scripts
-  {{- if lookPath "delta" }}
+  {{- if lookPath "difft" }}
+  # https://github.com/twpayne/chezmoi/discussions/2097
+  command: difft
+  pager: cat
+  {{- else if lookPath "delta" }}
   pager: delta
   {{- else if $codespaces }}
   command: code

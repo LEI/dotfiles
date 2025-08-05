@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! command -v gh >/dev/null; then
+  exit
+fi
+
+extensions="
+dlvhdr/gh-dash
+github/gh-copilot
+meiji163/gh-notify
+"
+
+for name in $extensions; do
+  cmd gh extension install "$name"
+done

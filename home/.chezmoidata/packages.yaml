@@ -1,7 +1,7 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
-  - { name: atuin, condition: eq .osIDLike "arch" "darwin" }
+  - { name: atuin, condition: eq .osIDLike "arch" "darwin" } # ddworken/hishtory, dvorka/hstr
   - bat
   - { name: bandwhich, condition: not (eq .osIDLike "debian") }
   # - { name: below, condition: not (eq .osIDLike "arch" "debian") }
@@ -14,12 +14,15 @@ commonPackages:
   #   condition: and .features.docker (ne .osID "alpine")
   - name: difftastic
     condition: and .features.git (not (eq .osIDLike "debian"))
-  # - duf
-  - name: dust
+  # - dog, doggo, dstp
+  # - dua, dug
+  # - duf, dysk
+  - name: dust # deletor, diskonaut, gdu, kondo
     condition: not (eq .osIDLike "debian")
-  - name: eza
+  - name: eza # chaqchase/lla
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - { name: fd, condition: ne .osIDLike "debian" }
+  # - gdu
   - name: gh
     condition: >
       and .features.git (not (or
@@ -39,11 +42,16 @@ commonPackages:
         (and (eq .osID "debian") (le (int .osVersion) 12))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       ))
-  # - gdu
   # - { name: glances, condition: not (eq .osIDLike "debian") }
+  - glow
+  # - gomi, gtrash
   - { name: gpg-tui, condition: not (eq .osIDLike "debian") }
   - name: helix
     condition: and .features.helix (ne .osIDLike "debian")
+  # - hostctl
+  # - htop
+  # - httm
+  # - httpstat
   - jq
   - { name: k9s, condition: and .features.kube (ne .osIDLike "debian") }
   - lnav
@@ -111,8 +119,11 @@ packages:
     - less
     - { name: nodejs, condition: .features.node }
     - proot
+    - { name: python, condition: .features.python }
+    - { name: ruby, condition: .features.ruby }
     - skim
     - sudo
+    - { name: uv, condition: .features.python }
     - which
   arch: # Archlinux/Manjaro
     pacman:

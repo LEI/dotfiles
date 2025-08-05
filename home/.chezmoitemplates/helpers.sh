@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# https://github.com/zyedidia/eget
+# https://github.com/devmatteini/dra
+
 OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
 if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
   OSID=android
