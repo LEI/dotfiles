@@ -2,13 +2,13 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 if command -v goss >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v goss || echo goss" }}"
-  goss --version
+  cmd goss --version
   exit
 fi
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 echo >&2 "Installing goss"
 

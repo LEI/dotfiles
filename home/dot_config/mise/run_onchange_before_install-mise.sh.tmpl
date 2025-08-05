@@ -4,6 +4,8 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
 
@@ -27,7 +29,7 @@ fi
 # TODO: reuse in script/bootstrap
 if command -v mise >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v mise || echo mise" }}"
-  mise --version | head -n1
+  cmd mise --version | head -n1
   exit
 fi
 

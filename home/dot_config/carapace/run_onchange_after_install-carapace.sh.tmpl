@@ -6,13 +6,13 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 if command -v carapace >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v carapace || echo carapace" }}"
-  carapace --version
+  cmd carapace --version
   exit
 fi
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # {{- if ne .chezmoi.os "darwin" }}
 VERSION="$(get_release carapace-sh/carapace-bin)"

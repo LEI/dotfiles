@@ -23,12 +23,8 @@ fi
 
 extensions="{{ .ghExtensions | join " " }}"
 for name in $extensions; do
-  cmd="${name##*/}"
-  cmd="${cmd#gh-}"
-  if command -v gh "$cmd" >/dev/null; then
-    echo >&2 "Already installed: gh $cmd"
-    continue
-  fi
   cmd gh extension install "$name"
 done
+
+cmd gh alias set mine 's -E -u @me'
 {{- end -}}

@@ -2,13 +2,13 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 if command -v nu >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v nu || echo nu" }}"
-  nu --version
+  cmd nu --version
   exit
 fi
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # {{- if eq .osid "debian" }} Debian/Ubuntu
 echo >&2 "Installing nushell"

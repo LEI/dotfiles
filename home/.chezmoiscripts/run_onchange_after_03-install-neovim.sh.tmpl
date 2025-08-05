@@ -13,7 +13,7 @@ fi
 # TODO: replace with .chezmoiexternal
 if command -v nvim >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v nvim || echo nvim" }}"
-  nvim --version | head -n1
+  cmd nvim --version | head -n1
 else
   echo >&2 "Installing neovim"
   VERSION="$(get_release neovim/neovim)" # v0.11.2

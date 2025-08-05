@@ -4,14 +4,14 @@
 
 set -eu
 
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 if command -v ghostty >/dev/null; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v ghostty || echo ghostty" }}"
   # TODO: use bash with pipefail option
-  ghostty --version | head -n1
+  cmd ghostty --version | head -n1
   exit
 fi
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 echo >&2 "Installing ghostty"
 # {{- if eq .chezmoi.os "darwin" }}

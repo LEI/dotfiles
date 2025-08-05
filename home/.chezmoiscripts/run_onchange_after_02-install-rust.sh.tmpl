@@ -15,7 +15,7 @@ fi
 
 if command -v cargo >/dev/null; then
   echo >&2 'Already installed: {{ output .sh "-c" "command -v cargo || echo cargo" }}'
-  cargo --version
+  cmd cargo --version
 else
   echo >&2 "Installing cargo"
 

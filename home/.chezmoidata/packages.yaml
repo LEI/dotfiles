@@ -14,15 +14,15 @@ commonPackages:
   #   condition: and .features.docker (ne .osID "alpine")
   - name: difftastic
     condition: and .features.git (not (eq .osIDLike "debian"))
-  # - dog, doggo, dstp, mtr
+  # - dog, doggo, dstp, mtr, trippy
   # - dua, dug
   # - duf, dysk
-  - name: dust # deletor, diskonaut, gdu, kondo, pdu
+  - name: dust # deletor, diskonaut, gdu, kondo, pdu, wiper
     condition: not (eq .osIDLike "debian")
   - name: eza # chaqchase/lla
     condition: not (or (eq .osID "debian") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - { name: fd, condition: ne .osIDLike "debian" }
-  # - fzf
+  - fzf
   # - gdu, ncdu
   - name: gh
     condition: >
@@ -55,6 +55,7 @@ commonPackages:
   # - httpstat
   - jq
   - { name: k9s, condition: and .features.kube (ne .osIDLike "debian") }
+  - { name: kmon, condition: eq .chezmoi.os "linux" }
   - lnav
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
@@ -71,10 +72,13 @@ commonPackages:
   - { name: progress, condition: eq .chezmoi.os "linux" }
   - ripgrep
   # - { name: shellcheck, condition: .features.not neovim }
+  - sshs # sshclick, ssm, fast-ssh
   - name: starship
     condition: not (eq .osIDLike "alpine" "debian")
+  - { name: tmux, condition: .features.tmux }
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
+  - { name: tuptime, condition: ne .osIDLike "arch" }
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
     condition: .features.vim
@@ -131,14 +135,18 @@ packages:
   arch: # Archlinux/Manjaro
     pacman:
       - base-devel
+      - ddgr
       - { name: github-cli, condition: .features.git }
       - gnu-netcat
       - gnupg
       - { name: lazygit, condition: .features.git }
       - skim
+      - systemctl-tui
       - time # condition: command time
       - tokei
       - { name: topgrade, condition: eq .osID "manjaro" }
+      - wiki-tui # so
+      - wikiman arch-wiki-docs
       # - { name: yay, condition: eq .osID "manjaro" }
     aur:
       # - below
@@ -149,11 +157,13 @@ packages:
       - { name: lazydocker-bin, condition: .features.docker }
       - lazyjournal-bin
       - { name: lazysql-bin, condition: .features.sql }
-      - podman-tui-bin
       - { name: meli, condition: .features.mail }
       - { name: notmuch, condition: .features.mail }
       - { name: notmuch-vim, condition: .features.mail }
-      - { name: terraform-pug-bin, condition: .features.tofu }
+      - pacseek-bin
+      - podman-tui-bin
+      - tuptime
+      # - { name: terraform-pug-bin, condition: .features.tofu } # terraform-tui, tofuref
       - { name: topgrade-bin, condition: ne .osID "manjaro" }
       # - { name: yay, condition: ne .osID "manjaro" }
   darwin:
@@ -166,9 +176,10 @@ packages:
       - { name: lazysql, condition: .features.sql }
       - { name: nowplaying-cli, condition: .features.tmux }
       - { name: pipx, condition: .features.python }
-      - { name: leg100/tap/pug, condition: .features.tofu }
+      # - { name: leg100/tap/pug, condition: .features.tofu }
       - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
+      - taproom
       - tokei
     casks:
       - firefox

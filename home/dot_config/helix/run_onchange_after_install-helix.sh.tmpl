@@ -4,8 +4,6 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
-
 if command -v hx >/dev/null && hx --version; then
   echo >&2 "Already installed: {{ output .sh "-c" "command -v hx || echo hx" }}"
   cmd hx --version
@@ -37,6 +35,7 @@ if [ ! -d "$HOME/.config/helix/runtime" ]; then
   cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
 fi
 # {{- else if eq (get .chezmoi.osRelease "id") "ubuntu" }}
+# https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo -E apt-get install --quiet --yes software-properties-common >/dev/null
 cmd sudo -E add-apt-repository --yes ppa:maveonair/helix-editor
