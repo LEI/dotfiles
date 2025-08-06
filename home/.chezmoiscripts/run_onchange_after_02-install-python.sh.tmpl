@@ -3,6 +3,7 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
 {{ if eq .osIDLike "darwin" "debian" -}}
 # https://docs.astral.sh/uv/getting-started/installation/
 if ! command -v uv >/dev/null; then
@@ -10,11 +11,11 @@ if ! command -v uv >/dev/null; then
   {{- if ne (lookPath "pipx") "" }}
   cmd pipx install uv
   {{- else }}
-  cmd python -m pip install --user --quiet $packages
+  cmd python3 -m pip install --user --quiet uv
   {{- end }}
 fi
-{{- end }}
-{{ $packages := list -}}
+{{ end -}}
+{{- $packages := list }}
 {{- $pythonPackages := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
 {{- range $name := $pythonPackages -}}
 {{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
@@ -22,7 +23,8 @@ fi
 {{-     continue -}}
 {{-   end -}}
 {{-   $packages = append $packages $name -}}
-{{- end -}}
+{{- end }}
+
 packages="{{ $packages | join " " }}"
 
 if [ -n "$packages" ]; then

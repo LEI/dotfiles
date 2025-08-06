@@ -84,6 +84,12 @@ commonPackages:
   - { name: tmux, condition: .features.tmux }
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
+  - name: tre-command
+    condition: >
+      and (not (eq .osIDLike "alpine" "arch")) (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      ))
   - { name: tuptime, condition: not (eq .osIDLike "alpine" "arch") }
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
@@ -92,7 +98,11 @@ commonPackages:
     condition: and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless)
   - { name: w3m, condition: .features.mail }
   - name: yq
-    condition: not (or (and (eq .osID "debian") (le (int .osVersion) 11)) (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
+    condition: >
+      not (or
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      )
   - name: zoxide
     condition: not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
 packages:
@@ -170,6 +180,7 @@ packages:
       - pacseek-bin
       - podman-tui-bin
       - tuptime
+      - tre-command-bin
       # - { name: terraform-pug-bin, condition: .features.tofu } # terraform-tui, tofuref
       - { name: topgrade-bin, condition: ne .osID "manjaro" }
       # - { name: yay, condition: ne .osID "manjaro" }
