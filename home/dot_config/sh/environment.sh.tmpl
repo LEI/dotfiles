@@ -17,18 +17,19 @@ fi
 # export DOCKER_CONFIG=$XDG_CONFIG_HOME/docker
 {{- end }}
 
-export EDITOR="${EDITOR:-vi}"
+editor=editor
 if command -v hx >/dev/null; then
-  VISUAL=hx
+  editor=hx
 elif command -v nvim >/dev/null; then
-  VISUAL=nvim
+  editor=nvim
 elif command -v vim >/dev/null; then
-  VISUAL=vim
+  editor=vim
 elif command -v code >/dev/null; then
-  VISUAL=code
+  editor=code
 else
-  VISUAL="${VISUAL:-EDITOR}"
+  editor="${VISUAL:-${EDITOR:-vi}}"
 fi
+export EDITOR="${EDITOR:-$editor}"
 export VISUAL
 
 export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
