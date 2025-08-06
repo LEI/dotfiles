@@ -55,7 +55,12 @@ commonPackages:
   # - httpstat
   - jq
   - { name: k9s, condition: and .features.kube (ne .osIDLike "debian") }
-  - { name: kmon, condition: eq .chezmoi.os "linux" }
+  - name: kmon
+    condition: >
+      and (eq .chezmoi.os "linux") (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      ))
   - lnav
   - name: neovim
     condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
@@ -72,13 +77,14 @@ commonPackages:
   - { name: progress, condition: eq .chezmoi.os "linux" }
   - ripgrep
   # - { name: shellcheck, condition: .features.not neovim }
-  - sshs # sshclick, ssm, fast-ssh
+  - name: sshs # sshclick, ssm, fast-ssh
+    condition: not (eq .osIDLike "alpine" "debian")
   - name: starship
     condition: not (eq .osIDLike "alpine" "debian")
   - { name: tmux, condition: .features.tmux }
   - name: topgrade
     condition: not (eq .osIDLike "arch" "debian")
-  - { name: tuptime, condition: ne .osIDLike "arch" }
+  - { name: tuptime, condition: not (eq .osIDLike "alpine" "arch") }
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
   - name: vim
     condition: .features.vim
@@ -140,6 +146,7 @@ packages:
       - gnu-netcat
       - gnupg
       - { name: lazygit, condition: .features.git }
+      - { name: rubygems, condition: .features.ruby }
       - skim
       - systemctl-tui
       - time # condition: command time
@@ -201,7 +208,8 @@ packages:
     - { name: python3, condition: .features.python }
     # - { name: python3-venv, condition: .features.python }
     - { name: ruby-dev, condition: .features.ruby }
-    - { name: ruby-rubygems, condition: .features.ruby }
+    - name: ruby-rubygems
+      condition: and .features.ruby (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
   # fedora:
   #   - openssl-devel
   windows:

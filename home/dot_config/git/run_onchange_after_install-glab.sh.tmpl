@@ -13,10 +13,10 @@ fi
 
 # cmd glab auth status
 
-hostname="$(hostname)"
-if ! cmd glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep "$hostname"; then
-  echo >&2 "No SSH key found for: $hostname"
-fi
+# hostname="$(hostname)"
+# if ! cmd glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep "$hostname"; then
+#   echo >&2 "No SSH key found for: $hostname"
+# fi
 
 {{ if get . "gitlab" -}}
 gitlab_email="{{ .gitlab.email }}"

@@ -1,7 +1,7 @@
 ---
 ghExtensions:
   - dlvhdr/gh-dash
-  - github/gh-copilot
+  - { name: github/gh-copilot, condition: .features.ai }
   - meiji163/gh-notify
   - gennaro-tedesco/gh-f
   - gennaro-tedesco/gh-s

@@ -21,10 +21,31 @@ if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep "$github_email"; t
 fi
 {{- end }}
 
-extensions="{{ .ghExtensions | join " " }}"
+{{- $extensions := list }}
+{{- $installed := output .sh "-c" "gh extension list | tr '\t' ' ' | cut -d' ' -f3" | trim | splitList "\n" }}
+{{- range $index, $pkg := .ghExtensions }}
+{{-   $extensionName := "" }}
+{{-   if kindIs "map" $pkg }}
+{{-     $extensionName = get $pkg "name" }}
+{{-   else if kindIs "string" $pkg }}
+{{-     $extensionName = $pkg }}
+{{-     $pkg = dict "name" $extensionName }}
+{{-   end }}
+{{-   if has $extensionName $installed }}
+{{-     continue }}
+{{-   end }}
+{{-   $condition := get $pkg "condition" | default nil }}
+{{-   if and $condition (eq (output "chezmoi" "execute-template" "--refresh-externals=never" (printf "{{ ne (%s) true }}" $condition) | trim) "true") }}
+{{-     continue }}
+{{-   end }}
+{{-   $extensions = append $extensions $extensionName }}
+{{- end }}
+extensions="{{ $extensions | join " " }}"
 for name in $extensions; do
   cmd gh extension install "$name"
 done
 
-cmd gh alias set mine 's -E -u @me'
+if ! gh alias list | cut -d: -f1 | grep '^mine$'; then
+  cmd gh alias set mine 's -E -u @me'
+fi
 {{- end -}}
