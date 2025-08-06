@@ -9,6 +9,7 @@ require('config.init')
 require('config.options')
 require('config.autocmds')
 require('config.lazy')
+require('config.commands')
 require('config.keymaps')
 
 vim.cmd('colorscheme ' .. vim.g.config.theme.colorscheme)

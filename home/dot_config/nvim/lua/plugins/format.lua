@@ -163,23 +163,32 @@ return {
         require('conform').format(options)
       end, { bang = true, range = true })
 
-      vim.api.nvim_create_user_command('FormatDisable', function(args)
+      -- FormatDisable! will disable formatting just for this buffer
+      local prefix = 'Format'
+      local toggle_option = 'disable_autoformat'
+      local desc = 'autoformat on save'
+      vim.api.nvim_create_user_command(prefix .. 'Disable', function(args)
         if args.bang then
-          -- FormatDisable! will disable formatting just for this buffer
-          vim.b.disable_autoformat = true
+          vim.b[toggle_option] = true
         else
-          vim.g.disable_autoformat = true
+          vim.g[toggle_option] = true
         end
-      end, {
-        desc = 'Disable autoformat-on-save',
-        bang = true,
-      })
-      vim.api.nvim_create_user_command('FormatEnable', function()
-        vim.b.disable_autoformat = false
-        vim.g.disable_autoformat = false
-      end, {
-        desc = 'Re-enable autoformat-on-save',
-      })
+      end, { desc = 'Disable ' .. desc, bang = true })
+      vim.api.nvim_create_user_command(prefix .. 'Enable', function(args)
+        if args.bang then
+          vim.b[toggle_option] = false
+        else
+          vim.g[toggle_option] = false
+        end
+      end, { desc = 'Enable ' .. desc, bang = true })
+      vim.api.nvim_create_user_command(prefix .. 'Toggle', function(args)
+        if args.bang then
+          vim.b[toggle_option] = not vim.b[toggle_option]
+        else
+          vim.g[toggle_option] = not vim.g[toggle_option]
+        end
+      end, { desc = 'Toggle ' .. desc, bang = true })
+
       -- local conform = require('conform')
       vim.api.nvim_create_user_command('FormatInfo', function()
         vim.cmd('ConformInfo')

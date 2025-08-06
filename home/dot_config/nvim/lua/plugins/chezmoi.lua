@@ -67,6 +67,31 @@ return {
       },
     },
     init = function()
+      -- local prefix = 'Chezmoi'
+      -- local toggle_option = 'disable_chezmoi_watch'
+      -- local desc = 'chezmoi watch'
+      -- vim.api.nvim_create_user_command(prefix .. 'Disable', function(args)
+      --   if args.bang then
+      --     vim.b[toggle_option] = true
+      --   else
+      --     vim.g[toggle_option] = true
+      --   end
+      -- end, { desc = 'Disable ' .. desc, bang = true })
+      -- vim.api.nvim_create_user_command(prefix .. 'Enable', function(args)
+      --   if args.bang then
+      --     vim.b[toggle_option] = false
+      --   else
+      --     vim.g[toggle_option] = false
+      --   end
+      -- end, { desc = 'Enable ' .. desc, bang = true })
+      -- vim.api.nvim_create_user_command(prefix .. 'Toggle', function(args)
+      --   if args.bang then
+      --     vim.b[toggle_option] = not vim.b[toggle_option]
+      --   else
+      --     vim.g[toggle_option] = not vim.g[toggle_option]
+      --   end
+      -- end, { desc = 'Toggle ' .. desc, bang = true })
+
       vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
         pattern = { vim.g.home .. '/.local/share/chezmoi/*' },
         callback = function(ev)
@@ -79,6 +104,9 @@ return {
           then
             return
           end
+          -- if vim.g.disable_chezmoi_watch or vim.b[bufnr].disable_chezmoi_watch then
+          --   return
+          -- end
           local cwd = vim.fn.getcwd()
           local file = vim.api.nvim_buf_get_name(bufnr)
           local ignore_prefix = '^%.'
