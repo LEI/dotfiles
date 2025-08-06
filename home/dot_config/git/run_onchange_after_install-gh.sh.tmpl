@@ -9,7 +9,9 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# cmd gh auth status
+if ! cmd gh auth status; then
+  exit
+fi
 
 # cmd gh ssh-key list
 
