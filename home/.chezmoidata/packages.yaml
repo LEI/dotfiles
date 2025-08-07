@@ -68,6 +68,8 @@ commonPackages:
   - name: nvtop # nvitop
     condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
   # - { name: pandoc, condition: .features.mail }
+  # - name: pass # gopass
+  #   condition: ne .accessToken ""
   - name: pastel
     condition: not (eq .osIDLike "alpine" "debian")
   - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }

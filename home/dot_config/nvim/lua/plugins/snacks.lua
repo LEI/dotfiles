@@ -96,28 +96,28 @@ local dashboard_sections = {
   -- { pane = 2, title = ' ', padding = 1 },
 
   --[[
-    function()
-      local in_git = Snacks.git.get_root() ~= nil
-      -- stylua: ignore
-      local cmds = {
-        -- { cmd = 'git --no-pager diff --stat -B -M -C', height = 1 },
-        { icon = ' ', title = 'Git diff', cmd = 'git --no-pager diff --stat -B -M -C', height = 10 },
-        -- gh ext install meiji163/gh-notify
-        { title = 'Notifications', cmd = 'gh notify -s -a -n1', action = function() vim.ui.open('https://github.com/notifications') end, key = 'n', icon = ' ', height = 3, enabled = true },
-        { title = 'Open issues', cmd = 'gh issue list -L 3', key = 'i', action = function() vim.fn.jobstart('gh issue list --web', { detach = true }) end, icon = ' ', height = 3 },
-        { icon = ' ', title = 'Open PRs', cmd = 'gh pr list -L 3', key = 'P', action = function() vim.fn.jobstart('gh pr list --web', { detach = true }) end, height = 3 },
-      }
-      return vim.tbl_map(function(cmd)
-        return vim.tbl_extend('force', {
-          pane = 2,
-          section = 'terminal',
-          enabled = in_git,
-          padding = 1,
-          ttl = 5 * 60,
-          indent = 3,
-        }, cmd)
-      end, cmds)
-    end,
+  function()
+    local in_git = Snacks.git.get_root() ~= nil
+    -- stylua: ignore
+    local cmds = {
+      -- { cmd = 'git --no-pager diff --stat -B -M -C', height = 1 },
+      { icon = ' ', title = 'Git diff', cmd = 'git --no-pager diff --stat -B -M -C', height = 10 },
+      -- gh ext install meiji163/gh-notify
+      { title = 'Notifications', cmd = 'gh notify -s -a -n1', action = function() vim.ui.open('https://github.com/notifications') end, key = 'n', icon = ' ', height = 3, enabled = true },
+      { title = 'Open issues', cmd = 'gh issue list -L 3', key = 'i', action = function() vim.fn.jobstart('gh issue list --web', { detach = true }) end, icon = ' ', height = 3 },
+      { icon = ' ', title = 'Open PRs', cmd = 'gh pr list -L 3', key = 'P', action = function() vim.fn.jobstart('gh pr list --web', { detach = true }) end, height = 3 },
+    }
+    return vim.tbl_map(function(cmd)
+      return vim.tbl_extend('force', {
+        pane = 2,
+        section = 'terminal',
+        enabled = in_git,
+        padding = 1,
+        ttl = 5 * 60,
+        indent = 3,
+      }, cmd)
+    end, cmds)
+  end,
     --]]
   -- { pane = 2, section = 'terminal', cmd = 'curl -s https://wttr.in/?0A' },
 }
