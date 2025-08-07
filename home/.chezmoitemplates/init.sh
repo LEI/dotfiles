@@ -1,4 +1,8 @@
-# [[ $- == *i* ]] || return
+case $- in
+*i*) ;;
+*) return ;;
+esac
+[ -z "$PS1" ] && return
 
 shell="{{ .shell }}" # ${SHELL##*/}
 
