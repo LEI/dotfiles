@@ -168,27 +168,21 @@ test_debian() {
 # https://github.com/sickcodes/Docker-OSX/issues/492
 test_macos() {
   local name="${1:-"test-macos"}"
-  local image="${2:-"docker.io/sickcodes/docker-osx:latest"}"
-  echo name: $name
-  echo image: $image
-  # NOTE: override all args
+  local image="${2:-"docker.io/sickcodes/docker-osx:auto"}"
   ARGS=(
     "--device=/dev/kvm"
-    "--env=NONINTERACTIVE=1"
-    "--env=OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber'"
-    "--name=$name"
-    "--publish=50922:10022"
-
-    # "--env=DISPLAY=${DISPLAY:-:0.0}"
+    "--env=DISPLAY=${DISPLAY:-:0.0}"
     # "--env=GENERATE_UNIQUE=true"
     # "--env=MASTER_PLIST_URL="
-    # "--volumes=/tmp/.X11-unix:/tmp/.X11-unix"
+    "--env=NONINTERACTIVE=1"
+    "--env=OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
+    "--name=$name"
+    "--publish=50922:10022"
+    "--volume=/tmp/.X11-unix:/tmp/.X11-unix"
   )
   # Arch: sudo pacman -S xorg-xhost && xhost +
   # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
-  # -v /tmp/.X11-unix:/tmp/.X11-unix \
-  # -e "DISPLAY=${DISPLAY:-:0.0}" \
-  $PROVIDER run -it "${ARGS[@]}" "$image"
+  container_test "$name" "$image"
 }
 
 test_clone() {
