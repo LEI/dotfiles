@@ -1,13 +1,15 @@
-{{ if (get . "github") -}}
+{{- if (get . "github") }}
+{{- $signingKey := includeTemplate "gpg-signing-key.tmpl" (dict "email" .github.email "sh" .sh) -}}
 [user]
 	name = {{ get .github "name" | default .name | quote }}
 	email = {{ .github.email | quote }}
-	signingkey = {{ includeTemplate "gpg-signing-key.tmpl" (dict "email" .github.email "sh" .sh) | quote }}
+	signingkey = {{ $signingKey | quote }}
 
 [commit]
-	gpgsign = true
+	gpgsign = {{ $signingKey | not | not }}
 
-{{ if (get .github "user") -}}
+{{- if (get .github "user") }}
+
 [github]
 	user = {{ .github.user | quote }}
 	token = {{ keyring "github" .github.user | quote }}

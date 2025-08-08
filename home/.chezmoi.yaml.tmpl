@@ -162,6 +162,14 @@ data:
   notmuch:
     queries:
 {{ (bitwardenSecrets "76589c60-aae2-4c2f-b500-b32f00750c0a" $accessToken).value | fromYaml | toYaml | indent 6 }}
+  {{- if eq .profile "personal" }}
+  personal:
+{{ (bitwardenSecrets "0ecca3dd-3404-47d5-8a14-b333014a23ca" $accessToken).value | fromYaml | toYaml | indent 6 }}
+  {{- end }}
+  {{- if eq .profile "work" }}
+  work:
+{{ (bitwardenSecrets "4966b346-1294-46ca-bb80-b33301498a1b" $accessToken).value | fromYaml | toYaml | indent 6 }}
+  {{- end }}
   {{- end }}
 
   # Upgrade system packages

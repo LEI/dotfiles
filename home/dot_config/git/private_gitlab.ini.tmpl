@@ -1,9 +1,10 @@
-{{ if (get . "gitlab") -}}
+{{- if (get . "gitlab") }}
+{{- $signingKey := includeTemplate "gpg-signing-key.tmpl" (dict "email" .gitlab.email "sh" .sh) -}}
 [user]
 	name = {{ get .gitlab "name" | default .name | quote }}
 	email = {{ .gitlab.email | quote }}
-	signingkey = {{ includeTemplate "gpg-signing-key.tmpl" (dict "email" .gitlab.email "sh" .sh) | quote }}
+	signingkey = {{ $signingKey | quote }}
 
 [commit]
-	gpgsign = true
+	gpgsign = {{ $signingKey | not | not }}
 {{- end }}

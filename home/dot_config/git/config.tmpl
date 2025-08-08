@@ -39,8 +39,30 @@
 
 [includeIf "gitdir:~/src/gitlab.com/"]
 	path = gitlab.ini
-[includeIf "hasconfig:remote.*.url:git@gitlab.com*/**"]
+[includeIf "hasconfig:remote.*.url:git@gitlab.com:*/**"]
 	path = gitlab.ini
+[includeIf "hasconfig:remote.*.url:https://gitlab.com/*/**"]
+	path = gitlab.ini
+
+{{- if (get . "personal") }}
+
+[includeIf "gitdir:~/src/{{ .personal.git_host }}/"]
+	path = personal.ini
+[includeIf "hasconfig:remote.*.url:git@{{ .personal.git_host }}:*/**"]
+	path = personal.ini
+[includeIf "hasconfig:remote.*.url:https://{{ .personal.git_host }}/*/**"]
+	path = personal.ini
+{{- end }}
+
+{{- if (get . "work") }}
+
+[includeIf "gitdir:~/src/{{ .work.git_host }}/"]
+	path = work.ini
+[includeIf "hasconfig:remote.*.url:git@{{ .work.git_host }}:*/**"]
+	path = work.ini
+[includeIf "hasconfig:remote.*.url:https://{{ .work.git_host }}/*/**"]
+	path = work.ini
+{{- end }}
 
 [ghq]
 	root = ~/src
