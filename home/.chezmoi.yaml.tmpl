@@ -165,6 +165,9 @@ data:
     queries:
 {{ (bitwardenSecrets "76589c60-aae2-4c2f-b500-b32f00750c0a" $accessToken).value | fromYaml | toYaml | indent 6 }}
 
+{{- else }}
+  git: {}
+  mail: {}
 {{- end }}
 
   # Upgrade system packages

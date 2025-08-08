@@ -7,12 +7,20 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- $packages := list -}}
-{{- if ne .osIDLike "arch" -}}
-{{-   $packages = includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $key := "" -}}
+{{- if eq .osIDLike "alpine" -}}
+{{-   $key = "apk" -}}
+{{- else if eq .osIDLike "android" -}}
+{{-   $key = "termux" -}}
+{{- else if eq .osIDLike "arch" -}}
+{{-   $key = "pacman" -}}
+{{- else if eq .osIDLike "debian" -}}
+{{-   $key = "apt" -}}
+{{- else if eq .osIDLike "fedora" -}}
+{{-   $key = "dnf" -}}
 {{- else -}}
-{{-   $packages = includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "pacman") .) | fromJson -}}
 {{- end -}}
+{{- $packages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" $key) .) | fromJson -}}
 
 {{- if .features.python }}
 {{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | splitList "\n" -}}
@@ -23,7 +31,7 @@ set -eu
 {{-     $prefix := "python" -}}
 {{-     if eq $.osID "alpine" -}}
 {{-       $prefix = "py3" -}}
-{{-     else if eq $.osIDLike "debian" -}}
+{{-     else if eq $.osIDLike "debian" "fedora" -}}
 {{-       $prefix = "python3" -}}
 {{-     end -}}
 {{-     $packages = append $packages (printf "%s-%s" $prefix $name) -}}
@@ -80,7 +88,11 @@ cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
 # shellcheck disable=SC2086
 cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
 {{- else if eq .osid "fedora" }}
-# TODO: packages="$packages gpg"
+cmd dnf update --assumeyes --quiet
+{{- if .upgrade }}
+cmd dnf upgrade --assumeyes --quiet
+{{- end }}
+cmd dnf install --assumeyes --quiet $packages
 {{- else if eq .osid "android" }}
 # TODO: termux-setup-package-manager, termux-setup-storage
 # TERM=xterm temux-change-repo # apt edit-sources
@@ -93,6 +105,9 @@ cmd pkg upgrade --quiet --yes
 {{- end }}
 # shellcheck disable=SC2086
 cmd apt-get install --quiet --yes $packages >/dev/null
+{{- else }}
+echo >&2 "Unknown package manager"
+exit 1
 {{- end }}
 
 {{- if and .codespaces (eq .osid "debian") }}

@@ -7,7 +7,7 @@ pynvim
 {{- if not (eq .osIDLike "darwin" "debian") }}
 uv
 {{- end }}
-{{- if eq .osIDLike "alpine" "arch" }}
+{{- if eq .osIDLike "alpine" "arch" "fedora" }}
 virtualenv
 {{- else }}
 venv

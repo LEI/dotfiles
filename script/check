@@ -58,12 +58,19 @@ check_version() {
   if command -v ble >/dev/null; then
     cmd ble --version
   fi
-  cmd btm --version
+
+  if command -v btm >/dev/null; then
+    cmd btm --version
+  fi
   # cmd bws --version
   cmd carapace --version
 
   cmd direnv export bash # "${SHELL##*/}"
-  cmd eza --version | head -n2 | tail -n1
+
+  if command -v eza >/dev/null; then
+    cmd eza --version | head -n2 | tail -n1
+  fi
+
   cmd fd --version
   # cmd ghostty --version | head -n1
   if has_feature helix "$features"; then

@@ -67,6 +67,7 @@ main() {
   alpine) test_alpine "$@" ;;
   archlinux) test_archlinux "$@" ;;
   debian | ubuntu) test_debian "$@" ;;
+  fedora) test_fedora "$@" ;;
   macos) test_macos "$@" ;;
   termux) test_clone "$@" ;;
   *) echo >&2 "Unknown image: $image" ;;
@@ -155,6 +156,20 @@ test_debian() {
     "--env=DEBIAN_FRONTEND=noninteractive"
     "--env=LANG=C"
     "--env=USER=root"
+    "--name=$name"
+    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+    "--workdir=/root/.local/share/chezmoi"
+  )
+  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+  container_test "$name" "$image"
+}
+
+test_fedora() {
+  local name="${1:-"test-fedora"}"
+  local image="${2:-"fedora:latest"}"
+  local packages="which unzip"
+  local prepare="dnf update --assumeyes --quiet && dnf install --assumeyes --quiet $packages"
+  ARGS+=(
     "--name=$name"
     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
     "--workdir=/root/.local/share/chezmoi"
