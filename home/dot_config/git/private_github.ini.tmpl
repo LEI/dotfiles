@@ -1,33 +1,3 @@
-{{- if (get . "github") }}
-{{- $signingKey := includeTemplate "gpg-signing-key.tmpl" (dict "email" .github.email "sh" .sh) -}}
-[user]
-	name = {{ get .github "name" | default .name | quote }}
-	email = {{ .github.email | quote }}
-	signingkey = {{ $signingKey | quote }}
-
-[commit]
-	gpgsign = {{ $signingKey | not | not }}
-
-{{- if (get .github "user") }}
-
-[github]
-	user = {{ .github.user | quote }}
-	token = {{ keyring "github" .github.user | quote }}
+{{- if get .git "github" }}
+{{- includeTemplate "git-config.tmpl" (mergeOverwrite .git.github (dict "name" .name "sh" .sh)) -}}
 {{- end }}
-{{- end }}
-
-# [url "git@github.com:"]
-# 	insteadOf = "gh:"
-# 	pushInsteadOf = "github:"
-# 	pushInsteadOf = "git://github.com/"
-
-# [url "git://github.com/"]
-# 	insteadOf = "github:"
-
-# [url "git@gist.github.com:"]
-# 	insteadOf = "gst:"
-# 	pushInsteadOf = "gist:"
-# 	pushInsteadOf = "git://gist.github.com/"
-
-# [url "git://gist.github.com/"]
-# 	insteadOf = "gist:"

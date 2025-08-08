@@ -30,39 +30,38 @@
 	path = delta.ini
 {{- end }}
 
-[includeIf "gitdir:~/src/github.com/"]
-	path = github.ini
-[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
-	path = github.ini
-[includeIf "hasconfig:remote.*.url:https://github.com/*/**"]
-	path = github.ini
+# [url "git@github.com:"]
+# 	insteadOf = "gh:"
+# 	pushInsteadOf = "github:"
+# 	pushInsteadOf = "git://github.com/"
 
-[includeIf "gitdir:~/src/gitlab.com/"]
-	path = gitlab.ini
-[includeIf "hasconfig:remote.*.url:git@gitlab.com:*/**"]
-	path = gitlab.ini
-[includeIf "hasconfig:remote.*.url:https://gitlab.com/*/**"]
-	path = gitlab.ini
+# [url "git://github.com/"]
+# 	insteadOf = "github:"
 
-{{- if (get . "personal") }}
+# [url "git@gist.github.com:"]
+# 	insteadOf = "gst:"
+# 	pushInsteadOf = "gist:"
+# 	pushInsteadOf = "git://gist.github.com/"
 
-[includeIf "gitdir:~/src/{{ .personal.git_host }}/"]
-	path = personal.ini
-[includeIf "hasconfig:remote.*.url:git@{{ .personal.git_host }}:*/**"]
-	path = personal.ini
-[includeIf "hasconfig:remote.*.url:https://{{ .personal.git_host }}/*/**"]
-	path = personal.ini
-{{- end }}
+# [url "git://gist.github.com/"]
+# 	insteadOf = "gist:"
 
-{{- if (get . "work") }}
+{{- range $name, $account := .git }}
 
-[includeIf "gitdir:~/src/{{ .work.git_host }}/"]
-	path = work.ini
-[includeIf "hasconfig:remote.*.url:git@{{ .work.git_host }}:*/**"]
-	path = work.ini
-[includeIf "hasconfig:remote.*.url:https://{{ .work.git_host }}/*/**"]
-	path = work.ini
+[includeIf "gitdir:~/src/{{ $account.host }}/"]
+	path = {{ $name }}.ini
+[includeIf "hasconfig:remote.*.url:git@{{ $account.host }}:*/**"]
+	path = {{ $name }}.ini
+[includeIf "hasconfig:remote.*.url:https://{{ $account.host }}/*/**"]
+	path = {{ $name }}.ini
 {{- end }}
 
 [ghq]
 	root = ~/src
+
+{{- if and (get .git "github") (get .git.github "user") }}
+
+[github]
+	user = {{ .git.github.user | quote }}
+	token = {{ keyring "github" .git.github.user | quote }}
+{{- end }}

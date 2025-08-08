@@ -18,7 +18,7 @@ fi
 #   echo >&2 "No SSH key found for: $hostname"
 # fi
 
-{{ if get . "gitlab" -}}
-gitlab_email="{{ .gitlab.email }}"
+{{ if get .git "gitlab" -}}
+gitlab_email="{{ .git.gitlab.email }}"
 {{- end }}
 {{- end -}}

@@ -15,8 +15,8 @@ fi
 
 # cmd gh ssh-key list
 
-{{ if get . "github" -}}
-github_email="{{ .github.email }}"
+{{ if get .git "github" -}}
+github_email="{{ .git.github.email }}"
 if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then
   echo >&2 "No GPG key found for: $github_email"
   # cmd gh gpg-key add "$key_file"

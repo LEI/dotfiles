@@ -1,0 +1,9 @@
+{{- $signingKey := includeTemplate "gpg-signing-key.tmpl" (dict "email" .email "sh" .sh) -}}
+
+[user]
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
+	signingkey = {{ $signingKey | quote }}
+
+[commit]
+	gpgsign = {{ $signingKey | not | not }}
