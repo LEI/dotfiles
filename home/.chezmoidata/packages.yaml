@@ -8,7 +8,7 @@ commonPackages:
   - { name: bottom, condition: not (eq .osIDLike "debian" "fedora") }
   - curl
   - name: cargo-binstall
-    condition: and .features.rust (not (eq .osIDLike "alpine" "debian"))
+    condition: and .features.rust (not (eq .osIDLike "alpine" "debian" "fedora"))
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
   # - name: dive
   #   condition: and .features.docker (ne .osID "alpine")
@@ -230,6 +230,7 @@ packages:
     dnf:
       - openssl-devel
       - procps
+      - { name: ruby-devel, condition: .features.ruby }
       - { name: rubygems, condition: .features.ruby }
       # - unzip
       # - which

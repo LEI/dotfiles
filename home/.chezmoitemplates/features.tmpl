@@ -131,6 +131,22 @@
   "zellij" true
   "zsh" false
 ) -}}
+{{- else if eq .osIDLike "fedora" }}
+{{- $features = mergeOverwrite $features (dict
+  "docker" true
+  "ghostty" true
+  "go" true
+  "goss" true
+  "kube" true
+  "neovim" true
+  "node" true
+  "rust" true
+  "sql" true
+  "tmux" true
+  "vim" true
+  "zellij" true
+  "zsh" true
+) -}}
 {{- else if eq .chezmoi.os "windows" }}
 {{- $features = mergeOverwrite $features (dict
   "docker" false

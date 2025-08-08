@@ -2,7 +2,11 @@ pip
 # pipenv
 # pipx
 {{- if .features.neovim }}
+{{ if eq .osIDLike "fedora" }}
+neovim
+{{- else }}
 pynvim
+{{- end }}
 {{- end }}
 {{- if not (eq .osIDLike "darwin" "debian") }}
 uv
