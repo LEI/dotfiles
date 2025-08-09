@@ -193,7 +193,7 @@
 .install-password-manager.sh
 {{ end -}}
 
-{{- if ne .osid "darwin" }}
+{{- if ne .osID "darwin" }}
 .chezmoiscripts/darwin/**
 .config/hammerspoon/
 .config/homebrew/
@@ -206,7 +206,7 @@
 .hushlogin
 {{- end }}
 
-{{- if ne .osid "windows" }}
+{{- if ne .osID "windows" }}
 *.ps1
 .chezmoiscripts/windows/**
 {{- else }}

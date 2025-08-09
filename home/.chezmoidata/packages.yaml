@@ -31,6 +31,8 @@ commonPackages:
         (and (eq .osID "debian") (le (int .osVersion) 11))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
       ))
+  - name: ghostty
+    condition: and .features.ghostty (not (eq .osIDLike "debian"))
   - name: ghq
     condition: and .features.git (not (eq .osIDLike "alpine" "debian" "fedora"))
   - { name: git, condition: .features.git }

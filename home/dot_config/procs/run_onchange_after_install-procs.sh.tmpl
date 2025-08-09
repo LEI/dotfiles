@@ -10,7 +10,7 @@ if command -v procs >/dev/null; then
   exit
 fi
 
-# {{- if eq .osid "debian" }} Debian/Ubuntu
+# {{- if eq .osID "debian" }} Debian/Ubuntu
 echo >&2 "Installing procs"
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release dalance/procs)"

@@ -10,9 +10,9 @@ if command -v hx >/dev/null && hx --version; then
   exit
 fi
 
-# {{- if eq .osid "alpine" }}
+# {{- if eq .osID "alpine" }}
 cmd sudo apk add --quiet helix tree-sitter-grammars
-# {{- else if eq .osid "android" }}
+# {{- else if eq .osID "android" }}
 cmd apt-get install --quiet --yes helix-grammars >/dev/null
 # {{- else if eq (get .chezmoi.osRelease "id") "debian" }}
 echo >&2 "Installing helix"

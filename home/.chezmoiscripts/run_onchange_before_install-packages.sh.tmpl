@@ -46,14 +46,14 @@ echo >&2 "OS ID like: {{ .osIDLike }}"
 echo >&2 "OS version: {{ .osVersion }}"
 echo >&2 "Installing packages: $packages"
 
-{{- if eq .osid "alpine" }}
+{{- if eq .osID "alpine" }}
 cmd sudo apk update --quiet
 {{- if .upgrade }}
 cmd sudo apk upgrade --quiet
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo apk add --quiet $packages
-{{- else if eq .osid "arch" }}
+{{- else if eq .osIDLike "arch" }}
 {{- if .upgrade }}
 cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
@@ -78,7 +78,7 @@ else
   echo >&2 "AUR package manager not found"
   exit 1
 fi
-{{- else if eq .osid "debian" }}
+{{- else if eq .osID "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo apt-get update --quiet >/dev/null
@@ -87,13 +87,13 @@ cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
-{{- else if eq .osid "fedora" }}
-cmd dnf update --assumeyes --quiet
+{{- else if eq .osID "fedora" }}
+cmd sudo dnf update --assumeyes --quiet
 {{- if .upgrade }}
-cmd dnf upgrade --assumeyes --quiet
+cmd sudo dnf upgrade --assumeyes --quiet
 {{- end }}
-cmd dnf install --assumeyes --quiet $packages
-{{- else if eq .osid "android" }}
+cmd sudo dnf install --assumeyes --quiet $packages
+{{- else if eq .osID "android" }}
 # TODO: termux-setup-package-manager, termux-setup-storage
 # TERM=xterm temux-change-repo # apt edit-sources
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
@@ -110,7 +110,7 @@ echo >&2 "Unknown package manager"
 exit 1
 {{- end }}
 
-{{- if and .codespaces (eq .osid "debian") }}
+{{- if and .codespaces (eq .osID "debian") }}
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
 if [ "${selected_editor##*/}" = nano ]; then
   if [ -x /usr/bin/vim.basic ]; then
