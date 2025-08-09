@@ -1,6 +1,6 @@
 {{- $config := includeTemplate "dot_config/.starship.yaml" . | fromYaml -}}
 {{- if lookPath "starship" -}}
-{{- $preset := "no-nerd-font" -}}
+{{- $preset := .symbols | ternary "no-nerd-font" "plain-text-symbols" -}}
 {{ output .sh "-c" (printf "starship preset %s 2>/dev/null || true" $preset) | trim | fromToml | merge $config | toToml }}
 {{- else -}}
 {{ $config | toToml }}

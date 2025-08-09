@@ -285,7 +285,7 @@ return {
         'mason',
         'nvim-dap-ui',
         oil_extension, -- 'oil',
-        'overseer',
+        -- 'overseer',
         'quickfix',
         'trouble',
       },

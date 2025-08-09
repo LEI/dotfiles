@@ -35,12 +35,14 @@ return {
         'buffers',
         'curdir',
         'folds',
-        'tabpages',
-        'winsize',
-        'help',
         'globals',
+        'help',
+        -- 'localoptions',
+        -- 'options',
         'skiprtp',
+        'tabpages',
         'terminal',
+        'winsize',
       }
       vim.api.nvim_create_user_command('Restore', function()
         require('persistence').load()
