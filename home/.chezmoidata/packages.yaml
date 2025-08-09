@@ -193,6 +193,7 @@ packages:
   darwin:
     brews:
       - carapace
+      # - { name: git-cc, condition: .features.git }
       - gpg
       - { name: lazydocker, condition: .features.docker }
       - { name: lazygit, condition: .features.git }
