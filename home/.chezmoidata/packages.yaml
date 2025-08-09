@@ -36,6 +36,7 @@ commonPackages:
   - name: ghq
     condition: and .features.git (not (eq .osIDLike "alpine" "debian" "fedora"))
   - { name: git, condition: .features.git }
+  - { name: git-absorb, condition: .features.git }
   # - name: git-delta
   #   condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
   - { name: gitui, condition: and .features.git (ne .osIDLike "debian") }
@@ -254,6 +255,7 @@ packages:
       # - dundee.gdu
       - { name: github.cli, condition: .features.git }
       - { name: git.git, condition: .features.git }
+      # - { name: gitummychow.git-absorb, condition: .features.git }
       # - { name: stephandilly.gitui, condition: .features.git }
       - { name: glab.glab, condition: .features.git }
       - { name: helix.helix, condition: .features.helix }

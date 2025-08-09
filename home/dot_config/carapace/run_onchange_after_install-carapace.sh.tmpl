@@ -30,7 +30,7 @@ echo >&2 "Installing carapace"
 # {{- if eq .osID "alpine" }}
 cmd curl -LSfs "$BASE_URL/$NAME.apk" -o "$TMPDIR/carapace.apk"
 cmd sudo apk add --allow-untrusted --quiet "$TMPDIR"/carapace.apk
-# {{- else if eq .osID "debian" }} Debian/Ubuntu
+# {{- else if eq .osIDLike "debian" }} Debian/Ubuntu
 export DEBIAN_FRONTEND=noninteractive
 cmd curl -LSfs "$BASE_URL/$NAME.deb" -o "$TMPDIR/carapace.deb"
 cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"

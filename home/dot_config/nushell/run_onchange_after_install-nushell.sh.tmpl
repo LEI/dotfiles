@@ -10,7 +10,7 @@ if command -v nu >/dev/null; then
   exit
 fi
 
-# {{- if eq .osID "debian" }} Debian/Ubuntu
+# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
 echo >&2 "Installing nushell"
 export DEBIAN_FRONTEND=noninteractive
 if [ ! -f /etc/apt/trusted.gpg.d/fury-nushell.gpg ]; then

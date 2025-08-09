@@ -10,7 +10,7 @@ if command -v topgrade >/dev/null; then
   exit
 fi
 
-# {{- if eq .osID "debian" }} Debian/Ubuntu
+# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
 echo >&2 "Installing topgrade"
 export DEBIAN_FRONTEND=noninteractive
 VERSION="$(get_release topgrade-rs/topgrade)"

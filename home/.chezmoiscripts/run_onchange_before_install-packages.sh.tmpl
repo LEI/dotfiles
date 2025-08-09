@@ -78,7 +78,7 @@ else
   echo >&2 "AUR package manager not found"
   exit 1
 fi
-{{- else if eq .osID "debian" }}
+{{- else if eq .osIDLike "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
 cmd sudo apt-get update --quiet >/dev/null
@@ -106,11 +106,11 @@ cmd pkg upgrade --quiet --yes
 # shellcheck disable=SC2086
 cmd apt-get install --quiet --yes $packages >/dev/null
 {{- else }}
-echo >&2 "Unknown package manager"
+echo >&2 "Package manager not found: {{ .osID }}"
 exit 1
 {{- end }}
 
-{{- if and .codespaces (eq .osID "debian") }}
+{{- if and .codespaces (eq .osIDLike "debian") }}
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
 if [ "${selected_editor##*/}" = nano ]; then
   if [ -x /usr/bin/vim.basic ]; then
