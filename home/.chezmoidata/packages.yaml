@@ -28,12 +28,17 @@ commonPackages:
   - { name: glow, condition: not (eq .osIDLike "alpine" "debian") }
   # - gomi, gtrash
   - { name: gpg, condition: eq .osIDLike "alpine" "darwin" "debian" }
-  - { name: gpg-tui, condition: not (eq .osIDLike "debian" "fedora") }
+  - { name: gpg-tui, condition: not (eq .osIDLike "darwin" "debian" "fedora") }
   - { name: gzip, condition: eq .osIDLike "alpine" }
   # - hostctl
   # - htop
   # - httm
   # - httpstat
+  - name: ipinfo-cli
+    condition: eq .osIDLike "arch" "darwin"
+    nameOverwrite:
+      arch: ipinfo-cli-bin
+    type: eq .osIDLike "arch" | ternary "aur" nil
   - jq
   - name: kmon
     condition: >
