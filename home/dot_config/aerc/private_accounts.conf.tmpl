@@ -1,4 +1,4 @@
-{{- range $account := get .mail "accounts" }}
+{{- range $account := get .mail "accounts" | default list }}
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}

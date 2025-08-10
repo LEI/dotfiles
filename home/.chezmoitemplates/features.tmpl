@@ -80,7 +80,7 @@
   "go" true
   "goss" true
   "kube" true
-  "mail" (ne .accessToken "")
+  "mail" (not (empty .accessToken))
   "neovim" true
   "node" true
   "php" true
@@ -120,7 +120,7 @@
   "git" false
   "go" true
   "kube" true
-  "mail" (ne .accessToken "")
+  "mail" (not (empty .accessToken))
   "neovim" true
   "node" true
   "php" true

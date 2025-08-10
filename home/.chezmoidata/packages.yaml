@@ -45,7 +45,7 @@ commonPackages:
   - name: nvtop # nvitop
     condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
   # - name: pass # gopass
-  #   condition: ne .accessToken ""
+  #   condition: not (empty .accessToken "")
   - name: pastel
     condition: not (eq .osIDLike "alpine" "debian" "fedora")
   - name: pipx
