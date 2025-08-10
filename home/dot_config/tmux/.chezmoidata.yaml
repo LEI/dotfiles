@@ -1,0 +1,9 @@
+---
+extraPackages:
+  tmux:
+  nowplaying-cli:
+    condition: eq .osID "darwin"
+  playerctl:
+    condition: eq .chezmoi.os "linux"
+  reattach-to-user-namespace:
+    condition: eq .osID "darwin"

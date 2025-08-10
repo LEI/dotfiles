@@ -1,4 +1,10 @@
 ---
+extraPackages:
+  nvim:
+    condition: not (or (eq .osIDLike "debian") .glibc231)
+    nameOverwrite:
+      windows: neovim.neovim
+    type: eq .osIDLike "windows" | ternary "winget" nil
 neovim:
   # See ./lua/plugins/init.lua
   plugins: []

@@ -1,0 +1,5 @@
+---
+extraPackages:
+  meli:
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  w3m:

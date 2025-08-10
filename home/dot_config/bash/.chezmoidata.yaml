@@ -1,0 +1,4 @@
+---
+extraPackages:
+  bash:
+    condition: eq .osIDLike "alpine" "darwin"

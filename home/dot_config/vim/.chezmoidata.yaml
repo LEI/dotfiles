@@ -1,4 +1,9 @@
 ---
+extraPackages:
+  vim:
+    nameOverwrite:
+      windows: vim.vim
+    type: eq .osIDLike "windows" | ternary "winget" nil
 vim:
   plugins:
     airline:

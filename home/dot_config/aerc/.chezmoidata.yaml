@@ -1,0 +1,6 @@
+---
+extraPackages:
+  aerc:
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  # pandoc:
+  w3m:

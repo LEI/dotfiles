@@ -1,0 +1,7 @@
+---
+extraPackages:
+  atuin: # ddworken/hishtory, dvorka/hstr
+    condition: eq .osIDLike "arch" "darwin"
+    nameOverwrite:
+      windows: atuin.atuin
+    type: eq .osIDLike "windows" | ternary "winget" nil

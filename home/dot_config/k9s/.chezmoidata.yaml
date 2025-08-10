@@ -1,0 +1,4 @@
+---
+extraPackages:
+  k9s:
+    condition: ne .osIDLike "debian"

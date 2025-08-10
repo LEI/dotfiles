@@ -1,63 +1,40 @@
 ---
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
-  - { name: atuin, condition: eq .osIDLike "arch" "darwin" } # ddworken/hishtory, dvorka/hstr
-  - bat
   - { name: bandwhich, condition: not (eq .osIDLike "debian" "fedora") }
+  - { name: build-base, condition: eq .osIDLike "alpine" }
   # - { name: below, condition: not (eq .osIDLike "arch" "debian") }
   - { name: bottom, condition: not (eq .osIDLike "debian" "fedora") }
-  - curl
   - name: cargo-binstall
     condition: and .features.rust (not (eq .osIDLike "alpine" "debian" "fedora"))
   - { name: coreutils, condition: eq .chezmoi.os "linux" }
   # - name: dive
   #   condition: and .features.docker (ne .osID "alpine")
   - name: difftastic
-    condition: and .features.git (not (eq .osIDLike "debian"))
+    condition: ne .osIDLike "debian"
   # - dog, doggo, dstp, mtr, trippy
   # - dua, dug
   # - duf, dysk
   - name: dust # deletor, diskonaut, gdu, kondo, pdu, wiper
     condition: not (eq .osIDLike "debian")
-  - name: eza # chaqchase/lla
-    condition: not (or (eq .osID "debian" "fedora") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
   - { name: fd, condition: ne .osIDLike "debian" }
   - fzf
   # - gdu, ncdu
-  - name: gh
-    condition: >
-      and .features.git (not (or
-        (eq .osIDLike "alpine" "arch")
-        (and (eq .osID "debian") (le (int .osVersion) 11))
-        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-      ))
-  - name: ghostty
-    condition: and .features.ghostty (not (eq .osIDLike "debian"))
-  - name: ghq
-    condition: and .features.git (not (eq .osIDLike "alpine" "debian" "fedora"))
-  - { name: git, condition: .features.git }
-  - { name: git-absorb, condition: .features.git }
-  # - name: git-delta
-  #   condition: and .features.git (not (eq .osIDLike "alpine" "debian"))
-  - { name: gitui, condition: and .features.git (ne .osIDLike "debian") }
-  - name: glab
-    condition: >
-      and .features.git (not (or
-        (and (eq .osID "debian") (le (int .osVersion) 12))
-        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-      ))
+  - name: git-delta
+    condition: and (not (eq .osIDLike "debian"))
+    nameOverwrite:
+      alpine: delta
   # - { name: glances, condition: not (eq .osIDLike "debian") }
   - { name: glow, condition: not (eq .osIDLike "alpine" "debian") }
   # - gomi, gtrash
+  - { name: gpg, condition: eq .osIDLike "alpine" "darwin" "debian" }
   - { name: gpg-tui, condition: not (eq .osIDLike "debian" "fedora") }
-  - name: helix
-    condition: and .features.helix (ne .osIDLike "debian")
+  - { name: gzip, condition: eq .osIDLike "alpine" }
   # - hostctl
   # - htop
   # - httm
   # - httpstat
   - jq
-  - { name: k9s, condition: and .features.kube (ne .osIDLike "debian") }
   - name: kmon
     condition: >
       and (eq .chezmoi.os "linux") (not (eq .osID "fedora")) (not (or
@@ -65,30 +42,36 @@ commonPackages:
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       ))
   - lnav
-  - name: neovim
-    condition: and .features.neovim (not (or (eq .osIDLike "debian") .glibc231))
-  - { name: nushell, condition: not (eq .osIDLike "debian" "fedora") }
   - name: nvtop # nvitop
     condition: and (eq .chezmoi.os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
-  # - { name: pandoc, condition: .features.mail }
   # - name: pass # gopass
   #   condition: ne .accessToken ""
   - name: pastel
     condition: not (eq .osIDLike "alpine" "debian" "fedora")
-  - { name: playerctl, condition: and .features.tmux (eq .chezmoi.os "linux") }
+  - name: pipx
+    condition: and .features.python (eq .osIDLike "alpine" "darwin") (not (and (eq .osID "debian") (le (int .osVersion) 11)))
   - name: podman-tui
     condition: and .features.docker (not (eq .osIDLike "arch" "debian"))
   - { name: procs, condition: not (eq .osIDLike "debian") }
   - { name: progress, condition: eq .chezmoi.os "linux" }
-  - ripgrep
+  - name: python3
+    condition: and .features.python (eq .osIDLike "alpine" "debian")
+  - name: ruby
+    condition: and .features.ruby (eq .osIDLike "alpine" "android" "fedora")
+    nameOverwrite:
+      debian: ruby-dev
+      fedora: ruby-devel
+  - name: ruby-rubygems
+    condition: and .features.ruby (eq .osIDLike "arch" "fedora") (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
+    nameOverwrite:
+      fedora: rubygems
   # - { name: shellcheck, condition: .features.not neovim }
+  - name: skim
+    condition: not (eq .osIDLike "debian")
   - name: sshs # sshclick, ssm, fast-ssh
     condition: not (eq .osIDLike "alpine" "debian" "fedora")
   - name: starship
     condition: not (eq .osIDLike "alpine" "debian" "fedora")
-  - { name: tmux, condition: .features.tmux }
-  - name: topgrade
-    condition: not (eq .osIDLike "arch" "debian" "fedora")
   - name: tre-command
     condition: >
       and (not (eq .osIDLike "alpine" "arch" "fedora")) (not (or
@@ -97,11 +80,8 @@ commonPackages:
       ))
   - { name: tuptime, condition: not (eq .osIDLike "alpine" "arch") }
   - { name: util-linux, condition: eq .chezmoi.os "linux" }
-  - name: vim
-    condition: .features.vim
   - name: vlc # mpv
     condition: and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless)
-  - { name: w3m, condition: .features.mail }
   - name: yq
     condition: >
       not (or
@@ -110,20 +90,10 @@ commonPackages:
       )
   - name: zoxide
     condition: not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+extraPackages: []
 packages:
   alpine:
     apk:
-      - bash
-      - build-base # gcc
-      # - delta
-      - gpg
-      - gzip
-      - { name: lazygit, condition: .features.git }
-      - { name: nodejs, condition: .features.node }
-      - { name: npm, condition: .features.node }
-      - { name: python3, condition: .features.python }
-      - { name: ruby, condition: .features.ruby }
-      - skim
       - tar
       - xdg-utils # xdg-open
       - xz
@@ -136,8 +106,6 @@ packages:
       # - g++
       # - linux-headers
       # - make
-      - { name: pipx, condition: .features.python }
-      - { name: python3, condition: .features.python }
 
       # Cargo gitlab-ci-ls
       - openssl-dev
@@ -147,11 +115,8 @@ packages:
     termux:
       - gnupg
       - less
-      - { name: nodejs, condition: .features.node }
       - proot
       - { name: python, condition: .features.python }
-      - { name: ruby, condition: .features.ruby }
-      - skim
       - sudo
       - { name: uv, condition: .features.python }
       - which
@@ -159,55 +124,36 @@ packages:
     pacman:
       - base-devel
       - ddgr
-      - { name: github-cli, condition: .features.git }
       - gnu-netcat
       - gnupg
-      - { name: lazygit, condition: .features.git }
-      - { name: rubygems, condition: .features.ruby }
-      - skim
       - systemctl-tui
       - time # condition: command time
       - tokei
-      - { name: topgrade, condition: eq .osID "manjaro" }
       - wiki-tui # so
       - wikiman arch-wiki-docs
       # - { name: yay, condition: eq .osID "manjaro" }
     aur:
       # - below
-      - carapace-bin
-      - name: helixbinhx
-        condition: and .features.helix (ne .osID "manjaro")
-      - { name: isync, condition: .features.mail }
       - { name: lazydocker-bin, condition: .features.docker }
       - lazyjournal-bin
       - { name: lazysql-bin, condition: .features.sql }
-      - { name: meli, condition: .features.mail }
-      - { name: notmuch, condition: .features.mail }
-      - { name: notmuch-vim, condition: .features.mail }
       - pacseek-bin
-      - podman-tui-bin
+      - { name: podman-tui-bin, condition: .features.docker }
       - tuptime
       - tre-command-bin
       # - { name: terraform-pug-bin, condition: .features.tofu } # terraform-tui, tofuref
-      - { name: topgrade-bin, condition: ne .osID "manjaro" }
       # - { name: yay, condition: ne .osID "manjaro" }
   darwin:
-    brews:
-      - carapace
+    brew:
       # - { name: git-cc, condition: .features.git }
-      - gpg
       - { name: lazydocker, condition: .features.docker }
-      - { name: lazygit, condition: .features.git }
       - lazyjournal
       - { name: lazysql, condition: .features.sql }
-      - { name: nowplaying-cli, condition: .features.tmux }
-      - { name: pipx, condition: .features.python }
       # - { name: leg100/tap/pug, condition: .features.tofu }
-      - { name: reattach-to-user-namespace, condition: .features.tmux }
       - sk
-      - taproom
+      - gromgit/brewtils/taproom
       - tokei
-    casks:
+    cask:
       - firefox
       - google-chrome
       - vlc
@@ -215,7 +161,6 @@ packages:
     apt:
       - apt-utils
       - build-essential
-      - gpg
       - time # condition: command time
 
       # Cargo gitlab-ci-ls
@@ -223,19 +168,10 @@ packages:
       - libssl-dev
 
       # Debian devcontainer
-      - name: pipx
-        condition: and .features.python (or (ne .osID "debian") (gt (int .osVersion) 11))
-      - { name: python3, condition: .features.python }
-      # - { name: python3-venv, condition: .features.python }
-      - { name: ruby-dev, condition: .features.ruby }
-      - name: ruby-rubygems
-        condition: and .features.ruby (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
   fedora:
     dnf:
       - openssl-devel
       - procps
-      - { name: ruby-devel, condition: .features.ruby }
-      - { name: rubygems, condition: .features.ruby }
       # - unzip
       # - which
   windows:
@@ -243,34 +179,25 @@ packages:
       # - main/dive
       - sudo
     winget:
-      - atuin.atuin
-      - sharkdp.bat
-      - lement.bottom
-      - curl.curl
+      - clement.bottom
       # - dandavison.delta
       # - { name: wagoodman.dive, condition: .features.docker }
       - bootandy.dust
-      - eza-community.eza
       - sharkdp.fd
       # - dundee.gdu
-      - { name: github.cli, condition: .features.git }
-      - { name: git.git, condition: .features.git }
-      # - { name: gitummychow.git-absorb, condition: .features.git }
-      # - { name: stephandilly.gitui, condition: .features.git }
-      - { name: glab.glab, condition: .features.git }
-      - { name: helix.helix, condition: .features.helix }
       - jdx.mise
       - jqlang.jq
-      - { name: neovim.neovim, condition: .features.neovim }
       - dalance.procs
-      - burntsushi.ripgrep.msvc
-      - topgrade-rs.topgrade
       # - { name: koalaman.shellcheck, condition: not .features.neovim }
       - { name: astral-sh.uv, condition: .features.python }
-      - { name: vim.vim, condition: .features.vim }
       - videolan.vlc
       - mikefarah.yq
       - ajeetdsouza.zoxide
     # - { name: golang.go, condition: .features.go }
-    # - { name: openjs.nodejs, condition: .features.node }
-    # - { name: openjs.nodejs.lts, condition: .features.node }
+packageManagerMap:
+  alpine: apk
+  android: termux # pkg
+  arch: pacman
+  darwin: brew
+  debian: apt
+  fedora: dnf

@@ -7,38 +7,9 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- $key := "" -}}
-{{- if eq .osIDLike "alpine" -}}
-{{-   $key = "apk" -}}
-{{- else if eq .osIDLike "android" -}}
-{{-   $key = "termux" -}}
-{{- else if eq .osIDLike "arch" -}}
-{{-   $key = "pacman" -}}
-{{- else if eq .osIDLike "debian" -}}
-{{-   $key = "apt" -}}
-{{- else if eq .osIDLike "fedora" -}}
-{{-   $key = "dnf" -}}
-{{- else -}}
-{{- end -}}
-{{- $packages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" $key) .) | fromJson -}}
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
 
-{{- if .features.python }}
-{{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | splitList "\n" -}}
-{{-   range $name := without $pythonPackages "" -}}
-{{-     if eq (substr 0 1 $name) "#" -}}
-{{-       continue -}}
-{{-     end -}}
-{{-     $prefix := "python" -}}
-{{-     if eq $.osID "alpine" -}}
-{{-       $prefix = "py3" -}}
-{{-     else if eq $.osIDLike "debian" "fedora" -}}
-{{-       $prefix = "python3" -}}
-{{-     end -}}
-{{-     $packages = append $packages (printf "%s-%s" $prefix $name) -}}
-{{-   end -}}
-{{- end }}
-
-packages="{{ $packages | join " " }}"
+packages="{{ $packages | sortAlpha | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS"
 echo >&2 "OS ID: {{ .osID }}"
@@ -66,8 +37,8 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   cmd cd /tmp/yay-bin
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
-{{ $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "key" "aur") .) | fromJson }}
-aur_packages="{{ $aurPackages | join " " }}"
+{{ $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
+aur_packages="{{ $aurPackages | sortAlpha | join " " }}"
 if command -v yay >/dev/null; then
   cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
 elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then

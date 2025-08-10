@@ -1,4 +1,46 @@
 ---
+extraPackages:
+  gh:
+    condition: >
+      not (or
+        (eq .osIDLike "alpine")
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      )
+    nameOverwrite:
+      arch: github-cli
+      windows: github.cli
+    type: eq .osIDLike "windows" | ternary "winget" nil
+  ghq:
+    condition: and (not (eq .osIDLike "alpine" "debian" "fedora"))
+  git: # { name: git, condition: .features.git }
+    nameOverwrite:
+      windows: git.git
+    type: eq .osIDLike "windows" | ternary "winget" nil
+  git-absorb:
+    condition: and (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)))
+    nameOverwrite:
+      windows: gitummychow.git-absorb
+    type: eq .osIDLike "windows" | ternary "winget" nil
+  git-extras:
+    condition: and (not (eq .osIDLike "alpine"))
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  # gitui:
+  #   condition: and (ne .osIDLike "debian")
+  #   nameOverwrite:
+  #     windows: stephandilly.gitui
+  #   type: eq .osIDLike "windows" | ternary "winget" nil
+  glab:
+    condition: >
+      and (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 12))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      ))
+    nameOverwrite:
+      windows: glab.glab
+    type: eq .osIDLike "windows" | ternary "winget" nil
+  lazygit:
+    condition: and .features.git (eq .osIDLike "alpine" "arch" "darwin")
 ghExtensions:
   - dlvhdr/gh-dash
   - { name: github/gh-copilot, condition: .features.ai }

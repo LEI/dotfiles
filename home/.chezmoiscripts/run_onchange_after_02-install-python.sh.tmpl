@@ -25,7 +25,7 @@ fi
 {{-   $packages = append $packages $name -}}
 {{- end }}
 
-packages="{{ $packages | join " " }}"
+packages="{{ $packages | sortAlpha | join " " }}"
 
 if [ -n "$packages" ]; then
   for name in $packages; do

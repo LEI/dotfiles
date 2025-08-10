@@ -1,0 +1,5 @@
+---
+extraPackages:
+  ghostty:
+    condition: and (not (eq .osIDLike "debian")) (not .headless)
+    type: eq .osIDLike "darwin" | ternary "cask" nil

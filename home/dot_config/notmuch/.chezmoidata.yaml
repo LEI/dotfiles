@@ -1,0 +1,6 @@
+---
+extraPackages:
+  notmuch:
+    type: eq .osIDLike "arch" | ternary "aur" nil
+  notmuch-vim:
+    type: eq .osIDLike "arch" | ternary "aur" nil

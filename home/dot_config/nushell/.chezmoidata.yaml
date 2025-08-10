@@ -1,0 +1,4 @@
+---
+extraPackages:
+  nushell:
+    condition: not (eq .osIDLike "debian" "fedora")

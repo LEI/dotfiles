@@ -18,7 +18,7 @@ cmd gem update --system
 {{-   end -}}
 {{-   $packages = append $packages $name -}}
 {{- end -}}
-packages="{{ $packages | join " " }}"
+packages="{{ $packages | sortAlpha | join " " }}"
 
 if [ -n "$packages" ]; then
   cmd gem install --quiet --user $packages

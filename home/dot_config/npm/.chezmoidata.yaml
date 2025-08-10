@@ -1,0 +1,9 @@
+---
+extraPackages:
+  nodejs:
+    condition: eq .osIDLike "alpine" "android"
+    # nameOverwrite:
+    #   windows: openjs.nodejs # .lts
+    # type: eq .osIDLike "windows" | ternary "winget" nil
+  npm:
+    condition: eq .osIDLike "alpine"

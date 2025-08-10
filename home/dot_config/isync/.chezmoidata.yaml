@@ -1,0 +1,4 @@
+---
+extraPackages:
+  isync:
+    type: eq .osIDLike "arch" | ternary "aur" nil
