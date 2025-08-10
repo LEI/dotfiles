@@ -4,6 +4,7 @@ end
 
 vim.g.ai = {
   avante = false,
+  claude = false,
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
@@ -159,6 +160,31 @@ return {
     },
   },
 
+  {
+    'greggh/claude-code.nvim',
+    enabled = vim.g.ai.claude,
+    tag = 'v0.4.3',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    cmd = { 'ClaudeCode', 'ClaudeCodeContinue', 'ClaudeCodeResume', 'ClaudeCodeVerbose' },
+    keys = {
+      { '<leader>cC', '<cmd>ClaudeCode<cr>', desc = 'Claude Code', mode = { 'n', 'v' } },
+    },
+    opts = {
+      -- command = 'claude',
+      -- keymaps = {
+      --   toggle = {
+      --     normal = '<C-,>', -- Normal mode keymap for toggling Claude Code, false to disable
+      --     terminal = '<C-,>', -- Terminal mode keymap for toggling Claude Code, false to disable
+      --     variants = {
+      --       continue = '<leader>cC', -- Normal mode keymap for Claude Code with continue flag
+      --       verbose = '<leader>cV', -- Normal mode keymap for Claude Code with verbose flag
+      --     },
+      --   },
+      --   window_navigation = true, -- Enable window navigation keymaps (<C-h/j/k/l>)
+      --   scrolling = true, -- Enable scrolling keymaps (<C-f/b>) for page up/down
+      -- },
+    },
+  },
   {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
