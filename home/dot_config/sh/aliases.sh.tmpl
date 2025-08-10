@@ -15,15 +15,6 @@ alias free="free --human"
 # Color matches
 alias grep="grep --color=auto"
 
-# {{- if .features.nushell }}
-# if ! hash l 2>/dev/null; then
-#   if type l >/dev/null; then
-#     unalias l
-#   fi
-#   l() { nu --commands "l $*" --login; }
-# fi
-# {{- end }}
-
 # List all files with colors, human-readable sizes and long format
 alias la="ls -ahl --color=auto"
 
@@ -39,23 +30,6 @@ alias cat=bat
 
 {{- if lookPath "eza" }}
 alias ls=eza
-{{- end }}
-
-# atuin dotfiles alias set o open
-if ! hash o 2>/dev/null; then
-  alias o=open
-fi
-
-{{- if .features.vim }}
-if ! hash v 2>/dev/null; then
-  alias v=vim
-fi
-{{- end }}
-
-{{- if .features.neovim }}
-if ! hash nv 2>/dev/null; then
-  alias n=nvim
-fi
 {{- end }}
 
 # TODO: termux-open

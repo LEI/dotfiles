@@ -59,14 +59,3 @@ export alias cat = bat
 # https://github.com/eza-community/eza/issues/472
 # export alias ls = eza
 {{- end }}
-
-{{- if .features.vim }}
-export alias v = vim
-{{- end }}
-
-{{- if .features.neovim }}
-export alias n = neovim
-{{- end }}
-
-# atuin dotfiles alias set o open
-export alias o = open

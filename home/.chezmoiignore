@@ -48,6 +48,8 @@
 {{- end }}
 
 {{- if not .features.docker }}
+.config/carapace/specs/d.yaml
+.config/carapace/specs/p.yaml
 # .config/docker/
 .config/sh/plugins/docker.sh
 {{- if lookPath "docker" }}.local/bin/d{{- end }}
@@ -59,6 +61,7 @@
 {{- end }}
 
 {{- if not .features.git }}
+.config/carapace/specs/g.yaml
 .config/git/
 .config/lazygit/
 # FIXME: mod.nu.tmpl loops on source directory
@@ -85,6 +88,7 @@
 {{- end }}
 
 {{- if not .features.kube }}
+.config/carapace/specs/k.yaml
 .config/k9s/
 .config/krew/
 .config/sh/plugins/kubectl.sh
@@ -113,6 +117,7 @@
 
 {{- if not .features.neovim }}
 .chezmoiscripts/*-install-neovim.sh
+.config/carapace/specs/n.yaml
 .config/cspell/
 .config/nvim/
 .local/share/nvim
@@ -151,6 +156,7 @@
 {{- end }}
 
 {{- if not .features.tmux }}
+.config/carapace/specs/t.yaml
 .config/tmux/
 {{- if lookPath "tmux" }}.local/bin/t{{- end }}
 {{- end }}
@@ -161,6 +167,7 @@
 {{- end }}
 
 {{- if not .features.vim }}
+.config/carapace/specs/v.yaml
 .config/vim/
 # .vim/
 .vimrc.local

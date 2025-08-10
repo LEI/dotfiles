@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: k
+description: kubectl
+completion:
+  positionalany: ["$carapace.bridge.Bash([kubectl])"]

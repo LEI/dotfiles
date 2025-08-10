@@ -37,7 +37,7 @@ if hash k 2>/dev/null; then
   if [ -f /usr/share/bash-completion/completions/kubectl ]; then
     source /usr/share/bash-completion/completions/kubectl
     complete -o default -F __start_kubectl k
-  else
+  elif hash _kubectl_completion 2>/dev/null; then
     complete -o noquote -F _kubectl_completion k
   fi
 fi
