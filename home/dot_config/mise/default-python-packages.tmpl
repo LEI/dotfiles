@@ -4,6 +4,9 @@ claude-monitor
 {{- end }}
 # euporie
 recoverpy
+{{ if .features.tofu -}}
+tofuref
+{{ end -}}
 {{ if ne (env "VT_API_KEY") "" -}}
 wtfis
 {{ end -}}

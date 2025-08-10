@@ -83,7 +83,6 @@ return {
       cmd = node_prefix .. 'node',
       cmdArgs = { node_prefix .. 'mcp-hub' },
 
-      -- TODO: install uv(x), setup EXA_API_KEY
       -- config = vim.fn.expand('~/.config/mcphub/servers.json'),
       -- port = 37373,
       -- server_url = 'http://localhost:37373',
