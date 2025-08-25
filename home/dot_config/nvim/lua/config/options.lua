@@ -91,6 +91,8 @@ vim.opt.termguicolors = true
 -- Lower than default (1000) to quickly trigger which-key
 vim.opt.timeoutlen = vim.g.vscode and 1000 or 300
 
+vim.opt.title = true
+
 vim.opt.virtualedit = 'block'
 
 -- Always show the window bar

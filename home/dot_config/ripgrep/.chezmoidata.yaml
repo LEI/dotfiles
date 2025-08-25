@@ -3,4 +3,8 @@ extraPackages:
   ripgrep:
     nameOverwrite:
       windows: burntsushi.ripgrep.msvc
-    # type: eq .osIDLike "windows" | ternary "winget" nil
+  ripgrep-all:
+    condition: eq .osIDLike "arch" "darwin"
+    nameOverwrite:
+      darwin: rga
+    type: eq .osIDLike "windows" | ternary "scoop" nil

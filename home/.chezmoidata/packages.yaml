@@ -28,6 +28,14 @@ commonPackages:
       # npm: @openai/codex
     type: eq .osIDLike "arch" | ternary "aur" nil
   - { name: coreutils, condition: eq .os "linux" }
+  - name: crush
+    condition: and .features.ai (eq .osIDLike "arch" "darwin" "windows")
+    nameOverwrite:
+      arch: crush-bin
+      darwin: charmbracelet/tap/crush
+      # npm: @charmland/crush
+      windows: charmbracelet.crush
+    type: eq .osIDLike "arch" | ternary "aur" nil
   - name: dive
     condition: and .features.docker (not (eq .osID "alpine" "fedora"))
     nameOverwrite:
@@ -43,6 +51,9 @@ commonPackages:
     condition: not (eq .osIDLike "debian")
     nameOverwrite:
       windows: bootandy.dust
+  # - name: fancy-cat
+  #   condition: eq .osIDLike "arch" "darwin"
+  #   type: eq .osIDLike "arch" | ternary "aur" nil
   - name: fd
     condition: ne .osIDLike "debian"
     nameOverwrite:
@@ -80,6 +91,10 @@ commonPackages:
       arch: httm-bin
     type: eq .osIDLike "arch" | ternary "aur" nil
   # - httpstat
+  - name: hyperfine
+    condition: eq .osIDLike "arch" "darwin"
+  - name: incus
+    condition: eq .osIDLike "arch" "darwin"
   - name: ipinfo-cli
     condition: eq .osIDLike "arch" "darwin"
     nameOverwrite:
@@ -98,14 +113,6 @@ commonPackages:
   - { name: lnav, condition: ne .os "windows" }
   - name: nvtop # nvitop
     condition: and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless)
-  # - name: opencode
-  #   condition: and .features.ai (eq .osIDLike "arch" "darwin")
-  #   nameOverwrite:
-  #     arch: opencode-bin
-  #     darwin: sst/tap/opencode
-  #     # npm: opencode-ai
-  #     windows: SST.opencode
-  #   type: eq .osIDLike "arch" | ternary "aur" nil
   # - name: pass # gopass
   #   condition: not (empty .accessToken "")
   - name: pastel
@@ -221,7 +228,7 @@ packages:
       - gnu-netcat
       - systemctl-tui
       - time # condition: command time
-      - tokei
+      - tokei # scc
       - wiki-tui # so
       - wikiman arch-wiki-docs
       # - { name: yay, condition: eq .osID "manjaro" }
@@ -282,7 +289,6 @@ packages:
       # - grep
       # - harfbuzz
       # - imagemagick
-      # - incus
       # - ipcalc
       # - ipinfo-cli
       # - iproute2mac
@@ -341,7 +347,7 @@ packages:
       # - unzip
       - owloops/tap/updo
       # - usage
-      - visidata
+      - visidata # csvlens, sc-im, qsv, xan
       # - watch
       # - webp
       # - wget
