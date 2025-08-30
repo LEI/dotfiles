@@ -27,7 +27,7 @@ alias path='echo -e ${PATH//:/\\n}'
 alias reload='exec ${SHELL} -l'
 {{- else }}
 
-alias reload='exec ${SHELL} -il'
+alias reload='exec ${SHELL} -i'
 {{- end }}
 
 {{- if lookPath "bat" }}

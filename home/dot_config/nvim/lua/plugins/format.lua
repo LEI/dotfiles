@@ -33,7 +33,7 @@ return {
     -- Alternative: nvimtools/none-ls.nvim + lukas-reineke/lsp-format.nvim
     'stevearc/conform.nvim',
     enabled = vim.fn.has('nvim-0.10') == 1,
-    tag = 'v9.0.0',
+    tag = 'v9.1.0',
     dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim' },
     cmd = {
       'ConformInfo',

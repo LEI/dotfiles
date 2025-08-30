@@ -58,7 +58,7 @@ commonPackages:
     condition: and .features.docker (not (eq .osID "alpine" "fedora"))
     nameOverwrite:
       windows: wagoodman.dive # scoop: main/dive
-  # - dog, doggo, dstp, mtr, trippy
+  # - dog, doggo, dstp, mtr, trippy, oryx
   # - dua, dug
   # - duf, dysk
   - name: dust # deletor, diskonaut, gdu, kondo, pdu, wiper
@@ -165,6 +165,7 @@ commonPackages:
     condition: and .features.docker (not (eq .osIDLike "arch" "debian"))
   - name: posting
     condition: eq .osIDLike "arch" "darwin"
+    type: eq .osIDLike "arch" | ternary "aur" nil
   - name: procs
     condition: not (eq .osIDLike "debian")
     nameOverwrite:
@@ -192,6 +193,8 @@ commonPackages:
     condition: or (eq .osID "alpine") (not (or .features.neovim .features.mise))
     nameOverwrite:
       windows: koalaman.shellcheck
+  # https://github.com/ghostty-org/ghostty/issues/189
+  # https://github.com/shell-pool/shpool/issues/240
   - name: shpool # abduco, dtach
     condition: and .features.shpool (not (eq .osIDLike "darwin" "windows"))
     type: eq .osIDLike "arch" | ternary "aur" "cargo"
@@ -301,7 +304,7 @@ packages:
     brew:
       # - ack
       # - aider
-      # - asciinema
+      # - asciinema # vhs
       # - autoconf
       # - automake
       # - bison

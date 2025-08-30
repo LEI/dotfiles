@@ -9,7 +9,7 @@ completion:
 commands:
   - name: attach
     aliases: [a]
-    run: '$(if [ $# -eq 0 ]; then shpool attach --cmd="$SHELL" main; else shpool attach --cmd="$SHELL" "$@"; fi)'
+    run: "[shpool-a]"
   - name: detach
     aliases: [d]
     run: "[shpool, detach]"

@@ -31,7 +31,7 @@ return {
     },
     init = function()
       vim.opt.sessionoptions = {
-        'blank',
+        -- 'blank',
         'buffers',
         'curdir',
         'folds',
@@ -39,9 +39,12 @@ return {
         'help',
         -- 'localoptions',
         -- 'options',
+        'resize',
+        -- 'sesdir',
         'skiprtp',
         'tabpages',
         'terminal',
+        'winpos',
         'winsize',
       }
       vim.api.nvim_create_user_command('Restore', function()
@@ -89,7 +92,11 @@ return {
           if not has_args and session_exists then
             vim.notify('Loading session: ' .. vim.fn.fnamemodify(cwd, ':~'))
             require('persistence').load()
-          elseif has_args and session_exists then
+          elseif
+            has_args
+            -- and (not vim.list_contains(vim.v.argv, '+Restore'))
+            and session_exists
+          then
             vim.notify('Stopping persistence (session exists)', vim.log.levels.WARN)
             require('persistence').stop()
           end

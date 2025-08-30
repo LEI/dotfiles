@@ -104,6 +104,9 @@ return {
         'mise',
         'scripts',
       },
+      components = {
+        { 'on_complete_dispose', timeout = 0 },
+      },
     },
     keys = {
       { '<leader>o', '', desc = '+overseer' },
@@ -114,6 +117,7 @@ return {
       { '<leader>ob', '<cmd>OverseerBuild<cr>', desc = 'Task builder' },
       { '<leader>ot', '<cmd>OverseerTaskAction<cr>', desc = 'Task action' },
       { '<leader>oc', '<cmd>OverseerClearCache<cr>', desc = 'Clear cache' },
+      { '<leader>ol', '<cmd>OverseerRestartLast<cr>', desc = 'Restart last' },
     },
     init = function()
       -- Restart last task

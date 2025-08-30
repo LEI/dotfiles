@@ -28,7 +28,9 @@ vim.api.nvim_create_user_command('LazyUpdate', get_action('Update'), { desc = 'U
 
 if os.getenv('SHPOOL_SESSION_NAME') then
   vim.api.nvim_create_user_command('ShpoolDetach', function()
-    vim.cmd('!shpool detach')
+    vim.cmd('silent !shpool detach')
   end, { desc = 'shpool detach' })
-  vim.keymap.set('n', '<leader>SD', '<cmd>ShpoolDetach<cr>', { desc = 'shpool detach' })
+  -- vim.keymap.set('n', '<leader>SD', '<cmd>ShpoolDetach<cr>', { desc = 'shpool detach' })
+  -- https://github.com/shell-pool/shpool/issues/71#issuecomment-2632396805
+  vim.keymap.set({ 'n', 'v', 'i' }, '<C-a>d', '<cmd>ShpoolDetach<cr>', { desc = 'shpool detach' })
 end

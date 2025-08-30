@@ -353,6 +353,7 @@ return {
       scroll = { enabled = false },
       statuscolumn = { enabled = true },
       terminal = {
+        -- interactive = false,
         win = {
           keys = {
             nav_h = { '<C-h>', term_nav('h'), desc = 'Go to Left Window', expr = true, mode = 't' },
@@ -360,7 +361,10 @@ return {
             nav_k = { '<C-k>', term_nav('k'), desc = 'Go to Upper Window', expr = true, mode = 't' },
             nav_l = { '<C-l>', term_nav('l'), desc = 'Go to Right Window', expr = true, mode = 't' },
           },
+          -- position = 'top', -- bottom
+          -- style = 'minimal', -- terminal
         },
+        -- shell = 'nu', -- vim.o.shell
       },
       words = { enabled = true },
     },
@@ -453,7 +457,8 @@ return {
       { '<leader>sz', function() Snacks.picker.zoxide() end, desc = 'Zoxide picker' },
       { '<leader>s.', function() Snacks.scratch.select() end, desc = 'Select scratch buffer' },
 
-      { '<leader>T', '<cmd>Terminal<cr>', desc = 'Terminal' },
+      -- { '<leader>T', '<cmd>horizontal terminal<cr>', desc = 'Open terminal' },
+      { '<leader>T', '<cmd>TerminalOpen<cr>', desc = 'Open terminal' },
 
       { '<leader>n', function() Snacks.picker.notifications() end, desc = 'Notification picker' },
       { '<leader>N', function() Snacks.notifier.show_history() end, desc = 'Notification history' },
@@ -608,20 +613,26 @@ return {
       --   end,
       -- })
 
-      -- Custom commands
+      vim.api.nvim_create_user_command('Colorize', function()
+        Snacks.terminal.colorize()
+      end, { desc = 'Colorize terminal (snacks)' })
       vim.api.nvim_create_user_command('Dashboard', function()
         Snacks.dashboard.open()
       end, { desc = 'Open dashboard (snacks)' })
-
       vim.api.nvim_create_user_command('Find', function()
         local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
         Snacks.picker.files({ cwd = cwd, hidden = true })
       end, { desc = 'Find files (snacks)' })
-
       vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })
-
-      vim.api.nvim_create_user_command('Terminal', function()
-        Snacks.terminal()
+      vim.api.nvim_create_user_command('TerminalList', function()
+        local list = Snacks.terminal.list()
+        dd(list)
+      end, { desc = 'Terminal list (snacks)' })
+      vim.api.nvim_create_user_command('TerminalOpen', function()
+        Snacks.terminal.open()
+      end, { desc = 'Open terminal (snacks)' })
+      vim.api.nvim_create_user_command('TerminalToggle', function()
+        Snacks.terminal.toggle()
       end, { desc = 'Toggle terminal (snacks)' })
     end,
   },
