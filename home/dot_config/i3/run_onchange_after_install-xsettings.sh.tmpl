@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# DISPLAY: {{ env "DISPLAY" }}
+if [ -z "${DISPLAY:-}" ]; then
+  echo >&2 "WARN: skipping xsettings (no display)"
+  exit 0
+fi
+
+theme_name="{{ .i3.themeName }}"
+icon_theme_name="{{ .i3.iconThemeName }}" # Arc-Dark
+dark_mode="{{ .i3.darkMode }}"
+pm_tray="{{ .i3.pmTray }}"
+
+{{- if lookPath "xfce4-settings-manager" | isExecutable }}
+
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml") | sha256sum
+current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/ThemeName || echo "")"
+if [ "$current_theme_name" != "$theme_name" ]; then
+  cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string --create
+fi
+current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/IconThemeName || echo "")"
+if [ "$current_theme_name" != "$icon_theme_name" ]; then
+  cmd xfconf-query --channel xsettings --property /Net/IconThemeName --set "$icon_theme_name" --type string --create
+fi
+{{- end }}
+
+{{- if lookPath "xfwm4" | isExecutable }}
+
+current_xfwm4_theme="$(cmd xfconf-query --channel xfwm4 --property /general/theme || echo "")"
+if [ "$current_xfwm4_theme" != "$theme_name" ]; then
+  cmd xfconf-query --channel xfwm4 --property /general/theme --set "$theme_name" --type string --create
+fi
+{{- end }}
+
+{{- if lookPath "xfce4-panel" | isExecutable }}
+
+# xfconf-query --channel xfce4-panel --property /panels/dark-mode --type bool
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml") | sha256sum
+current_dark_mode="$(cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode || echo "")"
+if [ "$current_dark_mode" != "$dark_mode" ]; then
+  cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode --set "$dark_mode" --type bool --create
+fi
+{{- end }}
+
+{{- if lookPath "xfce4-power-manager" | isExecutable }}
+
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml") | sha256sum
+current_pm_tray="$(cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon || echo "")"
+if [ "$current_pm_tray" != "$pm_tray" ]; then
+  cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon --set "$pm_tray" --type bool --create
+fi
+{{- end }}

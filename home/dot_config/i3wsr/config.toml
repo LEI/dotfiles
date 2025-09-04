@@ -1,0 +1,60 @@
+[icons]
+Alacritty = ""
+Chrome = "󰊯"
+Chromium = ""
+Chromium-dev = ""
+Firefox = ""
+Firefox-nightly = ""
+Ghostty = ""
+# Gpick = ""
+# Nautilus = "📘"
+Nvim = ""
+Notification = ""
+# TelegramDesktop = ""
+Terminal = ""
+Termite = ""
+Thunar = ""
+Thunderbird = ""
+Vim = ""
+
+# i3 / Xwayland
+[aliases.class]
+"^(?i)chromium$" = "Chromium"
+# "^com\\.mitchellh\\.ghostty$" = "Ghostty"
+"^(?i)firefox$" = "Firefox"
+# "Org\\.gnome\\.Nautilus" = "Nautilus"
+# TelegramDesktop = "Telegram"
+"(?i)^thunar$" = "Thunar"
+"(?i)^xfce4-notifyd$" = "Notification"
+
+# Sway only
+[aliases.app_id]
+# "^firefox$" = "Firefox"
+
+# i3 only
+[aliases.instance]
+"open.spotify.com" = "Spotify"
+
+# Both i3 and sway
+[aliases.name]
+# " . Chromium$" = "Chromium"
+# "( . )?Mozilla Firefox$" = "Firefox"
+" . Nvim$" = "Nvim"
+# " . Thunar$" = "Thunar"
+# "^Terminal . .*" = "Terminal"
+
+[general]
+separator = ' ｜ ' # |
+# split_at = ":"
+# empty_label = "🌕"
+# display_property = "app_id"
+# display_property = "class"
+# display_property = "instance"
+display_property = "name"
+# default_icon = ""
+
+[options]
+remove_duplicates = false
+no_names = false
+no_icon_names = true
+focus_fix = false

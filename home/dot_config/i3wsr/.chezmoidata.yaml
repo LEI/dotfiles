@@ -1,0 +1,5 @@
+---
+extraPackages:
+  i3wsr:
+    enabled: "{{ .features.i3 }}"
+    type: aur

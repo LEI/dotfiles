@@ -64,7 +64,17 @@ return {
     end,
   },
   { 'tpope/vim-fugitive', tag = 'v3.7', cmd = 'Git' },
-  { 'tpope/vim-sleuth', version = '2.0.0', event = 'VeryLazy' },
+  {
+    'tpope/vim-sleuth',
+    version = '2.0.0',
+    -- FIXME: lazy loading breaks PHP nvim_treesitter#indent()
+    -- and GetPhpIndent() neovim/0.11.4/share/nvim/runtime/indent/php.vim:123
+    -- cmd = 'Sleuth',
+    lazy = false,
+    -- init = function()
+    --   vim.b.sleuth_automatic = 0
+    -- end,
+  },
   -- { 'tpope/vim-repeat', version = 'v1.2', event = 'VeryLazy' },
   {
     'echasnovski/mini.ai',
@@ -167,7 +177,12 @@ return {
       },
 
       highlight = { enable = true },
-      indent = { enable = true },
+      indent = {
+        enable = true,
+        disable = {
+          -- 'php',
+        },
+      },
       -- sync_install = true,
     },
     init = function()

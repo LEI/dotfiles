@@ -57,9 +57,11 @@ if ! hash open 2>/dev/null; then
   fi
   {{- else }}
   if hash xdg-open 2>/dev/null; then
-    alias open=xdg-open
+    # alias open=xdg-open
+    open() { xdg-open "$@"; }
   elif hash code 2>/dev/null; then
-    alias open=code
+    # alias open=code
+    open() { code "$@"; }
   fi
   {{- end }}
 fi

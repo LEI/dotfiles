@@ -15,7 +15,7 @@ return {
       -- { 'gF', ':e <cfile><cr>', desc = 'Go to file', mode = { 'n', 'v' } },
 
       -- Helix
-      { 'U', ':redo<cr>', desc = 'Redo', mode = { 'n', 'v' } },
+      { 'U', ':redo<cr>', desc = 'Redo', mode = { 'n' } },
       { 'ge', 'G', desc = 'Go to last line', mode = { 'n', 'v' } },
       { 'gs', '^', desc = 'First non-blank', mode = { 'n', 'v' } },
       { 'gh', '0', desc = 'Go to line start', mode = { 'n', 'v' } },
@@ -25,7 +25,7 @@ return {
 
       { 'z', '', desc = '+fold' },
 
-      -- { '.', ':normal n.<cr>', desc = 'Repeat last command', mode = 'v', noremap = true }, -- as expected in visual mode
+      -- { '.', ':normal n.<cr>', desc = 'Repeat last command', mode = 'v' }, -- as expected in visual mode
 
       -- TODO: Reflow (gw/gq) and remap <leader>r (Rename symbol)
       { '<backspace>', '', desc = '+backspace' },
@@ -111,7 +111,7 @@ return {
       -- gb: window bottom
 
       -- Double escape to normal mode
-      { '<Esc><Esc>', '<C-\\><C-n>', desc = 'Escape terminal', mode = 't', noremap = true },
+      { '<Esc><Esc>', '<C-\\><C-n>', desc = 'Escape terminal', mode = 't' },
     },
     config = function(_, opts)
       local wk = require('which-key')

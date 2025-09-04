@@ -122,16 +122,27 @@ local dashboard_sections = {
   -- { pane = 2, section = 'terminal', cmd = 'curl -s https://wttr.in/?0A' },
 }
 
+-- TODO: exclude from history (dot repeat)
 local function grep_picker()
   local id = 1
   local ns_id = vim.api.nvim_create_namespace('grep')
   local original = vim.fn.getreg('/')
+  local regex = true
   local search = original
   if vim.startswith(search, '\\V') then
     -- search = search:gsub('^\\V', ''):gsub('([\\^$~+.*%[%]{}()])', '\\%1')
-    search = search:gsub('^\\V', ''):gsub('([%^$~+.*%[%]{}()])', '\\%1')
+    -- TODO: escape spaces at start and end (^ +| +$)
+    -- escape single backslashes?
+    search = search:gsub('^\\V', '')
+    if regex then
+      search = search:gsub('([%^$~+.*%[%]{}()|])', '\\%1')
+    else
+      search = search:gsub('\\\\', '\\')
+    end
   else
-    search = search:gsub('^\\<(.*)\\>$', '\\<%1\\>')
+    -- regex = true
+    -- search = search:gsub('^\\<(.*)\\>$', '\\<%1\\>')
+    search = search:gsub('^\\<(.*)\\>$', '%1')
   end
   local function set_virtual_text(text)
     local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -143,10 +154,14 @@ local function grep_picker()
     })
   end
   local function del_virtual_text()
-    vim.api.nvim_buf_del_extmark(0, ns_id, id)
+    -- vim.api.nvim_buf_del_extmark(0, ns_id, id)
+    pcall(vim.api.nvim_buf_del_extmark, 0, ns_id, id)
   end
   Snacks.picker.grep({
     hidden = true,
+    limit = 100,
+    need_search = true,
+    regex = regex,
     -- search = search,
     actions = {
       insert_enter = function(picker)
@@ -185,6 +200,9 @@ local function grep_picker()
           set_virtual_text(search)
         end
       end)
+    end,
+    on_close = function()
+      del_virtual_text()
     end,
   })
 end

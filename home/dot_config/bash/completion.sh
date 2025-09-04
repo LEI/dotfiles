@@ -21,20 +21,20 @@
 #   source /usr/share/bash-completion/completions/chezmoi
 #   complete -o default -F __start_chezmoi c
 # fi
-#
+
 # # if command -v docker >/dev/null && [ ! -f "$COMPLETION_PREFIX/etc/bash_completion.d/docker" ]; then
 # #   cmd docker completion bash >"$COMPLETION_PREFIX/etc/bash_completion.d/docker"
 # # fi
 # if [ -f /usr/share/bash-completion/completions/docker ]; then
 #   cmd source /usr/share/bash-completion/completions/docker
 # fi
-#
+
 # # https://docs.docker.com/engine/cli/completion/
 # # FIXME(codespaces): syntax error near unexpected token `)'
 # if [ "${CODESPACES:-}" != "true" ] && hash d 2>/dev/null && hash __start_docker 2>/dev/null; then
 #   complete -o default -F __start_docker d
 # fi
-#
+
 # # _completion_loader git
 # # # complete -F _git g
 # # # https://stackoverflow.com/a/24665529/7796750
@@ -45,7 +45,7 @@
 #   source /usr/share/bash-completion/completions/git
 #   __git_complete g __git_main
 # fi
-#
+
 # # https://kubernetes.io/docs/reference/kubectl/cheatsheet/#bash
 # if hash k 2>/dev/null; then
 #   if [ -f /usr/share/bash-completion/completions/kubectl ]; then

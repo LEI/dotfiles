@@ -38,13 +38,13 @@
 {{- $features = mergeOverwrite $features (dict
   "atuin" true
   "bash" true
-  "docker" (and (ne (or (lookPath "docker") (lookPath "podman")) "") (eq .osIDLike "arch" "darwin" "debian" "fedora"))
+  "docker" (and (or (lookPath "docker" | isExecutable) (lookPath "podman" | isExecutable)) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
   "git" true
   "helix" true
-  "kube" (ne (lookPath "kubectl") "")
+  "kube" (lookPath "kubectl" | isExecutable)
   "nushell" true
   "python" true
-  "tofu" (ne (lookPath "tofu") "")
+  "tofu" (lookPath "tofu" | isExecutable)
   "ruby" true
   "topgrade" true
 ) -}}

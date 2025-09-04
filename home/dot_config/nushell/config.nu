@@ -22,7 +22,7 @@ let zoxide_completer = {|spans|
 #     let expanded_alias = scope aliases
 #     | where name == $spans.0
 #     | get -i 0.expansion
-#
+
 #     let spans = if $expanded_alias != null {
 #         $spans
 #         | skip 1
@@ -30,7 +30,7 @@ let zoxide_completer = {|spans|
 #     } else {
 #         $spans
 #     }
-#
+
 #     match $spans.0 {
 #         # carapace completions are incorrect for nu
 #         # nu => $fish_completer

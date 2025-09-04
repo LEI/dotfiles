@@ -88,14 +88,14 @@ password = { type = "command_eval", value = "bw get password {{ $account.address
 # identity="email@example.com"
 # subscribed_mailboxes = ["folder", "folder/Sent"] # or [ "*", ] for all mailboxes
 # display_name = "Name"
-#
+
 # # Set mailbox-specific settings
 #   [accounts.account-name.mailboxes]
 #   "INBOX" = { alias="Inbox" } #inline table
 #   "drafts" = { alias="Drafts" } #inline table
 #   [accounts.account-name.mailboxes."foobar-devel"] # or a regular table
 #     ignore = true # don't show notifications for this mailbox
-#
+
 # # Setting up an mbox account
 # [accounts.mbox]
 # root_mailbox = "/var/mail/username"

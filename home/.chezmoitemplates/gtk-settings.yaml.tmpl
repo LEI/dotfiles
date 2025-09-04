@@ -1,0 +1,14 @@
+---
+# https://github.com/i3/i3/discussions/5896
+# NOTE: do not use ini to preserve value types
+gtk-theme-name: "{{ .i3.themeName }}" # Arc-Dark
+gtk-icon-theme-name: "{{ .i3.iconThemeName }}" # papirus-dark
+gtk-application-prefer-dark-theme: {{ .i3.darkMode | ternary 1 0 }}
+
+# Deprecated since: 3.10
+# https://docs.gtk.org/gtk3/property.Settings.gtk-icon-sizes.html
+# GTK+ itself use the following named icon sizes:
+# gtk-menu, gtk-button, gtk-small-toolbar, gtk-large-toolbar, gtk-dnd, gtk-dialog
+# gtk-icon-sizes: gtk-menu=16,16:gtk-button=20,20:gtk-dialog=48,48
+# gtk-icon-sizes: panel-menu=16,16:panel=16,16:gtk-menu=16,16:gtk-large-toolbar=16,16:gtk-small-toolbar=16,16:gtk-button=16,16
+#gtk-icon-sizes: panel-menu=32,32:panel=32,32:gtk-menu=32,32:gtk-large-toolbar=32,32:gtk-small-toolbar=32,32:gtk-button=32,32:gtk-dialog=96,96

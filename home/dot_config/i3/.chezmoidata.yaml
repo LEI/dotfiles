@@ -1,10 +1,77 @@
 ---
+i3:
+  themeName: Arc-Dark
+  iconThemeName: Arc-Dark
+  darkMode: true
+  pmTray: true
 extraPackages:
+  arc-gtk-theme:
+    enabled: "{{ .features.i3 }}"
+    type: aur
+  arc-icon-theme:
+    enabled: "{{ .features.i3 }}"
+    type: aur
+  autotiling-rs:
+    enabled: "{{ .features.i3 }}"
+  blueman:
+    enabled: '{{ and .features.i3 (eq .chassisType "laptop") }}'
+  caffeine-ng:
+    enabled: "{{ .features.i3 }}"
+    type: aur
+  dex:
+    enabled: "{{ .features.i3 }}"
+  dunst:
+    enabled: '{{ and .features.i3 (not (lookPath "xfce4-notifyd-config" | isExecutable)) }}'
+  feh: # nitrogen
+    enabled: "{{ .features.i3 }}"
+  i3lock:
+    name: i3lock xss-lock
+    enabled: "{{ .features.i3 }}"
+  # i3-resurrect:
+  #   enabled: "{{ .features.i3 }}"
   i3-wm:
     enabled: "{{ .features.i3 }}"
-  # i3lock: # xss-lock
-  #   enabled: '{{ .features.i3 }}'
+  i3status-rust:
+    enabled: "{{ .features.i3 }}"
   # i3status:
-  #   enabled: '{{ .features.i3 }}'
-  rofi: # dmenu
+  #   enabled: "{{ .features.i3 }}"
+  lightdm:
+    enabled: "{{ .features.i3 }}"
+  # lxappearance:
+  #   enabled: "{{ .features.i3 }}"
+  network-manager-applet:
+    enabled: "{{ .features.i3 }}"
+  ttf-noto-nerd: # noto-fonts
+    enabled: "{{ .features.i3 }}"
+  # pactl:
+  picom:
+    enabled: "{{ .features.i3 }}"
+  pavucontrol:
+    name: pavucontrol alsa-utils alsa-plugins
+    enabled: "{{ .features.i3 }}"
+    description: PulseAudio Volume Control
+  # playerctl:
+  redshift:
+    name: redshift geoclue
+    enabled: "{{ .features.i3 }}"
+  thunar:
+    enabled: "{{ .features.i3 }}"
+  xcwd:
+    enabled: "{{ .features.i3 }}"
+    type: aur
+  xfce4-power-manager:
+    enabled: "{{ .features.i3 }}"
+  xorg-server:
+    enabled: "{{ .features.i3 }}"
+  # xorg-xbacklight:
+  #   enabled: "{{ .features.i3 }}"
+  xorg-xev:
+    enabled: "{{ .features.i3 }}"
+  xorg-xinit:
+    enabled: "{{ .features.i3 }}"
+  xorg-xrandr:
+    enabled: "{{ .features.i3 }}"
+  xorg-xrdb:
+    enabled: "{{ .features.i3 }}"
+  xorg-xwininfo:
     enabled: "{{ .features.i3 }}"

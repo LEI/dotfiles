@@ -39,8 +39,8 @@ if [ -n "$packages" ]; then
     # cmd uv tool install --quiet --upgrade $name
   done
 fi
-# {{ if ne (lookPath "uv") "" -}}
-# {{- else if ne (lookPath "pipx") "" }}
+# {{ if lookPath "uv" | isExecutable -}}
+# {{- else if lookPath "pipx" | isExecutable }}
 # if [ -n "$packages" ]; then
 #   cmd pipx install $packages
 # fi

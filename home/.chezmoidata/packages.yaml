@@ -18,6 +18,13 @@ commonPackages:
     enabled: '{{ eq .osIDLike "arch" "debian" }}'
   - name: cargo-binstall
     enabled: '{{ and .features.rust (not (eq .osIDLike "alpine" "debian" "fedora")) }}'
+  - name: chromium
+    enabled: '{{ and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
+    nameOverwrite:
+      darwin: ungoogled-chromium
+      debian: chromium-browser
+      # windows: Hibbiki.Chromium
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   - name: codex
     enabled: '{{ and .features.ai (eq .osIDLike "arch" "darwin") }}'
     nameOverwrite:
@@ -61,8 +68,9 @@ commonPackages:
     nameOverwrite:
       windows: sharkdp.fd
   - name: firefox
-    enabled: '{{ and (eq .osIDLike "darwin" "windows") (not .headless) }}'
+    enabled: '{{ and (eq .osIDLike "arch" "debian" "darwin" "fedora" "windows") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
     nameOverwrite:
+      # darwin: firefox{,beta,developer-edition,esr,nightly}
       windows: Mozilla.Firefox # .DeveloperEdition
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # - name: foot
@@ -81,10 +89,11 @@ commonPackages:
     enabled: '{{ not (eq .osIDLike "alpine" "debian") }}'
     nameOverwrite:
       windows: charmbracelet.glow
-  # - gomi, gtrash
+    # - gomi, gtrash
   - name: google-chrome
     enabled: '{{ and (eq .osIDLike "darwin" "windows") (not .headless) }}'
     nameOverwrite:
+      # darwin: google-chrome{,beta,canary,dev}
       windows: Google.Chrome
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   - name: gpg
@@ -208,6 +217,8 @@ commonPackages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" "python" }}'
   - name: tailspin
     type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+  - name: tlp
+    enabled: '{{ and (eq .osIDLike "arch") (eq .chassisType "laptop") }}'
   - name: tokei # scc
     enabled: '{{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}'
   - name: tre-command
@@ -237,6 +248,7 @@ commonPackages:
   - name: wget
     nameOverwrite:
       windows: JernejSimoncic.Wget
+  - { name: xdg-utils, enabled: '{{ eq .osIDLike "alpine" "arch" }}' }
   - name: yq
     enabled: >
       {{ not (or
@@ -245,6 +257,9 @@ commonPackages:
       ) }}
     nameOverwrite:
       windows: mikefarah.yq
+  # - name: zen
+  #   enabled: '{{ and (eq .osIDLike "darwin") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
+  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   - name: zoxide
     enabled: '{{ not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)) }}'
     nameOverwrite:
@@ -255,7 +270,6 @@ packages:
     apk:
       - mandoc
       - tar
-      - xdg-utils # xdg-open
       - xz
 
       # NOTE(ble.sh): /lib/bash/{fdflags,sleep}: No such file or directory
@@ -350,7 +364,7 @@ packages:
       # - grc
       # - grep
       # - harfbuzz
-      # - imagemagick
+      # - imagemagick ghostscript
       # - ipcalc
       # - ipinfo-cli
       # - iproute2mac
@@ -411,10 +425,9 @@ packages:
       # - watch
       # - webp
       # - wireguard-tools
-      # - xdg-ninja
       # - xz
-      # TODO: yabai --start-service
-      - koekeishiya/formulae/yabai # koekeishiya/formulae/skhd
+      - koekeishiya/formulae/yabai # yabai --start-service
+      - jackielii/tap/skhd-zig # koekeishiya/formulae/skhd
       # - zsh
       # - zsh-completions
     cask:
@@ -484,7 +497,7 @@ packages:
   windows:
     scoop:
       - name: busybox
-        enabled: '{{ ne (lookPath "awk") "" }}'
+        enabled: '{{ not (lookPath "awk" | isExecutable) }}'
       # - livesplit
       # - prime95
       # - scoop-search

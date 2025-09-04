@@ -134,7 +134,10 @@ set -g @plugin 'tmux-plugins/tmux-pain-control # v1.0.0'
 
 # set -g @plugin 'tmux-plugins/tmux-sidebar'
 
-set -g @plugin 'tmux-plugins/tmux-resurrect # v4.0.0'
+# if 'test ! -d "$XDG_DATA_HOME/tmux/resurrect"' {
+#     run 'echo mkdir -p "$XDG_DATA_HOME/tmux/resurrect"'
+# }
+set -g @plugin "tmux-plugins/tmux-resurrect # v4.0.0"
 set -g @resurrect-capture-pane-contents on
 set -g @resurrect-dir "$XDG_DATA_HOME/tmux/resurrect" # ln -sf <file_name> last
 set -g @resurrect-processes '\

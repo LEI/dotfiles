@@ -89,7 +89,18 @@
 {{- end }}
 
 {{- if not .features.i3 }}
-.config/i3/
+.Xresources
+.config/X11/
+# .config/autostart/
+.config/gtk-*/
+.config/i3*/
+.config/picom/
+.config/rofi/
+.config/ulauncher/
+# .local/bin/i3-*
+# .local/share/applications/
+.xinitrc
+.xprofile
 {{- end }}
 
 {{- if not .features.kube }}

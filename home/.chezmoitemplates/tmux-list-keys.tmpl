@@ -1,6 +1,6 @@
 {{- $group := get . "group" | default "prefix" }}
 
-{{- $sed := ne (lookPath "gsed") "" | ternary "gsed" "sed" }}
+{{- $sed := lookPath "gsed" | isExecutable | ternary "gsed" "sed" }}
 {{- $listCmd := printf "tmux list-keys -T %[1]s 2>/dev/null | %s -e 's/^bind-key \\(-r \\|\\s*\\)-T %[1]s //' || true" $group $sed }}
 {{- $list := output .sh "-c" $listCmd | trim | splitList "\n" }}
 {{- $namesCmd := printf "tmux list-keys -N -T %s 2>/dev/null || true" $group }}

@@ -4,11 +4,11 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if ne (lookPath "launchctl") "" }}
+{{- if lookPath "launchctl" | isExecutable }}
 
 # cmd cat ~/Library/LaunchAgents/Tmux.Start.plist
 # cmd ~/.config/tmux/plugins/tmux-continuum/scripts/handle_tmux_automatic_start/osx_iterm_start_tmux.sh
-{{- else if ne (lookPath "systemctl") "" }}
+{{- else if lookPath "systemctl" | isExecutable }}
 
 # loginctl session-status
 if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
@@ -31,7 +31,10 @@ if test ! -d "$HOME/.config/tmux/plugins/tpm"; then
   cmd git clone https://github.com/tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
   cmd "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
 else
-  cmd "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all
+  # FIXME: unknown variable: TMUX_PLUGIN_MANAGER_PATH
+  # FATAL: Tmux Plugin Manager not configured in tmux.conf
+  export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
+  cmd "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all || true
 fi
 
 # FIXME(debian 11 tmux 3.1c): tmux-which-key/plugin/init.tmux:25:

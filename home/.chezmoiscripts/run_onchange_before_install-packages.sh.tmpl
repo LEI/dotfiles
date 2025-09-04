@@ -25,6 +25,14 @@ cmd sudo apk upgrade --quiet
 # shellcheck disable=SC2086
 cmd sudo apk add --quiet $packages
 {{- else if eq .osIDLike "arch" }}
+
+{{- if .features.rust }}
+# rustup default stable
+if [ ! -f "$HOME/rust-toolchain" ]; then
+  cmd echo stable >"$HOME/rust-toolchain"
+fi
+{{- end }}
+
 {{- if .upgrade }}
 cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}

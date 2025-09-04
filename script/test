@@ -126,6 +126,12 @@ test_alpine() {
   container_test "$name" "$image"
 }
 
+# user=test
+# pacman --sync --needed --noconfirm --quiet --refresh sudo which
+# useradd -ms /bin/bash "$user"
+# usermod -aG wheel "$user"
+# sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+# echo -n "$user":test | chpasswd -e "$user"
 test_archlinux() {
   local name="${1:-"test-archlinux"}"
   local image="${2:-"archlinux:latest"}"
