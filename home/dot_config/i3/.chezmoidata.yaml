@@ -1,10 +1,26 @@
 ---
 extraPackages:
+  autotiling-rs:
+    enabled: "{{ .features.i3 }}"
+  dex:
+    enabled: "{{ .features.i3 }}"
   i3-wm:
     enabled: "{{ .features.i3 }}"
-  # i3lock: # xss-lock
-  #   enabled: '{{ .features.i3 }}'
-  # i3status:
-  #   enabled: '{{ .features.i3 }}'
-  rofi: # dmenu
+  i3lock:
+    name: i3lock xss-lock
     enabled: "{{ .features.i3 }}"
+  i3status-rust:
+    enabled: "{{ .features.i3 }}"
+  # i3status:
+  #   enabled: "{{ .features.i3 }}"
+  # lxappearance:
+  #   enabled: "{{ .features.i3 }}"
+  # pactl:
+  picom:
+    enabled: "{{ .features.i3 }}"
+  # playerctl:
+  redshift:
+    # name: redshift geoclue
+    enabled: "{{ .features.i3 }}"
+  # xorg-xbacklight:
+  #   enabled: "{{ .features.i3 }}"

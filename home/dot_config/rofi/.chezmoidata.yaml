@@ -1,0 +1,8 @@
+---
+extraPackages:
+  # adwaita-icon-theme:
+  #   enabled: "{{ .features.i3 }}"
+  papirus-icon-theme:
+    enabled: "{{ .features.i3 }}"
+  rofi: # dmenu
+    enabled: "{{ .features.i3 }}"

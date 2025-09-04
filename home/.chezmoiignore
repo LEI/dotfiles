@@ -89,7 +89,14 @@
 {{- end }}
 
 {{- if not .features.i3 }}
-.config/i3/
+.Xresources
+.config/X11/
+.config/i3*/
+.config/picom/
+.config/rofi/
+.config/ulauncher/
+.xinitrc
+.xprofile
 {{- end }}
 
 {{- if not .features.kube }}

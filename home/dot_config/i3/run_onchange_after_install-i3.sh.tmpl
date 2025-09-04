@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# TODO: auto reload on change
+# {{ include (joinPath .chezmoi.homeDir ".Xresources") | sha256sum }}
+# {{ include (joinPath .chezmoi.homeDir ".config/X11/xresources") | sha256sum }}
+cmd xrdb -merge ~/.Xresources
+
+# Check the configuration file for validity
+# config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
+cmd i3 -C -c ~/.config/i3/config
