@@ -22,5 +22,9 @@ extraPackages:
   redshift:
     # name: redshift geoclue
     enabled: "{{ .features.i3 }}"
+  thunar:
+    enabled: "{{ .features.i3 }}"
   # xorg-xbacklight:
   #   enabled: "{{ .features.i3 }}"
+  xorg-xev:
+    enabled: "{{ .features.i3 }}"

@@ -12,3 +12,18 @@ cmd xrdb -merge ~/.Xresources
 # Check the configuration file for validity
 # config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
 cmd i3 -C -c ~/.config/i3/config
+
+gtk_theme="$(gsettings get org.gnome.desktop.interface gtk-theme)"
+if [ "$gtk_theme" != "'Adwaita-dark'" ]; then
+  cmd gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+fi
+
+icon_theme="$(gsettings get org.gnome.desktop.interface icon-theme)"
+if [ "$icon_theme" != "'Adwaita'" ]; then
+  cmd gsettings set org.gnome.desktop.interface icon-theme Adwaita
+fi
+
+color_scheme="$(gsettings get org.gnome.desktop.interface color-scheme)"
+if [ "$color_scheme" != "'prefer-dark'" ]; then
+  cmd gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+fi

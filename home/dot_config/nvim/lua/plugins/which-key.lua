@@ -15,7 +15,7 @@ return {
       -- { 'gF', ':e <cfile><cr>', desc = 'Go to file', mode = { 'n', 'v' } },
 
       -- Helix
-      { 'U', ':redo<cr>', desc = 'Redo', mode = { 'n', 'v' } },
+      { 'U', ':redo<cr>', desc = 'Redo', mode = { 'n' } },
       { 'ge', 'G', desc = 'Go to last line', mode = { 'n', 'v' } },
       { 'gs', '^', desc = 'First non-blank', mode = { 'n', 'v' } },
       { 'gh', '0', desc = 'Go to line start', mode = { 'n', 'v' } },

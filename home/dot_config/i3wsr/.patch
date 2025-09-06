@@ -1,0 +1,19 @@
+diff --git a/src/lib.rs b/src/lib.rs
+index 2c1420a..e238eb4 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -112,10 +112,13 @@ fn find_alias(value: Option<&String>, patterns: &[(regex::Regex, String)]) -> Op
+ }
+
+ fn format_with_icon(icon: &str, title: &str, no_names: bool, no_icon_names: bool) -> String {
++    let icon_fmt = icon.replace("%title", title);
++    let title_fmt = title.replace("%title", title);
++
+     if no_icon_names || no_names {
+-        icon.to_string()
++        icon_fmt
+     } else {
+-        format!("{} {}", icon, title)
++        format!("{} {}", icon_fmt, title_fmt)
+     }
+ }

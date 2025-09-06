@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v i3wsr; then
+  echo >&2 "Already installed: i3wsr"
+  exit 0
+fi
+
+# clone_dir="$HOME/.config/i4wsr/i3wsr"
+# patch="$CHEZMOI_WORKING_TREE/home/dot_config/i3wsr/.patch"
+
+# if [ ! -d "$clone_dir" ]; then
+#   cmd git clone --recurse-submodules --branch v3.1.2 --single-branch \
+#     https://github.com/roosta/i3wsr.git \
+#     "$clone_dir"
+# fi
+
+# cmd cd "$clone_dir"
+# cmd git apply "$patch"
+# cmd cargo build --release
+# cmd mv ./target/release/i3wsr ~/.local/bin/

@@ -129,6 +129,7 @@ local function grep_picker()
   local search = original
   if vim.startswith(search, '\\V') then
     -- search = search:gsub('^\\V', ''):gsub('([\\^$~+.*%[%]{}()])', '\\%1')
+    -- TODO: escape spaces at start and end (^ +| +$)
     search = search:gsub('^\\V', ''):gsub('([%^$~+.*%[%]{}()])', '\\%1')
   else
     search = search:gsub('^\\<(.*)\\>$', '\\<%1\\>')

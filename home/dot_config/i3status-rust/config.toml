@@ -1,22 +1,135 @@
 # icons_format = "{icon}"
 
 [theme]
+# theme = "plain"
 theme = "native"
+# theme = "semi-native"
 # [theme.overrides]
 # idle_bg = "#123456"
 # idle_fg = "#abcdef"
 
 [icons]
-icons = "awesome4"
+# icons = "none"
+# icons = "awesome4"
+# icons = "awesome5"
+# icons = "awesome6"
+icons = "material"
 [icons.overrides]
 bat = ["|E|", "|_|", "|=|", "|F|"]
 bat_charging = "|^| "
+# bat = ["| |", "|¼|", "|½|", "|¾|", "|X|"]
+# bat_charging = "|^|"
+
+# Capslock status indicator
+[[block]]
+block = "custom"
+signal = 11
+command = ''' if [[ "$(cat /sys/class/leds/input*::capslock/brightness | sort --numeric-sort --reverse | uniq --count | awk '{print $2}' | head --lines 1)" -eq 1 ]]; then printf "CAPS"; fi '''
+shell = "bash"
+format = " <span color='yellow'>$text</span>"
+hide_when_empty = true
+
+# # Hostname
+# [[block]]
+# block = "custom"
+# command = "cat /etc/hostname"
+# interval = "once"
+
+# # User
+# [[block]]
+# block = "custom"
+# command = "whoami"
+# interval = "once"
+
+# # Kernel
+# [[block]]
+# block = "custom"
+# command = "echo `uname` `uname -r | tr - . | cut -d. -f1-2`"
+# interval = "once"
+
+# # Nextcloud
+# [[block]]
+# block = "custom"
+# command = "echo \uf0c2 Nextcloud" # icon is for nerdfont, replace if other
+# [[block.click]]
+# button = "left"
+# cmd = "nextcloud"
+
+# Weather
+[[block]]
+block = "custom"
+# command = "sed 's/  //' <(curl 'https://wttr.in/?format=1' -s)"
+command = "curl 'https://wttr.in/?format=1' -s | tr -d ' '"
+interval = 600
+
+# # Public IP
+# [[block]]
+# block = "custom"
+# command = "echo '\uf0ac ' `curl bot.whatismyipaddress.com`"
+# interval = 60
+
+# # Ping/RTT
+# [[block]]
+# block = "custom"
+# json = true
+# command = ''' echo "{\"icon\":\"ping\",\"text\":\"`ping -c4 1.1.1.1 | tail -n1 | cut -d'/' -f5`\"}" '''
+# interval = 60
+# [[block.click]]
+# button = "left"
+# cmd = "<command>"
+
+# # https://github.com/greshake/i3status-rust/blob/master/examples/scripts/screenshot.sh
+# [[block]]
+# block = "custom"
+# command = "echo \uf030"
+# interval = "once"
+# [[block.click]]
+# button = "left"
+# cmd = "~/Projects/i3status-rust/examples/scripts/screenshot.sh"
+
+# # Monitors
+# [[block]]
+# block = "custom"
+# command = "xrandr --listmonitors | tail -n+2 | tr '+' ' ' | cut -d' ' -f 4 | tr '\n' ' '"
+# interval = "once"
+# signal = 4
+
+# # Intel GPU usage
+# [[block]]
+# block = "custom"
+# command = ''' sudo intel_gpu_top -l | head -n4 | tail -n1 | awk '{print $8 "%"}' '''
+# interval = 5
+
+# # https://github.com/greshake/i3status-rust/blob/master/examples/scripts/theme-switch.sh
+# [[block]]
+# block = "custom"
+# cycle = [
+#   "gsettings set org.gnome.desktop.interface gtk-theme Adapta; echo \U0001f311",
+#   "gsettings set org.gnome.desktop.interface gtk-theme None; echo \U0001f315",
+# ]
+# interval = "once"
+# [[block.click]]
+# button = "left"
+# action = "cycle"
 
 [[block]]
 block = "cpu"
 info_cpu = 20
 warning_cpu = 50
 critical_cpu = 90
+# icons_format = "{icon}"
+# [block.theme_overrides]
+# idle_bg = "x:background"
+# idle_fg = "x:foreground"
+# [block.icons_overrides]
+# cpu = [ # fa-gauge-{min,max} are not free
+#   "\uf62a", # fa-gauge-simple-high
+#   # "\uf624", # fa-gauge
+#   # "\uf624", # fa-gauge (2 times so that the gauge will go high at 66% which looks appropriate for the icon fa-gauge-high)
+#   # "\uf625", # fa-gauge-high
+# ]
+# cpu_boost_on = "\uf205"
+# cpu_boost_off = "\uf204"
 
 [[block]]
 block = "disk_space"
@@ -32,6 +145,7 @@ format = " $icon root: $available.eng(w:2) "
 block = "memory"
 format = " $icon $mem_total_used_percents.eng(w:2) "
 format_alt = " $icon_swap $swap_used_percents.eng(w:2) "
+[block.icons_overrides]
 
 [[block]]
 block = "sound"
@@ -43,3 +157,12 @@ cmd = "pavucontrol"
 block = "time"
 interval = 5
 format = " $timestamp.datetime(f:'%a %d/%m %R') "
+
+# System suspend, shutdown and reboot
+[[block]]
+block = "custom"
+command = "echo \uf011"
+interval = "once"
+[[block.click]]
+button = "left"
+cmd = "systemctl `echo -e 'suspend\npoweroff\nreboot' | dmenu`"

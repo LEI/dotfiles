@@ -1,0 +1,48 @@
+[icons]
+# Alacritty = ""
+Chromium = ""
+Firefox = ""
+Ghostty = ""
+# Gpick = ""
+# Nautilus = "📘"
+# TelegramDesktop = ""
+# Termite = ""
+Thunar = ""
+Thunderbird = ""
+
+# i3 / Xwayland
+[aliases.class]
+# TelegramDesktop = "Telegram"
+# Thunar = "%title"
+# "Org\\.gnome\\.Nautilus" = "Nautilus"
+"^com.mitchellh.ghostty$" = "Ghostty"
+"^firefox$" = "Firefox"
+# "^Xfce4-notifyd$" = ""
+
+# Sway only
+[aliases.app_id]
+# "^firefox$" = "Firefox"
+
+# i3 only
+[aliases.instance]
+"open.spotify.com" = "Spotify"
+
+# Both i3 and sway
+[aliases.name]
+# " - Thunar$" = "Thunar"
+
+[general]
+separator = "  "
+# split_at = ":"
+# empty_label = "🌕"
+# display_property = "app_id"
+display_property = "class"
+# display_property = "instance"
+# display_property = "name"
+# default_icon = ""
+
+[options]
+remove_duplicates = true
+no_names = false
+no_icon_names = false
+focus_fix = false
