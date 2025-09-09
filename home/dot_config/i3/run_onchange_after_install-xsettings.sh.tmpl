@@ -11,6 +11,7 @@ if [ -z "${DISPLAY:-}" ]; then
 fi
 
 theme_name="{{ .i3.themeName }}"
+# icon_sizes=""
 icon_theme_name="{{ .i3.iconThemeName }}" # Arc-Dark
 dark_mode="{{ .i3.darkMode }}"
 pm_tray="{{ .i3.pmTray }}"
@@ -22,6 +23,12 @@ current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/Theme
 if [ "$current_theme_name" != "$theme_name" ]; then
   cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string --create
 fi
+
+# current_icon_sizes="$(cmd xfconf-query --channel xsettings --property /Gtk/IconSizes || echo "")"
+# if [ "$current_icon_sizes" != "$icon_sizes" ]; then
+#   cmd xfconf-query --channel xsettings --property /Gtk/IconSizes --set "$icon_sizes" --type string --create
+# fi
+
 current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/IconThemeName || echo "")"
 if [ "$current_theme_name" != "$icon_theme_name" ]; then
   cmd xfconf-query --channel xsettings --property /Net/IconThemeName --set "$icon_theme_name" --type string --create

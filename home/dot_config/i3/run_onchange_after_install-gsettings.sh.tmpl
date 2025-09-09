@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-color_scheme="{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
+color_scheme=default # "{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
 gtk_theme="{{ .i3.themeName }}"
 icon_theme="{{ .i3.iconThemeName }}" # Arc
 

@@ -1,12 +1,18 @@
 /* TODO: arc theme */
 /* https://github.com/ghostty-org/ghostty/discussions/3185#discussioncomment-11673514 */
-
-/* popover contents {
+popover contents {
+  /* base02 */
   background-color: #252936;
+  /* base01 */
   border: 1px solid #1f222d;
   border-radius: 5px;
   box-shadow: none;
-} */
+}
+
+popover contents TODO:hover {
+  /* base03 */
+  background-color: #7780a1;
+}
 
 /* image {
   -gtk-icon-transform: scale(1.5);

@@ -395,7 +395,7 @@ return {
       -- { '<leader><space>', function() Snacks.picker.smart() end, desc = 'Smart Find Files' },
       { '<leader>\'', function() Snacks.picker.resume() end, desc = 'Resume last picker' },
       { '<leader>,', function() Snacks.picker.buffers() end, desc = 'Select buffer' },
-      { '<leader>/', grep_picker, desc = 'Grep' },
+      { '<leader>/', grep_picker, desc = 'Grep picker' },
       { '<leader>\\', function() Snacks.picker.grep({ hidden = true, }) end, desc = 'Grep' },
       { '<leader>:', function() Snacks.picker.command_history() end, desc = 'Command history' },
 

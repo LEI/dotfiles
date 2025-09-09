@@ -12,12 +12,12 @@ set $config_dir ~/.config/i3
 # set $font_family HackNerd
 set $font_family Noto Sans
 # set $font_family Roboto
-set $font_size 11
+set $font_size 10
 
 # Use "normal" to keep title bars and "pixel" to hide them
 # NOTE: this hides next split direction indicator too
 set $border_style normal
-set $border_width 0
+set $border_width 1
 
 set $alt Mod1
 set $mod Mod4
@@ -67,7 +67,7 @@ exec --no-startup-id nm-applet
 {{- end }}
 
 {{- if lookPath "i3wsr" }}
-# exec_always --no-startup-id i3wsr
+exec_always --no-startup-id i3wsr
 {{- end }}
 
 # # Use `xrandr` to list available modes (TODO: auto detection)
@@ -382,7 +382,17 @@ bar {
     }
 }
 
+# https://i3wm.org/docs/userguide.html#client_colors
+# # class                 border  backgr. text    indicator child_border
+# client.focused          #4c7899 #285577 #ffffff #2e9ef4   #285577
+# client.focused_inactive #333333 #5f676a #ffffff #484e50   #5f676a
+# client.unfocused        #333333 #222222 #888888 #292d2e   #222222
+# client.urgent           #2f343a #900000 #ffffff #900000   #900000
+# client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
+# client.background       #ffffff
+
 # Window colors
+# <colorclass> <border> <background> <text> <indicator> <child_border>
 # client.focused          $base01 $base01 $base07 $base0F
 # client.focused_inactive $base02 $base02 $base03 $base0F
 # client.unfocused        $base02 $base02 $base03 $base0F
@@ -392,17 +402,9 @@ client.focused_inactive $base02 $base02 $base03 $base0F
 client.unfocused        $base02 $base02 $base03 $base0F
 client.urgent           $base08 $base08 $base00 $base0F
 
-# # class border backgr. text indicator child_border
-# client.focused #4c7899 #285577 #ffffff #2e9ef4 #285577
-# client.focused_inactive #333333 #5f676a #ffffff #484e50 #5f676a
-# client.unfocused #333333 #222222 #888888 #292d2e #222222
-# client.urgent #2f343a #900000 #ffffff #900000 #900000
-# client.placeholder #000000 #0c0c0c #ffffff #000000 #0c0c0c
-# client.background #ffffff
-
 default_border $border_style $border_width
 default_floating_border $border_style $border_width
-
+for_window [all] border $border_style $border_width
 for_window [all] title_window_icon padding 5px
 
 # for_window [all] title_format %title ｜ %class ｜ %instance
@@ -410,7 +412,7 @@ for_window [all] title_window_icon padding 5px
 
 # no_focus [window_role="pop-up"]
 # no_focus [class="plasmashell" window_type="on_screen_display"]
-no_focus [class="Rustdesk"]
+no_focus [class="(?i)Rustdesk"]
 
 # include ~/.config/i3/config.d/*.conf
 # include config.d/assignments.conf

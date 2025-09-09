@@ -19,7 +19,7 @@ commonPackages:
   - name: cargo-binstall
     enabled: '{{ and .features.rust (not (eq .osIDLike "alpine" "debian" "fedora")) }}'
   - name: chromium
-    enabled: '{{ and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
+    enabled: '{{ and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)) }}'
     nameOverwrite:
       darwin: ungoogled-chromium
       debian: chromium-browser
@@ -42,6 +42,12 @@ commonPackages:
       # npm: @charmland/crush
       windows: charmbracelet.crush
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: devpod
+    enabled: '{{ and (eq .osIDLike "alpine" "arch" "darwin") (not (or .ephemeral .headless)) }}'
+    nameOverwrite:
+      arch: devpod-bin
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
+    type: '{{ get (dict "arch" "aur" "darwin" "cask") .osIDLike | default nil }}'
   - name: difftastic
     enabled: '{{ ne .osIDLike "debian" }}'
     nameOverwrite:
@@ -68,7 +74,7 @@ commonPackages:
     nameOverwrite:
       windows: sharkdp.fd
   - name: firefox
-    enabled: '{{ and (eq .osIDLike "arch" "debian" "darwin" "fedora" "windows") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
+    enabled: '{{ and (eq .osIDLike "arch" "debian" "darwin" "fedora" "windows") (not (or .ephemeral .headless)) }}'
     nameOverwrite:
       # darwin: firefox{,beta,developer-edition,esr,nightly}
       windows: Mozilla.Firefox # .DeveloperEdition
@@ -258,7 +264,7 @@ commonPackages:
     nameOverwrite:
       windows: mikefarah.yq
   # - name: zen
-  #   enabled: '{{ and (eq .osIDLike "darwin") (not (or .codespaces .devContainer .ephemeral .headless)) }}'
+  #   enabled: '{{ and (eq .osIDLike "darwin") (not (or .ephemeral .headless)) }}'
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   - name: zoxide
     enabled: '{{ not (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04)) }}'

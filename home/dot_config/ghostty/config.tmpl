@@ -7,20 +7,24 @@ background-opacity = 0.75
 # shell-integration-features = no-cursor
 
 # fullscreen = true
+# font-feature = -calt, -liga, -dlig
 gtk-titlebar = false
-maximize = true
 scrollback-limit = 90000000
 theme = tokyonight_night
 # theme = tokyonight-storm
 
-# font-feature = -calt, -liga, -dlig
 {{- if eq .os "darwin" }}
-font-size = 11
+
+font-size = 12
 
 # https://github.com/ghostty-org/ghostty/discussions/3642
-fullscreen = true
+# fullscreen = true
 # macos-non-native-fullscreen = visible-menu
-window-decoration = none
+# macos-titlebar-style = native
+macos-titlebar-style = transparent
+# macos-titlebar-style = tabs
+# macos-titlebar-style = hidden
+# window-decoration = client
 # window-save-state = always
 
 # https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
@@ -28,5 +32,9 @@ macos-option-as-alt = left
 keybind = alt+left=unbind
 keybind = alt+right=unbind
 {{- else }}
+
 font-size = 10
+
+maximize = true
+# window-decoration = none
 {{- end }}

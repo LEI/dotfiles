@@ -138,7 +138,7 @@
 ) -}}
 {{- end }}
 
-{{- if or .codespaces .devContainer .ephemeral .headless }}
+{{- if or .ephemeral .headless }}
 {{- $features = mergeOverwrite $features (dict
   "ghostty" false
   "go" false
