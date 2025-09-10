@@ -15,6 +15,12 @@ if [[ $- != *i* ]]; then
   return
 fi
 
+# Remove default prompt command
+if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
+  # echo >&2 "Original prompt command: $PROMPT_COMMAND"
+  export PROMPT_COMMAND=
+fi
+
 shell="{{ .shell }}" # ${SHELL##*/}
 
 if [ "$shell" = bash ]; then IS_BASH=true; else IS_BASH=false; fi

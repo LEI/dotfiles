@@ -59,9 +59,9 @@ vim.g.config = {
   theme = {
     -- colorscheme = 'nightfox',
     -- colorscheme = 'rose-pine',
-    colorscheme = 'tokyonight',
-    dim_inactive = true,
-    transparent = false,
+    colorscheme = os.getenv('COLORSCHEME') or 'tokyonight',
+    dim_inactive = os.getenv('DIM_INACTIVE') == 'true' or true,
+    transparent = os.getenv('TRANSPARENT_BACKGROUND') == 'true',
   },
 }
 

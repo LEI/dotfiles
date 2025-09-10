@@ -51,6 +51,12 @@ fi
 
 xrdb -merge ~/.Xresources
 
+# # Set desktop background with custom effect
+# betterlockscreen -w dim
+#
+# # Alternative (set last used background)
+# source ~/.fehbg
+#
 # "$twm" &
 # "$xclock" -geometry 50x50-1+1 &
 # "$xterm" -geometry 80x50+494+51 &

@@ -24,9 +24,12 @@ extraPackages:
     enabled: '{{ and .features.i3 (not (lookPath "xfce4-notifyd-config" | isExecutable)) }}'
   feh: # nitrogen
     enabled: "{{ .features.i3 }}"
-  i3lock:
-    name: i3lock xss-lock
+  i3lock-color betterlockscreen:
     enabled: "{{ .features.i3 }}"
+    type: aur
+  # i3lock:
+  #   name: i3lock xss-lock
+  #   enabled: "{{ .features.i3 }}"
   # i3-resurrect:
   #   enabled: "{{ .features.i3 }}"
   i3-wm:

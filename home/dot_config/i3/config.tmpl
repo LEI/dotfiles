@@ -5,7 +5,6 @@
 # https://github.com/Airblader/dotfiles-manjaro
 # https://gist.github.com/viking/5851049
 
-
 set $config_dir ~/.config/i3
 
 # set $font_family DejaVu Sans
@@ -30,7 +29,7 @@ font pango:$font_family $font_size
 # include config.d/exec.conf
 include config.d/bind.conf
 
-{{- if lookPath "dex" }}
+{{- if lookPath "dex" | isExecutable }}
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
@@ -46,27 +45,30 @@ exec --no-startup-id dex --autostart --environment i3
 # xcape
 {{- end }}
 
-{{- if lookPath "picom" }}
+{{- if lookPath "picom" | isExecutable }}
 # exec --no-startup-id picom
 {{- end }}
 
-# $findCmd := "find /etc/xdg/autostart ~/.config/autostart -mindepth 1"
-
-{{- if and (lookPath "xss-lock") (lookPath "i3lock") }}
-# output .sh "-c" (printf "%s -name %s.desktop" $findCmd "light-locker") | trim | not
+{{- if and (lookPath "xss-lock" | isExecutable) (lookPath "i3lock" | isExecutable) }}
+{{- if lookPath "betterlockscreen" | isExecutable }}
+# Set desktop background with custom effect
+exec --no-startup-id betterlockscreen -w dim
+# Alternative (set last used background)
+exec --no-startup-id source ~/.fehbg
+exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen --lock
+{{- else }}
+# TODO: check for light-locker in /etc/xdg/autostart and ~/.config/autostart
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 {{- end }}
+{{- end }}
 
-{{- if lookPath "nm-applet" }}
-# output .sh "-c" (printf "%s -name %s.desktop" $findCmd "nm-applet") | trim | not
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
+{{- if lookPath "nm-applet" | isExecutable }}
 exec --no-startup-id nm-applet
 {{- end }}
 
-{{- if lookPath "i3wsr" }}
+{{- if lookPath "i3wsr" | isExecutable }}
 exec_always --no-startup-id i3wsr
 {{- end }}
 
@@ -78,58 +80,58 @@ exec_always --no-startup-id i3wsr
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1600x900
 # exec --no-startup-id xautolock -time 10 -locker $config/bin/lock
 
-{{- if lookPath "feh" }}
+{{- if lookPath "feh" | isExecutable }}
 # exec_always --no-startup-id feh --scale ~/Pictures/wallpaper.jpg
-exec_always --no-startup-id feh --bg-fill --randomize ~/.wallpaper/*
+exec_always --no-startup-id feh --bg-fill --randomize ~/Wallpapers/*
 {{- end }}
 
-{{- if lookPath "autotiling-rs" }}
+{{- if lookPath "autotiling-rs" | isExecutable }}
 exec_always --no-startup-id autotiling-rs
-{{- else if lookPath "autotiling" }}
+{{- else if lookPath "autotiling" | isExecutable }}
 exec_always --no-startup-id autotiling
 {{- end }}
 
-{{- if lookPath "xfce4-panel" }}
+{{- if lookPath "xfce4-panel" | isExecutable }}
 # exec --no-startup-id xfce4-panel --disable-wm-check
 {{- end }}
 
-{{- if lookPath "xfce4-power-manager" }}
+{{- if lookPath "xfce4-power-manager" | isExecutable }}
 exec --no-startup-id xfce4-power-manager --daemon --restart
 {{- end }}
 
-{{- if lookPath "gnome-keyring-daemon" }}
+{{- if lookPath "gnome-keyring-daemon" | isExecutable }}
 exec --no-startup-id gnome-keyring-daemon --components=pkcs11,secrets --daemonize --start
 {{- end }}
 
-{{- if lookPath "pamac-tray" }}
+{{- if lookPath "pamac-tray" | isExecutable }}
 exec --no-startup-id pamac-tray
 {{- end }}
 
-{{- if lookPath "pipewire-pulse" }}
+{{- if lookPath "pipewire-pulse" | isExecutable }}
 # exec --no-startup-id pipewire-pulse
 {{- end }}
 
-{{- if lookPath "redshift-gtk" }}
+{{- if lookPath "redshift-gtk" | isExecutable }}
 # exec --no-startup-id redshift-gtk
-{{- else if lookPath "redshift" }}
+{{- else if lookPath "redshift" | isExecutable }}
 # exec --no-startup-id redshift
 {{- end }}
 
-{{- if lookPath "tmux" }}
+{{- if lookPath "tmux" | isExecutable }}
 # FIXME: resurrect
 # exec --no-startup-id i3-sensible-terminal -e 'tmux attach || tmux; $SHELL'
 {{- end }}
 exec --no-startup-id i3-sensible-terminal
 
-{{- if lookPath "firefox" }}
+{{- if lookPath "firefox" | isExecutable }}
 # exec --no-startup-id firefox
 {{- end }}
 
-{{- if lookPath "thunar" }}
+{{- if lookPath "thunar" | isExecutable }}
 # exec --no-startup-id thunar
 {{- end }}
 
-{{- if lookPath "seahorse" }}
+{{- if lookPath "seahorse" | isExecutable }}
 # exec --no-startup-id i3-msg "scratchpad; exec seahorse"
 exec --no-startup-id seahorse
 {{- end }}
@@ -157,9 +159,9 @@ bindsym $alt+Tab exec ~/.config/i3/scripts/alt-tab.sh
 
 # bindsym $mod+d exec --no-startup-id dmenu_run
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
-# bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 bindsym $mod+d exec "rofi -show combi"
 bindsym $mod+Shift+d exec "rofi -show combi -drun-show-actions"
+bindsym $mod+Control+d exec --no-startup-id "i3-dmenu-desktop"
 
 bindsym $mod+Shift+Tab exec "rofi -show windowcd"
 bindsym $mod+Tab exec "rofi -show window"
@@ -173,14 +175,21 @@ bindsym $mod+w exec "rofi -show filebrowser"
 
 bindsym $mod+x exec "rofi -show run"
 
-bindsym $mod+b exec firefox
+set $browser firefox
+set $explorer thunar
+
+bindsym $mod+b exec $browser
+bindsym $mod+e exec $explorer
 
 # Press $mod+o followed by either f, t, Escape or Return to launch firefox,
 # thunderbird or return to the default mode, respectively.
-set $mode_launcher Launch: [f]irefox [t]hunderbird
+set $mode_launcher Launch: [e]xplorer [f]irefox [t]hunderbird
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
+    # bindsym b exec $browser
+    bindsym c exec chromium
+    bindsym e exec $explorer
     bindsym f exec firefox
     bindsym t exec thunderbird
 
@@ -247,41 +256,28 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
+{{- range $i, $e := until 10 }}
+{{- $i = add $i 1 }}
+set $ws{{ $i }} "{{ $i }}"
+{{- end }}
 
 # Switch to workspace
-bindsym $mod+1 workspace number $ws1
-bindsym $mod+2 workspace number $ws2
-bindsym $mod+3 workspace number $ws3
-bindsym $mod+4 workspace number $ws4
-bindsym $mod+5 workspace number $ws5
-bindsym $mod+6 workspace number $ws6
-bindsym $mod+7 workspace number $ws7
-bindsym $mod+8 workspace number $ws8
-bindsym $mod+9 workspace number $ws9
-bindsym $mod+0 workspace number $ws10
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+{{ $index }} workspace number $ws{{ $i }}
+{{- end }}
 
 # Move focused container to workspace
-bindsym $mod+Shift+1 move container to workspace number $ws1
-bindsym $mod+Shift+2 move container to workspace number $ws2
-bindsym $mod+Shift+3 move container to workspace number $ws3
-bindsym $mod+Shift+4 move container to workspace number $ws4
-bindsym $mod+Shift+5 move container to workspace number $ws5
-bindsym $mod+Shift+6 move container to workspace number $ws6
-bindsym $mod+Shift+7 move container to workspace number $ws7
-bindsym $mod+Shift+8 move container to workspace number $ws8
-bindsym $mod+Shift+9 move container to workspace number $ws9
-bindsym $mod+Shift+0 move container to workspace number $ws10
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+Shift+{{ $index }} move container to workspace number $ws{{ $i }}
+{{- end }}
+
+# Keep floating windows on active workspace
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+Control+{{ $index }} [title="Picture-in-Picture"] move workspace number {{ $i }}; workspace number {{ $i }}
+{{- end }}
 
 # Reload the configuration file
 # bindsym $mod+Shift+c reload
@@ -293,27 +289,27 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 
 # Resize window (you can also use the mouse for that)
 mode "resize" {
-        # These bindings trigger as soon as you enter the resize mode
+    # These bindings trigger as soon as you enter the resize mode
 
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
-        bindsym $left resize shrink width 10 px or 10 ppt
-        bindsym $down resize grow height 10 px or 10 ppt
-        bindsym $up resize shrink height 10 px or 10 ppt
-        bindsym $right resize grow width 10 px or 10 ppt
+    # Pressing left will shrink the window’s width.
+    # Pressing right will grow the window’s width.
+    # Pressing up will shrink the window’s height.
+    # Pressing down will grow the window’s height.
+    bindsym $left resize shrink width 10 px or 10 ppt
+    bindsym $down resize grow height 10 px or 10 ppt
+    bindsym $up resize shrink height 10 px or 10 ppt
+    bindsym $right resize grow width 10 px or 10 ppt
 
-        # Same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+    # Same bindings, but for the arrow keys
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
 
-        # Back to normal: Enter or Escape or $mod+r
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-        bindsym $mod+r mode "default"
+    # Back to normal: Enter or Escape or $mod+r
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
 }
 
 bindsym $mod+r mode "resize"
@@ -404,7 +400,14 @@ client.urgent           $base08 $base08 $base00 $base0F
 
 default_border $border_style $border_width
 default_floating_border $border_style $border_width
+
+# Update borders on reload
 for_window [all] border $border_style $border_width
+
+# Hide title bar
+for_window [title="Picture-in-Picture"] border pixel 0
+
+# Increase space between icon and title
 for_window [all] title_window_icon padding 5px
 
 # for_window [all] title_format %title ｜ %class ｜ %instance
@@ -412,7 +415,6 @@ for_window [all] title_window_icon padding 5px
 
 # no_focus [window_role="pop-up"]
 # no_focus [class="plasmashell" window_type="on_screen_display"]
-no_focus [class="(?i)Rustdesk"]
 
 # include ~/.config/i3/config.d/*.conf
 # include config.d/assignments.conf
@@ -438,8 +440,9 @@ focus_follows_mouse off
 
 title_align center
 
-gaps inner 5px
-gaps outer -5px
+set $gap 5px
+gaps inner $gap
+gaps outer -$gap
 # smart_gaps inverse_outer
 # smart_gaps on
 
@@ -454,5 +457,8 @@ bindsym $mod+degree scratchpad show
 # Show the sup-mail scratchpad window, if any.
 # bindsym mod4+s [title="^Sup ::"] scratchpad show
 
+{{- if lookPath "i3status-rs" | isExecutable }}
+
 # Update status bar
 bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3status-rs
+{{- end }}

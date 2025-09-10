@@ -22,13 +22,19 @@ configuration {
   // on-menu-error: ;
   // on-screenshot-taken: ;
   terminal: "rofi-sensible-terminal";
+
   // ssh-client: "ssh";
   // ssh-command: "{terminal} -e {ssh-client} {host} [-p {port}]";
+
   // run-command: "{cmd}";
   // run-command: "{terminal} -e \"echo -ne '\033]0;{cmd}\007'; {cmd}\"";
+
   // run-list-command: "";
+
   // run-shell-command: "{terminal} -e {cmd}";
-  run-shell-command: "{terminal} -e \"echo -ne '\033]0;{cmd}\007'; {cmd}\"";
+  run-shell-command: "{terminal} --title={cmd} -e {cmd}"; // Ghostty
+  // run-shell-command: "{terminal} -e \"echo -ne '\033]0;{cmd}\007'; {cmd}\"";
+
   // window-command: "wmctrl -i -R {window}";
   // window-match-fields: "all";
   icon-theme: "Arc";

@@ -32,7 +32,7 @@ export VISUAL
 export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
 {{- end }}
 
-{{- if lookPath "curl" }}
+{{- if lookPath "curl" | isExecutable }}
 export CURL_HOME="$XDG_CONFIG_HOME/curl"
 {{- end }}
 
@@ -40,7 +40,7 @@ export CURL_HOME="$XDG_CONFIG_HOME/curl"
 # export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
 {{- end }}
 
-{{- if lookPath "eza" }}
+{{- if lookPath "eza" | isExecutable }}
 export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
 {{- end }}
 
@@ -55,12 +55,16 @@ export KREW_ROOT="${KREW_ROOT:-$HOME/.krew}"
 export TALOSCONFIG="${TALOSCONFIG:-$HOME/.talos/config}"
 {{- end }}
 
-{{- if lookPath "less" }}
-export LESSHISTFILE="$XDG_STATE_HOME/less/history"
+{{- if lookPath "less" | isExecutable }}
+export LESSHISTFILE=/dev/null # "$XDG_STATE_HOME/less/history"
 {{- end }}
 
 {{- if .features.git }}
 export LG_CONFIG_FILE="$XDG_CONFIG_HOME/lazygit/theme.yml,$XDG_CONFIG_HOME/lazygit/config.yml"
+{{- end }}
+
+{{- if lookPath "gpg" | isExecutable }}
+# TODO: export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 {{- end }}
 
 {{- if .features.go }}
@@ -93,19 +97,23 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 # export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
 {{- end }}
 
-{{- if lookPath "starship" }}
+{{- if lookPath "starship" | isExecutable }}
 export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
 {{- end }}
 
-{{- if and .features.sql (lookPath "psql") }}
+{{- if and .features.sql (lookPath "psql" | isExecutable) }}
 export PSQLRC="$XDG_CONFIG_HOME/psql/psqlrc"
 {{- end }}
 
-{{- if lookPath "rg" }}
+{{- if lookPath "rg" | isExecutable }}
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
 {{- end }}
 
-{{- if lookPath "wget" }}
+{{- if lookPath "wget" | isExecutable }}
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 {{- end }}
 # export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+{{- if lookPath "xauth" | isExecutable }}
+# TODO: export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+{{- end }}
