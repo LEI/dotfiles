@@ -1,5 +1,5 @@
-echo "mise install --quiet --yes"
-mise install --quiet --yes
+echo "mise install --verbose --yes"
+mise install --verbose --yes
 
 echo "mise ls"
-cmd mise ls
+mise ls

@@ -44,9 +44,15 @@ check_version() {
   local features
   features="$(chezmoi cat-config "$@" | yq .data.features)"
 
-  cmd dd --version | head -n1 # coreutils
-  # cmd grep --version | head -n1
-  cmd lsblk --version # util-linux
+  os="$(uname -s)"
+
+  # coreutils
+  if [ "$os" = Darwin ]; then
+    cmd gdd --version | head -n1
+  else
+    cmd dd --version | head -n1
+    cmd lsblk --version # util-linux
+  fi
 
   if has_feature atuin "$features"; then
     cmd atuin --version

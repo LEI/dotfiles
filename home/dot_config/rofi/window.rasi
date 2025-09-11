@@ -1,13 +1,7 @@
-// rofi -dump-config
-// https://github.com/davatorium/rofi/blob/next/CONFIG.md
-
-// @import "example" // ./example.rasi
-@theme "themes/tokyonight"
+// https://github.com/davatorium/rofi/issues/38
 
 configuration {
   // modes: "window,drun,run,ssh"; // combi
-  // font: "mono 12";
-  font: "Noto Sans 24";
   // location: 0;
   // yoffset: 0;
   // xoffset: 0;
@@ -20,31 +14,14 @@ configuration {
   // on-menu-canceled: ;
   // on-menu-error: ;
   // on-screenshot-taken: ;
-  terminal: "rofi-sensible-terminal";
-
-  // ssh-client: "ssh";
-  // ssh-command: "{terminal} -e {ssh-client} {host} [-p {port}]";
-
-  // run-command: "{cmd}";
-  // run-command: "{terminal} -e \"echo -ne '\033]0;{cmd}\007'; {cmd}\"";
-
-  // run-list-command: "";
-
-  // run-shell-command: "{terminal} -e {cmd}";
-  run-shell-command: "{terminal} --title={cmd} -e {cmd}"; // Ghostty
-  // run-shell-command: "{terminal} -e \"echo -ne '\033]0;{cmd}\007'; {cmd}\"";
 
   // window-command: "wmctrl -i -R {window}";
   // window-match-fields: "all";
-  icon-theme: "Arc";
+
   // drun-match-fields: "name,generic,exec,categories,keywords";
   // drun-categories: ;
   // drun-exclude-categories: ;
   // drun-show-actions: true;
-
-  // TODO: float right
-  // drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
-  drun-display-format: "{name} [<span weight='light' size='small'>{generic}</span>]";
 
   // drun-url-launcher: "xdg-open";
   // disable-history: false;
@@ -57,7 +34,7 @@ configuration {
   // sidebar-mode: false;
   // hover-select: false;
   // eh: 1;
-  // auto-select: false;
+  auto-select: true;
   // parse-hosts: false;
   // parse-known-hosts: true;
   // combi-modes: "window,drun,run,ssh,keys,calc";
@@ -115,7 +92,9 @@ configuration {
   // kb-remove-char-back: "BackSpace,Shift+BackSpace,Control+h";
   // kb-remove-to-eol: "Control+k";
   // kb-remove-to-sol: "Control+u";
-  // kb-accept-entry: "Control+j,Control+m,Return,KP_Enter";
+
+  // kb-accept-entry: "Control+j,Control+m,Return,KP_Enter,!Alt-Tab,!Alt+Alt_L,Alt+Return,Return";
+
   // kb-accept-custom: "Control+Return";
   // kb-accept-custom-alt: "Control+Shift+Return";
   // kb-accept-alt: "Shift+Return";
@@ -128,8 +107,10 @@ configuration {
   // kb-row-up: "Up,Control+p";
   // kb-row-down: "Down,Control+n";
   // kb-row-tab: "";
-  // kb-element-next: "Tab";
-  // kb-element-prev: "ISO_Left_Tab";
+
+  // kb-element-next: "Alt+Tab,Alt+Down"; // Tab
+  // kb-element-prev: "Alt+ISO_Left_Tab,Alt+Up"; // ISO_Left_Tab
+
   // kb-page-prev: "Page_Up";
   // kb-page-next: "Page_Down";
   // kb-row-first: "Home,KP_Home";
@@ -181,62 +162,7 @@ configuration {
   // me-accept-entry: "MouseDPrimary";
   // me-accept-custom: "Control+MouseDPrimary";
   timeout {
-    action: "kb-cancel";
-    delay:  0;
+    action: "kb-accept-entry";
+    delay:  5;
   }
-  window {
-    // display-name: "";
-    display-name: "";
-    // display-name: "";
-    // display-name: "󱂬";
-  }
-  run {
-    // display-name: "";
-    display-name: "";
-    // display-name: "";
-    // font: "mono 12";
-  }
-  keys {
-    display-name: "";
-  }
-  filebrowser {
-    display-name: "";
-    // directories-first: true;
-    // sorting-method:    "name";
-  }
-  combi {
-    // display-name: "";
-    display-name: ""; // 
-    height: 80%;
-  }
-  calc {
-    display-name: "󱖦";
-  }
-  // rofi-power-menu
-  // menu {
-  //   display-name: ">";
-  // }
-}
-
-listview {
-    lines: 28;
-    // columns: 1;
-}
-
-window {
-  // anchor: north;
-  // height: 80%;
-  location: north; // center;
-
-  // location: center;
-  // anchor: center;
-  // padding: 10px;
-  border-radius: 5px;
-
-  // background-color: transparent;
-  // transparency: "screenshot";
-
-  // x-offset: 10px;
-  y-offset: 180px;
-  // y-offset: 12%;
 }

@@ -43,7 +43,7 @@ commonPackages:
       windows: charmbracelet.crush
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   - name: devpod
-    enabled: '{{ and (eq .osIDLike "alpine" "arch" "darwin") (not (or .ephemeral .headless)) }}'
+    enabled: '{{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}'
     nameOverwrite:
       arch: devpod-bin
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
@@ -121,9 +121,9 @@ commonPackages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   # - httpstat
   - name: hurl
-    enabled: '{{ not (eq .osIDLike "debian" "fedora") }}'
-    nameOverwrite:
-      alpine: hurl --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
+    enabled: '{{ not (eq .osIDLike "alpine" "debian" "fedora") }}'
+    # nameOverwrite:
+    #   alpine: hurl --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
   - name: hyperfine
     enabled: '{{ eq .osIDLike "arch" "darwin" }}'
   # - name: incus incus-ui
@@ -175,12 +175,12 @@ commonPackages:
     enabled: '{{ not (eq .osIDLike "debian") }}'
     nameOverwrite:
       windows: dalance.procs
-  - { name: progress, enabled: '{{ eq .os "linux" }}' }
+  - { name: progress, enabled: '{{ eq .os "darwin" "linux" }}' }
   - name: python
     enabled: '{{ and .features.python (eq .osIDLike "alpine" "android" "darwin" "debian") }}'
     nameOverwrite:
       alpine: python3
-      darwin: python@3.11
+      # darwin: python@3.11
       debian: python3
   - name: ruby
     enabled: '{{ and .features.ruby (eq .osIDLike "alpine" "android" "debian" "fedora") }}'
@@ -433,7 +433,7 @@ packages:
       # - wireguard-tools
       # - xz
       - koekeishiya/formulae/yabai # yabai --start-service
-      - jackielii/tap/skhd-zig # koekeishiya/formulae/skhd
+      # - jackielii/tap/skhd-zig # koekeishiya/formulae/skhd
       # - zsh
       # - zsh-completions
     cask:

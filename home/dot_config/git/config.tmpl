@@ -6,7 +6,7 @@
 	c = clone --recursive
 	ca = !git add -A && git commit -av
 	co = checkout
-	cp = cherry-pick
+	# cp = cherry-pick # Conflicts with git-cp
 	l = log --abbrev-commit --graph --max-count=20 --pretty=oneline
 	P = push
 	p = pull # !"git pull; git submodule foreach git pull origin master"

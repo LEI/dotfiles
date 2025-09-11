@@ -17,7 +17,11 @@ log "Installing tools"
 # mise settings set disable_backends ubi
 {{- end }}
 
-cmd timeout 5m mise install --quiet --yes || cmd timeout 5m mise install --verbose --yes
+chezmoi_args="--yes"
+if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+  chezmoi_args="$chezmoi_args --verbose"
+fi
+cmd timeout 5m timeout 5m mise install $chezmoi_args
 
 log "Installed tools"
 

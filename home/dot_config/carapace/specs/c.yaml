@@ -32,5 +32,5 @@ commands:
     aliases: [v]
     run: "[chezmoi, verify]"
   - name: list-packages
-    aliases: []
+    aliases: [l]
     run: "[chezmoi-list-packages]"

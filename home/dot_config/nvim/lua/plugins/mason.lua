@@ -130,36 +130,6 @@ for _, name in pairs(mason_lsp) do
   table.insert(mason_tools, name)
 end
 
--- function table.indexOf(input, value)
---   local index = nil
---   for i, v in pairs(input) do
---     if v == value then
---       index = i
---       break
---     end
---   end
---   return index
--- end
-
-function table.removeValues(input, exclude)
-  if type(exclude) == 'string' then
-    exclude = { exclude }
-  end
-  for _, value in pairs(exclude) do
-    -- local index = table.indexOf(input, value)
-    -- if index ~= nil then
-    --   table.remove(input, index)
-    -- end
-    for i, v in pairs(input) do
-      if value == v then
-        table.remove(input, i)
-        break
-      end
-    end
-  end
-  return input
-end
-
 return {
   {
     'mason-org/mason.nvim',
@@ -237,15 +207,16 @@ return {
       'saghen/blink.cmp',
       -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
-    cmd = {
-      'LspInfo',
-      'LspInstall',
-      'LspLog',
-      -- 'LspRestart',
-      'LspStart',
-      -- 'LspStop',
-      'LspUninstall',
-    },
+    -- cmd = {
+    --   -- 'LspEslintFixAll',
+    --   'LspInfo',
+    --   'LspInstall',
+    --   'LspLog',
+    --   -- 'LspRestart',
+    --   'LspStart',
+    --   -- 'LspStop',
+    --   'LspUninstall',
+    -- },
     event = 'VeryLazy',
     opts = {
       automatic_enable = true, -- { exclude = {} },
@@ -349,10 +320,18 @@ return {
             },
           },
           tailwindcss = {
-            -- Exclude PHP
-            filetypes = table.removeValues(
+            -- filetypes = {
+            --   'css',
+            --   'less',
+            --   'postcss',
+            --   'sass',
+            --   'scss',
+            --   'stylus',
+            --   'sugarss',
+            -- },
+            filetypes = require('config.functions').removeValues(
               require('lspconfig.configs.tailwindcss').default_config.filetypes,
-              { 'php' }
+              { 'javascript', 'typescript', 'php' }
             ),
           },
           tofu_ls = {

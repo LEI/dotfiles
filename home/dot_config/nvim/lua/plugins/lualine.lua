@@ -2,8 +2,45 @@
 --   return vim.fn.expand('%:t')
 -- end
 
+local overseer_status = {
+  'overseer',
+  label = '', -- Prefix for task counts
+  colored = true, -- Color the task icons and counts
+  symbols = {
+    ['CANCELED'] = ' ',
+    ['FAILURE'] = '󰅚 ',
+    ['SUCCESS'] = '󰄴 ',
+    ['RUNNING'] = '󰑮 ',
+  },
+  unique = false, -- Unique-ify non-running task count by name
+  name = nil, -- List of task names to search for
+  name_not = false, -- When true, invert the name search
+  status = nil, -- List of task statuses to display
+  status_not = false, -- When true, invert the status search
+}
+
+local lazy_status = {
+  require('lazy.status').updates,
+  cond = require('lazy.status').has_updates,
+  color = function()
+    return { fg = Snacks and Snacks.util.color('Special') }
+  end,
+}
+
+local dap_status = {
+  function()
+    return '  ' .. require('dap').status()
+  end,
+  cond = function()
+    return Snacks and package.loaded.dap and require('dap').status() ~= ''
+  end,
+  color = function()
+    return { fg = Snacks and Snacks.util.color('Debug') }
+  end,
+}
+
 -- https://github.com/ravitemer/mcphub.nvim/blob/main/doc/extensions/lualine.md
-local mcphub = {
+local mcphub_status = {
   function()
     -- Check if MCPHub is loaded
     if not vim.g.loaded_mcphub then
@@ -134,36 +171,9 @@ return {
           -- },
         },
         lualine_x = {
-          {
-            'overseer',
-            label = '', -- Prefix for task counts
-            colored = true, -- Color the task icons and counts
-            symbols = {
-              ['CANCELED'] = ' ',
-              ['FAILURE'] = '󰅚 ',
-              ['SUCCESS'] = '󰄴 ',
-              ['RUNNING'] = '󰑮 ',
-            },
-            unique = false, -- Unique-ify non-running task count by name
-            name = nil, -- List of task names to search for
-            name_not = false, -- When true, invert the name search
-            status = nil, -- List of task statuses to display
-            status_not = false, -- When true, invert the status search
-          },
           -- 'nvim_treesitter#statusline(90)',
-          -- stylua: ignore
-          {
-            function() return '  ' .. require('dap').status() end,
-            cond = function() return Snacks and package.loaded.dap and require('dap').status() ~= '' end,
-            color = function() return { fg = Snacks and Snacks.util.color('Debug') } end,
-          },
-          -- stylua: ignore
-          {
-            require('lazy.status').updates,
-            cond = require('lazy.status').has_updates,
-            color = function() return { fg = Snacks and Snacks.util.color('Special') } end,
-          },
-          mcphub,
+          dap_status,
+          mcphub_status,
           {
             'codecompanion',
             cond = function()
@@ -244,6 +254,8 @@ return {
           -- 'filename',
         },
         lualine_x = {
+          overseer_status,
+          lazy_status,
           function()
             -- if not package.loaded.persistence then
             --   return ''

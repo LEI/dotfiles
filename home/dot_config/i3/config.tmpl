@@ -29,6 +29,13 @@ font pango:$font_family $font_size
 # include config.d/exec.conf
 include config.d/bind.conf
 
+{{- if lookPath "betterlockscreen" | isExecutable }}
+set $lock_command betterlockscreen --lock dim
+{{- else }}
+set $lock_command i3lock --nofork
+{{- end }}
+bindsym $mod+shift+x exec $lock_command
+
 {{- if lookPath "dex" | isExecutable }}
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
@@ -50,17 +57,17 @@ exec --no-startup-id dex --autostart --environment i3
 {{- end }}
 
 {{- if and (lookPath "xss-lock" | isExecutable) (lookPath "i3lock" | isExecutable) }}
+# TODO: check for light-locker in /etc/xdg/autostart and ~/.config/autostart
 {{- if lookPath "betterlockscreen" | isExecutable }}
 # Set desktop background with custom effect
-exec --no-startup-id betterlockscreen -w dim
+exec --no-startup-id betterlockscreen --wall dim
 # Alternative (set last used background)
 exec --no-startup-id source ~/.fehbg
-exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen --lock
+# exec --no-startup-id xss-lock --transfer-sleep-lock -- $lock_command
 {{- else }}
-# TODO: check for light-locker in /etc/xdg/autostart and ~/.config/autostart
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+# exec --no-startup-id xss-lock --transfer-sleep-lock -- $lock_command
 {{- end }}
 {{- end }}
 
@@ -117,6 +124,8 @@ exec --no-startup-id pamac-tray
 # exec --no-startup-id redshift
 {{- end }}
 
+exec --no-startup-id setxkbmap -option caps:escape
+
 {{- if lookPath "tmux" | isExecutable }}
 # FIXME: resurrect
 # exec --no-startup-id i3-sensible-terminal -e 'tmux attach || tmux; $SHELL'
@@ -134,6 +143,10 @@ exec --no-startup-id i3-sensible-terminal
 {{- if lookPath "seahorse" | isExecutable }}
 # exec --no-startup-id i3-msg "scratchpad; exec seahorse"
 exec --no-startup-id seahorse
+{{- end }}
+
+{{- if lookPath "xcape" | isExecutable }}
+exec --no-startup-id xcape
 {{- end }}
 
 # Use Mouse+$mod to drag floating windows to their wanted position
@@ -154,12 +167,12 @@ bindsym $mod+t exec $i3-sensible-terminal
 # Kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym $alt+space exec "rofi -show combi -modes combi -combi-modes 'drun,run,calc'"
+bindsym $alt+space exec "rofi -show combi -modes combi -combi-modes 'drun,run,keys,calc'"
 bindsym $alt+Tab exec ~/.config/i3/scripts/alt-tab.sh
 
 # bindsym $mod+d exec --no-startup-id dmenu_run
-# bindcode $mod+40 exec "rofi -modi drun,run -show drun"
-bindsym $mod+d exec "rofi -show combi"
+# bindsym $mod+d exec "rofi -modi drun,run -show drun"
+bindsym $mod+d exec "rofi -show combi -combi-modes 'drun,run'"
 bindsym $mod+Shift+d exec "rofi -show combi -drun-show-actions"
 bindsym $mod+Control+d exec --no-startup-id "i3-dmenu-desktop"
 
@@ -426,6 +439,7 @@ for_window [class="(?i)mplayer"] floating enable
 for_window [class="(?i)pavucontrol"] floating enable
 for_window [class="(?i)rustdesk"] floating enable
 for_window [class="(?i)seahorse"] floating enable
+for_window [class="(?i)vlc"] floating enable
 for_window [title="Preferences$"] floating enable
 for_window [title="^Configuration Errors$"] floating enable
 for_window [window_role="pop-up"] floating enable
