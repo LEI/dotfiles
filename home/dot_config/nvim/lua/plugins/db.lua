@@ -3,7 +3,7 @@ return {
     'tpope/vim-dadbod',
     tag = 'v1.4',
     dependencies = { 'kristijanhusak/vim-dadbod-completion' },
-    cmd = { 'DB' },
+    cmd = 'DB',
   },
   {
     'kristijanhusak/vim-dadbod-ui',

@@ -12,7 +12,6 @@ fi
 
 if [ $# -eq 0 ]; then
   # $KUBECTL_COMMAND cluster-info
-  $KUBECTL_COMMAND config get-contexts
-else
-  $KUBECTL_COMMAND "$@"
+  set -- config get-contexts
 fi
+$KUBECTL_COMMAND "$@"

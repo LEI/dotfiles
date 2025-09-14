@@ -46,7 +46,8 @@ return {
   -- },
   {
     'm4xshen/smartcolumn.nvim',
-    tag = 'v1.1.1',
+    -- tag = 'v1.1.1',
+    version = 'v1.x',
     event = 'VeryLazy',
     opts = {
       colorcolumn = '80',
@@ -70,7 +71,8 @@ return {
   {
     'lewis6991/gitsigns.nvim',
     dependencies = { 'folke/snacks.nvim' },
-    tag = 'v1.0.2',
+    -- tag = 'v1.0.2',
+    version = 'v1.x',
     cmd = 'Gitsigns',
     event = {
       -- 'CursorHold',
@@ -104,6 +106,7 @@ return {
     -- NOTE: snacks todo comments not released yet
     branch = 'main',
     -- tag = 'v1.4.0',
+    -- version = 'v1.x',
     dependencies = {
       'folke/snacks.nvim',
       'nvim-lua/plenary.nvim',
@@ -139,7 +142,8 @@ return {
 
   {
     'folke/trouble.nvim',
-    tag = 'v3.7.1',
+    -- tag = 'v3.7.1',
+    version = 'v3.x',
     cmd = 'Trouble',
     opts = {},
     -- event = 'CursorHold',

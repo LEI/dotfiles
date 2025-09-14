@@ -47,6 +47,7 @@ export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
 {{- if .features.kube }}
 export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
 # export KUBECONFIG="${KUBECONFIG:-$XDG_CONFIG_HOME/kube/config.yaml}"
+export KUBERC="${KUBERC:-$XDG_CONFIG_HOME/kube/kuberc.yaml}"
 
 export KREW_ROOT="${KREW_ROOT:-$HOME/.krew}"
 # export KREW_ROOT="$HOME/.local/share/krew" # /usr/local/krew

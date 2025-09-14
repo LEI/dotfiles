@@ -7,7 +7,7 @@ Firefox = ""
 Firefox-nightly = ""
 Ghostty = ""
 # Gpick = ""
-# Nautilus = "📘"
+Nautilus = "📘"
 Nvim = ""
 Notification = ""
 # TelegramDesktop = ""
@@ -22,8 +22,8 @@ Vim = ""
 [aliases.class]
 "^(?i)chromium$" = "Chromium"
 "^(?i)firefox$" = "Firefox"
-# "^(?i)com\\.mitchellh\\.ghostty$" = "Ghostty"
-# "Org\\.gnome\\.Nautilus" = "Nautilus"
+"^(?i)com\\.mitchellh\\.ghostty$" = "Ghostty"
+"^(?i)org\\.gnome\\.nautilus" = "Nautilus"
 # TelegramDesktop = "Telegram"
 "(?i)^thunar$" = "Thunar"
 "(?i)^vlc$" = "VLC"
@@ -50,7 +50,7 @@ Vim = ""
 [general]
 separator = ' ｜ ' # |
 # split_at = ":"
-# empty_label = "🌕"
+# empty_label = ""
 # display_property = "app_id"
 # display_property = "class"
 # display_property = "instance"
@@ -58,7 +58,7 @@ display_property = "name"
 # default_icon = ""
 
 [options]
-remove_duplicates = false
+remove_duplicates = true
 no_names = false
 no_icon_names = true
 focus_fix = false

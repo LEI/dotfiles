@@ -3,4 +3,4 @@ extraPackages:
   curl:
     nameOverwrite:
       windows: curl.curl
-    type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'

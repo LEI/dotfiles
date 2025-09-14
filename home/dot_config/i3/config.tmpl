@@ -74,10 +74,6 @@ exec --no-startup-id source ~/.fehbg
 exec --no-startup-id nm-applet
 {{- end }}
 
-{{- if lookPath "i3wsr" | isExecutable }}
-exec_always --no-startup-id i3wsr
-{{- end }}
-
 # # Use `xrandr` to list available modes (TODO: auto detection)
 # exec_always --no-startup-id xrandr --output VGA-1 --mode 1600x900
 # exec --no-startup-id xautolock -time 10 -locker $config/bin/lock
@@ -112,6 +108,10 @@ exec --no-startup-id xfce4-power-manager --daemon --restart
 
 {{- if lookPath "xfce4-volumed-pulse" | isExecutable }}
 exec --no-startup-id xfce4-volumed-pulse
+{{- end }}
+
+{{- if lookPath "volumeicon" | isExecutable }}
+exec --no-startup-id volumeicon
 {{- end }}
 
 {{- if lookPath "xfsettingsd" | isExecutable }}
@@ -365,23 +365,32 @@ set $base0F #fcc09e
 set_from_resource $base01 i3wm.base01 #1f222dCC
 set_from_resource $base02 i3wm.base02 #252936CC
 
+{{- if lookPath "polybar" | isExecutable }}
+
+exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+{{- else }}
+
 bar {
     font {{ .i3.barFont }}
     # font pango:$font_family, FontAwesome $font_size
 
     # NOTE: cause all tray icons to have a transparent background
-    # i3bar_command i3bar --transparency
+    i3bar_command i3bar # --transparency
 
     position top
+
+    {{- if lookPath "i3status-rs" | isExecutable }}
+
     # https://github.com/rholder/i3status-title-on-bar
     # i3status | i3status-title-on-bar
     status_command i3status-rs
+    {{- end }}
 
     tray_output primary
     # tray_padding 2px
 
     # separator_symbol ":|:"
-    separator_symbol "｜"
+    separator_symbol " " # ｜
 
     # workspace_buttons yes
     # workspace_command script.sh
@@ -407,6 +416,18 @@ bar {
     }
 }
 
+{{- if lookPath "i3status-rs" | isExecutable }}
+
+# Update status bar
+bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3status-rs
+{{- end }}
+
+{{- if lookPath "i3wsr" | isExecutable }}
+
+exec_always --no-startup-id i3wsr
+{{- end }}
+{{- end }}
+
 # https://i3wm.org/docs/userguide.html#client_colors
 # # class                 border  backgr. text    indicator child_border
 # client.focused          #4c7899 #285577 #ffffff #2e9ef4   #285577
@@ -422,6 +443,7 @@ bar {
 # client.focused_inactive $base02 $base02 $base03 $base0F
 # client.unfocused        $base02 $base02 $base03 $base0F
 # client.urgent           $base02 $base08 $base00 $base0F
+
 client.focused          $base01 $base01 $base07 $base0F
 client.focused_inactive $base02 $base02 $base03 $base0F
 client.unfocused        $base02 $base02 $base03 $base0F
@@ -435,6 +457,7 @@ default_floating_border $border_style $border_width
 
 # Hide title bar
 #for_window [class="(?i)Ghostty"] border pixel 0
+# for_window [class="(?i)polybar"] border pixel 0
 for_window [class="(?i)xfce4-notifyd"] border pixel 0
 for_window [title="(?i)Picture-in-Picture"] border pixel 0
 
@@ -459,7 +482,9 @@ for_window [class="(?i)pavucontrol"] floating enable
 for_window [class="(?i)rustdesk"] floating enable
 for_window [class="(?i)seahorse"] floating enable
 for_window [class="(?i)vlc"] floating enable
+for_window [title="Manager$"] floating enable
 for_window [title="Preferences$"] floating enable
+for_window [title="Tool$"] floating enable
 for_window [title="^Configuration Errors$"] floating enable
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="task_dialog"] floating enable
@@ -489,9 +514,3 @@ bindsym $mod+degree scratchpad show
 
 # Show the sup-mail scratchpad window, if any.
 # bindsym mod4+s [title="^Sup ::"] scratchpad show
-
-{{- if lookPath "i3status-rs" | isExecutable }}
-
-# Update status bar
-bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3status-rs
-{{- end }}

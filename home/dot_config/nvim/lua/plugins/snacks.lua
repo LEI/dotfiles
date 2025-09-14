@@ -262,9 +262,9 @@ return {
   -- https://www.lazyvim.org/extras/editor/snacks_picker
   {
     'folke/snacks.nvim',
-    -- NOTE: snacks git utils not released yet
     -- branch = 'main',
-    tag = 'v2.22.0',
+    -- tag = 'v2.23.0',
+    version = 'v2.x',
     dependencies = {
       'echasnovski/mini.icons',
       -- {

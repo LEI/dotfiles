@@ -42,5 +42,5 @@ winget upgrade --all --disable-interactivity --silent
  "WinGetVersion" "1.11.430"
 -}}
 '{{ $json | toJson }}' | Out-File -FilePath winget.json -Encoding utf8
-winget import --import-file=winget.json --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget import --import-file=winget.json --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade
 if(!$?) { Exit $LASTEXITCODE }

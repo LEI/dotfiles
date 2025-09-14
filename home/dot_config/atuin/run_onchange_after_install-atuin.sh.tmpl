@@ -9,12 +9,12 @@ set -eu
 # ble.sh or bash-preexec is required for atuin in bash
 # https://docs.atuin.sh/guide/installation/
 
-# {{- if eq .osID "alpine" }}
+{{- if eq .osID "alpine" }}
 if [ ! -f ~/.local/share/bash-preexec.sh ]; then
   curl -LSsfo ~/.local/share/bash-preexec.sh \
     https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
 fi
-# {{- else }}
+{{- else }}
 if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   echo >&2 "Installing ble.sh"
   BLE_NAME="ble-nightly"
@@ -23,7 +23,7 @@ if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
   echo >&2 "Installed ble.sh"
 fi
-# {{- end }}
+{{- end }}
 
 if command -v atuin; then
   echo >&2 "Already installed"
@@ -31,8 +31,9 @@ if command -v atuin; then
   exit
 fi
 
-# {{- $atuin := output "chezmoi" "execute-template" "--refresh-externals=never" .extraPackages.atuin.enabled | trim }}
-# {{- if ne $atuin "true" }}
+{{- $atuin := output "chezmoi" "execute-template" "--refresh-externals=never" .extraPackages.atuin.enabled | trim }}
+{{- if ne $atuin "true" }}
+
 echo >&2 "Installing atuin"
 # https://github.com/atuinsh/atuin/releases
 ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
@@ -48,6 +49,6 @@ URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
 BIN="$NAME/atuin"
 install_tar_gz "$URL" "$BIN"
 echo >&2 "Installed atuin"
-# {{- end }}
+{{- end }}
 
 # atuin import auto

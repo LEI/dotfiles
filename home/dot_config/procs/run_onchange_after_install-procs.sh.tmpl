@@ -10,14 +10,14 @@ if command -v procs; then
   exit
 fi
 
-# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
-echo >&2 "Installing procs"
-export DEBIAN_FRONTEND=noninteractive
-VERSION="$(get_release dalance/procs)"
-ARCH="$(uname -m)" # aarch64, x86_64
-OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # linux, mac, windows
-NAME="procs-$VERSION-$ARCH-$OS.zip"
-URL="https://github.com/dalance/procs/releases/download/$VERSION/$NAME"
-install_zip "$URL" procs
-echo >&2 "Installed procs"
-# {{- end }}
+{{- if eq .osIDLike "debian" }}
+# echo >&2 "Installing procs"
+# export DEBIAN_FRONTEND=noninteractive
+# VERSION="$(get_release dalance/procs)"
+# ARCH="$(uname -m)" # aarch64, x86_64
+# OS="$(uname -s | tr '[:upper:]' '[:lower:]')" # linux, mac, windows
+# NAME="procs-$VERSION-$ARCH-$OS.zip"
+# URL="https://github.com/dalance/procs/releases/download/$VERSION/$NAME"
+# install_zip "$URL" procs
+# echo >&2 "Installed procs"
+{{- end }}

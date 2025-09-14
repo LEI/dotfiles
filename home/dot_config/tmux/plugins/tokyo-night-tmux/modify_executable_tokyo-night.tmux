@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- $prefix := "Continuum status: #{continuum_status} " -}}
+{{- $prefix := "" -}}
 {{- $suffix := "" -}}
 {{- .chezmoi.stdin
   | replaceAllRegex "(tmux set -g message-style .*fg=).{THEME.background.}" "${1}${THEME[bblack]}"

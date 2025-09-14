@@ -24,11 +24,11 @@ if ! command -v ghostty; then
       cmd gpg --dearmor |
       cmd sudo tee /etc/apt/keyrings/home_clayrisser_sid.gpg >/dev/null
     cmd sudo tee /etc/apt/sources.list.d/home:clayrisser:sid.sources >/dev/null <<EOF
-  Types: deb
-  URIs: http://download.opensuse.org/repositories/home:/clayrisser:/sid/Debian_Unstable/
-  Suites: /
-  Signed-By: /etc/apt/keyrings/home_clayrisser_sid.gpg
-  EOF
+Types: deb
+URIs: http://download.opensuse.org/repositories/home:/clayrisser:/sid/Debian_Unstable/
+Suites: /
+Signed-By: /etc/apt/keyrings/home_clayrisser_sid.gpg
+EOF
   fi
 
   cmd sudo apt-get update --quiet >/dev/null
@@ -63,4 +63,5 @@ else
   cmd ghostty --version | head -n1
 fi
 
-cmd ghostty +validate-config
+# FIXME: Ghostyy 1.2.0 missing theme
+# cmd ghostty +validate-config

@@ -1,10 +1,10 @@
 # https://github.com/twpayne/dotfiles/blob/master/home/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 
-# $env:Path += ";$env:UserProfile\.local\bin"
 $env:XDG_CONFIG_HOME = "$HOME\.config"
 # $env:PATH="$env:USERPROFILE\.local\bin;$env:PATH"
 # $env:PATH="$env:USERPROFILE\scoop\shims;$env:PATH"
 # $env:PATH="$env:APPDATA\Python\Python39\Scripts;$env:PATH"
+$env:Path += ";$env:UserProfile\.local\bin"
 
 $ENV:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
 
@@ -20,6 +20,12 @@ $newPath = $currentPath + ";" + $shimPath
 # if (-not (Test-Path $profile)) { New-Item $profile -Force }
 # # open the profile
 # Invoke-Item $profile
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#powershell
+$env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
+Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+carapace _carapace | Out-String | Invoke-Expression
 
 # https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/creating-profiles?view=powershell-7.5
 if ($PSVersionTable.PSVersion.ToString() -ge '7.2.0') {

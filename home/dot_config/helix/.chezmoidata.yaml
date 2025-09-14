@@ -7,4 +7,4 @@ extraPackages:
     type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   helixbinhx:
     enabled: '{{ and .features.helix (eq .osID "arch") }}' # ne .osID "manjaro"
-    type: aur # '{{ eq .osIDLike "arch" | ternary "aur" "" }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

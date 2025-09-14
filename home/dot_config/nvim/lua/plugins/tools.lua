@@ -1,6 +1,6 @@
 return {
   {
-    -- Alternative: nvim-pack/nvim-spectre
+    -- Alternative: nvim-pack/nvim-spectre, scooter
     'MagicDuck/grug-far.nvim',
     cmd = { 'GrugFar', 'GrugFarWithin' },
     keys = {

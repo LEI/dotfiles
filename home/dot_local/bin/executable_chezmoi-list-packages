@@ -14,18 +14,19 @@ if [ -n "$extra_key" ]; then
 fi
 if [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
   extra_installed="$(pacman -Qqm)"
-  pacman -Qq | grep -vx "$extra_installed" | sort >$TMPDIR/installed-packages.txt
-  echo "$extra_installed" | sort >$TMPDIR/installed-extra.txt
+  pacman -Qq | grep -vx "$extra_installed" | sort >"$TMPDIR/installed-packages.txt"
+  echo "$extra_installed" | sort >"$TMPDIR/installed-extra.txt"
 elif [ "$OS" = "darwin" ]; then
-  brew list --install-on-request | sort >$TMPDIR/installed-packages.txt
-  brew list --cask | sort >$TMPDIR/installed-extra.txt
+  # brew list --install-on-request
+  brew list --formulae | sort >"$TMPDIR/installed-packages.txt"
+  brew list --cask | sort >"$TMPDIR/installed-extra.txt"
 fi
 echo "Packages:"
-# printf "%s\n%s" "$packages" "$extra" | sort >$TMPDIR/packages.txt
-echo "$packages" | sort >$TMPDIR/packages.txt
-$diff $TMPDIR/packages.txt $TMPDIR/installed-packages.txt
+# printf "%s\n%s" "$packages" "$extra" | sort >"$TMPDIR/packages.txt"
+echo "$packages" | sort >"$TMPDIR/packages.txt"
+$diff "$TMPDIR/packages.txt" "$TMPDIR/installed-packages.txt"
 if [ -n "${extra:-}" ]; then
   echo "Extras:"
-  echo "$extra" | sort >$TMPDIR/extra.txt
-  $diff $TMPDIR/extra.txt $TMPDIR/installed-extra.txt
+  echo "$extra" | sort >"$TMPDIR/extra.txt"
+  $diff "$TMPDIR/extra.txt" "$TMPDIR/installed-extra.txt"
 fi

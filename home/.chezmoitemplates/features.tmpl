@@ -104,7 +104,7 @@
 {{- else if eq .osIDLike "debian" }}
 {{- $features = mergeOverwrite $features (dict
   "atuin" (not .glibc231)
-  "ghostty" (not .glibc231)
+  "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))))
   "helix" (not .glibc231)
   "kube" false
   "neovim" true

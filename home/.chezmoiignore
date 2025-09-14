@@ -88,15 +88,17 @@
 .config/helix/Makefile
 {{- end }}
 
-.config/dunst/
 {{- if not .features.i3 }}
 .Xresources
 .config/Kvantum/
 .config/X11/
 # .config/autostart/
+.config/environment.d/
 .config/gtk-*/
 .config/i3*/
 .config/picom/
+.config/polybar/
+.config/qt*ct/
 .config/rofi/
 .config/ulauncher/
 .config/xdg-desktop-portal
@@ -110,6 +112,7 @@
 .config/carapace/specs/k.yaml
 .config/k9s/
 .config/krew/
+.config/kube/
 .config/sh/plugins/kubectl.sh
 {{- if lookPath "kubectl" }}.local/bin/k{{- end }}
 {{- end }}

@@ -1,5 +1,12 @@
 {{- $packages := list -}}
 {{- range $pkg := includeTemplate "packages.tmpl" . | fromJson -}}
-{{- $packages = concat $packages ($pkg | replaceAllRegex "[\\w@-]+/" "" | splitList " ") -}}
+{{-   $name := "" -}}
+{{-   if kindIs "map" $pkg -}}
+{{-     $name = $pkg.name -}}
+{{-   else -}}
+{{-     $name = $pkg -}}
+{{-   end -}}
+{{-   $name = $name | replaceAllRegex "[\\w@-]+/" "" -}}
+{{-   $packages = append $packages $name -}}
 {{- end -}}
-{{- $packages | join "\n" -}}
+{{- $packages | sortAlpha | uniq | join "\n" -}}

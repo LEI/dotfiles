@@ -53,21 +53,21 @@ shadow-offset-y = -7;
 # unless no-fading-openclose is used. Can be set per-window using rules.
 #
 # Default: false
-fading = true;
+# fading = true;
 
 # Opacity change between steps while fading in. (0.01 - 1.0, defaults to 0.028)
 # fade-in-step = 0.03;
-fade-in-step = 0.2;
+fade-in-step = 0.1;
 
 # Opacity change between steps while fading out. (0.01 - 1.0, defaults to 0.03)
 # fade-out-step = 0.03;
- fade-out-step = 0.2;
+fade-out-step = 0.1;
 
 # The time between steps in fade step, in milliseconds. (> 0, defaults to 10)
 # fade-delta = 10
 
 # Do not fade on window open/close.
-# no-fading-openclose = false
+# no-fading-openclose = true
 
 # Do not fade destroyed ARGB windows with WM frame. Workaround of bugs in Openbox, Fluxbox, etc.
 # no-fading-destroyed-argb = false
@@ -98,11 +98,9 @@ frame-opacity = {{ .i3.opacity }};
 # `transparent-clipping`.
 #
 # Default: 0 (disabled)
-# corner-radius = 5
 # FIXME: ghostty right-click menu
 # See ~/.config/gtk-4.0/gtk.css
-corner-radius = {{ add .i3.borderRadius 12 }}
-# corner-radius = {{ .i3.borderRadius }}
+corner-radius = {{ .i3.borderRadius }}
 
 #################################
 #            Blur               #
@@ -223,7 +221,6 @@ detect-transient = true;
 #
 # Default: false
 use-damage = true;
-# use-damage = false;
 
 # Use X Sync fence to wait for the completion of rendering of other windows,
 # before using their content to render the current screen.
@@ -345,10 +342,17 @@ rules: ({
   shadow = false;
 }, {
   # match = "class_g ?= 'Firefox' && argb";
-  match = "class_g ?= 'Firefox' && (window_type = 'popup_menu' || window_type = 'utility')";
+  match = "class_g ?= 'Firefox' && window_type = 'utility'";
+  # match = "class_g ?= 'Firefox' && (window_type = 'popup_menu' || window_type = 'utility')";
   blur-background = false;
   shadow = false;
   # full-shadow = true;
+}, {
+  match = "("
+    "class_g ?= 'riseupvpn' || "
+    "class_g ?= 'qpdfview') && window_type = 'popup_menu'";
+  blur-background = false;
+  shadow = false;
 })
 
 # `@include` directive can be used to include additional configuration files.

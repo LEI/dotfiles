@@ -11,7 +11,8 @@ if [ -z "${DISPLAY:-}" ]; then
 fi
 
 theme_name="{{ .i3.themeName }}"
-# icon_sizes=""
+font_name="{{ .i3.fontFamily }} {{ .i3.fontSize }}"
+monospace_font_name="{{ .i3.fontFamily }} Mono {{ .i3.fontSize }}"
 icon_theme_name="{{ .i3.iconThemeName }}" # Arc-Dark
 dark_mode="{{ .i3.darkMode }}"
 pm_tray="{{ .i3.pmTray }}"
@@ -24,6 +25,16 @@ if [ "$current_theme_name" != "$theme_name" ]; then
   cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string || true # --create
 fi
 
+current_font_name="$(cmd xfconf-query --channel xsettings --property /Gtk/FontName || echo "")"
+if [ "$current_font_name" != "$font_name" ]; then
+  cmd xfconf-query --channel xsettings --property /Gtk/FontName --set "$font_name" --type string || true # --create
+fi
+
+current_monospace_font_name="$(cmd xfconf-query --channel xsettings --property /Gtk/MonospaceFontName || echo "")"
+if [ "$current_monospace_font_name" != "$monospace_font_name" ]; then
+  cmd xfconf-query --channel xsettings --property /Gtk/MonospaceFontName --set "$monospace_font_name" --type string || true # --create
+fi
+
 # current_icon_sizes="$(cmd xfconf-query --channel xsettings --property /Gtk/IconSizes || echo "")"
 # if [ "$current_icon_sizes" != "$icon_sizes" ]; then
 #   cmd xfconf-query --channel xsettings --property /Gtk/IconSizes --set "$icon_sizes" --type string || true # --create
@@ -32,6 +43,13 @@ fi
 current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/IconThemeName || echo "")"
 if [ "$current_theme_name" != "$icon_theme_name" ]; then
   cmd xfconf-query --channel xsettings --property /Net/IconThemeName --set "$icon_theme_name" --type string || true # --create
+fi
+
+# dpi=96
+dpi=-1
+current_dpi="$(cmd xfconf-query --channel xsettings --property /Xft/DPI || echo "")"
+if [ "$current_dpi" != "$dpi" ]; then
+  cmd xfconf-query --channel xsettings --property /Xft/DPI --set "$dpi" --type int || true # --create
 fi
 {{- end }}
 

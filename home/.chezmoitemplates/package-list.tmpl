@@ -42,10 +42,15 @@
 {{-     continue }}
 {{-   end }}
 
-{{-   if ne $packageType "mas" }}
-{{-     $output = append $output $packageName }}
-{{-   else }}
-{{-     $output = append $output (dict "name" $packageName "id" $pkg.id) }}
+{{-   $hasSpaces := eq $packageType "mas" }}
+{{-   $pkgList := $hasSpaces | ternary (list $packageName) ($packageName | splitList " ") }}
+{{-   range $name := $pkgList }}
+{{-     if eq $packageType "tap" "brew" "cask" "mas" "vscode" }}
+{{-       $options := get $pkg "options" | default dict }}
+{{-       $output = append $output (dict "name" $name "options" $options) }}
+{{-     else }}
+{{-       $output = append $output $name }}
+{{-     end }}
 {{-   end }}
 
 {{- end }}

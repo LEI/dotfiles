@@ -19,24 +19,68 @@ brew update --quiet
 brew upgrade --quiet
 {{- end }}
 
-brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
-{{- range $packages | sortAlpha }}
-{{- if contains "/" . }}
-tap {{ . | replaceAllRegex "/[\\w@-]+$" "" | quote }}
-{{- end }}
-brew {{ . | quote }}
-{{- end }}
-{{- range $caskPackages | sortAlpha }}
-cask {{ . | quote }}
-{{- end }}
-{{- range $masPackages }}
-mas {{ .name | quote }}, id: {{ .id }}
-{{- end }}
-{{- range $vscodePackages | sortAlpha }}
-vscode {{ . | quote }}
+{{- $brewPackages := list }}
+{{- $taps := list }}
+{{- range $packages }}
+{{-   $name := "" }}
+{{-   $opts := "" }}
+{{-   if kindIs "map" . }}
+{{-     $name = .name }}
+{{-   else }}
+{{-     $name = . }}
+{{-   end }}
+{{-   if contains "/" $name }}
+{{-     $taps = append $taps ($name | replaceAllRegex "/[\\w@-]+$" "") }}
+{{-   end }}
+{{-   $brewPackages = append $brewPackages . }}
 {{- end }}
 
-# TODO: deduplicate
+{{- $brewfile := output .sh "-c" "test -f ~/.config/homebrew/Brewfile && grep -v '^#' ~/.config/homebrew/Brewfile" | splitList "\n" -}}
+{{- range without $brewfile "" }}
+{{-   $type := index (. | splitList " ") 0 }}
+{{-   $pattern := printf "^%s \"(.*)\",? ?(.*)$" $type }}
+{{-   $pkg := dict }}
+{{-   $_ := $pkg | setValueAtPath "name" (. | replaceAllRegex $pattern "${1}") }}
+{{-   $_ := $pkg | setValueAtPath "options" (. | replaceAllRegex $pattern "${2}") }}
+{{-   if eq $type "tap" }}
+{{-     $taps = append $taps $pkg }}
+{{-   else if eq $type "brew" }}
+{{-     $brewPackages = append $brewPackages $pkg }}
+{{-   else if eq $type "cask" }}
+{{-     $caskPackages = append $caskPackages $pkg }}
+{{-   else if eq $type "mas" }}
+{{-     $masPackages = append $masPackages $pkg }}
+{{-   else if eq $type "vscode" }}
+{{-     $vscodePackages = append $vscodePackages $pkg }}
+{{-   end }}
+{{- end }}
+
 # brew bundle dump --file=~/.config/homebrew/Brewfile
-{{ output .sh "-c" "test -f ~/.config/homebrew/Brewfile && grep -v '^#' ~/.config/homebrew/Brewfile" -}}
+brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
+{{- $packageMap := dict
+  "tap" $taps
+  "brew" $brewPackages
+  "cask" $caskPackages
+  "mas" $masPackages
+  "vscode" $vscodePackages
+}}
+{{- range $type := list "tap" "brew" "cask" "mas" "vscode" }}
+{{-   range $pkg := get $packageMap $type }}
+{{-     $name := "" }}
+{{-     $opts := "" }}
+{{-     if kindIs "map" $pkg }}
+{{-       $name = $pkg.name }}
+{{-       if get $pkg "options" }}
+{{-         $opts = $pkg.options }}
+{{-       end }}
+{{-     else }}
+{{-       $name = $pkg }}
+{{-     end }}
+{{ $type }} {{ $name | quote }}
+{{-     if kindIs "map" $opts }}
+{{-       range $key, $value := $opts }}, {{ $key }}: {{ $value | toJson }}{{ end }}
+{{-     else if $opts }}, {{ $opts }}
+{{-     end }}
+{{-   end }}
+{{- end }}
 EOF

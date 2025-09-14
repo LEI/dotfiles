@@ -1,15 +1,17 @@
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
 
-{{- $ephemeral := false -}}
-{{- $headless := false -}}
+{{- $ephemeral := env "CHEZMOI_EPHEMERAL" | not | not -}}
+{{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
 {{- $binDir := joinPath $homeDir ".local" "bin" -}}
+
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
+
 {{- $interactive := stdinIsATTY -}}
-{{- $profile := env "CHEZMOI_PROFILE" -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
@@ -107,7 +109,6 @@
 # age:
 #   identity: {{ env "HOME" }}/key.txt
 #   recipient: age12wkemshyplj4chhlz5e8tf9klsyuyxjuuzz6r0nxapjf4zq0sepqcdhfn0
-
 
 {{- if eq $osID "windows" }}
 interpreters:

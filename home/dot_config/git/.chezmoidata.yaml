@@ -1,5 +1,6 @@
 ---
 extraPackages:
+  # gcli:
   gh:
     enabled: >
       {{ and .features.git (not (or
@@ -45,7 +46,7 @@ extraPackages:
     nameOverwrite:
       windows: GLab.GLab
     type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
-  lazygit:
+  lazygit: # tig
     enabled: '{{ and .features.git (eq .osIDLike "alpine" "arch" "darwin" "windows") }}'
     nameOverwrite:
       windows: JesseDuffield.lazygit

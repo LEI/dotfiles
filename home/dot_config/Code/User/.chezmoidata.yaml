@@ -1,6 +1,6 @@
 ---
 extraPackages:
-  visual-studio-code:
+  visual-studio-code: # vscli
     enabled: "{{ and .features.vscode (not .headless) }}"
     type: cask
     nameOverwrite:

@@ -8,7 +8,7 @@ i3:
   borderRadius: 18
   borderWidth: 1
   fontFamily: Noto Sans
-  fontSize: 11
+  fontSize: 10
   opacity: 0.75
   barFont: pango:Noto Sans Mono, FontAwesome 10
   environment:
@@ -16,33 +16,40 @@ i3:
     GDK_SCALE: 2
     # GTK_ICON_THEME:
     # GTK_THEME: Adwaita:dark
-    QT_AUTO_SCREEN_SCALE_FACTOR: 1
     QT_FONT_DPI: 192
-    QT_QPA_PLATFORMTHEME: gtk2
+
+    # GTK2_RC_FILES: "$HOME/.gtkrc-2.0"
+    # GTK2_RC_FILES: "$HOME/.config/gtk-2.0"
+
+    QT_AUTO_SCREEN_SCALE_FACTOR: 0 # 1
+    # QT_QPA_PLATFORMTHEME: gtk2 # (xdg-desktop-portal)
+    QT_QPA_PLATFORMTHEME: qt5ct
+    # QT_QPA_PLATFORMTHEME: qt6ct
+
     QT_SCALE_FACTOR: 1
     # STEAM_FORCE_DESKTOPUI_SCALING: 1.5
     # STEAM_FORCE_DESKTOPUI_SCALING: 2.0
 extraPackages:
   arc-gtk-theme:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   arc-icon-theme:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   autotiling-rs:
     enabled: "{{ .features.i3 }}"
   blueman:
     enabled: '{{ and .features.i3 (eq .chassisType "laptop") }}'
   caffeine-ng:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   dex:
     enabled: "{{ .features.i3 }}"
   feh: # nitrogen
     enabled: "{{ .features.i3 }}"
   i3lock-color betterlockscreen:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   # i3lock:
   #   name: i3lock xss-lock
   #   enabled: "{{ .features.i3 }}"
@@ -75,13 +82,14 @@ extraPackages:
     enabled: "{{ .features.i3 }}"
   thunar:
     enabled: "{{ .features.i3 }}"
-    type: aur
   qt5-styleplugins qt6gtk2:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # qt5ct:
+  #   enabled: "{{ .features.i3 }}"
   xcwd:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   xdg-desktop-portal:
     enabled: "{{ .features.i3 }}"
   xfce4-power-manager:
@@ -106,4 +114,4 @@ extraPackages:
     enabled: "{{ .features.i3 }}"
   yin-yang: # darkman
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

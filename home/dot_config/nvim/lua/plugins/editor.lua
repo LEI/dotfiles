@@ -30,7 +30,8 @@ return {
   {
     'folke/flash.nvim',
     -- enabled = false, -- vim.fn.has('nvim-0.8') == 1,
-    tag = 'v2.1.0',
+    -- tag = 'v2.1.0',
+    version = 'v2.x',
     opts = {
       modes = {
         char = {
@@ -55,7 +56,8 @@ return {
   -- { 'tpope/vim-dotenv', tag = 'v1.0', cmd = 'Dotenv' },
   {
     'tpope/vim-eunuch',
-    tag = 'v1.3',
+    -- tag = 'v1.3',
+    version = 'v1.x',
     event = 'CmdlineEnter',
     init = function()
       -- FIXME: <SNR>51_EunuchNewLine
@@ -63,10 +65,16 @@ return {
       vim.g.eunuch_no_maps = 1
     end,
   },
-  { 'tpope/vim-fugitive', tag = 'v3.7', cmd = 'Git' },
+  {
+    'tpope/vim-fugitive',
+    -- tag = 'v3.7',
+    version = 'v3.x',
+    cmd = 'Git',
+  },
   {
     'tpope/vim-sleuth',
-    version = '2.0.0',
+    -- version = '2.0.0',
+    version = '2.x',
     -- FIXME: lazy loading breaks PHP nvim_treesitter#indent()
     -- and GetPhpIndent() neovim/0.11.4/share/nvim/runtime/indent/php.vim:123
     -- cmd = 'Sleuth',
@@ -88,7 +96,12 @@ return {
   },
 
   -- Alternative: kylechui/nvim-surround
-  { 'tpope/vim-surround', tag = 'v2.2', event = 'VeryLazy' },
+  {
+    'tpope/vim-surround',
+    -- tag = 'v2.2',
+    version = 'v2.x',
+    event = 'VeryLazy',
+  },
   -- :h MiniSurround-vim-surround-config
   -- { 'echasnovski/mini.surround', tag = 'v0.16.0', event = 'InsertEnter' },
 
@@ -176,6 +189,9 @@ return {
         'yaml',
       },
 
+      folds = {
+        enabled = true,
+      },
       highlight = {
         enable = true,
         disable = function()
@@ -195,7 +211,7 @@ return {
     },
     init = function()
       vim.opt.foldenable = false
-      vim.opt.foldlevel = 99
+      -- vim.opt.foldlevel = 99
       -- vim.wo.conceallevel = 2
       if vim.fn.has('nvim-0.10') == 1 then
         vim.opt.smoothscroll = true
@@ -210,11 +226,18 @@ return {
     config = function(_, opts)
       local configs = require('nvim-treesitter.configs')
       configs.setup(opts)
+      -- if opts.folds.enabled then
+      --   LazyVim.lsp.on_supports_method('textDocument/foldingRange', function(client, buffer)
+      --     local win = vim.api.nvim_get_current_win()
+      --     vim.wo[win][0].foldexpr = 'v:lua.vim.lsp.foldexpr()'
+      --   end)
+      -- end
     end,
   },
   {
     'nvim-treesitter/nvim-treesitter-context',
-    tag = 'v1.0.0',
+    -- tag = 'v1.0.0',
+    version = 'v1.x',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     cmd = 'TSContext',
     keys = {
@@ -270,7 +293,8 @@ return {
   {
     'folke/ts-comments.nvim',
     enabled = vim.fn.has('nvim-0.10') == 1,
-    tag = 'v1.5.0',
+    -- tag = 'v1.5.0',
+    version = 'v1.x',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
     opts = {},
     event = 'VeryLazy',
@@ -325,7 +349,8 @@ return {
   },
   {
     'gbprod/yanky.nvim',
-    tag = 'v2.0.0',
+    -- tag = 'v2.0.0',
+    version = 'v2.x',
     dependencies = { 'folke/snacks.nvim' },
     cmd = 'YankyRingHistory',
     -- event = 'VeryLazy',

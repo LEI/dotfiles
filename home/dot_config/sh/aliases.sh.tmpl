@@ -69,14 +69,22 @@ fi
 {{- if .features.ai }}
 
 if command -v claude >/dev/null; then
-  _claude() { if [ $# -eq 0 ]; then claude --resume; else claude "$@"; fi }
+  _claude() { claude "${@:---resume}"; }
   alias claude=_claude
 fi
+if command -v codex >/dev/null; then
+  _codex() { codex "${@:-resume --last}"; }
+  alias codex=_codex
+fi
 if command -v crush >/dev/null; then
-  _crush() { if [ $# -eq 0 ]; then crush --continue; else crush "$@"; fi }
+  _crush() { crush "${@:---continue}"; }
   alias crush=_crush
 fi
 {{- end }}
+
+if command -v process-compose >/dev/null && ! hash pc 2>/dev/null; then
+  alias pc=process-compose
+fi
 
 {{- if and .features.docker }}
 
@@ -95,10 +103,6 @@ fi
 
 if command -v lazygit >/dev/null; then
   alias G=lazygit
-fi
-
-if command -v podman-tui >/dev/null; then
-  alias P=podman-tui
 fi
 {{- end }}
 

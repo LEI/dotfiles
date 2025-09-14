@@ -4,15 +4,15 @@ extraPackages:
   #   enabled: "{{ .features.i3 }}"
   # papirus-icon-theme:
   #   enabled: "{{ .features.i3 }}"
-  rofi: # dmenu
+  rofi: # dmenu, sunbeam
     enabled: "{{ .features.i3 }}"
   rofi-calc: # rofi -show calc -modi calc -no-show-match -no-sort
     enabled: "{{ .features.i3 }}"
   # rofi-greenclip: # cliphist
   #   enabled: "{{ .features.i3 }}"
-  #   type: aur
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   rofi-power-menu:
     enabled: "{{ .features.i3 }}"
-    type: aur
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   # rofimoji: # rofi -modi emoji:rofimoji -show emoji
   #   enabled: "{{ .features.i3 }}"

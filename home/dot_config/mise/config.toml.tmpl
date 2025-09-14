@@ -42,12 +42,17 @@ go = "latest"
 
 # jq = "latest"
 
+{{- if .features.kube }}
+# FIXME(kubectl-krew): mise reshim
+# kubectl = "latest"
+{{- end }}
+
 {{- if and .features.git (not (eq .osIDLike "alpine" "arch" "darwin" "windows")) }}
 lazygit = "latest"
 {{- end }}
 
-{{- if .features.kube }}
-kubectl = "latest"
+{{- if and (eq .os "darwin") .features.neovim }}
+lua = "5.1"
 {{- end }}
 
 {{- if and (.features.node) (not (eq .osID "alpine" "android")) }}

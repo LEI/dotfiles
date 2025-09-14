@@ -13,6 +13,6 @@ fi
 
 rofi "$config" -show window \
   -kb-accept-entry "!Alt-Tab,!Alt+Alt_L,Alt-Return,Return" \
-  -kb-row-down Alt+Tab,Alt+Down \
-  -kb-row-up Alt+ISO_Left_Tab,Alt+Up \
+  -kb-row-down Alt+Tab,Alt+Down,Down,Control+n \
+  -kb-row-up Alt+ISO_Left_Tab,Alt+Up,Up,Control+p \
   -selected-row 1

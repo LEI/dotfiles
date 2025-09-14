@@ -253,6 +253,11 @@ return {
       { '<leader>ct', '<cmd>Copilot toggle<cr>', desc = 'Copilot toggle' },
     },
     config = function()
+      -- local wk = require('which-key')
+      -- wk.add({
+      --   { '<leader>c', group = '+copilot' },
+      -- })
+
       local copilot = require('copilot')
       copilot.setup({
         -- auth_provider_url = 'https://github.com',

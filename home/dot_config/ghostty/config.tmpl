@@ -1,5 +1,5 @@
 adjust-cursor-thickness = 1
-background-opacity = {{ get .i3 "opacity" | default 0.75 }}
+background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75 }}
 
 # cursor-style = block
 # cursor-style-blink = false

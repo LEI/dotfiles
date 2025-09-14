@@ -23,12 +23,9 @@ return {
       -- { 'mm', '%', desc = 'Go to matching bracket', mode = { 'n', 'v' } },
       -- { '%', 'ggVG', desc = 'Select all', mode = { 'n', 'v' } },
 
-      { 'z', '', desc = '+fold' },
-
       -- { '.', ':normal n.<cr>', desc = 'Repeat last command', mode = 'v' }, -- as expected in visual mode
 
       -- TODO: Reflow (gw/gq) and remap <leader>r (Rename symbol)
-      { '<backspace>', '', desc = '+backspace' },
       { '<backspace>L', ':LspLog<cr>', desc = 'Open LSP logs' },
       -- $HOME/.config/nvim/lua/plugins/lsp.lua
       {
@@ -42,9 +39,6 @@ return {
       { '<backspace>s', ":'<'>sort<cr>", desc = 'Sort lines', mode = { 'v' } },
 
       -- Leader
-      { '<space>', '', desc = '+leader' },
-      -- { '<leader><tab>', '', desc = '+tab' },
-      -- { '<leader>c', '', desc = '+code' },
 
       -- Alternate file or last accessed/modified file
       { '<leader><space>', '<C-^>', desc = 'Last file', mode = { 'n', 'v' } },
@@ -54,8 +48,6 @@ return {
       { '<leader>bn', ':bnext<cr>', desc = 'Next buffer', mode = { 'n', 'v' } },
       { '<leader>bp', ':bprevious<cr>', desc = 'Previous buffer', mode = { 'n', 'v' } },
 
-      { '(', '', desc = '+prev' },
-      { ')', '', desc = '+next' },
       {
         ')d',
         function()
@@ -72,9 +64,6 @@ return {
         desc = 'Next diagnostic',
         mode = { 'n', 'v' },
       },
-
-      { '[', '', desc = '+prev' },
-      { ']', '', desc = '+next' },
 
       -- {
       --   '<leader>E',
@@ -117,9 +106,18 @@ return {
       local wk = require('which-key')
       wk.setup(opts)
       wk.add({
+        -- { '<leader><tab>', group = '+tab' },
+        -- { '<leader>c', group = '+code' },
+        { '(', group = '+prev' },
+        { ')', group = '+next' },
+        { '<backspace>', group = '+backspace' },
+        { '<space>', group = '+leader' },
+        { '[', group = '+prev' },
+        { ']', group = '+next' },
         { 'g', group = '+goto' },
         { 'gx', desc = 'Open with system app' },
         { 'p', group = '+paste' },
+        { 'z', group = '+fold' },
         {
           '<leader>?',
           function()
@@ -165,7 +163,7 @@ return {
           -- https://github.com/neovim/neovim/blob/v0.11.3/runtime/lua/vim/_defaults.lua#L194
           -- stylua: ignore
           wk.add({
-            { 'gr', '', desc = '+lsp' },
+            { 'gr', group = '+lsp' },
             -- client.server_capabilities.codeActionProvider
             {
               '<leader>a', -- gra
@@ -200,7 +198,7 @@ return {
             { 'grR', function() Snacks.picker.lsp_references() end, nowait = true, desc = 'References' },
             { 'gI', function() Snacks.picker.lsp_implementations() end, desc = 'Go to implementation' },
             { 'gy', function() Snacks.picker.lsp_type_definitions() end, desc = 'Go to type definition' },
-            { '<leader>l', '', desc = '+lsp' },
+            { '<leader>l', group = '+lsp' },
             { '<leader>lc', function() Snacks.picker.lsp_config() end, desc = 'Search LSP configurations' },
             { '<leader>ls', function() Snacks.picker.lsp_symbols() end, desc = 'LSP symbols' }, -- gO
             { '<leader>lS', function() Snacks.picker.lsp_workspace_symbols() end, desc = 'LSP workspace symbols' },

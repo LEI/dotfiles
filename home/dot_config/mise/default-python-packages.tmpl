@@ -1,15 +1,9 @@
 # ansible
-{{- if .features.ai }}
-claude-monitor
-{{- end }}
 # euporie
 {{- if .features.sql }}
 pg_activity[psycopg]
 {{- end }}
 recoverpy
-{{ if .features.tofu -}}
-tofuref
-{{ end -}}
 {{ if ne (env "VT_API_KEY") "" -}}
 wtfis
 {{ end -}}

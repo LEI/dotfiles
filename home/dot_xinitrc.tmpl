@@ -49,13 +49,6 @@ if [ -d "$xinitdir"/xinitrc.d ]; then
   unset f
 fi
 
-# source ~/.profile
-# systemctl --user import-environment {{ keys .i3.environment | sortAlpha | join " " }}
-
-{{- range $key, $value := .i3.environment }}
-systemctl --user set-environment {{ $key }}={{ $value | quote }}
-{{- end }}
-
 xrdb -merge ~/.Xresources
 
 # # Set desktop background with custom effect

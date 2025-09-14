@@ -70,12 +70,33 @@ return {
       -- Default list of enabled providers defined so that you can extend it
       -- elsewhere in your config, without redefining it, due to `opts_extend`
       sources = {
-        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'tmux' },
+        default = {
+          'lsp',
+          'path',
+          'snippets',
+          'buffer',
+          'tmux',
+        },
         -- https://github.com/kristijanhusak/vim-dadbod-completion#install
         per_filetype = {
-          sql = { 'snippets', 'dadbod', 'buffer' },
+          lua = { inherit_defaults = true, 'lazydev' },
+          sql = { inherit_defaults = true, 'dadbod' },
         },
         providers = {
+          -- buffer = { fallbacks = { 'tmux' } },
+
+          -- Always show buffer completions with LSP
+          -- lsp = { fallbacks = {} }, -- defaults to `{ 'buffer' }`
+
+          -- Path completion from cwd instead of current buffer's directory
+          path = {
+            opts = {
+              get_cwd = function(_)
+                return vim.fn.getcwd()
+              end,
+            },
+          },
+
           dadbod = { name = 'Dadbod', module = 'vim_dadbod_completion.blink' },
           lazydev = {
             name = 'LazyDev',
@@ -90,8 +111,9 @@ return {
               all_panes = false,
               capture_history = true,
               triggered_only = false,
-              trigger_chars = { '.' },
+              -- trigger_chars = { '.' },
             },
+            score_offset = -100,
           },
         },
       },
@@ -101,22 +123,33 @@ return {
       -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
       --
       -- See the fuzzy documentation for more information
-      fuzzy = { implementation = 'prefer_rust_with_warning' },
+      fuzzy = {
+        implementation = 'prefer_rust_with_warning',
+        -- -- Always prioritoze exact matches
+        -- sorts = {
+        --   'exact',
+        --   -- defaults
+        --   'score',
+        --   'sort_text',
+        -- },
+      },
 
       cmdline = {
         -- FIXME: allow tab expansion (e.g. %)
-        enabled = false,
+        enabled = true,
         keymap = {
           preset = 'inherit',
           ['<CR>'] = { 'accept_and_enter', 'fallback' },
-          ['<Tab>'] = { 'show', 'accept' },
+          -- ['<Tab>'] = { 'show', 'accept' },
         },
         completion = {
           list = { selection = { preselect = false, auto_insert = true } },
           menu = {
-            auto_show = true,
-            -- function(ctx) return vim.fn.getcmdtype() == ':' or vim.fn.getcmdtype() == '@' end,
+            auto_show = function(ctx)
+              return vim.fn.getcmdtype() == ':' or vim.fn.getcmdtype() == '@'
+            end,
           },
+          ghost_text = { enabled = true },
         },
       },
 
