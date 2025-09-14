@@ -1,5 +1,5 @@
 adjust-cursor-thickness = 1
-background-opacity = 0.75
+background-opacity = {{ get .i3 "opacity" | default 0.75 }}
 
 # cursor-style = block
 # cursor-style-blink = false
@@ -9,7 +9,6 @@ background-opacity = 0.75
 
 # fullscreen = true
 # font-feature = -calt, -liga, -dlig
-gtk-titlebar = false
 scrollback-limit = 90000000
 theme = tokyonight_night
 # theme = tokyonight-storm
@@ -37,6 +36,7 @@ keybind = alt+right=unbind
 
 font-size = 10
 
+gtk-titlebar = false
 maximize = true
-# window-decoration = none
+window-decoration = server
 {{- end }}

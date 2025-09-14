@@ -21,17 +21,17 @@ pm_tray="{{ .i3.pmTray }}"
 # include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml") | sha256sum
 current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/ThemeName || echo "")"
 if [ "$current_theme_name" != "$theme_name" ]; then
-  cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string --create
+  cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string || true # --create
 fi
 
 # current_icon_sizes="$(cmd xfconf-query --channel xsettings --property /Gtk/IconSizes || echo "")"
 # if [ "$current_icon_sizes" != "$icon_sizes" ]; then
-#   cmd xfconf-query --channel xsettings --property /Gtk/IconSizes --set "$icon_sizes" --type string --create
+#   cmd xfconf-query --channel xsettings --property /Gtk/IconSizes --set "$icon_sizes" --type string || true # --create
 # fi
 
 current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/IconThemeName || echo "")"
 if [ "$current_theme_name" != "$icon_theme_name" ]; then
-  cmd xfconf-query --channel xsettings --property /Net/IconThemeName --set "$icon_theme_name" --type string --create
+  cmd xfconf-query --channel xsettings --property /Net/IconThemeName --set "$icon_theme_name" --type string || true # --create
 fi
 {{- end }}
 
@@ -39,7 +39,22 @@ fi
 
 current_xfwm4_theme="$(cmd xfconf-query --channel xfwm4 --property /general/theme || echo "")"
 if [ "$current_xfwm4_theme" != "$theme_name" ]; then
-  cmd xfconf-query --channel xfwm4 --property /general/theme --set "$theme_name" --type string --create
+  cmd xfconf-query --channel xfwm4 --property /general/theme --set "$theme_name" --type string || true # --create
+fi
+{{- end }}
+
+{{- if lookPath "xfce4-notifyd-config" | isExecutable }}
+
+notify_opacity={{ .i3.opacity }}
+current_notify_opacity="$(cmd xfconf-query --channel xfce4-notifyd --property /initial-opacity || echo "")"
+if [ "$current_notify_opacity" != "$notify_opacity" ]; then
+  cmd xfconf-query --channel xfce4-notifyd --property /initial-opacity --set "$notify_opacity" --type double || true # --create
+fi
+
+notify_location=top-right
+current_notify_location="$(cmd xfconf-query --channel xfce4-notifyd --property /notify-location || echo "")"
+if [ "$current_notify_location" != "$notify_location" ]; then
+  cmd xfconf-query --channel xfce4-notifyd --property /notify-location --set "$notify_location" --type string || true # --create
 fi
 {{- end }}
 
@@ -49,7 +64,7 @@ fi
 # include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml") | sha256sum
 current_dark_mode="$(cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode || echo "")"
 if [ "$current_dark_mode" != "$dark_mode" ]; then
-  cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode --set "$dark_mode" --type bool --create
+  cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode --set "$dark_mode" --type bool || true # --create
 fi
 {{- end }}
 
@@ -58,6 +73,6 @@ fi
 # include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml") | sha256sum
 current_pm_tray="$(cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon || echo "")"
 if [ "$current_pm_tray" != "$pm_tray" ]; then
-  cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon --set "$pm_tray" --type bool --create
+  cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon --set "$pm_tray" --type bool || true # --create
 fi
 {{- end }}

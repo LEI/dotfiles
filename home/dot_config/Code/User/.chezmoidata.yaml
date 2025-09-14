@@ -3,3 +3,5 @@ extraPackages:
   visual-studio-code:
     enabled: "{{ and .features.vscode (not .headless) }}"
     type: cask
+    nameOverwrite:
+      arch: visual-studio-code-bin

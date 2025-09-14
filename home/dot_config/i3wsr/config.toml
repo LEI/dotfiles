@@ -21,8 +21,8 @@ Vim = ""
 # i3 / Xwayland
 [aliases.class]
 "^(?i)chromium$" = "Chromium"
-# "^com\\.mitchellh\\.ghostty$" = "Ghostty"
 "^(?i)firefox$" = "Firefox"
+# "^(?i)com\\.mitchellh\\.ghostty$" = "Ghostty"
 # "Org\\.gnome\\.Nautilus" = "Nautilus"
 # TelegramDesktop = "Telegram"
 "(?i)^thunar$" = "Thunar"
@@ -44,6 +44,8 @@ Vim = ""
 " . Nvim$" = "Nvim"
 # " . Thunar$" = "Thunar"
 # "^Terminal . .*" = "Terminal"
+# FIXME: windows remaining after notification
+"(?i)^xfce4-notifyd$" = "Notification"
 
 [general]
 separator = ' ｜ ' # |

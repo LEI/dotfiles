@@ -1,0 +1,4 @@
+---
+extraPackages:
+  dunst:
+    enabled: '{{ and .features.i3 (not (lookPath "xfce4-notifyd-config" | isExecutable)) }}'

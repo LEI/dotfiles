@@ -304,7 +304,7 @@ return {
         -- },
         margin = { top = 0, right = 0, bottom = 1 },
         padding = true,
-        style = 'minimal', -- compact, fancy, minimal
+        style = 'compact', -- compact, fancy, minimal
         timeout = 5000,
         top_down = false,
         refresh = 1000, -- Refresh at most every second (default: 50ms)

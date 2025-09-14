@@ -176,7 +176,15 @@ return {
         'yaml',
       },
 
-      highlight = { enable = true },
+      highlight = {
+        enable = true,
+        disable = function()
+          -- Check if 'filetype' option includes 'chezmoitmpl'
+          if string.find(vim.bo.filetype, 'chezmoitmpl') then
+            return true
+          end
+        end,
+      },
       indent = {
         enable = true,
         disable = {

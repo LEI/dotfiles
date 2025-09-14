@@ -88,8 +88,10 @@
 .config/helix/Makefile
 {{- end }}
 
+.config/dunst/
 {{- if not .features.i3 }}
 .Xresources
+.config/Kvantum/
 .config/X11/
 # .config/autostart/
 .config/gtk-*/
@@ -163,6 +165,7 @@
 
 {{- if not .features.ruby }}
 .chezmoiscripts/*-install-ruby.sh
+.config/gem/
 .config/mise/default-gems
 {{- end }}
 

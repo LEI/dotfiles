@@ -1,4 +1,3 @@
-# vi: ft=i3config
 # i3 v4 configuration file
 
 # http://i3wm.org/docs/userguide.html
@@ -9,14 +8,14 @@ set $config_dir ~/.config/i3
 
 # set $font_family DejaVu Sans
 # set $font_family HackNerd
-set $font_family Noto Sans
+set $font_family {{ .i3.fontFamily }}
 # set $font_family Roboto
-set $font_size 10
+set $font_size {{ .i3.fontSize }}
 
 # Use "normal" to keep title bars and "pixel" to hide them
 # NOTE: this hides next split direction indicator too
 set $border_style normal
-set $border_width 1
+set $border_width {{ .i3.borderWidth }}
 
 set $alt Mod1
 set $mod Mod4
@@ -27,7 +26,7 @@ set $mod Mod4
 font pango:$font_family $font_size
 
 # include config.d/exec.conf
-include config.d/bind.conf
+# include config.d/bind.conf
 
 {{- if lookPath "betterlockscreen" | isExecutable }}
 set $lock_command betterlockscreen --lock dim
@@ -104,6 +103,21 @@ exec_always --no-startup-id autotiling
 
 {{- if lookPath "xfce4-power-manager" | isExecutable }}
 exec --no-startup-id xfce4-power-manager --daemon --restart
+{{- end }}
+
+{{- if lookPath "xfce4-settings-manager" | isExecutable }}
+# NOTE: Appearance > 96 dpi, scaling 2x
+# exec --no-startup-id xfce4-settings-manager --daemon --restart
+{{- end }}
+
+{{- if lookPath "xfce4-volumed-pulse" | isExecutable }}
+exec --no-startup-id xfce4-volumed-pulse
+{{- end }}
+
+{{- if lookPath "xfsettingsd" | isExecutable }}
+# XFSETTINGSD_DEBUG=1 xfsettingsd --replace --no-daemon
+# NOTE: this overrides ~/.config/gtk*
+# exec --no-startup-id xfsettingsd --daemon --restart
 {{- end }}
 
 {{- if lookPath "gnome-keyring-daemon" | isExecutable }}
@@ -298,7 +312,8 @@ bindsym $mod+Shift+c exec "i3-msg reload && notify-send 'i3 configuration reload
 # Restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r exec "i3-msg restart && notify-send 'i3 restarted'"
 # Exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+set $nagbar i3-nagbar -f 'pango:monospace {{ sub .i3.fontSize 1 }}'
+bindsym $mod+Shift+e exec "$nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # Resize window (you can also use the mouse for that)
 mode "resize" {
@@ -345,21 +360,22 @@ set $base0E #c0b7f9
 set $base0F #fcc09e
 
 # https://i3wm.org/docs/userguide.html#_transparency
-set_from_resource $base01 i3wm.base01 #1f222dDD
-set_from_resource $base02 i3wm.base02 #252936DD
+# set_from_resource $base01 i3wm.base01 #1f222dDD
+# set_from_resource $base02 i3wm.base02 #252936DD
+set_from_resource $base01 i3wm.base01 #1f222dCC
+set_from_resource $base02 i3wm.base02 #252936CC
 
 bar {
-    font pango:$font_family Mono, FontAwesome $font_size
+    font {{ .i3.barFont }}
     # font pango:$font_family, FontAwesome $font_size
 
     # NOTE: cause all tray icons to have a transparent background
     # i3bar_command i3bar --transparency
 
-    position top # bottom
-    # status_command i3status
-    status_command i3status-rs
+    position top
     # https://github.com/rholder/i3status-title-on-bar
-    # status_command i3status | i3status-title-on-bar
+    # i3status | i3status-title-on-bar
+    status_command i3status-rs
 
     tray_output primary
     # tray_padding 2px
@@ -415,10 +431,12 @@ default_border $border_style $border_width
 default_floating_border $border_style $border_width
 
 # Update borders on reload
-for_window [all] border $border_style $border_width
+#for_window [all] border $border_style $border_width
 
 # Hide title bar
-for_window [title="Picture-in-Picture"] border pixel 0
+#for_window [class="(?i)Ghostty"] border pixel 0
+for_window [class="(?i)xfce4-notifyd"] border pixel 0
+for_window [title="(?i)Picture-in-Picture"] border pixel 0
 
 # Increase space between icon and title
 for_window [all] title_window_icon padding 5px
@@ -428,6 +446,7 @@ for_window [all] title_window_icon padding 5px
 
 # no_focus [window_role="pop-up"]
 # no_focus [class="plasmashell" window_type="on_screen_display"]
+no_focus [class="(?i)rustdesk"]
 
 # include ~/.config/i3/config.d/*.conf
 # include config.d/assignments.conf

@@ -14,13 +14,14 @@ shadow = true;
 # The blur radius for shadows, in pixels.
 #
 # Default: 12
-shadow-radius = 7;
+# shadow-radius = 7;
+shadow-radius = 6;
 
 # The opacity of shadows.
 #
 # Range: 0.0 - 1.0
 # Default: 0.75
-# shadow-opacity = .75
+shadow-opacity = {{ .i3.opacity }};
 
 # The left offset for shadows, in pixels.
 #
@@ -35,7 +36,7 @@ shadow-offset-y = -7;
 # Hex string color value of shadow. Formatted like "#RRGGBB", e.g. "#C0FFEE".
 #
 # Default: #000000
-# shadow-color = "#000000"
+# shadow-color = "#FF0000"
 
 # Crop shadow of a window fully on a particular monitor to that monitor. This is
 # currently implemented using the X RandR extension.
@@ -81,7 +82,7 @@ fade-in-step = 0.2;
 # Range: 0.1 - 1.0
 # Default: 1.0 (disabled)
 # frame-opacity = 0.9;
-frame-opacity = 0.5;
+frame-opacity = {{ .i3.opacity }};
 
 # Use fixed inactive dim value, instead of adjusting according to window opacity.
 #
@@ -98,7 +99,10 @@ frame-opacity = 0.5;
 #
 # Default: 0 (disabled)
 # corner-radius = 5
-corner-radius = 18
+# FIXME: ghostty right-click menu
+# See ~/.config/gtk-4.0/gtk.css
+corner-radius = {{ add .i3.borderRadius 12 }}
+# corner-radius = {{ .i3.borderRadius }}
 
 #################################
 #            Blur               #
@@ -291,7 +295,7 @@ rules: ({
   match = "window_type = 'tooltip'";
   fade = false;
   shadow = true;
-  opacity = 0.75;
+  opacity = {{ .i3.opacity }};
   full-shadow = false;
 }, {
   match = "window_type = 'dock'    || "

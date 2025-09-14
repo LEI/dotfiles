@@ -3,6 +3,8 @@ extraPackages:
   vscodium:
     enabled: "{{ and .features.vscodium (not .headless) }}"
     type: cask
+    nameOverwrite:
+      arch: vscodium-bin
   # vscodium@insiders:
   #   enabled: "{{ and .features.vscodium (not .headless) }}"
   #   type: cask

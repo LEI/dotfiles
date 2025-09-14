@@ -4,9 +4,9 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-color_scheme=default # "{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
-gtk_theme="{{ .i3.themeName }}"
-icon_theme="{{ .i3.iconThemeName }}" # Arc
+color_scheme="{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
+gtk_theme={{ .i3.themeName | quote }}
+icon_theme={{ .i3.iconThemeName | quote }}
 
 current_color_scheme="$(cmd gsettings get org.gnome.desktop.interface color-scheme || echo "")"
 if [ "$current_color_scheme" != "'$color_scheme'" ]; then
