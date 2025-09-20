@@ -14,14 +14,14 @@ if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
   cmd . ~/.cargo/env
 fi
 
-# rustup default stable
-if [ ! -f "$TMPDIR/rust-toolchain" ]; then
-  if [ -f "$HOME/rust-toolchain" ]; then
-    cmd cp "$HOME/rust-toolchain" "$TMPDIR/rust-toolchain"
-  else
-    cmd echo stable >"$TMPDIR/rust-toolchain"
-  fi
-fi
+# # rustup default stable
+# if [ ! -f "$TMPDIR/rust-toolchain" ]; then
+#   if [ -f "$HOME/rust-toolchain" ]; then
+#     cmd cp "$HOME/rust-toolchain" "$TMPDIR/rust-toolchain"
+#   else
+#     cmd echo stable >"$TMPDIR/rust-toolchain"
+#   fi
+# fi
 
 if command -v cargo; then
   echo >&2 "Already installed"

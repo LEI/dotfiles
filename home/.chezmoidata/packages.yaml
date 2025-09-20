@@ -6,8 +6,10 @@ commonPackages:
   - name: bandwhich # netshow, slurm
     enabled: '{{ and (not (eq .osIDLike "debian" "fedora" "windows")) (ne .profile "minimal") }}'
   - name: bkt
-    enabled: '{{ not (eq .osIDLike "alpine" "debian" "fedora" "windows") }}'
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    enabled: '{{ not (eq .osIDLike "arch" "alpine" "debian" "fedora" "windows") }}'
+    # nameOverwrite:
+    #   arch: bkt-bin
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   - { name: build-base, enabled: '{{ eq .osIDLike "alpine" }}' }
   # - { name: below, enabled: '{{ not (eq .osIDLike "arch" "debian") }}' }
   - name: bottom
@@ -167,6 +169,31 @@ commonPackages:
     nameOverwrite:
       windows: Kubecolor.kubecolor
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: lazydocker # dry, sen
+    enabled: '{{ and .features.docker (eq .osIDLike "arch" "darwin") }}'
+    nameOverwrite:
+      arch: lazydocker-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: lazyjournal
+    enabled: '{{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}'
+    nameOverwrite:
+      arch: lazyjournal-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: lazysql
+    enabled: '{{ and .features.sql (eq .osIDLike "arch" "darwin") }}'
+    nameOverwrite:
+      arch: lazysql-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: lazyssh
+    enabled: '{{ and .features.ssh (eq .osIDLike "arch" "darwin") }}'
+    nameOverwrite:
+      arch: lazyssh-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  - name: lla # TODO: lla init && lla install
+    enabled: '{{ eq .osID "arch" "darwin" }}'
+    nameOverwrite:
+      arch: lla-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   - { name: lnav, enabled: '{{ ne .os "windows" }}' }
   # - name: mitmproxy # mitmweb # tproxy
   #   enabled: '{{ ne .os "windows" }}'
@@ -255,7 +282,7 @@ commonPackages:
   # - name: ssh-list
   #   enabled: '{{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}'
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
-  - name: sshs # lazyssh, sshclick, ssm, fast-ssh
+  - name: sshs # sshclick, ssm, fast-ssh
     enabled: '{{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}'
   - name: starship
     enabled: '{{ not (eq .osIDLike "alpine" "debian" "fedora") }}'
@@ -393,9 +420,6 @@ packages:
       # - below
       - name: gnu-netcat
         enabled: '{{ ne .osID "manjaro" }}'
-      - { name: lazydocker-bin, enabled: "{{ .features.docker }}" } # dry, sen
-      - lazyjournal-bin
-      - { name: lazysql-bin, enabled: "{{ .features.sql }}" }
       - pacseek-bin
       - { name: podman-tui-bin, enabled: "{{ .features.docker }}" }
       - tre-command-bin
@@ -456,9 +480,6 @@ packages:
       # - kind
       # - kustomize
       # - { name: git-cc, enabled: '{{ .features.git }}' }
-      - { name: lazydocker, enabled: "{{ .features.docker }}" }
-      - lazyjournal
-      - { name: lazysql, enabled: "{{ .features.sql }}" }
       # - libedit # readline, rlwrap
       # - llvm
       # - logrotate

@@ -43,28 +43,29 @@ check_version() {
 
   if command -v needs >/dev/null; then
     needs \
-      bash \
-      carapace \
-      direnv \
-      dd \
-      lsblk \
       atuin \
+      bash \
       bat \
       ble \
       btm \
+      carapace \
+      chezmoi \
+      dd \
+      direnv \
       eza \
       fd \
       hx \
       jq \
+      lsblk \
       mise \
       node \
       nu \
       nvim \
       pipx \
-      uvx \
       rg \
       tmux \
       topgrade \
+      uvx \
       vim \
       yq \
       zellij \

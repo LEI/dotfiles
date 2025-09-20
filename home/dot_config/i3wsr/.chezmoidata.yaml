@@ -1,5 +1,7 @@
 ---
 extraPackages:
   i3wsr:
-    enabled: "{{ .features.i3 }}"
+    enabled: "{{ and .features.i3 }}"
+    # nameOverwrite:
+    #   arch: i3wsr-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

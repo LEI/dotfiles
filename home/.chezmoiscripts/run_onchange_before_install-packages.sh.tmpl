@@ -27,13 +27,14 @@ cmd sudo apk add --quiet $packages
 {{- else if eq .osIDLike "arch" }}
 
 {{- if .features.rust }}
-# rustup default stable
-if [ ! -f "$HOME/rust-toolchain" ]; then
-  cmd echo stable >"$HOME/rust-toolchain"
-fi
+
+# if [ ! -f "$HOME/rust-toolchain" ]; then
+#   cmd echo stable >"$HOME/rust-toolchain"
+# fi
 {{- end }}
 
 {{- if .upgrade }}
+
 cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
 {{- end }}
 # shellcheck disable=SC2086
@@ -49,6 +50,12 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   # fi
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
+
+if command -v rustup >/dev/null; then
+  cmd rustup default stable
+  # cmd rustup install stable
+fi
+
 {{ $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
 aur_packages="{{ $aurPackages | sortAlpha | join " " }}"
 if command -v yay >/dev/null; then
