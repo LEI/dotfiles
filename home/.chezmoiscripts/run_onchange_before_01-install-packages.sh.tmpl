@@ -67,8 +67,12 @@ else
   exit 1
 fi
 if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
-  cmd flatpak list --all
-  cmd snap list --all
+  if command -v flatpak >/dev/null; then
+    cmd flatpak list --all
+  fi
+  if command -v snap >/dev/null; then
+    cmd snap list --all
+  fi
 fi
 {{- else if eq .osIDLike "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
