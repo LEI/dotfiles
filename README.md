@@ -9,13 +9,14 @@ Manually install [`chezmoi`](https://www.chezmoi.io/install/) and run this comma
 to clone using SSH:
 
 ```bash
-GITHUB_USERNAME=LEI
 GITHUB_TOKEN=
 chezmoi secret keyring set --service=github --user=$GITHUB_USERNAME --value=$GITHUB_TOKEN
+
+GITHUB_USERNAME=LEI
 chezmoi init --apply --interactive git@github.com:$GITHUB_USERNAME/dotfiles.git
 ```
 
-Or automatically install `chezmoi` and clone using HTTPS:
+Or automatically install if needed, and clone using HTTPS:
 
 ```bash
 GITHUB_USERNAME=LEI
