@@ -15,7 +15,7 @@ if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
 fi
 {{- end }}
 
-{{- if and .features.i3 }}
+{{- if get .features "i3" }}
 
 {{- range $key, $value := .i3.environment }}
 # if ! grep -q '^{{ $key }}=' /etc/environment; then

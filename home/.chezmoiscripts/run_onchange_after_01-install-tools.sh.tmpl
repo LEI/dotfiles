@@ -30,22 +30,22 @@ log "Installed tools"
 # cmd mise ls
 
 {{- $tools := list }}
-{{- if .features.ruby }}
+{{- if get .features "ruby" }}
 # default-gems: {{ includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum }}
 {{- /* $tools = append $tools "ruby" */ -}}
 {{- end }}
 
-{{- if .features.go }}
+{{- if get .features "go" }}
 # default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
 {{- $tools = append $tools "go" -}}
 {{- end }}
 
-{{- if and .features.node (ne .osIDLike "alpine") }}
+{{- if and (get .features "node") (ne .osIDLike "alpine") }}
 # default-npm-packages: {{ includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum }}
 {{- $tools = append $tools "node" -}}
 {{- end }}
 
-{{- if .features.python }}
+{{- if get .features "python" }}
 # default-python-packages: {{ includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum }}
 {{- /* $tools = append $tools "python" */ -}}
 {{- end }}

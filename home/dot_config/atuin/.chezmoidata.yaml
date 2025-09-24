@@ -3,7 +3,7 @@ extraPackages:
   atuin: # ddworken/hishtory, dvorka/hstr
     # name: atuin atuin-sync
     enabled: >
-      {{ and .features.atuin (not (or
+      {{ and (get .features "atuin") (not (or
         (and (eq .osID "debian") (le (int .osVersion) 12))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
       )) }}

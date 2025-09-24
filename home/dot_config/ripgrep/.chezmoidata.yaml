@@ -1,12 +1,12 @@
 ---
 extraPackages:
   ripgrep:
-    enabled: "{{ .features.ripgrep }}"
+    enabled: '{{ (get .features "ripgrep") }}'
     nameOverwrite:
       windows: BurntSushi.ripgrep.MSVC
     # type: mise
   ripgrep-all:
-    enabled: '{{ and .features.ripgrep (eq .osIDLike "arch" "darwin") }}'
+    enabled: '{{ and (get .features "ripgrep") (eq .osIDLike "arch" "darwin") }}'
     # nameOverwrite:
     #   darwin: rga
     type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'

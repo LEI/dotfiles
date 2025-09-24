@@ -1,4 +1,4 @@
 ---
 extraPackages:
   k9s:
-    enabled: '{{ and .features.kube (ne .osIDLike "debian") }}'
+    enabled: '{{ and (get .features "kube") (ne .osIDLike "debian") }}'

@@ -1,7 +1,7 @@
 ---
 extraPackages:
   nodejs:
-    enabled: "{{ .features.node }}"
+    enabled: '{{ (get .features "node") }}'
     nameOverwrite:
       alpine: node
       android: node
@@ -12,16 +12,16 @@ extraPackages:
     # ~/.local/share/mise/installs/node/23.11.0/bin/node -v
     # type: '{{ eq .osIDLike "alpine" | ternary nil "mise" }}'
   node:
-    enabled: '{{ and .features.node (ne .osIDLike "alpine") }}'
+    enabled: '{{ and (get .features "node") (ne .osIDLike "alpine") }}'
     type: mise
   npm:
-    enabled: '{{ and .features.node (eq .osIDLike "alpine") }}'
+    enabled: '{{ and (get .features "node") (eq .osIDLike "alpine") }}'
   pnpm:
-    enabled: "{{ .features.node }}"
+    enabled: '{{ get .features "node" }}'
     type: npm
   yarn:
-    enabled: "{{ and .features.node }}"
+    enabled: '{{ get .features "node" }}'
     type: npm
   runme:
-    # enabled: "{{ and .features.node }}"
+    # enabled: '{{ get .features "node" }}'
     type: npm

@@ -61,7 +61,7 @@ else
 
   cmd curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
   cmd chmod +x "$RUSTUP_INIT"
-  {{- if .features.neovim }}
+  {{- if get .features "neovim" }}
   RUSTUP_INIT_ARGS=""
   {{- else }}
   RUSTUP_INIT_ARGS="--component rust-analyzer"
@@ -76,7 +76,7 @@ fi
 
 # cmd rustup default stable
 
-{{- if not .features.neovim }}
+{{- if not (get .features "neovim") }}
 
 # cmd rustup component add rust-analyzer
 {{- end }}
@@ -128,7 +128,7 @@ if ! command -v cargo-install-update >/dev/null; then
   packages="$packages cargo-update"
 fi
 
-{{- if not .features.neovim }}
+{{- if not (get .features "neovim") }}
 
 if ! command -v taplo >/dev/null; then
   cmd cargo install taplo-cli --locked --features lsp --quiet

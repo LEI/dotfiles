@@ -107,7 +107,7 @@ fi
 
 # export PATH="/usr/local/opt/ruby/bin:$PATH"
 
-{{- if and .features.brew (ne .os "darwin") }}
+{{- if and (get .features "brew") (ne .os "darwin") }}
 
 if [ -d /home/linuxbrew/.linuxbrew ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -170,7 +170,7 @@ else
 fi
 
 # Must be after starship to preserve PROMPT_COMMAND?
-# {{- if .features.atuin }}
+# {{- if get .features "atuin" }}
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
   if command -v atuin >/dev/null; then
     TIMEFORMAT="init atuin: %R" bench eval "$(bench atuin init --disable-up-arrow "$shell")"
@@ -180,7 +180,7 @@ if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = t
 fi
 # {{- end }}
 
-# {{- if and .features.ai .features.git }}
+# {{- if and (get .features "ai") (get .features "git") }}
 # if command -v gh >/dev/null; then
 #   eval "$(bench gh copilot alias -- "$shell")"
 # fi

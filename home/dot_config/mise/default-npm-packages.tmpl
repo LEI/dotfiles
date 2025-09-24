@@ -2,7 +2,7 @@
 # pnpm
 # yarn
 
-{{- if .features.ai }}
+{{- if (get .features "ai") }}
 mcp-hub@4.2.0
 {{- if not (eq .osIDLike "arch" "darwin" "windows") }}
 {{- if eq .osIDLike "windows" }}
@@ -12,12 +12,12 @@ mcp-hub@4.2.0
 {{- end }}
 {{- end }}
 
-{{- if .features.neovim }}
+{{- if get .features "neovim" }}
 neovim
 {{- else }}
 bash-language-server
 prettier
-{{- if .features.sql }}
+{{- if get .features "sql" }}
 sql-language-server
 {{- end }}
 typescript

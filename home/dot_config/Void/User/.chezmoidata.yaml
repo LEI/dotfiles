@@ -1,7 +1,7 @@
 ---
 extraPackages:
   void:
-    enabled: "{{ and .features.void (not .headless) }}"
+    enabled: '{{ and (get .features "void") (not .headless) }}'
     nameOverwrite:
       arch: void-bin
       windows: GlassDevtools.Void

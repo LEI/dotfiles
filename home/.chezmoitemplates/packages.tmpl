@@ -44,7 +44,7 @@
 {{- $packages = merge $packages $osPackages -}}
 {{- end -}}
 
-{{- if and .features.python (eq $packageType $defaultType) }}
+{{- if and (get .features "python") (eq $packageType $defaultType) }}
 {{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
 {{-   range $name := without $pythonPackages "" -}}
 {{-     if eq (substr 0 1 $name) "#" -}}

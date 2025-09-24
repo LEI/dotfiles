@@ -1,5 +1,5 @@
 ---
 extraPackages:
   isync:
-    enabled: "{{ .features.mail }}"
+    enabled: '{{ get .features "mail" }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

@@ -1,7 +1,7 @@
 ---
 extraPackages:
   topgrade:
-    enabled: '{{ and .features.topgrade (not (eq .osIDLike "debian" "fedora")) }}'
+    enabled: '{{ and (get .features "topgrade") (not (eq .osIDLike "debian" "fedora")) }}'
     nameOverwrite:
       arch: topgrade-bin
       manjaro: topgrade

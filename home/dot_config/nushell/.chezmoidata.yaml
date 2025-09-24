@@ -1,6 +1,6 @@
 ---
 extraPackages:
   nushell:
-    enabled: '{{ and .features.nushell (not (eq .osIDLike "debian" "fedora")) }}'
+    enabled: '{{ and (get .features "nushell") (not (eq .osIDLike "debian" "fedora")) }}'
     nameOverwrite:
       windows: Nushell.Nushell

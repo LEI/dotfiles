@@ -1,7 +1,7 @@
 ---
 extraPackages:
   visual-studio-code: # vscli
-    enabled: "{{ and .features.vscode (not .headless) }}"
+    enabled: '{{ and (get .features "vscode") (not .headless) }}'
     # nameOverwrite:
     #   arch: visual-studio-code-bin
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'

@@ -4,7 +4,7 @@ pip
 {{- end }}
 # pipenv
 # pipx
-{{- if .features.neovim }}
+{{- if get .features "neovim" }}
 {{- if eq .osIDLike "fedora" }}
 neovim
 {{- else if ne .osID "darwin" }}

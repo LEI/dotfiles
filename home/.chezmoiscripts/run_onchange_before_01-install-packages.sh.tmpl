@@ -23,7 +23,7 @@ cmd sudo apk upgrade --quiet
 # shellcheck disable=SC2086
 cmd sudo apk add --quiet $packages
 {{- else if eq .osIDLike "arch" }}
-{{- if .features.rust }}
+{{- if get .features "rust" }}
 # if [ ! -f "$HOME/rust-toolchain" ]; then
 #   cmd echo stable >"$HOME/rust-toolchain"
 # fi
@@ -45,7 +45,7 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
 
-{{- if .features.rust }}
+{{- if get .features "rust" }}
 
 # if command -v rustup >/dev/null && ! cmd rustup default; then
 #   cmd rustup default "$(cat "$HOME/rust-toolchain")"

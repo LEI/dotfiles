@@ -12,7 +12,7 @@ if ! [ -f ~/.config/lla/themes/tokyo_night.toml ]; then
   cmd lla theme pull
 fi
 
-{{- if .features.rust }}
+{{- if get .features "rust" }}
 
 # NOTE: interactive
 # cmd lla install

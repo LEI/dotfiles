@@ -1,9 +1,9 @@
 {{- $ruby27 := and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) -}}
 bundler{{ if $ruby27 }}:2.4.22{{ end }}
-{{- if .features.mail }}
+{{- if get .features "mail" }}
 # mail
 {{- end }}
-{{- if .features.neovim }}
+{{- if get .features "neovim" }}
 {{- if $ruby27 }}
 multi_json:1.15.0
 {{- end }}

@@ -1,7 +1,7 @@
 ---
 extraPackages:
   i3wsr:
-    enabled: '{{ and .features.i3 (ne (env "USER") "test") }}' # FIXME: rustup
+    enabled: '{{ and (get .features "i3") (ne (env "USER") "test") }}' # FIXME: rustup
     # nameOverwrite:
     #   arch: i3wsr-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

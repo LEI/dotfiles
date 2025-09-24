@@ -2,17 +2,17 @@
 # .inputrc
 # .npmrc
 
-{{- if .features.sql }}
+{{- if get .features "sql" }}
 # .psqlrc
 {{- end }}
 
 # .ripgreprc
 
-{{- if .features.tmux }}
+{{- if get .features "tmux" }}
 # .tmux.conf
 {{- end }}
 
-{{- if .features.vim }}
+{{- if get .features "vim" }}
 # .vimrc
 {{- end }}
 

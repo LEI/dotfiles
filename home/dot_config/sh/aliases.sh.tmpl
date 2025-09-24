@@ -63,7 +63,7 @@ alias open=code
 {{- end }}
 {{- end }}
 
-{{- if .features.ai }}
+{{- if (get .features "ai") }}
 
 if command -v claude >/dev/null; then
   claude() { env claude "${@:---resume}"; }
@@ -76,7 +76,7 @@ if command -v crush >/dev/null; then
 fi
 {{- end }}
 
-{{- if and .features.docker }}
+{{- if and (get .features "docker") }}
 
 if command -v lazydocker >/dev/null; then
   alias D=lazydocker
@@ -89,7 +89,7 @@ if command -v podman-tui >/dev/null; then
 fi
 {{- end }}
 
-{{- if and .features.git }}
+{{- if and (get .features "git") }}
 
 if command -v lazygit >/dev/null; then
   alias G=lazygit
@@ -103,7 +103,7 @@ if command -v lazyjournal >/dev/null; then
 fi
 {{- end }}
 
-{{- if and .features.kube }}
+{{- if and (get .features "kube") }}
 
 if command -v k9s >/dev/null; then
   alias K="k9s --all-namespaces"
@@ -114,7 +114,7 @@ if command -v kubecolor >/dev/null; then
 fi
 {{- end }}
 
-{{- if or .features.neovim .features.vim }}
+{{- if or (get .features "neovim") (get .features "vim") }}
 
 if command -v nvim >/dev/null; then
   alias dbui="nvim +DBUI"
@@ -123,7 +123,7 @@ elif command -v vim >/dev/null; then
 fi
 {{- end }}
 
-{{- if .features.python }}
+{{- if (get .features "python") }}
 
 if ! hash recover 2>/dev/null; then
   {{- if lookPath "recoverpy" | isExecutable }}

@@ -1,7 +1,7 @@
 ---
 extraPackages:
   neovim:
-    enabled: '{{ and .features.neovim (or (ne .osIDLike "debian") (not .glibc231)) }}'
+    enabled: '{{ and (get .features "neovim") (or (ne .osIDLike "debian") (not .glibc231)) }}'
     nameOverwrite:
       # android: neovim
       # arch: neovim
