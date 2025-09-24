@@ -1,6 +1,14 @@
 # https://github.com/b3nj5m1n/xdg-ninja/tree/main/programs
 # https://github.com/twpayne/dotfiles/blob/master/home/dot_zshrc.tmpl
 
+# https://github.com/grawity/dotfiles/blob/main/.environ.notes
+{{- if .name }}
+export NAME={{ .name | quote }}
+{{- end }}
+{{- if .email }}
+export EMAIL={{ .email | quote }}
+{{- end }}
+
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -9,50 +17,52 @@ export XDG_STATE_HOME="$HOME/.local/state"
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
-if [ -z "${MANPAGER:-}" ]; then
-  export MANPAGER="less -X"
-fi
+{{- if (get .features "neovim") }}
+# Neovim
+# https://neovim.io/doc/user/filetype.html#ft-man-plugin
+# MANPAGER="nvim +Man!"
+# MANWIDTH="99999999"
+{{- end }}
+export MANPAGER="${MANPAGER:-less -X}"
 
-# if [ -z "${PAGER:-}" ]; then
-#   # export PAGER="less -SFX"
-#   export PAGER="less --chop-long-lines --no-init --quit-if-one-screen"
-# fi
+# export PAGER="less -SFX"
+# export PAGER="${PAGER:-less --chop-long-lines --no-init --quit-if-one-screen}"
 
 # https://github.com/xo/usql/issues/308
-if [ -z "${LESS:-}" ]; then
-  # export LESS="-S -I -R"
-  export LESS="--chop-long-lines --IGNORE-CASE --RAW-CONTROL-CHARS"
-fi
+# export LESS="-S -I -R"
+# export LESS="--chop-long-lines --IGNORE-CASE --RAW-CONTROL-CHARS"
+# export LESS="-S -X -F -I -R"
+export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}"
 
-editor=editor
-if command -v hx >/dev/null; then
-  editor=hx
-elif command -v nvim >/dev/null; then
-  editor=nvim
-elif command -v vim >/dev/null; then
-  editor=vim
-elif command -v code >/dev/null; then
-  editor=code
-else
-  editor="${VISUAL:-${EDITOR:-vi}}"
-fi
-export EDITOR="${EDITOR:-$editor}"
-export VISUAL
+{{- $editor := "vi" }}
+{{- if lookPath "editor" | isExecutable }}
+{{- $editor = "editor" }}
+{{- else if lookPath "hx" | isExecutable }}
+{{- $editor = "hx" }}
+{{- else if lookPath "nvim" | isExecutable }}
+{{- $editor = "nvim" }}
+{{- else if lookPath "vim" | isExecutable }}
+{{- $editor = "vim" }}
+{{- else if lookPath "code" | isExecutable }}
+{{- $editor = "code" }}
+{{- end }}
+export EDITOR="${EDITOR:-{{ $editor }}}"
+export VISUAL="${VISUAL:-$EDITOR}"
 
 {{- if (get .features "ai") }}
-export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
+export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
 {{- end }}
 
 {{- if lookPath "curl" | isExecutable }}
-export CURL_HOME="$XDG_CONFIG_HOME/curl"
+export CURL_HOME="${CURL_HOME:-$XDG_CONFIG_HOME/curl}"
 {{- end }}
 
 {{- if (get .features "docker") }}
-# export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+# export DOCKER_CONFIG="${DOCKER_CONFIG:-$XDG_CONFIG_HOME/docker}"
 {{- end }}
 
 {{- if lookPath "eza" | isExecutable }}
-export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
+export EZA_CONFIG_DIR="${EZA_CONFIG_DIR:-$XDG_CONFIG_HOME/eza}"
 {{- end }}
 
 {{- if (get .features "kube") }}
@@ -68,7 +78,7 @@ export TALOSCONFIG="${TALOSCONFIG:-$HOME/.talos/config}"
 {{- end }}
 
 {{- if lookPath "less" | isExecutable }}
-export LESSHISTFILE=/dev/null # "$XDG_STATE_HOME/less/history"
+export LESSHISTFILE="${LESSHISTFILE:-$XDG_STATE_HOME/lesshst}"
 {{- end }}
 
 {{- if (get .features "git") }}
@@ -85,14 +95,13 @@ export LG_CONFIG_FILE="$XDG_CONFIG_HOME/lazygit/theme.yml,$XDG_CONFIG_HOME/lazyg
 # export GO111MODULE=on
 
 # TODO: export GOPATH="$XDG_DATA_HOME/go"
-
 export GOPATH="${GOTPATH:-$HOME/go}"
 # export GOROOT="$HOME/go"
 
 # export GO111MODULE=auto # on
 {{- end }}
 
-export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
+export INPUTRC="${INPUTRC:-$XDG_CONFIG_HOME/readline/inputrc}"
 
 {{- if (get .features "node") }}
 export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"

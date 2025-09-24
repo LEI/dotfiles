@@ -1,5 +1,9 @@
 ---
 extraPackages:
+  # TODO: only if installed via brew
+  # if [ "$(claude config set --global autoUpdates false)" = true ]; then
+  #   claude config set --global autoUpdates false
+  # fi
   claude-code:
     enabled: '{{ and (get .features "ai") (eq .osIDLike "arch" "darwin" "windows") }}'
     nameOverwrite:

@@ -68,7 +68,7 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    -- build = node_prefix .. 'npm install --global mcp-hub@4.2.0',
+    -- build = node_prefix .. 'npm' .. ' install --global mcp-hub@4.2.0',
     -- build = 'bundled_build.lua',
     cmd = 'MCPHub',
     keys = {
@@ -246,18 +246,19 @@ return {
     cmd = 'Copilot',
     -- event = 'InsertEnter',
     keys = {
-      { '<leader>c', '', desc = '+copilot' },
+      -- { '<leader>c', '', desc = '+copilot' },
       { '<leader>cp', '<cmd>Copilot panel<cr>', desc = 'Copilot panel', mode = { 'n', 'v' } },
       { '<leader>cs', '<cmd>Copilot status<cr>', desc = 'Copilot status' },
       { '<leader>cT', '<cmd>Copilot suggestion toggle_auto_trigger<cr>', desc = 'Copilot toggle auto-trigger' },
       { '<leader>ct', '<cmd>Copilot toggle<cr>', desc = 'Copilot toggle' },
     },
+    init = function()
+      local wk = require('which-key')
+      wk.add({
+        { '<leader>c', group = '+copilot' },
+      })
+    end,
     config = function()
-      -- local wk = require('which-key')
-      -- wk.add({
-      --   { '<leader>c', group = '+copilot' },
-      -- })
-
       local copilot = require('copilot')
       copilot.setup({
         -- auth_provider_url = 'https://github.com',

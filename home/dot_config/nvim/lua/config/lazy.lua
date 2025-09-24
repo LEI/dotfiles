@@ -83,8 +83,7 @@ require('lazy').setup({
   },
   install = {
     colorscheme = { vim.g.config.theme.colorscheme },
-    -- FIXME: breaks dashboard/session on open
-    missing = false,
+    missing = vim.g.config.lazy.install_missing or false,
   },
   ui = {
     browser = 'firefox',

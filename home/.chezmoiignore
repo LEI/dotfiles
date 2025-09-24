@@ -203,6 +203,10 @@
 .ssh/
 {{- end }}
 
+{{- if not (get .features "ripgrep") }}
+.config/ripgrep/
+{{- end }}
+
 {{- if not (get .features "tmux") }}
 .config/carapace/specs/t.yaml
 .config/tmux/

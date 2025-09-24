@@ -30,16 +30,16 @@ return {
     cmd = 'Neotest',
     -- stylua: ignore
     keys = {
-      { '<leader>t', '', desc = '+test' },
-      { '<leader>tO', function() require('neotest').output_panel.toggle() end, desc = 'Toggle output panel (Neotest)' },
-      { '<leader>tS', function() require('neotest').run.stop() end, desc = 'Stop (Neotest)' },
-      { '<leader>tT', function() require('neotest').run.run(vim.uv.cwd()) end, desc = 'Run all test files (Neotest)' },
-      { '<leader>tl', function() require('neotest').run.run_last() end, desc = 'Run last (Neotest)' },
-      { '<leader>to', function() require('neotest').output.open({ enter = true, auto_close = true }) end, desc = 'Show output (Neotest)' },
-      { '<leader>tr', function() require('neotest').run.run() end, desc = 'Run nearest (Neotest)' },
-      { '<leader>ts', function() require('neotest').summary.toggle() end, desc = 'Toggle summary (Neotest)' },
-      { '<leader>tt', function() require('neotest').run.run(vim.fn.expand('%')) end, desc = 'Run file (Neotest)' },
-      { '<leader>tw', function() require('neotest').watch.toggle(vim.fn.expand('%')) end, desc = 'Toggle watch (Neotest)' },
+      { '<leader>T', '', desc = '+test' },
+      { '<leader>TO', function() require('neotest').output_panel.toggle() end, desc = 'Toggle output panel (Neotest)' },
+      { '<leader>TS', function() require('neotest').run.stop() end, desc = 'Stop (Neotest)' },
+      { '<leader>TT', function() require('neotest').run.run(vim.uv.cwd()) end, desc = 'Run all test files (Neotest)' },
+      { '<leader>Tl', function() require('neotest').run.run_last() end, desc = 'Run last (Neotest)' },
+      { '<leader>To', function() require('neotest').output.open({ enter = true, auto_close = true }) end, desc = 'Show output (Neotest)' },
+      { '<leader>Tr', function() require('neotest').run.run() end, desc = 'Run nearest (Neotest)' },
+      { '<leader>Ts', function() require('neotest').summary.toggle() end, desc = 'Toggle summary (Neotest)' },
+      { '<leader>Tt', function() require('neotest').run.run(vim.fn.expand('%')) end, desc = 'Run file (Neotest)' },
+      { '<leader>Tw', function() require('neotest').watch.toggle(vim.fn.expand('%')) end, desc = 'Toggle watch (Neotest)' },
     },
     config = function()
       -- local neotest_go = require('neotest-go')({
@@ -68,7 +68,7 @@ return {
     optional = true,
     -- stylua: ignore
     keys = {
-      { '<leader>td', function() require('neotest').run.run({ strategy = 'dap' }) end, desc = 'Debug nearest (Neotest)' },
+      { '<leader>Td', function() require('neotest').run.run({ strategy = 'dap' }) end, desc = 'Debug nearest (Neotest)' },
     },
   },
 }

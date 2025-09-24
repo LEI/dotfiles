@@ -137,6 +137,7 @@ return {
   },
   {
     'echasnovski/mini.icons',
+    -- enabled = vim.g.config.icon_font,
     tag = 'v0.16.0',
     lazy = true,
     opts = {

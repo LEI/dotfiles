@@ -166,3 +166,15 @@ end
 
 -- Refresh buffer
 map('n', '<M-l>', '<cmd>edit<cr>', { desc = 'Refresh buffer' })
+
+-- Vertical split
+-- T: ":silent !tmux split-window"
+-- '"': ":silent !tmux split-window"
+-- Horizontal split
+-- "%": ":silent !tmux split-window -h"
+-- Repeat last command in the previously selected tmux pane
+-- Send enter twice if shell expands '!!'
+map('n', '<leader>t', ":silent !tmux send-keys -t:.\\! '\\!!' C-m C-m<cr>", {
+  desc = 'Repeat last command in last pane',
+  -- silent = true,
+})

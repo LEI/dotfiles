@@ -19,8 +19,11 @@ BINS=("chezmoi")
 check_chezmoi() {
   echo >&2 "Checking chezmoi..."
   cmd chezmoi --version
-
   # set -- --debug --verbose "$@"
+  chezmoi_args=""
+  if [ "$DRYRUN" = true ]; then
+    chezmoi_args="--dry-run"
+  fi
   # NOTE: template output changes after installation (starship preset, gen config...)
   # out="$(chezmoi diff --exclude=scripts)"
   # if [ "$out" != "" ]; then
@@ -28,8 +31,8 @@ check_chezmoi() {
   #   echo >&2 "Expected empty diff without scripts, see output above"
   #   exit 1
   # fi
-  cmd chezmoi apply
-  out="$(cmd chezmoi diff)"
+  cmd chezmoi apply $chezmoi_args
+  out="$(cmd chezmoi diff $chezmoi_args)"
   if [ "$out" != "" ]; then
     echo >&2 "Expected empty diff: $out"
     exit 1

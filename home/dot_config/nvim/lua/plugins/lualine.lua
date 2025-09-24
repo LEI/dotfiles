@@ -218,10 +218,10 @@ return {
             'diagnostics',
             -- always_visible = true,
             symbols = {
-              error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR],
-              warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN],
-              info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO],
-              hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT],
+              error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR] .. ' ',
+              warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN] .. ' ',
+              info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO] .. ' ',
+              hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT] .. ' ',
             },
           },
           'progress',
@@ -268,8 +268,8 @@ return {
             -- local parts = vim.fn.split(current, '/')
             -- local file = parts[#parts]:gsub('%%', '/')
             -- local path = file:sub(1, -5) -- Trim ".vim"
-            local path = '.'
-            return vim.fn.fnamemodify(path, ':~')
+            local path = vim.fn.fnamemodify('.', ':~')
+            return (vim.g.config.node.version and 'nodejs v' .. vim.g.config.node.version .. ' ' or '') .. path
           end,
         },
         -- lualine_y = {},

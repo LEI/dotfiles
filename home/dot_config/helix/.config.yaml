@@ -144,7 +144,8 @@ keys:
       "%": ":sh tmux split-window -h"
       # Repeat last command in the previously selected tmux pane
       # https://stackoverflow.com/a/39523222/7796750
-      t: ":sh tmux send-keys -t :.! !! C-m"
+      # Send enter twice if shell expands '!!'
+      t: ":sh tmux send-keys -t:.! '!!' C-m C-m"
     backspace:
       c: ":character-info"
       # d: ":insert-output date"

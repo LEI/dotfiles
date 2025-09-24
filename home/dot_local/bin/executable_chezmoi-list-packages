@@ -1,43 +1,20 @@
 #!/bin/sh
 
+# Usage: chezmoi list-packages [manager]
+
 set -eu
 
-OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
-TMPDIR="${TMPDIR:-/tmp}"
-diff="diff"
-if command -v difft >/dev/null; then
-  diff="difft"
-elif command -v delta >/dev/null; then
-  diff="delta"
+key=default
+context=.
+
+if [ $# -gt 0 ]; then
+  key="$1"
+  shift
 fi
 
-# TODO: handle linuxbrew extras
-# package_manager="$(chezmoi execute-template '{{ get .packageManagerMap .osIDLike }}' "$@")"
-packages="$(chezmoi execute-template '{{ includeTemplate "list-packages.tmpl" . }}' "$@")"
-extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
-if [ -n "$extra_key" ]; then
-  extra="$(chezmoi execute-template '{{ includeTemplate "list-packages.tmpl" (mergeOverwrite . (dict "packageType" "'"$extra_key"'")) }}' "$@")"
+if [ "$key" != default ] && [ "$key" != . ]; then
+  context='(mergeOverwrite . (dict "packageType" "'"$key"'"))'
 fi
 
-if [ "$OS" = "linux" ] && command -v apk >/dev/null; then
-  apk list --installed --quiet | sort >"$TMPDIR/installed-packages.txt"
-elif [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
-  extra_installed="$(pacman -Qqm)"
-  pacman -Qq | grep -vx "$extra_installed" | sort >"$TMPDIR/installed-packages.txt"
-  echo "$extra_installed" | sort >"$TMPDIR/installed-extra.txt"
-elif [ "$OS" = "darwin" ]; then
-  # brew list --install-on-request
-  brew list --formulae | sort >"$TMPDIR/installed-packages.txt"
-  brew list --cask | sort >"$TMPDIR/installed-extra.txt"
-fi
-
-echo "Packages:"
-# printf "%s\n%s" "$packages" "$extra" | sort >"$TMPDIR/packages.txt"
-echo "$packages" | sort >"$TMPDIR/packages.txt"
-$diff "$TMPDIR/packages.txt" "$TMPDIR/installed-packages.txt"
-
-if [ -n "${extra:-}" ]; then
-  echo "Extras:"
-  echo "$extra" | sort >"$TMPDIR/extra.txt"
-  $diff "$TMPDIR/extra.txt" "$TMPDIR/installed-extra.txt"
-fi
+# echo >&2 "$key packages:"
+chezmoi execute '{{ includeTemplate "list-packages.tmpl" '"$context"' }}' "$@"

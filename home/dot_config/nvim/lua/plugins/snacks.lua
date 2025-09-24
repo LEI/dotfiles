@@ -22,7 +22,7 @@ local dashboard_sections = {
   {
     pane = 2,
     desc = 'Startup time',
-    icon = '⧗ ', -- ⧖
+    icon = vim.g.config.icon_font and '⧗ ' or 'S ', -- ⧖
     -- padding = 1,
     key = 'S',
     action = function()
@@ -32,7 +32,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = ' ',
+    icon = vim.g.config.icon_font and ' ' or 'O ',
     desc = 'Open directory ',
     file = display_dir,
     -- padding = 1,
@@ -50,7 +50,7 @@ local dashboard_sections = {
   },
   {
     pane = 2,
-    icon = ' ',
+    icon = vim.g.config.icon_font and ' ' or 'B ',
     desc = 'Browse repository',
     -- padding = 1,
     key = 'b',
@@ -65,7 +65,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = ' ',
+    icon = vim.g.config.icon_font and ' ' or 'GR ',
     title = 'Git remote',
     section = 'terminal',
     enabled = function()
@@ -80,7 +80,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = ' ',
+    icon = vim.g.config.icon_font and ' ' or 'GS ',
     title = 'Git status',
     section = 'terminal',
     enabled = function()
@@ -295,13 +295,13 @@ return {
       notifier = {
         enabled = true,
         level = vim.log.levels.TRACE,
-        -- icons = {
-        --   error = ' ',
-        --   warn = ' ',
-        --   info = ' ',
-        --   debug = ' ',
-        --   trace = ' ',
-        -- },
+        icons = {
+          error = vim.g.config.signs.error,
+          warn = vim.g.config.signs.warn,
+          info = vim.g.config.signs.info,
+          debug = vim.g.config.signs.debug,
+          trace = vim.g.config.signs.trace,
+        },
         margin = { top = 0, right = 0, bottom = 1 },
         padding = true,
         style = 'compact', -- compact, fancy, minimal
@@ -479,8 +479,8 @@ return {
       { '<leader>sz', function() Snacks.picker.zoxide() end, desc = 'Zoxide picker' },
       { '<leader>s.', function() Snacks.scratch.select() end, desc = 'Select scratch buffer' },
 
-      -- { '<leader>T', '<cmd>horizontal terminal<cr>', desc = 'Open terminal' },
-      { '<leader>T', '<cmd>TerminalOpen<cr>', desc = 'Open terminal' },
+      -- { '<leader>%', '<cmd>vertical terminal<cr>', desc = 'Open terminal' },
+      { '<leader>"', '<cmd>TerminalOpen<cr>', desc = 'Open terminal' },
 
       { '<leader>n', function() Snacks.picker.notifications() end, desc = 'Notification picker' },
       { '<leader>N', function() Snacks.notifier.show_history() end, desc = 'Notification history' },

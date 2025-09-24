@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Usage: chezmoi execute '{{ expr }}'
+
+set -eu
+
+chezmoi execute-template --refresh-externals=never -- "$@"

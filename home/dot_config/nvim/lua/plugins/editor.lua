@@ -157,47 +157,66 @@ return {
     dependencies = {
       'RRethy/nvim-treesitter-endwise',
     },
-    -- branch = 'master',
-    -- lazy = false,
+    -- branch = 'main',
     build = ':TSUpdate',
-    cmd = { 'TSInstall', 'TSInstallInfo', 'TSInstallSync', 'TSUpdate', 'TSUpdateSync' },
+    cmd = {
+      'TSBufDisable',
+      'TSBufEnable',
+      'TSDisable',
+      'TSEnable',
+      'TSInstall',
+      'TSInstallInfo',
+      'TSInstallSync',
+      'TSModuleInfo',
+      'TSUpdate',
+      'TSUpdateSync',
+    },
     event = 'BufEnter',
+    -- lazy = false,
     opts = {
-      auto_install = true,
-      ensure_installed = {
-        'angular',
-        'bash',
-        'c',
-        'dockerfile',
-        'hcl',
-        -- https://github.com/LazyVim/LazyVim/issues/524
-        -- 'help',
-        'html',
-        'javascript',
-        'json',
-        'jsonc',
-        'lua',
-        'markdown',
-        'markdown_inline',
-        -- 'norg',
-        'python',
-        'query',
-        'regex',
-        'tsx',
-        'typescript',
-        'vim',
-        'vimdoc',
-        'yaml',
-      },
+      auto_install = vim.g.config.treesitter.auto_install,
+      ensure_installed = vim.g.config.treesitter.ensure_installed
+          and {
+            'angular',
+            'bash',
+            'c',
+            'dockerfile',
+            'hcl',
+            -- https://github.com/LazyVim/LazyVim/issues/524
+            -- 'help',
+            'html',
+            'javascript',
+            'json',
+            'jsonc',
+            'lua',
+            'markdown',
+            'markdown_inline',
+            -- 'norg',
+            'python',
+            'query',
+            'regex',
+            'tsx',
+            'typescript',
+            'vim',
+            'vimdoc',
+            'yaml',
+          }
+        or {},
 
       folds = {
         enabled = true,
       },
       highlight = {
         enable = true,
-        disable = function()
+        disable = function(lang, buf)
           -- Check if 'filetype' option includes 'chezmoitmpl'
           if string.find(vim.bo.filetype, 'chezmoitmpl') then
+            return true
+          end
+          -- Disable slow treesitter highlight for large files
+          local max_filesize = 100 * 1024 -- 100 KB
+          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          if ok and stats and stats.size > max_filesize then
             return true
           end
         end,
@@ -312,6 +331,12 @@ return {
     event = 'InsertEnter', -- 'VeryLazy',
     opts = {},
   },
+  -- {
+  --   -- https://mise.jdx.dev/mise-cookbook/neovim.html
+  --   'jmbuhr/otter.nvim',
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  --   opts = {},
+  -- },
   {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {

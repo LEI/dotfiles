@@ -2,7 +2,7 @@
 extraPackages:
   notmuch:
     enabled: '{{ get .features "mail" }}'
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   notmuch-vim:
     enabled: '{{ get .features "mail" }}'
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

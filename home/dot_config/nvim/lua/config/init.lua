@@ -4,7 +4,7 @@ vim.g.tmp = os.getenv('TMPDIR') or os.getenv('TMP') or '/tmp'
 local mise_installs = vim.g.home .. '/.local/share/mise/installs'
 
 local function get_mise_node_version()
-  local node_version = vim.env._MISE_GLOBAL_NODE_VERSION
+  local node_version = nil -- vim.env._MISE_GLOBAL_NODE_VERSION
   -- local match = vim.env.PATH:gsub('.*:' .. mise_installs .. '/node/([0-9\\.]+)/bin:.*', '%1')
   -- if match ~= vim.env.PATH then
   --   node_version = match
@@ -23,7 +23,8 @@ local function get_node_config()
   local node_version = get_mise_node_version()
   if node_version then
     -- Use global mise node
-    node_prefix = mise_installs .. '/node/' .. node_version .. '/bin/'
+    local os_separator = package.config:sub(1, 1)
+    node_prefix = vim.fn.resolve(mise_installs .. '/node/' .. node_version .. '/bin') .. os_separator
   elseif not node_version and (vim.fn.executable('node') == 1) then
     -- Fallback to system node
     node_version = vim.fn.system('node --version'):gsub('[\n\r]', '')
@@ -33,12 +34,14 @@ local function get_node_config()
     vim.notify('node version not found', vim.log.levels.WARN)
     return {}
   end
-  if node_prefix and vim.fn.filereadable(node_prefix .. 'node') ~= 1 then
-    vim.notify('node prefix is not readable: ' .. node_prefix, vim.log.levels.WARN)
+  local node_path = node_prefix and node_prefix .. 'node' or nil
+  if node_path and vim.fn.filereadable(node_path) ~= 1 then
+    vim.notify('node path is not readable: ' .. node_path, vim.log.levels.WARN)
+    return {}
   end
   local node_major_version = node_version and tonumber(string.match(node_version, '^%d+')) or nil
   if node_major_version == nil or node_major_version < 20 then
-    vim.notify('node >=20 is required' .. (node_version and ': ' .. node_version or ''), vim.log.levels.WARN)
+    vim.notify('node >=20 is required' .. (node_version and ': found ' .. node_version or ''), vim.log.levels.WARN)
   end
   return {
     prefix = node_prefix,
@@ -46,14 +49,20 @@ local function get_node_config()
   }
 end
 
+local icon_font = os.getenv('ICON_FONT') == 'true' or false
 vim.g.config = {
   explorer = 'oil',
+  icon_font = icon_font,
   node = get_node_config(),
   signs = {
+    error = icon_font and '󰅙' or '✗', -- E: × ✕ 
+    hint = icon_font and '󰌵' or '?', -- H:
+    info = icon_font and '󰋼' or 'ℹ', -- I:  
+    warn = icon_font and '' or '!', -- W
+    debug = icon_font and '' or 'D',
+    trace = icon_font and '' or 'T',
     done = '', -- ✓ ✔
-    error = '✗', -- × ✕
     pending = '→', -- ➜ ➤
-    -- info = 'ℹ', -- 
     spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
   },
   theme = {
@@ -63,15 +72,28 @@ vim.g.config = {
     dim_inactive = os.getenv('DIM_INACTIVE') == 'true' or true,
     transparent = os.getenv('TRANSPARENT_BACKGROUND') == 'true',
   },
+  lazy = {
+    -- Install missing lazy.nvim plugins on startup
+    install_missing = true, -- FIXME: breaks dashboard/session on open
+  },
+  treesitter = {
+    -- Automatically install missing parsers when entering buffer
+    auto_install = true,
+    -- Always install the listed parsers
+    ensure_installed = false,
+  },
 }
 
 vim.g.diagnostic_signs = {
   [vim.diagnostic.severity.ERROR] = vim.g.config.signs.error,
-  [vim.diagnostic.severity.WARN] = '!',
-  [vim.diagnostic.severity.INFO] = 'i',
-  [vim.diagnostic.severity.HINT] = '?',
+  [vim.diagnostic.severity.WARN] = vim.g.config.signs.warn,
+  [vim.diagnostic.severity.INFO] = vim.g.config.signs.info,
+  [vim.diagnostic.severity.HINT] = vim.g.config.signs.hint,
 }
 
+vim.g.features = {}
 local features_json_file = vim.g.home .. '/.local/share/features.json'
-local features_contents = vim.fn.readfile(features_json_file)
-vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))
+if vim.fn.filereadable(features_json_file) == 1 then
+  local features_contents = vim.fn.readfile(features_json_file)
+  vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))
+end

@@ -5,8 +5,8 @@ return {
     ft = 'yaml',
     -- stylua: ignore
     keys = {
-      { '<leader>te', function() require('ansible').run() end, buffer = true, mode = 'v' },
-      { '<leader>te', ":w<CR> :lua require('ansible').run()<CR>", buffer = true, mode = 'n' },
+      { '<leader>Ae', function() require('ansible').run() end, buffer = true, mode = 'v' },
+      { '<leader>Ae', ":w<CR> :lua require('ansible').run()<CR>", buffer = true, mode = 'n' },
     },
   },
   {

@@ -1,4 +1,5 @@
 {{- /* TODO: move to .chezmoiscripts/darwin/ */ -}}
+{{- /* https://github.com/kevinSuttle/macOS-Defaults */ -}}
 
 # Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
 # Local host name: {{ .hostname }}

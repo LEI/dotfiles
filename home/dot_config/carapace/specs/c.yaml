@@ -31,6 +31,13 @@ commands:
   - name: verify
     aliases: [v]
     run: "[chezmoi, verify]"
+
+  - name: diff-packages
+    aliases: [D]
+    run: "[chezmoi-diff-packages]"
+  - name: execute
+    aliases: [E]
+    run: "[chezmoi-execute]"
   - name: list-packages
     aliases: [l]
     run: "[chezmoi-list-packages]"
