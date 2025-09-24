@@ -18,7 +18,7 @@ BINS=("chezmoi")
 
 check_chezmoi() {
   echo >&2 "Checking chezmoi..."
-  cmd chezmoi version
+  cmd chezmoi --version
 
   # set -- --debug --verbose "$@"
   # NOTE: template output changes after installation (starship preset, gen config...)
