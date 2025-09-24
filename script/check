@@ -11,10 +11,15 @@ if [ -z "${MISE_SHELL:-}" ]; then
 fi
 
 DOCTOR="${DOCTOR:-false}"
-TOPGRADE="${TOPGRADE:-false}"
+DRYRUN="${DRYRUN:-false}"
 UPDATE="${UPDATE:-false}"
 
+BINS=("chezmoi")
+
 check_chezmoi() {
+  echo >&2 "Checking chezmoi..."
+  cmd chezmoi version
+
   # set -- --debug --verbose "$@"
   # NOTE: template output changes after installation (starship preset, gen config...)
   # out="$(chezmoi diff --exclude=scripts)"
@@ -36,17 +41,182 @@ check_chezmoi() {
   fi
 }
 
-has_feature() {
-  local name="$1"
-  local features="$2"
-  cmd yq --exit-status ".$name" <<<"$features" >/dev/null 2>&1
-}
-
-check_version() {
-  echo >&2 "Checking versions..."
+check_features() {
+  echo >&2 "Checking features..."
 
   local features
-  features="$(chezmoi cat-config "$@" | yq .data.features)"
+  features="$(chezmoi cat-config | yq .data.features)"
+
+  has_feature() {
+    local name="$1"
+    cmd yq --exit-status ".$name" <<<"$features" >/dev/null 2>&1
+  }
+
+  if has_feature atuin; then
+    cmd atuin --version
+    # cmd atuin dotfiles alias list
+    # if [ "$DOCTOR" = true ]; then
+    #   cmd atuin doctor
+    # fi
+    BINS+=("atuin")
+    ble="$HOME/.local/share/blesh/ble.sh"
+    if [ -f "$ble" ]; then
+      cmd "$SHELL" "$ble" --version
+    fi
+  fi
+
+  if has_feature bash; then
+    cmd bash --version | head -n1
+    BINS+=("bash")
+  fi
+
+  if has_feature bat; then
+    if command -v batcat >/dev/null; then
+      cmd batcat --version
+      BINS+=("batcat")
+    else
+      cmd bat --version
+      BINS+=("bat")
+    fi
+  fi
+
+  if has_feature bottom; then
+    cmd btm --version
+    BINS+=("btm")
+  fi
+
+  if has_feature brew; then
+    if [ -d /home/linuxbrew/.linuxbrew ]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+    cmd brew --version
+    if [ "$DOCTOR" = true ]; then
+      # FIXME: ignore deprecated or disabled formulaes
+      cmd brew doctor || true
+    fi
+    BINS+=("brew")
+  fi
+
+  if has_feature carapace; then
+    cmd carapace --version
+    BINS+=("carapace")
+  fi
+
+  if has_feature direnv; then
+    cmd direnv --version
+    cmd direnv export bash # "${SHELL##*/}"
+    BINS+=("direnv")
+  fi
+
+  if has_feature eza; then
+    cmd eza --version | head -n2 | tail -n1
+    BINS+=("eza")
+  fi
+
+  if has_feature git; then
+    cmd git --version
+    BINS+=("git" "ghq" "lazygit")
+  fi
+
+  if has_feature helix; then
+    cmd hx --version
+    BINS+=("hx")
+  fi
+
+  if has_feature mise; then
+    # cmd mise trust # --all
+    cmd mise --version | head -n1
+    # cmd mise ls
+    # cmd mise trust --show
+    if [ "$DOCTOR" = true ]; then
+      cmd mise doctor
+    fi
+    BINS+=("mise")
+  fi
+
+  if has_feature node; then
+    cmd node --version
+    BINS+=("node")
+  fi
+
+  if has_feature nushell; then
+    cmd nu --version
+    BINS+=("nu")
+  fi
+
+  if has_feature neovim; then
+    cmd nvim --version 2>/dev/null | head -n1
+    if [ "$UPDATE" = true ]; then
+      # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
+      cmd timeout 5m nvim --headless +LazyUpdate! +qa # >/dev/null
+      echo
+      # fi
+    fi
+    if [ "$DOCTOR" = true ]; then
+      cmd timeout 5m nvim --headless +checkhealth +qa # >/dev/null
+      echo
+    fi
+    BINS+=("nvim")
+  fi
+
+  if has_feature python; then
+    # cmd command -v python
+    cmd python --version
+    if command -v pipx >/dev/null; then
+      cmd pipx --version
+      BINS+=("pipx")
+    fi
+    cmd uvx --version
+    BINS+=("uvx" "python")
+  fi
+
+  if has_feature ripgrep; then
+    cmd rg --version | head -n1
+    BINS+=("rg")
+  fi
+
+  if has_feature tmux; then
+    cmd tmux -V 2>/dev/null
+    if [ "$UPDATE" = true ]; then
+      export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
+      cmd timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
+    fi
+    BINS+=("tmux")
+  fi
+
+  if has_feature topgrade; then
+    cmd topgrade --version
+    if [ "$DRYRUN" = true ]; then
+      cmd topgrade \
+        --disable=chezmoi \
+        --dry-run # >/dev/null
+    fi
+    BINS+=("topgrade")
+  fi
+
+  if has_feature vim; then
+    vim --version | head -n1
+    BINS+=("vim")
+  fi
+
+  if has_feature zellij; then
+    cmd zellij --version
+    BINS+=("zellij")
+  fi
+
+  if has_feature zoxide; then
+    cmd zoxide --version
+    BINS+=("zoxide")
+  fi
+
+  if has_feature zsh; then
+    cmd zsh --version | head -n1
+    BINS+=("zsh")
+  fi
+}
+
+check_versions() {
+  echo >&2 "Checking versions..."
 
   os="$(uname -s)"
 
@@ -60,169 +230,25 @@ check_version() {
       cmd lsblk --version # util-linux
     fi
   fi
-
-  if has_feature atuin "$features"; then
-    cmd atuin --version
-    # cmd atuin dotfiles alias list
-    # if [ "$DOCTOR" = true ]; then
-    #   cmd atuin doctor
-    # fi
-  fi
-
-  cmd bash --version | head -n1
-
-  if command -v batcat >/dev/null; then
-    cmd batcat --version
-  else
-    cmd bat --version
-  fi
-
-  ble="$HOME/.local/share/blesh/ble.sh"
-  if [ -f "$ble" ]; then
-    cmd "$SHELL" "$ble" --version
-  fi
-
-  if has_feature brew "$features"; then
-    if [ -d /home/linuxbrew/.linuxbrew ]; then
-      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
-    cmd brew --version
-    if [ "$DOCTOR" = true ]; then
-      # FIXME: ignore deprecated or disabled formulaes
-      cmd brew doctor || true
-    fi
-  fi
-
-  if command -v btm >/dev/null; then
-    cmd btm --version
-  fi
-
   # cmd bws --version
-  cmd carapace --version
-
-  if command -v direnv >/dev/null; then
-    cmd direnv --version
-    cmd direnv export bash # "${SHELL##*/}"
-  fi
-
-  if command -v eza >/dev/null; then
-    cmd eza --version | head -n2 | tail -n1
-  fi
-
   cmd fd --version
   # cmd ghostty --version | head -n1
-
-  if has_feature helix "$features"; then
-    cmd hx --version
-  fi
-
   cmd jq --version
-
-  if has_feature mise "$features"; then
-    # cmd mise trust # --all
-    cmd mise --version | head -n1
-    # cmd mise ls
-    # cmd mise trust --show
-    if [ "$DOCTOR" = true ]; then
-      cmd mise doctor
-    fi
-  fi
-
-  if has_feature node "$features"; then
-    cmd node --version
-  fi
-
-  if has_feature nushell "$features"; then
-    cmd nu --version
-  fi
-
-  if has_feature neovim "$features"; then
-    cmd nvim --version 2>/dev/null | head -n1
-    if [ "$UPDATE" = true ]; then
-      # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
-      cmd timeout 5m nvim --headless +LazyUpdate! +qa # >/dev/null
-      echo
-      # fi
-    fi
-    if [ "$DOCTOR" = true ]; then
-      cmd timeout 5m nvim --headless +checkhealth +qa # >/dev/null
-      echo
-    fi
-  fi
-
-  if has_feature python "$features"; then
-    if command -v pipx >/dev/null; then
-      cmd pipx --version
-    fi
-    cmd uvx --version
-  fi
-
   cmd progress --version
   if [ "$os" != Darwin ]; then
     cmd ps --version
   fi
-  cmd rg --version | head -n1
-
-  if has_feature tmux "$features"; then
-    tmux -V 2>/dev/null
-    if [ "$UPDATE" = true ]; then
-      export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
-      cmd timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
-    fi
-  fi
-
-  if command -v topgrade >/dev/null; then
-    cmd topgrade --version
-    if [ "$TOPGRADE" = true ]; then
-      cmd topgrade \
-        --disable=chezmoi \
-        --dry-run # >/dev/null
-    fi
-  fi
-
-  if has_feature vim "$features"; then
-    vim --version | head -n1
-  fi
-
   cmd yq --version
-
-  if has_feature zellij "$features"; then
-    cmd zellij --version
-  fi
-
-  cmd zoxide --version
 
   if command -v needs >/dev/null; then
     cmd needs \
-      atuin \
-      bash \
-      bat \
-      btm \
-      carapace \
-      chezmoi \
       dd \
-      direnv \
-      eza \
       fd \
-      ghq \
-      hx \
       jq \
-      lazygit \
-      mise \
-      node \
-      nu \
-      nvim \
-      pipx \
       progress \
       ps \
-      rg \
-      tmux \
-      topgrade \
-      uvx \
-      vim \
       yq \
-      zellij \
-      zoxide \
+      "${BINS[@]}" \
       "$@"
   fi
 
@@ -232,5 +258,6 @@ check_version() {
   fi
 }
 
-check_chezmoi # "$@"
-check_version "$@"
+check_chezmoi
+check_features
+check_versions "$@"

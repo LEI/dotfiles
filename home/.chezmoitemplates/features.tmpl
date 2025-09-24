@@ -2,8 +2,13 @@
   "ai" false
   "atuin" false
   "bash" true
+  "bat" true
+  "bottom" true
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
+  "carapace" true
+  "direnv" true
   "docker" false
+  "eza" true
   "ghostty" false
   "git" true
   "go" (eq .osIDLike "arch" "darwin" "debian" "fedora")
@@ -18,6 +23,7 @@
   "nushell" true
   "php" false
   "python" false
+  "ripgrep" true
   "ruby" false
   "rust" false
   "shpool" false
@@ -32,6 +38,7 @@
   "vscode" (eq .osIDLike "arch" "darwin")
   "vscodium" (eq .osIDLike "arch")
   "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
+  "zoxide" true
   "zsh" false
 ) -}}
 
@@ -146,6 +153,7 @@
   "helix" false
   "neovim" false
   "node" false
+  "ruby" false
   "rust" false
   "tmux" false
   "vim" false

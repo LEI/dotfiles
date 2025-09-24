@@ -14,6 +14,7 @@ commonPackages:
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
   # below: { enabled: {{ not (eq .osIDLike "arch" "debian") }} }
   bottom:
+    enabled: {{ .features.bottom }}
     nameOverwrite:
       windows: clement.bottom
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
@@ -65,6 +66,7 @@ commonPackages:
     nameOverwrite:
       windows: wilfred.difftastic
   direnv:
+    enabled: {{ .features.direnv }}
     nameOverwrite:
       windows: direnv.direnv
     # type: mise
@@ -424,6 +426,7 @@ commonPackages:
   #   enabled: {{ and (eq .osIDLike "darwin") (not (or .ephemeral .headless)) }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   zoxide:
+    enabled: {{ .features.zoxide }}
     nameOverwrite:
       windows: ajeetdsouza.zoxide
     type: '{{ and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) | ternary "mise" nil }}'
