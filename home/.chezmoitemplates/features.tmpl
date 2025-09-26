@@ -1,7 +1,7 @@
 {{- $features := (dict
   "ai" false
   "atuin" false
-  "bash" true
+  "bash" false
   "bat" true
   "bottom" (ne .profile "minimal")
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
@@ -16,7 +16,7 @@
   "helix" false
   "i3" (eq .osIDLike "arch")
   "kube" false
-  "logseq" false
+  "logseq" (and (eq .osIDLike "arch" "darwin") (ne .profile "minimal"))
   "mail" false
   "mise" true
   "neovim" false
@@ -34,7 +34,7 @@
   "steam" (and (eq .osIDLike "arch") (eq .profile "personal"))
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
-  "topgrade" (not .ephemeral)
+  "topgrade" false
   "vim" false
   "void" (eq .osIDLike "arch")
   "vscode" (eq .osIDLike "arch" "darwin")
@@ -60,7 +60,8 @@
   "python" true
   "ruby" true
   "tofu" (or (lookPath "tofu" | isExecutable) (eq .osIDLike "arch" "darwin"))
-  "topgrade" true
+  "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) .glibc231)
+  "zsh" true
 ) -}}
 {{- end }}
 
@@ -97,11 +98,9 @@
   "sql" true
   "ssh" true
   "vim" true
-  "zsh" true
 ) -}}
 {{- else if eq .os "darwin" }}
 {{- $features = mergeOverwrite $features (dict
-  "bash" true
   "ghostty" true
   "git" true
   "kube" true
@@ -113,11 +112,9 @@
   "sql" true
   "ssh" true
   "vim" true
-  "zsh" false
 ) -}}
 {{- else if eq .osIDLike "debian" }}
 {{- $features = mergeOverwrite $features (dict
-  "atuin" (not .glibc231)
   "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))))
   "helix" (not .glibc231)
   "kube" false
@@ -127,7 +124,6 @@
   "rust" true
   "sql" true
   "ssh" true
-  "topgrade" (not .glibc231)
   "vim" true
 ) -}}
 {{- else if eq .osIDLike "fedora" }}
@@ -142,7 +138,6 @@
   "sql" true
   "ssh" true
   "vim" true
-  "zsh" true
 ) -}}
 {{- else if eq .os "windows" }}
 {{- $features = mergeOverwrite $features (dict

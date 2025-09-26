@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+EPHEMERAL="${EPHEMERAL:-false}"
+HEADLESS="${HEADLESS:-false}"
+PROFILE="${PROFILE:-}"
+
 # if [[ $- = *i* ]]; then
 #   INTERACTIVE=true
 # else
@@ -34,7 +38,7 @@ CLONE_SCRIPT='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHU
 # shellcheck disable=SC2016
 TEST_SCRIPT='$HOME/.local/share/chezmoi/script/test'
 if [ "$DEBUG_ON_ERROR" = true ]; then
-  TEST_SCRIPT="$TEST_SCRIPT || bash -l || sh -l"
+  TEST_SCRIPT="$TEST_SCRIPT || bash -l" # || sh -l
 fi
 
 main() {
@@ -59,11 +63,21 @@ main() {
   elif [ "$image" == macos ]; then
     image=docker.io/sickcodes/docker-osx
   fi
+  suffix=
+  if [ "$EPHEMERAL" = true ]; then
+    suffix="$suffix-ephemeral"
+  fi
+  if [ "$HEADLESS" = true ]; then
+    suffix="$suffix-headless"
+  fi
+  if [ -n "$PROFILE" ]; then
+    suffix="$suffix-$PROFILE"
+  fi
   if [ -n "$name" ] && [ -n "$tag" ]; then
     image="$name:$tag"
-    set -- "test-$name-$tag" "$image" "$@"
+    set -- "test-$name-$tag$suffix" "$image" "$@"
   elif [ -n "$name" ]; then
-    set -- "test-$name" "$image" "$@"
+    set -- "test-$name$suffix" "$image" "$@"
   fi
   case "$name" in
   "" | local) ./script/check "$@" ;;

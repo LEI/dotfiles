@@ -84,5 +84,5 @@ export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 # export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
 {{- if lookPath "xauth" | isExecutable }}
-export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+# export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
 {{- end }}

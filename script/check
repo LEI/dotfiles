@@ -148,7 +148,8 @@ check_features() {
   fi
 
   if has_feature neovim; then
-    cmd nvim --version 2>/dev/null | head -n1
+    # cmd nvim --version 2>/dev/null | head -n1
+    cmd nvim --version | head -n1
     if [ "$UPDATE" = true ]; then
       # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
       cmd timeout 5m nvim --headless +LazyUpdate! +qa # >/dev/null
@@ -254,13 +255,14 @@ check_versions() {
       "${BINS[@]}" \
       "$@"
   fi
-
-  if [ "${DEBUG:-}" = true ]; then
-    echo >&2 "DEBUG enabled"
-    bash
-  fi
 }
 
 check_chezmoi
 check_features
 check_versions "$@"
+chezmoi diff-packages all
+
+if [ "${DEBUG:-}" = true ]; then
+  echo >&2 "DEBUG enabled"
+  bash
+fi

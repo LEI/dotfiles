@@ -1,8 +1,8 @@
 ---
-pre_commands:
-  Pre commands: set -x; chezmoi status && chezmoi diff
+# pre_commands:
+#   Pre commands: set -x; chezmoi status && chezmoi diff
 commands:
-  Dotfiles: set -x; chezmoi apply --init --interactive --verbose
+  # Dotfiles: set -x; chezmoi apply --init --interactive --verbose
   Makefiles: |
     find ~/.config -mindepth 2 -maxdepth 2 -type f -name Makefile \
       -exec sh -c 'dir="$(dirname {})"; set -x; cd "$dir" && make' \;

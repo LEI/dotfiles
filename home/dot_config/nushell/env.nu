@@ -19,7 +19,8 @@ mkdir ~/.cache/carapace
 carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
 
 # path add ($env.CARGO_HOME | path join "bin")
-const cargo_path = "~/.cargo/env.nu" | path expand
+# const cargo_path = "~/.cargo/env.nu" | path expand
+const cargo_path = "~/.local/share/cargo/env.nu" | path expand
 # const cargo_path = ($nu.home-path | path join .cargo/env.nu)
 source (if ($cargo_path | path exists) { $cargo_path } else { null })
 

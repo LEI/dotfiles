@@ -2,8 +2,10 @@
 
 set -eu
 
-OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 TMPDIR="${TMPDIR:-/tmp}"
+chezmoi_packages="$TMPDIR/chezmoi-packages"
+installed_packages="$TMPDIR/installed-packages"
+
 diff="diff"
 if command -v difft >/dev/null; then
   diff="difft"
@@ -11,33 +13,145 @@ elif command -v delta >/dev/null; then
   diff="delta"
 fi
 
+arg="${1:-}"
+
+diff_packages() {
+  pm="${1:-}"
+  in="${chezmoi_packages}.${pm:-txt}"
+  out="${installed_packages}.${pm:-txt}"
+  if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+    echo >&2 "Listing $pm chezmoi packages..."
+  fi
+  chezmoi-list-packages "$pm" | sort >"$in"
+  if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+    echo >&2 "Listing $pm installed packages..."
+  fi
+  case "$pm" in
+  apk)
+    apk list --installed --quiet | sort >"$out"
+    ;;
+  apt)
+    apt list --installed | sort >"$out"
+    ;;
+  pacman)
+    extra_installed="$(pacman -Qqm)"
+    pacman -Qq | grep -vx "$extra_installed" | sort >"$out"
+    ;;
+  aur | yay)
+    pacman -Qqm | sort >"$out"
+    ;;
+  brew)
+    brew list --formulae | sort >"$out"
+    ;;
+  cask)
+    brew list --cask | sort >"$out"
+    ;;
+  dnf)
+    dnf list --installed | sort >"$out"
+    ;;
+  gem)
+    gem list | cut -d' ' -f1 | sort >"$out"
+    ;;
+  npm)
+    npm list --global --json | jq --raw-output '.dependencies | keys[]' | sort >"$out"
+    ;;
+  python)
+    if command -v uv >/dev/null; then
+      uv tool list | grep -v '^-' | cut -d' ' -f1 | sort >"$out"
+    else
+      pipx list | sort >"$out"
+    fi
+    ;;
+  *)
+    echo >&2 "Invalid package manager: $pm"
+    exit 1
+    ;;
+  esac
+  $diff "$in" "$out"
+}
+
+os="$(uname -s)" # | tr '[:upper:]' '[:lower:]'
+case "$os" in
+Darwin) package_manager=brew ;;
+Linux)
+  if command -v apk >/dev/null; then
+    package_manager=apk
+  elif command -v apt >/dev/null; then
+    package_manager=apt
+  elif command -v dnf >/dev/null; then
+    package_manager=dnf
+  elif command -v pacman >/dev/null; then
+    package_manager=pacman
+  else
+    echo >&2 "Unknown package manager for $os"
+    exit 1
+  fi
+  ;;
+*)
+  echo >&2 "Invalid OS: $os"
+  exit 1
+  ;;
+esac
+
+case "$arg" in
+all | "")
+  echo >&2 "System:"
+  diff_packages "$package_manager"
+  case "$package_manager" in
+  pacman)
+    echo >&2 "AUR:"
+    diff_packages aur
+    ;;
+  *) ;;
+  esac
+  # echo >&2 "Cargo:"
+  # diff_packages cargo
+  if command -v brew >/dev/null; then
+    echo >&2 "Brew:"
+    diff_packages brew
+  fi
+  # echo >&2 "Mise:"
+  # diff_packages mise
+  echo >&2 "Node:"
+  diff_packages npm
+  echo >&2 "Ruby:"
+  diff_packages gem
+  echo >&2 "Python:"
+  diff_packages python
+  ;;
+*)
+  diff_packages "$arg"
+  ;;
+esac
+
 # TODO: handle linuxbrew extras
 # package_manager="$(chezmoi execute-template '{{ get .packageManagerMap .osIDLike }}' "$@")"
-packages="$(chezmoi list-packages . "$@")"
-extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
-if [ -n "$extra_key" ]; then
-  extra="$(chezmoi list-packages "$extra_key" "$@")"
-fi
 
-if [ "$OS" = "linux" ] && command -v apk >/dev/null; then
-  apk list --installed --quiet | sort >"$TMPDIR/installed-packages.txt"
-elif [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
-  extra_installed="$(pacman -Qqm)"
-  pacman -Qq | grep -vx "$extra_installed" | sort >"$TMPDIR/installed-packages.txt"
-  echo "$extra_installed" | sort >"$TMPDIR/installed-extra.txt"
-elif [ "$OS" = "darwin" ]; then
-  # brew list --install-on-request
-  brew list --formulae | sort >"$TMPDIR/installed-packages.txt"
-  brew list --cask | sort >"$TMPDIR/installed-extra.txt"
-fi
-
-echo "Packages:"
-# printf "%s\n%s" "$packages" "$extra" | sort >"$TMPDIR/packages.txt"
-echo "$packages" | sort >"$TMPDIR/packages.txt"
-$diff "$TMPDIR/packages.txt" "$TMPDIR/installed-packages.txt"
-
-if [ -n "${extra:-}" ]; then
-  echo "Extras:"
-  echo "$extra" | sort >"$TMPDIR/extra.txt"
-  $diff "$TMPDIR/extra.txt" "$TMPDIR/installed-extra.txt"
-fi
+# packages="$(chezmoi list-packages . "$@")"
+# extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
+# if [ -n "$extra_key" ]; then
+#   extra="$(chezmoi list-packages "$extra_key" "$@")"
+# fi
+#
+# if [ "$OS" = "linux" ] && command -v apk >/dev/null; then
+#   apk list --installed --quiet | sort >"$TMPDIR/installed-packages.txt"
+# elif [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
+#   extra_installed="$(pacman -Qqm)"
+#   pacman -Qq | grep -vx "$extra_installed" | sort >"$TMPDIR/installed-packages.txt"
+#   echo "$extra_installed" | sort >"$TMPDIR/installed-extra.txt"
+# elif [ "$OS" = "darwin" ]; then
+#   # brew list --install-on-request
+#   brew list --formulae | sort >"$TMPDIR/installed-packages.txt"
+#   brew list --cask | sort >"$TMPDIR/installed-extra.txt"
+# fi
+#
+# echo "Packages:"
+# # printf "%s\n%s" "$packages" "$extra" | sort >"$TMPDIR/packages.txt"
+# echo "$packages" | sort >"$TMPDIR/packages.txt"
+# $diff "$TMPDIR/packages.txt" "$TMPDIR/installed-packages.txt"
+#
+# if [ -n "${extra:-}" ]; then
+#   echo "Extras:"
+#   echo "$extra" | sort >"$TMPDIR/extra.txt"
+#   $diff "$TMPDIR/extra.txt" "$TMPDIR/installed-extra.txt"
+# fi

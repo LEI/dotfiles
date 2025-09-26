@@ -5,16 +5,18 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/functions/pathmunge.sh"
 
 # NOTE: use global cargo
 TMPDIR="${TMPDIR:-/tmp}"
 cd "$TMPDIR"
 
-if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
-  cmd . ~/.cargo/env
+if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+  cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
 fi
 
-if ! rustup default; then
+if command -v rustup >/dev/null && ! rustup default; then
+  # echo >&2 "No default toolchain is configured, using stable"
   cmd rustup default stable
 fi
 # if [ ! -f "$TMPDIR/rust-toolchain" ]; then
@@ -81,8 +83,11 @@ fi
 # cmd rustup component add rust-analyzer
 {{- end }}
 
-if ! command -v cargo >/dev/null && [ -f ~/.cargo/env ]; then
-  cmd . ~/.cargo/env
+# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
 if ! command -v cargo-binstall >/dev/null; then

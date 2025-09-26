@@ -12,6 +12,8 @@ set -eu
 
 # cmd mise trust
 
+# TODO: check gpg-agent is running
+
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
 log "Installing tools"
 

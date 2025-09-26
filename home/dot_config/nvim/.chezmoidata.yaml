@@ -1,5 +1,6 @@
 ---
 extraPackages:
+  # NOTE: latest nvim requires GLIBC_2.42
   neovim:
     enabled: '{{ and (get .features "neovim") (or (ne .osIDLike "debian") (not .glibc231)) }}'
     nameOverwrite:

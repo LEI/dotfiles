@@ -121,11 +121,11 @@ else
   echo >&2 "Command 'mise' not found"
 fi
 
-if [ -f "$HOME/.cargo/env" ]; then
-  bench source "$HOME/.cargo/env"
-fi
-if [ -d "$HOME/.cargo/bin" ]; then
-  pathmunge "$HOME/.cargo/bin" after
+# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   bench source "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
 if [ -d "$GOPATH/bin" ]; then

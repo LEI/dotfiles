@@ -3,6 +3,7 @@
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
 commonPackages:
   7zip:
+    enabled: {{ not (eq .osIDLike "fedora") }}
     nameOverwrite:
       windows: 7zip.7zip
   autossh:
@@ -54,12 +55,21 @@ commonPackages:
       # npm: @charmland/crush
       windows: charmbracelet.crush
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # FIXME(arch): JVM terminated error
+  # https://wiki.archlinux.org/title/Dbeaver
+  # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+  # dbeaver: # Requires at least jdk17-openjdk, alternative: mysqlworkbench
+  #   enabled: {{ and (get .features "sql") (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not .ephemeral) (not .headless) }}
+  #   nameOverwrite:
+  #     darwin: dbeaver-community
+  #     windows: DBeaver.DBeaver
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   dcv: # dtop
     enabled: {{ and (get .features "docker") (eq .osIDLike "darwin") }}
     nameOverwrite:
       darwin: tokuhirom/tap/dcv
   devpod:
-    enabled: {{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       arch: devpod-bin
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
@@ -74,7 +84,7 @@ commonPackages:
       windows: direnv.direnv
     # type: mise
   dive: # sou
-    enabled: {{ and (get .features "docker") (not (eq .osID "alpine" "fedora")) }}
+    enabled: {{ and (get .features "docker") (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
       windows: wagoodman.dive # scoop: main/dive
   # dog, doggo, mtr, trippy, oryx / tshark termshark
@@ -149,7 +159,10 @@ commonPackages:
   gpg-tui:
     enabled: {{ not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows") }}
   gzip: { enabled: {{ eq .osIDLike "alpine" }} }
-  # hostctl
+  # hostctl:
+  #   nameOverwrite:
+  #     arch: hostctl-bin
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   htop:
   httm:
     enabled: {{ eq .osIDLike "arch" "darwin" }}
@@ -396,7 +409,7 @@ commonPackages:
   tree:
   tuptime:
     enabled: {{ and (eq .os "linux") (not (eq .osID "alpine" "fedora")) (not .ephemeral) (not (or
-      (and (eq .osID "debian") (le (int .osVersion) 1))
+      (and (eq .osID "debian") (le (int .osVersion) 13))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
     )) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "python" }}'
@@ -494,8 +507,8 @@ osPackages:
     pacman:
       base-devel:
       ddgr: # servitor, so
-      gnu-netcat:
-        enabled: {{ eq .osID "manjaro" }}
+      # gnu-netcat: # openbsd-netcat websocat
+      #   enabled: {{ eq .osID "manjaro" }}
       # iptables-nft:
       # jack2: # pipewire-jack
       mandoc:
@@ -522,7 +535,7 @@ osPackages:
     aur:
       # below:
       gnu-netcat:
-        enabled: {{ ne .osID "manjaro" }}
+        # enabled: {{ ne .osID "manjaro" }}
       pacseek-bin:
       tre-command-bin:
       # terraform-pug-bin: { enabled: {{ get .features "tofu" }} }
@@ -632,19 +645,14 @@ osPackages:
       koekeishiya/formulae/yabai:
         start: yabai --start-service
       # jackielii/tap/skhd-zig: # koekeishiya/formulae/skhd
-
-      # bash bash-completion
-      # zsh zsh-completions:
     cask:
       # android-platform-tools:
       # bitwarden:
       # bruno: # postman
       # cyberduck:
-      # dbeaver-community: # mysqlworkbench
-      # docker: # docker-desktop
+      # docker docker-desktop:
       # dropbox:
-      # font-hack:
-      # font-hack-nerd-font:
+      # font-hack font-hack-nerd-font:
       # google-drive:
       # gpg-suite:
       # grandperspective:

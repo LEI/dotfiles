@@ -1,6 +1,6 @@
 ---
 extraPackages:
   bash:
-    enabled: '{{ and (get .features "bash") (eq .osIDLike "alpine" "darwin") }}'
+    enabled: '{{ get .features "bash" }}'
   bash-completion:
-    enabled: '{{ and (get .features "bash") (eq .osIDLike "alpine" "darwin") }}'
+    enabled: '{{ get .features "bash" }}'

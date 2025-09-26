@@ -4,13 +4,17 @@ background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75
 # cursor-style = block
 # cursor-style-blink = false
 
+# A value of "3" (default) scrolls 3 lines per tick.
+# https://github.com/ghostty-org/ghostty/pull/8927
+# mouse-scroll-multiplier = 3
+
 # shell-integration = none
 # shell-integration-features = no-cursor
 
 # fullscreen = true
 # font-feature = -calt, -liga, -dlig
 scrollback-limit = 90000000
-theme = TokyoNight Night
+theme = dark:TokyoNight Night,light:TokyoNight Day
 # theme = TokyoNight Storm
 
 {{- if eq .os "darwin" }}

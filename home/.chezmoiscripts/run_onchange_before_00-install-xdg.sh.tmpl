@@ -48,8 +48,8 @@ fi
 {{- if lookPath "xauth" | isExecutable }}
 
 # https://askubuntu.com/a/961459
-if [ -d ~/.Xauthority ] && ! [ -d "$XAUTHORITY" ]; then
-  cmd mv ~/.Xauthority "$XAUTHORITY"
-  # cmd ln -s "$XAUTHORITY" ~/.Xauthority
-fi
+# if [ -d ~/.Xauthority ] && ! [ -d "$XAUTHORITY" ]; then
+#   cmd mv ~/.Xauthority "$XAUTHORITY"
+#   cmd ln -s "$XAUTHORITY" ~/.Xauthority
+# fi
 {{- end }}
