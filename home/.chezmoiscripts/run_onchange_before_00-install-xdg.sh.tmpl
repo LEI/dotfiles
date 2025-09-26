@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{ includeTemplate "xdg.sh.tmpl" . | trim }}
+
+{{- if (get .features "ai") }}
+
+# if [ -d "$HOME/.claude" ] && [ -d "$CLAUDE_CONFIG_DIR" ]; then
+#   echo >&2 "ERR: $HOME/.claude"
+#   exit 1
+# fi
+
+# https://github.com/anthropics/claude-code/issues/1455
+if [ -d "$HOME/.claude" ] && ! [ -d "$CLAUDE_CONFIG_DIR" ]; then
+  cmd mv "$HOME/.claude" "$CLAUDE_CONFIG_DIR"
+  cmd ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
+fi
+{{- end }}
+
+{{- if (get .features "rust") }}
+
+if [ -d ~/.cargo ] && ! [ -d "$CARGO_HOME" ]; then
+  cmd mv ~/.cargo "$CARGO_HOME"
+fi
+
+if [ -d ~/.rustup ] && ! [ -d "$RUSTUP_HOME" ]; then
+  cmd mv ~/.rustup "$RUSTUP_HOME"
+fi
+{{- end }}

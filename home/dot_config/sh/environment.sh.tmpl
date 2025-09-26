@@ -1,6 +1,3 @@
-# https://github.com/b3nj5m1n/xdg-ninja/tree/main/programs
-# https://github.com/twpayne/dotfiles/blob/master/home/dot_zshrc.tmpl
-
 # https://github.com/grawity/dotfiles/blob/main/.environ.notes
 {{- if .name }}
 export NAME={{ .name | quote }}
@@ -8,11 +5,6 @@ export NAME={{ .name | quote }}
 {{- if .email }}
 export EMAIL={{ .email | quote }}
 {{- end }}
-
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
 
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
@@ -49,92 +41,4 @@ export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-C
 export EDITOR="${EDITOR:-{{ $editor }}}"
 export VISUAL="${VISUAL:-$EDITOR}"
 
-{{- if (get .features "ai") }}
-export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
-{{- end }}
-
-{{- if lookPath "curl" | isExecutable }}
-export CURL_HOME="${CURL_HOME:-$XDG_CONFIG_HOME/curl}"
-{{- end }}
-
-{{- if (get .features "docker") }}
-# export DOCKER_CONFIG="${DOCKER_CONFIG:-$XDG_CONFIG_HOME/docker}"
-{{- end }}
-
-{{- if lookPath "eza" | isExecutable }}
-export EZA_CONFIG_DIR="${EZA_CONFIG_DIR:-$XDG_CONFIG_HOME/eza}"
-{{- end }}
-
-{{- if (get .features "kube") }}
-export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
-# export KUBECONFIG="${KUBECONFIG:-$XDG_CONFIG_HOME/kube/config.yaml}"
-export KUBERC="${KUBERC:-$XDG_CONFIG_HOME/kube/kuberc.yaml}"
-
-export KREW_ROOT="${KREW_ROOT:-$HOME/.krew}"
-# export KREW_ROOT="$HOME/.local/share/krew" # /usr/local/krew
-
-# TODO: $HOME/.config/talos/config
-export TALOSCONFIG="${TALOSCONFIG:-$HOME/.talos/config}"
-{{- end }}
-
-{{- if lookPath "less" | isExecutable }}
-export LESSHISTFILE="${LESSHISTFILE:-$XDG_STATE_HOME/lesshst}"
-{{- end }}
-
-{{- if (get .features "git") }}
-export LG_CONFIG_FILE="$XDG_CONFIG_HOME/lazygit/theme.yml,$XDG_CONFIG_HOME/lazygit/config.yml"
-{{- end }}
-
-{{- if lookPath "gpg" | isExecutable }}
-# TODO: export GNUPGHOME="$XDG_DATA_HOME/gnupg"
-{{- end }}
-
-{{- if (get .features "go") }}
-# export GOBIN=$HOME/.local/bin
-# export GOPATH="$HOME/.config/go"
-# export GO111MODULE=on
-
-# TODO: export GOPATH="$XDG_DATA_HOME/go"
-export GOPATH="${GOTPATH:-$HOME/go}"
-# export GOROOT="$HOME/go"
-
-# export GO111MODULE=auto # on
-{{- end }}
-
-export INPUTRC="${INPUTRC:-$XDG_CONFIG_HOME/readline/inputrc}"
-
-{{- if (get .features "node") }}
-export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
-# export PNPM_HOME="$OME/.local/share/pnpm"
-{{- end }}
-
-{{- if (get .features "ruby") }}
-# export GEM_HOME="$XDG_DATA_HOME/gem"
-# export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
-{{- end }}
-
-{{- if (get .features "rust") }}
-# export CARGO_HOME="$XDG_DATA_HOME/cargo"
-# export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
-{{- end }}
-
-{{- if lookPath "starship" | isExecutable }}
-export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
-{{- end }}
-
-{{- if and (get .features "sql") (lookPath "psql" | isExecutable) }}
-export PSQLRC="$XDG_CONFIG_HOME/psql/psqlrc"
-{{- end }}
-
-{{- if lookPath "rg" | isExecutable }}
-export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
-{{- end }}
-
-{{- if lookPath "wget" | isExecutable }}
-export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
-{{- end }}
-# export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-
-{{- if lookPath "xauth" | isExecutable }}
-# TODO: export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
-{{- end }}
+{{ includeTemplate "xdg.sh.tmpl" . | trim }}

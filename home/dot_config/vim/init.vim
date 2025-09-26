@@ -63,6 +63,8 @@ set shiftwidth=2
 set expandtab
 set smartindent
 
+set viminfofile=$XDG_STATE_HOME/vim/viminfo
+
 " Make 'dot' work as expected in visual mode
 " vnoremap . :normal .<cr>
 
