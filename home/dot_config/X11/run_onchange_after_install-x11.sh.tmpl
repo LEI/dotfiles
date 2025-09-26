@@ -13,4 +13,7 @@ fi
 # TODO: auto reload on change
 # include (joinPath .chezmoi.homeDir ".Xresources") | sha256sum
 # include (joinPath .chezmoi.homeDir ".config/X11/xresources") | sha256sum
-cmd xrdb -merge ~/.Xresources
+# cmd xrdb -merge ~/.Xresources
+
+# xrdb -load "$XDG_CONFIG_HOME/X11/xresources"
+xrdb -merge "$XDG_CONFIG_HOME/X11/xresources"

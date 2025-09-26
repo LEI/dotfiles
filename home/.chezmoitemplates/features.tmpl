@@ -23,6 +23,7 @@
   "node" false
   "nushell" true
   "php" false
+  "podman" false
   "python" false
   "ripgrep" true
   "ruby" false
@@ -50,14 +51,15 @@
     (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
   ))
   "bash" true
-  "docker" (and (or (lookPath "docker" | isExecutable) (lookPath "podman" | isExecutable)) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
+  "docker" (or (lookPath "docker" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
   "git" true
   "helix" true
   "kube" (lookPath "kubectl" | isExecutable)
   "nushell" true
+  "podman" (or (lookPath "podman" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
   "python" true
-  "tofu" (lookPath "tofu" | isExecutable)
   "ruby" true
+  "tofu" (or (lookPath "tofu" | isExecutable) (eq .osIDLike "arch" "darwin"))
   "topgrade" true
 ) -}}
 {{- end }}

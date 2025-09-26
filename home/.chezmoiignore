@@ -57,11 +57,12 @@
 
 {{- if not (get .features "docker") }}
 .config/carapace/specs/d.yaml
-.config/carapace/specs/p.yaml
-# .config/docker/
+.config/docker/
 .config/sh/plugins/docker.sh
-{{- if lookPath "docker" | isExecutable }}.config/carapace/specs/d.yaml{{- end }}
-{{- if lookPath "podman" | isExecutable }}.config/carapace/specs/p.yaml{{- end }}
+{{- end }}
+
+{{- if not (get .features "podman") }}
+.config/carapace/specs/p.yaml
 {{- end }}
 
 {{- if not (get .features "ghostty") }}
@@ -76,7 +77,7 @@
 # .config/nushell/modules/git.nu
 # NOTE: feature should be named "git-config"
 # .config/sh/plugins/git.sh
-{{- if lookPath "git" | isExecutable }}.config/carapace/specs/g.yaml{{- end }}
+.config/carapace/specs/g.yaml
 {{- end }}
 
 {{- if not (get .features "go") }}
@@ -94,8 +95,8 @@
 .config/helix/Makefile
 {{- end }}
 
-{{- if not (get .features "i3") }}
 .Xresources
+{{- if not (get .features "i3") }}
 .config/Kvantum/
 .config/X11/
 # .config/autostart/
@@ -120,7 +121,7 @@
 .config/krew/
 .config/kube/
 .config/sh/plugins/kubectl.sh
-{{- if lookPath "kubectl" | isExecutable }}.local/bin/k{{- end }}
+.local/bin/k
 {{- end }}
 
 {{- if not (get .features "mail") }}
@@ -210,7 +211,7 @@
 {{- if not (get .features "tmux") }}
 .config/carapace/specs/t.yaml
 .config/tmux/
-{{- if lookPath "tmux" | isExecutable }}.local/bin/t{{- end }}
+.local/bin/t
 {{- end }}
 
 {{- if not (get .features "topgrade") }}
