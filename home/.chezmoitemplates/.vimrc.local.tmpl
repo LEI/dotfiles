@@ -1,4 +1,4 @@
-{{- if (get .features "node") }}
+{{- if .features.node }}
 {{- if lookPath "neovim-node-host" | isExecutable -}}
 " By default, Nvim searches for "neovim-node-host" using "npm root -g"
 let g:node_host_prog = '{{ lookPath "neovim-node-host" }}'

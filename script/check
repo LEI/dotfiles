@@ -19,6 +19,7 @@ BINS=("chezmoi")
 check_chezmoi() {
   echo >&2 "Checking chezmoi..."
   cmd chezmoi --version
+  cmd chezmoi doctor --no-network || true
   # set -- --debug --verbose "$@"
   chezmoi_args=""
   if [ "$DRYRUN" = true ]; then
@@ -165,7 +166,7 @@ check_features() {
 
   if has_feature python; then
     # cmd command -v python
-    cmd python --version
+    cmd python --version || cmd python3 --version
     if command -v pipx >/dev/null; then
       cmd pipx --version
       BINS+=("pipx")
@@ -228,7 +229,9 @@ check_versions() {
   if [ "$os" = Darwin ]; then
     cmd gdd --version | head -n1
   else
-    cmd dd --version | head -n1
+    if ! cmd dd --version | head -n1; then
+      echo >&2 "dd exited with code: $?"
+    fi
 
     if command -v lsblk >/dev/null; then
       cmd lsblk --version # util-linux

@@ -80,8 +80,9 @@ return {
 
       use_bundled_binary = false,
 
-      cmd = node_prefix .. 'node',
-      cmdArgs = { node_prefix .. 'mcp-hub' },
+      cmd = vim.g.home .. '/.local/share/npm/bin/mcp-hub',
+      -- cmd = node_prefix .. 'node',
+      -- cmdArgs = { node_prefix .. 'mcp-hub' },
 
       -- config = vim.fn.expand('~/.config/mcphub/servers.json'),
       -- port = 37373,

@@ -70,6 +70,7 @@ return {
     'stevearc/overseer.nvim',
     -- enabled = false,
     tag = 'v1.6.0',
+    dependencies = { 'folke/persistence.nvim' },
     cmd = {
       'OverseerBuild',
       'OverseerClearCache',
@@ -119,6 +120,7 @@ return {
       { '<leader>oc', '<cmd>OverseerClearCache<cr>', desc = 'Clear cache' },
       { '<leader>ol', '<cmd>OverseerRestartLast<cr>', desc = 'Restart last' },
     },
+    -- lazy = false,
     init = function()
       -- Restart last task
       vim.api.nvim_create_user_command('OverseerRestartLast', function()

@@ -145,7 +145,7 @@ keys:
       # Repeat last command in the previously selected tmux pane
       # https://stackoverflow.com/a/39523222/7796750
       # Send enter twice if shell expands '!!'
-      t: ":sh tmux send-keys -t:.! '!!' C-m C-m"
+      t: ":sh repeat-last-command"
     backspace:
       c: ":character-info"
       # d: ":insert-output date"

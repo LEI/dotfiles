@@ -1,16 +1,4 @@
-# ansible
-# euporie
-{{- if get .features "sql" }}
-pg_activity[psycopg]
-{{- end }}
-recoverpy
-{{ if ne (env "VT_API_KEY") "" -}}
-wtfis
-{{ end -}}
-{{ if and (get .features "ai") (get .features "tmux") -}}
-wut-cli
-{{ end -}}
-{{- $pythonPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "python")) | fromJson }}
-{{- range $pythonPackages | keys | sortAlpha }}
+# {{ printf "%s/%s" (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile }}
+{{- range .uvPackages | keys | sortAlpha }}
 {{ . }}
 {{- end }}

@@ -6,48 +6,44 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ if eq .osIDLike "darwin" "debian" -}}
-# https://docs.astral.sh/uv/getting-started/installation/
-if ! command -v uv >/dev/null; then
-  # cmd curl -LsSf https://astral.sh/uv/install.sh | sh
-  if command -v pipx >/dev/null; then
-    cmd pipx install uv
-  else
-    cmd python3 -m pip install --user --quiet uv
-  fi
+pip_packages={{ .pipPackages | keys | sortAlpha | join " " | quote }}
+if [ -n "$pip_packages" ] && (command -v python >/dev/null || command -v python3 >/dev/null); then
+  cmd python3 -m pip install --user --quiet $pip_packages
 fi
-{{ end -}}
-{{- $packages := list }}
+
+pipx_packages={{ .pipxPackages | keys | sortAlpha | join " " | quote }}
+if [ -n "$pipx_packages" ] && command -v pipx >/dev/null; then
+  cmd pipx install $pipx_packages
+fi
+
+{{- $uvPackages := list }}
 {{- $pythonTools := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
 {{- range $name := $pythonTools -}}
 {{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
 {{-   if eq $name "" -}}
 {{-     continue -}}
 {{-   end -}}
-{{-   $packages = append $packages $name -}}
+{{-   $uvPackages = append $uvPackages $name -}}
 {{- end }}
 
-packages="{{ $packages | sortAlpha | join " " }}"
-
-if [ -n "$packages" ]; then
-  for name in $packages; do
+uv_packages={{ $uvPackages | sortAlpha | join " " | quote }}
+# cmd uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} $uv_packages
+if [ -n "$uv_packages" ]; then
+  for name in $uv_packages; do
     cmd="${name%%[*}"
     cmd="${cmd%-cli}"
     if command -v $cmd >/dev/null; then
+      {{- if .upgrade }}
+      cmd uv tool install --quiet --upgrade $name
+      {{- else }}
       echo >&2 "Already installed: $cmd"
+      {{- end }}
       continue
     fi
+    {{- if .upgrade }}
+    cmd uv tool install --quiet --upgrade $name
+    {{- else }}
     cmd uv tool install --quiet $name
-    # cmd uv tool install --quiet --upgrade $name
+    {{- end }}
   done
 fi
-# {{ if lookPath "uv" | isExecutable -}}
-# {{- else if lookPath "pipx" | isExecutable }}
-# if [ -n "$packages" ]; then
-#   cmd pipx install $packages
-# fi
-# {{- else }}
-# if [ -n "$packages" ]; then
-#   cmd python -m pip install --user --quiet $packages
-# fi
-# {{- end }}

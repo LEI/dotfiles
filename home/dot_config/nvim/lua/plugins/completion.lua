@@ -57,14 +57,40 @@ return {
           -- treesitter_highlighting = false,
         },
 
-        -- Manual selection with auto-insert
-        -- https://cmp.saghen.dev/configuration/completion.html#list
-        list = { selection = { preselect = false, auto_insert = true } },
-
         -- Ghost text
         -- https://cmp.saghen.dev/configuration/completion.html#ghost-text
         -- menu = { auto_show = true },
         -- ghost_text = { enabled = true, show_with_menu = true },
+
+        -- Manual selection with auto-insert
+        -- https://cmp.saghen.dev/configuration/completion.html#list
+        list = { selection = { preselect = false, auto_insert = true } },
+
+        -- Completion menu drawing (mini.icons)
+        menu = {
+          draw = {
+            components = {
+              kind_icon = {
+                text = function(ctx)
+                  local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return kind_icon
+                end,
+                -- (optional) use highlights from mini.icons
+                highlight = function(ctx)
+                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return hl
+                end,
+              },
+              kind = {
+                -- (optional) use highlights from mini.icons
+                highlight = function(ctx)
+                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return hl
+                end,
+              },
+            },
+          },
+        },
       },
 
       -- Default list of enabled providers defined so that you can extend it
@@ -90,14 +116,14 @@ return {
           -- Always show buffer completions with LSP
           -- lsp = { fallbacks = {} }, -- defaults to `{ 'buffer' }`
 
-          -- Path completion from cwd instead of current buffer's directory
-          path = {
-            opts = {
-              get_cwd = function(_)
-                return vim.fn.getcwd()
-              end,
-            },
-          },
+          -- -- Path completion from cwd instead of current buffer's directory
+          -- path = {
+          --   opts = {
+          --     get_cwd = function(_)
+          --       return vim.fn.getcwd()
+          --     end,
+          --   },
+          -- },
 
           ['blade-nav'] = {
             module = 'blade-nav.blink',

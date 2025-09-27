@@ -1,8 +1,3 @@
-{{- $packages := includeTemplate "packages.tmpl"  (mergeOverwrite . (dict "packageType" "brew")) | fromJson -}}
-{{- $caskPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "cask")) | fromJson -}}
-{{- $masPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "mas")) | fromJson -}}
-{{- $vscodePackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson -}}
-
 #!/bin/sh
 
 set -eu
@@ -36,17 +31,14 @@ cmd brew update --quiet
 cmd brew upgrade --quiet
 {{- end }}
 
-{{- $brewPackages := dict }}
 {{- $taps := dict }}
-{{- range $name, $options := $packages }}
-{{-   $opts := "" }}
+{{- range $name, $pkg := .brewPackages }}
 {{-   if contains "/" $name }}
 {{-     $_ := $taps | setValueAtPath ($name | replaceAllRegex "/[\\w@-]+$" "") dict }}
 {{-   end }}
-{{-   if get $brewPackages $name -}}
-{{-     warnf "Overriding package %s (%s -> %s)" $name (get (get $brewPackages $name) "options") $options -}}
-{{-   end -}}
-{{-   $_ := set $brewPackages $name $options }}
+{{- /* Hide brew tap prefix */ -}}
+{{- /* $name = $name | replaceAllRegex "[\\w@-]+/" "" */ -}}
+{{- /* $_ := set .brewPackages $name $pkg */ -}}
 {{- end }}
 
 {{- $brewfile := output .sh "-c" "if test -f ~/.config/homebrew/Brewfile; then grep -v '^#' ~/.config/homebrew/Brewfile; fi" | splitList "\n" -}}
@@ -61,47 +53,90 @@ cmd brew upgrade --quiet
 {{-     end -}}
 {{-     $_ := set $taps $name (dict "options" $options) }}
 {{-   else if eq $type "brew" }}
-{{-     if get $brewPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
+{{-     if get $.brewPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.brewPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $brewPackages $name (dict "options" $options) }}
+{{-     $_ := set $.brewPackages $name (dict "options" $options) }}
 {{-   else if eq $type "cask" }}
-{{-     if get $caskPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
+{{-     if get $.caskPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.caskPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $caskPackages $name (dict "options" $options) }}
+{{-     $_ := set $.caskPackages $name (dict "options" $options) }}
 {{-   else if eq $type "mas" }}
-{{-     if get $masPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
+{{-     if get $.masPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.masPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $masPackages $name (dict "options" $options) }}
+{{-     $_ := set $.masPackages $name (dict "options" $options) }}
 {{-   else if eq $type "vscode" }}
-{{-     if get $vscodePackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
+{{-     if get $.vscodePackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.vscodePackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $vscodePackages $name (dict "options" $options) }}
+{{-     $_ := set $.vscodePackages $name (dict "options" $options) }}
 {{-   end }}
 {{- end }}
+
+{{- /* TODO: in init */ -}}
+{{- $packageMap := dict
+  "tap" $taps
+  "brew" .brewPackages
+  "cask" (get . "caskPackages" | default dict)
+  "mas" (get . "masPackages" | default dict)
+  "vscode" .vscodePackages
+}}
+
+{{- $packages := (concat
+  (values .brewPackages)
+  (values (get . "caskPackages" | default dict))
+  (values (get . "masPackages" | default dict))
+  (values .vscodePackages)
+) }}
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "before_script"
+  "packages" $packages
+)) | trim }}
 
 # if ! [ -f ~/.config/homebrew/Brewfile ]; then
 #   cmd brew bundle dump --file=~/.config/homebrew/Brewfile
 # fi
 cmd brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
-{{- $packageMap := dict
-  "tap" $taps
-  "brew" $brewPackages
-  "cask" $caskPackages
-  "mas" $masPackages
-  "vscode" $vscodePackages
-}}
 {{- range $type := list "tap" "brew" "cask" "mas" "vscode" }}
 {{-   range $name, $pkg := get $packageMap $type }}
-{{-     $opts := get $pkg "options" }}
+{{-     if not (kindIs "map" $pkg) }}
+{{-       warnf "%s is not a map: %s" $name $pkg }}
+{{-       $pkg = dict }}
+{{-     end }}
 {{ $type }} {{ $name | quote }}
-{{-     if kindIs "map" $opts }}
-{{-       range $key, $value := $opts }}, {{ $key }}: {{ $value | toJson }}{{ end }}
-{{-     else if $opts }}, {{ $opts }}
+{{-     if not (kindIs "map" $pkg) }}
+{{-       warnf "%s: %s: %s" $type $name $pkg }}
+{{-       continue }}
+{{-     end }}
+{{-     range $key, $value := pick $pkg
+  "args"
+  "conflicts_with"
+  "link"
+  "restart_service"
+  "version_file"
+
+  "appdir"
+  "greedy"
+  "require_sha"
+
+  "id"
+-}}
+{{- /* if OS.linux? or OS.mac? */ -}}
+{{- /* cask "java" unless system "/usr/libexec/java_home", "--failfast" */ -}}
+, {{ $key }}: {{ $value | toJson }}
+{{-     end }}
+{{-     if get $pkg "options" -}}
+, {{ $pkg.options }}
 {{-     end }}
 {{-   end }}
 {{- end }}
+# ENV["SOME_ENV_VAR"] = "some_value"
 EOF
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "after_script"
+  "packages" $packages
+)) | trim }}

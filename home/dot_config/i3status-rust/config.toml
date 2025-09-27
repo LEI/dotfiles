@@ -124,15 +124,15 @@ cycle = [0, 25, 50, 75, 100]
 # format = "$icon$utilization$temperature$clocks"
 # interval = 5
 
-# [[block]]
-# block = "net"
-# # FIXME: format = "$icon ^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K) "
-# # format = "$icon{$signal_strength $ssid$frequency|Wired connection} $device"
-# # format = "$icon {$signal_strength |}$device"
-# # format_alt = "$icon {$signal_strength $ssid$frequency |Wired connection }$device"
-# # inactive_format = ""
-# # Default: 2s
-# interval = 10 # 5
+[[block]]
+block = "net"
+# FIXME: format = "$icon ^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K) "
+# format = "$icon{$signal_strength $ssid$frequency|Wired connection} $device"
+format = "$icon { $signal_strength |}$device ^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K)"
+format_alt = "$icon { $signal_strength $ssid$frequency | Wired connection }^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K)"
+# inactive_format = ""
+# Default: 2s
+interval = 10 # 5
 
 # FIXME: i3 crash
 # https://github.com/greshake/i3status-rust/issues/2184

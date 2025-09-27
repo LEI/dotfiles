@@ -60,11 +60,36 @@ return {
       edit = {
         watch = false,
         force = false,
+        -- ignore_patterns = {
+        --   'run_onchange_.*',
+        --   'run_once_.*',
+        --   '%.chezmoiignore',
+        --   '%.chezmoitemplate',
+        --   -- Add custom patterns here
+        -- },
       },
-      notification = {
-        on_open = true,
-        on_apply = true,
-        on_watch = false,
+      events = {
+        on_open = {
+          notification = {
+            enable = true,
+            msg = 'Opened a chezmoi-managed file',
+            opts = {},
+          },
+        },
+        on_watch = {
+          notification = {
+            enable = true,
+            msg = 'This file will be automatically applied',
+            opts = {},
+          },
+        },
+        on_apply = {
+          notification = {
+            enable = true,
+            msg = 'Successfully applied',
+            opts = {},
+          },
+        },
       },
     },
     init = function()
@@ -110,6 +135,7 @@ return {
           -- end
           local cwd = vim.fn.getcwd()
           local file = vim.api.nvim_buf_get_name(bufnr)
+          -- TODO: use ignore_patterns
           local ignore_prefix = '^%.'
           local name = vim.fn.fnamemodify(file, ':t')
           if name:match(ignore_prefix) then
@@ -134,27 +160,5 @@ return {
         end,
       })
     end,
-  },
-  {
-    'echasnovski/mini.icons',
-    -- enabled = vim.g.config.icon_font,
-    tag = 'v0.16.0',
-    lazy = true,
-    opts = {
-      file = {
-        ['.chezmoiignore'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['.chezmoiremove'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['.chezmoiroot'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['.chezmoiversion'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['bash.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['json.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['ps1.tmpl'] = { glyph = '󰨊', hl = 'MiniIconsGrey' },
-        ['sh.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['toml.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['yaml.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-        ['zsh.tmpl'] = { glyph = '', hl = 'MiniIconsGrey' },
-      },
-      -- style = 'ascii', -- Default: glyph
-    },
   },
 }

@@ -1,10 +1,10 @@
 {{- if ne .osID "windows" }}
 {{- if ne .osID "darwin" }}
-pip
+# pip
 {{- end }}
 # pipenv
 # pipx
-{{- if get .features "neovim" }}
+{{- if .features.neovim }}
 {{- if eq .osIDLike "fedora" }}
 neovim
 {{- else if ne .osID "darwin" }}

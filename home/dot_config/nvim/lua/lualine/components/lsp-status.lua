@@ -9,7 +9,7 @@ local default_options = {
     -- Use standard unicode characters for the spinner and done symbols:
     spinner = vim.g.config.signs.spinner,
     done = vim.g.config.signs.done or 'OK',
-    separator = '  ',
+    separator = ' ',
   },
   -- List of LSP names to ignore (e.g., `null-ls`):
   ignore_lsp = {},

@@ -32,7 +32,7 @@ show_icons = false
 # Default: false
 include_dirs = false
 
-# Format for displaying file permissions    
+# Format for displaying file permissions
 # Possible values:
 #   - "symbolic": Traditional Unix-style (e.g., -rw-r--r--)
 #   - "octal": Numeric mode (e.g., d644)
@@ -146,4 +146,3 @@ max_entries = 20000
 #  - Regular expression: "regex:.*\\.pyc$"
 # Default: ["node_modules", "target", ".git", ".idea", ".vscode"]
 ignore_patterns = ["node_modules", "target", ".git", ".idea", ".vscode"]
-

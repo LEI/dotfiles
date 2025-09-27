@@ -1,8 +1,10 @@
+---
 # https://github.com/chezmoi/dotfiles/blob/master/.chezmoi.yaml.tmpl
-
 {{- $ephemeral := env "CHEZMOI_EPHEMERAL" | not | not -}}
 {{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
+{{- $preset := env "CHEZMOI_PRESET" | default (ne .chezmoi.os "windows" | ternary "font" "text") -}}
 {{- $profile := env "CHEZMOI_PROFILE" -}}
+{{- $upgrade := eq (env "CHEZMOI_UPGRADE" | default (ne $profile "work" | ternary "true" "false")) "1" "true" -}}
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
 {{- $binDir := joinPath $homeDir ".local" "bin" -}}
@@ -32,15 +34,17 @@
 {{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
 {{- $osVersion := get .chezmoi.osRelease "versionID" -}}
 {{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
-{{- $osID = "android" -}}
+{{-   $osID = "android" -}}
 {{- end -}}
 
 {{- $sep := ":" -}}
 {{- $sh := "sh" -}}
 {{- if eq $osID "windows" -}}
-{{- $sep = ";" -}}
-{{- $sh = "bash" -}}
+{{-   $sep = ";" -}}
+{{-   $sh = "bash" -}}
 {{- end -}}
+
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $lddVersion := eq .chezmoi.os "linux" | ternary (output $sh "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
@@ -53,17 +57,18 @@
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
-{{- else if eq $hostname "docker" -}}
-{{-   $hostname = output $sh "-c" "hostname 2>/dev/null || echo docker" | trim -}}
+{{- else if eq $hostname "docker" "podman" -}}
+{{-   $hostname = output $sh "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
 {{- end -}}
 
-{{- $name := env "USER" -}}
-{{- $email := "" -}}
+{{- $user := env "USER" | default "me" -}}
+{{- $name := env "NAME" | default (env "USER") -}}
+{{- $email := env "EMAIL" | default (printf "%s@localhost" $user) -}}
 {{- $accessToken := "" -}}
 
 {{- if hasKey . "name" -}}
 {{-   $name = .name -}}
-{{- else if (env "GIT_CONFIG_USER_NAME") -}}
+{{- else if env "GIT_CONFIG_USER_NAME" -}}
 {{-   $name = env "GIT_CONFIG_USER_NAME" -}}
 {{- else if $interactive -}}
 {{-   $name = promptString "name" $name -}}
@@ -71,7 +76,7 @@
 
 {{- if hasKey . "email" -}}
 {{-   $email = .email -}}
-{{- else if (env "GIT_CONFIG_USER_EMAIL") -}}
+{{- else if env "GIT_CONFIG_USER_EMAIL" -}}
 {{-   $email = env "GIT_CONFIG_USER_EMAIL" -}}
 {{- else if $interactive -}}
 {{-   $email = promptString "email" $email -}}
@@ -79,7 +84,7 @@
 
 {{- if hasKey . "accessToken" -}}
 {{-   $accessToken = .accessToken -}}
-{{- else if (env "BWS_ACCESS_TOKEN") -}}
+{{- else if env "BWS_ACCESS_TOKEN" -}}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
 {{- else if and $interactive -}}
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken -}}
@@ -89,7 +94,7 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $features := includeTemplate "features.tmpl" (dict
+{{- $context := merge (dict
   "accessToken" $accessToken
   "chezmoi" .chezmoi
   "codespaces" $codespaces
@@ -103,9 +108,9 @@
   "osIDLike" $osIDLike
   "osVersion" $osVersion
   "profile" $profile
-) | fromJson -}}
-
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
+) . }}
+{{- $features := includeTemplate "features.tmpl" $context | fromJson -}}
+{{- $_ := set $context "features" $features }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -116,7 +121,7 @@
 {{- if eq $osID "windows" }}
 interpreters:
   sh:
-    command: "C:\\Windows\\System32\\bash.exe" # Get-Command bash
+    command: bash # "C:\\Windows\\System32\\bash.exe" # Get-Command bash
 {{- else }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
@@ -146,23 +151,14 @@ data:
 
   glibc231: {{ $glibc231 }}
   sh: {{ $sh | quote }}
-  symbols: false
+  preset: {{ $preset | quote }}
+  symbols:
+    prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
+    error: {{ eq $preset "font" | ternary " " "x" | quote }}
+  # term: truecolor
 
-  extraPackageManagerMap:
-    arch: aur
-    darwin: cask
-    windows: scoop
-  packageManagerMap:
-    alpine: apk
-    android: termux # pkg
-    arch: pacman
-    darwin: brew
-    debian: apt
-    fedora: dnf
-    windows: winget
-
-  # Upgrade system packages
-  upgrade: {{ eq (env "UPGRADE") "true" }}
+  # Upgrade packages
+  upgrade: {{ $upgrade }}
 
   email: {{ $email | quote }}
   name: {{ $name | quote }}
@@ -189,6 +185,113 @@ data:
 {{- else }}
   git: {}
   mail: {}
+{{- end }}
+
+{{- $packageManagerMap := dict
+  "alpine" "apk"
+  "android" "termux"
+  "arch" "pacman"
+  "darwin" "brew"
+  "debian" "apt"
+  "fedora" "dnf"
+  "windows" "winget"
+}}
+
+{{- $ignoreContext := merge (dict
+  "email" $email
+  "wsl" $wsl
+) $context . }}
+{{- $ignore := list }}
+{{- range $line := includeTemplate ".chezmoiignore" $ignoreContext | splitList "\n" }}
+{{-   if or (eq $line "") (eq (substr 0 1 $line) "#") }}
+{{-     continue }}
+{{-   end }}
+{{-   $ignore = append $ignore $line }}
+{{- end }}
+
+{{- $packageFiles := list }}
+{{- range $path := glob (printf "%s/**/.packages.yaml" .chezmoi.sourceDir) }}
+{{-   $ok := true }}
+{{-   range $excluded := $ignore }}
+{{-     $relative := trimPrefix $.chezmoi.sourceDir $path | replaceAllRegex "^/dot_" "." }}
+{{-     $prefix := substr 0 (sub (len $excluded) 1 | int) $relative }}
+{{-     $excluded = trimSuffix "/" $excluded }}
+{{-     if eq $prefix $excluded }}
+{{-       warnf "ignored: %s" $relative -}}
+{{-       $ok = false }}
+{{-       continue }}
+{{-     end }}
+{{-   end }}
+{{-   if not $ok }}
+{{-     continue }}
+{{-   end }}
+{{-   $packageFiles = append $packageFiles $path }}
+{{- end }}
+
+{{- $packageContext := merge (dict
+  "chassisType" $chassisType
+  "defaultType" (get $packageManagerMap $osIDLike)
+  "packageFiles" $packageFiles
+  "packages" dict
+) $context }}
+
+{{ warnf "%s" $packageContext.defaultType }}
+
+{{- /* TODO: osPackages */ -}}
+
+{{- $packages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" $packageContext.defaultType)) | fromJson }}
+  packages: {{ $packages | toJson }}
+
+{{- if eq $osIDLike "arch" }}
+{{- $aurPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "aur")) | fromJson }}
+  aurPackages: {{ $aurPackages | toJson }}
+{{- end }}
+
+{{- if $features.brew }}
+{{- $brewPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "brew")) | fromJson }}
+  brewPackages: {{ $brewPackages | toJson }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $caskPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "cask")) | fromJson }}
+  caskPackages: {{ $caskPackages | toJson }}
+{{- $masPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "mas")) | fromJson }}
+  masPackages: {{ $masPackages | toJson }}
+{{- end }}
+{{- $vscodePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "vscode")) | fromJson }}
+  vscodePackages: {{ $vscodePackages | toJson }}
+{{- end }}
+
+{{- if $features.mise }}
+{{- $misePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "mise")) | fromJson }}
+  misePackages: {{ $misePackages | toJson }}
+{{- end }}
+
+{{- if $features.go }}
+{{- $goPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "go")) | fromJson }}
+  goPackages: {{ $goPackages | toJson }}
+{{- end }}
+
+{{- if $features.node }}
+{{- $nodePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "npm")) | fromJson }}
+  npmPackages: {{ $nodePackages | toJson }}
+{{- end }}
+
+{{- if $features.python }}
+{{- $pipPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "pip")) | fromJson }}
+  pipPackages: {{ $pipPackages | toJson }}
+{{- $pipxPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "pipx")) | fromJson }}
+  pipxPackages: {{ $pipxPackages | toJson }}
+{{- $uvPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "uv")) | fromJson }}
+  uvPackages: {{ $uvPackages | toJson }}
+{{- end }}
+
+{{- if $features.ruby }}
+{{- $rubyGems := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "gem")) | fromJson }}
+  gemPackages: {{ $rubyGems | toJson }}
+{{- end }}
+
+{{- if $features.rust }}
+{{- $cargoPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "cargo")) | fromJson }}
+  cargoPackages: {{ $cargoPackages | toJson }}
 {{- end }}
 
 diff:

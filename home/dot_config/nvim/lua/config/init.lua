@@ -1,3 +1,4 @@
+local preset = require('config.preset')
 vim.g.home = os.getenv('HOME') or os.getenv('USERPROFILE')
 vim.g.tmp = os.getenv('TMPDIR') or os.getenv('TMP') or '/tmp'
 
@@ -49,22 +50,20 @@ local function get_node_config()
   }
 end
 
-local icon_font = os.getenv('ICON_FONT') == 'true' or false
 vim.g.config = {
+  backdrop = 100, -- 60,
+  -- "bold": Bold line box
+  -- "double": Double-line box
+  -- "none": No border
+  -- "rounded": Like "single", but with rounded corners ("╭" etc.)
+  -- "shadow": Drop shadow effect, by blending with the background
+  -- "single": Single-line box
+  -- "solid": Adds padding by a single whitespace cell
+  border = 'rounded',
   explorer = 'oil',
-  icon_font = icon_font,
   node = get_node_config(),
-  signs = {
-    error = icon_font and '󰅙' or '✗', -- E: × ✕ 
-    hint = icon_font and '󰌵' or '?', -- H:
-    info = icon_font and '󰋼' or 'ℹ', -- I:  
-    warn = icon_font and '' or '!', -- W
-    debug = icon_font and '' or 'D',
-    trace = icon_font and '' or 'T',
-    done = '', -- ✓ ✔
-    pending = '→', -- ➜ ➤
-    spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
-  },
+  preset = preset.name,
+  signs = preset.signs,
   theme = {
     -- colorscheme = 'nightfox',
     -- colorscheme = 'rose-pine',
@@ -74,7 +73,7 @@ vim.g.config = {
   },
   lazy = {
     -- Install missing lazy.nvim plugins on startup
-    install_missing = true, -- FIXME: breaks dashboard/session on open
+    install_missing = true, -- FIXME: breaks session restore
   },
   treesitter = {
     -- Automatically install missing parsers when entering buffer
@@ -97,3 +96,5 @@ if vim.fn.filereadable(features_json_file) == 1 then
   local features_contents = vim.fn.readfile(features_json_file)
   vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))
 end
+
+-- vim.o.winborder = vim.g.config.border

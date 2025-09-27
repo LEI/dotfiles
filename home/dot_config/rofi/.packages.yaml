@@ -1,0 +1,18 @@
+---
+packages:
+  # adwaita-icon-theme:
+  #   enabled: '{{ .features.i3 }}'
+  # papirus-icon-theme:
+  #   enabled: '{{ .features.i3 }}'
+  rofi: # dmenu, sunbeam
+    enabled: "{{ .features.i3 }}"
+  rofi-calc: # rofi -show calc -modi calc -no-show-match -no-sort
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+  # rofi-greenclip: # cliphist
+  #   enabled: '{{ .features.i3 }}'
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  rofi-power-menu:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # rofimoji: # rofi -modi emoji:rofimoji -show emoji
+  #   enabled: "{{ .features.i3 }}"

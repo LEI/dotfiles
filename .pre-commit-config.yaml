@@ -46,3 +46,11 @@ repos:
         language: system
         stages:
           - pre-commit
+
+  # - repo: local
+  #   hooks:
+  #     - id: chezmoi
+  #       name: chezmoi
+  #       entry: chezmoi status
+  #       language: system
+  #       pass_filenames: false

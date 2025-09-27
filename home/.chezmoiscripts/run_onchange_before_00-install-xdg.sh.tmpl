@@ -6,7 +6,7 @@ set -eu
 
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}
 
-{{- if (get .features "ai") }}
+{{- if .features.ai }}
 
 # if [ -d "$HOME/.claude" ] && [ -d "$CLAUDE_CONFIG_DIR" ]; then
 #   echo >&2 "ERR: $HOME/.claude"
@@ -20,21 +20,32 @@ if [ -d "$HOME/.claude" ] && ! [ -d "$CLAUDE_CONFIG_DIR" ]; then
 fi
 {{- end }}
 
-{{- if (get .features "docker") }}
+{{- if .features.docker }}
 
 if [ -d ~/.docker ] && ! [ -d "$DOCKER_CONFIG" ]; then
   cmd mv ~/.docker "$DOCKER_CONFIG"
 fi
 {{- end }}
 
-{{- if (get .features "go") }}
+{{- if .features.go }}
 
 if [ -d ~/go ] && ! [ -d "$GOPATH" ]; then
   cmd mv ~/go "$GOPATH"
 fi
 {{- end }}
 
-{{- if (get .features "rust") }}
+{{- if .features.node }}
+
+# if [ -d ~/.node_modules ] && ! [ -d "$npm_config_prefix" ]; then
+#   cmd mv ~/.node_modules "$npm_config_prefix"
+# fi
+
+if [ -d ~/Library/pnpm ] && ! [ -d "$PNPM_HOME" ]; then
+  cmd mv ~/Library/pnpm "$PNPM_HOME"
+fi
+{{- end }}
+
+{{- if .features.rust }}
 
 if [ -d ~/.cargo ] && ! [ -d "$CARGO_HOME" ]; then
   cmd mv ~/.cargo "$CARGO_HOME"

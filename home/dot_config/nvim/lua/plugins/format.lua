@@ -104,8 +104,12 @@ return {
       },
       formatters_by_ft = {
         json5 = prettier,
+
+        -- Disable LSP formatting
         lua = { 'stylua' },
+
         -- python = { 'isort', 'black' },
+
         -- WARN: intelphense causes indentation conflicts
         php = { 'phpcbf', lsp_format = 'never' },
 

@@ -13,7 +13,7 @@ elif command -v delta >/dev/null; then
   diff="delta"
 fi
 
-arg="${1:-}"
+os="$(uname -s)" # | tr '[:upper:]' '[:lower:]'
 
 diff_packages() {
   pm="${1:-}"
@@ -22,7 +22,12 @@ diff_packages() {
   if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
     echo >&2 "Listing $pm chezmoi packages..."
   fi
-  chezmoi-list-packages "$pm" | sort >"$in"
+  if [ "$pm" = uv ]; then
+    # pg_activity[psycopg] -> pg-activity
+    chezmoi-list-packages "$pm" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$in"
+  else
+    chezmoi-list-packages "$pm" | sort >"$in"
+  fi
   if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
     echo >&2 "Listing $pm installed packages..."
   fi
@@ -31,20 +36,25 @@ diff_packages() {
     apk list --installed --quiet | sort >"$out"
     ;;
   apt)
-    apt list --installed | sort >"$out"
-    ;;
-  pacman)
-    extra_installed="$(pacman -Qqm)"
-    pacman -Qq | grep -vx "$extra_installed" | sort >"$out"
+    # apt list --installed
+    # dpkg --get-selections
+    apt-mark showmanual | tr -s '\n' ' ' | cut -d' ' -f1 | sort >"$out"
     ;;
   aur | yay)
     pacman -Qqm | sort >"$out"
     ;;
   brew)
-    brew list --formulae | sort >"$out"
+    # brew bundle dump --file=-
+    brew list --formula | sort >"$out"
     ;;
   cask)
     brew list --cask | sort >"$out"
+    ;;
+  mas)
+    brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"' | sort >"$out"
+    ;;
+  vscode)
+    brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"' | sort >"$out"
     ;;
   dnf)
     dnf list --installed | sort >"$out"
@@ -52,106 +62,132 @@ diff_packages() {
   gem)
     gem list | cut -d' ' -f1 | sort >"$out"
     ;;
+  go)
+    # FIXME: exclude stanaard library
+    go list ... | grep -v / | sort >"$out"
+    ;;
+  mise)
+    mise list --global --json | jq --raw-output 'keys[]' | sort >"$out"
+    ;;
   npm)
     npm list --global --json | jq --raw-output '.dependencies | keys[]' | sort >"$out"
     ;;
-  python)
-    if command -v uv >/dev/null; then
-      uv tool list | grep -v '^-' | cut -d' ' -f1 | sort >"$out"
-    else
-      pipx list | sort >"$out"
-    fi
+  pacman)
+    extra_installed="$(pacman -Qqm)"
+    pacman -Qq | grep -vx "$extra_installed" | sort >"$out"
+    ;;
+  pip)
+    python3 -m pip install --user --quiet list | sort >"$out"
+    ;;
+  pipx)
+    pipx list | tr -d ' ' | grep '^-' | tr -d '-' | sort >"$out"
+    ;;
+  termux)
+    pkg list-installed | cut -d/ -f1 | sort >"$out"
+    ;;
+  uv)
+    uv tool list | grep -v '^-' | cut -d' ' -f1 | sort >"$out"
     ;;
   *)
     echo >&2 "Invalid package manager: $pm"
     exit 1
     ;;
   esac
-  $diff "$in" "$out"
+  $diff "$in" "$out" || echo >&2 "Exit code: $?"
 }
 
-os="$(uname -s)" # | tr '[:upper:]' '[:lower:]'
-case "$os" in
-Darwin) package_manager=brew ;;
-Linux)
-  if command -v apk >/dev/null; then
-    package_manager=apk
-  elif command -v apt >/dev/null; then
-    package_manager=apt
-  elif command -v dnf >/dev/null; then
-    package_manager=dnf
-  elif command -v pacman >/dev/null; then
-    package_manager=pacman
-  else
-    echo >&2 "Unknown package manager for $os"
-    exit 1
-  fi
-  ;;
-*)
-  echo >&2 "Invalid OS: $os"
-  exit 1
-  ;;
-esac
+main() {
+  arg="${1:-}"
 
-case "$arg" in
-all | "")
-  echo >&2 "System:"
-  diff_packages "$package_manager"
-  case "$package_manager" in
-  pacman)
-    echo >&2 "AUR:"
-    diff_packages aur
+  case "$os" in
+  Darwin) package_manager=brew ;;
+  Linux)
+    if [ "$HOME" = /data/data/com.termux/files/home ]; then
+      package_manager=termux
+    elif command -v apk >/dev/null; then
+      package_manager=apk
+    elif command -v apt >/dev/null; then
+      package_manager=apt
+    elif command -v dnf >/dev/null; then
+      package_manager=dnf
+    elif command -v pacman >/dev/null; then
+      package_manager=pacman
+    else
+      echo >&2 "Unknown package manager for $os"
+      exit 1
+    fi
     ;;
-  *) ;;
+  *)
+    echo >&2 "Invalid OS: $os"
+    exit 1
+    ;;
   esac
-  # echo >&2 "Cargo:"
-  # diff_packages cargo
-  if command -v brew >/dev/null; then
-    echo >&2 "Brew:"
-    diff_packages brew
-  fi
-  # echo >&2 "Mise:"
-  # diff_packages mise
-  echo >&2 "Node:"
-  diff_packages npm
-  echo >&2 "Ruby:"
-  diff_packages gem
-  echo >&2 "Python:"
-  diff_packages python
-  ;;
-*)
-  diff_packages "$arg"
-  ;;
-esac
 
-# TODO: handle linuxbrew extras
-# package_manager="$(chezmoi execute-template '{{ get .packageManagerMap .osIDLike }}' "$@")"
+  case "$arg" in
+  all | "")
+    echo >&2 "System:"
+    diff_packages "$package_manager"
+    case "$package_manager" in
+    pacman)
+      echo >&2 "AUR:"
+      diff_packages aur
+      ;;
+    *) ;;
+    esac
 
-# packages="$(chezmoi list-packages . "$@")"
-# extra_key="$(chezmoi execute-template '{{ get .extraPackageManagerMap .osIDLike }}' "$@")"
-# if [ -n "$extra_key" ]; then
-#   extra="$(chezmoi list-packages "$extra_key" "$@")"
-# fi
-#
-# if [ "$OS" = "linux" ] && command -v apk >/dev/null; then
-#   apk list --installed --quiet | sort >"$TMPDIR/installed-packages.txt"
-# elif [ "$OS" = "linux" ] && command -v pacman >/dev/null; then
-#   extra_installed="$(pacman -Qqm)"
-#   pacman -Qq | grep -vx "$extra_installed" | sort >"$TMPDIR/installed-packages.txt"
-#   echo "$extra_installed" | sort >"$TMPDIR/installed-extra.txt"
-# elif [ "$OS" = "darwin" ]; then
-#   # brew list --install-on-request
-#   brew list --formulae | sort >"$TMPDIR/installed-packages.txt"
-#   brew list --cask | sort >"$TMPDIR/installed-extra.txt"
-# fi
-#
-# echo "Packages:"
-# # printf "%s\n%s" "$packages" "$extra" | sort >"$TMPDIR/packages.txt"
-# echo "$packages" | sort >"$TMPDIR/packages.txt"
-# $diff "$TMPDIR/packages.txt" "$TMPDIR/installed-packages.txt"
-#
-# if [ -n "${extra:-}" ]; then
-#   echo "Extras:"
-#   echo "$extra" | sort >"$TMPDIR/extra.txt"
-#   $diff "$TMPDIR/extra.txt" "$TMPDIR/installed-extra.txt"
-# fi
+    # if command -v cargo >/dev/null; then
+    #   echo >&2 "Cargo:"
+    #   diff_packages cargo
+    # fi
+
+    if command -v brew >/dev/null; then
+      echo >&2 "Brew:"
+      diff_packages brew
+      if [ "$os" = Darwin ]; then
+        diff_packages cask
+        diff_packages mas
+      fi
+      # diff_packages vscode
+    fi
+
+    # if command -v go >/dev/null; then
+    #   echo >&2 "Go:"
+    #   diff_packages go
+    # fi
+
+    if command -v mise >/dev/null; then
+      echo >&2 "Mise:"
+      diff_packages mise
+    fi
+
+    if command -v npm >/dev/null; then
+      echo >&2 "Node:"
+      diff_packages npm
+    fi
+
+    # if command -v gem >/dev/null; then
+    #   echo >&2 "Ruby:"
+    #   diff_packages gem
+    # fi
+
+    if command -v pipx >/dev/null; then
+      echo >&2 "Python (pipx):"
+      diff_packages pipx
+    elif command -v python >/dev/null || command -v python3 >/dev/null; then
+      # TODO: check for externally managed environment
+      echo >&2 "Python:"
+      diff_packages pip
+    fi
+
+    if command -v uv >/dev/null; then
+      echo >&2 "Python (uv):"
+      diff_packages uv
+    fi
+    ;;
+  *)
+    diff_packages "$arg"
+    ;;
+  esac
+}
+
+main "$@"

@@ -1,5 +1,0 @@
----
-# extraPackages:
-#   ulauncher: # albert
-#     enabled: "{{ (get .features "i3") }}"
-#     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

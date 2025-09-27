@@ -3,24 +3,26 @@
   "atuin" false
   "bash" false
   "bat" true
-  "bottom" (ne .profile "minimal")
+  "bottom" false
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
   "docker" false
   "eza" true
   "ghostty" false
-  "git" true
-  "go" (eq .osIDLike "arch" "darwin" "debian" "fedora")
+  "git" false
+  "go" false
   "goss" false
+  "gpg" false
   "helix" false
-  "i3" (eq .osIDLike "arch")
+  "i3" (and (eq .osIDLike "arch" "debian") (not .headless))
   "kube" false
-  "logseq" (and (eq .osIDLike "arch" "darwin") (ne .profile "minimal"))
-  "mail" false
+  "lla" false
+  "logseq" false
+  "mail" (and (eq .osIDLike "arch") (not (empty .accessToken)))
   "mise" true
   "neovim" false
-  "node" false
+  "node" (eq .osIDLike "android" "arch" "darwin" "debian" "fedora")
   "nushell" true
   "php" false
   "podman" false
@@ -32,6 +34,7 @@
   "sql" false
   "ssh" false
   "steam" (and (eq .osIDLike "arch") (eq .profile "personal"))
+  "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
   "topgrade" false
@@ -51,16 +54,22 @@
     (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
   ))
   "bash" true
+  "bottom" true
   "docker" (or (lookPath "docker" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
-  "git" true
+  "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))) (not (eq .os "android" "windows")))
+  "git" (eq .osIDLike "arch" "darwin")
+  "go" (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora")
+  "gpg" (eq .osIDLike "arch" "darwin")
   "helix" true
-  "kube" (lookPath "kubectl" | isExecutable)
+  "kube" (or (lookPath "kubectl" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
+  "lla" (eq .osID "arch" "darwin")
+  "logseq" (eq .osIDLike "arch" "darwin")
   "nushell" true
   "podman" (or (lookPath "podman" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
   "python" true
   "ruby" true
   "tofu" (or (lookPath "tofu" | isExecutable) (eq .osIDLike "arch" "darwin"))
-  "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) .glibc231)
+  "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) (not .glibc231))
   "zsh" true
 ) -}}
 {{- end }}
@@ -73,7 +82,6 @@
 
 {{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
-  "kube" false
   "neovim" false
   "node" false
   "rust" false
@@ -81,18 +89,13 @@
 ) -}}
 {{- else if eq .osID "android" }}
 {{- $features = mergeOverwrite $features (dict
-  "kube" false
   "neovim" true
   "vim" true
 ) -}}
 {{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" true
   "goss" true
-  "kube" true
-  "mail" (not (empty .accessToken))
   "neovim" true
-  "node" true
   "php" true
   "rust" true
   "sql" true
@@ -101,12 +104,7 @@
 ) -}}
 {{- else if eq .os "darwin" }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" true
-  "git" true
-  "kube" true
-  "mail" false
   "neovim" true
-  "node" true
   "php" true
   "rust" true
   "sql" true
@@ -115,11 +113,8 @@
 ) -}}
 {{- else if eq .osIDLike "debian" }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))))
   "helix" (not .glibc231)
-  "kube" false
   "neovim" true
-  "node" true
   "php" true
   "rust" true
   "sql" true
@@ -128,12 +123,8 @@
 ) -}}
 {{- else if eq .osIDLike "fedora" }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" true
   "goss" true
-  "kube" true
-  "mail" false
   "neovim" true
-  "node" true
   "rust" true
   "sql" true
   "ssh" true
@@ -141,7 +132,6 @@
 ) -}}
 {{- else if eq .os "windows" }}
 {{- $features = mergeOverwrite $features (dict
-  "kube" false
   "neovim" true
   "vim" true
 ) -}}

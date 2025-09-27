@@ -1,0 +1,20 @@
+---
+packages:
+  # TODO: only if installed via brew
+  # if [ "$(claude config set --global autoUpdates false)" = true ]; then
+  #   claude config set --global autoUpdates false
+  # fi
+  claude-code:
+    enabled: '{{ and .features.ai (eq .osIDLike "arch" "darwin" "windows") }}'
+    nameOverwrite:
+      npm: "@anthropic-ai/claude-code"
+      windows: Anthropic.Claude
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+  claude-monitor:
+    enabled: "{{ .features.ai }}"
+    type: uv
+  # claude:
+  #   enabled: '{{ and .features.ai (eq .osIDLike "darwin" "windows") (not .headless) }}'
+  #   nameOverwrite:
+  #     windows: Anthropic.ClaudeCode
+  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'

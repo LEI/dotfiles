@@ -21,6 +21,13 @@ mise:
 # package:
 #   disabled: true
 
+# git_status:
+#   ahead: ">"
+#   behind: "<"
+#   deleted: "x"
+#   diverged: "<>"
+#   renamed: "r"
+
 custom:
   shpool:
     command: 'echo "$SHPOOL_SESSION_NAME"'

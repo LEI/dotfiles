@@ -1,6 +1,0 @@
----
-extraPackages:
-  bash:
-    enabled: '{{ get .features "bash" }}'
-  bash-completion:
-    enabled: '{{ get .features "bash" }}'

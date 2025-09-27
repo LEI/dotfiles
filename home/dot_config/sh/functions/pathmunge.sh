@@ -1,5 +1,5 @@
 pathmunge() {
-  if [ ! -d "$1" ]; then
+  if [ -z "$1" ] || [ ! -d "$1" ]; then
     # Not a directory
     return 1
   fi

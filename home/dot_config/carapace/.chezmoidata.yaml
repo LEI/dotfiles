@@ -1,8 +1,0 @@
----
-extraPackages:
-  carapace:
-    enabled: '{{ and (get .features "bottom") (eq .osIDLike "alpine" "darwin" "arch" "windows") }}'
-    nameOverwrite:
-      arch: carapace-bin
-      windows: rsteube.Carapace
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

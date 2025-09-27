@@ -1,8 +1,8 @@
 local M = require('lualine.component'):extend()
 
-M.done_icon = '󰦕'
-M.running_icon = '󱉶'
-M.separator = '  '
+M.done_icon = vim.g.config.signs.lint_done or 'OK'
+M.running_icon = vim.g.config.signs.lint_running or 'RUNNING'
+M.separator = ' '
 
 -- Initializer
 function M:init(options)

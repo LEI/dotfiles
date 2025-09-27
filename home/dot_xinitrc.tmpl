@@ -49,7 +49,8 @@ if [ -d "$xinitdir"/xinitrc.d ]; then
   unset f
 fi
 
-xrdb -merge ~/.Xresources
+# xrdb -merge ~/.Xresources
+xrdb -merge "$XDG_CONFIG_HOME/X11/xresources"
 
 # # Set desktop background with custom effect
 # betterlockscreen -w dim

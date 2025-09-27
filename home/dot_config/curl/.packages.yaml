@@ -1,0 +1,6 @@
+---
+packages:
+  curl:
+    nameOverwrite:
+      windows: curl.curl
+    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'

@@ -1,23 +1,10 @@
 # npm
 # pnpm
 # yarn
-
-{{- if (get .features "ai") }}
-mcp-hub@4.2.0
-{{- if not (eq .osIDLike "arch" "darwin" "windows") }}
-{{- if eq .osIDLike "windows" }}
-@openai/codex
-{{- end }}
-@charmland/crush
-{{- end }}
-{{- end }}
-
-{{- if get .features "neovim" }}
-neovim
-{{- else }}
+{{- if not .features.neovim }}
 bash-language-server
 prettier
-{{- if get .features "sql" }}
+{{- if .features.sql }}
 sql-language-server
 {{- end }}
 typescript
@@ -26,8 +13,6 @@ typescript-language-server
 vscode-langservers-extracted@4.8
 yaml-language-server@next
 {{- end }}
-
-{{- $npmPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "npm")) | fromJson }}
-{{- range $npmPackages | keys | sortAlpha }}
+{{- range .npmPackages | keys | sortAlpha }}
 {{ . }}
 {{- end }}

@@ -8,6 +8,8 @@
 	co = checkout
 	# cp = cherry-pick # Conflicts with git-cp
 	l = log --abbrev-commit --graph --max-count=20 --pretty=oneline
+	# https://robertandrewspencer.com/git_lg_with_links
+	lg = "log --color --graph --pretty=format:']8;;git://.#%h\\%Cred%h%Creset]8;;\\ -%C(yellow)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --abbrev-commit --max-count=20" # --all
 	p = !"git pull; git submodule foreach git pull origin master"
 	r = restore
 	ra = rebase --abort

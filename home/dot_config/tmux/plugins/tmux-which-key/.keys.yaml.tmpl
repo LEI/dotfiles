@@ -37,7 +37,7 @@
 
 {{- $escapedKey := $key | replaceAllRegex "([;#$%{}~])" "\\${1}" }}
 {{- $command := get $map ($escapedKey | replaceAllRegex "\"" "\\\"") }}
-{{- if eq $command "" }}
+{{- if empty $command }}
 {{- warnf "tmux: mapping not found, try escaping key: '%s' / %s / %s" . ($escapedKey | replaceAllRegex "\"" "\\\"") $map -}}
 {{- $note = printf "-%s (%s)" $note $key }}
 {{- $command = printf "display-message \"Mapping not found, try escaping: %s\"" $escapedKey }}

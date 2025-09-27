@@ -6,12 +6,7 @@ local overseer_status = {
   'overseer',
   label = '', -- Prefix for task counts
   colored = true, -- Color the task icons and counts
-  symbols = {
-    ['CANCELED'] = ' ',
-    ['FAILURE'] = '󰅚 ',
-    ['SUCCESS'] = '󰄴 ',
-    ['RUNNING'] = '󰑮 ',
-  },
+  symbols = vim.g.config.signs.overseer_symbols or {},
   unique = false, -- Unique-ify non-running task count by name
   name = nil, -- List of task names to search for
   name_not = false, -- When true, invert the name search
@@ -42,9 +37,12 @@ local dap_status = {
 -- https://github.com/ravitemer/mcphub.nvim/blob/main/doc/extensions/lualine.md
 local mcphub_status = {
   function()
+    local frames = vim.g.config.signs.spinner
+    local icon = vim.g.config.signs.mcphub
+
     -- Check if MCPHub is loaded
     if not vim.g.loaded_mcphub then
-      return '󰐻 -'
+      return icon .. ' -'
     end
 
     local count = vim.g.mcphub_servers_count or 0
@@ -53,17 +51,16 @@ local mcphub_status = {
 
     -- Show "-" when stopped
     if status == 'stopped' then
-      return '󰐻 -'
+      return icon .. '-'
     end
 
     -- Show spinner when executing, starting, or restarting
     if executing or status == 'starting' or status == 'restarting' then
-      local frames = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
       local frame = math.floor(vim.loop.now() / 100) % #frames + 1
-      return '󰐻 ' .. frames[frame]
+      return icon .. frames[frame]
     end
 
-    return '󰐻 ' .. count
+    return icon .. count
   end,
   color = function()
     if not vim.g.loaded_mcphub then
@@ -111,7 +108,7 @@ return {
     -- lazy = false,
     opts = {
       options = {
-        icons_enabled = false,
+        icons_enabled = vim.g.config.icons_enabled,
         component_separators = '',
         section_separators = '',
         disabled_filetypes = {
@@ -140,12 +137,13 @@ return {
         lualine_b = {
           {
             'branch',
-            -- color = '',
-            -- icon = '',
+            -- icon = vim.g.config.signs.branch,
+            icons_enabled = false,
           },
           {
             'diff',
             -- colored = false,
+            padding = { left = 0, right = 1 },
             -- symbols = {
             --   added = '+',
             --   modified = '~',
@@ -218,10 +216,10 @@ return {
             'diagnostics',
             -- always_visible = true,
             symbols = {
-              error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR] .. ' ',
-              warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN] .. ' ',
-              info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO] .. ' ',
-              hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT] .. ' ',
+              error = vim.g.diagnostic_signs[vim.diagnostic.severity.ERROR],
+              warn = vim.g.diagnostic_signs[vim.diagnostic.severity.WARN],
+              info = vim.g.diagnostic_signs[vim.diagnostic.severity.INFO],
+              hint = vim.g.diagnostic_signs[vim.diagnostic.severity.HINT],
             },
           },
           'progress',
@@ -235,7 +233,7 @@ return {
           },
           {
             'fileformat',
-            -- fmt = function(str) return str == 'unix' and 'LF' or str end,
+            symbols = vim.g.config.signs.lualine_fileformat_symbols,
           },
           'filetype',
         },

@@ -1,15 +1,4 @@
 ---
-extraPackages:
-  # macvim:
-  #   enabled: '{{ and (get .features "neovim") (eq .osIDLike "darwin") (not .headless) }}'
-  macvim-app:
-    enabled: '{{ and (get .features "neovim") (eq .osIDLike "darwin") (not .headless) }}'
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  vim:
-    enabled: '{{ get .features "vim" }}'
-    nameOverwrite:
-      windows: vim.vim
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
 vim:
   plugins:
     airline:

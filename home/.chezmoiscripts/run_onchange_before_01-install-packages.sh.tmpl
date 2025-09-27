@@ -6,14 +6,18 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- $packages := includeTemplate "packages.tmpl" . | fromJson }}
-packages="{{ $packages | keys | sortAlpha | join " " }}"
+packages="{{ .packages | keys | sortAlpha | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS"
 echo >&2 "OS ID: {{ .osID }}"
 echo >&2 "OS ID like: {{ .osIDLike }}"
 echo >&2 "OS version: {{ .osVersion }}"
 echo >&2 "Installing packages: $packages"
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "before_script"
+  "packages" .packages
+)) | trim }}
 
 {{- if eq .osID "alpine" }}
 cmd sudo apk update --quiet
@@ -23,13 +27,8 @@ cmd sudo apk upgrade --quiet
 # shellcheck disable=SC2086
 cmd sudo apk add --quiet $packages
 {{- else if eq .osIDLike "arch" }}
-{{- if get .features "rust" }}
-# if [ ! -f "$HOME/rust-toolchain" ]; then
-#   cmd echo stable >"$HOME/rust-toolchain"
-# fi
-{{- end }}
 {{- if .upgrade }}
-cmd sudo pacman --sync --needed --noconfirm --quiet --upgrade
+cmd sudo pacman --sync --sysupgrade --needed --noconfirm --quiet
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo pacman --sync --needed --noconfirm --quiet $packages
@@ -44,36 +43,14 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   # fi
   cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
 fi
-
-{{- if get .features "rust" }}
-
-# if command -v rustup >/dev/null && ! cmd rustup default; then
-#   cmd rustup default "$(cat "$HOME/rust-toolchain")"
-#   # cmd rustup install stable
+# if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+#   if command -v flatpak >/dev/null; then
+#     cmd flatpak list --all
+#   fi
+#   if command -v snap >/dev/null; then
+#     cmd snap list --all
+#   fi
 # fi
-{{- end }}
-
-{{- $aurPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
-aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
-
-if command -v yay >/dev/null; then
-  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
-elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
-  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
-elif command -v pamac >/dev/null; then
-  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
-else
-  echo >&2 "AUR package manager not found"
-  exit 1
-fi
-if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
-  if command -v flatpak >/dev/null; then
-    cmd flatpak list --all
-  fi
-  if command -v snap >/dev/null; then
-    cmd snap list --all
-  fi
-fi
 {{- else if eq .osIDLike "debian" }}
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
@@ -120,6 +97,37 @@ cmd pkg install --quiet --yes $packages # >/dev/null
 {{- else }}
 echo >&2 "Package manager not found: {{ .osID }}"
 exit 1
+{{- end }}
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "after_script"
+  "packages" .packages
+)) | trim }}
+
+{{- if eq .osIDLike "arch" }}
+
+aur_packages="{{ .aurPackages | keys | sortAlpha | join " " }}"
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "before_script"
+  "packages" .aurPackages
+)) | trim }}
+
+if command -v yay >/dev/null; then
+  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
+
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "after_script"
+  "packages" .aurPackages
+)) | trim }}
 {{- end }}
 
 {{- if and .codespaces (eq .osIDLike "debian") }}

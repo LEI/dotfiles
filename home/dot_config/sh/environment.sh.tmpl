@@ -9,12 +9,6 @@ export EMAIL={{ .email | quote }}
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
-{{- if (get .features "neovim") }}
-# Neovim
-# https://neovim.io/doc/user/filetype.html#ft-man-plugin
-# MANPAGER="nvim +Man!"
-# MANWIDTH="99999999"
-{{- end }}
 export MANPAGER="${MANPAGER:-less -X}"
 
 # export PAGER="less -SFX"

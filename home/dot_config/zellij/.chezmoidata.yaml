@@ -1,4 +1,0 @@
----
-extraPackages:
-  zellij:
-    enabled: '{{ and (get .features "zellij") (not (eq .osIDLike "debian" "fedora")) }}'

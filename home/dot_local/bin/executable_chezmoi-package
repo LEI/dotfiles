@@ -1,0 +1,78 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+  echo >&2 "Usage: chezmoi package [list] [-h|--help] [-o|--output text|json|yaml]"
+}
+
+action=list
+output=text
+type=packages
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -*=*)
+    key="${1##*=}"
+    value="${1#*=}"
+    shift
+    set -- "$key" "$value" "$@"
+    ;;
+  list)
+    action="$1"
+    shift
+    continue
+    ;;
+  -o | --output)
+    shift
+    output="$1"
+    shift
+    ;;
+  -t | --type)
+    shift
+    type="$1"
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo >&2 "chezmoi package: invalid argument: $1"
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+case "$type" in
+# apk) ;;
+# apt) ;;
+# aur) ;;
+# brew) ;;
+# cask) ;;
+# dnf) ;;
+# go) ;;
+# mas) ;;
+node) type="npm" ;;
+# pacman) ;;
+python) type="uv" ;;
+ruby) type="gem" ;;
+rust) type="cargo" ;;
+# vscode) ;;
+esac
+
+case "$action" in
+list)
+  case "$output" in
+  text) format='keys | sortAlpha | join "\n"' ;;
+  json) format="toPrettyJson" ;;
+  yaml) format="toYaml" ;;
+  *)
+    echo >&2 "chezmoi package: invalid output format: $output"
+    usage
+    exit 1
+    ;;
+  esac
+  chezmoi execute "{{ .$type | $format }}"
+  ;;
+esac

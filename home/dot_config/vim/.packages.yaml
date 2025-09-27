@@ -1,0 +1,12 @@
+---
+packages:
+  # macvim:
+  #   enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
+  macvim-app:
+    enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  vim:
+    enabled: "{{ .features.vim }}"
+    nameOverwrite:
+      windows: vim.vim
+    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'

@@ -15,7 +15,7 @@ cmd="echo; $bkt curl https://nvim.sh/t | sort"
 # shellcheck disable=SC2034
 tag="$(sk --ansi --cmd="$cmd" --interactive --preview="tag={}; $search")"
 search() {
-  cmd="$(eval "echo \"$search\"") | tail -n+2" # | tr -s '  ' ';'
+  cmd="$(eval "echo \"$search\"") | tail -n+2" # | tr -s ' ' ';'
   preview="echo {}"
   if command -v gh >/dev/null; then
     # shellcheck disable=SC2016

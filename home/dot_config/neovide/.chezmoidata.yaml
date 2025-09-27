@@ -1,9 +1,0 @@
----
-extraPackages:
-  # neovide:
-  #   enabled: '{{ and (get .features "neovim") (eq .osIDLike "darwin") (not .headless) }}'
-  #   options:
-  #     link: false
-  neovide-app:
-    enabled: '{{ and (get .features "neovim") (eq .osIDLike "darwin") (not .headless) }}'
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'

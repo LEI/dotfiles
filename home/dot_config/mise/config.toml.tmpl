@@ -3,16 +3,25 @@
 # FIXME(alpine): platform error (failed to install with ubi)
 disable_backends = ["ubi"]
 {{- end }}
-idiomatic_version_file_enable_tools = ["node", "go"]
+idiomatic_version_file_enable_tools = [
+  # "bun",
+  # "deno",
+  "go",
+  # "java",
+  "node",
+  "python",
+  "ruby",
+  # "terraform",
+  # "tiny",
+]
 
-{{- if get .features "goss" }}
+{{- if .features.goss }}
 [tasks.goss-validate]
 dir = "~/.config/goss"
 run = "goss --vars=vars.yaml validate"
 {{- end }}
 
 [tools]
-{{- $miseTools := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "mise")) | fromJson -}}
-{{- range $name, $options := $miseTools }}
-{{ $name }} = "{{ get .options "version" | default "latest" }}"
+{{- range $name, $pkg := .misePackages }}
+{{ $name }} = {{ get $pkg "version" | default "latest" | quote }}
 {{- end }}

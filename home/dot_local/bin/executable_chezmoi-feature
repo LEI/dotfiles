@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+chezmoi execute '{{ .features | toPrettyJson }}'
+# chezmoi execute '{{ .features | keys | join "\n" }}'

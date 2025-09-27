@@ -22,7 +22,7 @@ local dashboard_sections = {
   {
     pane = 2,
     desc = 'Startup time',
-    icon = vim.g.config.icon_font and '⧗ ' or 'S ', -- ⧖
+    icon = vim.g.config.signs.time,
     -- padding = 1,
     key = 'S',
     action = function()
@@ -32,7 +32,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = vim.g.config.icon_font and ' ' or 'O ',
+    icon = vim.g.config.signs.open_directory,
     desc = 'Open directory ',
     file = display_dir,
     -- padding = 1,
@@ -50,7 +50,7 @@ local dashboard_sections = {
   },
   {
     pane = 2,
-    icon = vim.g.config.icon_font and ' ' or 'B ',
+    icon = vim.g.config.signs.git_browse,
     desc = 'Browse repository',
     -- padding = 1,
     key = 'b',
@@ -65,7 +65,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = vim.g.config.icon_font and ' ' or 'GR ',
+    icon = vim.g.config.signs.git_remote,
     title = 'Git remote',
     section = 'terminal',
     enabled = function()
@@ -80,7 +80,7 @@ local dashboard_sections = {
 
   {
     pane = 2,
-    icon = vim.g.config.icon_font and ' ' or 'GS ',
+    icon = vim.g.config.signs.git_status,
     title = 'Git status',
     section = 'terminal',
     enabled = function()
@@ -122,11 +122,24 @@ local dashboard_sections = {
   -- { pane = 2, section = 'terminal', cmd = 'curl -s https://wttr.in/?0A' },
 }
 
+-- local function save_repeat()
+--   return vim.fn.getreg('.'), vim.fn.getregtype('.')
+-- end
+--
+-- local function restore_repeat(text, regtype)
+--   vim.print('Restore repeat (TODO)', text, regtype)
+--   -- FIXME: Invalid register value: '.'
+--   -- vim.fn.setreg('.', text, regtype)
+--   -- pcall(vim.fn.setreg, '.', text, regtype)
+-- end
+
 -- TODO: exclude from history (dot repeat)
 local function grep_picker()
   local id = 1
   local ns_id = vim.api.nvim_create_namespace('grep')
   local original = vim.fn.getreg('/')
+  -- local regtext, regtype = save_repeat()
+  -- vim.print('Save repeat', regtext, regtype)
   local regex = true
   local search = original
   if vim.startswith(search, '\\V') then
@@ -203,6 +216,7 @@ local function grep_picker()
     end,
     on_close = function()
       del_virtual_text()
+      -- restore_repeat(regtext, regtype)
     end,
   })
 end
@@ -282,7 +296,7 @@ return {
       animate = { enabled = false },
       bigfile = { enabled = true },
       dashboard = {
-        enabled = true,
+        enabled = false, -- true, -- FIXME: neovide error on open
         preset = { header = 'Neovim' },
         sections = dashboard_sections,
       },
@@ -294,6 +308,13 @@ return {
       input = { enabled = true },
       notifier = {
         enabled = true,
+
+        -- FIXME: width = { min = 40, max = 0.4 },
+        -- height = { min = 1, max = 0.6 },
+        -- editor margin to keep free. tabline and statusline are taken into account automatically
+        margin = { top = 0, right = 1, bottom = vim.o.cmdheight },
+        padding = true,
+
         level = vim.log.levels.TRACE,
         icons = {
           error = vim.g.config.signs.error,
@@ -302,13 +323,36 @@ return {
           debug = vim.g.config.signs.debug,
           trace = vim.g.config.signs.trace,
         },
-        margin = { top = 0, right = 0, bottom = 1 },
-        padding = true,
-        style = 'compact', -- compact, fancy, minimal
-        timeout = 5000,
-        top_down = false,
+        -- keep = function(notif)
+        --   return vim.fn.getcmdpos() > 0
+        -- end,
+
+        -- sort = { 'level', 'added' }, -- sort by level and time
+        sort = { 'added' },
+        ---@type snacks.notifier.style
+        -- style = 'minimal', -- compact, fancy, minimal
+        style = function(buf, notif, ctx)
+          -- https://github.com/folke/snacks.nvim/blob/v2.23.0/lua/snacks/notifier.lua#L176
+          ctx.opts.border = vim.g.config.border or 'none'
+          local whl = ctx.opts.wo.winhighlight
+          ctx.opts.wo.winhighlight = whl:gsub(ctx.hl.msg, 'SnacksNotifierMinimal')
+          vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(notif.msg, '\n'))
+          vim.api.nvim_buf_set_extmark(buf, ctx.ns, 0, 0, {
+            virt_text = { { notif.icon .. ' ', ctx.hl.icon } },
+            virt_text_pos = 'inline', -- 'right_align',
+          })
+        end,
+        -- top_down = false,
+
+        -- date_format = '%R', -- time format for notifications
+        -- format for footer when more lines are available
+        -- `%d` is replaced with the number of lines.
+        -- only works for styles with a border
+        ---@type string|boolean
+        -- more_format = ' ↓ %d lines ',
+
         refresh = 1000, -- Refresh at most every second (default: 50ms)
-        width = { min = 40, max = 0.4 },
+        timeout = 5000, -- Default: 3000ms
       },
       picker = {
         enabled = true,
@@ -317,10 +361,23 @@ return {
         -- https://github.com/folke/snacks.nvim/issues/1984
         main = { file = false },
 
+        prompt = vim.g.config.signs.snacks_picker_prompt,
+        icons = vim.g.config.signs.snacks_picker_icons,
+
         -- NOTE: maximize with meta-m
         -- https://github.com/LazyVim/LazyVim/discussions/5765
         -- https://github.com/folke/snacks.nvim/issues/1217#issuecomment-2661465574
         formatters = { file = { truncate = vim.o.columns <= 80 and 40 or 300 } },
+
+        sources = {
+          lines = {
+            confirm = function(picker, ...)
+              local search = picker.input:get()
+              vim.print(search)
+              Snacks.picker.actions.confirm(picker, ...)
+            end,
+          },
+        },
 
         actions = {
           flash = function(picker)
@@ -374,6 +431,15 @@ return {
       scope = { enabled = false },
       scroll = { enabled = false },
       statuscolumn = { enabled = true },
+      styles = {
+        -- terminal = {
+        --   -- FIXME: prsist terminal buffers created with Snacks
+        --   bo = {
+        --     buflisted = true,
+        --     filetype = 'snacks_terminal',
+        --   },
+        -- },
+      },
       terminal = {
         -- interactive = false,
         win = {
@@ -479,8 +545,10 @@ return {
       { '<leader>sz', function() Snacks.picker.zoxide() end, desc = 'Zoxide picker' },
       { '<leader>s.', function() Snacks.scratch.select() end, desc = 'Select scratch buffer' },
 
+      -- { '<leader>"', '<cmd>horizontal terminal<cr>', desc = 'Open terminal' },
       -- { '<leader>%', '<cmd>vertical terminal<cr>', desc = 'Open terminal' },
-      { '<leader>"', '<cmd>TerminalOpen<cr>', desc = 'Open terminal' },
+      { '<leader>"', '<cmd>TerminalOpen<cr>', desc = 'Open terminal (snacks)' },
+      { '<leader>%', '<cmd>TerminalOpen<cr>', desc = 'Open terminal (snacks)' },
 
       { '<leader>n', function() Snacks.picker.notifications() end, desc = 'Notification picker' },
       { '<leader>N', function() Snacks.notifier.show_history() end, desc = 'Notification history' },
@@ -492,8 +560,8 @@ return {
       { '<leader>uz', function() Snacks.zen() end, desc = 'Toggle zen mode' },
       { '<leader>.', function() Snacks.scratch() end, desc = 'Toggle scratch buffer' },
 
-      { '<c-/>',      function() Snacks.terminal() end, desc = 'Toggle Terminal' },
-      { '<c-_>',      function() Snacks.terminal() end, desc = 'which_key_ignore' },
+      -- { '<c-/>',      function() Snacks.terminal() end, desc = 'Toggle Terminal' },
+      -- { '<c-_>',      function() Snacks.terminal() end, desc = 'which_key_ignore' },
       { ']]',         function() Snacks.words.jump(vim.v.count1) end, desc = 'Next Reference', mode = { 'n', 't' } },
       { '[[',         function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev Reference', mode = { 'n', 't' } },
 
@@ -638,14 +706,17 @@ return {
       vim.api.nvim_create_user_command('Colorize', function()
         Snacks.terminal.colorize()
       end, { desc = 'Colorize terminal (snacks)' })
+
       vim.api.nvim_create_user_command('Dashboard', function()
         Snacks.dashboard.open()
       end, { desc = 'Open dashboard (snacks)' })
+      vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })
+
       vim.api.nvim_create_user_command('Find', function()
         local cwd = vim.fn.expand('%:p:h'):gsub('^oil://', '')
         Snacks.picker.files({ cwd = cwd, hidden = true })
       end, { desc = 'Find files (snacks)' })
-      vim.api.nvim_create_user_command('NeovimNews', neovim_news, { desc = 'Neovim news (snacks)' })
+
       vim.api.nvim_create_user_command('TerminalList', function()
         local list = Snacks.terminal.list()
         dd(list)

@@ -1,9 +1,0 @@
----
-extraPackages:
-  topgrade:
-    enabled: '{{ get .features "topgrade" }}'
-    nameOverwrite:
-      arch: topgrade-bin
-      manjaro: topgrade
-      windows: topgrade-rs.topgrade
-    type: '{{ and (eq .osIDLike "arch") (ne .osID "manjaro") | ternary "aur" nil }}'

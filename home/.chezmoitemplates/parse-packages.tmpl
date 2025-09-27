@@ -1,55 +1,67 @@
-{{- $defaultType := get . "defaultType" -}}
-{{- $packageType := get . "packageType" }}
-{{- $packages := includeTemplate "eval" (.packages | toYaml | replaceAllRegex "\\\\\"" "\"" | replaceAllRegex "\\\\n" "") | fromYaml }}
+{{- /* $input := .packages | toYaml
+  | replaceAllRegex "\\\\\"" "\""
+  | replaceAllRegex "\\\\n" ""
+  | replaceAllRegex "\\.packageType" (printf "\"%s\"" .packageType)
+-}}
+{{- $packages := includeTemplate "eval" $input | fromYaml */ -}}
 {{- $output := dict }}
-{{- range $packageName, $pkg := $packages }}
+{{- range $key, $pkg := .packages }}
 
 {{-   if eq $pkg nil }}
 {{-     $pkg = dict }}
 {{-   end }}
 
-{{-   if and (kindIs "map" $pkg) (get $pkg "name") }}
-{{-     $packageName = get $pkg "name" }}
-{{-   else if kindIs "string" $pkg }}
-{{-     $packageName = $pkg }}
+{{-   if not (kindIs "map" $pkg) }}
+{{-     warnf "%s expected map: %s (%s)" $key $pkg (kindOf $pkg) -}}
 {{-   end }}
 
+{{-   $name := get $pkg "name" | default $key }}
 {{-   $nameOverwrite := get $pkg "nameOverwrite" }}
 {{-   if and $nameOverwrite (get $nameOverwrite $.osID) }}
-{{-     $packageName = get $nameOverwrite $.osID }}
+{{-     $name = get $nameOverwrite $.osID }}
 {{-   else if and $nameOverwrite (get $nameOverwrite $.osIDLike) }}
-{{-     $packageName = get $nameOverwrite $.osIDLike }}
+{{-     $name = get $nameOverwrite $.osIDLike }}
+{{-   else if and $nameOverwrite (get $nameOverwrite $.packageType) }}
+{{-     $name = get $nameOverwrite $.packageType }}
 {{-   end }}
+
+{{-   if empty $name -}}
+{{-     warnf "%s: empty name: %s" $key $pkg -}}
+{{-   end -}}
+
+{{-   $version := get $pkg "version" -}}
+{{-   if and $version (ne $.packageType "mise") -}}
+{{-     $name = printf "%s@%s" $name $version -}}
+{{-   end -}}
 
 {{-   $type := get $pkg "type" | trim }}
 {{-   if eq $type nil "" "nil" "null" "<no value>" }}
-{{-     $type = $defaultType }}
+{{-     $type = $.defaultType }}
 {{-   end }}
-{{-   if and $packageType $type }}
-{{-     if and $type (ne $packageType $type) }}
-{{- /* warnf "Excluded package type (and): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-   if and $.packageType $type }}
+{{-     if and $type (ne $.packageType $type) }}
+{{- /* warnf "Excluded package type (and): %s: got '%s' expected '%s'" $name $type $.packageType */ -}}
 {{-       continue }}
 {{-     end }}
-{{-   else if or $packageType $type }}
-{{- /* warnf "Excluded package type (or): %s: got '%s' expected '%s'" $packageName $type $packageType */ -}}
+{{-   else if or $.packageType $type }}
+{{- /* warnf "Excluded package type (or): %s: got '%s' expected '%s'" $name $type $.packageType */ -}}
 {{-     continue }}
 {{-   end }}
 
 {{-   $enabled := get $pkg "enabled" }}
 {{-   if or (and (kindIs "bool" $enabled) (ne $enabled true)) (and (kindIs "string" $enabled) (ne $enabled "true") (ne $enabled "")) }}
-{{- /* warnf "Disabled package: %s (%s)" $packageName $enabled */ -}}
+{{- /* warnf "Disabled package: %s (%s)" $name $enabled */ -}}
 {{-     continue }}
 {{-   end }}
 
-{{-   $options := get $pkg "options" | default dict }}
-{{-   $hasSpaces := eq $packageType "mas" }}
-{{-   $pkgList := $hasSpaces | ternary (list $packageName) ($packageName | splitList " ") }}
-{{-   range $name := $pkgList }}
-{{- /*     $output = append $output (dict "name" $name "options" $options) */ -}}
-{{-     if get $output $name -}}
-{{-       warnf "Overriding pkg %s (%s -> %s)" $name (get (get $output $name) "options") $options -}}
+{{-   $hasSpaces := eq $.packageType "mas" }}
+{{-   range $part := $hasSpaces | ternary (list $name) ($name | splitList " ") }}
+{{-     $existing := get $output $part -}}
+{{- /*    if and $existing (not (deepEqual $existing $pkg)) */ -}}
+{{-     if $existing -}}
+{{-       warnf "Overriding package name %s (%s -> %s)" $part (get $output $name) $pkg -}}
 {{-     end -}}
-{{-     $_ := set $output $name (dict "options" $options) }}
+{{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}

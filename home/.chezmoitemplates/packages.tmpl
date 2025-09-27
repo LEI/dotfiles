@@ -1,4 +1,4 @@
-{{- $defaultType := get . "defaultType" | default (get .packageManagerMap .osIDLike) -}}
+{{- $defaultType := .defaultType -}}
 {{- $packageType := get . "packageType" | default $defaultType -}}
 {{- $packages := dict -}}
 
@@ -26,7 +26,13 @@
   "packageType" $packageType
   "packages" .extraPackages
 ) | fromJson -}}
-{{- $packages = merge $packages $extraPackages -}}
+{{- /* $packages = merge $packages $extraPackages */ -}}
+{{- range $name, $pkg := $extraPackages }}
+{{-   if get $packages $name -}}
+{{-     warnf "Overriding extra %s (%s -> %s)" $name (get (get $packages $name) "options") $pkg -}}
+{{-   end -}}
+{{-   $_ := set $packages $name $pkg }}
+{{- end }}
 
 {{- $os := get (get $p.osPackages .osIDLike) $packageType -}}
 {{- $osPackages := dict -}}
@@ -41,10 +47,16 @@
   "packageType" $packageType
   "packages" $os
 ) | fromJson -}}
-{{- $packages = merge $packages $osPackages -}}
+{{- /* $packages = merge $packages $osPackages */ -}}
+{{- range $name, $pkg := $osPackages }}
+{{-   if get $packages $name -}}
+{{-     warnf "Overriding os %s (%s -> %s)" $name (get (get $packages $name) "options") $pkg -}}
+{{-   end -}}
+{{-   $_ := set $packages $name $pkg }}
+{{- end }}
 {{- end -}}
 
-{{- if and (get .features "python") (eq $packageType $defaultType) }}
+{{- if and .features.python (eq $packageType $defaultType) }}
 {{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
 {{-   range $name := without $pythonPackages "" -}}
 {{-     if eq (substr 0 1 $name) "#" -}}
@@ -63,7 +75,7 @@
 {{-     if get $packages $name -}}
 {{-       warnf "Overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
 {{-     end -}}
-{{-     $_ := $packages | setValueAtPath $name dict -}}
+{{-     $_ := set $packages $name dict -}}
 {{-   end -}}
 {{- end }}
 

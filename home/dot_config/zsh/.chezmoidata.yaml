@@ -1,6 +1,0 @@
----
-extraPackages:
-  zsh:
-    enabled: '{{ get .features "zsh" }}'
-  zsh-completions:
-    enabled: '{{ and (get .features "zsh") (not (eq .osIDLike "debian" "fedora")) }}'

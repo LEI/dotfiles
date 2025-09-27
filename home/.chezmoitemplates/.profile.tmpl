@@ -3,7 +3,7 @@
 # shellcheck disable=SC1090
 [ -f ~/.sh_profile ] && . ~/.sh_profile
 
-{{- if get .features "i3" }}
+{{- if .features.i3 }}
 
 {{- range $key, $value := .i3.environment }}
 export {{ $key }}={{ $value | quote }}

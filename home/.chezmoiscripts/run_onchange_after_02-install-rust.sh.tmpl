@@ -11,13 +11,19 @@ set -eu
 TMPDIR="${TMPDIR:-/tmp}"
 cd "$TMPDIR"
 
-if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-  cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
 if command -v rustup >/dev/null && ! rustup default; then
   # echo >&2 "No default toolchain is configured, using stable"
   cmd rustup default stable
+  # cmd rustup toolchain list
+  # cmd rustup toolchain uninstall stable
+  # cmd rustup toolchain install stable
 fi
 # if [ ! -f "$TMPDIR/rust-toolchain" ]; then
 #   if [ -f "$HOME/rust-toolchain" ]; then
@@ -63,7 +69,7 @@ else
 
   cmd curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
   cmd chmod +x "$RUSTUP_INIT"
-  {{- if get .features "neovim" }}
+  {{- if .features.neovim }}
   RUSTUP_INIT_ARGS=""
   {{- else }}
   RUSTUP_INIT_ARGS="--component rust-analyzer"
@@ -78,7 +84,7 @@ fi
 
 # cmd rustup default stable
 
-{{- if not (get .features "neovim") }}
+{{- if not .features.neovim }}
 
 # cmd rustup component add rust-analyzer
 {{- end }}
@@ -91,7 +97,7 @@ if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; th
 fi
 
 if ! command -v cargo-binstall >/dev/null; then
-  # cmd cargo install --quiet cargo-binstall
+  # cmd cargo install --locked --quiet cargo-binstall
   # https://github.com/cargo-bins/cargo-binstall#manually
   echo >&2 "Installing cargo-binstall"
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
@@ -109,36 +115,24 @@ if ! command -v cargo-binstall >/dev/null; then
   NAME="cargo-binstall"
   if [ "$CHEZMOI_OS" = linux ]; then
     URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.tgz"
-    install_tar_gz "$URL" cargo-binstall
+    install_tar_gz "$URL" "$NAME"
   else
     URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.zip"
-    install_zip "$URL" cargo-binstall
+    install_zip "$URL" "$NAME"
   fi
   echo >&2 "Installed cargo-binstall"
 fi
 
 {{- $list := list }}
-{{- $cargoPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "cargo")) | fromJson }}
-{{- range $name, $options := $cargoPackages }}
+{{- range $name := .cargoPackages | keys }}
 {{- $list = append $list $name }}
 {{- end }}
 
 packages="{{ $list | sortAlpha | join " " }}"
-
-if ! command -v cargo-binstall >/dev/null; then
-  packages="$packages cargo-binstall"
-fi
-
-if ! command -v cargo-install-update >/dev/null; then
-  packages="$packages cargo-update"
-fi
-
-{{- if not (get .features "neovim") }}
-
-if ! command -v taplo >/dev/null; then
-  cmd cargo install taplo-cli --locked --features lsp --quiet
-fi
-{{- end }}
+#
+# if ! command -v cargo-install-update >/dev/null; then
+#   packages="$packages cargo-update"
+# fi
 
 if [ -n "$packages" ]; then
   cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages

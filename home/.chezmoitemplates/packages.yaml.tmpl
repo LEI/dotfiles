@@ -1,15 +1,35 @@
 ---
 # vi: ft=yaml.template
 # https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
-commonPackages:
+packages:
   7zip:
-    enabled: {{ not (eq .osIDLike "fedora") }}
+    enabled: {{ and (not (eq .osIDLike "fedora")) (not (or
+      (and (eq .osID "debian") (le (int .osVersion) 11))
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+    )) }}
     nameOverwrite:
+      darwin: sevenzip
       windows: 7zip.7zip
+  adb:
+    enabled: {{ and (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") }}
+    nameOverwrite:
+      arch: android-tools
+      darwin: android-platform-tools
+      windows: Google.PlatformTools
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  # ansible:
+  #   type: uv
   autossh:
-    enabled: {{ and (get .features "ssh") (not (eq .osIDLike "debian" "windows")) }}
+    enabled: {{ and .features.ssh (not (eq .osIDLike "debian" "windows")) }}
   bandwhich: # netshow, slurm
     enabled: {{ and (not (eq .osIDLike "android" "debian" "fedora" "windows")) (ne .profile "minimal") }}
+  bitwarden-cli:
+    enabled: {{ eq .osIDLike "arch" "darwin" }}
+  bitwarden:
+    enabled: {{ eq .osIDLike "darwin" "windows" }}
+    nameOverwrite:
+      windows: Bitwarden.Bitwarden
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   bkt:
     enabled: {{ not (eq .osIDLike "android" "arch" "alpine" "debian" "fedora" "windows") }}
     # nameOverwrite:
@@ -18,15 +38,20 @@ commonPackages:
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
   # below: { enabled: {{ not (eq .osIDLike "arch" "debian") }} }
   bottom:
-    enabled: {{ get .features "bottom" }}
+    enabled: {{ .features.bottom }}
     nameOverwrite:
       windows: clement.bottom
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
+  bvi:
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   ca-certificates:
     enabled: {{ eq .osIDLike "arch" "debian" }}
   cargo-binstall:
-    enabled: {{ and (get .features "rust") (not (eq .osIDLike "alpine")) }}
+    enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}'
+  cargo-update:
+    enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
+    type: '{{ eq .osIDLike "debian" "fedora" | ternary "cargo" nil }}'
   chezmoi:
     enabled: {{ eq .osIDLike "darwin" "windows" }}
     nameOverwrite:
@@ -39,33 +64,33 @@ commonPackages:
       # windows: Hibbiki.Chromium
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   codex:
-    enabled: {{ and (get .features "ai") (eq .osIDLike "arch" "darwin") }}
+    enabled: {{ .features.ai }}
     nameOverwrite:
       arch: openai-codex-bin
-      # npm: @openai/codex
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+      npm: "@openai/codex"
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .os "windows" | ternary "npm" nil) }}'
   coreutils: { enabled: {{ eq .os "android" "linux" }} }
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}
   crush:
-    enabled: {{ and (get .features "ai") (eq .osIDLike "arch" "darwin" "windows") }}
+    enabled: {{ .features.ai }}
     nameOverwrite:
       arch: crush-bin
       darwin: charmbracelet/tap/crush
-      # npm: @charmland/crush
+      npm: "@charmland/crush"
       windows: charmbracelet.crush
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "arch" "darwin" "windows" | ternary nil "npm") }}'
   # FIXME(arch): JVM terminated error
   # https://wiki.archlinux.org/title/Dbeaver
   # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
   # dbeaver: # Requires at least jdk17-openjdk, alternative: mysqlworkbench
-  #   enabled: {{ and (get .features "sql") (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not .ephemeral) (not .headless) }}
+  #   enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not .ephemeral) (not .headless) }}
   #   nameOverwrite:
   #     darwin: dbeaver-community
   #     windows: DBeaver.DBeaver
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   dcv: # dtop
-    enabled: {{ and (get .features "docker") (eq .osIDLike "darwin") }}
+    enabled: {{ and .features.docker (eq .osIDLike "darwin") }}
     nameOverwrite:
       darwin: tokuhirom/tap/dcv
   devpod:
@@ -78,13 +103,14 @@ commonPackages:
     enabled: {{ ne .osIDLike "debian" }}
     nameOverwrite:
       windows: wilfred.difftastic
+    type: '{{ eq .osIDLike "debian" | ternary "brew" nil }}'
   direnv:
-    enabled: {{ get .features "direnv" }}
+    enabled: {{ .features.direnv }}
     nameOverwrite:
       windows: direnv.direnv
     # type: mise
   dive: # sou
-    enabled: {{ and (get .features "docker") (not (eq .osIDLike "alpine" "debian" "fedora")) }}
+    enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
       windows: wagoodman.dive # scoop: main/dive
   # dog, doggo, mtr, trippy, oryx / tshark termshark
@@ -107,6 +133,10 @@ commonPackages:
     nameOverwrite:
       windows: sharkdp.fd
     type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
+  ffmpeg:
+    enabled: {{ ne .profile "minimal" }}
+    nameOverwrite:
+      windows: Gyan.FFmpeg
   # https://support.mozilla.org/en-US/kb/install-firefox-linux
   firefox:
     enabled: {{ and (eq .osIDLike "arch" "darwin" "fedora" "windows") (not (or .ephemeral .headless)) }}
@@ -114,16 +144,19 @@ commonPackages:
       # darwin: firefox{,beta,developer-edition,esr,nightly}
       windows: Mozilla.Firefox # .DeveloperEdition
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  # foot:
+  #   enabled: {{ and .features.sway (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
+  fzf:
+    nameOverwrite:
+      windows: junegunn.fzf
   envx:
     enabled: {{ eq .osIDLike "arch" }}
     nameOverwrite:
       arch: envx-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  # foot:
-  #   enabled: {{ and (get .features "sway") (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
-  fzf:
-    nameOverwrite:
-      windows: junegunn.fzf
+  # euporie:
+  #   enabled: {{ .features.python }}
+  #   type: uv
   # gdu, ncdu
   git-delta:
     enabled: {{ and (not (eq .osIDLike "debian")) (ne .profile "minimal") }}
@@ -135,13 +168,18 @@ commonPackages:
     enabled: {{ not (eq .osIDLike "alpine" "debian") }}
     nameOverwrite:
       windows: charmbracelet.glow
+  gnuplot:
+    enabled: {{ and (eq .os "darwin" "linux") (ne .profile "minimal") }}
   # gomi, gtrash
-  go:
-    enabled: {{ get .features "go" }}
-    nameOverwrite:
-      windows: golang.go
-    # TODO: install on system and with mise like node(js)
+  go-mise:
+    enabled: {{ and .features.mise .features.go }}
+    name: go
     type: mise
+  go:
+    enabled: {{ and .features.go (ne .profile "minimal") }}
+    nameOverwrite:
+      debian: golang
+      windows: golang.go
   google-chrome:
     enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
     nameOverwrite:
@@ -149,7 +187,7 @@ commonPackages:
       windows: Google.Chrome
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   gpg:
-    enabled: {{ and (or (get .features "git") (get .features "mail")) (eq .osIDLike "alpine" "arch" "darwin" "debian") }}
+    enabled: {{ and .features.gpg (eq .osIDLike "alpine" "arch" "darwin" "debian") }}
     nameOverwrite:
       android: gnupg
       arch: gnupg
@@ -179,7 +217,7 @@ commonPackages:
   #   enabled: {{ eq .osIDLike "arch" "windows" }}
   #   nameOverwrite:
   #     windows: JuanjoFuchs.hwinfo-tui
-  #   type: '{{ eq .osIDLike "windows" | ternary "winget" "python" }}'
+  #   type: '{{ eq .osIDLike "windows" | ternary "winget" "uv" }}'
   hwinfo:
     enabled: {{ eq .osIDLike "arch" "windows" }}
     nameOverwrite:
@@ -206,12 +244,12 @@ commonPackages:
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
     )) }}
   kubecolor:
-    enabled: {{ and (get .features "kube") (not (eq .osIDLike "alpine" "debian" "fedora")) }}
+    enabled: {{ and .features.kube (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
       windows: Kubecolor.kubecolor
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   lazydocker: # dry, sen
-    enabled: {{ get .features "docker" }}
+    enabled: {{ .features.docker }}
     nameOverwrite:
       arch: lazydocker-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" (ne .os "darwin" | ternary "mise" nil) }}'
@@ -221,27 +259,40 @@ commonPackages:
       arch: lazyjournal-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   lazysql:
-    enabled: {{ and (get .features "sql") (eq .osIDLike "arch" "darwin") }}
+    enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin") }}
     nameOverwrite:
       arch: lazysql-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   lazyssh:
-    enabled: {{ and (get .features "ssh") (eq .osIDLike "arch" "darwin") }}
+    enabled: {{ and .features.ssh (eq .osIDLike "arch" "darwin") }}
     nameOverwrite:
       arch: lazyssh-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   lnav: { enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} }
   logseq: # obsidian
-    enabled: {{ get .features "logseq" }}
+    enabled: {{ .features.logseq }}
     nameOverwrite:
       arch: logseq-desktop-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .os "darwin" | ternary "cask" nil) }}'
   lua:
-    enabled: {{ and (get .features "neovim") (eq .os "darwin") }}
-    options:
-      version: "5.1" # NOTE: brew only
+    enabled: {{ and .features.neovim (not (eq .osIDLike "alpine" "android" "debian" "fedora" "windows")) (ne .profile "minimal") }}
+    nameOverwrite:
+      arch: lua51
+    version: '{{ ne .osIDLike "arch" | ternary "5.1" "" }}'
+    type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
+  mailpit:
+    enabled: {{ and .features.mail (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    restart_service: ":changed"
+    nameOverwrite:
+      arch: mailpit-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
+  mcp-hub: # @4.2.0
+    enabled: {{ .features.ai }}
+    type: npm
   mise:
-    enabled: {{ eq .osIDLike "darwin" }}
+    enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "windows") }}
+    nameOverwrite:
+      windows: jdx.mise
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
@@ -250,46 +301,62 @@ commonPackages:
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   openssh:
-    enabled: {{ and (get .features "ssh") }} # (eq .osIDLike "arch" "darwin")
+    enabled: {{ and .features.ssh }} # (eq .osIDLike "arch" "darwin")
     nameOverwrite:
       debian: openssh-client
+  openvpn-connect: # tunnelblick
+    enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
+    nameOverwrite:
+      windows: OpenVPNTechnologies.OpenVPN
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # pass: # gopass
   #   enabled: {{ not (empty .accessToken) }}
   pastel: # termpicker
     enabled: {{ not (eq .osIDLike "alpine" "debian" "fedora") }}
     nameOverwrite:
       windows: sharkdp.pastel
+  pg_activity[psycopg]:
+    enabled: {{ .features.sql }}
+    type: uv
 
   # php:
-  #   enabled: {{ get .features "php" }}
+  #   enabled: {{ .features.php }}
   #   nameOverwrite:
   #     arch: php re2c postgresql-libs libzip
   #   type: mise
+  #   # version: "8.3"
+  #   # type: brew
 
   pipx:
-    enabled: {{ and (get .features "python") (eq .osIDLike "alpine" "darwin" "debian") (not (and (eq .osID "debian") (le (int .osVersion) 11))) }}
+    enabled: {{ .features.python }}
+    nameOverwrite:
+      arch: python-pipx
+    type: {{ and
+        (eq .osIDLike "alpine" "arch" "darwin" "debian")
+        (not (and (eq .osID "debian") (le (int .osVersion) 11)))
+      | ternary nil "pip" }}
   pik:
     enabled: {{ eq .osIDLike "arch" }}
     nameOverwrite:
       # fedora: copr enable rusty-jack/pik
     # repo: jacek-kurlit/pik
   # podman:
-  #   enabled: {{ and (get .features "docker") (eq .os "windows") }}
+  #   enabled: {{ and .features.docker (eq .os "windows") }}
   #   nameOverwrite:
   #     arch: RedHat.Podman
   # podman-desktop:
-  #   enabled: {{ and (get .features "docker") (eq .os "windows") }}
+  #   enabled: {{ and .features.docker (eq .os "windows") }}
   #   nameOverwrite:
   #     arch: RedHat.Podman-Desktop
   podman-tui:
-    enabled: {{ and (get .features "docker") (not (eq .osIDLike "debian")) }}
+    enabled: {{ and .features.docker (not (eq .osIDLike "debian")) }}
     nameOverwrite:
       arch: podman-tui-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   posting: # slumber
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-    type: '{{ eq .osIDLike "arch" | ternary "python" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "uv" nil }}'
   process-compose: # hapless, mani+sake / cmdperf, mult
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     nameOverwrite:
@@ -310,29 +377,48 @@ commonPackages:
       windows: dalance.procs
   progress: { enabled: {{ eq .os "darwin" "linux" }} }
   pspg:
-    enabled: {{ and (get .features "sql") (eq .osIDLike "arch" "darwin") }}
+    enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  pv:
+    enabled: {{ eq .os "android" "darwin" "linux" }}
+  python-mise:
+    enabled: false # {{ and .features.mise .features.python }}
+    name: python
+    type: mise
   python:
-    enabled: {{ and (get .features "python") (eq .osIDLike "alpine" "android" "darwin" "debian") }}
+    enabled: {{ and .features.python (eq .osIDLike "alpine" "android" "darwin" "debian") }}
     nameOverwrite:
       alpine: python3
       # darwin: python@3.11
       debian: python3
       # windows: Python.Python.3.12
     # type: mise
+  recoverpy:
+    type: uv
+  ruby-mise:
+    enabled: false # {{ and .features.mise .features.ruby }}
+    name: ruby
+    type: mise
   ruby:
-    enabled: {{ and (get .features "ruby") (eq .osIDLike "alpine" "android" "debian" "darwin" "fedora") }}
+    enabled: {{ and .features.ruby (eq .osIDLike "alpine" "android" "debian" "darwin" "fedora") }}
     nameOverwrite:
       darwin: ruby ruby-build
       debian: ruby-dev
       fedora: ruby-devel
-    # type: mise
   rubygems:
-    enabled: {{ and (get .features "ruby") (eq .osIDLike "arch" "debian" "fedora") (not
+    enabled: {{ and .features.ruby (eq .osIDLike "arch" "debian" "fedora") (not
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
     ) }}
     nameOverwrite:
       debian: ruby-rubygems
+  rustup: # rust
+    # enabled: {{ and .features.rust (not (lookPath "rustc" | isExecutable)) }}
+    enabled: {{ and .features.rust (not (or
+      (and (eq .osID "debian") (le (int .osVersion) 12))
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+    )) }}
+    nameOverwrite:
+      windows: Rustlang.Rustup
   s-tui:
     # enabled: {{ eq .osIDLike "arch" "debian" "fedora" }}
     enabled: {{ and (not (eq .osIDLike "android" "darwin" "windows")) (ne .profile "minimal") }}
@@ -345,74 +431,81 @@ commonPackages:
       windows: chmln.sd
   # FIXME(alpine): .rs syntax error (failed to install with aqua)
   shellcheck:
-    enabled: {{ and (not (get .features "neovim")) (not (get .features "mise")) }}
+    enabled: {{ and (not .features.neovim) (not .features.mise) }}
     nameOverwrite:
       windows: koalaman.shellcheck
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shfmt:
-    enabled: {{ and (not (get .features "neovim")) (not (get .features "mise")) }}
+    enabled: {{ and (not .features.neovim) (not .features.mise) }}
     nameOverwrite:
       windows: mvdan.shfmt
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shpool: # abduco, dtach
-    enabled: {{ and (get .features "shpool") (not (eq .osIDLike "darwin" "windows")) }}
+    enabled: {{ and .features.shpool (not (eq .osIDLike "darwin" "windows")) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
   # https://github.com/skim-rs/skim#shell-completions
   skim:
     enabled: {{ not (eq .osIDLike "android" "windows") }}
     nameOverwrite:
       darwin: sk
-    type: '{{ eq .osIDLike "debian" | ternary "cargo" nil }}' # (get .features "rust")
+    type: '{{ eq .osIDLike "debian" | ternary "cargo" nil }}' # .features.rust
   # ssh-list:
-  #   enabled: {{ and (get .features "ssh") (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
+  #   enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
   sshs: # sshclick, ssm, fast-ssh
-    enabled: {{ and (get .features "ssh") (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
+    enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
   steam:
-    enabled: {{ get .features "steam" }}
+    enabled: {{ .features.steam }}
     nameOverwrite:
       windows: Valve.Steam
   steamlink:
-    enabled: {{ get .features "steam" }}
+    enabled: {{ .features.steam }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
     nameOverwrite:
       windows: Valve.SteamLink
   subliminal:
     enabled: {{ and (eq .osIDLike "arch" "darwin" "windows") (eq .profile "personal") }}
-    type: '{{ eq .osIDLike "arch" | ternary "aur" "python" }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "uv" }}'
   # swaptop
   tailspin:
-    type: '{{ eq .osIDLike "android" "alpine" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+  taplo:
+    enabled: {{ and (not .features.neovim) (not (eq .profile "minimal")) }}
+    # nameOverwrite:
+    #   arch: taplo-cli
+    type: brew # cargo install taplo-cli --locked --features lsp --quiet
   termscp: # aim, zrok
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   tidy:
     nameOverwrite:
       darwin: tidy-html5
       windows: HTACG.tidy
-    enabled: {{ get .features "neovim" }}
+    enabled: {{ .features.neovim }}
   tlp:
     enabled: {{ and (eq .osIDLike "arch") (eq .chassisType "laptop") }}
   tofuref: # terraform-tui
-    enabled: {{ and (get .features "tofu") (get .features "python") }}
-    type: python
+    enabled: {{ and .features.tofu .features.python }}
+    type: uv
   tokei: # cloctui, scc
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   tracexec:
     enabled: {{ and (eq .osIDLike "arch") (ne .profile "minimal") }}
   tre-command:
-    enabled: {{ and (not (eq .osIDLike "android" "alpine" "arch" "fedora")) (not (or
+    enabled: {{ and (not (eq .osIDLike "alpine" "android" "arch" "fedora")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
     )) }}
     nameOverwrite:
       windows: duan.tre
+  time:
+    enabled: {{ eq .osIDLike "arch" "debian" }}
   tree:
   tuptime:
     enabled: {{ and (eq .os "linux") (not (eq .osID "alpine" "fedora")) (not .ephemeral) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 13))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
     )) }}
-    type: '{{ eq .osIDLike "arch" | ternary "aur" "python" }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "uv" }}'
   # tz: # tzupdate
   #   enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   #   # nameOverwrite:
@@ -425,24 +518,43 @@ commonPackages:
   up:
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     # usage: lshw |& up
+  owloops/tap/updo: # dstp, sntop
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    nameOverwrite:
+      arch: updo-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   usage:
-    enabled: {{ get .features "mise" }}
+    enabled: {{ .features.mise }}
     type: mise
   uv:
-    enabled: {{ and (get .features "python") (eq .osIDLike "alpine" "android" "arch" "fedora" "windows") }}
+    enabled: {{ .features.python }}
     nameOverwrite:
+      # pipx: uv uvx
       windows: astral-sh.uv
+    # https://docs.astral.sh/uv/getting-started/installation
+    type: '{{ eq .osIDLike "alpine" "android" "arch" "fedora" "windows" | ternary nil "pipx" }}'
   util-linux: { enabled: {{ eq .os "android" "linux" }} }
   viddy: # watch
     enabled: {{ and (eq .osIDLike "alpine" "arch" "darwin") (ne .profile "minimal") }}
     nameOverwrite:
       arch: viddy-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  # vlc: # mpv
-  #   enabled: {{ and (not (eq .osIDLike "alpine" "darwin" "debian")) (not .headless) }}
-  #   nameOverwrite:
-  #     arch: vlc vlc-plugins-all
-  #     windows: VideoLAN.VLC
+  vlc: # mpv
+    enabled: {{ and
+      (not (eq .osIDLike "alpine" "android" "debian"))
+      (ne .profile "minimal")
+      (not .headless)
+    }}
+    nameOverwrite:
+      arch: vlc vlc-plugins-all
+      windows: VideoLAN.VLC
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  wtfis:
+    enabled: {{ not (empty (env "VT_API_KEY")) }}
+    type: uv
+  wut-cli:
+    enabled: {{ .features.ai }}
+    type: uv
   xdg-utils: { enabled: {{ eq .osIDLike "alpine" "arch" }} }
   xh:
     enabled: {{ and (not (eq .osIDLike "debian" "fedora")) (ne .profile "minimal") }}
@@ -451,12 +563,13 @@ commonPackages:
   yazi:
     enabled: {{ not (eq .osIDLike "alpine" "debian" "fedora") }}
     nameOverwrite:
-      darwin: yazi ffmpeg sevenzip poppler resvg imagemagick # font-symbols-only-nerd-font
-      # debian: ffmpeg 7zip jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
+      darwin: yazi poppler resvg imagemagick # font-symbols-only-nerd-font
+      # debian: 7zip ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
       # fedora: # dnf copr enable lihaohong/yazi
-      windows: sxyazi.yazi Gyan.FFmpeg oschwartz10612.Poppler ImageMagick.ImageMagick
+      windows: sxyazi.yazi oschwartz10612.Poppler ImageMagick.ImageMagick
   yq:
     nameOverwrite:
+      alpine: yq-go
       windows: mikefarah.yq
     type: >
       {{ or
@@ -473,7 +586,7 @@ commonPackages:
   #   nameOverwrite:
   #     windows: zig.zig
   zoxide:
-    enabled: {{ get .features "zoxide" }}
+    enabled: {{ .features.zoxide }}
     nameOverwrite:
       windows: ajeetdsouza.zoxide
     type: '{{ and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) | ternary "mise" nil }}'
@@ -515,18 +628,14 @@ osPackages:
         enabled: {{ not (lookPath "man" | isExecutable) }}
       # net-tools:
       # rust:
-      #   enabled: {{ get .features "rust" }}
+      #   enabled: {{ .features.rust }}
+      #   version: latest
+      #   # TODO: default profile adds rust-docs, rustfmt and clippy
       #   options:
-      #     # Default profile adds rust-docs, rustfmt and clippy
-      #     version: latest
       #     components: rust-analyzer, rust-src,llvm-tools
       #     profile: minimal
       #   type: mise
-      rustup: # rust
-        # enabled: {{ and (get .features "rust") (not (lookPath "rustc" | isExecutable)) }}
-        enabled: {{ get .features "rust" }}
       systemctl-tui: # systemd-manager-tui-bin
-      time:
       ttf-roboto: # ttf-dejavu noto-fonts
         enabled: {{ not .headless }}
       wiki-tui: # so
@@ -538,7 +647,7 @@ osPackages:
         # enabled: {{ ne .osID "manjaro" }}
       pacseek-bin:
       tre-command-bin:
-      # terraform-pug-bin: { enabled: {{ get .features "tofu" }} }
+      # terraform-pug-bin: { enabled: {{ .features.tofu }} }
       # yay: { enabled: {{ ne .osID "manjaro" }} }
   darwin:
     brew:
@@ -548,8 +657,6 @@ osPackages:
       # autoconf:
       # automake:
       # bison:
-      # bitwarden-cli:
-      bvi:
       # bzip2:
       # caddy:
       # catimg:
@@ -563,7 +670,6 @@ osPackages:
       # diffutils:
       # dnsmasq:
       # dotenv-linter:
-      # ffmpeg:
       # findutils:
       # freetype:
       # gdb:
@@ -575,7 +681,6 @@ osPackages:
       # glow:
       # gmp:
       gnu-sed:
-      # gnuplot:
       # gnutls:
       # go-task:
       # gpgme:
@@ -593,16 +698,13 @@ osPackages:
       # k6:
       # kind:
       # kustomize:
-      # git-cc: { enabled: {{ get .features "git" }} }
+      # git-cc: { enabled: {{ .features.git }} }
       # libedit: # readline, rlwrap
       # llvm:
       # logrotate:
       # luacheck:
       # luarocks:
       # lynx:
-      mailpit:
-        options:
-          restart_service: ":changed"
       mas:
       # mercurial:
       # moreutils:
@@ -620,21 +722,19 @@ osPackages:
       # pip-completion:
       # pkgconf:
       # procmail:
-      # leg100/tap/pug: { enabled: {{ get .features "tofu" }} }
+      # leg100/tap/pug: { enabled: {{ .features.tofu }} }
       # rsync:
       # rsyslog:
       # semgrep:
       # shunit2:
       # sops:
       supervisor:
-        options:
-          restart_service: ":changed"
+        restart_service: ":changed"
       gromgit/brewtils/taproom:
       # tig:
       # ttyplot: # incplot, youplot
       # unibilium:
       # universal-ctags:
-      owloops/tap/updo: # dstp, sntop
       # usage:
       visidata: # csvlens, sc-im, tabview, textql qsv, xan
       # watch:
@@ -643,11 +743,9 @@ osPackages:
       # xz:
 
       koekeishiya/formulae/yabai:
-        start: yabai --start-service
+        after_script: cmd yabai --start-service
       # jackielii/tap/skhd-zig: # koekeishiya/formulae/skhd
     cask:
-      # android-platform-tools:
-      # bitwarden:
       # bruno: # postman
       # cyberduck:
       # docker docker-desktop:
@@ -671,7 +769,6 @@ osPackages:
       # microsoft-word: # doxx, hygg
       # ngrok:
       # onedrive:
-      openvpn-connect: # tunnelblick
       pearcleaner:
       # rustdesk:
       # safari-technology-preview:
@@ -680,19 +777,18 @@ osPackages:
       # soapui:
       # xquartz:
     mas:
-      Microsoft Excel: { options: { id: 462058435 } }
-      Microsoft Outlook: { options: { id: 985367838 } }
-      Microsoft Word: { options: { id: 462054704 } }
-      # Tailscale: { options: { id: 1475387142 } }
-      # WireGuard: { options: { id: 1451685025 } }
-      Xcode: { options: { id: 497799835 } }
+      Microsoft Excel: { id: 462058435 }
+      Microsoft Outlook: { id: 985367838 }
+      Microsoft Word: { id: 462054704 }
+      # Tailscale: { id: 1475387142 }
+      # WireGuard: { id: 1451685025 }
+      Xcode: { id: 497799835 }
     # vscode:
-    #   editorconfig.editorconfig: { enabled: {{ get .features "vscode" }} }
+    #   editorconfig.editorconfig: { enabled: {{ .features.vscode }} }
   debian: # Debian/Ubuntu
     apt:
       apt-utils:
       build-essential:
-      time:
       # ufw tufw:
 
       # Cargo gitlab-ci-ls
@@ -705,30 +801,25 @@ osPackages:
       openssl-devel:
       # which:
   windows:
-    scoop:
-      busybox:
-        enabled: {{ not (lookPath "awk" | isExecutable) }}
+    scoop: []
+      # busybox:
+      #   enabled: {{ not (lookPath "awk" | isExecutable) }}
       # livesplit:
       # prime95:
       # scoop-search:
-      sudo:
+      # sudo:
       # talosctl:
     winget:
       CPUID.CPU-Z:
       # dundee.gdu:
-      jdx.mise: { enabled: {{ get .features "mise" }} }
       Microsoft.PowerShell:
       Canonical.Ubuntu:
       MartiCliment.UniGetUI:
       Microsoft.PowerToys:
-      Rustlang.Rustup: { enabled: {{ get .features "rust" }} }
       # OpenTofu.Tofu:
       # Microsoft.Sysinternals.ProcessExplorer:
-      # Gyan.FFmpeg:
-      # Google.PlatformTools:
       # Discord.Discord:
       AutoHotkey.AutoHotkey:
-      # Bitwarden.Bitwarden:
       # Resplendence.LatencyMon:
       # Mozilla.Thunderbird:
       # RustDesk.RustDesk:
@@ -736,7 +827,6 @@ osPackages:
       # LLVM.LLVM:
       # Riseup.RiseupVPN:
       # TheDocumentFoundation.LibreOffice:
-      # OpenVPNTechnologies.OpenVPN:
       # PuTTY.PuTTY:
       # BitSum.ProcessLasso:
       # Microsoft.Edge:

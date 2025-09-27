@@ -1,0 +1,10 @@
+---
+packages: {}
+  # brew:
+  #   enabled: '{{ eq .osIDLike "alpine" "arch" }}'
+  #   nameOverwrite:
+  #     alpine: procps-ng
+  #     arch: brew-git # base-devel procps-ng curl file git
+  #     # debian: build-essential procps curl file git
+  #     # fedora: procps-ng curl file # development-tools
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

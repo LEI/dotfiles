@@ -21,15 +21,6 @@ alias la="ls -ahl --color=auto"
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
-{{- if eq .chezmoi.os "darwin" }}
-
-# Reload the shell (i.e. invoke as a login shell)
-alias reload='exec ${SHELL} -l'
-{{- else }}
-
-alias reload='exec ${SHELL} -i'
-{{- end }}
-
 {{- if lookPath "bat" | isExecutable }}
 alias cat=bat
 {{- else if lookPath "batcat" | isExecutable }}
@@ -37,13 +28,34 @@ alias cat=batcat
 {{- end }}
 
 {{- if lookPath "eza" | isExecutable }}
-alias ls=eza
+alias ls="eza --hyperlink"
 {{- else if lookPath "gls" | isExecutable }}
 # export LS_COLORS="$(vivid generate tokyonight-storm)"
 alias ls="gls --color"
 {{- end }}
 
-{{- if ne .os "darwin" }}
+{{- if eq .os "darwin" }}
+alias beep="afplay --rate 3 --time 0.3 --volume 3 /System/Library/Sounds/Glass.aiff"
+
+if ! hash notify-send 2>/dev/null; then
+  notify-send() {
+    if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+      echo >&2 "Usage: notify <title> [message]"
+      return 1
+    fi
+    # ${TERM_PROGRAM:-${SHELL##*/}}
+    title="$1"
+    message="${2:-}"
+    osascript -e "display notification \"${message//\"/\\\"}\" with title \"${title//\"/\\\"}\""
+  }
+fi
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload='exec ${SHELL} -l'
+{{- else }}
+
+alias reload='exec ${SHELL} -i'
+
 {{- if .wsl }}
 # [ -f /proc/version ] && grep -iq microsoft /proc/version
 if command -v wslview >/dev/null; then
@@ -61,9 +73,27 @@ alias open=termux-open
 {{- else if lookPath "code" | isExecutable }}
 alias open=code
 {{- end }}
+
+{{- if lookPath "xclip" | isExecutable }}
+alias pbcopy="xclip -selection clipboard"
+alias pbpaste="xclip -selection clipboard -o"
+{{- else if lookPath "xsel" | isExecutable }}
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+{{- else if and (lookPath "wl-copy" | isExecutable) (lookPath "wl-paste" | isExecutable) }}
+alias pbcopy=wl-copy
+alias pbpaste=wl-paste
 {{- end }}
 
-{{- if (get .features "ai") }}
+{{- end }}
+
+if ! hash clip 2>/dev/null; then
+  clip() {
+    [ -t 0 ] && pbpaste || pbcopy
+  }
+fi
+
+{{- if .features.ai }}
 
 if command -v claude >/dev/null; then
   claude() { env claude "${@:---resume}"; }
@@ -76,7 +106,7 @@ if command -v crush >/dev/null; then
 fi
 {{- end }}
 
-{{- if and (get .features "docker") }}
+{{- if and .features.docker }}
 
 if command -v lazydocker >/dev/null; then
   alias D=lazydocker
@@ -89,7 +119,7 @@ if command -v podman-tui >/dev/null; then
 fi
 {{- end }}
 
-{{- if and (get .features "git") }}
+{{- if and .features.git }}
 
 if command -v lazygit >/dev/null; then
   alias G=lazygit
@@ -103,7 +133,7 @@ if command -v lazyjournal >/dev/null; then
 fi
 {{- end }}
 
-{{- if and (get .features "kube") }}
+{{- if and .features.kube }}
 
 if command -v k9s >/dev/null; then
   alias K="k9s --all-namespaces"
@@ -114,7 +144,7 @@ if command -v kubecolor >/dev/null; then
 fi
 {{- end }}
 
-{{- if or (get .features "neovim") (get .features "vim") }}
+{{- if or .features.neovim .features.vim }}
 
 if command -v nvim >/dev/null; then
   alias dbui="nvim +DBUI"
@@ -123,7 +153,7 @@ elif command -v vim >/dev/null; then
 fi
 {{- end }}
 
-{{- if (get .features "python") }}
+{{- if .features.python }}
 
 if ! hash recover 2>/dev/null; then
   {{- if lookPath "recoverpy" | isExecutable }}
@@ -141,3 +171,10 @@ fi
 {{- if lookPath "tmux" | isExecutable }}
 alias tmux="TERM=tmux-256color tmux"
 {{- end }}
+
+# NOTE: COLUMNS variable is not exported
+cspan() {
+  lspan <(chezmoi apply --debug 2>&1) |
+    head -n"${1:-10}" |
+    cut -c1-${COLUMNS:-80}
+}

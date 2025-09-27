@@ -30,6 +30,10 @@ return {
         end
       end
       local callback = function()
+        if string.find(vim.bo.filetype, 'chezmoitmpl') then
+          -- vim.print('Linting disabled')
+          return
+        end
         lint.try_lint()
       end
       local events = { 'BufEnter', 'BufWritePost', 'InsertLeave', 'VimEnter' }

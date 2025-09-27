@@ -1,19 +1,33 @@
 #!/bin/sh
 
-# Usage: chezmoi list-packages [manager]
+# Usage: chezmoi list-packages [manager] [format]
 
 set -eu
 
-key=default
 context=.
+format=text
+key=default
 
 if [ $# -gt 0 ]; then
   key="$1"
   shift
 fi
 
+if [ $# -gt 0 ]; then
+  format="$1"
+  shift
+fi
+
+package_type=
+package_format=
 if [ "$key" != default ] && [ "$key" != . ]; then
-  context='(mergeOverwrite . (dict "packageType" "'"$key"'"))'
+  package_type='"packageType" "'"$key"'"'
+fi
+if [ "$format" != text ]; then
+  package_format='"format" "'"$format"'"'
+fi
+if [ "$key" != default ] || [ "$format" != text ]; then
+  context="(mergeOverwrite . (dict $package_type $package_format))"
 fi
 
 # echo >&2 "$key packages:"

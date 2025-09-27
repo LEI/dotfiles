@@ -1,14 +1,4 @@
 ---
-extraPackages:
-  # NOTE: latest nvim requires GLIBC_2.42
-  neovim:
-    enabled: '{{ and (get .features "neovim") (or (ne .osIDLike "debian") (not .glibc231)) }}'
-    nameOverwrite:
-      # android: neovim
-      # arch: neovim
-      # darwin: neovim
-      windows: neovim.neovim
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
 neovim:
   # See ./lua/plugins/init.lua
   plugins: []

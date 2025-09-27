@@ -1,8 +1,0 @@
----
-extraPackages:
-  atuin: # ddworken/hishtory, dvorka/hstr
-    # name: atuin atuin-sync
-    enabled: '{{ get .features "atuin" }}'
-    nameOverwrite:
-      windows: atuin.atuin
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'

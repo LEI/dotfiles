@@ -1,9 +1,33 @@
-{{- $packages := list -}}
-{{- range $name, $pkg := includeTemplate "packages.tmpl" . | fromJson -}}
-{{-   if and (kindIs "map" $pkg) (get $pkg "name") -}}
-{{-     $name = $pkg.name -}}
-{{-   end -}}
-{{-   $name = $name | replaceAllRegex "[\\w@-]+/" "" -}}
-{{-   $packages = append $packages $name -}}
+{{- $format := get . "format" | default "text" -}}
+{{- $type := get . "packageType" | default "system" -}}
+{{- $packages := includeTemplate "packages.tmpl" . | fromJson -}}
+{{- $length := len ($packages | keys) -}}
+
+{{- if eq $length 0 -}}
+{{- /* warnf "list %s packages: empty" $type */ -}}
+{{- else if ne $length (len ($packages | keys | uniq)) -}}
+{{-   warnf "list %s packages: invalid length: %s (expected %d)\nPossible duplicates: %s" $type (len ($packages | keys | uniq)) ($packages | keys) -}}
 {{- end -}}
-{{- $packages | sortAlpha | uniq | join "\n" -}}
+
+{{- if eq $format "json" -}}
+{{-   $packages | toPrettyJson -}}
+{{- else if eq $format "yaml" -}}
+{{-   $packages | toYaml -}}
+{{- else if eq $format "script" -}}
+# Before
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "before_script"
+  "packages" $packages
+)) | trim }}
+# After
+{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "after_script"
+  "packages" $packages
+)) | trim }}
+{{- else -}}
+{{-   if ne $format "text" -}}
+{{-     warnf "list %s packages: invalid list format: %s (expected text, json or yaml)" $type ($format | quote) -}}
+{{-   end -}}
+{{- /* Hide brew tap prefix */ -}}
+{{-   $packages | keys | uniq | sortAlpha | join "\n" | replaceAllRegex "[\\w@-]+/" "" }}
+{{- end -}}

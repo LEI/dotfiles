@@ -1,0 +1,9 @@
+---
+packages:
+  topgrade:
+    enabled: '{{ and .features.topgrade (ne .osIDLike "debian") }}'
+    nameOverwrite:
+      arch: topgrade-bin
+      manjaro: topgrade
+      windows: topgrade-rs.topgrade
+    type: '{{ and (eq .osIDLike "arch") (ne .osID "manjaro") | ternary "aur" nil }}'

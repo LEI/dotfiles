@@ -1,0 +1,16 @@
+{{- $packages := dict -}}
+{{- range $path := .packageFiles }}
+{{-   $fileData := includeTemplate $path $ | fromYaml }}
+{{-   $filePackages := get $fileData "packages" }}
+{{-   if not (kindIs "map" $filePackages) }}
+{{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
+{{-     continue }}
+{{-   end }}
+{{-   $packages = merge $filePackages $packages }}
+{{- end }}
+{{- $data := includeTemplate "packages.yaml.tmpl" . | fromYaml -}}
+{{- $parsed := includeTemplate "parse-packages.tmpl" (mergeOverwrite . (dict
+  "packages" (merge $packages $data.packages)
+)) | fromJson -}}
+{{- /* warnf "package debug %s: %s" .packageType ($parsed | keys) */ -}}
+{{- $parsed | toJson -}}

@@ -1,0 +1,6 @@
+---
+packages:
+  bash:
+    enabled: "{{ .features.bash }}"
+  bash-completion:
+    enabled: "{{ .features.bash }}"

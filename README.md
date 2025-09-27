@@ -1,6 +1,6 @@
 # dotfiles
 
-LEI's dotfiles, managed with [chezmoi](https://chezmoi.io).
+Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io).
 
 ## Install
 
@@ -51,13 +51,13 @@ chezmoi init --apply "$GITHUB_USERNAME"
 Show diff:
 
 ```bash
-chezmoi diff --dry-run --verbose
+chezmoi diff
 ```
 
 Update, init and apply:
 
 ```bash
-chezmoi update --apply --init
+chezmoi update --init --apply
 ```
 
 ## Development

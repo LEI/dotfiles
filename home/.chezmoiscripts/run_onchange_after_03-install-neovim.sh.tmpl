@@ -4,13 +4,11 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if .glibc231 }}
-
-export DEBIAN_FRONTEND=noninteractive
-if ! command -v nvim >/dev/null; then
-  cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
-fi
-{{- else if eq .osIDLike "debian" }}
+{{- if and (eq .osIDLike "debian") (not .glibc231) }}
+# export DEBIAN_FRONTEND=noninteractive
+# if ! command -v nvim >/dev/null; then
+#   cmd sudo -E apt-get install --quiet --yes neovim >/dev/null
+# fi
 
 # TODO: replace with .chezmoiexternal
 if command -v nvim; then
@@ -35,6 +33,6 @@ fi
 # Debian 12 has nvim 0.7.2
 # Debian 11 Ubuntu 22 nvim 0.4.3
 if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
-  cmd timeout 5m nvim --headless +LazyInstall! +qa >/dev/null
+  cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
   echo
 fi
