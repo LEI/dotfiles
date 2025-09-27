@@ -50,21 +50,37 @@ local function get_node_config()
 end
 
 local icon_font = os.getenv('ICON_FONT') == 'true' or false
+-- local plain_text = os.getenv('PLAIN_TEXT' == 'true' or false
+local preset = icon_font and 'icon_font' or 'plain_text'
+local signs = {
+  icon_font = {
+    error = '󰅙',
+    warn = '',
+    info = '󰋼',
+    hint = '󰌵',
+    debug = '',
+    trace = '',
+  },
+  plain_text = {
+    error = '✗', -- E: × ✕  ✖
+    hint = '?', -- H: ✦ ✧ ✱ ※
+    info = 'i', -- I: ℹ  
+    warn = '!', -- W: ⚠ ‼
+    debug = '⊙', -- D: ✲
+    trace = '⋯', -- T: … ⁂
+  },
+}
+signs[preset] = vim.tbl_extend('force', {
+  done = '', -- ✓ ✔
+  pending = '→', -- ➜ ➤
+  spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
+}, signs[preset])
+
 vim.g.config = {
   explorer = 'oil',
   icon_font = icon_font,
   node = get_node_config(),
-  signs = {
-    error = icon_font and '󰅙' or '✗', -- E: × ✕ 
-    hint = icon_font and '󰌵' or '?', -- H:
-    info = icon_font and '󰋼' or 'ℹ', -- I:  
-    warn = icon_font and '' or '!', -- W
-    debug = icon_font and '' or 'D',
-    trace = icon_font and '' or 'T',
-    done = '', -- ✓ ✔
-    pending = '→', -- ➜ ➤
-    spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
-  },
+  signs = signs[preset],
   theme = {
     -- colorscheme = 'nightfox',
     -- colorscheme = 'rose-pine',

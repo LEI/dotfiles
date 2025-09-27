@@ -24,7 +24,7 @@ commonPackages:
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
   ca-certificates:
     enabled: {{ eq .osIDLike "arch" "debian" }}
-  cargo-binstall:
+  cargo-binstall cargo-update:
     enabled: {{ and (get .features "rust") (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}'
   chezmoi:
@@ -241,7 +241,9 @@ commonPackages:
     options:
       version: "5.1" # NOTE: brew only
   mise:
-    enabled: {{ eq .osIDLike "darwin" }}
+    enabled: {{ and (get .features "mise") (eq .osIDLike "arch" "darwin" "windows") }}
+    nameOverwrite:
+      windows: jdx.mise
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
@@ -333,6 +335,11 @@ commonPackages:
     ) }}
     nameOverwrite:
       debian: ruby-rubygems
+  rustup: # rust
+    # enabled: {{ and (get .features "rust") (not (lookPath "rustc" | isExecutable)) }}
+    enabled: {{ get .features "rust" }}
+    nameOverwrite:
+      windows: Rustlang.Rustup
   s-tui:
     # enabled: {{ eq .osIDLike "arch" "debian" "fedora" }}
     enabled: {{ and (not (eq .osIDLike "android" "darwin" "windows")) (ne .profile "minimal") }}
@@ -522,9 +529,6 @@ osPackages:
       #     components: rust-analyzer, rust-src,llvm-tools
       #     profile: minimal
       #   type: mise
-      rustup: # rust
-        # enabled: {{ and (get .features "rust") (not (lookPath "rustc" | isExecutable)) }}
-        enabled: {{ get .features "rust" }}
       systemctl-tui: # systemd-manager-tui-bin
       time:
       ttf-roboto: # ttf-dejavu noto-fonts
@@ -716,12 +720,10 @@ osPackages:
     winget:
       CPUID.CPU-Z:
       # dundee.gdu:
-      jdx.mise: { enabled: {{ get .features "mise" }} }
       Microsoft.PowerShell:
       Canonical.Ubuntu:
       MartiCliment.UniGetUI:
       Microsoft.PowerToys:
-      Rustlang.Rustup: { enabled: {{ get .features "rust" }} }
       # OpenTofu.Tofu:
       # Microsoft.Sysinternals.ProcessExplorer:
       # Gyan.FFmpeg:

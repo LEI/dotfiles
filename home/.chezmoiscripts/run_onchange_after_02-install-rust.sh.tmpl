@@ -11,8 +11,11 @@ set -eu
 TMPDIR="${TMPDIR:-/tmp}"
 cd "$TMPDIR"
 
-if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-  cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
 if command -v rustup >/dev/null && ! rustup default; then
@@ -91,7 +94,7 @@ if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; th
 fi
 
 if ! command -v cargo-binstall >/dev/null; then
-  # cmd cargo install --quiet cargo-binstall
+  # cmd cargo install --locked --quiet cargo-binstall
   # https://github.com/cargo-bins/cargo-binstall#manually
   echo >&2 "Installing cargo-binstall"
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
@@ -133,7 +136,7 @@ if ! command -v cargo-install-update >/dev/null; then
   packages="$packages cargo-update"
 fi
 
-{{- if not (get .features "neovim") }}
+{{- if not (and (get .features "neovim") (eq .profile "minimal")) }}
 
 if ! command -v taplo >/dev/null; then
   cmd cargo install taplo-cli --locked --features lsp --quiet
