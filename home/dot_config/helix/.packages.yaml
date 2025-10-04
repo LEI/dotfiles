@@ -7,5 +7,5 @@ packages:
       android: helix helix-grammars
       windows: helix.helix
   helixbinhx:
-    enabled: '{{ and .features.helix (eq .osID "arch") }}' # ne .osID "manjaro"
+    enabled: '{{ and .features.helix (eq .osID "manjaro") }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

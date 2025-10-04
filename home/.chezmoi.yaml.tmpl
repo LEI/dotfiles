@@ -198,6 +198,7 @@ data:
 }}
 
 {{- $ignoreContext := merge (dict
+  "accessToken" $accessToken
   "email" $email
   "wsl" $wsl
 ) $context . }}
@@ -230,68 +231,75 @@ data:
 
 {{- $packageContext := merge (dict
   "chassisType" $chassisType
-  "defaultType" (get $packageManagerMap $osIDLike)
+  "defaultType" ""
   "packageFiles" $packageFiles
   "packages" dict
 ) $context }}
 
-{{ warnf "%s" $packageContext.defaultType }}
-
-{{- /* TODO: osPackages */ -}}
-
-{{- $packages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" $packageContext.defaultType)) | fromJson }}
-  packages: {{ $packages | toJson }}
+{{- $packageManager := get $packageManagerMap $osIDLike }}
+{{- $packages := includeTemplate "packages" (mergeOverwrite $packageContext (dict
+  "packageType" $packageManager
+  "defaultType" $packageManager
+)) | fromJson }}
+  packageManager: {{ $packageManager | quote }}
+  packages:
+    {{ $packageManager }}: {{ $packages | toJson }}
 
 {{- if eq $osIDLike "arch" }}
 {{- $aurPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "aur")) | fromJson }}
-  aurPackages: {{ $aurPackages | toJson }}
+    aur: {{ $aurPackages | toJson }}
 {{- end }}
 
 {{- if $features.brew }}
 {{- $brewPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "brew")) | fromJson }}
-  brewPackages: {{ $brewPackages | toJson }}
+    brew: {{ $brewPackages | toJson }}
 {{- if eq .chezmoi.os "darwin" }}
 {{- $caskPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "cask")) | fromJson }}
-  caskPackages: {{ $caskPackages | toJson }}
+    cask: {{ $caskPackages | toJson }}
 {{- $masPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "mas")) | fromJson }}
-  masPackages: {{ $masPackages | toJson }}
+    mas: {{ $masPackages | toJson }}
 {{- end }}
 {{- $vscodePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "vscode")) | fromJson }}
-  vscodePackages: {{ $vscodePackages | toJson }}
+    vscode: {{ $vscodePackages | toJson }}
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+{{- $scoopPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "scoop")) | fromJson }}
+    scoop: {{ $scoopPackages | toJson }}
 {{- end }}
 
 {{- if $features.mise }}
 {{- $misePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "mise")) | fromJson }}
-  misePackages: {{ $misePackages | toJson }}
+    mise: {{ $misePackages | toJson }}
 {{- end }}
 
 {{- if $features.go }}
 {{- $goPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "go")) | fromJson }}
-  goPackages: {{ $goPackages | toJson }}
+    go: {{ $goPackages | toJson }}
 {{- end }}
 
 {{- if $features.node }}
 {{- $nodePackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "npm")) | fromJson }}
-  npmPackages: {{ $nodePackages | toJson }}
+    npm: {{ $nodePackages | toJson }}
 {{- end }}
 
 {{- if $features.python }}
 {{- $pipPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "pip")) | fromJson }}
-  pipPackages: {{ $pipPackages | toJson }}
+    pip: {{ $pipPackages | toJson }}
 {{- $pipxPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "pipx")) | fromJson }}
-  pipxPackages: {{ $pipxPackages | toJson }}
+    pipx: {{ $pipxPackages | toJson }}
 {{- $uvPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "uv")) | fromJson }}
-  uvPackages: {{ $uvPackages | toJson }}
+    uv: {{ $uvPackages | toJson }}
 {{- end }}
 
 {{- if $features.ruby }}
 {{- $rubyGems := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "gem")) | fromJson }}
-  gemPackages: {{ $rubyGems | toJson }}
+    gem: {{ $rubyGems | toJson }}
 {{- end }}
 
 {{- if $features.rust }}
 {{- $cargoPackages := includeTemplate "packages" (mergeOverwrite $packageContext (dict "packageType" "cargo")) | fromJson }}
-  cargoPackages: {{ $cargoPackages | toJson }}
+    cargo: {{ $cargoPackages | toJson }}
 {{- end }}
 
 diff:

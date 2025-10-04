@@ -22,6 +22,6 @@ run = "goss --vars=vars.yaml validate"
 {{- end }}
 
 [tools]
-{{- range $name, $pkg := .misePackages }}
+{{- range $name, $pkg := .packages.mise }}
 {{ $name }} = {{ get $pkg "version" | default "latest" | quote }}
 {{- end }}

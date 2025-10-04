@@ -31,10 +31,8 @@ packages:
       windows: Bitwarden.Bitwarden
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   bkt:
-    enabled: {{ not (eq .osIDLike "android" "arch" "alpine" "debian" "fedora" "windows") }}
-    # nameOverwrite:
-    #   arch: bkt-bin
-    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    enabled: {{ and (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows")) (eq .profile "minimal") }}
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
   # below: { enabled: {{ not (eq .osIDLike "arch" "debian") }} }
   bottom:
@@ -348,11 +346,11 @@ packages:
   #   enabled: {{ and .features.docker (eq .os "windows") }}
   #   nameOverwrite:
   #     arch: RedHat.Podman-Desktop
-  podman-tui:
-    enabled: {{ and .features.docker (not (eq .osIDLike "debian")) }}
-    nameOverwrite:
-      arch: podman-tui-bin
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # podman-tui:
+  #   enabled: {{ and .features.docker (not (eq .osIDLike "debian")) }}
+  #   nameOverwrite:
+  #     arch: podman-tui-bin
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   posting: # slumber
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -395,6 +393,11 @@ packages:
     # type: mise
   recoverpy:
     type: uv
+  riseup-vpn:
+    enabled: {{ and (eq .osIDLike "arch" "windows") (ne .profile "minimal") }}
+    nameOverwrite:
+      windows: Riseup.RiseupVPN
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   ruby-mise:
     enabled: false # {{ and .features.mise .features.ruby }}
     name: ruby
@@ -491,12 +494,14 @@ packages:
   tracexec:
     enabled: {{ and (eq .osIDLike "arch") (ne .profile "minimal") }}
   tre-command:
-    enabled: {{ and (not (eq .osIDLike "alpine" "android" "arch" "fedora")) (not (or
+    enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
     )) }}
     nameOverwrite:
+      arch: tre-command-bin
       windows: duan.tre
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   time:
     enabled: {{ eq .osIDLike "arch" "debian" }}
   tree:
@@ -825,7 +830,6 @@ osPackages:
       # RustDesk.RustDesk:
       # Genymobile.scrcpy:
       # LLVM.LLVM:
-      # Riseup.RiseupVPN:
       # TheDocumentFoundation.LibreOffice:
       # PuTTY.PuTTY:
       # BitSum.ProcessLasso:

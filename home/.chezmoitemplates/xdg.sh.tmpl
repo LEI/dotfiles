@@ -52,16 +52,16 @@ export GOPATH="$XDG_DATA_HOME/go"
 export INPUTRC="${INPUTRC:-$XDG_CONFIG_HOME/readline/inputrc}"
 
 {{- if .features.node }}
-export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
-export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-export npm_config_prefix="$XDG_DATA_HOME/npm"
+export NPM_CONFIG_USERCONFIG="${NPM_CONFIG_USERCONFIG:-$XDG_CONFIG_HOME/npm/npmrc}"
+export PNPM_HOME="${PNPM_HOME:-$XDG_DATA_HOME/pnpm}"
+export npm_config_prefix="${npm_config_prefix:-$XDG_DATA_HOME/npm}"
 {{- end }}
 
 {{- if .features.ruby }}
 # ruby_version="${ruby_version:-3.4.0}"
 # export GEM_HOME=/usr/lib/ruby/gems/$ruby_version # gem environment home
 # export GEM_PATH= # gem environment path
-export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
+export GEM_SPEC_CACHE="${GEM_SPEC_CACHE:-$XDG_CACHE_HOME/gem}"
 # export GEM_USER_HOME="$XDG_DATA_HOME/gem/ruby/$ruby_version" # gem environment user_gemhome
 {{- end }}
 

@@ -70,30 +70,28 @@ return {
       -- Always restore session if one exists
       -- https://github.com/folke/persistence.nvim/issues/13
       local auto_restore = false
-      if auto_restore then
-        vim.api.nvim_create_autocmd('VimEnter', {
-          nested = true,
-          group = vim.api.nvim_create_augroup('RestoreSession', { clear = true }),
-          callback = function()
-            local cwd = vim.fn.getcwd()
-            -- vim.fn.argc(): number of files in the argument list
-            local has_args = (#vim.v.argv > 2) -- FIXME: or vim.g.started_with_stdin
-            local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
-            local session_exists = vim.fn.filereadable(session_file) == 1
-            if not has_args and session_exists then
-              vim.notify('Loading session: ' .. vim.fn.fnamemodify(cwd, ':~'))
-              require('persistence').load()
-            elseif
-              has_args
-              -- and (not vim.list_contains(vim.v.argv, '+Restore'))
-              and session_exists
-            then
-              vim.notify('Stopping persistence (session exists)', vim.log.levels.WARN)
-              require('persistence').stop()
-            end
-          end,
-        })
-      end
+      vim.api.nvim_create_autocmd('VimEnter', {
+        nested = true,
+        group = vim.api.nvim_create_augroup('RestoreSession', { clear = true }),
+        callback = function()
+          local cwd = vim.fn.getcwd()
+          -- vim.fn.argc(): number of files in the argument list
+          local has_args = (#vim.v.argv > 2) -- FIXME: or vim.g.started_with_stdin
+          local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
+          local session_exists = vim.fn.filereadable(session_file) == 1
+          if not has_args and session_exists and auto_restore then
+            vim.notify('Loading session: ' .. vim.fn.fnamemodify(cwd, ':~'))
+            require('persistence').load()
+          elseif
+            has_args
+            -- and (not vim.list_contains(vim.v.argv, '+Restore'))
+            and session_exists
+          then
+            vim.notify('Stopping persistence (session exists)', vim.log.levels.WARN)
+            require('persistence').stop()
+          end
+        end,
+      })
     end,
   },
 }

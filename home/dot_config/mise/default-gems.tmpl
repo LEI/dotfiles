@@ -6,6 +6,6 @@ bundler{{ if $ruby27 }}:2.4.22{{ end }}
 {{- if and .features.neovim $ruby27 }}
 multi_json:1.15.0
 {{- end }}
-{{- range .gemPackages | keys | sortAlpha }}
+{{- range .packages.gem | keys | sortAlpha }}
 {{ . }}
 {{- end }}

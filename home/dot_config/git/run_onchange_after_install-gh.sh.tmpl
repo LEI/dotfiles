@@ -33,8 +33,13 @@ fi
 {{-     $extensionName = $pkg }}
 {{-     $pkg = dict "name" $extensionName }}
 {{-   end }}
-{{-   $enabled := get $pkg "enabled" | default nil }}
-{{-   if and $enabled (ne (includeTemplate "eval" $enabled) "true") }}
+{{- /*  $enabled := get $pkg "enabled" }}
+{{-   if and $enabled (ne (get $pkg "enabled") "true") }}
+{{-     warnf "%s" $pkg }}
+{{-     continue }}
+{{-   end */ -}}
+{{-   $feature := get $pkg "feature" }}
+{{-   if and $feature (not (get $.features $feature)) }}
 {{-     continue }}
 {{-   end }}
 {{-   $extensions = append $extensions $extensionName }}

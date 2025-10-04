@@ -2,34 +2,46 @@
 
 set -eu
 
+uname="$(uname -s)"
+
 usage() {
-  echo >&2 "Usage: chezmoi package [list] [-h|--help] [-o|--output text|json|yaml]"
+  echo >&2 "Usage: chezmoi package [list*|diff] [-h|--help]"
+  echo >&2 "  [-o|--output=text*|json|yaml]"
+  echo >&2 "  [-t|--type=apk|apt|aur|brew|cask|dnf|go|mas|node|pacman|python|ruby|rust|vscode]"
 }
 
 action=list
 output=text
-type=packages
+type=
 while [ $# -gt 0 ]; do
   case "$1" in
-  -*=*)
-    key="${1##*=}"
-    value="${1#*=}"
-    shift
-    set -- "$key" "$value" "$@"
-    ;;
-  list)
+  list | diff)
     action="$1"
     shift
     continue
+    ;;
+  -*=*)
+    key="${1%%=*}"
+    value="${1#*=}"
+    shift
+    set -- "$key" "$value" "$@"
     ;;
   -o | --output)
     shift
     output="$1"
     shift
     ;;
+  -o*)
+    output="${1#-o}"
+    shift
+    ;;
   -t | --type)
     shift
     type="$1"
+    shift
+    ;;
+  -t*)
+    type="${1#-t}"
     shift
     ;;
   -h | --help)
@@ -45,34 +57,195 @@ while [ $# -gt 0 ]; do
 done
 
 case "$type" in
-# apk) ;;
-# apt) ;;
-# aur) ;;
-# brew) ;;
-# cask) ;;
-# dnf) ;;
-# go) ;;
-# mas) ;;
-node) type="npm" ;;
-# pacman) ;;
-python) type="uv" ;;
-ruby) type="gem" ;;
-rust) type="cargo" ;;
-# vscode) ;;
+all | '')
+  # TODO: .packageManager from template
+  if [ "$uname" = Darwin ]; then
+    manager=brew
+  elif [ "$HOME" = /data/data/com.termux/files/home ]; then
+    manager=termux
+  elif command -v apk >/dev/null; then
+    manager=apk
+  elif command -v apt >/dev/null; then
+    manager=apt
+  elif command -v dnf >/dev/null; then
+    manager=dnf
+  elif command -v pacman >/dev/null; then
+    manager=pacman
+  else
+    echo >&2 "Unknown package manager for $uname"
+    exit 1
+  fi
+  ;;
+apk | apt | dnf | pacman | termux | aur | brew | cask | mas | vscode | go | mise | pip | pipx)
+  manager="$type"
+  ;;
+node | npm) manager="npm" ;;
+python | uv) manager="uv" ;;
+ruby | gem) manager="gem" ;;
+rust | cargo) manager="cargo" ;;
+*)
+  echo >&2 "chezmoi package: invalid manager: $manager"
+  usage
+  exit 1
+  ;;
 esac
 
-case "$action" in
-list)
+list_packages() {
+  key="${1:-$manager}"
+  # echo >&2 "Listing $key packages..."
+  if [ "$output" = text ]; then
+    echo >&2 "# $key packages"
+  fi
   case "$output" in
-  text) format='keys | sortAlpha | join "\n"' ;;
+  text)
+    # format='keys | sortAlpha | join "\n" | append "\n"'
+    chezmoi execute "{{ range .packages.$key | keys | sortAlpha }}{{ printf \"%s\n\" . }}{{ end }}"
+    return 0
+    ;;
   json) format="toPrettyJson" ;;
   yaml) format="toYaml" ;;
   *)
     echo >&2 "chezmoi package: invalid output format: $output"
     usage
-    exit 1
+    return 1
     ;;
   esac
-  chezmoi execute "{{ .$type | $format }}"
+  # echo >&2 "Executing .packages.$key | $format"
+  chezmoi execute "{{ .packages.$key | $format | trim }}"
+}
+
+TMPDIR="${TMPDIR:-/tmp}"
+chezmoi_packages="$TMPDIR/chezmoi-packages"
+installed_packages="$TMPDIR/installed-packages"
+
+diff="diff"
+if command -v difft >/dev/null; then
+  diff="difft"
+elif command -v delta >/dev/null; then
+  diff="delta"
+fi
+
+diff_packages() {
+  key="${1:-$manager}"
+  in="${chezmoi_packages}.${key:-txt}"
+  out="${installed_packages}.${key:-txt}"
+  if [ "$key" = uv ]; then
+    # pg_activity[psycopg] -> pg-activity
+    chezmoi package list --type="$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$in"
+  else
+    chezmoi package list --type="$key" | sort >"$in"
+  fi
+  case "$key" in
+  apk)
+    apk list --installed --quiet | sort >"$out"
+    ;;
+  apt)
+    # apt list --installed
+    # dpkg --get-selections
+    apt-mark showmanual | tr -s '\n' ' ' | cut -d' ' -f1 | sort >"$out"
+    ;;
+  aur | yay)
+    pacman -Qqm | sort >"$out"
+    ;;
+  brew)
+    # brew bundle dump --file=-
+    brew list --formula | sort >"$out"
+    ;;
+  cask)
+    brew list --cask | sort >"$out"
+    ;;
+  mas)
+    brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"' | sort >"$out"
+    ;;
+  vscode)
+    brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"' | sort >"$out"
+    ;;
+  dnf)
+    # dnf list --installed | cut -d' ' -f1 | cut -d. -f1
+    dnf repoquery --leaves --userinstalled | sed -e 's/-[0-9]:.*$//' | sort >"$out"
+    ;;
+  gem)
+    gem list | cut -d' ' -f1 | sort >"$out"
+    ;;
+  go)
+    # FIXME: exclude stanaard library
+    go list ... | grep -v / | sort >"$out"
+    ;;
+  mise)
+    mise list --global --json | jq --raw-output 'keys[]' | sort >"$out"
+    ;;
+  npm)
+    npm list --global --json | jq --raw-output '.dependencies | keys[]' | sort >"$out"
+    ;;
+  pacman)
+    extra_installed="$(pacman -Qqm)"
+    pacman -Qq | grep -vx "$extra_installed" | sort >"$out"
+    ;;
+  pip)
+    python3 -m pip install --user --quiet list | sort >"$out"
+    ;;
+  pipx)
+    pipx list | tr -d ' ' | grep '^-' | tr -d '-' | sort >"$out"
+    ;;
+  termux)
+    pkg list-installed | cut -d/ -f1 | sort >"$out"
+    ;;
+  uv)
+    uv tool list | grep -v '^-' | cut -d' ' -f1 | sort >"$out"
+    ;;
+  *)
+    echo >&2 "Invalid package manager: $key"
+    return 1
+    ;;
+  esac
+  # echo >&2 "Diffing $key packages..."
+  $diff "$in" "$out" || echo >&2 "Exit code: $?"
+}
+
+main() {
+  command="$1"
+  "${command}_packages" "$manager"
+  if [ "$type" != all ]; then
+    exit 0
+  fi
+  if command -v pacman >/dev/null; then
+    "${command}_packages" aur
+  fi
+  if command -v brew >/dev/null; then
+    "${command}_packages" brew
+    if [ "$uname" = Darwin ]; then
+      "${command}_packages" cask
+      "${command}_packages" mas
+    fi
+    "${command}_packages" vscode
+  fi
+  # if command -v go >/dev/null; then
+  #   "${command}_packages" go
+  # fi
+  if command -v mise >/dev/null; then
+    "${command}_packages" mise
+  fi
+  if command -v npm >/dev/null; then
+    "${command}_packages" npm
+  fi
+  if command -v pipx >/dev/null; then
+    "${command}_packages" pipx
+  elif command -v pip >/dev/null; then
+    "${command}_packages" pip
+  fi
+  # if command -v ruby >/dev/null; then
+  #   "${command}_packages" gem
+  # fi
+  if command -v uv >/dev/null; then
+    "${command}_packages" uv
+  fi
+}
+
+case "$action" in
+list | diff) main "$action" ;;
+*)
+  echo >&2 "chezmoi package: invalid action: $action"
+  usage
+  exit 1
   ;;
 esac

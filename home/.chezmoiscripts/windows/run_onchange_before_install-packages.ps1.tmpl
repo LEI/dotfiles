@@ -9,8 +9,7 @@ echo "Scoop: {{ lookPath "scoop" }}"
 scoop update *
 {{- end }}
 
-{{- $scoopPackages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "scoop")) | fromJson }}
-scoop install {{ $scoopPackages | keys | sortAlpha | join " " }}
+scoop install {{ .packages.scoop | keys | sortAlpha | join " " }}
 
 echo "Winget: {{ lookPath "winget" }}"
 

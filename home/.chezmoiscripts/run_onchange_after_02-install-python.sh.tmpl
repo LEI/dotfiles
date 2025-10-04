@@ -6,12 +6,12 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-pip_packages={{ .pipPackages | keys | sortAlpha | join " " | quote }}
+pip_packages={{ .packages.pip | keys | sortAlpha | join " " | quote }}
 if [ -n "$pip_packages" ] && (command -v python >/dev/null || command -v python3 >/dev/null); then
   cmd python3 -m pip install --user --quiet $pip_packages
 fi
 
-pipx_packages={{ .pipxPackages | keys | sortAlpha | join " " | quote }}
+pipx_packages={{ .packages.pipx | keys | sortAlpha | join " " | quote }}
 if [ -n "$pipx_packages" ] && command -v pipx >/dev/null; then
   cmd pipx install $pipx_packages
 fi

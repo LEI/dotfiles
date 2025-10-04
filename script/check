@@ -19,7 +19,9 @@ BINS=("chezmoi")
 check_chezmoi() {
   echo >&2 "Checking chezmoi..."
   cmd chezmoi --version
-  cmd chezmoi doctor --no-network || true
+  if [ "$DOCTOR" = true ]; then
+    cmd chezmoi doctor --no-network || true
+  fi
   # set -- --debug --verbose "$@"
   chezmoi_args=""
   if [ "$DRYRUN" = true ]; then
@@ -263,7 +265,7 @@ check_versions() {
 check_chezmoi
 check_features
 check_versions "$@"
-chezmoi diff-packages all
+chezmoi package diff --type=all
 
 if [ "${DEBUG:-}" = true ]; then
   echo >&2 "DEBUG enabled"

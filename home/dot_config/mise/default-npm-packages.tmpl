@@ -13,6 +13,6 @@ typescript-language-server
 vscode-langservers-extracted@4.8
 yaml-language-server@next
 {{- end }}
-{{- range .npmPackages | keys | sortAlpha }}
+{{- range .packages.npm | keys | sortAlpha }}
 {{ . }}
 {{- end }}

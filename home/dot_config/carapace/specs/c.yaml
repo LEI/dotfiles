@@ -32,12 +32,12 @@ commands:
     aliases: [v]
     run: "[chezmoi, verify]"
 
-  - name: diff-packages
+  - name: package-diff
     aliases: [D]
-    run: "[chezmoi-diff-packages]"
+    run: "[chezmoi-package, diff]"
   - name: execute
     aliases: [E]
     run: "[chezmoi-execute]"
-  - name: list-packages
+  - name: package-list
     aliases: [l]
-    run: "[chezmoi-list-packages]"
+    run: "[chezmoi-package, list]"

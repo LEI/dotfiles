@@ -6,7 +6,13 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-packages="{{ .packages | keys | sortAlpha | join " " }}"
+{{- $systemPackages := get .packages .packageManager }}
+{{- if or (empty $systemPackages) (not (kindIs "map" $systemPackages)) }}
+{{-   warnf "invalid packages %s: %s" .packageManager $systemPackages }}
+{{- end }}
+{{- $packageList := $systemPackages | keys | sortAlpha }}
+
+packages="{{ $packageList | join " " }}"
 
 echo >&2 "OS: $CHEZMOI_OS"
 echo >&2 "OS ID: {{ .osID }}"
@@ -16,7 +22,7 @@ echo >&2 "Installing packages: $packages"
 
 {{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "before_script"
-  "packages" .packages
+  "packages" $systemPackages
 )) | trim }}
 
 {{- if eq .osID "alpine" }}
@@ -101,16 +107,16 @@ exit 1
 
 {{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "after_script"
-  "packages" .packages
+  "packages" $systemPackages
 )) | trim }}
 
 {{- if eq .osIDLike "arch" }}
 
-aur_packages="{{ .aurPackages | keys | sortAlpha | join " " }}"
+aur_packages="{{ .packages.aur | keys | sortAlpha | join " " }}"
 
 {{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "before_script"
-  "packages" .aurPackages
+  "packages" .packages.aur
 )) | trim }}
 
 if command -v yay >/dev/null; then
@@ -126,7 +132,7 @@ fi
 
 {{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "after_script"
-  "packages" .aurPackages
+  "packages" .packages.aur
 )) | trim }}
 {{- end }}
 

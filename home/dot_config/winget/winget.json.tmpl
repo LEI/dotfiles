@@ -1,6 +1,5 @@
-{{- $packages := includeTemplate "packages.tmpl" (mergeOverwrite . (dict "packageType" "winget")) | fromJson -}}
 {{- $jsonPackages := list -}}
-{{- range $packages | keys | sortAlpha -}}
+{{- range .packages | keys | sortAlpha -}}
 {{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
 {{- end -}}
 {{- dict

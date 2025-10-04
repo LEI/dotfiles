@@ -1,11 +1,5 @@
-{{- /* $input := .packages | toYaml
-  | replaceAllRegex "\\\\\"" "\""
-  | replaceAllRegex "\\\\n" ""
-  | replaceAllRegex "\\.packageType" (printf "\"%s\"" .packageType)
--}}
-{{- $packages := includeTemplate "eval" $input | fromYaml */ -}}
 {{- $output := dict }}
-{{- range $key, $pkg := .packages }}
+{{- range $key, $pkg := .input }}
 
 {{-   if eq $pkg nil }}
 {{-     $pkg = dict }}
@@ -57,9 +51,11 @@
 {{-   $hasSpaces := eq $.packageType "mas" }}
 {{-   range $part := $hasSpaces | ternary (list $name) ($name | splitList " ") }}
 {{-     $existing := get $output $part -}}
-{{- /*    if and $existing (not (deepEqual $existing $pkg)) */ -}}
 {{-     if $existing -}}
-{{-       warnf "Overriding package name %s (%s -> %s)" $part (get $output $name) $pkg -}}
+{{-       warnf "%s package %s: overriding key %s" $.packageType $name $part -}}
+{{-       if not (deepEqual $existing $pkg) -}}
+{{-         warnf "%s package part diff %s: %s -> %s" $.packageType $part $existing $pkg -}}
+{{-       end -}}
 {{-     end -}}
 {{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
 {{-   end }}

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# DEPRECATED: replaced by chezmoi-package
-
 set -eu
 
 TMPDIR="${TMPDIR:-/tmp}"
@@ -26,9 +24,9 @@ diff_packages() {
   fi
   if [ "$pm" = uv ]; then
     # pg_activity[psycopg] -> pg-activity
-    chezmoi-list-packages "$pm" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$in"
+    chezmoi package list --type="$pm" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$in"
   else
-    chezmoi-list-packages "$pm" | sort >"$in"
+    chezmoi package list --type="$pm" | sort >"$in"
   fi
   if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
     echo >&2 "Listing $pm installed packages..."

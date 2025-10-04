@@ -1,4 +1,8 @@
-{{- $packages := dict -}}
+{{- /* Include global packages */ -}}
+{{- $global := includeTemplate "packages.yaml.tmpl" . | fromYaml -}}
+{{- $packages := $global.packages }}
+
+{{- /* Parse all ".packages.yaml" */ -}}
 {{- range $path := .packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
 {{-   $filePackages := get $fileData "packages" }}
@@ -8,9 +12,41 @@
 {{-   end }}
 {{-   $packages = merge $filePackages $packages }}
 {{- end }}
-{{- $data := includeTemplate "packages.yaml.tmpl" . | fromYaml -}}
-{{- $parsed := includeTemplate "parse-packages.tmpl" (mergeOverwrite . (dict
-  "packages" (merge $packages $data.packages)
+
+{{- /* OS specific packages */ -}}
+{{- $managerMap := get $global.osPackages $.osIDLike | default dict }}
+{{- $osPackages := get $managerMap .packageType | default dict }}
+{{- $packages = merge $packages $osPackages -}}
+
+{{- /* Python system packages */ -}}
+{{- if and .features.python (eq .packageType .defaultType) }}
+{{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
+{{-   range $name := without $pythonPackages "" -}}
+{{-     if eq (substr 0 1 $name) "#" -}}
+{{-       continue -}}
+{{-     end -}}
+{{-     if not (eq $.osID "darwin") -}}
+{{-       $prefix := "python" -}}
+{{-       if eq $.osID "alpine" -}}
+{{-         $prefix = "py3" -}}
+{{-       else if eq $.osIDLike "debian" "fedora" -}}
+{{-         $prefix = "python3" -}}
+{{-       end -}}
+{{-       $name = printf "%s-%s" $prefix $name -}}
+{{-     end -}}
+{{- /*     $packages = append $packages $name */ -}}
+{{-     if get $packages $name -}}
+{{-       warnf "Overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
+{{-     end -}}
+{{-     $_ := set $packages $name dict -}}
+{{-   end -}}
+{{- end }}
+
+{{- $output := includeTemplate "parse-packages.tmpl" (mergeOverwrite . (dict
+  "input" $packages
 )) | fromJson -}}
-{{- /* warnf "package debug %s: %s" .packageType ($parsed | keys) */ -}}
-{{- $parsed | toJson -}}
+
+{{- /* warnf "package debug %s: %s" .packageType ($output | keys) */ -}}
+{{- $output | toJson -}}
+{{- /* Hide brew tap prefix */ -}}
+{{- /*  replaceAllRegex "[\\w@-]+/" "" */ -}}

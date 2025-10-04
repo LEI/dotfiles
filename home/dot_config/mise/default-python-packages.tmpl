@@ -1,4 +1,4 @@
 # {{ printf "%s/%s" (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile }}
-{{- range .uvPackages | keys | sortAlpha }}
+{{- range .packages.uv | keys | sortAlpha }}
 {{ . }}
 {{- end }}

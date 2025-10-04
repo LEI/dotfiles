@@ -7,9 +7,9 @@ packages:
     enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   autotiling-rs:
-    enabled: '{{ and .features.i3 (ne .osID "ubuntu") }}'
-    nameOverwrite:
-      debian: autotiling
+    enabled: '{{ and .features.i3 (not (eq .osID "debian" "ubuntu")) }}'
+    # nameOverwrite:
+    #   debian: autotiling # debian 13
   blueman:
     enabled: '{{ and .features.i3 (eq .chassisType "laptop") }}'
   caffeine-ng:
@@ -41,8 +41,8 @@ packages:
     enabled: "{{ .features.i3 }}"
   # lxappearance:
   #   enabled: '{{ .features.i3 }}'
-  network-manager-applet:
-    enabled: '{{ and .features.i3 (ne .osID "ubuntu") }}'
+  network-manager-applet: # debian 13
+    enabled: '{{ and .features.i3 (not (eq .osID "debian" "ubuntu")) }}'
   noto-fonts: # ttf-noto-nerd
     enabled: "{{ .features.i3 }}"
     nameOverwrite:

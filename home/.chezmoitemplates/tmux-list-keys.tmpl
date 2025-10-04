@@ -1,3 +1,4 @@
+{{- /* TODO: remove external commands */ -}}
 {{- $group := get . "group" | default "prefix" }}
 
 {{- $sed := lookPath "gsed" | isExecutable | ternary "gsed" "sed" }}

@@ -18,10 +18,10 @@ set -eu
 
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
 log "Installing tools"
-{{- $go := eq (includeTemplate "eval" (get (get .packages "go-mise" | default dict) "enabled")) "true" }}
-{{- $node := eq (includeTemplate "eval" (get (get .packages "node-mise" | default dict) "enabled")) "true" }}
-{{- $python := eq (includeTemplate "eval" (get (get .packages "python-mise" | default dict) "enabled")) "true" }}
-{{- $ruby := eq (includeTemplate "eval" (get (get .packages "ruby-mise" | default dict) "enabled")) "true" }}
+{{- $go := get .packages.mise "go" }}
+{{- $node := get .packages.mise "node" }}
+{{- $python := get .packages.mise "python"}}
+{{- $ruby := get .packages.mise "ruby" }}
 
 mise_args="--yes"
 if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
