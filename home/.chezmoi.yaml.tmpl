@@ -13,15 +13,6 @@
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 
-{{- /* https://github.com/starship/starship/blob/master/src/modules/container */ -}}
-
-# {{- and (stat "/proc/vz") (not (stat "/proc/bc")) -}} # OpenVZ
-# {{- stat "/run/host/container-manager" -}} # OCI
-# {{- stat "/dev/incus/sock" -}} # Incus
-# {{- stat "/run/.containerenv" -}} # Podman?
-# {{- stat "/run/systemd/container" -}} # docker/wsl/systemd
-# {{- stat "/.dockerenv" -}} # docker
-
 {{- $interactive := stdinIsATTY -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
@@ -54,6 +45,10 @@
 {{- end -}}
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
+{{- $container := includeTemplate "container.tmpl" dict -}}
+{{- if $container -}}
+{{-   warnf "container type: %s" $container -}}
+{{- end -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $lddVersion := eq .chezmoi.os "linux" | ternary (output $sh "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
@@ -106,6 +101,7 @@
 {{- $baseContext := dict
   "accessToken" $accessToken
   "codespaces" $codespaces
+  "container" $container
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "glibc231" $glibc231
