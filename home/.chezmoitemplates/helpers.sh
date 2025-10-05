@@ -83,7 +83,3 @@ install_tar_gz() {
 install_zip() {
   install_archive 'unzip -o "%s" -d "%s"' "$@"
 }
-
-musl() {
-  ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"
-}

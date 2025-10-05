@@ -70,6 +70,9 @@ return {
       -- Always restore session if one exists
       -- https://github.com/folke/persistence.nvim/issues/13
       local auto_restore = false
+      if not auto_restore then
+        return
+      end
       vim.api.nvim_create_autocmd('VimEnter', {
         nested = true,
         group = vim.api.nvim_create_augroup('RestoreSession', { clear = true }),
@@ -79,7 +82,7 @@ return {
           local has_args = (#vim.v.argv > 2) -- FIXME: or vim.g.started_with_stdin
           local session_file = sessions_dir .. cwd:gsub('/', '%%') .. '.vim'
           local session_exists = vim.fn.filereadable(session_file) == 1
-          if not has_args and session_exists and auto_restore then
+          if not has_args and session_exists then
             vim.notify('Loading session: ' .. vim.fn.fnamemodify(cwd, ':~'))
             require('persistence').load()
           elseif

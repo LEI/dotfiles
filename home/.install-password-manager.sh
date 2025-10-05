@@ -48,7 +48,7 @@ Linux)
   # FIXME: alpine musl
   # https://github.com/bitwarden/sdk-sm/issues/1218
   # https://community.bitwarden.com/t/add-x86-64-unknown-linux-musl-release-to-bws-cli/57379/3
-  if musl; then
+  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
     # echo >&2 "Building from source"
     # sudo apk add --quiet curl cargo openssl-dev pkgconfig
     # URL="https://github.com/bitwarden/sdk-sm/archive/refs/tags/bws-v$VERSION.tar.gz"

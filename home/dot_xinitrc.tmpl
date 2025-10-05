@@ -42,7 +42,7 @@ fi
 
 # start some nice programs
 
-if [ -d "$xinitdir"/xinitrc.d ]; then
+if [ -d "$xinitdir/xinitrc.d" ]; then
   for f in "$xinitdir/xinitrc.d"/?*.sh; do
     [ -x "$f" ] && . "$f"
   done

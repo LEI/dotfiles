@@ -1,5 +1,5 @@
 {{- $jsonPackages := list -}}
-{{- range .packages | keys | sortAlpha -}}
+{{- range .packages.winget | keys | sortAlpha -}}
 {{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
 {{- end -}}
 {{- dict

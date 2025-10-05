@@ -48,6 +48,10 @@
 {{-     continue }}
 {{-   end }}
 
+{{-   if ne $key $name -}}
+{{-     $_ := set $pkg "name" $key -}}
+{{-   end -}}
+
 {{-   $hasSpaces := eq $.packageType "mas" }}
 {{-   range $part := $hasSpaces | ternary (list $name) ($name | splitList " ") }}
 {{-     $existing := get $output $part -}}
@@ -57,7 +61,7 @@
 {{-         warnf "%s package part diff %s: %s -> %s" $.packageType $part $existing $pkg -}}
 {{-       end -}}
 {{-     end -}}
-{{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
+{{-     $_ := set $output $part (omit $pkg "enabled" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}

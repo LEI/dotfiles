@@ -1,7 +1,10 @@
 ---
 packages:
+  # Alternatives:
+  # https://github.com/nushell/nu_scripts/tree/main/custom-completions
+  # https://github.com/sigoden/argc-completions
   carapace:
-    enabled: '{{ and .features.bottom (eq .osIDLike "alpine" "darwin" "arch" "windows") }}'
+    enabled: '{{ and .features.carapace (eq .osIDLike "arch" "darwin" "windows") }}'
     nameOverwrite:
       arch: carapace-bin
       windows: rsteube.Carapace

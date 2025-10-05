@@ -58,7 +58,7 @@
 
 {{- if not (eq .os "android" "linux") }}
 .chezmoiscripts/*install-packages.sh
-# .chezmoiscripts/linux/**
+.chezmoiscripts/linux/**
 {{- end }}
 
 {{- if and (ne .osID "windows") (not .wsl) }}

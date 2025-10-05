@@ -18,12 +18,17 @@ echo >&2 "OS: $CHEZMOI_OS"
 echo >&2 "OS ID: {{ .osID }}"
 echo >&2 "OS ID like: {{ .osIDLike }}"
 echo >&2 "OS version: {{ .osVersion }}"
-echo >&2 "Installing packages: $packages"
+echo >&2 "Installing {{ .packageManager }} packages: $packages"
 
-{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+{{- $before := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "before_script"
   "packages" $systemPackages
 )) | trim }}
+{{- if $before }}
+
+# Before script:
+{{ $before }}
+{{- end }}
 
 {{- if eq .osID "alpine" }}
 cmd sudo apk update --quiet
@@ -38,17 +43,6 @@ cmd sudo pacman --sync --sysupgrade --needed --noconfirm --quiet
 {{- end }}
 # shellcheck disable=SC2086
 cmd sudo pacman --sync --needed --noconfirm --quiet $packages
-if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
-  TMPDIR="${TMPDIR:-/tmp}"
-  if [ ! -d $TMPDIR/yay-bin ]; then
-    cmd sudo -u "$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
-  fi
-  cmd cd $TMPDIR/yay-bin
-  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
-  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
-  # fi
-  cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
-fi
 # if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
 #   if command -v flatpak >/dev/null; then
 #     cmd flatpak list --all
@@ -105,35 +99,14 @@ echo >&2 "Package manager not found: {{ .osID }}"
 exit 1
 {{- end }}
 
-{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+{{- $after := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
   "key" "after_script"
   "packages" $systemPackages
 )) | trim }}
+{{- if $after }}
 
-{{- if eq .osIDLike "arch" }}
-
-aur_packages="{{ .packages.aur | keys | sortAlpha | join " " }}"
-
-{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
-  "key" "before_script"
-  "packages" .packages.aur
-)) | trim }}
-
-if command -v yay >/dev/null; then
-  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
-elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
-  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
-elif command -v pamac >/dev/null; then
-  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
-else
-  echo >&2 "AUR package manager not found"
-  exit 1
-fi
-
-{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
-  "key" "after_script"
-  "packages" .packages.aur
-)) | trim }}
+# After script:
+{{ $after }}
 {{- end }}
 
 {{- if and .codespaces (eq .osIDLike "debian") }}
@@ -147,4 +120,4 @@ if [ "${selected_editor##*/}" = nano ]; then
 fi
 {{- end }}
 
-echo >&2 "Installed packages"
+echo >&2 "Installed {{ .packageManager }} packages"

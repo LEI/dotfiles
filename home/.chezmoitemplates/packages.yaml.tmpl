@@ -193,7 +193,7 @@ packages:
       # debian: gnupg-agent
       windows: gnupg.gpg4win
   gpg-tui:
-    enabled: {{ not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows") }}
+    enabled: {{ and .features.gpg (not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows")) (eq .profile "minimal") }}
   gzip: { enabled: {{ eq .osIDLike "alpine" }} }
   # hostctl:
   #   nameOverwrite:
@@ -279,7 +279,7 @@ packages:
     version: '{{ ne .osIDLike "arch" | ternary "5.1" "" }}'
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
   macchina:
-    enabled: {{ ne .profile "minimal" }}
+    enabled: {{ and (not (eq .osIDLike "alpine")) (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
@@ -587,7 +587,7 @@ packages:
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       | ternary "mise" nil }}
   zen:
-    enabled: {{ and (eq .osIDLike "darwin" "arch") (not (or .ephemeral .headless)) }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       arch: zen-browser-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .os "darwin" | ternary "cask" nil) }}'
@@ -811,9 +811,8 @@ osPackages:
       openssl-devel:
       # which:
   windows:
-    scoop: []
-      # busybox:
-      #   enabled: {{ not (lookPath "awk" | isExecutable) }}
+    scoop:
+      busybox:
       # livesplit:
       # prime95:
       # scoop-search:

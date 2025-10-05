@@ -100,6 +100,8 @@ list_packages() {
   text)
     # format='keys | sortAlpha | join "\n" | append "\n"'
     chezmoi execute "{{ range .packages.$key | keys | sortAlpha }}{{ printf \"%s\n\" . }}{{ end }}"
+    # '{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict "key" "before_script" "packages" .packages.'"$key"')) | trim }}'
+    # '{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict "key" "after_script" "packages" .packages.'"$key"')) | trim }}'
     return 0
     ;;
   json) format="toPrettyJson" ;;

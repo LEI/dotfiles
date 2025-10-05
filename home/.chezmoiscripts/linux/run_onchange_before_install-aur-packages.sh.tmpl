@@ -1,0 +1,60 @@
+{{- if eq .osIDLike "arch" -}}
+#!/bin/sh
+
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+
+exit 0
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  TMPDIR="${TMPDIR:-/tmp}"
+  if [ ! -d $TMPDIR/yay-bin ]; then
+    cmd sudo -u "$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
+  fi
+  cmd cd $TMPDIR/yay-bin
+  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
+  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+  # fi
+  cmd sudo -u "$USER" makepkg --install --noconfirm --syncdeps
+fi
+
+echo >&2 "Installing AUR packages"
+
+aur_packages="{{ .packages.aur | keys | sortAlpha | join " " }}"
+
+{{- $before := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "before_script"
+  "packages" .packages.aur
+)) | trim }}
+{{- if $before }}
+
+# Before script:
+{{ $before }}
+{{- end }}
+
+if command -v yay >/dev/null; then
+  cmd sudo -u "$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -u "$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
+
+{{- $after := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+  "key" "after_script"
+  "packages" .packages.aur
+)) | trim }}
+{{- if $after }}
+
+# After script:
+{{ $after }}
+{{- end }}
+
+echo >&2 "Installed AUR packages"
+{{- end -}}

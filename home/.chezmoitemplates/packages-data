@@ -1,0 +1,90 @@
+{{- $ignore := list }}
+{{- range $line := includeTemplate ".chezmoiignore" . | splitList "\n" }}
+{{-   if or (eq $line "") (eq (substr 0 1 $line) "#") }}
+{{-     continue }}
+{{-   end }}
+{{-   $ignore = append $ignore $line }}
+{{- end }}
+
+{{- $packageFiles := list }}
+{{- range $path := glob (printf "%s/**/.packages.yaml" .chezmoi.sourceDir) }}
+{{-   $ok := true }}
+{{-   range $excluded := $ignore }}
+{{-     $relative := trimPrefix $.chezmoi.sourceDir $path | replaceAllRegex "^/dot_" "." }}
+{{-     $prefix := substr 0 (sub (len $excluded) 1 | int) $relative }}
+{{-     $excluded = trimSuffix "/" $excluded }}
+{{-     if eq $prefix $excluded }}
+{{-       warnf "ignored: %s" $relative -}}
+{{-       $ok = false }}
+{{-       continue }}
+{{-     end }}
+{{-   end }}
+{{-   if not $ok }}
+{{-     continue }}
+{{-   end }}
+{{-   $packageFiles = append $packageFiles $path }}
+{{- end }}
+{{- $_ := set . "packageFiles" $packageFiles }}
+
+{{- $packages := includeTemplate "packages" (mergeOverwrite . (dict
+  "packageType" .packageManager
+  "defaultType" .packageManager
+)) | fromJson }}
+{{ .packageManager }}: {{ $packages | toJson }}
+
+{{- if eq .osIDLike "arch" }}
+{{- $aurPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
+aur: {{ $aurPackages | toJson }}
+{{- end }}
+
+{{- if .features.brew }}
+{{- $brewPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "brew")) | fromJson }}
+brew: {{ $brewPackages | toJson }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $caskPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "cask")) | fromJson }}
+cask: {{ $caskPackages | toJson }}
+{{- $masPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "mas")) | fromJson }}
+mas: {{ $masPackages | toJson }}
+{{- end }}
+{{- $vscodePackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson }}
+vscode: {{ $vscodePackages | toJson }}
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+{{- $scoopPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "scoop")) | fromJson }}
+scoop: {{ $scoopPackages | toJson }}
+{{- end }}
+
+{{- if .features.mise }}
+{{- $misePackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "mise")) | fromJson }}
+mise: {{ $misePackages | toJson }}
+{{- end }}
+
+{{- if .features.go }}
+{{- $goPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "go")) | fromJson }}
+go: {{ $goPackages | toJson }}
+{{- end }}
+
+{{- if .features.node }}
+{{- $nodePackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "npm")) | fromJson }}
+npm: {{ $nodePackages | toJson }}
+{{- end }}
+
+{{- if .features.python }}
+{{- $pipPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "pip")) | fromJson }}
+pip: {{ $pipPackages | toJson }}
+{{- $pipxPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "pipx")) | fromJson }}
+pipx: {{ $pipxPackages | toJson }}
+{{- $uvPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "uv")) | fromJson }}
+uv: {{ $uvPackages | toJson }}
+{{- end }}
+
+{{- if .features.ruby }}
+{{- $rubyGems := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "gem")) | fromJson }}
+gem: {{ $rubyGems | toJson }}
+{{- end }}
+
+{{- if .features.rust }}
+{{- $cargoPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "cargo")) | fromJson }}
+cargo: {{ $cargoPackages | toJson }}
+{{- end }}

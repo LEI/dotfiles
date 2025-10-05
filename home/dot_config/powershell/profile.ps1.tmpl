@@ -13,9 +13,6 @@ $env:Path += ";$env:UserProfile\.local\bin"
 $ENV:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
 
 # Set-Alias -Name g -Value git
-{{- if not (lookPath "which" | isExecutable) }}
-Set-Alias -Name which -Value where # GnuWin32.Which
-{{- end }}
 
 # https://mise.jdx.dev/getting-started.html#activate-mise
 $shimPath = "$env:USERPROFILE\AppData\Local\mise\shims"
