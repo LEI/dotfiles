@@ -41,8 +41,15 @@ cmd brew upgrade --quiet
 {{- /* $_ := set .packages.brew $name $pkg */ -}}
 {{- end }}
 
-{{- $brewfile := output .sh "-c" "if test -f ~/.config/homebrew/Brewfile; then grep -v '^#' ~/.config/homebrew/Brewfile; fi" | splitList "\n" -}}
-{{- range without $brewfile "" }}
+{{- $brewfile := joinPath (env "XDG_CONFIG_HOME" | default (joinPath  .chezmoi.homeDir ".config")) "homebrew/Brewfile" -}}
+{{- $lines := list }}
+{{- if stat $brewfile -}}
+{{-   $lines = include $brewfile | splitList "\n" }}
+{{- end -}}
+{{- range without $lines "" }}
+{{-   if eq (substr 0 1 .) "#" -}}
+{{-     continue -}}
+{{-   end -}}
 {{-   $type := index (. | splitList " ") 0 }}
 {{-   $pattern := printf "^%s \"(.*)\",? ?(.*)$" $type }}
 {{-   $name := . | replaceAllRegex $pattern "${1}" }}

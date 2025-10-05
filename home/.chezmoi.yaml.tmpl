@@ -13,6 +13,15 @@
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 
+{{- /* https://github.com/starship/starship/blob/master/src/modules/container */ -}}
+
+# {{- and (stat "/proc/vz") (not (stat "/proc/bc")) -}} # OpenVZ
+# {{- stat "/run/host/container-manager" -}} # OCI
+# {{- stat "/dev/incus/sock" -}} # Incus
+# {{- stat "/run/.containerenv" -}} # Podman?
+# {{- stat "/run/systemd/container" -}} # docker/wsl/systemd
+# {{- stat "/.dockerenv" -}} # docker
+
 {{- $interactive := stdinIsATTY -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
@@ -94,9 +103,8 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $context := merge (dict
+{{- $baseContext := dict
   "accessToken" $accessToken
-  "chezmoi" .chezmoi
   "codespaces" $codespaces
   "devContainer" $devContainer
   "ephemeral" $ephemeral
@@ -108,9 +116,11 @@
   "osIDLike" $osIDLike
   "osVersion" $osVersion
   "profile" $profile
-) . }}
-{{- $features := includeTemplate "features.tmpl" $context | fromJson -}}
-{{- $_ := set $context "features" $features }}
+  "wsl" $wsl
+}}
+{{- $features := includeTemplate "features.tmpl" $baseContext | fromJson -}}
+{{- $_ := set $baseContext "features" $features }}
+{{- $context := mergeOverwrite . $baseContext }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -133,25 +143,10 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
-  accessToken: {{ $accessToken | quote }}
-  codespaces: {{ $codespaces }}
-  devContainer: {{ $devContainer }}
-  ephemeral: {{ $ephemeral }}
-  headless: {{ $headless }}
-  hostname: {{ $hostname | quote }}
-  profile: {{ $profile | quote }}
-  wsl: {{ $wsl }}
-
+{{ $baseContext | toYaml | indent 2 }}
   chassisType: {{ $chassisType | quote }}
-  features: {{ $features | toJson }}
-  os: {{ .chezmoi.os | quote }}
-  osID: {{ $osID | quote }}
-  osIDLike: {{ $osIDLike | quote }}
-  osVersion: {{ $osVersion | quote }}
-
-  glibc231: {{ $glibc231 }}
-  sh: {{ $sh | quote }}
   preset: {{ $preset | quote }}
+  sh: {{ $sh | quote }}
   symbols:
     prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
@@ -197,11 +192,11 @@ data:
   "windows" "winget"
 }}
 
-{{- $ignoreContext := merge (dict
+{{- $ignoreContext := mergeOverwrite $context (dict
   "accessToken" $accessToken
   "email" $email
   "wsl" $wsl
-) $context . }}
+) }}
 {{- $ignore := list }}
 {{- range $line := includeTemplate ".chezmoiignore" $ignoreContext | splitList "\n" }}
 {{-   if or (eq $line "") (eq (substr 0 1 $line) "#") }}
@@ -229,12 +224,12 @@ data:
 {{-   $packageFiles = append $packageFiles $path }}
 {{- end }}
 
-{{- $packageContext := merge (dict
+{{- $packageContext := mergeOverwrite $context (dict
   "chassisType" $chassisType
   "defaultType" ""
   "packageFiles" $packageFiles
   "packages" dict
-) $context }}
+) }}
 
 {{- $packageManager := get $packageManagerMap $osIDLike }}
 {{- $packages := includeTemplate "packages" (mergeOverwrite $packageContext (dict
