@@ -45,7 +45,7 @@ window-decoration = server
 {{- end }}
 
 # Quick terminal not available on X11
-{{- if ne (env "XDG_SESSION_TYPE") "x11"}}
+{{- if ne .sessionType "x11" }}
 
 # keybind = global:ctrl+grave_accent=toggle_quick_terminal
 {{- end }}

@@ -112,6 +112,7 @@
   "osIDLike" $osIDLike
   "osVersion" $osVersion
   "profile" $profile
+  "sessionType" (env "XDG_SESSION_TYPE")
   "wsl" $wsl
 }}
 {{- $features := includeTemplate "features.tmpl" $baseContext | fromJson -}}

@@ -278,6 +278,11 @@ packages:
       arch: lua51
     version: '{{ ne .osIDLike "arch" | ternary "5.1" "" }}'
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
+  macchina:
+    enabled: {{ ne .profile "minimal" }}
+    type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
+  wmctrl:
+    enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   mailpit:
     enabled: {{ and .features.mail (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
     restart_service: ":changed"
@@ -523,7 +528,7 @@ packages:
   up:
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     # usage: lshw |& up
-  owloops/tap/updo: # dstp, sntop
+  owloops/tap/updo: # exosphere # dstp, sntop
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
     nameOverwrite:
       arch: updo-bin
