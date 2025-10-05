@@ -26,11 +26,12 @@
 {{- end }}
 {{- $_ := set . "packageFiles" $packageFiles }}
 
+{{- if ne .os "darwin" }}
 {{- $packages := includeTemplate "packages" (mergeOverwrite . (dict
   "packageType" .packageManager
-  "defaultType" .packageManager
 )) | fromJson }}
 {{ .packageManager }}: {{ $packages | toJson }}
+{{- end }}
 
 {{- if eq .osIDLike "arch" }}
 {{- $aurPackages := includeTemplate "packages" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}

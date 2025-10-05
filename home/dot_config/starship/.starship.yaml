@@ -16,8 +16,13 @@ kubernetes:
   disabled: false
 # {{- end }}
 
+git_branch:
+  # Hide branch symbol
+  format: "on [$branch(:$remote_branch)]($style) "
+
 mise:
   disabled: false
+
 # package:
 #   disabled: true
 

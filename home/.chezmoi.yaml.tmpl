@@ -100,6 +100,7 @@
 
 {{- $data := dict
   "accessToken" $accessToken
+  "chassisType" $chassisType
   "codespaces" $codespaces
   "container" $container
   "devContainer" $devContainer
@@ -114,6 +115,9 @@
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
   "wsl" $wsl
+
+  "email" $email
+  "name" $name
 }}
 {{- $features := includeTemplate "features.tmpl" $data | fromJson -}}
 {{- $_ := set $data "features" $features }}
@@ -128,7 +132,7 @@
 {{- if eq $osID "windows" }}
 interpreters:
   sh:
-    command: bash # "C:\\Windows\\System32\\bash.exe" # Get-Command bash
+    command: {{ lookPath "sh" }} # "C:\\Windows\\System32\\bash.exe" # Get-Command bash
 {{- else }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
@@ -141,16 +145,12 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
 {{ $data | toYaml | indent 2 }}
-  chassisType: {{ $chassisType | quote }}
   preset: {{ $preset | quote }}
   sh: {{ $sh | quote }}
   symbols:
     prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
   # term: truecolor
-
-  email: {{ $email | quote }}
-  name: {{ $name | quote }}
 
   # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
 {{- if $accessToken }}
@@ -187,19 +187,18 @@ data:
 }}
 {{- $packageManager := get $packageManagerMap $osIDLike }}
   packageManager: {{ $packageManager | quote }}
-{{ $packages := includeTemplate "packages-data" (mergeOverwrite $context (dict
+{{- $_ := set . "defaultType" $packageManager }}
+{{- $packages := includeTemplate "packages-data" (mergeOverwrite $context (dict
   "packageManager" $packageManager
 )) | fromYaml }}
-
   packages: {{ $packages | toJson }}
-{{- /* $packages | toYaml | indent 4 */ -}}
 
 {{- $allPackages := dict }}
 {{- range $manager, $dict := $packages }}
 {{-   $final := dict }}
 {{-   range $key, $value := $dict }}
 {{-     $_ := set $value "type" $manager }}
-{{-     $_ := set $final (get $value "name" | default $key) $value }}
+{{-     $_ := set $final (get $value "key" | default $key) $value }}
 {{-   end }}
 {{-   $allPackages = mergeOverwrite $allPackages $final }}
 {{- end }}

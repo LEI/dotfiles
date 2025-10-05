@@ -117,6 +117,7 @@ packages:
   dust: # deletor, diskonaut, gdu, kondo, pdu, wiper
     enabled: {{ not (eq .osIDLike "debian") }}
     nameOverwrite:
+      fedora: du-dust
       windows: bootandy.dust
   # eget: # dra
   #   enabled: {{ eq .osIDLike "arch" "darwin" }}
@@ -129,6 +130,7 @@ packages:
   fd:
     # enabled: {{ ne .osIDLike "debian" }}
     nameOverwrite:
+      fedora: fd-find
       windows: sharkdp.fd
     type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
   ffmpeg:
@@ -177,6 +179,7 @@ packages:
     enabled: {{ and .features.go (ne .profile "minimal") }}
     nameOverwrite:
       debian: golang
+      fedora: golang
       windows: golang.go
   google-chrome:
     enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
@@ -279,8 +282,8 @@ packages:
     version: '{{ ne .osIDLike "arch" | ternary "5.1" "" }}'
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
   macchina:
-    enabled: {{ and (not (eq .osIDLike "alpine")) (ne .profile "minimal") }}
-    type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
+    enabled: {{ ne .profile "minimal" }}
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   mailpit:
@@ -303,6 +306,14 @@ packages:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
+  openssl:
+    enabled: {{ eq .osIDLike "alpine" "fedora" }}
+    nameOverwrite:
+      # Cargo gitlab-ci-ls
+      # https://github.com/sfackler/rust-openssl/issues/2185
+      apk: openssl-dev openssl-libs-static
+      # darwin: openssl # @3
+      fedora: openssl-devel
   openssh:
     enabled: {{ and .features.ssh }} # (eq .osIDLike "arch" "darwin")
     nameOverwrite:
@@ -403,22 +414,6 @@ packages:
     nameOverwrite:
       windows: Riseup.RiseupVPN
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  ruby-mise:
-    enabled: false # {{ and .features.mise .features.ruby }}
-    name: ruby
-    type: mise
-  ruby:
-    enabled: {{ and .features.ruby (eq .osIDLike "alpine" "android" "debian" "darwin" "fedora") }}
-    nameOverwrite:
-      darwin: ruby ruby-build
-      debian: ruby-dev
-      fedora: ruby-devel
-  rubygems:
-    enabled: {{ and .features.ruby (eq .osIDLike "arch" "debian" "fedora") (not
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-    ) }}
-    nameOverwrite:
-      debian: ruby-rubygems
   rustup: # rust
     # enabled: {{ and .features.rust (not (lookPath "rustc" | isExecutable)) }}
     enabled: {{ and .features.rust (not (or
@@ -472,8 +467,12 @@ packages:
     nameOverwrite:
       windows: Valve.SteamLink
   subliminal:
-    enabled: {{ and (eq .osIDLike "arch" "darwin" "windows") (eq .profile "personal") }}
+    enabled: {{ and (eq .osIDLike "android" "arch" "darwin" "windows") (eq .profile "personal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "uv" }}'
+  sudo:
+    enabled: {{ eq .osIDLike "fedora" }}
+    # enabled: {{ eq .osIDLike "android" "windows" }}
+    # type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
   # swaptop
   tailspin:
     type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
@@ -559,6 +558,8 @@ packages:
       arch: vlc vlc-plugins-all
       windows: VideoLAN.VLC
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  which:
+    enabled: {{ eq .osIDLike "android" }}
   wtfis:
     enabled: {{ not (empty (env "VT_API_KEY")) }}
     type: uv
@@ -615,17 +616,10 @@ osPackages:
       # g++:
       # linux-headers:
       # make:
-
-      # Cargo gitlab-ci-ls
-      openssl-dev:
-      # https://github.com/sfackler/rust-openssl/issues/2185
-      openssl-libs-static:
   android:
     termux:
       less:
       proot:
-      # sudo:
-      which:
   arch: # Archlinux/Manjaro
     pacman:
       base-devel:
@@ -723,7 +717,6 @@ osPackages:
       # ncdu:
       # ncurses:
       # nmap:
-      # openssl: # @3
       # pango:
       # patchutils:
       # percona-toolkit:
@@ -807,16 +800,13 @@ osPackages:
 
       # Debian devcontainer
   fedora:
-    dnf:
-      openssl-devel:
-      # which:
+    dnf: {}
   windows:
-    scoop:
-      busybox:
+    scoop: {}
+      # busybox:
       # livesplit:
       # prime95:
       # scoop-search:
-      # sudo:
       # talosctl:
     winget:
       CPUID.CPU-Z:
@@ -840,4 +830,6 @@ osPackages:
       # Microsoft.Edge:
       # Xming.Xming:
       # Microsoft.OneDrive:
-      # komorebi whkd:
+      komorebi whkd:
+      frippery.busybox-w32: # uutils.coreutils
+        # after_script: busybox --install

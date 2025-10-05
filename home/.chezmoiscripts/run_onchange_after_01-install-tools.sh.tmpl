@@ -1,33 +1,38 @@
+{{- if get .features "mise" -}}
 #!/bin/sh
 
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" (dict "osID" .osID) }}
+{{- includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" . }}
 
-{{- if eq .osID "android" }}
-# export -f mise
+{{- $args := list "--yes" }}
+{{- if .chezmoi.config.verbose }}
+{{- $args = append $args "--verbose" }}
 {{- end }}
-# cmd mise self-update --quiet --yes
+{{- $miseArgs := $args | quoteList | join " " }}
 
-# cmd mise trust
-# cmd mise settings set disable_backends ubi
+{{- if .upgrade }}
+
+if ! cmd mise self-update {{ $miseArgs }}; then
+  echo >&2 "mise self-update failed with exit code $?"
+fi
+{{- end }}
 
 # TODO: check gpg-agent is running
 
+# cmd mise trust
+
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
 log "Installing tools"
-{{- $go := get .packages.mise "go" }}
-{{- $node := get .packages.mise "node" }}
-{{- $python := get .packages.mise "python"}}
-{{- $ruby := get .packages.mise "ruby" }}
 
-mise_args="--yes"
-if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
-  mise_args="$mise_args --verbose"
-fi
-cmd timeout 5m mise install $mise_args
+# mise_args="--yes"
+# if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+#   mise_args="$mise_args --verbose"
+# fi
+
+cmd timeout 5m mise install {{ $miseArgs }}
 
 log "Installed tools"
 
@@ -35,29 +40,30 @@ log "Installed tools"
 
 {{- $tools := list }}
 
-{{- if $go }}
+{{- if get .packages "go" }}
 # default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
-{{- $tools = append $tools "go" -}}
+{{- $tools = append $tools "go" }}
 {{- end }}
 
-{{- if $node }}
+{{- if get .packages "node" }}
 # default-npm-packages: {{ includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum }}
-{{- $tools = append $tools "node" -}}
+{{- $tools = append $tools "node" }}
 {{- end }}
 
-{{- if $python }}
+{{- if get .packages "python" }}
 # default-python-packages: {{ includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum }}
-{{- $tools = append $tools "python" -}}
+{{- $tools = append $tools "python" }}
 {{- end }}
 
-{{- if $ruby }}
+{{- if get .packages "ruby" }}
 # default-gems: {{ includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum }}
-{{- $tools = append $tools "ruby" -}}
+{{- $tools = append $tools "ruby" }}
 {{- end }}
 
 {{- if not (empty $tools) }}
 
-cmd mise use --global $mise_args {{ $tools | sortAlpha | join " " }}
+cmd mise use --global {{ $miseArgs }} {{ $tools | sortAlpha | join " " }}
 {{- end }}
 
 # cmd mise prune # --tools
+{{- end -}}

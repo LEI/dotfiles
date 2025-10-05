@@ -34,22 +34,28 @@
 {{-   end }}
 {{-   if and $.packageType $type }}
 {{-     if and $type (ne $.packageType $type) }}
-{{- /* warnf "Excluded package type (and): %s: got '%s' expected '%s'" $name $type $.packageType */ -}}
+{{- if eq (env "DEBUG") $key }}
+{{- warnf "Excluded package type (and): %s: got '%s' expected '%s'" $name $type $.packageType -}}
+{{- end }}
 {{-       continue }}
 {{-     end }}
 {{-   else if or $.packageType $type }}
-{{- /* warnf "Excluded package type (or): %s: got '%s' expected '%s'" $name $type $.packageType */ -}}
+{{- if eq (env "DEBUG") $key }}
+{{- warnf "Excluded package type (or): %s: got '%s' expected '%s'" $name $type $.packageType -}}
+{{- end }}
 {{-     continue }}
 {{-   end }}
 
 {{-   $enabled := get $pkg "enabled" }}
 {{-   if or (and (kindIs "bool" $enabled) (ne $enabled true)) (and (kindIs "string" $enabled) (ne $enabled "true") (ne $enabled "")) }}
-{{- /* warnf "Disabled package: %s (%s)" $name $enabled */ -}}
+{{- if eq (env "DEBUG") $key }}
+{{- warnf "Disabled package: %s (%s)" $name $enabled -}}
+{{- end }}
 {{-     continue }}
 {{-   end }}
 
 {{-   if ne $key $name -}}
-{{-     $_ := set $pkg "name" $key -}}
+{{-     $_ := set $pkg "key" $key -}}
 {{-   end -}}
 
 {{-   $hasSpaces := eq $.packageType "mas" }}
@@ -61,7 +67,7 @@
 {{-         warnf "%s package part diff %s: %s -> %s" $.packageType $part $existing $pkg -}}
 {{-       end -}}
 {{-     end -}}
-{{-     $_ := set $output $part (omit $pkg "enabled" "nameOverwrite" "type") }}
+{{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}

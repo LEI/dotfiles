@@ -1,0 +1,18 @@
+---
+packages:
+  ruby-mise:
+    enabled: false # {{ and .features.mise .features.ruby }}
+    name: ruby
+    type: mise
+  ruby:
+    enabled: '{{ and .features.ruby (eq .osIDLike "alpine" "android" "debian" "darwin" "fedora") }}'
+    nameOverwrite:
+      darwin: ruby ruby-build
+      debian: ruby-dev
+      fedora: ruby-devel
+  rubygems:
+    enabled: '{{ and .features.ruby (eq .osIDLike "arch" "debian" "fedora") (not
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      ) }}'
+    nameOverwrite:
+      debian: ruby-rubygems

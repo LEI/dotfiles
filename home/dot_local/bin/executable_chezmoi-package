@@ -7,7 +7,7 @@ uname="$(uname -s)"
 usage() {
   echo >&2 "Usage: chezmoi package [list*|diff] [-h|--help]"
   echo >&2 "  [-o|--output=text*|json|yaml]"
-  echo >&2 "  [-t|--type=apk|apt|aur|brew|cask|dnf|go|mas|node|pacman|python|ruby|rust|vscode]"
+  echo >&2 "  [-t|--type=all|apk|apt|aur|brew|cask|dnf|go|mas|node|pacman|python|ruby|rust|vscode]"
 }
 
 action=list
@@ -56,42 +56,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-case "$type" in
-all | '')
-  # TODO: .packageManager from template
-  if [ "$uname" = Darwin ]; then
-    manager=brew
-  elif [ "$HOME" = /data/data/com.termux/files/home ]; then
-    manager=termux
-  elif command -v apk >/dev/null; then
-    manager=apk
-  elif command -v apt >/dev/null; then
-    manager=apt
-  elif command -v dnf >/dev/null; then
-    manager=dnf
-  elif command -v pacman >/dev/null; then
-    manager=pacman
-  else
-    echo >&2 "Unknown package manager for $uname"
-    exit 1
-  fi
-  ;;
-apk | apt | dnf | pacman | termux | aur | brew | cask | mas | vscode | go | mise | pip | pipx)
-  manager="$type"
-  ;;
-node | npm) manager="npm" ;;
-python | uv) manager="uv" ;;
-ruby | gem) manager="gem" ;;
-rust | cargo) manager="cargo" ;;
-*)
-  echo >&2 "chezmoi package: invalid manager: $manager"
-  usage
-  exit 1
-  ;;
-esac
-
 list_packages() {
-  key="${1:-$manager}"
+  key="$1"
   # echo >&2 "Listing $key packages..."
   if [ "$output" = text ]; then
     echo >&2 "# $key packages"
@@ -128,84 +94,27 @@ elif command -v delta >/dev/null; then
 fi
 
 diff_packages() {
-  key="${1:-$manager}"
-  in="${chezmoi_packages}.${key:-txt}"
-  out="${installed_packages}.${key:-txt}"
+  key="$1"
+  expected="${chezmoi_packages}.${key:-txt}"
+  current="${installed_packages}.${key:-txt}"
   if [ "$key" = uv ]; then
     # pg_activity[psycopg] -> pg-activity
-    chezmoi package list --type="$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$in"
+    chezmoi package list --type="$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$expected"
   else
-    chezmoi package list --type="$key" | sort >"$in"
+    chezmoi package list --type="$key" | sort >"$expected"
   fi
-  case "$key" in
-  apk)
-    apk list --installed --quiet | sort >"$out"
-    ;;
-  apt)
-    # apt list --installed
-    # dpkg --get-selections
-    apt-mark showmanual | tr -s '\n' ' ' | cut -d' ' -f1 | sort >"$out"
-    ;;
-  aur | yay)
-    pacman -Qqm | sort >"$out"
-    ;;
-  brew)
-    # brew bundle dump --file=-
-    brew list --formula | sort >"$out"
-    ;;
-  cask)
-    brew list --cask | sort >"$out"
-    ;;
-  mas)
-    brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"' | sort >"$out"
-    ;;
-  vscode)
-    brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"' | sort >"$out"
-    ;;
-  dnf)
-    # dnf list --installed | cut -d' ' -f1 | cut -d. -f1
-    dnf repoquery --leaves --userinstalled | sed -e 's/-[0-9]:.*$//' | sort >"$out"
-    ;;
-  gem)
-    gem list | cut -d' ' -f1 | sort >"$out"
-    ;;
-  go)
-    # FIXME: exclude stanaard library
-    go list ... | grep -v / | sort >"$out"
-    ;;
-  mise)
-    mise list --global --json | jq --raw-output 'keys[]' | sort >"$out"
-    ;;
-  npm)
-    npm list --global --json | jq --raw-output '.dependencies | keys[]' | sort >"$out"
-    ;;
-  pacman)
-    extra_installed="$(pacman -Qqm)"
-    pacman -Qq | grep -vx "$extra_installed" | sort >"$out"
-    ;;
-  pip)
-    python3 -m pip install --user --quiet list | sort >"$out"
-    ;;
-  pipx)
-    pipx list | tr -d ' ' | grep '^-' | tr -d '-' | sort >"$out"
-    ;;
-  termux)
-    pkg list-installed | cut -d/ -f1 | sort >"$out"
-    ;;
-  uv)
-    uv tool list | grep -v '^-' | cut -d' ' -f1 | sort >"$out"
-    ;;
-  *)
-    echo >&2 "Invalid package manager: $key"
-    return 1
-    ;;
-  esac
+  list-package "$key" | sort >"$current"
   # echo >&2 "Diffing $key packages..."
-  $diff "$in" "$out" || echo >&2 "Exit code: $?"
+  $diff "$expected" "$current" || echo >&2 "Exit code: $?"
 }
 
 main() {
   command="$1"
+  if [ -n "$type" ] && [ "$type" != all ]; then
+    manager="$type"
+  else
+    manager="$(package-manager)"
+  fi
   "${command}_packages" "$manager"
   if [ "$type" != all ]; then
     exit 0
@@ -219,7 +128,7 @@ main() {
       "${command}_packages" cask
       "${command}_packages" mas
     fi
-    "${command}_packages" vscode
+    # "${command}_packages" vscode
   fi
   # if command -v go >/dev/null; then
   #   "${command}_packages" go

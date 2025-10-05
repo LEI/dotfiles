@@ -10,13 +10,12 @@
 {{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
 {{-     continue }}
 {{-   end }}
-{{-   $packages = merge $filePackages $packages }}
+{{-   $packages = mergeOverwrite $packages $filePackages }}
 {{- end }}
 
 {{- /* OS specific packages */ -}}
-{{- $managerMap := get $global.osPackages $.osIDLike | default dict }}
-{{- $osPackages := get $managerMap .packageType | default dict }}
-{{- $packages = merge $packages $osPackages -}}
+{{- $osPackages := dig $.osIDLike .packageType dict $global.osPackages }}
+{{- $packages = mergeOverwrite $packages $osPackages -}}
 
 {{- /* Python system packages */ -}}
 {{- if and .features.python (eq .packageType .defaultType) }}

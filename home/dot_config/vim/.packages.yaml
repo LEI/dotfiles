@@ -8,5 +8,6 @@ packages:
   vim:
     enabled: "{{ .features.vim }}"
     nameOverwrite:
+      fedora: vim-enhanced # vim-minimal
       windows: vim.vim
     # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'

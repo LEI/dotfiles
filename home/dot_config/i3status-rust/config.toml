@@ -18,8 +18,16 @@ icons = "awesome6" # none, awesome4-6, material
 block = "custom"
 signal = 11
 command = ''' if [[ "$(cat /sys/class/leds/input*::capslock/brightness | sort --numeric-sort --reverse | uniq --count | awk '{print $2}' | head --lines 1)" -eq 1 ]]; then printf "CAPS"; fi '''
-shell = "bash"
+shell = "sh"
 format = "<span color='yellow'>$text</span>"
+hide_when_empty = true
+
+[[block]]
+block = "custom"
+signal = 11
+command = ''' i3-msg -t get_tree | jq -r 'recurse(.nodes[];.nodes!=null)|select(.nodes[].focused).layout' '''
+shell = "sh"
+format = "<span color='#fcc09e'>$text</span>"                                                                 # base0F
 hide_when_empty = true
 
 # # Hostname

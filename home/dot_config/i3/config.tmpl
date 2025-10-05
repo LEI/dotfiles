@@ -176,7 +176,7 @@ bindsym $mod+Shift+Return exec "notify-send \\"$(xcwd)\\""
 # Start a terminal in the same directory
 set $i3-sensible-terminal "i3-sensible-terminal --working-directory=\\"$(xcwd)\\""
 bindsym $mod+Return exec $i3-sensible-terminal
-bindsym $mod+t exec $i3-sensible-terminal
+# bindsym $mod+Shift+t exec $i3-sensible-terminal
 
 # Kill focused window
 bindsym $mod+Shift+q kill
@@ -197,8 +197,8 @@ bindsym $mod+c exec "rofi -show calc"
 bindsym $mod+comma exec "rofi -show keys"
 bindsym $mod+s exec "rofi -show ssh"
 
-bindsym $mod+Shift+w exec "rofi -show recursivebrowser"
-bindsym $mod+w exec "rofi -show filebrowser"
+# bindsym $mod+Shift+w exec "rofi -show recursivebrowser"
+# bindsym $mod+w exec "rofi -show filebrowser"
 
 bindsym $mod+x exec "rofi -show run"
 
@@ -371,6 +371,10 @@ exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 {{- else }}
 
 bar {
+    # mode hide
+    # hidden_state hide
+    # modifier $mod
+
     font {{ .i3.barFont }}
     # font pango:$font_family, FontAwesome $font_size
 
