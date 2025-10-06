@@ -2,6 +2,8 @@
 --   return vim.fn.expand('%:t')
 -- end
 
+local current_session = nil
+
 local overseer_status = {
   'overseer',
   label = '', -- Prefix for task counts
@@ -27,7 +29,7 @@ local dap_status = {
     return '  ' .. require('dap').status()
   end,
   cond = function()
-    return Snacks and package.loaded.dap and require('dap').status() ~= ''
+    return package.loaded.dap and require('dap').status() ~= ''
   end,
   color = function()
     return { fg = Snacks and Snacks.util.color('Debug') }
@@ -252,23 +254,44 @@ return {
           -- 'filename',
         },
         lualine_x = {
+          {
+            function()
+              return vim.g.config.signs.nodejs .. ' v' .. vim.g.config.node.version
+            end,
+            cond = function()
+              return vim.g.config.node.version and true or false
+            end,
+            -- color = function()
+            --   return { fg = Snacks and Snacks.util.color('String') }
+            -- end,
+          },
           overseer_status,
           lazy_status,
-          function()
-            -- if not package.loaded.persistence then
-            --   return ''
-            -- end
-            -- FIXME: expensive call and flickers cursor
-            -- local current = require('persistence').current()
-            -- if not current then
-            --   return ''
-            -- end
-            -- local parts = vim.fn.split(current, '/')
-            -- local file = parts[#parts]:gsub('%%', '/')
-            -- local path = file:sub(1, -5) -- Trim ".vim"
-            local path = vim.fn.fnamemodify('.', ':~')
-            return (vim.g.config.node.version and 'nodejs v' .. vim.g.config.node.version .. ' ' or '') .. path
-          end,
+          {
+            function()
+              if current_session == nil then
+                -- WARN: expensive call and flickers cursor
+                current_session = require('persistence').current()
+              end
+              return current_session and vim.g.config.signs.persistence or ''
+            end,
+            cond = function()
+              return package.loaded.persistence and true or false
+            end,
+            color = function()
+              return { fg = Snacks and Snacks.util.color('WarningMsg') }
+            end,
+            padding = { left = 1 },
+          },
+          {
+            function()
+              -- local parts = vim.fn.split(current, '/')
+              -- local file = parts[#parts]:gsub('%%', '/')
+              -- local path = file:sub(1, -5) -- Trim ".vim"
+              local path = vim.fn.fnamemodify('.', ':~')
+              return path
+            end,
+          },
         },
         -- lualine_y = {},
         lualine_z = { 'tabs' },

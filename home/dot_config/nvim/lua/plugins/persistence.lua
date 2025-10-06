@@ -95,6 +95,46 @@ return {
           end
         end,
       })
+
+      -- TODO: only if overseer is enabled
+
+      -- https://github.com/stevearc/overseer.nvim/discussions/373
+      local function get_cwd_as_name()
+        local dir = vim.fn.getcwd(0)
+        return dir:gsub('[^A-Za-z0-9]', '_')
+      end
+
+      vim.api.nvim_create_autocmd('User', {
+        desc = 'Save overseer.nvim tasks on persistence.nvim session save',
+        pattern = 'PersistenceSavePre',
+        callback = function()
+          local overseer = require('overseer')
+          overseer.save_task_bundle(get_cwd_as_name(), nil, { on_conflict = 'overwrite' })
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        desc = 'Remove all previous overseer.nvim tasks on persistence.nvim session load',
+        pattern = 'PersistenceLoadPre',
+        callback = function()
+          local overseer = require('overseer')
+          for _, task in ipairs(overseer.list_tasks({})) do
+            task:dispose(true)
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        desc = 'Load overseer.nvim tasks on persistence.nvim session load',
+        pattern = 'PersistenceLoadPost',
+        callback = function()
+          local overseer = require('overseer')
+          overseer.load_task_bundle(get_cwd_as_name(), {
+            autostart = false,
+            ignore_missing = true,
+          })
+        end,
+      })
     end,
   },
 }
