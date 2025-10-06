@@ -15,7 +15,7 @@ fi
 
 # cmd gh ssh-key list
 
-{{ if get .git "github" -}}
+{{ if dig "git" "github" nil . -}}
 # TODO: check active profile
 # github_email="{{ .git.github.email }}"
 # if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then

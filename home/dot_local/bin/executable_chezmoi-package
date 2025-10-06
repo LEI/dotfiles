@@ -5,9 +5,9 @@ set -eu
 uname="$(uname -s)"
 
 usage() {
-  echo >&2 "Usage: chezmoi package [list*|diff] [-h|--help]"
-  echo >&2 "  [-o|--output=text*|json|yaml]"
-  echo >&2 "  [-t|--type=all|apk|apt|aur|brew|cask|dnf|go|mas|node|pacman|python|ruby|rust|vscode]"
+  echo >&2 "Usage: chezmoi package [list|diff] [-h|--help]"
+  echo >&2 "  [all|apk|apt|aur|brew|cask|dnf|go|mas|node|pacman|python|ruby|rust|vscode]"
+  echo >&2 "  [-o|--output=text|json|yaml]"
 }
 
 action=list
@@ -18,7 +18,7 @@ while [ $# -gt 0 ]; do
   list | diff)
     action="$1"
     shift
-    continue
+    # continue
     ;;
   -*=*)
     key="${1%%=*}"
@@ -35,23 +35,27 @@ while [ $# -gt 0 ]; do
     output="${1#-o}"
     shift
     ;;
-  -t | --type)
-    shift
-    type="$1"
-    shift
-    ;;
-  -t*)
-    type="${1#-t}"
-    shift
-    ;;
+  # -t | --type)
+  #   shift
+  #   type="$1"
+  #   shift
+  #   ;;
+  # -t*)
+  #   type="${1#-t}"
+  #   shift
+  #   ;;
   -h | --help)
     usage
     exit 0
     ;;
   *)
-    echo >&2 "chezmoi package: invalid argument: $1"
-    usage
-    exit 1
+    if [ -n "$type" ]; then
+      echo >&2 "chezmoi package: invalid argument: $1"
+      usage
+      exit 1
+    fi
+    type="$1"
+    shift
     ;;
   esac
 done
@@ -65,9 +69,18 @@ list_packages() {
   case "$output" in
   text)
     # format='keys | sortAlpha | join "\n" | append "\n"'
-    chezmoi execute "{{ range .packages.$key | keys | sortAlpha }}{{ printf \"%s\n\" . }}{{ end }}"
-    # '{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict "key" "before_script" "packages" .packages.'"$key"')) | trim }}'
-    # '{{ includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict "key" "after_script" "packages" .packages.'"$key"')) | trim }}'
+    template=.
+    case "$key" in
+    # Hide brew tap prefix
+    brew | cask) template='. | replaceAllRegex "[\\w@-]+/" ""' ;;
+    esac
+    chezmoi execute <<EOF
+{{ range .packages.$key | keys | sortAlpha -}}
+{{ $template }}
+{{ end -}}
+EOF
+    # '{{ includeTemplate "pluck.tmpl" (dict "key" "before_script" "values" .packages.'"$key"') | trim }}'
+    # '{{ includeTemplate "pluck.tmpl" (dict "key" "after_script" "values" .packages.'"$key"') | trim }}'
     return 0
     ;;
   json) format="toPrettyJson" ;;
@@ -99,9 +112,9 @@ diff_packages() {
   current="${installed_packages}.${key:-txt}"
   if [ "$key" = uv ]; then
     # pg_activity[psycopg] -> pg-activity
-    chezmoi package list --type="$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$expected"
+    chezmoi package list "$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$expected"
   else
-    chezmoi package list --type="$key" | sort >"$expected"
+    chezmoi package list "$key" | sort >"$expected"
   fi
   list-package "$key" | sort >"$current"
   # echo >&2 "Diffing $key packages..."
@@ -110,12 +123,7 @@ diff_packages() {
 
 main() {
   command="$1"
-  if [ -n "$type" ] && [ "$type" != all ]; then
-    manager="$type"
-  else
-    manager="$(package-manager)"
-  fi
-  "${command}_packages" "$manager"
+  "${command}_packages" "$(package-manager "$type")"
   if [ "$type" != all ]; then
     exit 0
   fi
@@ -123,10 +131,11 @@ main() {
     "${command}_packages" aur
   fi
   if command -v brew >/dev/null; then
-    "${command}_packages" brew
     if [ "$uname" = Darwin ]; then
       "${command}_packages" cask
       "${command}_packages" mas
+    else
+      "${command}_packages" brew
     fi
     # "${command}_packages" vscode
   fi

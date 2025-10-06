@@ -2,8 +2,6 @@
 --   return vim.fn.expand('%:t')
 -- end
 
-local current_session = nil
-
 local overseer_status = {
   'overseer',
   label = '', -- Prefix for task counts
@@ -14,6 +12,7 @@ local overseer_status = {
   name_not = false, -- When true, invert the name search
   status = nil, -- List of task statuses to display
   status_not = false, -- When true, invert the status search
+  padding = { left = 1, right = 0 },
 }
 
 local lazy_status = {
@@ -22,6 +21,7 @@ local lazy_status = {
   color = function()
     return { fg = Snacks and Snacks.util.color('Special') }
   end,
+  padding = { left = 1, right = 0 },
 }
 
 local dap_status = {
@@ -40,7 +40,7 @@ local dap_status = {
 local mcphub_status = {
   function()
     local frames = vim.g.config.signs.spinner
-    local icon = vim.g.config.signs.mcphub
+    local icon = vim.g.config.signs.mcp
 
     -- Check if MCPHub is loaded
     if not vim.g.loaded_mcphub then
@@ -180,8 +180,9 @@ return {
               return vim.g.ai and vim.g.ai.codecompanion
             end,
             -- fmt = function(str)
-            --   return str ~= '' and str or '{c}' -- 'CodeCompanion OFF'
+            --   return str and str ~= '' and 'cc[' .. str .. ']' or '{c}' -- 'CodeCompanion OFF'
             -- end,
+            -- padding = { left = 1, right = 0 },
           },
           {
             'codeium#GetStatusString',
@@ -189,8 +190,9 @@ return {
               return vim.g.ai and vim.g.ai.windsurf
             end,
             -- fmt = function(str)
-            --   return str and str ~= '' and str or '{w}' -- 'Windsurf OFF'
+            --   return str and str ~= '' and 'ws[' .. str .. ']' or '{w}' -- 'Windsurf OFF'
             -- end,
+            -- padding = { left = 1, right = 0 },
           },
           {
             'copilot',
@@ -198,22 +200,52 @@ return {
               return vim.g.ai and vim.g.ai.copilot_lua
             end,
             -- fmt = function(str)
-            --   return str and str ~= '' and str or '{}' -- 'Copilot OFF'
+            --   return str and str ~= '' and 'copilot[' .. str .. ']' or '{}' -- 'Copilot OFF'
             -- end,
+            -- padding = { left = 1, right = 0 },
           },
-          'lsp-status',
-          'nvim-lint',
-          function()
-            if not package.loaded.conform then
-              return ''
-            end
-            local info = require('conform').list_formatters_to_run()
-            local result = {}
-            for index, item in pairs(info) do
-              result[index] = item.name .. (item.available and ' ●' or ' ○') -- item.command
-            end
-            return table.concat(result, ' ')
-          end,
+          {
+            -- FIXME: indicator only visible on non active buffer
+            -- or not at all if globalstatus is true
+            'lsp_status', -- 'lsp-status',
+            icon = false, -- vim.g.config.signs.lsp, -- f013
+            symbols = {
+              spinner = vim.g.config.signs.spinner,
+              done = vim.g.config.signs.done, -- '✓',
+              separator = ' ',
+            },
+            -- List of LSP names to ignore (e.g., `null-ls`):
+            ignore_lsp = {},
+            -- fmt = function(str)
+            --   return str and str ~= '' and 'lsp[' .. str .. ']' or ''
+            -- end,
+            -- padding = { left = 1, right = 0 },
+          },
+          {
+            'nvim-lint',
+            -- fmt = function(str)
+            --   return str and str ~= '' and 'lint[' .. str .. ']' or ''
+            -- end,
+            -- padding = { left = 1, right = 0 },
+          },
+          {
+            function()
+              if not package.loaded.conform then
+                return ''
+              end
+              local info = require('conform').list_formatters_to_run()
+              local result = {}
+              for index, item in pairs(info) do
+                result[index] = item.name
+                  .. (item.available and ' ' .. vim.g.config.signs.on or ' ' .. vim.g.config.signs.off) -- item.command
+              end
+              return table.concat(result, ' ')
+            end,
+            -- fmt = function(str)
+            --   return str and str ~= '' and 'fmt[' .. str .. ']' or ''
+            -- end,
+            -- padding = { left = 1, right = 0 },
+          },
           {
             'diagnostics',
             -- always_visible = true,
@@ -256,7 +288,7 @@ return {
         lualine_x = {
           {
             function()
-              return vim.g.config.signs.nodejs .. ' v' .. vim.g.config.node.version
+              return vim.g.config.signs.nodejs .. 'v' .. vim.g.config.node.version
             end,
             cond = function()
               return vim.g.config.node.version and true or false
@@ -264,16 +296,17 @@ return {
             -- color = function()
             --   return { fg = Snacks and Snacks.util.color('String') }
             -- end,
+            padding = { left = 1, right = 0 },
           },
           overseer_status,
           lazy_status,
           {
             function()
-              if current_session == nil then
+              if vim.g.current_session == nil then
                 -- WARN: expensive call and flickers cursor
-                current_session = require('persistence').current()
+                vim.g.current_session = require('persistence').current()
               end
-              return current_session and vim.g.config.signs.persistence or ''
+              return vim.g.current_session and vim.g.config.signs.persistence or ''
             end,
             cond = function()
               return package.loaded.persistence and true or false
@@ -281,7 +314,7 @@ return {
             color = function()
               return { fg = Snacks and Snacks.util.color('WarningMsg') }
             end,
-            padding = { left = 1 },
+            padding = { left = 1, right = 0 },
           },
           {
             function()
@@ -291,10 +324,18 @@ return {
               local path = vim.fn.fnamemodify('.', ':~')
               return path
             end,
+            padding = { left = 0, right = 1 },
           },
         },
         -- lualine_y = {},
-        lualine_z = { 'tabs' },
+        lualine_z = {
+          {
+            'tabs',
+            -- mode = 2,
+            -- path = 1,
+            show_modified_status = false,
+          },
+        },
       },
       -- winbar = {
       --   lualine_c = {

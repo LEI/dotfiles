@@ -5,11 +5,12 @@ packages:
     name: ruby
     type: mise
   ruby:
-    enabled: '{{ and .features.ruby (eq .osIDLike "alpine" "android" "debian" "darwin" "fedora") }}'
+    enabled: "{{ .features.ruby }}"
     nameOverwrite:
-      darwin: ruby ruby-build
+      darwin: ruby-build # ruby
       debian: ruby-dev
       fedora: ruby-devel
+      # windows: RubyInstallerTeam.Ruby.3.4
   rubygems:
     enabled: '{{ and .features.ruby (eq .osIDLike "arch" "debian" "fedora") (not
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))

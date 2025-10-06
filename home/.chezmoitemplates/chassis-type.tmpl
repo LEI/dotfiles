@@ -5,7 +5,7 @@
 {{-   else }}
 {{-     $chassisType = "desktop" }}
 {{-   end }}
-{{- else if and (eq .chezmoi.os "linux") (lookPath "hostnamectl" | isExecutable) ($chassisType = output .sh "-c" "hostnamectl chassis 2>/dev/null || echo" | trim) }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "hostnamectl" | isExecutable) ($chassisType = output "sh" "-c" "hostnamectl chassis 2>/dev/null || echo" | trim) }}
 {{- else if eq .chezmoi.os "linux" }}
 {{-   $chassisType = printf "unknown-%s" (get .chezmoi.osRelease "id" | default .chezmoi.os) }}
 {{- else if eq .chezmoi.os "windows" }}

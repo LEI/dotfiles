@@ -16,8 +16,8 @@ else
   # URL="https://github.com/neovim/neovim/releases/download/$VERSION/$NAME.tar.gz"
   {{- $url := gitHubLatestReleaseAssetURL
     "neovim/neovim"
-    (printf "nvim-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) -}}
-  {{- $_ := $url | mustRegexMatch "^https" -}}
+    (printf "nvim-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) }}
+  {{- $_ := $url | mustRegexMatch "^https" }}
   URL="{{ $url }}"
 
   install_tar_gz "$URL" "$NAME/bin/nvim"
@@ -35,6 +35,7 @@ fi
 # Debian 12 has nvim 0.7.2
 # Debian 11 Ubuntu 22 nvim 0.4.3
 if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
-  cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
+  # cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
+  cmd timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
   echo
 fi

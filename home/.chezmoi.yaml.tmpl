@@ -11,13 +11,17 @@
 
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
+{{- $container := includeTemplate "container.tmpl" dict -}}
+{{- if and $container .chezmoi.config.verbose -}}
+{{-   warnf "container type: %s" $container -}}
+{{- end -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 
 {{- $interactive := stdinIsATTY -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
-{{- if or $ci $codespaces $devContainer -}}
+{{- if or $ci $codespaces $container $devContainer -}}
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- else if $interactive -}}
@@ -37,21 +41,10 @@
 {{-   $osID = "android" -}}
 {{- end -}}
 
-{{- $sep := ":" -}}
-{{- $sh := "sh" -}}
-{{- if eq $osID "windows" -}}
-{{-   $sep = ";" -}}
-{{-   $sh = "bash" -}}
-{{- end -}}
-
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi "sh" $sh) -}}
-{{- $container := includeTemplate "container.tmpl" dict -}}
-{{- if $container -}}
-{{-   warnf "container type: %s" $container -}}
-{{- end -}}
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
-{{- $lddVersion := eq .chezmoi.os "linux" | ternary (output $sh "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
+{{- $lddVersion := eq .chezmoi.os "linux" | ternary (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
 {{- $glibc231 := le (float64 $lddVersion) 2.31 -}}
 {{- /* $glibc231 := or
   (and (eq $osID "debian") (le (int $osVersion) 11))
@@ -62,7 +55,7 @@
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- else if eq $hostname "docker" "podman" -}}
-{{-   $hostname = output $sh "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
+{{-   $hostname = output "sh" "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
 {{- end -}}
 
 {{- $user := env "USER" | default "me" -}}
@@ -98,6 +91,8 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
+{{- $timezone := env "TZ" | default (output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
+
 {{- $data := dict
   "accessToken" $accessToken
   "chassisType" $chassisType
@@ -114,12 +109,13 @@
   "osVersion" $osVersion
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
+  "timezone" $timezone
   "wsl" $wsl
 
   "email" $email
   "name" $name
 }}
-{{- $features := includeTemplate "features.tmpl" $data | fromJson -}}
+{{- $features := includeTemplate "features.json.tmpl" $data | fromJson -}}
 {{- $_ := set $data "features" $features }}
 {{- $context := mergeOverwrite . $data }}
 
@@ -146,14 +142,14 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 data:
 {{ $data | toYaml | indent 2 }}
   preset: {{ $preset | quote }}
-  sh: {{ $sh | quote }}
   symbols:
     prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
   # term: truecolor
 
+{{- if and .features.git $accessToken }}
+
   # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
-{{- if $accessToken }}
   git:
 {{ (bitwardenSecrets "0ecca3dd-3404-47d5-8a14-b333014a23ca" $accessToken).value | fromYaml | toYaml | indent 4 }}
 {{- if eq $profile "personal" }}
@@ -164,16 +160,15 @@ data:
     work:
 {{ (bitwardenSecrets "ff633e02-2cc7-4dc4-87f8-b3330154baf8" $accessToken).value | fromYaml | toYaml | indent 6 }}
 {{- end }}
+{{- end }}
+
+{{- if and .features.mail $accessToken }}
 
   mail:
     accounts:
 {{ (bitwardenSecrets "f8af12df-ee8e-4146-9272-b32f00a37b5e" $accessToken).value | fromYaml | toYaml | indent 6 }}
     queries:
 {{ (bitwardenSecrets "76589c60-aae2-4c2f-b500-b32f00750c0a" $accessToken).value | fromYaml | toYaml | indent 6 }}
-
-{{- else }}
-  git: {}
-  mail: {}
 {{- end }}
 
 {{- $packageManagerMap := dict
@@ -188,7 +183,7 @@ data:
 {{- $packageManager := get $packageManagerMap $osIDLike }}
   packageManager: {{ $packageManager | quote }}
 {{- $_ := set . "defaultType" $packageManager }}
-{{- $packages := includeTemplate "packages-data" (mergeOverwrite $context (dict
+{{- $packages := includeTemplate "packages-data.yaml.tmpl" (mergeOverwrite $context (dict
   "packageManager" $packageManager
 )) | fromYaml }}
   packages: {{ $packages | toJson }}
@@ -223,16 +218,15 @@ diff:
   # args: [--wait, --diff]
 {{- end }}
 
-env: {}
-
 github:
   refreshPeriod: 12h
 
+# WARN: only one of env or scriptEnv may be set
+env: {}
 scriptEnv:
-{{- if ne $osID "windows" }}
-  PATH: "{{ $binDir }}{{ $sep }}{{ env "PATH" | replaceAllRegex (printf "%s%s" $sep $binDir) "" }}"
+{{- if eq $osID "debian" }}
+  DEBIAN_FRONTEND: noninteractive
 {{- end }}
-  TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 {{- if or $features.brew (eq .chezmoi.os "darwin") }}
   HOMEBREW_BAT: "1"
   # HOMEBREW_GITHUB_API_TOKEN: ""
@@ -241,9 +235,15 @@ scriptEnv:
   HOMEBREW_NO_ENV_HINTS: "1"
   NONINTERACTIVE: "1"
 {{- end }}
-{{- if eq $osID "debian" }}
-  DEBIAN_FRONTEND: noninteractive
+{{- if ne $osID "windows" }}
+{{- $paths := env "PATH" | splitList ":" }}
+{{- if $features.mise }}
+{{-   $paths = append $paths (joinPath .chezmoi.homeDir ".local/share/mise/shims") }}
 {{- end }}
+{{- $paths = append $paths $binDir }}
+  PATH: {{ $paths | join ":" | quote }}
+{{- end }}
+  TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 
 # Files and directories not group writeable
 # umask: 0o022

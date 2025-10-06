@@ -5,8 +5,8 @@ MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
 mise() {
   proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$MISE_BIN" "$@"
 }
-{{- end }}
 
+{{- end }}
 export MISE_GO_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-go-packages"
 export MISE_NODE_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-npm-packages"
 export MISE_PYTHON_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-python-packages"

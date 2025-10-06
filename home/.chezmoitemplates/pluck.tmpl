@@ -1,0 +1,11 @@
+{{- $list := list }}
+{{- range .values }}
+{{-   $value := get . $.key | trim }}
+{{-   if $value }}
+{{-     $list = append $list $value }}
+{{-   end }}
+{{- end }}
+{{- range $list | uniq | sortAlpha }}
+
+{{ . }}
+{{- end }}

@@ -11,16 +11,28 @@ if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
 fi
 
 cmd() {
-  log "$@"
+  msg "$@"
   "$@"
+}
+run() {
+  msg "$@"
+  "$@"
+}
+dry_run() {
+  if [ "${DRY_RUN:-}" = true ]; then
+    msg "DRY-RUN: $*"
+    return
+  fi
+  msg "$@"
+  run "$@"
 }
 
 err() {
-  log "ERR: $*"
+  msg "ERR: $*"
   exit 1
 }
 
-log() {
+msg() {
   echo >&2 "$@"
 }
 
@@ -40,10 +52,10 @@ get_github_release() {
   redirect_url="$(curl -s -w %{redirect_url} "$url")"
   tag="${redirect_url##*/}"
   if [ "$tag" = "" ]; then
-    log "Invalid tag for URL: $url"
+    echo >&2 "Invalid tag for URL: $url"
     return 1
   elif [ "$tag" = "Not Found" ]; then
-    log "Invalid URL: $url"
+    echo >&2 "Invalid URL: $url"
     return 1
   fi
   echo "$tag"
@@ -61,18 +73,18 @@ install_archive() {
 
   bindir="$HOME/.local/bin"
   if [ ! -d "$bindir" ]; then
-    log "Creating directory: $bindir"
+    echo >&2 "Creating directory: $bindir"
     mkdir -p "$bindir"
   fi
 
-  log "Downloading: $url"
+  echo >&2 "Downloading: $url"
   curl -LSfs "$url" -o "$out"
-  log "Extracting: $out"
+  echo >&2 "Extracting: $out"
   # shellcheck disable=SC2059
   eval "$(printf "$format" "$out" "$dir")"
-  log "Executable: $dir/$bin"
+  echo >&2 "Executable: $dir/$bin"
   chmod +x "$dir/$bin"
-  log "Moving to: $bindir/$name"
+  echo >&2 "Moving to: $bindir/$name"
   mv "$dir/$bin" "$bindir/$name"
 }
 

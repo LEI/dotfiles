@@ -11,7 +11,6 @@ packages:
     nameOverwrite:
       arch: github-cli
       windows: GitHub.cli
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   ghq:
     enabled: "{{ .features.git }}"
     nameOverwrite:
@@ -21,12 +20,10 @@ packages:
     enabled: "{{ .features.git }}"
     nameOverwrite:
       windows: Git.Git
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   git-absorb:
     enabled: '{{ and .features.git (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
     nameOverwrite:
       windows: tummychow.git-absorb
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   # git-cal:
   git-extras:
     enabled: '{{ and .features.git (not (eq .osIDLike "alpine" "windows")) }}'
@@ -37,7 +34,6 @@ packages:
   #   enabled: '{{ and (ne .osIDLike "debian") }}'
   #   nameOverwrite:
   #     windows: stephandilly.gitui
-  #   type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   glab:
     enabled: >
       {{ and .features.git (ne .os "android") (not (or
@@ -46,7 +42,6 @@ packages:
       )) (ne .profile "minimal") }}
     nameOverwrite:
       windows: GLab.GLab
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
   lazygit: # tig
     enabled: "{{ .features.git }}"
     nameOverwrite:

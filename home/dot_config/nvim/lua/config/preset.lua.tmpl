@@ -5,6 +5,8 @@ local branch = {
 }
 local common_signs = {
   branch = branch[preset],
+  off = '○',
+  on = '●',
   pending = '→', -- ➜ ➤
   prompt = '{{ .symbols.prompt }}',
   prompt_error = '{{ .symbols.error }}',
@@ -18,7 +20,7 @@ local common_signs = {
   },
 
   nodejs = '⬢',
-  persistence = '🖫', -- 💾 🖪 🖬 🖴
+  persistence = '💾', -- 🖫 🖪 🖬 🖴
 }
 local signs = {
   -- Icon font
@@ -76,7 +78,8 @@ local signs = {
       -- },
     },
 
-    mcphub = '󰐻 ',
+    lsp = ' ',
+    mcp = '󰐻 ',
 
     overseer_symbols = {
       CANCELED = ' ',
@@ -85,11 +88,11 @@ local signs = {
       RUNNING = '󰑮 ',
     },
 
-    snacks_picker_prompt = common_signs.prompt,
+    snacks_picker_prompt = ' ' .. common_signs.prompt,
     -- snacks_picker_icons = {}
 
-    -- nodejs = ' ',
-    -- persistence = '',
+    nodejs = ' ',
+    persistence = ' ', -- 
   },
 
   -- Plain text
@@ -136,7 +139,8 @@ local signs = {
       lazy = '💤 ',
     },
 
-    mcphub = 'MCP',
+    lsp = 'LSP',
+    mcp = 'MCP',
 
     -- overseer_symbols = {},
 

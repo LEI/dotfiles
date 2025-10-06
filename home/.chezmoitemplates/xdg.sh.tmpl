@@ -54,7 +54,10 @@ export INPUTRC="${INPUTRC:-$XDG_CONFIG_HOME/readline/inputrc}"
 {{- if .features.node }}
 export NPM_CONFIG_USERCONFIG="${NPM_CONFIG_USERCONFIG:-$XDG_CONFIG_HOME/npm/npmrc}"
 export PNPM_HOME="${PNPM_HOME:-$XDG_DATA_HOME/pnpm}"
-export npm_config_prefix="${npm_config_prefix:-$XDG_DATA_HOME/npm}"
+npm_config_prefix="${npm_config_prefix:-$XDG_DATA_HOME/npm}"
+if [ -d "$npm_config_prefix" ]; then
+  export npm_config_prefix
+fi
 {{- end }}
 
 {{- if .features.ruby }}

@@ -42,7 +42,9 @@
       "Write"
     ],
     "deny": [
+      "Bash(cat:*)",
       "Bash(curl:*)",
+      "Bash(ls:*)",
       "Bash(wget:*)",
       "Read(./.env)",
       "Read(./secrets/**)"

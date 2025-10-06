@@ -20,7 +20,7 @@ aur | yay)
   ;;
 brew)
   # brew bundle dump --file=-
-  brew list --formula
+  brew list --formula --installed-on-request
   ;;
 cask)
   brew list --cask
@@ -53,13 +53,17 @@ pacman)
   pacman -Qq | grep -vx "$extra_installed"
   ;;
 pip)
-  python3 -m pip install --user --quiet list
+  python=python
+  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
+    python=python3
+  fi
+  $python -m pip install --user --quiet list
   ;;
 pipx)
   pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
   ;;
 termux)
-  pkg list-installed | cut -d/ -f1
+  pkg list-installed | grep -v '^Listing\.\.\.' | cut -d/ -f1
   ;;
 uv)
   uv tool list | grep -v '^-' | cut -d' ' -f1

@@ -1,62 +1,49 @@
 -- https://github.com/stevearc/overseer.nvim/blob/master/doc/recipes.md#run-shell-scripts-in-the-current-directory
-local script_dirs = { 'bin', 'script', 'scripts' }
 local files = require('overseer.files')
 
-local function filter_scripts(filename, basedir)
-  return filename:match('%.*sh$') or filename:match('%.nu$') or (vim.fn.executable(files.join(basedir, filename)) == 1)
+local function filter_scripts(file_name, base_dir)
+  return file_name:match('%.*sh$')
+    or file_name:match('%.nu$')
+    or vim.fn.executable(files.join(base_dir, file_name)) == 1
 end
 
 return {
   generator = function(opts, cb)
     local cwd = vim.fn.getcwd()
-    local dirs = { opts.dir or cwd }
-    -- if opts.dir ~= cwd then
-    --   table.insert(dirs, cwd)
+    local dirs = { cwd }
+    -- FIXME: duplicates when opening from a script dir
+    -- if opts.dir ~= cwd and opts.dir ~= '.' then
+    --   table.insert(dirs, opts.dir)
     -- end
-    local scripts = {}
+    local ret = {}
     for _, dir in ipairs(dirs) do
-      local list = files.list_files(dir)
-      -- local scripts = vim.tbl_filter(filter_scripts, list)
-      for _, filename in ipairs(list) do
-        if filter_scripts(filename, dir) then
-          local file = files.join(dir, filename)
-          table.insert(scripts, file)
-        end
-      end
-      for _, script_dir in ipairs(script_dirs) do
-        local dir_path = files.join(dir, script_dir)
-        for _, root_dir in ipairs(dirs) do
-          if dir_path == root_dir then
-            goto continue
-          end
-        end
-        ::continue::
-        if vim.fn.isdirectory(dir_path) == 1 then
-          local sublist = files.list_files(dir_path)
-          for _, filename in ipairs(sublist) do
-            if filter_scripts(filename, dir_path) then
-              table.insert(scripts, files.join(script_dir, filename))
+      for _, dir_name in ipairs({ '.', 'bin', 'script', 'scripts' }) do
+        local base_dir = files.join(dir, dir_name)
+        if vim.fn.isdirectory(base_dir) == 1 then
+          -- vim.print('Listing files in ' .. base_dir)
+          local dir_files = files.list_files(base_dir)
+          for _, file_name in ipairs(dir_files) do
+            if filter_scripts(file_name, base_dir) then
+              local file_path = files.join(base_dir, file_name)
+              local relative_name = vim.fn.resolve(file_path):gsub('^' .. cwd, '.')
+              table.insert(ret, {
+                name = relative_name,
+                params = {
+                  args = { optional = true, type = 'list', delimiter = ' ' },
+                  cwd = { optional = true },
+                },
+                builder = function(params)
+                  return {
+                    cmd = { relative_name },
+                    args = params.args,
+                    cwd = params.cwd,
+                  }
+                end,
+              })
             end
           end
         end
       end
-    end
-    local ret = {}
-    for _, filename in ipairs(scripts) do
-      table.insert(ret, {
-        name = filename,
-        params = {
-          args = { optional = true, type = 'list', delimiter = ' ' },
-          cwd = { optional = true },
-        },
-        builder = function(params)
-          return {
-            cmd = { filename },
-            args = params.args,
-            cwd = params.cwd,
-          }
-        end,
-      })
     end
     cb(ret)
   end,

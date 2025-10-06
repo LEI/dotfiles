@@ -15,7 +15,10 @@
 
 {{- /* OS specific packages */ -}}
 {{- $osPackages := dig $.osIDLike .packageType dict $global.osPackages }}
-{{- $packages = mergeOverwrite $packages $osPackages -}}
+{{- /* $packages = mergeOverwrite $packages $osPackages */ -}}
+{{- range $key, $value := $osPackages }}
+{{ $_ := set $packages $key (mergeOverwrite ($value | default dict) (dict "type" $.packageType))  }}
+{{- end }}
 
 {{- /* Python system packages */ -}}
 {{- if and .features.python (eq .packageType .defaultType) }}
@@ -41,11 +44,9 @@
 {{-   end -}}
 {{- end }}
 
-{{- $output := includeTemplate "parse-packages.tmpl" (mergeOverwrite . (dict
+{{- $output := includeTemplate "parse-packages.json.tmpl" (mergeOverwrite . (dict
   "input" $packages
 )) | fromJson -}}
 
-{{- /* warnf "package debug %s: %s" .packageType ($output | keys) */ -}}
+{{- /* warnf "%s packages: %s" .packageType ($output | keys) */ -}}
 {{- $output | toJson -}}
-{{- /* Hide brew tap prefix */ -}}
-{{- /*  replaceAllRegex "[\\w@-]+/" "" */ -}}

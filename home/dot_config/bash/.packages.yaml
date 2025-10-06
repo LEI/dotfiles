@@ -1,6 +1,19 @@
 ---
 packages:
   bash:
-    enabled: "{{ .features.bash }}"
+    enabled: '{{ and .features.bash (ne .os "windows") }}'
   bash-completion:
-    enabled: "{{ .features.bash }}"
+    enabled: '{{ and .features.bash (ne .os "windows") }}'
+  bats:
+    enabled: '{{ and .features.bash (eq .osIDLike "arch" "darwin") }}'
+    # nameOverwrite:
+    #   pacman: bats bats-assert bats-support
+    type: brew
+  kaos/shell/bats-assert kaos/shell/bats-support: # bats-file
+    enabled: '{{ and .features.bash (eq .osIDLike "arch" "darwin") }}'
+    type: brew
+  kaos/shell/bats-mock:
+    enabled: '{{ and .features.bash (eq .osIDLike "arch" "darwin") }}'
+    type: brew
+  kcov:
+    enabled: '{{ and .features.bash (eq .osIDLike "arch" "darwin") }}'

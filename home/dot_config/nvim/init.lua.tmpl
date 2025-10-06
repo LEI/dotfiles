@@ -5,6 +5,10 @@ if vim.fn.has('nvim-0.8') == 0 then
   return 1 -- vim.fn.finish()
 end
 
+if not vim.fn.has('macunix') then
+  vim.o.shell = '{{ lookPath "sh" | replaceAllRegex "\\\\" "\\\\" }}'
+end
+
 require('config.init')
 require('config.options')
 require('config.autocmds')

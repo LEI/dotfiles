@@ -63,13 +63,14 @@ local dashboard_sections = {
   },
   { pane = 2, title = ' ', padding = 0 },
 
+  -- FIXME(neovide): fatal: not a git repository (exit code 128)
   {
     pane = 2,
     icon = vim.g.config.signs.git_remote,
     title = 'Git remote',
     section = 'terminal',
     enabled = function()
-      return Snacks.git.get_root() ~= nil
+      return (not vim.g.neovide) and Snacks.git.get_root() ~= nil
     end,
     cmd = 'echo && git remote --verbose',
     height = 3,
@@ -77,14 +78,13 @@ local dashboard_sections = {
     ttl = 5 * 60,
     indent = 3,
   },
-
   {
     pane = 2,
     icon = vim.g.config.signs.git_status,
     title = 'Git status',
     section = 'terminal',
     enabled = function()
-      return Snacks.git.get_root() ~= nil
+      return (not vim.g.neovide) and Snacks.git.get_root() ~= nil
     end,
     cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
     -- height = 28,
@@ -143,15 +143,13 @@ local function grep_picker()
   local regex = true
   local search = original
   if vim.startswith(search, '\\V') then
-    -- search = search:gsub('^\\V', ''):gsub('([\\^$~+.*%[%]{}()])', '\\%1')
-    -- TODO: escape spaces at start and end (^ +| +$)
-    -- escape single backslashes?
     search = search:gsub('^\\V', '')
     if regex then
       search = search:gsub('([%^$~+.*%[%]{}()|])', '\\%1')
     else
       search = search:gsub('\\\\', '\\')
     end
+    search = search:gsub('^ ', '\\s'):gsub(' $', '\\s')
   else
     -- regex = true
     -- search = search:gsub('^\\<(.*)\\>$', '\\<%1\\>')
@@ -296,7 +294,7 @@ return {
       animate = { enabled = false },
       bigfile = { enabled = true },
       dashboard = {
-        enabled = false, -- true, -- FIXME: neovide error on open
+        enabled = true,
         preset = { header = 'Neovim' },
         sections = dashboard_sections,
       },

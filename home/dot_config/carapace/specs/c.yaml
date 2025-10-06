@@ -18,7 +18,7 @@ commands:
     run: "[chezmoi, execute-template]"
   - name: init
     aliases: [i]
-    run: "[chezmoi, init]"
+    run: "[chezmoi, init, --verbose]"
   - name: managed
     aliases: [m]
     run: "[chezmoi, managed]"

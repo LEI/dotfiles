@@ -1,6 +1,8 @@
 ---
 packages:
   tmux:
+    # FIXME(windows): ".config/tmux" should be ignored
+    enabled: '{{ ne .os "windows" }}'
   nowplaying-cli:
     enabled: '{{ and .features.tmux (eq .osID "darwin") }}'
   pam-reattach:

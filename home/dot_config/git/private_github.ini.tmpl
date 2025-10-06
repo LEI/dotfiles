@@ -1,8 +1,7 @@
-{{- if get .git "github" }}
-{{- includeTemplate "git-config.tmpl" (mergeOverwrite .git.github (dict "name" .name "sh" .sh)) -}}
-{{- end }}
+{{- if dig "git" "github" nil . -}}
+{{- includeTemplate "gitconfig" (mustMerge .git.github (dict "name" .name)) -}}
 
-{{- if and (get .git "github") (get .git.github "user") }}
+{{- if get .git.github "user" }}
 
 [github]
 	user = {{ .git.github.user | quote }}
@@ -11,3 +10,4 @@
 
 # [hub]
 # 	protocol = https
+{{- end -}}

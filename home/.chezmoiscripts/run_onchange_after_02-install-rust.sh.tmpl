@@ -7,6 +7,10 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 . "$CHEZMOI_WORKING_TREE/home/dot_config/sh/functions/pathmunge.sh"
 
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+
 # NOTE: use global cargo
 TMPDIR="${TMPDIR:-/tmp}"
 cd "$TMPDIR"
@@ -135,5 +139,5 @@ packages="{{ $list | sortAlpha | join " " }}"
 # fi
 
 if [ -n "$packages" ]; then
-  cmd cargo binstall --disable-telemetry --no-confirm --quiet $packages
+  cmd cargo binstall --disable-telemetry --no-confirm --quiet "$@" $packages
 fi

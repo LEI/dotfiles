@@ -17,7 +17,7 @@ vim.diagnostic.config({
   },
   virtual_text = {
     source = 'if_many',
-    prefix = '●',
+    prefix = vim.g.config.signs.on,
   },
 })
 

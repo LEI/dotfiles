@@ -12,7 +12,9 @@ if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
   # BASH_CONFIG="neovide"
   PATH="$HOME/.local/bin:$PATH"
-  PATH="$PATH:$HOME/.local/share/mise/shims"
+  if [ -z "${MISE_SHELL:-}" ]; then
+    PATH="$PATH:$HOME/.local/share/mise/shims"
+  fi
   source "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
   return
 fi
@@ -134,6 +136,9 @@ if [ -d /home/linuxbrew/.linuxbrew ]; then
 fi
 {{- end }}
 
+# # https://github.com/rossmacarthur/sheldon#loading-plugins
+# eval "$(sheldon source)"
+
 # Must be first to ensure tools are available
 if command -v mise >/dev/null; then
   TIMEFORMAT="init mise: %R" bench eval "$(bench mise activate "$shell")"
@@ -164,7 +169,7 @@ if [ -d "$HOME/.node_modules/bin" ]; then
   pathmunge "$HOME/.node_modules/bin" after
 fi
 # if [ ! -d "$npm_config_prefix" ]; then
-#   mkdir "$npm_config_prefix"
+#   mkdir -p "$npm_config_prefix"
 # fi
 if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
   pathmunge "$npm_config_prefix/bin" before replace

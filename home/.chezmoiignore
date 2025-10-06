@@ -57,8 +57,12 @@
 {{ end -}}
 
 {{- if not (eq .os "android" "linux") }}
-.chezmoiscripts/*install-packages.sh
 .chezmoiscripts/linux/**
+{{- end }}
+
+{{- if eq .osID "darwin" }}
+# System packages are managed with brew
+.chezmoiscripts/*install-packages.sh
 {{- end }}
 
 {{- if and (ne .osID "windows") (not .wsl) }}
@@ -66,7 +70,8 @@
 {{- end }}
 
 {{- if eq .osID "windows" }}
-.config/*/*.sh
-.install-password-manager.sh
-{,.chezmoiscripts/}*.sh
+# .chezmoiscripts/*install-xdg.sh
+# .config/*/*.sh
+# .install-password-manager.sh
+# {,.chezmoiscripts/}*.sh
 {{- end }}

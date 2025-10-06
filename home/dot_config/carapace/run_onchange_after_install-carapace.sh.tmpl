@@ -26,17 +26,17 @@ echo >&2 "Installing carapace"
   "carapace-sh/carapace-bin"
   (printf "carapace-bin_*_%s_%s.tar.gz"
     (eq .chezmoi.os "android" | ternary "termux" .chezmoi.os)
-    .chezmoi.arch) -}}
-{{- $_ := $url | mustRegexMatch "^https" -}}
+    .chezmoi.arch) }}
+{{- $_ := $url | mustRegexMatch "^https" }}
 URL="{{ $url }}"
 
 {{- if eq .osID "alpine" }}
 
-cmd curl -LSfs "${URL#.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
+cmd curl -LSfs "${URL%.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
 cmd sudo apk add --allow-untrusted --quiet "$TMPDIR/carapace.apk"
 {{- else if eq .osIDLike "debian" }}
 
-cmd curl -LSfs "${URL#.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
+cmd curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
 cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
 {{- else }}
 

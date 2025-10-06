@@ -1,10 +1,6 @@
 {{- if eq .osIDLike "arch" -}}
 #!/bin/sh
 
-# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
-
-exit 0
-
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -25,10 +21,10 @@ echo >&2 "Installing AUR packages"
 
 aur_packages="{{ .packages.aur | keys | sortAlpha | join " " }}"
 
-{{- $before := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+{{- $before := includeTemplate "pluck.tmpl" (dict
   "key" "before_script"
-  "packages" .packages.aur
-)) | trim }}
+  "values" .packages.aur
+) | trim }}
 {{- if $before }}
 
 # Before script:
@@ -46,10 +42,10 @@ else
   exit 1
 fi
 
-{{- $after := includeTemplate "packages-script.tmpl" (mergeOverwrite . (dict
+{{- $after := includeTemplate "pluck.tmpl" (dict
   "key" "after_script"
-  "packages" .packages.aur
-)) | trim }}
+  "values" .packages.aur
+) | trim }}
 {{- if $after }}
 
 # After script:

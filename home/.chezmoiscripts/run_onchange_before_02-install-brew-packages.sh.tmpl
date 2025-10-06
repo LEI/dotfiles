@@ -10,9 +10,9 @@ set -eu
 if ! command -v brew >/dev/null; then
   if ! [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
     echo >&2 "Installing homebrew"
-    cmd sudo mkdir -p /home/linuxbrew/.linuxbrew
-    cmd sudo chown -R "$USER:$USER" /home/linuxbrew/.linuxbrew
-    cmd git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
+    run sudo mkdir -p /home/linuxbrew/.linuxbrew
+    run sudo chown -R "$USER:$USER" /home/linuxbrew/.linuxbrew
+    run git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
     # SUDO_ASKPASS=1
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     echo >&2 "Installed homebrew"
@@ -24,78 +24,28 @@ fi
 # https://docs.brew.sh/Installation#unattended-installation
 export NONINTERACTIVE=1
 
-cmd brew update --quiet
+dry_run brew update --quiet "$@"
 
 {{- if .upgrade }}
 
-cmd brew upgrade --quiet
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+run brew upgrade --quiet "$@"
 {{- end }}
-
-{{- $taps := dict }}
-{{- range $name, $pkg := .packages.brew }}
-{{-   if contains "/" $name }}
-{{-     $_ := $taps | setValueAtPath ($name | replaceAllRegex "/[\\w@-]+$" "") dict }}
-{{-   end }}
-{{- /* Hide brew tap prefix */ -}}
-{{- /* $name = $name | replaceAllRegex "[\\w@-]+/" "" */ -}}
-{{- /* $_ := set .packages.brew $name $pkg */ -}}
-{{- end }}
-
-{{- $brewfile := joinPath (env "XDG_CONFIG_HOME" | default (joinPath  .chezmoi.homeDir ".config")) "homebrew/Brewfile" -}}
-{{- $lines := list }}
-{{- if stat $brewfile -}}
-{{-   $lines = include $brewfile | splitList "\n" }}
-{{- end -}}
-{{- range without $lines "" }}
-{{-   if eq (substr 0 1 .) "#" -}}
-{{-     continue -}}
-{{-   end -}}
-{{-   $type := index (. | splitList " ") 0 }}
-{{-   $pattern := printf "^%s \"(.*)\",? ?(.*)$" $type }}
-{{-   $name := . | replaceAllRegex $pattern "${1}" }}
-{{-   $options := . | replaceAllRegex $pattern "${2}" }}
-{{-   if eq $type "tap" }}
-{{-     if get $taps $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
-{{-     end -}}
-{{-     $_ := set $taps $name (dict "options" $options) }}
-{{-   else if eq $type "brew" }}
-{{-     if get $.packages.brew $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.brew $name) "options") $options -}}
-{{-     end -}}
-{{-     $_ := set $.packages.brew $name (dict "options" $options) }}
-{{-   else if eq $type "cask" }}
-{{-     if get $.packages.cask $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.cask $name) "options") $options -}}
-{{-     end -}}
-{{-     $_ := set $.packages.cask $name (dict "options" $options) }}
-{{-   else if eq $type "mas" }}
-{{-     if get $.packages.mas $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.mas $name) "options") $options -}}
-{{-     end -}}
-{{-     $_ := set $.packages.mas $name (dict "options" $options) }}
-{{-   else if eq $type "vscode" }}
-{{-     if get $.packages.vscode $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.vscode $name) "options") $options -}}
-{{-     end -}}
-{{-     $_ := set $.packages.vscode $name (dict "options" $options) }}
-{{-   end }}
-{{- end }}
-
-{{- $_ := set .packages "taps" $taps }}
 
 # if ! [ -f ~/.config/homebrew/Brewfile ]; then
-#   cmd brew bundle dump --file=~/.config/homebrew/Brewfile
+#   run brew bundle dump --file="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
 # fi
 
 {{- range $type := list "brew" "cask" "mas" "vscode" }}
 {{- if not (hasKey $.packages $type) }}
 {{-   continue }}
 {{- end }}
-{{- $before := includeTemplate "packages-script.tmpl" (mergeOverwrite $ (dict
+{{- $before := includeTemplate "pluck.tmpl" (dict
   "key" "before_script"
-  "packages" (get $.packages $type)
-)) | trim }}
+  "values" (get $.packages $type)
+) | trim }}
 {{- if $before }}
 
 # Before script ({{ $type }}):
@@ -103,54 +53,22 @@ cmd brew upgrade --quiet
 {{- end }}
 {{- end }}
 
-cmd brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} <<EOF
-{{- range $type := list "tap" "brew" "cask" "mas" "vscode" }}
-{{-   if not (hasKey $.packages $type) }}
-{{-     continue }}
-{{-   end }}
-{{-   range $name, $pkg := get $.packages $type }}
-{{-     if not (kindIs "map" $pkg) }}
-{{-       warnf "%s is not a map: %s" $name $pkg }}
-{{-       $pkg = dict }}
-{{-     end }}
-{{ $type }} {{ $name | quote }}
-{{-     if not (kindIs "map" $pkg) }}
-{{-       warnf "%s: %s: %s" $type $name $pkg }}
-{{-       continue }}
-{{-     end }}
-{{-     range $key, $value := pick $pkg
-  "args"
-  "conflicts_with"
-  "link"
-  "restart_service"
-  "version_file"
-
-  "appdir"
-  "greedy"
-  "require_sha"
-
-  "id"
--}}
-{{- /* if OS.linux? or OS.mac? */ -}}
-{{- /* cask "java" unless system "/usr/libexec/java_home", "--failfast" */ -}}
-, {{ $key }}: {{ $value | toJson }}
-{{-     end }}
-{{-     if get $pkg "options" -}}
-, {{ $pkg.options }}
-{{-     end }}
-{{-   end }}
-{{- end }}
-# ENV["SOME_ENV_VAR"] = "some_value"
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" list
+fi
+# run brew bundle list --global
+run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
+{{ includeTemplate "Brewfile" . | trim }}
 EOF
 
 {{- range $type := list "brew" "cask" "mas" "vscode" }}
 {{- if not (hasKey $.packages $type) }}
 {{-   continue }}
 {{- end }}
-{{- $after := includeTemplate "packages-script.tmpl" (mergeOverwrite $ (dict
+{{- $after := includeTemplate "pluck.tmpl" (dict
   "key" "after_script"
-  "packages" (get $.packages $type)
-)) | trim }}
+  "values" (get $.packages $type)
+) | trim }}
 {{- if $after }}
 
 # After script ({{ $type }}):

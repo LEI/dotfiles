@@ -58,7 +58,7 @@ items:
 
   # NOTE: this is fully applied only on the second run, when tmux config is up to date
 
-  # {{- $keys := includeTemplate "tmux-list-keys.tmpl" (dict "group" "prefix" "sh" .sh) | fromJson }}
+  # {{- $keys := includeTemplate "tmux-list-keys.tmpl" (dict "group" "prefix") | fromJson }}
 
   - name: +Keys (short)
     key: h
@@ -71,7 +71,7 @@ items:
   - name: +Keys (long)
     key: l
     menu:
-      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "min" 2 "map" $keys.map "names" $keys.names "sh" .sh) | indent 6 }}
+      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "min" 2 "map" $keys.map "names" $keys.names) | indent 6 }}
       - separator: true
       - name: Back
         key: BSpace
@@ -79,7 +79,7 @@ items:
   - separator: true
 
   # {{- $include := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}
-  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (mergeOverwrite . (dict "include" $include "map" $keys.map "names" $keys.names "sh" .sh)) | indent 2 }}
+  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (mergeOverwrite . (dict "include" $include "map" $keys.map "names" $keys.names)) | indent 2 }}
   - separator: true
 
   - name: +Windows

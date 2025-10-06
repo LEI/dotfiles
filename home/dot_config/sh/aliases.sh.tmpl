@@ -171,10 +171,3 @@ fi
 {{- if lookPath "tmux" | isExecutable }}
 alias tmux="TERM=tmux-256color tmux"
 {{- end }}
-
-# NOTE: COLUMNS variable is not exported
-cspan() {
-  lspan <(chezmoi apply --debug 2>&1) |
-    head -n"${1:-10}" |
-    cut -c1-${COLUMNS:-80}
-}

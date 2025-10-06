@@ -104,8 +104,8 @@ features:
     - .local/share/applications/meli.*
   mise:
     # - .chezmoiscripts/{*,*/*}mise-install.sh
+    - .chezmoiscripts/*install-tools.sh
     - .chezmoiscripts/*mise-install.sh
-    - .chezmoiscripts/windows/*mise-install.sh
     - .config/mise/
     - .config/sh/plugins/mise.sh
   neovim:

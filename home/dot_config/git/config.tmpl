@@ -132,7 +132,7 @@
 # [url "git://gist.github.com/"]
 # 	insteadOf = "gist:"
 
-{{- range $name, $account := .git }}
+{{- range $name, $account := get . "git" | default dict }}
 
 [includeIf "gitdir:~/src/{{ $account.host }}/"]
 	path = {{ $name }}.ini

@@ -3,7 +3,7 @@
 use std/log
 
 if (which zellij) != [] { # and (^zellij --version) != ""
-  log info "Already installed: {{ output .sh "-c" "command -v zellij || echo zellij" | trim }}"
+  log info "Already installed: {{ lookPath "zellij" }}"
   zellij --version
   exit
 }
