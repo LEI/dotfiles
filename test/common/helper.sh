@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+check_feature() {
+  local name="$1"
+  local cmd="${1##* }"
+  case "$name" in
+  python) cmd=uv ;;
+  rust) cmd=cargo ;;
+  esac
+  command -v "$cmd" >/dev/null || skip "feature disabled: $* ($cmd not found)"
+  # chezmoi feature "$name" ||
+  # grep -qx "$name" "$BATS_RUN_TMPDIR/chezmoi-features.txt" ||
+  # grep -q "\"$name\": true" "$HOME/.local/share/features.json" ||
+  #   skip "feature disabled: $*"
+}
+
 run_chezmoi() {
   local script="$1"
   shift
@@ -68,7 +82,7 @@ stub_seq() {
     plan+=('echo >&2 "# STUB '"$i: $name"' $*"')
   done
   stub "$name" "${plan[@]}" "$@" \
-    'echo >&3 "'"WARN: missing sub ($max): $name"' $*"' \
+    'echo >&3 "'"WARN: $BATS_TEST_NAME requires at least one more stub ($max + 1): $name"' $*"' \
     'exit 2'
 }
 

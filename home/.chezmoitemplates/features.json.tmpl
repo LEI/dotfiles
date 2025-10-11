@@ -1,7 +1,7 @@
 {{- $features := (dict
   "ai" false
   "atuin" false
-  "bash" false
+  "bash" (or .ci (ne .profile "minimal"))
   "bat" true
   "bottom" false
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
@@ -56,7 +56,6 @@
     (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
     (eq .os "windows")
   ))
-  "bash" true
   "bottom" true
   "docker" (or (lookPath "docker" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
   "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))) (not (eq .os "android" "windows")))

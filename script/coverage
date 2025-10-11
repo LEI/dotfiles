@@ -46,13 +46,17 @@ coverage() {
 }
 
 main() {
+  echo >&2 kcov --version
+  kcov --version
+
   # export SUDO_ASKPASS=false
   export TEST_JOBS=1
 
   # Create a temporary directory for rendered chezmoi templates
   TEST_TMPDIR="$(mktemp -dt bats-XXXXXX)"
   export TEST_TMPDIR
-  # trap 'rm -rf "$TEST_TMPDIR"' ERR EXIT
+
+  trap 'rm -rf "$TEST_TMPDIR"' ERR EXIT
 
   # FIXME: overwrite default bats temporary directory
   # export BATS_TMPDIR="$TEST_TMPDIR"
@@ -63,7 +67,9 @@ main() {
   # "kcov: error: File /tmp/*-stub-run exists, but can't be read???"
   rm -rf ./coverage
 
-  mkdir -p "$TEST_TMPDIR/"{,.chezmoiscripts/{,linux,windows},.local/bin}
+  mkdir -p "$TEST_TMPDIR/.chezmoiscripts/linux"
+  # mkdir -p "$TEST_TMPDIR/.chezmoiscripts/windows"
+  mkdir -p "$TEST_TMPDIR/.local/bin"
 
   coverage "$@"
 

@@ -3,7 +3,7 @@ packages:
   helix:
     enabled: '{{ and .features.helix (ne .osIDLike "debian") }}'
     nameOverwrite:
-      alpine: helix tree-sitter-grammars
+      alpine: helix helix-tree-sitter-vendor # tree-sitter-grammars
       android: helix helix-grammars
       windows: helix.helix
   helixbinhx:

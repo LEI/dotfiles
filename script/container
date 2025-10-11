@@ -4,239 +4,471 @@
 
 set -euo pipefail
 
-EPHEMERAL="${EPHEMERAL:-false}"
-HEADLESS="${HEADLESS:-false}"
-PROFILE="${PROFILE:-}"
-
-# if [[ $- = *i* ]]; then
-#   INTERACTIVE=true
-# else
-#   INTERACTIVE=false
-# fi
-DEBUG="${DEBUG:-false}"
-DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$DEBUG}"
+# EPHEMERAL="${EPHEMERAL:-false}"
+# HEADLESS="${HEADLESS:-false}"
+# PROFILE="${PROFILE:-minimal}"
 
 PROVIDER="${PROVIDER:-podman}"
 
-# ARGS="${ARGS:-} --env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
-ARGS=(
-  "--env=DEBUG=$DEBUG"
-)
-if [ -n "${GITHUB_TOKEN:-}" ]; then
-  ARGS+=("--env=GITHUB_TOKEN=${GITHUB_TOKEN:-}")
-fi
-REMOVE="${REMOVE:-false}"
-if [ "$REMOVE" = true ]; then
-  ARGS+=("--rm")
-fi
+usage() {
+  echo >&2 "Usage: container [bootstrap|<image>]"
+  echo >&2
+  echo >&2 "Examples:"
+  # echo >&2 "  container alpine ps --all"
+  echo >&2 "  container alpine up --build --detach"
+  echo >&2 "  container alpine logs --follow --since=1m"
+  # echo >&2 "  container alpine attach --no-stdin"
+  echo >&2 "  container alpine [check|test]"
+  echo >&2
+  echo >&2 "Images: alpine, archlinux, debian, ubuntu, fedora"
+}
 
-BOOTSTRAP_SCRIPT='./script/bootstrap --no-tty --verbose'
+compose_file() {
+  local interactive=true
+  # local sh_args=eux
+  # if [ "$interactive" = true ]; then
+  #   sh_args="i$sh_args"
+  # fi
+  cat <<EOF
+---
+services:
+  $name:
+    # container_name: "${name}-${tag}"
+    image: "$image"
+    environment:
+$(for e in "${environment[@]}"; do echo "      - $e"; done)
+    # entrypoint: ["/bin/sh", "-ceiux"]
+    command:
+      - sh
+      - -ceiux
+      - |
+$(for c in "${command[@]}"; do echo "        $c"; done)
+    volumes:
+$(for v in "${volumes[@]}"; do echo "      - $v"; done)
+    stdin_open: $interactive
+    tty: $interactive
+    user: $container_user
+    working_dir: $working_dir
+EOF
+}
 
-# shellcheck disable=SC2016
-CLONE_SCRIPT='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME"'
+compose() {
+  local home=/root
+  local container_user=root
+  # if [ "$user" = test ]; then
+  #   container_user=root
+  # fi
+  if [ "$user" != root ]; then
+    home="/home/$user"
+  fi
+  local working_dir="$home/.local/share/chezmoi"
+  local bootstrap="./script/container bootstrap"
+  # if [ "$user" != root ] && [ "$user" != ubuntu ]; then
+  #   command+=(
+  #     "if ! id $user; then useradd -ms /bin/bash $user; fi"
+  #     "usermod -aG wheel $user"
+  #     "sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
+  #     # FIXME: not compatible with mounted volume
+  #     # "chown -R $user:$user $home"
+  #     # "su $user"
+  #   )
+  #   bootstrap="su - $user -c 'ls -lah .local/share; cd \"$working_dir\"; ls -lah $bootstrap'"
+  # fi
+  command+=(
+    "[ -f /opt/install.done ] || touch /opt/install.done"
+    "$bootstrap"
+  )
+  volumes+=(
+    # "$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+    "$HOME/.local/share/chezmoi:$home/.local/share/chezmoi"
+    # ".:$working_dir"
+  )
+  if [ $# -eq 0 ]; then
+    set -- ps --all
+  elif [ $# -eq 1 ]; then
+    if [ "$1" = check ]; then
+      set -- exec -T "$name" ./script/check
+    elif [ "$1" = test ]; then
+      set -- exec -T "$name" ./script/test --pretty
+    fi
+  fi
+  echo >&2 "$PROVIDER compose --file=- $*"
+  compose_file="$(compose_file)"
+  # if command -v yq >/dev/null; then
+  #   if ! yq --output-format=yaml . >&2 <<<"$compose_file"; then
+  #     echo >&2 "container: yaml error in compose file"
+  #     echo >&2 "$compose_file"
+  #   fi
+  # else
+  echo >&2 "$compose_file"
+  # fi
+  $PROVIDER compose --file=- "$@" <<EOF
+$compose_file
+EOF
+}
 
-# shellcheck disable=SC2016
-TEST_SCRIPT='$HOME/.local/share/chezmoi/script/container'
-if [ "$DEBUG_ON_ERROR" = true ]; then
-  TEST_SCRIPT="$TEST_SCRIPT || bash -l" # || sh -l
-fi
+bootstrap() {
+  if [ $# -ne 0 ]; then
+    echo >&2 "WARN: ignoring bootstrap args: $*"
+  fi
 
-main() {
-  local name=${1:-}
-  [ -n "$name" ] && shift
-  if [ "$name" = all ]; then
-    export DEBUG DEBUG_ON_ERROR REMOVE
-    set -x
-    ./script/container alpine latest "$@"
-    ./script/container archlinux base-devel "$@"
-    # for v in 12 13; do ./script/container debian $v "$@"; done
-    # for v in 20 22 24; do ./script/container ubuntu $v.04 "$@"; done
-  fi
-  local image="$name"
-  local tag=${1:-}
-  [ -n "$tag" ] && shift
-  if [ "$name" = "ubuntu" ]; then
-    ARGS+=(
-      "--env=TZ=${TZ:-Etc/UTC}"
-      "--env=USER=ubuntu"
-    )
-  elif [ "$image" == macos ]; then
-    image=docker.io/sickcodes/docker-osx
-  fi
-  suffix=
-  if [ "$EPHEMERAL" = true ]; then
-    suffix="$suffix-ephemeral"
-  fi
-  if [ "$HEADLESS" = true ]; then
-    suffix="$suffix-headless"
-  fi
-  if [ -n "$PROFILE" ]; then
-    suffix="$suffix-$PROFILE"
-  fi
-  if [ -n "$name" ] && [ -n "$tag" ]; then
-    image="$name:$tag"
-    set -- "test-$name-$tag$suffix" "$image" "$@"
-  elif [ -n "$name" ]; then
-    set -- "test-$name$suffix" "$image" "$@"
+  # Ensure chezmoi is available
+  BIN_DIR="$HOME/.local/bin"
+  PATH="$PATH:$BIN_DIR"
+
+  set -x
+
+  # export CHEZMOI_PROFILE=$PROFILE
+  export CI=true
+  ./script/bootstrap --no-tty --verbose "$@"
+
+  # ./script/check
+  # ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+
+  # Keep the container running
+  bash -i
+  # bash -l
+  # watch -n60 chezmoi status
+}
+
+container() {
+  local user=root
+  local environment=()
+  # NOTE: container is recreated when command changes
+  local command=()
+  local volumes=()
+  # if [ -z "$tag" ]; then
+  #   image="$name:latest"
+  #   tag=latest
+  # fi
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    env+=("GITHUB_TOKEN=$GITHUB_TOKEN")
   fi
   case "$name" in
-  "" | local) ./script/check "$@" ;;
-  alpine) test_alpine "$@" ;;
-  archlinux) test_archlinux "$@" ;;
-  debian | ubuntu) test_debian "$@" ;;
-  fedora) test_fedora "$@" ;;
-  macos) test_macos "$@" ;;
-  termux) test_termux "$@" ;;
+  alpine)
+    environment+=(
+      "LANG=C"
+      "USER=$user"
+    )
+    command+=(
+      "[ -f /opt/install.done ] || apk update --quiet"
+      "[ -f /opt/install.done ] || apk add bash curl" # sudo unzip
+    )
+    compose "$@"
+    ;;
+  archlinux)
+    environment+=(
+      "LANG=C"
+      "USER=$user"
+    )
+    command+=(
+      # "pacman -Sy --needed --noconfirm --quiet sudo which"
+      "[ -f /opt/install.done ] || pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+
+      # user=$user
+      # pacman --sync --needed --noconfirm --quiet --refresh sudo which
+      # useradd -ms /bin/bash "$user"
+      # usermod -aG wheel "$user"
+      # sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+      # echo -n "$user:$user" | chpasswd -e "$user"
+    )
+    compose "$@"
+    ;;
+  debian | ubuntu)
+    if [ "$image" = ubuntu ]; then
+      user=ubuntu
+    fi
+    environment+=(
+      "DEBIAN_FRONTEND=noninteractive"
+      "LANG=C"
+      "TZ=${TZ:-Etc/UTC}" # ubuntu
+      "USER=$user"
+    )
+    command+=(
+      "[ -f /opt/install.done ] || apt-get update --quiet"
+      "[ -f /opt/install.done ] || apt-get install --no-install-recommends --quiet --yes ca-certificates curl locales" # sudo unzip
+      # "rm -rf /var/lib/apt/lists/*"
+    )
+    compose "$@"
+    ;;
+  fedora)
+    environment+=(
+      "DEBIAN_FRONTEND=noninteractive"
+      "LANG=C"
+      "USER=$user"
+    )
+    command+=(
+      "[ -f /opt/install.done ] || dnf update --assumeyes --quiet"
+      "[ -f /opt/install.done ] || dnf install -y -q which unzip"
+      # "dnf clean all"
+    )
+    compose "$@"
+    ;;
+
+  # macOS
+  # https://github.com/sickcodes/Docker-OSX#building-a-headless-osx-container
+  # https://github.com/sickcodes/Docker-OSX/issues/492
+  macos)
+    # Arch: sudo pacman -S xorg-xhost && xhost +
+    # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
+    image=docker.io/sickcodes/docker-osx:${tag:-auto}
+    environment+=(
+      # "GENERATE_UNIQUE=true"
+      # "MASTER_PLIST_URL="
+      # "NONINTERACTIVE=1"
+      # "OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
+    )
+    # command+=()
+    volumes+=("/tmp/.X11-unix:/tmp/.X11-unix")
+    compose "--publish=50922:10022" "$@"
+    ;;
+
+  android | termux)
+    image=docker.io/termux/termux-docker:${tag:-x86_64}
+    environment+=()
+    # command+=()
+    compose "$@"
+    ;;
+
   *)
-    echo >&2 "Unknown image: $image"
+    echo >&2 "container: invalid image: $image"
+    usage
     exit 1
     ;;
   esac
 }
 
-# Execute or run TEST with container ARGS
-# TODO: check ARGS and TEST did not change if REMOVE is set to false
-container_test() {
-  local name="$1"
-  local image="$2"
-  if $PROVIDER ps --format="{{.Names}}" | grep -qw "$name"; then
-    if [ "$REMOVE" != true ]; then
-      echo >&2 "Executing in running container: $name"
-      $PROVIDER exec -it "$name" "${TEST[@]}"
-      return
-    fi
-    echo >&2 "Removing container: $name"
-    $PROVIDER rm "$name"
-  elif $PROVIDER ps --all --format="{{.Names}}" | grep -qw "$name"; then
-    if [ "$REMOVE" != true ]; then
-      echo >&2 "Starting existing container: $name"
-      $PROVIDER start "$name"
-      echo >&2 "Attaching to container: $name"
-      $PROVIDER attach "$name"
-      return
-    fi
-    echo >&2 "Removing container: $name"
-    $PROVIDER rm "$name"
+main() {
+  if [ $# -eq 0 ]; then
+    usage
+    exit
   fi
-  echo >&2 "Starting test container: $name"
-  $PROVIDER run -it "${ARGS[@]}" "$image" "${TEST[@]}"
-}
-
-test_alpine() {
-  local name="${1:-"test-alpine"}"
-  local image="${2:-"alpine:latest"}"
-  # local id
-  # id="$($PROVIDER inspect --format="{{.Id}}" $name)"
-  # if [ -n "$id" ]; then
-  #   $PROVIDER exec "$id" ls -la
-  #   return
-  # fi
-  local prepare="apk update --quiet && apk add --quiet bash curl" # sudo unzip
-  # && apk upgrade --quiet
-  ARGS+=(
-    "--env=LANG=C"
-    "--env=USER=root"
-    "--name=$name"
-    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
-    "--workdir=/root/.local/share/chezmoi"
-  )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
-  container_test "$name" "$image"
-}
-
-# user=test
-# pacman --sync --needed --noconfirm --quiet --refresh sudo which
-# useradd -ms /bin/bash "$user"
-# usermod -aG wheel "$user"
-# sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
-# echo -n "$user":test | chpasswd -e "$user"
-test_archlinux() {
-  local name="${1:-"test-archlinux"}"
-  local image="${2:-"archlinux:latest"}"
-  local user=test
-  local prepare_array=(
-    "pacman --sync --needed --noconfirm --quiet --refresh sudo which"
-    "&& (useradd -ms /bin/bash $user || true)"
-    "&& usermod -aG wheel $user"
-    "&& sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
-    # "&& chown -R $user:$user ."
-    # "&& su $user"
-  )
-  ARGS+=(
-    "--env=LANG=C"
-    "--env=USER=$user"
-    "--name=$name"
-    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
-    "--workdir=/root/.local/share/chezmoi"
-  )
-  TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
-  container_test "$name" "$image"
-}
-
-# Debian/Ubuntu
-test_debian() {
-  local name="${1:-"test-debian"}"
-  local image="${2:-"debian:latest"}"
-  local packages="ca-certificates curl locales" # sudo unzip
-  local prepare="apt-get update --quiet && apt-get install --quiet --yes $packages"
-  # && apt-get upgrade --quiet --yes
-  ARGS+=(
-    "--env=DEBIAN_FRONTEND=noninteractive"
-    "--env=LANG=C"
-    "--env=USER=root"
-    "--name=$name"
-    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
-    "--workdir=/root/.local/share/chezmoi"
-  )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
-  container_test "$name" "$image"
-}
-
-test_fedora() {
-  local name="${1:-"test-fedora"}"
-  local image="${2:-"fedora:latest"}"
-  local packages="which unzip"
-  local prepare="dnf update --assumeyes --quiet && dnf install --assumeyes --quiet $packages"
-  ARGS+=(
-    "--env=USER=root"
-    "--name=$name"
-    "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
-    "--workdir=/root/.local/share/chezmoi"
-  )
-  TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
-  container_test "$name" "$image"
-}
-
-# macOS
-# https://github.com/sickcodes/Docker-OSX#building-a-headless-osx-container
-# https://github.com/sickcodes/Docker-OSX/issues/492
-test_macos() {
-  local name="${1:-"test-macos"}"
-  local image="${2:-"docker.io/sickcodes/docker-osx:auto"}"
-  ARGS=(
-    "--device=/dev/kvm"
-    "--env=DISPLAY=${DISPLAY:-:0.0}"
-    # "--env=GENERATE_UNIQUE=true"
-    # "--env=MASTER_PLIST_URL="
-    "--env=NONINTERACTIVE=1"
-    "--env=OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
-    "--name=$name"
-    "--publish=50922:10022"
-    "--volume=/tmp/.X11-unix:/tmp/.X11-unix"
-  )
-  # Arch: sudo pacman -S xorg-xhost && xhost +
-  # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
-  container_test "$name" "$image"
-}
-
-# FIXME: unsupported platform\n android/amd64
-test_termux() {
-  local name="${1:-"test-termux"}"
-  local image="${2:-"docker.io/termux/termux-docker:x86_64"}" # x86_64
-  ARGS+=("--name=$name")
-  TEST=("sh" "-ixc" "$CLONE_SCRIPT && $TEST_SCRIPT")
-  # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$CLONE_SCRIPT && $TEST_SCRIPT"
-  container_test "$name" "$image"
+  local image="$1"
+  shift
+  local name="${image%%:*}" tag="${image#*:}"
+  if [ "$name" = bootstrap ]; then
+    bootstrap "$@"
+  else
+    container "$@"
+  fi
 }
 
 main "$@"
+
+# # if [[ $- = *i* ]]; then
+# #   INTERACTIVE=true
+# # else
+# #   INTERACTIVE=false
+# # fi
+# DEBUG="${DEBUG:-false}"
+# DEBUG_ON_ERROR="${DEBUG_ON_ERROR:-$DEBUG}"
+#
+# PROVIDER="${PROVIDER:-podman}"
+#
+# # ARGS="${ARGS:-} --env=GITHUB_TOKEN=${GITHUB_TOKEN:-}"
+# ARGS=(
+#   "--env=DEBUG=$DEBUG"
+# )
+# if [ -n "${GITHUB_TOKEN:-}" ]; then
+#   ARGS+=("--env=GITHUB_TOKEN=${GITHUB_TOKEN:-}")
+# fi
+# REMOVE="${REMOVE:-false}"
+# if [ "$REMOVE" = true ]; then
+#   ARGS+=("--rm")
+# fi
+#
+# BOOTSTRAP_SCRIPT='./script/bootstrap --no-tty --verbose'
+#
+# # shellcheck disable=SC2016
+# CLONE_SCRIPT='GITHUB_USERNAME=LEI; URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/dotfiles/refs/heads/main/script/bootstrap"; curl -LSfs "$URL" | sh -s -- --no-tty "$GITHUB_USERNAME"'
+#
+# # shellcheck disable=SC2016
+# TEST_SCRIPT='$HOME/.local/share/chezmoi/script/check'
+# if [ "$DEBUG_ON_ERROR" = true ]; then
+#   TEST_SCRIPT="$TEST_SCRIPT || bash -l" # || sh -l
+# fi
+#
+# old() {
+#   local name=${1:-}
+#   [ -n "$name" ] && shift
+#   if [ "$name" = all ]; then
+#     # export DEBUG DEBUG_ON_ERROR REMOVE
+#     # set -x
+#     # ./script/container alpine latest "$@"
+#     # ./script/container archlinux base-devel "$@"
+#     # for v in 12 13; do ./script/container debian $v "$@"; done
+#     # for v in 20 22 24; do ./script/container ubuntu $v.04 "$@"; done
+#     exit 1
+#   fi
+#   local image="$name"
+#   local tag=${1:-}
+#   [ -n "$tag" ] && shift
+#   if [ "$name" = "ubuntu" ]; then
+#     ARGS+=(
+#       "--env=TZ=${TZ:-Etc/UTC}"
+#       "--env=USER=ubuntu"
+#     )
+#   elif [ "$image" == macos ]; then
+#     image=docker.io/sickcodes/docker-osx
+#   fi
+#   suffix=
+#   if [ "$EPHEMERAL" = true ]; then
+#     suffix="$suffix-ephemeral"
+#   fi
+#   if [ "$HEADLESS" = true ]; then
+#     suffix="$suffix-headless"
+#   fi
+#   if [ -n "$PROFILE" ]; then
+#     suffix="$suffix-$PROFILE"
+#   fi
+#   if [ -n "$name" ] && [ -n "$tag" ]; then
+#     image="$name:$tag"
+#     set -- "test-$name-$tag$suffix" "$image" "$@"
+#   elif [ -n "$name" ]; then
+#     set -- "test-$name$suffix" "$image" "$@"
+#   fi
+#   case "$name" in
+#   alpine) test_alpine "$@" ;;
+#   archlinux) test_archlinux "$@" ;;
+#   debian | ubuntu) test_debian "$@" ;;
+#   fedora) test_fedora "$@" ;;
+#   macos) test_macos "$@" ;;
+#   termux) test_termux "$@" ;;
+#   *)
+#     echo >&2 "Unknown image: $image"
+#     exit 1
+#     ;;
+#   esac
+# }
+#
+# # Execute or run TEST with container ARGS
+# # TODO: check ARGS and TEST did not change if REMOVE is set to false
+# container_test() {
+#   local name="$1"
+#   local image="$2"
+#   if $PROVIDER ps --format="{{.Names}}" | grep -qw "$name"; then
+#     if [ "$REMOVE" != true ]; then
+#       echo >&2 "Executing in running container: $name"
+#       $PROVIDER exec -it "$name" "${TEST[@]}"
+#       return
+#     fi
+#     echo >&2 "Removing container: $name"
+#     $PROVIDER rm "$name"
+#   elif $PROVIDER ps --all --format="{{.Names}}" | grep -qw "$name"; then
+#     if [ "$REMOVE" != true ]; then
+#       echo >&2 "Starting existing container: $name"
+#       $PROVIDER start "$name"
+#       echo >&2 "Attaching to container: $name"
+#       $PROVIDER attach "$name"
+#       return
+#     fi
+#     echo >&2 "Removing container: $name"
+#     $PROVIDER rm "$name"
+#   fi
+#   echo >&2 "Starting test container: $name"
+#   $PROVIDER run -it "${ARGS[@]}" "$image" "${TEST[@]}"
+# }
+#
+# test_alpine() {
+#   local name="${1:-"test-alpine"}"
+#   local image="${2:-"alpine:latest"}"
+#   # local id
+#   # id="$($PROVIDER inspect --format="{{.Id}}" $name)"
+#   # if [ -n "$id" ]; then
+#   #   $PROVIDER exec "$id" ls -la
+#   #   return
+#   # fi
+#   local prepare="{ }apk update --quiet && apk add --quiet bash curl" # sudo unzip
+#   # && apk upgrade --quiet
+#   ARGS+=(
+#     "--env=LANG=C"
+#     "--env=USER=root"
+#     "--name=$name"
+#     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+#     "--workdir=/root/.local/share/chezmoi"
+#   )
+#   TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+#   container_test "$name" "$image"
+# }
+#
+# test_archlinux() {
+#   local name="${1:-"test-archlinux"}"
+#   local image="${2:-"archlinux:latest"}"
+#   local user=test
+#   local prepare_array=(
+#     "pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+#     "&& (useradd -ms /bin/bash $user || true)"
+#     "&& usermod -aG wheel $user"
+#     "&& sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers"
+#     # "&& chown -R $user:$user ."
+#     # "&& su $user"
+#   )
+#   ARGS+=(
+#     "--env=LANG=C"
+#     "--env=USER=$user"
+#     "--name=$name"
+#     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+#     "--workdir=/root/.local/share/chezmoi"
+#   )
+#   TEST=("sh" "-ixc" "(${prepare_array[*]}) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+#   container_test "$name" "$image"
+# }
+#
+# # Debian/Ubuntu
+# test_debian() {
+#   local name="${1:-"test-debian"}"
+#   local image="${2:-"debian:latest"}"
+#   local packages="ca-certificates curl locales" # sudo unzip
+#   local prepare="apt-get update --quiet && apt-get install --quiet --yes $packages"
+#   # && apt-get upgrade --quiet --yes
+#   ARGS+=(
+#     "--env=DEBIAN_FRONTEND=noninteractive"
+#     "--env=LANG=C"
+#     "--env=USER=root"
+#     "--name=$name"
+#     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+#     "--workdir=/root/.local/share/chezmoi"
+#   )
+#   TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+#   container_test "$name" "$image"
+# }
+#
+# test_fedora() {
+#   local name="${1:-"test-fedora"}"
+#   local image="${2:-"fedora:latest"}"
+#   local packages="which unzip"
+#   local prepare="dnf update --assumeyes --quiet && dnf install --assumeyes --quiet $packages"
+#   ARGS+=(
+#     "--env=USER=root"
+#     "--name=$name"
+#     "--volume=$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
+#     "--workdir=/root/.local/share/chezmoi"
+#   )
+#   TEST=("sh" "-ixc" "($prepare) || exit 1; $BOOTSTRAP_SCRIPT && $TEST_SCRIPT")
+#   container_test "$name" "$image"
+# }
+#
+# # macOS
+# # https://github.com/sickcodes/Docker-OSX#building-a-headless-osx-container
+# # https://github.com/sickcodes/Docker-OSX/issues/492
+# test_macos() {
+#   local name="${1:-"test-macos"}"
+#   local image="${2:-"docker.io/sickcodes/docker-osx:auto"}"
+#   ARGS=(
+#     "--device=/dev/kvm"
+#     "--env=DISPLAY=${DISPLAY:-:0.0}"
+#   )
+#   # Arch: sudo pacman -S xorg-xhost && xhost +
+#   # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
+#   container_test "$name" "$image"
+# }
+#
+# # FIXME: unsupported platform\n android/amd64
+# test_termux() {
+#   local name="${1:-"test-termux"}"
+#   local image="${2:-"docker.io/termux/termux-docker:x86_64"}" # x86_64
+#   ARGS+=("--name=$name")
+#   TEST=("sh" "-ixc" "$CLONE_SCRIPT && $TEST_SCRIPT")
+#   # $PROVIDER run -it "${ARGS[@]}" "$image" sh -ixc "$CLONE_SCRIPT && $TEST_SCRIPT"
+#   container_test "$name" "$image"
+# }

@@ -33,7 +33,9 @@
 .config/readline/
 .config/sh/
 .config/wget/
+{{- if not .ci }}
 .local/bin/
+{{- end }}
 {{- end }}
 
 {{- if or (not .features.helix) (ne .osID "manjaro") }}

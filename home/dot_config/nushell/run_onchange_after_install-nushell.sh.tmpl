@@ -10,8 +10,8 @@ if command -v nu; then
   exit
 fi
 
-# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
 echo >&2 "Installing nushell"
+{{- if eq .osIDLike "debian" }}
 export DEBIAN_FRONTEND=noninteractive
 if [ ! -f /etc/apt/trusted.gpg.d/fury-nushell.gpg ]; then
   cmd curl -fsSL https://apt.fury.io/nushell/gpg.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/fury-nushell.gpg
@@ -24,8 +24,7 @@ cmd sudo -E apt-get install --quiet --yes nushell >/dev/null
 if [ -n "${USER:-}" ] && [ -d "$HOME/.config/nushell" ]; then
   cmd sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
 fi
-echo >&2 "Installed nushell"
-# {{- else if eq .osID "fedora" }}
+{{- else if eq .osID "fedora" }}
 if [ ! -f /etc/yum.repos.d/fury-nushell.repo ]; then
   echo "[gemfury-nushell]
 name=Gemfury Nushell Repo
@@ -35,7 +34,8 @@ gpgcheck=0
 gpgkey=https://yum.fury.io/nushell/gpg.key" | cmd sudo tee /etc/yum.repos.d/fury-nushell.repo
 fi
 sudo dnf install --assumeyes --quiet nushell
-# {{- end }}
+{{- end }}
+echo >&2 "Installed nushell"
 
 # # https://github.com/idanarye/nu_plugin_skim
 # cargo install --locked nu_plugin_skim

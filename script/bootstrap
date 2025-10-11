@@ -5,15 +5,14 @@
 
 set -eu
 
-BIN_DIR="$HOME/.local/bin"
-PATH="$PATH:$BIN_DIR"
+PATH="$HOME/.local/bin:$PATH"
 
 if ! chezmoi="$(command -v chezmoi)"; then
-  chezmoi="$BIN_DIR/chezmoi"
+  chezmoi="$HOME/.local/bin/chezmoi"
   if command -v curl >/dev/null; then
-    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$BIN_DIR"
+    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
   elif command -v wget >/dev/null; then
-    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$BIN_DIR"
+    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
   else
     echo "To install chezmoi, you must have curl or wget installed." >&2
     exit 1
@@ -29,7 +28,7 @@ if [ "${CI:-${CODESPACES:-}}" = "true" ]; then
   fi
   # set -- init --apply --source="$script_dir"
   # NOTE: the bootstrap script is in a subdirectory
-  set -- init --apply --source="$(dirname script_dir)"
+  set -- init --apply --source="$(dirname script_dir)" "$@"
 else
   if [ $# -eq 0 ]; then
     echo >&2 "Missing user name or repository (chezmoi init user)"

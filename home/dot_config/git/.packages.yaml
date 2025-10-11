@@ -1,5 +1,10 @@
 ---
 packages:
+  act:
+    enabled: '{{ and .features.git (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}'
+    nameOverwrite:
+      gh: nektos/gh-act
+    type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
   # gcli:
   gh:
     enabled: >
@@ -50,3 +55,4 @@ packages:
   prek: # pre-commit
     enabled: "{{ .features.git }}"
     type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
+    # type: brew

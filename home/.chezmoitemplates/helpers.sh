@@ -23,7 +23,6 @@ dry_run() {
     msg "DRY-RUN: $*"
     return
   fi
-  msg "$@"
   run "$@"
 }
 

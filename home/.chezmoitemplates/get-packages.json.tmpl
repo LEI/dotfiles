@@ -44,7 +44,7 @@
 {{-   end -}}
 {{- end }}
 
-{{- $output := includeTemplate "parse-packages.json.tmpl" (mergeOverwrite . (dict
+{{- $output := includeTemplate "filter-packages.json.tmpl" (mergeOverwrite . (dict
   "input" $packages
 )) | fromJson -}}
 

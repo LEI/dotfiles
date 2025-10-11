@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 
 _common_setup() {
-  # BW02: allow using flags on `run`
-  bats_require_minimum_version 1.5.0
-
-  # if [ "$UNAME" = Darwin ]; then
-  BATS_LIB_PATH="$(brew --prefix)/lib"
-  # elif [ -d /usr/lib/bats ]; then
-  #   BATS_LIB_PATH=/usr/lib/bats
-  # else
-  #   BATS_LIB_PATH=/usr/lib
-  # fi
-  export BATS_LIB_PATH
-
   # load "${BATS_LIB_PATH}/bats-support/load"
   # load "${BATS_LIB_PATH}/bats-assert/load"
-
+  # load "${BATS_LIB_PATH}/bats-file/load"
   bats_load_library bats-support
   bats_load_library bats-assert
+  bats_load_library bats-file
 
-  load "${BATS_LIB_PATH}/bats-mock/stub"
+  # bats_load_safe bats-mock/stub
+  # load "${BATS_LIB_PATH##*:}/test_helper/bats-mock/stub"
+
+  if command -v brew >/dev/null; then
+    bats_load_safe test_helper/bats-mock/stub
+  else
+    load "${BATS_LIB_PATH##*:}/bats-mock/stub"
+  fi
 
   # Get the containing directory of this file
   # use $BATS_TEST_FILENAME instead of ${BASH_SOURCE[0]} or $0,

@@ -131,7 +131,6 @@ check_features() {
   fi
 
   if has_feature mise; then
-    # dry_run mise trust # --all
     dry_run mise --version | head -n1
     # dry_run mise ls
     # dry_run mise trust --show
@@ -209,7 +208,7 @@ check_features() {
   fi
 
   if has_feature vim; then
-    vim --version | head -n1
+    dry_run vim --version | head -n1
     BINS+=("vim")
   fi
 
@@ -271,9 +270,14 @@ check_versions() {
 
 main() {
   check_chezmoi
+
+  # run chezmoi execute-template --refresh-externals=never '{{ .features | toPrettyJson }}'
   check_features
+
+  # run chezmoi managed | grep '.chezmoiscript\|.local/bin\|install-'
   check_versions "$@"
-  # chezmoi package diff all
+
+  # run chezmoi package diff all
 
   if [ "${DEBUG:-}" = true ]; then
     echo >&2 "DEBUG enabled"

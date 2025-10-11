@@ -304,7 +304,9 @@ packages:
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   mcp-hub: # @4.2.0
     enabled: {{ .features.ai }}
-    type: npm
+    nameOverwrite:
+      arch: nodejs-mcp-hub
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
   mise:
     enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "windows") }}
     nameOverwrite:
@@ -312,11 +314,11 @@ packages:
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
-  mmdc:
-    enabled: {{ and .features.neovim .features.node }}
-    nameOverwrite:
-      npm: "@mermaid-js/mermaid-cli"
-    type: npm
+  # mmdc:
+  #   enabled: {{ and .features.neovim .features.node }}
+  #   nameOverwrite:
+  #     npm: "@mermaid-js/mermaid-cli"
+  #   type: npm
   netscanner:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   nvtop: # nvitop, qmassa
@@ -623,6 +625,7 @@ osPackages:
   alpine:
     apk:
       mandoc:
+      ncurses: # tput (bats --pretty)
       tar:
       xz:
 
@@ -730,13 +733,13 @@ osPackages:
       # lynx:
       mas:
       # mercurial:
-      # moreutils:
       # mosh:
       # msgpack:
       # ncdu:
       # ncurses:
       # nmap:
       # pango:
+      parallel: # Conflicts with moreutils
       # patchutils:
       # percona-toolkit:
       # pgformatter:
@@ -750,6 +753,7 @@ osPackages:
       # semgrep:
       # shunit2:
       # sops:
+      # sponge: # Extracted from moreutils
       supervisor:
         restart_service: ":changed"
       gromgit/brewtils/taproom:

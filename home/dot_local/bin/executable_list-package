@@ -39,7 +39,7 @@ gem)
   gem list | cut -d' ' -f1
   ;;
 go)
-  # FIXME: exclude stanaard library
+  # FIXME: exclude standard library
   go list ... | grep -v /
   ;;
 mise)
@@ -50,7 +50,9 @@ npm)
   ;;
 pacman)
   extra_installed="$(pacman -Qqm)"
-  pacman -Qq | grep -vx "$extra_installed"
+  pacman -Qq | grep -vx "$extra_installed" ||
+    # Prevent grep error e.g. during test
+    echo
   ;;
 pip)
   python=python

@@ -38,6 +38,12 @@ commands:
   - name: execute
     aliases: [E]
     run: "[chezmoi-execute]"
+  - name: feature
+    aliases: [f]
+    run: "[chezmoi-feature]"
   - name: package-list
     aliases: [l]
     run: "[chezmoi-package, list]"
+  - name: package
+    aliases: [p]
+    run: "[chezmoi-package]"

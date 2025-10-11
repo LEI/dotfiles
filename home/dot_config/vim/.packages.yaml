@@ -1,5 +1,6 @@
 ---
 packages:
+  # gvim:
   # macvim:
   #   enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
   macvim-app:

@@ -6,12 +6,21 @@ set -euo pipefail
 
 source home/.chezmoitemplates/helpers.sh
 
+# DRY_RUN="${DRY_RUN:-}"
+BENCH_ITERATIONS="${BENCH_ITERATIONS:-10}"
+UNAME="${UNAME:-$(uname -s)}"
+
 command_time() {
   local file="$1.txt"
+  local time_args=("-a" "-o" "$file")
   shift
   # TIMEFORMAT="%e"
-  # FIXME(arch): TIMEFORMAT="%R"
-  command time -a -f "%e" -o "$file" -- "$@"
+  if [ "$UNAME" = Darwin ]; then
+    TIMEFORMAT="%R"
+  else
+    time_args+=("-f" "%e")
+  fi
+  command time "${time_args[@]}" -- "$@"
 }
 
 initial_time() {
@@ -46,17 +55,17 @@ main() {
   fi
 
   local shell="${1:-bash}"
-  if [ "${DRY_RUN:-}]" = true ]; then
-    shell="echo $shell"
-  fi
+  # if [ "$DRY_RUN" = true ]; then
+  #   shell="echo >&2 $shell"
+  # fi
   if [ $# -gt 0 ]; then
     shift
   fi
 
   local shell_arg=i
-  if [ "${UNAME:-$(uname -s)}" = Darwin ]; then
-    shell_arg=l
-  fi
+  # if [ "$UNAME" = Darwin ]; then
+  #   shell_arg=l
+  # fi
   local cmd="$shell -${shell_arg}c exit"
   local name="${cmd%% *}" # "${cmd// /-}"
 

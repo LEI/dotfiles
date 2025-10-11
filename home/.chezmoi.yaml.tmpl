@@ -4,6 +4,7 @@
 {{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
 {{- $preset := env "CHEZMOI_PRESET" | default (ne .chezmoi.os "windows" | ternary "font" "text") -}}
 {{- $profile := env "CHEZMOI_PROFILE" -}}
+{{- $system := env "CHEZMOI_SYSTEM" | default ($headless | ternary "server" "client") -}}
 {{- $upgrade := eq (env "CHEZMOI_UPGRADE") "true" -}}
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
@@ -96,6 +97,7 @@
 {{- $data := dict
   "accessToken" $accessToken
   "chassisType" $chassisType
+  "ci" $ci
   "codespaces" $codespaces
   "container" $container
   "devContainer" $devContainer
@@ -109,6 +111,7 @@
   "osVersion" $osVersion
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
+  "system" $system
   "timezone" $timezone
   "wsl" $wsl
 

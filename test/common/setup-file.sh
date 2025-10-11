@@ -6,4 +6,6 @@ _common_setup_file() {
   export BATS_TEST_RETRIES=1
 
   # export SUDO_ASKPASS=false
+
+  # chezmoi feature enabled --output=text >"$BATS_RUN_TMPDIR/chezmoi-features.txt"
 }
