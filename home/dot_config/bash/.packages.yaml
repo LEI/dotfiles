@@ -9,7 +9,7 @@ packages:
     # nameOverwrite:
     #   pacman: bats bats-assert bats-support
     type: brew
-  kaos/shell/bats-assert kaos/shell/bats-support: # bats-file
+  kaos/shell/bats-assert kaos/shell/bats-support kaos/shell/bats-file:
     enabled: '{{ and .features.bash (eq .osIDLike "arch" "darwin") }}'
     type: brew
   kaos/shell/bats-mock:

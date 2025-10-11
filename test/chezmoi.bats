@@ -1,4 +1,6 @@
 setup_file() {
+  command -v chezmoi >/dev/null || skip "chezmoi: command not found"
+
   source test/common/setup-file.sh
   _common_setup_file
 
