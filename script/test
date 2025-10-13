@@ -6,61 +6,14 @@ set -euo pipefail
 
 PATH="$HOME/.local/bin:$PATH"
 
-msg() {
-  echo >&2 "$@"
-}
-
-run() {
-  msg "$@"
-  "$@"
-}
-
-setup_bats() {
-  if ! command -v bats >/dev/null; then
-    # run apk add --no-cache bats # bats-assert bats-support bats-file
-    echo >&2 "test: bats is required"
-    exit 1
-  fi
-}
-
-setup_bats_libs() {
-  if command -v brew >/dev/null; then
-    return
-  fi
-  if ! command -v git >/dev/null; then
-    # run apk add --no-cache git
-    echo >&2 "test: git is required"
-    exit 1
-  fi
-  if ! [ -d ./test/test_helper/bats-assert ]; then
-    run git clone --branch=v2.2.2 --single-branch \
-      https://github.com/bats-core/bats-assert ./test/test_helper/bats-assert
-  fi
-  if ! [ -d ./test/test_helper/bats-support ]; then
-    run git clone --branch=v0.3.0 --single-branch \
-      https://github.com/bats-core/bats-support ./test/test_helper/bats-support
-  fi
-  if ! [ -d ./test/test_helper/bats-file ]; then
-    run git clone --branch=v0.4.0 --single-branch \
-      https://github.com/bats-core/bats-file ./test/test_helper/bats-file
-  fi
-  if ! [ -d ./test/test_helper/bats-mock ]; then
-    run git clone --branch=v1 --single-branch \
-      https://github.com/jasonkarns/bats-mock ./test/test_helper/bats-mock
-  fi
-}
-
 main() {
-  run chezmoi --version
-  setup_bats
-  run bats --version
-  setup_bats_libs
   local jobs="${TEST_JOBS:-$(nproc)}"
   if ! command -v parallel >/dev/null; then
     jobs=1
   fi
+  set -x
   # --no-parallelize-within-files
-  run bats \
+  bats \
     --jobs "$jobs" \
     --print-output-on-failure \
     --show-output-of-passing-tests \

@@ -7,15 +7,13 @@ _common_setup() {
   bats_load_library bats-support
   bats_load_library bats-assert
   bats_load_library bats-file
+  bats_load_library bats-mock/stub.bash
 
   # bats_load_safe bats-mock/stub
-  # load "${BATS_LIB_PATH##*:}/test_helper/bats-mock/stub"
+  # load "${BATS_LIB_PATH##*:}/libs/bats-mock/stub"
 
-  if command -v brew >/dev/null; then
-    bats_load_safe test_helper/bats-mock/stub
-  else
-    load "${BATS_LIB_PATH##*:}/bats-mock/stub"
-  fi
+  # bats_load_safe libs/bats-mock/stub
+  # load "${BATS_LIB_PATH##*:}/bats-mock/stub"
 
   # Get the containing directory of this file
   # use $BATS_TEST_FILENAME instead of ${BASH_SOURCE[0]} or $0,

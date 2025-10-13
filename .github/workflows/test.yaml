@@ -34,9 +34,9 @@ jobs:
         id: setup-bats
         uses: bats-core/bats-action@3.0.1
         with:
-          support-path: "${{ github.workspace }}/test/test_helper/bats-support"
-          assert-path: "${{ github.workspace }}/test/test_helper/bats-assert"
-          file-path: "${{ github.workspace }}/test/test_helper/bats-file"
+          support-path: "${{ github.workspace }}/test/libs/bats-support"
+          assert-path: "${{ github.workspace }}/test/libs/bats-assert"
+          file-path: "${{ github.workspace }}/test/libs/bats-file"
 
       - name: Run tests with coverage
         shell: bash
