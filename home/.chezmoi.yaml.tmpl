@@ -227,6 +227,7 @@ github:
 # WARN: only one of env or scriptEnv may be set
 env: {}
 scriptEnv:
+  USER: {{ env "USER" | default (output "id" "-un" | trim)}}
 {{- if eq $osID "debian" }}
   DEBIAN_FRONTEND: noninteractive
 {{- end }}

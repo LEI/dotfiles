@@ -23,7 +23,9 @@ fi
 echo >&2 "Installing mise"
 
 {{- $os := .chezmoi.os }}
-{{- if eq .os "darwin" }}
+{{- if eq .os "android" }}
+{{-   $os = "linux" }}
+{{- else if eq .os "darwin" }}
 {{-   $os = "macos" }}
 {{- end }}
 

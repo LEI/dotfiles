@@ -29,7 +29,7 @@
 {{- end }}
 
 {{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
-.config/curlrc
+.config/curl/
 .config/readline/
 .config/sh/
 .config/wget/

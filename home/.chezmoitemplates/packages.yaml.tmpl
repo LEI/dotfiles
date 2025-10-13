@@ -42,7 +42,7 @@ packages:
   bvi:
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   ca-certificates:
-    enabled: {{ eq .osIDLike "arch" "debian" }}
+    enabled: {{ eq .osIDLike "android" "arch" "debian" }}
   cargo-binstall:
     enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}'
@@ -498,7 +498,8 @@ packages:
     enabled: {{ and (not .features.neovim) (not (eq .profile "minimal")) }}
     # nameOverwrite:
     #   arch: taplo-cli
-    type: brew # cargo install taplo-cli --locked --features lsp --quiet
+    #   cargo: install taplo-cli --locked --features lsp --quiet
+    type: '{{ ne .osIDLike "alpine" | ternary "brew" nil }}'
   termscp: # aim, zrok
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   # tidy:

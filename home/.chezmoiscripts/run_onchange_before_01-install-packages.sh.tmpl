@@ -78,10 +78,13 @@ cmd sudo dnf upgrade --assumeyes --quiet
 cmd sudo dnf install --assumeyes --quiet $packages
 {{- else if eq .osID "android" }}
 
+{{- if not .container }}
+
 # https://github.com/termux/termux-packages/blob/master/scripts/setup-termux.sh
 if [ ! -d "$HOME/storage/shared" ]; then
   cmd termux-setup-storage
 fi
+{{- end }}
 
 # if [ -z "${TERMUX_APP_PACKAGE_MANAGER:-}" ]; then
 #   cmd termux-setup-package-manager
