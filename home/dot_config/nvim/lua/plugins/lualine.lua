@@ -327,7 +327,7 @@ return {
             padding = { left = 0, right = 1 },
           },
         },
-        -- lualine_y = {},
+        lualine_y = {},
         lualine_z = {
           {
             'tabs',

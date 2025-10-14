@@ -15,10 +15,13 @@ vim.diagnostic.config({
     --   [vim.diagnostic.severity.WARN] = 'WarningMsg',
     -- },
   },
-  virtual_text = {
-    source = 'if_many',
-    prefix = vim.g.config.signs.on,
+  virtual_lines = {
+    current_line = true,
   },
+  -- virtual_text = {
+  --   current_line = false,
+  --   prefix = vim.g.config.signs.on,
+  -- },
 })
 
 -- https://github.com/stevearc/aerial.nvim

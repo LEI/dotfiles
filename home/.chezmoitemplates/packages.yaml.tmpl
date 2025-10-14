@@ -21,7 +21,9 @@ packages:
   autossh:
     enabled: {{ and .features.ssh (not (eq .osIDLike "debian" "windows")) }}
   bandwhich: # netshow, slurm
-    enabled: {{ and (not (eq .osIDLike "android" "debian" "fedora" "windows")) (ne .profile "minimal") }}
+    enabled: {{ and
+      (not (eq .osIDLike "android" "debian" "fedora" "windows"))
+      (ne .profile "minimal") }}
   bitwarden-cli:
     enabled: {{ eq .osIDLike "arch" "darwin" }}
   bitwarden:
@@ -30,7 +32,9 @@ packages:
       windows: Bitwarden.Bitwarden
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   bkt:
-    enabled: {{ and (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows")) (eq .profile "minimal") }}
+    enabled: {{ and
+      (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows"))
+      (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
   # below: { enabled: {{ not (eq .osIDLike "arch" "debian") }} }
@@ -40,6 +44,7 @@ packages:
       windows: clement.bottom
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
   bvi:
+    enabled: {{ ne .profile "minimal" }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   ca-certificates:
     enabled: {{ eq .osIDLike "android" "arch" "debian" }}
@@ -170,7 +175,8 @@ packages:
       # debian: git less
       windows: Git.Git
 
-  glances: { enabled: {{ and (not (eq .osIDLike "android" "debian" "windows")) (ne .profile "minimal") }} }
+  glances:
+    enabled: {{ and (not (eq .osIDLike "android" "debian" "windows")) (ne .profile "minimal") }}
   glow:
     enabled: {{ not (eq .osIDLike "alpine" "debian") }}
     nameOverwrite:
@@ -253,7 +259,7 @@ packages:
     enabled: {{ and (eq .os "linux") (not (eq .osID "fedora")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-    )) }}
+    )) (ne .profile "minimal") }}
   kubecolor:
     enabled: {{ and .features.kube (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
@@ -343,7 +349,7 @@ packages:
   # pass: # gopass
   #   enabled: {{ not (empty .accessToken) }}
   pastel: # termpicker
-    enabled: {{ not (eq .osIDLike "alpine" "debian" "fedora") }}
+    enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
       windows: sharkdp.pastel
   pg_activity[psycopg]:
@@ -389,7 +395,7 @@ packages:
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
     type: '{{ eq .osIDLike "arch" | ternary "uv" nil }}'
   process-compose: # hapless, mani+sake / cmdperf, mult
-    enabled: {{ eq .osIDLike "arch" "darwin" }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
     nameOverwrite:
       darwin: f1bonacc1/tap/process-compose
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -406,7 +412,8 @@ packages:
     ) }}
     nameOverwrite:
       windows: dalance.procs
-  progress: { enabled: {{ eq .os "darwin" "linux" }} }
+  progress:
+    enabled: {{ eq .os "android" "darwin" "linux" }}
   pspg:
     enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -526,7 +533,7 @@ packages:
       windows: duan.tre
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   time:
-    enabled: {{ eq .osIDLike "arch" "debian" }}
+    enabled: {{ eq .osIDLike "android" "arch" "debian" "fedora" }}
   tree:
     enabled: {{ ne .os "windows" }}
   tuptime:
@@ -593,7 +600,7 @@ packages:
     nameOverwrite:
       windows: ducaale.xh
   yazi:
-    enabled: {{ not (eq .osIDLike "alpine" "debian" "fedora") }}
+    enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
       darwin: yazi poppler resvg imagemagick # font-symbols-only-nerd-font
       # debian: 7zip ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
@@ -648,6 +655,7 @@ osPackages:
     pacman:
       base-devel:
       ddgr: # servitor, so
+        enabled: {{ ne .profile "minimal" }}
       # gnu-netcat: # openbsd-netcat websocat
       #   enabled: {{ eq .osID "manjaro" }}
       # iptables-nft:
@@ -664,16 +672,20 @@ osPackages:
       #     profile: minimal
       #   type: mise
       systemctl-tui: # systemd-manager-tui-bin
+        enabled: {{ ne .profile "minimal" }}
       ttf-roboto: # ttf-dejavu noto-fonts
         enabled: {{ not .headless }}
       wiki-tui: # so
+        enabled: {{ ne .profile "minimal" }}
       wikiman arch-wiki-docs:
+        enabled: {{ ne .profile "minimal" }}
       # yay: { enabled: {{ eq .osID "manjaro" }} }}' }
     aur:
       # below:
       gnu-netcat:
         # enabled: {{ ne .osID "manjaro" }}
       pacseek-bin:
+        enabled: {{ ne .profile "minimal" }}
       # terraform-pug-bin: { enabled: {{ .features.tofu }} }
       # yay: { enabled: {{ ne .osID "manjaro" }} }
   darwin:
@@ -705,7 +717,6 @@ osPackages:
       # ghostscript:
       # gitlab-runner:
       # gitleaks # detect-secrets:
-      # glow:
       # gmp:
       gnu-sed:
       # gnutls:
@@ -824,7 +835,8 @@ osPackages:
 
       # Debian devcontainer
   fedora:
-    dnf: {}
+    dnf:
+      clang: # or run "brew install gcc", required to install bats-assert, file and mock
   windows:
     scoop: {}
       # busybox:

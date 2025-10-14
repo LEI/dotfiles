@@ -246,7 +246,7 @@ return {
       'MasonToolsUpdate',
       'MasonToolsUpdateSync',
     },
-    event = 'VeryLazy',
+    lazy = false, -- event = 'VeryLazy',
     opts = {
       ensure_installed = mason_tools,
       integrations = {
@@ -254,7 +254,7 @@ return {
         ['mason-null-ls'] = false,
         ['mason-nvim-dap'] = false,
       },
-      run_on_start = true,
+      run_on_start = true, -- Requires lazy = false?
     },
     init = function()
       -- vim.api.nvim_create_autocmd('CursorHold', {
@@ -328,7 +328,6 @@ return {
           cspell_ls = {
             cmd = {
               'cspell-lsp',
-              -- TODO: allow override per project
               '--config=~/.config/cspell/cspell.json',
               '--stdio',
             },

@@ -43,6 +43,14 @@ cmd sudo apk add --quiet $packages
 cmd sudo pacman --sync --sysupgrade --needed --noconfirm --quiet
 {{- end }}
 
+
+{{- if .container }}
+
+if [ -f /var/lib/pacman/db.lck ]; then
+  rm /var/lib/pacman/db.lck
+fi
+{{- end }}
+
 # shellcheck disable=SC2086
 cmd sudo pacman --sync --needed --noconfirm --quiet $packages
 
@@ -57,8 +65,9 @@ cmd sudo pacman --sync --needed --noconfirm --quiet $packages
 {{- else if eq .osIDLike "debian" }}
 
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
-export DEBIAN_FRONTEND=noninteractive
-cmd sudo apt-get update --quiet >/dev/null
+# export DEBIAN_FRONTEND=noninteractive
+
+cmd sudo -E apt-get update --quiet # >/dev/null
 
 {{- if .upgrade }}
 

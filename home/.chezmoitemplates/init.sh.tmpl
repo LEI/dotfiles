@@ -11,7 +11,7 @@
 if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
   # BASH_CONFIG="neovide"
-  PATH="$HOME/.local/bin:$PATH"
+  PATH="$PATH:$HOME/.local/bin"
   if [ -z "${MISE_SHELL:-}" ]; then
     PATH="$PATH:$HOME/.local/share/mise/shims"
   fi
@@ -36,7 +36,7 @@ fi
 shell="{{ .shell }}" # ${SHELL##*/}
 
 if [ -z "${USER:-}" ]; then
-  USER="$(id -un)"
+  USER="$(id --user --name)"
 fi
 
 if [ "$shell" = bash ]; then IS_BASH=true; else IS_BASH=false; fi
@@ -103,17 +103,17 @@ source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
 source_files "sh/functions"
 
 if [ -d "$HOME/bin" ]; then
-  pathmunge "$HOME/bin" before replace
+  pathmunge "$HOME/bin" # before replace
 fi
 
 if [ -d "$HOME/.local/bin" ]; then
-  pathmunge "$HOME/.local/bin" before replace
+  pathmunge "$HOME/.local/bin" # before replace
 fi
 
 {{- if .features.atuin }}
 
 if [ -d /usr/local/opt/ruby/bin ]; then
-  pathmunge /usr/local/opt/ruby/bin before replace
+  pathmunge /usr/local/opt/ruby/bin # before replace
 fi
 
 # ruby_version="${ruby_version:-3.4.0}"
@@ -176,10 +176,10 @@ fi
 #   mkdir -p "$npm_config_prefix"
 # fi
 if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
-  pathmunge "$npm_config_prefix/bin" before replace
+  pathmunge "$npm_config_prefix/bin" # before replace
 fi
 if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME/bin" ]; then
-  pathmunge "$PNPM_HOME/bin" before replace
+  pathmunge "$PNPM_HOME/bin" # before replace
 fi
 
 if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then

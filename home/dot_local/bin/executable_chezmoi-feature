@@ -23,12 +23,12 @@ get_format() {
 }
 
 list_features() {
-  format="$(get_format 'keys | join "\n"')"
+  format="$(get_format "keys | join \"\n\"")"
   chezmoi execute "{{ .features | $format }}"
 }
 
 list_enabled_features() {
-  format="$(get_format 'join "\n"')"
+  format="$(get_format "join \"\n\"")"
   # shellcheck disable=SC2016
   tmpl='{{ $features := list }}{{ range $key, $value := .features }}{{ if $value }}{{ $features = append $features $key }}{{ end }}{{ end }}'
   chezmoi execute "$tmpl{{ \$features | $format }}"
@@ -40,6 +40,12 @@ has_feature() {
   value="$(chezmoi execute "{{ get .features \"$key\" }}")"
   [ "$value" = true ]
 }
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 0
+  # set -- list
+fi
 
 action=
 output=text

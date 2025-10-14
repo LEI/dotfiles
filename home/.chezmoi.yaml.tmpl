@@ -59,8 +59,8 @@
 {{-   $hostname = output "sh" "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
 {{- end -}}
 
-{{- $user := env "USER" | default "me" -}}
-{{- $name := env "NAME" | default (env "USER") -}}
+{{- $user := env "USER" | default (output "id" "-un" | trim) -}}
+{{- $name := env "NAME" | default $user -}}
 {{- $email := env "EMAIL" | default (printf "%s@localhost" $user) -}}
 {{- $accessToken := "" -}}
 
@@ -143,6 +143,7 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
+  user: {{ $user | quote }}
 {{ $data | toYaml | indent 2 }}
   preset: {{ $preset | quote }}
   symbols:
@@ -227,7 +228,7 @@ github:
 # WARN: only one of env or scriptEnv may be set
 env: {}
 scriptEnv:
-  USER: {{ env "USER" | default (output "id" "-un" | trim)}}
+  USER: {{ $user }}
 {{- if eq $osID "debian" }}
   DEBIAN_FRONTEND: noninteractive
 {{- end }}

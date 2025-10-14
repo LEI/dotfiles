@@ -6,20 +6,31 @@
 set -eu
 
 case "$CHEZMOI_COMMAND" in
-apply | init | update) ;;
+init | apply | update) ;;
 *) exit ;;
 esac
 
+# exit immediately if bws is already in $PATH
+# type bws >/dev/null 2>&1 && exit
+if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
+  # echo >&2 "Already installed"
+  exit
+fi
+
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if ! command -v sudo >/dev/null; then
-  # NOTE: must be root
+# if [ -z "${USER:-}" ]; then
+#   USER="$(id --user --name)"
+# fi
+
+if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
   case "$OSID" in
   alpine)
     cmd apk update --quiet
     cmd apk add --quiet sudo
     ;;
   android | debian)
+    # export DEBIAN_FRONTEND=noninteractive
     cmd apt-get update --quiet >/dev/null
     cmd apt-get install --quiet --yes sudo >/dev/null
     ;;
@@ -30,19 +41,12 @@ if ! command -v sudo >/dev/null; then
   esac
 fi
 
-# exit immediately if bws is already in $PATH
-# type bws >/dev/null 2>&1 && exit
-if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
-  # echo >&2 "Already installed"
-  exit
-fi
-
-# Determine OS and setup bws requirements (unzip)
+# Setup bws requirements (unzip)
 case "$(uname -s)" in
 Darwin)
   OS=apple-darwin
-  export NONINTERACTIVE=1
-  cmd brew install --quiet unzip
+  # export NONINTERACTIVE=1
+  # cmd brew install --quiet unzip
   ;;
 Linux)
   # FIXME: alpine musl
@@ -68,8 +72,9 @@ Linux)
     cmd sudo pacman --sync --needed --noconfirm --quiet unzip
     ;;
   debian)
-    export DEBIAN_FRONTEND=noninteractive
-    cmd sudo -E apt-get install --quiet --yes unzip >/dev/null
+    # export DEBIAN_FRONTEND=noninteractive
+    # cmd sudo -E apt-get install --quiet --yes unzip >/dev/null
+    cmd sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
   esac
   ;;

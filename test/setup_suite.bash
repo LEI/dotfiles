@@ -89,6 +89,11 @@ setup_suite() {
 
   UNAME="$(uname -s)"
   export UNAME
+
+  local tmp_bin="$TMPDIR/bin"
+  if [ -d "$tmp_bin" ] && [ -n "$(find "$tmp_bin" -type f)" ]; then
+    echo >&3 "# WARN: $tmp_bin exists and is not empty, cleanup if stubs misbehave"
+  fi
 }
 
 # teardown_suite() {}

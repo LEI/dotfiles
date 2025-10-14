@@ -17,6 +17,8 @@ apt)
   ;;
 aur | yay)
   pacman -Qqm
+  # yay -? --repo
+  # yay -? --aur
   ;;
 brew)
   # brew bundle dump --file=-

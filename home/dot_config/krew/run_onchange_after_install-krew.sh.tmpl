@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
 
 if command -v kubectl-krew; then
   echo >&2 "Already installed"

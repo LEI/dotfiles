@@ -18,7 +18,7 @@ return {
     ft = 'markdown',
     opts = {
       code = { enabled = false }, -- FIXME: conceal_delimiters = false
-      completions = { lsp = { enabled = true } },
+      completions = { lsp = { enabled = false } }, -- FIXME: Invalid server name 'render-markdown'
       file_types = { 'markdown', 'codecompanion', 'Avante' },
       html = { comment = { conceal = false } },
       link = { enabled = false },

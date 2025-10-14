@@ -12,7 +12,7 @@
   "ghostty" false
   "git" false
   "go" false
-  "goss" false
+  "goss" (and (eq .osIDLike "arch" "fedora") (ne .profile "minimal"))
   "gpg" false
   "helix" (and
     (not (and (eq .osIDLike "debian") (not .glibc231)))
@@ -41,9 +41,9 @@
   "tofu" false
   "topgrade" false
   "vim" false
-  "void" (eq .osIDLike "arch")
-  "vscode" (eq .osIDLike "arch" "darwin")
-  "vscodium" (eq .osIDLike "arch")
+  "void" (and (eq .osIDLike "arch") (ne .profile "minimal"))
+  "vscode" (and (eq .osIDLike "arch" "darwin") (ne .profile "minimal"))
+  "vscodium" (and (eq .osIDLike "arch") (ne .profile "minimal"))
   "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "zoxide" true
   "zsh" false
@@ -96,7 +96,6 @@
 ) -}}
 {{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
-  "goss" true
   "neovim" true
   "php" true
   "sql" true
@@ -121,7 +120,6 @@
 ) -}}
 {{- else if eq .osIDLike "fedora" }}
 {{- $features = mergeOverwrite $features (dict
-  "goss" true
   "neovim" true
   "sql" true
   "ssh" true

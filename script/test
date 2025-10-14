@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-PATH="$HOME/.local/bin:$PATH"
+PATH="$PATH:$HOME/.local/bin"
 
 main() {
   local jobs="${TEST_JOBS:-$(nproc)}"
@@ -19,6 +19,7 @@ main() {
     --show-output-of-passing-tests \
     --timing \
     ./test/*.bats "$@"
+  # FIXME: exclude ./test/libs
   # --recursive ./test "$@"
 }
 

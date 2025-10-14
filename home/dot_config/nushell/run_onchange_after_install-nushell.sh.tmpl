@@ -21,9 +21,9 @@ if [ ! -f /etc/apt/sources.list.d/fury.list ]; then
   cmd sudo apt-get update --quiet >/dev/null
 fi
 cmd sudo -E apt-get install --quiet --yes nushell >/dev/null
-if [ -n "${USER:-}" ] && [ -d "$HOME/.config/nushell" ]; then
-  cmd sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
-fi
+# if [ -d "$HOME/.config/nushell" ]; then
+#   cmd sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
+# fi
 {{- else if eq .osID "fedora" }}
 if [ ! -f /etc/yum.repos.d/fury-nushell.repo ]; then
   echo "[gemfury-nushell]

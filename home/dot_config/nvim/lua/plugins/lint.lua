@@ -13,6 +13,7 @@ return {
       local common = {}
       local lint = require('lint')
       lint.linters_by_ft = {
+        -- cspell = { 'markdown', 'plaintext' },
         dockerfile = { 'hadolint' },
         markdown = { 'markdownlint' },
         mysql = { 'sqlfluff' },

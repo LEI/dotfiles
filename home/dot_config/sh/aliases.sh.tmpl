@@ -19,7 +19,7 @@ alias grep="grep --color=auto"
 alias la="ls -ahl --color=auto"
 
 # Print each PATH entry on a separate line
-alias path='echo -e ${PATH//:/\\n}'
+alias path='echo -e "${PATH//:/\\n}"'
 
 {{- if lookPath "bat" | isExecutable }}
 alias cat=bat
@@ -83,6 +83,9 @@ alias pbpaste='xsel --clipboard --output'
 {{- else if and (lookPath "wl-copy" | isExecutable) (lookPath "wl-paste" | isExecutable) }}
 alias pbcopy=wl-copy
 alias pbpaste=wl-paste
+{{- else if and (lookPath "termux-clipbload-set" | isExecutable) (lookPath "termux-clipbload-get" | isExecutable) }}
+alias pbcopy=termux-clipbload-set
+alias pbpaste=termux-clipbload-get
 {{- end }}
 
 {{- end }}

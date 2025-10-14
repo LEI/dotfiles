@@ -14,6 +14,12 @@ check_feature() {
   #   skip "feature disabled: $*"
 }
 
+check_command() {
+  for command in "$@"; do
+    command -v "$command" >/dev/null || skip "$command not found"
+  done
+}
+
 run_chezmoi() {
   local script="$1"
   shift
@@ -40,16 +46,21 @@ run_chezmoi() {
   local file="$TEST_TMPDIR/$script"
   local dir="${file%/*}"
   if ! [ -d "$dir" ]; then
-    echo >&3 "# mkdir -p" "$dir"
+    echo >&3 "# WARN: missing directory $dir"
   fi
 
+  # echo >&3 "# chezmoi cat --refresh-externals=never $HOME/$script >$file"
   chezmoi cat --refresh-externals=never "$HOME/$script" >"$file"
+
+  # echo >&3 "# chezmoi cat --refresh-externals=never $HOME/$script | tee $file"
+  # chezmoi cat --refresh-externals=never "$HOME/$script" | tee "$file"
+
   # || {
   #   if [ $# != 0 ]; then
   #     echo >&3 "# run_chezmoi: failed to redirect command to file:"
   #     echo >&3 "# chezmoi cat --refresh-externals=never $HOME/$script >$file"
   #   fi
-  #   # fail "run_chezmoi: failed with exit code $#"
+  #   fail "run_chezmoi: failed with exit code $#"
   #   exit "$#"
   # }
 
@@ -82,8 +93,12 @@ stub_seq() {
     plan+=('echo >&2 "# STUB '"$i: $name"' $*"')
   done
   stub "$name" "${plan[@]}" "$@" \
-    'echo >&3 "'"WARN: $BATS_TEST_NAME requires at least one more stub ($max + 1): $name"' $*"' \
+    'echo >&3 "'"WARN: $BATS_TEST_NAME extra stub, change to: stub_seq $name $((max + 1))"' $*"' \
     'exit 2'
+  # shellcheck disable=SC2329
+  bats::on_failure() {
+    unstub "$name" 2>/dev/null || true
+  }
 }
 
 # _is_first_run() {

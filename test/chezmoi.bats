@@ -16,15 +16,29 @@ setup() {
   source test/common/helper.sh
 }
 
-teardown() {
-  unstub brew 2>/dev/null || true
-  unstub ln 2>/dev/null || true
-  unstub mv 2>/dev/null || true
-  unstub package-manager 2>/dev/null || true
-  unstub sudo 2>/dev/null || true
-}
+# teardown() {
+#   unstub brew 2>/dev/null || true
+# }
 
 # bats file_tags=bin,chezmoi,packages
+
+# bats test_tags=chezmoi,feature
+@test "bin: chezmoi feature" {
+  run_chezmoi .local/bin/chezmoi-feature list
+  assert_line bash
+  assert_line lla
+  # refute_stderr
+  assert_success
+}
+
+# bats test_tags=chezmoi,feature
+@test "bin: chezmoi feature enabled" {
+  run_chezmoi .local/bin/chezmoi-feature enabled
+  assert_line bash
+  refute_line lla
+  # refute_stderr
+  assert_success
+}
 
 # package-manager
 @test "bin: get package manager" {
@@ -46,18 +60,23 @@ teardown() {
 @test "bin: list installed packages" {
   # [ "${CI:-}" != true ] && skip "not in ci"
   # stub_seq sudo
-  stub_seq "$(package-manager)" 2
+  local package_manager
+  package_manager="$(package-manager)"
+  stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
+  unstub "$package_manager" 2>/dev/null || true
   # assert_output
   # refute_stderr
   assert_success
 }
+
 @test "bin: list installed packages (brew)" {
   [ "$UNAME" = Darwin ] || skip "$UNAME"
   check_feature brew
   stub package-manager "echo brew"
-  stub_seq brew
+  stub_seq brew 2
   run_chezmoi .local/bin/list-package # brew
+  unstub brew 2>/dev/null || true
   refute_output
   # assert_stderr --partial "STUB"
   assert_success
@@ -67,6 +86,7 @@ teardown() {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
   stub_seq sudo 3 # 10
   run_chezmoi .chezmoiscripts/01-install-packages.sh
+  unstub sudo 2>/dev/null || true
   refute_output
   # assert_stderr_line --regexp "Installing .* packages"
   # assert_stderr --partial "DRY-RUN:"
@@ -75,10 +95,11 @@ teardown() {
 }
 
 @test "chezmoi: install aur packages" {
-  command -v pacman >/dev/null || skip "pacman not found"
+  check_command pacman
   # command -v pacman >/dev/null || skip "$UNAME"
   stub_seq sudo 2
   run_chezmoi .chezmoiscripts/linux/install-aur-packages.sh
+  unstub sudo 2>/dev/null || true
   # assert_stderr_line --regexp "Installing .* packages"
   # assert_stderr --partial "DRY-RUN:"
   # assert_stderr_line --regexp "Installed .* packages"
@@ -90,6 +111,7 @@ teardown() {
   stub_seq brew 2
   # skip "Commands brew update and brew bundle do not support --dry-run"
   run_chezmoi .chezmoiscripts/02-install-brew-packages.sh
+  unstub brew 2>/dev/null || true
   # assert_output
   refute_output
   # assert_stderr_line "DRY-RUN: brew update --quiet"
@@ -125,6 +147,8 @@ teardown() {
   stub_seq ln
   stub_seq mv
   run_chezmoi .chezmoiscripts/00-install-xdg.sh
+  unstub ln 2>/dev/null || true
+  unstub mv 2>/dev/null || true
   refute_output
   # refute_stderr
   assert_success
