@@ -48,23 +48,6 @@ return {
       { '<leader>bn', ':bnext<cr>', desc = 'Next buffer', mode = { 'n', 'v' } },
       { '<leader>bp', ':bprevious<cr>', desc = 'Previous buffer', mode = { 'n', 'v' } },
 
-      {
-        ')d',
-        function()
-          vim.diagnostic.jump({ count = 1, float = true })
-        end,
-        desc = 'Next diagnostic',
-        mode = { 'n', 'v' },
-      },
-      {
-        '(d',
-        function()
-          vim.diagnostic.jump({ count = -1, float = true })
-        end,
-        desc = 'Next diagnostic',
-        mode = { 'n', 'v' },
-      },
-
       -- {
       --   '<leader>E',
       --   -- TODO: depth=1
