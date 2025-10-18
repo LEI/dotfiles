@@ -18,9 +18,8 @@ main() {
     --print-output-on-failure \
     --show-output-of-passing-tests \
     --timing \
-    ./test/*.bats "$@"
-  # FIXME: exclude ./test/libs
-  # --recursive ./test "$@"
+    --recursive ./test "$@"
+  # ./test/*.bats "$@"
 }
 
 main "$@"

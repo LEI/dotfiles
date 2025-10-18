@@ -81,9 +81,8 @@ setup() {
 #   done
 # }
 
-# bats test_tags=container
-@test "script/container" {
-  local name=alpine
+test_container() {
+  local name="$1"
   export \
     GITHUB_TOKEN=nope \
     PROVIDER="echo container"
@@ -92,6 +91,34 @@ setup() {
   # assert_stderr_line "Starting test container: test-$name-latest"
   # assert_line --regexp "^container run .* --name=test-$name-latest"
   assert_success
+}
+# bats test_tags=container
+@test "script/container: alpine" {
+  test_container alpine
+}
+# bats test_tags=container
+@test "script/container: android" {
+  test_container android
+}
+# bats test_tags=container
+@test "script/container: archlinux" {
+  test_container archlinux
+}
+# bats test_tags=container
+@test "script/container: debian" {
+  test_container debian
+}
+# bats test_tags=container
+@test "script/container: ubuntu" {
+  test_container ubuntu
+}
+# bats test_tags=container
+@test "script/container: fedora" {
+  test_container fedora
+}
+# bats test_tags=container
+@test "script/container: macos" {
+  test_container macos
 }
 
 # bats test_tags=container

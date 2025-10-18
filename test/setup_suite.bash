@@ -41,24 +41,24 @@ setup_bats_libs() {
     echo >&2 "setup_suite: git is required"
     exit 1
   fi
-  if ! [ -d ./test/libs/bats-mock ]; then
+  if ! [ -d ./test_helper/bats-mock ]; then
     git_clone --branch=v1 https://github.com/jasonkarns/bats-mock \
-      ./test/libs/bats-mock
+      ./test_helper/bats-mock
   fi
   if [ "$pacman" = true ]; then
     return
   fi
-  if ! [ -d ./test/libs/bats-assert ]; then
+  if ! [ -d ./test_helper/bats-assert ]; then
     git_clone --branch=v2.2.2 https://github.com/bats-core/bats-assert \
-      ./test/libs/bats-assert
+      ./test_helper/bats-assert
   fi
-  if ! [ -d ./test/libs/bats-support ]; then
+  if ! [ -d ./test_helper/bats-support ]; then
     git_clone --branch=v0.3.0 https://github.com/bats-core/bats-support \
-      ./test/libs/bats-support
+      ./test_helper/bats-support
   fi
-  if ! [ -d ./test/libs/bats-file ]; then
+  if ! [ -d ./test_helper/bats-file ]; then
     git_clone --branch=v0.4.0 https://github.com/bats-core/bats-file \
-      ./test/libs/bats-file
+      ./test_helper/bats-file
   fi
 }
 
@@ -71,7 +71,7 @@ setup_suite() {
   bats_require_minimum_version 1.5.0
 
   setup_bats_libs
-  BATS_LIB_PATH="$PWD/test/libs:$(get_bats_lib_path)"
+  BATS_LIB_PATH="$PWD/test_helper:$(get_bats_lib_path)"
   echo >&3 "# setup_suite: BATS_LIB_PATH=$BATS_LIB_PATH"
   export BATS_LIB_PATH
 
@@ -79,7 +79,7 @@ setup_suite() {
 
   if ! [ -d "$TEST_TMPDIR" ]; then
     local dirs=()
-    for d in "$TEST_TMPDIR/"{,.chezmoiscripts/{,linux,windows},.local/bin}; do
+    for d in "$TEST_TMPDIR/"{,.chezmoiscripts/{linux,windows},.local/bin}; do
       dirs+=("$d")
     done
     echo >&3 "# setup_suite: creating missing directories in $TEST_TMPDIR"
@@ -90,7 +90,7 @@ setup_suite() {
   UNAME="$(uname -s)"
   export UNAME
 
-  local tmp_bin="$TMPDIR/bin"
+  local tmp_bin="${TMPDIR:-/tmp}/bin"
   if [ -d "$tmp_bin" ] && [ -n "$(find "$tmp_bin" -type f)" ]; then
     echo >&3 "# WARN: $tmp_bin exists and is not empty, cleanup if stubs misbehave"
   fi
