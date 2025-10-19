@@ -7,16 +7,22 @@ on: # yamllint disable-line rule:truthy
   # pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   clone-and-install:
     runs-on: ${{ matrix.os }}
     container:
-      image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}
+      # https://github.com/devcontainers/images/releases
+      image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}@a5328e06b77f7d01e6d66910155978db71716f2b # v0.4.19
       env:
         CHEZMOI_PROFILE: minimal
         # CODESPACES: true
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - run: ./script/bootstrap
       - run: ./script/check
       - name: chezmoi data

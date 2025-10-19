@@ -241,20 +241,18 @@ run_bootstrap() {
     # exit 1
   fi
 
-  if [ "$USER" = test ]; then
-    if ! id --user "$USER" >/dev/null 2>&1; then
-      echo >&2 "Creating user: $USER"
-      if command -v useradd >/dev/null; then
-        # useradd -ms /bin/bash "$USER"
-        useradd --create-home --shell=/bin/bash "$USER"
-        # if groups | grep -qv wheel; then
-        #   groupadd wheel
-        # fi
-        usermod -aG wheel "$USER"
-        sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
-      else
-        adduser -Ds /bin/bash "$USER" # -G wheel
-      fi
+  if [ "$USER" = test ] && ! id --user "$USER" >/dev/null 2>&1; then
+    echo >&2 "Creating user: $USER"
+    if command -v useradd >/dev/null; then
+      # useradd -ms /bin/bash "$USER"
+      useradd --create-home --shell=/bin/bash "$USER"
+      # if groups | grep -qv wheel; then
+      #   groupadd wheel
+      # fi
+      usermod -aG wheel "$USER"
+      sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+    else
+      adduser -Ds /bin/bash "$USER" # -G wheel
     fi
   fi
 
@@ -303,12 +301,12 @@ run_bootstrap() {
     "${bootstrap[@]}" "$@"
   fi
 
-  ./script/check
+  # ./script/check
 
-  if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
-    PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
-  fi
-  ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+  # if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
+  #   PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+  # fi
+  # ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
 
   # Keep the container running
   # bash -i

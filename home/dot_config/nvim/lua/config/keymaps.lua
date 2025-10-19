@@ -30,8 +30,8 @@ map('n', '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Increase Window W
 -- Buffers
 map('n', '<S-h>', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
 map('n', '<S-l>', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
-map('n', '[b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
-map('n', ']b', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
+map('n', '(b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
+map('n', ')b', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
 -- map('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
 -- map('n', '<leader>`', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
 if not Snacks then
@@ -104,8 +104,8 @@ map('n', '<leader>xq', function()
   end
 end, { desc = 'Quickfix List' })
 
-map('n', '[q', '<cmd>cprev<cr>', { desc = 'Previous quickfix' })
-map('n', ']q', '<cmd>cnext<cr>', { desc = 'Next quickfix' })
+map('n', '(q', '<cmd>cprev<cr>', { desc = 'Previous quickfix' })
+map('n', ')q', '<cmd>cnext<cr>', { desc = 'Next quickfix' })
 
 -- Quit
 -- map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
@@ -159,12 +159,12 @@ local diagnostic_goto = function(next, severity)
   end
 end
 map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line Diagnostics' })
-map('n', ']d', diagnostic_goto(true), { desc = 'Next Diagnostic' })
-map('n', '[d', diagnostic_goto(false), { desc = 'Prev Diagnostic' })
-map('n', ']e', diagnostic_goto(true, 'ERROR'), { desc = 'Next Error' })
-map('n', '[e', diagnostic_goto(false, 'ERROR'), { desc = 'Prev Error' })
-map('n', ']w', diagnostic_goto(true, 'WARN'), { desc = 'Next Warning' })
-map('n', '[w', diagnostic_goto(false, 'WARN'), { desc = 'Prev Warning' })
+map('n', ')d', diagnostic_goto(true), { desc = 'Next Diagnostic' })
+map('n', '(d', diagnostic_goto(false), { desc = 'Prev Diagnostic' })
+map('n', ')e', diagnostic_goto(true, 'ERROR'), { desc = 'Next Error' })
+map('n', '(e', diagnostic_goto(false, 'ERROR'), { desc = 'Prev Error' })
+map('n', ')w', diagnostic_goto(true, 'WARN'), { desc = 'Next Warning' })
+map('n', '(w', diagnostic_goto(false, 'WARN'), { desc = 'Prev Warning' })
 
 -- Refresh buffer
 map('n', '<M-l>', '<cmd>edit<cr>', { desc = 'Refresh buffer' })

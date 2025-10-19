@@ -140,8 +140,11 @@ if [ -d /home/linuxbrew/.linuxbrew ]; then
 fi
 {{- end }}
 
-# # https://github.com/rossmacarthur/sheldon#loading-plugins
-# eval "$(sheldon source)"
+{{- if .features.sheldon }}
+
+# https://github.com/rossmacarthur/sheldon#loading-plugins
+# TIMEFORMAT="init sheldon: %R" bench eval "$(bench sheldon source)"
+{{- end }}
 
 # Must be first to ensure tools are available
 if command -v mise >/dev/null; then

@@ -1,5 +1,11 @@
 {{- $output := dict }}
-{{- range $key, $pkg := .input }}
+{{- $input := get . "input" | default list }}
+
+{{- if empty $input }}
+{{-   warnf "%s: missing input" .chezmoi.sourceFile }}
+{{- end }}
+
+{{- range $key, $pkg := $input }}
 
 {{-   if eq $pkg nil }}
 {{-     $pkg = dict }}

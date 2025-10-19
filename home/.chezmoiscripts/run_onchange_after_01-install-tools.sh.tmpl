@@ -62,7 +62,7 @@ echo >&2 "Installed tools"
 
 {{- if not (empty $tools) }}
 
-# FIXME: ensure new tools are installed
+# FIXME: ensure new tools are installed and show hash diff
 run mise use --global "$@" {{ $miseArgs }} {{ $tools | sortAlpha | join " " }}
 {{- end }}
 

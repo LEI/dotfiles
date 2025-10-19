@@ -1,5 +1,11 @@
 {{- $list := list }}
-{{- range .values }}
+{{- $values := get . "values" | default list }}
+
+{{- if empty $values }}
+{{-   warnf "%s: missing values" .chezmoi.sourceFile }}
+{{- end }}
+
+{{- range $values }}
 {{-   $value := get . $.key | trim }}
 {{-   if $value }}
 {{-     $list = append $list $value }}

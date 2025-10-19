@@ -1,6 +1,12 @@
 ---
 {{ $baseURL := get . "baseURL" | default "https://github.com" -}}
-{{ range $name, $entry := .entries -}}
+{{ $entries := get . "entries" | default dict -}}
+
+{{- if empty $entries }}
+{{-   warnf "%s: missing entries" .chezmoi.sourceFile }}
+{{- end }}
+
+{{ range $name, $entry := $entries -}}
 {{ if ne (get $entry "tag") "" -}}
 {{ $base := get $entry "url" | default (printf "%s/%s" $baseURL $entry.repo) -}}
 {{ $url := printf "%s/archive/refs/tags/%s.tar.gz" $base $entry.tag -}}
