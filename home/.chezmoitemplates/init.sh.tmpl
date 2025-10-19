@@ -146,17 +146,21 @@ fi
 {{- end }}
 
 {{- if .features.sheldon }}
+# TODO: extract blocks to templates
 
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-# TIMEFORMAT="init sheldon: %R" bench eval "$(bench sheldon source)"
-{{- end }}
+TIMEFORMAT="sheldon: %R" bench eval "$(sheldon source)"
+{{- else }}
+
+{{- if .features.mise }}
 
 # Must be first to ensure tools are available
 if command -v mise >/dev/null; then
-  TIMEFORMAT="init mise: %R" bench eval "$(bench mise activate "$shell")"
+  TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
 else
   echo >&2 "Command 'mise' not found"
 fi
+{{- end }}
 
 # if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
 #   bench source "${CARGO_HOME:-$HOME/.cargo}/env"
@@ -198,37 +202,39 @@ fi
 source_plugins sh
 
 if command -v direnv >/dev/null; then
-  TIMEFORMAT="init direnv: %R" bench eval "$(bench direnv hook "$shell")"
+  TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
 else
   echo >&2 "Command 'direnv' not found"
 fi
 
 if command -v starship >/dev/null; then
-  TIMEFORMAT="init starship: %R" bench eval "$(bench starship init "$shell")"
+  TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
 else
   echo >&2 "Command 'starship' not found"
 fi
 
 if command -v zoxide >/dev/null; then
-  TIMEFORMAT="init zoxide: %R" bench eval "$(bench zoxide init "$shell")"
+  TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
 else
   echo >&2 "Command 'zoxide' not found"
 fi
 
-# Must be after starship to preserve PROMPT_COMMAND?
 {{- if .features.atuin }}
+
+# Must be after starship to preserve PROMPT_COMMAND
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
   if command -v atuin >/dev/null; then
-    TIMEFORMAT="init atuin: %R" bench eval "$(bench atuin init --disable-up-arrow "$shell")"
+    TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
   else
     echo >&2 "Command 'atuin' not found"
   fi
 fi
 {{- end }}
+{{- end }}
 
 {{- if and .features.ai .features.git }}
 # if command -v gh >/dev/null; then
-#   eval "$(bench gh copilot alias -- "$shell")"
+#   eval "$(gh copilot alias -- "$shell")"
 # fi
 {{- end }}
 

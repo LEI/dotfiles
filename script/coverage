@@ -52,7 +52,6 @@ coverage() {
     --bash-parse-files-in-dir="$dir" \
     --include-path="$dir" \
     --exclude-pattern=coverage \
-    --collect-only \
     --dump-summary \
     "$COVERAGE_OUTPUT" \
     ./script/test "$@"

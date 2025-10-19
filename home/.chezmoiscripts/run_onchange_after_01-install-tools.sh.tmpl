@@ -27,6 +27,8 @@ fi
 
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
 echo >&2 "Installing tools"
+echo "{{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}"
+cat ~/.config/mise/config.toml
 
 # mise_args="--yes"
 # if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then

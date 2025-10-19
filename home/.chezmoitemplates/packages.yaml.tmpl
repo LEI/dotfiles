@@ -8,6 +8,7 @@ packages:
     )) }}
     nameOverwrite:
       darwin: sevenzip
+      # FIXME: not recognized by "scoop check" which also recommends innounp and dark/wixtoolset
       windows: 7zip.7zip
   adb:
     enabled: {{ and (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") }}
@@ -832,8 +833,7 @@ osPackages:
       # Cargo gitlab-ci-ls
       pkg-config:
       libssl-dev:
-
-      # Debian devcontainer
+    # deb-get, pacstall
   fedora:
     dnf:
       clang: # or run "brew install gcc", required to install bats-assert, file and mock

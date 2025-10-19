@@ -51,7 +51,7 @@ container() {
     environment+=(
       # "LANG=C"
     )
-    build="apk update --quiet && apk add bash curl sudo unzip"
+    build="apk update --quiet && apk add bash chezmoi curl sudo unzip"
     compose "$@"
     ;;
   android | termux)
@@ -70,7 +70,7 @@ container() {
       # "LANG=C"
     )
     # pacman -Sy --needed --noconfirm --quiet sudo which
-    build="pacman --sync --needed --noconfirm --quiet --refresh sudo which"
+    build="pacman --sync --needed --noconfirm --quiet --refresh chezmoi sudo which"
     # user=$user
     # pacman --sync --needed --noconfirm --quiet --refresh sudo which
     # useradd -ms /bin/bash "$user"
@@ -157,7 +157,7 @@ compose() {
     if [ "$1" = check ]; then
       set -- exec -T "$name" ./script/check
     elif [ "$1" = test ]; then
-      set -- exec -T "$name" ./script/test --pretty
+      set -- exec -T "$name" ./script/test # --pretty
     fi
   elif [ $# -gt 1 ] && [ "$1" = exec ]; then
     shift
@@ -184,11 +184,13 @@ EOF
 }
 
 compose_file() {
-  local interactive=true
+  # local interactive=true
   # local sh_args=eux
   # if [ "$interactive" = true ]; then
   #   sh_args="i$sh_args"
   # fi
+  # stdin_open: $interactive
+  # tty: $interactive
   cat <<EOF
 ---
 networks:
@@ -222,8 +224,6 @@ $(for c in "${command[@]}"; do echo "        $c"; done)
 $(for v in "${volumes[@]}"; do echo "      - $v"; done)
     networks:
       - test
-    stdin_open: $interactive
-    tty: $interactive
     user: "$(if [[ "$user" = *test ]]; then echo root; else echo "$user"; fi)"
     working_dir: "$working_dir"
 EOF
@@ -241,35 +241,6 @@ run_bootstrap() {
     HOME="/home/$USER"
     # echo >&2 "Invalid $USER home: $HOME"
     # exit 1
-  fi
-
-  if [ "$USER" = test ]; then
-    if ! id --user "$USER" >/dev/null 2>&1; then
-      echo >&2 "Creating user: $USER"
-      if command -v useradd >/dev/null; then
-        # useradd -ms /bin/bash "$USER"
-        useradd --create-home --shell=/bin/bash "$USER"
-        # if groups | grep -qv wheel; then
-        #   groupadd wheel
-        # fi
-      else
-        adduser -Ds /bin/bash "$USER" # -G wheel
-      fi
-    fi
-    if groups | grep -qv wheel; then
-      echo >&2 "Creating group: $USER"
-      if command -v groupadd >/dev/null; then
-        groups "$USER"
-        groups
-        groupadd wheel --users "$USER" || true
-      else
-        addgroup wheel || true
-      fi
-    fi
-    if command -v usermod >/dev/null; then
-      usermod -aG wheel "$USER"
-    fi
-    sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
   fi
 
   # Ensure chezmoi is available
@@ -293,6 +264,38 @@ run_bootstrap() {
   fi
 
   set -x
+
+  if [ "$USER" = test ]; then
+    if ! id --user "$USER" >/dev/null 2>&1; then
+      echo >&2 "Creating user: $USER"
+      if command -v useradd >/dev/null; then
+        # useradd -ms /bin/bash "$USER"
+        useradd --create-home --shell=/bin/bash "$USER"
+        # if groups | grep -qv wheel; then
+        #   groupadd wheel
+        # fi
+      else
+        # FIXME: user 'test' in use
+        adduser -Ds /bin/bash "$USER" || true # -G wheel
+      fi
+    fi
+    if groups | grep -qv wheel; then
+      echo >&2 "Creating group: $USER"
+      if command -v groupadd >/dev/null; then
+        groups "$USER"
+        groups
+        groupadd wheel --users "$USER" || true
+      else
+        addgroup wheel || true
+      fi
+    fi
+    if command -v usermod >/dev/null; then
+      usermod -aG wheel "$USER"
+    fi
+    sed \
+      -e 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' \
+      -i /etc/sudoers
+  fi
 
   # mkdir -p "$HOME/.config/"{atuin,bash,bat,blesh,carapace/specs,curl,eza,mise,nushell/{functions,modules,themes},procs,readline,ripgrep,sh/{functions,plugins},starship,wget,yamllint,zsh}
   # mkdir -p "$HOME/"{.brew-aliases,.config/{homebrew,psql},.local/share,.ssh/config.d}
@@ -323,12 +326,16 @@ run_bootstrap() {
   if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
     PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
   fi
-  if command -v kcov >/dev/null; then
-    export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
-    ./script/coverage
-  elif command -v bats >/dev/null; then
+  # if command -v kcov >/dev/null; then
+  #   export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
+  #   ./script/coverage # --collect-only
+  # elif command -v bats >/dev/null; then
+  if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
     ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+  else
+    ./script/test
   fi
+  # fi
 
   # Keep the container running
   # bash -i
@@ -366,6 +373,7 @@ main() {
         --abort-on-container-exit \
         --build \
         "$@"
+      # -- --collect-only
     done
     # ls -la ./coverage-*
     # kcov \

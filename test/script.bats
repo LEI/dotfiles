@@ -24,10 +24,15 @@ setup() {
 @test "script/bootstrap" {
   # stub curl; stub wget
   stub_seq chezmoi 2
-  local chezmoi_args=("test" "--dry-run" "--refresh-externals=never") # ""
+  local chezmoi_args=(
+    # "test"
+    "--dry-run"
+    "--refresh-externals=never"
+  )
+  export CI=true
   run --separate-stderr bash ./script/bootstrap "${chezmoi_args[@]}"
   unstub chezmoi 2>/dev/null || true
-  # assert_stderr_line --regexp "chezmoi init --apply .*${chezmoi_args[*]}"
+  assert_stderr_line "Running 'chezmoi init --apply --source=. ${chezmoi_args[*]}'"
   refute_output --partial "Tip:"
   assert_success
 }

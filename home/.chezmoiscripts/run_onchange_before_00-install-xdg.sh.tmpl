@@ -47,6 +47,13 @@ fi
 
 {{- if .features.rust }}
 
+if [ -d "$XDG_DATA_HOME/gem" ] && ! [ -d ~/.gem ]; then
+  ln -s "$XDG_DATA_HOME/gem" ~/.gem
+fi
+{{- end }}
+
+{{- if .features.rust }}
+
 if [ -d ~/.cargo ] && ! [ -d "$CARGO_HOME" ]; then
   cmd mv ~/.cargo "$CARGO_HOME"
 fi
