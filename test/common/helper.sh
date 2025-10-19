@@ -7,7 +7,7 @@ check_feature() {
   python) cmd=uv ;;
   rust) cmd=cargo ;;
   esac
-  command -v "$cmd" >/dev/null || skip "feature disabled: $* ($cmd not found)"
+  command -v "$cmd" >/dev/null || skip "$* feature disabled: $cmd not found"
   # chezmoi feature "$name" ||
   # grep -qx "$name" "$BATS_RUN_TMPDIR/chezmoi-features.txt" ||
   # grep -q "\"$name\": true" "$HOME/.local/share/features.json" ||

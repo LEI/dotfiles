@@ -12,7 +12,6 @@ PROFILE="${PROFILE:-minimal}"
 # Podman Engine 5.6.1 + Docker Compose version 2.39.4
 PROVIDER="${PROVIDER:-docker}"
 PREFIX="${PREFIX:-}" # termux prefix
-prefix=              # /opt or HOME
 
 usage() {
   echo >&2 "Usage: container [bootstrap|<image>]"
@@ -29,10 +28,8 @@ usage() {
 
 container() {
   local build
-  if [ -z "$prefix" ]; then
-    # prefix="$HOME/.local/share"
-    prefix="/opt" # "$HOME/.local/state"
-  fi
+  local prefix="/opt" # "$HOME/.local/state"
+  # prefix="$HOME/.local/share"
   local user=test # root
   # Environment must contain at least one element be a mapping
   local environment=()
@@ -97,7 +94,7 @@ container() {
     environment+=(
       # "LANG=C"
     )
-    build="dnf update --assumeyes --quiet && dnf install -y -q which unzip" # && dnf clean all
+    build="dnf update --assumeyes --quiet && dnf install -y -q chezmoi which unzip" # && dnf clean all
     compose "$@"
     ;;
 
@@ -176,7 +173,7 @@ compose() {
   #     echo >&2 "$compose_file"
   #   fi
   # else
-  echo >&2 "$compose_file"
+  echo "$compose_file" >&2
   # fi
   $PROVIDER compose --file=- "$@" <<EOF
 $compose_file
@@ -184,13 +181,11 @@ EOF
 }
 
 compose_file() {
-  # local interactive=true
+  local interactive=true
   # local sh_args=eux
   # if [ "$interactive" = true ]; then
   #   sh_args="i$sh_args"
   # fi
-  # stdin_open: $interactive
-  # tty: $interactive
   cat <<EOF
 ---
 networks:
@@ -210,7 +205,7 @@ $(if [ "$user" = ubuntu ]; then echo "      # network: host"; fi)
 $(if [ -n "$build" ]; then echo "        RUN $build"; fi)
 $(if [ "$user" = test ]; then
     echo "        USER $user"
-    echo "        ENV HOME /home/$user"
+    echo "        ENV HOME=/home/$user"
   fi)
     environment:
 $(for e in "${environment[@]}"; do echo "      - $e"; done)
@@ -224,6 +219,8 @@ $(for c in "${command[@]}"; do echo "        $c"; done)
 $(for v in "${volumes[@]}"; do echo "      - $v"; done)
     networks:
       - test
+    stdin_open: $interactive
+    tty: $interactive
     user: "$(if [[ "$user" = *test ]]; then echo root; else echo "$user"; fi)"
     working_dir: "$working_dir"
 EOF
@@ -329,13 +326,14 @@ run_bootstrap() {
   # if command -v kcov >/dev/null; then
   #   export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
   #   ./script/coverage # --collect-only
-  # elif command -v bats >/dev/null; then
-  if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
-    ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
-  else
-    ./script/test
-  fi
   # fi
+  if command -v bats >/dev/null; then
+    if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
+      ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+    else
+      ./script/test
+    fi
+  fi
 
   # Keep the container running
   # bash -i
@@ -367,7 +365,17 @@ main() {
   all)
     shift
     set -x
-    for img in alpine archlinux debian ubuntu fedora; do # termux
+    local images=(
+      android # termux
+      alpine
+      archlinux
+      debian
+      ubuntu
+      fedora
+      # freebsd
+      # macos
+    )
+    for img in "${images[@]}"; do
       # --exit-code-from "$img-latest"
       run_container "$img" up \
         --abort-on-container-exit \

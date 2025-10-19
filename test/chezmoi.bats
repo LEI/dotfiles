@@ -96,7 +96,7 @@ setup() {
 
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
-  stub_seq sudo 3 # 10
+  stub_seq sudo 4 # 10
   run_chezmoi .chezmoiscripts/01-install-packages.sh
   unstub sudo 2>/dev/null || true
   refute_output
@@ -120,7 +120,7 @@ setup() {
 
 @test "chezmoi: install brew packages" {
   check_feature brew
-  stub_seq brew 2
+  stub_seq brew 3
   # skip "Commands brew update and brew bundle do not support --dry-run"
   run_chezmoi .chezmoiscripts/02-install-brew-packages.sh
   unstub brew 2>/dev/null || true
