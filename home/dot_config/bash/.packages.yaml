@@ -4,12 +4,13 @@ packages:
     enabled: '{{ and .features.bash (ne .os "windows") }}'
   bash-completion:
     enabled: '{{ and .features.bash (ne .os "windows") }}'
+  # FIXME: "mise install bats" 404 on android
   bats:
-    enabled: '{{ and .features.bash (or .features.brew (eq .osIDLike "android" "alpine" "arch")) }}'
+    enabled: '{{ and .features.bash (or .features.brew (eq .osIDLike "alpine" "arch")) }}'
     nameOverwrite:
       brew: bats-core
       # pacman: bats bats-assert bats-support
-    type: '{{ not (eq .osIDLike "alpine" "arch") | ternary (ne .os "android" | ternary "brew" "mise") nil }}'
+    type: '{{ not (eq .osIDLike "alpine" "arch") | ternary "brew" nil }}'
   # FIXME: bats-assert is missing stderr functions on alpine
   bats-assert bats-support bats-file:
     enabled: '{{ and .features.bash (or .features.brew (eq .osIDLike "arch")) }}' # "alpine"
