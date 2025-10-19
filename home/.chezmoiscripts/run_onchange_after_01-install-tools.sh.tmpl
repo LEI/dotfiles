@@ -18,7 +18,8 @@ fi
 
 {{- if .upgrade }}
 
-if ! run mise self-update "$@" {{ $miseArgs }}; then echo >&2 "mise self-update failed with exit code $?"
+if ! run mise self-update "$@" {{ $miseArgs }}; then
+  echo >&2 "mise self-update failed with exit code $?"
 fi
 {{- end }}
 
@@ -38,7 +39,7 @@ echo >&2 "Installed tools"
 
 # run mise ls "$@"
 
-{{- $tools := list }}
+{{- /* $tools := list }}
 
 {{- if get .packages.mise "go" }}
 # default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
@@ -67,3 +68,4 @@ run mise use --global "$@" {{ $miseArgs }} {{ $tools | sortAlpha | join " " }}
 {{- end }}
 
 # run mise prune "$@" # --tools
+{{- */ -}}

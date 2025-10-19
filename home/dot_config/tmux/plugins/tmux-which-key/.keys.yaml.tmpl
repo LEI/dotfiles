@@ -1,6 +1,11 @@
 {{- $keys := list }}
 {{- $map := get . "map" }}
-{{- $names := get . "names" }}
+{{- $names := get . "names" | default list }}
+
+{{- if empty $names }}
+{{-   warnf "missing names (tmux .keys)" }}
+{{- end }}
+
 {{- range $names }}
 {{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
 {{- $prefix := index $parts 0 }}

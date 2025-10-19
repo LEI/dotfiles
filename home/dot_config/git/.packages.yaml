@@ -56,3 +56,5 @@ packages:
     enabled: "{{ .features.git }}"
     type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
     # type: brew
+  # zizmor:
+  #   enabled: "{{ .features.git }}"

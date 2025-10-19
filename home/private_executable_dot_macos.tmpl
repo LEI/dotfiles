@@ -1,9 +1,13 @@
 {{- /* TODO: move to .chezmoiscripts/darwin/ */ -}}
 {{- /* https://github.com/kevinSuttle/macOS-Defaults */ -}}
 
+{{- if lookPath "scutil" | isExecutable }}
 # Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
+{{- end }}
 # Local host name: {{ .hostname }}
+{{- if lookPath "sw_vers" | isExecutable }}
 # macOS build version: {{ output "sw_vers" "--buildVersion" }}
+{{- end }}
 {{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
 {{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
 {{- output "curl" "-LSfs" $url

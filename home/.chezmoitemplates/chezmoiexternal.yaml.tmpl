@@ -3,7 +3,7 @@
 {{ $entries := get . "entries" | default dict -}}
 
 {{- if empty $entries }}
-{{-   warnf "%s: missing entries" .chezmoi.sourceFile }}
+{{-   warnf "missing entries: %s" .chezmoi.sourceFile }}
 {{- end }}
 
 {{ range $name, $entry := $entries -}}

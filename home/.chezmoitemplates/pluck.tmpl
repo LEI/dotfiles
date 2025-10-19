@@ -1,10 +1,5 @@
 {{- $list := list }}
 {{- $values := get . "values" | default list }}
-
-{{- if empty $values }}
-{{-   warnf "%s: missing values" .chezmoi.sourceFile }}
-{{- end }}
-
 {{- range $values }}
 {{-   $value := get . $.key | trim }}
 {{-   if $value }}

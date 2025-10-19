@@ -9,7 +9,13 @@ echo "scoop update *"
 scoop update *
 {{- end }}
 
-{{- $scoopPackages := .packages.scoop | keys | sortAlpha | join " " }}
+{{- $scoopPackages := get .packages "scoop" | default dict }}
 
-echo "scoop install {{ $scoopPackages }}"
-scoop install {{ $scoopPackages }}
+{{- if empty $scoopPackages }}
+{{-   warnf "missing scoop packages" }}
+{{- end }}
+
+{{- $scoopPackagesList := $scoopPackages | keys | sortAlpha | join " " }}
+
+echo "scoop install {{ $scoopPackagesList }}"
+scoop install {{ $scoopPackagesList }}

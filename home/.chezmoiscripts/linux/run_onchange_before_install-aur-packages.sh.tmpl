@@ -19,7 +19,13 @@ fi
 
 echo >&2 "Installing AUR packages"
 
-aur_packages="{{ .packages.aur | keys | sortAlpha | join " " }}"
+{{- $aurPackages := get .packages "aur" | default dict }}
+
+{{- if empty $aurPackages }}
+{{-   warnf "missing aur packages" }}
+{{- end }}
+
+aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
 
 {{- $before := includeTemplate "pluck.tmpl" (dict
   "key" "before_script"

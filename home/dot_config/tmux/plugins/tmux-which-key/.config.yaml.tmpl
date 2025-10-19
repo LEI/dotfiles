@@ -2,7 +2,11 @@
 {{- $lines := includeTemplate "dot_config/tmux/tmux.conf.tmpl" . | splitList "\n" }}
 {{- $include := get . "include" | default list }}
 {{- $map := get . "map" }}
-{{- $names := get . "names" }}
+{{- $names := get . "names" | default list }}
+
+{{- if empty $names }}
+{{-   warnf "missing names (tmux .config)" }}
+{{- end }}
 
 {{- $groupKeyMap := dict }}
 {{- $groupMap := dict }}
@@ -55,7 +59,7 @@
 {{- end }}
 
 {{- range $group, $parsedKeys := $groupMap }}
-{{- $groupKeys := includeTemplate "tmux-list-keys.tmpl" (dict "group" $group "sh" $.sh) | fromJson }}
+{{- $groupKeys := includeTemplate "tmux-list-keys.tmpl" (dict "group" $group) | fromJson }}
 {{- $menu := includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict
   "include" $parsedKeys
   "map" $groupKeys.map

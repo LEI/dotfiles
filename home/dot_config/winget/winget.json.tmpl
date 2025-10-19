@@ -1,5 +1,11 @@
 {{- $jsonPackages := list -}}
-{{- range .packages.winget | keys | sortAlpha -}}
+{{- $wingetPackages := get .packages "winget" | default dict }}
+
+{{- if empty $wingetPackages }}
+{{-   warnf "missing winget packages" }}
+{{- end }}
+
+{{- range $wingetPackages | keys | sortAlpha -}}
 {{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
 {{- end -}}
 {{- dict
