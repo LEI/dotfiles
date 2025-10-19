@@ -195,7 +195,8 @@ networks:
   test:
 services:
   $name:
-    # container_name: "${name}-${tag}"
+    # container_name: "${name}"
+    hostname: "${name}"
     # image: "$image"
     build:
       context: .
@@ -230,6 +231,7 @@ EOF
 
 # Runs in container
 run_bootstrap() {
+  # printenv
   local bootstrap=(./script/bootstrap --force --no-tty)
   # local user="${1:-$USER}"
   if [ -z "${USER:-}" ]; then
@@ -249,8 +251,10 @@ run_bootstrap() {
       # if groups | grep -qv wheel; then
       #   groupadd wheel
       # fi
-      usermod -aG wheel "$USER"
-      sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+      if groups | grep -q wheel; then
+        usermod -aG wheel "$USER"
+        sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+      fi
     else
       adduser -Ds /bin/bash "$USER" # -G wheel
     fi
@@ -301,12 +305,16 @@ run_bootstrap() {
     "${bootstrap[@]}" "$@"
   fi
 
-  # ./script/check
+  ./script/check
 
-  # if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
-  #   PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
-  # fi
-  # ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+  if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
+    PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+  fi
+  ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+  # COVERAGE_OUTPUT="./coverage/$HOSTNAME"
+  # mkdir -p "$COVERAGE_OUTPUT"
+  # export COVERAGE_OUTPUT
+  # ./script/coverage
 
   # Keep the container running
   # bash -i
@@ -314,18 +322,11 @@ run_bootstrap() {
   # watch -n60 chezmoi status
 }
 
-main() {
-  if [ $# -eq 0 ]; then
-    usage
-    exit
-  fi
-  local arg="$1"
+run_container() {
+  local name="$1"
+  local image="$name"
   shift
-  if [ "$arg" = bootstrap ]; then
-    run_bootstrap "$@"
-    return
-  fi
-  local image="$arg" tag=latest
+  local tag=latest
   if [[ "$image" = *:* ]]; then
     tag="${image#*:}"
     name="${image%%:*}-$tag"
@@ -334,6 +335,30 @@ main() {
     image="$image:$tag"
   fi
   container "$@"
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    usage
+    exit
+  fi
+  case "$1" in
+  all)
+    shift
+    for img in alpine archlinux debian ubuntu fedora termux; do
+      # --exit-code-from "$img-latest"
+      run_container "$img" up \
+        --abort-on-container-exit \
+        --build \
+        "$@"
+    done
+    ;;
+  bootstrap)
+    shift
+    run_bootstrap "$@"
+    ;;
+  *) run_container "$@" ;;
+  esac
 }
 
 main "$@"

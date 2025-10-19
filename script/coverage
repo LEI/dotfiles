@@ -4,6 +4,7 @@
 
 set -Eeuo pipefail
 
+COVERAGE_OUTPUT="${COVERAGE_OUTPUT:-./coverage}"
 TMPDIR="${TMPDIR:-${TMP:-/tmp}}"
 
 # generate() {
@@ -52,7 +53,7 @@ coverage() {
     --include-path="$dir" \
     --exclude-pattern=coverage \
     --dump-summary \
-    ./coverage \
+    "$COVERAGE_OUTPUT" \
     ./script/test "$@"
   # --exclude-path="$TEST_TMPDIR/.local/bin"
 }

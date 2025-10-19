@@ -25,7 +25,7 @@ packages:
     type: brew
   kcov:
     enabled: "{{ or .features.bash .features.brew }}"
-    type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
+    type: '{{ not (eq .osIDLike "arch") | ternary "brew" nil }}'
   # sheldon:
   #   enabled: "{{ or .features.bash .features.zsh }}"
   #   type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
