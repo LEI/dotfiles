@@ -14,7 +14,7 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
   # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
   #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
   # fi
-  cmd sudo -E makepkg --install --noconfirm --syncdeps
+  cmd sudo -E --user="$USER" makepkg --install --noconfirm --syncdeps
 fi
 
 echo >&2 "Installing AUR packages"

@@ -33,7 +33,7 @@ echo >&2 "Installing tools"
 #   mise_args="$mise_args --verbose"
 # fi
 
-run timeout 5m mise install "$@" {{ $miseArgs }}
+run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@" {{ $miseArgs }}
 
 echo >&2 "Installed tools"
 

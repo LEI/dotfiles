@@ -52,6 +52,7 @@ coverage() {
     --bash-parse-files-in-dir="$dir" \
     --include-path="$dir" \
     --exclude-pattern=coverage \
+    --collect-only \
     --dump-summary \
     "$COVERAGE_OUTPUT" \
     ./script/test "$@"
@@ -78,7 +79,7 @@ main() {
 
   # Force cleanup previous coverage to avoid merge errors, e.g.
   # "kcov: error: File /tmp/*-stub-run exists, but can't be read???"
-  rm -rf ./coverage
+  rm -rf ./coverage # "$COVERAGE_OUTPUT"
 
   mkdir -p "$TEST_TMPDIR/.chezmoiscripts/linux"
   # mkdir -p "$TEST_TMPDIR/.chezmoiscripts/windows"

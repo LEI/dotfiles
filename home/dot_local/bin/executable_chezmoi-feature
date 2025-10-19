@@ -8,9 +8,9 @@ usage() {
 }
 
 get_format() {
-  format="${1:-}"
+  format=
   case "$output" in
-  text) ;;
+  '' | text) ;;
   json) format="toPrettyJson" ;;
   yaml) format="toYaml" ;;
   *)
@@ -23,15 +23,29 @@ get_format() {
 }
 
 list_features() {
-  format="$(get_format "keys | join \"\n\"")"
-  chezmoi execute "{{ .features | $format }}"
+  output="$1"
+  shift
+  format="$(get_format "$output")"
+  set -x
+  if [ -n "$format" ]; then
+    chezmoi execute "{{ .features | $format }}"
+  else
+    chezmoi execute '{{ range $key, $value := .features }}{{ $key }}
+{{ end -}}'
+  fi
 }
 
 list_enabled_features() {
-  format="$(get_format "join \"\n\"")"
+  output="$1"
+  shift
+  format="$(get_format "$output")"
   # shellcheck disable=SC2016
-  tmpl='{{ $features := list }}{{ range $key, $value := .features }}{{ if $value }}{{ $features = append $features $key }}{{ end }}{{ end }}'
-  chezmoi execute "$tmpl{{ \$features | $format }}"
+  if [ -n "$format" ]; then
+    chezmoi execute "{{ .features | $format }}"
+  else
+    chezmoi execute '{{ range $key, $value := .features }}{{ if $value }}{{ $key }}
+{{ end }}{{ end -}}'
+  fi
 }
 
 has_feature() {
@@ -42,9 +56,9 @@ has_feature() {
 }
 
 if [ $# -eq 0 ]; then
-  usage
-  exit 0
-  # set -- list
+  # usage
+  # exit 0
+  set -- list
 fi
 
 action=
@@ -90,10 +104,10 @@ case "$action" in
   # list_features | wc -l
   ;;
 list)
-  list_features
+  list_features "$output"
   ;;
 enabled)
-  list_enabled_features
+  list_enabled_features "$output"
   ;;
 *)
   echo >&2 "chezmoi feature: invalid action: $action"

@@ -243,21 +243,33 @@ run_bootstrap() {
     # exit 1
   fi
 
-  if [ "$USER" = test ] && ! id --user "$USER" >/dev/null 2>&1; then
-    echo >&2 "Creating user: $USER"
-    if command -v useradd >/dev/null; then
-      # useradd -ms /bin/bash "$USER"
-      useradd --create-home --shell=/bin/bash "$USER"
-      # if groups | grep -qv wheel; then
-      #   groupadd wheel
-      # fi
-      if groups | grep -q wheel; then
-        usermod -aG wheel "$USER"
-        sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+  if [ "$USER" = test ]; then
+    if ! id --user "$USER" >/dev/null 2>&1; then
+      echo >&2 "Creating user: $USER"
+      if command -v useradd >/dev/null; then
+        # useradd -ms /bin/bash "$USER"
+        useradd --create-home --shell=/bin/bash "$USER"
+        # if groups | grep -qv wheel; then
+        #   groupadd wheel
+        # fi
+      else
+        adduser -Ds /bin/bash "$USER" # -G wheel
       fi
-    else
-      adduser -Ds /bin/bash "$USER" # -G wheel
     fi
+    if groups | grep -qv wheel; then
+      echo >&2 "Creating group: $USER"
+      if command -v groupadd >/dev/null; then
+        groups "$USER"
+        groups
+        groupadd wheel --users "$USER" || true
+      else
+        addgroup wheel || true
+      fi
+    fi
+    if command -v usermod >/dev/null; then
+      usermod -aG wheel "$USER"
+    fi
+    sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
   fi
 
   # Ensure chezmoi is available
@@ -269,6 +281,7 @@ run_bootstrap() {
   export BLE_ENABLED=false
 
   export CHEZMOI_PROFILE=$PROFILE
+  export CHEZMOI_UPGRADE=true
   export CI=true
 
   if [ "${DEBUG:-}" = true ]; then
@@ -310,11 +323,12 @@ run_bootstrap() {
   if [ -d /home/linuxbrew/.linuxbrew/bin ]; then
     PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
   fi
-  ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
-  # COVERAGE_OUTPUT="./coverage/$HOSTNAME"
-  # mkdir -p "$COVERAGE_OUTPUT"
-  # export COVERAGE_OUTPUT
-  # ./script/coverage
+  if command -v kcov >/dev/null; then
+    export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
+    ./script/coverage
+  elif command -v bats >/dev/null; then
+    ./script/test --pretty # --filter-tags '!bench,!check,!chezmoi'
+  fi
 
   # Keep the container running
   # bash -i
@@ -345,13 +359,22 @@ main() {
   case "$1" in
   all)
     shift
-    for img in alpine archlinux debian ubuntu fedora termux; do
+    set -x
+    for img in alpine archlinux debian ubuntu fedora; do # termux
       # --exit-code-from "$img-latest"
       run_container "$img" up \
         --abort-on-container-exit \
         --build \
         "$@"
     done
+    # ls -la ./coverage-*
+    # kcov \
+    #   --dump-summary \
+    #   --report-only \
+    #   --merge \
+    #   ./coverage \
+    #   ./coverage-*
+    # ls -la ./coverage
     ;;
   bootstrap)
     shift

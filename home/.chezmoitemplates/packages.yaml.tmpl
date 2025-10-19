@@ -150,9 +150,9 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # foot:
   #   enabled: {{ and .features.sway (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
-  fzf:
-    nameOverwrite:
-      windows: junegunn.fzf
+  # fzf: # FIXME: arch 404
+  #   nameOverwrite:
+  #     windows: junegunn.fzf
   envx:
     enabled: {{ eq .osIDLike "arch" }}
     nameOverwrite:
@@ -417,8 +417,8 @@ packages:
   pspg:
     enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  pv:
-    enabled: {{ eq .os "android" "darwin" "linux" }}
+    # pv: # FIXME: arch 404
+  #   enabled: {{ eq .os "android" "darwin" "linux" }}
   python-mise:
     enabled: false # {{ and .features.mise .features.python }}
     name: python
@@ -838,11 +838,11 @@ osPackages:
     dnf:
       clang: # or run "brew install gcc", required to install bats-assert, file and mock
   windows:
-    scoop: {}
+    scoop:
       # busybox:
       # livesplit:
       # prime95:
-      # scoop-search:
+      scoop-search:
       # talosctl:
     winget:
       CPUID.CPU-Z:

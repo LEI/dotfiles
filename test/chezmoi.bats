@@ -22,20 +22,32 @@ setup() {
 
 # bats file_tags=bin,chezmoi,packages
 
-# bats test_tags=chezmoi,feature
-@test "bin: chezmoi feature" {
-  run_chezmoi .local/bin/chezmoi-feature list
+# bats test_tags=feature
+@test "bin: chezmoi feature list" {
+  unstub chezmoi 2>/dev/null || true
+  # run_chezmoi .local/bin/chezmoi-feature # list
+  run chezmoi feature # list
+
+  # assert_output --partial bash
+  # assert_output --partial lla
   assert_line bash
   assert_line lla
+
   # refute_stderr
   assert_success
 }
 
-# bats test_tags=chezmoi,feature
+# bats test_tags=feature
 @test "bin: chezmoi feature enabled" {
-  run_chezmoi .local/bin/chezmoi-feature enabled
+  unstub chezmoi 2>/dev/null || true
+  # run_chezmoi .local/bin/chezmoi-feature enabled
+  run chezmoi feature enabled
+
+  # assert_output --partial bash
+  # refute_output --partial lla
   assert_line bash
   refute_line lla
+
   # refute_stderr
   assert_success
 }

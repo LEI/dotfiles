@@ -20,6 +20,8 @@ git:
 
 misc:
   disable:
+    - containers
+    - git_repos
     - node
     - vagrant
   # Do not ask to retry failed steps (default: false)

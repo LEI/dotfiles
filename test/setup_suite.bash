@@ -70,6 +70,8 @@ setup_suite() {
   # BW02: allow using flags on `run`
   bats_require_minimum_version 1.5.0
 
+  # rm -fr test_helper/*
+  # ls -la test_helper
   setup_bats_libs
   BATS_LIB_PATH="$PWD/test_helper:$(get_bats_lib_path)"
   echo >&3 "# setup_suite: BATS_LIB_PATH=$BATS_LIB_PATH"
