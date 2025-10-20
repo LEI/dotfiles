@@ -24,7 +24,11 @@ fi
 
 if command -v rustup >/dev/null && ! rustup default; then
   # echo >&2 "No default toolchain is configured, using stable"
+
+  # TODO(windows/msys2): rustup default stable-x86_64-pc-windows-gnu
+  # error: linking with `x86_64-w64-mingw32-gcc` failed
   cmd rustup default stable
+
   # cmd rustup toolchain list
   # cmd rustup toolchain uninstall stable
   # cmd rustup toolchain install stable
