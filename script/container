@@ -27,7 +27,7 @@ usage() {
 }
 
 container() {
-  local build
+  local build=
   local prefix="/opt" # "$HOME/.local/state"
   # prefix="$HOME/.local/share"
   local user=test # root
@@ -36,6 +36,8 @@ container() {
   # NOTE: container is recreated when command changes
   local command=()
   local volumes=()
+  local ports=()
+  local networks=("test")
   # if [ -z "$tag" ]; then
   #   image="$name:latest"
   #   tag=latest
@@ -109,7 +111,7 @@ container() {
   macos)
     # Arch: sudo pacman -S xorg-xhost && xhost +
     # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
-    image=docker.io/sickcodes/docker-osx:auto # ${tag:-auto}
+    image=docker.io/sickcodes/docker-osx:latest # ${tag:-auto}
     environment+=(
       # "GENERATE_UNIQUE=true"
       # "MASTER_PLIST_URL="
@@ -117,7 +119,8 @@ container() {
       # "OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
     )
     volumes+=("/tmp/.X11-unix:/tmp/.X11-unix")
-    compose "--publish=50922:10022" "$@"
+    ports+=("50922:10022")
+    compose "$@"
     ;;
   *)
     echo >&2 "container: invalid image: $image"
@@ -215,10 +218,12 @@ $(for e in "${environment[@]}"; do echo "      - $e"; done)
       - -ceiux
       - |
 $(for c in "${command[@]}"; do echo "        $c"; done)
-    volumes:
+$(if [ -n "${volumes[*]}" ]; then echo "    volumes:"; fi)
 $(for v in "${volumes[@]}"; do echo "      - $v"; done)
-    networks:
-      - test
+$(if [ -n "${ports[*]}" ]; then echo "    ports:"; fi)
+$(for v in "${ports[@]}"; do echo "      - $v"; done)
+$(if [ -n "${networks[*]}" ]; then echo "    networks:"; fi)
+$(for v in "${networks[@]}"; do echo "      - $v"; done)
     stdin_open: $interactive
     tty: $interactive
     user: "$(if [[ "$user" = *test ]]; then echo root; else echo "$user"; fi)"
@@ -260,8 +265,6 @@ run_bootstrap() {
     set -- --verbose "$@"
   fi
 
-  set -x
-
   if [ "$USER" = test ]; then
     if ! id --user "$USER" >/dev/null 2>&1; then
       echo >&2 "Creating user: $USER"
@@ -293,6 +296,8 @@ run_bootstrap() {
       -e 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' \
       -i /etc/sudoers
   fi
+
+  set -x
 
   # mkdir -p "$HOME/.config/"{atuin,bash,bat,blesh,carapace/specs,curl,eza,mise,nushell/{functions,modules,themes},procs,readline,ripgrep,sh/{functions,plugins},starship,wget,yamllint,zsh}
   # mkdir -p "$HOME/"{.brew-aliases,.config/{homebrew,psql},.local/share,.ssh/config.d}

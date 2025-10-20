@@ -86,8 +86,12 @@ setup() {
   [ "$UNAME" = Darwin ] || skip "$UNAME"
   check_feature brew
   stub package-manager "echo brew"
+  bats::on_failure() {
+    unstub package-manager 2>/dev/null || true
+  }
   stub_seq brew 2
   run_chezmoi .local/bin/list-package # brew
+  unstub package-manager 2>/dev/null || true
   unstub brew 2>/dev/null || true
   refute_output
   # assert_stderr --partial "STUB"

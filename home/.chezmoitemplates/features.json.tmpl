@@ -65,7 +65,6 @@
   "gpg" (eq .osIDLike "arch" "darwin")
   "helix" true
   "kube" (or (lookPath "kubectl" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
-  "lla" (eq .osID "arch" "darwin")
   "logseq" (eq .osIDLike "arch" "darwin")
   "nushell" true
   "podman" (or (lookPath "podman" | isExecutable) (eq .osIDLike "arch" "darwin" "debian" "fedora"))
@@ -76,6 +75,7 @@
   "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) (not .glibc231))
   "zsh" true
 ) -}}
+{{- /* "lla" (eq .osID "arch" "darwin") */ -}}
 {{- end }}
 
 {{- if or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname) -}}

@@ -26,7 +26,6 @@ list_features() {
   output="$1"
   shift
   format="$(get_format "$output")"
-  set -x
   if [ -n "$format" ]; then
     chezmoi execute "{{ .features | $format }}"
   else

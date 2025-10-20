@@ -145,7 +145,7 @@ if [ -d /home/linuxbrew/.linuxbrew ]; then
 fi
 {{- end }}
 
-{{- if .features.sheldon }}
+{{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # TODO: extract blocks to templates
 
 # https://github.com/rossmacarthur/sheldon#loading-plugins
