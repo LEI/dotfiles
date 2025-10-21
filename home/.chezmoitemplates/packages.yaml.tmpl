@@ -246,6 +246,10 @@ packages:
     enabled: {{ and (eq .osIDLike "arch") (eq .chassisType "laptop") }}
   # incus incus-ui:
   #   enabled: {{ eq .osIDLike "arch" "darwin" }}
+  iperf3: # speedtest-cli
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    nameOverwrite:
+      windows: ar51an.iPerf3
   ipinfo-cli:
     enabled: {{ eq .osIDLike "arch" "darwin" }}
     nameOverwrite:
@@ -664,6 +668,10 @@ osPackages:
       mandoc:
         enabled: {{ not (lookPath "man" | isExecutable) }}
       # net-tools:
+      opensnitch:
+        name: opensnitch python-qt-material
+        enabled: {{ ne .profile "minimal" }}
+        # after_install: sudo systemctl enable opensnitchd
       # rust:
       #   enabled: {{ .features.rust }}
       #   version: latest
@@ -801,7 +809,9 @@ osPackages:
       # keka: # the-unarchiver
       # keycastr:
       # keystore-explorer:
-      # little-snitch:
+      # lulu: # little-snitch
+      #   enabled: {{ ne .profile "minimal" }}
+      #   # https://github.com/elegracer/NetSpeedMonitor
       # microsoft-excel:
       # microsoft-outlook:
       microsoft-teams: # microsoft-auto-update

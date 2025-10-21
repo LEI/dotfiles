@@ -62,11 +62,11 @@ main() {
     shift
   fi
 
-  local shell_arg=i
+  # local shell_arg=i
   # if [ "$UNAME" = Darwin ]; then
   #   shell_arg=l
   # fi
-  local cmd="$shell -${shell_arg}c exit"
+  local cmd="$shell -ci exit"
   local name="${cmd%% *}" # "${cmd// /-}"
 
   local tmp_dir

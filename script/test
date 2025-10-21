@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#MISE alias="t"
+#MISE description="`mise test` or `mise run t`"
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
 
@@ -12,14 +14,12 @@ main() {
     jobs=1
   fi
   set -x
-  # --no-parallelize-within-files
   bats \
     --jobs "$jobs" \
     --print-output-on-failure \
     --show-output-of-passing-tests \
     --timing \
     --recursive ./test "$@"
-  # ./test/*.bats "$@"
 }
 
 main "$@"

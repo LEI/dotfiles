@@ -29,13 +29,13 @@ git_clone() {
 
 # Clone libs unless installed with brew and except bats-mock on archlinux
 setup_bats_libs() {
-  local pacman=false
-  if command -v pacman >/dev/null; then
-    pacman=true
-  fi
-  if [ -z "$pacman" ] && command -v brew >/dev/null; then
-    return
-  fi
+  # local pacman=false
+  # if command -v pacman >/dev/null; then
+  #   pacman=true
+  # fi
+  # if [ -z "$pacman" ] && command -v brew >/dev/null; then
+  #   return
+  # fi
   if ! command -v git >/dev/null; then
     # run apk add --no-cache git
     echo >&2 "setup_suite: git is required"
@@ -45,11 +45,11 @@ setup_bats_libs() {
     git_clone --branch=v1 https://github.com/jasonkarns/bats-mock \
       ./test_helper/bats-mock
   fi
-  if [ "$pacman" = true ]; then
-    return
-  fi
+  # if [ "$pacman" = true ]; then
+  #   return
+  # fi
   if ! [ -d ./test_helper/bats-assert ]; then
-    git_clone --branch=v2.2.2 https://github.com/bats-core/bats-assert \
+    git_clone --branch=v2.2.4 https://github.com/bats-core/bats-assert \
       ./test_helper/bats-assert
   fi
   if ! [ -d ./test_helper/bats-support ]; then
@@ -70,9 +70,11 @@ setup_suite() {
   # BW02: allow using flags on `run`
   bats_require_minimum_version 1.5.0
 
+  # TODO: renovate and checkout new versions
   # rm -fr test_helper/*
-  # ls -la test_helper
   setup_bats_libs
+
+  # BATS_LIB_PATH="$PWD/test_helper:$(get_bats_lib_path)"
   BATS_LIB_PATH="$PWD/test_helper:$(get_bats_lib_path)"
   echo >&3 "# setup_suite: BATS_LIB_PATH=$BATS_LIB_PATH"
   export BATS_LIB_PATH

@@ -12,6 +12,10 @@
 
 shell = "bash"
 
+[templates]
+# Add the directory after PATH
+PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
+
 [plugins]
 
 {{- if .features.mise }}
@@ -53,8 +57,8 @@ fi
 if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
   pathmunge "$npm_config_prefix/bin" # before replace
 fi
-if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME/bin" ]; then
-  pathmunge "$PNPM_HOME/bin" # before replace
+if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
+  pathmunge "$PNPM_HOME" # before replace
 fi
 
 if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then

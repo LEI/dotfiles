@@ -26,14 +26,14 @@ setup() {
 @test "bin: chezmoi feature list" {
   unstub chezmoi 2>/dev/null || true
   # run_chezmoi .local/bin/chezmoi-feature # list
-  run chezmoi feature # list
+  run --separate-stderr chezmoi feature # list
 
   # assert_output --partial bash
   # assert_output --partial lla
   assert_line bash
   assert_line lla
 
-  # refute_stderr
+  refute_stderr
   assert_success
 }
 
@@ -41,14 +41,14 @@ setup() {
 @test "bin: chezmoi feature enabled" {
   unstub chezmoi 2>/dev/null || true
   # run_chezmoi .local/bin/chezmoi-feature enabled
-  run chezmoi feature enabled
+  run --separate-stderr chezmoi feature enabled
 
   # assert_output --partial bash
   # refute_output --partial lla
   assert_line bash
   refute_line lla
 
-  # refute_stderr
+  refute_stderr
   assert_success
 }
 
@@ -56,7 +56,7 @@ setup() {
 @test "bin: get package manager" {
   run_chezmoi .local/bin/package-manager
   assert_output
-  # refute_stderr
+  refute_stderr
   assert_success
 }
 
@@ -64,7 +64,7 @@ setup() {
 @test "bin: list expected packages" {
   run_chezmoi .local/bin/chezmoi-package list
   assert_output
-  # assert_stderr_line --regexp '# .* packages'
+  assert_stderr_line --regexp '# .* packages'
   assert_success
 }
 
@@ -74,11 +74,15 @@ setup() {
   # stub_seq sudo
   local package_manager
   package_manager="$(package-manager)"
+  if [ "$package_manager" = apt ]; then
+    package_manager=apt-mark
+  fi
   stub_seq "$package_manager" 3
+  echo >&3 "Stub $package_manager"
   run_chezmoi .local/bin/list-package
   unstub "$package_manager" 2>/dev/null || true
-  # assert_output
-  # refute_stderr
+  refute_output
+  assert_stderr_line --regexp "^# STUB 1"
   assert_success
 }
 
@@ -94,7 +98,7 @@ setup() {
   unstub package-manager 2>/dev/null || true
   unstub brew 2>/dev/null || true
   refute_output
-  # assert_stderr --partial "STUB"
+  assert_stderr_line --regexp "^# STUB 1"
   assert_success
 }
 
@@ -104,9 +108,9 @@ setup() {
   run_chezmoi .chezmoiscripts/01-install-packages.sh
   unstub sudo 2>/dev/null || true
   refute_output
-  # assert_stderr_line --regexp "Installing .* packages"
-  # assert_stderr --partial "DRY-RUN:"
-  # assert_stderr_line --regexp "Installed .* packages"
+  assert_stderr_line --regexp "Installing .* packages"
+  assert_stderr_line --regexp "^# STUB 1"
+  assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
 
@@ -116,9 +120,9 @@ setup() {
   stub_seq sudo 2
   run_chezmoi .chezmoiscripts/linux/install-aur-packages.sh
   unstub sudo 2>/dev/null || true
-  # assert_stderr_line --regexp "Installing .* packages"
-  # assert_stderr --partial "DRY-RUN:"
-  # assert_stderr_line --regexp "Installed .* packages"
+  assert_stderr_line --regexp "Installing .* packages"
+  assert_stderr_line --regexp "^# STUB 1"
+  assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
 
@@ -128,26 +132,29 @@ setup() {
   # skip "Commands brew update and brew bundle do not support --dry-run"
   run_chezmoi .chezmoiscripts/02-install-brew-packages.sh
   unstub brew 2>/dev/null || true
-  # assert_output
   refute_output
-  # assert_stderr_line "DRY-RUN: brew update --quiet"
+  assert_stderr_line "DRY-RUN: brew update --quiet"
   # assert_stderr_line "brew bundle --file=/dev/stdin --no-upgrade list"
+  # assert_stderr_line "brew bundle --file=/dev/stdin --dry-run list"
+  assert_stderr_line --regexp "brew bundle --file=/dev/stdin .* list"
   assert_success
 }
 
 @test "chezmoi: install mise packages" {
   check_feature mise
   run_chezmoi .chezmoiscripts/01-install-tools.sh
-  # assert_output
-  # assert_stderr
+  refute_output
+  assert_stderr
   assert_success
 }
 
 @test "chezmoi: install python packages" {
   check_feature python
+  # stub_seq uv
   run_chezmoi .chezmoiscripts/02-install-python.sh
-  # assert_output
-  # assert_stderr
+  # unstub uv 2>/dev/null || true
+  refute_output
+  assert_stderr --partial "Already installed"
   assert_success
 }
 
@@ -155,7 +162,7 @@ setup() {
   check_feature rust
   run_chezmoi .chezmoiscripts/02-install-rust.sh
   assert_output
-  # assert_stderr
+  assert_stderr
   assert_success
 }
 
@@ -166,6 +173,6 @@ setup() {
   unstub ln 2>/dev/null || true
   unstub mv 2>/dev/null || true
   refute_output
-  # refute_stderr
+  refute_stderr
   assert_success
 }

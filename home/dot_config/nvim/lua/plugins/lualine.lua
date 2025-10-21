@@ -58,7 +58,8 @@ local mcphub_status = {
 
     -- Show spinner when executing, starting, or restarting
     if executing or status == 'starting' or status == 'restarting' then
-      local frame = math.floor(vim.loop.now() / 100) % #frames + 1
+      local now = (vim.uv or vim.loop).now
+      local frame = math.floor(now() / 100) % #frames + 1
       return icon .. frames[frame]
     end
 

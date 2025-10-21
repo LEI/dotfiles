@@ -10,11 +10,13 @@ set -eu
 # https://docs.atuin.sh/guide/installation/
 
 {{- if eq .osID "alpine" }}
+
 if [ ! -f ~/.local/share/bash-preexec.sh ]; then
   curl -LSsfo ~/.local/share/bash-preexec.sh \
     https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
 fi
 {{- else }}
+
 if [ ! -f ~/.local/share/blesh/ble.sh ]; then
   echo >&2 "Installing ble.sh"
   BLE_NAME="ble-nightly"

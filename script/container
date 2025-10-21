@@ -369,7 +369,6 @@ main() {
   case "$1" in
   all)
     shift
-    set -x
     local images=(
       android # termux
       alpine

@@ -215,7 +215,8 @@ return {
           end
           -- Disable slow treesitter highlight for large files
           local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          local fs_stat = (vim.uv or vim.loop).fs_stat
+          local ok, stats = pcall(fs_stat, vim.api.nvim_buf_get_name(buf))
           if ok and stats and stats.size > max_filesize then
             return true
           end
@@ -242,6 +243,15 @@ return {
         vim.opt.foldmethod = 'indent'
         vim.opt.foldtext = 'v:lua.vim.treesitter.foldexpr()'
       end
+      -- https://mise.jdx.dev/mise-cookbook/neovim.html
+      require('vim.treesitter.query').add_predicate('is-mise?', function(_, _, bufnr, _)
+        local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
+        local filename = vim.fn.fnamemodify(filepath, ':t')
+        return string.match(filename, '.*mise.*%.toml$') ~= nil
+          or string.match(filename, '.*mise.*%.toml%.tmpl$') ~= nil
+          or string.match(filepath, '.*mise/config%.toml$') ~= nil
+          or string.match(filepath, '.*mise/config%.toml%.tmpl$') ~= nil
+      end, { force = true, all = false })
     end,
     config = function(_, opts)
       local configs = require('nvim-treesitter.configs')
@@ -331,12 +341,24 @@ return {
     event = 'InsertEnter', -- 'VeryLazy',
     opts = {},
   },
-  -- {
-  --   -- https://mise.jdx.dev/mise-cookbook/neovim.html
-  --   'jmbuhr/otter.nvim',
-  --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
-  --   opts = {},
-  -- },
+  {
+    'jmbuhr/otter.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    lazy = false,
+    config = function()
+      -- https://mise.jdx.dev/mise-cookbook/neovim.html
+      vim.api.nvim_create_autocmd({ 'FileType' }, {
+        pattern = {
+          'toml',
+          -- FIXME: 'toml.chezmoitmpl',
+        },
+        group = vim.api.nvim_create_augroup('EmbedToml', {}),
+        callback = function()
+          require('otter').activate()
+        end,
+      })
+    end,
+  },
   {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {

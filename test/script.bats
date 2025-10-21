@@ -45,7 +45,7 @@ setup() {
   unstub dummy 2>/dev/null || true
   # assert_output --partial "$shell average startup time"
   # assert_output --partial "$shell initial startup time"
-  # assert_stderr_line --partial "bench 1/$BENCH_ITERATIONS: $shell"
+  assert_stderr_line --partial "bench 1/$BENCH_ITERATIONS: dummy"
   assert_success
   jq . <<<"$output" >/dev/null
 }
@@ -62,9 +62,9 @@ setup() {
   run --separate-stderr bash ./script/check
   unstub chezmoi 2>/dev/null || true
   refute_output
-  # assert_stderr_line "Checking chezmoi..."
-  # assert_stderr_line "Checking features..."
-  # assert_stderr_line "Checking versions..."
+  assert_stderr_line "Checking chezmoi..."
+  assert_stderr_line "Checking features..."
+  assert_stderr_line "Checking versions..."
   assert_success
 }
 
@@ -92,9 +92,11 @@ test_container() {
     GITHUB_TOKEN=nope \
     PROVIDER="echo container"
   run --separate-stderr bash ./script/container "$name"
-  assert_output
   # assert_stderr_line "Starting test container: test-$name-latest"
   # assert_line --regexp "^container run .* --name=test-$name-latest"
+  assert_output --partial "container compose --file"
+  assert_stderr --partial "$name-latest:"
+  refute_stderr --partial invalid
   assert_success
 }
 # bats test_tags=container,image
@@ -127,15 +129,21 @@ test_container() {
 }
 
 # bats test_tags=container
-@test "script/container: check" {
-  run --separate-stderr bash ./script/container check
+@test "script/container: alpine check" {
+  # skip "FIXME(container): command not found on first run"
+  run --separate-stderr bash ./script/container alpine check
   refute_output
+  assert_stderr
+  refute_stderr --partial invalid
   assert_failure
 }
 # bats test_tags=container
-@test "script/container: test" {
-  run --separate-stderr bash ./script/container test
+@test "script/container: alpine test" {
+  # skip "FIXME(container): command not found on first run"
+  run --separate-stderr bash ./script/container alpine test
   refute_output
+  assert_stderr
+  refute_stderr --partial invalid
   assert_failure
 }
 
@@ -143,7 +151,7 @@ test_container() {
 @test "script/container: unknown" {
   run --separate-stderr bash ./script/container unknown
   refute_output
-  # assert_stderr
+  assert_stderr --partial invalid
   assert_failure
 }
 
@@ -156,5 +164,6 @@ test_container() {
   run --separate-stderr bash home/.install-password-manager.sh
   unstub "$package_manager" 2>/dev/null || true
   refute_output
+  refute_stderr
   assert_success
 }

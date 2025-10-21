@@ -147,6 +147,11 @@ if command -v kubecolor >/dev/null; then
 fi
 {{- end }}
 
+{{- if .features.mise }}
+
+alias m=mise
+{{- end }}
+
 {{- if or .features.neovim .features.vim }}
 
 if command -v nvim >/dev/null; then

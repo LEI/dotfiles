@@ -39,16 +39,15 @@ jobs:
         id: setup-bats
         # github.com/bats-core/bats-action/releases
         uses: bats-core/bats-action@42fcc8700f773c075a16a90eb11674c0318ad507 # 3.0.1
-        with:
-          support-path: "${{ github.workspace }}/test_helper/bats-support"
-          assert-path: "${{ github.workspace }}/test_helper/bats-assert"
-          file-path: "${{ github.workspace }}/test_helper/bats-file"
+        # with:
+        #   support-path: "${{ github.workspace }}/test_helper/bats-support"
+        #   assert-path: "${{ github.workspace }}/test_helper/bats-assert" # FIXME: stderr
+        #   file-path: "${{ github.workspace }}/test_helper/bats-file"
 
       - name: Run tests with coverage
         shell: bash
         env:
           BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
-          # BATS_LIB_PATH: "${{ github.workspace }}/test/test_helper"
           TERM: xterm
         run: ./script/coverage
 

@@ -7,8 +7,8 @@ set -eu
 {{ includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" . | trim }}
 
 {{- $args := list "--yes" }}
-{{- if .chezmoi.config.verbose }}
-{{- $args = append $args "--verbose" }}
+{{- if not .chezmoi.config.verbose }}
+{{- $args = append $args "--quiet" }}
 {{- end }}
 {{- $miseArgs := $args | quoteList | join " " }}
 
@@ -18,17 +18,15 @@ fi
 
 {{- if .upgrade }}
 
-if ! run mise self-update "$@" {{ $miseArgs }}; then
-  echo >&2 "mise self-update failed with exit code $?"
-fi
+# if ! run mise self-update "$@" {{ $miseArgs }}; then
+#   echo >&2 "mise self-update failed with exit code $?"
+# fi
 {{- end }}
 
 # TODO: check gpg-agent is running
 
 # config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
-echo >&2 "Installing tools"
-echo "{{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}"
-cat ~/.config/mise/config.toml
+echo >&2 "Installing tools: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}"
 
 # mise_args="--yes"
 # if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
@@ -44,22 +42,22 @@ echo >&2 "Installed tools"
 {{- /* $tools := list }}
 
 {{- if get .packages.mise "go" }}
-# default-go-packages: {{ includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum }}
+# default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
 {{- $tools = append $tools "go" }}
 {{- end }}
 
 {{- if get .packages.mise "node" }}
-# default-npm-packages: {{ includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum }}
+# default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
 {{- $tools = append $tools "node" }}
 {{- end }}
 
 {{- if get .packages.mise "python" }}
-# default-python-packages: {{ includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum }}
+# default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
 {{- $tools = append $tools "python" }}
 {{- end }}
 
 {{- if get .packages.mise "ruby" }}
-# default-gems: {{ includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum }}
+# default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
 {{- $tools = append $tools "ruby" }}
 {{- end }}
 
