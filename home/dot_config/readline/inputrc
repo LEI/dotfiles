@@ -1,0 +1,76 @@
+# # Use the text that has already been typed as the prefix for searching through
+# # commands (i.e. more intelligent Up/Down behavior)
+# "\e[B": history-search-forward
+# "\e[A": history-search-backward
+
+# # Shift-TAB cycles backward
+# "\e[Z": menu-complete-backward
+
+# # set expand-tilde off
+
+# # Show all autocomplete results at once
+# set page-completions off
+
+# # Allow single tab completion
+# set show-all-if-ambiguous on
+
+# # Show extra file information when completing, like `ls -F` does
+# set visible-stats on
+
+# Make Tab autocomplete regardless of filename case
+set completion-ignore-case on
+
+# List all matches in case multiple possible completions are possible
+set show-all-if-ambiguous on
+
+# Immediately add a trailing slash when autocompleting symlinks to directories
+set mark-symlinked-directories on
+
+# Use the text that has already been typed as the prefix for searching through
+# commands (i.e. more intelligent Up/Down behavior)
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+
+# Shift-TAB cycles backward
+"\e[Z": menu-complete-backward
+
+# Do not autocomplete hidden files unless the pattern explicitly begins with a dot
+set match-hidden-files off
+
+# Show all autocomplete results at once
+set page-completions off
+
+# If there are more than 200 possible completions for a word, ask to show them all
+set completion-query-items 200
+
+# Show extra file information when completing, like `ls -F` does
+set visible-stats on
+
+# Be more intelligent when autocompleting by also looking at the text after
+# the cursor. For example, when the current line is "cd ~/src/mozil", and
+# the cursor is on the "z", pressing Tab will not autocomplete it to "cd
+# ~/src/mozillail", but to "cd ~/src/mozilla". (This is supported by the
+# Readline used by Bash 4.)
+set skip-completed-text on
+
+# Allow UTF-8 input and output, instead of showing stuff like $'\0123\0456'
+set input-meta on
+set output-meta on
+set convert-meta off
+
+# Use Alt/Meta + Delete to delete the preceding word
+"\e[3;3~": kill-word
+
+set expand-tilde off
+
+# Enable Vi-mode (bash only: set -o vi)
+# set editing-mode vi
+# set keymap vi-command
+
+# set editing-mode vi
+# set keymap vi
+# set keymap vi-insert
+
+# Visible bell if available (audible, visible, none)
+set bell-style visible
+# set prefer-visible-bell
