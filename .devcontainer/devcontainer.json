@@ -1,0 +1,88 @@
+{
+  // https://containers.dev/implementors/spec/
+  // https://hub.docker.com/r/microsoft/vscode-devcontainers
+  // https://github.com/devcontainers/images/blob/main/src/universal/.devcontainer/devcontainer.json
+  // https://github.com/devcontainers/images/blob/main/src/base-ubuntu/.devcontainer/devcontainer.json
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:debian", // alpine, debian or ubuntu
+  // "image": "mcr.microsoft.com/devcontainers/universal:2",
+
+  // https://containers.dev/features
+  "features": {
+    "ghcr.io/devcontainer-community/devcontainer-features/chezmoi.io:1": {},
+    // "ghcr.io/devcontainers-extra/features/mise:1": {},
+    // "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+    // "ghcr.io/devcontainers/features/go:1": {},
+    // "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+    // "ghcr.io/devcontainers/features/node:1": {}, // nvm
+    // "ghcr.io/devcontainers/features/rust:1": {},
+    // "ghcr.io/rio/features/chezmoi:1": {},
+    // "ghcr.io/roul/devcontainer-features/bitwarden-cli:1": {},
+    // "ghcr.io/roul/devcontainer-features/bitwarden-secrets-manager:1": {}
+    // "ghcr.io/roul/devcontainer-features/mise:1": {}
+    // "ghcr.io/roul/devcontainer-features/mise-{golang,node,python,ruby,rust}:1": {},
+    // "ghcr.io/tailscale/codespace/tailscale": {},
+  },
+
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "*": {
+          "permissions": "read-all"
+        },
+        "lei/vscode-settings": {
+          "permissions": "read-all"
+        }
+      }
+    },
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        // "ms-azuretools.vscode-containers",
+        // "vscodevim.vim",
+        "zokugun.sync-settings"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "redhat.telemetry.enabled": false
+        // "syncSettings.ignoredExtensions": [
+        //   "GitHub.codespaces",
+        //   "GitHub.github-vscode-theme"
+        // ],
+        // "[typescript]": {
+        //   "editor.defaultFormatter": "esbenp.prettier-vscode",
+        // },
+      }
+    }
+  },
+
+  "containerEnv": {
+    // "GITHUB_TOKEN": "",
+  },
+  "remoteEnv": {
+    // https://code.visualstudio.com/remote/advancedcontainers/environment-variables
+    // "PATH": "${containerEnv:PATH}:/home/vscode/.local/share/mise/shims",
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then gh auth login --hostname=github.com --git-protocol=https --web; export GITHUB_TOKEN=\"$(gh auth token)\"; chezmoi init --apply --source=.; fi",
+  "postCreateCommand": {
+    "chezmoi": "set -eu; if [ \"${CODESPACES:-}\" != true ]; then bash -c \"set -euo pipefail; read -p 'GitHub token: ' -s GITHUB_TOKEN; export GITHUB_TOKEN; chezmoi init --apply --source=.\"; fi"
+  }
+
+  // Replace when using a ptrace-based debugger like C++, Go, and Rust
+  // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+
+  // https://tailscale.com/kb/1160/github-codespaces
+  // https://login.tailscale.com/admin/settings/keys
+  // https://github.com/settings/codespaces/secrets/new
+  // tailscale up --accept-routes --auth-key=$TS_AUTH_KEY
+  // "runArgs": ["--device=/dev/net/tun"],
+
+  // Set `remoteUser` to `root` to connect as root instead
+  // More info: https://aka.ms/vscode-remote/containers/non-root.
+  // "remoteUser": "vscode",
+}
