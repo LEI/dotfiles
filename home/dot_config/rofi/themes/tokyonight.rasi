@@ -1,0 +1,144 @@
+/*
+ * ROFI color theme
+ *
+ * Based on Something Found in the Internet
+ *
+ * User: Contributors
+ * Copyright: *!
+ */
+
+configuration {
+  font: "Cascadia Code 10";
+
+  drun {
+    display-name: "";
+  }
+
+  run {
+    display-name: "";
+  }
+
+  window {
+    display-name: "";
+  }
+
+  timeout {
+    delay: 10;
+    action: "kb-cancel";
+  }
+}
+
+* {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  spacing: 0;
+
+  base03: #7780a1;
+  base04: #C0C5CE;
+
+  // bg: #1a1b26;
+  // bg-alt: #232433;
+  bg: rgba(26, 27, 38, 50%);
+  bg-alt: rgba(35, 36, 51, 75%);
+  fg: @base03; // #6a6f87;
+  fg-alt: @base04; //#a9b1d6;
+
+  background-color: @bg;
+  text-color: @fg;
+}
+
+window {
+  background-color: transparent;
+  transparency: "real";
+  // width: 700px;
+  width: 33%;
+}
+
+mainbox {
+  background-color: transparent;
+  children: [inputbar, message, listview, mode-switcher];
+}
+
+inputbar {
+  background-color: @bg-alt;
+  children: [prompt, entry, overlay, case-indicator, count];
+}
+
+entry {
+  // background-color: inherit;
+  background-color: transparent;
+  // text-color: @fg-alt;
+  // padding: 12px 3px;
+  padding: 12px;
+}
+
+overlay {
+  background-color: red;
+}
+
+case-indicator {
+  // content: "C";
+  // str: "c";
+  text-color: red; // @fg;
+}
+
+// Matched lines indicator
+// https://github.com/davatorium/rofi/issues/1026
+count {
+  // background-color: inherit;
+  background-color: transparent;
+  orientation: horizontal;
+  expand: false;
+  // children: [num-filtered-rows, count-sep, num-rows];
+  children: [num-filtered-rows];
+  padding: 12px;
+}
+
+num-filtered-rows, num-rows {
+  // background-color: inherit;
+  background-color: transparent;
+  // text-color: grey;
+  expand: false;
+  // vertical-align: 0.5;
+}
+// num-filtered-rows {
+//   text-color: @fg-alt;
+// }
+// count-sep {
+//   background-color: inherit;
+//   text-color: red;
+//   expand: false;
+//   // FIXME: str not displayed
+//   str: "/";
+//   width: 10px;
+// }
+
+prompt {
+  // background-color: inherit;
+  background-color: transparent;
+  padding: 12px;
+}
+
+listview {
+  background-color: transparent;
+  lines: 8;
+}
+
+element {
+  children: [element-icon, element-text];
+}
+
+element-icon {
+  padding: 10px 10px;
+  size: 44px;
+}
+
+element-text {
+  // padding: 10px 0;
+  padding: 10px 0;
+}
+
+element-text selected {
+  text-color: @fg-alt;
+}
