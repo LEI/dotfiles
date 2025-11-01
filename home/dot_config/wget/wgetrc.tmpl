@@ -1,0 +1,14 @@
+# Disguise as IE 9 on Windows 7
+user_agent = Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)
+
+# Wait 60 seconds before timing out. Default 15 minutes
+timeout = 60
+
+# Retry a few times when a download fails. Default 20
+tries = 3
+
+# Retry even when the connection was refused
+retry_connrefused = on
+
+# Must be an absolute path as wgetrc does not support environment variables
+hsts-file = {{ joinPath (env "XDG_CACHE_HOME" | default (joinPath .chezmoi.homeDir ".cache")) "wget-hsts" }}
