@@ -1,0 +1,20 @@
+{{- if eq .osID "android" }}
+# https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
+MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
+
+mise() {
+  proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$MISE_BIN" "$@"
+}
+
+{{- end }}
+export MISE_GO_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-go-packages"
+export MISE_NODE_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-npm-packages"
+export MISE_PYTHON_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-python-packages"
+export MISE_RUBY_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-gems"
+
+# if [ -z "${_MISE_GLOBAL_NODE_VERSION:-}" ]; then
+#   # mise list node --installed --json --quiet | jq --raw-output 'last .install_path' # /bin/
+#   TMPDIR="${TMPDIR:-/tmp}"
+#   _MISE_GLOBAL_NODE_VERSION="$(mise list node --cd=$TMPDIR --global --installed | awk '/^node / {print $2}')"
+#   export _MISE_GLOBAL_NODE_VERSION
+# fi

@@ -1,0 +1,179 @@
+#!/bin/sh
+
+# Allow aliases with sudo
+# alias sudo="sudo "
+
+# Confirm before overwriting
+alias cp="cp -i" # --interactive
+
+# Print sizes in powers of 1024
+alias df="df -h" # --human-readable
+
+# Show with human-readable units
+alias free="free --human"
+
+# Color matches
+alias grep="grep --color=auto"
+
+# List all files with colors, human-readable sizes and long format
+alias la="ls -ahl --color=auto"
+
+# Print each PATH entry on a separate line
+alias path='echo -e "${PATH//:/\\n}"'
+
+{{- if lookPath "bat" | isExecutable }}
+alias cat=bat
+{{- else if lookPath "batcat" | isExecutable }}
+alias cat=batcat
+{{- end }}
+
+{{- if lookPath "eza" | isExecutable }}
+alias ls="eza --hyperlink"
+{{- else if lookPath "gls" | isExecutable }}
+# export LS_COLORS="$(vivid generate tokyonight-storm)"
+alias ls="gls --color"
+{{- end }}
+
+{{- if eq .os "darwin" }}
+alias beep="afplay --rate 3 --time 0.3 --volume 3 /System/Library/Sounds/Glass.aiff"
+
+if ! hash notify-send 2>/dev/null; then
+  notify-send() {
+    if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+      echo >&2 "Usage: notify <title> [message]"
+      return 1
+    fi
+    # ${TERM_PROGRAM:-${SHELL##*/}}
+    title="$1"
+    message="${2:-}"
+    osascript -e "display notification \"${message//\"/\\\"}\" with title \"${title//\"/\\\"}\""
+  }
+fi
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload='exec ${SHELL} -l'
+{{- else }}
+
+alias reload='exec ${SHELL} -i'
+
+{{- if .wsl }}
+# [ -f /proc/version ] && grep -iq microsoft /proc/version
+if command -v wslview >/dev/null; then
+  alias open=wslview
+if [ -f /mnt/c/Windows/explorer.exe ]; then
+  # TODO: add /mnt/c/Windows to PATH
+  alias open=/mnt/c/Windows/explorer.exe
+else
+  alias open=explorer.exe
+fi
+{{- else if lookPath "xdg-open" | isExecutable }}
+alias open=xdg-open
+{{- else if and (eq .os "android") (lookPath "termux-open" | isExecutable) }}
+alias open=termux-open
+{{- else if lookPath "code" | isExecutable }}
+alias open=code
+{{- end }}
+
+{{- if lookPath "xclip" | isExecutable }}
+alias pbcopy="xclip -selection clipboard"
+alias pbpaste="xclip -selection clipboard -o"
+{{- else if lookPath "xsel" | isExecutable }}
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+{{- else if and (lookPath "wl-copy" | isExecutable) (lookPath "wl-paste" | isExecutable) }}
+alias pbcopy=wl-copy
+alias pbpaste=wl-paste
+{{- else if and (lookPath "termux-clipbload-set" | isExecutable) (lookPath "termux-clipbload-get" | isExecutable) }}
+alias pbcopy=termux-clipbload-set
+alias pbpaste=termux-clipbload-get
+{{- end }}
+
+{{- end }}
+
+if ! hash clip 2>/dev/null; then
+  clip() {
+    [ -t 0 ] && pbpaste || pbcopy
+  }
+fi
+
+{{- if .features.ai }}
+
+if command -v claude >/dev/null; then
+  claude() { env claude "${@:---resume}"; }
+fi
+if command -v codex >/dev/null; then
+  codex() { env codex "${@:-resume --last}"; }
+fi
+if command -v crush >/dev/null; then
+  crush() { env crush "${@:---continue}"; }
+fi
+{{- end }}
+
+{{- if and .features.docker }}
+
+if command -v lazydocker >/dev/null; then
+  alias D=lazydocker
+elif command -v oxker >/dev/null; then
+  alias D=oxker
+fi
+
+if command -v podman-tui >/dev/null; then
+  alias P=podman-tui
+fi
+{{- end }}
+
+{{- if and .features.git }}
+
+if command -v lazygit >/dev/null; then
+  alias G=lazygit
+fi
+{{- end }}
+
+{{- if lookPath "lazyjournal" | isExecutable }}
+
+if command -v lazyjournal >/dev/null; then
+  alias J=lazyjournal
+fi
+{{- end }}
+
+{{- if and .features.kube }}
+
+if command -v k9s >/dev/null; then
+  alias K="k9s --all-namespaces"
+fi
+
+if command -v kubecolor >/dev/null; then
+  alias kubectl=kubecolor
+fi
+{{- end }}
+
+{{- if .features.mise }}
+
+alias m=mise
+{{- end }}
+
+{{- if .features.neovim }}
+
+if command -v nvim >/dev/null; then
+  alias dbui="nvim +DBUI"
+fi
+{{- end }}
+
+{{- if .features.python }}
+
+if ! hash recover 2>/dev/null; then
+  {{- if lookPath "recoverpy" | isExecutable }}
+  alias recover="sudo recoverpy"
+  {{- else if lookPath "uvx" | isExecutable }}
+  alias recover="sudo uvx recoverpy"
+  {{- else if lookPath "pipx" | isExecutable }}
+  alias recover="sudo pipx run recoverpy"
+  {{- else }}
+  alias recover="sudo recoverpy"
+  {{- end }}
+fi
+{{- end }}
+
+{{- if lookPath "tmux" | isExecutable }}
+alias tmux="TERM=tmux-256color tmux"
+{{- end }}

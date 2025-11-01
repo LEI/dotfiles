@@ -1,0 +1,38 @@
+# https://github.com/grawity/dotfiles/blob/main/.environ.notes
+{{- if .name }}
+export NAME={{ .name | quote }}
+{{- end }}
+{{- if .email }}
+export EMAIL={{ .email | quote }}
+{{- end }}
+
+# export LANG=en_US.UTF-8
+# export LC_ALL=en_US.UTF-8
+
+export MANPAGER="${MANPAGER:-less -X}"
+
+# export PAGER="less -SFX"
+# export PAGER="${PAGER:-less --chop-long-lines --no-init --quit-if-one-screen}"
+
+# https://github.com/xo/usql/issues/308
+# export LESS="-S -I -R"
+# export LESS="--chop-long-lines --IGNORE-CASE --RAW-CONTROL-CHARS"
+# export LESS="-S -X -F -I -R"
+export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}"
+
+{{- $editor := "vi" }}
+{{- if lookPath "editor" | isExecutable }}
+{{- $editor = "editor" }}
+{{- else if lookPath "hx" | isExecutable }}
+{{- $editor = "hx" }}
+{{- else if lookPath "nvim" | isExecutable }}
+{{- $editor = "nvim" }}
+{{- else if lookPath "vim" | isExecutable }}
+{{- $editor = "vim" }}
+{{- else if lookPath "code" | isExecutable }}
+{{- $editor = "code" }}
+{{- end }}
+export EDITOR="${EDITOR:-{{ $editor }}}"
+export VISUAL="${VISUAL:-$EDITOR}"
+
+{{ includeTemplate "xdg.sh.tmpl" . | trim }}
