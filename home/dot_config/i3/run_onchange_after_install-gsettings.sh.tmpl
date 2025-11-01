@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+color_scheme="{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
+gtk_theme={{ .i3.themeName | quote }}
+icon_theme={{ .i3.iconThemeName | quote }}
+
+current_color_scheme="$(cmd gsettings get org.gnome.desktop.interface color-scheme || echo "")"
+if [ "$current_color_scheme" != "'$color_scheme'" ]; then
+  cmd gsettings set org.gnome.desktop.interface color-scheme "$color_scheme"
+fi
+
+current_gtk_theme="$(cmd gsettings get org.gnome.desktop.interface gtk-theme || echo "")"
+if [ "$current_gtk_theme" != "'$gtk_theme'" ]; then
+  cmd gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme"
+fi
+
+current_icon_theme="$(cmd gsettings get org.gnome.desktop.interface icon-theme || echo "")"
+if [ "$current_icon_theme" != "'$icon_theme'" ]; then
+  cmd gsettings set org.gnome.desktop.interface icon-theme "$icon_theme"
+fi

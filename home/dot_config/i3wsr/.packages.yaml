@@ -1,0 +1,23 @@
+---
+packages:
+  i3wsr:
+    # FIXME(test): rustup toolchain install stable (/etc/machine-id not found)
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") (ne (env "USER") "test") }}'
+    # nameOverwrite:
+    #   arch: i3wsr-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    # before_script: >
+    #   and (eq .osIDLike "arch") .features.rust | ternary
+    #   "if cmd command -v rustup >/dev/null; then cmd rustup default || cmd rustup default stable; fi"
+    #   nil
+
+    # {{- if .features.rust }}
+    # if [ ! -f "$HOME/rust-toolchain" ]; then
+    #   cmd echo stable >"$HOME/rust-toolchain"
+    # fi
+    # {{- end }}
+
+    # if command -v rustup >/dev/null && ! cmd rustup default; then
+    #   cmd rustup default "$(cat "$HOME/rust-toolchain")"
+    #   # cmd rustup install stable
+    # fi

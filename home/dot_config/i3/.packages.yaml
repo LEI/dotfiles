@@ -1,0 +1,111 @@
+---
+packages:
+  arc-gtk-theme:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  arc-icon-theme:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  autotiling-rs:
+    enabled: '{{ and .features.i3 (not (eq .osID "debian" "ubuntu")) }}'
+    # nameOverwrite:
+    #   debian: autotiling # debian 13
+  blueman:
+    enabled: '{{ and .features.i3 (eq .chassisType "laptop") }}'
+  caffeine-ng:
+    enabled: "{{ .features.i3 }}"
+    nameOverwrite:
+      debian: caffeine
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  dex:
+    enabled: "{{ .features.i3 }}"
+  feh: # nitrogen
+    enabled: "{{ .features.i3 }}"
+  i3lock-color betterlockscreen:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  i3lock:
+    name: i3lock xss-lock
+    enabled: '{{ and .features.i3 (eq .osIDLike "debian") }}'
+  # i3-resurrect:
+  #   enabled: '{{ .features.i3 }}'
+  i3-wm:
+    enabled: "{{ .features.i3 }}"
+  i3status-rust:
+    enabled: "{{ .features.i3 }}"
+    nameOverwrite:
+      debian: i3status
+  libglib2.0-bin: # xfconf-gsettings-backend
+    enabled: '{{ and .features.i3 (eq .osIDLike "debian") }}'
+  lightdm:
+    enabled: "{{ .features.i3 }}"
+  # lxappearance:
+  #   enabled: '{{ .features.i3 }}'
+  network-manager-applet: # debian 13
+    enabled: '{{ and .features.i3 (not (eq .osID "debian" "ubuntu")) }}'
+  noto-fonts: # ttf-noto-nerd
+    enabled: "{{ .features.i3 }}"
+    nameOverwrite:
+      debian: fonts-noto
+  # pactl:
+  picom:
+    enabled: "{{ .features.i3 }}"
+  pavucontrol:
+    description: PulseAudio Volume Control
+    enabled: "{{ .features.i3 }}"
+    name: pavucontrol alsa-utils alsa-plugins
+    nameOverwrite:
+      debian: pavucontrol alsa-utils # alsa-plugins
+  # playerctl:
+  redshift:
+    name: redshift geoclue
+    nameOverwrite:
+      debian: redshift geoclue-2.0
+    enabled: "{{ .features.i3 }}"
+  thunar:
+    enabled: "{{ .features.i3 }}"
+  qt5-styleplugins qt6gtk2:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    # nameOverwrite:
+    #   debian: qt5-style-kvantum
+  # qt5ct:
+  #   enabled: '{{ .features.i3 }}'
+  x11-xserver-utils:
+    enabled: '{{ and .features.i3 (eq .osIDLike "debian") }}'
+  xcwd:
+    enabled: "{{ .features.i3 }}"
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  xdg-desktop-portal:
+    enabled: "{{ .features.i3 }}"
+  xfce4-power-manager:
+    enabled: "{{ .features.i3 }}"
+  xfce4-settings:
+    enabled: "{{ .features.i3 }}"
+  xfce4-volumed-pulse:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+  xorg-server:
+    enabled: "{{ .features.i3 }}"
+    nameOverwrite:
+      debian: xorg
+  # xorg-xbacklight:
+  #   enabled: '{{ .features.i3 }}'
+  xorg-xev:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+  xorg-xinit:
+    enabled: "{{ .features.i3 }}"
+    nameOverwrite:
+      debian: xinit
+  xorg-xrandr:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    # nameOverwrite:
+    #   debian: x11-xserver-utils
+  xorg-xrdb:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    # nameOverwrite:
+    #   debian: x11-xserver-utils
+  xorg-xwininfo:
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+  yin-yang: # darkman
+    enabled: '{{ and .features.i3 (ne .osIDLike "debian") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

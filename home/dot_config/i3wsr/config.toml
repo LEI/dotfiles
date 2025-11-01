@@ -1,0 +1,64 @@
+[icons]
+Alacritty = ""
+Chrome = "󰊯"
+Chromium = ""
+Chromium-dev = ""
+Firefox = ""
+Firefox-nightly = ""
+Ghostty = ""
+# Gpick = ""
+Nautilus = "📘"
+Nvim = ""
+Notification = ""
+# TelegramDesktop = ""
+Terminal = ""
+Termite = ""
+Thunar = ""
+Thunderbird = ""
+VLC = "󰕼"
+Vim = ""
+
+# i3 / Xwayland
+[aliases.class]
+"^(?i)chromium$" = "Chromium"
+"^(?i)firefox$" = "Firefox"
+"^(?i)com\\.mitchellh\\.ghostty$" = "Ghostty"
+"^(?i)org\\.gnome\\.nautilus" = "Nautilus"
+# TelegramDesktop = "Telegram"
+"(?i)^thunar$" = "Thunar"
+"(?i)^vlc$" = "VLC"
+"(?i)^xfce4-notifyd$" = "Notification"
+
+# Sway only
+[aliases.app_id]
+# "^firefox$" = "Firefox"
+
+# i3 only
+[aliases.instance]
+"open.spotify.com" = "Spotify"
+
+# Both i3 and sway
+[aliases.name]
+# " . Chromium$" = "Chromium"
+# "( . )?Mozilla Firefox$" = "Firefox"
+" . Nvim$" = "Nvim"
+# " . Thunar$" = "Thunar"
+# "^Terminal . .*" = "Terminal"
+# FIXME: windows remaining after notification
+"(?i)^xfce4-notifyd$" = "Notification"
+
+[general]
+separator = ' ｜ ' # |
+# split_at = ":"
+# empty_label = ""
+# display_property = "app_id"
+# display_property = "class"
+# display_property = "instance"
+display_property = "name"
+# default_icon = ""
+
+[options]
+remove_duplicates = true
+no_names = false
+no_icon_names = true
+focus_fix = false
