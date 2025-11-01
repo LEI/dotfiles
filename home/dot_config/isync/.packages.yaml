@@ -1,0 +1,5 @@
+---
+packages:
+  isync:
+    enabled: "{{ .features.mail }}"
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
