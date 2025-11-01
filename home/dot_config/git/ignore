@@ -1,0 +1,77 @@
+# git config --global core.excludesfile
+
+# https://github.com/github/gitignore
+# https://gist.github.com/octocat/9257657
+
+tags
+*.*dump
+
+# Ansible
+*.retry
+
+# Composer
+composer.phar
+vendor
+
+# Node
+npm-debug.log*
+node_modules
+pids
+*.pid
+*.seed
+
+# Bower
+bower_components
+
+# Vagrant
+.vagrant
+
+# Vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+Session*.vim
+.netrwhist
+*~
+*.swp
+
+# VSCode
+.vscode
+
+# Compiled source
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.pyc
+*.so
+
+# Packages:
+# It's better to unpack these files and commit the raw source
+# Git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+logs
+*.log
+# *.sql
+*.sqlite
+
+# System files
+._*
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+**/.claude/settings.local.json

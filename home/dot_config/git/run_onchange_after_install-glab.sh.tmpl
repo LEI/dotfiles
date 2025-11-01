@@ -1,0 +1,24 @@
+{{- if lookPath "glab" | isExecutable -}}
+#!/bin/sh
+
+set -eu
+
+if ! command -v glab >/dev/null; then
+  exit
+fi
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# cmd glab check-update
+
+# cmd glab auth status
+
+# hostname="$(hostname)"
+# if ! cmd glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$hostname"; then
+#   echo >&2 "No SSH key found for: $hostname"
+# fi
+
+{{ if dig "git" "gitlab" nil . -}}
+gitlab_email="{{ .git.gitlab.email }}"
+{{- end }}
+{{- end -}}

@@ -1,0 +1,13 @@
+{{- if dig "git" "github" nil . -}}
+{{- includeTemplate "gitconfig" (mustMerge .git.github (dict "name" .name)) -}}
+
+{{- if get .git.github "user" }}
+
+[github]
+	user = {{ .git.github.user | quote }}
+	token = {{ keyring "github" .git.github.user | quote }}
+{{- end }}
+
+# [hub]
+# 	protocol = https
+{{- end -}}

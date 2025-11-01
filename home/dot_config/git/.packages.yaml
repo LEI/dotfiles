@@ -1,0 +1,60 @@
+---
+packages:
+  act: # "@github/local-action" only supports JavaScript and TypeScript
+    enabled: '{{ and .features.git (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}'
+    nameOverwrite:
+      gh: nektos/gh-act
+    type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
+  # gcli:
+  gh:
+    enabled: >
+      {{ and .features.git (not (or
+        (eq .osIDLike "alpine")
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      )) (ne .profile "minimal") }}
+    nameOverwrite:
+      arch: github-cli
+      windows: GitHub.cli
+  ghq:
+    enabled: "{{ .features.git }}"
+    nameOverwrite:
+      windows: x-motemen.ghq
+    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "mise" nil }}'
+  git:
+    enabled: "{{ .features.git }}"
+    nameOverwrite:
+      windows: Git.Git
+  git-absorb:
+    enabled: '{{ and .features.git (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
+    nameOverwrite:
+      windows: tummychow.git-absorb
+  # git-cal:
+  git-extras:
+    enabled: '{{ and .features.git (not (eq .osIDLike "alpine" "windows")) }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # git-lfs:
+  # git-sizer:
+  # gitui:
+  #   enabled: '{{ and (ne .osIDLike "debian") }}'
+  #   nameOverwrite:
+  #     windows: stephandilly.gitui
+  glab:
+    enabled: >
+      {{ and .features.git (ne .os "android") (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 12))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      )) (ne .profile "minimal") }}
+    nameOverwrite:
+      windows: GLab.GLab
+  lazygit: # tig
+    enabled: "{{ .features.git }}"
+    nameOverwrite:
+      windows: JesseDuffield.lazygit
+    type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "windows") | ternary "mise" nil }}'
+  prek: # pre-commit
+    enabled: "{{ .features.git }}"
+    type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
+    # type: brew
+  # zizmor:
+  #   enabled: "{{ .features.git }}"
