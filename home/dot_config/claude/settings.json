@@ -1,0 +1,58 @@
+{
+  "autoUpdates": false,
+  "enableAllProjectMcpServers": false,
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(composer:*)",
+      "Bash(fd:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(rg:*)",
+      "Glob",
+      "Grep",
+      "LS",
+      "NotebookRead",
+      "Read",
+      "Search",
+      "TodoWrite",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gitlab.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch"
+    ],
+    "ask": [
+      "Bash(gh)",
+      "Bash(git merge:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git rebase:*)",
+      "Bash(glab)",
+      "Edit",
+      "MultiEdit",
+      "NotebookEdit",
+      "Task",
+      "Write"
+    ],
+    "deny": [
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(wget:*)",
+      "Read(./.env)",
+      "Read(./secrets/**)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.config/claude/statusline.sh",
+    "padding": 0
+  }
+}
