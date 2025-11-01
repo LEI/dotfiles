@@ -1,0 +1,11 @@
+github.com/Gelio/go-global-update@latest
+{{- if not .features.neovim }}
+golang.org/x/tools/gopls@latest >/dev/null # LSP
+github.com/go-delve/delve/cmd/dlv@latest >/dev/null # Debugger
+golang.org/x/tools/cmd/goimports@latest >/dev/null # Formatter
+github.com/nametake/golangci-lint-langserver@latest >/dev/null # Linter
+github.com/golangci/golangci-lint/cmd/golangci-lint@latest >/dev/null # Linter cli
+{{- end }}
+{{- range .packages.go | keys | sortAlpha }}
+{{ . }}
+{{- end }}

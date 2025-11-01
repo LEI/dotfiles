@@ -1,0 +1,36 @@
+[settings]
+{{- if eq .osID "alpine" }}
+# FIXME(alpine): platform error (failed to install with ubi)
+disable_backends = ["ubi"]
+{{- else if eq .osID "darwin" }}
+# FIXME(darwin): HTTP status client error (403 rate limit exceeded)
+# https://mise.jdx.dev/troubleshooting.html#_403-forbidden-when-installing-a-tool
+disable_backends = ["aqua"]
+{{- end }}
+idiomatic_version_file_enable_tools = [
+  # "bun",
+  # "deno",
+  "go",
+  # "java",
+  "node",
+  "python",
+  "ruby",
+  # "terraform",
+  # "tiny",
+]
+
+{{- if ne .profile "work" }}
+experimental = true
+lockfile = true
+{{- end }}
+
+{{- if .features.goss }}
+[tasks.goss]
+dir = "~/.config/goss"
+run = "goss --vars=vars.yaml"
+{{- end }}
+
+[tools]
+{{- range $name, $pkg := .packages.mise }}
+{{ $name }} = {{ get $pkg "version" | default "latest" | quote }}
+{{- end }}
