@@ -1,0 +1,43 @@
+# https://github.com/twpayne/dotfiles/blob/master/home/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+
+$env:XDG_CACHE_HOME="$HOME\.cache"
+$env:XDG_CONFIG_HOME="$HOME\.config"
+$env:XDG_DATA_HOME="$HOME\.local\share"
+$env:XDG_STATE_HOME="$HOME\.local\state"
+
+# $env:PATH="$env:USERPROFILE\.local\bin;$env:PATH"
+# $env:PATH="$env:USERPROFILE\scoop\shims;$env:PATH"
+# $env:PATH="$env:APPDATA\Python\Python39\Scripts;$env:PATH"
+$env:Path += ";$env:UserProfile\.local\bin"
+
+$ENV:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
+
+# Set-Alias -Name g -Value git
+
+# https://mise.jdx.dev/getting-started.html#activate-mise
+$shimPath = "$env:USERPROFILE\AppData\Local\mise\shims"
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+# TODO: check if already present
+$newPath = $currentPath.Replace(";" + $shimPath, "") + ";" + $shimPath
+[Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#powershell
+if ($PSVersionTable.PSVersion.ToString() -ge "7.0.0") {
+  $env:CARAPACE_BRIDGES = "zsh,fish,bash,inshellisense" # optional
+  Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
+  Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+  carapace _carapace | Out-String | Invoke-Expression
+}
+
+$env:DIRENV_CONFIG="$HOME\.direnv\config"
+# https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/creating-profiles?view=powershell-7.5
+if ($PSVersionTable.PSVersion.ToString() -ge "7.2.0") {
+  # https://direnv.net/docs/hook.html#PowerShell
+  Invoke-Expression "$(direnv hook pwsh)"
+}
+
+# https://github.com/starship/starship#step-2-set-up-your-shell-to-use-starship
+Invoke-Expression (&starship init powershell)
+
+# https://github.com/ajeetdsouza/zoxide#installation
+Invoke-Expression (& { (zoxide init powershell | Out-String) })
