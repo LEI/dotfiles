@@ -1,0 +1,316 @@
+# https://github.com/tony/tmux-config/blob/master/.tmux.conf
+
+# set-option -g allow-rename on
+# set-window-option -g automatic-rename on
+
+set-option -g base-index 1
+set-window-option -g pane-base-index 1
+
+set-option -g renumber-windows on
+
+# set-option -g history-limit 50000
+
+# set-option -g status-keys emacs
+# set-option -g xterm-keys on
+set-window-option -g mode-keys vi
+
+set -g default-command $SHELL
+# set -g default-terminal tmux-256color
+set -g default-terminal xterm-256color
+
+# set -g remain-on-exit on
+
+set-option -g set-titles on
+set-option -g set-titles-string '#S #W - #{pane_title}'
+
+if "tmux show-option -s terminal-features | grep -vq ':hyperlinks$'" {
+    set -as terminal-features ",*:hyperlinks"
+}
+
+if "tmux show-option -s terminal-features | grep -vq ':Tc$'" {
+    set -ga terminal-overrides ",*-256color:Tc"
+}
+
+# Change the default prefix binding to Ctrl-a only when not connected via SSH
+if-shell 'test -z "$SSH_TTY"' 'set -g prefix C-a; bind C-a send-prefix; unbind C-b'
+
+# Auto begin selection
+bind-key -T copy-mode-vi v send -X begin-selection \; send -X rectangle-toggle
+bind-key -T copy-mode-vi C-v send -X begin-selection \; send -X rectangle-toggle
+
+set-option -g mouse on
+
+# https://github.com/tmux/tmux/issues/1732
+# Tmux >= 2.1 < 2.4
+# bind-key -t emacs-copy WheelDownPane scroll-down
+# bind-key -t emacs-copy WheelUpPane scroll-up
+# bind-key -t vi-copy WheelDownPane scroll-down
+# bind-key -t vi-copy WheelUpPane scroll-up
+# Tmux >= 2.4
+bind-key -T copy-mode WheelDownPane select-pane \; send-keys -X scroll-down
+bind-key -T copy-mode WheelUpPane select-pane \; send-keys -X scroll-up
+bind-key -T copy-mode-vi WheelDownPane select-pane \; send-keys -X scroll-down
+bind-key -T copy-mode-vi WheelUpPane select-pane \; send-keys -X scroll-up
+bind-key -T copy-mode C-WheelDownPane select-pane \; send-keys -X halfpage-down
+bind-key -T copy-mode C-WheelUpPane select-pane \; send-keys -X halfpage-up
+bind-key -T copy-mode-vi C-WheelDownPane select-pane \; send-keys -X halfpage-down
+bind-key -T copy-mode-vi C-WheelUpPane select-pane \; send-keys -X halfpage-up
+
+set -g @plugin 'tmux-plugins/tpm # v3.1.0'
+
+# set -g @plugin 'catppuccin/tmux # v2.1.3'
+# set -g @catppuccin_flavor mocha # latte, frappe, macchiato or mocha
+
+# set -g @plugin 'rose-pine/tmux'
+# set -g @rose_pine_variant main # Options are main, moon or dawn
+
+set -g @plugin 'janoamaral/tokyo-night-tmux # v1.6.6'
+
+set -g @tokyo-night-tmux_theme storm # storm | day | default to night
+set -g @tokyo-night-tmux_transparent 1
+
+set -g @tokyo-night-tmux_show_hostname 0
+
+# https://github.com/janoamaral/tokyo-night-tmux/discussions/126
+set -g @tokyo-night-tmux_window_id_style none # digital
+set -g @tokyo-night-tmux_pane_id_style super # hide
+set -g @tokyo-night-tmux_zoom_id_style hsquare # dsquare # hide
+set -g @tokyo-night-tmux_terminal_icon ○ # 
+set -g @tokyo-night-tmux_active_terminal_icon ● # 
+
+# No extra spaces between icons
+set -g @tokyo-night-tmux_window_tidy_icons 1
+
+set -g @tokyo-night-tmux_show_battery_widget 0
+# set -g @tokyo-night-tmux_battery_name BAT1 # some linux distro have BAT0
+# set -g @tokyo-night-tmux_battery_low_threshold 21 # default
+
+set -g @tokyo-night-tmux_show_path 1
+# set -g @tokyo-night-tmux_path_format relative # relative or full
+
+# Requires playerctl (Linux) or nowplaying-cli (macOS)
+set -g @tokyo-night-tmux_show_music 0
+
+set -g @tokyo-night-tmux_show_netspeed {{ eq .osIDLike "arch" "darwin" | ternary 0 1 }}
+# set -g @tokyo-night-tmux_netspeed_iface wlan0 # Detected via default route
+set -g @tokyo-night-tmux_netspeed_showip 1 # Display IPv4 address (default 0)
+# set -g @tokyo-night-tmux_netspeed_refresh 1 # Update interval in seconds (default 1)
+
+set -g @tokyo-night-tmux_show_git 1
+
+set -g @tokyo-night-tmux_show_datetime 0
+set -g @tokyo-night-tmux_date_format MYD
+set -g @tokyo-night-tmux_time_format 24H
+
+# set -g status-right-length 100
+# set -g status-left-length 100
+# set -g status-left ''
+
+# set -g @plugin 'tmux-plugins/tmux-prefix-highlight'
+# set -g @plugin 'MunifTanjim/tmux-mode-indicator'
+# set -g status-right '%Y-%m-%d %H:%M #{tmux_mode_indicator}'
+
+# set -g status-right '#{E:@catppuccin_status_application}'
+# set -agF status-right '#{E:@catppuccin_status_cpu}'
+# set -ag status-right '#{E:@catppuccin_status_session}'
+# set -ag status-right '#{E:@catppuccin_status_uptime}'
+# set -agF status-right '#{E:@catppuccin_status_battery}'
+
+set -g @plugin 'tmux-plugins/tmux-sensible # v3.0.0'
+
+# prefix + P Toggle (start/stop) logging in the current pane
+# prefix + M-p Screen capture
+# prefix + M-P Save complete history
+# prefix + M-c Clear pane history
+set -g @plugin 'tmux-plugins/tmux-logging # v2.1.0'
+# FIXME: set -g @logging-path "$HOME/.tmux/logs"
+
+set -g @plugin 'tmux-plugins/tmux-pain-control # v1.0.0'
+# bind h select-pane -L
+# bind j select-pane -D
+# bind k select-pane -U
+# bind l select-pane -R
+
+# set -g @plugin 'tmux-plugins/tmux-sidebar'
+
+# if 'test ! -d "$XDG_DATA_HOME/tmux/resurrect"' {
+#     run 'echo mkdir -p "$XDG_DATA_HOME/tmux/resurrect"'
+# }
+set -g @plugin "tmux-plugins/tmux-resurrect # v4.0.0"
+set -g @resurrect-capture-pane-contents on
+set -g @resurrect-dir "$XDG_DATA_HOME/tmux/resurrect" # ln -sf <file_name> last
+set -g @resurrect-processes '\
+    hx vi vim nvim emacs \
+    man less more tail \
+    top htop irssi weechat mutt \
+    psql mysql sqlite3 \
+    ssh mosh-client \
+'
+# ~Vim -> vim
+# https://github.com/tmux-plugins/tmux-resurrect/blob/master/docs/restoring_programs.md#working-with-nodejs-
+# "~yarn gulp test->gulp test"
+# "~yarn gulp \"test-it\"->gulp test-it"
+set -g @resurrect-strategy-nvim session
+set -g @resurrect-strategy-vim session
+# set -g @resurrect-save 'S'
+# set -g @resurrect-restore 'R'
+
+set -g @plugin 'tmux-plugins/tmux-continuum # v3.1.0'
+set -g @continuum-boot on
+{{- if eq .os "darwin" }}
+set -g @continuum-boot-options iterm # ,fullscreen
+{{- else }}
+set -g @continuum-boot-options ghostty
+{{- end }}
+set -g @continuum-restore on
+set -g @continuum-save-interval 60 # 1h
+# set -ga status-right 'Continuum status: #{continuum_status}'
+
+# prefix + g: prompts for session name and switches to it. Performs 'kind-of' name completion.
+# Faster than the built-in prefix + s prompt for long session lists.
+# prefix + C: prompt for creating a new session by name.
+# prefix + X: kill current session without detaching tmux.
+# prefix + S: switches to the last session.
+# The same as built-in prefix + L that everyone seems to override with some other binding.
+# prefix + @: promote current pane into a new session.
+# Analogous to how prefix + ! breaks current pane to a new window.
+# prefix + C-@: promote current window into a new session.
+# prefix + t<secondary-key>: join currently marked pane (prefix + m) to current session/window, and switch to it
+set -g @plugin 'tmux-plugins/tmux-sessionist # v2.3.0'
+
+# prefix + C-m: Save 'manual' snapshot
+# prefix + M: Prompt for a name and save the snapshot under that name
+# prefix + C-n: Restore 'manual' snapshot
+# prefix + N: Prompt for a name and restore the snapshot by that name
+# set -g @plugin 'spywhere/tmux-named-snapshot'
+
+# prefix + o: "open" a highlighted selection with the system default program. open for OS X or xdg-open for Linux.
+# prefix + C-o: open a highlighted selection with the $EDITOR
+# prefix + S: search the highlighted selection directly inside a search engine (defaults to google).
+set -g @plugin 'tmux-plugins/tmux-open # v3.0.0'
+# set -g @open o
+# set -g @open-editor 'C-o'
+# set -g @open-B 'https://www.bing.com/search?q='
+set -g @open-D 'https://www.duckduckgo.com/?q='
+# set -g @open-G 'https://www.google.com/search?q='
+set -g @open-S 'https://eu.startpage.com/do/dsearch?q='
+
+# prefix + C-f: simple file search
+# prefix + C-g: jumping over git status files (best used after git status command)
+# prefix + M-h: jumping over SHA-1/SHA-256 hashes (best used after git log command)
+# prefix + C-u: url search (http, ftp and git urls)
+# prefix + C-d: number search (mnemonic d, as digit)
+# prefix + M-i: ip address search
+set -g @plugin 'tmux-plugins/tmux-copycat'
+
+# Requires reattach-to-user-namespace (macOS)
+# prefix + y: copies text from the command line
+# prefix + Y: copy the current pane's current working directory
+set -g @plugin 'tmux-plugins/tmux-yank'
+# set -g @shell_mode vi # tmux <= 2.3
+# set -g @yank_action 'copy-pipe' # or 'copy-pipe-and-cancel'
+
+# set -g @plugin 'tmux-plugins/tmux-urlview'
+# set -g @plugin 'tmux-plugins/tmux-fpp'
+# set -g @plugin 'laktak/extrakto'
+# set -g @plugin 'Morantron/tmux-fingers'
+# set -g @plugin 'trevarj/tmux-open-nvim'
+# set -g @plugin 'fcsonline/tmux-thumbs'
+# set -g @thumbs-key F
+# set -g @thumbs-alphabet azerty
+
+# prefix + ?
+set -g @tmux-which-key-disable-autobuild 0
+set -g @plugin 'alexwforsythe/tmux-which-key'
+
+# set -g @plugin 'jaclu/tmux-menus'
+# set -g @menus_trigger Space
+# set -g @menus_display_commands Yes
+
+# TODO: remap C-a m (mark pane)
+# set -g @plugin 'rickstaa/tmux-notify # v1.6.0'
+# set -g @tnotify-verbose on
+
+# https://github.com/arl/gitmux
+# set -g @plugin 'thepante/tmux-git-autofetch'
+# set -g @git-autofetch-scan-paths '~/src/.*|.*\/chezmoi'
+# set -g @git-autofetch-frequency 5
+
+# TODO: move to ~/.local/share/tmux/plugins
+# https://github.com/tmux-plugins/tpm/issues/105
+setenv -g TMUX_PLUGIN_MANAGER_PATH "$HOME/.config/tmux/plugins/"
+
+if "test ! -d $HOME/.config/tmux/plugins/tpm" {
+    run "git clone https://github.com/tmux-plugins/tpm $HOME/.config/tmux/plugins/tpm \
+        && $HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+}
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run "$HOME/.config/tmux/plugins/tpm/tpm"
+
+# if-shell 'test -f $HOME/.tmux.conf.local' 'source-file $HOME/.tmux.conf.local'
+if "test -f $HOME/.config/tmux/tmux.conf.local" {
+    source-file "$HOME/.config/tmux/tmux.conf.local"
+}
+
+# Annotate existing bindings
+# bind -N 'Send prefix' C-a
+bind -N 'Last window' a
+bind -N 'Display panes' q
+
+bind -N 'Reload config' R
+bind -N 'New window' c
+
+# tmux-logging
+bind -N 'Toggle logging +logging' P
+bind -N 'Screen capture +logging' M-p
+bind -N 'Save history +logging' M-P
+bind -N 'Clear history +logging' M-c
+
+# tmux-open
+bind -N 'Open selection +open' o
+bind -N 'Open selection with editor +open' C-o
+
+# tmux-resurrect
+bind -N 'Restore session +resurrect' C-r
+bind -N 'Save session +resurrect' C-s
+
+# # tmux-named-snapshot
+# bind -N 'Save manual snapshot +snapshot' C-m
+# bind -N 'Save named snapshot +snapshot' M
+# bind -N 'Restore manual snapshot +snapshot' C-n
+# bind -N 'Restore named snapshot +snapshot' N
+
+# tmux-sessionist
+bind -N 'Switch session +sessionist' g
+bind -N 'Create session +sessionist' C
+bind -N 'Kill session +sessionist' X
+bind -N 'Switch last session +sessionist' S
+bind -N 'Promote pane to session +sessionist' @
+bind -N 'Promote window to session +sessionist' C-@
+bind -N '+join-pane Join pane to session +sessionist' t
+bind -T join-pane -N 'Join horizontally' h
+# bind -T join-pane -N 'Join horizontally' \"
+bind -T join-pane -N 'Join vertically' v
+# bind -T join-pane -N 'Join vertically' %
+bind -T join-pane -N 'Join full screen' f
+# bind -T join-pane -N 'Join full screen' @
+
+# tmux-yank
+bind -N 'Copy command line text +yank' y
+bind -N 'Copy current directory +yank' Y
+
+# tmux-copycat
+bind -N 'Search file +copycat' C-f
+bind -N 'Search files (git status) +copycat' C-g
+bind -N 'Search hashes (git log) +copycat' M-h
+bind -N 'Search URL +copycat' C-u
+bind -N 'Search number +copycat' C-d
+bind -N 'Search ip address +copycat' M-i
+
+# Custom key bindings
+bind -N 'Time' T clock-mode
+# bind -N 'Reload config' r 'source-file ~/.config/tmux/tmux.conf; display "Config reloaded"'
+# bind r 'display "#{log_info} Loading config... "; source-file ~/.config/tmux/tmux.conf; display -p "\n\n... Press ENTER to continue"'
+
+# run 'tmux set -g status-right "Continuum status: #{continuum_status} $(tmux show-option -gqv status-right)"'

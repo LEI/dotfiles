@@ -1,0 +1,67 @@
+{{- $keys := list }}
+{{- $map := get . "map" }}
+{{- $names := get . "names" | default list }}
+
+{{- if empty $names }}
+{{-   warnf "missing names (tmux .keys)" }}
+{{- end }}
+
+{{- range $names }}
+{{- $parts := . | replaceAllRegex "\\s+" " " | splitList " " }}
+{{- $prefix := index $parts 0 }}
+
+{{- /* if or (ne $prefix "C-a") (lt (len $parts) 3) }}
+{{- warnf "tmux: excluded prefix: %s %s" $prefix . -}}
+{{- continue }}
+{{- end }}
+{{- $key := index $parts 1 }}
+{{- $note := slice $parts 2 | join " " */ -}}
+
+{{- if lt (len $parts) 2 }}
+{{- warnf "tmux: invalid length: %s %s" (len $parts) . -}}
+{{- continue }}
+{{- end }}
+
+{{- $key := index $parts 0 }}
+{{- $note := slice $parts 1 | join " " | replaceAllRegex " \\+[\\w-]+$" "" -}}
+
+{{- if and (gt (get $ "include" | len | default 0) 0) (not (has $key $.include)) }}
+{{- /* warnf "tmux: not included: %s: %s" $key . */ -}}
+{{- continue }}
+{{- end }}
+
+{{- if has $key (get $ "exclude" | default (list "'")) }}
+{{- /* warnf "tmux: excluded key: %s" . */ -}}
+{{- continue }}
+{{- end }}
+
+{{- if or (lt (len $key) (get $ "min" | default 1)) (gt (len $key) (get $ "max" | default (len $key))) }}
+{{- /* warnf "tmux: excluded length: %s" . */ -}}
+{{- continue }}
+{{- end }}
+
+{{- $escapedKey := $key | replaceAllRegex "([;#$%{}~])" "\\${1}" }}
+{{- $command := get $map ($escapedKey | replaceAllRegex "\"" "\\\"") }}
+{{- if empty $command }}
+{{- warnf "tmux: mapping not found, try escaping key: '%s' / %s / %s" . ($escapedKey | replaceAllRegex "\"" "\\\"") $map -}}
+{{- $note = printf "-%s (%s)" $note $key }}
+{{- $command = printf "display-message \"Mapping not found, try escaping: %s\"" $escapedKey }}
+{{- else if contains "'" $command }}
+{{- $command = $command | replaceAllRegex "'" "\\\\\"" }}
+{{- end }}
+
+{{- $dict := dict
+  "name" $note
+  "key" $key
+  "command" $command
+-}}
+
+{{- $keys = append $keys $dict }}
+
+{{- end }}
+
+{{- range $keys }}
+- name: {{ .name | quote }}
+  key: {{ .key | quote }}
+  command: {{ .command | quote }}
+{{- end }}

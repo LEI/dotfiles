@@ -1,0 +1,355 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/alexwforsythe/tmux-which-key/refs/heads/main/config.schema.yaml
+---
+command_alias_start_index: 200
+keybindings:
+  root_table: "C-?" # C-Space
+  prefix_table: "?" # Space
+title:
+  style: align=centre,bold
+  prefix: tmux
+  prefix_style: fg=default,align=left # fg=green,align=centre,bold
+position:
+  x: R
+  y: W # P
+custom_variables:
+  - name: log_info
+    value: "#[fg=green,italics] [info]#[default]#[italics]"
+macros:
+  - name: reload-config
+    commands:
+      - display "#{log_info} Loading config... "
+      - source-file $HOME/.config/tmux/tmux.conf
+      - display -p "\n\n... Press ENTER to continue"
+      # - send-keys C-a
+      # - send-keys r
+  - name: restart-pane
+    commands:
+      - display "#{log_info} Restarting pane"
+      - "respawnp -k -c #{pane_current_path}"
+  # - name: goto-session
+  #   commands:
+  #     - display "#{log_info} Switching session"
+  #     - "send-prefix; send-keys g"
+items:
+  - name: List keys
+    key: "?"
+    command: list-keys -N
+  - separator: true
+
+  # - name: Run
+  #   key: ":" # space
+  #   command: command-prompt
+  # - name: Last window
+  #   key: a # tab
+  #   command: last-window
+  # - name: Last pane
+  #   key: space # "`"
+  #   command: last-pane
+  # - name: Copy
+  #   key: c
+  #   menu:
+  #     - name: Copy
+  #       key: c
+  #       command: copy-mode
+  #     - name: List buffers
+  #       key: "#"
+  #       command: list-buffers
+  - separator: true
+
+  # NOTE: this is fully applied only on the second run, when tmux config is up to date
+
+  # {{- $keys := includeTemplate "tmux-list-keys.tmpl" (dict "group" "prefix") | fromJson }}
+
+  - name: +Keys (short)
+    key: h
+    menu:
+      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "exclude" (list "'" "0" "1" "2" "3" "4" "5" "6" "7" "8" "9") "max" 1 "map" $keys.map "names" $keys.names) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Keys (long)
+    key: l
+    menu:
+      # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "min" 2 "map" $keys.map "names" $keys.names) | indent 6 }}
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - separator: true
+
+  # {{- $include := list "$" "&" "," ":" "Space" "c" "d" "n" "p" "q" "s" "w" "x" "z" "~" }}
+  # {{- "\n" }}{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.config.yaml.tmpl" (mergeOverwrite . (dict "include" $include "map" $keys.map "names" $keys.names)) | indent 2 }}
+  - separator: true
+
+  - name: +Windows
+    key: W
+    menu:
+      - name: Last
+        key: tab
+        command: last-window
+      - name: Choose
+        key: w
+        command: choose-tree -Zw
+      - name: Previous
+        key: p
+        command: previous-window
+      - name: Next
+        key: n
+        command: next-window
+      - name: New
+        key: c
+        command: "neww -c #{pane_current_path}"
+      - separator: true
+      - name: +Layout
+        key: l
+        menu:
+          - name: Next
+            key: l
+            command: nextl
+            transient: true
+          - name: Tiled
+            key: t
+            command: selectnl tiled
+          - name: Horizontal
+            key: h
+            command: selectl even-horizontal
+          - name: Vertical
+            key: v
+            command: selectl even-vertical
+          - name: Horizontal main
+            key: H
+            command: selectl main-horizontal
+          - name: Vertical main
+            key: V
+            command: selectl main-vertical
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_windows}"
+      - name: Split horizontal
+        key: /
+        command: "splitw -h -c #{pane_current_path}"
+      - name: Split vertical
+        key: "-"
+        command: "splitw -v -c #{pane_current_path}"
+      - name: Rotate
+        key: o
+        command: rotatew
+        transient: true
+      - name: Rotate reverse
+        key: O
+        command: rotatew -D
+        transient: true
+      - separator: true
+      - name: Rename
+        key: R
+        command: command-prompt -I "#W" "renamew -- \"%%\""
+      - name: Kill
+        key: X
+        command: 'confirm -p "Kill window #W? (y/n)" killw'
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Panes
+    key: C-P
+    menu:
+      - name: Last
+        key: tab
+        command: lastp
+      - name: Choose
+        key: p
+        command: displayp -d 0
+      - separator: true
+      - name: Left
+        key: h
+        command: selectp -L
+      - name: Down
+        key: j
+        command: selectp -D
+      - name: Up
+        key: k
+        command: selectp -U
+      - name: Right
+        key: l
+        command: selectp -R
+      - separator: true
+      - name: Zoom
+        key: z
+        command: resizep -Z
+      - name: +Resize
+        key: r
+        menu:
+          - name: Left
+            key: h
+            command: resizep -L
+            transient: true
+          - name: Down
+            key: j
+            command: resizep -D
+            transient: true
+          - name: Up
+            key: k
+            command: resizep -U
+            transient: true
+          - name: Right
+            key: l
+            command: resizep -R
+            transient: true
+          - name: Left more
+            key: H
+            command: resizep -L 10
+            transient: true
+          - name: Down more
+            key: J
+            command: resizep -D 10
+            transient: true
+          - name: Up more
+            key: K
+            command: resizep -U 10
+            transient: true
+          - name: Right more
+            key: L
+            command: resizep -R 10
+            transient: true
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_panes}"
+      - name: Swap left
+        key: H
+        command: swapp -t "{left-of}"
+      - name: Swap down
+        key: J
+        command: swapp -t "{down-of}"
+      - name: Swap up
+        key: K
+        command: swapp -t "{up-of}"
+      - name: Swap right
+        key: L
+        command: swapp -t "{right-of}"
+      - name: Break
+        key: "!"
+        command: break-pane
+      - separator: true
+      - name: Mark
+        key: m
+        command: selectp -m
+      - name: Unmark
+        key: M
+        command: selectp -M
+      - name: Capture
+        key: C
+        command: capture-pane
+      - name: Respawn pane
+        key: R
+        macro: restart-pane
+      - name: Kill
+        key: X
+        command: 'confirm -p "Kill pane #P? (y/n)" killp'
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Buffers
+    key: b
+    menu:
+      - name: Choose
+        key: b
+        command: choose-buffer -Z
+      - name: List
+        key: l
+        command: lsb
+      - name: Paste
+        key: p
+        command: pasteb
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Sessions
+    key: M-s
+    menu:
+      - name: Choose
+        key: s
+        command: choose-tree -Zs
+      - name: New
+        key: N
+        command: new
+      - name: Rename
+        key: r
+        command: rename
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  - name: +Client
+    key: M-C
+    menu:
+      - name: Choose
+        key: c
+        command: choose-client -Z
+      - name: Last
+        key: l
+        command: switchc -l
+      - name: Previous
+        key: p
+        command: switchc -p
+      - name: Next
+        key: n
+        command: switchc -n
+      - separator: true
+      - name: Refresh
+        key: R
+        command: refresh
+      - name: +Plugins
+        key: P
+        menu:
+          - name: Install
+            key: i
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/install_plugins
+          - name: Update
+            key: u
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/update_plugins
+          - name: Clean
+            key: c
+            command: run-shell ${TMUX_PLUGIN_MANAGER_PATH}tpm/bindings/clean_plugins
+          - separator: true
+          - name: Back
+            key: BSpace
+            command: "show-wk-menu #{@wk_menu_client}"
+      - name: Detach
+        key: D
+        command: detach
+      - name: Suspend
+        key: Z
+        command: suspendc
+      - separator: true
+      - name: Goto session
+        key: g
+        # command: goto-session
+        command: 'display "#{log_info} Switching session"; run-shell "$HOME/.config/tmux/plugins/tmux-sessionist/scripts/goto_session.sh"'
+      # - name: Reload config
+      #   key: r
+      #   macro: reload-config
+      - name: Customize
+        key: ","
+        command: customize-mode -Z
+      - separator: true
+      - name: Back
+        key: BSpace
+        command: show-wk-menu-root
+  # - name: Time
+  #   key: T
+  #   command: clock-mode
+  # - name: Show messages
+  #   key: "~"
+  #   command: show-messages
+  # - name: +Keys
+  #   key: "?"
+  #   command: list-keys -N
+  - separator: true
+  - name: -Back (BSpace)
+    key: BSpace
+    command: show-wk-menu-root
