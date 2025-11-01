@@ -1,0 +1,11 @@
+---
+packages:
+  vscodium:
+    enabled: "{{ and .features.vscodium (not .headless) }}"
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
+    nameOverwrite:
+      arch: vscodium-bin
+      windows: VSCodium.VSCodium
+  # vscodium@insiders:
+  #   enabled: '{{ and .features.vscodium (not .headless) }}'
+  #   type: cask
