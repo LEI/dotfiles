@@ -1,0 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "block-in-file.tmpl" (dict
+  "chezmoi" .chezmoi
+  "contents" (printf "%s\n" "[[ -f ~/.config/zsh/init.sh ]] && source ~/.config/zsh/init.sh")
+) -}}
