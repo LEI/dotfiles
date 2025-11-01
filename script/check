@@ -1,0 +1,66 @@
+#!/bin/sh
+#MISE alias="c"
+#MISE description="`mise check` or `mise c`"
+
+set -eux
+
+FORMAT="${FORMAT:-json}"
+
+# chezmoi feature enabled # list --output=json | jq --compact-output
+# chezmoi package diff all
+# chezmoi managed | grep '.chezmoiscript\|.local/bin\|install-'
+
+if chezmoi feature atuin && [ "$(atuin --version | sed -e 's/^atuin //' | cut -d. -f1)" -gt 15 ]; then
+  if [ "${DRY_RUN:-}" ]; then
+    echo >&2 atuin doctor
+  else
+    atuin doctor | tail -n+7 | jq --compact-output
+    # FIXME: "timeout 5m atuin" hangs
+    # timeout 5m atuin doctor
+  fi
+fi
+
+if chezmoi feature brew; then
+  if ! timeout 5m brew doctor; then
+    echo >&2 "WARN: brew doctor exited with code $?"
+  fi
+fi
+
+if ! timeout 5m chezmoi doctor --dry-run --no-network; then
+  echo >&2 "WARN: chezmoi doctor exited with code $?"
+fi
+
+if chezmoi feature goss; then
+  # PATH="$PATH:$HOME/.local/bin"
+  # # Add shims on PATH unless mise is already activated
+  # if [ -z "${MISE_SHELL:-}" ]; then
+  #   PATH="$PATH:$HOME/.local/share/mise/shims"
+  # fi
+  # mise run goss validate
+  cd ~/.config/goss
+  timeout 5m goss validate # --vars=vars.yaml
+fi
+
+if chezmoi feature mise; then
+  [ -n "${MISE_SHELL:-}" ] || PATH="$PATH:$HOME/.local/share/mise/shims"
+  if [ "$FORMAT" = "json" ]; then
+    timeout 5m mise doctor --json | jq --compact-output
+  else
+    timeout 5m mise doctor
+  fi
+fi
+
+if chezmoi feature neovim; then
+  timeout 5m nvim --headless try \| +checkhealth \| +quitall \| catch \| +cquitall \| end >/dev/null
+  # echo
+fi
+
+if chezmoi feature tmux; then
+  timeout 5m tmux ls
+  # tmux source ~/.config/tmux/tmux.conf
+fi
+
+# FIXME(i3): toggles floating window mode
+# if chezmoi feature topgrade; then
+#   topgrade --dry-run
+# fi
