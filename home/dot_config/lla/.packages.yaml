@@ -1,0 +1,21 @@
+---
+packages:
+  lla:
+    enabled: '{{ eq .osIDLike "arch" "darwin" }}'
+    nameOverwrite:
+      arch: lla-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    # if ! [ -f ~/.config/lla/themes/default.toml ]; then
+    #   cmd lla init
+    # fi
+    after_script: |-
+      if ! [ -f ~/.config/lla/themes/tokyo_night.toml ]; then
+        cmd lla theme pull
+      fi
+    # {{- if .features.rust }}
+
+    # NOTE: interactive
+    # cmd lla install
+
+    # cmd lla update
+    # {{- end }}
