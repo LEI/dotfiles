@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -eu
+
+run_check() {
+  cat "$@" |
+    chezmoi execute-template \
+      --dry-run \
+      --no-tty \
+      --refresh-externals=never \
+      --with-stdin \
+      >/dev/null
+}
+
+run_check_for_each() {
+  for f in "$@"; do
+    # echo >&2 "Checking: $f"
+    run_check "$f" || on_error "$f"
+  done
+}
+
+on_error() {
+  echo
+  echo >&2 "Failed to render template: $f"
+  echo
+  exit 1
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    echo >&2 "check: no arguments"
+    exit
+  fi
+  echo >&2 "Checking: $*"
+  run_check "$@" || run_check_for_each "$@"
+}
+
+main "$@"

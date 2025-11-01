@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -eu
+
+case "${1:-}" in
+all | '')
+  if [ "$(uname -s)" = Darwin ]; then
+    manager=brew
+  elif [ "$HOME" = /data/data/com.termux/files/home ]; then
+    manager=termux
+  elif command -v apk >/dev/null; then
+    manager=apk
+  elif command -v apt >/dev/null; then
+    manager=apt
+  elif command -v dnf >/dev/null; then
+    manager=dnf
+  elif command -v pacman >/dev/null; then
+    manager=pacman
+  elif command -v winget >/dev/null; then
+    manager=winget
+  else
+    echo >&2 "unknown package manager"
+    exit 1
+  fi
+  ;;
+apk | \
+  apt | \
+  aur | \
+  brew | \
+  cask | \
+  dnf | \
+  go | \
+  mas | \
+  mise | \
+  pacman | \
+  pip | \
+  pipx | \
+  scoop | \
+  tap | \
+  termux | \
+  vscode | \
+  winget)
+  manager="$1"
+  ;;
+node | npm) manager="npm" ;;
+python | uv) manager="uv" ;;
+ruby | gem) manager="gem" ;;
+rust | cargo) manager="cargo" ;;
+*)
+  echo >&2 "package-manager: invalid argument: $1"
+  exit 1
+  ;;
+esac
+
+echo "$manager"
