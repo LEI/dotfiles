@@ -1,0 +1,93 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -eq 0 ]; then
+  set -- "$(package-manager)"
+fi
+
+case "${1:-}" in
+apk)
+  apk list --installed --quiet
+  ;;
+apt)
+  # apt list --installed
+  # dpkg --get-selections
+  apt-mark showmanual | tr -s '\n' ' ' | cut -d' ' -f1
+  ;;
+aur | yay)
+  pacman -Qqm
+  # yay -? --repo
+  # yay -? --aur
+  ;;
+brew)
+  # brew bundle dump --file=-
+  brew list --formula --installed-on-request
+  ;;
+cask)
+  brew list --cask
+  ;;
+mas)
+  brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"'
+  ;;
+vscode)
+  brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"'
+  ;;
+dnf)
+  # dnf list --installed | cut -d' ' -f1 | cut -d. -f1
+  dnf repoquery --leaves --userinstalled | sed -e 's/-[0-9]:.*$//'
+  ;;
+gem)
+  gem list | cut -d' ' -f1
+  ;;
+go)
+  # FIXME: exclude standard library
+  go list ... | grep -v /
+  ;;
+mise)
+  mise list --global --json | jq --raw-output 'to_entries[] | "\(.key)@\(.value[0].requested_version)"'
+  ;;
+npm)
+  npm list --global --json | jq --raw-output '.dependencies | keys[]'
+  ;;
+pacman)
+  extra_installed="$(pacman -Qqm)"
+  pacman -Qq | grep -vx "$extra_installed" ||
+    # Prevent grep error e.g. during test
+    echo
+  ;;
+pip)
+  python=python
+  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
+    python=python3
+  fi
+  $python -m pip install --user --quiet list
+  ;;
+pipx)
+  pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
+  ;;
+termux)
+  pkg list-installed | grep -v '^Listing\.\.\.' | cut -d/ -f1
+  ;;
+uv)
+  uv tool list | grep -v '^-' | cut -d' ' -f1
+  ;;
+scoop)
+  scoop list | tail -n+2 | cut -d' ' -f1
+  ;;
+tap)
+  brew tap
+  ;;
+winget)
+  # https://www.powershellgallery.com/packages/Microsoft.WinGet.Client/1.6.3133.0
+  # winget list --disable-interactivity --source=winget | tail -n+2 # column 2 (Id)
+  if ! [ -f winget-export.json ]; then
+    winget export --source=winget --output=winget-export.json
+  fi
+  jq --raw-output '.Sources[0].Packages[].PackageIdentifier' winget-export.json
+  ;;
+*)
+  echo >&2 "list-package: invalid argument: $1"
+  exit 1
+  ;;
+esac

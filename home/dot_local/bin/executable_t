@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Attach to an existing session or create a new session
+
+set -eu
+
+export TERM=tmux-256color
+
+if [ $# -ne 0 ]; then
+  if [ "$*" = "-u NONE" ]; then
+    set -- -f/dev/null -Ltmp # lsk
+  fi
+  if [ "$1" = current-config ]; then
+    tmux -Lfoo -f/dev/null start\; show -g
+  elif [ "$1" = default-config ]; then
+    tmux -Lfoo -f/dev/null start\; show -gw
+  else
+    tmux "$@"
+  fi
+elif [ -n "${TMUX:-}" ]; then
+  tmux ls
+else
+  tmux attach || tmux new-session
+fi

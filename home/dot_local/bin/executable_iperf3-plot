@@ -1,0 +1,76 @@
+#!/bin/sh
+
+set -eu
+
+# #!/bin/bash
+
+# set -euo pipefail
+
+if [ $# -eq 0 ]; then
+  echo >&2 "Usage: perf <ip>"
+  return 1
+fi
+
+# format() {
+#   local json="$1"
+#   shift
+#   jq "$@" <<<"$json" | sed -e 's/\./,/' | numfmt --to=iec
+# }
+
+# main() {
+#   local ip="$1"
+#   shift
+#   set -- iperf3 --client "$ip" --json "$@"
+#   echo >&2 "Running: $*"
+#   local json
+#   json="$("$@")"
+#   if [ -z "$json" ]; then
+#     echo >&2 "Failed: $*"
+#     return 1
+#   fi
+#   # format='"\("Down")\t\(.end.sum_received.bits_per_second)"'
+#   # jq "$format" <<<"$json"
+#   local down down_per_second up up_per_second
+#   down="$(format "$json" .end.sum_received.bytes)"
+#   down_per_second="$(format "$json" ".end.sum_received.bits_per_second" <<<"$json")"
+#   up="$(format "$json" ".end.sum_sent.bytes" <<<"$json")"
+#   up_per_second="$(format "$json" ".end.sum_sent.bits_per_second" <<<"$json")"
+#   echo -e "Down\t$down_per_second/s\t$down"
+#   echo -e "Up\t$up_per_second/s\t$up"
+# }
+
+run_iperf3() {
+  ip="$1"
+  shift
+  # https://users.aalto.fi/~tontti/posts/jq-and-human-readable-bytes/
+  format='def bytes:
+  def _bytes(v; u):
+    if (u | length) == 1 or (u[0] == "" and v < 10000) or v < 1000 then
+      "\(v *100 | round /100) \(u[0])B"
+    else
+      _bytes(v/1000; u[1:])
+    end;
+  _bytes(.; ":k:M:G:T:P:E:Z:Y" / ":");
+  select(.event=="interval") | .data.sum.bits_per_second | "\(bytes)/s"'
+  # select(.event=="interval") | .data.sum.bits_per_second | "\(.)\t\(bytes)/s"
+  printf "Bits\tBits per second\n"
+  iperf3 --client="$ip" --json-stream "$@" |
+    jq --compact-output --raw-output --unbuffered "$format"
+  # sed -e 's# .B/s##g'
+}
+
+main() {
+  if [ $# -le 1 ]; then
+    set -- "$@" --time=33
+  fi
+  # if [ -t 1 ] && command -v incplot >/dev/null; then
+  #   # brew install --cask InCom-0/incom/incplot
+  #   run_iperf3 "$@" | incplot # --width 100 --height 10
+  if [ -t 1 ]; then
+    run_iperf3 "$@" | npx cli-plot # -w 100 -h 10
+  else
+    run_iperf3 "$@"
+  fi
+}
+
+main "$@"

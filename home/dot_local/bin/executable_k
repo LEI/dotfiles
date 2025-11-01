@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+if [ -z "${KUBECTL_COMMAND:-}" ]; then
+  if command -v kubecolor >/dev/null; then
+    KUBECTL_COMMAND=kubecolor
+  else
+    KUBECTL_COMMAND=kubectl
+  fi
+fi
+
+if [ $# -eq 0 ]; then
+  # $KUBECTL_COMMAND cluster-info
+  set -- config get-contexts
+fi
+$KUBECTL_COMMAND "$@"

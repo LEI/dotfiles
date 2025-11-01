@@ -1,0 +1,185 @@
+#!/bin/sh
+
+set -eu
+
+uname="$(uname -s)"
+
+usage() {
+  echo >&2 "Usage: chezmoi package [list|diff] [all|<package-manager>] [-h|--help]"
+  echo >&2 "  [-o|--output=text|json|yaml]"
+}
+
+action=list
+output=text
+type=
+while [ $# -gt 0 ]; do
+  case "$1" in
+  list | diff)
+    action="$1"
+    shift
+    # continue
+    ;;
+  -*=*)
+    key="${1%%=*}"
+    value="${1#*=}"
+    shift
+    set -- "$key" "$value" "$@"
+    ;;
+  -o | --output)
+    shift
+    output="$1"
+    shift
+    ;;
+  -o*)
+    output="${1#-o}"
+    shift
+    ;;
+  # -t | --type)
+  #   shift
+  #   type="$1"
+  #   shift
+  #   ;;
+  # -t*)
+  #   type="${1#-t}"
+  #   shift
+  #   ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    if [ -n "$type" ]; then
+      echo >&2 "chezmoi package: invalid argument (type '$type' already defined): $1"
+      usage
+      exit 1
+    fi
+    type="$1"
+    shift
+    ;;
+  esac
+done
+
+list_packages() {
+  key="$1"
+  # echo >&2 "Listing $key packages..."
+  if [ "$output" = text ]; then
+    echo >&2 "# $key packages"
+  fi
+  case "$output" in
+  text)
+    # format='keys | sortAlpha | join "\n" | append "\n"'
+    # shellcheck disable=SC2016
+    line='{{ $key }}'
+    case "$key" in
+    brew | cask)
+      # Hide brew tap prefix
+      # shellcheck disable=SC2016
+      line='{{ $key | replaceAllRegex "[\\w@-]+/" "" }}'
+      ;;
+    mise)
+      # Append requested version
+      # shellcheck disable=SC2016
+      line='{{ $key }}@{{ get $value "version" | default "latest" }}'
+      ;;
+    esac
+    #     template="
+    # {{- range .packages.$key | keys | sortAlpha -}}
+    # {{ . }}
+    # {{ end -}}"
+    template="
+{{- range \$key, \$value := .packages.$key -}}
+$line
+{{ end -}}"
+    chezmoi execute-template --refresh-externals=never <<EOF
+$template
+EOF
+    # '{{ includeTemplate "pluck.tmpl" (dict "key" "before_script" "values" .packages.'"$key"') | trim }}'
+    # '{{ includeTemplate "pluck.tmpl" (dict "key" "after_script" "values" .packages.'"$key"') | trim }}'
+    return 0
+    ;;
+  json) format="toPrettyJson" ;;
+  yaml) format="toYaml" ;;
+  *)
+    echo >&2 "chezmoi package: invalid output format: $output"
+    usage
+    return 1
+    ;;
+  esac
+  # echo >&2 "Executing .packages.$key | $format"
+  chezmoi execute "{{ .packages.$key | $format | trim }}"
+}
+
+TMPDIR="${TMPDIR:-${TMP:-/tmp}}"
+chezmoi_packages="$TMPDIR/chezmoi-packages"
+installed_packages="$TMPDIR/installed-packages"
+
+diff="diff"
+if command -v difft >/dev/null; then
+  diff="difft"
+elif command -v delta >/dev/null; then
+  diff="delta"
+fi
+
+diff_packages() {
+  key="$1"
+  expected="${chezmoi_packages}.${key:-txt}"
+  current="${installed_packages}.${key:-txt}"
+  if [ "$key" = uv ]; then
+    # pg_activity[psycopg] -> pg-activity
+    chezmoi-package list "$key" | cut -d[ -f1 | sed -e 's/_/-/' | sort >"$expected"
+  else
+    chezmoi-package list "$key" | sort >"$expected"
+  fi
+  list-package "$key" | sort >"$current"
+  # echo >&2 "Diffing $key packages..."
+  $diff "$expected" "$current" || echo >&2 "Exit code: $?"
+}
+
+main() {
+  command="$1"
+  "${command}_packages" "$(package-manager "$type")"
+  if [ "$type" != all ]; then
+    exit 0
+  fi
+  if command -v pacman >/dev/null; then
+    "${command}_packages" aur
+  fi
+  if command -v brew >/dev/null; then
+    "${command}_packages" cask
+    if [ "$uname" = Darwin ]; then
+      "${command}_packages" mas
+    else
+      "${command}_packages" brew
+    fi
+    # "${command}_packages" vscode
+  fi
+  # if command -v go >/dev/null; then
+  #   "${command}_packages" go
+  # fi
+  if command -v mise >/dev/null; then
+    "${command}_packages" mise
+  fi
+  if command -v npm >/dev/null; then
+    "${command}_packages" npm
+  fi
+  if command -v pipx >/dev/null; then
+    "${command}_packages" pipx
+  elif command -v pip >/dev/null; then
+    "${command}_packages" pip
+  fi
+  # if command -v ruby >/dev/null; then
+  #   "${command}_packages" gem
+  # fi
+  if command -v uv >/dev/null; then
+    "${command}_packages" uv
+  fi
+}
+
+case "$action" in
+list | diff) main "$action" ;;
+*)
+  echo >&2 "chezmoi package: invalid action: $action"
+  usage
+  exit 1
+  ;;
+esac

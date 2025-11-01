@@ -1,0 +1,124 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+  echo >&2 "Usage: chezmoi feature [list|enabled] [-h|--help]"
+  echo >&2 "  [-o|--output=text|json|yaml]"
+}
+
+get_format() {
+  format=
+  case "$output" in
+  '' | text) ;;
+  json) format="toPrettyJson" ;;
+  yaml) format="toYaml" ;;
+  *)
+    echo >&2 "chezmoi package: invalid output format: $output"
+    usage
+    return 1
+    ;;
+  esac
+  echo "$format"
+}
+
+list_features() {
+  output="$1"
+  shift
+  format="$(get_format "$output")"
+  if [ -n "$format" ]; then
+    chezmoi execute "{{ .features | $format }}"
+  else
+    chezmoi execute '{{ range $key, $value := .features }}{{ $key }}
+{{ end -}}'
+  fi
+}
+
+list_enabled_features() {
+  output="$1"
+  shift
+  format="$(get_format "$output")"
+  # shellcheck disable=SC2016
+  if [ -n "$format" ]; then
+    chezmoi execute "{{ .features | $format }}"
+  else
+    chezmoi execute '{{ range $key, $value := .features }}{{ if $value }}{{ $key }}
+{{ end }}{{ end -}}'
+  fi
+}
+
+get_feature() {
+  key="$1"
+  # shellcheck disable=SC2016
+  value="$(chezmoi execute "{{ get .features \"$key\" }}")"
+  echo "$value"
+}
+
+if [ $# -eq 0 ]; then
+  # usage
+  # exit 0
+  set -- list
+fi
+
+action=
+output=text
+while [ $# -gt 0 ]; do
+  case "$1" in
+  list | enabled)
+    action="$1"
+    shift
+    # continue
+    ;;
+  -*=*)
+    key="${1%%=*}"
+    value="${1#*=}"
+    shift
+    set -- "$key" "$value" "$@"
+    ;;
+  -o | --output)
+    shift
+    output="$1"
+    shift
+    ;;
+  -o*)
+    output="${1#-o}"
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    value="$(get_feature "$1")"
+    if [ -z "$value" ]; then
+      echo >&2 "chezmoi feature: unknown feature: $1"
+      usage
+      exit 1
+    elif [ "$value" != "true" ]; then
+      echo >&2 "chezmoi feature: feature disabled: $1"
+      exit 2
+    fi
+    shift
+    # echo >&2 "chezmoi package: invalid argument: $1"
+    # usage
+    # exit 1
+    ;;
+  esac
+done
+
+case "$action" in
+'')
+  # list_features | wc -l
+  ;;
+list)
+  list_features "$output"
+  ;;
+enabled)
+  list_enabled_features "$output"
+  ;;
+*)
+  echo >&2 "chezmoi feature: invalid action: $action"
+  usage
+  exit 1
+  ;;
+esac
