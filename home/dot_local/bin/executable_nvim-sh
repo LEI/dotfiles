@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Usage: xdg-open "https://github.com/$(nvim-sh)"
+
+set -eu
+
+bkt=
+if command -v bkt >/dev/null; then
+  ttl=1d
+  bkt="bkt --ttl=$ttl --"
+fi
+# shellcheck disable=SC2016
+search="$bkt "'curl -LSfs https://nvim.sh/s/$tag'
+cmd="echo; $bkt curl https://nvim.sh/t | sort"
+# shellcheck disable=SC2034
+tag="$(sk --ansi --cmd="$cmd" --interactive --preview="tag={}; $search")"
+search() {
+  cmd="$(eval "echo \"$search\"") | tail -n+2" # | tr -s ' ' ';'
+  preview="echo {}"
+  if command -v gh >/dev/null; then
+    # shellcheck disable=SC2016
+    preview="$bkt "'gh repo view $(echo {} | cut -d" " -f1)'
+    if command -v glow >/dev/null; then
+      preview="$preview | CLICOLOR_FORCE=1 COLORTERM=truecolor glow --style=dark"
+    fi
+  fi
+  sk --ansi --cmd="$cmd" --interactive --preview="$preview" "$@" # --delimiter=";" --nth=1
+}
+# Name Stars OpenIssues Updated Description
+name="$(search "$@" | cut -d' ' -f1)"
+if [ -z "$name" ]; then
+  exit 1
+fi
+echo "$name"

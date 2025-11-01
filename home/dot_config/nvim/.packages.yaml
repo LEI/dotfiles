@@ -1,0 +1,21 @@
+---
+packages:
+  # NOTE: latest nvim requires GLIBC_2.42
+  neovim:
+    enabled: '{{ and .features.neovim (or (ne .osIDLike "debian") (not .glibc231)) }}'
+    nameOverwrite:
+      # android: neovim
+      # arch: neovim
+      # darwin: neovim
+      windows: '{{ eq .packageType "winget" | ternary "Neovim.Neovim" nil }}'
+    type: '{{ eq .packageType "npm" "gem" | ternary .packageType nil }}'
+  # https://github.com/github/copilot-cli/issues/125
+  copilot:
+    # enabled: '{{ and .features.neovim .features.ai (eq .osIDLike "arch" "darwin" "windows") }}'
+    # nameOverwrite:
+    #   npm: "@githubnext/github-copilot-cli"
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+    enabled: "{{ and .features.neovim .features.ai }}"
+    nameOverwrite:
+      npm: "@github/copilot"
+    type: npm

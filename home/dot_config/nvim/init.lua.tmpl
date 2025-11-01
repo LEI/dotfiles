@@ -1,0 +1,29 @@
+if vim.fn.has('nvim-0.8') == 0 then
+  vim.opt.loadplugins = false
+  -- vim.opt.runtimepath = ''
+  assert(false, 'nvim-0.8 required')
+  return 1 -- vim.fn.finish()
+end
+
+if not vim.fn.has('macunix') then
+  vim.o.shell = '{{ lookPath "sh" | replaceAllRegex "\\\\" "\\\\" }}'
+end
+
+require('config.init')
+require('config.options')
+require('config.autocmds')
+require('config.lazy')
+require('config.commands')
+require('config.keymaps')
+
+vim.cmd('colorscheme ' .. vim.g.config.theme.colorscheme)
+
+local local_vimrc = vim.fn.expand('~/.vimrc.local')
+if vim.fn.filereadable(local_vimrc) == 1 then
+  vim.cmd('source ' .. local_vimrc)
+end
+
+local local_vimrc_lua = vim.fn.expand('~/.config/nvim/init.lua.local')
+if vim.fn.filereadable(local_vimrc_lua) == 1 then
+  vim.cmd('luafile ' .. local_vimrc_lua)
+end

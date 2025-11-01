@@ -1,0 +1,6 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "block-in-file.tmpl" (dict
+  "chezmoi" .chezmoi
+  "contents" (includeTemplate "init.lua.local")
+  "commentString" "-"
+) -}}
