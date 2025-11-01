@@ -1,0 +1,169 @@
+---
+# https://github.com/helix-editor/helix/wiki/Language-Server-Configurations
+
+# TODO:
+# python: sh -c "black --quiet - | isort -"
+# rust: rustfmt --emit-stdout
+# just: just --fmt --unstable
+language:
+  - name: bash
+    auto-format: true
+    formatter:
+      command: shfmt
+      args: ["-i", "2"]
+    # indent:
+    #   tab-width: 4
+    #   unit: "    "
+  - name: go
+    auto-format: true
+    formatter:
+      command: goimports
+  - name: json
+    auto-format: true
+    # config:
+    #   provideFormatter: true
+    #   json:
+    #     keepLines:
+    #       enable: true
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, json]
+  - name: jsonc
+    auto-format: true
+    file-types:
+      - jsonc
+      - glob: bun.lock
+      - glob: "{t,j}sconfig.json"
+      - glob: cspell.json
+      - glob: devcontainer.json
+      - glob: .vscode/*.json
+    # formatter:
+    #   command: prettier
+    #   args: [--parser, jsonc]
+  - name: json5
+    auto-format: true
+    # file-types:
+    #   - json5
+    language-servers: ["vscode-json-language-server"]
+  - name: lua
+    auto-format: true
+    formatter:
+      command: stylua
+      args:
+        - "-"
+        # - --search-parent-directories
+        # PR: current file in formatter args https://github.com/helix-editor/helix/pull/5626
+        # - --stdin-filepath={}
+  - name: markdown
+    auto-format: true
+    formatter:
+      command: prettier
+      args: [--parser, markdown]
+  # - auto-format: true
+  #   name: sql
+  #   formatter:
+  #     args:
+  #       - --reindent
+  #       - --indent_width
+  #       - "2"
+  #       - --keywords
+  #       - upper
+  #       - --identifiers
+  #       - lower
+  #       - "-"
+  #     command: sqlformat
+  # - auto-format: true
+  #   name: html
+  #   formatter:
+  #     args:
+  #       - --parser
+  #       - html
+  #     command: prettier
+  # - auto-format: true
+  #   name: css
+  #   formatter:
+  #     args:
+  #       - --parser
+  #       - css
+  #     command: prettier
+  # - auto-format: true
+  #   name: scss
+  #   formatter:
+  #     args:
+  #       - --parser
+  #       - scss
+  #     command: prettier
+  - name: javascript
+    language-servers:
+      - typescript-language-server
+      - vscode-eslint-language-server
+    # formatter:
+    #   args:
+    #     - --parser
+    #     - typescript
+    #   command: prettier
+    # auto-format: true
+  - name: typescript
+    language-servers:
+      - typescript-language-server
+      - vscode-eslint-language-server
+    # formatter:
+    #   args:
+    #     - --parser
+    #     - typescript
+    #   command: prettier
+    # auto-format: true
+  # - auto-format: true
+  #   name: tsx
+  #   formatter:
+  #     args:
+  #       - --parser
+  #       - typescript
+  #     command: prettier
+  - auto-format: true
+    name: toml
+    formatter:
+      args: [fmt, "-"]
+      command: taplo
+  - name: yaml
+    auto-format: true
+    # formatter:
+    #   command: prettier
+    #   args: ["--parser", "yaml"]
+language-server:
+  # gopls:
+  #   config:
+  #     gofumpt: true
+  rust-analyzer:
+    config:
+      cargo:
+        features: all
+      check:
+        command: clippy
+      checkOnSave:
+        command: clippy
+  yaml-language-server:
+    config:
+      yaml:
+        customTags:
+          # https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#configure-your-ide-to-support-reference-tags
+          - "!reference sequence"
+        validation: true
+        format:
+          enable: true # Replaces with prettier/yamlfmt
+        json:
+          schemaDownload:
+            enable: true
+        schemas:
+          https://json.schemastore.org/github-workflow.json: .github/workflows/*.{yml,yaml}
+          https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible-tasks.json: roles/{tasks,handlers}/*.{yml,yaml}
+          # "https://json.schemastore.org/kustomization": ["kustomization.yaml"]
+          # "https://json.schemastore.org/kubernetes-definitions.json": ["*.yaml"]
+          # "https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json": [ "/*.k8s.yaml" ]
+          # "https://raw.githubusercontent.com/GoogleContainerTools/skaffold/master/docs/content/en/schemas/v2beta8.json": [ "skaffold.yaml" ]
+          # FIXME: Matches multiple schemas when only one must validate
+          # https://github.com/redhat-developer/yaml-language-server/issues/132#issuecomment-2065095813
+          # "https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json": "*.yaml"
+          # "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.31.1/all.json": "*.yaml"
+        schemaStore:
+          enable: true

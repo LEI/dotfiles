@@ -1,0 +1,257 @@
+---
+theme: tokyonight_storm
+editor:
+  auto-format: true
+  bufferline: multiple
+  color-modes: true
+  # cursorcolumn: true
+  cursorline: true
+  cursor-shape:
+    insert: bar
+    select: underline
+  file-picker:
+    hidden: false
+  # inline-diagnostics:
+  #   cursor-line: hint
+  #   other-lines: errors
+  line-number: "relative"
+  # lsp:
+  #   display-diagnostic-message: false
+  #   display-messages: true
+  # persistence:
+  #   old-files: true
+  #   commands: true
+  #   search: true
+  #   clipboard: true
+  rulers: [80]
+  soft-wrap:
+    enable: true
+  statusline:
+    left: [mode, spacer, version-control, file-name]
+    # center: []
+    right:
+      - spinner
+      - diagnostics
+      - selections
+      - position-percentage
+      - position
+      - file-line-ending
+      - file-encoding
+      - file-type
+  true-color: true
+  whitespace:
+    characters:
+      # space: "·"
+      # nbsp: "⍽"
+      # tab: "→"
+      # newline: "¬"
+      # tabpad: "·" # Tabs will look like "→···" (depending on tab width)
+    render:
+      nbsp: all
+      newline: all
+      # space: trailing
+      tab: all
+
+# Reference: https://docs.helix-editor.com/master/keymap.html
+# Shared configs: https://github.com/helix-editor/helix/discussions/1360
+# User Tips: https://www.reddit.com/r/HelixEditor/comments/10reh4p
+# Vim like: https://github.com/LGUG2Z/helix-vim/blob/master/config.toml
+# Alt macOS: https://github.com/helix-editor/helix/issues/2280#issuecomment-1165256309
+# NOTE: REMAP: when the chord produces the same output as the key alone
+
+keys:
+  normal:
+    esc: ["collapse_selection", "keep_primary_selection"]
+    C-c: "no_op"
+    g:
+      c: "toggle_comments"
+      M: "goto_window_center"
+    # Go to space created when joining lines (default does not move the cursor)
+    J: ["goto_line_end_newline", "join_selections"]
+    # Extends the selection to the end of the line, regardless of where the head/anchor are
+    D: ["ensure_selections_forward", "extend_to_line_end"]
+    # Selects from the first non-whitespace to the end of the line
+    # V: ["goto_first_nonwhitespace", "extend_to_line_end"] # <x_>?
+    V: ["select_mode", "extend_to_line_bounds"]
+    # X: "extend_line_above"
+    # a: ["append_mode", "collapse_selection"]
+    # i: ["insert_mode", "collapse_selection"]
+    # Extend based on the head of the selection (use <A-;> to switch)
+    x: ["extend_line"]
+    # Open buffer directory
+    "minus": "file_picker_in_current_buffer_directory"
+    # Window navigation
+    C-h: "jump_view_left"
+    C-j: "jump_view_down"
+    C-k: "jump_view_up"
+    C-l: "jump_view_right"
+    C-q: ":buffer-close"
+    # Move line up
+    C-p:
+      - extend_to_line_bounds
+      - delete_selection
+      - move_line_up
+      - paste_before
+    # Move line down
+    C-n: ["extend_to_line_bounds", "delete_selection", "paste_after"]
+
+    # AZERTY macOS
+    "•": "repeat_last_motion" # Repeat last motion <A-.>
+    "`": "switch_to_lowercase" # Switch to lowercase <`> (default)
+    "@": "switch_to_uppercase" # Switch to uppercase <A-`>
+    "º": "earlier" # Move backward in history <A-u>
+    "ª": "later" # Move forward in history <A-U>
+    "∂": "delete_selection_noyank" # DELETE selection without yanking <A-d>
+    "©": "change_selection_noyank" # Change selection without yanking <A-c>
+    "¬": "shell_pipe_to" # Pipe selections into shell command ignoring output <A-|> (REMAP: <A-l>)
+    "¡": "shell_append_output" # Append shell command output after selections <A-!>
+    "Ò": "split_selection_on_newline" # Split selection on newlines <A-S>
+    "—": "merge_consecutive_selections" # Merge consecutive selections <A-_> (REMAP: <A-->)
+    "…": "flip_selections" # Flip selection cursor and anchor <A-;>
+    "÷": "ensure_selections_forward" # Ensure all selections face forward <A-:>
+    "∞": "remove_primary_selection" # Remove primary selection <A-,>
+    "¢": "copy_selection_on_prev_line" # Copy selection on previous line <A-C>
+    "ç": "rotate_selections_backward" # * Rotate main selection backward <(>
+    "à": "rotate_selections_forward" # * Rotate main selection forward <)>
+    "Ç": "rotate_selection_contents_backward" # * Rotate selections contents backward <A-(>
+    "ø": "rotate_selection_contents_forward" # * Rotate selection contents forward <A-)>
+    "≈": "shrink_to_line_bounds" # Shrink selection to line bounds <A-x>
+    "Í": "join_selections_space" # Join lines inside selection and select spaces <A-J>
+    "Ë": "remove_selections" # Remove selections matching regex <A-K>
+    "œ": "expand_selection" # Expand selection to parent syntax node <A-o> <A-up>
+    "î": "shrink_selection" # Shrink selection to previously expanded syntax node <A-i> <A-down>
+    "π": "select_prev_sibling" # Select previous sibling in syntax tree <A-p> <A-left>
+    "~": "select_next_sibling" # Select next sibling in syntax tree <A-n> <A-right>
+    "‡": "extend_line_up" # <A-q>
+    space:
+      # ".": ["search_next", "repeat_last_motion"]
+      # ";": ["search_next", "repeat_last_insert?"]
+      space: "goto_last_accessed_file"
+
+      # Global search current selection output to a scratch buffer
+      # g: ["yank", ":hsplit-new", "paste_after", ":pipe xargs rg"]
+
+      i: ":toggle lsp.display-inlay-hints"
+      m: ":toggle lsp.display-messages"
+
+      w: ":write" # Use <C-w> for window mode
+      q: ":quit"
+
+      # Vertical split
+      T: ":sh tmux split-window"
+      '"': ":sh tmux split-window"
+      # Horizontal split
+      "%": ":sh tmux split-window -h"
+      # Repeat last command in the previously selected tmux pane
+      # https://stackoverflow.com/a/39523222/7796750
+      # Send enter twice if shell expands '!!'
+      t: ":sh repeat-last-command"
+    backspace:
+      c: ":character-info"
+      # d: ":insert-output date"
+      L: ":log-open"
+      l: ":open ~/.config/helix/languages.toml"
+      e: ":config-open"
+      r: ":config-reload"
+      s: ["extend_to_line_bounds", ":pipe sort"]
+      t: ":tree-sitter-scopes"
+      T: ":tree-sitter-subtree"
+      w: ":reflow"
+
+      # :debug-start, :dbg	Start a debug session from a given template with given parameters.
+      # :debug-remote, :dbg-tcp	Connect to a debug adapter by TCP address and start a debugging session from a given template with given parameters.
+      # :debug-eval	Evaluate expression in current debug context.
+
+    # Unimpaired: AZERTY and alphabetical order
+    ")":
+      a: "goto_next_parameter"
+      c: "goto_next_comment"
+      D: "goto_last_diag"
+      d: "goto_next_diag"
+      f: "goto_next_function"
+      g: "goto_next_change"
+      G: "goto_last_change"
+      p: "goto_next_paragraph"
+      t: "goto_next_class"
+      T: "goto_next_test"
+      space: "add_newline_below"
+    "(":
+      a: "goto_prev_parameter"
+      c: "goto_prev_comment"
+      D: "goto_first_diag"
+      d: "goto_prev_diag"
+      f: "goto_prev_function"
+      G: "goto_first_change"
+      g: "goto_prev_change"
+      p: "goto_prev_paragraph"
+      t: "goto_prev_class"
+      T: "goto_prev_test"
+      space: "add_newline_above"
+  insert:
+    C-o: "normal_mode"
+    C-s: "signature_help"
+
+    # AZERTY macOS
+    # "": "delete_word_backward" # Delete previous word <C-w> <A-Backspace>
+    "∂": "delete_word_forward" # Delete next word <A-d> <A-Delete>
+  select:
+    C-c: "no_op"
+    g:
+      c: "toggle_comments"
+      M: "goto_window_center"
+    # In select mode, <;> is normally followed by escape to enter normal mode
+    ";": ["collapse_selection", "normal_mode"]
+    # Counterpart for normal mode <V>
+    V: "extend_to_line_end"
+    # Same behaviour as normal mode <x>
+    x: ["extend_line"]
+    # Window navigation
+    C-h: "jump_view_left"
+    C-j: "jump_view_down"
+    C-k: "jump_view_up"
+    C-l: "jump_view_right"
+    # C-q: "collapse_selection"
+    # Move line up
+    C-p:
+      - extend_to_line_bounds
+      - delete_selection
+      - move_line_up
+      - paste_before
+    # Move line down
+    C-n: ["extend_to_line_bounds", "delete_selection", "paste_after"]
+
+    # AZERTY macOS
+    "•": "repeat_last_motion" # Repeat last motion <A-.>
+    "`": "switch_to_lowercase" # Counterpart of normal mode <`>
+    "@": "switch_to_uppercase" # Switch to uppercase <A-`>
+    "º": "earlier" # Move backward in history <A-u>
+    "ª": "later" # Move forward in history <A-U>
+    "∂": "delete_selection_noyank" # DELETE selection without yanking <A-d>
+    "©": "change_selection_noyank" # Change selection without yanking <A-c>
+    "¬": "shell_pipe_to" # Pipe selections into shell command ignoring output <A-|> (REMAP: <A-l>)
+    "¡": "shell_append_output" # Append shell command output after selections <A-!>
+    "Ò": "split_selection_on_newline" # Split selection on newlines <A-s>
+    "—": "merge_consecutive_selections" # Merge consecutive selections <A-_> (REMAP: <A-->)
+    "…": "flip_selections" # Flip selection cursor and anchor <A-;>
+    "÷": "ensure_selections_forward" # Ensure all selections face forward <A-:>
+    "∞": "remove_primary_selection" # Remove primary selection <A-,>
+    "¢": "copy_selection_on_prev_line" # Copy selection on previous line <A-C>
+    "ç": "rotate_selections_backward" # * Rotate main selection backward <(>
+    "à": "rotate_selections_forward" # * Rotate main selection forward <)>
+    "Ç": "rotate_selection_contents_backward" # * Rotate selections contents backward <A-(>
+    "ø": "rotate_selection_contents_forward" # * Rotate selection contents forward <A-)>
+    "≈": "shrink_to_line_bounds" # Shrink selection to line bounds <A-x>
+    "Í": "join_selections_space" # Join lines inside selection and select spaces <A-J>
+    "Ë": "remove_selections" # Remove selections matching regex <A-K>
+    "œ": "expand_selection" # Expand selection to parent syntax node <A-o> <A-up>
+    "î": "shrink_selection" # Shrink selection to previously expanded syntax node <A-i> <A-down>
+    "π": "select_prev_sibling" # Select previous sibling in syntax tree <A-p> <A-left>
+    "~": "select_next_sibling" # Select next sibling in syntax tree <A-n> <A-right>
+    "‡": "extend_line_up" # <A-q>
+    space:
+      space: "goto_last_accessed_file"
+      w: ":write" # Use <C-w> for window mode
+      q: ":quit"
+    backspace:
+      s: ["extend_to_line_bounds", ":pipe sort"]
+      w: ":reflow"
