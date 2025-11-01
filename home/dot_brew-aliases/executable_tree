@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# alias: brew why
+#:  * `why` [args...]
+#:    `brew why` is an alias for `brew uses --installed`
+
+set -euxo pipefail
+
+brew deps --tree --installed "$@"

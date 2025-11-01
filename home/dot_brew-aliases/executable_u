@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# alias: brew u
+#:  * `u` [args...]
+#:    `brew u` is an alias for upgrade
+
+set -euxo pipefail
+
+brew update "$@"
+brew upgrade "$@" # --formulae
+# yes | brew cu --all --cleanup
+# brew cleanup --prune=all
