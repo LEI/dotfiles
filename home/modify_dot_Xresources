@@ -1,0 +1,8 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "block-in-file.tmpl" (dict
+  "chezmoi" .chezmoi
+  "commentString" "!"
+  "contents" (printf "%s\n"
+    "#include \".config/X11/xresources\""
+  )
+) -}}

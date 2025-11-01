@@ -1,0 +1,43 @@
+#!/bin/sh
+
+{{- if lookPath "ghostty" | isExecutable }}
+
+export TERMINAL="${TERMINAL:-ghostty}"
+{{- end }}
+
+# FIXME: xfconf-query -c xfce4-panel -p /plugins/plugin-6/symbolic-icons --type bool --set
+# export XDG_CURRENT_DESKTOP=XFCE
+
+# TODO: once on laptop and warn if already exists + sudo only if interactive
+
+# if [ ! -f /usr/share/X11/xorg.conf.d/41-libinput-local.conf ]; then
+#   # cat /usr/share/X11/xorg.conf.d/40-libinput.conf
+#   tee /usr/share/X11/xorg.conf.d/41-libinput-local.conf <<EOF
+# Section "InputClass"
+#         Identifier "libinput touchpad catchall"
+#         MatchIsTouchpad "on"
+#         MatchDevicePath "/dev/input/event*"
+#         Driver "libinput"
+#         Option "NaturalScrolling" "true"
+#         Option "Tapping" "on"
+# EndSection
+# EOF
+# fi
+
+# xrandr --dpi 192 --output eDP-1 --scale 1.25x1.25
+xrandr --dpi 192 --output eDP-1 --scale 1.5x1.5
+
+# Set keyboard repeat rate
+xset r rate 300 50
+
+# https://wiki.archlinux.org/title/Libinput
+# TOUCHPAD="$(xinput list | grep Touchpad | tr -s '\t' ' ' | cut -d' ' -f3- | sed -e 's/ id=.*$//')"
+for i in $(xinput list | grep "Touchpad" | perl -n -e'/id=(\d+)/ && print "$1\n"'); do
+  props="$(xinput list-props "$i")"
+  if echo "$props" | grep -q 'libinput Natural Scrolling Enabled (.*):.*0$'; then
+    xinput set-prop "$i" "libinput Natural Scrolling Enabled" 1
+  fi
+  if echo "$props" | grep -q "libinput Natural Scrolling Enabled (.*):.*0$"; then
+    xinput set-prop "$i" "libinput Tapping Enabled" 1
+  fi
+done
