@@ -1,0 +1,59 @@
+{{- $other := list -}}
+{{- range $account := get .mail "accounts" | default list }}
+{{- if eq (substr 0 3 $account.name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+{{- $other = append $other $account.address -}}
+{{- end -}}
+
+[database]
+path={{ .chezmoi.homeDir }}/Mail
+
+[user]
+name={{ .name }}
+# primary_email={{ .email | default (printf "%s@localhost" (env "USER")) }}
+other_email={{ $other | join ";" }}
+
+[new]
+# tags=
+# ignore=
+
+[search]
+# exclude_tags=
+
+[maildir]
+synchronize_flags=true
+
+[query]
+new=tag:unread
+old=not query:new
+{{- range $key, $value := get .mail "queries" | default list }}
+  {{- if eq (kindOf $value) "string" }}
+    {{- if contains " " $value }}
+{{ $key }}={{ $value }}
+    {{- else if contains "@" $value }}
+{{ $key }}=from:{{ $value }}
+    {{- else }}
+{{ $key }}=from:@{{ $value }} or from:"/[.]{{ $value | replaceAllRegex "\\." "[.]" }}>/"
+    {{- end }}
+  {{- else }}
+{{ $key }}=
+    {{- $first := true }}
+    {{- range $item := $value -}}
+      {{- if ne $first true }} or {{ end }}{{ $first = false -}}
+      {{- if contains " " $item -}}
+{{ $item }}
+      {{- else if contains "@" $item -}}
+from:{{ $item }}
+      {{- else -}}
+from:@{{ $item }} or from:"/[.]{{ $item | replaceAllRegex "\\." "[.]" }}>/"
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+all=
+{{- $first := true -}}
+{{- range $key, $item := get .mail "queries" | default list }}
+{{- if ne $first true }} or {{ end }}{{ $first = false }}query:{{ $key }}
+{{- end }}
+none=not query:all
