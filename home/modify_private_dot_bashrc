@@ -1,0 +1,8 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "block-in-file.tmpl" (dict
+  "chezmoi" .chezmoi
+  "contents" (printf "%s\n%s\n"
+    "[ \"${BENCH:-}\" = true ] && echo >&2 \"Loaded .bashrc ($-)\" # [[ -n \"$PS1\" ]] && [[ -f ~/.bash_profile ]] && source ~/.bash_profile"
+    "[[ -f ~/.config/bash/init.sh ]] && source ~/.config/bash/init.sh"
+  )
+) -}}
