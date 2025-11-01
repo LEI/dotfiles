@@ -1,0 +1,6 @@
+{{ if eq (get . "cleanup" | not | not) true -}}
+pack/chezmoi/start/*
+{{ range $name, $plugin := .vim.plugins -}}
+!pack/chezmoi/start/{{ $name }}
+{{ end -}}
+{{ end -}}
