@@ -1,0 +1,116 @@
+# https://meli-email.org/documentation.html#meli-themes.5_CUSTOM_THEMES
+# https://git.meli-email.org/meli/meli/src/branch/master/meli/docs/samples/themes
+[terminal.themes.tokyonight]
+"theme_default" = { fg = "$fg", bg = "$bg", attrs = "Default" }
+"error_message" = { fg = "$red", bg = "theme_default", attrs = "theme_default" }
+"text.normal" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"text.unfocused" = { fg = "theme_default", bg = "theme_default", attrs = "Dim" }
+"text.error" = { fg = "$red", bg = "theme_default", attrs = "theme_default" }
+"text.highlight" = { fg = "$blue", bg = "theme_default", attrs = "Reverse" }
+"highlight" = { fg = "theme_default.bg", bg = "theme_default.fg", attrs = "Bold" }
+"status.bar" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"status.command_bar" = { fg = "$terminal_black", bg = "$blue", attrs = "theme_default" }
+"status.history" = { fg = "DeepPink2", bg = "LightPink3", attrs = "theme_default" }
+"status.history.hints" = { fg = "Black", bg = "status.command_bar", attrs = "theme_default" }
+"status.notification" = { fg = "$yellow", bg = "$bg_dark", attrs = "theme_default" }
+"tab.focused" = { fg = "theme_default", bg = "$terminal_black", attrs = "theme_default" }
+"tab.unfocused" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"tab.bar" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"widgets.list.header" = { fg = "Black", bg = "theme_default.fg", attrs = "Bold" }
+"widgets.form.label" = { fg = "theme_default", bg = "theme_default", attrs = "Bold" }
+"widgets.form.field" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"widgets.form.highlighted" = { fg = "theme_default", bg = "theme_default", attrs = "Reverse" }
+"widgets.options.highlighted" = { fg = "theme_default", bg = "Grey", attrs = "theme_default" }
+"mail.sidebar" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.sidebar_divider" = { fg = "theme_default", bg = "$bg_dark1", attrs = "theme_default" }
+"mail.sidebar_account_name" = { fg = "mail.sidebar", bg = "mail.sidebar", attrs = "Bold" }
+"mail.sidebar_unread_count" = { fg = "$cyan", bg = "mail.sidebar", attrs = "mail.sidebar" }
+"mail.sidebar_index" = { fg = "$comment", bg = "mail.sidebar", attrs = "mail.sidebar" }
+"mail.sidebar_highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.sidebar_highlighted_unread_count" = { fg = "mail.sidebar_highlighted", bg = "mail.sidebar_highlighted", attrs = "mail.sidebar_highlighted" }
+"mail.sidebar_highlighted_index" = { fg = "mail.sidebar_index", bg = "mail.sidebar_highlighted", attrs = "mail.sidebar_highlighted" }
+"mail.sidebar_highlighted_account" = { fg = "theme_default", bg = "$bg_dark1", attrs = "mail.sidebar_highlighted" }
+"mail.sidebar_highlighted_account_name" = { fg = "mail.sidebar_highlighted_account", bg = "mail.sidebar_highlighted_account", attrs = "Bold" }
+"mail.sidebar_highlighted_account_unread_count" = { fg = "mail.sidebar_unread_count", bg = "mail.sidebar_highlighted_account", attrs = "mail.sidebar_highlighted" }
+"mail.sidebar_highlighted_account_index" = { fg = "mail.sidebar_index", bg = "mail.sidebar_highlighted_account", attrs = "mail.sidebar_highlighted" }
+"mail.view.divider" = { fg = "theme_default", bg = "$bg_dark1", attrs = "theme_default" }
+"mail.listing.compact.even" = { fg = "theme_default", bg = "$bg_dark", attrs = "theme_default" }
+"mail.listing.compact.odd" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.compact.even_unseen" = { fg = "$cyan", bg = "$bg_dark", attrs = "theme_default" }
+"mail.listing.compact.odd_unseen" = { fg = "$cyan", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.compact.even_selected" = { fg = "theme_default.bg", bg = "$magenta2", attrs = "theme_default" }
+"mail.listing.compact.odd_selected" = { fg = "theme_default.bg", bg = "$magenta2", attrs = "theme_default" }
+"mail.listing.compact.even_highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.listing.compact.odd_highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.listing.compact.even_highlighted_selected" = { fg = "theme_default", bg = "$magenta2", attrs = "Reverse" }
+"mail.listing.compact.odd_highlighted_selected" = { fg = "theme_default", bg = "$magenta2", attrs = "Reverse" }
+"mail.listing.conversations" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.conversations.subject" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.conversations.from" = { fg = "$comment", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.conversations.date" = { fg = "$fg_dark", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.conversations.unseen" = { fg = "$cyan", bg = "$bg_dark", attrs = "theme_default" }
+"mail.listing.conversations.highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.listing.conversations.selected" = { fg = "theme_default.bg", bg = "$magenta2", attrs = "theme_default" }
+"mail.listing.conversations.highlighted_selected" = { fg = "theme_default", bg = "$magenta2", attrs = "Reverse" }
+"mail.listing.plain.even" = { fg = "theme_default", bg = "$bg_dark", attrs = "theme_default" }
+"mail.listing.plain.odd" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.plain.even_unseen" = { fg = "$cyan", bg = "$bg_dark", attrs = "theme_default" }
+"mail.listing.plain.odd_unseen" = { fg = "$cyan", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.plain.even_selected" = { fg = "theme_default.bg", bg = "$magenta2", attrs = "theme_default" }
+"mail.listing.plain.odd_selected" = { fg = "theme_default.bg", bg = "$magenta2", attrs = "theme_default" }
+"mail.listing.plain.even_highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.listing.plain.odd_highlighted" = { fg = "highlight", bg = "highlight", attrs = "highlight" }
+"mail.listing.plain.even_highlighted_selected" = { fg = "theme_default", bg = "$magenta2", attrs = "Reverse" }
+"mail.listing.plain.odd_highlighted_selected" = { fg = "theme_default", bg = "$magenta2", attrs = "Reverse" }
+"mail.view.headers" = { fg = "$blue", bg = "theme_default", attrs = "theme_default" }
+"mail.view.headers_names" = { fg = "mail.view.headers", bg = "mail.view.headers", attrs = "mail.view.headers" }
+"mail.view.headers_area" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.view.body" = { fg = "theme_default", bg = "theme_default", attrs = "theme_default" }
+"mail.view.thread.indentation.a" = { fg = "theme_default", bg = "CornflowerBlue", attrs = "theme_default" }
+"mail.view.thread.indentation.b" = { fg = "theme_default", bg = "$red1", attrs = "theme_default" }
+"mail.view.thread.indentation.c" = { fg = "theme_default", bg = "Pink3", attrs = "theme_default" }
+"mail.view.thread.indentation.d" = { fg = "theme_default", bg = "Gold1", attrs = "theme_default" }
+"mail.view.thread.indentation.e" = { fg = "theme_default", bg = "Orange3", attrs = "theme_default" }
+"mail.view.thread.indentation.f" = { fg = "theme_default", bg = "CadetBlue", attrs = "theme_default" }
+"mail.listing.attachment_flag" = { fg = "LightSlateGrey", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.thread_snooze_flag" = { fg = "Red", bg = "theme_default", attrs = "theme_default" }
+"mail.listing.tag_default" = { fg = "theme_default", bg = "Grey", attrs = "Bold" }
+"mail.listing.highlight_self" = { fg = "$blue", bg = "theme_default", attrs = "theme_default" }
+"pager.highlight_search" = { fg = "theme_default", bg = "Teal", attrs = "Bold" }
+"pager.highlight_search_current" = { fg = "theme_default", bg = "NavyBlue", attrs = "Bold" }
+
+# https://github.com/folke/tokyonight.nvim/blob/main/lua/tokyonight/colors/storm.lua
+[terminal.themes.tokyonight.color_aliases]
+bg = "#24283b"
+bg_dark = "#1f2335"
+bg_dark1 = "#1b1e2d"
+bg_highlight = "#292e42"
+blue = "#7aa2f7"
+blue0 = "#3d59a1"
+blue1 = "#2ac3de"
+blue2 = "#0db9d7"
+blue5 = "#89ddff"
+blue6 = "#b4f9f8"
+blue7 = "#394b70"
+comment = "#565f89"
+cyan = "#7dcfff"
+dark3 = "#545c7e"
+dark5 = "#737aa2"
+fg = "#c0caf5"
+fg_dark = "#a9b1d6"
+fg_gutter = "#3b4261"
+green = "#9ece6a"
+green1 = "#73daca"
+green2 = "#41a6b5"
+magenta = "#bb9af7"
+magenta2 = "#ff007c"
+orange = "#ff9e64"
+purple = "#9d7cd8"
+red = "#f7768e"
+red1 = "#db4b4b"
+teal = "#1abc9c"
+terminal_black = "#414868"
+yellow = "#e0af68"
+git_add = "#449dab"
+git_change = "#6183bb"
+git_delete = "#914c54"
