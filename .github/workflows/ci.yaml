@@ -1,0 +1,289 @@
+---
+# https://github.com/chezmoi/dotfiles/blob/master/.github/workflows/ci.yaml
+# https://github.com/shunk031/dotfiles/blob/master/.github/workflows/test.yaml
+name: ci
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - test/README.md
+  # pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        # https://github.com/actions/runner-images/tree/main/images
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+        # system:
+        #   - client
+        #   - server
+        # exclude:
+        #   - os: macos-14
+        #     system: server
+
+        # https://hub.docker.com/r/microsoft/vscode-devcontainers
+        # https://mcr.microsoft.com/v2/vscode/devcontainers/base/tags/list
+        # image:
+        #   - base:alpine
+        #   # - base:debian
+        #   # - base:ubuntu
+    runs-on: ${{ matrix.os }}
+    # container:
+    #   # https://github.com/devcontainers/images/releases
+    #   image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}@sha256:51961964f65dd75cb55e846b6e0cd16c364148452a2d73df933e68394129ea24 # v0.4.19
+    env:
+      OS: ${{ matrix.os }}
+      # SYSTEM: ${{ matrix.system }}
+    permissions:
+      # deployments permission to deploy GitHub pages website
+      deployments: write
+      # contents permission to update benchmark contents in gh-pages branch
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Prepare system
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        # run: sudo debconf-set man-db/auto-update false
+        run: sudo rm /var/lib/man-db/auto-update || true
+
+      - name: Run bootstrap
+        env:
+          CHEZMOI_PROFILE: minimal
+          # CODESPACES: true
+        run: |
+          set -x
+          echo "$HOME/.local/bin" >>"$GITHUB_PATH"
+
+          ./script/bootstrap --no-tty # --verbose
+
+          if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+            # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            echo "/home/linuxbrew/.linuxbrew/bin" >>"$GITHUB_PATH"
+            echo "/home/linuxbrew/.linuxbrew/sbin" >>"$GITHUB_PATH"
+          fi
+
+      - name: Run check
+        run: ./script/check # ./script/check
+
+      # - name: chezmoi data
+      #   run: '"$HOME/.local/bin/chezmoi" data'
+
+      # NOTE: bats and kcov are installed with brew, which is absent on alpine
+      # - name: Setup Bats # and bats libs
+      #   id: setup-bats
+      #   # github.com/bats-core/bats-action/releases
+      #   uses: bats-core/bats-action@42fcc8700f773c075a16a90eb11674c0318ad507 # 3.0.1
+      #   if: ${{ container.image == 'alpine' }}
+      #   # with:
+      #   #   support-path: "${{ github.workspace }}/test_helper/bats-support"
+      #   #   assert-path: "${{ github.workspace }}/test_helper/bats-assert" # FIXME: stderr
+      #   #   file-path: "${{ github.workspace }}/test_helper/bats-file"
+
+      # - name: Run tests
+      #   run: ./script/test
+
+      - name: Run tests with coverage
+        id: coverage
+        # shell: bash
+        env:
+          # BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+          COVERAGE_OUTPUT: ./coverage-${{ matrix.os }}
+          TERM: xterm
+        # run: ./script/coverage # --collect-only
+        run: ./script/coverage --formatter junit >junit.xml
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage-${{ matrix.os }}/**/*
+          if-no-files-found: error
+          # include-hidden-files: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        with:
+          # directory: ./coverage/
+          env_vars: OS # ,SYSTEM
+          # fail_ci_if_error: true
+          files: ./coverage-${{ matrix.os }}/test/cobertura.xml # /kcov-merged/cobertura.xml
+          # files: ./coverage/kcov-merged/cobertura.xml
+          flags: ${{ matrix.os }} # ,${{ matrix.system }}
+          # name: codecov-dotfiles
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # verbose: true
+
+      - name: Upload test results to Codecov
+        # if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        with:
+          env_vars: OS # ,SYSTEM
+          # files: junit.xml
+          flags: ${{ matrix.os }} # ,${{ matrix.system }}
+          report_type: test_results
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Cleanup
+        run: rm -r coverage* junit.xml test_helper
+
+      # Run benchmark and store the output to a file
+      - name: Run benchmark
+        run: ./script/bench | tee output.json
+
+      # # Download previous benchmark result from cache
+      # - name: Download previous benchmark data
+      #   uses: actions/cache@v4
+      #   with:
+      #     key: ${{ runner.os }}-benchmark
+      #     path: ./cache
+
+      # gh-pages branch is updated and pushed automatically with extracted benchmark data
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@4bdcce38c94cec68da58d012ac24b7b1155efe8b # v1.20.7
+        with:
+          name: Bash benchmark (${{ matrix.os }})
+          tool: customSmallerIsBetter
+          output-file-path: output.json
+          # Access token to deploy GitHub Pages branch or make a commit comment
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Push and deploy GitHub pages branch automatically
+          # auto-push: true
+
+          # Workflow will fail when an alert happens
+          # fail-on-alert: true
+
+          # Default: 200%
+          alert-threshold: 150%
+          # Enable alert commit comment
+          comment-on-alert: true
+          # Enable Job Summary for PRs
+          summary-always: true
+          # Mention @rhysd in the commit comment
+          alert-comment-cc-users: "@LEI"
+
+          # benchmark-data-dir-path: dev/bench
+          # benchmark-data-dir-path: /github/workspace/bench-${{ matrix.os }}
+          benchmark-data-dir-path: benchmark-${{ matrix.os }} # /data.js
+
+          # Where the previous data file is stored
+          # external-data-json-path: ./cache/benchmark-data.json
+
+      # - name: Switch branch
+      #   uses: actions/checkout@v5
+      #   with:
+      #     persist-credentials: false
+      #     ref: gh-pages
+
+      - name: Checkout gh-pages
+        run: git switch gh-pages
+
+      - name: Upload benchmark
+        uses: actions/upload-artifact@v5
+        with:
+          name: benchmark-${{ matrix.os }}
+          path: benchmark-${{ matrix.os }}/**/*
+          if-no-files-found: error
+
+      # - name: Push benchmark result and coverage output
+      #   run: |
+      #     set -x
+      #     git checkout gh-pages
+      #     # git log -n2
+      #
+      #     git config --global user.email github@users.noreply.github.com
+      #     git config --global user.name github-action-benchmark
+      #
+      #     # NOTE: [ci skip] not supported for GitHub pages, to deploy manually
+      #     # switch source from "Deploy from a branch" to "GitHub Actions" here:
+      #     # https://github.com/LEI/dotfiles/settings/pages
+      #
+      #     # add <name> (<os>) (customSmallerIsBetter) benchmark result for <commit>
+      #     git commit --amend --message="deploy: add bash benchmark result (${{ matrix.os }}) for ${{ github.sha }}"
+      #
+      #     git rm coverage-${{ matrix.os }}/test/metadata/*
+      #     git add coverage-${{ matrix.os }}
+      #     git commit --message="deploy: add coverage output (${{ matrix.os }}) for ${{ github.sha }}"
+      #
+      #     git push 'https://github-action-benchmark:${{ secrets.GITHUB_TOKEN }}@github.com/LEI/dotfiles.git' gh-pages:gh-pages
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: kcov/kcov:latest-alpine
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          # ref: gh-pages
+
+      # - name: Checkout gh-pages
+      #   run: git switch gh-pages
+
+      # - name: Remove previous coverage
+      #   run: rm -frv coverage*
+
+      - name: Download benchmark
+        uses: actions/download-artifact@v6
+        with:
+          pattern: benchmark-*
+          path: ./
+          merge-multiple: false
+
+      - name: Download coverage
+        uses: actions/download-artifact@v6
+        with:
+          pattern: coverage-*
+          path: ./
+          merge-multiple: false
+
+      # - name: Merge coverage
+      #   uses: sudo-bot/action-kcov@4aee239a76259f7883a0f43ebbbdd7177a9ad9fe
+      #   # uses: sudo-bot/action-shunit2@latest # Alpine based
+      #   with:
+      #     cli-args: --merge coverage coverage-macos-latest coverage-ubuntu-latest
+
+      - name: Merge coverage
+        run: |
+          set -x
+          kcov --dump-summary --merge \
+            --replace-src-path=/home/runner/work/dotfiles/dotfiles:. \
+            --replace-src-path=/Users/runner/work/dotfiles/dotfiles:. \
+            coverage coverage-*
+
+      - name: Install git
+        run: apk add --no-cache git
+
+      - name: Prepare files for GitHub Pages
+        # coverage/kcov-merged # coverage/{data,index*,test,*.css}
+        run: |
+          set -x
+          mkdir -p public/coverage public/{benchmark,coverage}-{macos,ubuntu}-latest
+          cp -r benchmark* coverage* public/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          enable_jekyll: true
+          keep_files: true
