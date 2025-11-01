@@ -1,0 +1,63 @@
+# FIXME: aliases and nushell are not available with sudo
+# https://github.com/nushell/nushell/issues/8099#issuecomment-1952583562
+# export def --wrapped sudo [...rest] {
+#   let escaped_args = $rest
+#     | range 1..
+#     | each { || to nuon }
+#     | str join ' '
+#   ^sudo env XDG_RUNTIME_DIR=/run/user/0 nu --login --commands $'($rest.0) ($escaped_args)'
+# }
+
+# TODO: replace with native nushell commands where possible
+
+# Confirm before overwriting
+export alias cp = cp -i # --interactive
+
+# Print sizes in powers of 1024
+export alias df = df -h # --human-readable
+
+# Show with human-readable units
+export alias free = free --human
+
+# Color matches
+export alias grep = grep --color=auto
+
+# export def l [
+#     --all (-a), # List hidden files
+#     --no-highlight (-n) = true, # Find without marking with ascii code (TODO: detect interactive)
+#     --ignore-case (-i) = true, # Find case-insensitive regex mode; equivalent to (?i)
+#     --recursive (-r) = true, # List files in directories
+#     ...terms: string, # Terms to search
+# ] {
+#     let pattern = if $recursive { "**/*" } else { "*" } | into glob
+#     let list = ls --all=$all $pattern
+#     if ($terms | is-empty) {
+#         return ($list
+#         | get name
+#         | str join "\n")
+#     }
+#     $list
+#     | get name
+#     | find --ignore-case=$ignore_case --no-highlight=$no_highlight ...$terms
+#     | str join "\n"
+# }
+
+# List all files with colors, human-readable sizes and long format
+export alias la = ls --all --long
+
+# Print each PATH entry on a separate line
+export alias path = echo $env.PATH
+
+# Reload the configuration
+export alias reload = exec nu
+
+{{- if lookPath "bat" | isExecutable }}
+export alias cat = bat
+{{- else if lookPath "batcat" | isExecutable }}
+export alias cat = batcat
+{{- end }}
+
+{{- if lookPath "eza" | isExecutable }}
+# https://github.com/eza-community/eza/issues/472
+# export alias ls = eza
+{{- end }}
