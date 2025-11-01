@@ -1,0 +1,7 @@
+---
+hostname: ""
+profile: {{ .headless | ternary "remote" "main" | quote }}
+repository:
+  type: git
+  url: git@github.com:lei/vscode-settings.git
+  branch: main

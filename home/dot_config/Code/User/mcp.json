@@ -1,0 +1,36 @@
+{
+  "servers": {
+    "context7": {
+      "args": ["-y", "@upstash/context7-mcp"],
+      "command": "npx",
+      "type": "stdio"
+    },
+    "exa": {
+      "args": ["-y", "exa-mcp-server"],
+      "command": "npx",
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "type": "stdio"
+    },
+    "git": {
+      "args": ["mcp-server-git"],
+      "command": "uvx",
+      "type": "stdio"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "memory": {
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "command": "npx",
+      "type": "stdio"
+    },
+    "sequential-thinking": {
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": "npx",
+      "type": "stdio"
+    }
+  }
+}
