@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#MISE description="mise bench"
+
+# https://github.com/shunk031/dotfiles/blob/master/scripts/run_benchmark.sh
+
+set -euo pipefail
+
+# CHEZMOI_ROOT="${CHEZMOI_ROOT:-$HOME/.local/share/chezmoi}"
+# source "$CHEZMOI_ROOT/home/.chezmoitemplates/helpers.sh"
+
+# DRY_RUN="${DRY_RUN:-}"
+BENCH_ITERATIONS="${BENCH_ITERATIONS:-10}"
+UNAME="${UNAME:-$(uname -s)}"
+
+command_time() {
+  local file="$1.txt"
+  local time_args=("-a" "-o" "$file")
+  shift
+  # TIMEFORMAT="%e"
+  if [ "$UNAME" = Darwin ]; then
+    TIMEFORMAT="%R"
+  else
+    time_args+=("-f" "%e")
+  fi
+  command time "${time_args[@]}" -- "$@"
+}
+
+initial_time() {
+  local output="$1"
+  shift
+
+  echo >&2 "initial bench: $*"
+  # echo >&2 "${output##*/}: $*"
+  command_time "$output" "$@"
+
+  cat "$output.txt" | column -t | cut -d' ' -f1
+}
+
+average_time() {
+  local iterations="$1"
+  shift
+  local output="$1"
+  shift
+
+  for i in $(seq 1 "$iterations"); do
+    echo >&2 "bench $i/$iterations: $*"
+    command_time "$output-$i" "$@"
+  done
+
+  cat "$output-"*.txt | column -t | cut -d' ' -f1 | awk '{ total += $1 } END { print total/NR }'
+}
+
+main() {
+  if [ $# -gt 1 ]; then
+    echo >&2 "Usage: bench [shell]"
+    exit 1
+  fi
+
+  local shell="${1:-bash}"
+  # if [ "$DRY_RUN" = true ]; then
+  #   shell="echo >&2 $shell"
+  # fi
+  if [ $# -gt 0 ]; then
+    shift
+  fi
+
+  # local shell_arg=i
+  # if [ "$UNAME" = Darwin ]; then
+  #   shell_arg=l
+  # fi
+  local cmd="$shell -ci exit"
+  local name="${cmd%% *}" # "${cmd// /-}"
+
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  local output="${tmp_dir}/bench-$name"
+
+  # Print source timings
+  # export BENCH=true
+
+  # shellcheck disable=SC2086
+  initial_startup_time="$(initial_time "$output" $cmd)"
+
+  # shellcheck disable=SC2086
+  average_startup_time="$(average_time "$BENCH_ITERATIONS" "$output" $cmd)"
+
+  cat <<EOF
+[
+    {
+        "name": "$name average startup time",
+        "unit": "Second",
+        "value": ${average_startup_time}
+    },
+    {
+        "name": "$name initial startup time",
+        "unit": "Second",
+        "value": ${initial_startup_time}
+    }
+]
+EOF
+}
+
+main "$@"
