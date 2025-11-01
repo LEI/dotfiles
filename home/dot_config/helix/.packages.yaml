@@ -1,0 +1,11 @@
+---
+packages:
+  helix:
+    enabled: '{{ and .features.helix (ne .osIDLike "debian") }}'
+    nameOverwrite:
+      alpine: helix helix-tree-sitter-vendor # tree-sitter-grammars
+      android: helix helix-grammars
+      windows: Helix.Helix
+  helixbinhx:
+    enabled: '{{ and .features.helix (eq .osID "manjaro") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
