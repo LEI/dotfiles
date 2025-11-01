@@ -1,0 +1,253 @@
+# case $- in
+# *i*) ;;
+# *) return ;;
+# esac
+
+# [ -z "$PS1" ] && return
+
+# TODO: path.sh?
+# https://github.com/neovide/neovide/discussions/3175
+# Darwin: launchctl load ~/Library/LaunchAgents/environment.plist
+if [[ $- == *c* ]] && [[ $- != *i* ]]; then
+  # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
+  # BASH_CONFIG="neovide"
+  PATH="$PATH:$HOME/.local/bin"
+  if [ -z "${MISE_SHELL:-}" ]; then
+    PATH="$PATH:$HOME/.local/share/mise/shims"
+  fi
+  source "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
+  return
+fi
+
+if [[ $- != *i* ]]; then
+  # We are being invoked from a non-interactive shell.  If this
+  # is an SSH session (as in "ssh host command"), source
+  # /etc/profile so we get PATH and other essential variables.
+  [[ -n "${SSH_CLIENT:-}" ]] && source /etc/profile
+  return
+fi
+
+# Remove default prompt command
+if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
+  # echo >&2 "Original prompt command: $PROMPT_COMMAND"
+  export PROMPT_COMMAND=
+fi
+
+{{- $shell := get . "shell" }}
+{{- if empty $shell }}
+{{-   warnf "missing shell (bash or zsh)" }}
+{{- end }}
+
+shell="{{ $shell }}" # ${SHELL##*/}
+
+if [ -z "${USER:-}" ]; then
+  USER="$(id --user --name)"
+fi
+
+if [ "$shell" = bash ]; then IS_BASH=true; else IS_BASH=false; fi
+{{- if eq .osID "alpine" }}
+BLE_ENABLED="${BLE_ENABLED:-false}"
+PREEXEC_ENABLED=${PREEXEC_ENABLED:-$IS_BASH}
+{{- else }}
+BLE_ENABLED="${BLE_ENABLED:-$IS_BASH}"
+PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
+{{- end }}
+
+bench() {
+  if [ "${BENCH:-}" = true ]; then
+    ORIGINAL_TIMEFORMAT="${TIMEFORMAT:-}"
+    if [ -z "${TIMEFORMAT:-}" ]; then
+      TIMEFORMAT="$*: %R"
+    fi
+    time "$@"
+    # unset TIMEFORMAT
+    TIMEFORMAT="$ORIGINAL_TIMEFORMAT"
+    unset ORIGINAL_TIMEFORMAT
+  else
+    "$@"
+  fi
+}
+
+source_files() {
+  local dir="$1"
+  local ext="${2:-sh}"
+  if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/$dir" ]; then
+    for file in "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/"*".$ext"; do
+      bench source "$file"
+    done
+  fi
+}
+
+source_file_if_exists() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    bench source "$file"
+  fi
+}
+
+source_plugins() {
+  local dir="$1"
+  local ext="${2:-sh}"
+  if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/plugins" ]; then
+    for file in "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/plugins/"*".$ext"; do
+      name="${file##*/}"
+      name="${name%".$ext"}"
+      # Only source if a command exists with the same name
+      if command -v "$name" >/dev/null; then
+        bench source "$file"
+      fi
+    done
+  fi
+}
+
+# Load environment variables before other scripts
+# e.g. INPUTRC before ble.sh
+# TODO: .profile
+source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
+
+source_files "sh/functions"
+
+if [ -d "$HOME/bin" ]; then
+  pathmunge "$HOME/bin" # before replace
+fi
+
+if [ -d "$HOME/.local/bin" ]; then
+  pathmunge "$HOME/.local/bin" # before replace
+fi
+
+{{- if .features.ruby }}
+
+# TODO: brew prefix (/opt/homebrew)
+if [ -d /usr/local/opt/ruby/bin ]; then
+  pathmunge /usr/local/opt/ruby/bin # before replace
+fi
+
+# ruby_version="${ruby_version:-3.4.0}"
+# if [ -n "$GEM_USER_HOME" ] && [ -d "$GEM_USER_HOME" ]; then
+#   pathmunge "$GEM_USER_HOME" before replace
+# fi
+{{- end }}
+
+if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
+  bench source "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" --rcfile "${XDG_CONFIG_HOME:-$HOME/.config}/blesh/config.sh" # --noattach
+fi
+if [ "$PREEXEC_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/bash-preexec.sh" ]; then
+  bench source "${XDG_DATA_HOME:-$HOME/.local/share}/bash-preexec.sh"
+fi
+
+if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin" ]; then
+  pathmunge "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin"
+fi
+
+{{- if and .features.brew (ne .os "darwin") }}
+
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{- end }}
+
+{{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
+# TODO: extract blocks to templates
+
+# https://github.com/rossmacarthur/sheldon#loading-plugins
+TIMEFORMAT="sheldon: %R" bench eval "$(sheldon source)"
+{{- else }}
+
+{{- if .features.mise }}
+
+# Must be first to ensure tools are available
+if command -v mise >/dev/null; then
+  TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
+else
+  echo >&2 "Command 'mise' not found"
+fi
+{{- end }}
+
+# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   bench source "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
+fi
+
+if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
+  pathmunge "$GOPATH/bin" after
+fi
+
+if [ -n "$KREW_ROOT" ] && [ -d "$KREW_ROOT/bin" ]; then
+  pathmunge "$KREW_ROOT/bin" after
+fi
+
+if [ -d "$HOME/.nix-profile/bin" ]; then
+  pathmunge "$HOME/.nix-profile/bin" after
+fi
+
+if [ -d "$HOME/.node_modules/bin" ]; then
+  pathmunge "$HOME/.node_modules/bin" after
+fi
+# if [ ! -d "$npm_config_prefix" ]; then
+#   mkdir -p "$npm_config_prefix"
+# fi
+if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
+  pathmunge "$npm_config_prefix/bin" # before replace
+fi
+if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
+  pathmunge "$PNPM_HOME" # before replace
+fi
+
+if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then
+  pathmunge "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" after
+fi
+
+# Source plugins after updating PATH and activating mise
+source_plugins sh
+
+if command -v direnv >/dev/null; then
+  TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
+else
+  echo >&2 "Command 'direnv' not found"
+fi
+
+if command -v starship >/dev/null; then
+  TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
+else
+  echo >&2 "Command 'starship' not found"
+fi
+
+if command -v zoxide >/dev/null; then
+  TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
+else
+  echo >&2 "Command 'zoxide' not found"
+fi
+
+{{- if .features.atuin }}
+
+# Must be after starship to preserve PROMPT_COMMAND
+if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
+  if command -v atuin >/dev/null; then
+    TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
+  else
+    echo >&2 "Command 'atuin' not found"
+  fi
+fi
+{{- end }}
+{{- end }}
+
+{{- if and .features.ai .features.git }}
+# if command -v gh >/dev/null; then
+#   eval "$(gh copilot alias -- "$shell")"
+# fi
+{{- end }}
+
+source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/aliases.sh"
+
+source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/completion.sh"
+source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/environment.sh"
+source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/options.sh"
+
+source_file_if_exists "$HOME/.${shell}rc.local"
+
+# https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
+if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
+  [[ ! ${BLE_VERSION-} ]] || ble-attach
+fi

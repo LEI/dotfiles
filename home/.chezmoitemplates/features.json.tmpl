@@ -1,0 +1,144 @@
+{{- $features := (dict
+  "ai" (and
+    (eq .osIDLike "arch" "darwin")
+    (ne .profile "minimal")
+    (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname)))
+  "atuin" false
+  "bash" (or .ci (ne .profile "minimal"))
+  "bat" (ne .profile "minimal")
+  "bottom" false
+  "brew" (not (eq .osIDLike "alpine" "android" "windows"))
+  "carapace" true
+  "direnv" true
+  "docker" false
+  "eza" (ne .profile "minimal")
+  "ghostty" false
+  "git" false
+  "go" false
+  "goss" (and (not (eq .os "android" "windows")) (ne .profile "minimal"))
+  "gpg" false
+  "helix" (and
+    (not (and (eq .osIDLike "debian") (not .glibc231)))
+    (not (or .ephemeral .headless)))
+  "i3" (and (eq .osIDLike "arch") (not .headless))
+  "kube" false
+  "lla" false
+  "logseq" false
+  "mail" (and (eq .osIDLike "arch") (not (empty .accessToken)))
+  "mise" true
+  "neovim" (and
+    (not (eq .osIDLike "alpine"))
+    (not (or .ephemeral .headless)))
+  "node" (and
+    (not (eq .osIDLike "alpine"))
+    (not (or .ephemeral .headless)))
+  "nushell" false
+  "php" false
+  "podman" false
+  "python" false
+  "rest" false
+  "ripgrep" true
+  "ruby" false
+  "rust" false
+  "sheldon" (ne .os "windows")
+  "shpool" false
+  "sql" false
+  "ssh" false
+  "steam" (and (eq .osIDLike "arch" "windows") (eq .profile "personal"))
+  "sway" false
+  "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
+  "tofu" false
+  "topgrade" false
+  "vim" (and
+    (not (eq .osIDLike "alpine"))
+    (not (or .ephemeral .headless)))
+  "void" (and (eq .osIDLike "arch") (ne .profile "minimal"))
+  "vscode" (and (eq .osIDLike "arch" "darwin") (ne .profile "minimal"))
+  "vscodium" (and (eq .osIDLike "arch") (ne .profile "minimal"))
+  "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
+  "zoxide" true
+  "zsh" false
+) -}}
+{{- /* "node" (eq .osIDLike "android" "arch" "darwin" "debian" "fedora" "windows")*/ -}}
+
+{{- if ne .profile "minimal" }}
+{{- $features = mergeOverwrite $features (dict
+  "atuin" (not (or
+    (and (eq .osID "debian") (le (int .osVersion) 12))
+    (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
+    (eq .os "windows")
+  ))
+  "bottom" true
+  "docker" (eq .osIDLike "arch" "darwin" "fedora")
+  "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))) (not (eq .os "android" "windows")))
+  "git" (not .ephemeral)
+  "go" (and (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
+  "gpg" (eq .osIDLike "arch" "darwin")
+  "helix" true
+  "kube" (eq .osIDLike "arch" "darwin" "debian" "fedora")
+  "logseq" (eq .osIDLike "arch" "darwin")
+  "nushell" true
+  "podman" (eq .osIDLike "arch" "darwin" "fedora")
+  "python" (not (or .ephemeral .headless))
+  "ruby" (and (not (eq .os "windows")) (not (or .ephemeral .headless)))
+  "rust" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
+  "tofu" (eq .osIDLike "arch" "darwin")
+  "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) (not .glibc231))
+  "zsh" true
+) -}}
+{{- /* "lla" (eq .osID "arch" "darwin") */ -}}
+{{- end }}
+
+{{- if eq .osID "alpine" }}
+{{- $features = mergeOverwrite $features (dict
+) -}}
+{{- else if eq .osID "android" }}
+{{- $features = mergeOverwrite $features (dict
+) -}}
+{{- else if eq .osIDLike "arch" }}
+{{- $features = mergeOverwrite $features (dict
+  "php" true
+  "sql" true
+  "ssh" true
+) -}}
+{{- else if eq .os "darwin" }}
+{{- $features = mergeOverwrite $features (dict
+  "php" true
+  "sql" true
+  "ssh" true
+) -}}
+{{- else if eq .osIDLike "debian" }}
+{{- $features = mergeOverwrite $features (dict
+  "php" true
+  "sql" true
+  "ssh" true
+) -}}
+{{- else if eq .osIDLike "fedora" }}
+{{- $features = mergeOverwrite $features (dict
+  "sql" true
+  "ssh" true
+) -}}
+{{- else if eq .os "windows" }}
+{{- $features = mergeOverwrite $features (dict
+) -}}
+{{- end }}
+
+{{- if or .ephemeral .headless }}
+{{- $features = mergeOverwrite $features (dict
+  "ghostty" false
+  "go" false
+  "tmux" false
+  "zellij" false
+) -}}
+{{- end }}
+
+{{- range $name, $default := $features }}
+{{- $key := upper (printf "FEATURE_%s" $name) -}}
+{{- $value := env $key -}}
+{{- if empty $value -}}
+{{-   $value = $default -}}
+{{- end -}}
+{{- $_ := set $features $name $value -}}
+{{- end -}}
+
+{{- $features | toJson -}}

@@ -1,0 +1,24 @@
+# Set-PSDebug -Trace 1
+
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+{{- if .upgrade }}
+
+echo "scoop update *"
+scoop update *
+{{- end }}
+
+{{- $scoopPackages := get .packages "scoop" | default dict }}
+
+{{- if empty $scoopPackages }}
+{{-   warnf "missing scoop packages" }}
+{{- end }}
+
+{{- $scoopPackagesList := $scoopPackages | keys | sortAlpha | join " " }}
+
+{{- if eq (env "CACHE_BUST") "true" }}
+# scoop hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "scoop" | sha256sum }}
+{{- end }}
+echo "scoop install {{ $scoopPackagesList }}"
+scoop install {{ $scoopPackagesList }}
