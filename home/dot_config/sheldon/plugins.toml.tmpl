@@ -1,0 +1,108 @@
+# `sheldon` configuration file
+# ----------------------------
+#
+# You can modify this file directly or you can use one of the following
+# `sheldon` commands which are provided to assist in editing the config file:
+#
+# - `sheldon add` to add a new plugin to the config file
+# - `sheldon edit` to open up the config file in the default editor
+# - `sheldon remove` to remove a plugin from the config file
+#
+# See the documentation for more https://github.com/rossmacarthur/sheldon#readme
+
+shell = "bash"
+
+[templates]
+# Add the directory after PATH
+PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
+
+[plugins]
+
+{{- if .features.mise }}
+
+[plugins.mise]
+inline = """
+# Must be first to ensure tools are available
+TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
+"""
+{{- end }}
+
+[plugins.path]
+inline = """
+# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   source "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
+fi
+
+if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
+  pathmunge "$GOPATH/bin" after
+fi
+
+if [ -n "$KREW_ROOT" ] && [ -d "$KREW_ROOT/bin" ]; then
+  pathmunge "$KREW_ROOT/bin" after
+fi
+
+if [ -d "$HOME/.nix-profile/bin" ]; then
+  pathmunge "$HOME/.nix-profile/bin" after
+fi
+
+if [ -d "$HOME/.node_modules/bin" ]; then
+  pathmunge "$HOME/.node_modules/bin" after
+fi
+# if [ ! -d "$npm_config_prefix" ]; then
+#   mkdir -p "$npm_config_prefix"
+# fi
+if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
+  pathmunge "$npm_config_prefix/bin" # before replace
+fi
+if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
+  pathmunge "$PNPM_HOME" # before replace
+fi
+
+if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then
+  pathmunge "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" after
+fi
+
+# Source plugins after updating PATH and activating mise
+source_plugins sh
+"""
+
+{{- if .features.direnv }}
+
+[plugins.direnv]
+inline = """
+TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
+"""
+{{- end }}
+
+[plugins.starship]
+# github = "starship/starship"
+inline = """
+TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
+"""
+
+{{- if .features.zoxide }}
+
+[plugins.zoxide]
+inline = """
+TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
+"""
+{{- end }}
+
+{{- if .features.atuin }}
+
+[plugins.atuin]
+inline = """
+# Must be after starship to preserve PROMPT_COMMAND
+if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
+  TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
+fi
+"""
+{{- end }}
+
+# For example:
+#
+# [plugins.base16]
+# github = "chriskempson/base16-shell"

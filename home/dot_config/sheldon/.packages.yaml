@@ -1,0 +1,5 @@
+---
+packages:
+  sheldon:
+    enabled: "{{ .features.sheldon }}"
+    type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
