@@ -1,0 +1,130 @@
+{{- range $account := get .mail "accounts" | default list }}
+{{- if eq (substr 0 3 $account.name) "out" -}}
+{{-   continue -}}
+{{- end -}}
+{{- $inbox := or (get $account "inbox") "INBOX" -}}
+
+[accounts."{{ $account.name }}"]
+{{- if eq $account.format "imap" }}
+root_mailbox = {{ $inbox | quote }}
+format = {{ get $account "format" | default "imap" | quote }}
+server_hostname = {{ $account.imap_hostname | quote }}
+server_username = {{ $account.address | quote }}
+server_password_command = "bw get password {{ $account.address }}"
+server_port = {{ get $account "imap_port" 993 }}
+use_oauth2 = {{ get $account "oauth2" | default false }}
+use_starttls = {{ get $account "starttls" | default false }}
+use_tls = {{ get $account "tls" | default true }}
+{{- else }}
+root_mailbox = "~/Mail"
+default_mailbox = {{ $inbox | quote }}
+format = "notmuch"
+{{- end }}
+
+display_name = {{ get $account "from_name" | default .name | quote }}
+identity = {{ get $account "from_address" | default $account.address | quote }}
+
+{{- if eq $account.format "imap" }}
+# Show only specific mailboxes:
+# subscribed_mailboxes = ["INBOX", "INBOX/Sent", "INBOX/Drafts", "INBOX/Junk"]
+subscribed_mailboxes = ["*"]
+{{- else }}
+[accounts."{{ $account.name }}".mailboxes]
+{{- $cmd := printf "find ~/Mail/%[1]s -mindepth 1 -maxdepth 2 -type d ! -name cur ! -name tmp ! -name new -exec sh -c 'f=\"{}\"; echo ${f#$HOME/Mail/%[1]s/}' \\;" $account.name }}
+{{- $list := output "sh" "-c" $cmd | trim | splitList "\n" }}
+{{-   if eq (len $list) 0 }}
+"{{ $inbox }}" = { query="tag:inbox", subscribe = true }
+# "Drafts" = { query="tag:draft", subscribe = true }
+# "Sent" = { query="from:username@example.com from:username2@example.com", subscribe = true }
+# "Archives" = { query="tag:archived", subscribe = true }
+# "Archives/2019" = { query="tag:archived date:01-2019..12-2019", parent="Archives", subscribe = true }
+{{-   else }}
+{{-     range $index, $directory := $list }}
+"{{ . }}" = { subscribe = true, query = "folder:{{ $account.name }}/{{ . }}" }
+{{-     end }}
+{{-   end }}
+{{- end }}
+
+# [accounts."{{ $account.name }}".mailboxes."{{ $inbox }}"]
+# autoload = {{ get $account "autoload" | default false }}
+# subscribe = {{ get $account "subscribe" | default false }}
+# query = "tag:inbox AND NOT tag:killed AND to:{{ $account.address }}"
+
+# INBOX/DRAFT
+#   alias = "Drafts"
+#   usage = "Drafts"
+# INBOX/OUTBOX
+#   alias = "Sent"
+#   usage = "Sent"
+# INBOX/QUARANTAINE
+#   alias = "Spam"
+#   usage = "Junk"
+# INBOX/TRASH
+#   alias = "Trash"
+#   usage = "Trash"
+
+[accounts."{{ $account.name }}".listing]
+index_style = "threaded" # compact, conversations, threaded, plain
+# filter = "not flags:seen"
+
+[accounts."{{ $account.name }}".send_mail]
+hostname = {{ $account.smtp_hostname | quote }}
+port = {{ get $account "smtp_port" | default 587 }}
+security = { type = "STARTTLS" }
+
+[accounts."{{ $account.name }}".send_mail.auth]
+type = "auto"
+username = {{ $account.address | quote }}
+# password = { type = "command_eval", value = "gpg2 --no-tty -q -d ~/.passwords/user.gpg" }
+password = { type = "command_eval", value = "bw get password {{ $account.address }}" }
+
+{{ end -}}
+# https://git.meli-email.org/meli/meli/src/branch/master/meli/docs/samples/sample-config.toml
+# # Setting up a Maildir account
+# [accounts.account-name]
+# root_mailbox = "/path/to/root/folder"
+# format = "Maildir"
+# listing.index_style = "Compact"
+# identity="email@example.com"
+# subscribed_mailboxes = ["folder", "folder/Sent"] # or [ "*", ] for all mailboxes
+# display_name = "Name"
+
+# # Set mailbox-specific settings
+#   [accounts.account-name.mailboxes]
+#   "INBOX" = { alias="Inbox" } #inline table
+#   "drafts" = { alias="Drafts" } #inline table
+#   [accounts.account-name.mailboxes."foobar-devel"] # or a regular table
+#     ignore = true # don't show notifications for this mailbox
+
+# # Setting up an mbox account
+# [accounts.mbox]
+# root_mailbox = "/var/mail/username"
+# format = "mbox"
+# listing.index_style = "Compact"
+# identity="username@hostname.local"
+# composing.send_mail = { hostname = "localhost", port = 25, auth = { type = "none" }, security = { type = "none" } }
+
+# [pager]
+# filter = "COLUMNS=72 /usr/local/bin/pygmentize -l email"
+# html_filter = "w3m -I utf-8 -T text/html"
+
+# [notifications]
+# script = "notify-send"
+
+[composing]
+# editor_command = "vim +/^$"
+insert_user_agent = false
+store_sent_mail = true
+
+# [shortcuts]
+# [shortcuts.composing]
+# edit = "e"
+
+[shortcuts.listing]
+# new_mail = "m"
+# set_seen = "n"
+next_account = "L"
+prev_account = "H"
+
+[terminal]
+theme = "tokyonight" # dark, nord
