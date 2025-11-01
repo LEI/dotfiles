@@ -1,0 +1,7 @@
+---
+packages:
+  bat:
+    enabled: "{{ .features.bat }}"
+    nameOverwrite:
+      windows: sharkdp.bat
+    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
