@@ -1,0 +1,4 @@
+---
+packages:
+  k9s:
+    enabled: '{{ and .features.kube (ne .osIDLike "debian") }}' # (not (or .ephemeral .headless))
