@@ -1,0 +1,10 @@
+---
+packages:
+  ghostty:
+    enabled: '{{ and .features.ghostty (not (eq .osIDLike "debian" "fedora")) (not .headless) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  libadwaita:
+    enabled: '{{ and .features.ghostty (eq .os "android" "linux") }}'
+    nameOverwrite:
+      # alpine: libadwaita-1-6.9-r0
+      debian: libadwaita-1-0
