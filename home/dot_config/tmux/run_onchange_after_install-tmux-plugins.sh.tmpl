@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if lookPath "launchctl" | isExecutable }}
+
+# cmd cat ~/Library/LaunchAgents/Tmux.Start.plist
+# cmd ~/.config/tmux/plugins/tmux-continuum/scripts/handle_tmux_automatic_start/osx_iterm_start_tmux.sh
+{{- else if lookPath "systemctl" | isExecutable }}
+
+# loginctl session-status
+if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  set +e
+  cmd systemctl --user status tmux.service
+  ret=$?
+  set -e
+  if [ $ret -ne 0 ] && [ $ret -ne 3 ]; then # EXIT_NOTIMPLEMENTED
+    exit $ret
+  fi
+fi
+{{- end }}
+
+if ! tmux ls; then
+  echo >&2 "Starting a detached tmux session"
+  tmux new-session -d
+fi
+
+if test ! -d "$HOME/.config/tmux/plugins/tpm"; then
+  cmd git clone https://github.com/tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
+  cmd "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+else
+  # FIXME: unknown variable: TMUX_PLUGIN_MANAGER_PATH
+  # FATAL: Tmux Plugin Manager not configured in tmux.conf
+  export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
+  cmd "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all || true
+fi
+
+# FIXME(debian 11 tmux 3.1c): tmux-which-key/plugin/init.tmux:25:
+# usage: set-environment [-gru] [-t target-session] name [value]
+# tmux-which-key config hash: {{ include (joinPath .chezmoi.homeDir ".config/tmux/plugins/tmux-which-key/config.yaml") | sha256sum }}
+cmd ~/.config/tmux/plugins/tmux-which-key/plugin.sh.tmux || true
+
+# https://github.com/tmux-plugins/tmux-resurrect/issues/122#issuecomment-2530961970
+tmux_default_command="$(tmux show -g default-command)"
+if echo "$tmux_default_command" | grep -q '&\||\|;'; then
+  echo >&2 "WARN: invalid character(s) in `tmux show -g default-command`: "
+  exit 1
+fi

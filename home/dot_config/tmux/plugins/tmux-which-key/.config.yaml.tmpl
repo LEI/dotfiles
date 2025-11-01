@@ -1,0 +1,79 @@
+{{- /* NOTE: this does not parse bindings from sourced files */ -}}
+{{- $lines := includeTemplate "dot_config/tmux/tmux.conf.tmpl" . | splitList "\n" }}
+{{- $include := get . "include" | default list }}
+{{- $map := get . "map" }}
+{{- $names := get . "names" | default list }}
+
+{{- if empty $names }}
+{{-   warnf "missing names (tmux .config)" }}
+{{- end }}
+
+{{- $groupKeyMap := dict }}
+{{- $groupMap := dict }}
+{{- $groupNotes := dict }}
+
+{{- $pluginMap := dict }}
+
+{{- range $lines }}
+  {{- if not (hasPrefix "bind" .) }}{{ continue }}{{ end }}
+  {{- $parts := . | splitList " " }}
+  {{- if lt (len $parts) 4 }}{{ continue }}{{ end }}
+  {{- if not (has "-N" $parts) }}{{ continue }}{{ end }}
+
+  {{- $group := "prefix" }}
+  {{- if has "-T" $parts }}
+    {{- $group = . | replaceAllRegex "bind.* -T ([\\w-]+) .*" "${1}" }}
+  {{- end }}
+  {{- $key := . | replaceAllRegex "bind.* -N '[^']+' ([^ ]+).*" "${1}" }}
+  {{- $note := . | replaceAllRegex "bind.* -N '([^']+)'.*" "${1}" }}
+
+  {{- if eq $group "prefix" }}
+    {{- $subGroup := $note | replaceAllRegex "^\\+([\\w-]+) .*" "${1}" }}
+    {{- $plugin := $note | replaceAllRegex ".* \\+([\\w-]+)$" "${1}" }}
+    {{- if ne $subGroup $note }}
+      {{- $_ := set $groupKeyMap $subGroup $key }}
+      {{- $_ := set $groupNotes $subGroup ($note | replaceAllRegex (printf "\\+%s " $subGroup) "") }}
+    {{- else if ne $plugin $note }}
+      {{- if not (hasKey $pluginMap $plugin) }}{{- $_ := set $pluginMap $plugin list }}{{- end }}
+      {{- $_ := set $pluginMap $plugin (append (get $pluginMap $plugin) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+    {{- else }}
+      {{- $include = append $include $key }}
+    {{- end }}
+  {{- else }}
+    {{- if not (hasKey $groupMap $group) }}{{- $_ := set $groupMap $group list }}{{- end }}
+    {{- $_ := set $groupMap $group (append (get $groupMap $group) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+  {{- end }}
+{{- end }}
+
+{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "include" $include "map" $map "names" $names) }}
+- separator: true
+
+{{- $count := 20 }}
+{{- range $plugin, $parsedKeys := $pluginMap }}
+{{- $count = add $count 1 }}
+- name: "-Plugin: {{ $plugin }}"
+  key: "F{{ $count }}"
+  command: "display-message {{ $plugin }}"
+{{- includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict "include" $parsedKeys "map" $map "names" $names) }}
+- separator: true
+{{- end }}
+
+{{- range $group, $parsedKeys := $groupMap }}
+{{- $groupKeys := includeTemplate "tmux-list-keys.tmpl" (dict "group" $group) | fromJson }}
+{{- $menu := includeTemplate "dot_config/tmux/plugins/tmux-which-key/.keys.yaml.tmpl" (dict
+  "include" $parsedKeys
+  "map" $groupKeys.map
+  "names" $groupKeys.names
+) | trim -}}
+{{- if $menu }}
+- name: {{ get $groupNotes $group | default (printf "+%s" $group) }}
+  key: {{ get $groupKeyMap $group }}
+  menu:
+    {{ $menu | nindent 4 }}
+- separator: true
+{{- else }}
+# Empty {{ $group }} menu: {{ $menu | toJson }}
+# Group keys: {{ $groupKeys | toJson }}
+{{- warnf "tmux lt 3.5a: empty %s menu: %s" $group ($menu | toJson) -}}
+{{- end }}
+{{- end }}

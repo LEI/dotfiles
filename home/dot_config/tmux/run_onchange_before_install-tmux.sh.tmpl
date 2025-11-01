@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! command -v tmux >/dev/null; then
+  echo >&2 "Not installed: tmux"
+  exit 1
+fi
+
+echo >&2 "Already installed"
+cmd tmux -V
+
+# NOTE: clone patched plugins to avoid error on tpm install
+
+if [ ! -d ~/.config/tmux/plugins/tpm ]; then
+  cmd git clone --recurse-submodules --single-branch \
+    https://github.com/tmux-plugins/tpm.git \
+    ~/.config/tmux/plugins/tpm
+fi
+
+if [ -z "$(find ~/.config/tmux/plugins/tmux-which-key/plugin/pyyaml -mindepth 1)" ]; then
+  cmd rm -fr ~/.config/tmux/plugins/tmux-which-key
+fi
+if [ ! -d ~/.config/tmux/plugins/tmux-which-key ]; then
+  cmd git clone --recurse-submodules --single-branch \
+    https://github.com/alexwforsythe/tmux-which-key.git \
+    ~/.config/tmux/plugins/tmux-which-key
+fi
+
+# cmd rm -fr ~/.config/tmux/plugins/tokyo-night-tmux
+if [ ! -d ~/.config/tmux/plugins/tokyo-night-tmux ]; then
+  cmd git clone --recurse-submodules --branch v1.6.6 --single-branch \
+    https://github.com/janoamaral/tokyo-night-tmux.git \
+    ~/.config/tmux/plugins/tokyo-night-tmux
+fi
