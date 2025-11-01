@@ -1,0 +1,79 @@
+# https://www.chezmoi.io/reference/special-files/chezmoiignore/
+
+# NOTE: replaced by ~/.config/git/config
+.gitconfig
+
+{{- if ne .email "firstname.lastname@company.com" }}
+# Ignore .company-directory unless configured with a company email
+.company-directory # note that the pattern is not dot_company-directory
+{{- end }}
+
+{{- if ne .email "me@home.org" }}
+.personal-file
+{{- end }}
+
+{{- $ignore := include ".chezmoiignore.yaml" | fromYaml -}}
+{{- range $feature, $patterns := $ignore.features }}
+{{-   if not (get $.features $feature) }}
+{{-     range $patterns }}
+{{ . }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+{{- range $os, $patterns := $ignore.os }}
+{{-   if ne $.osID $os }}
+{{-     range $patterns }}
+{{ . }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
+{{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
+.config/curl/
+.config/readline/
+.config/sh/
+.config/wget/
+{{- if not .ci }}
+.local/bin/
+{{- end }}
+{{- end }}
+
+{{- if or (not .features.helix) (ne .osID "manjaro") }}
+.config/helix/Makefile
+{{- end }}
+
+.Xresources
+.config/tmux/plugins/tmux-which-key/
+.hushlogin
+
+{{- if not (lookPath "process-compose" | isExecutable) }}
+.config/carapace/specs/pc.yaml
+{{- end }}
+
+{{ if not .codespaces -}}
+.vscode-remote/
+{{ end -}}
+
+{{ if or .ephemeral (empty .accessToken) -}}
+.install-password-manager.sh
+{{ end -}}
+
+{{- if not (eq .os "android" "linux") }}
+.chezmoiscripts/linux/**
+{{- end }}
+
+{{- if eq .osID "darwin" }}
+# System packages are managed with brew
+.chezmoiscripts/*install-packages.sh
+{{- end }}
+
+{{- if and (ne .osID "windows") (not .wsl) }}
+.config/powershell/
+{{- end }}
+
+{{- if eq .osID "windows" }}
+# .chezmoiscripts/*install-xdg.sh
+# .config/*/*.sh
+# .install-password-manager.sh
+# {,.chezmoiscripts/}*.sh
+{{- end }}

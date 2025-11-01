@@ -1,0 +1,8 @@
+---
+packages:
+  notmuch:
+    enabled: "{{ .features.mail }}"
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  notmuch-vim:
+    enabled: "{{ .features.mail }}"
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

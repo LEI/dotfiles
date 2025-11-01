@@ -1,0 +1,245 @@
+local preset = '{{ .preset }}'
+local branch = {
+  font = ' ', -- 
+  icon = '',
+}
+local common_signs = {
+  branch = branch[preset],
+  off = '○',
+  on = '●',
+  pending = '→', -- ➜ ➤
+  prompt = '{{ .symbols.prompt }}',
+  prompt_error = '{{ .symbols.error }}',
+  spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
+  time = '⧗', -- ⧖
+
+  lualine_fileformat_symbols = {
+    unix = 'LF', -- '', -- e712
+    dos = 'CRLF', -- '', -- e70f
+    mac = '⌘', -- '', -- e711
+  },
+
+  nodejs = '⬢',
+  persistence = '💾', -- 🖫 🖪 🖬 🖴
+}
+local signs = {
+  -- Icon font
+  font = {
+    error = '󰅙 ', --  
+    warn = ' ',
+    info = '󰋼 ', --  
+    hint = '󰌵 ', -- 
+    debug = ' ',
+    trace = ' ',
+
+    lint_done = '󰦕 ',
+    lint_running = '󱉶 ',
+
+    done = ' ',
+    open_directory = ' ',
+    git_browse = ' ',
+    git_remote = branch[preset],
+    git_status = branch[preset],
+
+    comments = {
+      fix = ' ',
+      todo = ' ',
+      hack = ' ',
+      warn = ' ',
+      perf = ' ',
+      note = ' ',
+      test = '⏲ ',
+    },
+
+    lazy_ui_icons = {
+      -- cmd = ' ',
+      -- config = '',
+      -- debug = '● ',
+      -- event = ' ',
+      -- favorite = ' ',
+      -- ft = ' ',
+      -- init = ' ',
+      -- import = ' ',
+      -- keys = ' ',
+      -- lazy = '󰒲 ',
+      -- loaded = '●',
+      -- not_loaded = '○',
+      -- plugin = ' ',
+      -- runtime = ' ',
+      -- require = '󰢱 ',
+      -- source = ' ',
+      -- start = ' ',
+      -- task = '✔ ',
+      -- list = {
+      --   '●',
+      --   '➜',
+      --   '★',
+      --   '‒',
+      -- },
+    },
+
+    lsp = ' ',
+    mcp = '󰐻 ',
+
+    overseer_symbols = {
+      CANCELED = ' ',
+      FAILURE = '󰅚 ',
+      SUCCESS = '󰄴 ',
+      RUNNING = '󰑮 ',
+    },
+
+    snacks_picker_prompt = ' ' .. common_signs.prompt,
+    -- snacks_picker_icons = {}
+
+    nodejs = ' ',
+    persistence = ' ', -- 
+  },
+
+  -- Plain text
+  text = {
+    error = '✗', -- E: × ✕ ✖
+    hint = '?', -- H: ✦ ✧ ✱ ※
+    info = 'i', -- I: ℹ
+    warn = '!', -- W: ⚠ ‼
+    debug = '⊙', -- D: ✲
+    trace = '⋯', -- T: … ⁂
+
+    lint_done = '.',
+    lint_running = '…',
+
+    done = '✓', -- ✔
+    open_directory = 'O', -- Open
+    git_browse = 'B',
+    git_remote = 'GR',
+    git_status = 'GS',
+
+    comments = {
+      fix = 'F:',
+      todo = 'T:',
+      hack = 'H:',
+      warn = 'W:',
+      perf = 'P:',
+      note = 'N:',
+      test = 't:',
+    },
+
+    lazy_ui_icons = {
+      cmd = '⌘',
+      config = '🛠',
+      event = '📅',
+      ft = '📂',
+      init = '⚙',
+      keys = '🗝',
+      plugin = '🔌',
+      runtime = '💻',
+      require = '🌙',
+      source = '📄',
+      start = '🚀',
+      task = '📌',
+      lazy = '💤 ',
+    },
+
+    lsp = 'LSP',
+    mcp = 'MCP',
+
+    -- overseer_symbols = {},
+
+    snacks_picker_prompt = ' ' .. common_signs.prompt .. ' ',
+    snacks_picker_icons = {
+      -- files = {
+      --   enabled = true, -- show file icons
+      --   dir = '󰉋 ',
+      --   dir_open = '󰝰 ',
+      --   file = '󰈔 ',
+      -- },
+      -- keymaps = {
+      --   nowait = '󰓅 ',
+      -- },
+      -- tree = {
+      --   vertical = '│ ',
+      --   middle = '├╴',
+      --   last = '└╴',
+      -- },
+      -- undo = {
+      --   saved = ' ',
+      -- },
+      -- ui = {
+      --   live = '󰐰 ',
+      --   hidden = 'h',
+      --   ignored = 'i',
+      --   follow = 'f',
+      --   selected = '● ',
+      --   unselected = '○ ',
+      --   -- selected = " ",
+      -- },
+      -- git = {
+      --   enabled = true, -- show git icons
+      --   commit = '󰜘 ', -- used by git log
+      --   staged = '●', -- staged changes. always overrides the type icons
+      --   added = '',
+      --   deleted = '',
+      --   ignored = ' ',
+      --   modified = '○',
+      --   renamed = '',
+      --   unmerged = ' ',
+      --   untracked = '?',
+      -- },
+      -- diagnostics = {
+      --   Error = ' ',
+      --   Warn = ' ',
+      --   Hint = ' ',
+      --   Info = ' ',
+      -- },
+      -- lsp = {
+      --   unavailable = '',
+      --   enabled = ' ',
+      --   disabled = ' ',
+      --   attached = '󰖩 ',
+      -- },
+      -- kinds = {
+      --   Array = ' ',
+      --   Boolean = '󰨙 ',
+      --   Class = ' ',
+      --   Color = ' ',
+      --   Control = ' ',
+      --   Collapsed = ' ',
+      --   Constant = '󰏿 ',
+      --   Constructor = ' ',
+      --   Copilot = ' ',
+      --   Enum = ' ',
+      --   EnumMember = ' ',
+      --   Event = ' ',
+      --   Field = ' ',
+      --   File = ' ',
+      --   Folder = ' ',
+      --   Function = '󰊕 ',
+      --   Interface = ' ',
+      --   Key = ' ',
+      --   Keyword = ' ',
+      --   Method = '󰊕 ',
+      --   Module = ' ',
+      --   Namespace = '󰦮 ',
+      --   Null = ' ',
+      --   Number = '󰎠 ',
+      --   Object = ' ',
+      --   Operator = ' ',
+      --   Package = ' ',
+      --   Property = ' ',
+      --   Reference = ' ',
+      --   Snippet = '󱄽 ',
+      --   String = ' ',
+      --   Struct = '󰆼 ',
+      --   Text = ' ',
+      --   TypeParameter = ' ',
+      --   Unit = ' ',
+      --   Unknown = ' ',
+      --   Value = ' ',
+      --   Variable = '󰀫 ',
+      -- },
+    },
+  },
+}
+return {
+  name = preset,
+  signs = vim.tbl_extend('force', common_signs, signs[preset] or signs.text),
+}

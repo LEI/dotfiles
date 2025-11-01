@@ -1,0 +1,5 @@
+{{- if lookPath "procs" | isExecutable -}}
+# https://github.com/dalance/procs#configuration
+
+{{ output "procs" "--gen-config" | fromToml | toToml }}
+{{- end -}}

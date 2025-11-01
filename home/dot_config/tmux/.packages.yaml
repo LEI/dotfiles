@@ -1,0 +1,13 @@
+---
+packages:
+  tmux:
+    # FIXME(windows): ".config/tmux" should be ignored
+    enabled: '{{ ne .os "windows" }}'
+  nowplaying-cli:
+    enabled: '{{ and .features.tmux (eq .osID "darwin") }}'
+  pam-reattach:
+    enabled: '{{ and .features.tmux (eq .osID "darwin") }}'
+  playerctl:
+    enabled: '{{ and .features.tmux (eq .os "linux") }}'
+  reattach-to-user-namespace:
+    enabled: '{{ and .features.tmux (eq .osID "darwin") }}'

@@ -1,0 +1,10 @@
+\timing on
+\set HISTSIZE 65536
+
+\pset linestyle unicode
+\pset border 2
+-- \set x '\\setenv PAGER less'
+{{- if lookPath "pspg" | isExecutable }}
+\set xx '\\setenv PAGER \'pspg -bX --no-mouse\''
+:xx
+{{- end }}

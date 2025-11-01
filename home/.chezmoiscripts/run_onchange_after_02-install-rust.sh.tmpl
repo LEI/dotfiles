@@ -1,0 +1,147 @@
+#!/bin/sh
+
+# https://forge.rust-lang.org/infra/other-installation-methods.html#other-ways-to-install-rustup
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/functions/pathmunge.sh"
+
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+
+# NOTE: use global cargo
+TMPDIR="${TMPDIR:-/tmp}"
+cd "$TMPDIR"
+
+# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
+fi
+
+if command -v rustup >/dev/null && ! rustup default; then
+  # echo >&2 "No default toolchain is configured, using stable"
+
+  # TODO(windows/msys2): rustup default stable-x86_64-pc-windows-gnu
+  # error: linking with `x86_64-w64-mingw32-gcc` failed
+  cmd rustup default stable
+
+  # cmd rustup toolchain list
+  # cmd rustup toolchain uninstall stable
+  # cmd rustup toolchain install stable
+fi
+# if [ ! -f "$TMPDIR/rust-toolchain" ]; then
+#   if [ -f "$HOME/rust-toolchain" ]; then
+#     cmd cp "$HOME/rust-toolchain" "$TMPDIR/rust-toolchain"
+#   else
+#     cmd echo stable >"$TMPDIR/rust-toolchain"
+#   fi
+# fi
+
+if command -v cargo; then
+  echo >&2 "Already installed"
+  cmd cargo --version
+else
+  echo >&2 "Installing cargo"
+
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
+    ARCH=x86_64
+  else
+    ARCH="$CHEZMOI_ARCH"
+  fi
+  if [ "$CHEZMOI_OS" = darwin ]; then
+    OS=darwin
+  else
+    OS=unknown-linux
+  fi
+  NAME="$ARCH-$OS"
+  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)" 2>/dev/null; then
+    NAME="$NAME-musl"
+  else
+    NAME="$NAME-gnu"
+  fi
+
+  BIN_DIR="$HOME/.local/bin"
+  if [ ! -d "$BIN_DIR" ]; then
+    echo >&2 "Creating directory: $BIN_DIR"
+    mkdir -p "$BIN_DIR"
+  fi
+
+  RUSTUP_INIT="$BIN_DIR/rustup-init"
+
+  # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  #   | sh -s -- --component rust-analyzer --quiet -y
+
+  cmd curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
+  cmd chmod +x "$RUSTUP_INIT"
+  {{- if .features.neovim }}
+  RUSTUP_INIT_ARGS=""
+  {{- else }}
+  RUSTUP_INIT_ARGS="--component rust-analyzer"
+  {{- end }}
+  # shellcheck disable=SC2086
+  cmd "$RUSTUP_INIT" $RUSTUP_INIT_ARGS --no-modify-path --quiet -y
+
+  echo >&2 "Installed cargo"
+fi
+
+# cmd rustc --version
+
+# cmd rustup default stable
+
+{{- if not .features.neovim }}
+
+# cmd rustup component add rust-analyzer
+{{- end }}
+
+# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
+fi
+
+if ! command -v cargo-binstall >/dev/null; then
+  # cmd cargo install --locked --quiet cargo-binstall
+  # https://github.com/cargo-bins/cargo-binstall#manually
+  echo >&2 "Installing cargo-binstall"
+  if [ "$CHEZMOI_ARCH" = amd64 ]; then
+    ARCH=x86_64
+  else
+    ARCH="$CHEZMOI_ARCH"
+  fi
+  if [ "$CHEZMOI_OS" = darwin ]; then
+    OS=apple-darwin
+  elif [ "$CHEZMOI_OS" = linux ]; then
+    OS=unknown-linux-musl
+  elif [ "$CHEZMOI_OS" = windows ]; then
+    OS=pc-windows-msvc
+  fi
+  NAME="cargo-binstall"
+  if [ "$CHEZMOI_OS" = linux ]; then
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.tgz"
+    install_tar_gz "$URL" "$NAME"
+  else
+    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.zip"
+    install_zip "$URL" "$NAME"
+  fi
+  echo >&2 "Installed cargo-binstall"
+fi
+
+{{- $list := list }}
+{{- range $name := .packages.cargo | keys }}
+{{- $list = append $list $name }}
+{{- end }}
+
+packages="{{ $list | sortAlpha | join " " }}"
+#
+# if ! command -v cargo-install-update >/dev/null; then
+#   packages="$packages cargo-update"
+# fi
+
+if [ -n "$packages" ]; then
+  cmd cargo binstall --disable-telemetry --no-confirm --quiet "$@" $packages
+fi

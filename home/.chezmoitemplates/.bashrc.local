@@ -1,0 +1,9 @@
+# export CHEZMOI_GITHUB_ACCESS_TOKEN=""
+{{- if not .ephemeral }}
+# export GITHUB_ACCESS_TOKEN=""
+{{- end }}
+
+{{-  if lookPath "xhost" | isExecutable }}
+
+xhost +local:root >/dev/null 2>&1
+{{- end }}

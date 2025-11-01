@@ -1,0 +1,54 @@
+adjust-cursor-thickness = 1
+background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75  }}
+# unfocused-split-opacity = 1
+
+# cursor-style = block
+# cursor-style-blink = false
+
+# A value of "3" (default) scrolls 3 lines per tick.
+# https://github.com/ghostty-org/ghostty/pull/8927
+# mouse-scroll-multiplier = 3
+
+# shell-integration = none
+# shell-integration-features = no-cursor
+
+# fullscreen = true
+# font-feature = -calt, -liga, -dlig
+scrollback-limit = 90000000
+theme = dark:TokyoNight Night,light:TokyoNight Day
+# theme = TokyoNight Storm
+
+{{- if eq .os "darwin" }}
+
+# bell-features = border
+font-size = 12
+# window-decoration = client
+window-padding-x = 8
+# window-save-state = always
+
+# https://github.com/ghostty-org/ghostty/discussions/3642
+# fullscreen = true
+# macos-non-native-fullscreen = visible-menu
+macos-titlebar-style = transparent
+
+# https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
+macos-option-as-alt = left
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+{{- else }}
+
+bell-features = system
+font-size = 10
+gtk-titlebar = false
+maximize = true
+window-decoration = server
+{{- end }}
+
+# Quick terminal not available on X11
+{{- if ne .sessionType "x11" }}
+
+# keybind = global:ctrl+grave_accent=toggle_quick_terminal
+{{- end }}
+
+# xdg-mime default nvim.desktop text/plain
+# keybind = ctrl+s>w>s=write_screen_file:open

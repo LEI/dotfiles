@@ -1,0 +1,33 @@
+{{- /* TODO: move to .chezmoiscripts/darwin/ */ -}}
+{{- /* https://github.com/kevinSuttle/macOS-Defaults */ -}}
+
+{{- if lookPath "scutil" | isExecutable }}
+# Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
+{{- end }}
+# Local host name: {{ .hostname }}
+{{- if lookPath "sw_vers" | isExecutable }}
+# macOS build version: {{ output "sw_vers" "--buildVersion" }}
+{{- end }}
+{{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
+{{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
+{{- output "curl" "-LSfs" $url
+    | replaceAllRegex "Europe/Brussels" .timezone
+    | replaceAllRegex "\"nl\"" "\"fr\""
+    | replaceAllRegex "\n#launchctl" "\nlaunchctl"
+    | replaceAllRegex "\nkillall mds" "\n# killall mds"
+    | replaceAllRegex "\nsudo mdutil" "\n# sudo mdutil"
+    | replaceAllRegex "(\\s*)(.*open.*HOME.*init.*)" "${1}# ${2}"
+    | replaceAllRegex "(defaults write NSGlobalDomain com.apple.swipescrolldirection -bool )false" "${1}true"
+    | replaceAllRegex "(defaults write com.apple.dock minimize-to-application -bool )true" "${1}false" -}}
+
+defaults write org.hammerspoon.Hammerspoon MJConfigFile "~/.config/hammerspoon/init.lua"
+
+# TODO: uncomment line to enable TouchID
+# https://github.com/MikeMcQuaid/strap/blob/main/strap.sh#L174
+
+# sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
+# grep '^#\?auth' /etc/pam.d/sudo_local
+
+# https://github.com/fabianishere/pam_reattach
+# auth optional   pam_reattach.so
+# auth sufficient pam_tid.so

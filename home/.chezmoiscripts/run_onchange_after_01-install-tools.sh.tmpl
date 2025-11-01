@@ -1,0 +1,71 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{ includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" . | trim }}
+
+{{- $args := list "--yes" }}
+{{- if not .chezmoi.config.verbose }}
+{{- $args = append $args "--quiet" }}
+{{- end }}
+{{- $miseArgs := $args | quoteList | join " " }}
+
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+
+{{- if .upgrade }}
+
+# if ! run mise self-update "$@" {{ $miseArgs }}; then
+#   echo >&2 "mise self-update failed with exit code $?"
+# fi
+{{- end }}
+
+# TODO: check gpg-agent is running
+
+# config.toml tools hash: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" | toJson | sha256sum }}
+echo >&2 "Installing tools: {{ get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}"
+
+# mise_args="--yes"
+# if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+#   mise_args="$mise_args --verbose"
+# fi
+
+run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@" {{ $miseArgs }}
+
+echo >&2 "Installed tools"
+
+# run mise ls "$@"
+
+{{- /* $tools := list }}
+
+{{- if get .packages.mise "go" }}
+# default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
+{{- $tools = append $tools "go" }}
+{{- end }}
+
+{{- if get .packages.mise "node" }}
+# default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
+{{- $tools = append $tools "node" }}
+{{- end }}
+
+{{- if get .packages.mise "python" }}
+# default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
+{{- $tools = append $tools "python" }}
+{{- end }}
+
+{{- if get .packages.mise "ruby" }}
+# default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
+{{- $tools = append $tools "ruby" }}
+{{- end }}
+
+{{- if not (empty $tools) }}
+
+# FIXME: ensure new tools are installed and show hash diff
+run mise use --global "$@" {{ $miseArgs }} {{ $tools | sortAlpha | join " " }}
+{{- end }}
+
+# run mise prune "$@" # --tools
+{{- */ -}}

@@ -1,0 +1,520 @@
+# i3 v4 configuration file
+
+# http://i3wm.org/docs/userguide.html
+# https://github.com/Airblader/dotfiles-manjaro
+# https://gist.github.com/viking/5851049
+
+set $config_dir ~/.config/i3
+
+# set $font_family DejaVu Sans
+# set $font_family HackNerd
+set $font_family {{ .i3.fontFamily }}
+# set $font_family Roboto
+set $font_size {{ .i3.fontSize }}
+
+# Use "normal" to keep title bars and "pixel" to hide them
+# NOTE: this hides next split direction indicator too
+set $border_style normal
+set $border_width {{ .i3.borderWidth }}
+
+set $alt Mod1
+set $mod Mod4
+
+# Font for window titles. Will also be used by the bar unless a different font
+# is used in the bar {} block below.
+#font pango:monospace 8
+font pango:$font_family $font_size
+
+# include config.d/exec.conf
+# include config.d/bind.conf
+
+{{- if lookPath "betterlockscreen" | isExecutable }}
+set $lock_command betterlockscreen --lock dim
+{{- else }}
+set $lock_command i3lock --nofork
+{{- end }}
+bindsym $mod+shift+x exec $lock_command
+
+{{- if lookPath "dex" | isExecutable }}
+# Start XDG autostart .desktop files using dex. See also
+# https://wiki.archlinux.org/index.php/XDG_Autostart
+exec --no-startup-id dex --autostart --environment i3
+# FIXME: backintime
+# blueman-applet
+# caffeine
+# finderprint-polkit-agent
+# geoclue
+# xfce4-notifyd
+# xfsettingsd
+# xiccd
+# ulauncher
+# xcape
+{{- end }}
+
+{{- if lookPath "picom" | isExecutable }}
+# exec --no-startup-id picom
+{{- end }}
+
+{{- if and (lookPath "xss-lock" | isExecutable) (lookPath "i3lock" | isExecutable) }}
+# TODO: check for light-locker in /etc/xdg/autostart and ~/.config/autostart
+{{- if lookPath "betterlockscreen" | isExecutable }}
+# Set desktop background with custom effect
+exec --no-startup-id betterlockscreen --wall dim
+# Alternative (set last used background)
+exec --no-startup-id source ~/.fehbg
+# exec --no-startup-id xss-lock --transfer-sleep-lock -- $lock_command
+{{- else }}
+# xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
+# screen before suspend. Use loginctl lock-session to lock your screen.
+# exec --no-startup-id xss-lock --transfer-sleep-lock -- $lock_command
+{{- end }}
+{{- end }}
+
+{{- if lookPath "nm-applet" | isExecutable }}
+exec --no-startup-id nm-applet
+{{- end }}
+
+# # Use `xrandr` to list available modes (TODO: auto detection)
+# exec_always --no-startup-id xrandr --output VGA-1 --mode 1600x900
+# exec --no-startup-id xautolock -time 10 -locker $config/bin/lock
+
+# # Use `xrandr` to list available modes (TODO: auto detection)
+# exec_always --no-startup-id xrandr --output VGA-1 --mode 1600x900
+# exec --no-startup-id xautolock -time 10 -locker $config/bin/lock
+
+{{- if lookPath "feh" | isExecutable }}
+# exec_always --no-startup-id feh --scale ~/Pictures/wallpaper.jpg
+exec_always --no-startup-id feh --bg-fill --randomize ~/Wallpapers/*
+{{- end }}
+
+{{- if lookPath "autotiling-rs" | isExecutable }}
+exec_always --no-startup-id autotiling-rs
+{{- else if lookPath "autotiling" | isExecutable }}
+exec_always --no-startup-id autotiling
+{{- end }}
+
+{{- if lookPath "xfce4-panel" | isExecutable }}
+# exec --no-startup-id xfce4-panel --disable-wm-check
+{{- end }}
+
+{{- if lookPath "xfce4-power-manager" | isExecutable }}
+exec --no-startup-id xfce4-power-manager --daemon --restart
+{{- end }}
+
+{{- if lookPath "xfce4-settings-manager" | isExecutable }}
+# NOTE: Appearance > 96 dpi, scaling 2x
+# exec --no-startup-id xfce4-settings-manager --daemon --restart
+{{- end }}
+
+{{- if lookPath "xfce4-volumed-pulse" | isExecutable }}
+exec --no-startup-id xfce4-volumed-pulse
+{{- end }}
+
+{{- if lookPath "volumeicon" | isExecutable }}
+exec --no-startup-id volumeicon
+{{- end }}
+
+{{- if lookPath "xfsettingsd" | isExecutable }}
+# XFSETTINGSD_DEBUG=1 xfsettingsd --replace --no-daemon
+# NOTE: this overrides ~/.config/gtk*
+# exec --no-startup-id xfsettingsd --daemon --restart
+{{- end }}
+
+{{- if lookPath "gnome-keyring-daemon" | isExecutable }}
+exec --no-startup-id gnome-keyring-daemon --components=pkcs11,secrets --daemonize --start
+{{- end }}
+
+{{- if lookPath "pamac-tray" | isExecutable }}
+exec --no-startup-id pamac-tray
+{{- end }}
+
+{{- if lookPath "pipewire-pulse" | isExecutable }}
+# exec --no-startup-id pipewire-pulse
+{{- end }}
+
+{{- if lookPath "redshift-gtk" | isExecutable }}
+# exec --no-startup-id redshift-gtk
+{{- else if lookPath "redshift" | isExecutable }}
+# exec --no-startup-id redshift
+{{- end }}
+
+exec --no-startup-id setxkbmap -option caps:escape
+
+{{- if lookPath "tmux" | isExecutable }}
+# FIXME: resurrect
+# exec --no-startup-id i3-sensible-terminal -e 'tmux attach || tmux; $SHELL'
+{{- end }}
+exec --no-startup-id i3-sensible-terminal
+
+{{- if lookPath "firefox" | isExecutable }}
+# exec --no-startup-id firefox
+{{- end }}
+
+{{- if lookPath "thunar" | isExecutable }}
+# exec --no-startup-id thunar
+{{- end }}
+
+{{- if lookPath "seahorse" | isExecutable }}
+# exec --no-startup-id i3-msg "scratchpad; exec seahorse"
+exec --no-startup-id seahorse
+{{- end }}
+
+{{- if lookPath "xcape" | isExecutable }}
+exec --no-startup-id xcape
+{{- end }}
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# Move tiling windows via drag & drop by left-clicking into the title bar,
+# or left-clicking anywhere into the window while holding the floating modifier.
+tiling_drag modifier titlebar
+
+# FIXME: nvim in / ro
+bindsym $mod+Shift+Return exec "notify-send \\"$(xcwd)\\""
+
+# Start a terminal in the same directory
+set $i3-sensible-terminal "i3-sensible-terminal --working-directory=\\"$(xcwd)\\""
+bindsym $mod+Return exec $i3-sensible-terminal
+# bindsym $mod+Shift+t exec $i3-sensible-terminal
+
+# Kill focused window
+bindsym $mod+Shift+q kill
+
+bindsym $alt+space exec "rofi -show combi -modes combi -combi-modes 'drun,run,keys,calc'"
+bindsym $alt+Tab exec ~/.config/i3/scripts/alt-tab.sh
+
+# bindsym $mod+d exec --no-startup-id dmenu_run
+# bindsym $mod+d exec "rofi -modi drun,run -show drun"
+bindsym $mod+d exec "rofi -show combi -combi-modes 'drun,run'"
+bindsym $mod+Shift+d exec "rofi -show combi -drun-show-actions"
+bindsym $mod+Control+d exec --no-startup-id "i3-dmenu-desktop"
+
+bindsym $mod+Shift+Tab exec "rofi -show windowcd"
+bindsym $mod+Tab exec "rofi -show window"
+
+bindsym $mod+c exec "rofi -show calc"
+bindsym $mod+comma exec "rofi -show keys"
+bindsym $mod+s exec "rofi -show ssh"
+
+# bindsym $mod+Shift+w exec "rofi -show recursivebrowser"
+# bindsym $mod+w exec "rofi -show filebrowser"
+
+bindsym $mod+x exec "rofi -show run"
+
+set $browser firefox
+set $explorer thunar
+
+bindsym $mod+b exec $browser
+bindsym $mod+e exec $explorer
+
+# Press $mod+o followed by either f, t, Escape or Return to launch firefox,
+# thunderbird or return to the default mode, respectively.
+set $mode_launcher Launch: [e]xplorer [f]irefox [t]hunderbird
+bindsym $mod+o mode "$mode_launcher"
+
+mode "$mode_launcher" {
+    # bindsym b exec $browser
+    bindsym c exec chromium
+    bindsym e exec $explorer
+    bindsym f exec firefox
+    bindsym t exec thunderbird
+
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+
+# bindsym $mod+p exec "notify-send TEST"
+
+set $left h
+set $down j
+set $up k
+set $right l
+
+# Change focus
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+# Alternatively, you can use the cursor keys:
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# Move focused window
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+
+# Alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Split in horizontal orientation
+# bindsym $mod+h split h
+
+# Split in vertical orientation
+# bindsym $mod+v split v
+
+# Enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# # Change container layout (stacked, tabbed, toggle split)
+# bindsym $mod+s layout stacking
+# bindsym $mod+w layout tabbed
+# bindsym $mod+e layout toggle split
+
+# Toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# Change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# Focus the parent container
+bindsym $mod+a focus parent
+
+# Focus the child container
+#bindsym $mod+d focus child
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+{{- range $i, $e := until 10 }}
+{{- $i = add $i 1 }}
+set $ws{{ $i }} "{{ $i }}"
+{{- end }}
+
+# Switch to workspace
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+{{ $index }} workspace number $ws{{ $i }}
+{{- end }}
+
+# Move focused container to workspace
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+Shift+{{ $index }} move container to workspace number $ws{{ $i }}
+{{- end }}
+
+# Keep floating windows on active workspace
+{{- range $i, $e :=  until 10 }}
+{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+bindsym $mod+Control+{{ $index }} [title="Picture-in-Picture"] move workspace number {{ $i }}; workspace number {{ $i }}
+{{- end }}
+
+# Reload the configuration file
+# bindsym $mod+Shift+c reload
+bindsym $mod+Shift+c exec "i3-msg reload && notify-send 'i3 configuration reloaded'"
+# Restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r exec "i3-msg restart && notify-send 'i3 restarted'"
+# Exit i3 (logs you out of your X session)
+set $nagbar i3-nagbar -f 'pango:monospace {{ sub .i3.fontSize 1 }}'
+bindsym $mod+Shift+e exec "$nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+# Resize window (you can also use the mouse for that)
+mode "resize" {
+    # These bindings trigger as soon as you enter the resize mode
+
+    # Pressing left will shrink the window’s width.
+    # Pressing right will grow the window’s width.
+    # Pressing up will shrink the window’s height.
+    # Pressing down will grow the window’s height.
+    bindsym $left resize shrink width 10 px or 10 ppt
+    bindsym $down resize grow height 10 px or 10 ppt
+    bindsym $up resize shrink height 10 px or 10 ppt
+    bindsym $right resize grow width 10 px or 10 ppt
+
+    # Same bindings, but for the arrow keys
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # Back to normal: Enter or Escape or $mod+r
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
+}
+
+bindsym $mod+r mode "resize"
+
+set $base00 #101218
+# set $base01 #1f222d
+# set $base02 #252936
+set $base03 #7780a1
+set $base04 #C0C5CE
+set $base05 #d1d4e0
+set $base06 #C9CCDB
+set $base07 #ffffff
+set $base08 #ee829f
+set $base09 #f99170
+set $base0A #ffefcc
+set $base0B #a5ffe1
+set $base0C #97e0ff
+set $base0D #97bbf7
+set $base0E #c0b7f9
+set $base0F #fcc09e
+
+# https://i3wm.org/docs/userguide.html#_transparency
+# set_from_resource $base01 i3wm.base01 #1f222dDD
+# set_from_resource $base02 i3wm.base02 #252936DD
+set_from_resource $base01 i3wm.base01 #1f222dCC
+set_from_resource $base02 i3wm.base02 #252936CC
+
+{{- if lookPath "polybar" | isExecutable }}
+
+exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+{{- else }}
+
+bar {
+    # mode hide
+    # hidden_state hide
+    # modifier $mod
+
+    font {{ .i3.barFont }}
+    # font pango:$font_family, FontAwesome $font_size
+
+    # NOTE: cause all tray icons to have a transparent background
+    i3bar_command i3bar # --transparency
+
+    position top
+
+    {{- if lookPath "i3status-rs" | isExecutable }}
+
+    # https://github.com/rholder/i3status-title-on-bar
+    # i3status | i3status-title-on-bar
+    status_command i3status-rs
+    {{- end }}
+
+    tray_output primary
+    # tray_padding 2px
+
+    # separator_symbol ":|:"
+    separator_symbol " " # ｜
+
+    # workspace_buttons yes
+    # workspace_command script.sh
+
+    # colors {
+    #     separator #666666
+    #     background #222222
+    #     statusline #dddddd
+    #     # focused_workspace #0088CC #0088CC #ffffff
+    #     active_workspace #333333 #333333 #ffffff
+    #     inactive_workspace #333333 #333333 #888888
+    #     urgent_workspace #2f343a #900000 #ffffff
+    # }
+    colors {
+        background $base01
+        separator $base02
+        statusline $base05
+        #                  border  bg      text
+        focused_workspace  $base01 $base01 $base07
+        active_workspace   $base01 $base02 $base03
+        inactive_workspace $base01 $base01 $base03
+        urgent_workspace   $base01 $base01 $base08
+    }
+}
+
+{{- if lookPath "i3status-rs" | isExecutable }}
+
+# Update status bar
+bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3status-rs
+{{- end }}
+
+{{- if lookPath "i3wsr" | isExecutable }}
+
+exec_always --no-startup-id i3wsr
+{{- end }}
+{{- end }}
+
+# https://i3wm.org/docs/userguide.html#client_colors
+# # class                 border  backgr. text    indicator child_border
+# client.focused          #4c7899 #285577 #ffffff #2e9ef4   #285577
+# client.focused_inactive #333333 #5f676a #ffffff #484e50   #5f676a
+# client.unfocused        #333333 #222222 #888888 #292d2e   #222222
+# client.urgent           #2f343a #900000 #ffffff #900000   #900000
+# client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
+# client.background       #ffffff
+
+# Window colors
+# <colorclass> <border> <background> <text> <indicator> <child_border>
+# client.focused          $base01 $base01 $base07 $base0F
+# client.focused_inactive $base02 $base02 $base03 $base0F
+# client.unfocused        $base02 $base02 $base03 $base0F
+# client.urgent           $base02 $base08 $base00 $base0F
+
+client.focused          $base01 $base01 $base07 $base0F
+client.focused_inactive $base02 $base02 $base03 $base0F
+client.unfocused        $base02 $base02 $base03 $base0F
+client.urgent           $base08 $base08 $base00 $base0F
+
+default_border $border_style $border_width
+default_floating_border $border_style $border_width
+
+# Update borders on reload
+#for_window [all] border $border_style $border_width
+
+# Hide title bar
+#for_window [class="(?i)Ghostty"] border pixel 0
+# for_window [class="(?i)polybar"] border pixel 0
+for_window [class="(?i)xfce4-notifyd"] border pixel 0
+for_window [title="(?i)Picture-in-Picture"] border pixel 0
+
+# Increase space between icon and title
+for_window [all] title_window_icon padding 5px
+
+# for_window [all] title_format %title ｜ %class ｜ %instance
+# for_window [class=".*"] title_format %title ｜ <span font="mono 9">%class</span> ｜ <span size="smaller">%instance</span>
+
+# no_focus [window_role="pop-up"]
+# no_focus [class="plasmashell" window_type="on_screen_display"]
+no_focus [class="(?i)rustdesk"]
+
+# include ~/.config/i3/config.d/*.conf
+# include config.d/assignments.conf
+
+# Floating windows
+for_window [class="(?i)blueman-manager"] floating enable
+for_window [class="(?i)lxappearance"] floating enable
+for_window [class="(?i)mplayer"] floating enable
+for_window [class="(?i)pavucontrol"] floating enable
+for_window [class="(?i)rustdesk"] floating enable
+for_window [class="(?i)seahorse"] floating enable
+for_window [class="(?i)vlc"] floating enable
+for_window [title="Manager$"] floating enable
+for_window [title="Preferences$"] floating enable
+for_window [title="Tool$"] floating enable
+for_window [title="^Configuration Errors$"] floating enable
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="task_dialog"] floating enable
+
+# Application workspaces
+# assign [class="Thunar"] number 2
+# assign [class="(?i)firefox"] number 3
+# for_window [class="Seahorse"] move scratchpad
+
+focus_follows_mouse off
+
+title_align center
+
+set $gap 5px
+gaps inner $gap
+gaps outer -$gap
+# smart_gaps inverse_outer
+# smart_gaps on
+
+# Make the currently focused window a scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+Shift+parenright move scratchpad
+
+# Show the first scratchpad window
+bindsym $mod+minus scratchpad show
+bindsym $mod+degree scratchpad show
+
+# Show the sup-mail scratchpad window, if any.
+# bindsym mod4+s [title="^Sup ::"] scratchpad show

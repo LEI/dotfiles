@@ -1,0 +1,21 @@
+{{- $jsonPackages := list -}}
+{{- $wingetPackages := get .packages "winget" | default dict }}
+
+{{- if empty $wingetPackages }}
+{{-   warnf "missing winget packages" }}
+{{- end }}
+
+{{- range $wingetPackages | keys | sortAlpha -}}
+{{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
+{{- end -}}
+{{- dict
+  "$schema" "https://aka.ms/winget-packages.schema.2.0.json"
+  "CreationDate" "2025-08-21T00:00:35.334-00:00"
+  "Sources" (list (dict "Packages" $jsonPackages "SourceDetails" (dict
+    "Argument" "https://cdn.winget.microsoft.com/cache"
+    "Identifier" "Microsoft.Winget.Source_8wekyb3d8bbwe"
+    "Name" "winget"
+    "Type" "Microsoft.PreIndexed.Package"
+  )))
+ "WinGetVersion" "1.11.430"
+| toPrettyJson -}}

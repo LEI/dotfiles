@@ -1,0 +1,27 @@
+[settings]
+{{- if eq .osID "alpine" }}
+# FIXME(alpine): platform error (failed to install with ubi)
+disable_backends = ["ubi"]
+{{- end }}
+idiomatic_version_file_enable_tools = [
+  # "bun",
+  # "deno",
+  "go",
+  # "java",
+  "node",
+  "python",
+  "ruby",
+  # "terraform",
+  # "tiny",
+]
+
+{{- if .features.goss }}
+[tasks.goss]
+dir = "~/.config/goss"
+run = "goss --vars=vars.yaml"
+{{- end }}
+
+[tools]
+{{- range $name, $pkg := .packages.mise }}
+{{ $name }} = {{ get $pkg "version" | default "latest" | quote }}
+{{- end }}

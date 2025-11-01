@@ -1,0 +1,6 @@
+Host *
+  # ForwardAgent yes
+  Include config.d/* # ssh -V >= 7.3p1
+  # LocalCommand if [[ $TERM == screen* ]]; then printf "\033k%h\033\\"; fi
+  # PermitLocalCommand yes
+  # PubkeyAcceptedKeyTypes +ssh-rsa

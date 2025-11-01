@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# alias: brew installed
+#:  * `installed` [args...]
+#:    `brew installed` is an alias for `brew list --`
+
+set -euxo pipefail
+
+brew list --installed-on-request "$@"
+# brew leaves | xargs brew deps --include-build --tree

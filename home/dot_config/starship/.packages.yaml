@@ -1,0 +1,6 @@
+---
+packages:
+  starship:
+    nameOverwrite:
+      windows: Starship.Starship
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "mise" nil }}'

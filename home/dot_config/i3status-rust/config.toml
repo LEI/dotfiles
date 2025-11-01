@@ -1,0 +1,248 @@
+icons_format = "{icon}"
+
+[theme]
+theme = "semi-native" # native, plain
+# [theme.overrides]
+# idle_bg = "#123456"
+# idle_fg = "#abcdef"
+
+[icons]
+icons = "awesome6" # none, awesome4-6, material
+[icons.overrides]
+# bat = ["|E|", "|_|", "|=|", "|F|"]
+# bat = ["| |", "|¼|", "|½|", "|¾|", "|X|"]
+# bat_charging = "|^|"
+
+# Capslock status indicator
+[[block]]
+block = "custom"
+signal = 11
+command = ''' if [[ "$(cat /sys/class/leds/input*::capslock/brightness | sort --numeric-sort --reverse | uniq --count | awk '{print $2}' | head --lines 1)" -eq 1 ]]; then printf "CAPS"; fi '''
+shell = "sh"
+format = "<span color='yellow'>$text</span>"
+hide_when_empty = true
+
+[[block]]
+block = "custom"
+signal = 11
+command = ''' i3-msg -t get_tree | jq -r 'recurse(.nodes[];.nodes!=null)|select(.nodes[].focused).layout' '''
+shell = "sh"
+format = "<span color='#fcc09e'>$text</span>"                                                                 # base0F
+hide_when_empty = true
+
+# # Hostname
+# [[block]]
+# block = "custom"
+# command = "cat /etc/hostname"
+# interval = "once"
+
+# # User
+# [[block]]
+# block = "custom"
+# command = "whoami"
+# interval = "once"
+
+# # Kernel
+# [[block]]
+# block = "custom"
+# command = "echo `uname` `uname -r | tr - . | cut -d. -f1-2`"
+# interval = "once"
+
+# # Nextcloud
+# [[block]]
+# block = "custom"
+# command = "echo \uf0c2 Nextcloud"
+# [[block.click]]
+# button = "left"
+# cmd = "nextcloud"
+
+# # Weather
+# [[block]]
+# block = "custom"
+# # command = "sed 's/  //' <(curl 'https://wttr.in/?format=1' -s)"
+# command = "curl 'https://wttr.in/?format=1' -s | tr -d ' '"
+# interval = 600
+
+# # Public IP
+# [[block]]
+# block = "custom"
+# command = "echo '\uf0ac ' `curl bot.whatismyipaddress.com`"
+# interval = 60
+
+# # Ping/RTT
+# [[block]]
+# block = "custom"
+# json = true
+# command = ''' echo "{\"icon\":\"ping\",\"text\":\"`ping -c4 1.1.1.1 | tail -n1 | cut -d'/' -f5`\"}" '''
+# interval = 60
+# [[block.click]]
+# button = "left"
+# cmd = "<command>"
+
+# # https://github.com/greshake/i3status-rust/blob/master/examples/scripts/screenshot.sh
+# [[block]]
+# block = "custom"
+# command = "echo \uf030"
+# interval = "once"
+# [[block.click]]
+# button = "left"
+# cmd = "~/Projects/i3status-rust/examples/scripts/screenshot.sh"
+
+# # Monitors
+# [[block]]
+# block = "custom"
+# command = "xrandr --listmonitors | tail -n+2 | tr '+' ' ' | cut -d' ' -f 4 | tr '\n' ' '"
+# interval = "once"
+# signal = 4
+
+# # https://github.com/greshake/i3status-rust/blob/master/examples/scripts/theme-switch.sh
+# [[block]]
+# block = "custom"
+# cycle = [
+#   "gsettings set org.gnome.desktop.interface gtk-theme Adapta; echo \U0001f311",
+#   "gsettings set org.gnome.desktop.interface gtk-theme None; echo \U0001f315",
+# ]
+# interval = "once"
+# [[block.click]]
+# button = "left"
+# action = "cycle"
+
+# [[block]]
+# block = "pomodoro"
+# notify_cmd = "notify-send '{msg}'"
+# blocking_cmd = false
+
+[[block]]
+block = "backlight"
+device = "intel_backlight"
+format = "$icon $brightness"
+missing_format = ""
+step_width = -5
+minimum = 0
+maximum = 100
+cycle = [0, 25, 50, 75, 100]
+
+# [[block]]
+# block = "custom"
+# command = ''' sudo intel_gpu_top -l | head -n4 | tail -n1 | awk '{print $8 "%"}' '''
+# interval = 5
+
+# [[block]]
+# block = "nvidia_gpu"
+# format = "$icon$utilization$temperature$clocks"
+# interval = 5
+
+[[block]]
+block = "net"
+# FIXME: format = "$icon ^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K) "
+# format = "$icon{$signal_strength $ssid$frequency|Wired connection} $device"
+format = "$icon { $signal_strength |}$device ^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K)"
+format_alt = "$icon { $signal_strength $ssid$frequency | Wired connection }^icon_net_down $speed_down.eng(prefix:K) ^icon_net_up $speed_up.eng(prefix:K)"
+# inactive_format = ""
+# Default: 2s
+interval = 10 # 5
+
+# FIXME: i3 crash
+# https://github.com/greshake/i3status-rust/issues/2184
+
+# [[block]]
+# block = "battery"
+# format = " $percentage {$time_remaining.dur(hms:true, min_unit:m) |}"
+# full_format = "$icon $percentage F"
+# charging_format = "$icon $percentage ="
+# empty_format = "$icon $percentage E"
+# not_charging_format = "$icon $percentage _"
+# missing_format = ""
+# interval = 30
+# # device = "BAT0"
+# # driver = "sysfs"
+# # driver = "apc_ups"
+# driver = "upower"
+
+# TODO: graph
+# https://github.com/alcortesm/sysmon
+[[block]]
+block = "cpu"
+info_cpu = 20
+warning_cpu = 50
+critical_cpu = 90
+# format = "$icon $barchart $utilization"
+# format_alt = "$icon $frequency{ $boost|}"
+format = "{$boost |}$utilization $barchart"
+format_alt = "{$boost |}$frequency $barchart"
+icons_format = "{icon}"
+# [block.theme_overrides]
+# idle_bg = "x:background"
+# idle_fg = "x:foreground"
+[block.icons_overrides]
+# cpu = [
+#   "⣀", # fa-gauge
+#   "⣇", # ⣦ # "\uf624", # fa-gauge (2 times so that the gauge will go high at 66% which looks appropriate for the icon fa-gauge-high)
+#   "⣿", # fa-gauge-high
+# ]
+cpu_boost_on = ""  # "\uf205"
+cpu_boost_off = "" # "\uf204"
+
+[[block]]
+block = "disk_space"
+path = "/"
+info_type = "available"
+alert_unit = "GB"
+interval = 20
+warning = 20.0
+alert = 10.0
+# format = "$icon root: $available"
+format = "$icon $percentage.eng(w:2)"
+format_alt = "$icon $available"       # /$total
+# format_alt = "$icon $path $used+$free
+
+# Show the block only if less than 10GB is available
+# format = " $free.eng(range:..10e9) |"
+
+# [block.icons_overrides]
+# ""
+
+[[block]]
+block = "memory"
+format = "$icon $mem_total_used_percents.eng(w:2)"
+format_alt = "$icon_swap $swap_used_percents.eng(w:2)"
+# format = "$icon $mem_used.eng(prefix:Mi)/$mem_total.eng(prefix:Mi)($mem_used_percents.eng(w:2))"
+# format = "$icon $mem_used_percents.eng(w:1)"
+# format_alt = "$icon_swap $swap_free.eng(w:3,u:B,p:Mi)/$swap_total.eng(w:3,u:B,p:Mi)($swap_used_percents.eng(w:2))"
+[block.icons_overrides]
+memory_mem = ""
+
+[[block]]
+block = "sound"
+format = "$icon{ $volume|}"
+# format_alt = "$icon $output_name{ $volume|}"
+max_vol = 100
+show_volume_when_muted = true
+[block.icons_overrides]
+volume_muted = ""
+[[block.click]]
+button = "left"
+cmd = "pavucontrol"
+
+[[block]]
+block = "time"
+interval = 5
+format = "$timestamp.datetime(f:'%a %d/%m %R')"
+[[block.click]]
+button = "left"
+cmd = "rofi -show drun"
+[[block.click]]
+button = "right"
+cmd = "i3-sensible-terminal"
+
+[[block]]
+block = "custom"
+command = "echo \uf011"
+format = "$text "
+interval = "once"
+[[block.click]]
+button = "left"
+# System suspend, shutdown and reboot
+# cmd = "systemctl $(echo -e 'suspend\npoweroff\nreboot' | rofi -dmenu -theme-str 'element {children: [element-text];} element-text {padding: 10px 0 10px 10px;}')"
+# cmd = "rofi -show menu -modi 'menu:rofi-power-menu --no-symbols' -theme-str 'element {children: [element-text];} element-text {padding: 10px 0 10px 10px;}'"
+cmd = "rofi -show menu -modi 'menu:rofi-power-menu' -theme-str 'element {children: [element-text];} element-text {padding: 10px 0 10px 10px;} window {anchor: north east; location: north east; width: 240px; x-offset: -1px; y-offset: 35px;}'"

@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+# Usage:
+# lspan <(chezmoi apply --debug --dry-run 2>&1) | less
+# lspan <(chezmoi status --debug 2>&1) | head -n"${1:-10}" | cut -c1-${COLUMNS:-80}
+
+import sys
+from datetime import datetime
+
+# Check arguments
+if len(sys.argv) != 2 or sys.argv[1] in ("-h", "--help"):
+    print(f"Usage: {sys.argv[0] or "lspan"} <file>", file=sys.stderr)
+    sys.exit(1)
+
+file = sys.argv[1]
+
+# Try to open file
+try:
+    f = open(file)
+except Exception as e:
+    print(f"Error: cannot open '{file}': {e}", file=sys.stderr)
+    sys.exit(1)
+
+FALLBACK_FORMATS = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"]
+
+# Parse timestamps first
+entries = []
+for line in f:
+    line = line.strip()
+    ts_str = None
+
+    # Extract timestamp
+    if "time=" in line:
+        ts_str = line.split("time=")[1].split()[0]
+    elif line.split():
+        ts_str = line.split()[0]
+
+    if not ts_str:
+        continue
+
+    ts = None
+    # Try ISO format first
+    try:
+        ts = datetime.fromisoformat(ts_str)
+    except ValueError:
+        # Fallback formats
+        for fmt in FALLBACK_FORMATS:
+            try:
+                ts = datetime.strptime(ts_str, fmt)
+                break
+            except ValueError:
+                continue
+    if not ts:
+        try:
+            print(f"Failed to parse timestamp '{ts_str}' in line: {line}", file=sys.stderr)
+        except BrokenPipeError:
+            sys.exit(0)
+        continue
+
+    entries.append((ts, line))
+
+f.close()
+
+# Sort chronologically to ensure diffs are correct
+entries.sort(key=lambda x: x[0])
+
+# Compute diffs and elapsed
+lines = []
+prev = start = None
+for ts, line in entries:
+    if start is None:
+        start = ts
+    elapsed = (ts - start).total_seconds()
+    diff = (ts - prev).total_seconds() if prev else 0
+    diff = max(diff, 0)  # clamp negative diffs
+    prev = ts
+    lines.append((diff, elapsed, line))
+
+# Sort by largest diff
+lines.sort(key=lambda x: x[0], reverse=True)
+
+# Print results
+for diff, elapsed, line in lines:
+    try:
+        print(f"{diff:>8.3f} {elapsed:>8.3f} {line}")
+    except BrokenPipeError:
+        sys.exit(0)

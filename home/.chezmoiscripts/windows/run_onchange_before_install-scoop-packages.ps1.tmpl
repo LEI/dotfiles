@@ -1,0 +1,21 @@
+# Set-PSDebug -Trace 1
+
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+{{- if .upgrade }}
+
+echo "scoop update *"
+scoop update *
+{{- end }}
+
+{{- $scoopPackages := get .packages "scoop" | default dict }}
+
+{{- if empty $scoopPackages }}
+{{-   warnf "missing scoop packages" }}
+{{- end }}
+
+{{- $scoopPackagesList := $scoopPackages | keys | sortAlpha | join " " }}
+
+echo "scoop install {{ $scoopPackagesList }}"
+scoop install {{ $scoopPackagesList }}

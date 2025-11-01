@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v topgrade; then
+  echo >&2 'Already installed'
+  cmd topgrade --version
+  exit
+fi
+
+# {{- if eq .osIDLike "debian" }} Debian/Ubuntu
+echo >&2 "Installing topgrade"
+export DEBIAN_FRONTEND=noninteractive
+VERSION="$(get_release topgrade-rs/topgrade)"
+# TODO: ARCH="$(uname -m)" # aarch64, x86_64
+NAME="topgrade_${VERSION#v}-1_amd64"
+URL="https://github.com/topgrade-rs/topgrade/releases/download/$VERSION/$NAME.deb"
+cmd curl -LSfs "$URL" -o "$TMPDIR/$NAME.deb"
+cmd sudo -E apt-get install --quiet --yes "$TMPDIR/$NAME.deb"
+echo >&2 "Installed topgrade"
+# {{- end }}

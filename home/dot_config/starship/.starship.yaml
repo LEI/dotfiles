@@ -1,0 +1,44 @@
+---
+# https://starship.rs/config/
+# https://starship.rs/presets/plain-text
+
+# Get editor completions based on the config schema
+$schema: "https://starship.rs/config-schema.json"
+
+# Inserts a blank line between shell prompts
+add_newline: true
+
+gcloud:
+  disabled: true
+
+# {{- if ne .os "darwin" }}
+kubernetes:
+  disabled: false
+# {{- end }}
+
+git_branch:
+  # Hide branch symbol
+  format: "on [$branch(:$remote_branch)]($style) "
+
+mise:
+  disabled: false
+
+# package:
+#   disabled: true
+
+# git_status:
+#   ahead: ">"
+#   behind: "<"
+#   deleted: "x"
+#   diverged: "<>"
+#   renamed: "r"
+
+custom:
+  shpool:
+    command: 'echo "$SHPOOL_SESSION_NAME"'
+    description: "Current shpool sesion" # $SHPOOL_SESSION_DIR
+    when: 'test -n "$SHPOOL_SESSION_NAME"'
+    symbol: shpool
+    style: dimmed white # bold green
+    format: "[$symbol({$output} )]($style)"
+    os: linux

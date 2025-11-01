@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+if [ -n "${TMUX:-}" ]; then
+  # Send C-m twice to ensure '!!' is expanded
+  tmux send-keys -t:.! '!!' C-m C-m
+else
+  echo >&2 "Unknown environment"
+  exit 1
+fi
