@@ -1,0 +1,19 @@
+# https://github.com/sharkdp/bat#configuration-file
+
+
+# --theme=TwoDark
+# --theme=ansi
+{{- if eq .os "darwin" }}
+--theme=auto:system
+{{- end }}
+
+# Show line numbers, Git modifications and file header (but no grid)
+# FIXME: only when interactive
+# --decorations=auto
+# --style="numbers,changes,header"
+
+# Use italic text on the terminal (not supported on all terminals)
+--italic-text=always
+
+# Use C++ syntax for Arduino .ino files
+--map-syntax "*.ino:C++"
