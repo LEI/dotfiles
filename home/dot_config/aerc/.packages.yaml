@@ -1,0 +1,8 @@
+---
+packages:
+  aerc:
+    enabled: "{{ .features.mail }}"
+    # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  # pandoc:
+  w3m:
+    enabled: "{{ .features.mail }}"
