@@ -1,0 +1,93 @@
+---
+repos:
+  # https://github.com/gitleaks/gitleaks#pre-commit
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+        name: gitleaks # Detect hardcoded secrets
+        language: system
+        stages:
+          - pre-commit
+
+  # https://pre-commit.com/hooks.html
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # https://github.com/koalaman/shellcheck-precommit
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        args:
+          - --exclude=SC2148
+          - --severity=warning
+        entry: shellcheck
+        exclude: ^home/.*/(modify_.*\.sh|.*\.tmpl)$
+        language: system
+        stages:
+          - pre-commit
+
+  # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        args:
+          - --strict
+          - --config-file=home/dot_config/yamllint/config
+        # Use yamlfmt installed on the system instead of building with Go
+        language: system
+        stages:
+          - pre-commit
+
+  # https://docs.zizmor.sh/integrations/#pre-commit
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.15.2
+    hooks:
+      - id: zizmor
+        files: ^.github/workflows/.*\.ya?ml$
+
+  - repo: local
+    hooks:
+      # - id: chezmoi-config
+      #   name: chezmoi config
+      #   entry: chezmoi cat-config --dry-run --no-tty --refresh-externals=never
+      #   files: ^(home/.*|\.chezmoi.*)$
+      #   language: system
+      #   pass_filenames: false
+
+      # - id: chezmoi-init
+      #   name: chezmoi init
+      #   entry: chezmoi init --dry-run --no-tty --refresh-externals=never
+      #   files: ^(\.chezmoi.*|home/\.chezmoi\.ya?ml\.tmpl)$
+      #   language: system
+      #   pass_filenames: false
+
+      # - id: chezmoi-status
+      #   name: chezmoi status
+      #   entry: bash -c 'for f in "$@"; do chezmoi status --dry-run --no-tty --refresh-externals=never "$(chezmoi target-path "$f")"; done'
+      #   # entry: bash -c 'chezmoi status --dry-run --no-tty --refresh-externals=never $(chezmoi target-path "$@")'
+      #   # files: ^(home/.*|\.chezmoi.*)$
+      #   # language: system
+      #   # pass_filenames: false
+      #   files: ^home/.*$
+      #   exclude: "$(chezmoi unmanaged)"
+      #   language: system
+
+      - id: chezmoi # -template
+        name: chezmoi # template
+        # entry: |
+        #   sh -c 'for f in "$@"; do echo "$f"; done; cat "$@" | chezmoi execute-template --dry-run --no-tty --refresh-externals=never --with-stdin >/dev/null'
+        # entry: sh -c 'for f in "$@"; do echo >&2 "$f"; sh home/dot_local/bin/executable_chezmoi-check "$f" || exit 1; done'
+        entry: sh -c 'sh home/dot_local/bin/executable_chezmoi-check "$@" || exit 1'
+        files: ^home/.*\.tmpl$
+        # exclude: ^home/(\.chezmoi\.ya?ml\.tmpl|.*/modify_.*\.sh)$
+        exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
+        language: system
