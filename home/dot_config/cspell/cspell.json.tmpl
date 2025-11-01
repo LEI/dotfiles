@@ -1,0 +1,31 @@
+// cSpell Settings
+{
+  // Version of the setting file.  Always 0.2
+  "version": "0.2",
+
+  "import": ["@cspell/dict-fr-fr/cspell-ext.json"],
+
+  // language - current active spelling language
+  "language": "en, fr, fr_FR",
+  // Dictionaries will always be checked
+  "dictionaries": [
+    "coding",
+    {{- if eq .profile "work" }}
+    "company",
+    {{- end }}
+  ],
+  "dictionaryDefinitions": [
+    { "name": "coding", "path": "~/.config/cspell/dict/coding.txt" },
+    {{- if eq .profile "work" }}
+    { "name": "company", "path": "~/.config/cspell/dict/company.txt" }
+    // {
+    //   "name": "corp-terms",
+    //   "path": "https://shared-company-repository/cspell-terms.txt"
+    // },
+    {{- end }}
+  ],
+  // List of words to be always considered correct
+  "words": ["chezmoi"],
+  // List of words to be always considered incorrect
+  "flagWords": ["hte"]
+}
