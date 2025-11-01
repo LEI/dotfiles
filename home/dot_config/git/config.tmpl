@@ -1,0 +1,150 @@
+# https://github.com/twpayne/dotfiles/blob/master/home/dot_config/git/config.tmpl
+
+[alias]
+	a = add
+	b = branch
+	c = clone --recursive
+	ca = !git add -A && git commit -av
+	co = checkout
+	# cp = cherry-pick # Conflicts with git-cp
+	l = log --abbrev-commit --graph --max-count=20 --pretty=oneline
+	# https://robertandrewspencer.com/git_lg_with_links
+	lg = "log --color --graph --pretty=format:']8;;git://.#%h\\%Cred%h%Creset]8;;\\ -%C(yellow)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --abbrev-commit --max-count=20" # --all
+	p = !"git pull; git submodule foreach git pull origin master"
+	r = restore
+	ra = rebase --abort
+	rc = rebase --continue
+	ri = rebase --interactive
+	s = status --branch --short
+
+	log = log{{ if lookPath "difft" | isExecutable }} --ext-diff{{ end }}
+	show = show{{ if lookPath "difft" | isExecutable }} --ext-diff{{ end }}
+
+	branches = branch -a
+	remotes = remote -v
+	tags = tag -l
+
+	# assume = update-index --assume-unchanged
+	# unassume = update-index --no-assume-unchanged
+	# assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+
+	# Amend the currently staged files to the latest commit
+	amend = commit --amend --reuse-message=HEAD
+
+	# List contributors with number of commits
+	contributors = shortlog --summary --numbered
+
+	# Credit an author on the latest commit
+	credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
+
+	# Show the diff between the latest commit and the current state
+	# d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+	d = diff
+
+	# 'git di $number' shows the diff between the state '$number' revisions ago and the current state
+	di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+
+	# Find files
+	f = "!git ls-files | grep -i"
+
+	# Find branches containing commit
+	fb = "!f() { git branch -a --contains $1; }; f"
+
+	# Find tags containing commit
+	ft = "!f() { git describe --always --contains $1; }; f"
+
+	# Find commits by source code
+	fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+
+	# Find commits by commit message
+	fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+	# Interactive rebase with the given number of latest commits
+	reb = "!r() { git rebase -i HEAD~$1; }; r"
+
+	# Remove the old tag with this name and tag the latest commit with it.
+	retag = "!r() { git tag -d $1 && git push origin :refs/tags/$1 && git tag $1; }; r"
+
+	# Merge GitHub pull request on top of the current branch or,
+	# if a branch name is specified, on top of the specified branch
+	mpr = "!f() { \
+	  declare current-branch=\"$(git symbolic-ref --short HEAD)\"; \
+	  declare branch=\"${2:-$current-branch}\"; \
+	  if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
+	    git fetch origin refs/pull/$1/head:pr/$1 && \
+	    git checkout -B $branch && \
+	    git rebase $branch pr/$1 && \
+	    git checkout -B $branch && \
+	    git merge pr/$1 && \
+	    git branch -D pr/$1 && \
+	    git commit --amend -m \"$(git log -1 --pretty=%B)\n\nCloses #$1.\"; \
+	  fi \
+	}; f"
+
+	hash = rev-parse --short --quiet HEAD
+	current-branch = symbolic-ref --short HEAD
+	current-tag = tag --points-at HEAD
+	zip = "!f() { \
+	  declare tag=\"$(git current-tag)\"; \
+	  declare name=\"$(git current-branch)-${tag:-$(git hash)}\"; \
+	  git archive --format=zip -o $name.zip HEAD; \
+	}; f"
+
+[core]
+	excludesFile = ~/.config/git/ignore
+	attributesFile = ~/.config/git/attributes
+
+{{- if eq .os "darwin" }}
+
+[credential]
+	helper = osxkeychain
+{{- end }}
+
+[pull]
+	rebase = true
+
+[include]
+	path = "~/.gitconfig.local"
+
+{{- if lookPath "difft" | isExecutable }}
+
+[diff]
+	external = difft --override=*.blade.php:html
+{{- else if lookPath "delta" | isExecutable }}
+
+[include]
+	path = delta.ini
+{{- end }}
+
+# [url "git@github.com:"]
+# 	insteadOf = "gh:"
+# 	pushInsteadOf = "github:"
+# 	pushInsteadOf = "git://github.com/"
+
+# [url "git://github.com/"]
+# 	insteadOf = "github:"
+
+# [url "git@gist.github.com:"]
+# 	insteadOf = "gst:"
+# 	pushInsteadOf = "gist:"
+# 	pushInsteadOf = "git://gist.github.com/"
+
+# [url "git://gist.github.com/"]
+# 	insteadOf = "gist:"
+
+# TODO: https://github.com/nathabonfim59/gitid
+{{- range $name, $account := get . "git" | default dict }}
+
+[includeIf "gitdir:~/src/{{ $account.host }}/"]
+	path = {{ $name }}.ini
+[includeIf "hasconfig:remote.*.url:git@{{ $account.host }}:*/**"]
+	path = {{ $name }}.ini
+[includeIf "hasconfig:remote.*.url:https://{{ $account.host }}/*/**"]
+	path = {{ $name }}.ini
+{{- end }}
+
+{{- if lookPath "ghq" | isExecutable }}
+
+[ghq]
+	root = ~/src
+{{- end }}

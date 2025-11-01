@@ -1,0 +1,3 @@
+{{- if dig "git" "personal" nil . -}}
+{{- includeTemplate "gitconfig" (mustMerge .git.personal (dict "name" .name)) -}}
+{{- end -}}

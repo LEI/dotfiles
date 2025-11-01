@@ -1,0 +1,3 @@
+{{- if dig "git" "github" nil . -}}
+{{- includeTemplate "gitconfig" (mustMerge .git.gitlab (dict "name" .name)) -}}
+{{- end -}}
