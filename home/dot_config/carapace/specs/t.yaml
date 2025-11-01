@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: t
+description: tmux
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([tmux])"]
+commands:
+  - name: current-config
+  - name: default-config

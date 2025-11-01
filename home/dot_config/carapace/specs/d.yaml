@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: d
+description: docker
+run: '$(if [ $# -eq 0 ]; then docker ps --all; else docker "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([docker])"]
+commands:
+  - name: compose
+    # description: Docker Compose
+    aliases: [c]
+    run: "[docker, compose]"
