@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#MISE description="mise coverage"
+
+# https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
+
+set -Eeuo pipefail
+
+COVERAGE_OUTPUT="${COVERAGE_OUTPUT:-./coverage}"
+TMPDIR="${TMPDIR:-${TMP:-/tmp}}"
+
+# generate() {
+#   for path in $(chezmoi managed | grep '^.chezmoiscripts\|.local/bin'); do
+#     if [ -d "$HOME/$path" ]; then
+#       continue
+#     fi
+#     local tmp_path="$TEST_TMPDIR/$path"
+#     echo >&2 "Writing file: $tmp_path"
+#     local base_dir
+#     base_dir="$(dirname "$tmp_path")"
+#     if ! [ -d "$base_dir" ]; then
+#       mkdir -p "$base_dir"
+#     fi
+#     chezmoi cat "$HOME/$path" >"$tmp_path"
+#   done
+# }
+
+coverage() {
+  # local bash_parser=/bin/bash
+  # if [ -x /usr/local/bin/bash ]; then
+  #   bash_parser=/usr/local/bin/bash
+  # fi
+
+  # --bash-handle-sh-invocation \
+  # --bash-method=DEBUG \
+  # --bash-method=PS4 \
+  # --bash-tracefd-cloexec \
+  # --configure=bash-use-basic-parser=1 \
+  # --include-pattern="$TMPDIR/bats-run-*/out"
+
+  # local dirs
+  # dirs="$(find home -mindepth 2 \( -name '*.sh' -or -name '*.sh.tmpl' \) -exec dirname {} \; | sort | uniq)"
+  # ${dirs//\n\,/}
+
+  # local dir="$TEST_TMPDIR,script"
+
+  # FIXME: duplicate $TEST_TMPDIR/.local/bin and home/dot_local/bin
+  # local dir="$TEST_TMPDIR,home/dot_local/bin,script"
+
+  # if [ -t 1 ]; then
+  #   kcov_args+=("--dump-summary")
+  # fi
+
+  local dir="$TEST_TMPDIR/.chezmoiscripts,home/dot_local/bin,script"
+
+  kcov --clean \
+    --bash-dont-parse-binary-dir \
+    --bash-parser="$(which bash)" \
+    --bash-parse-files-in-dir="$dir" \
+    --include-path="$dir" \
+    --exclude-pattern=coverage \
+    --path-strip-level=1 \
+    --strip-path="$PWD" \
+    "$COVERAGE_OUTPUT" \
+    ./script/test "$@"
+  # --exclude-path="$TEST_TMPDIR/.local/bin"
+  # --replace-src-path=P1:P2
+}
+
+main() {
+  # echo >&2 kcov --version
+  # kcov --version >&2
+
+  # export SUDO_ASKPASS=false
+  export TEST_JOBS=1
+
+  # Create a temporary directory for rendered chezmoi templates
+  # TEST_TMPDIR="$(mktemp -dt bats-XXXXXX)"
+
+  TEST_TMPDIR="$PWD/tmp"
+  mkdir -p "$TEST_TMPDIR"
+
+  export TEST_TMPDIR
+
+  trap 'rm -rf "$TEST_TMPDIR"' ERR EXIT
+
+  # FIXME: overwrite default bats temporary directory
+  # export BATS_TMPDIR="$TEST_TMPDIR"
+  # export BATS_RUN_TMPDIR="$TEST_TMPDIR"
+  # then use --no-tempdir-cleanup
+
+  # Force cleanup previous coverage to avoid merge errors, e.g.
+  # "kcov: error: File /tmp/*-stub-run exists, but can't be read???"
+  rm -rf ./coverage # "$COVERAGE_OUTPUT"
+
+  mkdir -p "$TEST_TMPDIR/.chezmoiscripts/linux"
+  # mkdir -p "$TEST_TMPDIR/.chezmoiscripts/windows"
+  mkdir -p "$TEST_TMPDIR/.local/bin"
+
+  coverage "$@"
+
+  # ls -la "$TEST_TMPDIR/"{,.*,bin/*}
+}
+
+main "$@"
