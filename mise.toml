@@ -1,0 +1,14 @@
+redactions = [
+  # "API_KEY",
+  "*_TOKEN",
+  # "PASSWORD",
+]
+
+[task_config]
+includes = ["script"]
+
+[tasks.ci]
+run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
+
+[tasks.hyperfine]
+run = "hyperfine 'mise run test' --max-runs=5 --show-output"

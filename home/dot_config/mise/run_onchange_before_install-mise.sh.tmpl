@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# https://mise.jdx.dev/installing-mise.html
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v mise; then
+  echo >&2 "Already installed: {{ lookPath "mise" }}"
+  cmd mise --version | head -n1
+  exit
+fi
+
+BIN_DIR="$HOME/.local/bin"
+MISE_BIN="$BIN_DIR/mise"
+
+if [ ! -d "$BIN_DIR" ]; then
+  # echo >&2 "Creating directory: $BIN_DIR"
+  cmd mkdir -p "$BIN_DIR"
+fi
+
+echo >&2 "Installing mise"
+
+{{- $os := .chezmoi.os }}
+{{- if eq .os "android" }}
+{{-   $os = "linux" }}
+{{- else if eq .os "darwin" }}
+{{-   $os = "macos" }}
+{{- end }}
+
+{{- $arch := .chezmoi.arch }}
+{{- if eq .chezmoi.arch "amd64" }}
+{{-   $arch = "x64" }}
+{{- else if eq .chezmoi.arch "arm" }}
+{{-   $arch = "arm64" }}
+{{- /* else armv{6,7} */ -}}
+{{- end }}
+
+os={{ $os | quote }}
+arch={{ $arch | quote }}
+if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+  arch="$arch-musl"
+fi
+
+cmd curl -LSfs "https://mise.jdx.dev/mise-latest-$os-$arch" -o "$MISE_BIN"
+cmd chmod +x "$MISE_BIN"
+
+{{- if eq .osID "android" }}
+
+# Also see home/dot_config/sh/plugins/mise.sh.tmpl
+# https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
+cmd mkdir -p "$PREFIX/etc/tls/certs"
+cmd ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
+cmd ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
+{{- end }}
+
+echo >&2 "Installed mise"
