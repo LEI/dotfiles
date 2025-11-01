@@ -1,0 +1,7 @@
+---
+packages:
+  eza: # chaqchase/lla
+    enabled: "{{ .features.eza }}"
+    nameOverwrite:
+      windows: eza-community.eza
+    type: '{{ or (eq .osID "debian" "fedora") (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)) | ternary "mise" nil }}'
