@@ -1,0 +1,8 @@
+---
+packages:
+  void:
+    enabled: "{{ and .features.void (not .headless) }}"
+    nameOverwrite:
+      arch: void-bin
+      windows: GlassDevtools.Void
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
