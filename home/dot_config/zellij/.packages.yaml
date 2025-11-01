@@ -1,0 +1,4 @@
+---
+packages:
+  zellij:
+    enabled: '{{ and .features.zellij (not (eq .osIDLike "debian" "fedora")) }}'

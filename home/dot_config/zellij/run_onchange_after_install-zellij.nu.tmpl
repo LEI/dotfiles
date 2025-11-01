@@ -1,0 +1,38 @@
+#!{{ if eq .osID "android" }}/data/data/com.termux/files{{ end }}/usr/bin/env nu
+
+use std/log
+
+if (which zellij) != [] { # and (^zellij --version) != ""
+  log info "Already installed: {{ lookPath "zellij" }}"
+  zellij --version
+  exit
+}
+
+log info "Installing zellij"
+
+def get_release [repo: string] {
+  let alias = "latest"
+  let url = $"https://github.com/($repo)/releases/($alias)"
+  let redirect_url = ^curl -s -w '%{redirect_url}' $url
+  let tag = $redirect_url | split row "/" | last
+  $tag
+}
+
+let arch = ^uname -m
+let kernel_name = ^uname -s | str downcase
+let os = match ($kernel_name) {
+  linux => "unknown-linux",
+  _ => $kernel_name,
+}
+let tag = get_release "zellij-org/zellij"
+let name = $"zellij-($arch)-($os)-musl"
+let out = $"($env.TMPDIR)/($name).tar.gz"
+let archive = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).tar.gz"
+# let checksum = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).sha256sum"
+log info $"Downloading ($archive)"
+curl -LSfs $archive -o $out
+tar -xzf $out -C $env.TMPDIR
+chmod +x $"($env.TMPDIR)/zellij"
+mv $"($env.TMPDIR)/zellij" $"($env.HOME)/.local/bin/zellij"
+
+log info "Installed zellij"
