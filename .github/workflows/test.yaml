@@ -1,0 +1,80 @@
+---
+# https://github.com/bats-core/bats-action
+# https://github.com/SimonKagstrom/kcov/blob/master/doc/github.md
+name: test
+
+on: # yamllint disable-line rule:truthy
+  # push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    # name: Install Bats and bats libs
+    container:
+      # image: alpine
+      # image: bats/bats:1.12.0
+      image: kcov/kcov:latest-alpine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # - name: Install dependencies
+      #   run: apk add --no-cache bash chezmoi curl git sudo yq
+
+      - name: Run bootstrap
+        env:
+          CHEZMOI_PROFILE: minimal
+          # CODESPACES: true
+        run: |
+          echo "$HOME/.local/bin" >>"$GITHUB_PATH"
+          ./script/bootstrap # --no-tty --verbose
+
+      - name: Setup Bats # and bats libs
+        id: setup-bats
+        # github.com/bats-core/bats-action/releases
+        uses: bats-core/bats-action@42fcc8700f773c075a16a90eb11674c0318ad507 # 3.0.1
+        # with:
+        #   support-path: "${{ github.workspace }}/test_helper/bats-support"
+        #   assert-path: "${{ github.workspace }}/test_helper/bats-assert" # FIXME: stderr
+        #   file-path: "${{ github.workspace }}/test_helper/bats-file"
+
+      - name: Run tests with coverage
+        shell: bash
+        env:
+          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+          TERM: xterm
+        run: ./script/coverage
+
+      # - name: Run a bash script with kcov coverage
+      #   # Debian based, uses the Docker image kcov/kcov
+
+      # - name: Example with a bash script (running on Docker kcov/kcov)
+      #   uses: sudo-bot/action-kcov@latest
+      #   with:
+      #     cli-args: "--version"
+      #
+      # - name: Run a bash script with kcov coverage
+      #   # Debian based, uses the Docker image kcov/kcov
+      #   uses: sudo-bot/action-kcov@latest
+      #   with:
+      #     cli-args: "--dump-summary ./coverage ./bash-script.sh"
+      #
+      # - name: Run shunit2 tests with kcov coverage
+      #   # Alpine based
+      #   uses: sudo-bot/action-shunit2@latest
+      #   with:
+      #     cli: "kcov --dump-summary ./coverage ./tests.sh"
+      #
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     # Must be set in the repo or org settings as a secret
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     directory: ./coverage/
+      #     fail_ci_if_error: true
