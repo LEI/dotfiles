@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# Check the configuration file for validity
+# config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
+cmd i3 -C -c ~/.config/i3/config
+
+{{- if lookPath "thunar" | isExecutable }}
+explorer=thunar.desktop
+if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
+  cmd xdg-mime default "$explorer" inode/directory
+fi
+{{- end }}
+
+{{- if .features.i3 }}
+
+{{- range $key, $value := .i3.environment }}
+# if ! grep -q '^{{ $key }}=' /etc/environment; then
+#   echo '{{ $key }}={{ $value | quote }}' | sudo tee --append /etc/environment
+# fi
+{{- end }}
+{{- end }}
+
+if [ -f ~/.config/qt5ct/qt5ct.conf ]; then
+  sed \
+    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }} Mono,{{ .i3.fontSize }},/' \
+    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }},{{ .i3.fontSize }},/' \
+    -i ~/.config/qt5ct/qt5ct.conf
+  sed \
+    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }} Mono,{{ .i3.fontSize }},/' \
+    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }},{{ .i3.fontSize }},/' \
+    -i ~/.config/qt6ct/qt6ct.conf
+fi
