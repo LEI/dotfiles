@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+# if [ $# -ne 2 ] ; then
+#   echo "usage: shpool-ssh <remote-machine> <session-name>" >&2
+#   return 1
+# fi
+# ssh -t "-oRemoteCommand=shpool attach -f $2" "$1"
+
+bind="ctrl-x:execute(shpool detach '{}' && echo >&2 'Detached session: {}')+refresh-preview,ctrl-q:execute(shpool kill '{}' && echo >&2 'Killed session: {}')+refresh-cmd"
+cmd="shpool list | tail -n+2 | tr '\t' ' ' | cut -d' ' -f1"
+preview="shpool list | tr '\t' ' ' | grep '^{} '"
+name="$(sk --bind="$bind" --cmd="$cmd" --preview="$preview" --preview-window=down:2)"
+
+if [ -z "$name" ]; then
+  exit 1
+fi
+
+# FIXME: $SHELL -c 'cd $PWD; $SHELL'
+shpool attach --cmd="$SHELL" "$name" "$@"
