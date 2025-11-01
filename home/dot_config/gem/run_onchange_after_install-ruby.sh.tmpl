@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- /* Upgrade unless RubyGems is managed by APT + FIXME(arch): EACCES */ -}}
+{{- if and .upgrade (ne .osIDLike "debian") }}
+
+# cmd sudo gem update --system
+{{- end }}
+
+{{ $packages := list -}}
+{{- $rubyGems := includeTemplate "dot_config/mise/default-gems.tmpl" . | splitList "\n" -}}
+{{- range $name := $rubyGems -}}
+{{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
+{{-   if empty $name -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $packages = append $packages $name -}}
+{{- end -}}
+packages="{{ $packages | sortAlpha | join " " }}"
+
+if [ -n "$packages" ]; then
+  cmd gem install --quiet --user $packages
+fi
