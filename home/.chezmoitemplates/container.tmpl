@@ -1,0 +1,24 @@
+{{- /* https://github.com/starship/starship/blob/master/src/modules/container */ -}}
+{{- $container := "" -}}
+{{- if and (stat "/proc/vz") (not (stat "/proc/bc")) -}}
+{{-   $container = "OpenVZ" -}}
+{{- else if stat "/run/host/container-manager" -}}
+{{-   $container = "OCI" -}}
+{{- else if stat "/dev/incus/sock" -}}
+{{-   $container = "Incus" -}}
+{{- else if stat "/run/.containerenv" -}}
+{{-   $data := include "/run/.containerenv" | trim -}}
+{{-   if $data -}}
+{{-     warnf "container env: %s" $data -}}
+{{-   end -}}
+{{-   $container = "Podman" -}}{{- /* or others */ -}}
+{{- else if stat "/run/systemd/container" -}}
+{{-   $data := include "/run/systemd/container" | trim -}}
+{{-   if $data -}}
+{{-     warnf "container systemd: %s" $data -}}
+{{-   end -}}
+{{-   $container = printf "Container" -}}{{- /* docker/wsl/systemd */ -}}
+{{- else if stat "/.dockerenv" -}}
+{{-   $container = "Docker" -}}
+{{- end -}}
+{{- $container -}}

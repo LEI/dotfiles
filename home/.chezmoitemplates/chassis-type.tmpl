@@ -1,0 +1,14 @@
+{{- $chassisType := "desktop" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if contains "MacBook" (output "sysctl" "-n" "hw.model") }}
+{{-     $chassisType = "laptop" }}
+{{-   else }}
+{{-     $chassisType = "desktop" }}
+{{-   end }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "hostnamectl" | isExecutable) ($chassisType = output "sh" "-c" "hostnamectl chassis 2>/dev/null || echo" | trim) }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   $chassisType = printf "unknown-%s" (get .chezmoi.osRelease "id" | default .chezmoi.os) }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $chassisType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim }}
+{{- end }}
+{{- $chassisType -}}

@@ -1,0 +1,151 @@
+{{- $ignore := list }}
+{{- range $line := includeTemplate ".chezmoiignore" . | splitList "\n" }}
+{{-   if or (eq $line "") (eq ($line | trunc 1) "#") }}
+{{-     continue }}
+{{-   end }}
+{{-   $ignore = append $ignore $line }}
+{{- end }}
+
+{{- $packageFiles := list }}
+{{- range $path := glob (joinPath .chezmoi.sourceDir "**" ".packages.yaml") }}
+{{-   $ignored := false }}
+{{-   range $excluded := $ignore }}
+{{-     $regex := $excluded
+          | replaceAllRegex " #.*" ""
+          | replaceAllRegex "\\." "\\."
+          | replaceAllRegex "\\*\\*" "*"
+          | replaceAllRegex "\\*" ".*" }}
+{{-     $relative := trimPrefix (printf "%s/" $.chezmoi.sourceDir) $path
+          | replaceAllRegex "dot_" "."
+          | replaceAllRegex "\\w+_" "" }}
+{{- /*     warnf "regex: %s" $regex -}}
+{{-     warnf "file: %s" $relative */ -}}
+{{-     if mustRegexMatch $regex $relative }}
+{{-       if $.chezmoi.config.verbose }}
+{{-         warnf "ignored: %s" $relative -}}
+{{-       end }}
+{{-       $ignored = true }}
+{{-       continue }}
+{{-     end }}
+{{-   end }}
+{{-   if $ignored }}
+{{-     continue }}
+{{-   end }}
+{{-   $packageFiles = append $packageFiles $path }}
+{{- end }}
+{{- $_ := set . "packageFiles" $packageFiles }}
+
+{{- if ne .os "darwin" }}
+{{- $packages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" .packageManager)) | fromJson }}
+{{ .packageManager }}: {{ $packages | toJson }}
+{{- end }}
+
+{{- if eq .osIDLike "arch" }}
+{{- $aurPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "aur")) | fromJson }}
+aur: {{ $aurPackages | toJson }}
+{{- end }}
+
+{{- if .features.brew }}
+{{- $allBrewPackages := dict }}
+{{- $brewPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "brew")) | fromJson }}
+{{- $allBrewPackages = merge $allBrewPackages $brewPackages }}
+brew: {{ $brewPackages | toJson }}
+{{- $caskPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "cask")) | fromJson }}
+{{- $allBrewPackages = merge $allBrewPackages $caskPackages }}
+cask: {{ $caskPackages | toJson }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $masPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "mas")) | fromJson }}
+mas: {{ $masPackages | toJson }}
+{{- end }}
+{{- $vscodePackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson }}
+vscode: {{ $vscodePackages | toJson }}
+
+{{- $taps := dict }}
+{{- range $name, $pkg := $allBrewPackages }}
+{{-   if contains "/" $name }}
+{{-     $_ := $taps | setValueAtPath ($name | replaceAllRegex "/[\\w@-]+$" "") dict }}
+{{-   end }}
+{{- end }}
+
+{{- $brewfile := joinPath (env "XDG_CONFIG_HOME" | default (joinPath  .chezmoi.homeDir ".config")) "homebrew/Brewfile" -}}
+{{- $lines := list }}
+{{- if stat $brewfile -}}
+{{-   $lines = include $brewfile | splitList "\n" }}
+{{- end -}}
+{{- range without $lines "" }}
+{{-   if eq (substr 0 1 .) "#" -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $type := index (. | splitList " ") 0 }}
+{{-   $pattern := printf "^%s \"(.*)\",? ?(.*)$" $type }}
+{{-   $name := . | replaceAllRegex $pattern "${1}" }}
+{{-   $options := . | replaceAllRegex $pattern "${2}" }}
+{{-   if eq $type "tap" }}
+{{-     if get $taps $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $taps $name (dict "options" $options) }}
+{{-   else if eq $type "brew" }}
+{{-     if get $.packages.brew $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.brew $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $.packages.brew $name (dict "options" $options) }}
+{{-   else if eq $type "cask" }}
+{{-     if get $.packages.cask $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.cask $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $.packages.cask $name (dict "options" $options) }}
+{{-   else if eq $type "mas" }}
+{{-     if get $.packages.mas $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.mas $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $.packages.mas $name (dict "options" $options) }}
+{{-   else if eq $type "vscode" }}
+{{-     if get $.packages.vscode $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.vscode $name) "options") $options -}}
+{{-     end -}}
+{{-     $_ := set $.packages.vscode $name (dict "options" $options) }}
+{{-   end }}
+{{- end }}
+tap: {{ $taps | toJson }}
+
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+{{- $scoopPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "scoop")) | fromJson }}
+scoop: {{ $scoopPackages | toJson }}
+{{- end }}
+
+{{- if .features.mise }}
+{{- $misePackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "mise")) | fromJson }}
+mise: {{ $misePackages | toJson }}
+{{- end }}
+
+{{- if .features.go }}
+{{- $goPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "go")) | fromJson }}
+go: {{ $goPackages | toJson }}
+{{- end }}
+
+{{- if .features.node }}
+{{- $nodePackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "npm")) | fromJson }}
+npm: {{ $nodePackages | toJson }}
+{{- end }}
+
+{{- if .features.python }}
+{{- $pipPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "pip")) | fromJson }}
+pip: {{ $pipPackages | toJson }}
+{{- $pipxPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "pipx")) | fromJson }}
+pipx: {{ $pipxPackages | toJson }}
+{{- $uvPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "uv")) | fromJson }}
+uv: {{ $uvPackages | toJson }}
+{{- end }}
+
+{{- if .features.ruby }}
+{{- $rubyGems := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "gem")) | fromJson }}
+gem: {{ $rubyGems | toJson }}
+{{- end }}
+
+{{- if .features.rust }}
+{{- $cargoPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "cargo")) | fromJson }}
+cargo: {{ $cargoPackages | toJson }}
+{{- end }}

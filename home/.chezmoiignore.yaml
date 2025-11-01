@@ -1,0 +1,172 @@
+---
+os:
+  darwin:
+    - .bash_profile
+    - .chezmoiscripts/darwin/**
+    - .config/hammerspoon/
+    - .config/karabiner/
+    - .macos
+    - Library/
+  linux:
+    - .hushlogin
+  windows:
+    - "*.ps1"
+    - .chezmoiscripts/windows/**
+    - .config/powershell/ # not .wsl
+    - .config/winget/
+    - Documents/
+    # - Documents/PowerShell/
+    # - Documents/WindowsPowerShell/
+features:
+  ai:
+    # - .claude/
+    - .config/claude/
+    - .config/mcphub/
+  atuin:
+    - .config/atuin/
+  bash:
+    # - .bash_aliases
+    # - .bash_profile
+    - .bashrc
+    - .config/bash/
+    - .config/blesh/
+  bat:
+    - .config/bat/
+  zsh:
+    - .config/zsh/
+    # - .zprofile
+    - .zshrc
+  carapace:
+    - .config/carapace/
+  brew:
+    - .brew-aliases/
+    - .chezmoiscripts/*install-brew-packages.sh
+    - .config/homebrew/
+  docker:
+    - .config/carapace/specs/d.yaml
+    - .config/docker/
+    - .config/sh/plugins/docker.sh
+  eza:
+    - .config/eza/
+  podman:
+    - .config/carapace/specs/p.yaml
+  ghostty:
+    - .config/ghostty/
+  git:
+    - .config/carapace/specs/g.yaml
+    - .config/git/
+    - .config/lazygit/
+    # FIXME: mod.nu.tmpl loops on source directory
+    # .config/nushell/modules/git.nu
+    # NOTE: feature should be named "git-config"
+    # .config/sh/plugins/git.sh
+    - .config/carapace/specs/g.yaml
+  go:
+    - .config/mise/default-go-packages
+  goss:
+    - .config/goss/
+  gpg:
+    - .gnupg/
+  helix:
+    - .config/helix/
+  i3:
+    - .config/Kvantum/
+    - .config/X11/
+    # - .config/autostart/
+    - .config/environment.d/
+    - .config/gtk-*/
+    - .config/i3*/
+    - .config/picom/
+    - .config/polybar/
+    - .config/qt*ct/
+    - .config/rofi/
+    - .config/ulauncher/
+    - .config/xdg-desktop-portal
+    # - .local/bin/i3-*
+    - .local/share/applications/
+    - .xinitrc
+    - .xprofile
+  kube:
+    - .config/carapace/specs/k.yaml
+    - .config/k9s/
+    - .config/krew/
+    - .config/kube/
+    - .config/sh/plugins/kubectl.sh
+    - .local/bin/k
+  lla:
+    - .config/lla/
+  mail:
+    - .config/aerc/
+    - .config/isync/
+    - .config/meli/
+    - .config/notmuch/
+    - .config/systemd/ # user/mbsync-run.*
+    - .local/share/applications/aerc.*
+    - .local/share/applications/meli.*
+  mise:
+    # - .chezmoiscripts/{*,*/*}mise-install.sh
+    - .chezmoiscripts/*install-tools.sh
+    - .chezmoiscripts/*mise-install.sh
+    - .config/mise/
+    - .config/sh/plugins/mise.sh
+  neovim:
+    - .chezmoiscripts/*install-neovim.sh
+    - .config/carapace/specs/n.yaml
+    - .config/cspell/
+    - .config/neovide/
+    - .config/nvim/
+    - .local/bin/nvim-*
+    - .local/share/nvim
+  node:
+    - .config/mise/default-npm-packages
+    - .config/npm/
+  nushell:
+    # - .config/*/*.nu
+    - .config/nushell/
+    - "*.nu"
+  # php: []
+  python:
+    - .chezmoiscripts/*install-python.sh
+    - .config/mise/default-python-packages
+  ruby:
+    - .chezmoiscripts/*install-ruby.sh
+    - .config/gem/
+    - .config/mise/default-gems
+  rust:
+    - .chezmoiscripts/*install-rust.sh
+  sheldon:
+    - .config/sheldon/
+  shpool:
+    - .config/carapace/specs/s.yaml
+    - .config/shpool/
+    - .local/bin/shpool-*
+    - .ssh/config.s/shpool.conf
+  sql:
+    - .config/psql/
+  ssh:
+    - .ssh/
+  ripgrep:
+    - .config/ripgrep/
+  tmux:
+    - .config/carapace/specs/t.yaml
+    - .config/tmux/
+    - .local/bin/t
+  topgrade:
+    # - .config/topgrade.d/
+    - .config/topgrade/
+  vim:
+    - .config/carapace/specs/v.yaml
+    - .config/vim/
+    # - .vim/
+    - .vimrc.local
+  void:
+    - .config/Void/
+    - .void-editor/
+  vscode:
+    - .config/Code/
+  # - .config/Code - OSS/
+  # - .vscode-oss/
+  vscodium:
+    - .config/VSCodium/
+  zellij:
+    - .config/zellij/

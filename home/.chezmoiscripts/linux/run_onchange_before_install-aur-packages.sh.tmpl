@@ -1,0 +1,66 @@
+{{- if eq .osIDLike "arch" -}}
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  TMPDIR="${TMPDIR:-/tmp}"
+  if [ ! -d $TMPDIR/yay-bin ]; then
+    cmd sudo -E --user="$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
+  fi
+  cmd cd $TMPDIR/yay-bin
+  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
+  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+  # fi
+  cmd sudo -E --user="$USER" makepkg --install --noconfirm --syncdeps
+fi
+
+{{- if eq (env "CACHE_BUST") "true" }}
+# aur hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "aur" | sha256sum }}
+{{- end }}
+echo >&2 "Installing AUR packages"
+
+{{- $aurPackages := get .packages "aur" | default dict }}
+
+{{- if empty $aurPackages }}
+{{-   warnf "missing aur packages" }}
+{{- end }}
+
+aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
+
+{{- $before := includeTemplate "pluck.tmpl" (dict
+  "key" "before_script"
+  "values" .packages.aur
+) | trim }}
+{{- if $before }}
+
+# Before script:
+{{ $before }}
+{{- end }}
+
+if command -v yay >/dev/null; then
+  # cmd sudo chown -R "$USER:$USER" /tmp/yay
+  cmd sudo -E --user="$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
+  cmd sudo -E --user="$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+elif command -v pamac >/dev/null; then
+  cmd sudo -E --user="$USER" pamac install --no-confirm --quiet $aur_packages
+else
+  echo >&2 "AUR package manager not found"
+  exit 1
+fi
+
+{{- $after := includeTemplate "pluck.tmpl" (dict
+  "key" "after_script"
+  "values" .packages.aur
+) | trim }}
+{{- if $after }}
+
+# After script:
+{{ $after }}
+{{- end }}
+
+echo >&2 "Installed AUR packages"
+{{- end -}}

@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# NOTE: after install-packages.sh (system)
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# NOTE: not supported by pipx
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+
+pip_packages={{ .packages.pip | keys | sortAlpha | join " " | quote }}
+if [ -n "$pip_packages" ]; then
+  python=python
+  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
+    python=python3
+  fi
+  run $python -m pip install --user --quiet "$@" $pip_packages
+fi
+
+pipx_packages={{ .packages.pipx | keys | sortAlpha | join " " | quote }}
+if [ -n "$pipx_packages" ] && command -v pipx >/dev/null; then
+  dry_run pipx install "$@" $pipx_packages
+fi
+
+{{- $uvPackages := list }}
+{{- $pythonTools := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
+{{- range $name := $pythonTools -}}
+{{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
+{{-   if eq $name "" -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $uvPackages = append $uvPackages $name -}}
+{{- end }}
+
+{{- if eq (env "CACHE_BUST") "true" }}
+# uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
+{{- end }}
+uv_packages={{ $uvPackages | sortAlpha | join " " | quote }}
+# run uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} "$@" $uv_packages
+if [ -n "$uv_packages" ]; then
+  for name in $uv_packages; do
+    cmd="${name%%[*}"
+    cmd="${cmd%-cli}"
+    if command -v $cmd >/dev/null; then
+      {{- if .upgrade }}
+      run uv tool install --quiet --upgrade "$@" $name
+      {{- else }}
+      echo >&2 "Already installed: $cmd"
+      {{- end }}
+      continue
+    fi
+    {{- if .upgrade }}
+    run uv tool install --quiet --upgrade "$@" $name
+    {{- else }}
+    run uv tool install --quiet "$@" $name
+    {{- end }}
+  done
+fi

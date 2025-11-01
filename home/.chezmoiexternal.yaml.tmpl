@@ -1,0 +1,26 @@
+---
+# https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
+
+{{- if .codespaces }}
+# TODO: vscode extension install
+# .vscode-remote/User/globalStorage/zokugun.sync-settings/repository:
+#   type: git-repo
+#   url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
+#   refreshPeriod: 168h
+{{- end }}
+
+{{- if eq .os "darwin" }}
+.config/hammerspoon:
+  type: git-repo
+  url: {{ .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
+  refreshPeriod: 168h
+{{- end }}
+
+{{- if eq .os "linux" }}
+# .local/bin/uv:
+#   type: "archive-file"
+#   url: # gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-unknown-linux-gnu.tar.gz" | quote
+#   refreshPeriod: "72h"
+#   executable: true
+#   path: "uv-x86_64-unknown-linux-gnu/uv"
+{{- end }}

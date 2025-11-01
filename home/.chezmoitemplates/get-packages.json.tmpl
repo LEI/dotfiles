@@ -1,0 +1,66 @@
+{{- /* Include global packages */ -}}
+{{- $global := includeTemplate "packages.yaml.tmpl" . | fromYaml -}}
+{{- $packages := $global.packages }}
+
+{{- /* Parse all ".packages.yaml" */ -}}
+{{- $defaultType := get . "defaultType" | default "" }}
+{{- $packageFiles := get . "packageFiles" | default list }}
+{{- $packageType := get . "packageType" | default "" }}
+
+{{- if empty $defaultType }}
+{{-   warnf "missing defaultType" }}
+{{- end }}
+{{- if empty $packageFiles }}
+{{-   warnf "missing packageFiles" }}
+{{- end }}
+{{- if empty $packageType }}
+{{-   warnf "missing packageType" }}
+{{- end }}
+
+{{- range $path := $packageFiles }}
+{{-   $fileData := includeTemplate $path $ | fromYaml }}
+{{-   $filePackages := get $fileData "packages" }}
+{{-   if not (kindIs "map" $filePackages) }}
+{{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
+{{-     continue }}
+{{-   end }}
+{{-   $packages = mergeOverwrite $packages $filePackages }}
+{{- end }}
+
+{{- /* OS specific packages */ -}}
+{{- $osPackages := dig $.osIDLike $packageType dict $global.osPackages }}
+{{- /* $packages = mergeOverwrite $packages $osPackages */ -}}
+{{- range $key, $value := $osPackages }}
+{{ $_ := set $packages $key (mergeOverwrite ($value | default dict) (dict "type" $packageType))  }}
+{{- end }}
+
+{{- /* Python system packages */ -}}
+{{- if and .features.python (eq $packageType $defaultType) }}
+{{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
+{{-   range $name := without $pythonPackages "" -}}
+{{-     if eq (substr 0 1 $name) "#" -}}
+{{-       continue -}}
+{{-     end -}}
+{{-     if not (eq $.osID "darwin") -}}
+{{-       $prefix := "python" -}}
+{{-       if eq $.osID "alpine" -}}
+{{-         $prefix = "py3" -}}
+{{-       else if eq $.osIDLike "debian" "fedora" -}}
+{{-         $prefix = "python3" -}}
+{{-       end -}}
+{{-       $name = printf "%s-%s" $prefix $name -}}
+{{-     end -}}
+{{- /*     $packages = append $packages $name */ -}}
+{{-     if get $packages $name -}}
+{{-       warnf "Overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
+{{-     end -}}
+{{-     $_ := set $packages $name dict -}}
+{{-   end -}}
+{{- end }}
+
+{{- $output := includeTemplate "filter-packages.json.tmpl" (mergeOverwrite . (dict
+  "input" $packages
+)) | fromJson -}}
+
+{{- /* warnf "%s packages: %s" $packageType ($output | keys) */ -}}
+{{- $output | toJson -}}

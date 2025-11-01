@@ -1,0 +1,14 @@
+-- vi: ft=lua
+
+--[[
+vim.g.db_ui_dotenv_variable_prefix = 'DB_'
+
+vim.g.db_ui_env_variable_name = 'DATABASE_NAME'
+vim.g.db_ui_env_variable_url = 'DATABASE_URL'
+
+vim.g.dbs = {
+  { name = 'postgres', url = 'postgres://postgres:postgres@localhost:5432/postgres' },
+  { name = 'production', url = function() return vim.fn.system('get-prod-url') end },
+}
+]]
+--

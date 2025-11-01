@@ -1,0 +1,83 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if ne .os "darwin" }}
+
+# https://docs.brew.sh/Homebrew-on-Linux
+if ! command -v brew >/dev/null; then
+  if ! [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    echo >&2 "Installing homebrew"
+    run sudo mkdir -p /home/linuxbrew/.linuxbrew
+    run sudo chown -R "$USER:$USER" /home/linuxbrew/.linuxbrew
+    run git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
+    # SUDO_ASKPASS=1
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo >&2 "Installed homebrew"
+  fi
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{- end }}
+
+# https://docs.brew.sh/Installation#unattended-installation
+export NONINTERACTIVE=1
+
+dry_run brew update --quiet "$@"
+
+{{- if .upgrade }}
+
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" --dry-run
+fi
+run brew upgrade --quiet "$@"
+{{- end }}
+
+# if ! [ -f ~/.config/homebrew/Brewfile ]; then
+#   run brew bundle dump --file="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
+# fi
+
+{{- range $type := list "brew" "cask" "mas" "vscode" }}
+{{- if not (hasKey $.packages $type) }}
+{{-   continue }}
+{{- end }}
+{{- $before := includeTemplate "pluck.tmpl" (dict
+  "key" "before_script"
+  "values" (get $.packages $type)
+) | trim }}
+{{- if $before }}
+
+# Before script ({{ $type }}):
+{{ $before }}
+{{- end }}
+{{- end }}
+
+if [ "${DRY_RUN:-}" = true ]; then
+  set -- "$@" list
+fi
+# run brew bundle list --global
+{{- if eq (env "CACHE_BUST") "true" }}
+# brew hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "brew") | sha256sum }}
+# cask hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "cask") | sha256sum }}
+# mas hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "mas") | sha256sum }}
+# vscode hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "vscode") | sha256sum }}
+{{- end }}
+run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
+{{ includeTemplate "Brewfile" . | trim }}
+EOF
+
+{{- range $type := list "brew" "cask" "mas" "vscode" }}
+{{- if not (hasKey $.packages $type) }}
+{{-   continue }}
+{{- end }}
+{{- $after := includeTemplate "pluck.tmpl" (dict
+  "key" "after_script"
+  "values" (get $.packages $type)
+) | trim }}
+{{- if $after }}
+
+# After script ({{ $type }}):
+{{ $after }}
+{{- end }}
+{{- end }}

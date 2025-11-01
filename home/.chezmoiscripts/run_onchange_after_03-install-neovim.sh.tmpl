@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if and (not (hasKey .allPackages "neovim")) (not (lookPath "nvim" | isExecutable)) }}
+if command -v nvim; then
+  echo >&2 "Already installed"
+  cmd nvim --version | head -n1
+else
+  echo >&2 "Installing neovim"
+
+  # VERSION="$(get_release neovim/neovim)" # v0.11.2
+  # NAME="nvim-linux-x86_64"
+  # URL="https://github.com/neovim/neovim/releases/download/$VERSION/$NAME.tar.gz"
+  {{- $url := gitHubLatestReleaseAssetURL
+    "neovim/neovim"
+    (printf "nvim-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) }}
+  {{- $_ := $url | mustRegexMatch "^https" }}
+  URL="{{ $url }}"
+
+  install_tar_gz "$URL" "$NAME/bin/nvim"
+  sudo mv $TMPDIR/$NAME/lib/* /usr/local/lib/
+  sudo mv $TMPDIR/$NAME/share/* /usr/local/share/
+
+  echo >&2 "Installed neovim"
+fi
+{{- else }}
+
+# TODO: replace system package with latest pynvim (0.4.2 to 0.5.2)
+# cmd python3 -m pip install --user --quiet pynvim
+{{- end }}
+
+# Debian 12 has nvim 0.7.2
+# Debian 11 Ubuntu 22 nvim 0.4.3
+if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
+  # cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
+  cmd timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
+  echo
+fi

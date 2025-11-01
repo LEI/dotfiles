@@ -1,0 +1,158 @@
+#!/bin/sh
+
+# https://www.chezmoi.io/user-guide/advanced/install-packages-declaratively/
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- $systemPackages := get .packages .packageManager }}
+{{- if or (empty $systemPackages) (not (kindIs "map" $systemPackages)) }}
+{{-   warnf "invalid packages %s: %s" .packageManager $systemPackages }}
+{{- end }}
+{{- $packageList := $systemPackages | keys | sortAlpha }}
+
+packages="{{ $packageList | join " " }}"
+
+{{- if eq (env "CACHE_BUST") "true" }}
+# Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
+{{- end }}
+echo >&2 "Installing {{ .packageManager }} packages: $packages"
+
+{{- $before := includeTemplate "pluck.tmpl" (dict
+  "key" "before_script"
+  "values" $systemPackages
+) | trim }}
+{{- if $before }}
+
+# Before script:
+{{ $before }}
+{{- end }}
+
+{{- if eq .osID "alpine" }}
+
+cmd sudo apk update --quiet
+{{- if .upgrade }}
+
+cmd sudo apk upgrade --quiet
+{{- end }}
+
+# shellcheck disable=SC2086
+cmd sudo apk add --quiet $packages
+{{- else if eq .osIDLike "arch" }}
+
+{{- if .upgrade }}
+
+cmd sudo pacman --sync --sysupgrade --needed --noconfirm --quiet
+{{- end }}
+
+
+{{- if .container }}
+
+if [ -f /var/lib/pacman/db.lck ]; then
+  rm /var/lib/pacman/db.lck
+fi
+{{- end }}
+
+# shellcheck disable=SC2086
+cmd sudo pacman --sync --needed --noconfirm --quiet $packages
+
+# if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
+#   if command -v flatpak >/dev/null; then
+#     cmd flatpak list --all
+#   fi
+#   if command -v snap >/dev/null; then
+#     cmd snap list --all
+#   fi
+# fi
+{{- else if eq .osIDLike "debian" }}
+
+# https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
+# export DEBIAN_FRONTEND=noninteractive
+
+cmd sudo -E apt-get update --quiet # >/dev/null
+
+{{- if .upgrade }}
+
+cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
+{{- end }}
+
+# shellcheck disable=SC2086
+cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
+{{- else if eq .osID "fedora" }}
+
+cmd sudo dnf update --assumeyes --quiet
+{{- if .upgrade }}
+
+cmd sudo dnf upgrade --assumeyes --quiet
+{{- end }}
+
+cmd sudo dnf install --assumeyes --quiet $packages
+{{- else if eq .osID "android" }}
+
+{{- if not .container }}
+
+# https://github.com/termux/termux-packages/blob/master/scripts/setup-termux.sh
+if [ ! -d "$HOME/storage/shared" ]; then
+  cmd termux-setup-storage
+fi
+{{- end }}
+
+# if [ -z "${TERMUX_APP_PACKAGE_MANAGER:-}" ]; then
+#   cmd termux-setup-package-manager
+#   TERMUX_APP_PACKAGE_MANAGER=apt
+# fi
+
+# TERM=xterm temux-change-repo # apt edit-sources
+
+# cat /data/data/com.termux/files/usr/etc/apt/sources.list
+# cmd apt-get update --quiet >/dev/null
+cmd pkg update --quiet
+
+{{- if .upgrade }}
+
+# cmd apt-get upgrade --quiet --yes # >/dev/null
+cmd pkg upgrade --quiet --yes
+{{- end }}
+
+cmd pkg install --quiet --yes $packages # >/dev/null
+{{- else if eq .os "windows" }}
+{{- if .upgrade }}
+
+winget upgrade --all --disable-interactivity --silent
+{{- end }}
+
+# NOTE: winget.json is updated after apply
+# Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256sum }}
+winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
+{{- if not .upgrade }} --no-upgrade{{ end }}
+# --accept-package-agreements --accept-source-agreements
+{{- else }}
+
+echo >&2 "Invalid OS: {{ .osID }}"
+exit 1
+{{- end }}
+
+{{- $after := includeTemplate "pluck.tmpl" (dict
+  "key" "after_script"
+  "values" $systemPackages
+) | trim }}
+{{- if $after }}
+
+# After script:
+{{ $after }}
+{{- end }}
+
+{{- if and .codespaces (eq .osIDLike "debian") }}
+
+selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
+if [ "${selected_editor##*/}" = nano ]; then
+  if [ -x /usr/bin/vim.basic ]; then
+    cmd sudo update-alternatives --set editor /usr/bin/vim.basic
+  elif [ -x /usr/bin/vim.tiny ]; then
+    cmd sudo update-alternatives --set editor /usr/bin/vim.tiny
+  fi
+fi
+{{- end }}
+
+echo >&2 "Installed {{ .packageManager }} packages"
