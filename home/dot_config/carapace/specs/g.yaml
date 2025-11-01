@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: g
+description: git
+run: '$(if [ $# -eq 0 ]; then git status --short --branch; else git "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([git])"]

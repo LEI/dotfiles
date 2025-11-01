@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: s
+description: shpool
+run: '$(if [ $# -eq 0 ]; then if [ -n "${SHPOOL_SESSION_NAME:-}" ]; then shpool list; else s select; fi; else shpool "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([shpool])"]
+commands:
+  - name: attach
+    aliases: [a]
+    run: "[shpool-a]"
+  - name: detach
+    aliases: [d]
+    run: "[shpool, detach]"
+  - name: list
+    aliases: [l, ls]
+    run: "[shpool, list]"
+  - name: select
+    aliases: [s]
+    run: "$(shpool-select)"

@@ -1,0 +1,50 @@
+{{- if and
+  (not (hasKey .allPackages "carapace"))
+  (not (lookPath "carapace" | isExecutable)) -}}
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if command -v carapace; then
+  echo >&2 "Already installed"
+  cmd carapace --version
+  exit
+fi
+
+echo >&2 "Installing carapace"
+
+# VERSION="$(get_release carapace-sh/carapace-bin)"
+# OS="$CHEZMOI_OS"
+# if [ "$OSID" = android ]; then
+#   OS=termux
+# fi
+# ARCH="$CHEZMOI_ARCH"
+# BASE_URL="https://github.com/carapace-sh/carapace-bin/releases/download/$VERSION"
+# NAME="carapace-bin_${VERSION#v}_${OS}_${ARCH}"
+# URL="$BASE_URL/$NAME.tar.gz"
+{{- $url := gitHubLatestReleaseAssetURL
+  "carapace-sh/carapace-bin"
+  (printf "carapace-bin_*_%s_%s.tar.gz"
+    (eq .chezmoi.os "android" | ternary "termux" .chezmoi.os)
+    .chezmoi.arch) }}
+{{- $_ := $url | mustRegexMatch "^https" }}
+URL="{{ $url }}"
+
+{{- if eq .osID "alpine" }}
+
+cmd curl -LSfs "${URL%.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
+cmd sudo apk add --allow-untrusted --quiet "$TMPDIR/carapace.apk"
+{{- else if eq .osIDLike "debian" }}
+
+cmd curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
+cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
+{{- else }}
+
+# https://github.com/carapace-sh/carapace-bin/releases
+install_tar_gz "$URL" carapace
+{{- end }}
+
+echo >&2 "Installed carapace"
+{{ end -}}

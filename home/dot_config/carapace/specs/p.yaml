@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: p
+description: podman
+run: '$(if [ $# -eq 0 ]; then podman ps --all; else podman "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([podman])"]
+commands:
+  - name: compose
+    aliases: [c]
+    run: "[podman, compose]"

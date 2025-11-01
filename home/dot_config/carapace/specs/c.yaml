@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: c
+description: chezmoi
+run: '$(if [ $# -eq 0 ]; then chezmoi status; else chezmoi "$@"; fi)'
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([chezmoi])"]
+commands:
+  - name: apply
+    aliases: [a]
+    run: "[chezmoi, apply, --verbose]"
+  - name: diff
+    aliases: [d]
+    run: "[chezmoi, diff]"
+  - name: execute-template
+    aliases: [e]
+    run: "[chezmoi, execute-template]"
+  - name: init
+    aliases: [i]
+    run: "[chezmoi, init, --verbose]"
+  - name: managed
+    aliases: [m]
+    run: "[chezmoi, managed]"
+  - name: status
+    aliases: [s]
+    run: "[chezmoi, status]"
+  - name: unmanaged
+    aliases: [u]
+    run: "[chezmoi, unmanaged]"
+  - name: verify
+    aliases: [v]
+    run: "[chezmoi, verify]"
+
+  - name: package-diff
+    aliases: [D]
+    run: "[chezmoi-package, diff]"
+  - name: execute
+    aliases: [E]
+    run: "[chezmoi-execute]"
+  - name: feature
+    aliases: [f]
+    run: "[chezmoi-feature]"
+  - name: package-list
+    aliases: [l]
+    run: "[chezmoi-package, list]"
+  - name: package
+    aliases: [p]
+    run: "[chezmoi-package]"
