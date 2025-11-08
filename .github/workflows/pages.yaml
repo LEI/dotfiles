@@ -1,0 +1,40 @@
+---
+name: pages
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - script/bootstrap
+      - test/README.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Prepare files for GitHub Pages
+        run: |
+          mkdir -p public/{script,test}
+          cp README.md public/README.md
+          cp script/bootstrap public/script/bootstrap
+          cp test/README.md public/test/README.md
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          enable_jekyll: true
+          keep_files: true
