@@ -1,0 +1,31 @@
+var data = {lines:[
+{"lineNum":"    1","line":"#!/bin/sh"},
+{"lineNum":"    2","line":""},
+{"lineNum":"    3","line":"set -eu","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    4","line":""},
+{"lineNum":"    5","line":"cmd=\"$SHELL\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    6","line":""},
+{"lineNum":"    7","line":"if [ $# -eq 0 ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    8","line":"  if [ \"$PWD\" = \"$HOME\" ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    9","line":"    name=\"~\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   10","line":"  else"},
+{"lineNum":"   11","line":"    name=\"$(basename \"$PWD\")\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   12","line":"  fi"},
+{"lineNum":"   13","line":"else"},
+{"lineNum":"   14","line":"  name=\"$1\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   15","line":"  shift","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   16","line":"fi"},
+{"lineNum":"   17","line":""},
+{"lineNum":"   18","line":"# cmd=\"$SHELL -c \'cd $PWD && exec $SHELL -i\'\""},
+{"lineNum":"   19","line":"# cmd=\"$SHELL -c \'cd $(zoxide query \"$name\" || echo \"$PWD\") && exec $SHELL -i\'\""},
+{"lineNum":"   20","line":"cmd=\"$SHELL -c \'cd $(zoxide query \"$name\" || echo \"$PWD\"); nvim; $SHELL -i\'\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   21","line":""},
+{"lineNum":"   22","line":"# if ! shpool list | tr \'\\t\' \' \' | grep \"^$name \"; then"},
+{"lineNum":"   23","line":"#   cmd=\"$SHELL -c \'z $name && exec $SHELL -i\'\""},
+{"lineNum":"   24","line":"# fi"},
+{"lineNum":"   25","line":""},
+{"lineNum":"   26","line":"shpool attach --cmd=\"$cmd\" \"$name\" \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+]};
+var percent_low = 25;var percent_high = 75;
+var header = { "command" : "test", "date" : "2025-11-10 00:08:19", "instrumented" : 10, "covered" : 0,};
+var merged_data = [];

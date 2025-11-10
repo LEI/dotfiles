@@ -1,0 +1,30 @@
+var data = {lines:[
+{"lineNum":"    1","line":"#!/usr/bin/env bash"},
+{"lineNum":"    2","line":"#MISE alias=\"t\""},
+{"lineNum":"    3","line":"#MISE description=\"`mise test` or `mise run t`\""},
+{"lineNum":"    4","line":""},
+{"lineNum":"    5","line":"# https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh"},
+{"lineNum":"    6","line":""},
+{"lineNum":"    7","line":"set -euo pipefail","class":"lineCov","hits":"1","order":"1","possible_hits":"0",},
+{"lineNum":"    8","line":""},
+{"lineNum":"    9","line":"PATH=\"$PATH:$HOME/.local/bin\"","class":"lineCov","hits":"1","order":"2","possible_hits":"0",},
+{"lineNum":"   10","line":""},
+{"lineNum":"   11","line":"main() {"},
+{"lineNum":"   12","line":"  local jobs=\"${TEST_JOBS:-1}\"","class":"lineCov","hits":"1","order":"4","possible_hits":"0",},
+{"lineNum":"   13","line":"  if command -v parallel >/dev/null; then","class":"lineCov","hits":"1","order":"5","possible_hits":"0",},
+{"lineNum":"   14","line":"    jobs=\"${TEST_JOBS:-$(nproc)}\"","class":"lineCov","hits":"1","order":"6","possible_hits":"0",},
+{"lineNum":"   15","line":"  fi"},
+{"lineNum":"   16","line":"  set -x","class":"lineCov","hits":"1","order":"7","possible_hits":"0",},
+{"lineNum":"   17","line":"  bats \\","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   18","line":"    --jobs \"$jobs\" \\"},
+{"lineNum":"   19","line":"    --print-output-on-failure \\"},
+{"lineNum":"   20","line":"    --show-output-of-passing-tests \\"},
+{"lineNum":"   21","line":"    --timing \\"},
+{"lineNum":"   22","line":"    --recursive ./test \"$@\""},
+{"lineNum":"   23","line":"}"},
+{"lineNum":"   24","line":""},
+{"lineNum":"   25","line":"main \"$@\"","class":"lineCov","hits":"1","order":"3","possible_hits":"0",},
+]};
+var percent_low = 25;var percent_high = 75;
+var header = { "command" : "test", "date" : "2025-11-10 00:07:24", "instrumented" : 8, "covered" : 7,};
+var merged_data = [];

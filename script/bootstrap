@@ -1,0 +1,43 @@
+#!/bin/sh
+#MISE description="mise bootstrap"
+
+# https://github.com/twpayne/dotfiles/blob/master/install.sh
+# https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles
+
+set -eu
+
+PATH="$PATH:$HOME/.local/bin"
+
+if ! chezmoi="$(command -v chezmoi)"; then
+  chezmoi="$HOME/.local/bin/chezmoi"
+  if command -v curl >/dev/null; then
+    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+  elif command -v wget >/dev/null; then
+    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+  else
+    echo "To install chezmoi, you must have curl or wget installed." >&2
+    exit 1
+  fi
+fi
+
+if [ "${CI:-${CODESPACES:-}}" = "true" ]; then
+  # POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
+  script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
+  if [ ! -d "$script_dir" ]; then
+    echo >&2 "Missing source directory: $script_dir"
+    exit 1
+  fi
+  # set -- init --apply --source="$script_dir"
+  # NOTE: the bootstrap script is in a subdirectory
+  set -- init --apply --source="$(dirname script_dir)" "$@"
+else
+  if [ $# -eq 0 ]; then
+    echo >&2 "Missing user name or repository (chezmoi init user)"
+    exit 1
+  fi
+  set -- init --apply "$@"
+fi
+
+echo "Running 'chezmoi $*'" >&2
+# exec: replace current process with chezmoi
+exec "$chezmoi" "$@"
