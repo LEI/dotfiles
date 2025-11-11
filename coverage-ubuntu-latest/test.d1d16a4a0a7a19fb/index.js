@@ -1,8 +1,6 @@
 var data = {files:[
-{"link":"00-install-xdg.sh.8e5f3c1b.html","title":"00-install-xdg.sh","summary_name":"/tmp/bats-B4tGfw/.chezmoiscripts/00-install-xdg.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"15","uncovered_lines":"0","total_lines" : "15"},
-{"link":"01-install-tools.sh.80766780.html","title":"01-install-tools.sh","summary_name":"/tmp/bats-B4tGfw/.chezmoiscripts/01-install-tools.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"12","uncovered_lines":"0","total_lines" : "12"},
-{"link":"02-install-brew-packages.sh.dc2cc929.html","title":"02-install-brew-packages.sh","summary_name":"/tmp/bats-B4tGfw/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"50.0","covered_lines":"8","uncovered_lines":"8","total_lines" : "16"},
-{"link":"01-install-packages.sh.a499e0d.html","title":"01-install-packages.sh","summary_name":"/tmp/bats-B4tGfw/.chezmoiscripts/01-install-packages.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"7","uncovered_lines":"0","total_lines" : "7"},
+{"link":"00-install-xdg.sh.9e36e402.html","title":"00-install-xdg.sh","summary_name":"/tmp/bats-tfAu44/.chezmoiscripts/00-install-xdg.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"15","uncovered_lines":"0","total_lines" : "15"},
+{"link":"01-install-tools.sh.937e8417.html","title":"01-install-tools.sh","summary_name":"/tmp/bats-tfAu44/.chezmoiscripts/01-install-tools.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"12","uncovered_lines":"0","total_lines" : "12"},
 {"link":"test.38e987d4.html","title":"test","summary_name":"/home/runner/work/dotfiles/dotfiles/script/test","covered_class":"lineCov","covered":"87.5","covered_lines":"7","uncovered_lines":"1","total_lines" : "8"},
 {"link":"container.22a9b600.html","title":"container","summary_name":"/home/runner/work/dotfiles/dotfiles/script/container","covered_class":"linePartCov","covered":"43.9","covered_lines":"82","uncovered_lines":"105","total_lines" : "187"},
 {"link":"check.b466600c.html","title":"check","summary_name":"/home/runner/work/dotfiles/dotfiles/script/check","covered_class":"linePartCov","covered":"56.5","covered_lines":"13","uncovered_lines":"10","total_lines" : "23"},
@@ -11,9 +9,11 @@ var data = {files:[
 {"link":"executable_iperf3-plot.7d2b319f.html","title":"executable_iperf3-plot","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_iperf3-plot","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"23","total_lines" : "23"},
 {"link":"bootstrap.b4a81c6b.html","title":"bootstrap","summary_name":"/home/runner/work/dotfiles/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"40.9","covered_lines":"9","uncovered_lines":"13","total_lines" : "22"},
 {"link":"executable_chezmoi-execute.9b5f3f3c.html","title":"executable_chezmoi-execute","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-execute","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
+{"link":"01-install-packages.sh.899d1876.html","title":"01-install-packages.sh","summary_name":"/tmp/bats-tfAu44/.chezmoiscripts/01-install-packages.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"7","uncovered_lines":"0","total_lines" : "7"},
 {"link":"executable_list-package.33cd18fe.html","title":"executable_list-package","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_list-package","covered_class":"lineNoCov","covered":"18.2","covered_lines":"6","uncovered_lines":"27","total_lines" : "33"},
 {"link":"bench.ee302f3a.html","title":"bench","summary_name":"/home/runner/work/dotfiles/dotfiles/script/bench","covered_class":"lineCov","covered":"92.1","covered_lines":"35","uncovered_lines":"3","total_lines" : "38"},
 {"link":"executable_chezmoi-check.d3199067.html","title":"executable_chezmoi-check","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-check","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"15","total_lines" : "15"},
+{"link":"02-install-brew-packages.sh.32a774.html","title":"02-install-brew-packages.sh","summary_name":"/tmp/bats-tfAu44/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"50.0","covered_lines":"8","uncovered_lines":"8","total_lines" : "16"},
 {"link":"executable_nvim-sh.e7924d9.html","title":"executable_nvim-sh","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 {"link":"executable_e.93f27309.html","title":"executable_e","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_e","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"executable_t.f94253fb.html","title":"executable_t","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
@@ -26,5 +26,5 @@ var data = {files:[
 {"link":"executable_chezmoi-feature.7beb5a84.html","title":"executable_chezmoi-feature","summary_name":"/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"39.7","covered_lines":"25","uncovered_lines":"38","total_lines" : "63"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-11 23:06:52", "instrumented" : 658, "covered" : 262,};
+var header = { "command" : "test", "date" : "2025-11-11 23:22:02", "instrumented" : 658, "covered" : 262,};
 var merged_data = [];

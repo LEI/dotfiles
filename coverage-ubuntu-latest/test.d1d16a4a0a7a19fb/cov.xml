@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1762902412">
+<coverage line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1762903322">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="test" line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="00_install_xdg_sh__50" filename="tmp/bats-B4tGfw/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="00_install_xdg_sh__50" filename="tmp/bats-tfAu44/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -26,7 +26,7 @@
 						<line number="25" hits="2"/>
 					</lines>
 				</class>
-				<class name="01_install_tools_sh__51" filename="tmp/bats-B4tGfw/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="01_install_tools_sh__51" filename="tmp/bats-tfAu44/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -42,38 +42,7 @@
 						<line number="36" hits="1"/>
 					</lines>
 				</class>
-				<class name="02_install_brew_packages_sh__52" filename="tmp/bats-B4tGfw/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.500">
-					<lines>
-						<line number="3" hits="1"/>
-						<line number="5" hits="1"/>
-						<line number="8" hits="1"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="12" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="22" hits="2"/>
-						<line number="24" hits="1"/>
-						<line number="30" hits="1"/>
-						<line number="31" hits="1"/>
-						<line number="34" hits="1"/>
-					</lines>
-				</class>
-				<class name="01_install_packages_sh__53" filename="tmp/bats-B4tGfw/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="5" hits="1"/>
-						<line number="7" hits="1"/>
-						<line number="9" hits="1"/>
-						<line number="10" hits="1"/>
-						<line number="15" hits="1"/>
-						<line number="18" hits="1"/>
-						<line number="20" hits="1"/>
-					</lines>
-				</class>
-				<class name="test__54" filename="home/runner/work/dotfiles/dotfiles/script/test" branch-rate="1.0" complexity="1.0" line-rate="0.875">
+				<class name="test__52" filename="home/runner/work/dotfiles/dotfiles/script/test" branch-rate="1.0" complexity="1.0" line-rate="0.875">
 					<lines>
 						<line number="7" hits="1"/>
 						<line number="9" hits="1"/>
@@ -85,7 +54,7 @@
 						<line number="25" hits="1"/>
 					</lines>
 				</class>
-				<class name="container__55" filename="home/runner/work/dotfiles/dotfiles/script/container" branch-rate="1.0" complexity="1.0" line-rate="0.439">
+				<class name="container__53" filename="home/runner/work/dotfiles/dotfiles/script/container" branch-rate="1.0" complexity="1.0" line-rate="0.439">
 					<lines>
 						<line number="9" hits="8"/>
 						<line number="13" hits="8"/>
@@ -276,7 +245,7 @@
 						<line number="504" hits="8"/>
 					</lines>
 				</class>
-				<class name="check__56" filename="home/runner/work/dotfiles/dotfiles/script/check" branch-rate="1.0" complexity="1.0" line-rate="0.565">
+				<class name="check__54" filename="home/runner/work/dotfiles/dotfiles/script/check" branch-rate="1.0" complexity="1.0" line-rate="0.565">
 					<lines>
 						<line number="5" hits="1"/>
 						<line number="7" hits="1"/>
@@ -303,7 +272,7 @@
 						<line number="59" hits="0"/>
 					</lines>
 				</class>
-				<class name="update__57" filename="home/runner/work/dotfiles/dotfiles/script/update" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="update__55" filename="home/runner/work/dotfiles/dotfiles/script/update" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="4" hits="1"/>
 						<line number="8" hits="1"/>
@@ -312,7 +281,7 @@
 						<line number="15" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_package__58" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.345">
+				<class name="executable_chezmoi_package__56" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.345">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="2"/>
@@ -403,7 +372,7 @@
 						<line number="183" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_iperf3_plot__59" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_iperf3_plot__57" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="9" hits="0"/>
@@ -430,7 +399,7 @@
 						<line number="76" hits="0"/>
 					</lines>
 				</class>
-				<class name="bootstrap__60" filename="home/runner/work/dotfiles/dotfiles/script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.409">
+				<class name="bootstrap__58" filename="home/runner/work/dotfiles/dotfiles/script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.409">
 					<lines>
 						<line number="7" hits="1"/>
 						<line number="9" hits="1"/>
@@ -456,13 +425,24 @@
 						<line number="43" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_execute__61" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-execute" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_execute__59" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-execute" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_list_package__62" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.182">
+				<class name="01_install_packages_sh__60" filename="tmp/bats-tfAu44/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="5" hits="1"/>
+						<line number="7" hits="1"/>
+						<line number="9" hits="1"/>
+						<line number="10" hits="1"/>
+						<line number="15" hits="1"/>
+						<line number="18" hits="1"/>
+						<line number="20" hits="1"/>
+					</lines>
+				</class>
+				<class name="executable_list_package__61" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.182">
 					<lines>
 						<line number="3" hits="2"/>
 						<line number="5" hits="2"/>
@@ -499,7 +479,7 @@
 						<line number="91" hits="0"/>
 					</lines>
 				</class>
-				<class name="bench__63" filename="home/runner/work/dotfiles/dotfiles/script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.921">
+				<class name="bench__62" filename="home/runner/work/dotfiles/dotfiles/script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.921">
 					<lines>
 						<line number="6" hits="1"/>
 						<line number="12" hits="1"/>
@@ -541,7 +521,7 @@
 						<line number="103" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_check__64" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-check" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_check__63" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-check" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="6" hits="0"/>
@@ -558,6 +538,26 @@
 						<line number="34" hits="0"/>
 						<line number="35" hits="0"/>
 						<line number="38" hits="0"/>
+					</lines>
+				</class>
+				<class name="02_install_brew_packages_sh__64" filename="tmp/bats-tfAu44/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.500">
+					<lines>
+						<line number="3" hits="1"/>
+						<line number="5" hits="1"/>
+						<line number="8" hits="1"/>
+						<line number="9" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="12" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="16" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="22" hits="2"/>
+						<line number="24" hits="1"/>
+						<line number="30" hits="1"/>
+						<line number="31" hits="1"/>
+						<line number="34" hits="1"/>
 					</lines>
 				</class>
 				<class name="executable_nvim_sh__65" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">

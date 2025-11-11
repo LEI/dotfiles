@@ -44,5 +44,5 @@ var data = {lines:[
 {"lineNum":"   43","line":"exec \"$chezmoi\" \"$@\"","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-11 23:06:30", "instrumented" : 22, "covered" : 9,};
+var header = { "command" : "test", "date" : "2025-11-11 23:20:27", "instrumented" : 22, "covered" : 9,};
 var merged_data = [];
