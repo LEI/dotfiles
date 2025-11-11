@@ -8,8 +8,9 @@ Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io).
 - [Bash benchmark](https://lei.github.io/dotfiles/dev/bench/)
 - [Bash benchmark (macos)](https://lei.github.io/dotfiles/benchmark-macos-latest/)
 - [Bash benchmark (ubuntu)](https://lei.github.io/dotfiles/benchmark-ubuntu-latest/)
-- [Test coverage (macos)](https://lei.github.io/dotfiles/coverage-macos-latest/)
-- [Test coverage (ubuntu)](https://lei.github.io/dotfiles/coverage-ubuntu-latest/)
+- [Test coverage](https://lei.github.io/dotfiles/coverage/kcov-merged/)
+- [Test coverage (macos)](https://lei.github.io/dotfiles/coverage-macos-latest/test/)
+- [Test coverage (ubuntu)](https://lei.github.io/dotfiles/coverage-ubuntu-latest/test/)
 
 ## Install
 
