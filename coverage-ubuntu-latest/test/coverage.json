@@ -1,17 +1,18 @@
 {
   "files": [
-    {"file": "/tmp/bats-tfu9dh/.chezmoiscripts/01-install-tools.sh", "percent_covered": "100.00", "covered_lines": "12", "total_lines": "12"},
+    {"file": "/tmp/bats-oCfILN/.chezmoiscripts/01-install-tools.sh", "percent_covered": "100.00", "covered_lines": "12", "total_lines": "12"},
+    {"file": "/tmp/bats-oCfILN/.chezmoiscripts/02-install-brew-packages.sh", "percent_covered": "50.00", "covered_lines": "8", "total_lines": "16"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/test", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
+    {"file": "/tmp/bats-oCfILN/.chezmoiscripts/01-install-packages.sh", "percent_covered": "100.00", "covered_lines": "7", "total_lines": "7"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/container", "percent_covered": "43.85", "covered_lines": "82", "total_lines": "187"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/check", "percent_covered": "56.52", "covered_lines": "13", "total_lines": "23"},
-    {"file": "/tmp/bats-tfu9dh/.chezmoiscripts/00-install-xdg.sh", "percent_covered": "100.00", "covered_lines": "15", "total_lines": "15"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/update", "percent_covered": "100.00", "covered_lines": "5", "total_lines": "5"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-package", "percent_covered": "34.48", "covered_lines": "30", "total_lines": "87"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_iperf3-plot", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "23"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/bootstrap", "percent_covered": "40.91", "covered_lines": "9", "total_lines": "22"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-execute", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "2"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_list-package", "percent_covered": "18.18", "covered_lines": "6", "total_lines": "33"},
-    {"file": "/tmp/bats-tfu9dh/.chezmoiscripts/01-install-packages.sh", "percent_covered": "100.00", "covered_lines": "7", "total_lines": "7"},
+    {"file": "/tmp/bats-oCfILN/.chezmoiscripts/00-install-xdg.sh", "percent_covered": "100.00", "covered_lines": "15", "total_lines": "15"},
     {"file": "/home/runner/work/dotfiles/dotfiles/script/bench", "percent_covered": "92.11", "covered_lines": "35", "total_lines": "38"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-check", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "15"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_nvim-sh", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "19"},
@@ -20,7 +21,6 @@
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_repeat-last-command", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "5"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_git-P", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "2"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-a", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "10"},
-    {"file": "/tmp/bats-tfu9dh/.chezmoiscripts/02-install-brew-packages.sh", "percent_covered": "50.00", "covered_lines": "8", "total_lines": "16"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-select", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "8"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_package-manager", "percent_covered": "29.63", "covered_lines": "8", "total_lines": "27"},
     {"file": "/home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_k", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "8"},
@@ -32,5 +32,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "test",
-  "date": "2025-11-11 23:29:37"
+  "date": "2025-11-11 23:48:08"
 }
