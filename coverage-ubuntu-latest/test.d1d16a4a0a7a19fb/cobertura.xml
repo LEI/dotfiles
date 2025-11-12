@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1762907632">
+<coverage line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1762907930">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="test" line-rate="0.398" lines-covered="262" lines-valid="658" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="00_install_xdg_sh__50" filename="tmp/bats-BFivDl/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="00_install_xdg_sh__48" filename="tmp/bats-Zy4Pis/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -26,7 +26,7 @@
 						<line number="25" hits="2"/>
 					</lines>
 				</class>
-				<class name="01_install_tools_sh__51" filename="tmp/bats-BFivDl/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="01_install_tools_sh__49" filename="tmp/bats-Zy4Pis/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -40,6 +40,37 @@
 						<line number="27" hits="1"/>
 						<line number="34" hits="1"/>
 						<line number="36" hits="1"/>
+					</lines>
+				</class>
+				<class name="02_install_brew_packages_sh__50" filename="tmp/bats-Zy4Pis/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.500">
+					<lines>
+						<line number="3" hits="1"/>
+						<line number="5" hits="1"/>
+						<line number="8" hits="1"/>
+						<line number="9" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="12" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="16" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="22" hits="2"/>
+						<line number="24" hits="1"/>
+						<line number="30" hits="1"/>
+						<line number="31" hits="1"/>
+						<line number="34" hits="1"/>
+					</lines>
+				</class>
+				<class name="01_install_packages_sh__51" filename="tmp/bats-Zy4Pis/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="5" hits="1"/>
+						<line number="7" hits="1"/>
+						<line number="9" hits="1"/>
+						<line number="10" hits="1"/>
+						<line number="15" hits="1"/>
+						<line number="18" hits="1"/>
+						<line number="20" hits="1"/>
 					</lines>
 				</class>
 				<class name="test__52" filename="home/runner/work/dotfiles/dotfiles/script/test" branch-rate="1.0" complexity="1.0" line-rate="0.875">
@@ -529,27 +560,7 @@
 						<line number="38" hits="0"/>
 					</lines>
 				</class>
-				<class name="02_install_brew_packages_sh__63" filename="tmp/bats-BFivDl/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.500">
-					<lines>
-						<line number="3" hits="1"/>
-						<line number="5" hits="1"/>
-						<line number="8" hits="1"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="12" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="22" hits="2"/>
-						<line number="24" hits="1"/>
-						<line number="30" hits="1"/>
-						<line number="31" hits="1"/>
-						<line number="34" hits="1"/>
-					</lines>
-				</class>
-				<class name="executable_nvim_sh__64" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_nvim_sh__63" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -572,7 +583,7 @@
 						<line number="34" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_e__65" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_e__64" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -586,7 +597,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_t__66" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_t__65" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -603,7 +614,7 @@
 						<line number="23" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_repeat_last_command__67" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_repeat_last_command__66" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -612,13 +623,13 @@
 						<line number="10" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_git_P__68" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_git_P__67" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_shpool_a__69" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_shpool_a__68" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -632,18 +643,7 @@
 						<line number="26" hits="0"/>
 					</lines>
 				</class>
-				<class name="01_install_packages_sh__70" filename="tmp/bats-BFivDl/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="5" hits="1"/>
-						<line number="7" hits="1"/>
-						<line number="9" hits="1"/>
-						<line number="10" hits="1"/>
-						<line number="15" hits="1"/>
-						<line number="18" hits="1"/>
-						<line number="20" hits="1"/>
-					</lines>
-				</class>
-				<class name="executable_shpool_select__71" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_shpool_select__69" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="11" hits="0"/>
@@ -655,7 +655,7 @@
 						<line number="21" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_package_manager__72" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.296">
+				<class name="executable_package_manager__70" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.296">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="2"/>
@@ -686,7 +686,7 @@
 						<line number="55" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_k__73" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_k__71" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -698,7 +698,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_feature__74" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.397">
+				<class name="executable_chezmoi_feature__72" filename="home/runner/work/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.397">
 					<lines>
 						<line number="3" hits="2"/>
 						<line number="6" hits="0"/>
