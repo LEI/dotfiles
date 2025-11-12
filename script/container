@@ -425,14 +425,7 @@ run_bootstrap() {
   #   export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
   #   run_command ./script/coverage # --collect-only
   # fi
-  if command -v bats >/dev/null; then
-    if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
-      set -- --pretty
-    else
-      set --
-    fi
-    run_command ./script/test "$@"
-  fi
+  run_command mise run test "$@"
 
   # TODO: keep the container running after "up --build --detached"
   # bash -i
