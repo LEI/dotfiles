@@ -147,7 +147,9 @@ local oil_extension = {
 
 return {
   {
-    'nvim-lualine/lualine.nvim',
+    -- 'nvim-lualine/lualine.nvim',
+    'LEI/lualine.nvim',
+    branch = 'fix/lsp-progress',
     event = 'VeryLazy',
     -- lazy = false,
     opts = {
