@@ -39,5 +39,5 @@ var data = {lines:[
 {"lineNum":"   38","line":"# run mise ls \"$@\""},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-12 00:57:42", "instrumented" : 12, "covered" : 12,};
+var header = { "command" : "test", "date" : "2025-11-12 02:15:05", "instrumented" : 12, "covered" : 12,};
 var merged_data = [];

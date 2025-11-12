@@ -26,5 +26,5 @@ var data = {files:[
 {"link":"executable_chezmoi-feature.7beb5a84.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"39.7","covered_lines":"25","uncovered_lines":"38","total_lines" : "63"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-12 00:57:29", "instrumented" : 658, "covered" : 262,};
+var header = { "command" : "test", "date" : "2025-11-12 02:14:53", "instrumented" : 658, "covered" : 262,};
 var merged_data = [];
