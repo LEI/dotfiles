@@ -15,33 +15,33 @@ set -eu
 
 # https://github.com/anthropics/claude-code/issues/1455
 if [ -d "$HOME/.claude" ] && ! [ -d "$CLAUDE_CONFIG_DIR" ]; then
-  cmd mv "$HOME/.claude" "$CLAUDE_CONFIG_DIR"
-  cmd ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
+  dry_run mv "$HOME/.claude" "$CLAUDE_CONFIG_DIR"
+  dry_run ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
 fi
 {{- end }}
 
 {{- if .features.docker }}
 
 if [ -d ~/.docker ] && ! [ -d "$DOCKER_CONFIG" ]; then
-  cmd mv ~/.docker "$DOCKER_CONFIG"
+  dry_run mv ~/.docker "$DOCKER_CONFIG"
 fi
 {{- end }}
 
 {{- if .features.go }}
 
 if [ -d ~/go ] && ! [ -d "$GOPATH" ]; then
-  cmd mv ~/go "$GOPATH"
+  dry_run mv ~/go "$GOPATH"
 fi
 {{- end }}
 
 {{- if .features.node }}
 
 # if [ -d ~/.node_modules ] && ! [ -d "$npm_config_prefix" ]; then
-#   cmd mv ~/.node_modules "$npm_config_prefix"
+#   dry_run mv ~/.node_modules "$npm_config_prefix"
 # fi
 
 if [ -d ~/Library/pnpm ] && ! [ -d "$PNPM_HOME" ]; then
-  cmd mv ~/Library/pnpm "$PNPM_HOME"
+  dry_run mv ~/Library/pnpm "$PNPM_HOME"
 fi
 {{- end }}
 
@@ -55,11 +55,11 @@ fi
 {{- if .features.rust }}
 
 if [ -d ~/.cargo ] && ! [ -d "$CARGO_HOME" ]; then
-  cmd mv ~/.cargo "$CARGO_HOME"
+  dry_run mv ~/.cargo "$CARGO_HOME"
 fi
 
 if [ -d ~/.rustup ] && ! [ -d "$RUSTUP_HOME" ]; then
-  cmd mv ~/.rustup "$RUSTUP_HOME"
+  dry_run mv ~/.rustup "$RUSTUP_HOME"
 fi
 {{- end }}
 
@@ -67,7 +67,7 @@ fi
 
 # https://askubuntu.com/a/961459
 # if [ -d ~/.Xauthority ] && ! [ -d "$XAUTHORITY" ]; then
-#   cmd mv ~/.Xauthority "$XAUTHORITY"
-#   cmd ln -s "$XAUTHORITY" ~/.Xauthority
+#   dry_run mv ~/.Xauthority "$XAUTHORITY"
+#   dry_run ln -s "$XAUTHORITY" ~/.Xauthority
 # fi
 {{- end }}
