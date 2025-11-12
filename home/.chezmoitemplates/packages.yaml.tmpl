@@ -389,6 +389,7 @@ packages:
   # pass: # gopass
   #   enabled: {{ not (empty .accessToken) }}
   parallel: # Conflicts with moreutils on darwin
+    enabled: {{ ne .os "windows" }}
   pastel: # termpicker
     enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
@@ -955,3 +956,4 @@ osPackages:
       # MSYS2.MSYS2: # ucrt64\bin\dlltool
       frippery.busybox-w32: # uutils.coreutils
         # after_script: busybox --install
+      gerardog.gsudo:
