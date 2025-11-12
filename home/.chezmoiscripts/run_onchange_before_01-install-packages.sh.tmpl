@@ -107,24 +107,24 @@ fi
 
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
 # cmd apt-get update --quiet >/dev/null
-cmd pkg update --quiet
+dry_run pkg update --quiet
 
 {{- if .upgrade }}
 
 # cmd apt-get upgrade --quiet --yes # >/dev/null
-cmd pkg upgrade --quiet --yes
+dry_run pkg upgrade --quiet --yes
 {{- end }}
 
-cmd pkg install --quiet --yes $packages # >/dev/null
+dry_run pkg install --quiet --yes $packages # >/dev/null
 {{- else if eq .os "windows" }}
 {{- if .upgrade }}
 
-winget upgrade --all --disable-interactivity --silent
+cmd winget upgrade --all --disable-interactivity --silent
 {{- end }}
 
 # NOTE: winget.json is updated after apply
 # Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256sum }}
-winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
+cmd winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
 {{- if not .upgrade }} --no-upgrade{{ end }}
 # --accept-package-agreements --accept-source-agreements
 {{- else }}
