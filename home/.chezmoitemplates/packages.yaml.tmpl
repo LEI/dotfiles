@@ -389,6 +389,7 @@ packages:
   # pass: # gopass
   #   enabled: {{ not (empty .accessToken) }}
   parallel: # Conflicts with moreutils on darwin
+    enabled: {{ ne .os "windows" }}
   pastel: # termpicker
     enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
