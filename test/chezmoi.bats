@@ -84,6 +84,8 @@ setup() {
   package_manager="$(package-manager)"
   if [ "$package_manager" = apt ]; then
     package_manager=apt-mark
+  elif [ "$package_manager" = termux ]; then
+    package_manager=pkg
   fi
   stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
@@ -113,12 +115,14 @@ setup() {
 # bats test_tags=system,package
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
-  stub_seq sudo 4 # 10
+  stub_seq sudo 4
   run_chezmoi .chezmoiscripts/01-install-packages.sh
   unstub sudo 2>/dev/null || true
   refute_output
   assert_stderr_line --regexp "Installing .* packages"
-  assert_stderr_line --regexp "^# STUB 1"
+  if [ -z "${PREFIX:-}" ]; then
+    assert_stderr_line --regexp "^# STUB 1"
+  fi
   assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
@@ -188,11 +192,7 @@ setup() {
 
 # bats test_tags=xdg
 @test "chezmoi: install xdg" {
-  stub_seq ln
-  stub_seq mv
   run_chezmoi .chezmoiscripts/00-install-xdg.sh
-  unstub ln 2>/dev/null || true
-  unstub mv 2>/dev/null || true
   refute_output
   refute_stderr
   assert_success

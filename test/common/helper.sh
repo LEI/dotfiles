@@ -19,7 +19,8 @@ has_feature() {
 }
 
 check_feature() {
-  if ! has_feature "$@"; then
+  local name="$1"
+  if ! has_feature "$name"; then
     skip "feature disabled: $name"
   fi
 }
