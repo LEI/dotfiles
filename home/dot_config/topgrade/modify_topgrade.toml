@@ -1,5 +1,6 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- $contents := includeTemplate "dot_config/topgrade/.topgrade.toml" . -}}
 {{ includeTemplate "block-in-file.tmpl" (dict
 "chezmoi" .chezmoi
-  "contents" (includeTemplate "dot_config/topgrade/.topgrade.yaml" . | fromYaml | toToml)
+  "contents" $contents
 ) -}}
