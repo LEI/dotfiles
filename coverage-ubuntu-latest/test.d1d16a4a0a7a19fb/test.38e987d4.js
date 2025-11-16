@@ -14,17 +14,21 @@ var data = {lines:[
 {"lineNum":"   13","line":"  if command -v parallel >/dev/null; then","class":"lineCov","hits":"1","order":"5","possible_hits":"0",},
 {"lineNum":"   14","line":"    jobs=\"${TEST_JOBS:-$(nproc)}\"","class":"lineCov","hits":"1","order":"6","possible_hits":"0",},
 {"lineNum":"   15","line":"  fi"},
-{"lineNum":"   16","line":"  set -x","class":"lineCov","hits":"1","order":"7","possible_hits":"0",},
-{"lineNum":"   17","line":"  bats \\","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   18","line":"    --jobs \"$jobs\" \\"},
-{"lineNum":"   19","line":"    --print-output-on-failure \\"},
-{"lineNum":"   20","line":"    --show-output-of-passing-tests \\"},
-{"lineNum":"   21","line":"    --timing \\"},
-{"lineNum":"   22","line":"    --recursive ./test \"$@\""},
-{"lineNum":"   23","line":"}"},
-{"lineNum":"   24","line":""},
-{"lineNum":"   25","line":"main \"$@\"","class":"lineCov","hits":"1","order":"3","possible_hits":"0",},
+{"lineNum":"   16","line":"  if [ -n \"${TERM:-}\" ] && [ \"$TERM\" != dumb ]; then","class":"lineCov","hits":"2","order":"7","possible_hits":"0",},
+{"lineNum":"   17","line":"    set -- --pretty \"$@\"","class":"lineCov","hits":"1","order":"8","possible_hits":"0",},
+{"lineNum":"   18","line":"  fi"},
+{"lineNum":"   19","line":"  # set -- --trace \"$@\""},
+{"lineNum":"   20","line":"  set -x","class":"lineCov","hits":"1","order":"9","possible_hits":"0",},
+{"lineNum":"   21","line":"  bats \\","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   22","line":"    --jobs \"$jobs\" \\"},
+{"lineNum":"   23","line":"    --print-output-on-failure \\"},
+{"lineNum":"   24","line":"    --show-output-of-passing-tests \\"},
+{"lineNum":"   25","line":"    --timing \\"},
+{"lineNum":"   26","line":"    --recursive ./test \"$@\""},
+{"lineNum":"   27","line":"}"},
+{"lineNum":"   28","line":""},
+{"lineNum":"   29","line":"main \"$@\"","class":"lineCov","hits":"1","order":"3","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-12 03:09:57", "instrumented" : 8, "covered" : 7,};
+var header = { "command" : "test", "date" : "2025-11-16 11:33:10", "instrumented" : 10, "covered" : 9,};
 var merged_data = [];

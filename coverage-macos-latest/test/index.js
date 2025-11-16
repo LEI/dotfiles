@@ -2,11 +2,11 @@ var data = {files:[
 {"link":"01-install-tools.sh.550f1dc9.html","title":"01-install-tools.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/01-install-tools.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"12","uncovered_lines":"0","total_lines" : "12"},
 {"link":"00-install-xdg.sh.d9c46f8d.html","title":"00-install-xdg.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/00-install-xdg.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"14","uncovered_lines":"0","total_lines" : "14"},
 {"link":"executable_chezmoi-execute.c66a6c27.html","title":"executable_chezmoi-execute","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-execute","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
-{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"100.0","covered_lines":"8","uncovered_lines":"0","total_lines" : "8"},
+{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"100.0","covered_lines":"10","uncovered_lines":"0","total_lines" : "10"},
 {"link":"bootstrap.38b56fc6.html","title":"bootstrap","summary_name":"[...]/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"40.9","covered_lines":"9","uncovered_lines":"13","total_lines" : "22"},
 {"link":"executable_git-P.37405422.html","title":"executable_git-P","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_git-P","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
 {"link":"executable_shpool-a.78bd3ea3.html","title":"executable_shpool-a","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_shpool-a","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
-{"link":"container.aeb4c5ad.html","title":"container","summary_name":"[...]/dotfiles/script/container","covered_class":"linePartCov","covered":"42.8","covered_lines":"80","uncovered_lines":"107","total_lines" : "187"},
+{"link":"container.aeb4c5ad.html","title":"container","summary_name":"[...]/dotfiles/script/container","covered_class":"linePartCov","covered":"43.7","covered_lines":"80","uncovered_lines":"103","total_lines" : "183"},
 {"link":"executable_t.c3e69d89.html","title":"executable_t","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 {"link":"executable_iperf3-plot.dd86af8a.html","title":"executable_iperf3-plot","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_iperf3-plot","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"23","total_lines" : "23"},
 {"link":"executable_package-manager.f0c50c5f.html","title":"executable_package-manager","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_package-manager","covered_class":"lineNoCov","covered":"18.5","covered_lines":"5","uncovered_lines":"22","total_lines" : "27"},
@@ -25,5 +25,5 @@ var data = {files:[
 {"link":"executable_nvim-sh.f54330bd.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-12 03:10:25", "instrumented" : 641, "covered" : 249,};
+var header = { "command" : "test", "date" : "2025-11-16 11:34:20", "instrumented" : 639, "covered" : 251,};
 var merged_data = [];

@@ -16,11 +16,11 @@ var data = {files:[
 {"link":"executable_shpool-a.b7c60244.html","title":"executable_shpool-a","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-a","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"executable_e.3921249b.html","title":"executable_e","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_e","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"executable_chezmoi-feature.334d795e.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"39.7","covered_lines":"25","uncovered_lines":"38","total_lines" : "63"},
-{"link":"container.f16741f6.html","title":"container","summary_name":"[...]/dotfiles/dotfiles/script/container","covered_class":"linePartCov","covered":"42.8","covered_lines":"80","uncovered_lines":"107","total_lines" : "187"},
+{"link":"container.f16741f6.html","title":"container","summary_name":"[...]/dotfiles/dotfiles/script/container","covered_class":"linePartCov","covered":"43.7","covered_lines":"80","uncovered_lines":"103","total_lines" : "183"},
 {"link":"update.540b30bd.html","title":"update","summary_name":"[...]/dotfiles/dotfiles/script/update","covered_class":"lineCov","covered":"100.0","covered_lines":"5","uncovered_lines":"0","total_lines" : "5"},
-{"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"lineCov","covered":"100.0","covered_lines":"8","uncovered_lines":"0","total_lines" : "8"},
+{"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"lineCov","covered":"100.0","covered_lines":"10","uncovered_lines":"0","total_lines" : "10"},
 {"link":"executable_t.53910469.html","title":"executable_t","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-11-12 03:10:58", "instrumented" : 608, "covered" : 216,};
+var header = { "command" : "", "date" : "2025-11-16 11:34:52", "instrumented" : 606, "covered" : 218,};
 var merged_data = [];

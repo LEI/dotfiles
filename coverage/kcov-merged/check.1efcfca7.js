@@ -56,16 +56,15 @@ var data = {lines:[
 {"lineNum":"   55","line":"  # echo"},
 {"lineNum":"   56","line":"fi"},
 {"lineNum":"   57","line":""},
-{"lineNum":"   58","line":"if chezmoi feature tmux; then","class":"lineCov","hits":"1","order":"116",},
-{"lineNum":"   59","line":"  timeout 5m tmux ls","class":"lineNoCov","hits":"0",},
-{"lineNum":"   60","line":"  # tmux source ~/.config/tmux/tmux.conf"},
-{"lineNum":"   61","line":"fi"},
-{"lineNum":"   62","line":""},
-{"lineNum":"   63","line":"# FIXME(i3): toggles floating window mode"},
-{"lineNum":"   64","line":"# if chezmoi feature topgrade; then"},
-{"lineNum":"   65","line":"#   topgrade --dry-run"},
-{"lineNum":"   66","line":"# fi"},
+{"lineNum":"   58","line":"if chezmoi feature tmux && timeout 5m tmux ls; then","class":"lineCov","hits":"1","order":"116",},
+{"lineNum":"   59","line":"  timeout 5m tmux source ~/.config/tmux/tmux.conf","class":"lineNoCov","hits":"0",},
+{"lineNum":"   60","line":"fi"},
+{"lineNum":"   61","line":""},
+{"lineNum":"   62","line":"# FIXME(i3): toggles floating window mode"},
+{"lineNum":"   63","line":"# if chezmoi feature topgrade; then"},
+{"lineNum":"   64","line":"#   topgrade --dry-run"},
+{"lineNum":"   65","line":"# fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-11-12 03:10:58", "instrumented" : 23, "covered" : 13,};
+var header = { "command" : "", "date" : "2025-11-16 11:34:52", "instrumented" : 23, "covered" : 13,};
 var merged_data = [];
