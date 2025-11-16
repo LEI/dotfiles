@@ -69,8 +69,6 @@ Update, init and apply:
 chezmoi update --init --apply
 ```
 
----
-
 Verify installation:
 
 ```bash
@@ -79,8 +77,16 @@ mise run check
 
 ## Development
 
+Install `pre-commit` hook:
+
 ```bash
 prek install
+```
+
+Run tests:
+
+```bash
+mise run test
 ```
 
 - [Test documentation](./test)
