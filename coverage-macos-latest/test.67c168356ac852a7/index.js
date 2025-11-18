@@ -25,5 +25,5 @@ var data = {files:[
 {"link":"executable_nvim-sh.f54330bd.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-16 11:34:20", "instrumented" : 639, "covered" : 251,};
+var header = { "command" : "test", "date" : "2025-11-18 18:43:33", "instrumented" : 639, "covered" : 251,};
 var merged_data = [];

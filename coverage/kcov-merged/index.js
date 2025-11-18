@@ -22,5 +22,5 @@ var data = {files:[
 {"link":"executable_t.53910469.html","title":"executable_t","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-11-16 11:34:52", "instrumented" : 606, "covered" : 218,};
+var header = { "command" : "", "date" : "2025-11-18 18:44:07", "instrumented" : 606, "covered" : 218,};
 var merged_data = [];
