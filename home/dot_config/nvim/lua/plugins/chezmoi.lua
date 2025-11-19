@@ -1,40 +1,3 @@
--- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/extras/util/chezmoi.lua
--- local function chezmoi_picker()
---   local args = {
---     '--path-style=absolute',
---     '--include=files',
---     '--exclude=externals',
---   }
---   local cmd = 'chezmoi ' .. vim.fn.join(args, ' ')
---   local results = require('chezmoi.commands').list({
---     args = args,
---   })
---   local items = {}
---
---   for _, czFile in ipairs(results) do
---     table.insert(items, {
---       text = czFile,
---       file = czFile,
---     })
---   end
---
---   ---@type snacks.picker.Config
---   local opts = {
---     title = cmd,
---     items = items,
---     confirm = function(picker, item)
---       picker:close()
---       require('chezmoi.commands').edit({
---         targets = { item.text },
---         args = { '--watch' },
---       })
---     end,
---     -- formatters = { file = { truncate = 80 } },
---     -- win = { preview = { title = '{preview}' } },
---   }
---   Snacks.picker.pick(opts)
--- end
-
 return {
   {
     -- highlighting for chezmoi files template files
@@ -58,13 +21,10 @@ return {
       {
         '<leader>sC',
         function()
-          require('chezmoi.pick').snacks({
-            -- targets = vim.fn.stdpath('config'),
-            args = {
-              '--path-style=absolute',
-              '--include=files',
-              '--exclude=externals',
-            },
+          require('chezmoi.pick').snacks(vim.fn.stdpath('config'), {
+            '--path-style=absolute',
+            '--include=files',
+            '--exclude=externals',
           })
         end,
         desc = 'Search dotfiles (chezmoi)',

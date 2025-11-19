@@ -11,7 +11,7 @@
     (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")
-  "bottom" (and (ne .profile "minimal") (or .ephemeral .headless))
+  "bottom" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
