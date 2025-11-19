@@ -1,24 +1,24 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"77","possible_hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"70","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"78","possible_hits":"0",},
+{"lineNum":"    5","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"71","possible_hits":"0",},
 {"lineNum":"    6","line":""},
 {"lineNum":"    7","line":"# https://docs.brew.sh/Installation#unattended-installation"},
-{"lineNum":"    8","line":"export NONINTERACTIVE=1","class":"lineCov","hits":"2","order":"79","possible_hits":"0",},
+{"lineNum":"    8","line":"export NONINTERACTIVE=1","class":"lineCov","hits":"2","order":"72","possible_hits":"0",},
 {"lineNum":"    9","line":""},
-{"lineNum":"   10","line":"dry_run brew update --quiet \"$@\"","class":"lineCov","hits":"1","order":"80","possible_hits":"0",},
+{"lineNum":"   10","line":"dry_run brew update --quiet \"$@\"","class":"lineCov","hits":"1","order":"73","possible_hits":"0",},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"# if ! [ -f ~/.config/homebrew/Brewfile ]; then"},
 {"lineNum":"   13","line":"#   run brew bundle dump --file=\"${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile\""},
 {"lineNum":"   14","line":"# fi"},
 {"lineNum":"   15","line":""},
-{"lineNum":"   16","line":"if [ \"${DRY_RUN:-}\" = true ]; then","class":"lineCov","hits":"1","order":"81","possible_hits":"0",},
-{"lineNum":"   17","line":"  set -- \"$@\" list","class":"lineCov","hits":"1","order":"82","possible_hits":"0",},
+{"lineNum":"   16","line":"if [ \"${DRY_RUN:-}\" = true ]; then","class":"lineCov","hits":"1","order":"74","possible_hits":"0",},
+{"lineNum":"   17","line":"  set -- \"$@\" list","class":"lineCov","hits":"1","order":"75","possible_hits":"0",},
 {"lineNum":"   18","line":"fi"},
 {"lineNum":"   19","line":"# run brew bundle list --global"},
-{"lineNum":"   20","line":"run brew bundle --file=/dev/stdin --no-upgrade \"$@\" <<EOF","class":"lineCov","hits":"1","order":"83","possible_hits":"0",},
+{"lineNum":"   20","line":"run brew bundle --file=/dev/stdin --no-upgrade \"$@\" <<EOF","class":"lineCov","hits":"1","order":"76","possible_hits":"0",},
 {"lineNum":"   21","line":"brew \"bash\""},
 {"lineNum":"   22","line":"brew \"bash-completion\""},
 {"lineNum":"   23","line":"brew \"bats-core\""},
@@ -48,5 +48,5 @@ var data = {lines:[
 {"lineNum":"   47","line":"EOF"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-18 18:43:33", "instrumented" : 7, "covered" : 7,};
+var header = { "command" : "test", "date" : "2025-11-19 02:42:33", "instrumented" : 7, "covered" : 7,};
 var merged_data = [];

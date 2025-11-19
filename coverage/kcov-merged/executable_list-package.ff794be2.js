@@ -1,13 +1,13 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"218",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"211",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"215",},
-{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"216",},
+{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"208",},
+{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"209",},
 {"lineNum":"    7","line":"fi"},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"214",},
+{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"207",},
 {"lineNum":"   10","line":"apk)"},
 {"lineNum":"   11","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0",},
 {"lineNum":"   12","line":"  ;;"},
@@ -23,7 +23,7 @@ var data = {lines:[
 {"lineNum":"   22","line":"  ;;"},
 {"lineNum":"   23","line":"brew)"},
 {"lineNum":"   24","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   25","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"217",},
+{"lineNum":"   25","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"210",},
 {"lineNum":"   26","line":"  ;;"},
 {"lineNum":"   27","line":"cask)"},
 {"lineNum":"   28","line":"  brew list --cask","class":"lineNoCov","hits":"0",},
@@ -94,5 +94,5 @@ var data = {lines:[
 {"lineNum":"   93","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-11-18 18:44:07", "instrumented" : 33, "covered" : 5,};
+var header = { "command" : "", "date" : "2025-11-19 02:43:07", "instrumented" : 33, "covered" : 5,};
 var merged_data = [];

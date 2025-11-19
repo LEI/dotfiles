@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1763491428210,
+  "lastUpdate": 1763520169333,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -781,6 +781,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.73,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "7b40c7b0afc1283bd8d476f9454a73e84643fbe1",
+          "message": "fix: chezmoi",
+          "timestamp": "2025-11-19T00:54:51+01:00",
+          "tree_id": "89f3799e6c5eb3ff3e7336553a7f6d2d765a626e",
+          "url": "https://github.com/LEI/dotfiles/commit/7b40c7b0afc1283bd8d476f9454a73e84643fbe1"
+        },
+        "date": 1763520167510,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.238,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 1.07,
             "unit": "Second"
           }
         ]
