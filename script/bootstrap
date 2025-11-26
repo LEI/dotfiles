@@ -38,6 +38,11 @@ else
   set -- init --apply "$@"
 fi
 
-echo "Running 'chezmoi $*'" >&2
+if [ "${DRY_RUN:-}" = true ]; then
+  printf >&2 "DRY-RUN: "
+fi
+echo >&2 "Running 'chezmoi $*'"
 # exec: replace current process with chezmoi
-exec "$chezmoi" "$@"
+if [ "${DRY_RUN:-}" != true ]; then
+  exec "$chezmoi" "$@"
+fi
