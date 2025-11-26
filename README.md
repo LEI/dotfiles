@@ -83,13 +83,11 @@ Install `pre-commit` hook:
 prek install
 ```
 
-Run tests:
+Run [tests](./test):
 
 ```bash
 mise run test
 ```
-
-- [Test documentation](./test)
 
 ## Ideas
 
