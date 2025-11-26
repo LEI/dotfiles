@@ -197,8 +197,8 @@ return {
       auto_toggle_mcp_servers = true,
 
       use_bundled_binary = false,
+      -- cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
 
-      cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
       -- cmd = node_prefix .. 'node',
       -- cmdArgs = { node_prefix .. 'mcp-hub' },
 
