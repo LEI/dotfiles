@@ -1,9 +1,17 @@
 {
   "servers": {
-    "context7": {
+    "context7-local": {
       "args": ["-y", "@upstash/context7-mcp"],
       "command": "npx",
-      "type": "stdio"
+      "type": "stdio",
+      "enabled": false
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
     },
     "exa": {
       "args": ["-y", "exa-mcp-server"],
