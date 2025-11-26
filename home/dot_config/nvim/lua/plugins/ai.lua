@@ -249,6 +249,16 @@ return {
       },
     },
     opts = {
+      -- acp_providers = {
+      --   ['opencode'] = {
+      --     command = 'opencode',
+      --     args = { 'acp' },
+      --     env = {
+      --       OPENCODE_API_KEY = os.getenv('OPENCODE_API_KEY'),
+      --     },
+      --   },
+      -- },
+
       -- provider = 'claude',
       -- providers = {
       --   claude = {
