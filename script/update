@@ -3,14 +3,23 @@
 
 set -eux
 
+run() {
+  if [ "${DRY_RUN:-}" = true ]; then
+    echo >&2 "DRY-RUN: $*"
+    return 0
+  fi
+  echo >&2 "$*"
+  "$@"
+}
+
 # if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
 # timeout 5m nvim --headless +LazyUpdate! +qa # >/dev/null
-if chezmoi feature neovim; then
-  timeout 5m nvim --headless try \| +LazyUpdate! \| +quitall \| catch \| +cquitall \| end
+if run chezmoi feature neovim; then
+  run timeout 5m nvim --headless try \| +LazyUpdate! \| +quitall \| catch \| +cquitall \| end
   # echo
 fi
 
 # export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
-if chezmoi feature tmux; then
-  timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
+if run chezmoi feature tmux; then
+  run timeout 5m ~/.config/tmux/plugins/tpm/bin/update_plugins all
 fi
