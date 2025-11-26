@@ -46,7 +46,7 @@ packages:
       windows: Clement.bottom
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
   bvi:
-    enabled: {{ ne .profile "minimal" }}
+    enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   ca-certificates:
     enabled: {{ eq .osIDLike "android" "arch" "debian" }}
@@ -92,7 +92,7 @@ packages:
   # https://wiki.archlinux.org/title/Dbeaver
   # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
   # dbeaver: # Requires at least jdk17-openjdk, alternative: mysqlworkbench
-  #   enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not .ephemeral) (not .headless) }}
+  #   enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   #   nameOverwrite:
   #     darwin: dbeaver-community
   #     windows: DBeaver.DBeaver
@@ -121,13 +121,13 @@ packages:
     enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
       windows: wagoodman.dive # scoop: main/dive
-  docker:
-    enabled: {{ .features.docker }}
-    nameOverwrite:
-      arch: docker docker-buildx docker-compose # python-docker
-  # docker-desktop:
-  #   enabled: {{ and .features.docker (ne .profile "minimal") }}
-  #   type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
+  # docker:
+  #   enabled: {{ .features.docker }}
+  #   nameOverwrite:
+  #     arch: docker docker-buildx docker-compose # python-docker
+  docker-desktop:
+    enabled: {{ and .features.docker (ne .profile "minimal") }}
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
   # dog, doggo, mtr, trippy, oryx / tshark termshark
   dolphie:
     enabled: {{ and .features.sql (ne .profile "minimal") }}
@@ -173,7 +173,7 @@ packages:
     nameOverwrite:
       windows: junegunn.fzf
   envx:
-    enabled: {{ eq .osIDLike "arch" }}
+    enabled: {{ and (eq .osIDLike "arch") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       arch: envx-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -182,6 +182,9 @@ packages:
     enabled: {{ and .features.ai .features.python (ne .os "android") (ne .profile "minimal") }}
     type: uv
   # gdu, ncdu
+  gimp:
+    enabled: {{ and (eq .osIDLike "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+    type: cask
   git-delta:
     enabled: {{ and (not (eq .osIDLike "debian")) (ne .profile "minimal") }}
     nameOverwrite:
@@ -291,6 +294,9 @@ packages:
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
     )) (ne .profile "minimal") }}
+  # krita:
+  #   enabled: {{ and (eq .osIDLike "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+  #   type: cask
   kubecolor:
     enabled: {{ and .features.kube (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
@@ -438,7 +444,7 @@ packages:
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
     type: '{{ eq .osIDLike "arch" | ternary "uv" nil }}'
   process-compose: # hapless, mani+sake / cmdperf, mult
-    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       darwin: f1bonacc1/tap/process-compose
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -478,7 +484,7 @@ packages:
   recoverpy:
     type: uv
   riseup-vpn:
-    enabled: {{ and (eq .osIDLike "arch" "windows") (ne .profile "minimal") }}
+    enabled: {{ and (eq .osIDLike "arch" "windows") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       windows: Riseup.RiseupVPN
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -553,7 +559,7 @@ packages:
     #   cargo: install taplo-cli --locked --features lsp --quiet
     type: '{{ ne .osIDLike "alpine" | ternary "brew" nil }}'
   termscp: # aim, zrok
-    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   # tidy:
   #   enabled: {{ .features.neovim }}
   #   nameOverwrite:
@@ -583,7 +589,7 @@ packages:
     enabled: {{ ne .os "windows" }}
   # tuios: # vtm
   tuptime:
-    enabled: {{ and (eq .os "linux") (not (eq .osID "alpine" "fedora")) (not .ephemeral) (not (or
+    enabled: {{ and (eq .os "linux") (not (eq .osID "alpine" "fedora")) (not (or .ephemeral .headless)) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 13))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
     )) }}
@@ -594,7 +600,7 @@ packages:
   #   #   go: github.com/oz/tz
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" (ne .os "darwin" | ternary "go" nil) }}'
   ugm:
-    enabled: {{ and (not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows")) (ne .profile "minimal") }}
+    enabled: {{ and (not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows")) (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   unzip:
     enabled: {{ ne .os "windows" }}
@@ -619,7 +625,7 @@ packages:
   util-linux: # lsblk
     enabled: {{ eq .os "android" "linux" }}
   viddy: # watch
-    enabled: {{ and (eq .osIDLike "alpine" "arch" "darwin") (ne .profile "minimal") }}
+    enabled: {{ and (eq .osIDLike "alpine" "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       arch: viddy-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -740,9 +746,9 @@ osPackages:
     aur:
       # below:
       gnu-netcat:
-        # enabled: {{ ne .osID "manjaro" }}
+        enabled: {{ not (or .ephemeral .headless) }}
       pacseek-bin:
-        enabled: {{ ne .profile "minimal" }}
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # terraform-pug-bin: { enabled: {{ .features.tofu }} }
       # yay: { enabled: {{ ne .osID "manjaro" }} }
   darwin:
