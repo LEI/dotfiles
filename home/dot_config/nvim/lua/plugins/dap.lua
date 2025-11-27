@@ -180,7 +180,7 @@ return {
     tag = 'v4.0.0',
     dependencies = {
       'mfussenegger/nvim-dap',
-      'nvim-neotest/nvim-nio',
+      { 'nvim-neotest/nvim-nio', version = 'v1.x' },
     },
     cmd = {
       'DapUI',
