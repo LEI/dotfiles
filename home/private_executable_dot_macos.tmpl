@@ -20,14 +20,30 @@
     | replaceAllRegex "(defaults write NSGlobalDomain com.apple.swipescrolldirection -bool )false" "${1}true"
     | replaceAllRegex "(defaults write com.apple.dock minimize-to-application -bool )true" "${1}false" -}}
 
+# Always show hidden files
+defaults write com.apple.finder AppleShowAllFiles -boolean true
+
 defaults write org.hammerspoon.Hammerspoon MJConfigFile "~/.config/hammerspoon/init.lua"
+
+# TODO: enable three fingers drag with trackpad
 
 # TODO: uncomment line to enable TouchID
 # https://github.com/MikeMcQuaid/strap/blob/main/strap.sh#L174
+
+defaults -currentHost write -globalDomain NSStatusItemSpacing -int 12
+defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
 
 # sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
 # grep '^#\?auth' /etc/pam.d/sudo_local
 
 # https://github.com/fabianishere/pam_reattach
+# brew install pam-reattach
+
 # auth optional   pam_reattach.so
 # auth sufficient pam_tid.so
+
+# WARN: path must be specified when the module is not installed in
+# /usr/lib/pam or /usr/local/lib/pam (uname -m -> arm64)
+
+# auth     optional     /opt/homebrew/lib/pam/pam_reattach.so
+# auth     sufficient   pam_tid.so

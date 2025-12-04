@@ -189,6 +189,7 @@ data:
 {{- $_ := set . "defaultType" $packageManager }}
 {{- $packages := includeTemplate "packages-data.yaml.tmpl" (mergeOverwrite $context (dict
   "packageManager" $packageManager
+  "packages" (get . "packages" | default (dict $packageManager dict))
 )) | fromYaml }}
   packages: {{ $packages | toJson }}
 
@@ -210,17 +211,17 @@ diff:
   # exclude:
   #   - externals
   #   - scripts
-{{- if lookPath "difft" | isExecutable }}
-  # https://github.com/twpayne/chezmoi/discussions/2097
-  command: difft
-  args: [--color=always, --skip-unchanged]
-  pager: cat # less
-{{- else if lookPath "delta" | isExecutable }}
-  pager: delta
-{{- else if $codespaces }}
-  # command: code
-  # args: [--wait, --diff]
-{{- end }}
+# {{- if lookPath "difft" | isExecutable }}
+#   # https://github.com/twpayne/chezmoi/discussions/2097
+#   command: difft
+#   args: [--color=always, --skip-unchanged]
+#   pager: cat # less
+# {{- else if lookPath "delta" | isExecutable }}
+#   pager: delta
+# {{- else if $codespaces }}
+#   # command: code
+#   # args: [--wait, --diff]
+# {{- end }}
 
 github:
   refreshPeriod: 12h
@@ -244,12 +245,21 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-{{- $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
-{{- $paths := env "PATH" | splitList ":" }}
-{{- if and $features.mise (not (has $miseShims $paths)) }}
-{{-   $paths = append $paths $miseShims }}
-{{- end }}
-{{- $paths = append $paths $binDir }}
+{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
+{{-   $paths := env "PATH" | splitList ":" }}
+{{-   if and $features.mise (not (has $miseShims $paths)) }}
+{{-     $paths = append $paths $miseShims }}
+{{-   end }}
+{{-   $brewPrefix := eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local" }}
+{{-   $brewBin := joinPath $brewPrefix "bin" }}
+{{-   if not (has $brewBin $paths) }}
+{{-     $paths = prepend $paths $brewBin }}
+{{-   end }}
+{{-   $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
+{{-   if not (has $rubyBin $paths) -}}
+{{-     $paths = prepend $paths $rubyBin }}
+{{-   end -}}
+{{-   $paths = append $paths $binDir }}
   PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 

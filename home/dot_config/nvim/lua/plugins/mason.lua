@@ -36,7 +36,7 @@ local mason_tools = {
   -- 'gitleaks',
   -- 'gitlint',
   { 'goimports', condition = has_go },
-  { 'hadolint', version = 'v2.12.0' },
+  'hadolint', -- { 'hadolint', version = 'v2.12.0' },
   'markdownlint',
   -- { 'phpactor', condition = has_php },
   { 'phpcs', condition = has_php },

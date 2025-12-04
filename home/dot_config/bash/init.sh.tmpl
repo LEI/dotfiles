@@ -1,4 +1,5 @@
 {{- includeTemplate "init.sh.tmpl" (dict
+  "arch" .chezmoi.arch
   "features" .features
   "os" .os
   "osID" .osID

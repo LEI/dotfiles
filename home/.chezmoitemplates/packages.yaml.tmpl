@@ -29,7 +29,7 @@ packages:
   bitwarden-cli:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   bitwarden:
-    enabled: {{ and (eq .osIDLike "arch" "windows") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin" "windows") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       windows: Bitwarden.Bitwarden
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
@@ -121,10 +121,12 @@ packages:
     enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
       windows: wagoodman.dive # scoop: main/dive
-  # docker:
-  #   enabled: {{ .features.docker }}
-  #   nameOverwrite:
-  #     arch: docker docker-buildx docker-compose # python-docker
+  docker: # python-docker
+    enabled: {{ and .features.docker (eq .osIDLike "darwin") }}
+  docker-buildx:
+    enabled: {{ and .features.docker (eq .os "darwin") }}
+  docker-compose:
+    enabled: {{ and .features.docker (eq .os "darwin") }}
   docker-desktop:
     enabled: {{ and .features.docker (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
@@ -322,6 +324,8 @@ packages:
     nameOverwrite:
       arch: lazyssh-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  llama.cpp:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not (or .ephemeral .headless)) }}
   lnav: { enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} }
   logseq: # obsidian
     enabled: {{ .features.logseq }}
@@ -362,12 +366,18 @@ packages:
   #   nameOverwrite:
   #     npm: "@mermaid-js/mermaid-cli"
   #   type: npm
+  mpv:
+    description: Video player
+    enabled: {{ and (eq .osIDLike "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   # navi: # pet
   #   enabled: {{ and (ne .osIDLike "debian") (ne .profile "minimal") }}
   netscanner:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
+  ollama-app:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not (or .ephemeral .headless)) }}
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   opencode:
     enabled: {{ .features.ai }}
     nameOverwrite:
@@ -550,6 +560,11 @@ packages:
     # enabled: {{ eq .osIDLike "android" "windows" }}
     # type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
   # swaptop
+  # systemctl-tui:
+  #   enabled: {{ and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+  #   nameOverwrite:
+  #     arch: systemd-manager-tui-bin
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   tailspin:
     enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
@@ -670,8 +685,7 @@ packages:
     nameOverwrite:
       alpine: yq-go
       windows: MikeFarah.yq
-    type: >
-      {{ or
+    type: {{ or
         (and (eq .osID "debian") (le (int .osVersion) 11))
         (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
       | ternary "mise" nil }}
@@ -735,8 +749,6 @@ osPackages:
       #     components: rust-analyzer, rust-src,llvm-tools
       #     profile: minimal
       #   type: mise
-      systemctl-tui: # systemd-manager-tui-bin
-        enabled: {{ ne .profile "minimal" }}
       ttf-roboto: # ttf-dejavu noto-fonts
         enabled: {{ not .headless }}
       wiki-tui: # so
@@ -766,6 +778,8 @@ osPackages:
       # cdrtools:
       # cheat:
       # cmake:
+      container:
+        enabled: {{ and (eq .chezmoi.arch "arm64") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # coreutils:
       # cpanminus:
       # daemonize:
@@ -859,7 +873,8 @@ osPackages:
       # bruno: # postman
       # cyberduck:
       # dropbox:
-      # font-hack font-hack-nerd-font:
+      font-hack font-hack-nerd-font:
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # google-drive:
       # gpg-suite:
       # grandperspective:
@@ -875,16 +890,21 @@ osPackages:
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # keycastr:
       # keystore-explorer:
-      # lulu: # little-snitch
+
+      little-snitch:
+        enabled: {{ ne .profile "minimal" }}
+      # lulu:
       #   enabled: {{ ne .profile "minimal" }}
       # menubar-stats: # istatmenus, stats, https://github.com/elegracer/NetSpeedMonitor
+
       # microsoft-excel:
       # microsoft-outlook:
       microsoft-teams: # microsoft-auto-update
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # microsoft-word: # doxx, hygg
       # ngrok:
-      # onedrive:
+      onedrive:
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # pearcleaner:
       # rustdesk:
       # safari-technology-preview:
@@ -894,6 +914,9 @@ osPackages:
       # soapui:
       # xquartz:
     mas:
+      Keynote:
+        id: 409183694
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       Microsoft Excel:
         id: 462058435
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
@@ -902,6 +925,12 @@ osPackages:
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       Microsoft Word:
         id: 462054704
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+      Numbers:
+        id: 409203825
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+      Pages:
+        id: 409201541
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # Tailscale: { id: 1475387142 }
       # WireGuard: { id: 1451685025 }

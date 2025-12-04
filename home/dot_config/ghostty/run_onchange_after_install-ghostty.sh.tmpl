@@ -7,7 +7,9 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v ghostty; then
-  {{- if eq .osID "debian" }}
+  {{- if eq .osID "darwin" }}
+  echo >&2 "Managed by homebrew"
+  {{- else if eq .osID "debian" }}
   echo >&2 "Installing ghostty"
   # https://github.com/clayrisser/debian-ghostty/
   export DEBIAN_FRONTEND=noninteractive

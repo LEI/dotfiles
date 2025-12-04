@@ -39,9 +39,11 @@ echo >&2 "Installing mise"
 
 os={{ $os | quote }}
 arch={{ $arch | quote }}
+{{- if ne .os "darwin"}}
 if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
   arch="$arch-musl"
 fi
+{{- end }}
 
 cmd curl -LSfs "https://mise.jdx.dev/mise-latest-$os-$arch" -o "$MISE_BIN"
 cmd chmod +x "$MISE_BIN"

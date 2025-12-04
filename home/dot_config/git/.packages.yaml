@@ -7,12 +7,11 @@ packages:
     type: '{{ ne .osIDLike "arch" | ternary "brew" nil }}'
   # gcli:
   gh:
-    enabled: >
-      {{ and .features.git (not (or
-        (eq .osIDLike "alpine")
-        (and (eq .osID "debian") (le (int .osVersion) 11))
-        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-      )) (ne .profile "minimal") }}
+    enabled: '{{ and .features.git (not (or
+      (eq .osIDLike "alpine")
+      (and (eq .osID "debian") (le (int .osVersion) 11))
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
+      )) (ne .profile "minimal") }}'
     nameOverwrite:
       arch: github-cli
       windows: GitHub.cli
@@ -40,11 +39,10 @@ packages:
   #   nameOverwrite:
   #     windows: stephandilly.gitui
   glab:
-    enabled: >
-      {{ and .features.git (ne .os "android") (not (or
-        (and (eq .osID "debian") (le (int .osVersion) 12))
-        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-      )) (ne .profile "minimal") }}
+    enabled: '{{ and .features.git (ne .os "android") (not (or
+      (and (eq .osID "debian") (le (int .osVersion) 12))
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+      )) (ne .profile "minimal") }}'
     nameOverwrite:
       windows: GLab.GLab
   lazygit: # tig

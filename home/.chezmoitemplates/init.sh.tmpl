@@ -115,17 +115,39 @@ if [ -d "$HOME/.local/bin" ]; then
   pathmunge "$HOME/.local/bin" # before replace
 fi
 
+{{- if .features.brew }}
+
+# Homebrew
+{{- if eq .os "linux" }}
+brew_prefix=/home/linuxbrew/.linuxbrew
+{{- else if eq .arch "arm64" }}
+brew_prefix=/opt/homebrew
+{{- else }}
+brew_prefix=/usr/local
+{{- end }}
+
+if [ -x "$brew_prefix/bin/brew" ]; then
+  eval "$("$brew_prefix/bin/brew" shellenv)"
+fi
+
+{{- if .features.bash }}
+
+if [ -d $brew_prefix/opt/bash/bin ]; then
+  pathmunge $brew_prefix/opt/bash/bin before replace
+fi
+{{- end }}
+
 {{- if .features.ruby }}
 
-# TODO: brew prefix (/opt/homebrew)
-if [ -d /usr/local/opt/ruby/bin ]; then
-  pathmunge /usr/local/opt/ruby/bin # before replace
+if [ -d $brew_prefix/opt/ruby/bin ]; then
+  pathmunge $brew_prefix/opt/ruby/bin before replace
 fi
 
 # ruby_version="${ruby_version:-3.4.0}"
 # if [ -n "$GEM_USER_HOME" ] && [ -d "$GEM_USER_HOME" ]; then
 #   pathmunge "$GEM_USER_HOME" before replace
 # fi
+{{- end }}
 {{- end }}
 
 if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
@@ -138,13 +160,6 @@ fi
 if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin" ]; then
   pathmunge "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin"
 fi
-
-{{- if and .features.brew (ne .os "darwin") }}
-
-if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-{{- end }}
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # TODO: extract blocks to templates

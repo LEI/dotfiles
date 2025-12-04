@@ -25,6 +25,20 @@ if ! command -v brew >/dev/null; then
   fi
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
+{{- else }}
+
+if ! command -v brew >/dev/null; then
+  echo >&2 "Installing homebrew"
+  # FIXME: Need sudo access on macOS
+  run sudo echo
+  install_script="$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  if [ -z "$install_script" ]; then
+    echo >&2 "Failed to download install script"
+    exit 1
+  fi
+  /bin/bash -c "$install_script"
+  echo >&2 "Installed homebrew"
+fi
 {{- end }}
 
 # https://docs.brew.sh/Installation#unattended-installation
