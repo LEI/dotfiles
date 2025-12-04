@@ -550,6 +550,11 @@ packages:
     # enabled: {{ eq .osIDLike "android" "windows" }}
     # type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
   # swaptop
+  # systemctl-tui:
+  #   enabled: {{ and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+  #   nameOverwrite:
+  #     arch: systemd-manager-tui-bin
+  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   tailspin:
     enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
@@ -735,8 +740,6 @@ osPackages:
       #     components: rust-analyzer, rust-src,llvm-tools
       #     profile: minimal
       #   type: mise
-      systemctl-tui: # systemd-manager-tui-bin
-        enabled: {{ ne .profile "minimal" }}
       ttf-roboto: # ttf-dejavu noto-fonts
         enabled: {{ not .headless }}
       wiki-tui: # so
