@@ -438,7 +438,11 @@ packages:
   podman:
     enabled: {{ .features.podman }}
     nameOverwrite:
-      arch: podman podman-compose
+      arch: podman
+      windows: RedHat.Podman
+  podman-compose:
+    enabled: {{ and .features.podman (ne .os "windows") }}
+    nameOverwrite:
       windows: RedHat.Podman
   # podman-desktop:
   #   enabled: {{ and .features.podman (ne .profile "minimal") }}

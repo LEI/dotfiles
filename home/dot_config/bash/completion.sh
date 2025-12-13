@@ -55,12 +55,3 @@
 #     complete -o noquote -F _kubectl_completion k
 #   fi
 # fi
-
-# https://carapace-sh.github.io/carapace-bin/setup.html#bash
-export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
-if command -v carapace >/dev/null; then
-  # shellcheck disable=SC1090
-  source <(carapace _carapace | sed -e 's/ && +X//')
-  # OK: complete -F _carapace_lazy 000_bash_completion_compat 2to3 [...]
-  # KO: complete -F _carapace_lazy && +X [...]
-fi

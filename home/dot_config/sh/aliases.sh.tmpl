@@ -28,7 +28,7 @@ alias cat=batcat
 {{- end }}
 
 {{- if lookPath "eza" | isExecutable }}
-alias ls="eza --hyperlink"
+alias ls="eza --hyperlink --total-size"
 {{- else if lookPath "gls" | isExecutable }}
 # export LS_COLORS="$(vivid generate tokyonight-storm)"
 alias ls="gls --color"

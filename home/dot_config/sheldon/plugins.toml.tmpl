@@ -71,6 +71,25 @@ fi
 source_plugins sh
 """
 
+{{- if .features.carapace }}
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#bash
+[plugins.carapace]
+inline = """
+if command -v carapace >/dev/null; then
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  if [ "$shell" = zsh ]; then
+    autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
+    zstyle ':completion:*' format $'\\e[2;37mCompleting %d\\e[m'
+  fi
+  # BENCHFMT="carapace" bench source <(carapace _carapace)
+  BENCHFMT="carapace" bench source <(carapace _carapace | sed -e 's/ && +X//')
+else
+  echo >&2 "Command 'carapace' not found"
+fi
+"""
+{{- end }}
+
 {{- if .features.direnv }}
 
 [plugins.direnv]
@@ -108,6 +127,10 @@ fi
 # github = "chriskempson/base16-shell"
 
 {{- if eq $shell "zsh" }}
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+use = ["{{ `{{ name }}` }}.zsh"]
 
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"

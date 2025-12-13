@@ -74,7 +74,7 @@ bench() {
     fi
     # NOTE: zsh time does not work with other builtins like source
     # https://unix.stackexchange.com/a/478220/223694
-    time
+    {time} 2>&1 | head -n1
     "$@"
     TIMEFMT="$ORIGINAL_TIMEFMT"
     unset ORIGINAL_TIMEFMT
@@ -233,6 +233,19 @@ fi
 
 # Source plugins after updating PATH and activating mise
 source_plugins sh
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#bash
+if command -v carapace >/dev/null; then
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  if [ "$shell" = zsh ]; then
+    autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
+    zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+  fi
+  # BENCHFMT="carapace" bench source <(carapace _carapace)
+  BENCHFMT="carapace" bench source <(carapace _carapace | sed -e 's/ && +X//')
+else
+  echo >&2 "Command 'carapace' not found"
+fi
 
 if command -v direnv >/dev/null; then
   BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
