@@ -938,7 +938,10 @@ osPackages:
         id: 497799835
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     vscode:
-      editorconfig.editorconfig: { enabled: {{ .features.vscode }} }
+      # editorconfig.editorconfig:
+      #   enabled: {{ .features.vscode }}
+      zokugun.sync-settings:
+        enabled: {{ .features.vscode }}
   debian: # Debian/Ubuntu
     apt:
       apt-utils:

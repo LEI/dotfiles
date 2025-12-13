@@ -54,15 +54,32 @@ PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
 {{- end }}
 
 bench() {
-  if [ "${BENCH:-}" = true ]; then
+  if [ "${BENCH:-}" = true ] && [ "$shell" = bash ]; then
     ORIGINAL_TIMEFORMAT="${TIMEFORMAT:-}"
-    if [ -z "${TIMEFORMAT:-}" ]; then
+    if [ -n "${BENCHFMT:-}" ]; then
+      TIMEFORMAT="$BENCHFMT: %R"
+    else
       TIMEFORMAT="$*: %R"
     fi
     time "$@"
-    # unset TIMEFORMAT
     TIMEFORMAT="$ORIGINAL_TIMEFORMAT"
     unset ORIGINAL_TIMEFORMAT
+  elif [ "${BENCH:-}" = true ] && [ "$shell" = zsh ]; then
+    ORIGINAL_TIMEFMT="${TIMEFMT:-}"
+    if [ -n "${BENCHFMT:-}" ]; then
+      TIMEFMT="$BENCHFMT: %E elapsed"
+    else
+      # TIMEFMT="%J: %E"
+      TIMEFMT="$*: %E elapsed"
+    fi
+    # NOTE: zsh time does not work with other builtins like source
+    # https://unix.stackexchange.com/a/478220/223694
+    time
+    "$@"
+    TIMEFMT="$ORIGINAL_TIMEFMT"
+    unset ORIGINAL_TIMEFMT
+    # echo >&2 "Benchmarking OFF ${BENCHFMT:-${*%% *}}"
+    # "$@"
   else
     "$@"
   fi
@@ -165,14 +182,14 @@ fi
 # TODO: extract blocks to templates
 
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-TIMEFORMAT="sheldon: %R" bench eval "$(sheldon source)"
+BENCHFMT="sheldon" bench eval "$(sheldon source)"
 {{- else }}
 
 {{- if .features.mise }}
 
 # Must be first to ensure tools are available
 if command -v mise >/dev/null; then
-  TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
+  BENCHFMT="mise" bench eval "$(mise activate "$shell")"
 else
   echo >&2 "Command 'mise' not found"
 fi
@@ -218,19 +235,19 @@ fi
 source_plugins sh
 
 if command -v direnv >/dev/null; then
-  TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
+  BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
 else
   echo >&2 "Command 'direnv' not found"
 fi
 
 if command -v starship >/dev/null; then
-  TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
+  BENCHFMT="starship" bench eval "$(starship init "$shell")"
 else
   echo >&2 "Command 'starship' not found"
 fi
 
 if command -v zoxide >/dev/null; then
-  TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
+  BENCHFMT="zoxide" bench eval "$(zoxide init "$shell")"
 else
   echo >&2 "Command 'zoxide' not found"
 fi
@@ -240,7 +257,7 @@ fi
 # Must be after starship to preserve PROMPT_COMMAND
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
   if command -v atuin >/dev/null; then
-    TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
+    BENCHFMT="atuin" bench eval "$(atuin init --disable-up-arrow "$shell")"
   else
     echo >&2 "Command 'atuin' not found"
   fi
