@@ -21,18 +21,17 @@ var data = {lines:[
 {"lineNum":"   20","line":"# TODO: export GNUPGHOME=\"$XDG_DATA_HOME/gnupg\""},
 {"lineNum":"   21","line":"export INPUTRC=\"${INPUTRC:-$XDG_CONFIG_HOME/readline/inputrc}\"","class":"lineCov","hits":"2","order":"116","possible_hits":"0",},
 {"lineNum":"   22","line":"export STARSHIP_CONFIG=\"$XDG_CONFIG_HOME/starship/starship.toml\"","class":"lineCov","hits":"2","order":"117","possible_hits":"0",},
-{"lineNum":"   23","line":"export PSQLRC=\"$XDG_CONFIG_HOME/psql/psqlrc\"","class":"lineCov","hits":"2","order":"118","possible_hits":"0",},
-{"lineNum":"   24","line":"export RIPGREP_CONFIG_PATH=\"$XDG_CONFIG_HOME/ripgrep/config\"","class":"lineCov","hits":"2","order":"119","possible_hits":"0",},
-{"lineNum":"   25","line":"export WGETRC=\"$XDG_CONFIG_HOME/wget/wgetrc\"","class":"lineCov","hits":"2","order":"120","possible_hits":"0",},
-{"lineNum":"   26","line":"# export ZDOTDIR=\"$XDG_CONFIG_HOME/zsh\""},
-{"lineNum":"   27","line":"# export XAUTHORITY=\"$XDG_RUNTIME_DIR/Xauthority\""},
-{"lineNum":"   28","line":""},
-{"lineNum":"   29","line":"# https://askubuntu.com/a/961459"},
-{"lineNum":"   30","line":"# if [ -d ~/.Xauthority ] && ! [ -d \"$XAUTHORITY\" ]; then"},
-{"lineNum":"   31","line":"#   dry_run mv ~/.Xauthority \"$XAUTHORITY\""},
-{"lineNum":"   32","line":"#   dry_run ln -s \"$XAUTHORITY\" ~/.Xauthority"},
-{"lineNum":"   33","line":"# fi"},
+{"lineNum":"   23","line":"export RIPGREP_CONFIG_PATH=\"$XDG_CONFIG_HOME/ripgrep/config\"","class":"lineCov","hits":"2","order":"118","possible_hits":"0",},
+{"lineNum":"   24","line":"export WGETRC=\"$XDG_CONFIG_HOME/wget/wgetrc\"","class":"lineCov","hits":"2","order":"119","possible_hits":"0",},
+{"lineNum":"   25","line":"# export ZDOTDIR=\"$XDG_CONFIG_HOME/zsh\""},
+{"lineNum":"   26","line":"# export XAUTHORITY=\"$XDG_RUNTIME_DIR/Xauthority\""},
+{"lineNum":"   27","line":""},
+{"lineNum":"   28","line":"# https://askubuntu.com/a/961459"},
+{"lineNum":"   29","line":"# if [ -d ~/.Xauthority ] && ! [ -d \"$XAUTHORITY\" ]; then"},
+{"lineNum":"   30","line":"#   dry_run mv ~/.Xauthority \"$XAUTHORITY\""},
+{"lineNum":"   31","line":"#   dry_run ln -s \"$XAUTHORITY\" ~/.Xauthority"},
+{"lineNum":"   32","line":"# fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-11-18 18:42:28", "instrumented" : 15, "covered" : 15,};
+var header = { "command" : "test", "date" : "2025-12-13 20:53:49", "instrumented" : 14, "covered" : 14,};
 var merged_data = [];
