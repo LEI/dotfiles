@@ -7,7 +7,7 @@ packages:
   ruby:
     enabled: "{{ .features.ruby }}"
     nameOverwrite:
-      darwin: ruby-build # ruby
+      darwin: ruby ruby-build # ruby
       debian: ruby-dev
       fedora: ruby-devel
       # windows: RubyInstallerTeam.Ruby.3.4
