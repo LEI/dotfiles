@@ -54,15 +54,32 @@ PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
 {{- end }}
 
 bench() {
-  if [ "${BENCH:-}" = true ]; then
+  if [ "${BENCH:-}" = true ] && [ "$shell" = bash ]; then
     ORIGINAL_TIMEFORMAT="${TIMEFORMAT:-}"
-    if [ -z "${TIMEFORMAT:-}" ]; then
+    if [ -n "${BENCHFMT:-}" ]; then
+      TIMEFORMAT="$BENCHFMT: %R"
+    else
       TIMEFORMAT="$*: %R"
     fi
     time "$@"
-    # unset TIMEFORMAT
     TIMEFORMAT="$ORIGINAL_TIMEFORMAT"
     unset ORIGINAL_TIMEFORMAT
+  elif [ "${BENCH:-}" = true ] && [ "$shell" = zsh ]; then
+    ORIGINAL_TIMEFMT="${TIMEFMT:-}"
+    if [ -n "${BENCHFMT:-}" ]; then
+      TIMEFMT="$BENCHFMT: %E elapsed"
+    else
+      # TIMEFMT="%J: %E"
+      TIMEFMT="$*: %E elapsed"
+    fi
+    # NOTE: zsh time does not work with other builtins like source
+    # https://unix.stackexchange.com/a/478220/223694
+    {time} 2>&1 | head -n1
+    "$@"
+    TIMEFMT="$ORIGINAL_TIMEFMT"
+    unset ORIGINAL_TIMEFMT
+    # echo >&2 "Benchmarking OFF ${BENCHFMT:-${*%% *}}"
+    # "$@"
   else
     "$@"
   fi
@@ -115,17 +132,39 @@ if [ -d "$HOME/.local/bin" ]; then
   pathmunge "$HOME/.local/bin" # before replace
 fi
 
+{{- if .features.brew }}
+
+# Homebrew
+{{- if eq .os "linux" }}
+brew_prefix=/home/linuxbrew/.linuxbrew
+{{- else if eq .arch "arm64" }}
+brew_prefix=/opt/homebrew
+{{- else }}
+brew_prefix=/usr/local
+{{- end }}
+
+if [ -x "$brew_prefix/bin/brew" ]; then
+  eval "$("$brew_prefix/bin/brew" shellenv)"
+fi
+
+{{- if .features.bash }}
+
+if [ -d $brew_prefix/opt/bash/bin ]; then
+  pathmunge $brew_prefix/opt/bash/bin before replace
+fi
+{{- end }}
+
 {{- if .features.ruby }}
 
-# TODO: brew prefix (/opt/homebrew)
-if [ -d /usr/local/opt/ruby/bin ]; then
-  pathmunge /usr/local/opt/ruby/bin # before replace
+if [ -d $brew_prefix/opt/ruby/bin ]; then
+  pathmunge $brew_prefix/opt/ruby/bin before replace
 fi
 
 # ruby_version="${ruby_version:-3.4.0}"
 # if [ -n "$GEM_USER_HOME" ] && [ -d "$GEM_USER_HOME" ]; then
 #   pathmunge "$GEM_USER_HOME" before replace
 # fi
+{{- end }}
 {{- end }}
 
 if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
@@ -139,25 +178,18 @@ if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin" ]; then
   pathmunge "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin"
 fi
 
-{{- if and .features.brew (ne .os "darwin") }}
-
-if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-{{- end }}
-
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # TODO: extract blocks to templates
 
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-TIMEFORMAT="sheldon: %R" bench eval "$(sheldon source)"
+BENCHFMT="sheldon" bench eval "$(sheldon source)"
 {{- else }}
 
 {{- if .features.mise }}
 
 # Must be first to ensure tools are available
 if command -v mise >/dev/null; then
-  TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
+  BENCHFMT="mise" bench eval "$(mise activate "$shell")"
 else
   echo >&2 "Command 'mise' not found"
 fi
@@ -202,20 +234,33 @@ fi
 # Source plugins after updating PATH and activating mise
 source_plugins sh
 
+# https://carapace-sh.github.io/carapace-bin/setup.html#bash
+if command -v carapace >/dev/null; then
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  if [ "$shell" = zsh ]; then
+    autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
+    zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+  fi
+  # BENCHFMT="carapace" bench source <(carapace _carapace)
+  BENCHFMT="carapace" bench source <(carapace _carapace | sed -e 's/ && +X//')
+else
+  echo >&2 "Command 'carapace' not found"
+fi
+
 if command -v direnv >/dev/null; then
-  TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
+  BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
 else
   echo >&2 "Command 'direnv' not found"
 fi
 
 if command -v starship >/dev/null; then
-  TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
+  BENCHFMT="starship" bench eval "$(starship init "$shell")"
 else
   echo >&2 "Command 'starship' not found"
 fi
 
 if command -v zoxide >/dev/null; then
-  TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
+  BENCHFMT="zoxide" bench eval "$(zoxide init "$shell")"
 else
   echo >&2 "Command 'zoxide' not found"
 fi
@@ -225,7 +270,7 @@ fi
 # Must be after starship to preserve PROMPT_COMMAND
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
   if command -v atuin >/dev/null; then
-    TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
+    BENCHFMT="atuin" bench eval "$(atuin init --disable-up-arrow "$shell")"
   else
     echo >&2 "Command 'atuin' not found"
   fi

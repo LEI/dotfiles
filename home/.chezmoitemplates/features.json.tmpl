@@ -1,26 +1,37 @@
 {{- $features := (dict
   "ai" (and
-    (eq .osIDLike "arch" "darwin")
+    (eq .osIDLike "arch" "darwin" "fedora")
     (ne .profile "minimal")
     (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname)))
-  "atuin" false
+  "atuin" (and
+    (not (or
+      (and (eq .osID "debian") (le (int .osVersion) 12))
+      (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
+      (eq .os "windows")))
+    (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")
-  "bottom" false
+  "bottom" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
-  "docker" false
+  "docker" (and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)))
   "eza" (ne .profile "minimal")
-  "ghostty" false
-  "git" false
+  "ghostty" (and
+    (not .glibc231)
+    (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
+    (not (eq .os "android" "windows"))
+    (ne .profile "minimal")
+    (not (or .ephemeral .headless)))
+  "git" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
   "go" false
   "goss" (and (not (eq .os "android" "windows")) (ne .profile "minimal"))
   "gpg" false
   "helix" (and
     (not (and (eq .osIDLike "debian") (not .glibc231)))
+    (ne .profile "minimal")
     (not (or .ephemeral .headless)))
-  "i3" (and (eq .osIDLike "arch") (not .headless))
+  "i3" (and (eq .osIDLike "arch") (not (or .ephemeral .headless)))
   "kube" false
   "lla" false
   "logseq" false
@@ -32,19 +43,19 @@
   "node" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
-  "nushell" false
+  "nushell" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
   "php" false
-  "podman" false
-  "python" false
+  "podman" (and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "python" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
   "rest" false
   "ripgrep" true
   "ruby" false
   "rust" false
   "sheldon" (ne .os "windows")
   "shpool" false
-  "sql" false
+  "sql" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "ssh" false
-  "steam" (and (eq .osIDLike "arch" "windows") (eq .profile "personal"))
+  "steam" (and (eq .osIDLike "arch" "fedora" "windows") (eq .profile "personal"))
   "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
@@ -52,9 +63,9 @@
   "vim" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
-  "void" (and (eq .osIDLike "arch") (ne .profile "minimal"))
-  "vscode" (and (eq .osIDLike "arch" "darwin") (ne .profile "minimal"))
-  "vscodium" (and (eq .osIDLike "arch") (ne .profile "minimal"))
+  "void" (and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "vscode" (and (eq .osIDLike "arch" "fedora" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "vscodium" (and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)))
   "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "zoxide" true
   "zsh" false
@@ -63,27 +74,14 @@
 
 {{- if ne .profile "minimal" }}
 {{- $features = mergeOverwrite $features (dict
-  "atuin" (not (or
-    (and (eq .osID "debian") (le (int .osVersion) 12))
-    (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
-    (eq .os "windows")
-  ))
-  "bottom" true
-  "docker" (eq .osIDLike "arch" "darwin" "fedora")
-  "ghostty" (and (not .glibc231) (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))) (not (eq .os "android" "windows")))
-  "git" (not .ephemeral)
   "go" (and (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "gpg" (eq .osIDLike "arch" "darwin")
-  "helix" true
-  "kube" (eq .osIDLike "arch" "darwin" "debian" "fedora")
-  "logseq" (eq .osIDLike "arch" "darwin")
-  "nushell" true
-  "podman" (eq .osIDLike "arch" "darwin" "fedora")
+  "kube" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
+  "logseq" (and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)))
   "python" (not (or .ephemeral .headless))
   "ruby" (and (not (eq .os "windows")) (not (or .ephemeral .headless)))
   "rust" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "tofu" (eq .osIDLike "arch" "darwin")
-  "topgrade" (and (ne .osIDLike "fedora") (not .ephemeral) (not .glibc231))
   "zsh" true
 ) -}}
 {{- /* "lla" (eq .osID "arch" "darwin") */ -}}
@@ -98,24 +96,20 @@
 {{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict
   "php" true
-  "sql" true
   "ssh" true
 ) -}}
 {{- else if eq .os "darwin" }}
 {{- $features = mergeOverwrite $features (dict
   "php" true
-  "sql" true
   "ssh" true
 ) -}}
 {{- else if eq .osIDLike "debian" }}
 {{- $features = mergeOverwrite $features (dict
   "php" true
-  "sql" true
   "ssh" true
 ) -}}
 {{- else if eq .osIDLike "fedora" }}
 {{- $features = mergeOverwrite $features (dict
-  "sql" true
   "ssh" true
 ) -}}
 {{- else if eq .os "windows" }}
@@ -125,7 +119,6 @@
 
 {{- if or .ephemeral .headless }}
 {{- $features = mergeOverwrite $features (dict
-  "ghostty" false
   "go" false
   "tmux" false
   "zellij" false

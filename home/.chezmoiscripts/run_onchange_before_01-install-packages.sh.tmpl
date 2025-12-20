@@ -31,100 +31,101 @@ echo >&2 "Installing {{ .packageManager }} packages: $packages"
 
 {{- if eq .osID "alpine" }}
 
-cmd sudo apk update --quiet
+dry_run sudo apk update --quiet
 {{- if .upgrade }}
 
-cmd sudo apk upgrade --quiet
+dry_run sudo apk upgrade --quiet
 {{- end }}
 
 # shellcheck disable=SC2086
-cmd sudo apk add --quiet $packages
+dry_run sudo apk add --quiet $packages
 {{- else if eq .osIDLike "arch" }}
-
-{{- if .upgrade }}
-
-cmd sudo pacman --sync --sysupgrade --needed --noconfirm --quiet
-{{- end }}
-
 
 {{- if .container }}
 
 if [ -f /var/lib/pacman/db.lck ]; then
-  rm /var/lib/pacman/db.lck
+  dry_run rm /var/lib/pacman/db.lck
 fi
 {{- end }}
 
-# shellcheck disable=SC2086
-cmd sudo pacman --sync --needed --noconfirm --quiet $packages
+{{- if .upgrade }}
 
-# if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
-#   if command -v flatpak >/dev/null; then
-#     cmd flatpak list --all
-#   fi
-#   if command -v snap >/dev/null; then
-#     cmd snap list --all
-#   fi
-# fi
+dry_run sudo pacman --refresh --sync --sysupgrade --needed --noconfirm --quiet
+{{- end }}
+
+# shellcheck disable=SC2086
+dry_run sudo pacman --sync --needed --noconfirm --quiet $packages
+
 {{- else if eq .osIDLike "debian" }}
 
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 # export DEBIAN_FRONTEND=noninteractive
 
-cmd sudo -E apt-get update --quiet # >/dev/null
+dry_run sudo -E apt-get update --quiet # >/dev/null
 
 {{- if .upgrade }}
 
-cmd sudo -E apt-get upgrade --quiet --yes # >/dev/null
+dry_run sudo -E apt-get upgrade --quiet --yes # >/dev/null
 {{- end }}
 
 # shellcheck disable=SC2086
-cmd sudo -E apt-get install --quiet --yes $packages # >/dev/null
-{{- else if eq .osID "fedora" }}
+dry_run sudo -E apt-get install --quiet --yes $packages # >/dev/null
+{{- else if and (eq .osID "fedora") (eq .packageManager "dnf") }}
 
-cmd sudo dnf update --assumeyes --quiet
+dry_run sudo dnf update --assumeyes --quiet
 {{- if .upgrade }}
 
-cmd sudo dnf upgrade --assumeyes --quiet
+dry_run sudo dnf upgrade --assumeyes --quiet
 {{- end }}
 
-cmd sudo dnf install --assumeyes --quiet $packages
+dry_run sudo dnf install --assumeyes --quiet $packages
+{{- else if eq .osID "fedora" }}
+
+dry_run rpm-ostree refresh-md # --quiet
+{{- if .upgrade }}
+
+dry_run rpm-ostree upgrade # --quiet
+{{- end }}
+
+dry_run rpm-ostree install --allow-inactive --assumeyes --idempotent $packages
+# --apply-live --quiet
 {{- else if eq .osID "android" }}
 
 {{- if not .container }}
 
 # https://github.com/termux/termux-packages/blob/master/scripts/setup-termux.sh
 if [ ! -d "$HOME/storage/shared" ]; then
-  cmd termux-setup-storage
+  dry_run termux-setup-storage
 fi
 {{- end }}
 
 # if [ -z "${TERMUX_APP_PACKAGE_MANAGER:-}" ]; then
-#   cmd termux-setup-package-manager
+#   dry_run termux-setup-package-manager
 #   TERMUX_APP_PACKAGE_MANAGER=apt
 # fi
 
 # TERM=xterm temux-change-repo # apt edit-sources
 
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
-# cmd apt-get update --quiet >/dev/null
-cmd pkg update --quiet
+# dry_run apt-get update --quiet >/dev/null
+dry_run pkg update --quiet
 
 {{- if .upgrade }}
 
-# cmd apt-get upgrade --quiet --yes # >/dev/null
-cmd pkg upgrade --quiet --yes
+# dry_run apt-get upgrade --quiet --yes # >/dev/null
+dry_run pkg upgrade --quiet --yes
 {{- end }}
 
-cmd pkg install --quiet --yes $packages # >/dev/null
+dry_run pkg install --quiet --yes $packages # >/dev/null
 {{- else if eq .os "windows" }}
 {{- if .upgrade }}
 
-winget upgrade --all --disable-interactivity --silent
+dry_run winget upgrade --all --disable-interactivity --silent
 {{- end }}
 
 # NOTE: winget.json is updated after apply
 # Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256sum }}
-winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
+dry_run winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
 {{- if not .upgrade }} --no-upgrade{{ end }}
 # --accept-package-agreements --accept-source-agreements
 {{- else }}
@@ -148,9 +149,9 @@ exit 1
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"
 if [ "${selected_editor##*/}" = nano ]; then
   if [ -x /usr/bin/vim.basic ]; then
-    cmd sudo update-alternatives --set editor /usr/bin/vim.basic
+    dry_run sudo update-alternatives --set editor /usr/bin/vim.basic
   elif [ -x /usr/bin/vim.tiny ]; then
-    cmd sudo update-alternatives --set editor /usr/bin/vim.tiny
+    dry_run sudo update-alternatives --set editor /usr/bin/vim.tiny
   fi
 fi
 {{- end }}

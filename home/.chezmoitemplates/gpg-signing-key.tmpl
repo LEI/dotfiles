@@ -1,3 +1,4 @@
 {{- /* TODO(init): gpg --list-keys --with-colons | jc --gpg */ -}}
-{{- $cmd := printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" (.email | quote) -}}
+{{- /* $cmd := printf "gpg --list-keys | grep %s -B1 | head -n1 | tr -s ' ' | cut -d' ' -f11-14 | tr -d ' \n'" (.email | quote) */ -}}
+{{- $cmd := printf "gpg --list-keys --with-colons | grep -i '<%s>:' -B2 | head -n1 | cut -d: -f5" .email | trim -}}
 {{- output "sh" "-c" $cmd | trim -}}

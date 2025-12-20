@@ -14,10 +14,30 @@ if ! command -v brew >/dev/null; then
     run sudo chown -R "$USER:$USER" /home/linuxbrew/.linuxbrew
     run git config --global --add safe.directory /home/linuxbrew/.linuxbrew/Homebrew
     # SUDO_ASKPASS=1
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # NOTE: Homebrew/install/HEAD/install.sh -> 404
+    install_script="$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    if [ -z "$install_script" ]; then
+      echo >&2 "Failed to download install script"
+      exit 1
+    fi
+    /bin/bash -c "$install_script"
     echo >&2 "Installed homebrew"
   fi
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{- else }}
+
+if ! command -v brew >/dev/null; then
+  echo >&2 "Installing homebrew"
+  # FIXME: Need sudo access on macOS
+  run sudo echo
+  install_script="$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  if [ -z "$install_script" ]; then
+    echo >&2 "Failed to download install script"
+    exit 1
+  fi
+  /bin/bash -c "$install_script"
+  echo >&2 "Installed homebrew"
 fi
 {{- end }}
 

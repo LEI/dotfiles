@@ -49,16 +49,12 @@ aur: {{ $aurPackages | toJson }}
 {{- $allBrewPackages := dict }}
 {{- $brewPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "brew")) | fromJson }}
 {{- $allBrewPackages = merge $allBrewPackages $brewPackages }}
-brew: {{ $brewPackages | toJson }}
 {{- $caskPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "cask")) | fromJson }}
 {{- $allBrewPackages = merge $allBrewPackages $caskPackages }}
-cask: {{ $caskPackages | toJson }}
-{{- if eq .chezmoi.os "darwin" }}
-{{- $masPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "mas")) | fromJson }}
-mas: {{ $masPackages | toJson }}
-{{- end }}
+{{- $masPackages := eq .os "darwin" | ternary
+  (includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "mas")))
+  "{}" | fromJson }}
 {{- $vscodePackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "vscode")) | fromJson }}
-vscode: {{ $vscodePackages | toJson }}
 
 {{- $taps := dict }}
 {{- range $name, $pkg := $allBrewPackages }}
@@ -86,34 +82,45 @@ vscode: {{ $vscodePackages | toJson }}
 {{-     end -}}
 {{-     $_ := set $taps $name (dict "options" $options) }}
 {{-   else if eq $type "brew" }}
-{{-     if get $.packages.brew $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.brew $name) "options") $options -}}
+{{-     if get $brewPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $.packages.brew $name (dict "options" $options) }}
+{{-     $_ := set $brewPackages $name (dict "options" $options) }}
 {{-   else if eq $type "cask" }}
-{{-     if get $.packages.cask $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.cask $name) "options") $options -}}
+{{-     if get $caskPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $.packages.cask $name (dict "options" $options) }}
+{{-     $_ := set $caskPackages $name (dict "options" $options) }}
 {{-   else if eq $type "mas" }}
-{{-     if get $.packages.mas $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.mas $name) "options") $options -}}
+{{-     if get $masPackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $.packages.mas $name (dict "options" $options) }}
+{{-     $_ := set $masPackages $name (dict "options" $options) }}
 {{-   else if eq $type "vscode" }}
-{{-     if get $.packages.vscode $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $.packages.vscode $name) "options") $options -}}
+{{-     if get $vscodePackages $name -}}
+{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $.packages.vscode $name (dict "options" $options) }}
+{{-     $_ := set $vscodePackages $name (dict "options" $options) }}
 {{-   end }}
 {{- end }}
 tap: {{ $taps | toJson }}
+brew: {{ $brewPackages | toJson }}
+cask: {{ $caskPackages | toJson }}
+{{- if eq .os "darwin" }}
+mas: {{ $masPackages | toJson }}
+{{- end }}
+vscode: {{ $vscodePackages | toJson }}
 
 {{- end }}
 
-{{- if eq .chezmoi.os "windows" }}
+{{- if eq .os "windows" }}
 {{- $scoopPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "scoop")) | fromJson }}
 scoop: {{ $scoopPackages | toJson }}
+{{- end }}
+
+{{- if and (eq .osIDLike "arch" "fedora") (lookPath "flatpak" | isExecutable) }}
+{{- $flatpakPackages := includeTemplate "get-packages.json.tmpl" (mergeOverwrite . (dict "packageType" "flatpak")) | fromJson }}
+flatpak: {{ $flatpakPackages | toJson }}
 {{- end }}
 
 {{- if .features.mise }}

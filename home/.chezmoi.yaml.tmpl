@@ -35,12 +35,16 @@
 {{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
 {{- end -}}
 
+{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}
+
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
 {{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
 {{- $osVersion := get .chezmoi.osRelease "versionID" -}}
 {{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
 {{-   $osID = "android" -}}
 {{- end -}}
+
+{{- $variantID := (get (get .chezmoi "osRelease" | default dict) "variantID") -}}
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
 
@@ -113,6 +117,7 @@
   "sessionType" (env "XDG_SESSION_TYPE")
   "system" $system
   "timezone" $timezone
+  "variantID" $variantID
   "wsl" $wsl
 
   "email" $email
@@ -181,14 +186,19 @@ data:
   "arch" "pacman"
   "darwin" "brew"
   "debian" "apt"
-  "fedora" "dnf"
+  "fedora" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
   "windows" "winget"
 }}
 {{- $packageManager := get $packageManagerMap $osIDLike }}
   packageManager: {{ $packageManager | quote }}
 {{- $_ := set . "defaultType" $packageManager }}
 {{- $packages := includeTemplate "packages-data.yaml.tmpl" (mergeOverwrite $context (dict
+  "os" .chezmoi.os
+  "osID" $osID
+  "osIDLike" $osIDLike
   "packageManager" $packageManager
+  "packages" (get . "packages" | default (dict $packageManager dict))
+  "variantID" $variantID
 )) | fromYaml }}
   packages: {{ $packages | toJson }}
 
@@ -210,17 +220,17 @@ diff:
   # exclude:
   #   - externals
   #   - scripts
-{{- if lookPath "difft" | isExecutable }}
-  # https://github.com/twpayne/chezmoi/discussions/2097
-  command: difft
-  args: [--color=always, --skip-unchanged]
-  pager: cat # less
-{{- else if lookPath "delta" | isExecutable }}
-  pager: delta
-{{- else if $codespaces }}
-  # command: code
-  # args: [--wait, --diff]
-{{- end }}
+# {{- if lookPath "difft" | isExecutable }}
+#   # https://github.com/twpayne/chezmoi/discussions/2097
+#   command: difft
+#   args: [--color=always, --skip-unchanged]
+#   pager: cat # less
+# {{- else if lookPath "delta" | isExecutable }}
+#   pager: delta
+# {{- else if $codespaces }}
+#   # command: code
+#   # args: [--wait, --diff]
+# {{- end }}
 
 github:
   refreshPeriod: 12h
@@ -244,12 +254,25 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-{{- $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
-{{- $paths := env "PATH" | splitList ":" }}
-{{- if and $features.mise (not (has $miseShims $paths)) }}
-{{-   $paths = append $paths $miseShims }}
+{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
+{{-   $paths := env "PATH" | splitList ":" }}
+{{-   if and $features.mise (not (has $miseShims $paths)) }}
+{{-     $paths = append $paths $miseShims }}
+{{-   end }}
+{{- if or $features.brew (eq .chezmoi.os "darwin") }}
+{{-   $brewPrefix := ne .chezmoi.os "linux" | ternary
+  (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local")
+  "/home/linuxbrew/.linuxbrew" }}
+{{-   $brewBin := joinPath $brewPrefix "bin" }}
+{{-   if not (has $brewBin $paths) }}
+{{-     $paths = prepend $paths $brewBin }}
+{{-   end }}
+{{-   $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
+{{-   if not (has $rubyBin $paths) -}}
+{{-     $paths = prepend $paths $rubyBin }}
+{{-   end -}}
 {{- end }}
-{{- $paths = append $paths $binDir }}
+{{-   $paths = append $paths $binDir }}
   PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 
@@ -257,4 +280,3 @@ scriptEnv:
 
 # Files and directories not group writeable
 # umask: 0o022
-{{- warnf "Profile: %s (ephemeral: %v, headless: %v)" .profile .ephemeral .headless }}

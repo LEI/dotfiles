@@ -49,20 +49,24 @@ else
 
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
     ARCH=x86_64
+  elif [ "$CHEZMOI_ARCH" = arm64 ]; then
+    ARCH=aarch64
   else
     ARCH="$CHEZMOI_ARCH"
   fi
   if [ "$CHEZMOI_OS" = darwin ]; then
-    OS=darwin
+    OS=apple-darwin
   else
     OS=unknown-linux
   fi
   NAME="$ARCH-$OS"
+{{- if ne .os "darwin"}}
   if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)" 2>/dev/null; then
     NAME="$NAME-musl"
   else
     NAME="$NAME-gnu"
   fi
+  {{- end }}
 
   BIN_DIR="$HOME/.local/bin"
   if [ ! -d "$BIN_DIR" ]; then
@@ -110,6 +114,8 @@ if ! command -v cargo-binstall >/dev/null; then
   echo >&2 "Installing cargo-binstall"
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
     ARCH=x86_64
+  elif [ "$CHEZMOI_ARCH" = arm64 ]; then
+    ARCH=aarch64
   else
     ARCH="$CHEZMOI_ARCH"
   fi
