@@ -153,6 +153,9 @@ main() {
     fi
     # "${command}_packages" vscode
   fi
+  if command -v flatpak >/dev/null; then
+    "${command}_packages" flatpak
+  fi
   # if command -v go >/dev/null; then
   #   "${command}_packages" go
   # fi

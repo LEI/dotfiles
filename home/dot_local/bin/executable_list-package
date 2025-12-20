@@ -37,6 +37,10 @@ dnf)
   # dnf list --installed | cut -d' ' -f1 | cut -d. -f1
   dnf repoquery --leaves --userinstalled | sed -e 's/-[0-9]:.*$//'
   ;;
+flatpak)
+  # flatpak list --app --columns=application,version
+  flatpak list --app --columns=application | grep -v '^org\.fedoraproject\|^org\.gnome'
+  ;;
 gem)
   gem list | cut -d' ' -f1
   ;;
@@ -66,6 +70,12 @@ pip)
 pipx)
   pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
   ;;
+rpm)
+  rpm-ostree status --json | jq --raw-output '.deployments[0]["requested-packages"][]'
+  ;;
+# snap)
+#   snap list --all
+#   ;;
 termux)
   pkg list-installed | grep -v '^Listing\.\.\.' | cut -d/ -f1
   ;;
