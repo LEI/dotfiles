@@ -11,13 +11,10 @@ set -eu
 {{- else if lookPath "systemctl" | isExecutable }}
 
 # loginctl session-status
-if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
-  set +e
-  cmd systemctl --user status tmux.service
-  ret=$?
-  set -e
-  if [ $ret -ne 0 ] && [ $ret -ne 3 ]; then # EXIT_NOTIMPLEMENTED
-    exit $ret
+if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && cmd systemctl --user status tmux.service; then
+  exit_code="$?"
+  if [ "$exit_code" -ne 0 ] && [ "$exit_code" -ne 3 ]; then # EXIT_NOTIMPLEMENTED
+    exit "$exit_code"
   fi
 fi
 {{- end }}
