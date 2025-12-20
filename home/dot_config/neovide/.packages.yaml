@@ -4,5 +4,7 @@ packages:
   #   enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
   #   link: false
   neovide-app:
-    enabled: '{{ and .features.neovim (eq .osIDLike "darwin") (not .headless) }}'
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+    enabled: '{{ and .features.neovim (eq .osIDLike "darwin" "fedora") (not .headless) }}'
+    nameOverwrite:
+      fedora: dev.neovide.neovide
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
