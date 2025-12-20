@@ -13,6 +13,10 @@ main() {
   if command -v parallel >/dev/null; then
     jobs="${TEST_JOBS:-$(nproc)}"
   fi
+  if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
+    set -- --pretty "$@"
+  fi
+  # set -- --trace "$@"
   set -x
   bats \
     --jobs "$jobs" \
