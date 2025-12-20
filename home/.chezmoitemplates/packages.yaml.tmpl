@@ -280,8 +280,8 @@ packages:
   #   enabled: {{ lookPath "strace" | isExecutable }} # x86-64
   impala iwd:
     enabled: {{ and (eq .osIDLike "arch") (eq .chassisType "laptop") }}
-  # incus incus-ui:
-  #   enabled: {{ eq .osIDLike "arch" "darwin" }}
+  incus: # incus-ui
+    enabled: {{ and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   iperf3: # speedtest-cli
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
     nameOverwrite:
@@ -602,6 +602,8 @@ packages:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   # tracexec:
   #   enabled: {{ and (eq .osIDLike "arch") (ne .profile "minimal") }}
+  trash-cli:
+    enabled: {{ and (eq .osIDLike "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   tre-command:
     enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
@@ -918,6 +920,8 @@ osPackages:
       onedrive:
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # pearcleaner:
+      utm:
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # rustdesk:
       # safari-technology-preview:
       scroll-reverser:
