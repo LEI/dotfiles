@@ -40,11 +40,13 @@ echo >&2 "Installing atuin"
 ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
 OS=unknown-linux
 NAME="atuin-$ARCH-$OS"
+{{- if ne .os "darwin"}}
 if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
   NAME="$NAME-musl"
 else
   NAME="$NAME-gnu"
 fi
+{{- end }}
 VERSION="$(get_release atuinsh/atuin)"
 URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
 BIN="$NAME/atuin"
