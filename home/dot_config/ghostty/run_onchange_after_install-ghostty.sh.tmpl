@@ -7,7 +7,9 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v ghostty; then
-  {{- if eq .osID "debian" }}
+  {{- if eq .osID "darwin" }}
+  echo >&2 "Managed by homebrew"
+  {{- else if eq .osID "debian" }}
   echo >&2 "Installing ghostty"
   # https://github.com/clayrisser/debian-ghostty/
   export DEBIAN_FRONTEND=noninteractive
@@ -46,9 +48,16 @@ EOF
   cmd curl -LSfs "$URL" -o "$TMPDIR/ghostty.deb"
   cmd sudo apt-get install --quiet --yes "$TMPDIR/ghostty.deb"
   {{- else if eq .osID "fedora" }}
-  cmd sudo dnf copr enable --assumeyes --quiet scottames/ghostty
-  # cmd sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
-  cmd sudo dnf install --assumeyes --quiet ghostty
+  if command -v dnf >/dev/null; then
+    cmd sudo dnf copr enable --assumeyes --quiet scottames/ghostty
+    # cmd sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+    cmd sudo dnf install --assumeyes --quiet ghostty
+  else
+    cmd . /etc/os-release
+    cmd curl -fsSL "https://copr.fedorainfracloud.org/coprs/scottames/ghostty/repo/fedora-${VERSION_ID}/scottames-ghostty-fedora-${VERSION_ID}.repo" | sudo tee /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo >/dev/null
+    cmd rpm-ostree refresh-md
+    cmd rpm-ostree install --allow-inactive --assumeyes --idempotent ghostty
+  fi
   # . /etc/os-release
   # cmd curl -fsSL "https://copr.fedorainfracloud.org/coprs/scottames/ghostty/repo/fedora-${VERSION_ID}/scottames-ghostty-fedora-${VERSION_ID}.repo" | sudo tee /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo > /dev/null
   # cmd rpm-ostree refresh-md

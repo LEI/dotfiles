@@ -1,7 +1,7 @@
 ---
 packages:
   ghostty:
-    enabled: '{{ and .features.ghostty (not (eq .osIDLike "debian" "fedora")) (not .headless) }}'
+    enabled: '{{ and .features.ghostty (not (eq .osIDLike "debian")) (not .headless) }}'
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   libadwaita:
     enabled: '{{ and .features.ghostty (eq .os "android" "linux") }}'
