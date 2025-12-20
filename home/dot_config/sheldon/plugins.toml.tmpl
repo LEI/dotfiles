@@ -10,7 +10,9 @@
 #
 # See the documentation for more https://github.com/rossmacarthur/sheldon#readme
 
-shell = "bash"
+{{ $shell := env "SHELL" | base -}}
+
+shell = {{ $shell | quote }}
 
 [templates]
 # Add the directory after PATH
@@ -23,7 +25,7 @@ PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
 [plugins.mise]
 inline = """
 # Must be first to ensure tools are available
-TIMEFORMAT="mise: %R" bench eval "$(mise activate "$shell")"
+BENCHFMT="mise" bench eval "$(mise activate "$shell")"
 """
 {{- end }}
 
@@ -69,25 +71,44 @@ fi
 source_plugins sh
 """
 
+{{- if .features.carapace }}
+
+# https://carapace-sh.github.io/carapace-bin/setup.html#bash
+[plugins.carapace]
+inline = """
+if command -v carapace >/dev/null; then
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  if [ "$shell" = zsh ]; then
+    autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
+    zstyle ':completion:*' format $'\\e[2;37mCompleting %d\\e[m'
+  fi
+  # BENCHFMT="carapace" bench source <(carapace _carapace)
+  BENCHFMT="carapace" bench source <(carapace _carapace | sed -e 's/ && +X//')
+else
+  echo >&2 "Command 'carapace' not found"
+fi
+"""
+{{- end }}
+
 {{- if .features.direnv }}
 
 [plugins.direnv]
 inline = """
-TIMEFORMAT="direnv: %R" bench eval "$(direnv hook "$shell")"
+BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
 """
 {{- end }}
 
 [plugins.starship]
 # github = "starship/starship"
 inline = """
-TIMEFORMAT="starship: %R" bench eval "$(starship init "$shell")"
+BENCHFMT="starship" bench eval "$(starship init "$shell")"
 """
 
 {{- if .features.zoxide }}
 
 [plugins.zoxide]
 inline = """
-TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
+BENCHFMT="zoxide" bench eval "$(zoxide init "$shell")"
 """
 {{- end }}
 
@@ -97,12 +118,20 @@ TIMEFORMAT="zoxide: %R" bench eval "$(zoxide init "$shell")"
 inline = """
 # Must be after starship to preserve PROMPT_COMMAND
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
-  TIMEFORMAT="atuin: %R" bench eval "$(atuin init --disable-up-arrow "$shell")"
+  BENCHFMT="atuin" bench eval "$(atuin init --disable-up-arrow "$shell")"
 fi
 """
 {{- end }}
 
-# For example:
-#
 # [plugins.base16]
 # github = "chriskempson/base16-shell"
+
+{{- if eq $shell "zsh" }}
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+use = ["{{ `{{ name }}` }}.zsh"]
+
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+{{- end }}
