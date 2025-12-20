@@ -1,0 +1,50 @@
+{{- if and (eq .osIDLike "arch" "fedora") (lookPath "flatpak" | isExecutable) -}}
+#!/bin/sh
+
+# TODO: manage flatpaks from homebrew bundle
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+cmd flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+{{- if eq (env "CACHE_BUST") "true" }}
+# flatpak hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "flatpak" | sha256sum }}
+{{- end }}
+echo >&2 "Installing flatpak packages"
+
+{{- $flatpakPackages := get .packages "flatpak" | default dict }}
+
+{{- if empty $flatpakPackages }}
+{{-   warnf "missing flatpak packages" }}
+{{- end }}
+
+flatpak_packages="{{ $flatpakPackages | keys | sortAlpha | join " " }}"
+
+{{- $before := includeTemplate "pluck.tmpl" (dict
+  "key" "before_script"
+  "values" .packages.flatpak
+) | trim }}
+{{- if $before }}
+
+# Before script:
+{{ $before }}
+{{- end }}
+
+cmd flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages 
+# --user/--system
+# --installation=chezmoi
+
+{{- $after := includeTemplate "pluck.tmpl" (dict
+  "key" "after_script"
+  "values" .packages.flatpak
+) | trim }}
+{{- if $after }}
+
+# After script:
+{{ $after }}
+{{- end }}
+
+echo >&2 "Installed flatpak packages"
+{{ end -}}
