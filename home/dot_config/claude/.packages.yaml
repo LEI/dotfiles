@@ -5,11 +5,11 @@ packages:
   #   claude config set --global autoUpdates false
   # fi
   claude-code:
-    enabled: '{{ and .features.ai (eq .osIDLike "arch" "darwin" "windows") }}'
+    enabled: '{{ and .features.ai (eq .osIDLike "arch" "darwin" "fedora" "windows") }}'
     nameOverwrite:
       npm: "@anthropic-ai/claude-code"
       windows: Anthropic.Claude
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" "npm") }}'
   claude-monitor:
     enabled: "{{ .features.ai }}"
     type: uv
