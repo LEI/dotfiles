@@ -38,7 +38,9 @@ if chezmoi feature goss; then
   # fi
   # mise run goss validate
   cd ~/.config/goss
-  timeout 5m goss validate # --vars=vars.yaml
+  if ! timeout 5m goss validate; then # --vars=vars.yaml
+    echo >&2 "WARN: goss validate exited with code $?"
+  fi
 fi
 
 if chezmoi feature mise; then
@@ -55,9 +57,8 @@ if chezmoi feature neovim; then
   # echo
 fi
 
-if chezmoi feature tmux; then
-  timeout 5m tmux ls
-  # tmux source ~/.config/tmux/tmux.conf
+if chezmoi feature tmux && timeout 5m tmux ls; then
+  timeout 5m tmux source ~/.config/tmux/tmux.conf
 fi
 
 # FIXME(i3): toggles floating window mode
