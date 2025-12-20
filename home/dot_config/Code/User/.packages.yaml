@@ -7,4 +7,5 @@ packages:
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
     nameOverwrite:
       arch: code
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+      fedora: com.visualstudio.code
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'

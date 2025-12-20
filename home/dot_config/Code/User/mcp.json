@@ -1,15 +1,32 @@
 {
   "servers": {
-    "context7": {
+    "context7-local": {
       "args": ["-y", "@upstash/context7-mcp"],
       "command": "npx",
-      "type": "stdio"
+      "type": "stdio",
+      "enabled": false
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
     },
     "exa": {
       "args": ["-y", "exa-mcp-server"],
       "command": "npx",
+      "enabled": false,
       "env": {
         "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "type": "stdio"
+    },
+    "firecrawl": {
+      "args": ["-y", "firecrawl-mcp"],
+      "command": "npx",
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       },
       "type": "stdio"
     },
