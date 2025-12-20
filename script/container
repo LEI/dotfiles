@@ -313,11 +313,6 @@ run_bootstrap() {
   BIN_DIR="$HOME/.local/bin"
   PATH="$PATH:$BIN_DIR"
 
-  # Ensure bats is available for tests
-  if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
-
   # chezmoi package list mise
   if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
     PATH="$PATH:$HOME/.local/share/mise/shims"
@@ -357,6 +352,19 @@ run_bootstrap() {
       else
         # FIXME: user 'test' in use
         adduser -Ds /bin/bash "$USER" || true # -G wheel
+      fi
+    fi
+    if groups | grep -qv "$USER"; then
+      echo >&2 "Creating group: $USER"
+      if command -v groupadd >/dev/null; then
+        groups "$USER"
+        groups
+        groupadd "$USER" --users "$USER" || true
+      else
+        addgroup "$USER" || true
+      fi
+      if command -v usermod >/dev/null; then
+        usermod -aG "$USER" "$USER"
       fi
     fi
     if groups | grep -qv wheel; then
@@ -418,21 +426,20 @@ run_bootstrap() {
   # fi
   prefix_run_command "${bootstrap[@]}" "$@"
   # prefix_run_command mise self-update
-  run_command mise run check
-  run_command mise run update
+  run_command ./script/check
+  run_command ./script/update
 
   # if command -v kcov >/dev/null; then
   #   export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
   #   run_command ./script/coverage # --collect-only
   # fi
-  if command -v bats >/dev/null; then
-    if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
-      set -- --pretty
-    else
-      set --
-    fi
-    run_command ./script/test "$@"
+
+  # Ensure bats is available for tests
+  if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
+
+  run_command ./script/test
 
   # TODO: keep the container running after "up --build --detached"
   # bash -i
@@ -469,7 +476,7 @@ main() {
     local images=(
       android # termux
       alpine
-      # archlinux
+      archlinux
       debian
       ubuntu
       fedora
