@@ -33,7 +33,11 @@ enabled=1
 gpgcheck=0
 gpgkey=https://yum.fury.io/nushell/gpg.key" | cmd sudo tee /etc/yum.repos.d/fury-nushell.repo
 fi
-sudo dnf install --assumeyes --quiet nushell
+if command -v dnf >/dev/null; then
+  sudo dnf install --assumeyes --quiet nushell
+else
+  cmd rpm-ostree install --allow-inactive --assumeyes --idempotent nushell
+fi
 {{- end }}
 echo >&2 "Installed nushell"
 
