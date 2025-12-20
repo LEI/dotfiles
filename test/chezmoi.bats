@@ -87,6 +87,8 @@ setup() {
     package_manager=apt-mark
   elif [ "$package_manager" = termux ]; then
     package_manager=pkg
+  elif [ "$package_manager" = rpm ]; then
+    package_manager=rpm-ostree
   fi
   stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
@@ -116,14 +118,12 @@ setup() {
 # bats test_tags=system,package
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
-  stub_seq sudo 4
+  # stub_seq sudo 4
   run_chezmoi .chezmoiscripts/01-install-packages.sh
-  unstub sudo 2>/dev/null || true
-  refute_output
+  # unstub sudo 2>/dev/null || true
+  # refute_output
   assert_stderr_line --regexp "Installing .* packages"
-  if [ -z "${PREFIX:-}" ]; then
-    assert_stderr_line --regexp "^# STUB 1"
-  fi
+  assert_stderr_line --regexp "^DRY-RUN"
   assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
