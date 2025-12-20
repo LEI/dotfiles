@@ -2,12 +2,6 @@ return {
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
   { 'nvim-lua/plenary.nvim', tag = 'v0.1.4', lazy = true },
   {
-    'nvim-neotest/nvim-nio',
-    -- tag = 'v1.10.1',
-    version = 'v1.x',
-    lazy = true,
-  },
-  {
     'MeanderingProgrammer/render-markdown.nvim',
     -- tag = 'v8.6.0',
     version = 'v8.x',

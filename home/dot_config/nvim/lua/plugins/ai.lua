@@ -57,18 +57,17 @@ return {
         },
       },
       nes = {
-        -- Requires GitHub Copilot subscription
+        enabled = false,
+        --[[
         enabled = function(buf)
           local bufname = vim.api.nvim_buf_get_name(buf)
           if not should_attach(bufname) then
             return false
           end
-          local enabled = vim.g.sidekick_nes ~= false and vim.b.sidekick_nes ~= false
-          -- if enabled then
-          --   vim.print('NES enabled: ' .. vim.fs.basename(bufname) or bufname)
-          -- end
-          return enabled
+          return vim.g.sidekick_nes ~= false and vim.b.sidekick_nes ~= false
         end,
+        ]]
+        --
       },
     },
     keys = {
@@ -197,8 +196,8 @@ return {
       auto_toggle_mcp_servers = true,
 
       use_bundled_binary = false,
+      -- cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
 
-      cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
       -- cmd = node_prefix .. 'node',
       -- cmdArgs = { node_prefix .. 'mcp-hub' },
 
@@ -249,6 +248,16 @@ return {
       },
     },
     opts = {
+      -- acp_providers = {
+      --   ['opencode'] = {
+      --     command = 'opencode',
+      --     args = { 'acp' },
+      --     env = {
+      --       OPENCODE_API_KEY = os.getenv('OPENCODE_API_KEY'),
+      --     },
+      --   },
+      -- },
+
       -- provider = 'claude',
       -- providers = {
       --   claude = {
@@ -420,7 +429,7 @@ return {
           return true
         end,
         suggestion = {
-          auto_trigger = true, -- false,
+          auto_trigger = true,
           keymap = {
             accept = '<M-l>',
             accept_word = false,
@@ -430,6 +439,17 @@ return {
             dismiss = '<M-h>', -- '<C-]>',
           },
         },
+        nes = {
+          enabled = false, -- requires copilot-lsp as a dependency
+          auto_trigger = false,
+          keymap = {
+            accept_and_goto = false,
+            accept = false,
+            dismiss = false,
+          },
+        },
+        -- copilot_model = '',
+        disable_limit_reached_message = true,
       })
     end,
   },

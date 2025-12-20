@@ -15,10 +15,13 @@ if not fs_stat(lazypath) then
     os.exit(1)
   end
 end
--- cd ~/.local/share/nvim/lazy/lazy.nvim
--- git remote add fork https://github.com/LEI/lazy.nvim.git
--- git fetch fork
--- git checkout feat/check-tags
+--[[
+cd ~/.local/share/nvim/lazy/lazy.nvim
+git remote add fork https://github.com/LEI/lazy.nvim.git
+git fetch fork
+git checkout feat/check-tags
+]]
+--
 vim.opt.rtp:prepend(lazypath)
 
 -- Make sure to setup `mapleader` and `maplocalleader` before

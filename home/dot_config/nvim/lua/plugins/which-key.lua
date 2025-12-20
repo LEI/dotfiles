@@ -127,7 +127,11 @@ return {
         { '<leader><tab>', group = '+tabs' },
         {
           mode = { 'n', 'v' },
-          { '<leader>q', '<cmd>q<cr>', desc = 'Quit editor' },
+          {
+            package.loaded.persistence and '<leader>qq' or '<leader>q',
+            '<cmd>q<cr>',
+            desc = 'Quit the current window',
+          },
           { '<leader>w', '<cmd>w<cr>', desc = 'Write file' },
         },
       })

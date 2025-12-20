@@ -11,11 +11,11 @@ return {
     },
     -- stylua: ignore
     keys = {
-      { '<leader>S', '', desc = '+session' },
-      { '<leader>Sl', function() require('persistence').load({ last = true }) end, desc = 'Restore last session' },
-      { '<leader>Sq', '<cmd>Stop<cr>', desc = 'Stop persistence' },
-      { '<leader>Sr', function() require('persistence').load() end, desc = 'Restore session' },
-      { '<leader>Ss', function() require('persistence').select() end,desc = 'Select session' },
+      { '<leader>q', '', desc = '+session/quit' },
+      { '<leader>ql', function() require('persistence').load({ last = true }) end, desc = 'Restore last session' },
+      { '<leader>qd', '<cmd>Stop<cr>', desc = 'Stop persistence' },
+      { '<leader>qs', function() require('persistence').load() end, desc = 'Restore session' },
+      { '<leader>qS', function() require('persistence').select() end,desc = 'Select session' },
     },
     -- lazy = false,
     init = function()

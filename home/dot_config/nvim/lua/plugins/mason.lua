@@ -36,7 +36,7 @@ local mason_tools = {
   -- 'gitleaks',
   -- 'gitlint',
   { 'goimports', condition = has_go },
-  { 'hadolint', version = 'v2.12.0' },
+  'hadolint', -- { 'hadolint', version = 'v2.12.0' },
   'markdownlint',
   -- { 'phpactor', condition = has_php },
   { 'phpcs', condition = has_php },
@@ -63,7 +63,13 @@ local mason_lsp = {
   { 'intelephense', condition = has_php },
   'lua_ls', -- 'lua-language-server',
   'marksman', -- '',
-  'nginx_language_server', -- 'nginx-language-server',
+  {
+    -- FIXME: install 0.9.0 only if <3.14,>=3.9
+    'nginx_language_server', -- 'nginx-language-server',
+    condition = function()
+      return vim.fn.executable('nginx') == 1
+    end,
+  },
   { 'postgres-language-server', enabled = vim.g.features.sql }, -- 'postgres_lsp',
   -- 'sqlls', -- '',
   'tailwindcss', -- 'tailwindcss-language-server',
