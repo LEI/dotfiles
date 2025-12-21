@@ -1,4 +1,4 @@
-{{- if dig "git" "github" nil . -}}
+{{- if and (hasKey . "git") (hasKey .git "github") -}}
 {{- includeTemplate "gitconfig" (mustMerge .git.github (dict "name" .name)) -}}
 
 {{- if get .git.github "user" }}
@@ -10,4 +10,4 @@
 
 # [hub]
 # 	protocol = https
-{{- end -}}
+{{ end -}}

@@ -15,14 +15,15 @@ fi
 
 # cmd gh ssh-key list
 
-{{ if dig "git" "github" nil . -}}
+{{- if and (hasKey . "git") (hasKey .git "github") }}
+
 # TODO: check active profile
 # github_email="{{ .git.github.email }}"
 # if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then
 #   echo >&2 "No GPG key found for: $github_email"
 #   # cmd gh gpg-key add "$key_file"
 # fi
-{{- end }}
+{{ end }}
 
 {{- $extensions := list }}
 {{- range $index, $pkg := .ghExtensions }}
