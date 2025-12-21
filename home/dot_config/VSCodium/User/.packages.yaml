@@ -1,11 +1,12 @@
 ---
+enabled: "{{ .features.vscodium }}"
 packages:
   vscodium:
-    enabled: "{{ and .features.vscodium (not .headless) }}"
+    # enabled: "{{ .features.vscodium }}"
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
     nameOverwrite:
       arch: vscodium-bin
+      fedora: com.vscodium.codium
       windows: VSCodium.VSCodium
   # vscodium@insiders:
-  #   enabled: '{{ and .features.vscodium (not .headless) }}'
   #   type: cask

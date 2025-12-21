@@ -5,7 +5,7 @@ packages:
     enabled: {{ and (not (eq .osIDLike "fedora")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-    )) }}
+    )) (ne .profile "minimal") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       darwin: sevenzip
       # FIXME: not recognized by "scoop check" which also recommends innounp and dark/wixtoolset
@@ -118,6 +118,8 @@ packages:
     nameOverwrite:
       windows: direnv.direnv
     # type: mise
+  distrobox:
+    enabled: {{ and (eq .osIDLike "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   dive: # sou
     enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
@@ -225,7 +227,7 @@ packages:
       fedora: golang
       windows: golang.go
   google-chrome:
-    enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
+    enabled: {{ and (eq .osIDLike "darwin" "windows") (not (or .ephemeral .headless)) }}
     nameOverwrite:
       # darwin: google-chrome{,beta,canary,dev}
       windows: Google.Chrome
@@ -399,7 +401,7 @@ packages:
       # darwin: openssl # @3
       fedora: openssl-devel
   openssh:
-    enabled: {{ and .features.ssh }} # (eq .osIDLike "arch" "darwin")
+    enabled: {{ .features.ssh }}
     nameOverwrite:
       debian: openssh-client
   openvpn-connect: # tunnelblick
@@ -664,7 +666,7 @@ packages:
     enabled: {{ and
       (not (eq .osIDLike "alpine" "android" "debian"))
       (ne .profile "minimal")
-      (not .headless)
+      (not (or .ephemeral .headless))
     }}
     nameOverwrite:
       arch: vlc vlc-plugins-all
@@ -916,6 +918,8 @@ osPackages:
       microsoft-teams: # microsoft-auto-update
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # microsoft-word: # doxx, hygg
+      monitorcontrol:
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # ngrok:
       onedrive:
         enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
@@ -975,8 +979,6 @@ osPackages:
       # chezmoi:
       clang:
       dconf-editor:
-        enabled: {{ not (or .ephemeral .headless) }}
-      distrobox:
         enabled: {{ not (or .ephemeral .headless) }}
       espeak:
         enabled: {{ not (or .ephemeral .headless) }}

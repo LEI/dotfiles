@@ -4,9 +4,6 @@ packages:
   neovim:
     enabled: '{{ and .features.neovim (or (ne .osIDLike "debian") (not .glibc231)) }}'
     nameOverwrite:
-      # android: neovim
-      # arch: neovim
-      # darwin: neovim
       windows: '{{ eq .packageType "winget" | ternary "Neovim.Neovim" nil }}'
     type: '{{ eq .packageType "npm" "gem" | ternary .packageType nil }}'
   copilot:
