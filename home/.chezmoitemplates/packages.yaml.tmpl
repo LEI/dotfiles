@@ -794,7 +794,7 @@ osPackages:
       # cmake:
       container:
         enabled: {{ and (eq .chezmoi.arch "arm64") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
-      # coreutils:
+      coreutils: # timeout
       # cpanminus:
       # daemonize:
       # dbus:

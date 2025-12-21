@@ -153,7 +153,7 @@ setup() {
   assert_stderr_line "DRY-RUN: brew update --quiet"
   # assert_stderr_line "brew bundle --file=/dev/stdin --no-upgrade list"
   # assert_stderr_line "brew bundle --file=/dev/stdin --dry-run list"
-  assert_stderr_line --regexp "brew bundle --file=/dev/stdin .* list"
+  assert_stderr_line "DRY-RUN: brew bundle --file=/dev/stdin --no-upgrade"
   assert_success
 }
 

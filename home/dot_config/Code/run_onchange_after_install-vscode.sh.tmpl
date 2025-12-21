@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if eq .os "darwin" }}
+
+if [ -d "$HOME/Library/Application Support/Code" ] && ! [ -L "$HOME/Library/Application Support/Code" ]; then
+  cmd rmdir "$HOME/Library/Application Support/Code"
+  cmd ln -s "$HOME/.config/Code" "$HOME/Library/Application Support/Code"
+fi
+{{- end }}

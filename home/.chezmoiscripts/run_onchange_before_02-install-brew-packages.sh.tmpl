@@ -48,10 +48,7 @@ dry_run brew update --quiet "$@"
 
 {{- if .upgrade }}
 
-if [ "${DRY_RUN:-}" = true ]; then
-  set -- "$@" --dry-run
-fi
-run brew upgrade --quiet "$@"
+dry_run brew upgrade --quiet "$@" # --dry-run
 {{- end }}
 
 # if ! [ -f ~/.config/homebrew/Brewfile ]; then
@@ -73,9 +70,6 @@ run brew upgrade --quiet "$@"
 {{- end }}
 {{- end }}
 
-if [ "${DRY_RUN:-}" = true ]; then
-  set -- "$@" list
-fi
 # run brew bundle list --global
 {{- if eq (env "CACHE_BUST") "true" }}
 # brew hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "brew") | sha256sum }}
@@ -83,7 +77,7 @@ fi
 # mas hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "mas") | sha256sum }}
 # vscode hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "vscode") | sha256sum }}
 {{- end }}
-run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
+dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
 {{ includeTemplate "Brewfile" . | trim }}
 EOF
 
