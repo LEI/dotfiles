@@ -1,10 +1,5 @@
 #!/bin/sh
 
-{{- if lookPath "ghostty" | isExecutable }}
-
-export TERMINAL="${TERMINAL:-ghostty}"
-{{- end }}
-
 # FIXME: xfconf-query -c xfce4-panel -p /plugins/plugin-6/symbolic-icons --type bool --set
 # export XDG_CURRENT_DESKTOP=XFCE
 

@@ -1,7 +1,21 @@
 ---
 # https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
 
+{{- if hasPrefix "fr" .hostname }}
+
+.local/share/backgrounds/framework-dark.svg:
+  type: file
+  url: https://raw.githubusercontent.com/ublue-os/artwork/refs/heads/main/wallpapers/framework/framework-day.svg
+  refreshPeriod: "1s"
+
+.local/share/backgrounds/framework-light.svg:
+  type: file
+  url: https://raw.githubusercontent.com/ublue-os/artwork/refs/heads/main/wallpapers/framework/framework-night.svg
+  refreshPeriod: "1s"
+{{- end }}
+
 {{- if .codespaces }}
+
 # TODO: vscode extension install
 # .vscode-remote/User/globalStorage/zokugun.sync-settings/repository:
 #   type: git-repo
@@ -10,6 +24,7 @@
 {{- end }}
 
 {{- if eq .os "darwin" }}
+
 .config/hammerspoon:
   type: git-repo
   url: {{ .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
@@ -17,6 +32,7 @@
 {{- end }}
 
 {{- if eq .os "linux" }}
+
 # .local/bin/uv:
 #   type: "archive-file"
 #   url: # gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-unknown-linux-gnu.tar.gz" | quote

@@ -59,7 +59,7 @@
   "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
-  "topgrade" false
+  "topgrade" (and (ne .profile "minimal") (not (or .ephemeral .headless)) (not .glibc231))
   "vim" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))

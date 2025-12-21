@@ -20,19 +20,24 @@ export MANPAGER="${MANPAGER:-less -X}"
 # export LESS="-S -X -F -I -R"
 export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}"
 
-{{- $editor := "vi" }}
+{{- $editor := lookPath "vi" }}
 {{- if lookPath "editor" | isExecutable }}
-{{- $editor = "editor" }}
+{{- $editor = lookPath "editor" }}
 {{- else if lookPath "hx" | isExecutable }}
-{{- $editor = "hx" }}
+{{- $editor = lookPath "hx" }}
 {{- else if lookPath "nvim" | isExecutable }}
-{{- $editor = "nvim" }}
+{{- $editor = lookPath "nvim" }}
 {{- else if lookPath "vim" | isExecutable }}
-{{- $editor = "vim" }}
+{{- $editor = lookPath "vim" }}
 {{- else if lookPath "code" | isExecutable }}
-{{- $editor = "code" }}
+{{- $editor = lookPath "code" }}
 {{- end }}
 export EDITOR="${EDITOR:-{{ $editor }}}"
 export VISUAL="${VISUAL:-$EDITOR}"
+{{- if lookPath "ghostty" | isExecutable }}
+
+# xdg-terminal-exec
+export TERMINAL="${TERMINAL:-ghostty}"
+{{- end }}
 
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}

@@ -39,3 +39,11 @@ if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
   cmd timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
   echo
 fi
+
+{{- if not .features.helix }}
+
+if command -v xdg-mime >/dev/null &&
+  [ "$(xdg-mime query default text/plain)" != "nvim.desktop" ]; then
+  cmd xdg-mime default nvim.desktop text/plain
+fi
+{{- end }}

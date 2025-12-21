@@ -4,42 +4,48 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+{{- if eq .osIDLike "debian" }}
 if command -v hx; then
   echo >&2 "Already installed"
   cmd hx --version
-  exit
+else
+  {{- if eq .osID "debian" }}
+  echo >&2 "Installing helix"
+  export DEBIAN_FRONTEND=noninteractive
+  # https://docs.helix-editor.com/install.html#pre-built-binaries
+  VERSION="$(get_release helix-editor/helix)"
+  NAME="helix-$VERSION-x86_64-linux"
+  URL="https://github.com/helix-editor/helix/releases/download/$VERSION/$NAME.tar.xz"
+  BIN="$TMPDIR/$NAME/hx"
+  cmd curl -LSsf "$URL" | tar xJf - -C "$TMPDIR"
+  if [ ! -d "$HOME/.local/bin" ]; then
+    mkdir -p "$HOME/.local/bin"
+  fi
+  mv "$BIN" "$HOME/.local/bin"
+  if [ ! -d "$HOME/.config/helix" ]; then
+    mkdir -p "$HOME/.config/helix"
+  fi
+  # TODO: overwrite if needed
+  if [ ! -d "$HOME/.config/helix/runtime" ]; then
+    cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
+  fi
+  {{- else if eq .osID "ubuntu" }}
+  # https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
+  export DEBIAN_FRONTEND=noninteractive
+  cmd sudo -E apt-get install --quiet --yes software-properties-common >/dev/null
+  cmd sudo -E add-apt-repository --yes ppa:maveonair/helix-editor
+  cmd sudo apt-get update --quiet >/dev/null
+  cmd sudo -E apt-get install --quiet --yes helix >/dev/null
+  cmd sudo update-alternatives --set editor /usr/bin/hx
+  echo >&2 "Installed helix"
+  {{- end }}
 fi
-
-{{- if eq .osID "debian" }}
-echo >&2 "Installing helix"
-export DEBIAN_FRONTEND=noninteractive
-# https://docs.helix-editor.com/install.html#pre-built-binaries
-VERSION="$(get_release helix-editor/helix)"
-NAME="helix-$VERSION-x86_64-linux"
-URL="https://github.com/helix-editor/helix/releases/download/$VERSION/$NAME.tar.xz"
-BIN="$TMPDIR/$NAME/hx"
-cmd curl -LSsf "$URL" | tar xJf - -C "$TMPDIR"
-if [ ! -d "$HOME/.local/bin" ]; then
-  mkdir -p "$HOME/.local/bin"
-fi
-mv "$BIN" "$HOME/.local/bin"
-if [ ! -d "$HOME/.config/helix" ]; then
-  mkdir -p "$HOME/.config/helix"
-fi
-# TODO: overwrite if needed
-if [ ! -d "$HOME/.config/helix/runtime" ]; then
-  cmd mv "$TMPDIR/$NAME/runtime" "$HOME/.config/helix/runtime"
-fi
-{{- else if eq .osID "ubuntu" }}
-# https://docs.helix-editor.com/package-managers.html#ubuntu-ppa
-export DEBIAN_FRONTEND=noninteractive
-cmd sudo -E apt-get install --quiet --yes software-properties-common >/dev/null
-cmd sudo -E add-apt-repository --yes ppa:maveonair/helix-editor
-cmd sudo apt-get update --quiet >/dev/null
-cmd sudo -E apt-get install --quiet --yes helix >/dev/null
-cmd sudo update-alternatives --set editor /usr/bin/hx
-echo >&2 "Installed helix"
 {{- end }}
 
 # cmd hx --grammar fetch
 # cmd timeout 5m hx --grammar build
+
+if command -v xdg-mime >/dev/null &&
+  [ "$(xdg-mime query default text/plain)" != "Helix.desktop" ]; then
+  cmd xdg-mime default Helix.desktop text/plain
+fi
