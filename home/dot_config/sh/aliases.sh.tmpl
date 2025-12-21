@@ -28,13 +28,23 @@ alias cat=batcat
 {{- end }}
 
 {{- if lookPath "eza" | isExecutable }}
-alias ls="eza --hyperlink --total-size"
+# alias ls="eza --hyperlink"
+if alias ls >/dev/null 2>&1; then
+  unalias ls
+fi
+ls() {
+  if [ -t 1 ]; then
+    set -- --hyperlink "$@"
+  fi
+  command eza "$@"
+}
 {{- else if lookPath "gls" | isExecutable }}
 # export LS_COLORS="$(vivid generate tokyonight-storm)"
 alias ls="gls --color"
 {{- end }}
 
 {{- if eq .os "darwin" }}
+
 alias beep="afplay --rate 3 --time 0.3 --volume 3 /System/Library/Sounds/Glass.aiff"
 
 if ! hash notify-send 2>/dev/null; then

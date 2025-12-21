@@ -78,6 +78,12 @@ packages:
       arch: openai-codex-bin
       npm: "@openai/codex"
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" (eq .os "windows" | ternary "npm" nil)) }}'
+  copilot:
+    enabled: {{ and .features.ai (eq .osIDLike "arch" "darwin" "windows") }}
+    nameOverwrite:
+      npm: "@github/copilot"
+      darwin: copilot-cli
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
   coreutils: { enabled: {{ eq .os "android" "linux" }} }
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}

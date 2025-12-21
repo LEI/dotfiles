@@ -49,9 +49,12 @@
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
-{{- $lddVersion := eq .chezmoi.os "linux" | ternary (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim) "3" -}}
-{{- $glibc231 := le (float64 $lddVersion) 2.31 -}}
-{{- /* $glibc231 := or
+{{- $lddVersion := eq .chezmoi.os "linux" | ternary
+  (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim)
+  "3" -}}
+{{- $glibc := float64 $lddVersion -}}
+{{- /* $glibc231 := le (float64 $lddVersion) 2.31 -}}
+{{- $glibc231 := or
   (and (eq $osID "debian") (le (int $osVersion) 11))
   (and (eq $osID "ubuntu") (le (float64 $osVersion) 20.04))
 */ -}}
@@ -106,7 +109,7 @@
   "container" $container
   "devContainer" $devContainer
   "ephemeral" $ephemeral
-  "glibc231" $glibc231
+  "glibc" $glibc
   "headless" $headless
   "hostname" $hostname
   "os" .chezmoi.os

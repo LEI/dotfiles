@@ -18,7 +18,7 @@
   "docker" (and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)))
   "eza" (ne .profile "minimal")
   "ghostty" (and
-    (not .glibc231)
+    (gt .glibc 2.31)
     (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     (not (eq .os "android" "windows"))
     (ne .profile "minimal")
@@ -28,7 +28,7 @@
   "goss" (and (not (eq .os "android" "windows")) (ne .profile "minimal"))
   "gpg" false
   "helix" (and
-    (not (and (eq .osIDLike "debian") (not .glibc231)))
+    (not (and (eq .osIDLike "debian") (gt .glibc 2.31)))
     (ne .profile "minimal")
     (not (or .ephemeral .headless)))
   "i3" (and (eq .osIDLike "arch") (not (or .ephemeral .headless)))
@@ -59,7 +59,7 @@
   "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
-  "topgrade" (and (ne .profile "minimal") (not (or .ephemeral .headless)) (not .glibc231))
+  "topgrade" (and (ne .profile "minimal") (not (or .ephemeral .headless)) (gt .glibc 2.31))
   "vim" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))

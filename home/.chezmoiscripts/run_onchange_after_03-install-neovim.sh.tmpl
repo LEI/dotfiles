@@ -5,6 +5,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 {{- if and (not (hasKey .allPackages "neovim")) (not (lookPath "nvim" | isExecutable)) }}
+
 if command -v nvim; then
   echo >&2 "Already installed"
   cmd nvim --version | head -n1
@@ -32,8 +33,8 @@ fi
 # cmd python3 -m pip install --user --quiet pynvim
 {{- end }}
 
-# Debian 12 has nvim 0.7.2
-# Debian 11 Ubuntu 22 nvim 0.4.3
+# Debian 12: nvim 0.7.2
+# Debian 11 and Ubuntu 22: nvim 0.4.3
 if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
   # cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
   cmd timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end

@@ -19,6 +19,9 @@
 
 {{- range $path := $packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
+{{-   if and (hasKey $fileData "enabled") (not $fileData.enabled) }}
+{{-     continue }}
+{{-   end }}
 {{-   $filePackages := get $fileData "packages" }}
 {{-   if not (kindIs "map" $filePackages) }}
 {{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}

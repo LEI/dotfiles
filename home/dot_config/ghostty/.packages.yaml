@@ -1,10 +1,22 @@
 ---
+enabled: "{{ and .features.ghostty }}"
 packages:
   ghostty:
-    enabled: '{{ and .features.ghostty (not (eq .osIDLike "debian")) (not .headless) }}'
+    enabled: '{{ not (eq .osIDLike "debian") }}'
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+    before_script: |
+      {{- if eq .osIDLike "fedora" }}
+      ghostty_repo=/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
+      if ! [ -f "$ghostty_repo" ]; then
+        cmd . /etc/os-release
+        url="https://copr.fedorainfracloud.org/coprs/scottames/ghostty/repo/fedora-${VERSION_ID}/scottames-ghostty-fedora-${VERSION_ID}.repo"
+        cmd curl -fsSL "$url" | cmd sudo tee "$ghostty_repo" >/dev/null
+      fi
+      # cmd rpm-ostree refresh-md
+      # cmd rpm-ostree install --allow-inactive --assumeyes --idempotent ghostty
+      {{- end }}
   libadwaita:
-    enabled: '{{ and .features.ghostty (eq .os "android" "linux") }}'
+    enabled: '{{ eq .os "android" "linux" }}'
     nameOverwrite:
       # alpine: libadwaita-1-6.9-r0
       debian: libadwaita-1-0
