@@ -125,7 +125,7 @@ packages:
       windows: direnv.direnv
     # type: mise
   distrobox:
-    enabled: {{ and (eq .osIDLike "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+    enabled: {{ and (eq .osIDLike "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)) }}
   dive: # sou
     enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
     nameOverwrite:
