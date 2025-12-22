@@ -22,6 +22,10 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
+container_status() {
+  $PROVIDER container inspect --format '{{.State.Status}}' "$@"
+}
+
 build_container() {
   name="$1"
   shift
@@ -31,24 +35,85 @@ build_container() {
   else
     image_version=latest
   fi
-  tag="$tag_prefix-$image_name-$image_version"
+  name="$tag_prefix-$image_name-$image_version"
   if [ "$image_name" = termux ]; then
-    image_name="docker.io/termux/termux-docker"
-    image_version="x86_64"
+    image_name_arg="docker.io/termux/termux-docker"
+    image_version_arg="x86_64"
     # prefix=/data/data/com.termux/files/home
     # user=a0_test
+    # TODO: prefix bootstrap only for termux in docker
   fi
 
   # case "$image_name" in
   # *) ;;
   # esac
-  $PROVIDER build . \
-    --build-arg=IMAGE_NAME="$image_name" \
-    --build-arg=IMAGE_VERSION="$image_version" \
-    --tag="$tag"
-  if [ $# -gt 0 ]; then
-    $PROVIDER run --name="$tag_prefix-$image_name-run" --rm "$tag" "$@"
+
+  # container_user=test
+  user="test"
+  home="/home/$user"
+  if [ "$image_name" = termux ]; then
+    prefix=/data/data/com.termux/files
+    home="$prefix/home"
+    # container_user=root
+    user=a0_test
   fi
+  chezmoi_root="$home/.local/share/chezmoi"
+
+  $PROVIDER build . \
+    --build-arg=IMAGE_NAME="${image_name_arg:-$image_name}" \
+    --build-arg=IMAGE_VERSION="${image_version_arg:-$image_version}" \
+    --build-arg=USER="$user" \
+    --tag="$name"
+
+  # $PROVIDER run -it --name="$name" --rm "$name" "$@"
+  # --userns=keep-id
+  # --volume="$PWD:$chezmoi_root:ro"
+  if ! $PROVIDER container inspect "$name" >/dev/null; then
+    $PROVIDER create --name="$name" "$name" # "$@"
+  fi
+  if [ "$(container_status "$name")" != running ]; then
+    $PROVIDER start "$name" # "$@"
+  fi
+  status="$(container_status "$name")"
+  if [ "$status" != running ]; then
+    echo >&2 "Container $name is not running (status: $status)"
+    exit 1
+  fi
+  $PROVIDER exec "$name" mkdir -p "$chezmoi_root"
+  $PROVIDER container cp .chezmoiroot "$name:$chezmoi_root/"
+  $PROVIDER container cp .chezmoiversion "$name:$chezmoi_root/"
+  $PROVIDER container cp --overwrite home "$name:$chezmoi_root/"
+  $PROVIDER container cp script "$name:$chezmoi_root/"
+
+  # FIXME: Cannot run 'pkg' command as root
+  if [ "$image_name" = termux ]; then
+    # ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors
+    $PROVIDER exec "$name" sh -c 'set -x; pkg update --quiet && pkg install --quiet --yes chezmoi proot'
+  fi
+
+  # $PROVIDER exec "$name" ls -la "home"
+  # $PROVIDER exec "$name" sudo chown -R test:test "$home/.local"
+  $PROVIDER exec \
+    --env=CI=true \
+    --workdir="$chezmoi_root" \
+    "$name" ./script/bootstrap --branch=main # --no-tty --verbose
+
+  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/check
+  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/update
+  $PROVIDER container cp test "$name:$chezmoi_root/"
+  if [ -d test_support ]; then
+    $PROVIDER container cp test_support "$name:$chezmoi_root/"
+  fi
+  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/test
+
+  if [ $# -eq 0 ]; then
+    set -- bash -i
+  fi
+  $PROVIDER exec \
+    --interactive \
+    --tty \
+    --workdir="$chezmoi_root" \
+    "$name" "$@"
 }
 
 name="$1"
@@ -61,12 +126,14 @@ if [ "$name" = all ]; then
     debian
     ubuntu
     fedora
-    termux
+    # termux
   )
   for img in "${images[@]}"; do
-    time build_container "$img" "$@"
+    if ! time build_container "$img" "$@"; then
+      exit $?
+    fi
   done
-  return
+  exit
 fi
 
 time build_container "$name" "$@"

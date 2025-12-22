@@ -1,17 +1,18 @@
 ---
 # https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
 
-{{- if hasPrefix "fr" .hostname }}
+{{- if and (eq .os "linux") (eq .chassisVendor "Framework") }}
 
+# Framework: sudo dmidecode | grep -A1 'System Information' | tail -n1 | cut -d: -f2 | tr -d ' '
 .local/share/backgrounds/framework-dark.svg:
   type: file
   url: https://raw.githubusercontent.com/ublue-os/artwork/refs/heads/main/wallpapers/framework/framework-day.svg
-  refreshPeriod: "1s"
+  refreshPeriod: 0
 
 .local/share/backgrounds/framework-light.svg:
   type: file
   url: https://raw.githubusercontent.com/ublue-os/artwork/refs/heads/main/wallpapers/framework/framework-night.svg
-  refreshPeriod: "1s"
+  refreshPeriod: 0
 {{- end }}
 
 {{- if .codespaces }}

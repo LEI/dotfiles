@@ -11,9 +11,16 @@ export TERM=tmux-256color
 resurrect_dir="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/resurrect"
 if [ -f "$resurrect_dir/last" ] && ! [ -s "$resurrect_dir/last" ]; then
   empty_file="$(readlink "$resurrect_dir/last")"
-  last_file="$(find "$resurrect_dir" -type f -name 'tmux_resurrect_*.txt' | sort | tail -n1)"
   echo >&2 "Removing empty tmux resurrect session: $empty_file"
-  rm "$empty_file"
+  rm "$resurrect_dir/$empty_file"
+fi
+if [ -f "$resurrect_dir/last" ] && ! [ -L "$resurrect_dir/last" ]; then
+  target="$(readlink "$resurrect_dir/last")"
+  echo >&2 "Removing invalid symbolic link: $target"
+  rm "$resurrect_dir/last"
+fi
+if ! [ -f "$resurrect_dir/last" ]; then
+  last_file="$(find "$resurrect_dir" -type f -name 'tmux_resurrect_*.txt' | sort | tail -n1)"
   if [ -n "$last_file" ]; then
     echo >&2 "Setting last tmux resurrect session: $last_file"
     ln -fs "$last_file" "$resurrect_dir/last"

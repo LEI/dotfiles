@@ -48,6 +48,12 @@
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
 
+{{- $chassisVendor := "" -}}
+{{- $chassisVendorFile := "/sys/devices/virtual/dmi/id/chassis_vendor" -}}
+{{- if stat $chassisVendorFile -}}
+{{-  $chassisVendor = include $chassisVendorFile | trim -}}
+{{- end -}}
+
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $lddVersion := eq .chezmoi.os "linux" | ternary
   (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim)
@@ -104,12 +110,14 @@
 {{- $data := dict
   "accessToken" $accessToken
   "chassisType" $chassisType
+  "chassisVendor" $chassisVendor
   "ci" $ci
   "codespaces" $codespaces
   "container" $container
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "glibc" $glibc
+  "gui" (and (ne $profile "minimal") (not (or $ephemeral $headless)))
   "headless" $headless
   "hostname" $hostname
   "os" .chezmoi.os

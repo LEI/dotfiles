@@ -2,8 +2,17 @@
 # https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
 MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
 
+# TODO: reuse or replace ./script/termux-prefix
+termux-prefix() {
+  proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$@"
+}
+
 mise() {
-  proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$MISE_BIN" "$@"
+  termux-prefix "$MISE_BIN" "$@"
+}
+
+topgrade() {
+  termux-prefix topgrade "$@"
 }
 
 {{- end }}

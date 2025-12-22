@@ -104,7 +104,9 @@ fi
 #   TERMUX_APP_PACKAGE_MANAGER=apt
 # fi
 
-# TERM=xterm temux-change-repo # apt edit-sources
+# TERM=xterm termux-change-repo # apt edit-sources
+# https://github.com/termux/termux-app/issues/4517#issuecomment-2831997163
+dry_run ln -sf "$PREFIX/etc/termux/mirrors/default" "$PREFIX/etc/termux/chosen_mirrors"
 
 # cat /data/data/com.termux/files/usr/etc/apt/sources.list
 # dry_run apt-get update --quiet >/dev/null

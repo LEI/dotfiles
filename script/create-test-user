@@ -4,6 +4,15 @@
 
 set -eux
 
+if [ -n "${PREFIX:-}" ]; then
+  echo >&2 "Skip in termux"
+  exit
+fi
+
+# if [ -z "${USER:-}" ]; then
+#   USER="$(id --user --name)"
+# fi
+
 test_user="$1"
 
 if [ -z "$test_user" ]; then
@@ -11,10 +20,14 @@ if [ -z "$test_user" ]; then
   exit 1
 fi
 
-if [ "$test_user" != test ]; then
+case "$test_user" in
+# *test) ;;
+test) ;;
+*)
   echo >&2 "Invalid user: $test_user"
   exit 1
-fi
+  ;;
+esac
 
 create_user() {
   user="$1"

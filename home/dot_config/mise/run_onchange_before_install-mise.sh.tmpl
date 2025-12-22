@@ -16,6 +16,7 @@ BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
 
 if [ ! -d "$BIN_DIR" ]; then
+  cmd ls -la ~/.local
   # echo >&2 "Creating directory: $BIN_DIR"
   cmd mkdir -p "$BIN_DIR"
 fi

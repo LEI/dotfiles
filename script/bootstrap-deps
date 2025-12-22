@@ -4,6 +4,11 @@
 
 set -eux
 
+if [ -n "${PREFIX:-}" ]; then
+  echo >&2 "Skip in termux"
+  exit
+fi
+
 if command -v apk >/dev/null; then
   apk update --quiet
   apk add bash chezmoi curl sudo unzip

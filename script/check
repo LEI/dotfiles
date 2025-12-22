@@ -2,9 +2,19 @@
 #MISE alias="c"
 #MISE description="`mise check` or `mise c`"
 
-set -eux
+set -eu
 
 FORMAT="${FORMAT:-json}"
+
+PATH="$PATH:$HOME/.local/bin"
+
+set -x
+
+chezmoi feature carapace
+chezmoi feature direnv
+# chezmoi feature mise
+chezmoi feature ripgrep
+chezmoi feature zoxide
 
 # chezmoi feature enabled # list --output=json | jq --compact-output
 # chezmoi package diff all

@@ -11,11 +11,11 @@
     (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")
-  "bottom" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "bottom" (and .gui)
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
-  "docker" (and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "docker" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
   "eza" (ne .profile "minimal")
   "ghostty" (and
     (gt .glibc 2.31)
@@ -23,7 +23,7 @@
     (not (eq .os "android" "windows"))
     (ne .profile "minimal")
     (not (or .ephemeral .headless)))
-  "git" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "git" (and .gui)
   "go" false
   "goss" (and (not (eq .os "android" "windows")) (ne .profile "minimal"))
   "gpg" false
@@ -43,10 +43,10 @@
   "node" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
-  "nushell" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "nushell" (and .gui)
   "php" false
-  "podman" (and (eq .osIDLike "arch" "darwin" "fedora") (ne .profile "minimal") (not (or .ephemeral .headless)))
-  "python" (and (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "podman" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
+  "python" (and .gui)
   "rest" false
   "ripgrep" true
   "ruby" false
@@ -59,13 +59,13 @@
   "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
-  "topgrade" (and (ne .profile "minimal") (not (or .ephemeral .headless)) (gt .glibc 2.31))
+  "topgrade" (and .gui (gt .glibc 2.31))
   "vim" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
-  "void" (and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)))
-  "vscode" (and (eq .osIDLike "arch" "fedora" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)))
-  "vscodium" (and (eq .osIDLike "arch") (ne .profile "minimal") (not (or .ephemeral .headless)))
+  "void" (and (eq .osIDLike "arch") .gui)
+  "vscode" (and (eq .osIDLike "arch" "fedora" "darwin") .gui)
+  "vscodium" (and (eq .osIDLike "arch") .gui)
   "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "zoxide" true
   "zsh" false

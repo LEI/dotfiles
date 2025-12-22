@@ -27,9 +27,12 @@ disable = [
   "containers",
   "git_repos",
   "node",
+  {{- if eq .os "android" }}
+  "pip3",
+  {{- end }}
   # "pnpm", # Requires npx pnpm install --global pnpm@latest
-  "vagrant",
-  # "ruby_gems", # Requires sudo
+  # "vagrant",
+  "ruby_gems", # Requires sudo
 ]
 # Do not ask to retry failed steps (default: false)
 no_retry = true

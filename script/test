@@ -11,11 +11,41 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; t
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
+# # Ensure chezmoi is available
+# BIN_DIR="$HOME/.local/bin"
+# PATH="$PATH:$BIN_DIR"
+
+# chezmoi package list mise
+if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
+  PATH="$PATH:$HOME/.local/share/mise/shims"
+fi
+
+if [ "$USER" = test ] && command -v mise >/dev/null; then
+  mise trust --all --quiet --yes
+  # mise prune --quiet --yes
+fi
+
+# FIXME(termux): ble.sh: updating binders..../script/container: line 112:
+# 2764 Segmentation fault (core dumped) bash -i
+# export BLE_ENABLED=false
+
+# export CHEZMOI_PROFILE="$PROFILE"
+# export CHEZMOI_ROOT="$PWD"
+# export CHEZMOI_UPGRADE=true
+# export CI=true
+
 main() {
   local jobs="${TEST_JOBS:-1}"
   if command -v parallel >/dev/null; then
     jobs="${TEST_JOBS:-$(nproc)}"
   fi
+  # if [ "${DEBUG:-}" = true ]; then
+  #   set -- --debug "$@"
+  # fi
+  #
+  # if [ "${VERBOSE:-true}" = true ]; then
+  #   set -- --verbose "$@"
+  # fi
   if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
     set -- --pretty "$@"
   fi

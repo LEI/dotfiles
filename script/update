@@ -1,7 +1,13 @@
 #!/bin/sh
 #MISE description="'mise update' or 'mise run update'"
 
-set -eux
+set -eu
+
+PATH="$PATH:$HOME/.local/bin"
+
+set -x
+
+chezmoi feature mise
 
 run() {
   if [ "${DRY_RUN:-}" = true ]; then
