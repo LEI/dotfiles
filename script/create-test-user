@@ -1,0 +1,91 @@
+#!/bin/sh
+
+# Create a non-root user 'test' with sudo privileges
+
+set -eux
+
+test_user="$1"
+
+if [ -z "$test_user" ]; then
+  echo >&2 "Missing user name"
+  exit 1
+fi
+
+if [ "$test_user" != test ]; then
+  echo >&2 "Invalid user: $test_user"
+  exit 1
+fi
+
+create_user() {
+  user="$1"
+  # NOTE: --user not supported on alpine
+  if ! id -u "$user" >/dev/null 2>&1; then
+    echo >&2 "Creating user: $user"
+    if command -v useradd >/dev/null; then
+      # useradd -ms /bin/bash "$user"
+      useradd --create-home --shell=/bin/bash "$user"
+      # if groups | grep -qv "$group"; then
+      #   groupadd "$group"
+      # fi
+    else
+      # FIXME: user 'test' in use
+      adduser -Ds /bin/bash "$user" # -G "$group"
+    fi
+  fi
+}
+
+create_group() {
+  user="$1"
+  group="$2"
+  if ! getent group "$group" >/dev/null; then
+    echo >&2 "Creating group: $group"
+    if command -v groupadd >/dev/null; then
+      groupadd "$group" --users "$user"
+    else
+      addgroup "$user" "$group"
+    fi
+  elif groups "$user" | grep -qv "$group"; then
+    if command -v usermod >/dev/null; then
+      usermod -aG "$group" "$user"
+    else
+      adduser "$user" "$group"
+    fi
+  fi
+}
+
+admin_group=wheel
+# if getent group sudo >/dev/null; then
+#   admin_group=sudo
+# fi
+
+create_user "$test_user"
+create_group "$test_user" "$test_user"
+create_group "$test_user" "$admin_group"
+
+if [ -f /etc/sudoers ]; then
+  # Debian: %sudo   ALL=(ALL:ALL) ALL
+  if grep -q "^# %$admin_group ALL=(ALL:ALL) NOPASSWD: ALL" /etc/sudoers; then
+    sed \
+      -e "s/^# %$admin_group ALL=(ALL:ALL) NOPASSWD: ALL/%$admin_group ALL=(ALL:ALL) NOPASSWD: ALL/" \
+      -i /etc/sudoers
+  elif ! grep -q "^%$admin_group ALL=(ALL:ALL) NOPASSWD: ALL" /etc/sudoers; then
+    if [ -f "/etc/sudoers.d/$admin_group" ]; then
+      echo >&2 "Sudoers file /etc/sudoers.d/$admin_group already exists, aborting"
+      exit 1
+    fi
+    echo "%$admin_group ALL=(ALL:ALL) NOPASSWD: ALL" >"/etc/sudoers.d/$admin_group"
+  fi
+fi
+
+if [ "$(id -u "$test_user")" -eq 0 ]; then
+  echo >&2 "User '$test_user' has UID 0 (root), aborting"
+  exit 1
+fi
+if ! groups "$test_user" | grep -q "$test_user"; then
+  echo >&2 "User '$test_user' is not in its own group, aborting"
+  exit 1
+fi
+if ! groups "$test_user" | grep -q "$admin_group"; then
+  echo >&2 "User '$test_user' is not in $admin_group group, aborting"
+  exit 1
+fi

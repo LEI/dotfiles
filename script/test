@@ -7,6 +7,9 @@
 set -euo pipefail
 
 PATH="$PATH:$HOME/.local/bin"
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
 main() {
   local jobs="${TEST_JOBS:-1}"

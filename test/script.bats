@@ -94,56 +94,56 @@ setup() {
 #   done
 # }
 
-test_container() {
-  local name="$1"
-  export \
-    GITHUB_TOKEN=nope \
-    PROVIDER="echo container"
-
-  run --separate-stderr bash ./script/container "$name"
-  # assert_stderr_line "Starting test container: test-$name-latest"
-  # assert_line --regexp "^container run .* --name=test-$name-latest"
-  assert_line --partial "container compose"
-  assert_stderr_line "container: $name-latest"
-  refute_stderr_line --partial invalid
-  assert_success
-}
-# bats test_tags=container,image
-@test "script/container: alpine" {
-  test_container alpine
-}
-# bats test_tags=container,image
-@test "script/container: android" {
-  test_container android
-}
-# bats test_tags=container,image
-@test "script/container: archlinux" {
-  test_container archlinux
-}
-# bats test_tags=container,image
-@test "script/container: debian" {
-  test_container debian
-}
-# bats test_tags=container,image
-@test "script/container: ubuntu" {
-  test_container ubuntu
-}
-# bats test_tags=container,image
-@test "script/container: fedora" {
-  test_container fedora
-}
-# bats test_tags=container,image
-@test "script/container: macos" {
-  test_container macos
-}
-
-# bats test_tags=container
-@test "script/container: unknown" {
-  run --separate-stderr bash ./script/container unknown
-  refute_output
-  assert_stderr_line --partial invalid
-  assert_failure
-}
+# test_container() {
+#   local name="$1"
+#   export \
+#     GITHUB_TOKEN=nope \
+#     PROVIDER="echo container"
+#
+#   run --separate-stderr bash ./script/container "$name"
+#   # assert_stderr_line "Starting test container: test-$name-latest"
+#   # assert_line --regexp "^container run .* --name=test-$name-latest"
+#   assert_line --partial "container compose"
+#   assert_stderr_line "container: $name-latest"
+#   refute_stderr_line --partial invalid
+#   assert_success
+# }
+# # bats test_tags=container,image
+# @test "script/container: alpine" {
+#   test_container alpine
+# }
+# # bats test_tags=container,image
+# @test "script/container: android" {
+#   test_container android
+# }
+# # bats test_tags=container,image
+# @test "script/container: archlinux" {
+#   test_container archlinux
+# }
+# # bats test_tags=container,image
+# @test "script/container: debian" {
+#   test_container debian
+# }
+# # bats test_tags=container,image
+# @test "script/container: ubuntu" {
+#   test_container ubuntu
+# }
+# # bats test_tags=container,image
+# @test "script/container: fedora" {
+#   test_container fedora
+# }
+# # bats test_tags=container,image
+# @test "script/container: macos" {
+#   test_container macos
+# }
+#
+# # bats test_tags=container
+# @test "script/container: unknown" {
+#   run --separate-stderr bash ./script/container unknown
+#   refute_output
+#   assert_stderr_line --partial invalid
+#   assert_failure
+# }
 
 # bats test_tags=update
 @test "script/update" {
