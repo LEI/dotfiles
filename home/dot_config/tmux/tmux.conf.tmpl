@@ -138,7 +138,8 @@ set -g @plugin 'tmux-plugins/tmux-pain-control # v1.0.0'
 # }
 set -g @plugin "tmux-plugins/tmux-resurrect # v4.0.0"
 set -g @resurrect-capture-pane-contents on
-# set -g @resurrect-dir "$XDG_DATA_HOME/tmux/resurrect" # ln -sf <file_name> last
+set -g @resurrect-dir "$XDG_DATA_HOME/tmux/resurrect" # ln -sf <file_name> last
+# set -g @resurrect-processes '~Vim -> vim'
 set -g @resurrect-processes '\
     hx vi vim nvim emacs \
     man less more tail \
@@ -162,8 +163,7 @@ set -g @continuum-boot-options iterm # ,fullscreen
 {{- else }}
 set -g @continuum-boot-options ghostty
 {{- end }}
-# FIXME: creates empty $XDG_DATA_HOME/tmux/resurrect/last
-set -g @continuum-restore {{ eq .osIDLike "arch" "darwin" | ternary "on" "off" }}
+set -g @continuum-restore on
 set -g @continuum-save-interval 60 # 1h
 # set -ga status-right 'Continuum status: #{continuum_status}'
 

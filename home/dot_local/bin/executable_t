@@ -6,6 +6,20 @@ set -eu
 
 export TERM=tmux-256color
 
+# FIXME: empty file crashes tmux on session restore
+# https://github.com/tmux-plugins/tmux-resurrect/issues/403
+resurrect_dir="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/resurrect"
+if [ -f "$resurrect_dir/last" ] && ! [ -s "$resurrect_dir/last" ]; then
+  empty_file="$(readlink "$resurrect_dir/last")"
+  last_file="$(find "$resurrect_dir" -type f -name 'tmux_resurrect_*.txt' | sort | tail -n1)"
+  echo >&2 "Removing empty tmux resurrect session: $empty_file"
+  rm "$empty_file"
+  if [ -n "$last_file" ]; then
+    echo >&2 "Setting last tmux resurrect session: $last_file"
+    ln -fs "$last_file" "$resurrect_dir/last"
+  fi
+fi
+
 if [ $# -ne 0 ]; then
   if [ "$*" = "-u NONE" ]; then
     set -- -f/dev/null -Ltmp # lsk
