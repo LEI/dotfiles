@@ -1,27 +1,39 @@
+local function exec(command, desc, exit_code, silent)
+  local out = vim.fn.system(command)
+  if vim.v.shell_error ~= 0 then
+    local exit = exit_code == nil or exit_code ~= 0
+    if not silent then
+      vim.api.nvim_echo({
+        { string.format('Failed to %s:\n', desc or 'execute command'), 'ErrorMsg' },
+        { out, 'WarningMsg' },
+        { exit and '' or '\nPress any key to exit...' },
+      }, true, {})
+    end
+    if exit then
+      return
+    end
+    -- vim.fn.getchar()
+    -- os.exit(exit_code)
+  end
+end
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 local fs_stat = (vim.uv or vim.loop).fs_stat
 if not fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
   local branch = 'stable'
-  local out = vim.fn.system({ 'git', 'clone', '--filter=blob:none', '--branch=' .. branch, lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
-      { out, 'WarningMsg' },
-      { '\nPress any key to exit...' },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
+  exec({ 'git', 'clone', '--filter=blob:none', '--branch=' .. branch, lazyrepo, lazypath }, 'clone lazy.nvim', 1)
 end
---[[
-cd ~/.local/share/nvim/lazy/lazy.nvim
-git remote add fork https://github.com/LEI/lazy.nvim.git
-git fetch fork
-git checkout feat/check-tags
-]]
---
+
+local branch = 'feat/check-tags'
+local remote = 'fork'
+local remote_url = 'https://github.com/LEI/lazy.nvim.git'
+-- exec({ 'git', '-C', lazypath, 'remote', 'remove', remote }, 'remove remote')
+exec({ 'git', '-C', lazypath, 'remote', 'add', remote, remote_url }, 'add remote', 0, true)
+exec({ 'git', '-C', lazypath, 'fetch', remote }, 'fetch remote')
+exec({ 'git', '-C', lazypath, 'checkout', branch }, 'checkout branch')
+
 vim.opt.rtp:prepend(lazypath)
 
 -- Make sure to setup `mapleader` and `maplocalleader` before

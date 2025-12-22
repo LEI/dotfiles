@@ -1,30 +1,44 @@
 -- TODO: replace with mise when possible
 local mason_packages_dir = vim.env.HOME .. '/.local/share/nvim/mason/packages'
 
-local function has_cargo()
-  return vim.g.features.rust or (vim.fn.executable('cargo') == 1)
-end
+-- local function has(feature, prog)
+--   return function()
+--     return vim.g.features[feature] and (vim.fn.executable(prog or feature) == 1)
+--   end
+-- end
 
-local function has_go()
-  return vim.g.features.go or (vim.fn.executable('go') == 1)
-end
-
-local function has_php()
-  return vim.g.features.php or (vim.fn.executable('php') == 1)
+local function has(...)
+  local features = { ... }
+  return function()
+    for _, value in ipairs(features) do
+      local name, prog
+      if type(value) == 'table' then
+        name = value[1]
+        prog = value[2]
+      else
+        name = value
+        prog = name
+      end
+      if vim.g.features[name] == false or (prog ~= nil and (vim.fn.executable(prog or name) == 0)) then
+        return false
+      end
+    end
+    return true
+  end
 end
 
 -- TODO: do not install if already present, e.g. installed from source
 local mason_tools = {
   -- Formatters
-  { 'golangci-lint', condition = has_go },
-  { 'phpcbf', condition = has_php },
+  { 'golangci-lint', condition = has('go') },
+  { 'phpcbf', condition = has('php') },
   -- 'pgformatter',
-  'prettier',
-  'prettierd',
+  { 'prettier', condition = has('node') },
+  { 'prettierd', condition = has('node') },
   'shfmt',
   -- 'sleek',
-  { 'sql-formatter', enabled = vim.g.features.sql },
-  -- { 'sqlfmt', enabled = vim.g.features.sql },
+  { 'sql-formatter', condition = has({ 'sql', 'psql' }, 'node') },
+  -- { 'sqlfmt', condition = has({ 'sql', 'psql' }) },
   'stylua',
   'yamlfmt',
 
@@ -35,67 +49,67 @@ local mason_tools = {
   -- 'cspell',
   -- 'gitleaks',
   -- 'gitlint',
-  { 'goimports', condition = has_go },
+  { 'goimports', condition = has('go') },
   'hadolint', -- { 'hadolint', version = 'v2.12.0' },
-  'markdownlint',
-  -- { 'phpactor', condition = has_php },
-  { 'phpcs', condition = has_php },
+  { 'markdownlint', condition = has('node') },
+  -- { 'phpactor', condition = has('php') },
+  { 'phpcs', condition = has('php') },
   'shellcheck',
-  { 'sqlfluff', enabled = vim.g.features.sql },
+  { 'sqlfluff', condition = has({ 'sql', 'psql' }) },
   -- 'vale',
   'yamllint',
 
   -- Tools
   'gitui',
-  { 'kulala-fmt', enabled = vim.g.features.rest },
+  { 'kulala-fmt', condition = has({ 'rest', nil }, 'node') },
 }
 
 local mason_lsp = {
   -- LSP
-  'angularls', -- 'angular-language-server',
-  'ansiblels', -- 'ansible-language-server',
-  'cspell_ls', -- 'cspell-lsp',
-  { 'docker_compose_language_service', enabled = vim.g.features.docker }, -- 'docker-compose-language-service',
-  { 'dockerls', enabled = vim.g.features.docker }, -- 'dockerfile-language-server',
-  'gh_actions_ls', -- 'gh-actions-language-server',
-  { 'gitlab_ci_ls', condition = has_cargo }, -- 'gitlab-ci-ls',
-  'helm_ls', -- 'helm-ls',
-  { 'intelephense', condition = has_php },
+  { 'angularls', condition = has('node') }, -- 'angular-language-server',
+  { 'ansiblels', condition = has('node') }, -- 'ansible-language-server',
+  { 'cspell_ls', condition = has('node') }, -- 'cspell-lsp',
+  { 'docker_compose_language_service', condition = has('docker') }, -- 'docker-compose-language-service',
+  { 'dockerls', condition = has('docker') }, -- 'dockerfile-language-server',
+  { 'gh_actions_ls', condition = has('node') }, -- 'gh-actions-language-server',
+  { 'gitlab_ci_ls', condition = has('cargo') }, -- 'gitlab-ci-ls',
+  { 'helm_ls', condition = has({ 'kube', 'kubectl' }, 'node') }, -- 'helm-ls',
+  { 'intelephense', condition = has('php') },
   'lua_ls', -- 'lua-language-server',
-  'marksman', -- '',
+  'marksman',
   {
-    -- FIXME: install 0.9.0 only if <3.14,>=3.9
+    -- FIXME: install 0.9.0 only if python <3.14,>=3.9
     'nginx_language_server', -- 'nginx-language-server',
     condition = function()
       return vim.fn.executable('nginx') == 1
     end,
   },
-  { 'postgres-language-server', enabled = vim.g.features.sql }, -- 'postgres_lsp',
-  -- 'sqlls', -- '',
-  'tailwindcss', -- 'tailwindcss-language-server',
-  { 'tofu_ls', enabled = vim.g.features.tofu }, -- 'tofu-ls', -- 'terraformls', -- 'terraformls-ls',
+  { 'postgres-language-server', condition = has({ 'sql', 'psql' }) }, -- 'postgres_lsp',
+  -- 'sqlls',
+  { 'tailwindcss', condition = has('node') }, -- 'tailwindcss-language-server',
+  { 'tofu_ls', condition = has('tofu') }, -- 'tofu-ls', -- 'terraformls', -- 'terraformls-ls',
   -- 'vale_ls', -- 'vale-ls',
-  'vimls', -- 'vim-language-server',
+  { 'vimls', condition = has('node') }, -- 'vim-language-server',
 
   -- Go
-  { 'golangci_lint_ls', condition = has_go }, -- 'golangci-lint-langserver',
-  { 'gopls', condition = has_go },
-  -- { 'sqls', condition = has_go },
+  { 'golangci_lint_ls', condition = has('go') }, -- 'golangci-lint-langserver',
+  { 'gopls', condition = has('go') },
+  -- { 'sqls', condition = has('go') },
 
   -- Node
-  { 'bashls', enabled = vim.g.features.bash }, -- 'bash-language-server',
+  { 'bashls', condition = has('bash', 'node') }, -- 'bash-language-server',
 
   -- TODO: use global vscode ls if installed
-  'cssls', -- 'css-lsp',
-  'eslint', -- 'eslint-lsp',
-  'html', -- 'html-lsp',
-  'jsonls', -- 'json-lsp',
+  { 'cssls', condition = has('node') }, -- 'css-lsp',
+  { 'eslint', condition = has('node') }, -- 'eslint-lsp',
+  { 'html', condition = has('node') }, -- 'html-lsp',
+  { 'jsonls', condition = has('node') }, -- 'json-lsp',
 
-  { 'ts_ls', enabled = vim.g.features.node }, -- 'typescript-language-server',
-  'yamlls', -- 'yaml-language-server',
+  { 'ts_ls', condition = has('node') }, -- 'typescript-language-server',
+  { 'yamlls', condition = has('node') }, -- 'yaml-language-server',
 
   -- Rust
-  { 'rust_analyzer', enabled = vim.g.features.rust }, -- 'rust-analyzer',
+  { 'rust_analyzer', condition = has('rust') }, -- 'rust-analyzer',
   'taplo',
 }
 
@@ -113,11 +127,11 @@ local mason_dap = {
   -- 'haskell', -- haskell-debug-adapter
   -- 'javadbg', -- java-debug-adapter
   -- 'javatest', -- java-test
-  'js', -- js-debug-adapter
+  { 'js', enabled = vim.g.features.node }, -- js-debug-adapter
   -- 'kotlin', -- kotlin-debug-adapter
   -- 'mock', -- mockdebug
   -- 'node2', -- node-debug2-adapter
-  { 'php', condition = has_php }, -- php-debug-adapter
+  { 'php', condition = has('php') }, -- php-debug-adapter
   -- 'puppet', -- puppet-editor-services
   { 'python', enabled = vim.g.features.python }, -- debugpy
 }
@@ -126,7 +140,7 @@ for _, name in pairs(mason_lsp) do
   table.insert(mason_tools, name)
 end
 
-if vim.g.ai and vim.g.ai.sidekick then -- and opts.nes.enabled
+if vim.g.ai and vim.g.ai.sidekick and (vim.fn.executable('npm') == 1) then
   table.insert(mason_tools, 'copilot-language-server')
 end
 

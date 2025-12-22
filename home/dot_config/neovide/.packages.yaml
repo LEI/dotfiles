@@ -8,3 +8,10 @@ packages:
     nameOverwrite:
       fedora: dev.neovide.neovide
     type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+    after_script: |
+      {{- if eq .osIDLike "fedora" }}
+      # cmd flatpak override dev.neovide.neovide --filesystem=home
+      if ! [ -L ~/.var/app/dev.neovide.neovide/config/nvim ]; then
+        cmd ln -s ~/.config/nvim ~/.var/app/dev.neovide.neovide/config/nvim
+      fi
+      {{- end }}
