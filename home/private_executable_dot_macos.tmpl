@@ -10,7 +10,7 @@
 {{- end }}
 {{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
 {{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
-{{- output "curl" "-LSfs" $url
+{{- $script := output "curl" "-LSfs" $url
     | replaceAllRegex "Europe/Brussels" .timezone
     | replaceAllRegex "\"nl\"" "\"fr\""
     | replaceAllRegex "\n#launchctl" "\nlaunchctl"
@@ -18,7 +18,8 @@
     | replaceAllRegex "\nsudo mdutil" "\n# sudo mdutil"
     | replaceAllRegex "(\\s*)(.*open.*HOME.*init.*)" "${1}# ${2}"
     | replaceAllRegex "(defaults write NSGlobalDomain com.apple.swipescrolldirection -bool )false" "${1}true"
-    | replaceAllRegex "(defaults write com.apple.dock minimize-to-application -bool )true" "${1}false" -}}
+    | replaceAllRegex "(defaults write com.apple.dock minimize-to-application -bool )true" "${1}false"
+    | trim -}}
 
 # Always show hidden files
 defaults write com.apple.finder AppleShowAllFiles -boolean true
@@ -33,6 +34,7 @@ defaults write org.hammerspoon.Hammerspoon MJConfigFile "~/.config/hammerspoon/i
 defaults -currentHost write -globalDomain NSStatusItemSpacing -int 12
 defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
 
+# TODO: use fingerprint for sudo
 # sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
 # grep '^#\?auth' /etc/pam.d/sudo_local
 
@@ -47,3 +49,16 @@ defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
 
 # auth     optional     /opt/homebrew/lib/pam/pam_reattach.so
 # auth     sufficient   pam_tid.so
+
+# FIXME: set default text editor, to change manually:
+# Right click, Get Info, Open with: Change All...
+editor="com.neovide.neovide" # osascript -e 'id of app "Neovide"'
+# defaults write com.apple.LaunchServices/com.apple.launchservices.secure \
+#   LSHandlers -array-add \
+#   "{LSHandlerContentType=public.plain-text;LSHandlerRoleAll=$editor;}"
+# TODO: ~/.duti
+# for ext in .bash .json .md .sh .toml .yaml public.data public.plain-text public.unix-executable; do
+#   duti -s "$editor" "$ext" all
+# done
+
+{{ $script }}

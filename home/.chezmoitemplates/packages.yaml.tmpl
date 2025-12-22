@@ -809,6 +809,9 @@ osPackages:
       # diffutils:
       # dnsmasq:
       # dotenv-linter:
+      duti:
+        description: Default apps, documents and URL schemes
+        enabled: {{ and (ne .profile "minimal") (not (or .ephemeral .headless)) }}
       # findutils:
       # freetype:
       # gdb:

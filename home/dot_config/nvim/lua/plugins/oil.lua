@@ -1,6 +1,7 @@
 return {
   {
     'stevearc/oil.nvim',
+    -- FIXME: must be disabled once to download spell files via netrw
     enabled = vim.g.config.explorer == 'oil',
     -- https://github.com/stevearc/oil.nvim/pull/591
     branch = 'master',
