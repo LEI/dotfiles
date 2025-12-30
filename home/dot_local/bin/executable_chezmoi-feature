@@ -49,9 +49,10 @@ list_enabled_features() {
 
 get_feature() {
   key="$1"
-  # shellcheck disable=SC2016
-  value="$(chezmoi execute "{{ get .features \"$key\" }}")"
-  echo "$value"
+  # # shellcheck disable=SC2016
+  # value="$(chezmoi execute "{{ get .features \"$key\" }}")"
+  # echo "$value"
+  jq ".$key == true" "$HOME/.local/share/features.json"
 }
 
 if [ $# -eq 0 ]; then
@@ -90,18 +91,15 @@ while [ $# -gt 0 ]; do
     ;;
   *)
     value="$(get_feature "$1")"
-    if [ -z "$value" ]; then
-      echo >&2 "chezmoi feature: unknown feature: $1"
-      usage
-      exit 1
-    elif [ "$value" != "true" ]; then
+    if [ "$value" = false ]; then
       echo >&2 "chezmoi feature: feature disabled: $1"
+      exit 1
+    elif [ "$value" != true ]; then
+      echo >&2 "chezmoi feature: unknown value: $1 ($value)"
       exit 2
     fi
+    # echo >&2 "chezmoi feature: feature enabled: $1"
     shift
-    # echo >&2 "chezmoi package: invalid argument: $1"
-    # usage
-    # exit 1
     ;;
   esac
 done

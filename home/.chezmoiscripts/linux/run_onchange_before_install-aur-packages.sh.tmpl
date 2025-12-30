@@ -3,6 +3,10 @@
 
 set -eu
 
+if [ -z "${USER:-}" ]; then
+  USER="$(id --user --name)"
+fi
+
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
@@ -11,9 +15,12 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
     cmd sudo -E --user="$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
   fi
   cmd cd $TMPDIR/yay-bin
-  # if grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
-  #   cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
-  # fi
+  if [ -n "${CI:-}" ] && grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
+    cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+  fi
+  if [ -n "${CI:-}" ] && [ "$(uname -m)" = "aarch64" ]; then
+    cmd sudo sed -e 's/^#\?LocalFileSigLevel = .*/LocalFileSigLevel = Optional/' -i /etc/pacman.conf
+  fi
   cmd sudo -E --user="$USER" makepkg --install --noconfirm --syncdeps
 fi
 

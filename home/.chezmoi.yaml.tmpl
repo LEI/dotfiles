@@ -148,7 +148,7 @@
 interpreters:
   sh:
     command: {{ lookPath "sh" }} # "C:\\Windows\\System32\\bash.exe" # Get-Command bash
-{{- else }}
+{{- else if ne $osID "android" }}
 # https://www.chezmoi.io/user-guide/advanced/install-your-password-manager-on-init/
 hooks:
   read-source-state:

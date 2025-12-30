@@ -22,6 +22,9 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
+NAME="$1"
+shift
+
 container_status() {
   $PROVIDER container inspect --format '{{.State.Status}}' "$@"
 }
@@ -35,10 +38,18 @@ build_container() {
   else
     image_version=latest
   fi
-  name="$tag_prefix-$image_name-$image_version"
-  if [ "$image_name" = termux ]; then
-    image_name_arg="docker.io/termux/termux-docker"
-    image_version_arg="x86_64"
+  container="$tag_prefix-$image_name-$image_version"
+  if [ "$image_name" = archlinux ] && [ "$(uname -m)" = arm64 ]; then
+    image_name_arg=docker.io/ogarcia/archlinux
+    # base, base-devel
+  elif [ "$image_name" = termux ]; then
+    image_name_arg=docker.io/termux/termux-docker
+    # aarch64, arm, i686 (latest), x86_64
+    if [ "$(uname -m)" = arm64 ]; then
+      image_version_arg=arm
+    else
+      image_version_arg=x86_64
+    fi
     # prefix=/data/data/com.termux/files/home
     # user=a0_test
     # TODO: prefix bootstrap only for termux in docker
@@ -55,85 +66,116 @@ build_container() {
     prefix=/data/data/com.termux/files
     home="$prefix/home"
     # container_user=root
-    user=a0_test
+    user=root # a0_test
   fi
   chezmoi_root="$home/.local/share/chezmoi"
 
   $PROVIDER build . \
     --build-arg=IMAGE_NAME="${image_name_arg:-$image_name}" \
     --build-arg=IMAGE_VERSION="${image_version_arg:-$image_version}" \
-    --build-arg=USER="$user" \
-    --tag="$name"
+    --tag="$container"
+  # --build-arg=USER="$user"
 
-  # $PROVIDER run -it --name="$name" --rm "$name" "$@"
+  # $PROVIDER run -it --name="$container" --rm "$container" "$@"
   # --userns=keep-id
   # --volume="$PWD:$chezmoi_root:ro"
-  if ! $PROVIDER container inspect "$name" >/dev/null; then
-    $PROVIDER create --name="$name" "$name" # "$@"
+
+  # # Stop running container
+  # if [ "$(container_status "$container")" = running ]; then
+  #   $PROVIDER stop "$container"
+  # fi
+
+  # # Remove existing container
+  # if $PROVIDER container inspect "$container" >/dev/null; then
+  #   $PROVIDER container rm "$container"
+  # fi
+
+  # Create container
+  if ! $PROVIDER container inspect "$container" >/dev/null; then
+    $PROVIDER create --name="$container" "$container"
   fi
-  if [ "$(container_status "$name")" != running ]; then
-    $PROVIDER start "$name" # "$@"
+
+  # Start container
+  if [ "$(container_status "$container")" != running ]; then
+    $PROVIDER start "$container"
   fi
-  status="$(container_status "$name")"
+
+  # $PROVIDER wait "$container"
+
+  # Verify container is running
+  status="$(container_status "$container")"
   if [ "$status" != running ]; then
-    echo >&2 "Container $name is not running (status: $status)"
+    echo >&2 "Container $container is not running (status: $status)"
     exit 1
   fi
-  $PROVIDER exec "$name" mkdir -p "$chezmoi_root"
-  $PROVIDER container cp .chezmoiroot "$name:$chezmoi_root/"
-  $PROVIDER container cp .chezmoiversion "$name:$chezmoi_root/"
-  $PROVIDER container cp --overwrite home "$name:$chezmoi_root/"
-  $PROVIDER container cp script "$name:$chezmoi_root/"
 
-  # FIXME: Cannot run 'pkg' command as root
+  command=(./script/bootstrap --verbose)
   if [ "$image_name" = termux ]; then
-    # ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors
-    $PROVIDER exec "$name" sh -c 'set -x; pkg update --quiet && pkg install --quiet --yes chezmoi proot'
+    prefix_command=(
+      proot
+      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf"
+      -b "$prefix/usr/etc/tls:/etc/ssl"
+    )
+    command=(
+      "${prefix_command[@]}"
+      "${command[@]}"
+    )
+    user=system
+    $PROVIDER exec "$container" sh -euxc 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
+    # NOTE: Cannot run 'pkg' command as root
+    $PROVIDER exec --user=$user "$container" sh -euxc 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
+  else
+    # Wait for test user
+    $PROVIDER exec "$container" sh -euxc "
+      until id -u $user >/dev/null 2>&1; do
+        echo 'Waiting for $user user to be created...'
+        sleep 1
+      done
+    "
   fi
-
-  # $PROVIDER exec "$name" ls -la "home"
-  # $PROVIDER exec "$name" sudo chown -R test:test "$home/.local"
-  $PROVIDER exec \
-    --env=CI=true \
-    --workdir="$chezmoi_root" \
-    "$name" ./script/bootstrap --branch=main # --no-tty --verbose
-
-  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/check
-  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/update
-  $PROVIDER container cp test "$name:$chezmoi_root/"
+  $PROVIDER exec "$container" mkdir -p "$chezmoi_root"
+  $PROVIDER container cp .chezmoiroot "$container:$chezmoi_root/"
+  $PROVIDER container cp .chezmoiversion "$container:$chezmoi_root/"
+  $PROVIDER container cp --overwrite home "$container:$chezmoi_root/"
+  $PROVIDER container cp script "$container:$chezmoi_root/"
+  $PROVIDER container cp test "$container:$chezmoi_root/"
   if [ -d test_support ]; then
-    $PROVIDER container cp test_support "$name:$chezmoi_root/"
+    $PROVIDER container cp test_support "$container:$chezmoi_root/"
   fi
-  $PROVIDER exec --workdir="$chezmoi_root" "$name" ./script/test
+  $PROVIDER exec "$container" chown -R $user:$user "$home"
+
+  $PROVIDER exec \
+    --env=CHEZMOI_UPGRADE=true \
+    --env=CI=true \
+    --user="$user" \
+    --workdir="$chezmoi_root" \
+    "$container" "${command[@]}"
+
+  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/check
+  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/update
+  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/test
 
   if [ $# -eq 0 ]; then
-    set -- bash -i
+    # FIXME: override temporary directory to avoid permission issues in termux
+    if [ "$image_name" = termux ]; then
+      set -- bash --version
+    else
+      set -- bash -ic "chezmoi package diff all"
+    fi
   fi
   $PROVIDER exec \
     --interactive \
     --tty \
+    --user="$user" \
     --workdir="$chezmoi_root" \
-    "$name" "$@"
+    "$container" "$@"
+  # $PROVIDER stop "$container"
 }
 
-name="$1"
-shift
-
-if [ "$name" = all ]; then
-  images=(
-    alpine
-    archlinux
-    debian
-    ubuntu
-    fedora
-    # termux
-  )
-  for img in "${images[@]}"; do
-    if ! time build_container "$img" "$@"; then
-      exit $?
-    fi
-  done
-  exit
+if [ "$NAME" = all ]; then
+  NAME=alpine,archlinux,debian,ubuntu,fedora,termux
 fi
 
-time build_container "$name" "$@"
+for name in ${NAME//,/ }; do
+  time build_container "$name" "$@"
+done

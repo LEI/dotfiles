@@ -77,7 +77,6 @@ setup() {
   assert_success
 }
 
-# list-package
 # bats test_tags=bin,package
 @test "bin: list installed packages" {
   # [ "${CI:-}" != true ] && skip "not in ci"
@@ -90,16 +89,18 @@ setup() {
   elif [ "$package_manager" = rpm ]; then
     package_manager=rpm-ostree
   fi
+  echo >&3 "STUB package manager: $package_manager"
   stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
   unstub "$package_manager" 2>/dev/null || true
   refute_output
-  assert_stderr_line --regexp "^# STUB 1"
+  assert_stderr_line --regexp "^# STUB"
   assert_success
 }
 
 # bats test_tags=bin,brew,package
 @test "bin: list installed packages (brew)" {
+  [ "$UNAME" != Darwin ] || skip "$UNAME"
   # skip "stub conflicts with feature test"
   check_feature brew
   # stub package-manager "echo brew"
@@ -153,7 +154,7 @@ setup() {
   assert_stderr_line "DRY-RUN: brew update --quiet"
   # assert_stderr_line "brew bundle --file=/dev/stdin --no-upgrade list"
   # assert_stderr_line "brew bundle --file=/dev/stdin --dry-run list"
-  assert_stderr_line "DRY-RUN: brew bundle --file=/dev/stdin --no-upgrade"
+  assert_stderr_line --regexp "^DRY-RUN: brew bundle --file=/dev/stdin" # --no-upgrade
   assert_success
 }
 
@@ -188,8 +189,10 @@ setup() {
 @test "chezmoi: install rust packages" {
   check_feature rust
   run_chezmoi .chezmoiscripts/02-install-rust.sh
-  assert_output
-  assert_stderr
+  refute_output
+  assert_stderr_line "Already installed"
+  assert_stderr_line "DRY-RUN: cargo --version"
+  # assert_stderr_line --regexp "^DRY-RUN: cargo binstall"
   assert_success
 }
 

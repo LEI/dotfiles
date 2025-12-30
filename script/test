@@ -20,6 +20,10 @@ if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
+if [ -z "${USER:-}" ]; then
+  USER="$(id --user --name)"
+fi
+
 if [ "$USER" = test ] && command -v mise >/dev/null; then
   mise trust --all --quiet --yes
   # mise prune --quiet --yes

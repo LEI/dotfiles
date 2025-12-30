@@ -15,7 +15,17 @@ has_feature() {
   # command -v "$cmd" >/dev/null || skip "$* feature: $cmd not found"
   local feature
   feature="$(jq ".$name == true" "$HOME/.local/share/features.json")"
-  [ "$feature" = "true" ]
+  if [ "$feature" = false ]; then
+    # echo >&3 "# has_feature: feature disabled: $name"
+    return 1
+  fi
+  if [ "$feature" != true ]; then
+    # echo >&3 "# has_feature: unknown value: $name ($feature)"
+    return 2
+  fi
+  if [ -n "${DEBUG-}" ]; then
+    echo >&3 "# DEBUG has_feature: feature enabled: $name"
+  fi
 }
 
 check_feature() {

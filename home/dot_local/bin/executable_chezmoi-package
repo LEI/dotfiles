@@ -167,7 +167,7 @@ main() {
   fi
   if command -v pipx >/dev/null; then
     "${command}_packages" pipx
-  elif command -v pip >/dev/null; then
+  elif command -v pip >/dev/null && chezmoi feature python; then
     "${command}_packages" pip
   fi
   # if command -v ruby >/dev/null; then

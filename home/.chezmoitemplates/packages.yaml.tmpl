@@ -37,6 +37,7 @@ packages:
   bkt:
     enabled: {{ and
       (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows"))
+      (and (ne .osIDLike "arch") (ne .chezmoi.arch "arm64"))
       (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
@@ -462,11 +463,11 @@ packages:
   #   nameOverwrite:
   #     windows: RedHat.Podman-Desktop
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  # podman-tui:
-  #   enabled: {{ and .features.podman (not (eq .osIDLike "debian")) }}
-  #   nameOverwrite:
-  #     arch: podman-tui-bin
-  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  podman-tui:
+    enabled: {{ and .features.podman (not (eq .osIDLike "debian")) }}
+    nameOverwrite:
+      arch: podman-tui-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   posting: # slumber, resterm (.http/.rest)
     enabled: {{ and .features.rest (eq .osIDLike "arch" "darwin") .gui }}
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -614,11 +615,12 @@ packages:
     enabled: {{ and (eq .osIDLike "fedora") .gui }}
   tre-command:
     enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora")) (not (or
+      (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64"))
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
     )) (ne .profile "minimal") }}
     nameOverwrite:
-      arch: tre-command-bin
+      arch: {{ eq .chezmoi.arch "arm64" | ternary "tre-command" "tre-command-bin" }}
       windows: duan.tre
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   time:
@@ -1016,8 +1018,8 @@ osPackages:
       com.mattjakeman.ExtensionManager:
         description: Alternative GNOME extensions manager
         enabled: {{ eq .variantID "silverblue" }}
-      com.obsproject.Studio:
-        enabled: {{ not (or .ephemeral .headless) }}
+      # com.obsproject.Studio:
+      #   enabled: {{ not (or .ephemeral .headless) }}
       com.protonvpn.www:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
       com.rustdesk.RustDesk:

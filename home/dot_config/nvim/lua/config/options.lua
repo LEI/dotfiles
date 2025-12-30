@@ -7,11 +7,9 @@
 -- Sync with system clipboard
 if vim.env.SSH_TTY then
   vim.opt.clipboard = ''
-elseif vim.env.WAYLAND_DISPLAY then
-  -- vim.opt.clipboard:append({ 'unnamed', 'unnamedplus' })
-  vim.opt.clipboard = { 'unnamed', 'unnamedplus' }
+-- elseif vim.env.WAYLAND_DISPLAY then
+--   vim.opt.clipboard = { 'unnamed', 'unnamedplus' }
 else
-  -- vim.opt.clipboard:append({ 'unnamedplus' })
   vim.opt.clipboard = 'unnamedplus'
 end
 

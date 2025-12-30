@@ -97,8 +97,6 @@ main() {
   mkdir -p "$TEST_TMPDIR/.local/bin"
 
   coverage "$@"
-
-  # ls -la "$TEST_TMPDIR/"{,.*,bin/*}
 }
 
 main "$@"

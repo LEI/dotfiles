@@ -11,7 +11,7 @@
     (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")
-  "bottom" (and .gui)
+  "bottom" .gui
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
@@ -21,17 +21,15 @@
     (gt .glibc 2.31)
     (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))
     (not (eq .os "android" "windows"))
-    (ne .profile "minimal")
-    (not (or .ephemeral .headless)))
-  "git" (and .gui)
+    .gui)
+  "git" .gui
   "go" false
-  "goss" (and (not (eq .os "android" "windows")) (ne .profile "minimal"))
+  "goss" (and (ne .profile "minimal"))
   "gpg" false
   "helix" (and
     (not (and (eq .osIDLike "debian") (gt .glibc 2.31)))
-    (ne .profile "minimal")
     (not (or .ephemeral .headless)))
-  "i3" (and (eq .osIDLike "arch") (not (or .ephemeral .headless)))
+  "i3" (and (eq .osIDLike "arch") .gui)
   "kube" false
   "lla" false
   "logseq" false
@@ -43,10 +41,10 @@
   "node" (and
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
-  "nushell" (and .gui)
+  "nushell" .gui
   "php" false
   "podman" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
-  "python" (and .gui)
+  "python" .gui
   "rest" false
   "ripgrep" true
   "ruby" false

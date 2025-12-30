@@ -3,5 +3,6 @@ packages:
   goss:
     enabled: "{{ .features.goss }}"
     nameOverwrite:
-      arch: goss-bin
-    type: '{{ eq .osID "alpine" "android" "darwin" "fedora" "ubuntu" | ternary "mise" (eq .osIDLike "arch" | ternary "aur" nil) }}'
+      arch: '{{ eq .chezmoi.arch "arm64" | ternary "goss" "goss-bin" }}'
+    # mise: android, darwin, fedora, ubuntu
+    type: '{{ and (eq .osIDLike "arch") (ne .chezmoi.arch "arm64") | ternary "aur" "mise" }}'

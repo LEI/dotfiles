@@ -22,28 +22,28 @@ if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; th
   pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
-if command -v rustup >/dev/null && ! rustup default; then
+if command -v rustup >/dev/null && ! rustup default >/dev/null; then
   # echo >&2 "No default toolchain is configured, using stable"
 
   # TODO(windows/msys2): rustup default stable-x86_64-pc-windows-gnu
   # error: linking with `x86_64-w64-mingw32-gcc` failed
-  cmd rustup default stable
+  dry_run rustup default stable
 
-  # cmd rustup toolchain list
-  # cmd rustup toolchain uninstall stable
-  # cmd rustup toolchain install stable
+  # dry_run rustup toolchain list
+  # dry_run rustup toolchain uninstall stable
+  # dry_run rustup toolchain install stable
 fi
 # if [ ! -f "$TMPDIR/rust-toolchain" ]; then
 #   if [ -f "$HOME/rust-toolchain" ]; then
-#     cmd cp "$HOME/rust-toolchain" "$TMPDIR/rust-toolchain"
+#     dry_run cp "$HOME/rust-toolchain" "$TMPDIR/rust-toolchain"
 #   else
-#     cmd echo stable >"$TMPDIR/rust-toolchain"
+#     # dry_run echo stable >"$TMPDIR/rust-toolchain"
 #   fi
 # fi
 
-if command -v cargo; then
+if command -v cargo >/dev/null; then
   echo >&2 "Already installed"
-  cmd cargo --version
+  dry_run cargo --version
 else
   echo >&2 "Installing cargo"
 
@@ -79,26 +79,26 @@ else
   # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
   #   | sh -s -- --component rust-analyzer --quiet -y
 
-  cmd curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
-  cmd chmod +x "$RUSTUP_INIT"
+  dry_run curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
+  dry_run chmod +x "$RUSTUP_INIT"
   {{- if .features.neovim }}
   RUSTUP_INIT_ARGS=""
   {{- else }}
   RUSTUP_INIT_ARGS="--component rust-analyzer"
   {{- end }}
   # shellcheck disable=SC2086
-  cmd "$RUSTUP_INIT" $RUSTUP_INIT_ARGS --no-modify-path --quiet -y
+  dry_run "$RUSTUP_INIT" $RUSTUP_INIT_ARGS --no-modify-path --quiet -y
 
   echo >&2 "Installed cargo"
 fi
 
-# cmd rustc --version
+# dry_run rustc --version
 
-# cmd rustup default stable
+# dry_run rustup default stable
 
 {{- if not .features.neovim }}
 
-# cmd rustup component add rust-analyzer
+# dry_run rustup component add rust-analyzer
 {{- end }}
 
 # if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
@@ -109,7 +109,7 @@ if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; th
 fi
 
 if ! command -v cargo-binstall >/dev/null; then
-  # cmd cargo install --locked --quiet cargo-binstall
+  # dry_run cargo install --locked --quiet cargo-binstall
   # https://github.com/cargo-bins/cargo-binstall#manually
   echo >&2 "Installing cargo-binstall"
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
@@ -149,5 +149,5 @@ packages="{{ $list | sortAlpha | join " " }}"
 # fi
 
 if [ -n "$packages" ]; then
-  cmd cargo binstall --disable-telemetry --no-confirm --quiet "$@" $packages
+  dry_run cargo binstall --disable-telemetry --no-confirm --quiet "$@" $packages
 fi

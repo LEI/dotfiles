@@ -3,16 +3,16 @@
 MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
 
 # TODO: reuse or replace ./script/termux-prefix
-termux-prefix() {
+termux_prefix() {
   proot -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" -b "$PREFIX/etc/tls:/etc/ssl" "$@"
 }
 
 mise() {
-  termux-prefix "$MISE_BIN" "$@"
+  termux_prefix "$MISE_BIN" "$@"
 }
 
 topgrade() {
-  termux-prefix topgrade "$@"
+  termux_prefix topgrade "$@"
 }
 
 {{- end }}

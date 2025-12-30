@@ -401,9 +401,10 @@ return {
   },
   {
     'gbprod/yanky.nvim',
-    enabled = vim.fn.has('nvim-0.9') == 1,
     -- tag = 'v2.0.0',
-    version = 'v2.x',
+    -- version = 'v2.x',
+    -- https://github.com/gbprod/yanky.nvim/pull/184
+    branch = 'main',
     dependencies = {
       'folke/snacks.nvim',
       'kkharji/sqlite.lua',
@@ -440,6 +441,7 @@ return {
     },
     opts = {
       highlight = { timer = 150 },
+      -- system_clipboard = { sync_with_ring = not vim.env.WAYLAND_DISPLAY },
     },
   },
 }
