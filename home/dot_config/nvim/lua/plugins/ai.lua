@@ -2,6 +2,9 @@ if not vim.g.features.ai then
   return {}
 end
 
+local has_llama_cpp = false -- vim.fn.executable('llama-server') == 1
+local has_ollama = vim.fn.executable('ollama') == 1
+
 vim.g.ai = {
   avante = false,
   claude = true,
@@ -11,6 +14,9 @@ vim.g.ai = {
   mcphub = true,
   sidekick = true,
   windsurf = false,
+
+  llama_cpp = has_llama_cpp,
+  ollama = has_ollama,
 }
 
 vim.g.codeium_enabled = vim.g.ai.windsurf
@@ -478,4 +484,26 @@ return {
   -- https://github.com/A7Lavinraj/assistant.nvim
   -- https://github.com/CopilotC-Nvim/CopilotChat.nvim
   -- https://github.com/jackMort/ChatGPT.nvim
+
+  -- https://github.com/ggml-org/llama.vim#llamacpp-settings
+  -- https://huggingface.co/collections/ggml-org/llamavim
+  -- FIXME: Input types must match cooperative tensor types
+  -- llama-server --fim-qwen-7b-default
+  {
+    'ggml-org/llama.vim',
+    enabled = vim.g.ai.llama_cpp,
+    init = function()
+      vim.g.llama_config = {
+        -- endpoint = 'http://127.0.0.1:8012/infill',
+        -- api_key = '',
+        -- model = '',
+        auto_fim = false, -- Fill-In-The-Middle (FIM)
+        -- keymap_trigger = '<C-F>',
+        -- keymap_accept_full = '<Tab>',
+        -- keymap_accept_line = '<S-Tab>',
+        -- keymap_accept_word = '<C-B>',
+        -- enable_at_startup = false,
+      }
+    end,
+  },
 }

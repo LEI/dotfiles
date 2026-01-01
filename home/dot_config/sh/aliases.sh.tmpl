@@ -117,6 +117,9 @@ fi
 if command -v crush >/dev/null; then
   crush() { env crush "${@:---continue}"; }
 fi
+if command -v opencode >/dev/null; then
+  opencode() { env opencode "${@:---continue}"; }
+fi
 {{- end }}
 
 {{- if and .features.docker }}

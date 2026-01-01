@@ -37,7 +37,7 @@ packages:
   bkt:
     enabled: {{ and
       (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows"))
-      (and (ne .osIDLike "arch") (ne .chezmoi.arch "arm64"))
+      (not (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64")))
       (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   build-base: { enabled: {{ eq .osIDLike "alpine" }} }
@@ -144,6 +144,7 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
   # dog, doggo, mtr, trippy, oryx / tshark termshark
   dolphie:
+    description: MySQL monitoring TUI
     enabled: {{ and .features.sql (ne .profile "minimal") }}
     type: '{{ ne .osIDLike "darwin" | ternary "uv" nil }}'
   # dua, dug
@@ -264,6 +265,9 @@ packages:
       arch: httm-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   # httpstat
+  huggingface-cli:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    # type: brew
   hurl:
     enabled: {{ and
       .features.rest
@@ -355,6 +359,11 @@ packages:
   macchina:
     enabled: {{ ne .profile "minimal" }}
     type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+  mlx-lm:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    # FIXME(brew): RuntimeError: [metal::Device] Unable to load kernel
+    # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
+    type: uv
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   # mailpit:
@@ -389,8 +398,10 @@ packages:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
+  ollama:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not .gui) }}
   ollama-app:
-    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not (or .ephemeral .headless)) }}
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") .gui }}
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   opencode:
     enabled: {{ .features.ai }}

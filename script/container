@@ -46,7 +46,7 @@ build_container() {
     image_name_arg=docker.io/termux/termux-docker
     # aarch64, arm, i686 (latest), x86_64
     if [ "$(uname -m)" = arm64 ]; then
-      image_version_arg=arm
+      image_version_arg=aarch64
     else
       image_version_arg=x86_64
     fi
