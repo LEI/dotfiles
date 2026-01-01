@@ -277,7 +277,7 @@ return {
     -- branch = 'main',
     version = 'v2.x',
     dependencies = {
-      'echasnovski/mini.icons',
+      'nvim-mini/mini.icons',
       -- {
       --   'nvim-tree/nvim-web-devicons',
       --   tag = 'v0.100',

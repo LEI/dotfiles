@@ -1,8 +1,9 @@
 return {
   -- https://www.lazyvim.org/extras/util/mini-hipatterns
   {
-    'echasnovski/mini.hipatterns',
-    version = 'v0.16.0',
+    'nvim-mini/mini.hipatterns',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     event = 'VeryLazy',
     opts = function()
       local hi = require('mini.hipatterns')

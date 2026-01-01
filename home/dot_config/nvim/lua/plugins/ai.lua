@@ -231,7 +231,7 @@ return {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
 
-      'echasnovski/mini.icons', -- or nvim-tree/nvim-web-devicons
+      'nvim-mini/mini.icons', -- or nvim-tree/nvim-web-devicons
       'folke/snacks.nvim', -- for input provider snacks
       -- 'zbirenbaum/copilot.lua', -- for providers='copilot'
       'HakonHarnes/img-clip.nvim', -- for image pasting
@@ -347,11 +347,11 @@ return {
   {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
-    -- tag = 'v17.5.0',
-    version = 'v17.x',
+    -- tag = 'v18.3.1',
+    version = 'v18.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
-      -- 'echasnovski/mini.diff',
+      -- 'nvim-mini/mini.diff',
       'HakonHarnes/img-clip.nvim',
       -- https://codecompanion.olimorris.dev/installation.html#additional-plugins
       -- Alternative: https://github.com/OXY2DEV/markview.nvim

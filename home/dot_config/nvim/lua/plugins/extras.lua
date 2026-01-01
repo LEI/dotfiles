@@ -7,7 +7,7 @@ return {
     version = 'v8.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
-      'echasnovski/mini.icons',
+      'nvim-mini/mini.icons',
     },
     ft = 'markdown',
     opts = {
@@ -41,8 +41,9 @@ return {
     },
   },
   {
-    'echasnovski/mini.icons',
-    tag = 'v0.16.0',
+    'nvim-mini/mini.icons',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     lazy = true,
     opts = {
       file = {
