@@ -12,6 +12,6 @@ packages:
       fedora: vim-enhanced # vim-minimal
       windows: vim.vim
     # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
-  # TODO:  rpm-ostree override remove nano nano-default-editor --install vim-default-editor
-  # vim-default-editor: # Conflicts with nano-default-editor
-  #   enabled: '{{ and .features.vim (eq .osIDLike "fedora") (not .headless) }}'
+  # TODO: rpm-ostree override remove nano nano-default-editor --install vim-default-editor
+  vim-default-editor: # Conflicts with nano-default-editor
+    enabled: '{{ and .features.vim (eq .osIDLike "fedora") (not .headless) }}'

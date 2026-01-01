@@ -42,8 +42,8 @@
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 
-{{-   $type := get $pkg "type" | trim }}{{- /* TODO: "<no value>" toString */ -}}
-{{-   if eq $type nil "" "nil" "null" "<no value>" }}
+{{-   $type := get $pkg "type" }}
+{{-   if or (empty $type) (eq $type "nil" "null" "<no value>") }}
 {{-     $type = $defaultType }}
 {{-   end }}
 {{-   if and $packageType $type }}

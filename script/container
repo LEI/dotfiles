@@ -153,7 +153,7 @@ build_container() {
 
   $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/check
   $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/update
-  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/test
+  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" "$container" ./script/test
 
   if [ $# -eq 0 ]; then
     # FIXME: override temporary directory to avoid permission issues in termux

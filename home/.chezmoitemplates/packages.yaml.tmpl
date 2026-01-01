@@ -99,12 +99,17 @@ packages:
   # FIXME(arch): JVM terminated error
   # https://wiki.archlinux.org/title/Dbeaver
   # export _JAVA_OPTIONS="-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-  # dbeaver: # Requires at least jdk17-openjdk, alternative: mysqlworkbench
-  #   enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin" "windows") .gui }}
-  #   nameOverwrite:
-  #     darwin: dbeaver-community
-  #     windows: DBeaver.DBeaver
-  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  dbeaver: # Requires at least jdk17-openjdk, alternative: mysqlworkbench
+    enabled: {{ and .features.sql (eq .osIDLike "arch" "darwin" "fedora" "windows") .gui }}
+    nameOverwrite:
+      darwin: dbeaver-community
+      flatpak: io.dbeaver.DBeaverCommunity
+      windows: DBeaver.DBeaver
+    type: {{ if eq .osIDLike "arch" -}}
+      aur
+      {{- else if eq .variantID "silverblue" -}}
+      flatpak
+      {{- end }}
   dcv: # dtop
     enabled: {{ and .features.docker (eq .osIDLike "darwin") }}
     nameOverwrite:
@@ -287,7 +292,8 @@ packages:
     nameOverwrite:
       windows: REALiX.HWiNFO
   hyperfine:
-    enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
+    enabled: {{ and (eq .osIDLike "arch" "darwin" "fedora") .gui }}
+    # type: {{ if eq .osIDLike "fedora" }}brew{{ end }}
   # intentrace:
   #   description: strace alternative
   #   enabled: {{ lookPath "strace" | isExecutable }} # x86-64
@@ -396,6 +402,8 @@ packages:
   #   enabled: {{ and (ne .osIDLike "debian") (ne .profile "minimal") }}
   netscanner:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+  nextcloud-client:
+    enabled: {{ and (eq .osIDLike "fedora") (eq .profile "personal") .gui }}
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
@@ -567,6 +575,8 @@ packages:
     nameOverwrite:
       darwin: sk
     type: '{{ eq .osIDLike "debian" | ternary "cargo" nil }}' # .features.rust
+  snapper:
+    enabled: {{ and (eq .osIDLike "fedora") (eq .profile "personal") (not .ephemeral) }}
   # ssh-list:
   #   enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
@@ -680,6 +690,8 @@ packages:
     nameOverwrite:
       arch: viddy-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  virt-manager:
+    enabled: {{ and (eq .osIDLike "fedora") .gui }}
   vlc: # mpv
     description: Video player
     enabled: {{ and
@@ -1004,7 +1016,27 @@ osPackages:
         enabled: {{ not (or .ephemeral .headless) }}
       espeak:
         enabled: {{ not (or .ephemeral .headless) }}
-      gnome-shell-extension-appindicator gnome-shell-extension-blur-my-shell gnome-shell-extension-caffeine gnome-shell-extension-dash-to-dock gnome-shell-extension-frippery-move-clock gnome-shell-extension-system-monitor gnome-shell-extension-user-theme:
+      # https://extensions.gnome.org/extension/4651/notification-banner-reloaded/
+      # https://extensions.gnome.org/extension/4691/pip-on-top/
+      # https://extensions.gnome.org/extension/5446/quick-settings-tweaker/
+      # https://github.com/corecoding/Vitals
+      gnome-shell-extension-appindicator:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-blur-my-shell:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-caffeine:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-dash-to-dock:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      # gnome-shell-extension-frippery-move-clock:
+      #   enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-just-perfection:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-pop-shell:
+        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      # gnome-shell-extension-system-monitor:
+      #   enabled: {{ and (eq .variantID "silverblue") .gui }}
+      gnome-shell-extension-user-theme:
         enabled: {{ and (eq .variantID "silverblue") .gui }}
       rsms-inter-vf-fonts:
         enabled: {{ .gui }}
@@ -1039,12 +1071,11 @@ osPackages:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
       dev.aunetx.deezer:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
-      dev.geopjr.Tuba:
-        enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
-        description: Fediverse
       in.cinny.Cinny:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
         description: Matrix client
+      io.github.flattool.Ignition:
+        enabled: {{ not (or .ephemeral .headless) }}
       page.tesk.Refine:
         description: GNOME tweaks
         enabled: {{ and (eq .variantID "silverblue") (not (or .ephemeral .headless)) }}
