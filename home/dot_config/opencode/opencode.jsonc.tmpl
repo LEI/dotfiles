@@ -1,4 +1,4 @@
-{{- $mcp := includeTemplate "dot_config/Code/User/mcp.json" | fromJson -}}
+{{- $mcp := includeTemplate "dot_config/Code/User/mcp.json.tmpl" . | fromJson -}}
 {{- $servers := dict -}}
 {{- range $key, $value := $mcp.servers -}}
 {{- if hasKey $value "command" -}}
