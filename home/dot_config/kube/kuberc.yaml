@@ -2,21 +2,21 @@
 # https://kubernetes.io/docs/reference/kubectl/kuberc/
 apiVersion: kubectl.config.k8s.io/v1beta1
 kind: Preference
-defaults:
-  # Default server-side apply
-  - command: apply
-    options:
-      - name: server-side
-        default: "true"
-
-  # Default interactive deletion
-  - command: delete
-    options:
-      - name: interactive
-        default: "true"
-
-  - name: getn
-    command: get
-    options:
-      - name: output
-        default: json
+# defaults:
+#   # Default server-side apply
+#   - command: apply
+#     options:
+#       - name: server-side
+#         default: "true"
+#
+#   # Default interactive deletion
+#   - command: delete
+#     options:
+#       - name: interactive
+#         default: "true"
+#
+#   - name: getn
+#     command: get
+#     options:
+#       - name: output
+#         default: json

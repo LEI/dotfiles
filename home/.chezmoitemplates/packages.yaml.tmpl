@@ -1044,15 +1044,20 @@ osPackages:
         enabled: {{ .gui }}
       steam-devices:
         enabled: {{ .features.steam }}
-      tailscale: # trayscale
+      tailscale trayscale:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
+        # TODO: approve new device and accept routes
+        # after_script: |
+        #   sudo systemctl enable # tailscaled
+        #   sudo systemctl start tailscaled
+        #   sudo tailscale set --operator=$USER
       thunderbird:
         enabled: {{ not (or .ephemeral .headless) }}
     flatpak:
       com.collaboraoffice.Office:
         enabled: {{ not (or .ephemeral .headless) }}
-      dev.deedles.Trayscale:
-        enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
+      # dev.deedles.Trayscale:
+      #   enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
       com.discordapp.Discord:
         enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
       com.github.tchx84.Flatseal:

@@ -128,7 +128,7 @@ return {
         {
           mode = { 'n', 'v' },
           {
-            package.loaded.persistence and '<leader>qq' or '<leader>q',
+            '<leader>qq',
             '<cmd>q<cr>',
             desc = 'Quit the current window',
           },

@@ -20,7 +20,7 @@ export MANPAGER="${MANPAGER:-less -X}"
 # export LESS="-S -X -F -I -R"
 export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}"
 
-{{- $editor := lookPath "vi" }}
+{{- $editor := "" }}
 {{- if lookPath "editor" | isExecutable }}
 {{- $editor = lookPath "editor" }}
 {{- else if lookPath "hx" | isExecutable }}
@@ -31,9 +31,13 @@ export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-C
 {{- $editor = lookPath "vim" }}
 {{- else if lookPath "code" | isExecutable }}
 {{- $editor = lookPath "code" }}
+{{- else -}}
+{{- $editor = env "EDITOR" | default (lookPath "vi") }}
 {{- end }}
-export EDITOR="${EDITOR:-{{ $editor }}}"
+# export EDITOR="${EDITOR:-{{ $editor }}}"
+export EDITOR="{{ $editor }}"
 export VISUAL="${VISUAL:-$EDITOR}"
+
 {{- if lookPath "ghostty" | isExecutable }}
 
 # xdg-terminal-exec
