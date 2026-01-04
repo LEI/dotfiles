@@ -1,13 +1,13 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"223",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"157",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"220",},
-{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"221",},
+{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"154",},
+{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"155",},
 {"lineNum":"    7","line":"fi"},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"219",},
+{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"153",},
 {"lineNum":"   10","line":"apk)"},
 {"lineNum":"   11","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0",},
 {"lineNum":"   12","line":"  ;;"},
@@ -23,7 +23,7 @@ var data = {lines:[
 {"lineNum":"   22","line":"  ;;"},
 {"lineNum":"   23","line":"brew)"},
 {"lineNum":"   24","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   25","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"222",},
+{"lineNum":"   25","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"156",},
 {"lineNum":"   26","line":"  ;;"},
 {"lineNum":"   27","line":"cask)"},
 {"lineNum":"   28","line":"  brew list --cask","class":"lineNoCov","hits":"0",},
@@ -104,5 +104,5 @@ var data = {lines:[
 {"lineNum":"  103","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-12-21 16:55:26", "instrumented" : 35, "covered" : 5,};
+var header = { "command" : "", "date" : "2026-01-04 23:51:18", "instrumented" : 35, "covered" : 5,};
 var merged_data = [];

@@ -1,12 +1,12 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"218",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"152",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"216",},
+{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"150",},
 {"lineNum":"    6","line":"all | \'\')"},
-{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"1","order":"215",},
-{"lineNum":"    8","line":"    manager=brew","class":"lineCov","hits":"1","order":"217",},
+{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"1","order":"149",},
+{"lineNum":"    8","line":"    manager=brew","class":"lineCov","hits":"1","order":"151",},
 {"lineNum":"    9","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineNoCov","hits":"0",},
 {"lineNum":"   10","line":"    manager=termux","class":"lineNoCov","hits":"0",},
 {"lineNum":"   11","line":"  elif command -v apk >/dev/null; then","class":"lineNoCov","hits":"0",},
@@ -57,8 +57,8 @@ var data = {lines:[
 {"lineNum":"   56","line":"  ;;"},
 {"lineNum":"   57","line":"esac"},
 {"lineNum":"   58","line":""},
-{"lineNum":"   59","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"214",},
+{"lineNum":"   59","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"148",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2025-12-21 16:55:26", "instrumented" : 29, "covered" : 5,};
+var header = { "command" : "", "date" : "2026-01-04 23:51:18", "instrumented" : 29, "covered" : 5,};
 var merged_data = [];

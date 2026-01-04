@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1766336109917,
+  "lastUpdate": 1767570658469,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -883,6 +883,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.54,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "70cb1cbc68ec72711dfa8adb8fbd85d8b3d8e7ce",
+          "message": "feat: flux mcp",
+          "timestamp": "2026-01-05T00:48:28+01:00",
+          "tree_id": "86e321eede7da4756bf3e554cbfe62ceac8f04c2",
+          "url": "https://github.com/LEI/dotfiles/commit/70cb1cbc68ec72711dfa8adb8fbd85d8b3d8e7ce"
+        },
+        "date": 1767570656505,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.172,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.44,
             "unit": "Second"
           }
         ]

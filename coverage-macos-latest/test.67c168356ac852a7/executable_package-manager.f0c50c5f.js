@@ -1,12 +1,12 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"36","possible_hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"41","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineCov","hits":"2","order":"37","possible_hits":"0",},
+{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineCov","hits":"2","order":"42","possible_hits":"0",},
 {"lineNum":"    6","line":"all | \'\')"},
-{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"2","order":"38","possible_hits":"0",},
-{"lineNum":"    8","line":"    manager=brew","class":"lineCov","hits":"1","order":"39","possible_hits":"0",},
+{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"2","order":"43","possible_hits":"0",},
+{"lineNum":"    8","line":"    manager=brew","class":"lineCov","hits":"1","order":"44","possible_hits":"0",},
 {"lineNum":"    9","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   10","line":"    manager=termux","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   11","line":"  elif command -v apk >/dev/null; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -57,8 +57,8 @@ var data = {lines:[
 {"lineNum":"   56","line":"  ;;"},
 {"lineNum":"   57","line":"esac"},
 {"lineNum":"   58","line":""},
-{"lineNum":"   59","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"40","possible_hits":"0",},
+{"lineNum":"   59","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"45","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-12-21 16:54:58", "instrumented" : 29, "covered" : 5,};
+var header = { "command" : "test", "date" : "2026-01-04 23:50:47", "instrumented" : 29, "covered" : 5,};
 var merged_data = [];

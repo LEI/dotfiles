@@ -6,5 +6,5 @@ var data = {lines:[
 {"lineNum":"    5","line":"git push \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2025-12-21 16:54:58", "instrumented" : 2, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-01-04 23:50:47", "instrumented" : 2, "covered" : 0,};
 var merged_data = [];
