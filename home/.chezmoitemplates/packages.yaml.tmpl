@@ -107,6 +107,8 @@ packages:
       windows: DBeaver.DBeaver
     type: {{ if eq .osIDLike "arch" -}}
       aur
+      {{- else if eq .osIDLike "darwin" -}}
+      cask
       {{- else if eq .variantID "silverblue" -}}
       flatpak
       {{- end }}
@@ -369,6 +371,7 @@ packages:
     enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
     # FIXME(brew): RuntimeError: [metal::Device] Unable to load kernel
     # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
+    command: mlx_lm.server
     type: uv
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}

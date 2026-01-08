@@ -211,7 +211,8 @@ data:
   "packages" (get . "packages" | default (dict $packageManager dict))
   "variantID" $variantID
 )) | fromYaml }}
-  packages: {{ $packages | toJson }}
+  packages:
+{{ $packages | toYaml | indent 4 }}
 
 {{- $allPackages := dict }}
 {{- range $manager, $dict := $packages }}
@@ -222,7 +223,8 @@ data:
 {{-   end }}
 {{-   $allPackages = mergeOverwrite $allPackages $final }}
 {{- end }}
-  allPackages: {{ $allPackages | toJson }}
+  allPackages:
+{{ $allPackages | toYaml | indent 4 }}
 
   # Upgrade packages
   upgrade: {{ $upgrade }}

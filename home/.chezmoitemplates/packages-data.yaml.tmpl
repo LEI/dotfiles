@@ -77,28 +77,28 @@ aur: {{ $aurPackages | toJson }}
 {{-   $name := . | replaceAllRegex $pattern "${1}" }}
 {{-   $options := . | replaceAllRegex $pattern "${2}" }}
 {{-   if eq $type "tap" }}
-{{-     if get $taps $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
+{{-     if and (get $taps $name) (get (get $taps $name) "options") -}}
+{{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
 {{-     end -}}
 {{-     $_ := set $taps $name (dict "options" $options) }}
 {{-   else if eq $type "brew" }}
-{{-     if get $brewPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
+{{-     if and (get $brewPackages $name) (get (get $brewPackages $name) "options") -}}
+{{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
 {{-     end -}}
 {{-     $_ := set $brewPackages $name (dict "options" $options) }}
 {{-   else if eq $type "cask" }}
-{{-     if get $caskPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
+{{-     if and (get $caskPackages $name) (get (get $caskPackages $name) "options") -}}
+{{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
 {{-     end -}}
 {{-     $_ := set $caskPackages $name (dict "options" $options) }}
 {{-   else if eq $type "mas" }}
-{{-     if get $masPackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
+{{-     if and (get $masPackages $name) (get (get $masPackages $name) "options") -}}
+{{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
 {{-     end -}}
 {{-     $_ := set $masPackages $name (dict "options" $options) }}
 {{-   else if eq $type "vscode" }}
-{{-     if get $vscodePackages $name -}}
-{{-       warnf "Overriding %s %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
+{{-     if and (get $vscodePackages $name) (get (get $vscodePackages $name) "options") -}}
+{{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
 {{-     end -}}
 {{-     $_ := set $vscodePackages $name (dict "options" $options) }}
 {{-   end }}

@@ -25,37 +25,26 @@ if [ -n "$pipx_packages" ] && command -v pipx >/dev/null; then
   dry_run pipx install "$@" $pipx_packages
 fi
 
-{{- $uvPackages := list }}
-{{- $pythonTools := includeTemplate "dot_config/mise/default-python-packages.tmpl" . | splitList "\n" -}}
-{{- range $name := $pythonTools -}}
-{{-   $name = $name | replaceAllRegex "#.*" "" | trim -}}
-{{-   if eq $name "" -}}
-{{-     continue -}}
-{{-   end -}}
-{{-   $uvPackages = append $uvPackages $name -}}
+# https://github.com/astral-sh/uv/issues/13750
+# run uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} "$@" $uv_packages
+
+{{- $uvPackages := get .packages "uv" | default dict }}
+
+{{- if empty $uvPackages }}
+{{-   warnf "missing uv packages" }}
 {{- end }}
 
 {{- if eq (env "CACHE_BUST") "true" }}
 # uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
 {{- end }}
-uv_packages={{ $uvPackages | sortAlpha | join " " | quote }}
-# run uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} "$@" $uv_packages
-if [ -n "$uv_packages" ]; then
-  for name in $uv_packages; do
-    cmd="${name%%[*}"
-    cmd="${cmd%-cli}"
-    if command -v $cmd >/dev/null; then
-      {{- if .upgrade }}
-      run uv tool install --quiet --upgrade "$@" $name
-      {{- else }}
-      echo >&2 "Already installed: $cmd"
-      {{- end }}
-      continue
-    fi
-    {{- if .upgrade }}
-    run uv tool install --quiet --upgrade "$@" $name
-    {{- else }}
-    run uv tool install --quiet "$@" $name
-    {{- end }}
-  done
-fi
+
+{{- range $key, $value := $uvPackages }}
+{{-   $command := get $value "command" | default $key
+  | replaceAllRegex `\[.*\]$` ""
+  | replaceAllRegex `-cli$` "" }}
+{{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}
+echo >&2 "Already installed: {{ $key }}"
+{{-     continue }}
+{{-   end }}
+run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $key }}
+{{- end }}
