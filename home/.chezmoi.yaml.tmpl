@@ -19,7 +19,7 @@
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
 
 {{- $interactive := stdinIsATTY -}}
-{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | toLower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
 {{- if or $ci $codespaces $container $devContainer -}}
