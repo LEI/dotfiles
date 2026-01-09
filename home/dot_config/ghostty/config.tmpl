@@ -1,5 +1,5 @@
 adjust-cursor-thickness = 1
-background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75  }}
+background-opacity = {{ . | get "i3" | default dict | get "opacity" | default 0.75  }}
 # unfocused-split-opacity = 1
 
 # cursor-style = block

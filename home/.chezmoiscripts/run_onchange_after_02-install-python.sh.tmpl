@@ -28,18 +28,18 @@ fi
 # https://github.com/astral-sh/uv/issues/13750
 # run uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} "$@" $uv_packages
 
-{{- $uvPackages := get .packages "uv" | default dict }}
+{{- $uvPackages := .packages | get "uv" | default dict }}
 
 {{- if empty $uvPackages }}
 {{-   warnf "missing uv packages" }}
 {{- end }}
 
 {{- if eq (env "CACHE_BUST") "true" }}
-# uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
+# uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256Sum }}
 {{- end }}
 
 {{- range $key, $value := $uvPackages }}
-{{-   $command := get $value "command" | default $key
+{{-   $command := $value | get "command" | default $key
   | replaceAllRegex `\[.*\]$` ""
   | replaceAllRegex `-cli$` "" }}
 {{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}

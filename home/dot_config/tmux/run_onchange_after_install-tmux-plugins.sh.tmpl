@@ -36,7 +36,7 @@ fi
 
 # FIXME(debian 11 tmux 3.1c): tmux-which-key/plugin/init.tmux:25:
 # usage: set-environment [-gru] [-t target-session] name [value]
-# tmux-which-key config hash: {{ include (joinPath .chezmoi.homeDir ".config/tmux/plugins/tmux-which-key/config.yaml") | sha256sum }}
+# tmux-which-key config hash: {{ include (joinPath .chezmoi.homeDir ".config/tmux/plugins/tmux-which-key/config.yaml") | sha256Sum }}
 cmd ~/.config/tmux/plugins/tmux-which-key/plugin.sh.tmux || true
 
 # https://github.com/tmux-plugins/tmux-resurrect/issues/122#issuecomment-2530961970

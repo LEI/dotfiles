@@ -1,15 +1,15 @@
-{{- range $account := get .mail "accounts" | default list }}
+{{- range $account := .mail | get "accounts" | default list }}
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
 {{- if ne $account.format "notmuch" -}}
 {{-   continue -}}
 {{- end -}}
-{{- $inbox := get $account "inbox" | default "INBOX" -}}
+{{- $inbox := $account | get "inbox" | default "INBOX" -}}
 
 IMAPAccount {{ $account.name }}-imap
 Host {{ $account.imap_hostname | quote }}
-Port {{ get $account "imap_port" | default 993 }}
+Port {{ $account | get "imap_port" | default 993 }}
 User {{ $account.address | quote }}
 PassCmd "bw get password {{ $account.address }}"
 TLSType IMAPS

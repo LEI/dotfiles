@@ -1,7 +1,7 @@
 {{- $output := dict }}
-{{- $defaultType := get . "defaultType" | default "" }}
-{{- $input := get . "input" | default list }}
-{{- $packageType := get . "packageType" | default "" }}
+{{- $defaultType := . | get "defaultType" | default "" }}
+{{- $input := . | get "input" | default list }}
+{{- $packageType := . | get "packageType" | default "" }}
 
 {{- if empty $defaultType }}
 {{-   warnf "missing defaultType" }}
@@ -23,26 +23,26 @@
 {{-     warnf "%s expected map: %s (%s)" $key $pkg (kindOf $pkg) -}}
 {{-   end }}
 
-{{-   $name := get $pkg "name" | default $key }}
-{{-   $nameOverwrite := get $pkg "nameOverwrite" }}
-{{-   if and $nameOverwrite (not (empty (get $nameOverwrite $.osID))) }}
-{{-     $name = get $nameOverwrite $.osID }}
-{{-   else if and $nameOverwrite (not (empty (get $nameOverwrite $.osIDLike))) }}
-{{-     $name = get $nameOverwrite $.osIDLike }}
-{{-   else if and $nameOverwrite (not (empty (get $nameOverwrite $packageType))) }}
-{{-     $name = get $nameOverwrite $packageType }}
+{{-   $name := $pkg | get "name" | default $key }}
+{{-   $nameOverwrite := $pkg | get "nameOverwrite" }}
+{{-   if and $nameOverwrite (not (empty ($nameOverwrite | get $.osID))) }}
+{{-     $name = $nameOverwrite | get $.osID }}
+{{-   else if and $nameOverwrite (not (empty ($nameOverwrite | get $.osIDLike))) }}
+{{-     $name = $nameOverwrite | get $.osIDLike }}
+{{-   else if and $nameOverwrite (not (empty ($nameOverwrite | get $packageType))) }}
+{{-     $name = $nameOverwrite | get $packageType }}
 {{-   end }}
 
 {{-   if empty $name -}}
 {{-     warnf "%s: empty name: %s" $key $pkg -}}
 {{-   end -}}
 
-{{-   $version := get $pkg "version" -}}
+{{-   $version := $pkg | get "version" -}}
 {{-   if and $version (ne $packageType "mise") -}}
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 
-{{-   $type := get $pkg "type" }}
+{{-   $type := $pkg | get "type" }}
 {{-   if or (empty $type) (eq $type "nil" "null" "<no value>") }}
 {{-     $type = $defaultType }}
 {{-   end }}
@@ -60,7 +60,7 @@
 {{-     continue }}
 {{-   end }}
 
-{{-   $enabled := get $pkg "enabled" }}
+{{-   $enabled := $pkg | get "enabled" }}
 {{-   if or (and (kindIs "bool" $enabled) (ne $enabled true)) (and (kindIs "string" $enabled) (ne $enabled "true") (ne $enabled "")) }}
 {{- /* if $.chezmoi.config.verbose }}
 {{- warnf "Disabled package: %s (%v)" $name $enabled -}}
@@ -69,20 +69,20 @@
 {{-   end }}
 
 {{-   if ne $key $name -}}
-{{-     $_ := set $pkg "key" $key -}}
+{{-     $_ := $pkg | set "key" $key -}}
 {{-   end -}}
 
 {{-   $hasSpaces := eq $packageType "mas" }}
 {{-   range $part := $hasSpaces | ternary (list $name) ($name | splitList " ") }}
-{{-     $existing := get $output $part -}}
+{{-     $existing := $output | get $part -}}
 {{-     if $existing -}}
 {{-       warnf "%s package %s: overriding key %s" $packageType $name $part -}}
 {{- /*       if not (deepEqual $existing $pkg) -}}
 {{-         warnf "%s package part diff %s: %s -> %s" $packageType $part $existing $pkg -}}
 {{-       end */ -}}
 {{-     end -}}
-{{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
+{{-     $_ := $output | set $part ($pkg | omit "enabled" "name" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}
-{{- $output | toJson -}}
+{{- $output | toJSON -}}

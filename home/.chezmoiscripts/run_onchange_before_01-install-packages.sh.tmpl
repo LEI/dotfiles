@@ -6,7 +6,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- $systemPackages := get .packages .packageManager }}
+{{- $systemPackages := .packages | get .packageManager }}
 {{- if or (empty $systemPackages) (not (kindIs "map" $systemPackages)) }}
 {{-   warnf "invalid packages %s: %s" .packageManager $systemPackages }}
 {{- end }}
@@ -15,7 +15,7 @@ set -eu
 packages="{{ $packageList | join " " }}"
 
 {{- if eq (env "CACHE_BUST") "true" }}
-# Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
+# Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256Sum }}
 {{- end }}
 echo >&2 "Installing {{ .packageManager }} packages: $packages"
 
@@ -126,7 +126,7 @@ dry_run winget upgrade --all --disable-interactivity --silent
 {{- end }}
 
 # NOTE: winget.json is updated after apply
-# Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256sum }}
+# Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256Sum }}
 dry_run winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
 {{- if not .upgrade }} --no-upgrade{{ end }}
 # --accept-package-agreements --accept-source-agreements

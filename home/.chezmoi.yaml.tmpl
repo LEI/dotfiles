@@ -37,14 +37,14 @@
 
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}
 
-{{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os -}}
-{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID -}}
-{{- $osVersion := get .chezmoi.osRelease "versionID" -}}
+{{- $osID := .chezmoi.osRelease | get "id" | default .chezmoi.os -}}
+{{- $osIDLike := .chezmoi.osRelease | get "idLike" | default $osID -}}
+{{- $osVersion := .chezmoi.osRelease | get "versionID" -}}
 {{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") -}}
 {{-   $osID = "android" -}}
 {{- end -}}
 
-{{- $variantID := (get (get .chezmoi "osRelease" | default dict) "variantID") -}}
+{{- $variantID := .chezmoi | get "osRelease" | default dict | get "variantID" -}}
 
 {{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
 
@@ -58,7 +58,7 @@
 {{- $lddVersion := eq .chezmoi.os "linux" | ternary
   (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim)
   "3" -}}
-{{- $glibc := float64 $lddVersion -}}
+{{- $glibc := toFloat64 $lddVersion -}}
 {{- /* $glibc231 := le (float64 $lddVersion) 2.31 -}}
 {{- $glibc231 := or
   (and (eq $osID "debian") (le (int $osVersion) 11))
@@ -77,7 +77,7 @@
 {{- $email := env "EMAIL" | default (printf "%s@localhost" $user) -}}
 {{- $accessToken := "" -}}
 
-{{- if hasKey . "name" -}}
+{{- if . | hasKey "name" -}}
 {{-   $name = .name -}}
 {{- else if env "GIT_CONFIG_USER_NAME" -}}
 {{-   $name = env "GIT_CONFIG_USER_NAME" -}}
@@ -85,7 +85,7 @@
 {{-   $name = promptString "name" $name -}}
 {{- end -}}
 
-{{- if hasKey . "email" -}}
+{{- if . | hasKey "email" -}}
 {{-   $email = .email -}}
 {{- else if env "GIT_CONFIG_USER_EMAIL" -}}
 {{-   $email = env "GIT_CONFIG_USER_EMAIL" -}}
@@ -93,7 +93,7 @@
 {{-   $email = promptString "email" $email -}}
 {{- end -}}
 
-{{- if hasKey . "accessToken" -}}
+{{- if . | hasKey "accessToken" -}}
 {{-   $accessToken = .accessToken -}}
 {{- else if env "BWS_ACCESS_TOKEN" -}}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" -}}
@@ -135,7 +135,7 @@
   "name" $name
 }}
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson -}}
-{{- $_ := set $data "features" $features }}
+{{- $_ := $data | set "features" $features }}
 {{- $context := mergeOverwrite . $data }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
@@ -200,15 +200,15 @@ data:
   "fedora" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
   "windows" "winget"
 }}
-{{- $packageManager := get $packageManagerMap $osIDLike }}
+{{- $packageManager := $packageManagerMap | get $osIDLike }}
   packageManager: {{ $packageManager | quote }}
-{{- $_ := set . "defaultType" $packageManager }}
+{{- $_ := . | set "defaultType" $packageManager }}
 {{- $packages := includeTemplate "packages-data.yaml.tmpl" (mergeOverwrite $context (dict
   "os" .chezmoi.os
   "osID" $osID
   "osIDLike" $osIDLike
   "packageManager" $packageManager
-  "packages" (get . "packages" | default (dict $packageManager dict))
+  "packages" (. | get "packages" | default (dict $packageManager dict))
   "variantID" $variantID
 )) | fromYaml }}
   packages:
@@ -218,8 +218,8 @@ data:
 {{- range $manager, $dict := $packages }}
 {{-   $final := dict }}
 {{-   range $key, $value := $dict }}
-{{-     $_ := set $value "type" $manager }}
-{{-     $_ := set $final (get $value "key" | default $key) $value }}
+{{-     $_ := $value | set "type" $manager }}
+{{-     $_ := $final | set ($value | get "key" | default $key) $value }}
 {{-   end }}
 {{-   $allPackages = mergeOverwrite $allPackages $final }}
 {{- end }}
@@ -270,7 +270,7 @@ scriptEnv:
 {{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
 {{-   $paths := env "PATH" | splitList ":" }}
 {{-   if and $features.mise (not (has $miseShims $paths)) }}
-{{-     $paths = append $paths $miseShims }}
+{{-     $paths = $paths | append $miseShims }}
 {{-   end }}
 {{- if or $features.brew (eq .chezmoi.os "darwin") }}
 {{-   $brewPrefix := ne .chezmoi.os "linux" | ternary
@@ -285,7 +285,7 @@ scriptEnv:
 {{-     $paths = prepend $paths $rubyBin }}
 {{-   end -}}
 {{- end }}
-{{-   $paths = append $paths $binDir }}
+{{-   $paths = $paths | append $binDir }}
   PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 

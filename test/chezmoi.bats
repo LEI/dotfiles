@@ -89,7 +89,6 @@ setup() {
   elif [ "$package_manager" = rpm ]; then
     package_manager=rpm-ostree
   fi
-  echo >&3 "STUB package manager: $package_manager"
   stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
   unstub "$package_manager" 2>/dev/null || true

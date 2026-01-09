@@ -33,7 +33,7 @@ if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
   export PROMPT_COMMAND=
 fi
 
-{{- $shell := get . "shell" }}
+{{- $shell := . | get "shell" }}
 {{- if empty $shell }}
 {{-   warnf "missing shell (bash or zsh)" }}
 {{- end }}

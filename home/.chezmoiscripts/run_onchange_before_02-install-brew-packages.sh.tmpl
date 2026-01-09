@@ -56,12 +56,12 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 # fi
 
 {{- range $type := list "brew" "cask" "mas" "vscode" }}
-{{- if not (hasKey $.packages $type) }}
+{{- if not ($.packages | hasKey $type) }}
 {{-   continue }}
 {{- end }}
 {{- $before := includeTemplate "pluck.tmpl" (dict
   "key" "before_script"
-  "values" (get $.packages $type)
+  "values" ($.packages | get $type)
 ) | trim }}
 {{- if $before }}
 
@@ -72,22 +72,22 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 
 # run brew bundle list --global
 {{- if eq (env "CACHE_BUST") "true" }}
-# brew hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "brew") | sha256sum }}
-# cask hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "cask") | sha256sum }}
-# mas hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "mas") | sha256sum }}
-# vscode hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "vscode") | sha256sum }}
+# brew hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "brew") | sha256Sum }}
+# cask hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "cask") | sha256Sum }}
+# mas hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "mas") | sha256Sum }}
+# vscode hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "vscode") | sha256Sum }}
 {{- end }}
 dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
 {{ includeTemplate "Brewfile" . | trim }}
 EOF
 
 {{- range $type := list "brew" "cask" "mas" "vscode" }}
-{{- if not (hasKey $.packages $type) }}
+{{- if not ($.packages | hasKey $type) }}
 {{-   continue }}
 {{- end }}
 {{- $after := includeTemplate "pluck.tmpl" (dict
   "key" "after_script"
-  "values" (get $.packages $type)
+  "values" ($.packages | get $type)
 ) | trim }}
 {{- if $after }}
 

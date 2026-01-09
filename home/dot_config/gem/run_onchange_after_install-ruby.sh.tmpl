@@ -17,7 +17,7 @@ set -eu
 {{-   if empty $name -}}
 {{-     continue -}}
 {{-   end -}}
-{{-   $packages = append $packages $name -}}
+{{-   $packages = $packages | append $name -}}
 {{- end -}}
 packages="{{ $packages | sortAlpha | join " " }}"
 

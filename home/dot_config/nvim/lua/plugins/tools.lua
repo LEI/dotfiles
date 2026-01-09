@@ -71,8 +71,7 @@ return {
   {
     'stevearc/overseer.nvim',
     -- enabled = false,
-    -- tag = 'v1.6.0',
-    version = 'v1.x',
+    version = 'v2.x',
     dependencies = { 'folke/persistence.nvim' },
     cmd = {
       'OverseerBuild',

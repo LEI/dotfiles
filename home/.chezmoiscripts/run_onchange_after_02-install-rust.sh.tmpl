@@ -139,7 +139,7 @@ fi
 
 {{- $list := list }}
 {{- range $name := .packages.cargo | keys }}
-{{- $list = append $list $name }}
+{{- $list = $list | append $name }}
 {{- end }}
 
 packages="{{ $list | sortAlpha | join " " }}"

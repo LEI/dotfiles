@@ -19,7 +19,7 @@ pm_tray="{{ .i3.pmTray }}"
 
 {{- if lookPath "xfce4-settings-manager" | isExecutable }}
 
-# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml") | sha256sum
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml") | sha256Sum
 current_theme_name="$(cmd xfconf-query --channel xsettings --property /Net/ThemeName || echo "")"
 if [ "$current_theme_name" != "$theme_name" ]; then
   cmd xfconf-query --channel xsettings --property /Net/ThemeName --set "$theme_name" --type string || true # --create
@@ -79,7 +79,7 @@ fi
 {{- if lookPath "xfce4-panel" | isExecutable }}
 
 # xfconf-query --channel xfce4-panel --property /panels/dark-mode --type bool
-# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml") | sha256sum
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml") | sha256Sum
 current_dark_mode="$(cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode || echo "")"
 if [ "$current_dark_mode" != "$dark_mode" ]; then
   cmd xfconf-query --channel xfce4-panel --property /panels/dark-mode --set "$dark_mode" --type bool || true # --create
@@ -88,7 +88,7 @@ fi
 
 {{- if lookPath "xfce4-power-manager" | isExecutable }}
 
-# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml") | sha256sum
+# include (joinPath .chezmoi.homeDir ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml") | sha256Sum
 current_pm_tray="$(cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon || echo "")"
 if [ "$current_pm_tray" != "$pm_tray" ]; then
   cmd xfconf-query --channel xfce4-power-manager --property /xfce4-power-manager/show-tray-icon --set "$pm_tray" --type bool || true # --create

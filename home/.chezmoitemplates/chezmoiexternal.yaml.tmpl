@@ -1,31 +1,31 @@
 ---
-{{ $baseURL := get . "baseURL" | default "https://github.com" -}}
-{{ $entries := get . "entries" | default dict -}}
+{{ $baseURL := . | get "baseURL" | default "https://github.com" -}}
+{{ $entries := . | get "entries" | default dict -}}
 
 {{- if empty $entries }}
 {{-   warnf "missing entries: %s" .chezmoi.sourceFile }}
 {{- end }}
 
 {{ range $name, $entry := $entries -}}
-{{ if ne (get $entry "tag") "" -}}
-{{ $base := get $entry "url" | default (printf "%s/%s" $baseURL $entry.repo) -}}
+{{ if ne ($entry | get "tag") "" -}}
+{{ $base := $entry | get "url" | default (printf "%s/%s" $baseURL $entry.repo) -}}
 {{ $url := printf "%s/archive/refs/tags/%s.tar.gz" $base $entry.tag -}}
 {{ $.baseDir }}/{{ $name }}:
   type: archive
   url: {{ $url | quote }}
-  exact: {{ get $entry "exact" | default true }}
-  stripComponents: {{ get $entry "stripComponents" | default 1 }}
-  refreshPeriod: {{ get $entry "refreshPeriod" | default 0 }}
+  exact: {{ $entry | get "exact" | default true }}
+  stripComponents: {{ $entry | get "stripComponents" | default 1 }}
+  refreshPeriod: {{ $entry | get "refreshPeriod" | default 0 }}
 {{ else -}}
-{{ $base := get $entry "url" | default (printf "%s/%s" $baseURL $entry.repo) -}}
+{{ $base := $entry | get "url" | default (printf "%s/%s" $baseURL $entry.repo) -}}
 {{ $url := printf "%s.git" $base -}}
 {{ $.baseDir }}/{{ $name }}:
   type: git-repo
   url: {{ $url | quote }}
-  refreshPeriod: {{ get $entry "refreshPeriod" | default "168h" }}
+  refreshPeriod: {{ $entry | get "refreshPeriod" | default "168h" }}
   clone:
     args:
-      {{ if ne (get $entry "branch") "" -}}
+      {{ if ne ($entry | get "branch") "" -}}
       - --branch={{ $entry.branch }}
       {{ end -}}
       - --depth=1

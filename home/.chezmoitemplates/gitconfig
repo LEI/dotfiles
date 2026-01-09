@@ -1,4 +1,4 @@
-{{- $signingKey := get . "signingkey" | default (includeTemplate "gpg-signing-key.tmpl" (dict "email" .email)) -}}
+{{- $signingKey := . | get "signingkey" | default (includeTemplate "gpg-signing-key.tmpl" (dict "email" .email)) -}}
 
 [user]
 	name = {{ .name | trim | quote }}

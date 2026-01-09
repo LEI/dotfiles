@@ -28,7 +28,7 @@ let tag = get_release "zellij-org/zellij"
 let name = $"zellij-($arch)-($os)-musl"
 let out = $"($env.TMPDIR)/($name).tar.gz"
 let archive = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).tar.gz"
-# let checksum = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).sha256sum"
+# let checksum = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).sha256Sum"
 log info $"Downloading ($archive)"
 curl -LSfs $archive -o $out
 tar -xzf $out -C $env.TMPDIR

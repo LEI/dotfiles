@@ -14,7 +14,7 @@ has_feature() {
   # esac
   # command -v "$cmd" >/dev/null || skip "$* feature: $cmd not found"
   local feature
-  feature="$(jq ".$name == true" "$HOME/.local/share/features.json")"
+  feature="$(jq ".$name == true" "$HOME/.config/chezmoi/features.json")"
   if [ "$feature" = false ]; then
     # echo >&3 "# has_feature: feature disabled: $name"
     return 1

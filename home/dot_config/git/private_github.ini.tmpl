@@ -1,7 +1,7 @@
-{{- if and (hasKey . "git") (hasKey .git "github") -}}
-{{- includeTemplate "gitconfig" (mustMerge .git.github (dict "name" .name)) -}}
+{{- if and (. | hasKey "git") (.git | hasKey "github") -}}
+{{- includeTemplate "gitconfig" (merge .git.github (dict "name" .name)) -}}
 
-{{- if get .git.github "user" }}
+{{- if .git.github | get "user" }}
 
 [github]
 	user = {{ .git.github.user | quote }}

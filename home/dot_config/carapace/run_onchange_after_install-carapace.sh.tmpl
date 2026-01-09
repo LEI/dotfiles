@@ -1,5 +1,5 @@
 {{- if and
-  (not (hasKey .allPackages "carapace"))
+  (not (.allPackages | hasKey "carapace"))
   (not (lookPath "carapace" | isExecutable)) -}}
 #!/bin/sh
 
@@ -29,7 +29,7 @@ echo >&2 "Installing carapace"
   (printf "carapace-bin_*_%s_%s.tar.gz"
     (eq .chezmoi.os "android" | ternary "termux" .chezmoi.os)
     .chezmoi.arch) }}
-{{- $_ := $url | mustRegexMatch "^https" }}
+{{- $_ := $url | regexMatch "^https" }}
 URL="{{ $url }}"
 
 {{- if eq .osID "alpine" }}

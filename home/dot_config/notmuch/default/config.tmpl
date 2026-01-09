@@ -1,9 +1,9 @@
 {{- $other := list -}}
-{{- range $account := get .mail "accounts" | default list }}
+{{- range $account := .mail | get "accounts" | default list }}
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
-{{- $other = append $other $account.address -}}
+{{- $other = $other | append $account.address -}}
 {{- end -}}
 
 [database]
@@ -27,7 +27,7 @@ synchronize_flags=true
 [query]
 new=tag:unread
 old=not query:new
-{{- range $key, $value := get .mail "queries" | default list }}
+{{- range $key, $value := .mail | get "queries" | default list }}
   {{- if eq (kindOf $value) "string" }}
     {{- if contains " " $value }}
 {{ $key }}={{ $value }}
@@ -53,7 +53,7 @@ from:@{{ $item }} or from:"/[.]{{ $item | replaceAllRegex "\\." "[.]" }}>/"
 {{- end }}
 all=
 {{- $first := true -}}
-{{- range $key, $item := get .mail "queries" | default list }}
+{{- range $key, $item := .mail | get "queries" | default list }}
 {{- if ne $first true }} or {{ end }}{{ $first = false }}query:{{ $key }}
 {{- end }}
 none=not query:all

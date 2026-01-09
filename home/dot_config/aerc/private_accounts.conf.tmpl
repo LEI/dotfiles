@@ -1,11 +1,11 @@
-{{- range $account := get .mail "accounts" | default list }}
+{{- range $account := .mail | get "accounts" | default list }}
 {{- if eq (substr 0 3 $account.name) "out" -}}
 {{-   continue -}}
 {{- end -}}
 [{{ $account.name }}]
 
 {{- if eq $account.format "imap" }}
-source = imaps://{{ $account.address | urlquery }}@{{ $account.imap_hostname }}:{{ get $account "imap_port" | default 993 }}
+source = imaps://{{ $account.address | urlquery }}@{{ $account.imap_hostname }}:{{ $account | get "imap_port" | default 993 }}
 source-cred-cmd = bw get password {{ $account.address }}
 {{- else }}
 check-mail-cmd = mbsync -c ~/.config/isync/mbsyncrc {{ $account.name }}
@@ -16,10 +16,10 @@ maildir-account-path = {{ $account.name }}
 # query-map = ~/Mail/query-map.txt # inbox=tag:inbox and not tag:archived
 {{- end }}
 
-outgoing = smtps://{{ $account.address | urlquery }}@{{ $account.smtp_hostname }}:{{ get $account "smtp_port" | default 587 }}
+outgoing = smtps://{{ $account.address | urlquery }}@{{ $account.smtp_hostname }}:{{ $account | get "smtp_port" | default 587 }}
 outgoing-cred-cmd = bw get password {{ $account.address }}
-default = {{ get $account "inbox" | default "INBOX" }}
-from = {{ get $account "from_name" | default .name }} <{{ get $account "from_address" | default $account.address }}>
+default = {{ $account | get "inbox" | default "INBOX" }}
+from = {{ $account | get "from_name" | default .name }} <{{ $account | get "from_address" | default $account.address }}>
 cache-headers = true
 copy-to = Sent
 # pgp-auto-sign = true

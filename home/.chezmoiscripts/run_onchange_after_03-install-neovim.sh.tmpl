@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if and (not (hasKey .allPackages "neovim")) (not (lookPath "nvim" | isExecutable)) }}
+{{- if and (not (.allPackages | hasKey "neovim")) (not (lookPath "nvim" | isExecutable)) }}
 
 if command -v nvim; then
   echo >&2 "Already installed"
@@ -18,7 +18,7 @@ else
   {{- $url := gitHubLatestReleaseAssetURL
     "neovim/neovim"
     (printf "nvim-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) }}
-  {{- $_ := $url | mustRegexMatch "^https" }}
+  {{- $_ := $url | regexMatch "^https" }}
   URL="{{ $url }}"
 
   install_tar_gz "$URL" "$NAME/bin/nvim"

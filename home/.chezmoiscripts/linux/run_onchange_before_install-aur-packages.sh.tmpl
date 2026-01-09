@@ -25,11 +25,11 @@ if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v p
 fi
 
 {{- if eq (env "CACHE_BUST") "true" }}
-# aur hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "aur" | sha256sum }}
+# aur hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "aur" | sha256Sum }}
 {{- end }}
 echo >&2 "Installing AUR packages"
 
-{{- $aurPackages := get .packages "aur" | default dict }}
+{{- $aurPackages := .packages | get "aur" | default dict }}
 
 {{- if empty $aurPackages }}
 {{-   warnf "missing aur packages" }}

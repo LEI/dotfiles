@@ -33,7 +33,7 @@ if command -v atuin; then
   exit
 fi
 
-{{- if not (empty (get (get .packages .packageManager) "atuin")) }}
+{{- if not (empty (.packages | get .packageManager | get "atuin")) }}
 
 echo >&2 "Installing atuin"
 # https://github.com/atuinsh/atuin/releases

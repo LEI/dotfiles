@@ -133,7 +133,7 @@
 # 	insteadOf = "gist:"
 
 # TODO: https://github.com/nathabonfim59/gitid
-{{- range $name, $account := get . "git" | default dict }}
+{{- range $name, $account := . | get "git" | default dict }}
 
 [includeIf "gitdir:~/src/{{ $account.host }}/"]
 	path = {{ $name }}.ini

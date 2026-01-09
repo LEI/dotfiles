@@ -1,9 +1,9 @@
 {{- $list := list }}
-{{- $values := get . "values" | default list }}
+{{- $values := . | get "values" | default list }}
 {{- range $values }}
-{{-   $value := get . $.key | trim }}
+{{-   $value := . | get $.key | trim }}
 {{-   if $value }}
-{{-     $list = append $list $value }}
+{{-     $list = $list | append $value }}
 {{-   end }}
 {{- end }}
 {{- range $list | uniq | sortAlpha }}

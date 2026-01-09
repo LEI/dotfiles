@@ -128,7 +128,7 @@ vim.g.diagnostic_signs = {
 }
 
 vim.g.features = {}
-local features_json_file = vim.env.HOME .. '/.local/share/features.json'
+local features_json_file = vim.env.HOME .. '/.config/chezmoi/features.json'
 if vim.fn.filereadable(features_json_file) == 1 then
   local features_contents = vim.fn.readfile(features_json_file)
   vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))

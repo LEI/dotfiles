@@ -1,3 +1,3 @@
-{{- if and (hasKey . "git") (hasKey .git "gitlab") -}}
-{{- includeTemplate "gitconfig" (mustMerge .git.gitlab (dict "name" .name)) -}}
+{{- if and (. | hasKey "git") (.git | hasKey "gitlab") -}}
+{{- includeTemplate "gitconfig" (merge .git.gitlab (dict "name" .name)) -}}
 {{- end -}}

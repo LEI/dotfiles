@@ -20,9 +20,9 @@ set -- "$@" --yes
 
 # TODO: check gpg-agent is running
 
-{{- $tools := get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}
+{{- $tools := includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml | get "tools" }}
 
-# config.toml tools hash: {{ $tools | toJson | sha256sum }}
+# config.toml tools hash: {{ $tools | toJSON | sha256Sum }}
 echo >&2 "Installing tools"
 
 # mise_args="--yes"
@@ -38,24 +38,24 @@ echo >&2 "Installed tools"
 
 {{- /* $tools := list }}
 
-{{- if get .packages.mise "go" }}
-# default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "go" }}
+{{- if .packages.mise | get "go" }}
+# default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256Sum
+{{- $tools = $tools | append "go" }}
 {{- end }}
 
-{{- if get .packages.mise "node" }}
-# default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "node" }}
+{{- if .packages.mise | get "node" }}
+# default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256Sum
+{{- $tools = $tools | append "node" }}
 {{- end }}
 
-{{- if get .packages.mise "python" }}
-# default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "python" }}
+{{- if .packages.mise | get "python" }}
+# default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256Sum
+{{- $tools = $tools | append "python" }}
 {{- end }}
 
-{{- if get .packages.mise "ruby" }}
-# default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
-{{- $tools = append $tools "ruby" }}
+{{- if .packages.mise | get "ruby" }}
+# default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256Sum
+{{- $tools = $tools | append "ruby" }}
 {{- end }}
 
 {{- if not (empty $tools) }}

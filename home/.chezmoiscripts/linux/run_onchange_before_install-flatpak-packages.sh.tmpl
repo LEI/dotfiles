@@ -10,11 +10,11 @@ set -eu
 cmd flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 {{- if eq (env "CACHE_BUST") "true" }}
-# flatpak hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "flatpak" | sha256sum }}
+# flatpak hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "flatpak" | sha256Sum }}
 {{- end }}
 echo >&2 "Installing flatpak packages"
 
-{{- $flatpakPackages := get .packages "flatpak" | default dict }}
+{{- $flatpakPackages := .packages | get "flatpak" | default dict }}
 
 {{- if empty $flatpakPackages }}
 {{-   warnf "missing flatpak packages" }}
