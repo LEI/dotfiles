@@ -14,12 +14,11 @@ Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io).
 
 ## Install
 
-<!--
 <details>
   <summary>cURL</summary>
 
 ```bash
-curl -LSfs https://lei.github.io/dotfiles/script/bootstrap | sh -s -- --interactive LEI
+curl -LSfs --proto '=https' --tlsv1.2 https://dotfiles.lei.sh/script/bootstrap | sh -s -- --interactive LEI
 ```
 
 </details>
@@ -28,11 +27,12 @@ curl -LSfs https://lei.github.io/dotfiles/script/bootstrap | sh -s -- --interact
   <summary>Wget</summary>
 
 ```bash
-wget -qO- https://lei.github.io/dotfiles/script/bootstrap | sh -s -- --interactive LEI
+wget -qO- https://dotfiles.lei.sh/script/bootstrap | sh -s -- --interactive LEI
 ```
 
 </details>
 
+<!--
 ```bash
 chezmoi secret keyring set --service=github --user=LEI --value=$GITHUB_TOKEN
 chezmoi init LEI --apply --interactive git@github.com:LEI/dotfiles.git
