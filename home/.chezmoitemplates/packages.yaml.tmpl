@@ -418,7 +418,7 @@ packages:
     enabled: {{ .features.ai }}
     nameOverwrite:
       arch: opencode-bin
-      darwin: sst/tap/opencode
+      darwin: anomalyco/tap/opencode
       # npm: opencode-ai@latest
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil)) }}'
   openssl:
