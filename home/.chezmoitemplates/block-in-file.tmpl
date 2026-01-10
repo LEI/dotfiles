@@ -1,5 +1,5 @@
 {{- $suffix := printf "%s/%s" (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile -}}
-{{- $commentString := . | get "commentString" | default "#" -}}
+{{- $commentString := get . "commentString" | default "#" -}}
 {{- $prefix := printf "%[1]s%[1]s%[1]s" $commentString -}}
 {{- $before := .chezmoi.stdin | replaceAllRegex (printf "(?s)(\r?\n?)%[1]s START .*%[1]s END .*" $prefix) "${1}" -}}
 {{- $after := .chezmoi.stdin | replaceAllRegex (printf "(?s).*%[1]s START .*%[1]s END .*?\r?\n(\r?\n?)" $prefix) "" -}}

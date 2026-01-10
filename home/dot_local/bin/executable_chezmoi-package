@@ -79,7 +79,7 @@ list_packages() {
     mise)
       # Append requested version
       # shellcheck disable=SC2016
-      line='{{ $key }}@{{ $value | get "version" | default "latest" }}'
+      line='{{ $key }}@{{ get $value "version" | default "latest" }}'
       ;;
     esac
     #     template="

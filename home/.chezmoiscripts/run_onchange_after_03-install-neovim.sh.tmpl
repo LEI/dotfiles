@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if and (not (.allPackages | hasKey "neovim")) (not (lookPath "nvim" | isExecutable)) }}
+{{- if and (not (hasKey .allPackages "neovim")) (not (lookPath "nvim" | isExecutable)) }}
 
 if command -v nvim; then
   echo >&2 "Already installed"

@@ -1,10 +1,10 @@
 {{- $config := includeTemplate "dot_config/starship/.starship.yaml" . | fromYaml -}}
 
 {{- if lookPath "starship" | isExecutable -}}
-{{- $preset := dict
+{{- $preset := get (dict
   "font" "nerd-font-symbols"
   "text" "no-nerd-font"
-  | get .preset | default "plain-text-symbols" -}}
+) .preset | default "plain-text-symbols" -}}
 {{ $config = output "starship" "preset" $preset | fromToml | merge $config }}
 {{- end -}}
 
@@ -13,6 +13,6 @@
   "success_symbol" (printf "[%s](bold green)" (.symbols.prompt | trim))
   "vimcmd_symbol" (printf "[%s](bold green)" "<")
 -}}
-{{ $_ := $config | set "character" ($config | get "character" | default dict | merge $character) }}
+{{ $_ := set $config "character" (get $config "character" | default dict | merge $character) }}
 
 {{ $config | toToml }}

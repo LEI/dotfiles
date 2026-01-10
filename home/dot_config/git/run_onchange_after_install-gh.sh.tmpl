@@ -15,7 +15,7 @@ fi
 
 # cmd gh ssh-key list
 
-{{- if and (. | hasKey "git") (.git | hasKey "github") }}
+{{- if and (hasKey . "git") (hasKey .git "github") }}
 
 # TODO: check active profile
 # github_email="{{ .git.github.email }}"
@@ -29,21 +29,21 @@ fi
 {{- range $index, $pkg := .ghExtensions }}
 {{-   $extensionName := "" }}
 {{-   if kindIs "map" $pkg }}
-{{-     $extensionName = $pkg | get "name" }}
+{{-     $extensionName = get $pkg "name" }}
 {{-   else if kindIs "string" $pkg }}
 {{-     $extensionName = $pkg }}
 {{-     $pkg = dict "name" $extensionName }}
 {{-   end }}
-{{- /*  $enabled := $pkg | get "enabled" }}
-{{-   if and $enabled (ne ($pkg | get "enabled") "true") }}
+{{- /*  $enabled := get $pkg "enabled" }}
+{{-   if and $enabled (ne (get $pkg "enabled") "true") }}
 {{-     warnf "%s" $pkg }}
 {{-     continue }}
 {{-   end */ -}}
-{{-   $feature := $pkg | get "feature" }}
-{{-   if and $feature (not ($.features | get $feature)) }}
+{{-   $feature := get $pkg "feature" }}
+{{-   if and $feature (not (get $.features $feature)) }}
 {{-     continue }}
 {{-   end }}
-{{-   $extensions = $extensions | append $extensionName }}
+{{-   $extensions = append $extensions $extensionName }}
 {{- end }}
 extensions="{{ $extensions | join " " }}"
 for name in $extensions; do

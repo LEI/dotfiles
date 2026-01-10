@@ -124,12 +124,12 @@
 {{- end }}
 
 {{- range $name, $default := $features }}
-{{- $key := toUpper (printf "FEATURE_%s" $name) -}}
+{{- $key := upper (printf "FEATURE_%s" $name) -}}
 {{- $value := env $key -}}
 {{- if empty $value -}}
 {{-   $value = $default -}}
 {{- end -}}
-{{- $_ := $features | set $name $value -}}
+{{- $_ := set $features $name $value -}}
 {{- end -}}
 
-{{- $features | toJSON -}}
+{{- $features | toJson -}}

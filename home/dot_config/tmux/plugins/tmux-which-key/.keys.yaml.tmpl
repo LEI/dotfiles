@@ -1,6 +1,6 @@
 {{- $keys := list }}
-{{- $map := . | get "map" }}
-{{- $names := . | get "names" | default list }}
+{{- $map := get . "map" }}
+{{- $names := get . "names" | default list }}
 
 {{- if empty $names }}
 {{-   warnf "missing names (tmux .keys)" }}
@@ -25,23 +25,23 @@
 {{- $key := index $parts 0 }}
 {{- $note := slice $parts 1 | join " " | replaceAllRegex " \\+[\\w-]+$" "" -}}
 
-{{- if and (gt ($ | get "include" | len | default 0) 0) (not (has $key $.include)) }}
+{{- if and (gt (get $ "include" | len | default 0) 0) (not (has $key $.include)) }}
 {{- /* warnf "tmux: not included: %s: %s" $key . */ -}}
 {{- continue }}
 {{- end }}
 
-{{- if has $key ($ | get "exclude" | default (list "'")) }}
+{{- if has $key (get $ "exclude" | default (list "'")) }}
 {{- /* warnf "tmux: excluded key: %s" . */ -}}
 {{- continue }}
 {{- end }}
 
-{{- if or (lt (len $key) ($ | get "min" | default 1)) (gt (len $key) ($ | get "max" | default (len $key))) }}
+{{- if or (lt (len $key) (get $ "min" | default 1)) (gt (len $key) (get $ "max" | default (len $key))) }}
 {{- /* warnf "tmux: excluded length: %s" . */ -}}
 {{- continue }}
 {{- end }}
 
 {{- $escapedKey := $key | replaceAllRegex "([;#$%{}~])" "\\${1}" }}
-{{- $command := $map | get ($escapedKey | replaceAllRegex "\"" "\\\"") }}
+{{- $command := get $map ($escapedKey | replaceAllRegex "\"" "\\\"") }}
 {{- if empty $command }}
 {{- warnf "tmux: mapping not found, try escaping key: '%s' / %s / %s" . ($escapedKey | replaceAllRegex "\"" "\\\"") $map -}}
 {{- $note = printf "-%s (%s)" $note $key }}
@@ -56,7 +56,7 @@
   "command" $command
 -}}
 
-{{- $keys = $keys | append $dict }}
+{{- $keys = append $keys $dict }}
 
 {{- end }}
 

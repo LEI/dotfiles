@@ -3,9 +3,9 @@
 {{- $packages := $global.packages }}
 
 {{- /* Parse all ".packages.yaml" */ -}}
-{{- $defaultType := . | get "defaultType" | default "" }}
-{{- $packageFiles := . | get "packageFiles" | default list }}
-{{- $packageType := . | get "packageType" | default "" }}
+{{- $defaultType := get . "defaultType" | default "" }}
+{{- $packageFiles := get . "packageFiles" | default list }}
+{{- $packageType := get . "packageType" | default "" }}
 
 {{- if empty $defaultType }}
 {{-   warnf "missing defaultType" }}
@@ -19,10 +19,10 @@
 
 {{- range $path := $packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
-{{-   if and ($fileData | hasKey "enabled") (not $fileData.enabled) }}
+{{-   if and (hasKey $fileData "enabled") (not $fileData.enabled) }}
 {{-     continue }}
 {{-   end }}
-{{-   $filePackages := $fileData | get "packages" }}
+{{-   $filePackages := get $fileData "packages" }}
 {{-   if not (kindIs "map" $filePackages) }}
 {{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
 {{-     continue }}
@@ -32,16 +32,16 @@
 
 {{- /* OS specific packages */ -}}
 {{- /* FIXME: $osPackages := $global.osPackages | dig $.osIDLike $packageType | default dict */ -}}
-{{- $osPackages := $global.osPackages | get $.osIDLike | get $packageType | default dict }}
+{{- $osPackages := get (get $global.osPackages $.osIDLike) $packageType | default dict }}
 {{- /* $packages = mergeOverwrite $packages $osPackages */ -}}
 {{- range $key, $value := $osPackages }}
-{{ $_ := $packages | set $key (mergeOverwrite ($value | default dict) (dict "type" $packageType))  }}
+{{ $_ := set $packages $key (mergeOverwrite ($value | default dict) (dict "type" $packageType))  }}
 {{- end }}
 
 {{- /* Python system packages */ -}}
 {{- if and .features.python (eq $packageType $defaultType) }}
 {{-   $pythonPackages := includeTemplate "dot_config/mise/system-python-packages.tmpl" . | trim | splitList "\n" -}}
-{{-   range $name := $pythonPackages | without "" -}}
+{{-   range $name := without $pythonPackages "" -}}
 {{-     if eq (substr 0 1 $name) "#" -}}
 {{-       continue -}}
 {{-     end -}}
@@ -54,11 +54,11 @@
 {{-       end -}}
 {{-       $name = printf "%s-%s" $prefix $name -}}
 {{-     end -}}
-{{- /*     $packages = $packages | append $name */ -}}
-{{-     if $packages | get $name -}}
-{{-       warnf "Overriding package (python) %s (%s -> %s)" $name ($packages | get $name | get "options") dict -}}
+{{- /*     $packages = append $packages $name */ -}}
+{{-     if get $packages $name -}}
+{{-       warnf "Overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
 {{-     end -}}
-{{-     $_ := $packages | set $name dict -}}
+{{-     $_ := set $packages $name dict -}}
 {{-   end -}}
 {{- end }}
 
@@ -67,4 +67,4 @@
 )) | fromJson -}}
 
 {{- /* warnf "%s packages: %s" $packageType ($output | keys) */ -}}
-{{- $output | toJSON -}}
+{{- $output | toJson -}}

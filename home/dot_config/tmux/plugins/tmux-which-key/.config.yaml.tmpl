@@ -1,8 +1,8 @@
 {{- /* NOTE: this does not parse bindings from sourced files */ -}}
 {{- $lines := includeTemplate "dot_config/tmux/tmux.conf.tmpl" . | splitList "\n" }}
-{{- $include := . | get "include" | default list }}
-{{- $map := . | get "map" }}
-{{- $names := . | get "names" | default list }}
+{{- $include := get . "include" | default list }}
+{{- $map := get . "map" }}
+{{- $names := get . "names" | default list }}
 
 {{- if empty $names }}
 {{-   warnf "missing names (tmux .config)" }}
@@ -31,17 +31,17 @@
     {{- $subGroup := $note | replaceAllRegex "^\\+([\\w-]+) .*" "${1}" }}
     {{- $plugin := $note | replaceAllRegex ".* \\+([\\w-]+)$" "${1}" }}
     {{- if ne $subGroup $note }}
-      {{- $_ := $groupKeyMap | set $subGroup $key }}
-      {{- $_ := $groupNotes | set $subGroup ($note | replaceAllRegex (printf "\\+%s " $subGroup) "") }}
+      {{- $_ := set $groupKeyMap $subGroup $key }}
+      {{- $_ := set $groupNotes $subGroup ($note | replaceAllRegex (printf "\\+%s " $subGroup) "") }}
     {{- else if ne $plugin $note }}
-      {{- if not ($pluginMap | hasKey $plugin) }}{{- $_ := $pluginMap | set $plugin list }}{{- end }}
-      {{- $_ := $pluginMap | set $plugin (($pluginMap | append | get $plugin) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+      {{- if not (hasKey $pluginMap $plugin) }}{{- $_ := set $pluginMap $plugin list }}{{- end }}
+      {{- $_ := set $pluginMap $plugin (($pluginMap | append | get $plugin) ($key | replaceAllRegex "\\\\\"" "\"")) }}
     {{- else }}
       {{- $include = $include | append $key }}
     {{- end }}
   {{- else }}
-    {{- if not ($groupMap | hasKey $group) }}{{- $_ := $groupMap | set $group list }}{{- end }}
-    {{- $_ := $groupMap | set $group (($groupMap | append | get $group) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+    {{- if not (hasKey $groupMap $group) }}{{- $_ := set $groupMap $group list }}{{- end }}
+    {{- $_ := set $groupMap $group (($groupMap | append | get $group) ($key | replaceAllRegex "\\\\\"" "\"")) }}
   {{- end }}
 {{- end }}
 
@@ -66,14 +66,14 @@
   "names" $groupKeys.names
 ) | trim -}}
 {{- if $menu }}
-- name: {{ $groupNotes | get $group | default (printf "+%s" $group) }}
-  key: {{ $groupKeyMap | get $group }}
+- name: {{ get $groupNotes $group | default (printf "+%s" $group) }}
+  key: {{ get $groupKeyMap $group }}
   menu:
     {{ $menu | nindent 4 }}
 - separator: true
 {{- else }}
-# Empty {{ $group }} menu: {{ $menu | toJSON }}
-# Group keys: {{ $groupKeys | toJSON }}
-{{- warnf "tmux lt 3.5a: empty %s menu: %s" $group ($menu | toJSON) -}}
+# Empty {{ $group }} menu: {{ $menu | toJson }}
+# Group keys: {{ $groupKeys | toJson }}
+{{- warnf "tmux lt 3.5a: empty %s menu: %s" $group ($menu | toJson) -}}
 {{- end }}
 {{- end }}

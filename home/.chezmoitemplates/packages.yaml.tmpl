@@ -121,7 +121,7 @@ packages:
     nameOverwrite:
       arch: devpod-bin
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
-    type: '{{ dict "arch" "aur" "darwin" "cask" | get .osIDLike | default nil }}'
+    type: '{{ get (dict "arch" "aur" "darwin" "cask") .osIDLike | default nil }}'
   difftastic:
     enabled: {{ ne .osIDLike "debian" }}
     nameOverwrite:

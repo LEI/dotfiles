@@ -50,7 +50,7 @@ list_enabled_features() {
 get_feature() {
   key="$1"
   # # shellcheck disable=SC2016
-  # value="$(chezmoi execute "{{ .features | get \"$key\" }}")"
+  # value="$(chezmoi execute "{{ get .features \"$key\" }}")"
   # echo "$value"
   jq ".$key == true" "$HOME/.config/chezmoi/features.json"
 }

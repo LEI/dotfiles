@@ -1,5 +1,5 @@
 {{- /* TODO: remove external commands */ -}}
-{{- $group := . | get "group" | default "prefix" }}
+{{- $group := get . "group" | default "prefix" }}
 
 {{- $sed := lookPath "gsed" | isExecutable | ternary "gsed" "sed" }}
 {{- $listCmd := printf "tmux list-keys -T %[1]s 2>/dev/null | %s -e 's/^bind-key \\(-r \\|\\s*\\)-T %[1]s //' || true" $group $sed }}
@@ -7,12 +7,12 @@
 {{- $namesCmd := printf "tmux list-keys -N -T %s 2>/dev/null || true" $group }}
 {{- $names := output "sh" "-c" $namesCmd | trim | splitList "\n" | sortAlpha }}
 
-{{- if not ($list | without "") }}
-{{- warnf "tmux lt 3.5a: empty %s list:\n%s\n%s" $group $listCmd ($list | toJSON) -}}
+{{- if not (without $list "") }}
+{{- warnf "tmux lt 3.5a: empty %s list:\n%s\n%s" $group $listCmd ($list | toJson) -}}
 {{- end }}
 
-{{- if not ($names | without "") }}
-{{- warnf "tmux lt 3.5a: empty %s names:\n%s\n%s" $group $namesCmd ($names | toJSON) -}}
+{{- if not (without $names "") }}
+{{- warnf "tmux lt 3.5a: empty %s names:\n%s\n%s" $group $namesCmd ($names | toJson) -}}
 {{- end }}
 
 {{- $map := dict }}
@@ -24,4 +24,4 @@
   {{- $map = merge $map (dict $key $command) }}
 {{- end }}
 
-{{- dict "list" ($list | without "") "names" ($names | without "") "map" $map | toJSON }}
+{{- dict "list" (without $list "") "names" (without $names "") "map" $map | toJson }}

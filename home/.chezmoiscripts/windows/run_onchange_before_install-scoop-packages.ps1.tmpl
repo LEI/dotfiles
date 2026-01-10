@@ -9,7 +9,7 @@ echo "scoop update *"
 scoop update *
 {{- end }}
 
-{{- $scoopPackages := .packages | get "scoop" | default dict }}
+{{- $scoopPackages := .packages.scoop }}
 
 {{- if empty $scoopPackages }}
 {{-   warnf "missing scoop packages" }}
@@ -18,7 +18,7 @@ scoop update *
 {{- $scoopPackagesList := $scoopPackages | keys | sortAlpha | join " " }}
 
 {{- if eq (env "CACHE_BUST") "true" }}
-# scoop hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "scoop" | sha256Sum }}
+# scoop hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "scoop" | sha256sum }}
 {{- end }}
 echo "scoop install {{ $scoopPackagesList }}"
 scoop install {{ $scoopPackagesList }}

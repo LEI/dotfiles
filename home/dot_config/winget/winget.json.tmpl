@@ -1,12 +1,12 @@
 {{- $jsonPackages := list -}}
-{{- $wingetPackages := .packages | get "winget" | default dict }}
+{{- $wingetPackages := .packages.winget }}
 
 {{- if empty $wingetPackages }}
 {{-   warnf "missing winget packages" }}
 {{- end }}
 
 {{- range $wingetPackages | keys | sortAlpha -}}
-{{-   $jsonPackages = $jsonPackages | append (dict "PackageIdentifier" .) -}}
+{{-   $jsonPackages = append $jsonPackages (dict "PackageIdentifier" .) -}}
 {{- end -}}
 {{- dict
   "$schema" "https://aka.ms/winget-packages.schema.2.0.json"

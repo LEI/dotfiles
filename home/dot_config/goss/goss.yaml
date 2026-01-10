@@ -137,9 +137,9 @@ matching:
   #       - have-key: baz
 
 # TODO: sprig syntax fails to accept upper block below
-# https://github.com/goss-org/goss/blob/master/docs/manual.md#examples-2
+# https://goss.readthedocs.io/en/stable/gossfile/#templates
 #  sping_basic:
-#    content: { { "hello!" | toUpper | repeat 5 }}
+#    content: {{ "hello!" | toUpper | repeat 5 }}
 #                 matches:
 #                 match-regexp: "HELLO!HELLO!HELLO!HELLO!HELLO!"
 

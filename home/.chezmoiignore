@@ -14,7 +14,7 @@
 
 {{- $ignore := include ".chezmoiignore.yaml" | fromYaml -}}
 {{- range $feature, $patterns := $ignore.features }}
-{{-   if not ($.features | get $feature) }}
+{{-   if not (get $.features $feature) }}
 {{-     range $patterns }}
 {{ . }}
 {{-     end }}

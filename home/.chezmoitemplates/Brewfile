@@ -1,8 +1,8 @@
 {{- range $type := list "tap" "brew" "cask" "mas" "vscode" }}
-{{-   if not ( $.packages | hasKey $type) }}
+{{-   if not (hasKey $.packages $type) }}
 {{-     continue }}
 {{-   end }}
-{{-   range $name, $pkg := $.packages | get $type }}
+{{-   range $name, $pkg := get $.packages $type }}
 {{-     if not (kindIs "map" $pkg) }}
 {{-       warnf "%s is not a map: %s" $name $pkg }}
 {{-       $pkg = dict }}
@@ -12,7 +12,7 @@
 {{-       warnf "%s: %s: %s" $type $name $pkg }}
 {{-       continue }}
 {{-     end }}
-{{-     range $key, $value := $pkg | pick
+{{-     range $key, $value := pick $pkg
   "args"
   "conflicts_with"
   "link"
@@ -27,9 +27,9 @@
 -}}
 {{- /* if OS.linux? or OS.mac? */ -}}
 {{- /* cask "java" unless system "/usr/libexec/java_home", "--failfast" */ -}}
-, {{ $key }}: {{ $value | toJSON }}
+, {{ $key }}: {{ $value | toJson }}
 {{-     end }}
-{{-     if $pkg | get "options" -}}
+{{-     if get $pkg "options" -}}
 , {{ $pkg.options }}
 {{-     end }}
 {{-   end }}

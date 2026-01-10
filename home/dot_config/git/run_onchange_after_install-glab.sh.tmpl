@@ -18,7 +18,7 @@ fi
 #   echo >&2 "No SSH key found for: $hostname"
 # fi
 
-{{- if and (. | hasKey "git") (.git | hasKey "gitlab") (.git.gitlab | hasKey "email") }}
+{{- if and (hasKey . "git") (hasKey .git "gitlab") (hasKey .git.gitlab "email") }}
 
 gitlab_email="{{ .git.gitlab.email }}"
 {{ end -}}

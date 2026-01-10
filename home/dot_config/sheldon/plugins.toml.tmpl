@@ -10,7 +10,7 @@
 #
 # See the documentation for more https://github.com/rossmacarthur/sheldon#readme
 
-{{ $shell := env "SHELL" | default "bash" | pathBase -}}
+{{ $shell := env "SHELL" | default "bash" | base -}}
 
 shell = {{ $shell | quote }}
 

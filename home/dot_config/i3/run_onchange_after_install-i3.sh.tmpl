@@ -5,7 +5,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # Check the configuration file for validity
-# config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256Sum }}
+# config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
 cmd i3 -C -c ~/.config/i3/config
 
 {{- if lookPath "thunar" | isExecutable }}

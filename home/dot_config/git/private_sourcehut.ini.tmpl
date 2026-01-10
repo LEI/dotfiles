@@ -1,3 +1,3 @@
-{{- if and (. | hasKey . "git") (.git | hasKey "sourcehut") -}}
+{{- if and (hasKey . "git") (hasKey .git "sourcehut") -}}
 {{- includeTemplate "gitconfig" (merge .git.sourcehut (dict "name" .name)) -}}
 {{- end -}}

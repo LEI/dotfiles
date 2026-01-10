@@ -1,4 +1,4 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $input := or .chezmoi.stdin "{}" | fromJson -}}
-{{- $_ := $input | set "theme" "dark" -}}
+{{- $_ := set $input "theme" "dark" -}}
 {{- $input | toPrettyJson -}}
