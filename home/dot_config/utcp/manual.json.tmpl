@@ -1,0 +1,31 @@
+
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $tools := list -}}
+{{- range $key, $value := omit $mcp.servers
+  "code-mode"
+  "context7"
+  "memory"
+  "mise"
+  "qdrant-memory"
+  "sequential-thinking"
+  "utcp"
+-}}
+{{- $_ := $value | setValueAtPath "transport" (get $value "type" | default "stdio") -}}
+{{- if and (hasKey $value "type") -}}
+{{-   $_ := $value | deleteValueAtPath "type" -}}
+{{- end -}}
+{{- $tools = append $tools (dict
+  "name" $key
+  "description" ""
+  "tool_call_template" (dict
+    "call_template_type" "mcp"
+    "config" (dict "mcpServers" $value)
+    "register_resources_as_tools" true
+  )
+) -}}
+{{- end -}}
+{
+  "manual_version": "1.0.0",
+  "utcp_version": "1.0.1",
+  "tools": {{ $tools | toPrettyJson | indent 4 | trim }}
+}

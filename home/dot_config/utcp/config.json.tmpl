@@ -1,0 +1,53 @@
+{
+  {{- /* "load_variables_from": [
+    {
+      "variable_loader_type": "dotenv",
+      "env_file_path": ".env"
+    }
+  ], */ -}}
+  "manual_call_templates": [
+    {{- /* {
+      "name": "utcp-mcp",
+      "call_template_type": "file",
+      "file_path": "manual.json",
+      "allowed_communication_protocols": ["mcp"]
+    }, */ -}}
+    {{- range $name, $url := dict
+      "local" (env "LOCAL_URL")
+      "nest" (env "NEST_URL")
+    }}
+    {{- if $url }}
+    {
+      "name": {{ $name | quote }},
+      "call_template_type": "http",
+      "http_method": "GET",
+      "url": {{ $url | quote }},
+      "content_type": "application/json"
+    },
+    {{- end }}
+    {{- end }}
+    {
+      "name": "openlibrary",
+      "call_template_type": "http",
+      "http_method": "GET",
+      "url": "https://openlibrary.org/static/openapi.json",
+      "content_type": "application/json"
+    }
+  ]{{- /* ,
+  "variables": {
+    "utcp__mcp_HOME": {{ env "HOME" | quote }}
+  },
+  "post_processing": [
+    {
+      "tool_post_processor_type": "filter_dict",
+      "only_include_keys": ["name", "description"],
+      "only_include_tools": ["openlibrary.*"]
+    }
+  ],
+  "tool_repository": {
+    "tool_repository_type": "in_memory"
+  },
+  "tool_search_strategy": {
+    "tool_search_strategy_type": "tag_and_description_word_match"
+  } */ -}}
+}
