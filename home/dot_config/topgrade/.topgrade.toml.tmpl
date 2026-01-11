@@ -32,6 +32,9 @@ disable = [
   {{- end }}
   # "pnpm", # Requires npx pnpm install --global pnpm@latest
   # "vagrant",
+  {{- if eq .os "linux" }}
+  "waydroid",
+  {{- end }}
   "ruby_gems", # Requires sudo
 ]
 # Do not ask to retry failed steps (default: false)

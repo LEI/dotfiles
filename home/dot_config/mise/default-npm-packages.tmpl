@@ -1,6 +1,9 @@
 # npm
 # pnpm
 # yarn
+{{- if .features.ai }}
+@fission-ai/openspec
+{{- end }}
 {{- if not .features.neovim }}
 bash-language-server
 prettier
