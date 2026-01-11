@@ -1,0 +1,13 @@
+---
+# https://fluxoperator.dev/docs/mcp/prompting/
+# Flux Operator API specifications (docs/operator):
+# https://github.com/controlplaneio-fluxcd/distribution
+# Enhance these instructions with information specific to your clusters, such as:
+# - Kubernetes distribution details (EKS, GKE, AKS, etc.)
+# - Cloud-specific services integrated with your clusters
+# - Types of applications deployed
+# - Secret management approaches
+docs/flux-operator-mcp.md:
+  type: file
+  url: https://raw.githubusercontent.com/controlplaneio-fluxcd/distribution/refs/heads/main/docs/mcp/instructions.md
+  # refreshPeriod: 168h

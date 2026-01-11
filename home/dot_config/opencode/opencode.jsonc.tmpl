@@ -7,10 +7,16 @@
 {{- end -}}
 {{- if hasKey $value "env" -}}
 {{- /* TODO: replace values containing ${KEY} with {env:KEY} */ -}}
+{{- range $k, $v := $value.env -}}
+{{-   $val := $v | replaceAllRegex "\\${" "{env:" -}}
+{{-   if ne $v $val -}}
+{{-     $_ := $value.env | setValueAtPath $k $val -}}
+{{-   end -}}
+{{- end -}}
 {{-   $_ := $value | setValueAtPath "environment" $value.env -}}
 {{-   $_ := $value | deleteValueAtPath "env" -}}
 {{- end -}}
-{{- if and (hasKey $value "type") (eq $value.type "stdio") -}}
+{{- if or (not (hasKey $value "type")) (eq $value.type "stdio") -}}
 {{-   $_ := $value | setValueAtPath "type" "local" -}}
 {{- else if and (hasKey $value "type") (eq $value.type "http") -}}
 {{-   $_ := $value | setValueAtPath "type" "remote" -}}
@@ -22,10 +28,24 @@
   "theme": "{{ get . "theme" | default "system" }}",
   // "model": "anthropic/claude-sonnet-4-5",
   "autoupdate": false,
+  // "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"],
+  "permission": {
+    "edit": "deny"
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "edit": "ask"
+      }
+    }
+  },
   "mcp": {{ $servers | toPrettyJson | indent 2 | trim }}{{ if eq .chezmoi.arch "arm64" }},
   // https://opencode.ai/docs/models/#recommended-models
+  {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
   "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
+  {{- end }}
   "provider": {
+    {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
     "mlx-lm": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "MLX",
@@ -99,7 +119,8 @@
         }
       }
     },
-    "openai": {
+    {{- end }}
+    /* "openai": {
       "models": {
         "gpt-5": {
           "variants": {
@@ -128,6 +149,6 @@
           }
         }
       }
-    }
+    } */
   }{{ end }}
 }

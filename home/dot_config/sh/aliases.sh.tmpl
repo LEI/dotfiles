@@ -119,6 +119,7 @@ if command -v crush >/dev/null; then
 fi
 if command -v opencode >/dev/null; then
   opencode() { env opencode "${@:---continue}"; }
+  alias oc=opencode
 fi
 {{- end }}
 
