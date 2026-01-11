@@ -1,5 +1,5 @@
 {{- $settings := includeTemplate "dot_config/Code/User/.settings.json" | fromJson -}}
-{{- /* $mcp := includeTemplate "dot_config/Code/User/mcp.json.tmpl" . | fromJson */ -}}
-{{- $settings := includeTemplate "dot_config/Code/User/.settings.json" | fromJson -}}
-{{- /* $_ := $settings | setValueAtPath "mcp" $mcp | toPrettyJson */ -}}
+{{- /* $mcp := includeTemplate "mcp.jsonc" . | fromJsonc */ -}}
+{{- /* $_ := $settings | setValueAtPath "mcp" $mcp.servers */ -}}
+{{- /* $_ := $settings | setValueAtPath "inputs" $mcp.inputs */ -}}
 {{- $settings | toPrettyJson }}

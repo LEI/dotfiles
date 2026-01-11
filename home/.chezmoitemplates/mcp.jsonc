@@ -1,0 +1,97 @@
+{
+  "servers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--channel=stable",
+        "--headless=true",
+        "--isolated=true",
+      ],
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+    },
+    "context7-http": {
+      "enabled": false,
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}",
+      },
+    },
+    "exa": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}",
+      },
+    },
+    "firecrawl": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}",
+      },
+    },
+    {{- if lookPath "flux-operator-mcp" | isExecutable }}
+    "flux-operator-mcp": {
+      "command": "flux-operator-mcp",
+      "args": ["serve"],
+      "env": {
+        "KUBECONFIG": "${HOME}/.kube/config",
+      },
+    },
+    "flux-operator-mcp-ro": {
+      "command": "flux-operator-mcp",
+      "args": ["serve", "--read-only"],
+      "env": {
+        "KUBECONFIG": "${HOME}/.kube/config",
+      },
+    },
+    {{- end }}
+    {{- if .features.kube }}
+    "kubernetes": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "kubernetes-mcp-server@latest",
+      ],
+    },
+    {{- end }}
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+    },
+    "github": {
+      "enabled": false,
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      // "oauth": {},
+      "headers": {
+        // "Authorization": "Bearer ${GITHUB_TOKEN}",
+        "Authorization": "Bearer ${input:github_mcp_pat}",
+      },
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    },
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    },
+  ],
+}

@@ -1,2 +1,5 @@
-{{- $mcp := includeTemplate "dot_config/Code/User/mcp.json.tmpl" . | fromJson -}}
-{{- (dict) | setValueAtPath "mcpServers" $mcp.servers | toPrettyJson }}
+{{- $data := dict -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $_ := $data | setValueAtPath "mcpServers" $mcp.servers }}
+{{- $_ := $data | setValueAtPath "inputs" $mcp.inputs }}
+{{- $data | toPrettyJson -}}

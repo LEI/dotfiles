@@ -159,6 +159,7 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
+  theme: tokyonight
   user: {{ $user | quote }}
 {{ $data | toYaml | indent 2 }}
   preset: {{ $preset | quote }}

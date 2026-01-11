@@ -127,4 +127,4 @@ next_account = "L"
 prev_account = "H"
 
 [terminal]
-theme = "tokyonight" # dark, nord
+theme = {{ .theme | default "opencode" | quote }} # dark, nord
