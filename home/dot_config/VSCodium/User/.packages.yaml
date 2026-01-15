@@ -3,10 +3,10 @@ enabled: "{{ .features.vscodium }}"
 packages:
   vscodium:
     # enabled: "{{ .features.vscodium }}"
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
     nameOverwrite:
       arch: vscodium-bin
       fedora: com.vscodium.codium
       windows: VSCodium.VSCodium
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
   # vscodium@insiders:
   #   type: cask

@@ -63,7 +63,7 @@
     (not (or .ephemeral .headless)))
   "void" (and (eq .osIDLike "arch") .gui)
   "vscode" (and (eq .osIDLike "arch" "fedora" "darwin") .gui)
-  "vscodium" (and (eq .osIDLike "arch") .gui)
+  "vscodium" (and (eq .osIDLike "arch" "fedora") .gui)
   "zellij" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "zoxide" true
   "zsh" false
