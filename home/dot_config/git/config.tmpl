@@ -101,7 +101,9 @@
 {{- end }}
 
 [pull]
-	rebase = merges
+	ff = only
+	# NOTE: use git pull --rebase=merges
+	# rebase = false
 
 [include]
 	path = "~/.gitconfig.local"
