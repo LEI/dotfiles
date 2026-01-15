@@ -75,9 +75,8 @@ return {
   },
   {
     'lewis6991/gitsigns.nvim',
+    version = vim.fn.has('nvim-0.11') == 1 and 'v2.x' or 'v1.x',
     dependencies = { 'folke/snacks.nvim' },
-    -- tag = 'v1.0.2',
-    version = 'v1.x',
     cmd = 'Gitsigns',
     event = {
       -- 'CursorHold',
