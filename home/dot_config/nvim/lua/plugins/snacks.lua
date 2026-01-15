@@ -145,7 +145,7 @@ local function grep_picker()
   if vim.startswith(search, '\\V') then
     search = search:gsub('^\\V', '')
     if regex then
-      search = search:gsub('([%^$~+.*%[%]{}()|])', '\\%1')
+      search = search:gsub('([%^$~+.*%[%]{}()|\\?])', '\\%1')
     else
       search = search:gsub('\\\\', '\\')
     end

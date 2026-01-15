@@ -369,10 +369,12 @@ packages:
     type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
   mlx-lm:
     enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    # brew services start mlx-lm
+    restart_service: ":changed"
     # FIXME(brew): RuntimeError: [metal::Device] Unable to load kernel
     # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
-    command: mlx_lm.server
-    type: uv
+    # command: mlx_lm.server
+    # type: uv
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   # mailpit:

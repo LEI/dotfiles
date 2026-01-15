@@ -20,6 +20,11 @@ PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
 
 [plugins]
 
+# TODO: load command aliases/environment/functions in bash and zsh
+# https://github.com/rossmacarthur/sheldon#local
+# [plugins.sh]
+# local = "~/.config/sh"
+
 {{- if .features.mise }}
 
 [plugins.mise]

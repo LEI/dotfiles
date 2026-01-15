@@ -38,6 +38,7 @@ fi
 # uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
 {{- end }}
 
+{{- $list := list }}
 {{- range $key, $value := $uvPackages }}
 {{-   $command := get $value "command" | default $key
   | replaceAllRegex `\[.*\]$` ""
@@ -45,6 +46,9 @@ fi
 {{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}
 echo >&2 "Already installed: {{ $key }}"
 {{-     continue }}
+{{-   $list = append $list $key }}
 {{-   end }}
-run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $key }}
+{{- end }}
+{{- if gt (len $list) 0 }}
+run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $list | join " " }}
 {{- end }}

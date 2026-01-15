@@ -77,9 +77,39 @@
   {{- end }}
   "provider": {
     {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    // https://opencode.ai/docs/providers#llamacpp
+    // FIXME: Unrecognized schema: {"description":"The call template for the UTCP Manual endpoint."}
+    /* "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (local)",
+      "options": {
+        "baseURL": "http://127.0.0.1:8080/v1"
+      },
+      "models": {
+        // https://github.com/ggml-org/llama.cpp/discussions/15396
+        // https://huggingface.co/ggml-org/gpt-oss-20b-GGUF
+        // llama-server -hf ggml-org/gpt-oss-20b-GGUF --ctx-size 0 --jinja -ub 2048 -b 2048
+        "ggml-org/gpt-oss-20b-GGUF": {
+          "name": "gpt-oss-20b-GGUF",
+          "limit": {
+            "context": 128000,
+            "output": 65536
+          }
+        },
+        "qwen3-coder:a3b": {
+          "name": "Qwen3-Coder: a3b-30b (local)",
+          "limit": {
+            "context": 128000,
+            "output": 65536
+          }
+        }
+      }
+    }, */
+    // FIXME: <|channel|>analysis<|message|>[...]
+    // <|end|><|start|>assistant<|channel|>final<|message|>[...]
     "mlx-lm": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "MLX",
+      "name": "MLX LM (local)",
       "options": {
         "baseURL": "http://127.0.0.1:8080/v1"
       },
@@ -99,6 +129,11 @@
           "reasoning": true,
           "tools": true
         },
+        "mistralai/Mistral-7B-Instruct-v0.3": {
+          "name": "Mistral-7B-Instruct-v0.3",
+          "reasoning": true,
+          "tools": true
+        },
         "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit": {
           "name": "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit",
           "reasoning": true,
@@ -106,22 +141,28 @@
         }
       }
     },
+    // https://opencode.ai/docs/providers#ollama
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama",
+      "name": "Ollama (local)",
       "options": {
         "baseURL": "http://127.0.0.1:11434/v1"
       },
       "models": {
+        "deepseek-r1:8b": {
+          "name": "deepseek-r1:8b",
+          "reasoning": true,
+          "tools": true
+        },
         "gpt-oss:20b": {
           "name": "gpt-oss:20b",
           "reasoning": true,
           "tools": true
         },
-        "deepseek-r1:8b": {
-          "name": "deepseek-r1:8b",
-          "reasoning": true,
-          "tools": true
+        // If tool calls aren’t working, try increasing num_ctx in Ollama
+        // Start around 16k - 32k
+        "llama2": {
+          "name": "Llama 2"
         },
         "qwen3": {
           "name": "qwen3",

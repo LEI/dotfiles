@@ -31,14 +31,13 @@ if chezmoi feature atuin && [ "$(atuin --version | sed -e 's/^atuin //' | cut -d
 fi
 
 if chezmoi feature brew; then
+  # TODO: ignore deprectated or disabled warnings for pinned packages
   if ! timeout 5m brew doctor; then
     echo >&2 "WARN: brew doctor exited with code $?"
   fi
 fi
 
-if ! timeout 5m chezmoi doctor --dry-run --no-network; then
-  echo >&2 "WARN: chezmoi doctor exited with code $?"
-fi
+timeout 5m chezmoi doctor --dry-run --no-network
 
 if chezmoi feature goss; then
   # PATH="$PATH:$HOME/.local/bin"
