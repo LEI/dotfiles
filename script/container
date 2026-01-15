@@ -42,6 +42,8 @@ build_container() {
   if [ "$image_name" = archlinux ] && [ "$(uname -m)" = arm64 ]; then
     image_name_arg=docker.io/ogarcia/archlinux
     # base, base-devel
+  elif [ "$image_name" = macos ]; then
+    image_name_arg=docker.io/sickcodes/docker-osx
   elif [ "$image_name" = termux ]; then
     image_name_arg=docker.io/termux/termux-docker
     # aarch64, arm, i686 (latest), x86_64
@@ -62,7 +64,9 @@ build_container() {
   # container_user=test
   user="test"
   home="/home/$user"
-  if [ "$image_name" = termux ]; then
+  if [ "$image_name" = macos ]; then
+    home="/Users/$user"
+  elif [ "$image_name" = termux ]; then
     prefix=/data/data/com.termux/files
     home="$prefix/home"
     # container_user=root
@@ -93,6 +97,28 @@ build_container() {
   # Create container
   if ! $PROVIDER container inspect "$container" >/dev/null; then
     $PROVIDER create --name="$container" "$container"
+  fi
+
+  # https://github.com/sickcodes/Docker-OSX/issues/381
+  if [ "$image_name" = macos ]; then
+    # export XAUTHORITY="$HOME/.Xauthority"
+    # xhost +local:root
+    # xhost +
+    # sudo usermod -aG kvm $USER
+    $PROVIDER run -it --name="$container" \
+      -device /dev/kvm \
+      -p 50922:10022 \
+      -p 22222:22 \
+      -p 5999:5999 \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -e "DISPLAY=:1" \
+      -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
+      -v "/run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket" \
+      -e MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist" \
+      -e EXTRA="-vnc 0.0.0.0:99,password=off" \
+      -e SHORTNAME=tahoe \
+      "$container"
+    return
   fi
 
   # Start container
