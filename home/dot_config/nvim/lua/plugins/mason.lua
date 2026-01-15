@@ -475,6 +475,9 @@ return {
                   url = '',
                 },
                 schemas = schemastore.yaml.schemas(),
+                kubernetesCRDStore = {
+                  enable = true,
+                },
               },
             },
           },

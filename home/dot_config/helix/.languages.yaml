@@ -167,3 +167,5 @@ language-server:
           # "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.31.1/all.json": "*.yaml"
         schemaStore:
           enable: true
+        kubernetesCRDStore:
+          enable: true
