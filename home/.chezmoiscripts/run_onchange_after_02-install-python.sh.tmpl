@@ -38,6 +38,7 @@ fi
 # uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
 {{- end }}
 
+# https://github.com/astral-sh/uv/issues/13750
 {{- $list := list }}
 {{- range $key, $value := $uvPackages }}
 {{-   $command := get $value "command" | default $key
@@ -46,9 +47,6 @@ fi
 {{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}
 echo >&2 "Already installed: {{ $key }}"
 {{-     continue }}
-{{-   $list = append $list $key }}
+run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $key }}
 {{-   end }}
-{{- end }}
-{{- if gt (len $list) 0 }}
-run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $list | join " " }}
 {{- end }}
