@@ -21,5 +21,5 @@ var data = {lines:[
 {"lineNum":"   20","line":"echo >&2 \"Installed apt packages\"","class":"lineCov","hits":"1","order":"90","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-01-04 23:50:22", "instrumented" : 7, "covered" : 7,};
+var header = { "command" : "test", "date" : "2026-01-22 02:05:20", "instrumented" : 7, "covered" : 7,};
 var merged_data = [];

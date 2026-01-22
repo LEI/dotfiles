@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767570658469,
+  "lastUpdate": 1769047568779,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -917,6 +917,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.44,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "ec47ee9a04b35baca323beaf00121caca05d6cc6",
+          "message": "fix: opencode plugins",
+          "timestamp": "2026-01-22T03:02:50+01:00",
+          "tree_id": "9db7977ce64bab7d3e0478e14cad7fd853cd4f7b",
+          "url": "https://github.com/LEI/dotfiles/commit/ec47ee9a04b35baca323beaf00121caca05d6cc6"
+        },
+        "date": 1769047566858,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.292,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.86,
             "unit": "Second"
           }
         ]

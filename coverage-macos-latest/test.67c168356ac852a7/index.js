@@ -7,7 +7,7 @@ var data = {files:[
 {"link":"bootstrap.38b56fc6.html","title":"bootstrap","summary_name":"[...]/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"44.0","covered_lines":"11","uncovered_lines":"14","total_lines" : "25"},
 {"link":"executable_git-P.37405422.html","title":"executable_git-P","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_git-P","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
 {"link":"executable_shpool-a.78bd3ea3.html","title":"executable_shpool-a","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_shpool-a","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
-{"link":"container.aeb4c5ad.html","title":"container","summary_name":"[...]/dotfiles/script/container","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"80","total_lines" : "80"},
+{"link":"container.aeb4c5ad.html","title":"container","summary_name":"[...]/dotfiles/script/container","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"87","total_lines" : "87"},
 {"link":"executable_t.c3e69d89.html","title":"executable_t","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"27","total_lines" : "27"},
 {"link":"executable_iperf3-plot.dd86af8a.html","title":"executable_iperf3-plot","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_iperf3-plot","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"23","total_lines" : "23"},
 {"link":"executable_package-manager.f0c50c5f.html","title":"executable_package-manager","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_package-manager","covered_class":"lineNoCov","covered":"17.2","covered_lines":"5","uncovered_lines":"24","total_lines" : "29"},
@@ -21,10 +21,10 @@ var data = {files:[
 {"link":"executable_chezmoi-feature.26de099f.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"41.0","covered_lines":"25","uncovered_lines":"36","total_lines" : "61"},
 {"link":"02-install-brew-packages.sh.cfde33aa.html","title":"02-install-brew-packages.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"42.9","covered_lines":"6","uncovered_lines":"8","total_lines" : "14"},
 {"link":"executable_list-package.5eb0518b.html","title":"executable_list-package","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_list-package","covered_class":"lineNoCov","covered":"14.3","covered_lines":"5","uncovered_lines":"30","total_lines" : "35"},
-{"link":"check.c89106a8.html","title":"check","summary_name":"[...]/dotfiles/script/check","covered_class":"linePartCov","covered":"63.3","covered_lines":"19","uncovered_lines":"11","total_lines" : "30"},
+{"link":"check.c89106a8.html","title":"check","summary_name":"[...]/dotfiles/script/check","covered_class":"linePartCov","covered":"62.5","covered_lines":"20","uncovered_lines":"12","total_lines" : "32"},
 {"link":"executable_k.4eee907c.html","title":"executable_k","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_k","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 {"link":"executable_nvim-sh.f54330bd.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-01-04 23:50:47", "instrumented" : 658, "covered" : 189,};
+var header = { "command" : "test", "date" : "2026-01-22 02:05:52", "instrumented" : 667, "covered" : 190,};
 var merged_data = [];

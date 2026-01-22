@@ -8,7 +8,7 @@ var data = {files:[
 {"link":"bootstrap.6766eb9d.html","title":"bootstrap","summary_name":"[...]/dotfiles/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"44.0","covered_lines":"11","uncovered_lines":"14","total_lines" : "25"},
 {"link":"bench.44aab391.html","title":"bench","summary_name":"[...]/dotfiles/dotfiles/script/bench","covered_class":"lineCov","covered":"92.1","covered_lines":"35","uncovered_lines":"3","total_lines" : "38"},
 {"link":"executable_shpool-select.c666840e.html","title":"executable_shpool-select","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-select","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
-{"link":"check.1efcfca7.html","title":"check","summary_name":"[...]/dotfiles/dotfiles/script/check","covered_class":"linePartCov","covered":"63.3","covered_lines":"19","uncovered_lines":"11","total_lines" : "30"},
+{"link":"check.1efcfca7.html","title":"check","summary_name":"[...]/dotfiles/dotfiles/script/check","covered_class":"linePartCov","covered":"62.5","covered_lines":"20","uncovered_lines":"12","total_lines" : "32"},
 {"link":"entrypoint.902fa044.html","title":"entrypoint","summary_name":"[...]/dotfiles/dotfiles/script/entrypoint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"71","total_lines" : "71"},
 {"link":"executable_chezmoi-check.c7d4787b.html","title":"executable_chezmoi-check","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-check","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"15","total_lines" : "15"},
 {"link":"executable_chezmoi-package.f2f26bad.html","title":"executable_chezmoi-package","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-package","covered_class":"linePartCov","covered":"34.8","covered_lines":"31","uncovered_lines":"58","total_lines" : "89"},
@@ -17,11 +17,11 @@ var data = {files:[
 {"link":"executable_shpool-a.b7c60244.html","title":"executable_shpool-a","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-a","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"executable_e.3921249b.html","title":"executable_e","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_e","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"executable_chezmoi-feature.334d795e.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"41.0","covered_lines":"25","uncovered_lines":"36","total_lines" : "61"},
-{"link":"container.f16741f6.html","title":"container","summary_name":"[...]/dotfiles/dotfiles/script/container","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"80","total_lines" : "80"},
+{"link":"container.f16741f6.html","title":"container","summary_name":"[...]/dotfiles/dotfiles/script/container","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"87","total_lines" : "87"},
 {"link":"update.540b30bd.html","title":"update","summary_name":"[...]/dotfiles/dotfiles/script/update","covered_class":"lineCov","covered":"84.6","covered_lines":"11","uncovered_lines":"2","total_lines" : "13"},
 {"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"lineCov","covered":"83.3","covered_lines":"15","uncovered_lines":"3","total_lines" : "18"},
 {"link":"executable_t.53910469.html","title":"executable_t","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"27","total_lines" : "27"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-01-04 23:51:18", "instrumented" : 618, "covered" : 157,};
+var header = { "command" : "", "date" : "2026-01-22 02:06:30", "instrumented" : 627, "covered" : 158,};
 var merged_data = [];

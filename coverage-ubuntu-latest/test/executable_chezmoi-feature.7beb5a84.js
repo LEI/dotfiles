@@ -53,7 +53,7 @@ var data = {lines:[
 {"lineNum":"   52","line":"  # # shellcheck disable=SC2016"},
 {"lineNum":"   53","line":"  # value=\"$(chezmoi execute \"{{ get .features \\\"$key\\\" }}\")\""},
 {"lineNum":"   54","line":"  # echo \"$value\""},
-{"lineNum":"   55","line":"  jq \".$key == true\" \"$HOME/.local/share/features.json\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   55","line":"  jq \".$key == true\" \"$HOME/.config/chezmoi/features.json\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   56","line":"}"},
 {"lineNum":"   57","line":""},
 {"lineNum":"   58","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"2","order":"16","possible_hits":"0",},
@@ -123,5 +123,5 @@ var data = {lines:[
 {"lineNum":"  122","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-01-04 23:50:22", "instrumented" : 61, "covered" : 25,};
+var header = { "command" : "test", "date" : "2026-01-22 02:05:20", "instrumented" : 61, "covered" : 25,};
 var merged_data = [];
