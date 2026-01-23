@@ -2,23 +2,29 @@ import { type Plugin, tool } from "@opencode-ai/plugin"
 
 // https://opencode.ai/docs/plugins/#send-notifications
 export const NotificationPlugin: Plugin = async ({ project, client, $, directory, worktree }) => {
+  function notify(title: string, message: string) {
+    if (process.platform === "darwin") {
+      $`osascript -e 'display notification "${message}" with title "${title}"'`
+    } else {
+      $`notify-send "${title}" "${message}"`
+    }
+  }
   return {
     event: async ({ event }) => {
       // Send notification on session completion
       if (event.type === "session.idle") {
-        // await $`osascript -e 'display notification "Session completed!" with title "opencode"'`
-        await $`notify-send "opencode" "Session completed!"`
+        notify("opencode", "Session completed!")
       }
     },
     tool: {
-      mytool: tool({
+      notify: tool({
         description: "Send a notification",
         args: {
           title: tool.schema.string(),
           message: tool.schema.string(),
         },
         async execute(args, ctx) {
-          return $`notify-send ${args.title} ${args.message}`.text()
+          return notify(args.title, args.message)
         },
       }),
     },

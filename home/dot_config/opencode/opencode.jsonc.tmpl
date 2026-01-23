@@ -29,36 +29,49 @@
   "autoupdate": false,
   // "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"],
   "permission": {
-    "edit": "deny"
-    // "bash": {
-    //   "*": "ask",
-    //   "git status": "allow"
-    // }
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "git commit *": "deny",
+      "git push *": "deny",
+      // "grep *": "deny",
+    },
+    "edit": "deny",
+    "read": {
+      // "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+    },
+    "chrome-devtools_evaluate_script": "ask",
+    "chrome-devtools_navigate_page": "ask",
   },
-  "plugins": [],
+  "plugin": [],
   "tools": {
     {{- if lookPath "flux-operator-mcp" | isExecutable }}
     "flux-operator-mcp": false,
-    "flux-operator-mcp-ro": true
+    "flux-operator-mcp-ro": true,
     {{- end }}
   },
   "agent": {
     "build": {
       "permission": {
-        "edit": "ask"
-        // "bash": {
-        //   "*": "ask",
-        //   "git status": "allow",
-        //   "git push": "allow"
-        // }
+        "bash": {
+          "*": "ask",
+          "git *": "allow",
+          "git commit *": "ask",
+          "git push *": "deny",
+          // "grep *": "allow",
+        },
+        "edit": "ask",
       },
       "tools": {
         {{- if lookPath "flux-operator-mcp" | isExecutable }}
         "flux-operator-mcp": true,
-        "flux-operator-mcp-ro": false
+        "flux-operator-mcp-ro": false,
         {{- end }}
-      }
-    }
+      },
+    },
   },
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
   "mcp": {{ omit $mcp.servers "flux-operator-mcp-ro" | toPrettyJson | indent 2 | trim }},
@@ -68,9 +81,9 @@
   //     "type": "local",
   //     "command": ["npx", "-y", "@utcp/code-mode-mcp"],
   //     "environment": {
-  //       "UTCP_CONFIG_FILE": "{env:HOME}/.config/utcp/config.json"
-  //     }
-  //   }
+  //       "UTCP_CONFIG_FILE": "{env:HOME}/.config/utcp/config.json",
+  //     },
+  //   },
   // },
   // https://opencode.ai/docs/models/#recommended-models
   {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
@@ -84,7 +97,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "llama-server (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:8080/v1"
+        "baseURL": "http://127.0.0.1:8080/v1",
       },
       "models": {
         // https://github.com/ggml-org/llama.cpp/discussions/15396
@@ -94,17 +107,17 @@
           "name": "gpt-oss-20b-GGUF",
           "limit": {
             "context": 128000,
-            "output": 65536
-          }
+            "output": 65536,
+          },
         },
         "qwen3-coder:a3b": {
           "name": "Qwen3-Coder: a3b-30b (local)",
           "limit": {
             "context": 128000,
-            "output": 65536
-          }
-        }
-      }
+            "output": 65536,
+          },
+        },
+      },
     }, */
     // FIXME: <|channel|>analysis<|message|>[...]
     // <|end|><|start|>assistant<|channel|>final<|message|>[...]
@@ -112,90 +125,90 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "MLX LM (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:8080/v1"
+        "baseURL": "http://127.0.0.1:8080/v1",
       },
       "models": {
         "mlx-community/Llama-3.2-3B-Instruct-4bit": {
           "name": "mlx-community/Llama-3.2-3B-Instruct-4bit",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "mlx-community/gpt-oss-20b-mxfp4-q8": {
           "name": "mlx-community/gpt-oss-20b-mxfp4-q8",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "mlx-community/Qwen3-30B-A3B-4bit": {
           "name": "mlx-community/Qwen3-30B-A3B-4bit",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "mlx-community/whisper-large-v3-mlx": {
           "name": "mlx-community/whisper-large-v3-mlx",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "mistralai/Mistral-7B-Instruct-v0.3": {
           "name": "Mistral-7B-Instruct-v0.3",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit": {
           "name": "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit",
           "reasoning": true,
-          "tools": true
-        }
-      }
+          "tools": true,
+        },
+      },
     },
     // https://opencode.ai/docs/providers#ollama
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:11434/v1"
+        "baseURL": "http://127.0.0.1:11434/v1",
       },
       "models": {
         "deepseek-r1:8b": {
           "name": "deepseek-r1:8b",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "gpt-oss:20b": {
           "name": "gpt-oss:20b",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         // If tool calls aren’t working, try increasing num_ctx in Ollama
         // Start around 16k - 32k
         "llama2": {
-          "name": "Llama 2"
+          "name": "Llama 2",
         },
         "qwen3": {
           "name": "qwen3",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "qwen3:4b": {
           "name": "qwen3:4b",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "qwen3:8b": {
           "name": "qwen3:8b",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "qwen3:30b": {
           "name": "qwen3:30b",
           "reasoning": true,
-          "tools": true
+          "tools": true,
         },
         "qwen3-coder:30b": {
           "name": "qwen3-coder:30b",
           "reasoning": true,
-          "tools": true
-        }
-      }
+          "tools": true,
+        },
+      },
     },
     {{- end }}
     /* "openai": {
@@ -205,16 +218,16 @@
             "high": {
               "reasoningEffort": "high",
               "textVerbosity": "low",
-              "reasoningSummary": "auto"
+              "reasoningSummary": "auto",
             },
             "low": {
               "reasoningEffort": "low",
               "textVerbosity": "low",
-              "reasoningSummary": "auto"
-            }
-          }
-        }
-      }
+              "reasoningSummary": "auto",
+            },
+          },
+        },
+      },
     },
     "anthropic": {
       "models": {
@@ -222,11 +235,27 @@
           "options": {
             "thinking": {
               "type": "enabled",
-              "budgetTokens": 16000
-            }
-          }
-        }
-      }
-    } */
+              "budgetTokens": 16000,
+            },
+          },
+        },
+      },
+    }, */
+    {{- $litellmURL := env "LITELLM_API_BASE" }}
+    {{- $litellmKey := env "LITELLM_API_KEY" }}
+    {{- if $litellmURL }}
+    "litellm": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LiteLLM (custom)",
+      "options": {
+        "baseURL": {{ $litellmURL | quote }},
+      },
+      "models": {
+        "github_copilot/claude-haiku-4.5": {
+          "name": "Claude Haiku 4.5",
+        },
+      },
+    },
+    {{- end }}
   },
 }

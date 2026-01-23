@@ -13,7 +13,7 @@
       "args": ["-y", "@utcp/mcp-bridge"],
       "env": {
         "UTCP_CONFIG_FILE": "${HOME}/.config/utcp/config.json",
-      }
+      },
     },
     // https://github.com/universal-tool-calling-protocol/typescript-utcp
     "code-mode": {
@@ -73,6 +73,7 @@
     {{- end }}
     {{- if .features.kube }}
     "kubernetes": {
+      "enabled": {{ ne .profile "work" }},
       "command": "npx",
       "args": [
         "-y",
@@ -80,6 +81,10 @@
       ],
     },
     {{- end }}
+    "gh_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app"
+    },
     {{- if .features.git }}
     "git": {
       "command": "uvx",
@@ -88,9 +93,12 @@
     {{- end }}
     {{- if env "GITHUB_TOKEN" }}
     "github": {
+      "enabled": false,
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
-      // "oauth": {},
+      // FIXME: https://github.com/github/github-mcp-server/issues/1396
+      // opencode mcp auth github || opencode mcp debug github
+      "oauth": false, // {},
       "headers": {
         "Authorization": "Bearer ${GITHUB_TOKEN}",
         // "Authorization": "Bearer ${input:github_mcp_pat}",
@@ -110,7 +118,8 @@
       },
     },
     {{- end }}
-    {{- if lookPath "chrome" | isExecutable }}
+    {{- /* /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome */ -}}
+    {{- if or (eq .os "darwin") (lookPath "chrome" | isExecutable) }}
     "chrome-devtools": {
       "command": "npx",
       "args": [
@@ -143,6 +152,11 @@
       },
     },
     {{- end }}
+    // "sentry": {
+    //   "type": "remote",
+    //   "url": "https://mcp.sentry.dev/mcp",
+    //   "oauth": {}
+    // },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],

@@ -5,7 +5,7 @@
 
 [github]
 	user = {{ .git.github.user | quote }}
-	token = {{ keyring "github" .git.github.user | quote }}
+	{{- /* token = {{ keyring "github" .git.github.user | quote }} */ -}}
 {{- end }}
 
 # [hub]

@@ -31,6 +31,7 @@ local remote = 'fork'
 local remote_url = 'https://github.com/LEI/lazy.nvim.git'
 -- exec({ 'git', '-C', lazypath, 'remote', 'remove', remote }, 'remove remote')
 exec({ 'git', '-C', lazypath, 'remote', 'add', remote, remote_url }, 'add remote', 0, true)
+-- TODO: only fetch once
 exec({ 'git', '-C', lazypath, 'fetch', remote }, 'fetch remote')
 exec({ 'git', '-C', lazypath, 'checkout', branch }, 'checkout branch')
 

@@ -10,7 +10,8 @@
 	l = log --abbrev-commit --graph --max-count=20 --pretty=oneline
 	# https://robertandrewspencer.com/git_lg_with_links
 	lg = "log --color --graph --pretty=format:']8;;git://.#%h\\%Cred%h%Creset]8;;\\ -%C(yellow)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --abbrev-commit --max-count=20" # --all
-	p = !"git pull; git submodule foreach git pull origin master"
+	p = "!git pull; git submodule foreach git pull origin master"
+	up = "!git remote update -p; git merge --ff-only @{u}"
 	r = restore
 	ra = rebase --abort
 	rc = rebase --continue
@@ -38,11 +39,11 @@
 	credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
 
 	# Show the diff between the latest commit and the current state
-	# d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+	# d = "!git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 	d = diff
 
 	# 'git di $number' shows the diff between the state '$number' revisions ago and the current state
-	di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+	di = "!d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
 	# Find files
 	f = "!git ls-files | grep -i"
@@ -89,6 +90,8 @@
 	  declare name=\"$(git current-branch)-${tag:-$(git hash)}\"; \
 	  git archive --format=zip -o $name.zip HEAD; \
 	}; f"
+
+	visual = !gitk
 
 [core]
 	excludesFile = ~/.config/git/ignore
