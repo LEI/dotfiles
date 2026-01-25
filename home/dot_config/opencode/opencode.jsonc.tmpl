@@ -1,110 +1,218 @@
+{{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $servers := dict -}}
 {{- range $key, $value := $mcp.servers -}}
-{{- if hasKey $value "command" -}}
-{{-   $_ := $value | setValueAtPath "command" (concat (list $value.command) $value.args) -}}
-{{-   $_ := $value | deleteValueAtPath "args" -}}
-{{- end -}}
-{{- if hasKey $value "env" -}}
-{{- range $k, $v := $value.env -}}
-{{-   $val := $v | replaceAllRegex "\\${" "{env:" -}}
-{{-   if ne $v $val -}}
-{{-     $_ := $value.env | setValueAtPath $k $val -}}
+{{-   if hasKey $value "command" -}}
+{{-     $_ := $value | setValueAtPath "command" (concat (list $value.command) $value.args) -}}
+{{-     $_ := $value | deleteValueAtPath "args" -}}
 {{-   end -}}
-{{- end -}}
-{{-   $_ := $value | setValueAtPath "environment" $value.env -}}
-{{-   $_ := $value | deleteValueAtPath "env" -}}
-{{- end -}}
-{{- if or (not (hasKey $value "type")) (eq $value.type "stdio") -}}
-{{-   $_ := $value | setValueAtPath "type" "local" -}}
-{{- else if and (hasKey $value "type") (eq $value.type "http") -}}
-{{-   $_ := $value | setValueAtPath "type" "remote" -}}
-{{- end -}}
-{{- $_ := $servers | setValueAtPath $key $value -}}
+{{-   if hasKey $value "env" -}}
+{{-     range $k, $v := $value.env -}}
+{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
+{{-       if ne $v $val -}}
+{{-         $_ := $value.env | setValueAtPath $k $val -}}
+{{-       end -}}
+{{-     end -}}
+{{-     $_ := $value | setValueAtPath "environment" $value.env -}}
+{{-     $_ := $value | deleteValueAtPath "env" -}}
+{{-   end -}}
+{{-   if hasKey $value "headers" -}}
+{{-     range $k, $v := $value.headers -}}
+{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
+{{-       if ne $v $val -}}
+{{-         $_ := $value.headers | setValueAtPath $k $val -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   if or (not (hasKey $value "type")) (eq $value.type "stdio") -}}
+{{-     $_ := $value | setValueAtPath "type" "local" -}}
+{{-   else if and (hasKey $value "type") (eq $value.type "http") -}}
+{{-     $_ := $value | setValueAtPath "type" "remote" -}}
+{{-   end -}}
+{{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "theme": {{ get . "theme" | default "system" | quote }},
   // "model": "anthropic/claude-sonnet-4-5",
+  // "model": "opencode/big-pickle",
   "autoupdate": false,
   // "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"],
-  "plugin": [],
+  "plugin": [
+    "@franlol/opencode-md-table-formatter@0.0.3",
+
+    // NOTE: already included in oh-my-opencode
+    // "@mohak34/opencode-notifier@0.1.15",
+
+    // TODO: openspec init
+    // bunx oh-my-opencode install
+    // mv ~/.config/opencode/oh-my-opencode.json{,c}
+    "oh-my-opencode@3.1.0",
+    "opencode-antigravity-auth@v1.3.1",
+  ],
+  // https://opencode.ai/docs/permissions#defaults
   "permission": {
     "*": "ask",
+    // Reading a file (matches the file path)
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+    },
+    // All file modifications (covers edit, write, patch, multiedit)
+    "edit": "deny",
+    // File globbing (matches the glob pattern)
+    "glob": "allow",
+    // Content search (matches the regex pattern)
+    "grep": "allow",
+    // Listing files in a directory (matches the directory path)
+    "list": "allow",
+    // Running shell commands (matches parsed commands like git status --porcelain)
     "bash": {
       "*": "ask",
-      "git *": "allow",
-      "git commit *": "deny",
-      "git push *": "deny",
-      // "grep *": "deny",
+      "cd *": "deny",
+      "git *": "deny",
+      // "git commit *": "deny",
+      // "git push *": "deny",
+      "grep *": "deny",
+      "ls *": "deny",
+      "mv *": "deny",
+      "rm *": "deny",
+      // "sed *": "deny",
     },
-    "edit": "deny",
-    // "read": {
-    //   "*": "allow",
-    //   "*.env": "deny",
-    //   "*.env.*": "deny",
-    //   "*.env.example": "allow",
-    // },
-    "chrome-devtools_*": "ask",
+    // Launching subagents (matches the subagent type)
+    // "task": "ask",
+    // Loading a skill (matches the skill name)
+    // "skill": "ask",
+    // Running LSP queries (currently non-granular)
+    // "lsp": "ask",
+    // Reading/updating the todo list
+    "todoread": "allow",
+    "todowrite": "allow",
+    // Fetching a URL (matches the URL)
+    // "webfetch": "ask",
+    // Web/code search (matches the query)
+    // "websearch": "ask",
+    // "codesearch": "ask",
+    // Triggered when a tool touches paths outside the project working directory
+    // "external_directory": "ask",
+    // Triggered when the same tool call repeats 3 times with identical input
+    // "doom_loop": "ask",
+
+    // "chrome-devtools_*": "ask",
     // "chrome-devtools_evaluate_script": "ask",
     // "chrome-devtools_navigate_page": "ask",
+
+    // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+    "filesystem_read_text_file": "allow",
+    "filesystem_read_media_file": "allow",
+    "filesystem_read_multiple_files": "allow",
+    "filesystem_list_directory": "allow",
+    "filesystem_list_directory_with_sizes": "allow",
+    "filesystem_directory_tree": "allow",
+    "filesystem_search_files": "allow",
+    "filesystem_get_file_info": "allow",
+    "filesystem_list_allowed_directories": "allow",
+    "filesystem_create_directory": "ask",
+    "filesystem_write_file": "ask",
+    "filesystem_edit_file": "ask",
+    "filesystem_move_file": "ask",
+
     {{- if lookPath "flux-operator-mcp" | isExecutable }}
-    "flux-operator-mcp_*": "deny",
-    "flux-operator-mcp-read-only_*": "ask",
+    "flux-operator_*": "deny",
+    "flux-operator-read-only_*": "ask",
     {{- end }}
+
+    "code-mode_list_tools": "allow",
+    "utcp_list_tools": "allow",
+    "utcp_tool_info": "allow",
+
+    // https://github.com/modelcontextprotocol/servers/tree/main/src/git
+    "git_git_branch": "allow",
+    "git_git_diff*": "allow",
+    "git_git_log": "allow",
+    "git_git_show": "allow",
+    "git_git_status": "allow",
+
+    "gh_grep_searchGitHub": "allow",
+
+    // https://github.com/github/github-mcp-server
+    "github_search_issue_read": "allow",
+    "github_search_issues": "allow",
+    "github_search_pull_request_read": "allow",
+    "github_search_pull_requests": "allow",
+    "github_search_repositories": "allow",
   },
+  {{ "// If no temperature is specified, OpenCode uses model-specific defaults," }}
+  {{ "// typically 0 for most models, 0.55 for Qwen models" }}
+  // Default agents:
+  // Primary: build, compaction, plan, summary, title
+  // Subagent: explore, general, readonly, review
   "agent": {
+    "analyze": {
+      "disable": true,
+      "temperature": 0.1,
+      // "prompt": "{file:./prompts/analysis.txt}",
+    },
+    "brainstorm": {
+      "disable": true,
+      "temperature": 0.7,
+      // "prompt": "{file:./prompts/creative.txt}",
+    },
     "build": {
       "mode": "primary",
       // "model": "anthropic/claude-sonnet-4-20250514",
+      "model": "{{ eq .profile "work" | ternary
+        "github-copilot/claude-sonnet-4.5"
+        "opencode/big-pickle"
+      }}",
+      // "temperature": 0.3,
       "permission": {
         "bash": {
           "*": "ask",
-          "git *": "allow",
-          "git commit *": "ask",
-          "git push *": "deny",
+          // "git *": "allow",
+          // "git commit *": "ask",
+          // "git push *": "deny",
           // "grep *": "allow",
         },
+        "write": "ask",
         "edit": "ask",
         {{- if lookPath "flux-operator-mcp" | isExecutable }}
-        "flux-operator-mcp_*": "ask",
-        "flux-operator-mcp-read-only_*": "allow",
+        "flux-operator_*": "ask",
+        "flux-operator-read-only_*": "allow",
         {{- end }}
       },
       // "prompt": "{file:./prompts/build.txt}",
-      "tools": {
-        "write": true,
-        "edit": true,
-        "bash": true,
-      },
     },
     "plan": {
       "mode": "primary",
       // "model": "anthropic/claude-haiku-4-20250514",
+      "model": "{{ eq .profile "work" | ternary
+        "github-copilot/claude-haiku-4.5"
+        "opencode/big-pickle"
+      }}",
       "permission": {
-        // "edit": "deny",
+        "write": "deny",
+        "edit": "deny",
+        "bash": "ask",
         {{- if lookPath "flux-operator-mcp" | isExecutable }}
-        "flux-operator-mcp_*": "deny",
-        "flux-operator-mcp-read-only_*": "allow",
+        "flux-operator_*": "deny",
+        "flux-operator-read-only_*": "allow",
         {{- end }}
-      },
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false,
       },
     },
     "readonly": {
-      "tools": {
-        // "mymcp_*": false,
-        "write": false,
-        "edit": false,
-        // "bash": false,
+      "permission": {
+        // "mymcp_*": "deny",
+        "write": "deny",
+        "edit": "deny",
+        // "bash": "deny",
       },
     },
   },
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
-  "mcp": {{ omit $mcp.servers "flux-operator-mcp" | toPrettyJson | indent 2 | trim }},
+  "mcp": {{ $mcp.servers | toPrettyJson | indent 2 | trim }},
   // dict "code-mode" (get $mcp.servers "code-mode") | toPrettyJson | indent 2 | trim
   // "mcp": {
   //   "code-mode": {
@@ -163,6 +271,9 @@
         },
         "mlx-community/gpt-oss-20b-mxfp4-q8": {
           "name": "mlx-community/gpt-oss-20b-mxfp4-q8",
+        },
+        "mlx-community/Qwen3-4B-Instruct-2507-4bit": {
+          "name": "Qwen3-4B-Instruct-2507-4bit",
         },
         "mlx-community/Qwen3-30B-A3B-4bit": {
           "name": "mlx-community/Qwen3-30B-A3B-4bit",
@@ -261,5 +372,141 @@
       },
     },
     {{- end }}
+    "google": {
+      "name": "Google",
+      "models": {
+        "antigravity-gemini-3-pro": {
+          "name": "Gemini 3 Pro (Antigravity)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535,
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf",
+            ],
+            "output": [
+              "text",
+            ],
+          },
+          "variants": {
+            "low": {
+              "thinkingLevel": "low",
+            },
+            "high": {
+              "thinkingLevel": "high",
+            },
+          },
+        },
+        "antigravity-gemini-3-flash": {
+          "name": "Gemini 3 Flash (Antigravity)",
+          "limit": {
+            "context": 1048576,
+            "output": 65536,
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf",
+            ],
+            "output": [
+              "text",
+            ],
+          },
+          "variants": {
+            "minimal": {
+              "thinkingLevel": "minimal",
+            },
+            "low": {
+              "thinkingLevel": "low",
+            },
+            "medium": {
+              "thinkingLevel": "medium",
+            },
+            "high": {
+              "thinkingLevel": "high",
+            },
+          },
+        },
+        "antigravity-claude-sonnet-4-5": {
+          "name": "Claude Sonnet 4.5 (Antigravity)",
+          "limit": {
+            "context": 200000,
+            "output": 64000,
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf",
+            ],
+            "output": [
+              "text",
+            ],
+          },
+        },
+        "antigravity-claude-sonnet-4-5-thinking": {
+          "name": "Claude Sonnet 4.5 Thinking (Antigravity)",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ],
+          },
+          "variants": {
+            "low": {
+              "thinkingConfig": {
+                "thinkingBudget": 8192,
+              },
+            },
+            "max": {
+              "thinkingConfig": {
+                "thinkingBudget": 32768,
+              },
+            },
+          },
+        },
+        "antigravity-claude-opus-4-5-thinking": {
+          "name": "Claude Opus 4.5 Thinking (Antigravity)",
+          "limit": {
+            "context": 200000,
+            "output": 64000,
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf",
+            ],
+            "output": [
+              "text",
+            ],
+          },
+          "variants": {
+            "low": {
+              "thinkingConfig": {
+                "thinkingBudget": 8192,
+              },
+            },
+            "max": {
+              "thinkingConfig": {
+                "thinkingBudget": 32768,
+              },
+            },
+          },
+        },
+      },
+    },
   },
 }

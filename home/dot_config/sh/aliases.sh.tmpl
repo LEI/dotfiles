@@ -118,7 +118,14 @@ if command -v crush >/dev/null; then
   crush() { env crush "${@:---continue}"; }
 fi
 if command -v opencode >/dev/null; then
-  opencode() { env opencode "${@:---continue}"; }
+  # opencode() { env opencode "${@:---continue}"; }
+  opencode() {
+    if [ $# -eq 0 ]; then
+      env opencode --agent plan --continue
+    else
+      env opencode "$@"
+    fi
+  }
   alias oc=opencode
 fi
 {{- end }}

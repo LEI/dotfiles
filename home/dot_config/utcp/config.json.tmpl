@@ -6,12 +6,12 @@
     }
   ], */ -}}
   "manual_call_templates": [
-    {{- /* {
+    {
       "name": "utcp-mcp",
       "call_template_type": "file",
       "file_path": "manual.json",
       "allowed_communication_protocols": ["mcp"]
-    }, */ -}}
+    },
     {{- range $name, $url := dict
       "local" (env "LOCAL_URL")
       "nest" (env "NEST_URL")

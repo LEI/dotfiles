@@ -36,33 +36,33 @@ echo >&2 "Installed tools"
 
 # run mise ls "$@"
 
-{{- /* $tools := list }}
+{{- $tools := list }}
 
 {{- if get .packages.mise "go" }}
 # default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "go" }}
+{{- $tools = append $tools (printf "go@%s" (get .packages.mise.go "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "node" }}
 # default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "node" }}
+{{- $tools = append $tools (printf "node@%s" (get .packages.mise.node "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "python" }}
 # default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "python" }}
+{{- $tools = append $tools (printf "python@%s" (get .packages.mise.python "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "ruby" }}
 # default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
-{{- $tools = append $tools "ruby" }}
+{{- $tools = append $tools (printf "ruby@%s" (get .packages.mise.ruby "version" | default "latest")) }}
 {{- end }}
 
 {{- if not (empty $tools) }}
 
-# FIXME: ensure new tools are installed and show hash diff
-run mise use --global "$@" {{ $tools | sortAlpha | join " " }}
+# FIXME: ensure new tools are installed and preserve order
+# run mise unuse --global --no-prune "$@" {{ $tools | sortAlpha | join " " }}
+# run mise use --global "$@" {{ $tools | sortAlpha | join " " }}
 {{- end }}
 
 # run mise prune "$@" # --tools
-{{- */ -}}

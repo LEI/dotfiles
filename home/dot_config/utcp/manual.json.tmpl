@@ -1,14 +1,10 @@
-
+{{- $_ := . | setValueAtPath "client" "utcp" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $tools := list -}}
-{{- range $key, $value := omit $mcp.servers
-  "code-mode"
-  "context7"
-  "memory"
-  "mise"
-  "qdrant-memory"
-  "sequential-thinking"
-  "utcp"
+{{- range $key, $value := pick $mcp.servers
+  "flux-operator"
+  "flux-operator-read-only"
+  "kubernetes"
 -}}
 {{- $_ := $value | setValueAtPath "transport" (get $value "type" | default "stdio") -}}
 {{- if and (hasKey $value "type") -}}

@@ -14,7 +14,7 @@ Instructions:
 
 Always prefer built-in tools and MCP servers if available.
 
-To find up-to-date documentation, use context7 or dedicated tools
-like Flux Operator MCP @search_flux_docs instead of web search.
+To find up-to-date documentation, use context7 or dedicated tools like
+Flux Operator MCP @search_flux_docs instead of web search.
 
 For Flux Operator MCP: @docs/flux-operator-mcp.md

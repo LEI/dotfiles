@@ -1,12 +1,15 @@
 ---
+enabled: "{{ .features.node }}"
 packages:
+  bun:
+    type: mise
   node-mise:
-    enabled: '{{ and .features.node (not (eq .osIDLike "alpine" "android")) }}'
+    enabled: '{{ not (eq .osIDLike "alpine" "android") }}'
     name: node
-    version: lts
+    version: lts # {{ `{{ env['NODE_VERSION'] | default(value='lts') }}` }}
     type: mise
   nodejs:
-    enabled: '{{ and .features.node (eq .osIDLike "alpine" "windows") }}'
+    enabled: '{{ eq .osIDLike "alpine" "windows" }}'
     nameOverwrite:
       alpine: node
       # android: nodejs # -lts
@@ -18,15 +21,11 @@ packages:
     # type: '{{ eq .osIDLike "alpine" | ternary nil "mise" }}'
     # version: '{{ eq .packageType "mise" | ternary "lts" "" }}'
   npm:
-    enabled: "{{ .features.node }}"
     type: '{{ eq .osIDLike "alpine" | ternary nil "npm" }}'
   pnpm:
-    enabled: "{{ .features.node }}"
     # pnpm.pnpm
     type: npm
   yarn:
-    enabled: "{{ .features.node }}"
     type: npm
   runme:
-    # enabled: '{{ .features.node }}'
     type: npm

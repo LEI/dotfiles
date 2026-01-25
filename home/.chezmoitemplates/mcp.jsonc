@@ -8,13 +8,13 @@
     }, */
   ],
   "servers": {
-    "utcp": {
+    /* "utcp": {
       "command": "npx",
       "args": ["-y", "@utcp/mcp-bridge"],
       "env": {
         "UTCP_CONFIG_FILE": "${HOME}/.config/utcp/config.json",
       },
-    },
+    }, */
     // https://github.com/universal-tool-calling-protocol/typescript-utcp
     "code-mode": {
       "command": "npx",
@@ -37,6 +37,20 @@
       "args": ["-y", "@upstash/context7-mcp"],
     },
     {{- end }}
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}",
+      ],
+    },
+    {{- if ne .client "opencode" }}
+    // Included in oh-my-opencode
+    "grep_app": {
+      "type": "remote",
+      "url": "https://mcp.grep.app"
+    },
     {{- if env "EXA_API_KEY" }}
     "exa": {
       "command": "npx",
@@ -45,6 +59,7 @@
         "EXA_API_KEY": "${EXA_API_KEY}",
       },
     },
+    {{- end }}
     {{- end }}
     {{- if env "FIRECRAWL_API_KEY" }}
     "firecrawl": {
@@ -81,30 +96,21 @@
       ],
     },
     {{- end }}
-    "gh_grep": {
-      "type": "remote",
-      "url": "https://mcp.grep.app"
-    },
     {{- if .features.git }}
     "git": {
       "command": "uvx",
       "args": ["mcp-server-git"],
     },
     {{- end }}
-    {{- if env "GITHUB_TOKEN" }}
     "github": {
-      "enabled": false,
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
-      // FIXME: https://github.com/github/github-mcp-server/issues/1396
-      // opencode mcp auth github || opencode mcp debug github
-      "oauth": false, // {},
+      "oauth": false, // {}
       "headers": {
         "Authorization": "Bearer ${GITHUB_TOKEN}",
         // "Authorization": "Bearer ${input:github_mcp_pat}",
       },
     },
-    {{- end }}
     "memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"],
@@ -135,10 +141,11 @@
     "qdrant-memory": {
       "command": "uvx",
       "args": [
-        // NOTE: qdrant-client fastembed 0.3.6 does not support python 3.14
+        // FIXME: qdrant-client fastembed 0.3.6 does not support python 3.14
         // https://github.com/astral-sh/uv/issues/8206
         // uv python install 3.13
         "--python=3.13",
+        // "--transport=streamable-http",
         "mcp-server-qdrant",
       ],
       "env": {
@@ -158,6 +165,7 @@
     //   "oauth": {}
     // },
     "sequential-thinking": {
+      "enabled": false,
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
     },

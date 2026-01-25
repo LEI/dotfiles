@@ -1,3 +1,5 @@
+export DO_NOT_TRACK=1
+
 # export CHEZMOI_GITHUB_ACCESS_TOKEN=""
 {{- if not (or .ephemeral .headless) }}
 # export GITHUB_ACCESS_TOKEN=""

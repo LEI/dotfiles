@@ -88,6 +88,41 @@ packages:
   coreutils: { enabled: {{ eq .os "android" "linux" }} }
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}
+
+  antigravity:
+    enabled: {{ .features.ai }}
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  cherry-studio:
+    enabled: {{ .features.ai }}
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  jan:
+    enabled: {{ .features.ai }}
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  lobehub:
+    enabled: {{ .features.ai }}
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+
+  # uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+  "@fission-ai/openspec":
+    enabled: {{ .features.ai }}
+    type: npm
+  "@kilocode/cli":
+    enabled: {{ .features.ai }}
+    type: npm
+  "@qodo/command": # uv tool install pr-agent
+    enabled: {{ .features.ai }}
+    type: npm
+  cline: # roocode
+    enabled: {{ .features.ai }}
+    type: npm
+
+  scorecard:
+    enabled: {{ eq .osIDLike "darwin" }}
+    type: brew
+  serie:
+    enabled: {{ eq .osIDLike "darwin" }}
+    type: brew
+
   crush:
     enabled: {{ .features.ai }}
     nameOverwrite:
@@ -375,6 +410,12 @@ packages:
     # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
     # command: mlx_lm.server
     # type: uv
+  mlx-openai-server:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    type: uv
+  pr-agent:
+    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+    type: uv
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   # mailpit:
@@ -934,7 +975,7 @@ osPackages:
       # gpg-suite:
       # grandperspective:
       # hammerspoon: # rectangle, swiftbar
-      # inkscape:
+      inkscape:
       iterm2:
         enabled: {{ .gui }}
       karabiner-elements:
@@ -963,6 +1004,8 @@ osPackages:
       onedrive:
         enabled: {{ .gui }}
       # pearcleaner:
+      redis-insight:
+        enabled: {{ .gui }}
       utm:
         enabled: {{ .gui }}
       # rustdesk:
