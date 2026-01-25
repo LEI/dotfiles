@@ -23,8 +23,6 @@ export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-C
 {{- $editor := "" }}
 {{- if lookPath "editor" | isExecutable }}
 {{- $editor = lookPath "editor" }}
-{{- else if lookPath "hx" | isExecutable }}
-{{- $editor = lookPath "hx" }}
 {{- else if lookPath "nvim" | isExecutable }}
 {{- $editor = lookPath "nvim" }}
 {{- else if lookPath "vim" | isExecutable }}

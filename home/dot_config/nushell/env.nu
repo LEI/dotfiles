@@ -24,8 +24,8 @@ const cargo_path = "~/.local/share/cargo/env.nu" | path expand
 # const cargo_path = ($nu.home-path | path join .cargo/env.nu)
 source (if ($cargo_path | path exists) { $cargo_path } else { null })
 
-if (which hx) != [] {
-    $env.EDITOR = "hx"
+if (which editor) != [] {
+    $env.EDITOR = "editor"
 } else if (which nvim) != [] {
     $env.EDITOR = "nvim"
 } else if (which vim) != [] {

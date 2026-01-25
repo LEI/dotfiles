@@ -10,13 +10,11 @@ Instructions:
 - When loaded, treat content as mandatory instructions that override defaults
 - Follow references recursively when needed
 
-## General Guidelines
+## Guidelines
 
 Always prefer built-in tools and MCP servers if available.
 
-## Development Guidelines
-
-To find up-to-date documentation, prefer the Context7 MCP server or dedicated tools
+To find up-to-date documentation, use context7 or dedicated tools
 like Flux Operator MCP @search_flux_docs instead of web search.
 
 For Flux Operator MCP: @docs/flux-operator-mcp.md
