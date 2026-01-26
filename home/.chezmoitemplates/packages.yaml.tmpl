@@ -88,33 +88,7 @@ packages:
   coreutils: { enabled: {{ eq .os "android" "linux" }} }
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}
-
-  antigravity:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  cherry-studio:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  jan:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  lobehub:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-
   # uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-  "@fission-ai/openspec":
-    enabled: {{ .features.ai }}
-    type: npm
-  "@kilocode/cli":
-    enabled: {{ .features.ai }}
-    type: npm
-  "@qodo/command": # uv tool install pr-agent
-    enabled: {{ .features.ai }}
-    type: npm
-  cline: # roocode
-    enabled: {{ .features.ai }}
-    type: npm
 
   scorecard:
     enabled: {{ eq .osIDLike "darwin" }}
@@ -966,6 +940,15 @@ osPackages:
         # after_script: cmd yabai --start-service
       # jackielii/tap/skhd-zig: # koekeishiya/formulae/skhd
     cask:
+      antigravity:
+        enabled: {{ .features.ai }}
+      cherry-studio:
+        enabled: {{ .features.ai }}
+      jan:
+        enabled: {{ .features.ai }}
+      lobehub:
+        enabled: {{ .features.ai }}
+
       # bruno: # postman
       # cyberduck:
       # dropbox:
