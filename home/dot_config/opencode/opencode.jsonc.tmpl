@@ -50,6 +50,11 @@
     "oh-my-opencode@3.1.0",
     "opencode-antigravity-auth@v1.3.1",
   ],
+  // TODO: remove unused tools
+  "tools": {
+    "todoread": false,
+    "todowrite": false,
+  },
   // https://opencode.ai/docs/permissions#defaults
   "permission": {
     "*": "ask",
@@ -71,15 +76,16 @@
     // Running shell commands (matches parsed commands like git status --porcelain)
     "bash": {
       "*": "ask",
+      "cat *": "deny",
       "cd *": "deny",
       "git *": "deny",
-      // "git commit *": "deny",
-      // "git push *": "deny",
       "grep *": "deny",
+      "head *": "deny",
       "ls *": "deny",
       "mv *": "deny",
       "rm *": "deny",
-      // "sed *": "deny",
+      "sed *": "deny",
+      "tail *": "deny",
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",
@@ -96,9 +102,11 @@
     // "websearch": "ask",
     // "codesearch": "ask",
     // Triggered when a tool touches paths outside the project working directory
-    // "external_directory": "ask",
+    "external_directory": "deny",
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
+
+    "context7_*": "allow",
 
     // "chrome-devtools_*": "ask",
     // "chrome-devtools_evaluate_script": "ask",
