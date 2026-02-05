@@ -11,47 +11,47 @@ set -eu
 
 {{- if eq .osID "alpine" }}
 
-if [ ! -f ~/.local/share/bash-preexec.sh ]; then
-  curl -LSsfo ~/.local/share/bash-preexec.sh \
-    https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-fi
+# if [ ! -f ~/.local/share/bash-preexec.sh ]; then
+#   curl -LSsfo ~/.local/share/bash-preexec.sh \
+#     https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+# fi
 {{- else }}
 
-if [ ! -f ~/.local/share/blesh/ble.sh ]; then
-  echo >&2 "Installing ble.sh"
-  BLE_NAME="ble-nightly"
-  URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
-  cmd curl -LSsf "$URL" | cmd tar xJf - -C "$TMPDIR"
-  cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
-  echo >&2 "Installed ble.sh"
-fi
+# if [ ! -f ~/.local/share/blesh/ble.sh ]; then
+#   echo >&2 "Installing ble.sh"
+#   BLE_NAME="ble-nightly"
+#   URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
+#   cmd curl -LSsf "$URL" | cmd tar xJf - -C "$TMPDIR"
+#   cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
+#   echo >&2 "Installed ble.sh"
+# fi
 {{- end }}
 
-if command -v atuin; then
-  echo >&2 "Already installed"
+# if command -v atuin; then
+#   echo >&2 "Already installed"
   cmd atuin --version
-  exit
-fi
+#   exit
+# fi
 
 {{- if not (empty (get (get .packages .packageManager) "atuin")) }}
 
-echo >&2 "Installing atuin"
-# https://github.com/atuinsh/atuin/releases
-ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
-OS=unknown-linux
-NAME="atuin-$ARCH-$OS"
-{{- if ne .os "darwin"}}
-if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
-  NAME="$NAME-musl"
-else
-  NAME="$NAME-gnu"
-fi
-{{- end }}
-VERSION="$(get_release atuinsh/atuin)"
-URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
-BIN="$NAME/atuin"
-install_tar_gz "$URL" "$BIN"
-echo >&2 "Installed atuin"
+# echo >&2 "Installing atuin"
+# # https://github.com/atuinsh/atuin/releases
+# ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
+# OS=unknown-linux
+# NAME="atuin-$ARCH-$OS"
+# {{- if ne .os "darwin"}}
+# if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
+#   NAME="$NAME-musl"
+# else
+#   NAME="$NAME-gnu"
+# fi
+# {{- end }}
+# VERSION="$(get_release atuinsh/atuin)"
+# URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
+# BIN="$NAME/atuin"
+# install_tar_gz "$URL" "$BIN"
+# echo >&2 "Installed atuin"
 {{- end }}
 
 # atuin import auto

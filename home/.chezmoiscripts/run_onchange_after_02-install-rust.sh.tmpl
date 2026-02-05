@@ -108,35 +108,6 @@ if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; th
   pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
-if ! command -v cargo-binstall >/dev/null; then
-  # dry_run cargo install --locked --quiet cargo-binstall
-  # https://github.com/cargo-bins/cargo-binstall#manually
-  echo >&2 "Installing cargo-binstall"
-  if [ "$CHEZMOI_ARCH" = amd64 ]; then
-    ARCH=x86_64
-  elif [ "$CHEZMOI_ARCH" = arm64 ]; then
-    ARCH=aarch64
-  else
-    ARCH="$CHEZMOI_ARCH"
-  fi
-  if [ "$CHEZMOI_OS" = darwin ]; then
-    OS=apple-darwin
-  elif [ "$CHEZMOI_OS" = linux ]; then
-    OS=unknown-linux-musl
-  elif [ "$CHEZMOI_OS" = windows ]; then
-    OS=pc-windows-msvc
-  fi
-  NAME="cargo-binstall"
-  if [ "$CHEZMOI_OS" = linux ]; then
-    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.tgz"
-    install_tar_gz "$URL" "$NAME"
-  else
-    URL="https://github.com/cargo-bins/cargo-binstall/releases/latest/download/$NAME-$ARCH-$OS.zip"
-    install_zip "$URL" "$NAME"
-  fi
-  echo >&2 "Installed cargo-binstall"
-fi
-
 {{- $list := list }}
 {{- range $name := .packages.cargo | keys }}
 {{- $list = append $list $name }}

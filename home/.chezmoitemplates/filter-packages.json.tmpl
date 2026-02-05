@@ -42,7 +42,7 @@
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 
-{{-   $type := get $pkg "type" }}
+{{-   $type := get $pkg "type" | default "" | trim }}
 {{-   if or (empty $type) (eq $type "nil" "null" "<no value>") }}
 {{-     $type = $defaultType }}
 {{-   end }}

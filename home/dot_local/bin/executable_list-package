@@ -21,16 +21,20 @@ aur | yay)
   # yay -? --aur
   ;;
 brew)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   # brew bundle dump --file=-
   brew list --formula --installed-on-request
   ;;
 cask)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew list --cask
   ;;
 mas)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"'
   ;;
 vscode)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"'
   ;;
 dnf)
@@ -86,6 +90,7 @@ scoop)
   scoop list | tail -n+2 | cut -d' ' -f1
   ;;
 tap)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew tap
   ;;
 winget)

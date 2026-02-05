@@ -29,27 +29,46 @@
 {{-   else if and (hasKey $value "type") (eq $value.type "http") -}}
 {{-     $_ := $value | setValueAtPath "type" "remote" -}}
 {{-   end -}}
+{{- /* $_ := $value | setValueAtPath "enabled" false */ -}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
+
+{{- $ohMyOpencode := false -}}
+
 {
   "$schema": "https://opencode.ai/config.json",
   "theme": {{ get . "theme" | default "system" | quote }},
   // "model": "anthropic/claude-sonnet-4-5",
   // "model": "opencode/big-pickle",
   "autoupdate": false,
+
+  // https://github.com/anomalyco/opencode/pull/8562
+  "server": {
+    "hostname": "localhost"
+  },
+
   // "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"],
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
-
-    // NOTE: already included in oh-my-opencode
-    // "@mohak34/opencode-notifier@0.1.15",
-
+    // "@ramtinj95/opencode-tokenscope@1.5.2",
+    "@slkiser/opencode-quota@1.3.0",
+    "opencode-pty@0.2.0",
+    // "opencode-sessions@1.0.0",
+    {{- if $ohMyOpencode }}
     // TODO: openspec init
-    // bunx oh-my-opencode install
+    // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
     // mv ~/.config/opencode/oh-my-opencode.json{,c}
-    "oh-my-opencode@3.1.0",
-    "opencode-antigravity-auth@v1.3.1",
+    "oh-my-opencode@3.2.3",
+    {{- else }}
+    "@mohak34/opencode-notifier@0.1.15",
+    {{- end }}
+    "opencode-antigravity-auth@1.4.3"
   ],
+  "experimental": {
+    "quotaToast": {
+      "enabledProviders": ["copilot", "openai", "google-antigravity"]
+    }
+  },
   // https://opencode.ai/docs/permissions#defaults
   "permission": {
     "*": "ask",
@@ -58,10 +77,10 @@
       "*": "allow",
       "*.env": "deny",
       "*.env.*": "deny",
-      "*.env.example": "allow",
+      "*.env.example": "allow"
     },
     // All file modifications (covers edit, write, patch, multiedit)
-    "edit": "deny",
+    "edit": "ask",
     // File globbing (matches the glob pattern)
     "glob": "allow",
     // Content search (matches the regex pattern)
@@ -71,22 +90,72 @@
     // Running shell commands (matches parsed commands like git status --porcelain)
     "bash": {
       "*": "ask",
+      "awk *": "allow",
+      "cat *": "allow",
       "cd *": "deny",
+      // "curl *": "allow",
+      "echo *": "allow",
+      "env *": "deny",
+      "find *": "allow",
       "git *": "deny",
-      // "git commit *": "deny",
-      // "git push *": "deny",
+      "git worktree *": "allow",
+      "git wt *": "allow",
       "grep *": "deny",
+      "head *": "allow",
+      "jq *": "allow",
       "ls *": "deny",
-      "mv *": "deny",
+      // "mv *": "deny",
+      "rg *": "allow",
       "rm *": "deny",
-      // "sed *": "deny",
+      // "sed *": "allow",
+      "sed * -I*": "deny",
+      "sed * -i*": "deny",
+      "sleep *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+      "yq *": "allow",
+
+      "npm run build*": "allow",
+      "npm run dev*": "allow", // Requires timeout or pty_spawn
+      "npm run test*": "allow",
+      "npm test *": "allow",
+      "npm t *": "allow",
+
+      "sq *": "allow",
+      "sq * -o*": "ask",
+      "sq * --output*": "ask"
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",
+    "task": {
+      // "*": "deny",
+      // "orchestrator-*": "allow",
+      // "code-reviewer": "ask"
+
+      "*": "ask"
+      // "explore": "ask",
+      // "general": "ask",
+      // "readonly": "ask",
+      // "review": "ask",
+      // "analyze": "ask",
+      // "archive": "ask",
+      // "brainstorm": "ask",
+      // "browser": "ask",
+      // "coder": "ask",
+      // "flux": "ask",
+      // "flux-read-only": "ask",
+      // "github": "ask",
+      // "search": "ask",
+      // "system": "ask",
+      // "zero": "ask",
+    },
     // Loading a skill (matches the skill name)
-    // "skill": "ask",
+    "skill": {
+      "*": "allow",
+      "flux-operator": "deny"
+    },
     // Running LSP queries (currently non-granular)
-    // "lsp": "ask",
+    "lsp": "allow",
     // Reading/updating the todo list
     "todoread": "allow",
     "todowrite": "allow",
@@ -96,136 +165,249 @@
     // "websearch": "ask",
     // "codesearch": "ask",
     // Triggered when a tool touches paths outside the project working directory
-    // "external_directory": "ask",
+    "external_directory": "ask",
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
 
-    // "chrome-devtools_*": "ask",
-    // "chrome-devtools_evaluate_script": "ask",
-    // "chrome-devtools_navigate_page": "ask",
-
-    // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
-    "filesystem_read_text_file": "allow",
-    "filesystem_read_media_file": "allow",
-    "filesystem_read_multiple_files": "allow",
-    "filesystem_list_directory": "allow",
-    "filesystem_list_directory_with_sizes": "allow",
-    "filesystem_directory_tree": "allow",
-    "filesystem_search_files": "allow",
-    "filesystem_get_file_info": "allow",
-    "filesystem_list_allowed_directories": "allow",
-    "filesystem_create_directory": "ask",
-    "filesystem_write_file": "ask",
-    "filesystem_edit_file": "ask",
-    "filesystem_move_file": "ask",
-
-    {{- if lookPath "flux-operator-mcp" | isExecutable }}
-    "flux-operator_*": "deny",
-    "flux-operator-read-only_*": "ask",
+    {{- range $mcp.servers | keys | sortAlpha }}
+    "{{ . }}_*": "deny",
     {{- end }}
 
-    "code-mode_list_tools": "allow",
-    "utcp_list_tools": "allow",
-    "utcp_tool_info": "allow",
-
     // https://github.com/modelcontextprotocol/servers/tree/main/src/git
+    "git_git_*": "ask",
     "git_git_branch": "allow",
     "git_git_diff*": "allow",
     "git_git_log": "allow",
     "git_git_show": "allow",
     "git_git_status": "allow",
 
-    "gh_grep_searchGitHub": "allow",
-
-    // https://github.com/github/github-mcp-server
-    "github_search_issue_read": "allow",
-    "github_search_issues": "allow",
-    "github_search_pull_request_read": "allow",
-    "github_search_pull_requests": "allow",
-    "github_search_repositories": "allow",
+    // Included in opencode
+    "context7_*": "ask",
+    "exa_*": "ask",
+    "grep_app_*": "ask",
+    "grep_app_searchGitHub": "allow"
   },
   {{ "// If no temperature is specified, OpenCode uses model-specific defaults," }}
   {{ "// typically 0 for most models, 0.55 for Qwen models" }}
-  // Default agents:
-  // Primary: build, compaction, plan, summary, title
-  // Subagent: explore, general, readonly, review
   "agent": {
-    "analyze": {
-      "disable": true,
-      "temperature": 0.1,
-      // "prompt": "{file:./prompts/analysis.txt}",
-    },
-    "brainstorm": {
-      "disable": true,
-      "temperature": 0.7,
-      // "prompt": "{file:./prompts/creative.txt}",
-    },
+    // Primary: build, compaction, plan, summary, title
     "build": {
       "mode": "primary",
       // "model": "anthropic/claude-sonnet-4-20250514",
-      "model": "{{ eq .profile "work" | ternary
-        "github-copilot/claude-sonnet-4.5"
-        "opencode/big-pickle"
-      }}",
+      // "model": "github-copilot/claude-sonnet-4.5",
+      "model": "github-copilot/claude-opus-4.5",
+      "variant": "max",
       // "temperature": 0.3,
       "permission": {
-        "bash": {
+        // "edit": "ask",
+        // "bash": {
+        //   "*": "ask",
+        //   "git *": "allow",
+        //   "git commit *": "ask",
+        //   "git push *": "deny",
+        //   "grep *": "allow",
+        // },
+        "task": {
+          // Agents
           "*": "ask",
-          // "git *": "allow",
-          // "git commit *": "ask",
-          // "git push *": "deny",
-          // "grep *": "allow",
+          "flux-read-only": "ask"
         },
-        "write": "ask",
-        "edit": "ask",
-        {{- if lookPath "flux-operator-mcp" | isExecutable }}
-        "flux-operator_*": "ask",
-        "flux-operator-read-only_*": "allow",
-        {{- end }}
-      },
+        // "git_git_*": "ask",
+        // "git_git_branch": "allow",
+        // "git_git_diff*": "allow",
+        // "git_git_log": "allow",
+        // "git_git_show": "allow",
+        // "git_git_status": "allow",
+      }
       // "prompt": "{file:./prompts/build.txt}",
     },
     "plan": {
       "mode": "primary",
       // "model": "anthropic/claude-haiku-4-20250514",
-      "model": "{{ eq .profile "work" | ternary
-        "github-copilot/claude-haiku-4.5"
-        "opencode/big-pickle"
-      }}",
+      // "model": "github-copilot/claude-haiku-3.5",
+      "model": "github-copilot/claude-sonnet-4.5",
+      "variant": "max",
       "permission": {
-        "write": "deny",
         "edit": "deny",
-        "bash": "ask",
-        {{- if lookPath "flux-operator-mcp" | isExecutable }}
-        "flux-operator_*": "deny",
-        "flux-operator-read-only_*": "allow",
-        {{- end }}
-      },
+        // "bash": "ask",
+        "task": {
+          // Agents
+          "*": "ask",
+          "flux": "deny",
+          "flux-read-only": "allow"
+        },
+        // "todoread": "allow",
+        // "todowrite": "ask",
+
+        "git_git_*": "deny",
+        "git_git_branch": "allow",
+        "git_git_diff*": "allow",
+        "git_git_log": "allow",
+        "git_git_show": "allow",
+        "git_git_status": "allow"
+      }
     },
-    "readonly": {
+    // Subagent: explore, general, readonly, review
+    "analyze": {
+      "disable": true,
+      "temperature": 0.1,
+      // "prompt": "{file:./prompts/analysis.txt}",
       "permission": {
-        // "mymcp_*": "deny",
-        "write": "deny",
-        "edit": "deny",
-        // "bash": "deny",
-      },
+        "*": "deny"
+      }
     },
+    "archive": {
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "memory_*": "allow",
+        "qdrant-memory_*": "allow"
+      }
+    },
+    "brainstorm": {
+      "disable": true,
+      "temperature": 0.7,
+      // "prompt": "{file:./prompts/creative.txt}",
+      "permission": {
+        "*": "deny",
+        "sequential-thinking_*": "ask"
+      }
+    },
+    "browser": {
+      "description": "Chrome devtools MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "chrome-devtools_*": "ask"
+        // "chrome-devtools_evaluate_script": "ask",
+        // "chrome-devtools_list_pages": "ask",
+        // "chrome-devtools_navigate_page": "ask",
+      }
+    },
+    "coder": {
+      "description": "Code mode MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "code-mode_*": "ask",
+        "code-mode_list_tools": "allow"
+        // "utcp_*": "ask",
+        // "utcp_list_tools": "allow",
+        // "utcp_tool_info": "allow",
+      }
+    },
+    "crawl": {
+      "description": "Firecrawl MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "firecrawl_*": "allow"
+      }
+    },
+    "flux": {
+      "description": "Flux and k8s MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "skill": {
+          "*": "deny",
+          "flux-operator": "allow"
+        },
+        // MCP servers
+        "flux-operator_*": "allow",
+        "kubernetes_*": "allow"
+      }
+    },
+    "flux-read-only": {
+      "description": "Read-only Flux MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "skill": {
+          "*": "deny",
+          "flux-operator": "allow"
+        },
+        // MCP servers
+        "flux-operator-read-only_*": "allow"
+      }
+    },
+    "github": {
+      "description": "GitHub MCP and Grep App",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "bash": {
+          "gh *": "ask",
+        },
+        // https://github.com/github/github-mcp-server
+        "github_*": "ask",
+        "github_get_file_contents": "allow",
+        "github_issue_read": "allow",
+        "github_list_discussions": "allow",
+        "github_list_gist": "allow",
+        "github_list_issues": "allow",
+        "github_list_pull_requests": "allow",
+        "github_search_code": "allow",
+        "github_search_issues": "allow",
+        "github_search_pull_request_read": "allow",
+        "github_search_pull_requests": "allow",
+        "github_search_repositories": "allow",
+        "grep_app_*": "ask",
+        "grep_app_searchGitHub": "allow"
+      }
+    },
+    "gitlab": {
+      "description": "GitLab MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "bash": {
+          "glab *": "ask",
+        },
+        "gitlab_*": "ask",
+      }
+    },
+    "system": {
+      "description": "Filesystem MCP and mise-en-place MCP",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "mise_*": "ask",
+        // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+        "filesystem_*": "ask",
+        "filesystem_read_text_file": "allow",
+        "filesystem_read_media_file": "allow",
+        "filesystem_read_multiple_files": "allow",
+        "filesystem_list_directory": "allow",
+        "filesystem_list_directory_with_sizes": "allow",
+        "filesystem_directory_tree": "allow",
+        "filesystem_search_files": "allow",
+        "filesystem_get_file_info": "allow",
+        "filesystem_list_allowed_directories": "allow",
+        // "filesystem_create_directory": "ask",
+        // "filesystem_write_file": "ask",
+        // "filesystem_edit_file": "ask",
+        // "filesystem_move_file": "ask",
+        "pty_*": "allow",
+        "pty_kill": "ask",
+        "pty_spawn": "ask",
+        "pty_write": "ask"
+      }
+    },
+    "zero": {
+      "description": "Minimal context",
+      "prompt": "",
+      "mode": "all",
+      "permission": {
+        "*": "deny"
+      }
+    }
   },
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
   "mcp": {{ $mcp.servers | toPrettyJson | indent 2 | trim }},
-  // dict "code-mode" (get $mcp.servers "code-mode") | toPrettyJson | indent 2 | trim
-  // "mcp": {
-  //   "code-mode": {
-  //     "type": "local",
-  //     "command": ["npx", "-y", "@utcp/code-mode-mcp"],
-  //     "environment": {
-  //       "UTCP_CONFIG_FILE": "{env:HOME}/.config/utcp/config.json",
-  //     },
-  //   },
-  // },
   // https://opencode.ai/docs/models/#recommended-models
   {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
-  "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
+  // "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
   {{- end }}
   "provider": {
     {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
@@ -263,67 +445,67 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "MLX LM (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:8080/v1",
+        "baseURL": "http://127.0.0.1:8080/v1"
       },
       "models": {
         "mlx-community/Llama-3.2-3B-Instruct-4bit": {
-          "name": "mlx-community/Llama-3.2-3B-Instruct-4bit",
+          "name": "mlx-community/Llama-3.2-3B-Instruct-4bit"
         },
         "mlx-community/gpt-oss-20b-mxfp4-q8": {
-          "name": "mlx-community/gpt-oss-20b-mxfp4-q8",
+          "name": "mlx-community/gpt-oss-20b-mxfp4-q8"
         },
         "mlx-community/Qwen3-4B-Instruct-2507-4bit": {
-          "name": "Qwen3-4B-Instruct-2507-4bit",
+          "name": "Qwen3-4B-Instruct-2507-4bit"
         },
         "mlx-community/Qwen3-30B-A3B-4bit": {
-          "name": "mlx-community/Qwen3-30B-A3B-4bit",
+          "name": "mlx-community/Qwen3-30B-A3B-4bit"
         },
         "mlx-community/whisper-large-v3-mlx": {
-          "name": "mlx-community/whisper-large-v3-mlx",
+          "name": "mlx-community/whisper-large-v3-mlx"
         },
         "mistralai/Mistral-7B-Instruct-v0.3": {
-          "name": "Mistral-7B-Instruct-v0.3",
+          "name": "Mistral-7B-Instruct-v0.3"
         },
         "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit": {
-          "name": "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit",
-        },
-      },
+          "name": "lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-4bit"
+        }
+      }
     },
     // https://opencode.ai/docs/providers#ollama
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:11434/v1",
+        "baseURL": "http://127.0.0.1:11434/v1"
       },
       "models": {
         "deepseek-r1:8b": {
-          "name": "deepseek-r1:8b",
+          "name": "deepseek-r1:8b"
         },
         "gpt-oss:20b": {
-          "name": "gpt-oss:20b",
+          "name": "gpt-oss:20b"
         },
         // If tool calls aren’t working, try increasing num_ctx in Ollama
         // Start around 16k - 32k
         "llama2": {
-          "name": "Llama 2",
+          "name": "Llama 2"
         },
         "qwen3": {
-          "name": "qwen3",
+          "name": "qwen3"
         },
         "qwen3:4b": {
-          "name": "qwen3:4b",
+          "name": "qwen3:4b"
         },
         "qwen3:8b": {
-          "name": "qwen3:8b",
+          "name": "qwen3:8b"
         },
         "qwen3:30b": {
-          "name": "qwen3:30b",
+          "name": "qwen3:30b"
         },
         "qwen3-coder:30b": {
-          "name": "qwen3-coder:30b",
-        },
-      },
+          "name": "qwen3-coder:30b"
+        }
+      }
     },
     {{- end }}
     /* "openai": {
@@ -363,13 +545,22 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "LiteLLM (custom)",
       "options": {
-        "baseURL": {{ $litellmURL | quote }},
+        "baseURL": {{ $litellmURL | quote }}
       },
       "models": {
-        "github_copilot/claude-haiku-4.5": {
-          "name": "Claude Haiku 4.5",
+        "github_copilot/*": {
+          "name": "All"
         },
-      },
+        // "github_copilot/claude-haiku-4.5": {
+        //   "name": "Claude Haiku 4.5"
+        // },
+        // "github_copilot/claude-sonnet-4-5": {
+        //   "name": "Claude Sonnet 4.5"
+        // },
+        // "github_copilot/claude-opus-4-5": {
+        //   "name": "Claude Opus 4.5"
+        // }
+      }
     },
     {{- end }}
     "google": {
@@ -379,74 +570,74 @@
           "name": "Gemini 3 Pro (Antigravity)",
           "limit": {
             "context": 1048576,
-            "output": 65535,
+            "output": 65535
           },
           "modalities": {
             "input": [
               "text",
               "image",
-              "pdf",
+              "pdf"
             ],
             "output": [
-              "text",
-            ],
+              "text"
+            ]
           },
           "variants": {
             "low": {
-              "thinkingLevel": "low",
+              "thinkingLevel": "low"
             },
             "high": {
-              "thinkingLevel": "high",
-            },
-          },
+              "thinkingLevel": "high"
+            }
+          }
         },
         "antigravity-gemini-3-flash": {
           "name": "Gemini 3 Flash (Antigravity)",
           "limit": {
             "context": 1048576,
-            "output": 65536,
+            "output": 65536
           },
           "modalities": {
             "input": [
               "text",
               "image",
-              "pdf",
+              "pdf"
             ],
             "output": [
-              "text",
-            ],
+              "text"
+            ]
           },
           "variants": {
             "minimal": {
-              "thinkingLevel": "minimal",
+              "thinkingLevel": "minimal"
             },
             "low": {
-              "thinkingLevel": "low",
+              "thinkingLevel": "low"
             },
             "medium": {
-              "thinkingLevel": "medium",
+              "thinkingLevel": "medium"
             },
             "high": {
-              "thinkingLevel": "high",
-            },
-          },
+              "thinkingLevel": "high"
+            }
+          }
         },
         "antigravity-claude-sonnet-4-5": {
           "name": "Claude Sonnet 4.5 (Antigravity)",
           "limit": {
             "context": 200000,
-            "output": 64000,
+            "output": 64000
           },
           "modalities": {
             "input": [
               "text",
               "image",
-              "pdf",
+              "pdf"
             ],
             "output": [
-              "text",
-            ],
-          },
+              "text"
+            ]
+          }
         },
         "antigravity-claude-sonnet-4-5-thinking": {
           "name": "Claude Sonnet 4.5 Thinking (Antigravity)",
@@ -462,51 +653,51 @@
             ],
             "output": [
               "text"
-            ],
+            ]
           },
           "variants": {
             "low": {
               "thinkingConfig": {
-                "thinkingBudget": 8192,
-              },
+                "thinkingBudget": 8192
+              }
             },
             "max": {
               "thinkingConfig": {
-                "thinkingBudget": 32768,
-              },
-            },
-          },
+                "thinkingBudget": 32768
+              }
+            }
+          }
         },
         "antigravity-claude-opus-4-5-thinking": {
           "name": "Claude Opus 4.5 Thinking (Antigravity)",
           "limit": {
             "context": 200000,
-            "output": 64000,
+            "output": 64000
           },
           "modalities": {
             "input": [
               "text",
               "image",
-              "pdf",
+              "pdf"
             ],
             "output": [
-              "text",
-            ],
+              "text"
+            ]
           },
           "variants": {
             "low": {
               "thinkingConfig": {
-                "thinkingBudget": 8192,
-              },
+                "thinkingBudget": 8192
+              }
             },
             "max": {
               "thinkingConfig": {
-                "thinkingBudget": 32768,
-              },
-            },
-          },
-        },
-      },
-    },
-  },
+                "thinkingBudget": 32768
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

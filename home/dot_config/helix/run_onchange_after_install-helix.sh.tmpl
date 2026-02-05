@@ -45,7 +45,9 @@ fi
 # cmd hx --grammar fetch
 # cmd timeout 5m hx --grammar build
 
-if command -v xdg-mime >/dev/null &&
-  [ "$(xdg-mime query default text/plain)" != "Helix.desktop" ]; then
+{{- if lookPath "xdg-mime" | isExecutable }}
+
+if [ "$(xdg-mime query default text/plain)" != "Helix.desktop" ]; then
   cmd xdg-mime default Helix.desktop text/plain
 fi
+{{- end }}

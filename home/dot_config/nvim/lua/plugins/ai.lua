@@ -506,4 +506,7 @@ return {
       }
     end,
   },
+
+  -- NickvanDyke/opencode.nvim
+  -- sudo-tee/opencode.nvim
 }

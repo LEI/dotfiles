@@ -121,7 +121,7 @@ if command -v opencode >/dev/null; then
   # opencode() { env opencode "${@:---continue}"; }
   opencode() {
     if [ $# -eq 0 ]; then
-      env opencode --agent plan --continue
+      env opencode --agent=plan --continue
     else
       env opencode "$@"
     fi

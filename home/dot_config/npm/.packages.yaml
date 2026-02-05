@@ -2,6 +2,8 @@
 enabled: "{{ .features.node }}"
 packages:
   bun:
+    # FIXME: bun download fails in termux
+    enabled: '{{ not (eq .osIDLike "android") }}'
     type: mise
   node-mise:
     enabled: '{{ not (eq .osIDLike "alpine" "android") }}'
@@ -28,4 +30,16 @@ packages:
   yarn:
     type: npm
   runme:
+    type: npm
+  "@fission-ai/openspec":
+    enabled: "{{ .features.ai }}"
+    type: npm
+  "@kilocode/cli":
+    enabled: "{{ .features.ai }}"
+    type: npm
+  "@qodo/command": # uv tool install pr-agent
+    enabled: "{{ .features.ai }}"
+    type: npm
+  cline: # roocode
+    enabled: "{{ .features.ai }}"
     type: npm

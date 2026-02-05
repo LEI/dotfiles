@@ -2,6 +2,8 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $tools := list -}}
 {{- range $key, $value := pick $mcp.servers
+  "github"
+
   "flux-operator"
   "flux-operator-read-only"
   "kubernetes"
@@ -12,7 +14,7 @@
 {{- end -}}
 {{- $tools = append $tools (dict
   "name" $key
-  "description" ""
+  "description" (printf "Manual %s" $key)
   "tool_call_template" (dict
     "call_template_type" "mcp"
     "config" (dict "mcpServers" $value)

@@ -3,7 +3,9 @@ enabled: "{{ .features.neovim }}"
 packages:
   # NOTE: latest nvim requires GLIBC_2.42
   neovim:
-    enabled: '{{ or (ne .osIDLike "debian") (gt .glibc 2.31) }}'
+    # enabled: '{{ or (ne .osIDLike "debian") (gt .glibc 2.31) }}'
     nameOverwrite:
       windows: '{{ eq .packageType "winget" | ternary "Neovim.Neovim" nil }}'
-    type: '{{ eq .packageType "npm" "gem" | ternary .packageType nil }}'
+    type: |-
+      {{ and (eq .osIDLike "debian") (le .glibc 2.31) | ternary "mise"
+        (eq .packageType "npm" "gem" | ternary .packageType nil) }}

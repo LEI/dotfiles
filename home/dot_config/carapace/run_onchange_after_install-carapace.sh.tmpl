@@ -24,13 +24,14 @@ echo >&2 "Installing carapace"
 # BASE_URL="https://github.com/carapace-sh/carapace-bin/releases/download/$VERSION"
 # NAME="carapace-bin_${VERSION#v}_${OS}_${ARCH}"
 # URL="$BASE_URL/$NAME.tar.gz"
+{{- if eq .osIDLike "alpine" "debian" }}
 {{- $url := gitHubLatestReleaseAssetURL
   "carapace-sh/carapace-bin"
   (printf "carapace-bin_*_%s_%s.tar.gz"
     (eq .chezmoi.os "android" | ternary "termux" .chezmoi.os)
     .chezmoi.arch) }}
-{{- $_ := $url | regexMatch "^https" }}
 URL="{{ $url }}"
+{{- end }}
 
 {{- if eq .osID "alpine" }}
 

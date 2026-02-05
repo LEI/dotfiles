@@ -26,6 +26,7 @@ if not fs_stat(lazypath) then
   exec({ 'git', 'clone', '--filter=blob:none', '--branch=' .. branch, lazyrepo, lazypath }, 'clone lazy.nvim', 1)
 end
 
+--[[
 local branch = 'feat/check-tags'
 local remote = 'fork'
 local remote_url = 'https://github.com/LEI/lazy.nvim.git'
@@ -34,6 +35,8 @@ exec({ 'git', '-C', lazypath, 'remote', 'add', remote, remote_url }, 'add remote
 -- TODO: only fetch once
 exec({ 'git', '-C', lazypath, 'fetch', remote }, 'fetch remote')
 exec({ 'git', '-C', lazypath, 'checkout', branch }, 'checkout branch')
+]]
+--
 
 vim.opt.rtp:prepend(lazypath)
 

@@ -12,19 +12,14 @@
       "file_path": "manual.json",
       "allowed_communication_protocols": ["mcp"]
     },
-    {{- range $name, $url := dict
-      "local" (env "LOCAL_URL")
-      "nest" (env "NEST_URL")
-    }}
-    {{- if $url }}
+    {{- range $url := env "OPENAPI_URLS" | splitList "," }}
     {
-      "name": {{ $name | quote }},
+      "name": {{ $url | quote }},
       "call_template_type": "http",
       "http_method": "GET",
       "url": {{ $url | quote }},
       "content_type": "application/json"
     },
-    {{- end }}
     {{- end }}
     {
       "name": "openlibrary",

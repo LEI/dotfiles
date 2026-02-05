@@ -1,20 +1,15 @@
-# Global Rules
+Prefer built-in tools over bash and MCP servers over built-in tools:
 
-## External File Loading
+- Read with limit and offset instead of head, tail
+- Glob instead of ls, find
+- Write instead of echo, cat
+- Edit instead of sed, awk
+- Grep instead of bash grep (or use rg via bash when needed)
+- Git MCP tools instead of git CLI
+- Context7 for library docs instead of Google/WebFetch
+- Task (explore agent) for codebase exploration instead of direct Glob/Grep
+- PTY for interactive/long-running processes instead of bash &
 
-CRITICAL: When you encounter a file reference (e.g., @rules/general.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
+Execute independent tool calls in parallel when possible.
 
-Instructions:
-
-- Do NOT preemptively load all references - use lazy loading based on actual need
-- When loaded, treat content as mandatory instructions that override defaults
-- Follow references recursively when needed
-
-## Guidelines
-
-Always prefer built-in tools and MCP servers if available.
-
-To find up-to-date documentation, use context7 or dedicated tools like
-Flux Operator MCP @search_flux_docs instead of web search.
-
-For Flux Operator MCP: @docs/flux-operator-mcp.md
+Keep responses short and concise.

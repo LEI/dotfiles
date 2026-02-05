@@ -53,8 +53,10 @@ packages:
   ca-certificates:
     enabled: {{ eq .osIDLike "android" "arch" "debian" }}
   cargo-binstall:
-    enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
-    type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}'
+    # enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
+    enabled: {{ .features.rust }}
+    type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew"
+      (eq .osIDLike "alpine" | ternary "mise" nil) }}'
   cargo-update:
     enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "cargo" nil }}'
@@ -88,41 +90,7 @@ packages:
   coreutils: { enabled: {{ eq .os "android" "linux" }} }
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}
-
-  antigravity:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  cherry-studio:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  jan:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  lobehub:
-    enabled: {{ .features.ai }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-
   # uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-  "@fission-ai/openspec":
-    enabled: {{ .features.ai }}
-    type: npm
-  "@kilocode/cli":
-    enabled: {{ .features.ai }}
-    type: npm
-  "@qodo/command": # uv tool install pr-agent
-    enabled: {{ .features.ai }}
-    type: npm
-  cline: # roocode
-    enabled: {{ .features.ai }}
-    type: npm
-
-  scorecard:
-    enabled: {{ eq .osIDLike "darwin" }}
-    type: brew
-  serie:
-    enabled: {{ eq .osIDLike "darwin" }}
-    type: brew
-
   crush:
     enabled: {{ .features.ai }}
     nameOverwrite:
@@ -251,8 +219,7 @@ packages:
       windows: dandavison.delta
 
   git:
-    description: Ensure git is always installed
-    enabled: {{ not .features.git }}
+    enabled: {{ .features.git }}
     nameOverwrite:
       # debian: git less
       windows: Git.Git
@@ -593,6 +560,9 @@ packages:
   s-tui:
     # enabled: {{ eq .osIDLike "arch" "debian" "fedora" }}
     enabled: {{ and (not (eq .osIDLike "android" "darwin" "windows")) (ne .profile "minimal") }}
+  scorecard:
+    enabled: {{ eq .osIDLike "darwin" }}
+    type: brew
   sd:
     description: sed alternative # search & displace
     enabled: {{ and (eq .osIDLike "alpine" "arch" "debian" "darwin" "windows") (not (or
@@ -601,6 +571,13 @@ packages:
     )) (ne .profile "minimal") }}
     nameOverwrite:
       windows: chmln.sd
+  serie:
+    description: Git graph
+    enabled: {{ eq .osIDLike "darwin" }}
+    type: brew
+  sq:
+    enabled: {{ .features.sql }}
+    type: brew
   # FIXME(alpine): .rs syntax error (failed to install with aqua)
   shellcheck:
     enabled: {{ and (not .features.neovim) (not .features.mise) }}
@@ -887,6 +864,8 @@ osPackages:
       # freetype:
       # gdb:
       # gdbm:
+      gemini-cli:
+        enabled: {{ .features.ai }}
       # gettext:
       # ghostscript:
       # gitlab-runner:
@@ -966,6 +945,15 @@ osPackages:
         # after_script: cmd yabai --start-service
       # jackielii/tap/skhd-zig: # koekeishiya/formulae/skhd
     cask:
+      antigravity:
+        enabled: {{ and .features.ai .gui }}
+      cherry-studio:
+        enabled: {{ and .features.ai .gui }}
+      jan:
+        enabled: {{ and .features.ai .gui }}
+      lobehub:
+        enabled: {{ and .features.ai .gui }}
+
       # bruno: # postman
       # cyberduck:
       # dropbox:
@@ -988,9 +976,9 @@ osPackages:
       # keystore-explorer:
 
       little-snitch:
-        enabled: {{ ne .profile "minimal" }}
+        enabled: {{ and (ne .profile "minimal") .gui }}
       # lulu:
-      #   enabled: {{ ne .profile "minimal" }}
+      #   enabled: {{ and (ne .profile "minimal") .gui }}
       # menubar-stats: # istatmenus, stats, https://github.com/elegracer/NetSpeedMonitor
 
       # microsoft-excel:

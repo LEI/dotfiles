@@ -2,7 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "github-copilot/claude-sonnet-4.5",
+      "model": "github-copilot/claude-opus-4.5",
+      "variant": "max",
     },
     "oracle": {
       "model": "github-copilot/gpt-5.2",
@@ -12,7 +13,7 @@
       "model": "github-copilot/claude-sonnet-4.5",
     },
     "explore": {
-      "model": "opencode/gpt-5-nano",
+      "model": "github-copilot/gpt-5-mini",
     },
     "multimodal-looker": {
       "model": "google/gemini-3-flash",
@@ -32,6 +33,10 @@
     "atlas": {
       "model": "github-copilot/claude-sonnet-4.5",
     },
+    "hephaestus": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "medium",
+    },
   },
   "categories": {
     "visual-engineering": {
@@ -43,7 +48,7 @@
     },
     "artistry": {
       "model": "google/gemini-3-pro",
-      "variant": "max",
+      "variant": "high",
     },
     "quick": {
       "model": "github-copilot/claude-haiku-4.5",
@@ -57,6 +62,10 @@
     "writing": {
       "model": "google/gemini-3-flash",
     },
+    "deep": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "medium",
+    },
   },
   "disabled_hooks": [
     "auto-update-checker",
@@ -68,12 +77,25 @@
     // "prometheus-md-only", // Remove Prometheus write restrictions (not recommended)
   ],
   // "disabled_mcps": ["websearch", "context7", "grep_app"],
+  "disabled_skills": [
+    // TODO: whitelist
+    // "agent-browser",
+    "dev-browser",
+    "frontend-ui-ux",
+    "git-master",
+    "playwright",
+  ],
+  "skills": {
+    "sources": [],
+    "enable": [],
+    // "disable": [],
+  },
   "sisyphus_agent": {
     // Enable OpenCode-Builder agent alongside Sisyphus
     // The default build agent is always demoted to subagent mode when Sisyphus is enabled
     "default_builder_enabled": true,
-    // "disabled": false, // Enable Atlas orchestration (default: false)
-    // "planner_enabled": true, // Enable Prometheus (default: true)
+    // "disabled": true, // Enable Atlas orchestration (default: false)
+    // "planner_enabled": false, // Enable Prometheus (default: true)
     "replace_plan": false, // Replace default plan agent with Prometheus (default: true)
   },
 }

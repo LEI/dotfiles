@@ -18,7 +18,8 @@ return {
         -- 'size',
         -- 'mtime',
       },
-      default_file_explorer = true, -- not vim.opt.spelllang,
+      -- WARN: this replaces netrw and breaks scp://
+      default_file_explorer = false, -- true, -- not vim.opt.spelllang,
       delete_to_trash = true,
       keymaps = {
         ['g?'] = { 'actions.show_help', mode = 'n' },

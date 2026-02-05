@@ -3,27 +3,13 @@ description: Review changes, stage files and create commit messages
 agent: build
 ---
 
-# Commit
-
-Analyze the changes and create a concise, descriptive commit message for each
-change. Follow conventional commit format if appropriate.
-
-Recent commit history:
+Atomic commits: one logical change per commit, buildable after each.
+Match project style from history, else use conventional: `type(scope): why`
+Subject: imperative, lowercase, no period, ≤50 chars. Body lines ≤72 chars.
 
 !`git log --oneline -5`
-
-Git status:
-
-!`git status --branch --short`
-
-Modified files:
-
+!`git status -sb`
 !`git diff --stat`
-
-Already staged files:
-
 !`git diff --staged --stat`
 
-Use the git and read tool to inspect files if needed.
-
-Ask for confirmation before staging files and creating commits.
+Split unrelated changes into separate commits. Confirm before committing.

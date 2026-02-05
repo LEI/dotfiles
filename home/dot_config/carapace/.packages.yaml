@@ -1,13 +1,14 @@
 ---
+enabled: "{{ .features.carapace }}"
 packages:
   # Alternatives:
   # https://github.com/nushell/nu_scripts/tree/main/custom-completions
   # https://github.com/sigoden/argc-completions
   carapace:
-    enabled: '{{ and .features.carapace (eq .osIDLike "android" "arch" "darwin" "windows") }}'
-    # enabled: "{{ .features.carapace }}"
+    enabled: '{{ not (eq .osIDLike "alpine" "debian") }}'
     nameOverwrite:
       arch: carapace-bin
       windows: rsteube.Carapace
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur"
+      (eq .osIDLike "android" "arch" "darwin" "windows" | ternary nil "mise") }}'
     # type: '{{ eq .osIDLike "arch" | ternary "aur" (not (eq .osIDLike "arch" "darwin" "windows") | ternary "mise" nil) }}'
