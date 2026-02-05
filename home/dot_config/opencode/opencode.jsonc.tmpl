@@ -29,32 +29,47 @@
 {{-   else if and (hasKey $value "type") (eq $value.type "http") -}}
 {{-     $_ := $value | setValueAtPath "type" "remote" -}}
 {{-   end -}}
+{{-   if hasKey $value "url" -}}
+{{-     $_ := $value | setValueAtPath "url" ($value.url | replaceAllRegex "\\${" "{env:") -}}
+{{-   end -}}
 {{- /* $_ := $value | setValueAtPath "enabled" false */ -}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
 
-{{- $ohMyOpencode := false -}}
-
+{{- $ohMyOC := false -}}
+{{- $quotaToast := false -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "theme": {{ get . "theme" | default "system" | quote }},
   // "model": "anthropic/claude-sonnet-4-5",
-  // "model": "opencode/big-pickle",
+  {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
+  // "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
+  {{- end }}
   "autoupdate": false,
 
   // https://github.com/anomalyco/opencode/pull/8562
-  "server": {
-    "hostname": "localhost"
-  },
+  // "server": {
+  //   "hostname": "localhost"
+  // },
 
-  // "instructions": ["CONTRIBUTING.md", "docs/guidelines.md", ".cursor/rules/*.md"],
+  // https://opencode.ai/docs/rules/#using-opencodejson
+  "instructions": [
+    // ".cursor/rules/*.md",
+    "CONTRIBUTING.md",
+    // "docs/development-standards.md",
+    // "docs/guidelines.md",
+    "packages/*/AGENTS.md"
+    // "test/testing-guidelines.md",
+  ],
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
     // "@ramtinj95/opencode-tokenscope@1.5.2",
-    "@slkiser/opencode-quota@1.3.0",
+    {{- if $quotaToast }}
+    "@slkiser/opencode-quota@1.4.0",
+    {{- end }}
     "opencode-pty@0.2.0",
     // "opencode-sessions@1.0.0",
-    {{- if $ohMyOpencode }}
+    {{- if $ohMyOC }}
     // TODO: openspec init
     // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
     // mv ~/.config/opencode/oh-my-opencode.json{,c}
@@ -62,13 +77,19 @@
     {{- else }}
     "@mohak34/opencode-notifier@0.1.15",
     {{- end }}
-    "opencode-antigravity-auth@1.4.3"
+    "opencode-antigravity-auth@1.4.5"
   ],
+  {{- if $quotaToast }}
   "experimental": {
     "quotaToast": {
-      "enabledProviders": ["copilot", "openai", "google-antigravity"]
+      "enabledProviders": [
+        "copilot"
+        // "openai",
+        // "google-antigravity",
+      ]
     }
   },
+  {{- end }}
   // https://opencode.ai/docs/permissions#defaults
   "permission": {
     "*": "ask",
@@ -92,14 +113,14 @@
       "*": "ask",
       "awk *": "allow",
       "cat *": "allow",
-      "cd *": "deny",
+      // "cd *": "allow",
       // "curl *": "allow",
       "echo *": "allow",
       "env *": "deny",
       "find *": "allow",
-      "git *": "deny",
-      "git worktree *": "allow",
-      "git wt *": "allow",
+      // "git *": "deny",
+      // "git worktree *": "allow",
+      // "git wt *": "allow",
       "grep *": "deny",
       "head *": "allow",
       "jq *": "allow",
@@ -107,11 +128,13 @@
       // "mv *": "deny",
       "rg *": "allow",
       "rm *": "deny",
-      // "sed *": "allow",
-      "sed * -I*": "deny",
-      "sed * -i*": "deny",
+      "sed *": "allow",
+      "sed * -I*": "ask",
+      "sed * -i*": "ask",
       "sleep *": "allow",
       "tail *": "allow",
+      "test *": "allow",
+      "trash *": "ask",
       "wc *": "allow",
       "yq *": "allow",
 
@@ -121,6 +144,11 @@
       "npm test *": "allow",
       "npm t *": "allow",
 
+      "npx skills check *": "allow",
+      "npx skills find *": "allow",
+      "npx skills list *": "allow",
+      "npx skills search *": "allow",
+
       "sq *": "allow",
       "sq * -o*": "ask",
       "sq * --output*": "ask"
@@ -128,50 +156,45 @@
     // Launching subagents (matches the subagent type)
     // "task": "ask",
     "task": {
-      // "*": "deny",
+      "*": "deny",
       // "orchestrator-*": "allow",
       // "code-reviewer": "ask"
-
-      "*": "ask"
-      // "explore": "ask",
-      // "general": "ask",
-      // "readonly": "ask",
-      // "review": "ask",
-      // "analyze": "ask",
-      // "archive": "ask",
-      // "brainstorm": "ask",
-      // "browser": "ask",
-      // "coder": "ask",
-      // "flux": "ask",
-      // "flux-read-only": "ask",
-      // "github": "ask",
-      // "search": "ask",
-      // "system": "ask",
-      // "zero": "ask",
     },
     // Loading a skill (matches the skill name)
     "skill": {
       "*": "allow",
-      "flux-operator": "deny"
+      "find-skills": "allow",
+      "flux-operator": "deny",
+      "sq": "allow"
     },
     // Running LSP queries (currently non-granular)
+    // OPENCODE_EXPERIMENTAL_LSP_TOOL=true or OPENCODE_EXPERIMENTAL=true
     "lsp": "allow",
     // Reading/updating the todo list
-    "todoread": "allow",
-    "todowrite": "allow",
+    "todoread": "deny",
+    "todowrite": "deny",
     // Fetching a URL (matches the URL)
-    // "webfetch": "ask",
+    // "webfetch": { "*" "ask" },
     // Web/code search (matches the query)
-    // "websearch": "ask",
-    // "codesearch": "ask",
+    "websearch": "allow",
+    "codesearch": "allow",
     // Triggered when a tool touches paths outside the project working directory
     "external_directory": "ask",
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
+    // Ask the user questions during execution
+    "question": "allow",
 
+    // Custom tools
+    "notify": "allow",
+
+    // MCP tools
     {{- range $mcp.servers | keys | sortAlpha }}
     "{{ . }}_*": "deny",
     {{- end }}
+
+    "mcp-registry_*": "allow",
+    "skills-search_*": "allow",
 
     // https://github.com/modelcontextprotocol/servers/tree/main/src/git
     "git_git_*": "ask",
@@ -180,6 +203,12 @@
     "git_git_log": "allow",
     "git_git_show": "allow",
     "git_git_status": "allow",
+
+    // Plugins
+    "pty_*": "allow",
+    "pty_kill": "ask",
+    "pty_spawn": "ask",
+    "pty_write": "ask",
 
     // Included in opencode
     "context7_*": "ask",
@@ -195,11 +224,16 @@
       "mode": "primary",
       // "model": "anthropic/claude-sonnet-4-20250514",
       // "model": "github-copilot/claude-sonnet-4.5",
+      {{- if eq .profile "work" }}
       "model": "github-copilot/claude-opus-4.5",
-      "variant": "max",
+      // "variant": "max",
+      {{- else }}
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "high",
+      {{- end }}
       // "temperature": 0.3,
       "permission": {
-        // "edit": "ask",
+        "edit": "ask", // Always allow per session
         // "bash": {
         //   "*": "ask",
         //   "git *": "allow",
@@ -210,8 +244,26 @@
         "task": {
           // Agents
           "*": "ask",
-          "flux-read-only": "ask"
+          // "explore": "ask",
+          // "general": "ask",
+          // "readonly": "ask",
+          "review": "allow",
+          // "analyze": "ask",
+          // "archive": "ask",
+          // "brainstorm": "ask",
+          // "browser": "ask",
+          // "coder": "ask",
+          // "flux": "ask",
+          // "flux-read-only": "ask",
+          // "github": "ask",
+          // "search": "ask",
+          // "system": "ask",
+          // "zero": "ask",
+          "flux": "allow",
+          "flux-read-only": "deny"
         },
+        "todoread": "allow",
+        "todowrite": "allow"
         // "git_git_*": "ask",
         // "git_git_branch": "allow",
         // "git_git_diff*": "allow",
@@ -225,20 +277,39 @@
       "mode": "primary",
       // "model": "anthropic/claude-haiku-4-20250514",
       // "model": "github-copilot/claude-haiku-3.5",
+      {{- if eq .profile "work" }}
       "model": "github-copilot/claude-sonnet-4.5",
-      "variant": "max",
+      // "variant": "max",
+      {{- else }}
+      "model": "opencode/gpt-5-nano",
+      "variant": "minimal",
+      {{- end }}
       "permission": {
         "edit": "deny",
         // "bash": "ask",
         "task": {
           // Agents
           "*": "ask",
+          // "explore": "ask",
+          // "general": "ask",
+          // "readonly": "ask",
+          // "review": "ask",
+          // "analyze": "ask",
+          // "archive": "ask",
+          // "brainstorm": "ask",
+          // "browser": "ask",
+          // "coder": "ask",
+          // "flux": "ask",
+          // "flux-read-only": "ask",
+          // "github": "ask",
+          // "search": "ask",
+          // "system": "ask",
+          // "zero": "ask",
           "flux": "deny",
           "flux-read-only": "allow"
         },
-        // "todoread": "allow",
-        // "todowrite": "ask",
-
+        "todoread": "allow",
+        "todowrite": "allow",
         "git_git_*": "deny",
         "git_git_branch": "allow",
         "git_git_diff*": "allow",
@@ -388,10 +459,6 @@
         // "filesystem_write_file": "ask",
         // "filesystem_edit_file": "ask",
         // "filesystem_move_file": "ask",
-        "pty_*": "allow",
-        "pty_kill": "ask",
-        "pty_spawn": "ask",
-        "pty_write": "ask"
       }
     },
     "zero": {
@@ -406,9 +473,6 @@
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
   "mcp": {{ $mcp.servers | toPrettyJson | indent 2 | trim }},
   // https://opencode.ai/docs/models/#recommended-models
-  {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
-  // "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
-  {{- end }}
   "provider": {
     {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
     // https://opencode.ai/docs/providers#llamacpp

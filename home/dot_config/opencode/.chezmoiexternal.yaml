@@ -3,5 +3,23 @@
 #   type: file
 #   url: https://raw.githubusercontent.com/ramtinJ95/opencode-tokenscope/refs/tags/v1.5.2/command/tokenscope.md
 
-# https://github.com/openai/skills
+# https://github.com/ast-grep/agent-skill/blob/main/ast-grep/skills/ast-grep/SKILL.md
+
 # https://github.com/anthropics/skills
+# https://github.com/openai/skills
+# https://skills.sh
+
+skills/find-skills/SKILL.md:
+  type: file
+  url: https://raw.githubusercontent.com/vercel-labs/skills/main/skills/find-skills/SKILL.md
+  refreshPeriod: 168h
+
+skills/git-commit/SKILL.md:
+  type: file
+  url: https://raw.githubusercontent.com/github/awesome-copilot/refs/heads/main/skills/git-commit/SKILL.md
+  refreshPeriod: 168h
+
+skills/code-review-excellence/SKILL.md:
+  type: file
+  url: https://raw.githubusercontent.com/wshobson/agents/main/skills/code-review-excellence/SKILL.md
+  refreshPeriod: 168h

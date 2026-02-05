@@ -194,5 +194,10 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
     },
+
+    "mcp-registry": {
+      "type": "http",
+      "url": "https://registry.run.mcp.com.ai/mcp",
+    },
   },
 }
