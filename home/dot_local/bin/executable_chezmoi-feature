@@ -52,7 +52,7 @@ get_feature() {
   # # shellcheck disable=SC2016
   # value="$(chezmoi execute "{{ get .features \"$key\" }}")"
   # echo "$value"
-  jq ".$key == true" "$HOME/.config/chezmoi/features.json"
+  jq ".$key == true" "$HOME/.local/state/chezmoi/features.json"
 }
 
 if [ $# -eq 0 ]; then

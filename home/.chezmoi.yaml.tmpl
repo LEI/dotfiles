@@ -293,4 +293,4 @@ scriptEnv:
   TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
 
 # Files and directories not group writeable
-# umask: 0o022
+umask: 0o022
