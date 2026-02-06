@@ -7,6 +7,9 @@ mode: subagent
 permission:
   "*": deny
   read: allow
+  glob: allow
+  grep: allow
+  list: allow
   git_git_*: deny
   git_git_branch: allow
   git_git_diff*: allow
@@ -16,8 +19,12 @@ permission:
   skill:
     "*": deny
     code-review-excellence: allow
+    verification-before-completion: allow
+  task:
+    "*": deny
+    explore: allow
 ---
 
 # Review
 
-Follow the code-review-excellence skill workflow. Focus on code quality, security, performance, and maintainability. Provide actionable feedback without making direct changes.
+Focus on code quality, security, performance, and maintainability. Provide actionable feedback without making direct changes.

@@ -1,40 +1,6 @@
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
-{{- $servers := dict -}}
-{{- range $key, $value := $mcp.servers -}}
-{{-   if hasKey $value "command" -}}
-{{-     $_ := $value | setValueAtPath "command" (concat (list $value.command) $value.args) -}}
-{{-     $_ := $value | deleteValueAtPath "args" -}}
-{{-   end -}}
-{{-   if hasKey $value "env" -}}
-{{-     range $k, $v := $value.env -}}
-{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
-{{-       if ne $v $val -}}
-{{-         $_ := $value.env | setValueAtPath $k $val -}}
-{{-       end -}}
-{{-     end -}}
-{{-     $_ := $value | setValueAtPath "environment" $value.env -}}
-{{-     $_ := $value | deleteValueAtPath "env" -}}
-{{-   end -}}
-{{-   if hasKey $value "headers" -}}
-{{-     range $k, $v := $value.headers -}}
-{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
-{{-       if ne $v $val -}}
-{{-         $_ := $value.headers | setValueAtPath $k $val -}}
-{{-       end -}}
-{{-     end -}}
-{{-   end -}}
-{{-   if or (not (hasKey $value "type")) (eq $value.type "stdio") -}}
-{{-     $_ := $value | setValueAtPath "type" "local" -}}
-{{-   else if and (hasKey $value "type") (eq $value.type "http") -}}
-{{-     $_ := $value | setValueAtPath "type" "remote" -}}
-{{-   end -}}
-{{-   if hasKey $value "url" -}}
-{{-     $_ := $value | setValueAtPath "url" ($value.url | replaceAllRegex "\\${" "{env:") -}}
-{{-   end -}}
-{{- /* $_ := $value | setValueAtPath "enabled" false */ -}}
-{{-   $_ := $servers | setValueAtPath $key $value -}}
-{{- end -}}
+{{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
 {{- $ohMyOC := false -}}
 {{- $quotaToast := false -}}
@@ -70,7 +36,6 @@
     "opencode-pty@0.2.0",
     // "opencode-sessions@1.0.0",
     {{- if $ohMyOC }}
-    // TODO: openspec init
     // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
     // mv ~/.config/opencode/oh-my-opencode.json{,c}
     "oh-my-opencode@3.2.3",
@@ -117,6 +82,7 @@
       // "curl *": "allow",
       "echo *": "allow",
       "env *": "deny",
+      "fd *": "allow",
       "find *": "allow",
       // "git *": "deny",
       // "git worktree *": "allow",
@@ -160,12 +126,54 @@
       // "orchestrator-*": "allow",
       // "code-reviewer": "ask"
     },
-    // Loading a skill (matches the skill name)
+    // Loading a skill (matches skill name, not org/name)
     "skill": {
-      "*": "allow",
-      "find-skills": "allow",
+      "*": "ask",
+      // affaan-m
+      "backend-patterns": "allow",
+      "coding-standards": "allow",
+      "security-review": "allow",
+      "tdd-workflow": "allow",
+      // anthropics
+      "mcp-builder": "allow",
+      "skill-creator": "allow",
+      // antfu
+      "pnpm": "allow",
+      "turborepo": "allow",
+      // github
+      "git-commit": "deny",
+      // local
       "flux-operator": "deny",
-      "sq": "allow"
+      "sq": "allow",
+      // supabase
+      "supabase-postgres-best-practices": "allow",
+      // superpowers
+      "brainstorming": "allow",
+      "dispatching-parallel-agents": "allow",
+      "executing-plans": "allow",
+      "finishing-a-development-branch": "allow",
+      "receiving-code-review": "allow",
+      "requesting-code-review": "allow",
+      "subagent-driven-development": "allow",
+      "systematic-debugging": "allow",
+      "test-driven-development": "allow",
+      "using-git-worktrees": "allow",
+      "using-superpowers": "allow",
+      "verification-before-completion": "allow",
+      "writing-plans": "allow",
+      "writing-skills": "allow",
+      // vercel
+      "ai-sdk": "allow",
+      // vercel-labs
+      "find-skills": "allow",
+      "next-best-practices": "allow",
+      "vercel-react-best-practices": "allow",
+      "web-design-guidelines": "allow",
+      // wshobson
+      "api-design-principles": "allow",
+      "code-review-excellence": "allow",
+      "nodejs-backend-patterns": "allow",
+      "typescript-advanced-types": "allow"
     },
     // Running LSP queries (currently non-granular)
     // OPENCODE_EXPERIMENTAL_LSP_TOOL=true or OPENCODE_EXPERIMENTAL=true
@@ -211,267 +219,18 @@
     "pty_write": "ask",
 
     // Included in opencode
-    "context7_*": "ask",
+    "context7_*": "allow",
+    // "context7_query-docs": "allow",
+    // "context7_resolve-library-id": "allow",
     "exa_*": "ask",
     "grep_app_*": "ask",
     "grep_app_searchGitHub": "allow"
   },
   {{ "// If no temperature is specified, OpenCode uses model-specific defaults," }}
   {{ "// typically 0 for most models, 0.55 for Qwen models" }}
-  "agent": {
-    // Primary: build, compaction, plan, summary, title
-    "build": {
-      "mode": "primary",
-      // "model": "anthropic/claude-sonnet-4-20250514",
-      // "model": "github-copilot/claude-sonnet-4.5",
-      {{- if eq .profile "work" }}
-      "model": "github-copilot/claude-opus-4.5",
-      // "variant": "max",
-      {{- else }}
-      "model": "opencode/kimi-k2.5-free",
-      "variant": "high",
-      {{- end }}
-      // "temperature": 0.3,
-      "permission": {
-        "edit": "ask", // Always allow per session
-        // "bash": {
-        //   "*": "ask",
-        //   "git *": "allow",
-        //   "git commit *": "ask",
-        //   "git push *": "deny",
-        //   "grep *": "allow",
-        // },
-        "task": {
-          // Agents
-          "*": "ask",
-          // "explore": "ask",
-          // "general": "ask",
-          // "readonly": "ask",
-          "review": "allow",
-          // "analyze": "ask",
-          // "archive": "ask",
-          // "brainstorm": "ask",
-          // "browser": "ask",
-          // "coder": "ask",
-          // "flux": "ask",
-          // "flux-read-only": "ask",
-          // "github": "ask",
-          // "search": "ask",
-          // "system": "ask",
-          // "zero": "ask",
-          "flux": "allow",
-          "flux-read-only": "deny"
-        },
-        "todoread": "allow",
-        "todowrite": "allow"
-        // "git_git_*": "ask",
-        // "git_git_branch": "allow",
-        // "git_git_diff*": "allow",
-        // "git_git_log": "allow",
-        // "git_git_show": "allow",
-        // "git_git_status": "allow",
-      }
-      // "prompt": "{file:./prompts/build.txt}",
-    },
-    "plan": {
-      "mode": "primary",
-      // "model": "anthropic/claude-haiku-4-20250514",
-      // "model": "github-copilot/claude-haiku-3.5",
-      {{- if eq .profile "work" }}
-      "model": "github-copilot/claude-sonnet-4.5",
-      // "variant": "max",
-      {{- else }}
-      "model": "opencode/gpt-5-nano",
-      "variant": "minimal",
-      {{- end }}
-      "permission": {
-        "edit": "deny",
-        // "bash": "ask",
-        "task": {
-          // Agents
-          "*": "ask",
-          // "explore": "ask",
-          // "general": "ask",
-          // "readonly": "ask",
-          // "review": "ask",
-          // "analyze": "ask",
-          // "archive": "ask",
-          // "brainstorm": "ask",
-          // "browser": "ask",
-          // "coder": "ask",
-          // "flux": "ask",
-          // "flux-read-only": "ask",
-          // "github": "ask",
-          // "search": "ask",
-          // "system": "ask",
-          // "zero": "ask",
-          "flux": "deny",
-          "flux-read-only": "allow"
-        },
-        "todoread": "allow",
-        "todowrite": "allow",
-        "git_git_*": "deny",
-        "git_git_branch": "allow",
-        "git_git_diff*": "allow",
-        "git_git_log": "allow",
-        "git_git_show": "allow",
-        "git_git_status": "allow"
-      }
-    },
-    // Subagent: explore, general, readonly, review
-    "analyze": {
-      "disable": true,
-      "temperature": 0.1,
-      // "prompt": "{file:./prompts/analysis.txt}",
-      "permission": {
-        "*": "deny"
-      }
-    },
-    "archive": {
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "memory_*": "allow",
-        "qdrant-memory_*": "allow"
-      }
-    },
-    "brainstorm": {
-      "disable": true,
-      "temperature": 0.7,
-      // "prompt": "{file:./prompts/creative.txt}",
-      "permission": {
-        "*": "deny",
-        "sequential-thinking_*": "ask"
-      }
-    },
-    "browser": {
-      "description": "Chrome devtools MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "chrome-devtools_*": "ask"
-        // "chrome-devtools_evaluate_script": "ask",
-        // "chrome-devtools_list_pages": "ask",
-        // "chrome-devtools_navigate_page": "ask",
-      }
-    },
-    "coder": {
-      "description": "Code mode MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "code-mode_*": "ask",
-        "code-mode_list_tools": "allow"
-        // "utcp_*": "ask",
-        // "utcp_list_tools": "allow",
-        // "utcp_tool_info": "allow",
-      }
-    },
-    "crawl": {
-      "description": "Firecrawl MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "firecrawl_*": "allow"
-      }
-    },
-    "flux": {
-      "description": "Flux and k8s MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "skill": {
-          "*": "deny",
-          "flux-operator": "allow"
-        },
-        // MCP servers
-        "flux-operator_*": "allow",
-        "kubernetes_*": "allow"
-      }
-    },
-    "flux-read-only": {
-      "description": "Read-only Flux MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "skill": {
-          "*": "deny",
-          "flux-operator": "allow"
-        },
-        // MCP servers
-        "flux-operator-read-only_*": "allow"
-      }
-    },
-    "github": {
-      "description": "GitHub MCP and Grep App",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "bash": {
-          "gh *": "ask",
-        },
-        // https://github.com/github/github-mcp-server
-        "github_*": "ask",
-        "github_get_file_contents": "allow",
-        "github_issue_read": "allow",
-        "github_list_discussions": "allow",
-        "github_list_gist": "allow",
-        "github_list_issues": "allow",
-        "github_list_pull_requests": "allow",
-        "github_search_code": "allow",
-        "github_search_issues": "allow",
-        "github_search_pull_request_read": "allow",
-        "github_search_pull_requests": "allow",
-        "github_search_repositories": "allow",
-        "grep_app_*": "ask",
-        "grep_app_searchGitHub": "allow"
-      }
-    },
-    "gitlab": {
-      "description": "GitLab MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "bash": {
-          "glab *": "ask",
-        },
-        "gitlab_*": "ask",
-      }
-    },
-    "system": {
-      "description": "Filesystem MCP and mise-en-place MCP",
-      "mode": "subagent",
-      "permission": {
-        "*": "deny",
-        "mise_*": "ask",
-        // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
-        "filesystem_*": "ask",
-        "filesystem_read_text_file": "allow",
-        "filesystem_read_media_file": "allow",
-        "filesystem_read_multiple_files": "allow",
-        "filesystem_list_directory": "allow",
-        "filesystem_list_directory_with_sizes": "allow",
-        "filesystem_directory_tree": "allow",
-        "filesystem_search_files": "allow",
-        "filesystem_get_file_info": "allow",
-        "filesystem_list_allowed_directories": "allow",
-        // "filesystem_create_directory": "ask",
-        // "filesystem_write_file": "ask",
-        // "filesystem_edit_file": "ask",
-        // "filesystem_move_file": "ask",
-      }
-    },
-    "zero": {
-      "description": "Minimal context",
-      "prompt": "",
-      "mode": "all",
-      "permission": {
-        "*": "deny"
-      }
-    }
-  },
+  "agent": {{ include "dot_config/opencode/.agent.jsonc" | indent 2 | trim }},
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
-  "mcp": {{ $mcp.servers | toPrettyJson | indent 2 | trim }},
+  "mcp": {{ $mcpServers | toPrettyJson | indent 2 | trim }},
   // https://opencode.ai/docs/models/#recommended-models
   "provider": {
     {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}

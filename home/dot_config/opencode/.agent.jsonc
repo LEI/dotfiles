@@ -1,0 +1,310 @@
+/* Avoid adding trailing commas */
+/* prettier-ignore */
+{
+  // Primary agents: build, plan
+  // Internal agents: compaction, summary, title
+  "build": {
+    "color": "accent", // Orange
+    "description": "Primary orchestrator with full tool access and subagents",
+    "mode": "primary",
+    "model": "github-copilot/claude-opus-4.6",
+    // "temperature": 0.3,
+    "permission": {
+      "edit": "ask", // Always allow per session
+      // "bash": {
+      //   "*": "ask",
+      //   "git *": "allow",
+      //   "git commit *": "ask",
+      //   "git push *": "deny",
+      //   "grep *": "allow",
+      // },
+      "skill": {
+        "git-commit": "allow"
+      },
+      "task": {
+        "*": "ask",
+        "analyze": "allow",
+        "archive": "allow",
+        // "brainstorm": "allow",
+        "browser": "allow",
+        "coder": "allow",
+        "crawl": "allow",
+        "debug": "allow",
+        "explore": "allow",
+        "flux": "allow",
+        "flux-read-only": "deny",
+        "github": "allow",
+        "gitlab": "allow",
+        "review": "allow",
+        "search": "allow",
+        "system": "allow"
+      },
+      "todoread": "allow",
+      "todowrite": "allow"
+      // "git_git_*": "ask",
+      // "git_git_branch": "allow",
+      // "git_git_diff*": "allow",
+      // "git_git_log": "allow",
+      // "git_git_show": "allow",
+      // "git_git_status": "allow",
+    }
+    // "prompt": "{file:./prompts/build.txt}",
+  },
+  "plan": {
+    "color": "primary", // Blue
+    "description": "Read-only orchestrator for research and planning",
+    "mode": "primary",
+    // "model": "github-copilot/claude-haiku-4.5",
+    "model": "github-copilot/claude-sonnet-4.5",
+    "permission": {
+      "edit": "deny",
+      // "bash": "ask",
+      "task": {
+        "*": "deny",
+        "analyze": "allow",
+        "brainstorm": "allow",
+        "crawl": "allow",
+        "explore": "allow",
+        "github-read-only": "allow",
+        "gitlab-read-only": "allow",
+        "search": "allow"
+      },
+      "todoread": "allow",
+      "todowrite": "allow",
+      "git_git_*": "deny",
+      "git_git_branch": "allow",
+      "git_git_diff*": "allow",
+      "git_git_log": "allow",
+      "git_git_show": "allow",
+      "git_git_status": "allow"
+    }
+  },
+  // Built-in subagents: explore, general, readonly
+  // Custom subagents (also see ./agent/ for markdown-based agents):
+  "analyze": {
+    "description": "Read-only file analysis",
+    "mode": "subagent",
+    "temperature": 0.1,
+    // "prompt": "{file:./prompts/analysis.txt}",
+    "permission": {
+      "*": "deny",
+      "read": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow"
+    }
+  },
+  "archive": {
+    "description": "Memory and Qdrant MCP",
+    "mode": "subagent",
+    "permission": {
+      "*": "deny",
+      "memory_*": "allow",
+      "qdrant-memory_*": "allow"
+    }
+  },
+  "brainstorm": {
+    "description": "Creative thinking with sequential-thinking MCP",
+    "mode": "subagent",
+    "temperature": 0.7,
+    // "prompt": "{file:./prompts/creative.txt}",
+    "permission": {
+      "*": "deny",
+      "sequential-thinking_*": "ask"
+    }
+  },
+  "browser": {
+    "description": "Chrome DevTools for page inspection, JS evaluation, navigation",
+    "mode": "subagent",
+    "permission": {
+      "*": "deny",
+      "chrome-devtools_*": "ask"
+      // "chrome-devtools_evaluate_script": "ask",
+      // "chrome-devtools_list_pages": "ask",
+      // "chrome-devtools_navigate_page": "ask",
+    }
+  },
+  "coder": {
+    // "color": "secondary", // Purple
+    "description": "Programmatic tool chaining with code-mode MCP via UTCP",
+    "mode": "subagent",
+    // "model": "github-copilot/claude-opus-4.5",
+    "temperature": 0.2,
+    "permission": {
+      "*": "deny",
+      "code-mode_*": "ask",
+      "code-mode_list_tools": "allow"
+      // "utcp_*": "ask",
+      // "utcp_list_tools": "allow",
+      // "utcp_tool_info": "allow",
+    }
+  },
+  "debug": {
+    "color": "error", // Red
+    "description": "Systematic debugging with hypothesis testing",
+    "mode": "subagent", // "all",
+    // "model": "github-copilot/claude-opus-4.5",
+    "temperature": 0.3,
+    "permission": {
+      // "*": "deny",
+      // "read": "allow",
+      // "glob": "allow",
+      // "grep": "allow",
+      // "list": "allow",
+      // "bash": "ask",
+      "skill": {
+        "*": "deny",
+        "systematic-debugging": "allow"
+      },
+      "task": { "*": "deny", "explore": "allow" }
+    }
+  },
+  "crawl": {
+    "description": "Web crawling and scraping via Firecrawl",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "firecrawl_*": "allow"
+    }
+  },
+  "flux": {
+    "description": "Flux CD and Kubernetes MCP",
+    "mode": "subagent",
+    "model": "github-copilot/claude-sonnet-4.5",
+    "permission": {
+      "*": "deny",
+      "skill": {
+        "*": "deny",
+        "flux-operator": "allow"
+      },
+      // MCP servers
+      "flux-operator_*": "allow",
+      "kubernetes_*": "allow"
+    }
+  },
+  "flux-read-only": {
+    "description": "Flux CD read-only MCP",
+    "mode": "subagent",
+    "model": "github-copilot/claude-sonnet-4.5",
+    "permission": {
+      "*": "deny",
+      "skill": {
+        "*": "deny",
+        "flux-operator": "allow"
+      },
+      // MCP servers
+      "flux-operator-read-only_*": "allow"
+    }
+  },
+  "github": {
+    "description": "GitHub via MCP and gh CLI",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "read": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "skill": { "*": "deny" },
+      "task": { "*": "deny", "explore": "allow" },
+
+      // https://github.com/github/github-mcp-server
+      "github_*": "ask",
+      "github_get_*": "allow",
+      "github_list_*": "allow",
+      "github_search_*": "allow",
+      "bash": { "gh *": "ask" }
+    }
+  },
+  "github-read-only": {
+    "description": "GitHub read-only MCP",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "read": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "skill": { "*": "deny" },
+      "task": { "*": "deny", "explore": "allow" },
+
+      // uses github-read-only MCP server (X-MCP-Readonly: true)
+      "github-read-only_*": "allow"
+    }
+  },
+  "gitlab": {
+    "description": "GitLab MCP and glab CLI",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "read": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "skill": { "*": "deny" },
+      "task": { "*": "deny", "explore": "allow" },
+
+      // https://docs.gitlab.com/ee/user/gitlab_duo/mcp.html
+      "gitlab_*": "ask",
+      "gitlab_get_*": "allow",
+      "gitlab_list_*": "allow",
+      "gitlab_search_*": "allow",
+      "bash": { "glab *": "ask" }
+    }
+  },
+  "gitlab-read-only": {
+    "description": "GitLab API read-only",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "read": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "skill": { "*": "deny" },
+      "task": { "*": "deny", "explore": "allow" },
+
+      // uses gitlab-read-only MCP server (X-MCP-Readonly: true)
+      "gitlab-read-only_*": "allow"
+    }
+  },
+  "system": {
+    "description": "Filesystem and mise MCP",
+    "mode": "subagent",
+    "model": "github-copilot/claude-haiku-4.5",
+    "permission": {
+      "*": "deny",
+      "mise_*": "ask",
+      // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+      "filesystem_*": "ask",
+      "filesystem_read_text_file": "allow",
+      "filesystem_read_media_file": "allow",
+      "filesystem_read_multiple_files": "allow",
+      "filesystem_list_directory": "allow",
+      "filesystem_list_directory_with_sizes": "allow",
+      "filesystem_directory_tree": "allow",
+      "filesystem_search_files": "allow",
+      "filesystem_get_file_info": "allow",
+      "filesystem_list_allowed_directories": "allow"
+      // "filesystem_create_directory": "ask",
+      // "filesystem_write_file": "ask",
+      // "filesystem_edit_file": "ask",
+      // "filesystem_move_file": "ask",
+    }
+  },
+  "zero": {
+    "color": "success", // Green
+    "description": "Minimal context",
+    "disable": true,
+    "prompt": "",
+    "mode": "all",
+    "permission": {
+      "*": "deny"
+    }
+  }
+}

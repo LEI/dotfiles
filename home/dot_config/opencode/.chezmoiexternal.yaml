@@ -9,17 +9,99 @@
 # https://github.com/openai/skills
 # https://skills.sh
 
-skills/find-skills/SKILL.md:
-  type: file
-  url: https://raw.githubusercontent.com/vercel-labs/skills/main/skills/find-skills/SKILL.md
+superpowers:
+  type: git-repo
+  url: https://github.com/obra/superpowers.git
+  refreshPeriod: 168h
+  clone:
+    args: ["--branch", "v4.1.1", "--depth", "1"]
+
+skills/affaan-m:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 2
+  include:
+    - "*/skills/backend-patterns/**"
+    - "*/skills/coding-standards/**"
+    - "*/skills/security-review/**"
+    - "*/skills/tdd-workflow/**"
   refreshPeriod: 168h
 
-skills/git-commit/SKILL.md:
+skills/anthropics:
+  type: archive
+  url: https://github.com/anthropics/skills/archive/main.tar.gz
+  stripComponents: 2
+  include:
+    - "*/skills/mcp-builder/**"
+    - "*/skills/skill-creator/**"
+  refreshPeriod: 168h
+
+skills/antfu:
+  type: archive
+  url: https://github.com/antfu/skills/archive/main.tar.gz
+  stripComponents: 2
+  include:
+    - "*/skills/pnpm/**"
+    - "*/skills/turborepo/**"
+  refreshPeriod: 168h
+
+skills/github/git-commit/SKILL.md:
   type: file
   url: https://raw.githubusercontent.com/github/awesome-copilot/refs/heads/main/skills/git-commit/SKILL.md
   refreshPeriod: 168h
 
-skills/code-review-excellence/SKILL.md:
+skills/supabase:
+  type: archive
+  url: https://github.com/supabase/agent-skills/archive/main.tar.gz
+  stripComponents: 2
+  include:
+    - "*/skills/supabase-postgres-best-practices/**"
+  refreshPeriod: 168h
+
+skills/vercel/ai-sdk:
+  type: archive
+  url: https://github.com/vercel/ai/archive/main.tar.gz
+  stripComponents: 3
+  include:
+    - "*/skills/use-ai-sdk/**"
+  refreshPeriod: 168h
+
+skills/vercel-labs/react-best-practices:
+  type: archive
+  url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
+  stripComponents: 3
+  include:
+    - "*/skills/react-best-practices/**"
+  refreshPeriod: 168h
+
+skills/vercel-labs/web-design-guidelines:
+  type: archive
+  url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
+  stripComponents: 3
+  include:
+    - "*/skills/web-design-guidelines/**"
+  refreshPeriod: 168h
+
+skills/vercel-labs/next-best-practices:
+  type: archive
+  url: https://github.com/vercel-labs/next-skills/archive/main.tar.gz
+  stripComponents: 3
+  include:
+    - "*/skills/next-best-practices/**"
+  refreshPeriod: 168h
+
+skills/vercel-labs/find-skills/SKILL.md:
   type: file
-  url: https://raw.githubusercontent.com/wshobson/agents/main/skills/code-review-excellence/SKILL.md
+  url: https://raw.githubusercontent.com/vercel-labs/skills/main/skills/find-skills/SKILL.md
+  refreshPeriod: 168h
+
+skills/wshobson:
+  type: archive
+  url: https://github.com/wshobson/agents/archive/main.tar.gz
+  stripComponents: 4
+  include:
+    - "*/plugins/backend-development/skills/api-design-principles/**"
+    - "*/plugins/developer-essentials/skills/code-review-excellence/**"
+    - "*/plugins/javascript-typescript/skills/nodejs-backend-patterns/**"
+    - "*/plugins/javascript-typescript/skills/typescript-advanced-types/**"
   refreshPeriod: 168h

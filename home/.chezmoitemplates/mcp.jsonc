@@ -112,6 +112,15 @@
         // "Authorization": "Bearer ${input:github_mcp_pat}",
       },
     },
+    "github-read-only": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}",
+        "X-MCP-Readonly": "true",
+      },
+    },
     {{- end }}
 
     {{- if and (env "GITLAB_HOST") (env "GITLAB_TOKEN") }}
@@ -120,6 +129,15 @@
       "url": "https://${GITLAB_HOST}/api/v4/mcp",
       "headers": {
         "Authorization": "Bearer ${GITLAB_TOKEN}",
+      },
+    },
+    // TODO: verify gitlab MCP supports read-only header
+    "gitlab-read-only": {
+      "type": "http",
+      "url": "https://${GITLAB_HOST}/api/v4/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITLAB_TOKEN}",
+        "X-MCP-Readonly": "true",
       },
     },
     {{- end }}

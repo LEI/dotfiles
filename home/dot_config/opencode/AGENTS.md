@@ -1,23 +1,31 @@
 # Global rules
 
-Prefer MCP over built-in over bash tool:
-
-- Read with limit and offset instead of head, tail
-- Glob instead of find
-- List or test -f instead of ls
-- Write instead of echo, cat
-- Edit instead of sed
-- Grep instead of rg, never use grep
-- trash instead of rm
-- git_git_status instead of git status
-- context7 for documentation instead of WebFetch, avoid searching dates
-- task for complex work (3+ steps), codebase exploration, and parallel streams
-- pty_spawn for interactive/long-running processes instead of bash &
-
+Use task tool to run subagents for specialized work.
 Execute independent tool calls in parallel.
 
-Use TodoRead and TodoWrite to keep track of goals.
+Prefer MCP over built-in over bash:
 
-Keep comments in code, use plain language or adapt to the project.
+- grep tool to search content, or rg as last resort
+- read tool with limit and offset to avoid loading large files
+- glob tool or fd instead of find
+- list tool or `test -f` instead of ls
+- write tool instead of echo, cat
+- edit tool instead of sed, awk
+- multiedit tool to group changes
+- or batch similar edits once the first is accepted
+- trash instead of rm
+- git MCP `git_git_*` instead of git commands
+- context7 MCP instead of webfetch for docs
+- pty_spawn tool for interactive/long-running processes
 
-Keep responses short and concise.
+Use todoread and todowrite extensively:
+
+- track progress and follow-up ideas
+- group similar items to use multiedit
+- end with pending todos if follow-up exists
+
+Keep code, comments, and responses short and concise.
+Preserve comments unless incorrect or obsolete.
+Use proper language structure, avoid emojis.
+
+For feature work in projects without `openspec/` dir, suggest `openspec init --tools opencode`.
