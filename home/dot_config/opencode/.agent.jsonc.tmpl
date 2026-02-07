@@ -1,13 +1,11 @@
-/* Avoid adding trailing commas */
-/* prettier-ignore */
 {
   // Primary agents: build, plan
   // Internal agents: compaction, summary, title
   "build": {
     "color": "accent", // Orange
-    "description": "Primary orchestrator with full tool access and subagents",
+    "description": "Builder orchestrator with write access",
     "mode": "primary",
-    "model": "github-copilot/claude-opus-4.6",
+    // "model": "github-copilot/claude-opus-4.6",
     // "temperature": 0.3,
     "permission": {
       "edit": "ask", // Always allow per session
@@ -28,13 +26,18 @@
         // "brainstorm": "allow",
         "browser": "allow",
         "coder": "allow",
+        "code-mode": "allow",
         "crawl": "allow",
         "debug": "allow",
         "explore": "allow",
+        {{- if .features.kube }}
         "flux": "allow",
-        "flux-read-only": "deny",
+        "flux-explorer": "deny",
+        {{- end }}
         "github": "allow",
+        "github-explorer": "deny",
         "gitlab": "allow",
+        "gitlab-explorer": "deny",
         "review": "allow",
         "search": "allow",
         "system": "allow"
@@ -47,15 +50,16 @@
       // "git_git_log": "allow",
       // "git_git_show": "allow",
       // "git_git_status": "allow",
-    }
-    // "prompt": "{file:./prompts/build.txt}",
+    },
+    "prompt": "{file:./prompts/build.md}"
   },
   "plan": {
     "color": "primary", // Blue
-    "description": "Read-only orchestrator for research and planning",
+    "description": "Researcher orchestrator with read-only access",
     "mode": "primary",
+    "prompt": "{file:./prompts/plan.md}",
     // "model": "github-copilot/claude-haiku-4.5",
-    "model": "github-copilot/claude-sonnet-4.5",
+    // "model": "github-copilot/claude-sonnet-4.5",
     "permission": {
       "edit": "deny",
       // "bash": "ask",
@@ -65,8 +69,8 @@
         "brainstorm": "allow",
         "crawl": "allow",
         "explore": "allow",
-        "github-read-only": "allow",
-        "gitlab-read-only": "allow",
+        "github-explorer": "allow",
+        "gitlab-explorer": "allow",
         "search": "allow"
       },
       "todoread": "allow",
@@ -126,6 +130,16 @@
   },
   "coder": {
     // "color": "secondary", // Purple
+    "description": "Coding agent",
+    "mode": "subagent", // "all",
+    // "model": "github-copilot/claude-opus-4.5",
+    // "temperature": 0.2,
+    "permission": {
+      // "*": "deny"
+    }
+  },
+  "code-mode": {
+    // "color": "warning", // Orange
     "description": "Programmatic tool chaining with code-mode MCP via UTCP",
     "mode": "subagent",
     // "model": "github-copilot/claude-opus-4.5",
@@ -133,10 +147,10 @@
     "permission": {
       "*": "deny",
       "code-mode_*": "ask",
-      "code-mode_list_tools": "allow"
-      // "utcp_*": "ask",
-      // "utcp_list_tools": "allow",
-      // "utcp_tool_info": "allow",
+      "code-mode_list_tools": "allow",
+      "utcp_*": "ask",
+      "utcp_list_tools": "allow",
+      "utcp_tool_info": "allow"
     }
   },
   "debug": {
@@ -162,16 +176,17 @@
   "crawl": {
     "description": "Web crawling and scraping via Firecrawl",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "firecrawl_*": "allow"
     }
   },
+  {{- if .features.kube }}
   "flux": {
     "description": "Flux CD and Kubernetes MCP",
     "mode": "subagent",
-    "model": "github-copilot/claude-sonnet-4.5",
+    // "model": "github-copilot/claude-sonnet-4.5",
     "permission": {
       "*": "deny",
       "skill": {
@@ -183,10 +198,10 @@
       "kubernetes_*": "allow"
     }
   },
-  "flux-read-only": {
+  "flux-explorer": {
     "description": "Flux CD read-only MCP",
     "mode": "subagent",
-    "model": "github-copilot/claude-sonnet-4.5",
+    // "model": "github-copilot/claude-sonnet-4.5",
     "permission": {
       "*": "deny",
       "skill": {
@@ -197,10 +212,11 @@
       "flux-operator-read-only_*": "allow"
     }
   },
+  {{- end }}
   "github": {
     "description": "GitHub via MCP and gh CLI",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "read": "allow",
@@ -218,10 +234,10 @@
       "bash": { "gh *": "ask" }
     }
   },
-  "github-read-only": {
+  "github-explorer": {
     "description": "GitHub read-only MCP",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "read": "allow",
@@ -238,7 +254,7 @@
   "gitlab": {
     "description": "GitLab MCP and glab CLI",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "read": "allow",
@@ -256,10 +272,10 @@
       "bash": { "glab *": "ask" }
     }
   },
-  "gitlab-read-only": {
+  "gitlab-explorer": {
     "description": "GitLab API read-only",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "read": "allow",
@@ -276,7 +292,7 @@
   "system": {
     "description": "Filesystem and mise MCP",
     "mode": "subagent",
-    "model": "github-copilot/claude-haiku-4.5",
+    // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
       "*": "deny",
       "mise_*": "ask",
@@ -300,9 +316,9 @@
   "zero": {
     "color": "success", // Green
     "description": "Minimal context",
-    "disable": true,
+    // "disable": true,
     "prompt": "",
-    "mode": "all",
+    "mode": "subagent", // "all",
     "permission": {
       "*": "deny"
     }
