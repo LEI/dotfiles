@@ -1,8 +1,52 @@
 ---
-# TODO: pin tag or commit (75d32a3)
+agent/extensions:
+  type: archive
+  url: https://github.com/badlogic/pi-mono/archive/refs/tags/v0.52.9.tar.gz
+  refreshPeriod: 168h
+  stripComponents: 5
+  include:
+    # - "*/packages/coding-agent/examples/extensions/dynamic-resources/**"
+    - "*/packages/coding-agent/examples/extensions/plan-mode/**"
+    - "*/packages/coding-agent/examples/extensions/sandox/**"
+    - "*/packages/coding-agent/examples/extensions/subagent/**"
+    - "*/packages/coding-agent/examples/extensions/commands.ts"
+    # - "*/packages/coding-agent/examples/extensions/antigravity-image-gen.ts"
+    # - "*/packages/coding-agent/examples/extensions/auto-commit-on-exit.ts"
+    # - "*/packages/coding-agent/examples/extensions/bash-spawn-hook.ts" # source ~/.profile
+    - "*/packages/coding-agent/examples/extensions/confirm-destructive.ts"
+    # - "*/packages/coding-agent/examples/extensions/custom-compaction.ts"
+    # - "*/packages/coding-agent/examples/extensions/dirty-repo-guard.ts"
+    # - "*/packages/coding-agent/examples/extensions/git-checkpoint.ts"
+    - "*/packages/coding-agent/examples/extensions/handoff.ts"
+    # - "*/packages/coding-agent/examples/extensions/inline-bash.ts"
+    - "*/packages/coding-agent/examples/extensions/interactive-shell.ts"
+    - "*/packages/coding-agent/examples/extensions/minimal-mode.ts"
+    - "*/packages/coding-agent/examples/extensions/modal-editor.ts"
+    - "*/packages/coding-agent/examples/extensions/notify.ts"
+    # - "*/packages/coding-agent/examples/extensions/permission-gate.ts"
+    # - "*/packages/coding-agent/examples/extensions/preset.ts"
+    - "*/packages/coding-agent/examples/extensions/protected-paths.ts"
+    # - "*/packages/coding-agent/examples/extensions/qna.ts"
+    - "*/packages/coding-agent/examples/extensions/question.ts"
+    # - "*/packages/coding-agent/examples/extensions/questionnaire.ts"
+    # - "*/packages/coding-agent/examples/extensions/ssh.ts"
+    # - "*/packages/coding-agent/examples/extensions/summarize.ts"
+    - "*/packages/coding-agent/examples/extensions/tools.ts"
+    # - "*/packages/coding-agent/examples/extensions/trigger-compact.ts"
+    - "*/packages/coding-agent/examples/extensions/truncated-tools.ts"
+
 agent/skills/pi-skills:
   type: git-repo
   url: https://github.com/badlogic/pi-skills.git
+  # ref: 75d32a3
   refreshPeriod: 168h
   clone:
     args: ["--depth=1"]
+
+# Depends on https://github.com/nicobailon/pi-interactive-shell
+# pi_exec pi install npm:pi-interactive-shell
+agent/skills/foreground-chains/SKILL.md:
+  type: file
+  url: https://raw.githubusercontent.com/nicobailon/pi-foreground-chains/refs/heads/main/SKILL.md
+  # ref: 545a570
+  refreshPeriod: 168h

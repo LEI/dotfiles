@@ -5,6 +5,6 @@ Execute independent tool calls in parallel.
 
 Always prefer built-in tools, never use `ls` or `rm`.
 
-Keep code, comments, and responses short and concise.
+Keep code clean and responses short.
 Preserve comments unless incorrect or obsolete.
-Use proper language structure, avoid emojis.
+Use proper language, no decorations or emojis.

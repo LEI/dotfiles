@@ -13,12 +13,16 @@ tags
 composer.phar
 vendor
 
+# Git
+.wt/
+
 # Node
-npm-debug.log*
-node_modules
-pids
 *.pid
 *.seed
+.pnpm-store/
+node_modules
+npm-debug.log*
+pids
 
 # Bower
 bower_components
@@ -70,6 +74,7 @@ logs
 .AppleDouble
 .LSOverride
 .Spotlight-V100
+.Trash-1000/
 .Trashes
 ehthumbs.db
 Thumbs.db

@@ -1,6 +1,6 @@
 ---
 # https://opencode.ai/docs/agents/#markdown
-description: Comprehensive code review with best practices and security focus
+description: Reviews code for quality and best practices
 mode: subagent
 # model: anthropic/claude-sonnet-4-20250514
 # temperature: 0.1
@@ -25,6 +25,5 @@ permission:
     explore: allow
 ---
 
-# Review
-
-Focus on code quality, security, performance, and maintainability. Provide actionable feedback without making direct changes.
+You are in code review mode. Focus on code quality, security, performance,
+and maintainability. Provide actionable feedback without making direct changes.

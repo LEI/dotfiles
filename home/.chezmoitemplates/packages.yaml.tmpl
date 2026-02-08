@@ -380,8 +380,7 @@ packages:
   mlx-openai-server:
     enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
     type: uv
-  # TODO: install in container
-  # mise use -g npm:@mariozechner/pi-coding-agent
+  # bunx @mariozechner/pi-coding-agent
   # pi:
   #   enabled: {{ and .container .features.ai }}
   #   # env:
@@ -969,7 +968,8 @@ osPackages:
         enabled: {{ .gui }}
       # google-drive:
       # gpg-suite:
-      # grandperspective:
+      grandperspective:
+        enabled: {{ .gui }}
       # hammerspoon: # rectangle, swiftbar
       inkscape:
       iterm2:

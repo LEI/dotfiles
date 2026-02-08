@@ -8,10 +8,11 @@ run() {
 }
 
 # FIXME: interactive prompt in case mise.toml exists
-mise trust ~/.config/mise
-if test -f mise.toml; then
-  run mise trust --ignore
-fi
+mise trust --all
+# mise trust ~/.config/mise
+# if test -f mise.toml; then
+#   run mise trust --ignore
+# fi
 
 # Run the agent
 if ! run pi --continue "$@"; then

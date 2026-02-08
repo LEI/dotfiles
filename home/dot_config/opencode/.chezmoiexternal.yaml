@@ -20,40 +20,40 @@
 skills/superpowers:
   type: archive
   url: https://github.com/obra/superpowers/archive/v4.1.1.tar.gz
+  refreshPeriod: 168h
   stripComponents: 2
   include:
     - "*/skills/**"
-  refreshPeriod: 168h
 
 skills/affaan-m:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/v1.4.1.tar.gz
+  refreshPeriod: 168h
   stripComponents: 2
   include:
     - "*/skills/backend-patterns/**"
     - "*/skills/coding-standards/**"
     - "*/skills/security-review/**"
     - "*/skills/tdd-workflow/**"
-  refreshPeriod: 168h
 
 # https://github.com/anthropics/skills
 skills/anthropics:
   type: archive
   url: https://github.com/anthropics/skills/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 2
   include:
     - "*/skills/mcp-builder/**"
     - "*/skills/skill-creator/**"
-  refreshPeriod: 168h
 
 # skills/antfu:
 #   type: archive
 #   url: https://github.com/antfu/skills/archive/main.tar.gz
+#   refreshPeriod: 168h
 #   stripComponents: 2
 #   include:
 #     - "*/skills/pnpm/**"
 #     - "*/skills/turborepo/**"
-#   refreshPeriod: 168h
 
 skills/github/git-commit/SKILL.md:
   type: file
@@ -64,6 +64,7 @@ skills/github/git-commit/SKILL.md:
 skills/openai:
   type: archive
   url: https://github.com/openai/skills/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 2
   include:
     # - "*/skills/.system/skill-creator/**"
@@ -81,47 +82,46 @@ skills/openai:
     - "*/slills/.curated/security-threat-model/**"
     # - "*/slills/.curated/spreadsheet/**"
     # - "*/slills/.experimental/gitlab-address-comments/**"
-  refreshPeriod: 168h
 
 skills/supabase:
   type: archive
   url: https://github.com/supabase/agent-skills/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 2
   include:
     - "*/skills/supabase-postgres-best-practices/**"
-  refreshPeriod: 168h
 
 skills/vercel/ai-sdk:
   type: archive
   url: https://github.com/vercel/ai/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 3
   include:
     - "*/skills/use-ai-sdk/**"
-  refreshPeriod: 168h
 
 # skills/vercel-labs/react-best-practices:
 #   type: archive
 #   url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
+#   refreshPeriod: 168h
 #   stripComponents: 3
 #   include:
 #     - "*/skills/react-best-practices/**"
-#   refreshPeriod: 168h
 
 skills/vercel-labs/web-design-guidelines:
   type: archive
   url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 3
   include:
     - "*/skills/web-design-guidelines/**"
-  refreshPeriod: 168h
 
 # skills/vercel-labs/next-best-practices:
 #   type: archive
 #   url: https://github.com/vercel-labs/next-skills/archive/main.tar.gz
+#   refreshPeriod: 168h
 #   stripComponents: 3
 #   include:
 #     - "*/skills/next-best-practices/**"
-#   refreshPeriod: 168h
 
 skills/vercel-labs/find-skills/SKILL.md:
   type: file
@@ -131,10 +131,10 @@ skills/vercel-labs/find-skills/SKILL.md:
 skills/wshobson:
   type: archive
   url: https://github.com/wshobson/agents/archive/main.tar.gz
+  refreshPeriod: 168h
   stripComponents: 4
   include:
     - "*/plugins/backend-development/skills/api-design-principles/**"
     - "*/plugins/developer-essentials/skills/code-review-excellence/**"
     - "*/plugins/javascript-typescript/skills/nodejs-backend-patterns/**"
     - "*/plugins/javascript-typescript/skills/typescript-advanced-types/**"
-  refreshPeriod: 168h

@@ -38,7 +38,7 @@
 {{- end }}
 {{- end }}
 
-{{- if not (and .features.ai (or .features.docker .features.podman)) }}
+{{- if not (or .features.docker .features.podman) }}
 .config/pi/
 {{- end }}
 

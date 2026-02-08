@@ -1,5 +1,9 @@
 #!/bin/bash
 
+pi_local() {
+  bunx @mariozechner/pi-coding-agent@0.52.9 "$@"
+}
+
 pi_compose() {
   # local dir="$PWD"
   # dir="${dir#$HOME/}"
@@ -14,7 +18,7 @@ pi_compose() {
     "$@"
 }
 
-# Rebuild and start the container in detached mode by default
+# Rebuild and start detached by default
 pi_up() {
   if [ $# -eq 0 ]; then
     set -- --build --detach
@@ -27,7 +31,7 @@ pi_attach() {
   pi_compose attach pi "$@"
 }
 
-# Execute a command in the running container
+# Execute in the running container
 pi_exec() {
   # pi_compose exec -it pi bash -c "$*"
   pi_compose exec -it pi "$@"
@@ -37,15 +41,17 @@ pi_down() {
   pi_compose down "$@"
 }
 
-# Start the container and continue session
+# Start or continue session
 pi() {
-  # pi_up --detach && pi_exec mise exec -- pi --continue "$@"
-  if pi_up --detach || pi_up --build --detach; then
-    if [ $# -gt 0 ]; then
-      pi_exec "$@"
-      pi_exec /entrypoint.sh "$@"
-    else
-      pi_attach --index 0
-    fi
+  pi_up --detach
+  if [ $# -eq 0 ]; then
+    set -- --continue
   fi
+  # NOTE: this ensures per project mise.toml is ignored
+  pi_exec mise exec node@lts -- pi "$@"
+  # if [ $# -gt 0 ]; then
+  #   pi_exec pi "$@"
+  # else
+  #   pi_attach --
+  # fi
 }

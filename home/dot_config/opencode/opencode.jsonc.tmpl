@@ -70,7 +70,12 @@
       "*.env.example": "allow"
     },
     // All file modifications (covers edit, write, patch, multiedit)
-    "edit": "ask",
+    "edit": {
+      "*": "ask",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
     // File globbing (matches the glob pattern)
     "glob": "allow",
     // Content search (matches the regex pattern)
@@ -282,6 +287,8 @@
     }, */
     // FIXME: <|channel|>analysis<|message|>[...]
     // <|end|><|start|>assistant<|channel|>final<|message|>[...]
+    // hf cache ls
+    // hf cache rm $(hf cache ls --format=json | jq -r '.[] | "\(.repo_type)/\(.repo_id)"')
     "mlx-lm": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "MLX LM (local)",
@@ -313,6 +320,8 @@
       }
     },
     // https://opencode.ai/docs/providers#ollama
+    // ollama list
+    // ollama rm $(ollama list | tail -n+2 | cut -d' ' -f1)
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",

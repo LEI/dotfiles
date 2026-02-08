@@ -4,10 +4,10 @@ FROM debian:13-slim
 
 # Install system dependencies and mise
 # https://mise.jdx.dev/installing-mise.html#apt
-ENV DEPS "bash build-essential ca-certificates curl debhelper-compat dpkg-dev git jq"
+ENV DEPS "bash build-essential ca-certificates curl debhelper-compat dpkg-dev git jq trash-cli"
 # hadolint ignore=DL3008
 RUN apt-get update --assume-yes --quiet && \
-    apt-get install --assume-yes --no-install-recommends --quiet $DEPS && \
+    apt-get install --assume-yes --no-install-recommends --quiet ${DEPS?:} && \
     install -dm 755 /etc/apt/keyrings && \
     sh -euc 'curl -LSfs https://mise.jdx.dev/gpg-key.pub -o /etc/apt/keyrings/mise-archive-keyring.asc' && \
     sh -euc 'echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.asc] https://mise.jdx.dev/deb stable main" >/etc/apt/sources.list.d/mise.list' && \
@@ -17,13 +17,13 @@ RUN apt-get update --assume-yes --quiet && \
 
 # Install shpool
 # https://github.com/shell-pool/shpool/tree/master/debian
-ENV SHPOOL_VERSION=0.9.3
+ARG SHPOOL_VERSION
 # hadolint ignore=DL3003
 RUN set -eux && \
     mkdir /opt/shpool && \
-    curl -LSfs https://github.com/shell-pool/shpool/archive/refs/tags/v$SHPOOL_VERSION.tar.gz -o /opt/shpool/shpool.tar.gz && \
+    curl -LSfs https://github.com/shell-pool/shpool/archive/refs/tags/v${SHPOOL_VERSION:?}.tar.gz -o /opt/shpool/shpool.tar.gz && \
     tar -xzf /opt/shpool/shpool.tar.gz -C /opt && \
-    cd /opt/shpool-$SHPOOL_VERSION && \
+    cd /opt/shpool-${SHPOOL_VERSION:?} && \
     mise exec rust@stable -- dpkg-buildpackage --unsigned-changes --unsigned-source --build=binary --no-check-builddeps && \
     dpkg -i ../shpool_*.deb
 
@@ -35,15 +35,22 @@ ENV HOME /home/coder
 ENV PATH "/home/coder/.local/share/mise/shims:$PATH"
 
 # Install pi-coding-agent globally
-# RUN npm install --global @mariozechner/pi-coding-agent@0.52.8
+# RUN npm install --global @mariozechner/pi-coding-agent@${PI_VERSION:?}
 
 # https://mise.jdx.dev/mise-cookbook/docker.html
+ARG PI_VERSION
 RUN mise use --global --quiet \
-    fd@10.3.0 \
-    bun@1.3.9 \
+    bun@latest \
+    codex@latest \
+    fd@latest \
+    gh@latest \
+    glab@latest \
     node@lts \
-    npm:@mariozechner/pi-coding-agent@0.52.8 \
-    starship
+    npm:@fission-ai/openspec@latest \
+    npm:@mariozechner/pi-coding-agent@${PI_VERSION:?} \
+    pnpm@latest \
+    ripgrep@latest \
+    starship@latest
 
 # Create entry point
 COPY --chown=coder:coder entrypoint.sh "/entrypoint.sh"
@@ -51,9 +58,10 @@ COPY --chown=coder:coder entrypoint.sh "/entrypoint.sh"
 RUN chmod +x /entrypoint.sh && \
     echo 'eval "$(mise activate bash)' >>~/.bashrc && \
     echo 'eval "$(starship init bash)' >>~/.bashrc 
-# echo 'PATH="/home/coder/.local/share/mise/shims:$PATH"' >>~/.bashrc
 
-# USER node
+# Install extensions
+RUN pi update
+
 ARG WORKSPACE
 WORKDIR ${WORKSPACE:?}
 ENTRYPOINT ["/entrypoint.sh"]
