@@ -1,0 +1,8 @@
+---
+# TODO: pin tag or commit (75d32a3)
+agent/skills/pi-skills:
+  type: git-repo
+  url: https://github.com/badlogic/pi-skills.git
+  refreshPeriod: 168h
+  clone:
+    args: ["--depth=1"]

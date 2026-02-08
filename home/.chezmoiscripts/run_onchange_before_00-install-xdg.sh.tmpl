@@ -18,6 +18,12 @@ if [ -d "$HOME/.claude" ] && ! [ -d "$CLAUDE_CONFIG_DIR" ]; then
   dry_run mv "$HOME/.claude" "$CLAUDE_CONFIG_DIR"
   dry_run ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
 fi
+
+# https://github.com/badlogic/pi-mono/issues/534
+if [ -d "$HOME/.pi" ] && ! [ -d "$PI_CONFIG_DIR" ]; then
+  dry_run mv "$HOME/.pi" "$PI_CONFIG_DIR"
+  dry_run ln -s "$PI_CONFIG_DIR" "$HOME/.pi"
+fi
 {{- end }}
 
 {{- if .features.docker }}

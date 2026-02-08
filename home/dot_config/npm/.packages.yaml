@@ -43,3 +43,25 @@ packages:
   cline: # roocode
     enabled: "{{ .features.ai }}"
     type: npm
+  bash-language-server:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  prettier:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  sql-language-server:
+    enabled: "{{ and .features.sql (not .features.neovim) }}"
+    type: npm
+  typescript:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  typescript-language-server:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+  vscode-langservers-extracted@4.8:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  yaml-language-server@next:
+    enabled: "{{ not .features.neovim }}"
+    type: npm

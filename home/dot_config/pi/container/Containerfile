@@ -1,0 +1,60 @@
+# FROM node:24-slim
+FROM debian:13-slim
+# FROM dhi.io/debian-base:trixie
+
+# Install system dependencies and mise
+# https://mise.jdx.dev/installing-mise.html#apt
+ENV DEPS "bash build-essential ca-certificates curl debhelper-compat dpkg-dev git jq"
+# hadolint ignore=DL3008
+RUN apt-get update --assume-yes --quiet && \
+    apt-get install --assume-yes --no-install-recommends --quiet $DEPS && \
+    install -dm 755 /etc/apt/keyrings && \
+    sh -euc 'curl -LSfs https://mise.jdx.dev/gpg-key.pub -o /etc/apt/keyrings/mise-archive-keyring.asc' && \
+    sh -euc 'echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.asc] https://mise.jdx.dev/deb stable main" >/etc/apt/sources.list.d/mise.list' && \
+    apt-get update --assume-yes --quiet && \
+    apt-get install --assume-yes --no-install-recommends --quiet mise && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install shpool
+# https://github.com/shell-pool/shpool/tree/master/debian
+ENV SHPOOL_VERSION=0.9.3
+# hadolint ignore=DL3003
+RUN set -eux && \
+    mkdir /opt/shpool && \
+    curl -LSfs https://github.com/shell-pool/shpool/archive/refs/tags/v$SHPOOL_VERSION.tar.gz -o /opt/shpool/shpool.tar.gz && \
+    tar -xzf /opt/shpool/shpool.tar.gz -C /opt && \
+    cd /opt/shpool-$SHPOOL_VERSION && \
+    mise exec rust@stable -- dpkg-buildpackage --unsigned-changes --unsigned-source --build=binary --no-check-builddeps && \
+    dpkg -i ../shpool_*.deb
+
+# Create a non-root user
+RUN groupadd --gid 1000 coder \
+    && useradd --uid 1000 --gid coder --shell /bin/bash --create-home coder
+USER coder
+ENV HOME /home/coder
+ENV PATH "/home/coder/.local/share/mise/shims:$PATH"
+
+# Install pi-coding-agent globally
+# RUN npm install --global @mariozechner/pi-coding-agent@0.52.8
+
+# https://mise.jdx.dev/mise-cookbook/docker.html
+RUN mise use --global --quiet \
+    fd@10.3.0 \
+    bun@1.3.9 \
+    node@lts \
+    npm:@mariozechner/pi-coding-agent@0.52.8 \
+    starship
+
+# Create entry point
+COPY --chown=coder:coder entrypoint.sh "/entrypoint.sh"
+# hadolint ignore=SC2016
+RUN chmod +x /entrypoint.sh && \
+    echo 'eval "$(mise activate bash)' >>~/.bashrc && \
+    echo 'eval "$(starship init bash)' >>~/.bashrc 
+# echo 'PATH="/home/coder/.local/share/mise/shims:$PATH"' >>~/.bashrc
+
+# USER node
+ARG WORKSPACE
+WORKDIR ${WORKSPACE:?}
+ENTRYPOINT ["/entrypoint.sh"]
+# tmux new-session -A -s 'pi --continue; bash -l'

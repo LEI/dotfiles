@@ -27,7 +27,7 @@
         "browser": "allow",
         "coder": "allow",
         "code-mode": "allow",
-        "crawl": "allow",
+        // "firecrawl": "allow",
         "debug": "allow",
         "explore": "allow",
         {{- if .features.kube }}
@@ -42,8 +42,8 @@
         "search": "allow",
         "system": "allow"
       },
-      "todoread": "allow",
-      "todowrite": "allow"
+      // "todoread": "allow",
+      // "todowrite": "allow"
       // "git_git_*": "ask",
       // "git_git_branch": "allow",
       // "git_git_diff*": "allow",
@@ -67,14 +67,14 @@
         "*": "deny",
         "analyze": "allow",
         "brainstorm": "allow",
-        "crawl": "allow",
+        // "firecrawl": "allow",
         "explore": "allow",
         "github-explorer": "allow",
         "gitlab-explorer": "allow",
         "search": "allow"
       },
-      "todoread": "allow",
-      "todowrite": "allow",
+      // "todoread": "allow",
+      // "todowrite": "allow",
       "git_git_*": "deny",
       "git_git_branch": "allow",
       "git_git_diff*": "allow",
@@ -91,7 +91,7 @@
     "temperature": 0.1,
     // "prompt": "{file:./prompts/analysis.txt}",
     "permission": {
-      "*": "deny",
+      "*": "ask",
       "read": "allow",
       "glob": "allow",
       "grep": "allow",
@@ -167,14 +167,15 @@
       // "list": "allow",
       // "bash": "ask",
       "skill": {
-        "*": "deny",
+        "ask": "deny",
         "systematic-debugging": "allow"
       },
       "task": { "*": "deny", "explore": "allow" }
     }
   },
-  "crawl": {
-    "description": "Web crawling and scraping via Firecrawl",
+  "firecrawl": {
+    "description": "Firecrawl MCP",
+    "disable": true,
     "mode": "subagent",
     // "model": "github-copilot/claude-haiku-4.5",
     "permission": {
@@ -223,7 +224,7 @@
       "glob": "allow",
       "grep": "allow",
       "list": "allow",
-      "skill": { "*": "deny" },
+      "skill": "deny",
       "task": { "*": "deny", "explore": "allow" },
 
       // https://github.com/github/github-mcp-server
@@ -244,7 +245,7 @@
       "glob": "allow",
       "grep": "allow",
       "list": "allow",
-      "skill": { "*": "deny" },
+      "skill": "deny",
       "task": { "*": "deny", "explore": "allow" },
 
       // uses github-read-only MCP server (X-MCP-Readonly: true)
@@ -261,7 +262,7 @@
       "glob": "allow",
       "grep": "allow",
       "list": "allow",
-      "skill": { "*": "deny" },
+      "skill": "deny",
       "task": { "*": "deny", "explore": "allow" },
 
       // https://docs.gitlab.com/ee/user/gitlab_duo/mcp.html
@@ -282,7 +283,7 @@
       "glob": "allow",
       "grep": "allow",
       "list": "allow",
-      "skill": { "*": "deny" },
+      "skill": "deny",
       "task": { "*": "deny", "explore": "allow" },
 
       // uses gitlab-read-only MCP server (X-MCP-Readonly: true)

@@ -6,21 +6,21 @@
 {{- $quotaToast := false -}}
 {
   "$schema": "https://opencode.ai/config.json",
-  "theme": {{ get . "theme" | default "system" | quote }},
+  "autoupdate": "notify", // false,
   // "model": "anthropic/claude-sonnet-4-5",
   // "model": "anthropic/claude-opus-4-6",
   // "model": "opencode/kimi-k2.5-free",
-  "model": "opencode/big-pickle",
+  "model": "github-copilot/gpt-4o",
   {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
   // "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
   {{- end }}
-  "autoupdate": false,
-
+  // "small_model": "",
+  "default_agent": "plan",
   // https://github.com/anomalyco/opencode/pull/8562
   // "server": {
   //   "hostname": "localhost"
   // },
-
+  "theme": {{ get . "theme" | default "system" | quote }},
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [
     // ".cursor/rules/*.md",
@@ -101,12 +101,15 @@
       "rg *": "allow",
       "rm *": "deny",
       "sed * -I*": "ask",
-      "sed *": "allow",
       "sed * -i*": "ask",
+      "sed *": "allow",
       "sleep *": "allow",
+      "sort *": "allow",
+      "stat *": "allow",
       "tail *": "allow",
       "test *": "allow",
       "trash *": "ask",
+      "uniq *": "ask",
       "wc *": "allow",
       "yq *": "allow",
 
@@ -151,10 +154,14 @@
       "mcp-builder": "allow",
       "skill-creator": "allow",
       // antfu/skills
-      "pnpm": "allow",
-      "turborepo": "allow",
+      // "pnpm": "allow",
+      // "turborepo": "allow",
       // github/awesome-copilot
       "git-commit": "deny",
+      // openai/skill
+      "security-best-practices": "allow",
+      "security-ownership-map": "allow",
+      "security-threat-model": "allow",
       // supabase
       "supabase-postgres-best-practices": "allow",
       // obra/superpowers
@@ -176,8 +183,8 @@
       "ai-sdk": "allow",
       // vercel-labs
       "find-skills": "allow",
-      "next-best-practices": "allow",
-      "vercel-react-best-practices": "allow",
+      // "next-best-practices": "allow",
+      // "vercel-react-best-practices": "allow",
       "web-design-guidelines": "allow",
       // wshobson/agents
       "api-design-principles": "allow",
@@ -233,6 +240,7 @@
     // "context7_query-docs": "allow",
     // "context7_resolve-library-id": "allow",
     "exa_*": "ask",
+    "google_search": "allow",
     "grep_app_*": "ask",
     "grep_app_searchGitHub": "allow"
   },

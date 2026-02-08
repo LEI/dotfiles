@@ -1,0 +1,27 @@
+---
+services:
+  pi:
+    build:
+      context: .
+      dockerfile: Containerfile
+      args:
+        # - UID={{ output "id" "-u" }}
+        # - GID={{ output "id" "-g" }}
+        - USER=coder
+        - WORKSPACE=${WORKSPACE:?}
+    stdin_open: true
+    tty: true
+    # working_dir: ${WORKSPACE:?}
+    volumes:
+      # - ${PI_CONFIG_DIR:-$HOME/.config/pi}:/home/coder/.pi:ro
+      - ${PI_CODING_AGENT_DIR:-$HOME/.config/pi/agent}:/home/coder/.pi/agent
+      - ${PWD:-.}:${WORKSPACE:?}
+    environment:
+      # - PI_CONFIG_DIR=${PI_CONFIG_DIR:-/home/coder/.config/pi}
+      # - PI_CODING_AGENT_DIR=${PI_CODING_AGENT_DIR:-/home/coder/.config/pi/agent}
+      # - ANTHROPIC_API_KEY
+      - BRAVE_API_KEY
+      # - GEMINI_API_KEY
+      # - GITHUB_TOKEN
+      # - GOOGLE_API_KEY
+      # - OPENAI_API_KEY

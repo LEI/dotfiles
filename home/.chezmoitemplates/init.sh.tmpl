@@ -123,6 +123,9 @@ source_plugins() {
 source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
 
 source_files "sh/functions"
+for file in "${XDG_CONFIG_HOME:-$HOME/.config}/"*/functions.sh; do
+  bench source "$file"
+done
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin" # before replace
@@ -184,6 +187,7 @@ fi
 # https://github.com/rossmacarthur/sheldon#loading-plugins
 BENCHFMT="sheldon" bench eval "$(sheldon source)"
 {{- else }}
+# WARN: this block is duplicated in sheldon plugin.toml
 
 {{- if .features.mise }}
 

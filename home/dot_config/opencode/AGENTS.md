@@ -1,6 +1,7 @@
 # Global rules
 
-Use relative paths for files in directory, absolute if outside.
+Use task tool to run subagents for specialized work.
+Execute independent tool calls in parallel.
 
 Always prefer built-in tools, never use `ls` or `rm`.
 

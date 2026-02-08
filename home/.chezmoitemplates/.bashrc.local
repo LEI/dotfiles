@@ -2,7 +2,7 @@ export DO_NOT_TRACK=1
 
 {{- if .features.ai }}
 
-# export OPENCODE_EXPERIMENTAL=true
+export OPENCODE_EXPERIMENTAL=true
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 {{- end }}
 

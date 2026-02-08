@@ -38,6 +38,10 @@
 {{- end }}
 {{- end }}
 
+{{- if not (and .features.ai (or .features.docker .features.podman)) }}
+.config/pi/
+{{- end }}
+
 {{- if or (not .features.helix) (ne .osID "manjaro") }}
 .config/helix/Makefile
 {{- end }}
