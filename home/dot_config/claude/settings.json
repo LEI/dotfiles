@@ -1,9 +1,10 @@
 {
-  "autoUpdates": false,
-  "enableAllProjectMcpServers": false,
   "env": {
-    "DISABLE_TELEMETRY": "1",
-    "OTEL_METRICS_EXPORTER": ""
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
   },
   "permissions": {
     "allow": [
@@ -28,6 +29,14 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch"
     ],
+    "deny": [
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(wget:*)",
+      "Read(./.env)",
+      "Read(./secrets/**)"
+    ],
     "ask": [
       "Bash(gh)",
       "Bash(git merge:*)",
@@ -41,18 +50,14 @@
       "Task",
       "Write"
     ],
-    "deny": [
-      "Bash(cat:*)",
-      "Bash(curl:*)",
-      "Bash(ls:*)",
-      "Bash(wget:*)",
-      "Read(./.env)",
-      "Read(./secrets/**)"
-    ]
+    "defaultMode": "default"
   },
+  "enableAllProjectMcpServers": false,
   "statusLine": {
     "type": "command",
     "command": "~/.config/claude/statusline.sh",
     "padding": 0
-  }
+  },
+  "alwaysThinkingEnabled": false,
+  "autoUpdates": false
 }
