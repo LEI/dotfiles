@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eux
+
+# Providers: {{ get (includeTemplate "dot_config/opencode/opencode.jsonc.tmpl" . | fromJsonc) "provider" | keys | sortAlpha | join ", " }}
+opencode models --refresh # --verbose

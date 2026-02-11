@@ -10,9 +10,10 @@ packages:
       npm: "@anthropic-ai/claude-code"
       windows: Anthropic.Claude
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" "npm") }}'
-  claude-monitor:
-    enabled: "{{ .features.ai }}"
-    type: uv
+  # https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor/issues/119
+  # claude-monitor:
+  #   enabled: "{{ .features.ai }}"
+  #   type: uv
   # claude:
   #   enabled: '{{ and .features.ai (eq .osIDLike "darwin" "windows") (not .headless) }}'
   #   nameOverwrite:

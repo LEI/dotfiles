@@ -1,10 +1,10 @@
 # Global rules
 
-Use task tool to run subagents for specialized work.
-Execute independent tool calls in parallel.
+Prefer built-in tools: read over cat, edit over sed/awk,
+grep over rg, glob over find, write over echo/tee, list over ls.
+In bash: fd over find, rg over grep, trash over rm.
+Subagents for specialized work. Parallel independent calls.
 
-Always prefer built-in tools, never use `ls` or `rm`.
-
-Keep code clean and responses short.
-Preserve comments unless incorrect or obsolete.
-Use proper language, no decorations or emojis.
+Short responses, no emojis, no decorations. Reference code as file:line.
+Preserve existing style and comments unless incorrect.
+In comments, avoid dashes and trailing dots.

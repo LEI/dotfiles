@@ -31,9 +31,9 @@ services:
       # - OPENAI_API_KEY
 
       # https://www.npmjs.com/package/pi-telemetry-otel
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4317
       # - OTEL_EXPORTER_OTLP_HEADERS
-      # - OTEL_SERVICE_NAME=${PI_AGENT_CHAIN:-pi-agent}
+      - OTEL_SERVICE_NAME=${PI_AGENT_CHAIN:-pi-agent}
       - OTEL_RESOURCE_ATTRIBUTES=user=coder,workspace=${WORKSPACE:?}
       # - PI_AGENT_TRACE_ID
       # - PI_AGENT_SPAN_ID
@@ -41,15 +41,15 @@ services:
   # https://github.com/pai4451/opencode-telemetry-plugin
   # https://opentelemetry.io/docs/demo/docker-deployment
   # https://github.com/open-telemetry/opentelemetry-demo/blob/main/docker-compose.yml
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    command:
-      - --config-file=/etc/jaeger/config.yaml
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    # ports:
-    #   - "4318:4318"   # OTLP HTTP
-    #   - "16686:16686" # Jaeger UI
-    volumes:
-      - ./jaeger.yaml:/etc/jaeger/config.yaml
-      - ./jaeger-ui.json:/etc/jaeger/ui-config.json
+  # jaeger:
+  #   image: jaegertracing/all-in-one:latest
+  #   command:
+  #     - --config-file=/etc/jaeger/config.yaml
+  #   environment:
+  #     - COLLECTOR_OTLP_ENABLED=true
+  #   # ports:
+  #   #   - "4318:4318"   # OTLP HTTP
+  #   #   - "16686:16686" # Jaeger UI
+  #   volumes:
+  #     - ./jaeger.yaml:/etc/jaeger/config.yaml
+  #     - ./jaeger-ui.json:/etc/jaeger/ui-config.json

@@ -1,0 +1,25 @@
+---
+# Grafana dashboards — auto-downloaded by chezmoi
+# https://github.com/anthropics/claude-code-monitoring-guide
+grafana/dashboards/claude-code.json:
+  type: file
+  url: https://raw.githubusercontent.com/anthropics/claude-code-monitoring-guide/main/grafana/dashboards/working-dashboard.json
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: [s/PBFA97CFB590B2093/prometheus/g]
+
+# https://grafana.com/grafana/dashboards/15983-opentelemetry-collector/
+grafana/dashboards/otel-collector.json:
+  type: file
+  url: https://grafana.com/api/dashboards/15983/revisions/29/download
+  refreshPeriod: 168h
+
+# https://grafana.com/grafana/dashboards/20376-opentelemetry-collector-hostmetrics-node-exporter/
+grafana/dashboards/hostmetrics.json:
+  type: file
+  url: https://grafana.com/api/dashboards/20376/revisions/6/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ['s/${DS_MIMIR}/prometheus/g']

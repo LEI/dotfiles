@@ -1,0 +1,50 @@
+# Loki local config — based on the embedded default (/etc/loki/local-config.yaml)
+# with OTLP structured metadata support.
+#
+# https://grafana.com/docs/loki/latest/configure/
+# https://grafana.com/docs/loki/latest/send-data/otel/
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  log_level: warn
+
+# https://grafana.com/docs/loki/latest/configure/#common
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# https://grafana.com/docs/loki/latest/configure/#schema_config
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# https://grafana.com/docs/loki/latest/configure/#limits_config
+limits_config:
+  allow_structured_metadata: true
+  # https://grafana.com/docs/loki/latest/send-data/otel/#format-considerations
+  # Default promotes ~17 resource attributes as labels (k8s.*, service.*, etc.).
+  # Override: only service.name as index label, rest as structured metadata.
+  otlp_config:
+    resource_attributes:
+      ignore_defaults: true
+      attributes_config:
+        - action: index_label
+          attributes: [service.name]
+
+analytics:
+  reporting_enabled: false

@@ -1,0 +1,112 @@
+---
+# Local OTEL stack: Collector + Prometheus (metrics) + Loki (logs) + Tempo (traces) + Grafana
+#
+# docker compose -f ~/.config/otel/compose.yaml up -d     # Start
+# docker compose -f ~/.config/otel/compose.yaml down       # Stop
+# docker compose -f ~/.config/otel/compose.yaml down -v    # Stop + delete data
+#
+# Grafana:    http://localhost:3033
+# Prometheus: http://localhost:9090
+# OTLP gRPC:  localhost:4317
+# OTLP HTTP:  localhost:4318
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.145.0
+    restart: unless-stopped
+    user: "0"
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostfs:ro
+    environment:
+      - HOST_PROC=/hostfs/proc
+      - HOST_SYS=/hostfs/sys
+      - HOST_ETC=/hostfs/etc
+      - HOST_VAR=/hostfs/var
+      - HOST_RUN=/hostfs/run
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=200h
+      - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  loki:
+    image: grafana/loki:3.6
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/loki
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  grafana:
+    image: grafana/grafana:12.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3033:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Uncomment to add Jaeger for trace viewing (http://localhost:16686)
+  # jaeger:
+  #   image: cr.jaegertracing.io/jaegertracing/jaeger:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:16686:16686"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+
+volumes:
+  prometheus-data:
+  loki-data:
+  tempo-data:
+  grafana-data:

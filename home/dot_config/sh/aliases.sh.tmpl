@@ -108,9 +108,6 @@ fi
 
 {{- if .features.ai }}
 
-if command -v claude >/dev/null; then
-  claude() { env claude "${@:---resume}"; }
-fi
 if command -v codex >/dev/null; then
   codex() { env codex "${@:-resume --last}"; }
 fi

@@ -1,4 +1,11 @@
+{{- if false }}
 #!/bin/bash
+
+  # "statusLine": {
+  #   "type": "command",
+  #   "command": "~/.config/claude/statusline.sh",
+  #   "padding": 0
+  # },
 
 set -euo pipefail
 
@@ -34,3 +41,4 @@ DURATION=$(get_duration)
 ADDED=$(get_lines_added)
 REMOVED=$(get_lines_removed)
 echo "[$MODEL] Directory: ${DIR##*/}$GIT_BRANCH | Project: $PROJECT | Version: $VERSION | Cost: $COST | Duration: $DURATION | Added: $ADDED | Removed: $REMOVED"
+{{- end -}}

@@ -2,6 +2,9 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
+{{- $smartModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/kimi-k2.5" -}}
+{{- $fastModel := eq .profile "work" | ternary "github-copilot/claude-haiku-4.5" "opencode/minimax-m2.1" -}}
+{{- $reasoningModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/minimax-m2.1" -}}
 {{- $ohMyOC := false -}}
 {{- $quotaToast := false -}}
 {
@@ -14,6 +17,7 @@
   {{- if and (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") }}
   // "model": "mlx-community/Llama-3.2-3B-Instruct-4bit",
   {{- end }}
+  // TODO: smart/fast/reasoning -> large/small/plan?
   // "small_model": "",
   "default_agent": "plan",
   // https://github.com/anomalyco/opencode/pull/8562
@@ -37,7 +41,8 @@
     {{- if $quotaToast }}
     "@slkiser/opencode-quota@1.4.0",
     {{- end }}
-    "opencode-pty@0.2.0",
+    // "@tarquinen/opencode-dcp@2.1.3"
+    "opencode-pty@0.2.1",
     // "opencode-sessions@1.0.0",
     {{- if $ohMyOC }}
     // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
@@ -46,7 +51,9 @@
     {{- else }}
     "@mohak34/opencode-notifier@0.1.15",
     {{- end }}
-    "opencode-antigravity-auth@1.4.6"
+    "opencode-antigravity-auth@1.5.1",
+    "opencode-agent-skills@0.6.4",
+    // "opencode-worktree@0.4.0",
   ],
   {{- if $quotaToast }}
   "experimental": {
@@ -104,7 +111,7 @@
       // "mv *": "deny",
       "readlink *": "allow",
       "rg *": "allow",
-      "rm *": "deny",
+      // "rm *": "deny",
       "sed * -I*": "ask",
       "sed * -i*": "ask",
       "sed *": "allow",
@@ -124,11 +131,6 @@
       "npm test *": "allow",
       "npm t *": "allow",
 
-      "npx skills check *": "allow",
-      "npx skills find *": "allow",
-      "npx skills list *": "allow",
-      "npx skills search *": "allow",
-
       "sq *": "allow",
       "sq * -o*": "ask",
       "sq * --output*": "ask"
@@ -136,11 +138,9 @@
     // Launching subagents (matches the subagent type)
     // "task": "ask",
     "task": {
-      "*": "deny",
+      "*": "deny"
       // "orchestrator-*": "allow",
       // "code-reviewer": "ask",
-      "github-read-only": "allow",
-      "gitlab-read-only": "allow"
     },
     // Loading a skill (matches skill name, not org/name)
     "skill": {
@@ -148,7 +148,6 @@
       // Custom
       "flux-operator": "deny",
       "sq": "allow",
-      "using-skills": "allow",
 
       // affaan-m/everything-claude-code
       "backend-patterns": "allow",
@@ -170,24 +169,23 @@
       // supabase
       "supabase-postgres-best-practices": "allow",
       // obra/superpowers
-      "brainstorming": "allow",
-      "dispatching-parallel-agents": "allow",
-      "executing-plans": "allow",
-      "finishing-a-development-branch": "allow",
-      "receiving-code-review": "allow",
-      "requesting-code-review": "allow",
-      "subagent-driven-development": "allow",
-      "systematic-debugging": "allow",
-      "test-driven-development": "allow",
-      "using-git-worktrees": "allow",
-      "using-superpowers": "allow",
-      "verification-before-completion": "allow",
-      "writing-plans": "allow",
-      "writing-skills": "allow",
+      // "brainstorming": "allow",
+      // "dispatching-parallel-agents": "allow",
+      // "executing-plans": "allow",
+      // "finishing-a-development-branch": "allow",
+      // "receiving-code-review": "allow",
+      // "requesting-code-review": "allow",
+      // "subagent-driven-development": "allow",
+      // "systematic-debugging": "allow",
+      // "test-driven-development": "allow",
+      // "using-git-worktrees": "allow",
+      // "using-superpowers": "allow",
+      // "verification-before-completion": "allow",
+      // "writing-plans": "allow",
+      // "writing-skills": "allow",
       // vercel
       "ai-sdk": "allow",
       // vercel-labs
-      "find-skills": "allow",
       // "next-best-practices": "allow",
       // "vercel-react-best-practices": "allow",
       "web-design-guidelines": "allow",
@@ -218,13 +216,23 @@
     // Custom tools
     "notify": "allow",
 
+    // Plugins
+    // opencode-agent-skills
+    "use_skill": "allow",
+    "read_skill_file": "allow",
+    "get_available_skills": "allow",
+    "run_skill_script": "ask",
+
+    // opencode-worktree
+    // "worktree_create": "allow",
+    // "worktree_delete": "allow",
+
     // MCP tools
     {{- range $mcp.servers | keys | sortAlpha }}
     "{{ . }}_*": "deny",
     {{- end }}
 
     "mcp-registry_*": "allow",
-    "skills-search_*": "allow",
 
     // https://github.com/modelcontextprotocol/servers/tree/main/src/git
     "git_git_*": "ask",
@@ -251,7 +259,314 @@
   },
   {{ "// If no temperature is specified, OpenCode uses model-specific defaults," }}
   {{ "// typically 0 for most models, 0.55 for Qwen models" }}
-  "agent": {{ includeTemplate "dot_config/opencode/.agent.jsonc.tmpl" . | indent 2 | trim }},
+  "agent": {
+    // Primary agents: build, plan
+    // Internal agents: compaction, summary, title
+    "build": {
+      "color": "accent", // Orange
+      "description": "Builder orchestrator with write access",
+      "mode": "primary",
+      "model": {{ $smartModel | quote }},
+      "temperature": 0.1,
+      "permission": {
+        "edit": "ask", // Always allow per session
+        // "bash": {
+        //   "*": "ask",
+        //   "git *": "allow",
+        //   "git commit *": "ask",
+        //   "git push *": "deny",
+        //   "grep *": "allow",
+        // },
+        "skill": {
+          "git-commit": "allow"
+        },
+        "task": {
+          "*": "ask",
+          "analyze": "allow",
+          "archive": "allow",
+          // "brainstorm": "allow",
+          "browser": "allow",
+          "implement": "allow",
+          "code-mode": "allow",
+          // "firecrawl": "allow",
+          "debug": "allow",
+          "explore": "allow",
+          {{- if .features.kube }}
+          "flux": "allow",
+          {{- end }}
+          "github": "allow",
+          "gitlab": "allow",
+          "review": "allow",
+          "search": "allow",
+          "system": "allow"
+        },
+        // "todoread": "allow",
+        // "todowrite": "allow"
+        // "git_git_*": "ask",
+        // "git_git_branch": "allow",
+        // "git_git_diff*": "allow",
+        // "git_git_log": "allow",
+        // "git_git_show": "allow",
+        // "git_git_status": "allow",
+      },
+      "prompt": "{file:./prompts/build.md}"
+    },
+    "plan": {
+      "color": "primary", // Blue
+      "description": "Researcher orchestrator with read-only access",
+      "mode": "primary",
+      // "model": "github-copilot/claude-haiku-4.5",
+      // "model": "github-copilot/claude-sonnet-4.5",
+      "model": {{ $reasoningModel | quote }},
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/plan.md}",
+      "permission": {
+        "edit": "deny",
+        // "bash": "ask",
+        "task": {
+          "*": "deny",
+          "analyze": "allow",
+          "brainstorm": "allow",
+          "explore": "allow",
+          "flux": "allow",
+          // "github": "allow",
+          // "gitlab": "allow",
+          "review": "allow",
+          "search": "allow"
+        }
+      }
+    },
+    // Built-in subagents: explore, general, readonly
+    // Custom subagents (also see ./agent/ for markdown-based agents):
+    "analyze": {
+      // "color": "primary",
+      "description": "Read-only file analysis",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "prompt": "{file:./prompts/analyze.md}",
+      "permission": {
+        "edit": "deny",
+        "write": "deny"
+      }
+    },
+    "archive": {
+      "description": "Persistent memory and context storage",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "memory_*": "allow",
+        "qdrant-memory_*": "allow"
+      }
+    },
+    "brainstorm": {
+      "description": "Structured creative thinking and problem decomposition",
+      "mode": "subagent",
+      "temperature": 0.7,
+      // "prompt": "{file:./prompts/creative.txt}"
+    },
+    "browser": {
+      "description": "Web browser automation and debugging",
+      "mode": "subagent",
+      "permission": {
+        "*": "deny",
+        "chrome-devtools_*": "ask"
+        // "chrome-devtools_evaluate_script": "ask",
+        // "chrome-devtools_list_pages": "ask",
+        // "chrome-devtools_navigate_page": "ask",
+      }
+    },
+    "implement": {
+      // "color": "secondary", // Purple
+      "description": "Implementation agent for writing and modifying code",
+      "mode": "subagent", // "all",
+      // "model": {{ $smartModel | quote }},
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/implement.md}"
+      // "permission": {
+      //   "edit": "allow",
+      //   "write": "allow"
+      // }
+    },
+    "code-mode": {
+      // "color": "warning", // Orange
+      "description": "Programmatic tool chaining and automation",
+      "mode": "subagent",
+      // "model": "github-copilot/claude-opus-4.5",
+      "temperature": 0.2,
+      "permission": {
+        "*": "deny",
+        "code-mode_*": "ask",
+        "code-mode_list_tools": "allow",
+        "utcp_*": "ask",
+        "utcp_list_tools": "allow",
+        "utcp_tool_info": "allow"
+      }
+    },
+    "debug": {
+      "color": "error", // Red
+      "description": "Systematic debugging with hypothesis testing",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/debug.md}",
+      "permission": {
+        // "skill": {
+        //   "systematic-debugging": "allow"
+        // },
+        "task": {
+          "*": "deny",
+          "explore": "allow"
+        }
+      }
+    },
+    "firecrawl": {
+      "description": "Web scraping and content extraction",
+      "disable": true,
+      "mode": "subagent",
+      // // "model": "github-copilot/claude-haiku-4.5",
+      "permission": {
+        "*": "deny",
+        "firecrawl_*": "allow"
+      }
+    },
+    {{- if .features.kube }}
+    "flux": {
+      "description": "Kubernetes and GitOps operations",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "permission": {
+        "*": "deny",
+        "skill": {
+          "*": "deny",
+          "flux-operator": "allow"
+        },
+        // MCP servers
+        "flux-operator_*": "allow",
+        "kubernetes_*": "allow"
+      }
+    },
+    {{- end }}
+    "github": {
+      "description": "GitHub platform operations",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "skill": "deny",
+        "task": {
+          "*": "deny",
+          "explore": "allow"
+        },
+
+        // https://docs.github.com/en/copilot/building-copilot-extensions/
+        // building-copilot-extensions/configuring-a-copilot-extension/
+        // configuring-an-mcp-server-for-copilot
+        "github_*": "ask",
+        "github_get_*": "allow",
+        "github_list_*": "allow",
+        "github_search_*": "allow",
+        "bash": {
+          "gh *": "ask"
+        }
+      }
+    },
+    "review": {
+      "description": "Reviews code for quality and best practices",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "prompt": "{file:./prompts/review.md}",
+      "permission": {
+        "skill": {
+          "code-review-excellence": "allow"
+          // "verification-before-completion": "allow"
+        }
+      }
+    },
+    "search": {
+      "description": "External research and documentation lookup",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "prompt": "{file:./prompts/search.md}",
+      "permission": {
+        "websearch": "allow",
+        "codesearch": "allow",
+        "context7_*": "allow"
+      }
+    },
+
+    "gitlab": {
+      "description": "GitLab platform operations",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "skill": "deny",
+        "task": {
+          "*": "deny",
+          "explore": "allow"
+        },
+
+        // https://docs.gitlab.com/ee/user/gitlab_duo/mcp.html
+        "gitlab_*": "ask",
+        "gitlab_get_*": "allow",
+        "gitlab_list_*": "allow",
+        "gitlab_search_*": "allow",
+        "bash": {
+          "glab *": "ask",
+        }
+      }
+    },
+
+    "system": {
+      "description": "System operations and environment management",
+      "mode": "subagent",
+      // "model": {{ $fastModel | quote }},
+      "temperature": 0.0,
+      "permission": {
+        "*": "deny",
+        "mise_*": "ask",
+        // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+        "filesystem_*": "ask",
+        "filesystem_read_text_file": "allow",
+        "filesystem_read_media_file": "allow",
+        "filesystem_read_multiple_files": "allow",
+        "filesystem_list_directory": "allow",
+        "filesystem_list_directory_with_sizes": "allow",
+        "filesystem_directory_tree": "allow",
+        "filesystem_search_files": "allow",
+        "filesystem_get_file_info": "allow",
+        "filesystem_list_allowed_directories": "allow"
+        // "filesystem_create_directory": "ask",
+        // "filesystem_write_file": "ask",
+        // "filesystem_edit_file": "ask",
+        // "filesystem_move_file": "ask",
+      }
+    },
+    "zero": {
+      "color": "success", // Green
+      "description": "Minimal context",
+      // "disable": true,
+      "prompt": "",
+      "mode": "subagent", // "all",
+      "permission": {
+        "*": "deny"
+      }
+    }
+  },
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
   "mcp": {{ $mcpServers | toPrettyJson | indent 2 | trim }},
   // https://opencode.ai/docs/models/#recommended-models

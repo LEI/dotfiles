@@ -1,0 +1,9 @@
+---
+# FIXME: ~/.config/claude/plugins/installed_plugins.json
+# TODO: /claude-dashboard:setup
+plugins/claude-dashboard:
+  type: git-repo
+  url: https://github.com/uppinote20/claude-dashboard.git
+  refreshPeriod: 168h
+  clone:
+    args: ["--branch=v1.10.0", "--depth=1"]
