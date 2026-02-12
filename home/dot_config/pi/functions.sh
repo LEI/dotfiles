@@ -1,7 +1,8 @@
 #!/bin/bash
 
 pi_local() {
-  bunx @mariozechner/pi-coding-agent@0.52.9 "$@"
+  local pi_version="${PI_VERSION:-latest}"
+  bunx "@mariozechner/pi-coding-agent@$pi_version" "$@"
 }
 
 pi_compose() {
@@ -55,3 +56,7 @@ pi() {
   #   pi_attach --
   # fi
 }
+
+# if command -v pi >/dev/null; then
+#   pi() { env pi "${@:---continue}"; }
+# fi

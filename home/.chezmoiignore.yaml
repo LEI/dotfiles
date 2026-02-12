@@ -131,6 +131,8 @@ features:
     # - .config/*/*.nu
     - .config/nushell/
     - "*.nu"
+  otel:
+    - .config/otel/
   # php: []
   python:
     - .chezmoiscripts/*install-python.sh

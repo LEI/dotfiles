@@ -15,11 +15,52 @@ grafana/dashboards/otel-collector.json:
   url: https://grafana.com/api/dashboards/15983/revisions/29/download
   refreshPeriod: 168h
 
-# https://grafana.com/grafana/dashboards/20376-opentelemetry-collector-hostmetrics-node-exporter/
-grafana/dashboards/hostmetrics.json:
+# https://grafana.com/grafana/dashboards/19419-opentelemetry-apm/
+# Service-level APM with RED metrics from span metrics
+grafana/dashboards/otel-apm.json:
   type: file
-  url: https://grafana.com/api/dashboards/20376/revisions/6/download
+  url: https://grafana.com/api/dashboards/19419/revisions/6/download
   refreshPeriod: 168h
   filter:
     command: sed
-    args: ['s/${DS_MIMIR}/prometheus/g']
+    args: ['s/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g']
+
+# https://grafana.com/grafana/dashboards/22784-lightweight-apm-for-opentelemetry/
+# Minimal dev-focused APM with trace/log/metric correlation
+grafana/dashboards/otel-lightweight-apm.json:
+  type: file
+  url: https://grafana.com/api/dashboards/22784/revisions/7/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ['s/${DS_GRAFANACLOUD-CLECLERC-PROM}/prometheus/g; s/${DS_GRAFANACLOUD-CLECLERC-LOGS}/loki/g; s/${DS_GRAFANACLOUD-CLECLERC-TRACES}/tempo/g']
+
+# https://grafana.com/grafana/dashboards/23789-loki-logging-volume-analysis/
+# Log pattern monitoring and error rate tracking
+grafana/dashboards/loki-volume-analysis.json:
+  type: file
+  url: https://grafana.com/api/dashboards/23789/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ['s/${DS_LOKI}/loki/g']
+
+# https://grafana.com/grafana/dashboards/23242-opentelemetry-tempo/
+# Pipeline debugging for OTEL Collector and Tempo
+grafana/dashboards/otel-tempo-pipeline.json:
+  type: file
+  url: https://grafana.com/api/dashboards/23242/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ['s/${DS_PROMETHEUS}/prometheus/g']
+
+# https://grafana.com/grafana/dashboards/18042-logging-dashboard-via-loki-v2/
+# Log analysis with trace correlation
+grafana/dashboards/loki-logging.json:
+  type: file
+  url: https://grafana.com/api/dashboards/18042/revisions/5/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ['s/${DS_LOKI}/loki/g; s/${DS_NY-ALERTING2}/loki/g']

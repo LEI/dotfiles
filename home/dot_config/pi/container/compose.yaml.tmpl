@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Containerfile
       args:
-        - PI_VERSION=0.52.9
+        - PI_VERSION={{ .piVersion }}
         - SHPOOL_VERSION=0.9.3
         - USER=coder
         # - UID={{ output "id" "-u" }}

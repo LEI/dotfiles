@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/srikanthccv/otelcol-jsonschema/main/schema.json
 receivers:
   otlp:
     protocols:
@@ -6,38 +7,14 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
-  # Docker Desktop VM metrics (cpu, memory, load, filesystem)
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
-  hostmetrics:
-    collection_interval: 30s
-    root_path: /hostfs
-    scrapers:
-      cpu:
-      memory:
-      load:
-        cpu_average: true
-      filesystem:
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /dev/.*
-            - /proc/.*
-            - /sys/.*
-            - /run/.*
-            - /var/lib/docker/.*
-
-  # Per-container resource metrics
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/dockerstatsreceiver
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    collection_interval: 30s
-
 processors:
   memory_limiter:
-    check_interval: 5s
-    limit_mib: 400
-    spike_limit_mib: 100
+    check_interval: 5s         # default: 0s (disabled)
+    limit_mib: 400             # default: 0 (no limit); 78% of 512M container limit
+    spike_limit_mib: 100       # default: 0 (no spike buffer)
   batch:
+    send_batch_size: 8192      # default: 8192
+    timeout: 200ms             # default: 200ms
 
 exporters:
   prometheus:
@@ -62,7 +39,7 @@ service:
                 port: 8888
   pipelines:
     metrics:
-      receivers: [otlp, hostmetrics, docker_stats]
+      receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [prometheus]
     logs:

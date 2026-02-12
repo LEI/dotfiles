@@ -1,3 +1,4 @@
+{{ $sandboxEnabled := false -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
@@ -21,6 +22,7 @@
       "Bash(echo *)",
       "Bash(fd *)",
       "Bash(file *)",
+      "Bash(gh api *)",
       "Bash(gh issue list *)",
       "Bash(gh issue status *)",
       "Bash(gh issue view *)",
@@ -35,15 +37,13 @@
       "Bash(gh run list *)",
       "Bash(gh run view *)",
       "Bash(gh search *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
       "Bash(git diff *)",
       "Bash(git fetch *)",
       "Bash(git log *)",
-      "Bash(git remote *)",
+      "Bash(git remote -v*)",
       "Bash(git show *)",
       "Bash(git status *)",
-      "Bash(git tag *)",
+      "Bash(glab api *)",
       "Bash(glab ci list *)",
       "Bash(glab ci status *)",
       "Bash(glab ci view *)",
@@ -62,6 +62,7 @@
       "Bash(rg *)",
       "Bash(sed *)",
       "Bash(sort *)",
+      "Bash(sq *)",
       "Bash(stat *)",
       "Bash(tail *)",
       "Bash(test *)",
@@ -80,6 +81,7 @@
       "WebFetch(domain:gist.github.com)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:gitlab.com)",
+      "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch"
     ],
@@ -117,10 +119,11 @@
     "defaultMode": "default",
     "disableBypassPermissionsMode": "disable"
   },
+  "model": "sonnet",
   "enableAllProjectMcpServers": false,
   "statusLine": {
     "type": "command",
-    "command": "node ~/.config/claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
+    "command": "{{ lookPath "node" }} ~/.config/claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
   },
   "enabledPlugins": {
     "claude-code-setup@claude-plugins-official": true,
@@ -128,9 +131,23 @@
     "code-simplifier@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
-    "claude-dashboard@claude-dashboard": true,
-    "php-lsp@claude-plugins-official": true
+    "claude-dashboard@claude-dashboard": true
   },
-  "alwaysThinkingEnabled": true,
+  "sandbox": {
+    "enabled": {{ $sandboxEnabled }},
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [
+        "*.github.com",
+        "*.githubusercontent.com",
+        "*.gitlab.com",
+        "*.npmjs.org",
+        "registry.yarnpkg.com",
+        "{{ env "GITLAB_HOST" | default "gitlab.com" }}"
+      ]
+    }
+  },
+  "alwaysThinkingEnabled": false,
   "autoUpdates": false
 }

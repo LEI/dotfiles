@@ -1,7 +1,7 @@
 ---
 agent/extensions:
   type: archive
-  url: https://github.com/badlogic/pi-mono/archive/refs/tags/v0.52.9.tar.gz
+  url: https://github.com/badlogic/pi-mono/archive/refs/tags/v{{ .piVersion }}.tar.gz
   refreshPeriod: 168h
   stripComponents: 5
   include:
@@ -44,9 +44,9 @@ agent/skills/pi-skills:
     args: ["--depth=1"]
 
 # Depends on https://github.com/nicobailon/pi-interactive-shell
-# pi_exec pi install npm:pi-interactive-shell
-agent/skills/foreground-chains/SKILL.md:
-  type: file
-  url: https://raw.githubusercontent.com/nicobailon/pi-foreground-chains/refs/heads/main/SKILL.md
-  # ref: 545a570
-  refreshPeriod: 168h
+# pi_exec pi install npm:pi-interactive-shell@0.8.2
+# agent/skills/foreground-chains/SKILL.md:
+#   type: file
+#   url: https://raw.githubusercontent.com/nicobailon/pi-foreground-chains/refs/heads/main/SKILL.md
+#   # ref: 545a570
+#   refreshPeriod: 168h

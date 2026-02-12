@@ -2,9 +2,15 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $smartModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/kimi-k2.5" -}}
-{{- $fastModel := eq .profile "work" | ternary "github-copilot/claude-haiku-4.5" "opencode/minimax-m2.1" -}}
-{{- $reasoningModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/minimax-m2.1" -}}
+{{- /* $smartModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/kimi-k2.5" */ -}}
+{{- /* $fastModel := eq .profile "work" | ternary "github-copilot/claude-haiku-4.5" "opencode/minimax-m2.1" */ -}}
+{{- /* $reasoningModel := eq .profile "work" | ternary "github-copilot/claude-opus-4.6" "opencode/minimax-m2.1" */ -}}
+
+{{- $model := eq .profile "work" | ternary "github-copilot/gpt-4o" "opencode/big-pickle" -}}
+{{- $smartModel := $model -}}
+{{- $fastModel := $model -}}
+{{- $reasoningModel := $model -}}
+
 {{- $ohMyOC := false -}}
 {{- $quotaToast := false -}}
 {
@@ -51,12 +57,13 @@
     {{- else }}
     "@mohak34/opencode-notifier@0.1.15",
     {{- end }}
-    "opencode-antigravity-auth@1.5.1",
+    // "opencode-antigravity-auth@1.5.1",
     "opencode-agent-skills@0.6.4",
     // "opencode-worktree@0.4.0",
   ],
-  {{- if $quotaToast }}
   "experimental": {
+    // "openTelemetry": true,
+    {{- if $quotaToast }}
     "quotaToast": {
       "enabledProviders": [
         "copilot"
@@ -64,8 +71,8 @@
         // "google-antigravity",
       ]
     }
+    {{- end }}
   },
-  {{- end }}
   // https://opencode.ai/docs/permissions#defaults
   "permission": {
     "*": "ask",

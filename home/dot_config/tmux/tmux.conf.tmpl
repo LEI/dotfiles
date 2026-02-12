@@ -23,6 +23,21 @@ set -g default-terminal xterm-256color
 set-option -g set-titles on
 set-option -g set-titles-string '#S #W - #{pane_title}'
 
+# Enable all monitoring types globally
+set-window-option -g monitor-activity on
+set-window-option -g monitor-bell on  
+# set-window-option -g monitor-silence 60
+
+# Enable visual notifications
+set-option -g visual-activity on
+set-option -g visual-bell on
+
+# Customize activity highlighting
+# set-window-option -g window-status-activity-style bg=red,fg=white
+
+# Add symbols to window names
+# set-window-option -g window-status-format '#I:#W#{?window_activity_flag,!,}'
+
 if "tmux show-option -s terminal-features | grep -vq ':hyperlinks$'" {
     set -as terminal-features ",*:hyperlinks"
 }

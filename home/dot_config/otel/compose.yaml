@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 # Local OTEL stack: Collector + Prometheus (metrics) + Loki (logs) + Tempo (traces) + Grafana
 #
 # docker compose -f ~/.config/otel/compose.yaml up -d     # Start
@@ -13,21 +14,12 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.145.0
     restart: unless-stopped
-    user: "0"
     command: ["--config=/etc/otel-collector-config.yaml"]
     ports:
       - "127.0.0.1:4317:4317"
       - "127.0.0.1:4318:4318"
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/hostfs:ro
-    environment:
-      - HOST_PROC=/hostfs/proc
-      - HOST_SYS=/hostfs/sys
-      - HOST_ETC=/hostfs/etc
-      - HOST_VAR=/hostfs/var
-      - HOST_RUN=/hostfs/run
     deploy:
       resources:
         limits:
@@ -39,7 +31,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=200h
+      - --storage.tsdb.retention.time=720h  # 30 days (default: 15d)
       - --web.enable-lifecycle
       - --web.enable-remote-write-receiver
     ports:

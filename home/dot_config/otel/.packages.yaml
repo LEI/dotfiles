@@ -1,0 +1,7 @@
+---
+enabled: "{{ .features.otel }}"
+packages:
+  otel-cli:
+    type: brew
+  otel-tui:
+    type: brew

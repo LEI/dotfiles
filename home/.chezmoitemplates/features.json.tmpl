@@ -42,6 +42,7 @@
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
   "nushell" .gui
+  "otel" .gui
   "php" false
   "podman" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
   "python" .gui
