@@ -4,4 +4,5 @@ packages:
   otel-cli:
     type: brew
   otel-tui:
+    enabled: '{{ eq .os "darwin" }}'
     type: brew
