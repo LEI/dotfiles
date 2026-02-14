@@ -5,6 +5,9 @@
 
 # [ -z "$PS1" ] && return
 
+# Source local environment variables
+[ -f ~/.secrets ] && source ~/.secrets
+
 # TODO: path.sh?
 # https://github.com/neovide/neovide/discussions/3175
 # Darwin: launchctl load ~/Library/LaunchAgents/environment.plist

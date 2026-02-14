@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/prometheus.json
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [alertmanager:9093]  # routes evaluated alerts to Alertmanager for notification handling
+
+rule_files:
+  # Alert rules loaded from mounted volume for proactive incident detection
+  - /etc/prometheus/alerts/*.yaml
+
+scrape_configs:
+  # Port 8889: application metrics from spanmetrics connector and OTLP receivers
+  - job_name: otel-collector
+    static_configs:
+      - targets: [otel-collector:8889]
+    metric_relabel_configs:
+      # OTEL best practice: map service.namespace/service.name to job label
+      # Ref: https://prometheus.io/docs/guides/opentelemetry/
+      - source_labels: [service_namespace, service_name]
+        separator: /
+        regex: /?(.+)
+        replacement: $1
+        target_label: job
+  # Port 8888: internal collector metrics (scrapes, dropped spans, memory usage)
+  - job_name: otel-collector-internal
+    static_configs:
+      - targets: [otel-collector:8888]
+  - job_name: node-exporter
+    static_configs:
+      - targets: [node-exporter:9100]
+  - job_name: cadvisor
+    static_configs:
+      - targets: [cadvisor:8080]
+  - job_name: alertmanager
+    static_configs:
+      - targets: [alertmanager:9093]
+  - job_name: tempo
+    static_configs:
+      - targets: [tempo:3200]

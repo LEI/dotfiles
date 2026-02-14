@@ -1,7 +1,8 @@
 ---
 # Grafana dashboards — auto-downloaded by chezmoi
+
 # https://github.com/anthropics/claude-code-monitoring-guide
-grafana/dashboards/claude-code.json:
+grafana/dashboards/Application/claude-code.json:
   type: file
   url: https://raw.githubusercontent.com/anthropics/claude-code-monitoring-guide/main/grafana/dashboards/working-dashboard.json
   refreshPeriod: 168h
@@ -9,58 +10,145 @@ grafana/dashboards/claude-code.json:
     command: sed
     args: [s/PBFA97CFB590B2093/prometheus/g]
 
-# https://grafana.com/grafana/dashboards/15983-opentelemetry-collector/
-grafana/dashboards/otel-collector.json:
-  type: file
-  url: https://grafana.com/api/dashboards/15983/revisions/29/download
-  refreshPeriod: 168h
-
+# Application monitoring with RED metrics derived from traces via spanmetrics connector
 # https://grafana.com/grafana/dashboards/19419-opentelemetry-apm/
-# Service-level APM with RED metrics from span metrics
-grafana/dashboards/otel-apm.json:
+grafana/dashboards/Application/opentelemetry-apm.json:
   type: file
   url: https://grafana.com/api/dashboards/19419/revisions/6/download
   refreshPeriod: 168h
   filter:
     command: sed
-    args: ['s/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g']
+    args:
+      - -e # Fix datasource UID
+      - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
+      - -e # Fix metric name format
+      - "s/traces_spanmetrics_/traces_span_metrics_/g"
+      - -e # Update to stable semantic conventions
+      - "s/http_status_code/http_response_status_code/g"
+      - -e
+      - "s/http_method/http_request_method/g"
+      - -e # Exclude compose from Application dropdown (CLIENT spans only, not SERVER)
+      - 's/label_values(service_name)/label_values(traces_span_metrics_calls_total{span_kind=\\"SPAN_KIND_SERVER\\"},service_name)/g'
 
-# https://grafana.com/grafana/dashboards/22784-lightweight-apm-for-opentelemetry/
-# Minimal dev-focused APM with trace/log/metric correlation
-grafana/dashboards/otel-lightweight-apm.json:
+# HTTP services with log correlation and predictive analytics
+# Requires native OTEL SDK metrics: http.server.request.duration (stable semconv)
+# https://grafana.com/grafana/dashboards/21587-opentelemetry-for-http-services/
+grafana/dashboards/Application/otel-http.json:
   type: file
-  url: https://grafana.com/api/dashboards/22784/revisions/7/download
+  url: https://grafana.com/api/dashboards/21587/revisions/2/download
   refreshPeriod: 168h
   filter:
     command: sed
-    args: ['s/${DS_GRAFANACLOUD-CLECLERC-PROM}/prometheus/g; s/${DS_GRAFANACLOUD-CLECLERC-LOGS}/loki/g; s/${DS_GRAFANACLOUD-CLECLERC-TRACES}/tempo/g']
+    args:
+      - -e # Fix datasource UIDs
+      - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
+      - -e
+      - 's/"uid": "${DS_LOKI}"/"uid": "loki"/g'
+      - -e
+      - 's/"uid": "${DS_TEMPO}"/"uid": "tempo"/g'
+      - -e # Variable: service_namespace query from service_namespace label (not parsed from job)
+      - "s/label_values(http_server_request_duration_seconds_count,job)/label_values(http_server_request_duration_seconds_count,service_namespace)/g"
+      - -e # Variable: service_namespace regex no longer needed
+      - 's|"regex": "(.*)/.*"|"regex": ""|g'
+      - -e # Variable: service_name query from service_name label filtered by namespace
+      - 's/label_values(http_server_request_duration_seconds_count{job=~\\"\\${service_namespace}\\.\\*\\"},job)/label_values(http_server_request_duration_seconds_count{service_namespace=~\\"\\${service_namespace}\\"},service_name)/g'
+      - -e # Variable: service_name regex no longer needed
+      - 's|"regex": ".*/(.*)"|"regex": ""|g'
+      - -e # Variable: job resolved by namespace and service_name (not namespace/service format)
+      - 's|label_values(http_server_request_duration_seconds_count{job=\\"${service_namespace}/${service_name}\\"},job)|label_values(http_server_request_duration_seconds_count{service_namespace=\\"${service_namespace}\\",service_name=\\"${service_name}\\"},job)|g'
 
-# https://grafana.com/grafana/dashboards/23789-loki-logging-volume-analysis/
+# OTEL Collector pipeline metrics
+# https://grafana.com/grafana/dashboards/15983-opentelemetry-collector/
+# No filter needed: uses $datasource variable auto-resolved by Grafana
+grafana/dashboards/Infrastructure/opentelemetry-collector.json:
+  type: file
+  url: https://grafana.com/api/dashboards/15983/revisions/29/download
+  refreshPeriod: 168h
+
+# Host metrics: CPU, memory, disk, network (requires node-exporter container)
+# https://grafana.com/grafana/dashboards/1860-node-exporter-full/
+grafana/dashboards/Infrastructure/node-exporter-full.json:
+  type: file
+  url: https://grafana.com/api/dashboards/1860/revisions/37/download
+  refreshPeriod: 168h
+
+# Container metrics via cAdvisor
+# https://grafana.com/grafana/dashboards/14282-docker-container/
+grafana/dashboards/Infrastructure/cadvisor-exporter.json:
+  type: file
+  url: https://grafana.com/api/dashboards/14282/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args:
+      - -e # Fix datasource UID
+      - "s/${DS_PROMETHEUS}/prometheus/g"
+
+# Alertmanager monitoring
+# https://grafana.com/grafana/dashboards/9578-alertmanager-overview/
+grafana/dashboards/Infrastructure/alertmanager.json:
+  type: file
+  url: https://grafana.com/api/dashboards/9578/revisions/4/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args: ["s/${DS_PROMETHEUS}/prometheus/g"]
+
+# Log analysis with pattern matching and service correlation
+# https://grafana.com/grafana/dashboards/24574/logging-dashboard-via-loki-v3/
+# Keep container_name label (indexed by Loki from container.name resource attribute)
+grafana/dashboards/Logs/logging-dashboard-via-loki-v3.json:
+  type: file
+  url: https://grafana.com/api/dashboards/24574/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args:
+      - -e # Fix datasource UID
+      - "s/${DS_LOKI}/loki/g"
+      - -e # Fix Grafana v11 variable syntax $[[var]] to $var
+      - 's/\$\[\[container_name\]\]_exclude/$container_name_exclude/g'
+      - -e
+      - 's/\$\[\[service_name\]\]_exclude/$service_name_exclude/g'
+      - -e # Fix interval variable reference format
+      - 's/\[\$ _interval\]/[$_interval]/g'
+      - -e # Loki v3 requires non-empty matchers (.+ not .*)
+      - 's/=~"\.\*"/=~".+"/g'
+      - -e # service_name variable: query directly to avoid empty matcher when container_name=$__all
+      - 's/"query": "label_values({container_name=~\\"$container_name\\"}, service_name)"/"query": "label_values({service_name=~\\".+\\"}, service_name)"/g'
+      - -e
+      - 's/"definition": "label_values({container_name=~\\"$container_name\\"}, service_name)"/"definition": "label_values({service_name=~\\".+\\"}, service_name)"/g' # yamllint disable-line rule:line-length
+      - -e # instance variable: query directly to avoid empty matcher when container_name=$__all
+      - 's/"query": "label_values({container_name=~\\"$container_name\\"}, instance)"/"query": "label_values({instance=~\\".+\\"}, instance)"/g' # yamllint disable-line rule:line-length
+      - -e
+      - 's/"definition": "label_values({container_name=~\\"$container_name\\"}, instance)"/"definition": "label_values({instance=~\\".+\\"}, instance)"/g'
+      - -e # searchable_pattern variable: default to empty string (no filter) instead of "error"
+      - 's/"value": "error"/"value": ""/g'
+      - -e
+      - 's/"text": "error"/"text": ""/g'
+      - -e
+      - 's/"query": "error"/"query": ""/g'
+
 # Log pattern monitoring and error rate tracking
-grafana/dashboards/loki-volume-analysis.json:
+# https://grafana.com/grafana/dashboards/23789-loki-logging-volume-analysis/
+grafana/dashboards/Kubernetes/loki-volume-analysis.json:
   type: file
   url: https://grafana.com/api/dashboards/23789/revisions/1/download
   refreshPeriod: 168h
   filter:
     command: sed
-    args: ['s/${DS_LOKI}/loki/g']
+    args:
+      - -e # Fix datasource UID
+      - "s/${DS_LOKI}/loki/g"
 
+# Pipeline debugging for OTEL Collector and Tempo (partial data on Docker)
 # https://grafana.com/grafana/dashboards/23242-opentelemetry-tempo/
-# Pipeline debugging for OTEL Collector and Tempo
-grafana/dashboards/otel-tempo-pipeline.json:
+grafana/dashboards/Kubernetes/opentelemetry-tempo.json:
   type: file
   url: https://grafana.com/api/dashboards/23242/revisions/1/download
   refreshPeriod: 168h
   filter:
     command: sed
-    args: ['s/${DS_PROMETHEUS}/prometheus/g']
-
-# https://grafana.com/grafana/dashboards/18042-logging-dashboard-via-loki-v2/
-# Log analysis with trace correlation
-grafana/dashboards/loki-logging.json:
-  type: file
-  url: https://grafana.com/api/dashboards/18042/revisions/5/download
-  refreshPeriod: 168h
-  filter:
-    command: sed
-    args: ['s/${DS_LOKI}/loki/g; s/${DS_NY-ALERTING2}/loki/g']
+    args:
+      - -e # Fix datasource UID
+      - "s/${DS_PROMETHEUS}/prometheus/g"

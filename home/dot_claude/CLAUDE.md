@@ -2,6 +2,8 @@ In Bash: fd over find, rg over grep, trash over rm.
 Preserve existing style and comments unless incorrect.
 In comments, avoid dashes and trailing dots.
 
+You may have a persistent global memory system at `~/.claude/MEMORY.md`.
+
 # Orchestration
 
 Orchestrator plans, delegates, synthesizes.
@@ -13,6 +15,7 @@ Parallel subagents must touch disjoint files.
 Subagents return concise results with file:line refs.
 
 Subagent model selection:
+
 - haiku: search, inspection, mechanical edits
 - sonnet: implementation, multi-file work
 - opus: architecture, ambiguity

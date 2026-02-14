@@ -1,4 +1,17 @@
+---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/srikanthccv/otelcol-jsonschema/main/schema.json
+
+# Extensions: health check, profiling, and observability
+# Uncomment endpoints in compose.yaml to expose externally
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133  # curl http://localhost:13133
+  pprof:
+    endpoint: 0.0.0.0:1777    # go pprof http://localhost:1777/debug/pprof
+  zpages:
+    endpoint: 0.0.0.0:55679   # tracez http://localhost:55679/debug/tracez
+
+# Receivers: OTLP for traces, logs, metrics from applications
 receivers:
   otlp:
     protocols:
@@ -7,20 +20,53 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
+# Processors: batch and memory management
 processors:
   memory_limiter:
-    check_interval: 5s         # default: 0s (disabled)
-    limit_mib: 400             # default: 0 (no limit); 78% of 512M container limit
-    spike_limit_mib: 100       # default: 0 (no spike buffer)
+    check_interval: 5s  # required: enables memory limiting
+    limit_mib: 400  # required: 78% of container memory prevents OOM
   batch:
-    send_batch_size: 8192      # default: 8192
-    timeout: 200ms             # default: 200ms
+    send_batch_size: 1024  # batch before export to reduce backend load and requests
+    timeout: 10s
+  # Resource detection: add host/container metadata
+  # resourcedetection:
+  #   detectors: [env, system, docker]
+  #   timeout: 5s
 
+# Connectors: bridge between pipelines
+connectors:
+  # spanmetrics: derive metrics from trace spans
+  # For instrumented apps: native SDK metrics preferred for http.server (lower overhead)
+  # For uninstrumented/legacy: spanmetrics provides metrics from any span
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/connector/spanmetricsconnector
+  spanmetrics:
+    exclude_dimensions: [span.kind]
+    histogram:
+      explicit:
+        buckets: [10ms, 50ms, 100ms, 500ms, 1s, 5s]
+    dimensions:
+      # HTTP semantic conventions (stable)
+      - name: http.route
+      - name: http.response.status_code
+      - name: http.request.method
+      # HTTP semantic conventions (deprecated)
+      - name: http.status_code
+      - name: http.method
+      # Database semantic conventions
+      - name: db.system
+      - name: db.operation
+      # RPC semantic conventions
+      - name: rpc.system
+      - name: rpc.service
+
+# Exporters: send data to backends
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
     send_timestamps: true
     metric_expiration: 180m
+    resource_to_telemetry_conversion:
+      enabled: true  # Convert resource attrs to metric labels (adds service_name, service_namespace, etc)
   otlp_http/loki:
     endpoint: http://loki:3100/otlp
   otlp_grpc/tempo:
@@ -29,6 +75,7 @@ exporters:
       insecure: true
 
 service:
+  extensions: [health_check, pprof, zpages]
   telemetry:
     metrics:
       readers:
@@ -36,17 +83,23 @@ service:
             exporter:
               prometheus:
                 host: 0.0.0.0
-                port: 8888
+                port: 8888  # internal collector metrics (separate from spanmetrics on 8889)
   pipelines:
-    metrics:
+    # Traces: OTLP → batch → spanmetrics (derive metrics) + Tempo (storage)
+    # Spanmetrics generates metrics from all spans (http, db, rpc, etc)
+    # Native SDK metrics preferred for http.server when available (lower overhead)
+    traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
+      exporters: [spanmetrics, otlp_grpc/tempo]
+    # Metrics: native SDK (OTLP) + spanmetrics (derived from traces)
+    # Dashboards prefer native SDK metrics, fallback to spanmetrics for uninstrumented apps
+    metrics:
+      receivers: [otlp, spanmetrics]
+      processors: [memory_limiter, batch]
       exporters: [prometheus]
+    # Logs: OTLP to processors to Loki
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [otlp_http/loki]
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [otlp_grpc/tempo]

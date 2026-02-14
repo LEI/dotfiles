@@ -1,73 +1,81 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
-# Local OTEL stack: Collector + Prometheus (metrics) + Loki (logs) + Tempo (traces) + Grafana
-#
-# docker compose -f ~/.config/otel/compose.yaml up -d     # Start
-# docker compose -f ~/.config/otel/compose.yaml down       # Stop
-# docker compose -f ~/.config/otel/compose.yaml down -v    # Stop + delete data
-#
-# Grafana:    http://localhost:3033
-# Prometheus: http://localhost:9090
-# OTLP gRPC:  localhost:4317
-# OTLP HTTP:  localhost:4318
 services:
+  # OTLP collector (scratch image, no healthcheck)
+  # curl -fs http://localhost:13133
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.145.0
-    restart: unless-stopped
     command: ["--config=/etc/otel-collector-config.yaml"]
+    restart: unless-stopped
     ports:
-      - "127.0.0.1:4317:4317"
-      - "127.0.0.1:4318:4318"
+      - "127.0.0.1:4317:4317" # gRPC
+      - "127.0.0.1:4318:4318" # HTTP
+      # - "127.0.0.1:8888:8888" # Metrics (internal only, Prometheus scrapes via Docker DNS)
     volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro,Z
     deploy:
       resources:
         limits:
           memory: 512M
 
+  # Prometheus (metrics): http://localhost:9090
   prometheus:
     image: prom/prometheus:v3.9.1
-    restart: unless-stopped
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
+      - --config.file=/etc/prometheus/prometheus.yaml
       - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=720h  # 30 days (default: 15d)
+      - --storage.tsdb.retention.time=720h # 30 days (default: 15d)
       - --web.enable-lifecycle
       - --web.enable-remote-write-receiver
+    restart: unless-stopped
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro,Z
+      - ./alerts:/etc/prometheus/alerts:ro,Z
       - prometheus-data:/prometheus
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
+  # Loki (logs, scratch image, no healthcheck)
+  # curl -fs http://localhost:3100/ready
   loki:
     image: grafana/loki:3.6
-    restart: unless-stopped
     command: ["-config.file=/etc/loki/loki.yaml"]
+    restart: unless-stopped
+    # ports:
+    #   - "127.0.0.1:3100:3100"
     volumes:
-      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - ./loki.yaml:/etc/loki/loki.yaml:ro,Z
       - loki-data:/loki
     deploy:
       resources:
         limits:
           memory: 512M
 
+  # Tempo (traces, distroless image since 2.10, no healthcheck)
+  # wget --spider -q http://localhost:3200/ready
   tempo:
-    image: grafana/tempo:2.7.2
-    restart: unless-stopped
+    image: grafana/tempo:2.10.0
     command: ["-config.file=/etc/tempo/tempo.yaml"]
+    restart: unless-stopped
     volumes:
-      - ./tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - ./tempo.yaml:/etc/tempo/tempo.yaml:ro,Z
       - tempo-data:/var/tempo
     deploy:
       resources:
         limits:
           memory: 512M
 
+  # Grafana: http://localhost:3033
   grafana:
     image: grafana/grafana:12.3
     restart: unless-stopped
@@ -78,13 +86,82 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
       GF_AUTH_DISABLE_LOGIN_FORM: "true"
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro,Z
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro,Z
       - grafana-data:/var/lib/grafana
     deploy:
       resources:
         limits:
           memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Node Exporter: host metrics for dashboard 1860
+  # curl -fs http://localhost:9100/metrics
+  node-exporter:
+    image: prom/node-exporter:v1.10.2
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|run)($$|/)"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # cAdvisor: container metrics for dashboards 893, 14282
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.56.2
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      # Explicit socket: macOS /var/run/docker.sock is a symlink
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Containerd socket for container name resolution (Docker Desktop Engine 29+)
+      # https://github.com/google/cadvisor/pull/3709
+      - /run/containerd:/run/containerd:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Alertmanager: alert testing and management
+  alertmanager:
+    image: prom/alertmanager:v0.31.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro,Z
+      - alertmanager-data:/alertmanager
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Uncomment to add Jaeger for trace viewing (http://localhost:16686)
   # jaeger:
@@ -102,3 +179,4 @@ volumes:
   loki-data:
   tempo-data:
   grafana-data:
+  alertmanager-data:

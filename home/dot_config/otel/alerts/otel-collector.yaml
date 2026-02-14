@@ -1,0 +1,42 @@
+---
+groups:
+  - name: otel-collector
+    interval: 30s
+    rules:
+      # Collector pipeline issues
+      - alert: OTELCollectorDroppedSpans
+        expr: rate(otelcol_processor_dropped_spans[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OTEL Collector dropping spans"
+          description: "OTEL Collector is dropping {{ $value }} spans/sec on {{ $labels.processor }}"
+
+      - alert: OTELCollectorDroppedMetrics
+        expr: rate(otelcol_processor_dropped_metric_points[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OTEL Collector dropping metrics"
+          description: "OTEL Collector is dropping {{ $value }} metric points/sec on {{ $labels.processor }}"
+
+      - alert: OTELCollectorDroppedLogs
+        expr: rate(otelcol_processor_dropped_log_records[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OTEL Collector dropping logs"
+          description: "OTEL Collector is dropping {{ $value }} log records/sec on {{ $labels.processor }}"
+
+      # Receiver errors
+      - alert: OTELCollectorReceiverErrors
+        expr: rate(otelcol_receiver_refused_spans[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OTEL Collector receiver errors"
+          description: "OTEL Collector receiver {{ $labels.receiver }} is refusing spans ({{ $value }}/sec)"

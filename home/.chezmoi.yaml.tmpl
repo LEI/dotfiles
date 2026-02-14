@@ -55,9 +55,10 @@
 {{- end -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
-{{- $lddVersion := eq .chezmoi.os "linux" | ternary
-  (output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim)
-  "3" -}}
+{{- $lddVersion := "3" -}}
+{{- if and (eq .chezmoi.os "linux") (lookPath "sh") -}}
+{{-   $lddVersion = output "sh" "-c" "ldd --version 2>&1 | awk '/(^ldd|^Version)/ {print $NF}'" | trim -}}
+{{- end -}}
 {{- $glibc := float64 $lddVersion -}}
 {{- /* $glibc231 := le (float64 $lddVersion) 2.31 -}}
 {{- $glibc231 := or
@@ -72,7 +73,10 @@
 {{-   $hostname = output "sh" "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
 {{- end -}}
 
-{{- $user := env "USER" | default (output "id" "-un" | trim) -}}
+{{- $user := env "USER" -}}
+{{- if not $user -}}
+{{-   $user = lookPath "id" | isExecutable | ternary (output "id" "-un" | trim) "" -}}
+{{- end -}}
 {{- $name := env "NAME" | default $user -}}
 {{- $email := env "EMAIL" | default (printf "%s@localhost" $user) -}}
 {{- $accessToken := "" -}}
@@ -105,7 +109,10 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
-{{- $timezone := env "TZ" | default (output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim) -}}
+{{- $timezone := env "TZ" -}}
+{{- if and (not $timezone) (lookPath "sh" | isExecutable) -}}
+{{-   $timezone = output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim -}}
+{{- end -}}
 
 {{- $data := dict
   "accessToken" $accessToken
@@ -168,7 +175,7 @@ data:
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
   # term: truecolor
 
-{{- if and .features.git $accessToken }}
+{{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}
 
   # https://www.chezmoi.io/user-guide/password-managers/bitwarden/#bitwarden-secrets-cli
   git:
@@ -183,7 +190,7 @@ data:
 {{- end }}
 {{- end }}
 
-{{- if and .features.mail $accessToken }}
+{{- if and .features.mail $accessToken (lookPath "bws" | isExecutable) }}
 
   mail:
     accounts:
@@ -268,25 +275,29 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
 {{-   $paths := env "PATH" | splitList ":" }}
+{{-   if not (has "/usr/bin" $paths) }}
+{{-     $paths = prepend $paths "/usr/bin" }}
+{{-   end }}
+{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
 {{-   if and $features.mise (not (has $miseShims $paths)) }}
 {{-     $paths = append $paths $miseShims }}
 {{-   end }}
-{{- if or $features.brew (eq .chezmoi.os "darwin") }}
-{{-   $brewPrefix := ne .chezmoi.os "linux" | ternary
-  (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local")
-  "/home/linuxbrew/.linuxbrew" }}
-{{-   $brewBin := joinPath $brewPrefix "bin" }}
-{{-   if not (has $brewBin $paths) }}
-{{-     $paths = prepend $paths $brewBin }}
+{{-   if or $features.brew (eq .chezmoi.os "darwin") }}
+{{-     $brewPrefix := ne .chezmoi.os "linux" | ternary
+          (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local")
+          "/home/linuxbrew/.linuxbrew" }}
+{{-     $brewBin := joinPath $brewPrefix "bin" }}
+{{-     if not (has $brewBin $paths) }}
+{{-       $paths = prepend $paths $brewBin }}
+{{-     end }}
+{{-     $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
+{{-     if not (has $rubyBin $paths) -}}
+{{-       $paths = prepend $paths $rubyBin }}
+{{-     end -}}
 {{-   end }}
-{{-   $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
-{{-   if not (has $rubyBin $paths) -}}
-{{-     $paths = prepend $paths $rubyBin }}
-{{-   end -}}
-{{- end }}
 {{-   $paths = append $paths $binDir }}
+
   PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 

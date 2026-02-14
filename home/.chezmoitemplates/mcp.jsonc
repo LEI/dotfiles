@@ -163,16 +163,29 @@
     },
     {{- end }}
 
-    {{- /* /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome */ -}}
-    {{- if or (eq .os "darwin") (lookPath "chrome" | isExecutable) }}
+    {{- if .gui }}
+    {{-   $chromePath := "" -}}
+    {{-   if (lookPath "chromium-browser") | isExecutable -}}
+    {{-     $chromePath = lookPath "chromium-browser" -}}
+    {{-   else if (lookPath "chrome") | isExecutable -}}
+    {{-     $chromePath = lookPath "chrome" -}}
+    {{-   else if eq .os "darwin" -}}
+    {{-     $chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" -}}
+    {{-   end -}}
+    {{-   if not $chromePath }}
+    {{      warnf "chrome-devtools: no browser found, using stable channel" }}
+    {{    end -}}
     "chrome-devtools": {
-      // "enabled": false,
       "command": "npx",
       "args": [
         "-y",
         "chrome-devtools-mcp@latest",
+        {{- if $chromePath }}
+        "--executable-path={{ $chromePath }}",
+        {{- else }}
         "--channel=stable",
-        "--headless=true",
+        {{- end }}
+        // "--headless=true",
         "--isolated=true",
       ],
     },

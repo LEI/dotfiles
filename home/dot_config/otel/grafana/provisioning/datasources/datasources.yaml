@@ -1,5 +1,5 @@
+---
 apiVersion: 1
-
 datasources:
   - name: Prometheus
     uid: prometheus
@@ -21,7 +21,7 @@ datasources:
           datasourceUid: tempo
           matcherType: label
           matcherRegex: trace_id
-          url: '$${__value.raw}'
+          url: "$${__value.raw}"
           urlDisplayLabel: View Trace
 
   - name: Tempo
@@ -33,8 +33,8 @@ datasources:
     jsonData:
       tracesToLogsV2:
         datasourceUid: loki
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
         tags:
           - key: service.name
             value: service_name
@@ -42,18 +42,20 @@ datasources:
         filterBySpanID: false
         customQuery: true
         query: '{service_name="$${__span.tags["service.name"]}"} | trace_id = `$${__span.traceId}`'
+      # Bridge traces to spanmetrics-generated metrics in Prometheus for correlation
       tracesToMetrics:
         datasourceUid: prometheus
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
         tags:
           - key: service.name
             value: service_name
         queries:
           - name: Request rate
-            query: 'sum(rate(traces_spanmetrics_calls_total{$$__tags}[5m]))'
+            query: "sum(rate(traces_spanmetrics_calls_total{$$__tags}[5m]))"
+          # $$__tags placeholder auto-injects service filters from trace context
           - name: Latency (p95)
-            query: 'histogram_quantile(0.95, sum(rate(traces_spanmetrics_duration_seconds_bucket{$$__tags}[5m])) by (le))'
+            query: "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m])) by (le))"
       serviceMap:
         datasourceUid: prometheus
       nodeGraph:
@@ -62,5 +64,5 @@ datasources:
         datasourceUid: loki
       traceQuery:
         timeShiftEnabled: true
-        spanStartTimeShift: '-30m'
-        spanEndTimeShift: '30m'
+        spanStartTimeShift: "-30m"
+        spanEndTimeShift: "30m"

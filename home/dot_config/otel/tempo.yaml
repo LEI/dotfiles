@@ -1,4 +1,5 @@
-# Tempo local config — single-binary mode with local storage.
+---
+# Tempo local config for single-binary mode with local storage.
 #
 # https://grafana.com/docs/tempo/latest/configuration/
 # https://grafana.com/docs/tempo/latest/setup/set-up-single-binary/
@@ -18,10 +19,11 @@ ingester:
   max_block_duration: 5m
 
 # https://grafana.com/docs/tempo/latest/metrics-generator/
-# Required by Grafana Traces Drilldown plugin (rate queries)
+# Generates RED metrics from traces (parallel to otel-collector spanmetrics for redundancy)
 metrics_generator:
   storage:
     path: /var/tempo/generator/wal
+    # Export derived metrics to Prometheus: request rates, service graphs, span metrics
     remote_write:
       - url: http://prometheus:9090/api/v1/write
   traces_storage:
@@ -30,6 +32,7 @@ metrics_generator:
 overrides:
   defaults:
     metrics_generator:
+      # service-graphs: dependency map; span-metrics: RED timeseries; local-blocks: retention
       processors: [service-graphs, span-metrics, local-blocks]
 
 compactor:

@@ -32,7 +32,7 @@ flatpak_packages="{{ $flatpakPackages | keys | sortAlpha | join " " }}"
 {{ $before }}
 {{- end }}
 
-cmd flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages 
+cmd flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages
 # --user/--system
 # --installation=chezmoi
 

@@ -57,7 +57,7 @@ COPY --chown=coder:coder entrypoint.sh "/entrypoint.sh"
 # hadolint ignore=SC2016
 RUN chmod +x /entrypoint.sh && \
     echo 'eval "$(mise activate bash)' >>~/.bashrc && \
-    echo 'eval "$(starship init bash)' >>~/.bashrc 
+    echo 'eval "$(starship init bash)' >>~/.bashrc
 
 # Install extensions
 RUN pi update

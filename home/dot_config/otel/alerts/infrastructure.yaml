@@ -1,0 +1,44 @@
+---
+groups:
+  - name: infrastructure
+    interval: 30s
+    rules:
+      # Service availability
+      - alert: ServiceDown
+        expr: up{job=~"otel-collector|prometheus|tempo|loki|grafana"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+      # Container memory pressure
+      - alert: ContainerMemoryHigh
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} memory usage high"
+          description: "Container {{ $labels.name }} is using {{ $value | humanizePercentage }} of its memory limit"
+
+      # Disk space low (host)
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space low on root filesystem"
+          description: "Root filesystem has less than 15% free space ({{ $value | humanizePercentage }} remaining)"
+
+      # High CPU usage (host)
+      - alert: HighCPUUsage
+        expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on host"
+          description: "CPU usage is above 85% for 5 minutes (current: {{ $value | humanizePercentage }})"

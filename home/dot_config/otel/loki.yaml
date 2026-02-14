@@ -1,4 +1,5 @@
-# Loki local config — based on the embedded default (/etc/loki/local-config.yaml)
+---
+# Loki local config based on the embedded default (/etc/loki/local-config.yaml)
 # with OTLP structured metadata support.
 #
 # https://grafana.com/docs/loki/latest/configure/
@@ -7,6 +8,8 @@ auth_enabled: false
 
 server:
   http_listen_port: 3100
+  http_server_read_timeout: 60s
+  http_server_write_timeout: 60s
   log_level: warn
 
 # https://grafana.com/docs/loki/latest/configure/#common
@@ -36,22 +39,38 @@ schema_config:
 # https://grafana.com/docs/loki/latest/configure/#limits_config
 limits_config:
   allow_structured_metadata: true
-  retention_period: 720h  # 30 days (default: 0 = disabled)
-  # https://grafana.com/docs/loki/latest/send-data/otel/#format-considerations
-  # Default promotes ~17 resource attributes as labels (k8s.*, service.*, etc.).
-  # Override: only service.name as index label, rest as structured metadata.
+  retention_period: 720h # 30 days (default: 0 = disabled)
+  # OTLP defaults: resource attrs promoted to index labels
+  # https://grafana.com/docs/loki/latest/get-started/labels/modify-default-labels/
   otlp_config:
     resource_attributes:
       ignore_defaults: true
       attributes_config:
         - action: index_label
-          attributes: [service.name]
+          attributes:
+            # - cloud.availability_zone
+            # - cloud.region
+            - container.name
+            # - deployment.environment
+            # - deployment.environment.name
+            # - k8s.cluster.name
+            # - k8s.container.name
+            # - k8s.cronjob.name
+            # - k8s.daemonset.name
+            # - k8s.deployment.name
+            # - k8s.job.name
+            # - k8s.namespace.name
+            # - k8s.pod.name # high cardinality, one per pod
+            # - k8s.replicaset.name
+            # - k8s.statefulset.name
+            # - service.instance.id # high cardinality, one per pod
+            - service.name
+            - service.namespace
 
 compactor:
   working_directory: /loki/compactor
-  retention_enabled: true  # Required for retention_period to work (default: false)
-  retention_delete_delay: 2h  # Wait before deleting (default: 2h)
-  retention_delete_worker_count: 150  # Parallel delete workers (default: 150)
+  retention_enabled: true
+  delete_request_store: filesystem
 
 analytics:
   reporting_enabled: false

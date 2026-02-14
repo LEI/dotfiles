@@ -103,6 +103,7 @@
       "cat *": "allow",
       // "cd *": "allow",
       // "curl *": "allow",
+      "date *": "allow",
       "echo *": "allow",
       "env *": "deny",
       "fd *": "allow",
@@ -128,7 +129,7 @@
       "tail *": "allow",
       "test *": "allow",
       "trash *": "ask",
-      "uniq *": "ask",
+      "uniq *": "allow",
       "wc *": "allow",
       "yq *": "allow",
 
@@ -271,7 +272,7 @@
     // Internal agents: compaction, summary, title
     "build": {
       "color": "accent", // Orange
-      "description": "Builder orchestrator with write access",
+      "description": "Build orchestrator with write access",
       "mode": "primary",
       "model": {{ $smartModel | quote }},
       "temperature": 0.1,
@@ -307,8 +308,8 @@
           "search": "allow",
           "system": "allow"
         },
-        // "todoread": "allow",
-        // "todowrite": "allow"
+        "todoread": "allow",
+        "todowrite": "allow"
         // "git_git_*": "ask",
         // "git_git_branch": "allow",
         // "git_git_diff*": "allow",
@@ -320,7 +321,7 @@
     },
     "plan": {
       "color": "primary", // Blue
-      "description": "Researcher orchestrator with read-only access",
+      "description": "Research orchestrator with read-only access",
       "mode": "primary",
       // "model": "github-copilot/claude-haiku-4.5",
       // "model": "github-copilot/claude-sonnet-4.5",
@@ -340,7 +341,9 @@
           // "gitlab": "allow",
           "review": "allow",
           "search": "allow"
-        }
+        },
+        "todoread": "allow",
+        "todowrite": "allow"
       }
     },
     // Built-in subagents: explore, general, readonly
@@ -360,6 +363,7 @@
     "archive": {
       "description": "Persistent memory and context storage",
       "mode": "subagent",
+      "prompt": "Store and retrieve memories. All other tools denied.",
       "permission": {
         "*": "deny",
         "memory_*": "allow",
@@ -375,12 +379,35 @@
     "browser": {
       "description": "Web browser automation and debugging",
       "mode": "subagent",
+      "prompt": "Control Chrome browser. All other tools denied.",
       "permission": {
         "*": "deny",
-        "chrome-devtools_*": "ask"
-        // "chrome-devtools_evaluate_script": "ask",
-        // "chrome-devtools_list_pages": "ask",
-        // "chrome-devtools_navigate_page": "ask",
+        // https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/main/docs/tool-reference.md
+        "chrome-devtools_*": "ask",
+        // "chrome-devtools_click": "allow",
+        // "chrome-devtools_close_page": "allow",
+        // "chrome-devtools_drag": "allow",
+        "chrome-devtools_emulate": "allow",
+        // "chrome-devtools_evaluate_script": "allow",
+        // "chrome-devtools_fill": "allow",
+        // "chrome-devtools_fill_form": "allow",
+        "chrome-devtools_get_console_message": "allow",
+        "chrome-devtools_get_network_request": "allow",
+        // "chrome-devtools_handle_dialog": "allow",
+        "chrome-devtools_hover": "allow",
+        "chrome-devtools_list_console_messages": "allow",
+        "chrome-devtools_list_network_requests": "allow",
+        "chrome-devtools_list_pages": "allow",
+        // "chrome-devtools_navigate_page": "allow",
+        "chrome-devtools_new_page": "allow",
+        "chrome-devtools_performance_*": "allow",
+        // "chrome-devtools_press_key": "allow",
+        "chrome-devtools_resize_page": "allow",
+        "chrome-devtools_select_page": "allow",
+        "chrome-devtools_take_screenshot": "allow",
+        "chrome-devtools_take_snapshot": "allow",
+        // "chrome-devtools_upload_file": "allow",
+        "chrome-devtools_wait_for": "allow"
       }
     },
     "implement": {
@@ -401,6 +428,7 @@
       "mode": "subagent",
       // "model": "github-copilot/claude-opus-4.5",
       "temperature": 0.2,
+      "prompt": "Chain code-mode tools for automation. All other tools denied.",
       "permission": {
         "*": "deny",
         "code-mode_*": "ask",
@@ -421,10 +449,7 @@
         // "skill": {
         //   "systematic-debugging": "allow"
         // },
-        "task": {
-          "*": "deny",
-          "explore": "allow"
-        }
+        "task": "deny"
       }
     },
     "firecrawl": {
@@ -432,6 +457,7 @@
       "disable": true,
       "mode": "subagent",
       // // "model": "github-copilot/claude-haiku-4.5",
+      "prompt": "Scrape web pages with firecrawl. All other tools denied.",
       "permission": {
         "*": "deny",
         "firecrawl_*": "allow"
@@ -443,6 +469,7 @@
       "mode": "subagent",
       // "model": {{ $fastModel | quote }},
       "temperature": 0.0,
+      "prompt": "Manage Kubernetes and GitOps with flux. All other tools denied.",
       "permission": {
         "*": "deny",
         "skill": {
@@ -460,6 +487,7 @@
       "mode": "subagent",
       // "model": {{ $fastModel | quote }},
       "temperature": 0.0,
+      "prompt": "GitHub operations with gh CLI and github_* MCP. All other tools denied.",
       "permission": {
         "*": "deny",
         "read": "allow",
@@ -467,10 +495,7 @@
         "grep": "allow",
         "list": "allow",
         "skill": "deny",
-        "task": {
-          "*": "deny",
-          "explore": "allow"
-        },
+        "task": "deny",
 
         // https://docs.github.com/en/copilot/building-copilot-extensions/
         // building-copilot-extensions/configuring-a-copilot-extension/
@@ -515,6 +540,7 @@
       "mode": "subagent",
       // "model": {{ $fastModel | quote }},
       "temperature": 0.0,
+      "prompt": "GitLab operations with glab CLI and gitlab_* MCP. All other tools denied.",
       "permission": {
         "*": "deny",
         "read": "allow",
@@ -522,10 +548,7 @@
         "grep": "allow",
         "list": "allow",
         "skill": "deny",
-        "task": {
-          "*": "deny",
-          "explore": "allow"
-        },
+        "task": "deny",
 
         // https://docs.gitlab.com/ee/user/gitlab_duo/mcp.html
         "gitlab_*": "ask",
@@ -543,6 +566,7 @@
       "mode": "subagent",
       // "model": {{ $fastModel | quote }},
       "temperature": 0.0,
+      "prompt": "Manage system and environment with mise and filesystem. All other tools denied.",
       "permission": {
         "*": "deny",
         "mise_*": "ask",
