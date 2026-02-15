@@ -15,7 +15,7 @@ groups:
 
       # Container memory pressure
       - alert: ContainerMemoryHigh
-        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) > 0.85
+        expr: (container_memory_usage_bytes{name=~".+"} / (container_spec_memory_limit_bytes{name=~".+"} > 0)) > 0.85
         for: 2m
         labels:
           severity: warning

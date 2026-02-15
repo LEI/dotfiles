@@ -21,13 +21,19 @@ lint_markdown() {
 lint() {
   case "$1" in
 
+  # TODO: evaluate alternatives (remark-lint, mdformat) and per-directory config
   # MD007: list indent level
   # MD013: line-length
   # MD022: blanks around headings
+  # MD031: blanks around fences (noisy for models)
   # MD032: blanks around lists
+  # MD012: no multiple blanks
+  # MD034: no bare URLs (friction for note-taking)
   # MD040: fenced-code-language
+  # MD041: first-line-h1 (conflicts with YAML frontmatter)
+  # MD047: single trailing newline (noisy for models)
   # MD060: table-column-style
-  *.md) lint_markdown --disable MD007 MD013 MD022 MD032 MD040 MD060 -- "$1" ;;
+  *.md) lint_markdown --disable MD007 MD012 MD013 MD022 MD031 MD032 MD034 MD040 MD041 MD047 MD060 -- "$1" ;;
 
   *.sh) has shellcheck && shellcheck "$1" ;;
 

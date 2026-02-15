@@ -10,9 +10,6 @@
 {{- $smartModel := $model -}}
 {{- $fastModel := $model -}}
 {{- $reasoningModel := $model -}}
-
-{{- $ohMyOC := false -}}
-{{- $quotaToast := false -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": "notify", // false,
@@ -43,27 +40,23 @@
   // Plugin manager: https://github.com/kdcokenny/ocx
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
+    "@mohak34/opencode-notifier@0.1.15",
     // "@ramtinj95/opencode-tokenscope@1.5.2",
-    {{- if $quotaToast }}
     "@slkiser/opencode-quota@1.4.0",
-    {{- end }}
     // "@tarquinen/opencode-dcp@2.1.3"
-    "opencode-pty@0.2.1",
-    // "opencode-sessions@1.0.0",
-    {{- if $ohMyOC }}
+
     // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
     // mv ~/.config/opencode/oh-my-opencode.json{,c}
-    "oh-my-opencode@3.2.3",
-    {{- else }}
-    "@mohak34/opencode-notifier@0.1.15",
-    {{- end }}
-    // "opencode-antigravity-auth@1.5.1",
+    // "oh-my-opencode@3.2.3",
+
     "opencode-agent-skills@0.6.4",
+    // "opencode-antigravity-auth@1.5.1",
+    "opencode-pty@0.2.1",
+    // "opencode-sessions@1.0.0",
     // "opencode-worktree@0.4.0",
   ],
   "experimental": {
     // "openTelemetry": true,
-    {{- if $quotaToast }}
     "quotaToast": {
       "enabledProviders": [
         "copilot"
@@ -71,7 +64,6 @@
         // "google-antigravity",
       ]
     }
-    {{- end }}
   },
   // https://opencode.ai/docs/permissions#defaults
   "permission": {

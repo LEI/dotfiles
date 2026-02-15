@@ -1,6 +1,8 @@
 ---
 # Grafana dashboards — auto-downloaded by chezmoi
 
+# Claude Code monitoring: cost, tokens, tool usage
+# Data: claude_code_* (OTLP metrics from Claude Code CLI)
 # https://github.com/anthropics/claude-code-monitoring-guide
 grafana/dashboards/Application/claude-code.json:
   type: file
@@ -10,7 +12,9 @@ grafana/dashboards/Application/claude-code.json:
     command: sed
     args: [s/PBFA97CFB590B2093/prometheus/g]
 
-# Application monitoring with RED metrics derived from traces via spanmetrics connector
+# Application monitoring with RED metrics derived from traces via Tempo metrics_generator
+# Data: traces_spanmetrics_latency (from Tempo 2.10 remote_write, old format)
+# Dashboard rev 6 uses new format; sed rewrites metric names and labels to match Tempo
 # https://grafana.com/grafana/dashboards/19419-opentelemetry-apm/
 grafana/dashboards/Application/opentelemetry-apm.json:
   type: file
@@ -21,17 +25,27 @@ grafana/dashboards/Application/opentelemetry-apm.json:
     args:
       - -e # Fix datasource UID
       - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
-      - -e # Fix metric name format
-      - "s/traces_spanmetrics_/traces_span_metrics_/g"
-      - -e # Update to stable semantic conventions
+      - -e # Metric name: dashboard new format → Tempo 2.10 old format
+      - "s/traces_span_metrics_duration_milliseconds/traces_spanmetrics_latency/g"
+      - -e
+      - "s/traces_span_metrics_calls_total/traces_spanmetrics_calls_total/g"
+      - -e # Label: service_name → service in PromQL (Tempo remote_write uses service)
+      - "s/service_name=/service=/g"
+      - -e
+      - "s/service_name}/service}/g"
+      - -e
+      - "s/service_name,/service,/g"
+      - -e
+      - "s/service_name)/service)/g"
+      - -e # Label: rewrite old semconv to stable (matching Tempo dimension labels)
       - "s/http_status_code/http_response_status_code/g"
       - -e
       - "s/http_method/http_request_method/g"
-      - -e # Exclude compose from Application dropdown (CLIENT spans only, not SERVER)
-      - 's/label_values(service_name)/label_values(traces_span_metrics_calls_total{span_kind=\\"SPAN_KIND_SERVER\\"},service_name)/g'
+      - -e # Filter Application dropdown to services with SERVER spans
+      - 's/label_values(service)/label_values(traces_spanmetrics_calls_total{span_kind=\\"SPAN_KIND_SERVER\\"},service)/g'
 
 # HTTP services with log correlation and predictive analytics
-# Requires native OTEL SDK metrics: http.server.request.duration (stable semconv)
+# Data: http_server_request_duration_seconds (native OTEL SDK metric, stable semconv)
 # https://grafana.com/grafana/dashboards/21587-opentelemetry-for-http-services/
 grafana/dashboards/Application/otel-http.json:
   type: file
@@ -58,6 +72,7 @@ grafana/dashboards/Application/otel-http.json:
       - 's|label_values(http_server_request_duration_seconds_count{job=\\"${service_namespace}/${service_name}\\"},job)|label_values(http_server_request_duration_seconds_count{service_namespace=\\"${service_namespace}\\",service_name=\\"${service_name}\\"},job)|g'
 
 # OTEL Collector pipeline metrics
+# Data: otelcol_* (self-reported collector metrics on port 8888)
 # https://grafana.com/grafana/dashboards/15983-opentelemetry-collector/
 # No filter needed: uses $datasource variable auto-resolved by Grafana
 grafana/dashboards/Infrastructure/opentelemetry-collector.json:
@@ -65,14 +80,31 @@ grafana/dashboards/Infrastructure/opentelemetry-collector.json:
   url: https://grafana.com/api/dashboards/15983/revisions/29/download
   refreshPeriod: 168h
 
-# Host metrics: CPU, memory, disk, network (requires node-exporter container)
+# OTEL Collector ingress/egress data flow visualization
+# Data: otelcol_* (self-reported collector metrics on port 8888)
+# https://grafana.com/grafana/dashboards/18309-opentelemetry-collector-data-flow/
+grafana/dashboards/Infrastructure/opentelemetry-collector-data-flow.json:
+  type: file
+  url: https://grafana.com/api/dashboards/18309/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args:
+      - -e # Fix datasource UID
+      - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
+
+# Host metrics: CPU, memory, disk, network
+# Data: node_* (requires node-exporter container)
 # https://grafana.com/grafana/dashboards/1860-node-exporter-full/
+# Alternative: 12486 uses instance label directly, minimal gain over 1860
+# https://grafana.com/grafana/dashboards/12486-node-exporter-full/
 grafana/dashboards/Infrastructure/node-exporter-full.json:
   type: file
   url: https://grafana.com/api/dashboards/1860/revisions/37/download
   refreshPeriod: 168h
 
 # Container metrics via cAdvisor
+# Data: container_* (requires cadvisor container)
 # https://grafana.com/grafana/dashboards/14282-docker-container/
 grafana/dashboards/Infrastructure/cadvisor-exporter.json:
   type: file
@@ -84,17 +116,30 @@ grafana/dashboards/Infrastructure/cadvisor-exporter.json:
       - -e # Fix datasource UID
       - "s/${DS_PROMETHEUS}/prometheus/g"
 
+# Container monitoring with CPU/memory/IO/restarts (more complete than 14282)
+# Data: container_* (requires cadvisor container)
+# https://grafana.com/grafana/dashboards/19908-docker-container-monitoring-with-prometheus-and-cadvisor/
+grafana/dashboards/Infrastructure/cadvisor-docker-monitoring.json:
+  type: file
+  url: https://grafana.com/api/dashboards/19908/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args:
+      - -e # Fix datasource UID
+      - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
+
 # Alertmanager monitoring
+# Data: alertmanager_* (requires alertmanager container and Prometheus scrape)
 # https://grafana.com/grafana/dashboards/9578-alertmanager-overview/
+# No filter needed: uses $datasource variable auto-resolved by Grafana
 grafana/dashboards/Infrastructure/alertmanager.json:
   type: file
   url: https://grafana.com/api/dashboards/9578/revisions/4/download
   refreshPeriod: 168h
-  filter:
-    command: sed
-    args: ["s/${DS_PROMETHEUS}/prometheus/g"]
 
 # Log analysis with pattern matching and service correlation
+# Data: Loki log streams with service_name label (OTLP logs or container logs)
 # https://grafana.com/grafana/dashboards/24574/logging-dashboard-via-loki-v3/
 # Keep container_name label (indexed by Loki from container.name resource attribute)
 grafana/dashboards/Logs/logging-dashboard-via-loki-v3.json:
@@ -122,26 +167,22 @@ grafana/dashboards/Logs/logging-dashboard-via-loki-v3.json:
       - 's/"query": "label_values({container_name=~\\"$container_name\\"}, instance)"/"query": "label_values({instance=~\\".+\\"}, instance)"/g' # yamllint disable-line rule:line-length
       - -e
       - 's/"definition": "label_values({container_name=~\\"$container_name\\"}, instance)"/"definition": "label_values({instance=~\\".+\\"}, instance)"/g'
-      - -e # searchable_pattern variable: default to empty string (no filter) instead of "error"
-      - 's/"value": "error"/"value": ""/g'
-      - -e
-      - 's/"text": "error"/"text": ""/g'
-      - -e
-      - 's/"query": "error"/"query": ""/g'
 
-# Log pattern monitoring and error rate tracking
+# Log pattern monitoring and error rate tracking (K8s-focused, no data on Docker Compose)
+# Data: Loki log streams (uses log volume and pattern detection)
 # https://grafana.com/grafana/dashboards/23789-loki-logging-volume-analysis/
-grafana/dashboards/Kubernetes/loki-volume-analysis.json:
-  type: file
-  url: https://grafana.com/api/dashboards/23789/revisions/1/download
-  refreshPeriod: 168h
-  filter:
-    command: sed
-    args:
-      - -e # Fix datasource UID
-      - "s/${DS_LOKI}/loki/g"
+# grafana/dashboards/Kubernetes/loki-volume-analysis.json:
+#   type: file
+#   url: https://grafana.com/api/dashboards/23789/revisions/1/download
+#   refreshPeriod: 168h
+#   filter:
+#     command: sed
+#     args:
+#       - -e # Fix datasource UID
+#       - "s/${DS_LOKI}/loki/g"
 
-# Pipeline debugging for OTEL Collector and Tempo (partial data on Docker)
+# Pipeline debugging for OTEL Collector and Tempo
+# Data: otelcol_* + tempo_* (partial on Docker, designed for Kubernetes)
 # https://grafana.com/grafana/dashboards/23242-opentelemetry-tempo/
 grafana/dashboards/Kubernetes/opentelemetry-tempo.json:
   type: file

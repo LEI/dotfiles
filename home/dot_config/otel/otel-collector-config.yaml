@@ -33,37 +33,14 @@ processors:
   #   detectors: [env, system, docker]
   #   timeout: 5s
 
-# Connectors: bridge between pipelines
-connectors:
-  # spanmetrics: derive metrics from trace spans
-  # For instrumented apps: native SDK metrics preferred for http.server (lower overhead)
-  # For uninstrumented/legacy: spanmetrics provides metrics from any span
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/connector/spanmetricsconnector
-  spanmetrics:
-    exclude_dimensions: [span.kind]
-    histogram:
-      explicit:
-        buckets: [10ms, 50ms, 100ms, 500ms, 1s, 5s]
-    dimensions:
-      # HTTP semantic conventions (stable)
-      - name: http.route
-      - name: http.response.status_code
-      - name: http.request.method
-      # HTTP semantic conventions (deprecated)
-      - name: http.status_code
-      - name: http.method
-      # Database semantic conventions
-      - name: db.system
-      - name: db.operation
-      # RPC semantic conventions
-      - name: rpc.system
-      - name: rpc.service
+# Spanmetrics removed: Tempo metrics_generator handles RED metrics + service-graphs
+# https://grafana.com/docs/tempo/latest/metrics-generator/
 
 # Exporters: send data to backends
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
-    send_timestamps: true
+    send_timestamps: false # Prometheus scrape time preferred, avoids "samples too old"
     metric_expiration: 180m
     resource_to_telemetry_conversion:
       enabled: true  # Convert resource attrs to metric labels (adds service_name, service_namespace, etc)
@@ -83,19 +60,16 @@ service:
             exporter:
               prometheus:
                 host: 0.0.0.0
-                port: 8888  # internal collector metrics (separate from spanmetrics on 8889)
+                port: 8888  # internal collector metrics (separate from app metrics on 8889)
   pipelines:
-    # Traces: OTLP → batch → spanmetrics (derive metrics) + Tempo (storage)
-    # Spanmetrics generates metrics from all spans (http, db, rpc, etc)
-    # Native SDK metrics preferred for http.server when available (lower overhead)
+    # Traces: OTLP → batch → Tempo (storage + metrics_generator for RED/service-graphs)
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [spanmetrics, otlp_grpc/tempo]
-    # Metrics: native SDK (OTLP) + spanmetrics (derived from traces)
-    # Dashboards prefer native SDK metrics, fallback to spanmetrics for uninstrumented apps
+      exporters: [otlp_grpc/tempo]
+    # Metrics: native SDK (OTLP) → Prometheus
     metrics:
-      receivers: [otlp, spanmetrics]
+      receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [prometheus]
     # Logs: OTLP to processors to Loki

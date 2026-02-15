@@ -19,8 +19,18 @@ ingester:
   max_block_duration: 5m
 
 # https://grafana.com/docs/tempo/latest/metrics-generator/
-# Generates RED metrics from traces (parallel to otel-collector spanmetrics for redundancy)
+# Generates RED metrics and service-graphs from ingested traces
 metrics_generator:
+  # service-graphs: dependency map; span-metrics: RED timeseries; local-blocks: retention
+  processor:
+    span_metrics:
+      # Expose HTTP attributes as labels for APM dashboard queries
+      # https://grafana.com/docs/tempo/latest/metrics-from-traces/span-metrics/
+      dimensions:
+        - http.route
+        - http.request.method
+        - http.response.status_code
+      enable_target_info: true
   storage:
     path: /var/tempo/generator/wal
     # Export derived metrics to Prometheus: request rates, service graphs, span metrics
@@ -29,10 +39,11 @@ metrics_generator:
   traces_storage:
     path: /var/tempo/generator/traces
 
+# Processors enabled via overrides (required even in single-tenant mode)
+# Processor config (dimensions etc) lives under metrics_generator.processor above
 overrides:
   defaults:
     metrics_generator:
-      # service-graphs: dependency map; span-metrics: RED timeseries; local-blocks: retention
       processors: [service-graphs, span-metrics, local-blocks]
 
 compactor:

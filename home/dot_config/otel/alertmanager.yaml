@@ -11,5 +11,6 @@ route:
 
 receivers:
   - name: 'default'
-    # No handler configured - alerts visible in UI only (http://localhost:9093)
-    # To add notifications: webhook_configs, email_configs, etc.
+    webhook_configs:
+      - url: 'http://ntfy:80/alerts'
+        send_resolved: true

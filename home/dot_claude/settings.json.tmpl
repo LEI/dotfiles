@@ -20,11 +20,13 @@
       "Bash(column *)",
       "Bash(cut *)",
       "Bash(date *)",
+      "Bash(date)",
       "Bash(diff *)",
       "Bash(dirname *)",
       "Bash(echo *)",
       "Bash(fd *)",
       "Bash(file *)",
+      "Bash(find *)",
       "Bash(gh api *)",
       "Bash(gh issue list *)",
       "Bash(gh issue status *)",
@@ -41,11 +43,16 @@
       "Bash(gh run view *)",
       "Bash(gh search *)",
       "Bash(git diff *)",
+      "Bash(git diff)",
       "Bash(git fetch *)",
       "Bash(git log *)",
-      "Bash(git remote -v*)",
+      "Bash(git remote -v *)",
+      "Bash(git remote -v)",
       "Bash(git show *)",
+      "Bash(git stash list *)",
       "Bash(git status *)",
+      "Bash(git status)",
+      "Bash(git worktree list *)",
       "Bash(glab api *)",
       "Bash(glab ci list *)",
       "Bash(glab ci status *)",
@@ -60,7 +67,7 @@
       "Bash(head *)",
       "Bash(jq *)",
       "Bash(ls *)",
-      "Bash(pwd *)",
+      "Bash(pwd)",
       "Bash(realpath *)",
       "Bash(rg *)",
       "Bash(sed *)",
@@ -113,6 +120,11 @@
       "Write(./secrets/**)"
     ],
     "ask": [
+      "Bash(find -delete*)",
+      "Bash(find -exec*)",
+      "Bash(find -execdir*)",
+      "Bash(find -ok*)",
+      "Bash(find -okdir*)",
       "Bash(sed -I*)",
       "Bash(sed -i*)",
       "Edit",
@@ -124,19 +136,39 @@
     "disableBypassPermissionsMode": "disable"
   },
   "enableAllProjectMcpServers": false,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/lint.sh"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "{{ lookPath "node" }} ~/.config/claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
   },
   "enabledPlugins": {
+    {{- $plugins := env "CLAUDE_CODE_PLUGINS" | splitList "," }}
+    {{- range $plugins }}
+    {{ . | quote }}: true,
+    {{- end }}
     "claude-code-setup@claude-plugins-official": true,
+    "claude-dashboard@claude-dashboard": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
-    "security-guidance@claude-plugins-official": true,
-    "claude-dashboard@claude-dashboard": true,
     "php-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "security-guidance@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
@@ -152,19 +184,6 @@
         "{{ env "GITLAB_HOST" | default "gitlab.com" }}"
       ]
     }
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/post-edit-lint.sh"
-          }
-        ]
-      }
-    ]
   },
   "alwaysThinkingEnabled": false,
   "autoUpdates": false

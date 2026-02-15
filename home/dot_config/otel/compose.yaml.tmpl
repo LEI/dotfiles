@@ -1,8 +1,9 @@
+{{- $podman := and .features.podman (not .features.docker) -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
   # OTLP collector (scratch image, no healthcheck)
-  # curl -fs http://localhost:13133
+  # Healthcheck: curl -fs http://localhost:13133
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.145.0
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -18,7 +19,8 @@ services:
         limits:
           memory: 512M
 
-  # Prometheus (metrics): http://localhost:9090
+  # Prometheus (metrics)
+  # valet proxy --secure prometheus http://localhost:9090
   prometheus:
     image: prom/prometheus:v3.9.1
     command:
@@ -46,7 +48,7 @@ services:
       start_period: 10s
 
   # Loki (logs, scratch image, no healthcheck)
-  # curl -fs http://localhost:3100/ready
+  # Healthcheck: curl -fs http://localhost:3100/ready
   loki:
     image: grafana/loki:3.6
     command: ["-config.file=/etc/loki/loki.yaml"]
@@ -62,7 +64,7 @@ services:
           memory: 512M
 
   # Tempo (traces, distroless image since 2.10, no healthcheck)
-  # wget --spider -q http://localhost:3200/ready
+  # Healthcheck: wget --spider -q http://localhost:3200/ready
   tempo:
     image: grafana/tempo:2.10.0
     command: ["-config.file=/etc/tempo/tempo.yaml"]
@@ -75,7 +77,8 @@ services:
         limits:
           memory: 512M
 
-  # Grafana: http://localhost:3033
+  # Grafana
+  # valet proxy --secure grafana http://localhost:3033
   grafana:
     image: grafana/grafana:12.3
     restart: unless-stopped
@@ -92,7 +95,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
       interval: 30s
@@ -100,38 +103,56 @@ services:
       retries: 3
       start_period: 10s
 
-  # Node Exporter: host metrics for dashboard 1860
-  # curl -fs http://localhost:9100/metrics
+  # Node Exporter: host metrics
+  # Healthcheck: curl -fs http://localhost:9100/metrics
   node-exporter:
     image: prom/node-exporter:v1.10.2
     restart: unless-stopped
+    {{- if $podman }}
+    privileged: true
+    {{- end }}
     volumes:
+      - /:/rootfs:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /:/rootfs:ro
     command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--path.rootfs=/rootfs"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|run)($$|/)"
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
     deploy:
       resources:
         limits:
           memory: 128M
 
-  # cAdvisor: container metrics for dashboards 893, 14282
+  # cAdvisor: container metrics
   cadvisor:
     image: ghcr.io/google/cadvisor:0.56.2
     restart: unless-stopped
+    {{- if $podman }}
+    privileged: true
+    command:
+      - --podman=unix:///var/run/podman/podman.sock
+    {{- end }}
     volumes:
       - /:/rootfs:ro
-      # Explicit socket: macOS /var/run/docker.sock is a symlink
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      {{- if $podman }}
+      # https://github.com/google/cadvisor/issues/3628
+      - {{ .chezmoi.homeDir }}/.local/share/containers:/var/lib/containers:ro
+      - /dev/disk:/dev/disk:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /run/user/{{ .chezmoi.uid }}:/run/user/{{ .chezmoi.uid }}:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+      {{- else }}
+      - /var/lib/docker:/var/lib/docker:ro
       # Containerd socket for container name resolution (Docker Desktop Engine 29+)
       # https://github.com/google/cadvisor/pull/3709
       - /run/containerd:/run/containerd:ro
-      - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
+      # Explicit socket: macOS /var/run/docker.sock is a symlink
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      {{- end }}
     deploy:
       resources:
         limits:
@@ -146,11 +167,12 @@ services:
   # Alertmanager: alert testing and management
   alertmanager:
     image: prom/alertmanager:v0.31.1
+    # command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
     restart: unless-stopped
     ports:
       - "127.0.0.1:9093:9093"
     volumes:
-      - ./alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro,Z
+      - ./alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro,Z
       - alertmanager-data:/alertmanager
     deploy:
       resources:
@@ -163,7 +185,28 @@ services:
       retries: 3
       start_period: 10s
 
-  # Uncomment to add Jaeger for trace viewing (http://localhost:16686)
+  # ntfy: push notifications
+  ntfy:
+    image: binwiederhier/ntfy:v2
+    command: serve
+    restart: unless-stopped
+    # ports:
+    #   - "127.0.0.1:8080:80"
+    volumes:
+      - ./ntfy/server.yaml:/etc/ntfy/server.yml:ro,Z
+      - ntfy-cache:/var/cache/ntfy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--tries=1", "http://localhost:80/v1/health", "-O", "-"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # # Jaeger (traces)
   # jaeger:
   #   image: cr.jaegertracing.io/jaegertracing/jaeger:latest
   #   restart: unless-stopped
@@ -180,3 +223,4 @@ volumes:
   tempo-data:
   grafana-data:
   alertmanager-data:
+  ntfy-cache:

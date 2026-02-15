@@ -129,6 +129,9 @@ source_files "sh/functions"
 for file in "${XDG_CONFIG_HOME:-$HOME/.config}/"*/functions.sh; do
   bench source "$file"
 done
+if [ -f ~/.claude/functions.sh ] && ! [ -f ~/.config/claude/functions.sh ]; then
+  bench source ~/.claude/functions.sh
+fi
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin" # before replace
