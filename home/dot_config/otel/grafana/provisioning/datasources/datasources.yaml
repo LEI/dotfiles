@@ -14,8 +14,8 @@ datasources:
     type: loki
     access: proxy
     url: http://loki:3100
-    editable: false
     jsonData:
+      httpMethod: GET  # GET for unauthenticated Loki (auth_enabled: false)
       derivedFields:
         - name: TraceID
           datasourceUid: tempo
@@ -29,6 +29,7 @@ datasources:
     type: tempo
     access: proxy
     url: http://tempo:3200
+    http2: false  # Disable HTTP/2; Tempo only supports HTTP/1.1 on query API
     editable: false
     jsonData:
       tracesToLogsV2:

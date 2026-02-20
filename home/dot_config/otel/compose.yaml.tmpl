@@ -1,3 +1,4 @@
+{{- $linux := eq .os "linux" -}}
 {{- $podman := and .features.podman (not .features.docker) -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
@@ -53,8 +54,8 @@ services:
     image: grafana/loki:3.6
     command: ["-config.file=/etc/loki/loki.yaml"]
     restart: unless-stopped
-    # ports:
-    #   - "127.0.0.1:3100:3100"
+    ports:
+      - "127.0.0.1:3100:3100"
     volumes:
       - ./loki.yaml:/etc/loki/loki.yaml:ro,Z
       - loki-data:/loki
@@ -108,7 +109,7 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.10.2
     restart: unless-stopped
-    {{- if $podman }}
+    {{- if or $linux $podman }}
     privileged: true
     {{- end }}
     volumes:
@@ -129,8 +130,10 @@ services:
   cadvisor:
     image: ghcr.io/google/cadvisor:0.56.2
     restart: unless-stopped
-    {{- if $podman }}
+    {{- if or $linux $podman }}
     privileged: true
+    {{- end }}
+    {{- if $podman }}
     command:
       - --podman=unix:///var/run/podman/podman.sock
     {{- end }}
