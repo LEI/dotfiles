@@ -12,7 +12,7 @@
       "command": "npx",
       "args": ["-y", "@utcp/mcp-bridge"],
       "env": {
-        "UTCP_CONFIG_FILE": "${HOME}/.config/utcp/config.json",
+        "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
       },
     }, */
     // https://github.com/universal-tool-calling-protocol/typescript-utcp
@@ -20,7 +20,7 @@
       "command": "npx",
       "args": ["-y", "@utcp/code-mode-mcp"],
       "env": {
-        "UTCP_CONFIG_FILE": "${HOME}/.config/utcp/config.json",
+        "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
       },
     },
 
@@ -73,14 +73,14 @@
       "command": "flux-operator-mcp",
       "args": ["serve"],
       "env": {
-        "KUBECONFIG": "${HOME}/.kube/config",
+        "KUBECONFIG": "${KUBECONFIG}",
       },
     },
     "flux-operator-read-only": {
       "command": "flux-operator-mcp",
       "args": ["serve", "--read-only"],
       "env": {
-        "KUBECONFIG": "${HOME}/.kube/config",
+        "KUBECONFIG": "${KUBECONFIG}",
       },
     },
     {{- end }}
@@ -144,13 +144,16 @@
 
     "grep_app": {
       // "enabled": {{ ne .client "opencode" }},
-      "type": "remote",
+      "type": "http",
       "url": "https://mcp.grep.app"
     },
 
     "memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "${XDG_DATA_HOME}/memory.jsonl"
+      },
     },
 
     {{- if .features.mise }}
@@ -215,7 +218,7 @@
     {{- end }}
 
     /* "sentry": {
-      "type": "remote",
+      "type": "http",
       "url": "https://mcp.sentry.dev/mcp",
       "oauth": {}
     }, */

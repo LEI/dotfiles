@@ -1,0 +1,18 @@
+{{- $_ := . | setValueAtPath "client" "claude-code" -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $servers := dict -}}
+{{- range $key, $value := pick $mcp.servers "grep_app" "memory" -}}
+{{-   $_ := $servers | setValueAtPath $key $value -}}
+{{- end -}}
+#!/bin/bash
+
+set -euxo pipefail
+
+{{- range $key, $value := $servers }}
+
+if ! claude mcp get {{ $key | quote }} >/dev/null 2>&1; then
+  claude mcp add-json --scope=user {{ $key | quote }} {{ $value | toJson | quote }}
+fi
+{{- end }}
+
+claude mcp list

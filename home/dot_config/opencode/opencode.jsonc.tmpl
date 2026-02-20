@@ -91,14 +91,30 @@
     // Running shell commands (matches parsed commands like git status --porcelain)
     "bash": {
       "*": "ask",
-      "awk *": "allow",
+      "awk *": "ask",
+      "basename *": "allow",
       "cat *": "allow",
       // "cd *": "allow",
+      "column *": "allow",
       // "curl *": "allow",
+      "cut *": "allow",
       "date *": "allow",
+      "date": "allow",
+      "diff *": "allow",
+      "dirname *": "allow",
+      "du *": "allow",
       "echo *": "allow",
-      "env *": "deny",
+      "env *": "ask",
+      "env": "deny",
+      "fd * --exec*": "ask",
+      "fd * -X*": "ask",
+      "fd * -x*": "ask",
       "fd *": "allow",
+      "file *": "allow",
+      "find * -delete*": "ask",
+      "find * -exec*": "ask",
+      "find * -fprint*": "ask",
+      "find * -ok*": "ask",
       "find *": "allow",
       // "git *": "deny",
       // "git worktree *": "allow",
@@ -109,31 +125,39 @@
       "ls *": "allow", // Should be denied
       // "mkdir *": "allow",
       // "mv *": "deny",
+      "printenv *": "ask",
+      "printenv": "deny",
+      "pwd": "allow",
       "readlink *": "allow",
+      "realpath *": "allow",
       "rg *": "allow",
-      // "rm *": "deny",
+      "rm *": "ask",
       "sed * -I*": "ask",
       "sed * -i*": "ask",
       "sed *": "allow",
       "sleep *": "allow",
+      "sort * --output*": "ask",
+      "sort * -o*": "ask",
       "sort *": "allow",
       "stat *": "allow",
       "tail *": "allow",
       "test *": "allow",
+      "tr *": "allow",
       "trash *": "ask",
+      "true": "allow",
+      "uname *": "allow",
       "uniq *": "allow",
       "wc *": "allow",
+      "which *": "allow",
+      "whoami": "allow",
+      "xxd": "allow",
+      "yq * --inplace*": "ask",
+      "yq * -i*": "ask",
       "yq *": "allow",
 
-      "npm run build*": "allow",
-      "npm run dev*": "allow", // Requires timeout or pty_spawn
-      "npm run test*": "allow",
-      "npm test *": "allow",
-      "npm t *": "allow",
-
-      "sq *": "allow",
+      "sq * --output*": "ask",
       "sq * -o*": "ask",
-      "sq * --output*": "ask"
+      "sq *": "allow"
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",
@@ -283,7 +307,7 @@
         "task": {
           "*": "ask",
           "analyze": "allow",
-          "archive": "allow",
+          "qdrant": "allow",
           // "brainstorm": "allow",
           "browser": "allow",
           "implement": "allow",
@@ -301,13 +325,14 @@
           "system": "allow"
         },
         "todoread": "allow",
-        "todowrite": "allow"
+        "todowrite": "allow",
         // "git_git_*": "ask",
         // "git_git_branch": "allow",
         // "git_git_diff*": "allow",
         // "git_git_log": "allow",
         // "git_git_show": "allow",
         // "git_git_status": "allow",
+        "memory_*": "allow"
       },
       "prompt": "{file:./prompts/build.md}"
     },
@@ -335,7 +360,8 @@
           "search": "allow"
         },
         "todoread": "allow",
-        "todowrite": "allow"
+        "todowrite": "allow",
+        "memory_*": "allow"
       }
     },
     // Built-in subagents: explore, general, readonly
@@ -352,13 +378,12 @@
         "write": "deny"
       }
     },
-    "archive": {
+    "qdrant": {
       "description": "Persistent memory and context storage",
       "mode": "subagent",
       "prompt": "Store and retrieve memories. All other tools denied.",
       "permission": {
         "*": "deny",
-        "memory_*": "allow",
         "qdrant-memory_*": "allow"
       }
     },

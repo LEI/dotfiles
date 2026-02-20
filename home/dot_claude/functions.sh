@@ -2,6 +2,7 @@
 
 # Resume last session by default
 claude() {
+  # export CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}"
   if [ $# -eq 0 ]; then
     set -- --resume "$(basename "$PWD")"
   fi

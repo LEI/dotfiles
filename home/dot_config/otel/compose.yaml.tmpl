@@ -209,6 +209,24 @@ services:
       retries: 3
       start_period: 5s
 
+  # ntfy-alertmanager: bridges Alertmanager webhooks to readable ntfy messages
+  ntfy-alertmanager:
+    # https://hub.docker.com/r/xenrox/ntfy-alertmanager/tags
+    image: xenrox/ntfy-alertmanager:0.5.0
+    restart: unless-stopped
+    volumes:
+      - ./ntfy-alertmanager.scfg:/etc/ntfy-alertmanager/config:ro,Z
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
   # # Jaeger (traces)
   # jaeger:
   #   image: cr.jaegertracing.io/jaegertracing/jaeger:latest
@@ -220,6 +238,62 @@ services:
   #       limits:
   #         memory: 512M
 
+{{- if .features.ai }}
+
+  # sandboxed.sh: self-hosted AI agent orchestrator (Claude Code, OpenCode, Amp)
+  # Runs agents in isolated Linux workspaces with mission control dashboard
+  sandboxed-sh:
+    # No published image; builds from source a multi-stage
+    build: https://github.com/Th0rgal/sandboxed.sh.git#v0.9.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3030:80"
+    volumes:
+      - sandboxed-data:/root/.sandboxed-sh
+      - claude-auth:/root/.claude
+      - opencode-config:/root/.config/opencode
+      # - ~/.ssh:/root/.ssh:ro
+    environment:
+      # Auth
+      DASHBOARD_PASSWORD: "${SANDBOXED_DASHBOARD_PASSWORD:-admin}"
+      JWT_SECRET: "${SANDBOXED_JWT_SECRET:-change-me-to-a-long-random-string}"
+      # DEV_MODE: "false"
+      # JWT_TTL_DAYS: "30"
+
+      # Server: Caddyfile hardcodes localhost:3000 as upstream
+      HOST: "0.0.0.0"
+      # PORT: "3000"
+      # MAX_ITERATIONS: "50"
+      # STALE_MISSION_HOURS: "24"
+      # MAX_PARALLEL_MISSIONS: "1"
+
+      # Backend: overrides auto-detection (claude > opencode > amp > codex)
+      DEFAULT_BACKEND: "opencode"
+
+      # Workspace: nspawn needs D-Bus system bus, unavailable in Docker
+      SANDBOXED_SH_ALLOW_CONTAINER_FALLBACK: "true"
+      WORKING_DIR: /root
+      # DESKTOP_ENABLED: "false"
+
+      # Dashboard SSR: should auto-resolve via window.location.origin but may not
+      # Configure API URL at http://localhost:3030/settings/backends
+      NEXT_PUBLIC_API_URL: "http://localhost:3030"
+    # Workspace isolation: nspawn/unshare call clone() which needs full capabilities
+    privileged: true
+    # nspawn manages its own cgroups, needs access to the host cgroup hierarchy
+    cgroup: host
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:80/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+{{- end }}
+
 volumes:
   prometheus-data:
   loki-data:
@@ -227,3 +301,8 @@ volumes:
   grafana-data:
   alertmanager-data:
   ntfy-cache:
+{{- if .features.ai }}
+  sandboxed-data:
+  claude-auth:
+  opencode-config:
+{{- end }}

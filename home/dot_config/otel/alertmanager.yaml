@@ -12,5 +12,5 @@ route:
 receivers:
   - name: 'default'
     webhook_configs:
-      - url: 'http://ntfy:80/alerts'
+      - url: 'http://ntfy-alertmanager:8080'
         send_resolved: true
