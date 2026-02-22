@@ -431,13 +431,6 @@ packages:
   ollama-app:
     enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") .gui }}
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  opencode:
-    enabled: {{ .features.ai }}
-    nameOverwrite:
-      arch: opencode-bin
-      darwin: anomalyco/tap/opencode
-      # npm: opencode-ai@latest
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil)) }}'
   openssl:
     enabled: {{ eq .osIDLike "alpine" "fedora" }}
     nameOverwrite:
@@ -1055,7 +1048,8 @@ osPackages:
     dnf:
       clang: # or run "brew install gcc", required to install bats-assert, file and mock
     rpm:
-      # chezmoi:
+      beep:
+      chezmoi:
       clang:
       dconf-editor:
         enabled: {{ not (or .ephemeral .headless) }}
@@ -1097,6 +1091,8 @@ osPackages:
         #   sudo systemctl start tailscaled
         #   sudo tailscale set --operator=$USER
       thunderbird:
+        enabled: {{ not (or .ephemeral .headless) }}
+      waydroid:
         enabled: {{ not (or .ephemeral .headless) }}
     flatpak:
       com.collaboraoffice.Office:

@@ -1,8 +1,12 @@
-{{- $features := (dict
-  "ai" (and
+{{- $ai := and
     (eq .osIDLike "arch" "darwin" "fedora")
     (ne .profile "minimal")
-    (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname)))
+    (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname))
+-}}
+{{- $docker := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
+{{- $podman := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
+{{- $features := (dict
+  "ai" $ai
   "atuin" (and
     (not (or
       (and (eq .osID "debian") (le (int .osVersion) 12))
@@ -15,7 +19,7 @@
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
   "direnv" true
-  "docker" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
+  "docker" $docker
   "eza" (ne .profile "minimal")
   "ghostty" (and
     (gt .glibc 2.31)
@@ -42,10 +46,10 @@
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
   "nushell" .gui
-  "oage" (and .ai .gui)
-  "otel" .gui
+  "oage" (and $ai (or $docker $podman))
+  "otel" (or $docker $podman)
   "php" false
-  "podman" (and (eq .osIDLike "arch" "darwin" "fedora") .gui)
+  "podman" $podman
   "python" .gui
   "rest" false
   "ripgrep" true

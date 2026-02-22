@@ -91,13 +91,13 @@ skills/supabase:
   include:
     - "*/skills/supabase-postgres-best-practices/**"
 
-skills/vercel/ai-sdk:
-  type: archive
-  url: https://github.com/vercel/ai/archive/main.tar.gz
-  refreshPeriod: 168h
-  stripComponents: 3
-  include:
-    - "*/skills/use-ai-sdk/**"
+# skills/vercel/ai-sdk:
+#   type: archive
+#   url: https://github.com/vercel/ai/archive/main.tar.gz
+#   refreshPeriod: 168h
+#   stripComponents: 3
+#   include:
+#     - "*/skills/use-ai-sdk/**"
 
 # skills/vercel-labs/react-best-practices:
 #   type: archive

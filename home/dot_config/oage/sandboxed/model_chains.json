@@ -1,0 +1,28 @@
+[
+  {
+    "id": "builtin/smart",
+    "name": "Smart",
+    "entries": [
+      {
+        "provider_id": "zai",
+        "model_id": "glm-5"
+      },
+      {
+        "provider_id": "minimax",
+        "model_id": "MiniMax-M2.5"
+      }
+    ],
+    "is_default": true
+  },
+  {
+    "id": "builtin/cheap",
+    "name": "Cheap",
+    "entries": [
+      {
+        "provider_id": "zai",
+        "model_id": "glm-4.7"
+      }
+    ],
+    "is_default": false
+  }
+]

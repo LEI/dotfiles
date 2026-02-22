@@ -1,0 +1,13 @@
+---
+enabled: "{{ .features.ai }}"
+packages:
+  opencode:
+    nameOverwrite:
+      arch: opencode-bin
+      darwin: anomalyco/tap/opencode
+      # npm: opencode-ai@latest
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil)) }}'
+  # openwork:
+  #   enabled: "{{ .gui }}"
+  #   name: github:chronologos/cc-sessions
+  #   type: mise

@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
-  # OpenCode AI service for sandboxed.sh backend
   opencode:
     image: ghcr.io/anomalyco/opencode:1.2.10
     restart: unless-stopped
@@ -11,73 +10,42 @@ services:
       - "127.0.0.1:4096:4096"
     volumes:
       - opencode-config:/data
+      - opencode-share:/root/.local/share/opencode
       - ./opencode/auth.json:/data/auth.json:z
-      - ./opencode/opencode.json:/data/opencode.json:z
-      # - opencode-projects:/projects
 
-  # sandboxed.sh: self-hosted AI agent orchestrator (Claude Code, OpenCode, Amp)
-  # Runs agents in isolated Linux workspaces with mission control dashboard
-  sandboxed-sh: # openagent
-    # No published image; builds from source a multi-stage
+  sandboxed-sh:
     build: https://github.com/Th0rgal/sandboxed.sh.git#v0.9.1
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3030:80"
+      - "127.0.0.1:${SANDBOXED_PORT:-3030}:80"
     volumes:
-      - opencode-config:/root/.config/opencode
-      - sandboxed-data:/root/.sandboxed-sh
       - claude-auth:/root/.claude
-      # Auth and config for OpenCode CLI in sandboxed workspaces
+      - opencode-config:/root/.config/opencode
+      - opencode-share:/root/.local/share/opencode
+      - sandboxed-data:/root/.sandboxed-sh
       - ./opencode/auth.json:/root/.local/share/opencode/auth.json:z
-      - ./opencode/opencode.json:/root/.config/opencode/opencode.json:z
-      - ./opencode/oh-my-opencode.json:/root/.config/opencode/oh-my-opencode.json:z
-      # - ~/.ssh:/root/.ssh:ro
+      # - ./sandboxed/backend_config.json:/root/.sandboxed-sh/backend_config.json:z
+      # - ./sandboxed/model_chains.json:/root/.sandboxed-sh/model_chains.json:z
+      # WARN: library is cloned on first start
+      # - ./opencode/auth.json:/root/.sandboxed-sh/library/configs/default/.opencode/auth.json:z
     environment:
-      # DASHBOARD_PASSWORD: "${SANDBOXED_DASHBOARD_PASSWORD:-admin}"
-      # JWT_SECRET: "${SANDBOXED_JWT_SECRET:-change-me-to-a-long-random-string}"
-      # DEV_MODE: "false"
-      # JWT_TTL_DAYS: "30"
-
-      # Server: Caddyfile hardcodes localhost:3000 as upstream
+      DEV_MODE: "true"
       HOST: "0.0.0.0"
-      # PORT: "3000"
-      # MAX_ITERATIONS: "50"
-      # STALE_MISSION_HOURS: "24"
-      # MAX_PARALLEL_MISSIONS: "1"
-
-      # Backend: overrides auto-detection (claude > opencode > amp > codex)
-      DEFAULT_BACKEND: opencode
+      # DEFAULT_BACKEND: opencode
+      # OPENCODE_AGENT: oracle
+      # DEFAULT_MODEL: opencode/big-pickle
       # OPENCODE_BASE_URL: "http://opencode:4096"
-      OPENCODE_PERMISSIVE: "true"
-      # OPENCODE_USERNAME: opencode
-      # OPENCODE_PASSWORD: "${OPENCODE_SERVER_PASSWORD:-admin}"
-      OPENCODE_IDLE_TIMEOUT_SECS: "300"
-
-      # Workspace: nspawn needs D-Bus system bus, unavailable in Docker
-      # SANDBOXED_SH_ALLOW_CONTAINER_FALLBACK: "true"
       WORKING_DIR: /root
-      # DESKTOP_ENABLED: "false"
-
-      # Dashboard SSR: should auto-resolve via window.location.origin but may not
-      # Configure API URL at http://localhost:3030/settings/backends
-      NEXT_PUBLIC_API_URL: "http://localhost:3030"
-    # Workspace isolation: nspawn/unshare call clone() which needs full capabilities
+      NEXT_LOG_LEVEL: "info"
     privileged: true
-    # nspawn manages its own cgroups, needs access to the host cgroup hierarchy
     cgroup: host
     deploy:
       resources:
         limits:
           memory: 1G
-    healthcheck:
-      test: ["CMD", "curl", "-fs", "http://localhost:80/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
 volumes:
   sandboxed-data:
   claude-auth:
   opencode-config:
-  # opencode-projects:
+  opencode-share:

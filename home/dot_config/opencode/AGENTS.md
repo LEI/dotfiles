@@ -6,3 +6,5 @@ In comments, avoid dashes and trailing dots.
 In Bash: fd over find, rg over grep, trash over rm.
 Keep shell commands simple; avoid piping and inline scripting.
 Subagents return concise results with file:line refs.
+
+Global memory index: `~/.local/share/memory/MEMORY.md`

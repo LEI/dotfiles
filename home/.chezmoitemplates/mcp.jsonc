@@ -8,13 +8,13 @@
     }, */
   ],
   "servers": {
-    /* "utcp": {
+    "utcp": {
       "command": "npx",
       "args": ["-y", "@utcp/mcp-bridge"],
       "env": {
         "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
       },
-    }, */
+    },
     // https://github.com/universal-tool-calling-protocol/typescript-utcp
     "code-mode": {
       "command": "npx",

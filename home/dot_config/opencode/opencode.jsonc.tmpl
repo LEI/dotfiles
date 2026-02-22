@@ -45,11 +45,11 @@
     "@slkiser/opencode-quota@1.4.0",
     // "@tarquinen/opencode-dcp@2.1.3"
 
-    // bunx oh-my-opencode install --no-tui --claude=no --gemini=yes --copilot=yes
+    // bunx oh-my-opencode install --no-tui --claude=yes --gemini=yes --copilot=yes
     // mv ~/.config/opencode/oh-my-opencode.json{,c}
     // "oh-my-opencode@3.2.3",
 
-    "opencode-agent-skills@0.6.4",
+    // "opencode-agent-skills@0.6.4",
     // "opencode-antigravity-auth@1.5.1",
     "opencode-pty@0.2.1",
     // "opencode-sessions@1.0.0",
@@ -176,6 +176,7 @@
       "{{ . }} rm *": "ask",
       "{{ . }} run *": "ask",
       // "{{ . }} run --rm *": "allow",
+      "{{ . }} search *": "allow",
       "{{ . }} volume inspect *": "allow",
       "{{ . }} volume ls *": "allow",
       "{{ . }} wait *": "allow",
@@ -205,8 +206,10 @@
     },
     // Loading a skill (matches skill name, not org/name)
     "skill": {
-      "*": "ask",
-      // Custom
+      // FIXME: "ask" auto loads all claude plugins
+      "*": "deny", // "ask",
+
+      // Custom ./skills
       "flux-operator": "deny",
       "sq": "allow",
 
@@ -215,20 +218,26 @@
       "coding-standards": "allow",
       "security-review": "allow",
       "tdd-workflow": "allow",
+
       // anthropics/skills
       "mcp-builder": "allow",
-      "skill-creator": "allow",
+      "skill-creator": "ask",
+
       // antfu/skills
       // "pnpm": "allow",
       // "turborepo": "allow",
+
       // github/awesome-copilot
-      "git-commit": "deny",
+      "git-commit": "ask",
+
       // openai/skill
       "security-best-practices": "allow",
       "security-ownership-map": "allow",
       "security-threat-model": "allow",
+
       // supabase
       "supabase-postgres-best-practices": "allow",
+
       // obra/superpowers
       // "brainstorming": "allow",
       // "dispatching-parallel-agents": "allow",
@@ -244,12 +253,15 @@
       // "verification-before-completion": "allow",
       // "writing-plans": "allow",
       // "writing-skills": "allow",
+
       // vercel
-      "ai-sdk": "allow",
+      // "ai-sdk": "allow",
+
       // vercel-labs
       // "next-best-practices": "allow",
       // "vercel-react-best-practices": "allow",
       "web-design-guidelines": "allow",
+
       // wshobson/agents
       "api-design-principles": "allow",
       "code-review-excellence": "allow",
@@ -279,16 +291,16 @@
 
     // Plugins
     // opencode-agent-skills
-    "use_skill": "allow",
-    "read_skill_file": "allow",
-    "get_available_skills": "allow",
-    "run_skill_script": "ask",
+    // "get_available_skills": "allow",
+    // "read_skill_file": "ask",
+    // "run_skill_script": "ask",
+    // "use_skill": "ask",
 
     // opencode-worktree
     // "worktree_create": "allow",
     // "worktree_delete": "allow",
 
-    // MCP tools
+    // Blacklist MCP tools, set to  "allow" or "ask" to enable
     {{- range $mcp.servers | keys | sortAlpha }}
     "{{ . }}_*": "deny",
     {{- end }}
@@ -339,6 +351,7 @@
         //   "grep *": "allow",
         // },
         "skill": {
+          // "*": "ask",
           "git-commit": "allow"
         },
         "task": {
@@ -369,7 +382,9 @@
         // "git_git_log": "allow",
         // "git_git_show": "allow",
         // "git_git_status": "allow",
-        "memory_*": "ask"
+        "memory_*": "ask",
+        "memory_read_graph": "allow",
+        "memory_read_node": "allow"
       },
       "prompt": "{file:./prompts/build.md}"
     },
@@ -385,6 +400,10 @@
       "permission": {
         "edit": "deny",
         // "bash": "ask",
+        "skill": {
+          // "*": "ask",
+          "git-commit": "deny"
+        },
         "task": {
           "*": "deny",
           "analyze": "allow",
@@ -398,7 +417,9 @@
         },
         "todoread": "allow",
         "todowrite": "allow",
-        "memory_*": "ask"
+        "memory_*": "ask",
+        "memory_read_graph": "allow",
+        "memory_read_node": "allow"
       }
     },
     // Built-in subagents: explore, general, readonly
@@ -550,6 +571,7 @@
         "list": "allow",
         "bash": {
           "gh issue list *": "allow",
+          "gh issue view *": "allow",
           "gh *": "ask"
         },
         "skill": "deny",
@@ -603,7 +625,6 @@
         "grep": "allow",
         "list": "allow",
         "bash": {
-          "glab issue list *": "allow",
           "glab *": "ask"
         },
         "skill": "deny",

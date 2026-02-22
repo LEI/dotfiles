@@ -4,17 +4,17 @@
 claude() {
   # export CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}"
   if [ $# -eq 0 ]; then
-    set -- --resume "$(basename "$PWD")"
+    set -- --continue
   fi
   env claude "$@"
 }
 
 # Launch claude in a named tmux session
 claude_tmux() {
-  project="$(basename "$PWD")"
-  if [ $# -eq 0 ]; then
-    set -- --resume "$project"
-  fi
+  # project="$(basename "$PWD")"
+  # if [ $# -eq 0 ]; then
+  #   set -- --resume "$project"
+  # fi
   tmux new-session -As "$project" claude "$@"
 }
 

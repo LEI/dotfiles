@@ -20,6 +20,10 @@ oage_compose() {
 }
 
 oage() {
+  if ! [ -f "$OAGE_CONFIG_DIR/opencode/auth.json" ]; then
+    echo >&2 "ERR: $OAGE_CONFIG_DIR/opencode/auth.json not found"
+    return 1
+  fi
   if [ $# -eq 0 ]; then
     oage_compose up --build --detach
     set -- logs --follow --since=1m

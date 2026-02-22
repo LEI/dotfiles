@@ -5,10 +5,11 @@ export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
 # FIXME: disable auto loading
 # https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/flag/flag.ts
-# OPENCODE_DISABLE_CLAUDE_CODE=true
-# OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
-# OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=true
-# OPENCODE_DISABLE_EXTERNAL_SKILLS=true
+export OPENCODE_DISABLE_CLAUDE_CODE=true
+export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
+export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=true
+export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
+
 opencode() { env opencode "${@:---continue}"; }
 # if command -v opencode >/dev/null; then
 # opencode() {

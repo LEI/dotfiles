@@ -1,7 +1,10 @@
 {{- $_ := . | setValueAtPath "client" "claude-code" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $servers := dict -}}
-{{- range $key, $value := pick $mcp.servers "grep_app" "memory" -}}
+{{- range $key, $value := pick $mcp.servers
+  "grep_app"
+  "utcp"
+-}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
 #!/bin/bash
@@ -14,5 +17,7 @@ if ! claude mcp get {{ $key | quote }} >/dev/null 2>&1; then
   claude mcp add-json --scope=user {{ $key | quote }} {{ $value | toJson | quote }}
 fi
 {{- end }}
+
+# claude mcp remove code-mode memory
 
 claude mcp list
