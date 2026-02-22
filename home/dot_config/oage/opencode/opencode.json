@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {},
+  "model": "opencode/big-pickle",
+  "plugin": [],
+  "tools": {
+    "bash": true,
+    "browser_*": true,
+    "desktop_*": true,
+    "playwright_*": true,
+    "workspace_*": false
+  }
+}

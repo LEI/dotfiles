@@ -106,22 +106,19 @@
       "echo *": "allow",
       "env *": "ask",
       "env": "deny",
-      "fd * --exec*": "ask",
-      "fd * -X*": "ask",
-      "fd * -x*": "ask",
-      "fd *": "allow",
       "file *": "allow",
+
+      "find *": "allow",
       "find * -delete*": "ask",
       "find * -exec*": "ask",
       "find * -fprint*": "ask",
       "find * -ok*": "ask",
-      "find *": "allow",
+
       // "git *": "deny",
       // "git worktree *": "allow",
       // "git wt *": "allow",
       "grep *": "allow",
       "head *": "allow",
-      "jq *": "allow",
       "ls *": "allow", // Should be denied
       // "mkdir *": "allow",
       // "mv *": "deny",
@@ -132,13 +129,17 @@
       "realpath *": "allow",
       "rg *": "allow",
       "rm *": "ask",
+
+      "sed *": "allow",
       "sed * -I*": "ask",
       "sed * -i*": "ask",
-      "sed *": "allow",
+
       "sleep *": "allow",
-      "sort * --output*": "ask",
-      "sort * -o*": "ask",
+
       "sort *": "allow",
+      "sort * -o*": "ask",
+      "sort * --output*": "ask",
+
       "stat *": "allow",
       "tail *": "allow",
       "test *": "allow",
@@ -151,13 +152,49 @@
       "which *": "allow",
       "whoami": "allow",
       "xxd": "allow",
-      "yq * --inplace*": "ask",
-      "yq * -i*": "ask",
-      "yq *": "allow",
 
-      "sq * --output*": "ask",
+      {{- range list "docker" "podman" }}
+
+      "{{ . }} compose exec *": "ask",
+      "{{ . }} compose logs *": "allow",
+      "{{ . }} compose ps *": "allow",
+      "{{ . }} compose restart *": "ask",
+      "{{ . }} compose rm *": "ask",
+      "{{ . }} compose run *": "ask",
+      // "{{ . }} compose run --rm *": "allow",
+      "{{ . }} compose up *": "ask",
+      "{{ . }} compose wait *": "allow",
+
+      "{{ . }} exec *": "ask",
+      "{{ . }} inspect *": "allow",
+      "{{ . }} logs *": "allow",
+      "{{ . }} network inspect *": "allow",
+      "{{ . }} network ls *": "allow",
+      "{{ . }} ps *": "allow",
+      "{{ . }} pull *": "ask",
+      "{{ . }} restart *": "ask",
+      "{{ . }} rm *": "ask",
+      "{{ . }} run *": "ask",
+      // "{{ . }} run --rm *": "allow",
+      "{{ . }} volume inspect *": "allow",
+      "{{ . }} volume ls *": "allow",
+      "{{ . }} wait *": "allow",
+      {{- end }}
+
+      "jq *": "allow",
+
+      "fd * --exec*": "ask",
+      "fd * -X*": "ask",
+      "fd * -x*": "ask",
+      "fd *": "allow",
+
+      "sq *": "allow",
       "sq * -o*": "ask",
-      "sq *": "allow"
+      "sq * --output*": "ask",
+
+      "yq *": "allow",
+      "yq * -i*": "ask",
+      "yq * --inplace*": "ask"
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",
@@ -307,7 +344,6 @@
         "task": {
           "*": "ask",
           "analyze": "allow",
-          "qdrant": "allow",
           // "brainstorm": "allow",
           "browser": "allow",
           "implement": "allow",
@@ -320,6 +356,7 @@
           {{- end }}
           "github": "allow",
           "gitlab": "allow",
+          "qdrant": "allow",
           "review": "allow",
           "search": "allow",
           "system": "allow"
@@ -332,7 +369,7 @@
         // "git_git_log": "allow",
         // "git_git_show": "allow",
         // "git_git_status": "allow",
-        "memory_*": "allow"
+        "memory_*": "ask"
       },
       "prompt": "{file:./prompts/build.md}"
     },
@@ -361,7 +398,7 @@
         },
         "todoread": "allow",
         "todowrite": "allow",
-        "memory_*": "allow"
+        "memory_*": "ask"
       }
     },
     // Built-in subagents: explore, general, readonly
@@ -511,6 +548,10 @@
         "glob": "allow",
         "grep": "allow",
         "list": "allow",
+        "bash": {
+          "gh issue list *": "allow",
+          "gh *": "ask"
+        },
         "skill": "deny",
         "task": "deny",
 
@@ -520,10 +561,7 @@
         "github_*": "ask",
         "github_get_*": "allow",
         "github_list_*": "allow",
-        "github_search_*": "allow",
-        "bash": {
-          "gh *": "ask"
-        }
+        "github_search_*": "allow"
       }
     },
     "review": {
@@ -564,6 +602,10 @@
         "glob": "allow",
         "grep": "allow",
         "list": "allow",
+        "bash": {
+          "glab issue list *": "allow",
+          "glab *": "ask"
+        },
         "skill": "deny",
         "task": "deny",
 
@@ -571,10 +613,7 @@
         "gitlab_*": "ask",
         "gitlab_get_*": "allow",
         "gitlab_list_*": "allow",
-        "gitlab_search_*": "allow",
-        "bash": {
-          "glab *": "ask",
-        }
+        "gitlab_search_*": "allow"
       }
     },
 
