@@ -1,23 +1,49 @@
-{{- $_ := . | setValueAtPath "client" "claude-code" -}}
+{{- $_ := . | setValueAtPath "client" "claude" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $servers := dict -}}
 {{- range $key, $value := pick $mcp.servers
+  "claude-context"
+  "context7"
+  "deep-wiki"
   "grep_app"
-  "utcp"
 -}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
 {{- range $key, $value := $servers }}
 
-if ! claude mcp get {{ $key | quote }} >/dev/null 2>&1; then
-  claude mcp add-json --scope=user {{ $key | quote }} {{ $value | toJson | quote }}
+expected={{ $value | toJson | quote }}
+current=$(jq -Sc '.mcpServers[{{ $key | quote }}] // empty' ~/.claude.json 2>/dev/null)
+if [ "$current" != "$(echo "$expected" | jq -Sc .)" ]; then
+  echo >&2 "Updating MCP server: {{ $key }}"
+  if claude mcp get {{ $key | quote }} >/dev/null 2>&1; then
+    claude mcp remove {{ $key | quote }}
+  fi
+  claude mcp add-json --scope=user {{ $key | quote }} "$expected"
+else
+  echo >&2 "MCP server up to date: {{ $key }}"
 fi
 {{- end }}
 
-# claude mcp remove code-mode memory
+for name in code-mode memory utcp; do
+  if claude mcp get "$name" >/dev/null 2>&1; then
+    echo >&2 "Removing MCP server: $name"
+    claude mcp remove "$name"
+  else
+    echo >&2 "MCP server not found, skipping removal: $name"
+  fi
+done
 
 claude mcp list
+
+# Register local plugin
+plugin_file=~/.claude/plugins/installed_plugins.json
+if ! jq -e '.plugins["local@local"]' "$plugin_file" >/dev/null 2>&1; then
+  echo >&2 "Registering local plugin"
+  now=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+  jq --arg now "$now" '.plugins["local@local"] = [{"scope":"user","installPath":"{{ .chezmoi.homeDir }}/.claude/plugins/local","version":"0.1.0","installedAt":$now,"lastUpdated":$now}]' \
+    "$plugin_file" > "$plugin_file.tmp" && mv "$plugin_file.tmp" "$plugin_file"
+fi

@@ -153,3 +153,9 @@
 [ghq]
 	root = ~/src
 {{- end }}
+
+{{- if lookPath "git-wt" | isExecutable }}
+
+[wt]
+	copyignored = true
+{{- end }}

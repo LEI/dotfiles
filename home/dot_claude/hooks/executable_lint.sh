@@ -33,12 +33,20 @@ lint() {
   # MD041: first-line-h1 (conflicts with YAML frontmatter)
   # MD047: single trailing newline (noisy for models)
   # MD060: table-column-style
-  *.md) lint_markdown --disable MD007 MD012 MD013 MD022 MD031 MD032 MD034 MD040 MD041 MD047 MD060 -- "$1" ;;
+  *.md) lint_markdown --disable MD007 MD012 MD013 MD022 MD031 MD032 MD034 MD040 MD041 MD047 MD060 -- "$1" >&2 ;;
 
-  *.sh) has shellcheck && shellcheck "$1" ;;
+  *.sh)
+    if has shellcheck; then
+      shellcheck "$1" >&2
+    fi
+    ;;
 
   # -d "{extends: default, rules: {line-length: {max: 120}}}"
-  *.yaml | *.yml) has yamllint && yamllint "$1" ;;
+  *.yaml | *.yml)
+    if has yamllint; then
+      yamllint "$1" >&2
+    fi
+    ;;
 
   esac
 }

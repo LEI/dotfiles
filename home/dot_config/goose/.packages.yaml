@@ -1,0 +1,6 @@
+---
+enabled: "{{ .features.goose }}"
+packages:
+  block-goose-cli:
+    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
+    type: brew

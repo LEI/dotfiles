@@ -1,20 +1,152 @@
-{{ $sandboxEnabled := false -}}
+{{- $sandboxEnabled := false -}}
+{{- $model := "sonnet" -}}
 {{- /* $model := "sonnet[1m]" */ -}}
+{{- $plugins := list
+  "beads@beads-marketplace"
+  "claude-code-setup@claude-plugins-official"
+  "claude-dashboard@claude-dashboard"
+  "claude-md-management@claude-plugins-official"
+  "code-review@claude-plugins-official"
+  "code-simplifier@claude-plugins-official"
+  "commit-commands@claude-plugins-official"
+  "feature-dev@claude-plugins-official"
+  "frontend-design@claude-plugins-official"
+  "hookify@claude-plugins-official"
+  "local@local"
+  "security-guidance@claude-plugins-official"
+  "semgrep@claude-plugins-official"
+  "skill-creator@claude-plugins-official"
+-}}
+{{- $plugins := concat $plugins (env "CLAUDE_CODE_PLUGINS" | splitList ",") | sortAlpha -}}
+{{- /* "agent-sdk-dev@claude-plugins-official" */ -}}
+{{- /* "github@claude-plugins-official": true, */ -}}
+{{- /* "gitlab@claude-plugins-official": true, */ -}}
+{{- /* "greptile@claude-plugins-official": true, */ -}}
+{{- /* "php-lsp@claude-plugins-official": true, */ -}}
+{{- /* "plugin-dev@claude-plugins-official": true, */ -}}
+{{- /* "pr-review-toolkit@claude-plugins-official": true, */ -}}
+{{- /* "supabase@claude-plugins-official": true */ -}}
+{{- /* "typescript-lsp@claude-plugins-official": true, */ -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
-    "OTEL_METRICS_EXPORTER": "otlp",
-    "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
-    "OTEL_LOG_USER_PROMPTS": "1",
-    "OTEL_LOG_TOOL_DETAILS": "1"
+  "alwaysThinkingEnabled": false,
+  "autoUpdates": false,
+  "enableAllProjectMcpServers": false,
+  "enabledPlugins": {
+    {{- range $index, $value := $plugins }}
+    {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}
+    {{- end }}
   },
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_LOG_TOOL_DETAILS": "1",
+    "OTEL_LOG_USER_PROMPTS": "1",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "XDG_CACHE_HOME": "{{ .chezmoi.homeDir }}/.cache",
+    "XDG_CONFIG_HOME": "{{ .chezmoi.homeDir }}/.config",
+    "XDG_DATA_HOME": "{{ .chezmoi.homeDir }}/.local/share",
+    "XDG_STATE_HOME": "{{ .chezmoi.homeDir }}/.local/state"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/lint.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "model": {{ $model | quote }},
   "permissions": {
     "allow": [
+      "Bash(BEADS_DIR=~/.local/share/beads bd blocked)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd blocked *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd config get *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd config list)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd doctor)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd doctor *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd graph)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd graph *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd list)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd list *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd onboard)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd onboard *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd preflight)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd prime)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd prime *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd query *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd ready)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd ready *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd search *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd show *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd stale)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd stale *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd stats)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd stats *)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd version)",
+      "Bash(BEADS_DIR=~/.local/share/beads bd where)",
+      "Bash(bd blocked)",
+      "Bash(bd blocked *)",
+      "Bash(bd config get *)",
+      "Bash(bd config list)",
+      "Bash(bd doctor)",
+      "Bash(bd doctor *)",
+      "Bash(bd graph)",
+      "Bash(bd graph *)",
+      "Bash(bd list)",
+      "Bash(bd list *)",
+      "Bash(bd onboard)",
+      "Bash(bd onboard *)",
+      "Bash(bd preflight)",
+      "Bash(bd prime)",
+      "Bash(bd prime *)",
+      "Bash(bd query *)",
+      "Bash(bd ready)",
+      "Bash(bd ready *)",
+      "Bash(bd search *)",
+      "Bash(bd show *)",
+      "Bash(bd stale)",
+      "Bash(bd stale *)",
+      "Bash(bd stats)",
+      "Bash(bd stats *)",
+      "Bash(bd version)",
+      "Bash(bd where)",
+      "Bash(bd worktree info)",
+      "Bash(bd worktree list)",
       "Bash(basename *)",
+      "Bash(claude mcp get *)",
+      "Bash(claude mcp list)",
+      "Bash(claude plugin list)",
       "Bash(cat *)",
       "Bash(column *)",
       "Bash(cut *)",
@@ -41,6 +173,7 @@
       "Bash(gh run list *)",
       "Bash(gh run view *)",
       "Bash(gh search *)",
+      "Bash(git describe *)",
       "Bash(git diff *)",
       "Bash(git diff)",
       "Bash(git fetch *)",
@@ -66,6 +199,8 @@
       "Bash(head *)",
       "Bash(jq *)",
       "Bash(ls *)",
+      "Bash(mise current *)",
+      "Bash(mise list *)",
       "Bash(pwd)",
       "Bash(readlink *)",
       "Bash(realpath *)",
@@ -94,6 +229,7 @@
       "NotebookRead",
       "Read",
       "Read(~/.local/share/memory/**.md)",
+      "Task",
       "TaskCreate",
       "TaskGet",
       "TaskList",
@@ -108,39 +244,25 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:gitlab.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
+      "Skill(beads:blocked)",
+      "Skill(beads:list)",
+      "Skill(beads:ready)",
+      "Skill(beads:search)",
+      "Skill(beads:show)",
+      "Skill(beads:stats)",
+      "Skill(beads:version)",
       "WebSearch",
-      "mcp__plugin_context7_context7__query-docs",
-      "mcp__plugin_context7_context7__resolve-library-id"
-    ],
-    "deny": [
-      "Bash(env)",
-      "Bash(printenv)",
-      "Edit(**/*.key)",
-      "Edit(**/*.pem)",
-      "Edit(**/*.pfx)",
-      "Edit(./**/.env)",
-      "Edit(./**/.env.*)",
-      "Edit(./secrets/**)",
-      "Edit(~/.ssh/**)",
-      "Read(**/*.key)",
-      "Read(**/*.pem)",
-      "Read(**/*.pfx)",
-      "Read(./**/.env)",
-      "Read(./**/.env.*)",
-      "Read(./secrets/**)",
-      "Read(~/.ssh/**)",
-      "TodoWrite",
-      "Write(**/*.key)",
-      "Write(**/*.pem)",
-      "Write(**/*.pfx)",
-      "Write(./**/.env)",
-      "Write(./**/.env.*)",
-      "Write(./secrets/**)",
-      "Write(~/.ssh/**)"
+      "mcp__claude-context__*",
+      "mcp__context7__*",
+      "mcp__deep-wiki__*",
+      "mcp__grep_app__*"
     ],
     "ask": [
       "Bash(awk *)",
+      "Bash(env)",
       "Bash(env *)",
+      "Bash(export *)",
+      "Bash(unset *)",
       "Bash(fd * --exec *)",
       "Bash(fd * --exec-batch *)",
       "Bash(fd * -X *)",
@@ -158,6 +280,7 @@
       "Bash(find -exec*)",
       "Bash(find -fprint*)",
       "Bash(find -ok*)",
+      "Bash(printenv)",
       "Bash(printenv *)",
       "Bash(rm *)",
       "Bash(sed * -I*)",
@@ -182,91 +305,39 @@
       "MultiEdit",
       "NotebookEdit",
       "Skill",
-      "Task",
       "Write"
     ],
     "defaultMode": "default",
+    "deny": [
+      "Edit(**/*.key)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.pfx)",
+      "Edit(./**/.env)",
+      "Edit(./**/.env.*)",
+      "Edit(./secrets/**)",
+      "Edit(~/.ssh/**)",
+      "Read(**/*.key)",
+      "Read(**/*.pem)",
+      "Read(**/*.pfx)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "TodoWrite",
+      "Write(**/*.key)",
+      "Write(**/*.pem)",
+      "Write(**/*.pfx)",
+      "Write(./**/.env)",
+      "Write(./**/.env.*)",
+      "Write(./secrets/**)",
+      "Write(~/.ssh/**)"
+    ],
     "disableBypassPermissionsMode": "disable"
   },
-  "enableAllProjectMcpServers": false,
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/lint.sh"
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "{{ lookPath "node" }} ~/.config/claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
-  },
-  "enabledPlugins": {
-    {{- $plugins := env "CLAUDE_CODE_PLUGINS" | splitList "," }}
-    {{- range $plugins }}
-    {{ . | quote }}: true,
-    {{- end }}
-    "claude-code-setup@claude-plugins-official": true,
-    "claude-dashboard@claude-dashboard": true,
-    "claude-md-management@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "hookify@claude-plugins-official": true,
-    "security-guidance@claude-plugins-official": true,
-    "semgrep@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true
-    {{- /* "agent-sdk-dev@claude-plugins-official": true, */ -}}
-    {{- /* "github@claude-plugins-official": true, */ -}}
-    {{- /* "gitlab@claude-plugins-official": true, */ -}}
-    {{- /* "greptile@claude-plugins-official": true, */ -}}
-    {{- /* "php-lsp@claude-plugins-official": true, */ -}}
-    {{- /* "plugin-dev@claude-plugins-official": true, */ -}}
-    {{- /* "pr-review-toolkit@claude-plugins-official": true, */ -}}
-    {{- /* "supabase@claude-plugins-official": true */ -}}
-    {{- /* "typescript-lsp@claude-plugins-official": true, */ -}}
-    {{ "" }}
-  },
-  "skills": {
-    "audit": true,
-    "cleanup": true,
-    "journal": true,
-    "reflect": true,
-    "standup": true,
-    "agent-sdk-dev:new-sdk-app": true,
-    "claude-automation-recommender": true,
-    "claude-dashboard:check-usage": true,
-    "claude-dashboard:setup": true,
-    "claude-dashboard:update": true,
-    "claude-md-improver": true,
-    "claude-md-management:revise-claude-md": true,
-    "code-review:code-review": true,
-    "commit-commands:clean_gone": true,
-    "commit-commands:commit": true,
-    "commit-commands:commit-push-pr": true,
-    "feature-dev:feature-dev": true,
-    "frontend-design": true,
-    "hookify:configure": true,
-    "hookify:help": true,
-    "hookify:hookify": true,
-    "hookify:list": true,
-    "hookify:writing-rules": true,
-    "keybindings-help": true,
-    "pr-review-toolkit:review-pr": true,
-    "skill-creator": false
-  },
   "sandbox": {
-    "enabled": {{ $sandboxEnabled }},
-    "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
+    "autoAllowBashIfSandboxed": true,
+    "enabled": {{ $sandboxEnabled }},
     "network": {
       "allowedDomains": [
         "*.github.com",
@@ -278,7 +349,37 @@
       ]
     }
   },
-  "alwaysThinkingEnabled": false,
-  "autoUpdates": false,
-  "model": "haiku"
+  "skills": {
+    "audit": true,
+    "beads:quickstart": false,
+    "claude-automation-recommender": true,
+    "claude-dashboard:check-usage": true,
+    "claude-dashboard:setup": true,
+    "claude-dashboard:update": true,
+    "claude-md-improver": true,
+    "claude-md-management:revise-claude-md": true,
+    "cleanup": true,
+    "code-review:code-review": true,
+    "code-simplifier:code-simplifier": true,
+    "commit-commands:clean_gone": true,
+    "commit-commands:commit": true,
+    "commit-commands:commit-push-pr": true,
+    "feature-dev:feature-dev": true,
+    "frontend-design": true,
+    "hookify:configure": true,
+    "hookify:help": true,
+    "hookify:hookify": true,
+    "hookify:list": true,
+    "hookify:writing-rules": true,
+    "journal": true,
+    "keybindings-help": true,
+    "local:sq": true,
+    "reflect": true,
+    "skill-creator": false,
+    "standup": true
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "{{ lookPath "node" }} ~/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
+  }
 }

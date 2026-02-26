@@ -9,18 +9,33 @@
   ],
   "servers": {
     "utcp": {
-      "command": "npx",
-      "args": ["-y", "@utcp/mcp-bridge"],
+      "command": "mise",
+      "args": ["--no-config", "exec", "node@24", "--", "npx", "-y", "@utcp/mcp-bridge"],
       "env": {
         "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
       },
     },
     // https://github.com/universal-tool-calling-protocol/typescript-utcp
     "code-mode": {
-      "command": "npx",
-      "args": ["-y", "@utcp/code-mode-mcp"],
+      "command": "mise",
+      "args": ["--no-config", "exec", "node@24", "--", "npx", "-y", "@utcp/code-mode-mcp"],
       "env": {
         "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
+      },
+    },
+
+    // requires: ollama pull nomic-embed-text
+    // requires: milvus lite running locally (localhost:19530) — file path not supported by SDK
+    "claude-context": {
+      // Offline: Ollama embeddings + local Milvus
+      // Embeddings only at index time; zero API calls at query time
+      // Package: @zilliz/claude-context-mcp (not "claude-context" which is a different tool)
+      "command": "npx",
+      "args": ["-y", "@zilliz/claude-context-mcp"],
+      "env": {
+        "EMBEDDING_PROVIDER": "Ollama",
+        "EMBEDDING_MODEL": "nomic-embed-text",
+        "MILVUS_ADDRESS": "localhost:19530",
       },
     },
 
@@ -33,9 +48,13 @@
         "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}",
       },
       {{- else }}
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
+      "command": "mise",
+      "args": ["--no-config", "exec", "node@24", "--", "npx", "-y", "@upstash/context7-mcp"],
       {{- end }}
+    },
+    "deep-wiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp",
     },
 
     {{- if env "EXA_API_KEY" }}
@@ -194,28 +213,25 @@
     },
     {{- end }}
 
-    {{- if and (env "QDRANT_API_KEY") (env "QDRANT_API_KEY") }}
     "qdrant-memory": {
+      // Cloud mode when QDRANT_API_KEY is set, local embedded mode otherwise
+      // fastembed supports Python 3.14 as of 0.7.x
       "command": "uvx",
-      "args": [
-        // FIXME: qdrant-client fastembed 0.3.6 does not support python 3.14
-        // https://github.com/astral-sh/uv/issues/8206
-        // uv python install 3.13
-        "--python=3.13",
-        // "--transport=streamable-http",
-        "mcp-server-qdrant",
-      ],
+      "args": ["mcp-server-qdrant"],
       "env": {
+        {{- if env "QDRANT_API_KEY" }}
         "QDRANT_URL": "${QDRANT_URL}",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+        {{- else }}
+        "QDRANT_LOCAL_PATH": "${XDG_DATA_HOME}/qdrant",
+        {{- end }}
         "COLLECTION_NAME": "{{ .profile | default "default" }}",
-        // "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
         // https://github.com/qdrant/mcp-server-qdrant/blob/master/src/mcp_server_qdrant/settings.py
-        "TOOL_STORE_DESCRIPTION": "Store code snippets with semantic descriptions for future retrieval",
-        "TOOL_FIND_DESCRIPTION": "Search for relevant code patterns and solutions using natural language",
+        "TOOL_STORE_DESCRIPTION": "Store notes and research with semantic descriptions for future retrieval",
+        "TOOL_FIND_DESCRIPTION": "Search notes and memory using natural language",
       },
     },
-    {{- end }}
 
     /* "sentry": {
       "type": "http",
