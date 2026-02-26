@@ -23,3 +23,7 @@ packages:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
     name: github:chronologos/cc-sessions
     type: mise
+  beads:
+    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
+    # npm: "@beads/bd"
+    type: brew

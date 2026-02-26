@@ -105,7 +105,8 @@
       "du *": "allow",
       "echo *": "allow",
       "env *": "ask",
-      "env": "deny",
+      "export *": "ask",
+      "unset *": "ask",
       "file *": "allow",
 
       "find *": "allow",
@@ -123,7 +124,6 @@
       // "mkdir *": "allow",
       // "mv *": "deny",
       "printenv *": "ask",
-      "printenv": "deny",
       "pwd": "allow",
       "readlink *": "allow",
       "realpath *": "allow",
@@ -209,10 +209,6 @@
       // FIXME: "ask" auto loads all claude plugins
       "*": "deny", // "ask",
 
-      // Custom ./skills
-      "flux-operator": "deny",
-      "sq": "allow",
-
       // affaan-m/everything-claude-code
       "backend-patterns": "allow",
       "coding-standards": "allow",
@@ -266,7 +262,11 @@
       "api-design-principles": "allow",
       "code-review-excellence": "allow",
       "nodejs-backend-patterns": "allow",
-      "typescript-advanced-types": "allow"
+      "typescript-advanced-types": "allow",
+
+      // Custom skills
+      "flux-operator": "deny",
+      "sq": "allow"
     },
     // Running LSP queries (currently non-granular)
     // OPENCODE_EXPERIMENTAL_LSP_TOOL=true or OPENCODE_EXPERIMENTAL=true
@@ -307,6 +307,8 @@
 
     "mcp-registry_*": "allow",
 
+    "deep-wiki_*": "allow",
+
     // https://github.com/modelcontextprotocol/servers/tree/main/src/git
     "git_git_*": "ask",
     "git_git_branch": "allow",
@@ -328,7 +330,10 @@
     "exa_*": "ask",
     "google_search": "allow",
     "grep_app_*": "ask",
-    "grep_app_searchGitHub": "allow"
+    "grep_app_searchGitHub": "allow",
+
+    // Custom plugins
+    "notify": "ask"
   },
   {{ "// If no temperature is specified, OpenCode uses model-specific defaults," }}
   {{ "// typically 0 for most models, 0.55 for Qwen models" }}

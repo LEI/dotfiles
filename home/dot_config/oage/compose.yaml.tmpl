@@ -1,51 +1,110 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
-  opencode:
-    image: ghcr.io/anomalyco/opencode:1.2.10
-    restart: unless-stopped
-    entrypoint: []
-    command: ["opencode", "serve", "--hostname", "0.0.0.0"]
-    ports:
-      - "127.0.0.1:4096:4096"
-    volumes:
-      - opencode-config:/data
-      - opencode-share:/root/.local/share/opencode
-      - ./opencode/auth.json:/data/auth.json:z
+  # https://opencode.ai/docs/server
+  # OpenCode is now bundled in sandboxed.sh v0.10.0
+  # opencode:
+  #   image: ghcr.io/anomalyco/opencode:1.2.10
+  #   restart: unless-stopped
+  #   entrypoint: []
+  #   command: ["opencode", "serve", "--hostname", "0.0.0.0"]
+  #   ports:
+  #     - "127.0.0.1:4096:4096"
+  #   volumes:
+  #     - opencode-config:/data
+  #     - opencode-share:/root/.local/share/opencode
+  #     - ./opencode/auth.json:/data/auth.json:z
 
-  sandboxed-sh:
-    build: https://github.com/Th0rgal/sandboxed.sh.git#v0.9.1
+  # # https://sandboxed.sh/install-docker
+  # sandboxed-sh:
+  #   build: https://github.com/Th0rgal/sandboxed.sh.git#v0.10.0
+  #   restart: unless-stopped
+  #   # Start internal OpenCode server for agent discovery, then run original entrypoint
+  #   # Workaround: v0.10.0 agents endpoint queries OpenCode /agent HTTP, not library
+  #   entrypoint: ["/bin/bash", "-c", "opencode serve --hostname 127.0.0.1 --port 4096 & exec /entrypoint.sh"]
+  #   ports:
+  #     - "127.0.0.1:${SANDBOXED_PORT:-3030}:80"
+  #   volumes:
+  #     - sandboxed-data:/root/.sandboxed-sh
+  #     - claude-auth:/root/.claude
+  #     - ./opencode/auth.json:/root/.local/share/opencode/auth.json:z
+  #     # - ~/.ssh:/root/.ssh:ro
+  #     # - ./sandboxed/backend_config.json:/root/.sandboxed-sh/backend_config.json:z
+  #     # - ./sandboxed/model_chains.json:/root/.sandboxed-sh/model_chains.json:z
+  #   environment:
+  #     DEV_MODE: "true"
+  #     HOST: "0.0.0.0"
+  #     WORKING_DIR: /root
+  #     MAX_PARALLEL_MISSIONS: "1"
+  #     OPENCODE_BASE_URL: "http://127.0.0.1:4096"
+  #     DEFAULT_MODEL: "github-copilot/gpt-4o"
+  #     # MAX_ITERATIONS: "50"
+  #     # STALE_MISSION_HOURS: "24"
+  #     # DEFAULT_BACKEND: opencode
+  #     # OPENCODE_PERMISSIVE: "true"
+  #   privileged: true
+  #   cgroup: host
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1G
+
+  # # https://github.com/lfnovo/open-notebook/tree/main/examples
+  # surrealdb:
+  #   image: surrealdb/surrealdb:v2
+  #   command: start --log info --user root --pass root rocksdb:/mydata/mydatabase.db
+  #   user: root  # Required for bind mounts on Linux
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - surreal-data:/mydata
+  #   environment:
+  #     - SURREAL_EXPERIMENTAL_GRAPHQL=true
+  #   restart: always
+  #   # pull_policy: always
+  #
+  # open_notebook:
+  #   image: lfnovo/open_notebook:v1-latest
+  #   ports:
+  #     - "8502:8502" # Web UI
+  #     - "5055:5055" # REST API
+  #   environment:
+  #     # REQUIRED: Change this to your own secret string
+  #     # This encrypts your API keys in the database
+  #     - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
+  #
+  #     # Database connection (default values - no need to change)
+  #     - SURREAL_URL=ws://surrealdb:8000/rpc
+  #     - SURREAL_USER=root
+  #     - SURREAL_PASSWORD=root
+  #     - SURREAL_NAMESPACE=open_notebook
+  #     - SURREAL_DATABASE=open_notebook
+  #   volumes:
+  #     - notebook-data:/app/data
+  #   depends_on:
+  #     - surrealdb
+  #   restart: always
+  #   # pull_policy: always
+
+  # TODO: replace default index.md and CONFIG.md
+  # http://localhost:5050/global/MEMORY
+  silverbullet:
+    image: ghcr.io/silverbulletmd/silverbullet:latest
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${SANDBOXED_PORT:-3030}:80"
+      - "5050:3000"
     volumes:
-      - claude-auth:/root/.claude
-      - opencode-config:/root/.config/opencode
-      - opencode-share:/root/.local/share/opencode
-      - sandboxed-data:/root/.sandboxed-sh
-      - ./opencode/auth.json:/root/.local/share/opencode/auth.json:z
-      # - ./sandboxed/backend_config.json:/root/.sandboxed-sh/backend_config.json:z
-      # - ./sandboxed/model_chains.json:/root/.sandboxed-sh/model_chains.json:z
-      # WARN: library is cloned on first start
-      # - ./opencode/auth.json:/root/.sandboxed-sh/library/configs/default/.opencode/auth.json:z
+      - ~/.claude/projects:/space/projects
+      - ~/.local/share/memory:/space/global
     environment:
-      DEV_MODE: "true"
-      HOST: "0.0.0.0"
-      # DEFAULT_BACKEND: opencode
-      # OPENCODE_AGENT: oracle
-      # DEFAULT_MODEL: opencode/big-pickle
-      # OPENCODE_BASE_URL: "http://opencode:4096"
-      WORKING_DIR: /root
-      NEXT_LOG_LEVEL: "info"
-    privileged: true
-    cgroup: host
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+      - SB_HIDE_SYNC_BUTTON=true
+      - SB_INDEX_PAGE=MEMORY
+      - SB_SPACE_IGNORE="index.md,CONFIG.md,index.page,SETTINGS.md"
+      # - SB_USER=admin:password123
 
-volumes:
-  sandboxed-data:
-  claude-auth:
-  opencode-config:
-  opencode-share:
+# volumes:
+#   sandboxed-data:
+#   claude-auth:
+
+#   notebook-data:
+#   surreal-data:
