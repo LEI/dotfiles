@@ -20,11 +20,11 @@ var data = {files:[
 {"link":"executable_repeat-last-command.15cf1b08.html","title":"executable_repeat-last-command","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_repeat-last-command","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"5","total_lines" : "5"},
 {"link":"executable_chezmoi-feature.26de099f.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"41.0","covered_lines":"25","uncovered_lines":"36","total_lines" : "61"},
 {"link":"02-install-brew-packages.sh.cfde33aa.html","title":"02-install-brew-packages.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"42.9","covered_lines":"6","uncovered_lines":"8","total_lines" : "14"},
-{"link":"executable_list-package.5eb0518b.html","title":"executable_list-package","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_list-package","covered_class":"lineNoCov","covered":"14.3","covered_lines":"5","uncovered_lines":"30","total_lines" : "35"},
+{"link":"executable_list-package.5eb0518b.html","title":"executable_list-package","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_list-package","covered_class":"lineNoCov","covered":"15.0","covered_lines":"6","uncovered_lines":"34","total_lines" : "40"},
 {"link":"check.c89106a8.html","title":"check","summary_name":"[...]/dotfiles/script/check","covered_class":"linePartCov","covered":"62.5","covered_lines":"20","uncovered_lines":"12","total_lines" : "32"},
 {"link":"executable_k.4eee907c.html","title":"executable_k","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_k","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 {"link":"executable_nvim-sh.f54330bd.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-01-22 02:05:52", "instrumented" : 667, "covered" : 190,};
+var header = { "command" : "test", "date" : "2026-03-02 14:09:41", "instrumented" : 672, "covered" : 191,};
 var merged_data = [];
