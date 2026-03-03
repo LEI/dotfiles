@@ -109,5 +109,5 @@ var data = {lines:[
 {"lineNum":"  108","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-03 14:25:49", "instrumented" : 40, "covered" : 6,};
+var header = { "command" : "test", "date" : "2026-03-03 14:32:44", "instrumented" : 40, "covered" : 6,};
 var merged_data = [];
