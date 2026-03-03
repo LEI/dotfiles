@@ -32,5 +32,5 @@ var data = {lines:[
 {"lineNum":"   31","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-03 13:05:42", "instrumented" : 13, "covered" : 11,};
+var header = { "command" : "", "date" : "2026-03-03 13:34:56", "instrumented" : 13, "covered" : 11,};
 var merged_data = [];
