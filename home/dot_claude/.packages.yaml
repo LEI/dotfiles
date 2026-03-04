@@ -25,5 +25,9 @@ packages:
     type: mise
   beads:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
-    # npm: "@beads/bd"
+    nameOverwrite:
+      npm: "@beads/bd"
+    type: npm # brew has not 0.58.0 yet (allow multiple prefixes)
+  dolt: # Required if beads is not installed via brew
+    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
     type: brew
