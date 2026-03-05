@@ -76,7 +76,7 @@ packages:
       # windows: Hibbiki.Chromium
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   codex:
-    enabled: {{ and .features.ai }}
+    enabled: {{ .features.ai }}
     nameOverwrite:
       arch: openai-codex-bin
       npm: "@openai/codex"
@@ -852,11 +852,13 @@ osPackages:
         enabled: {{ and (eq .chezmoi.arch "arm64") .gui }}
       coreutils: # timeout
       # cpanminus:
+      cronboard:
       # daemonize:
       # dbus:
       # diffutils:
       # dnsmasq:
       # dotenv-linter:
+      # dua-cli:
       duti:
         description: Default apps, documents and URL schemes
         enabled: {{ .gui }}
@@ -891,7 +893,7 @@ osPackages:
       # jemalloc:
       # jpeg:
       # k6:
-      # kind:
+      kind:
       # kustomize:
       # git-cc: { enabled: {{ .features.git }} }
       # libedit: # readline, rlwrap
@@ -902,6 +904,7 @@ osPackages:
       # lynx:
       markdownlint-cli: # NOTE: also installed via mason.nvim
       mas:
+      mdr:
       # mercurial:
       # mosh:
       # msgpack:

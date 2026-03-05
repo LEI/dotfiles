@@ -263,7 +263,6 @@
       "ExitPlanMode",
       "MultiEdit",
       "NotebookEdit",
-      "Skill",
       "Write"
     ],
     "defaultMode": "default",
@@ -314,7 +313,7 @@
     {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}
     {{- end }}
   },
-  "extraKnownMarketplaces": {{ get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict | toPrettyJson | indent 4 | trim }},
+  "extraKnownMarketplaces": {{ get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict | toPrettyJson | indent 2 | trim }},
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
     "autoAllowBashIfSandboxed": true,
