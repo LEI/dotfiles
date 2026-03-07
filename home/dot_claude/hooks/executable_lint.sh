@@ -41,10 +41,9 @@ lint() {
     fi
     ;;
 
-  # -d "{extends: default, rules: {line-length: {max: 120}}}"
   *.yaml | *.yml)
     if has yamllint; then
-      yamllint "$1" >&2
+      yamllint -d "{extends: default, rules: {line-length: {max: 120}}}" "$1" >&2
     fi
     ;;
 

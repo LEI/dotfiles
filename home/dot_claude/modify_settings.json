@@ -9,12 +9,12 @@
   "code-review@claude-plugins-official"
   "code-simplifier@claude-plugins-official"
   "commit-commands@claude-plugins-official"
+  "everything-claude-code@everything-claude-code"
   "feature-dev@claude-plugins-official"
   "frontend-design@claude-plugins-official"
   "hookify@claude-plugins-official"
   "local@local"
   "security-guidance@claude-plugins-official"
-  "skill-creator@claude-plugins-official"
 -}}
 {{- $plugins := concat $plugins (env "CLAUDE_CODE_PLUGINS" | splitList ",") | sortAlpha -}}
 {{- /* "agent-sdk-dev@claude-plugins-official" per-project */ -}}
@@ -23,6 +23,7 @@
 {{- /* "greptile@claude-plugins-official" needs API key */ -}}
 {{- /* "php-lsp@claude-plugins-official" per-project */ -}}
 {{- /* "plugin-dev@claude-plugins-official" plugin authoring only */ -}}
+{{- /* "skill-creator@claude-plugins-official" plugin authoring only */ -}}
 {{- /* "pr-review-toolkit@claude-plugins-official" overlaps code-review */ -}}
 {{- /* "semgrep@claude-plugins-official" needs semgrep installed */ -}}
 {{- /* "supabase@claude-plugins-official" needs supabase project */ -}}
@@ -291,6 +292,26 @@
   },
   "enableAllProjectMcpServers": false,
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/bash_safety.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "TaskCreate|TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/task_info.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -308,7 +329,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bd prime 2>/dev/null || true"
+            "command": "echo 'Compaction imminent. Include in the summary: current task state (pending/in-progress subjects and key context), any uncommitted decisions or discoveries, and enough detail for the next turn to orient without tool calls.'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Before finishing: run TaskList and review task status. Mark completed tasks done. Persist any session discoveries to memory files (not just task descriptions). Ensure pending/in-progress tasks have self-contained descriptions for the next session.'"
           }
         ]
       }
@@ -319,7 +351,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bd prime 2>/dev/null || true"
+            "command": "echo 'Use session tasks proactively: create before coding, mark in_progress when starting, completed when done. Check TaskList for pending tasks. For multi-step work, break into tasks with dependencies (addBlocks/addBlockedBy). Descriptions must be self-contained: root cause, specific files, approach, and done criteria.'"
           }
         ]
       }
@@ -337,7 +369,8 @@
     {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}
     {{- end }}
   },
-  "extraKnownMarketplaces": {{ get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict | toPrettyJson | indent 2 | trim }},
+  {{- $eccMkt := dict "everything-claude-code" (dict "source" (dict "source" "github" "repo" "affaan-m/everything-claude-code")) -}}
+  "extraKnownMarketplaces": {{ merge $eccMkt (get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict) | toPrettyJson | indent 2 | trim }},
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
     "autoAllowBashIfSandboxed": true,
@@ -370,6 +403,87 @@
     "commit-commands:clean_gone": true,
     "commit-commands:commit": true,
     "commit-commands:commit-push-pr": true,
+    "everything-claude-code:agentic-engineering": true,
+    "everything-claude-code:agent-harness-construction": true,
+    "everything-claude-code:ai-first-engineering": true,
+    "everything-claude-code:api-design": true,
+    "everything-claude-code:article-writing": true,
+    "everything-claude-code:autonomous-loops": true,
+    "everything-claude-code:backend-patterns": true,
+    "everything-claude-code:claw": true,
+    "everything-claude-code:clickhouse-io": true,
+    "everything-claude-code:coding-standards": true,
+    "everything-claude-code:configure-ecc": true,
+    "everything-claude-code:content-engine": true,
+    "everything-claude-code:content-hash-cache-pattern": true,
+    "everything-claude-code:continuous-agent-loop": true,
+    "everything-claude-code:continuous-learning": true,
+    "everything-claude-code:continuous-learning-v2": true,
+    "everything-claude-code:cost-aware-llm-pipeline": true,
+    "everything-claude-code:cpp-coding-standards": true,
+    "everything-claude-code:cpp-testing": true,
+    "everything-claude-code:database-migrations": true,
+    "everything-claude-code:deployment-patterns": true,
+    "everything-claude-code:django-patterns": true,
+    "everything-claude-code:django-security": true,
+    "everything-claude-code:django-tdd": true,
+    "everything-claude-code:django-verification": true,
+    "everything-claude-code:docker-patterns": true,
+    "everything-claude-code:e2e": true,
+    "everything-claude-code:e2e-testing": true,
+    "everything-claude-code:enterprise-agent-ops": true,
+    "everything-claude-code:eval-harness": true,
+    "everything-claude-code:evolve": true,
+    "everything-claude-code:foundation-models-on-device": true,
+    "everything-claude-code:frontend-patterns": true,
+    "everything-claude-code:frontend-slides": true,
+    "everything-claude-code:go-build": true,
+    "everything-claude-code:go-review": true,
+    "everything-claude-code:go-test": true,
+    "everything-claude-code:golang-patterns": true,
+    "everything-claude-code:golang-testing": true,
+    "everything-claude-code:instinct-export": true,
+    "everything-claude-code:instinct-import": true,
+    "everything-claude-code:instinct-status": true,
+    "everything-claude-code:investor-materials": true,
+    "everything-claude-code:investor-outreach": true,
+    "everything-claude-code:iterative-retrieval": true,
+    "everything-claude-code:java-coding-standards": true,
+    "everything-claude-code:jpa-patterns": true,
+    "everything-claude-code:learn-eval": true,
+    "everything-claude-code:liquid-glass-design": true,
+    "everything-claude-code:market-research": true,
+    "everything-claude-code:nanoclaw-repl": true,
+    "everything-claude-code:nutrient-document-processing": true,
+    "everything-claude-code:plan": true,
+    "everything-claude-code:plankton-code-quality": true,
+    "everything-claude-code:postgres-patterns": true,
+    "everything-claude-code:project-guidelines-example": true,
+    "everything-claude-code:projects": true,
+    "everything-claude-code:promote": true,
+    "everything-claude-code:python-patterns": true,
+    "everything-claude-code:python-review": true,
+    "everything-claude-code:python-testing": true,
+    "everything-claude-code:ralphinho-rfc-pipeline": true,
+    "everything-claude-code:regex-vs-llm-structured-text": true,
+    "everything-claude-code:search-first": true,
+    "everything-claude-code:security-review": true,
+    "everything-claude-code:security-scan": true,
+    "everything-claude-code:skill-create": true,
+    "everything-claude-code:skill-stocktake": true,
+    "everything-claude-code:springboot-patterns": true,
+    "everything-claude-code:springboot-security": true,
+    "everything-claude-code:springboot-tdd": true,
+    "everything-claude-code:springboot-verification": true,
+    "everything-claude-code:strategic-compact": true,
+    "everything-claude-code:swift-actor-persistence": true,
+    "everything-claude-code:swift-concurrency-6-2": true,
+    "everything-claude-code:swift-protocol-di-testing": true,
+    "everything-claude-code:swiftui-patterns": true,
+    "everything-claude-code:tdd": true,
+    "everything-claude-code:tdd-workflow": true,
+    "everything-claude-code:verification-loop": true,
+    "everything-claude-code:visa-doc-translate": true,
     "feature-dev:feature-dev": true,
     "frontend-design": true,
     "hookify:configure": true,
@@ -380,8 +494,17 @@
     "journal": true,
     "keybindings-help": true,
     "local:sq": true,
+    {{- /* plugin-dev skills leak from installed_plugins.json despite not being in enabledPlugins */ -}}
+    "plugin-dev:agent-development": false,
+    "plugin-dev:command-development": false,
+    "plugin-dev:create-plugin": false,
+    "plugin-dev:hook-development": false,
+    "plugin-dev:mcp-integration": false,
+    "plugin-dev:plugin-settings": false,
+    "plugin-dev:plugin-structure": false,
+    "plugin-dev:skill-development": false,
+    "quality": true,
     "reflect": true,
-    "skill-creator": false,
     "standup": true
   }
 }
