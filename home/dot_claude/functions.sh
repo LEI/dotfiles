@@ -40,6 +40,11 @@ cld() {
   fi
 }
 
+# Web kanban viewer for Claude Code tasks (localhost:3456)
+claude_tasks() {
+  npx claude-task-viewer "$@"
+}
+
 claude_sessions() {
   if [ $# -eq 0 ]; then
     if [ -t 0 ]; then
