@@ -11,22 +11,22 @@
   "commit-commands@claude-plugins-official"
   "feature-dev@claude-plugins-official"
   "frontend-design@claude-plugins-official"
+  "hookify@claude-plugins-official"
   "local@local"
   "security-guidance@claude-plugins-official"
   "skill-creator@claude-plugins-official"
 -}}
 {{- $plugins := concat $plugins (env "CLAUDE_CODE_PLUGINS" | splitList ",") | sortAlpha -}}
-{{- /* "agent-sdk-dev@claude-plugins-official" */ -}}
-{{- /* "github@claude-plugins-official": true, */ -}}
-{{- /* "gitlab@claude-plugins-official": true, */ -}}
-{{- /* "greptile@claude-plugins-official": true, */ -}}
-{{- /* "hookify@claude-plugins-official" */ -}}
-{{- /* "php-lsp@claude-plugins-official": true, */ -}}
-{{- /* "plugin-dev@claude-plugins-official": true, */ -}}
-{{- /* "pr-review-toolkit@claude-plugins-official": true, */ -}}
-{{- /* "semgrep@claude-plugins-official" */ -}}
-{{- /* "supabase@claude-plugins-official": true */ -}}
-{{- /* "typescript-lsp@claude-plugins-official": true, */ -}}
+{{- /* "agent-sdk-dev@claude-plugins-official" per-project */ -}}
+{{- /* "github@claude-plugins-official" per-project */ -}}
+{{- /* "gitlab@claude-plugins-official" per-project */ -}}
+{{- /* "greptile@claude-plugins-official" needs API key */ -}}
+{{- /* "php-lsp@claude-plugins-official" per-project */ -}}
+{{- /* "plugin-dev@claude-plugins-official" plugin authoring only */ -}}
+{{- /* "pr-review-toolkit@claude-plugins-official" overlaps code-review */ -}}
+{{- /* "semgrep@claude-plugins-official" needs semgrep installed */ -}}
+{{- /* "supabase@claude-plugins-official" needs supabase project */ -}}
+{{- /* "typescript-lsp@claude-plugins-official" per-project */ -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   {{- if not (empty $model) }}
@@ -165,12 +165,10 @@
       "Read",
       "Read(~/.local/share/memory/**.md)",
       "Task",
-      "TaskCreate",
       "TaskGet",
       "TaskList",
       "TaskOutput",
       "TaskStop",
-      "TaskUpdate",
       "ToolSearch",
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:docs.anthropic.com)",
@@ -199,6 +197,13 @@
       "Edit(./**/.env)",
       "Edit(./**/.env.*)",
       "Edit(./secrets/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.azure/**)",
+      "Edit(~/.gem/credentials)",
+      "Edit(~/.git-credentials)",
+      "Edit(~/.gnupg/**)",
+      "Edit(~/.npmrc)",
+      "Edit(~/.pypirc)",
       "Edit(~/.ssh/**)",
       "Read(**/*.key)",
       "Read(**/*.pem)",
@@ -206,6 +211,13 @@
       "Read(./**/.env)",
       "Read(./**/.env.*)",
       "Read(./secrets/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.gem/credentials)",
+      "Read(~/.git-credentials)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.npmrc)",
+      "Read(~/.pypirc)",
       "Read(~/.ssh/**)",
       "TodoWrite",
       "Write(**/*.key)",
@@ -214,6 +226,13 @@
       "Write(./**/.env)",
       "Write(./**/.env.*)",
       "Write(./secrets/**)",
+      "Write(~/.aws/**)",
+      "Write(~/.azure/**)",
+      "Write(~/.gem/credentials)",
+      "Write(~/.git-credentials)",
+      "Write(~/.gnupg/**)",
+      "Write(~/.npmrc)",
+      "Write(~/.pypirc)",
       "Write(~/.ssh/**)"
     ],
     "ask": [
@@ -263,6 +282,8 @@
       "ExitPlanMode",
       "MultiEdit",
       "NotebookEdit",
+      "TaskCreate",
+      "TaskUpdate",
       "Write"
     ],
     "defaultMode": "default",
@@ -304,10 +325,13 @@
       }
     ]
   },
+  {{- $dashboardPaths := glob (joinPath .chezmoi.homeDir ".claude/plugins/cache/claude-dashboard/claude-dashboard/*/dist/index.js") }}
+  {{- if $dashboardPaths }}
   "statusLine": {
     "type": "command",
-    "command": "{{ lookPath "node" }} ~/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.10.0/dist/index.js"
+    "command": "{{ lookPath "node" }} {{ last $dashboardPaths }}"
   },
+  {{- end }}
   "enabledPlugins": {
     {{- range $index, $value := $plugins }}
     {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}

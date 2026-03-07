@@ -33,6 +33,7 @@ bower_components
 # Vim
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
+[._]*.un~
 Session*.vim
 .netrwhist
 *~
@@ -74,12 +75,14 @@ logs
 .AppleDouble
 .LSOverride
 .Spotlight-V100
-.Trash-1000/
+.Trash-*
 .Trashes
 ehthumbs.db
 Thumbs.db
 
 **/.claude/settings.local.json
+**/.claude/*.local.*
+CLAUDE.local.md
 
 # bv (beads viewer) local config and caches
 .bv/
