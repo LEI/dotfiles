@@ -400,8 +400,7 @@ return {
     -- :Copilot auth
     'zbirenbaum/copilot.lua',
     enabled = vim.g.ai.copilot_lua,
-    -- tag = '1.338.0',
-    version = '1.x',
+    version = '2.x',
     dependencies = { 'AndreM222/copilot-lualine' },
     cmd = 'Copilot',
     event = 'VeryLazy', -- 'InsertEnter',
