@@ -1,30 +1,18 @@
 #!/bin/bash
 
-# Observer hook: log event name and brief summary to ~/.claude/hooks.log
+# Observer hook: structured JSONL logging of lifecycle events
 # Pure observer; exits 0 with no stdout
 
 INPUT=$(cat)
 EVENT="${CLAUDE_HOOK_EVENT_NAME:-unknown}"
-TIMESTAMP=$(date '+%Y-%m-%dT%H:%M:%S')
-
-case "$EVENT" in
-  SubagentStart)
-    DETAIL=$(echo "$INPUT" | jq -r '.agent_type // .tool_input.agent_type // "agent"')
-    ;;
-  SubagentStop)
-    DETAIL=$(echo "$INPUT" | jq -r '.agent_type // .tool_input.agent_type // "agent"')
-    ;;
-  TaskCompleted)
-    DETAIL=$(echo "$INPUT" | jq -r '.subject // .tool_input.subject // "task"')
-    ;;
-  PostToolUseFailure)
-    DETAIL=$(echo "$INPUT" | jq -r '.tool_name // .tool_input.tool_name // "tool"')
-    ;;
-  *)
-    DETAIL=$(echo "$INPUT" | jq -r '.tool_name // .event // "n/a"')
-    ;;
-esac
+TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+SESSION=$(echo "$INPUT" | jq -r '.session_id // empty')
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude"
 mkdir -p "$LOG_DIR"
-echo "$TIMESTAMP $EVENT $DETAIL" >> "$LOG_DIR/hooks.log"
+echo "$INPUT" | jq -c \
+  --arg ts "$TIMESTAMP" \
+  --arg ev "$EVENT" \
+  --arg sid "$SESSION" \
+  '{ts: $ts, event: $ev, session: $sid} + .' \
+  >> "$LOG_DIR/hooks.jsonl"

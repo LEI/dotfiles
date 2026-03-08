@@ -230,8 +230,6 @@
       "ExitPlanMode",
       "MultiEdit",
       "NotebookEdit",
-      "TaskCreate",
-      "TaskUpdate",
       "Write"
     ],
     "defaultMode": "default",
@@ -361,11 +359,12 @@
       }
     ]
   },
-  {{- $dashboardPaths := glob (joinPath .chezmoi.homeDir ".claude/plugins/cache/claude-dashboard/claude-dashboard/*/dist/index.js") }}
-  {{- if $dashboardPaths }}
+  {{- $ccstatusline := lookPath "ccstatusline" }}
+  {{- if $ccstatusline }}
   "statusLine": {
     "type": "command",
-    "command": "{{ lookPath "node" }} {{ last $dashboardPaths }}"
+    "command": "{{ $ccstatusline }}",
+    "padding": 0
   },
   {{- end }}
   {{- $managedPlugins := dict -}}
@@ -398,9 +397,9 @@
   "skills": {
     "audit": true,
     "claude-automation-recommender": true,
-    "claude-dashboard:check-usage": true,
-    "claude-dashboard:setup": true,
-    "claude-dashboard:update": true,
+    "claude-dashboard:check-usage": false,
+    "claude-dashboard:setup": false,
+    "claude-dashboard:update": false,
     "claude-md-improver": true,
     "claude-md-management:revise-claude-md": true,
     "cleanup": true,
