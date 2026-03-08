@@ -1,0 +1,40 @@
+---
+# Non-standard marketplaces (claude-plugins-official is built-in)
+claudeMarketplaces:
+  claude-dashboard:
+    repo: uppinote20/claude-dashboard
+  everything-claude-code:
+    repo: affaan-m/everything-claude-code
+
+# Managed plugins: all handled identically by run_onchange_after_plugins.sh
+# - marketplace: claude-plugins-official -> no version pin (latest is fine)
+# - marketplace: other                   -> optional version pin
+# - marketplace: local                   -> TODO: replace jq hack with proper marketplace install
+# Add env-local plugins via $CLAUDE_CODE_PLUGINS (comma-separated, not managed here)
+claudePlugins:
+  - name: claude-code-setup
+    marketplace: claude-plugins-official
+  - name: claude-dashboard
+    marketplace: claude-dashboard
+  - name: claude-md-management
+    marketplace: claude-plugins-official
+  - name: code-review
+    marketplace: claude-plugins-official
+  - name: code-simplifier
+    marketplace: claude-plugins-official
+  - name: commit-commands
+    marketplace: claude-plugins-official
+  - name: everything-claude-code
+    marketplace: everything-claude-code
+    version: "1.8.0"
+  - name: feature-dev
+    marketplace: claude-plugins-official
+  - name: frontend-design
+    marketplace: claude-plugins-official
+  - name: hookify
+    marketplace: claude-plugins-official
+  - name: local
+    marketplace: local
+    version: "0.1.0"
+  - name: security-guidance
+    marketplace: claude-plugins-official

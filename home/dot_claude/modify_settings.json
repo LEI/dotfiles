@@ -1,22 +1,15 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $sandboxEnabled := false -}}
 {{- $model := "" -}}
-{{- $plugins := list
-  "beads@beads-marketplace"
-  "claude-code-setup@claude-plugins-official"
-  "claude-dashboard@claude-dashboard"
-  "claude-md-management@claude-plugins-official"
-  "code-review@claude-plugins-official"
-  "code-simplifier@claude-plugins-official"
-  "commit-commands@claude-plugins-official"
-  "everything-claude-code@everything-claude-code"
-  "feature-dev@claude-plugins-official"
-  "frontend-design@claude-plugins-official"
-  "hookify@claude-plugins-official"
-  "local@local"
-  "security-guidance@claude-plugins-official"
--}}
-{{- $plugins := concat $plugins (env "CLAUDE_CODE_PLUGINS" | splitList ",") | sortAlpha -}}
+{{- $plugins := list -}}
+{{- range .claudePlugins -}}
+{{-   $plugins = append $plugins (printf "%s@%s" .name .marketplace) -}}
+{{- end -}}
+{{- $envPlugins := env "CLAUDE_CODE_PLUGINS" -}}
+{{- if $envPlugins -}}
+{{-   $plugins = concat $plugins ($envPlugins | splitList ",") -}}
+{{- end -}}
+{{- $plugins = sortAlpha $plugins -}}
 {{- /* "agent-sdk-dev@claude-plugins-official" per-project */ -}}
 {{- /* "github@claude-plugins-official" per-project */ -}}
 {{- /* "gitlab@claude-plugins-official" per-project */ -}}
@@ -329,7 +322,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Compaction imminent. Include in the summary: current task state (pending/in-progress subjects and key context), any uncommitted decisions or discoveries, and enough detail for the next turn to orient without tool calls.'"
+            "command": "echo 'For each active task, capture what it is doing and why. Record any context, decisions, or discoveries not yet written to task descriptions or memory files. A future session must be able to resume all work automatically by checking TaskList.'"
           }
         ]
       }
@@ -340,7 +333,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Before finishing: run TaskList and review task status. Mark completed tasks done. Persist any session discoveries to memory files (not just task descriptions). Ensure pending/in-progress tasks have self-contained descriptions for the next session.'"
+            "command": "echo 'Before finishing: run TaskList and mark any completed tasks as done. Write session discoveries to memory files rather than leaving them only in task descriptions. Update any in-progress task descriptions to be self-contained so the next session can resume without prior context.'"
           }
         ]
       }
@@ -351,7 +344,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Use session tasks proactively: create before coding, mark in_progress when starting, completed when done. Check TaskList for pending tasks. For multi-step work, break into tasks with dependencies (addBlocks/addBlockedBy). Descriptions must be self-contained: root cause, specific files, approach, and done criteria.'"
+            "command": "echo 'Session task protocol: check TaskList for pending tasks from previous sessions before starting work. Create tasks before coding, mark them in_progress when starting, and completed when done. For multi-step work, break into subtasks with dependencies using addBlocks and addBlockedBy. Task descriptions must include the root cause, specific files, approach, and completion criteria.'"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Decision protocol: before taking important or irreversible actions, use AskUserQuestion to confirm intent. When multiple approaches exist, recommend the best one with a brief rationale rather than acting silently. Always include a free-form option so the user can redirect or propose their own approach.'"
           }
         ]
       }
@@ -369,8 +371,11 @@
     {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}
     {{- end }}
   },
-  {{- $eccMkt := dict "everything-claude-code" (dict "source" (dict "source" "github" "repo" "affaan-m/everything-claude-code")) -}}
-  "extraKnownMarketplaces": {{ merge $eccMkt (get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict) | toPrettyJson | indent 2 | trim }},
+  {{- $extraMkts := dict -}}
+  {{- range $name, $info := .claudeMarketplaces -}}
+  {{-   $_ := set $extraMkts $name (dict "source" (dict "source" "github" "repo" $info.repo)) -}}
+  {{- end -}}
+  "extraKnownMarketplaces": {{ merge $extraMkts (get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict) | toPrettyJson | indent 2 | trim }},
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
     "autoAllowBashIfSandboxed": true,
