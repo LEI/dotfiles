@@ -1,5 +1,3 @@
-{{- $lv := "" -}}
-{{- range .claudePlugins -}}{{- if eq .marketplace "local" -}}{{- $lv = .version -}}{{- end -}}{{- end -}}
 #!/bin/bash
 
 set -euo pipefail
@@ -27,11 +25,17 @@ fi
 {{- end }}
 {{- end }}
 
-if ! jq -e '.plugins["local@local"]' "$plugin_file" >/dev/null 2>&1; then
-  echo >&2 "Registering local plugin"
-  now=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-  jq --arg now "$now" '.plugins["local@local"] = [{"scope":"user","installPath":"{{ .chezmoi.homeDir }}/.claude/plugins/local","version":"{{ $lv }}","installedAt":$now,"lastUpdated":$now}]' \
-    "$plugin_file" > "$plugin_file.tmp" && mv "$plugin_file.tmp" "$plugin_file"
+# Local marketplace and plugin
+if ! jq -e '.["local"]' "$marketplace_file" >/dev/null 2>&1; then
+  echo >&2 "Registering marketplace: local"
+  claude plugin marketplace add "{{ .chezmoi.homeDir }}/.claude/plugins/local"
 else
-  echo >&2 "Local plugin already registered"
+  echo >&2 "Marketplace already registered: local"
+fi
+
+if jq -e '.plugins["local@local"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
+  echo >&2 "Plugin already installed: local@local"
+else
+  echo >&2 "Installing plugin: local@local"
+  claude plugin install --scope=user "local@local"
 fi

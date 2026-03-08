@@ -10,17 +10,6 @@
 {{-   $plugins = concat $plugins ($envPlugins | splitList ",") -}}
 {{- end -}}
 {{- $plugins = sortAlpha $plugins -}}
-{{- /* "agent-sdk-dev@claude-plugins-official" per-project */ -}}
-{{- /* "github@claude-plugins-official" per-project */ -}}
-{{- /* "gitlab@claude-plugins-official" per-project */ -}}
-{{- /* "greptile@claude-plugins-official" needs API key */ -}}
-{{- /* "php-lsp@claude-plugins-official" per-project */ -}}
-{{- /* "plugin-dev@claude-plugins-official" plugin authoring only */ -}}
-{{- /* "skill-creator@claude-plugins-official" plugin authoring only */ -}}
-{{- /* "pr-review-toolkit@claude-plugins-official" overlaps code-review */ -}}
-{{- /* "semgrep@claude-plugins-official" needs semgrep installed */ -}}
-{{- /* "supabase@claude-plugins-official" needs supabase project */ -}}
-{{- /* "typescript-lsp@claude-plugins-official" per-project */ -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   {{- if not (empty $model) }}
@@ -42,34 +31,6 @@
   },
   "permissions": {
     "allow": [
-      "Bash(bd blocked)",
-      "Bash(bd blocked *)",
-      "Bash(bd config get *)",
-      "Bash(bd config list)",
-      "Bash(bd doctor)",
-      "Bash(bd doctor *)",
-      "Bash(bd graph)",
-      "Bash(bd graph *)",
-      "Bash(bd list)",
-      "Bash(bd list *)",
-      "Bash(bd onboard)",
-      "Bash(bd onboard *)",
-      "Bash(bd preflight)",
-      "Bash(bd prime)",
-      "Bash(bd prime *)",
-      "Bash(bd query *)",
-      "Bash(bd ready)",
-      "Bash(bd ready *)",
-      "Bash(bd search *)",
-      "Bash(bd show *)",
-      "Bash(bd stale)",
-      "Bash(bd stale *)",
-      "Bash(bd stats)",
-      "Bash(bd stats *)",
-      "Bash(bd version)",
-      "Bash(bd where)",
-      "Bash(bd worktree info)",
-      "Bash(bd worktree list)",
       "Bash(basename *)",
       "Bash(claude mcp get *)",
       "Bash(claude mcp list)",
@@ -171,13 +132,6 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:gitlab.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Skill(beads:blocked)",
-      "Skill(beads:list)",
-      "Skill(beads:ready)",
-      "Skill(beads:search)",
-      "Skill(beads:show)",
-      "Skill(beads:stats)",
-      "Skill(beads:version)",
       "WebSearch",
       "mcp__claude-context__*",
       "mcp__context7__*",
@@ -300,7 +254,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/task_info.sh"
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/task_info.nu"
           }
         ]
       }
@@ -322,7 +276,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'For each active task, capture what it is doing and why. Record any context, decisions, or discoveries not yet written to task descriptions or memory files. A future session must be able to resume all work automatically by checking TaskList.'"
+            "command": "echo 'Summarize each active task: what was done, what remains, and the concrete next step. Include any discoveries not yet persisted to memory.'"
           }
         ]
       }
@@ -333,7 +287,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Before finishing: run TaskList and mark any completed tasks as done. Write session discoveries to memory files rather than leaving them only in task descriptions. Update any in-progress task descriptions to be self-contained so the next session can resume without prior context.'"
+            "command": "echo 'Before finishing: report what was completed, what remains in progress, and suggest which task to pick up next. Flag any discoveries not yet written to memory.'"
           }
         ]
       }
@@ -366,15 +320,15 @@
     "command": "{{ lookPath "node" }} {{ last $dashboardPaths }}"
   },
   {{- end }}
-  "enabledPlugins": {
-    {{- range $index, $value := $plugins }}
-    {{ $value | quote }}: true{{ if ne (add $index 1) (len $plugins) }},{{ end }}
-    {{- end }}
-  },
+  {{- $managedPlugins := dict -}}
+  {{- range $plugins -}}
+  {{-   $_ := set $managedPlugins . true -}}
+  {{- end }}
+  "enabledPlugins": {{ merge $managedPlugins (get (.chezmoi.stdin | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
   {{- $extraMkts := dict -}}
   {{- range $name, $info := .claudeMarketplaces -}}
   {{-   $_ := set $extraMkts $name (dict "source" (dict "source" "github" "repo" $info.repo)) -}}
-  {{- end -}}
+  {{- end }}
   "extraKnownMarketplaces": {{ merge $extraMkts (get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict) | toPrettyJson | indent 2 | trim }},
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
@@ -395,7 +349,6 @@
   "autoUpdates": false,
   "skills": {
     "audit": true,
-    "beads:quickstart": false,
     "claude-automation-recommender": true,
     "claude-dashboard:check-usage": true,
     "claude-dashboard:setup": true,
@@ -499,15 +452,9 @@
     "journal": true,
     "keybindings-help": true,
     "local:sq": true,
-    {{- /* plugin-dev skills leak from installed_plugins.json despite not being in enabledPlugins */ -}}
-    "plugin-dev:agent-development": false,
-    "plugin-dev:command-development": false,
-    "plugin-dev:create-plugin": false,
-    "plugin-dev:hook-development": false,
-    "plugin-dev:mcp-integration": false,
-    "plugin-dev:plugin-settings": false,
-    "plugin-dev:plugin-structure": false,
-    "plugin-dev:skill-development": false,
+{{- range .claudeDisabledSkills }}
+    {{ . | quote }}: false,
+{{- end }}
     "quality": true,
     "reflect": true,
     "standup": true

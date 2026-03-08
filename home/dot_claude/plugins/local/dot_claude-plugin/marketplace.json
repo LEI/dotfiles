@@ -1,0 +1,14 @@
+{
+  "name": "local",
+  "description": "Local plugins managed by chezmoi",
+  "owner": {
+    "name": "local"
+  },
+  "plugins": [
+    {
+      "name": "local",
+      "description": "Local skills for sq data queries",
+      "source": "./plugins/local"
+    }
+  ]
+}
