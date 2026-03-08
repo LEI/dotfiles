@@ -56,7 +56,7 @@ claude_sessions() {
       set -- --count=100 --include-forks --list --min-turns=0 "$@"
     fi
     project="$(basename "$PWD")"
-    set -- --project="$project"
+    set -- "$@" --project="$project"
   fi
   env cc-sessions "$@"
 }

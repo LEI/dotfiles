@@ -15,7 +15,7 @@
 # Pin option: replace /main.tar.gz with /refs/tags/vX.Y.Z.tar.gz
 # Security and quality rules are prioritized; language packs are opt-in.
 
-# Common rules: security, testing, hooks, patterns, performance
+# Common rules: agents, hooks, patterns, performance, security, testing
 rules/ecc/common:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
@@ -38,6 +38,7 @@ rules/ecc/common-experimental:
     - "*/rules/common/coding-style.md"
     - "*/rules/common/development-workflow.md"
   refreshPeriod: 168h
+# local commit.md overrides ECC's commit message style
 
 # git-workflow.md duplicates local commit and git conventions
 # rules/ecc/common-disabled:

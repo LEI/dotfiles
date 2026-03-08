@@ -2,13 +2,19 @@
 
 # Tests and examples for executable_task_info.nu
 # Run tests:    nu .test_task_info.nu
-# Run examples: nu .test_task_info.nu --examples
+# Run examples: EXAMPLES=1 nu .test_task_info.nu
 
 use std assert
 
 $env.HOOK_PATH = ($env.FILE_PWD | path join "executable_task_info.nu")
 $env.FAKE_SID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 $env.CLAUDE_HOOK_DEBUG = "0"
+
+const ICONS = {
+  pending: "◻", in_progress: "◼", completed: "✔",
+  resume: "▶", complete: "✔", revert: "◁", update: "△", delete: "✕",
+  key: "🔑"
+}
 
 # Setup temp dir with fake task data
 let tmp = (mktemp -d | str trim)
@@ -68,30 +74,24 @@ def run [name: string, body: closure] {
   }
 }
 
-# Examples: full output per mode as Nu tables
+# Examples
+
 def show_examples [] {
   let examples = [
     {action: "CREATE", input: (inp TaskCreate {subject: "Add rate limiting", description: "The /api/v2/users endpoint needs 100 req/min limit", metadata: {priority: 1}, addBlockedBy: ["1"]})}
-    {action: "START", input: (inp TaskUpdate {taskId: "3", status: "in_progress"})}
+    {action: "RESUME", input: (inp TaskUpdate {taskId: "3", status: "in_progress"})}
     {action: "UPDATE", input: (inp TaskUpdate {taskId: "2", subject: "Render: split + enum output", description: "Split into render_table and render_detail", metadata: {priority: 2}})}
-    {action: "CLOSE", input: (inp TaskUpdate {taskId: "2", status: "completed"})}
+    {action: "COMPLETE", input: (inp TaskUpdate {taskId: "2", status: "completed"})}
     {action: "DELETE", input: (inp TaskUpdate {taskId: "2", status: "deleted"})}
   ]
-  let modes = ["default" "unicode" "emoji" "verbose"]
 
-  for mode in $modes {
-    $env.CLAUDE_HOOK_ICONS = $mode
-    let rows = ($examples | each { |ex|
-      {action: $ex.action, output: (reason $ex.input)}
-    })
-    print $"($mode)"
-    print ($rows | table --expand --width 120)
+  for ex in $examples {
+    let out = (reason $ex.input)
+    print ([{$ex.action: $out}] | table --expand --width 120)
     print ""
   }
-  hide-env CLAUDE_HOOK_ICONS
 }
 
-# EXAMPLES=1 to skip tests and show examples only
 if ($env.EXAMPLES? | default "") == "1" {
   show_examples
   rm -rf $tmp
@@ -163,8 +163,9 @@ let results = [
     assert ($out =~ 'open')
   })
 
-  (run "create: session short id in summary" {
+  (run "create: session icon and short id in summary" {
     let out = (reason (inp TaskCreate {subject: "X"}))
+    assert ($out | str contains $ICONS.key)
     assert ($out | str contains "aaaaaaaa")
   })
 
@@ -203,68 +204,83 @@ let results = [
 
   # TaskUpdate: status transitions
 
-  (run "start: action, status, id, subject" {
+  (run "resume: action, slug, and subject" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "Start")
-    assert ($out | str contains "pending")
+    assert ($out | str contains "Resume:")
+    assert ($out | str contains $ICONS.resume)
+    assert ($out | str contains $"($ICONS.pending) pending")
     assert ($out | str contains "#3")
     assert ($out | str contains "Third task")
   })
 
-  (run "start: per-field stat with inline values" {
+  (run "resume: status icons in diffstat" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out =~ 'M status:.*pending.*in_progress')
-    assert (not ($out | str contains "Will do thing"))
-    assert (not ($out | str contains "@@"))
+    assert ($out | str contains $"($ICONS.pending) pending")
+    assert ($out | str contains $"($ICONS.in_progress) in_progress")
   })
 
-  (run "close: action, status, id" {
+  (run "resume: no redundant yaml diff for status-only" {
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert (not ($out | str contains "-status:"))
+    assert (not ($out | str contains "+status:"))
+  })
+
+  (run "complete: action, slug, and id" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "completed"}))
-    assert ($out | str contains "Close")
-    assert ($out | str contains "pending")
+    assert ($out | str contains "Complete:")
+    assert ($out | str contains $ICONS.complete)
+    assert ($out | str contains $"($ICONS.pending) pending")
     assert ($out | str contains "#3")
   })
 
-  (run "close: per-category deltas" {
+  (run "complete: per-category deltas" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "completed"}))
     assert ($out =~ '\(\+1\).*done')
     assert ($out =~ '\(-1\).*open')
   })
 
-  (run "close: status stat with inline values" {
+  (run "complete: status icons in diffstat" {
     let out = (reason (inp TaskUpdate {taskId: "2", status: "completed"}))
-    assert ($out =~ 'M status:.*in_progress.*completed')
+    assert ($out | str contains $"($ICONS.in_progress) in_progress")
+    assert ($out | str contains $"($ICONS.completed) completed")
     assert (not ($out | str contains "Doing thing"))
   })
 
-  (run "reopen: action, status, id" {
+  (run "revert: action, slug, and id" {
     let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
-    assert ($out | str contains "Reopen")
-    assert ($out | str contains "completed")
+    assert ($out | str contains "Revert:")
+    assert ($out | str contains $ICONS.revert)
+    assert ($out | str contains $"($ICONS.completed) completed")
     assert ($out | str contains "#1")
   })
 
-  (run "reopen: unchanged fields hidden" {
+  (run "revert: unchanged fields hidden" {
     let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
     assert (not ($out | str contains "Done thing"))
   })
 
   # TaskUpdate: field changes
 
-  (run "update description: stat with char bar" {
+  (run "update description: heading with detail" {
     let out = (reason (inp TaskUpdate {taskId: "2", description: "New desc for the task"}))
-    # "Doing thing" (11 chars) -> "New desc for the task" (21 chars): bar with + and -
-    assert ($out =~ 'M description')
-    assert ($out | str contains "|")
-    assert ($out | str contains "Doing thing")
-    assert ($out | str contains "New desc for the task")
+    assert ($out =~ 'M description:')
+    assert ($out | str contains "  - Doing thing")
+    assert ($out | str contains "  + New desc for the task")
+  })
+
+  (run "update description: full replacement shows unified diff" {
+    let long_desc = "This is a completely rewritten description that replaces the old one entirely"
+    let out = (reason (inp TaskUpdate {taskId: "2", description: $long_desc}))
+    assert ($out =~ 'M description:')
+    assert ($out | str contains "  - Doing thing")
+    assert ($out | str contains "  + This is a completely rewritten")
   })
 
   (run "update subject: short field uses inline" {
     let out = (reason (inp TaskUpdate {taskId: "1", subject: "Renamed"}))
-    assert ($out | str contains "Renamed")
-    assert ($out | str contains "First task")
-    assert ($out =~ 'M subject:.*First task.*Renamed')
+    assert ($out =~ 'M subject:')
+    assert ($out | str contains "  - First task")
+    assert ($out | str contains "  + Renamed")
   })
 
   (run "update: blocks and owner" {
@@ -276,7 +292,11 @@ let results = [
   (run "update: multi-field stat lines" {
     let out = (reason (inp TaskUpdate {taskId: "2", subject: "New name", description: "A much longer description for this task"}))
     assert ($out =~ 'M subject:')
-    assert ($out =~ 'M description \\|')
+    assert ($out | str contains "  - Second task")
+    assert ($out | str contains "  + New name")
+    assert ($out =~ 'M description:')
+    assert ($out | str contains "  - Doing thing")
+    assert ($out | str contains "  + A much longer description")
   })
 
   (run "update: added field shows A prefix" {
@@ -307,7 +327,8 @@ let results = [
 
   (run "delete: full snapshot" {
     let out = (reason (inp TaskUpdate {taskId: "2", status: "deleted"}))
-    assert ($out | str contains "Delete")
+    assert ($out | str contains "Delete:")
+    assert ($out | str contains $ICONS.delete)
     assert ($out | str contains "Second task")
     assert ($out | str contains "in_progress")
     assert ($out | str contains "Doing thing")
@@ -321,11 +342,16 @@ let results = [
 
   # TaskUpdate: edge cases
 
-  (run "not found: error with id and list" {
+  (run "not found: error with id" {
     let out = (reason (inp TaskUpdate {taskId: "999", status: "completed"}))
     assert ($out | str contains "not found")
     assert ($out | str contains "#999")
-    assert ($out | str contains "tasks")
+  })
+
+  (run "update: shows triangle icon" {
+    let out = (reason (inp TaskUpdate {taskId: "2", subject: "Renamed"}))
+    assert ($out | str contains $ICONS.update)
+    assert ($out | str contains "Update:")
   })
 
   (run "noop: no diff lines" {
@@ -341,57 +367,28 @@ let results = [
 
   # Debug mode
 
-  (run "debug: shows JSON when enabled" {
+  (run "debug: stderr when enabled" {
     $env.CLAUDE_HOOK_DEBUG = "1"
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
-    assert ($out | str contains "\"tool_name\"")
-    assert ($out | str contains "\"status\"")
+    let result = ((inp TaskUpdate {taskId: "1", status: "completed"}) | ^nu $env.HOOK_PATH | complete)
+    assert ($result.stderr | str contains "tool_name")
     $env.CLAUDE_HOOK_DEBUG = "0"
   })
 
-  (run "debug: hidden when disabled" {
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
-    assert (not ($out | str contains "\"tool_name\""))
+  (run "debug: no stderr when disabled" {
+    let result = ((inp TaskUpdate {taskId: "1", status: "completed"}) | ^nu $env.HOOK_PATH | complete)
+    assert ($result.stderr | is-empty)
   })
 
-  # CLAUDE_HOOK_ICONS modes
+  # Icons off
 
-  (run "icons: default mode has no icons" {
+  (run "icons off: no unicode symbols" {
+    $env.CLAUDE_HOOK_TASK_ICONS = "0"
     let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "Start")
-    assert (not ($out | str contains "◻"))
-    assert (not ($out | str contains "🔑"))
-  })
-
-  (run "icons: unicode mode adds status icons" {
-    $env.CLAUDE_HOOK_ICONS = "unicode"
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "◻")
-    assert ($out | str contains "▶")
-    hide-env CLAUDE_HOOK_ICONS
-  })
-
-  (run "icons: emoji mode adds session icon" {
-    $env.CLAUDE_HOOK_ICONS = "emoji"
-    let out = (reason (inp TaskCreate {subject: "Test"}))
-    assert ($out | str contains "🔑")
-    hide-env CLAUDE_HOOK_ICONS
-  })
-
-  (run "icons: verbose mode shows slugs" {
-    $env.CLAUDE_HOOK_ICONS = "verbose"
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "pending")
-    assert ($out | str contains "◻")
-    hide-env CLAUDE_HOOK_ICONS
-  })
-
-  (run "icons: unknown mode falls back to default" {
-    $env.CLAUDE_HOOK_ICONS = "unknown"
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "Start")
-    assert (not ($out | str contains "◻"))
-    hide-env CLAUDE_HOOK_ICONS
+    assert ($out | str contains "Resume:")
+    assert (not ($out | str contains $ICONS.resume))
+    assert (not ($out | str contains $ICONS.pending))
+    assert (not ($out | str contains $ICONS.key))
+    hide-env CLAUDE_HOOK_TASK_ICONS
   })
 
   # CLAUDE_CODE_TASK_LIST_ID override
@@ -412,10 +409,7 @@ let fail = ($results | get fail | math sum)
 print ""
 print $"($pass)/($pass + $fail) passed"
 
-if $fail == 0 {
-  if ($env.CLAUDE_CODE_TASK_LIST_ID? | default "") != "" { hide-env CLAUDE_CODE_TASK_LIST_ID }
-  show_examples
-}
+if $fail == 0 { show_examples }
 
 # Cleanup
 rm -rf $tmp
