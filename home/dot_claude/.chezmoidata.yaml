@@ -53,6 +53,35 @@ claudePlugins:
 
 # Skills disabled globally (plugin installed for per-project use)
 claudeDisabledSkills:
+  - everything-claude-code:clickhouse-io
+  - everything-claude-code:content-engine
+  - everything-claude-code:cpp-coding-standards
+  - everything-claude-code:cpp-testing
+  - everything-claude-code:django-patterns
+  - everything-claude-code:django-security
+  - everything-claude-code:django-tdd
+  - everything-claude-code:django-verification
+  - everything-claude-code:enterprise-agent-ops
+  - everything-claude-code:foundation-models-on-device
+  - everything-claude-code:investor-materials
+  - everything-claude-code:investor-outreach
+  - everything-claude-code:java-coding-standards
+  - everything-claude-code:jpa-patterns
+  - everything-claude-code:liquid-glass-design
+  - everything-claude-code:market-research
+  - everything-claude-code:nutrient-document-processing
+  - everything-claude-code:plankton-code-quality
+  - everything-claude-code:project-guidelines-example
+  - everything-claude-code:ralphinho-rfc-pipeline
+  - everything-claude-code:springboot-patterns
+  - everything-claude-code:springboot-security
+  - everything-claude-code:springboot-tdd
+  - everything-claude-code:springboot-verification
+  - everything-claude-code:swift-actor-persistence
+  - everything-claude-code:swift-concurrency-6-2
+  - everything-claude-code:swift-protocol-di-testing
+  - everything-claude-code:swiftui-patterns
+  - everything-claude-code:visa-doc-translate
   - plugin-dev:agent-development
   - plugin-dev:command-development
   - plugin-dev:create-plugin

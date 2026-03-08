@@ -1,15 +1,14 @@
 #!/usr/bin/env nu
 
-# Tests for executable_task_info.nu
-# Run: nu home/dot_claude/hooks/.test_task_info.nu
-#
-# Assertions test data values, not format strings,
-# so tests survive format changes (separators, layout, icons)
+# Tests and examples for executable_task_info.nu
+# Run tests:    nu .test_task_info.nu
+# Run examples: nu .test_task_info.nu --examples
 
 use std assert
 
 $env.HOOK_PATH = ($env.FILE_PWD | path join "executable_task_info.nu")
 $env.FAKE_SID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+$env.CLAUDE_HOOK_DEBUG = "0"
 
 # Setup temp dir with fake task data
 let tmp = (mktemp -d | str trim)
@@ -69,12 +68,42 @@ def run [name: string, body: closure] {
   }
 }
 
+# Examples: full output per mode as Nu tables
+def show_examples [] {
+  let examples = [
+    {action: "CREATE", input: (inp TaskCreate {subject: "Add rate limiting", description: "The /api/v2/users endpoint needs 100 req/min limit", metadata: {priority: 1}, addBlockedBy: ["1"]})}
+    {action: "START", input: (inp TaskUpdate {taskId: "3", status: "in_progress"})}
+    {action: "UPDATE", input: (inp TaskUpdate {taskId: "2", subject: "Render: split + enum output", description: "Split into render_table and render_detail", metadata: {priority: 2}})}
+    {action: "CLOSE", input: (inp TaskUpdate {taskId: "2", status: "completed"})}
+    {action: "DELETE", input: (inp TaskUpdate {taskId: "2", status: "deleted"})}
+  ]
+  let modes = ["default" "unicode" "emoji" "verbose"]
+
+  for mode in $modes {
+    $env.CLAUDE_HOOK_ICONS = $mode
+    let rows = ($examples | each { |ex|
+      {action: $ex.action, output: (reason $ex.input)}
+    })
+    print $"($mode)"
+    print ($rows | table --expand --width 120)
+    print ""
+  }
+  hide-env CLAUDE_HOOK_ICONS
+}
+
+# EXAMPLES=1 to skip tests and show examples only
+if ($env.EXAMPLES? | default "") == "1" {
+  show_examples
+  rm -rf $tmp
+  exit 0
+}
+
 print "task_info.nu hook tests"
 print ""
 
 let results = [
 
-  # --- Guards ---
+  # Guards
 
   (run "missing session_id returns error" {
     let out = (reason '{"tool_name":"TaskCreate","tool_input":{"subject":"X"}}')
@@ -87,40 +116,38 @@ let results = [
     assert (($out | get hookSpecificOutput?) != null)
   })
 
-  (run "unknown tool produces no output" {
-    let input = ({tool_name: "Read", session_id: "x", tool_input: {}} | to json)
-    let out = (raw $input)
-    assert ($out | is-empty)
+  (run "unknown tool emits diagnostic" {
+    let out = (reason ({tool_name: "Read", session_id: "x", tool_input: {}} | to json))
+    assert ($out | str contains "unexpected tool")
   })
 
-  # --- TaskCreate ---
+  (run "empty input emits diagnostic" {
+    let out = (reason "")
+    assert ($out | str contains "empty stdin")
+  })
 
-  (run "create: shows action and subject" {
+  (run "non-record input emits diagnostic" {
+    let out = (reason "\"just a string\"")
+    assert ($out | str contains "expected record")
+  })
+
+  # TaskCreate
+
+  (run "create: header with subject" {
     let out = (reason (inp TaskCreate {subject: "New task"}))
     assert ($out | str contains "Create")
     assert ($out | str contains "New task")
   })
 
+  (run "create: fields have + prefix" {
+    let out = (reason (inp TaskCreate {subject: "New task", description: "Details"}))
+    assert ($out | str contains "+ subject:")
+    assert ($out | str contains "+ description:")
+  })
+
   (run "create: hides pending status" {
     let out = (reason (inp TaskCreate {subject: "New task"}))
     assert (not ($out | str contains "pending"))
-  })
-
-  (run "create: list shows positive delta" {
-    let out = (reason (inp TaskCreate {subject: "X"}))
-    assert ($out | str contains "(+1)")
-  })
-
-  (run "create: list shows per-category delta" {
-    let out = (reason (inp TaskCreate {subject: "X"}))
-    assert ($out | str contains "done")
-    assert ($out =~ 'open')
-    assert ($out =~ '\(\+1\)')
-  })
-
-  (run "create: shows session short id" {
-    let out = (reason (inp TaskCreate {subject: "X"}))
-    assert ($out | str contains "aaaaaaaa")
   })
 
   (run "create: returns ask decision" {
@@ -129,114 +156,182 @@ let results = [
     assert ($out.hookSpecificOutput.permissionDecision == "ask")
   })
 
-  # --- TaskUpdate: status change ---
+  (run "create: positive delta and categories" {
+    let out = (reason (inp TaskCreate {subject: "X"}))
+    assert ($out | str contains "(+1)")
+    assert ($out | str contains "done")
+    assert ($out =~ 'open')
+  })
 
-  (run "start: shows action, id, subject" {
+  (run "create: session short id in summary" {
+    let out = (reason (inp TaskCreate {subject: "X"}))
+    assert ($out | str contains "aaaaaaaa")
+  })
+
+  (run "create: description content" {
+    let out = (reason (inp TaskCreate {subject: "Task", description: "A detailed description of work"}))
+    assert ($out | str contains "A detailed description of work")
+  })
+
+  (run "create: blocks and blocked by" {
+    let out = (reason (inp TaskCreate {subject: "Task", addBlocks: ["5", "6"], addBlockedBy: ["1"]}))
+    assert ($out | str contains "addBlocks")
+    assert ($out | str contains "addBlockedBy")
+  })
+
+  (run "create: owner" {
+    let out = (reason (inp TaskCreate {subject: "Task", owner: "agent-1"}))
+    assert ($out | str contains "agent-1")
+  })
+
+  (run "create: no priority warning" {
+    let out = (reason (inp TaskCreate {subject: "No prio"}))
+    assert ($out | str contains "no priority")
+  })
+
+  (run "create: priority label" {
+    let out = (reason (inp TaskCreate {subject: "With prio", metadata: {priority: 0}}))
+    assert ($out | str contains "P0")
+    assert ($out | str contains "critical")
+  })
+
+  (run "create: extra metadata" {
+    let out = (reason (inp TaskCreate {subject: "Task", metadata: {priority: 2, estimate: "30m"}}))
+    assert ($out | str contains "P2")
+    assert ($out | str contains "30m")
+  })
+
+  # TaskUpdate: status transitions
+
+  (run "start: action, status, id, subject" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
     assert ($out | str contains "Start")
+    assert ($out | str contains "pending")
     assert ($out | str contains "#3")
     assert ($out | str contains "Third task")
   })
 
-  (run "close: shows close action" {
+  (run "start: per-field stat with inline values" {
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert ($out =~ 'M status:.*pending.*in_progress')
+    assert (not ($out | str contains "Will do thing"))
+    assert (not ($out | str contains "@@"))
+  })
+
+  (run "close: action, status, id" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "completed"}))
     assert ($out | str contains "Close")
+    assert ($out | str contains "pending")
     assert ($out | str contains "#3")
   })
 
-  (run "reopen: shows reopen action" {
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
-    assert ($out | str contains "Reopen")
-    assert ($out | str contains "#1")
-  })
-
-  (run "start: shows both old and new status" {
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "pending")
-    assert ($out | str contains "in_progress")
-  })
-
-  (run "start: shows context in diff" {
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert ($out | str contains "Will do thing")
-  })
-
-  (run "start: no char diff summary" {
-    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
-    assert (not ($out | str contains "chars total"))
-  })
-
-  (run "close: list shows per-category deltas" {
+  (run "close: per-category deltas" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "completed"}))
     assert ($out =~ '\(\+1\).*done')
     assert ($out =~ '\(-1\).*open')
   })
 
-  # --- TaskUpdate: description change ---
-
-  (run "update description: shows diff" {
-    let out = (reason (inp TaskUpdate {taskId: "2", description: "New desc"}))
-    assert ($out | str contains "description")
-    assert ($out | str contains "changed")
+  (run "close: status stat with inline values" {
+    let out = (reason (inp TaskUpdate {taskId: "2", status: "completed"}))
+    assert ($out =~ 'M status:.*in_progress.*completed')
+    assert (not ($out | str contains "Doing thing"))
   })
 
-  (run "update description: shows content diff" {
-    let out = (reason (inp TaskUpdate {taskId: "2", description: "New desc"}))
+  (run "reopen: action, status, id" {
+    let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
+    assert ($out | str contains "Reopen")
+    assert ($out | str contains "completed")
+    assert ($out | str contains "#1")
+  })
+
+  (run "reopen: unchanged fields hidden" {
+    let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
+    assert (not ($out | str contains "Done thing"))
+  })
+
+  # TaskUpdate: field changes
+
+  (run "update description: stat with char bar" {
+    let out = (reason (inp TaskUpdate {taskId: "2", description: "New desc for the task"}))
+    # "Doing thing" (11 chars) -> "New desc for the task" (21 chars): bar with + and -
+    assert ($out =~ 'M description')
+    assert ($out | str contains "|")
     assert ($out | str contains "Doing thing")
-    assert ($out | str contains "New desc")
+    assert ($out | str contains "New desc for the task")
   })
 
-  # --- TaskUpdate: subject change ---
-
-  (run "update subject: shows old and new" {
+  (run "update subject: short field uses inline" {
     let out = (reason (inp TaskUpdate {taskId: "1", subject: "Renamed"}))
-    assert ($out | str contains "subject")
     assert ($out | str contains "Renamed")
     assert ($out | str contains "First task")
+    assert ($out =~ 'M subject:.*First task.*Renamed')
   })
 
-  # --- TaskUpdate: delete ---
+  (run "update: blocks and owner" {
+    let out = (reason (inp TaskUpdate {taskId: "2", addBlocks: ["3"], owner: "lead"}))
+    assert ($out | str contains "addBlocks")
+    assert ($out | str contains "lead")
+  })
 
-  (run "delete: shows action and subject" {
+  (run "update: multi-field stat lines" {
+    let out = (reason (inp TaskUpdate {taskId: "2", subject: "New name", description: "A much longer description for this task"}))
+    assert ($out =~ 'M subject:')
+    assert ($out =~ 'M description \\|')
+  })
+
+  (run "update: added field shows A prefix" {
+    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: 2}}))
+    assert ($out =~ 'A priority:')
+    assert ($out | str contains "P2")
+  })
+
+  # TaskUpdate: priority
+
+  (run "update: priority change shows both" {
+    let out = (reason (inp TaskUpdate {taskId: "4", metadata: {priority: 3}}))
+    assert ($out | str contains "P1")
+    assert ($out | str contains "P3")
+  })
+
+  (run "update: priority added" {
+    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: 2}}))
+    assert ($out | str contains "P2")
+  })
+
+  (run "update: unchanged priority hidden" {
+    let out = (reason (inp TaskUpdate {taskId: "4", status: "in_progress"}))
+    assert (not ($out | str contains "P1"))
+  })
+
+  # TaskUpdate: delete
+
+  (run "delete: full snapshot" {
     let out = (reason (inp TaskUpdate {taskId: "2", status: "deleted"}))
     assert ($out | str contains "Delete")
     assert ($out | str contains "Second task")
-  })
-
-  (run "delete: list shows negative delta" {
-    let out = (reason (inp TaskUpdate {taskId: "2", status: "deleted"}))
+    assert ($out | str contains "in_progress")
+    assert ($out | str contains "Doing thing")
     assert ($out | str contains "(-1)")
   })
 
-  (run "delete: shows status snapshot" {
-    let out = (reason (inp TaskUpdate {taskId: "2", status: "deleted"}))
-    assert ($out | str contains "in_progress")
-  })
-
-  (run "delete: shows description content" {
-    let out = (reason (inp TaskUpdate {taskId: "2", status: "deleted"}))
-    assert ($out | str contains "Doing thing")
-  })
-
-  (run "delete: shows priority snapshot" {
+  (run "delete: priority snapshot" {
     let out = (reason (inp TaskUpdate {taskId: "4", status: "deleted"}))
     assert ($out | str contains "P1")
   })
 
-  # --- TaskUpdate: not found ---
+  # TaskUpdate: edge cases
 
-  (run "not found: shows error with id" {
+  (run "not found: error with id and list" {
     let out = (reason (inp TaskUpdate {taskId: "999", status: "completed"}))
     assert ($out | str contains "not found")
     assert ($out | str contains "#999")
-  })
-
-  (run "not found: still shows list" {
-    let out = (reason (inp TaskUpdate {taskId: "999", status: "completed"}))
     assert ($out | str contains "tasks")
   })
 
-  # --- Cross-session isolation ---
+  (run "noop: no diff lines" {
+    let out = (reason (inp TaskUpdate {taskId: "2"}))
+    assert (not ($out | str contains "@@"))
+  })
 
   (run "isolation: correct session only" {
     let out = (reason (inp TaskUpdate {taskId: "3", status: "completed"}))
@@ -244,135 +339,69 @@ let results = [
     assert (not ($out | str contains "WRONG SESSION"))
   })
 
-  # --- Debug mode ---
+  # Debug mode
 
-  (run "debug: on by default" {
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
-    assert ($out | str contains "--- input:")
-    assert ($out | str contains "--- on disk:")
-  })
-
-  (run "debug: off with env var" {
-    $env.CLAUDE_HOOK_DEBUG = "0"
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
-    assert (not ($out | str contains "--- input:"))
+  (run "debug: shows JSON when enabled" {
     $env.CLAUDE_HOOK_DEBUG = "1"
+    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
+    assert ($out | str contains "\"tool_name\"")
+    assert ($out | str contains "\"status\"")
+    $env.CLAUDE_HOOK_DEBUG = "0"
   })
 
-  # --- CLAUDE_CODE_TASK_LIST_ID override ---
+  (run "debug: hidden when disabled" {
+    let out = (reason (inp TaskUpdate {taskId: "1", status: "completed"}))
+    assert (not ($out | str contains "\"tool_name\""))
+  })
+
+  # CLAUDE_HOOK_ICONS modes
+
+  (run "icons: default mode has no icons" {
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert ($out | str contains "Start")
+    assert (not ($out | str contains "◻"))
+    assert (not ($out | str contains "🔑"))
+  })
+
+  (run "icons: unicode mode adds status icons" {
+    $env.CLAUDE_HOOK_ICONS = "unicode"
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert ($out | str contains "◻")
+    assert ($out | str contains "▶")
+    hide-env CLAUDE_HOOK_ICONS
+  })
+
+  (run "icons: emoji mode adds session icon" {
+    $env.CLAUDE_HOOK_ICONS = "emoji"
+    let out = (reason (inp TaskCreate {subject: "Test"}))
+    assert ($out | str contains "🔑")
+    hide-env CLAUDE_HOOK_ICONS
+  })
+
+  (run "icons: verbose mode shows slugs" {
+    $env.CLAUDE_HOOK_ICONS = "verbose"
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert ($out | str contains "pending")
+    assert ($out | str contains "◻")
+    hide-env CLAUDE_HOOK_ICONS
+  })
+
+  (run "icons: unknown mode falls back to default" {
+    $env.CLAUDE_HOOK_ICONS = "unknown"
+    let out = (reason (inp TaskUpdate {taskId: "3", status: "in_progress"}))
+    assert ($out | str contains "Start")
+    assert (not ($out | str contains "◻"))
+    hide-env CLAUDE_HOOK_ICONS
+  })
+
+  # CLAUDE_CODE_TASK_LIST_ID override
 
   (run "list_id override: resolves custom list" {
     $env.CLAUDE_CODE_TASK_LIST_ID = "my-feature"
     let out = (reason (inp TaskUpdate {taskId: "1", status: "in_progress"}))
     assert ($out | str contains "Feature task")
     assert ($out | str contains "my-feature")
-  })
-
-  # --- No-op update ---
-
-  (run "noop: no diff shown" {
-    let out = (reason (inp TaskUpdate {taskId: "2"}))
-    assert (not ($out | str contains "@@"))
-  })
-
-  # --- Priority ---
-
-  (run "create: shows no priority warning" {
-    let out = (reason (inp TaskCreate {subject: "No prio"}))
-    assert ($out | str contains "no priority")
-  })
-
-  (run "create: shows priority label" {
-    let out = (reason (inp TaskCreate {subject: "With prio", metadata: {priority: 0}}))
-    assert ($out | str contains "P0")
-    assert ($out | str contains "critical")
-  })
-
-  (run "update: shows priority change" {
-    let out = (reason (inp TaskUpdate {taskId: "4", metadata: {priority: 3}}))
-    assert ($out | str contains "P1")
-    assert ($out | str contains "P3")
-  })
-
-  (run "update: shows priority added" {
-    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: 2}}))
-    assert ($out | str contains "P2")
-  })
-
-  (run "update: shows context priority" {
-    let out = (reason (inp TaskUpdate {taskId: "4", status: "in_progress"}))
-    assert ($out | str contains "P1")
-  })
-
-  # --- Diffstat ---
-
-  (run "update description: shows diffstat" {
-    let out = (reason (inp TaskUpdate {taskId: "2", description: "Short"}))
-    assert ($out | str contains "changed")
-  })
-
-  (run "update subject: shows diffstat" {
-    let out = (reason (inp TaskUpdate {taskId: "1", subject: "Renamed task with longer name"}))
-    assert ($out | str contains "changed")
-  })
-
-  # --- Create: field display ---
-
-  (run "create: shows description content" {
-    let out = (reason (inp TaskCreate {subject: "Task", description: "A detailed description of work"}))
-    assert ($out | str contains "description")
-    assert ($out | str contains "A detailed description of work")
-  })
-
-  (run "create: shows blocks" {
-    let out = (reason (inp TaskCreate {subject: "Task", addBlocks: ["5", "6"]}))
-    assert ($out | str contains "addBlocks")
-    assert ($out | str contains "5")
-  })
-
-  (run "create: shows blocked by" {
-    let out = (reason (inp TaskCreate {subject: "Task", addBlockedBy: ["1"]}))
-    assert ($out | str contains "addBlockedBy")
-    assert ($out | str contains "1")
-  })
-
-  (run "create: shows owner" {
-    let out = (reason (inp TaskCreate {subject: "Task", owner: "agent-1"}))
-    assert ($out | str contains "owner")
-    assert ($out | str contains "agent-1")
-  })
-
-  (run "create: shows extra metadata" {
-    let out = (reason (inp TaskCreate {subject: "Task", metadata: {priority: 2, estimate: "30m"}}))
-    assert ($out | str contains "P2")
-    assert ($out | str contains "estimate")
-    assert ($out | str contains "30m")
-  })
-
-  # --- Update: structured fields ---
-
-  (run "update: shows blocks field" {
-    let out = (reason (inp TaskUpdate {taskId: "2", addBlocks: ["3"]}))
-    assert ($out | str contains "addBlocks")
-    assert ($out | str contains "3")
-  })
-
-  (run "update: shows owner field" {
-    let out = (reason (inp TaskUpdate {taskId: "2", owner: "lead"}))
-    assert ($out | str contains "owner")
-    assert ($out | str contains "lead")
-  })
-
-  # --- Context: unchanged fields visible in diff ---
-
-  (run "close: shows context description" {
-    let out = (reason (inp TaskUpdate {taskId: "2", status: "completed"}))
-    assert ($out | str contains "Doing thing")
-  })
-
-  (run "reopen: shows context description" {
-    let out = (reason (inp TaskUpdate {taskId: "1", status: "pending"}))
-    assert ($out | str contains "Done thing")
+    hide-env CLAUDE_CODE_TASK_LIST_ID
   })
 
 ]
@@ -383,27 +412,9 @@ let fail = ($results | get fail | math sum)
 print ""
 print $"($pass)/($pass + $fail) passed"
 
-# Example output (like git showing commit details after tests)
 if $fail == 0 {
-  # Reset env for clean examples
-  $env.CLAUDE_HOOK_DEBUG = "0"
   if ($env.CLAUDE_CODE_TASK_LIST_ID? | default "") != "" { hide-env CLAUDE_CODE_TASK_LIST_ID }
-
-  print ""
-  print "--- example output ---"
-  print ""
-
-  for example in [
-    {label: "CREATE", input: (inp TaskCreate {subject: "Add rate limiting", description: "The /api/v2/users endpoint needs 100 req/min limit", metadata: {priority: 1}, addBlockedBy: ["1"]})}
-    {label: "START", input: (inp TaskUpdate {taskId: "3", status: "in_progress"})}
-    {label: "UPDATE", input: (inp TaskUpdate {taskId: "2", subject: "Render: split + enum output", description: "Split into render_table and render_detail", metadata: {priority: 2}})}
-    {label: "CLOSE", input: (inp TaskUpdate {taskId: "2", status: "completed"})}
-    {label: "DELETE", input: (inp TaskUpdate {taskId: "2", status: "deleted"})}
-  ] {
-    print $"($example.label):"
-    print (reason $example.input)
-    print ""
-  }
+  show_examples
 }
 
 # Cleanup

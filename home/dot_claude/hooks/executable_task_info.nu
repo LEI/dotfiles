@@ -9,7 +9,45 @@
 
 const PRIORITY_LABELS = {0: "P0:critical", 1: "P1:high", 2: "P2:medium", 3: "P3:low", 4: "P4:backlog"}
 
-# --- Helpers ---
+# Icon sets keyed by CLAUDE_HOOK_ICONS env var
+# default: plain text, no icons
+# unicode: adds status and action icons
+# emoji: adds session emoji on top of unicode
+# verbose: shows internal slug names for debugging
+# Action values are the full prefix shown in headers (icon or word or both)
+const ICON_SETS = {
+  default: {
+    status: {pending: "", in_progress: "", completed: ""}
+    action: {create: "+", start: "Start:", close: "Close:", reopen: "Reopen:", update: "Update:", delete: "Delete:"}
+    session: ""
+    show_slug: false
+  }
+  unicode: {
+    status: {pending: "◻", in_progress: "◼", completed: "✔"}
+    action: {create: "+", start: "▶ Start:", close: "☑ Close:", reopen: "◁ Reopen:", update: "△ Update:", delete: "✕ Delete:"}
+    session: ""
+    show_slug: false
+  }
+  emoji: {
+    status: {pending: "◻", in_progress: "◼", completed: "✔"}
+    action: {create: "+", start: "▶ Start:", close: "☑ Close:", reopen: "◁ Reopen:", update: "△ Update:", delete: "✕ Delete:"}
+    session: "🔑"
+    show_slug: false
+  }
+  verbose: {
+    status: {pending: "◻", in_progress: "◼", completed: "✔"}
+    action: {create: "+", start: "▶ Start:", close: "☑ Close:", reopen: "◁ Reopen:", update: "△ Update:", delete: "✕ Delete:"}
+    session: "🔑"
+    show_slug: true
+  }
+}
+
+def icon_set [] {
+  let mode = ($env.CLAUDE_HOOK_ICONS? | default "default")
+  $ICON_SETS | get -o $mode | default ($ICON_SETS | get default)
+}
+
+# Helpers
 
 def priority_label [p] {
   if $p == null { return "" }
@@ -17,8 +55,12 @@ def priority_label [p] {
   $PRIORITY_LABELS | get -o ($n | into string) | default $"P($n)"
 }
 
-def status_icon [s: string] {
-  match $s { "pending" => "◻", "in_progress" => "◼", "completed" => "✔", _ => "?" }
+# Build status display: icon + slug (verbose) or icon only or slug only
+def status_tag [s: string] {
+  let set = (icon_set)
+  let icon = ($set.status | get -o $s | default "")
+  let slug = if $set.show_slug { $s } else { "" }
+  [$icon $slug] | where { $in != "" } | str join " "
 }
 
 def fmt_delta [d: int] {
@@ -41,7 +83,7 @@ def list_counts [list_dir: string] {
   {total: $total, done: $done, prog: $prog, open: $open}
 }
 
-def list_summary [list_dir: string, dt: int, dd: int, dp: int, do_: int] {
+def list_summary [list_dir: string, dt: int, dd: int, dp: int, do_: int, label: string] {
   let base = (list_counts $list_dir)
   let total = $base.total + $dt
   let done = $base.done + $dd
@@ -52,7 +94,7 @@ def list_summary [list_dir: string, dt: int, dd: int, dp: int, do_: int] {
   if $prog > 0 or $dp != 0 { $parts = ($parts | append $"($prog)(fmt_delta $dp) in progress") }
   if $open > 0 or $do_ != 0 { $parts = ($parts | append $"($open)(fmt_delta $do_) open") }
   let breakdown = ($parts | str join ", ")
-  $"($total)(fmt_delta $dt) tasks \(($breakdown)\)"
+  $"($total)(fmt_delta $dt) tasks \(($breakdown)\) ($label)"
 }
 
 def find_task [list_dir: string, id: string] {
@@ -65,8 +107,7 @@ def compose [...sections: string] {
   $sections | where { $in != "" } | str join "\n\n"
 }
 
-# --- Task record helpers ---
-
+# Task record helpers
 # Build a display record from a task, keeping only user-visible fields
 def task_display [rec: record] {
   mut out = {}
@@ -111,88 +152,134 @@ def merge_update [disk: record, ti: record] {
   $merged
 }
 
-# --- Diff engine ---
-
+# Diff engine
 # Produce unified diff between two YAML strings
-def yaml_diff [before: string, after: string, label_a: string = "before", label_b: string = "after"] {
+def yaml_diff [before: string, after: string] {
   let tmp = (mktemp -d | str trim)
-  let file_a = $"($tmp)/($label_a)"
-  let file_b = $"($tmp)/($label_b)"
-  $before | save $file_a
-  $after | save $file_b
-  let result = (^diff -u $file_a $file_b | complete)
-  rm -rf $tmp
-  if $result.exit_code == 0 { return "" }
-  # Strip temp path headers and "no newline" warnings
-  $result.stdout
-    | lines
-    | where { |line| not ($line | str starts-with "---") and not ($line | str starts-with "+++") and not ($line | str starts-with "\\") }
-    | str join "\n"
+  try {
+    $before | save $"($tmp)/a"
+    $after | save $"($tmp)/b"
+    let result = (^diff -U0 $"($tmp)/a" $"($tmp)/b" | complete)
+    rm -rf $tmp
+    if $result.exit_code == 0 { return "" }
+    $result.stdout
+      | lines
+      | where { |line| ($line | str starts-with "-") or ($line | str starts-with "+") }
+      | where { |line| not ($line | str starts-with "---") and not ($line | str starts-with "+++") }
+      | str join "\n"
+  } catch { |e|
+    rm -rf $tmp
+    error make {msg: $e.msg}
+  }
 }
 
-# Diffstat: count changed fields like git --stat
+# Diffstat: per-field summary like git diff --stat
+# M field: old -> new       (short values, inline)
+# M field | N +++---         (long values, char-proportional bar)
+# A field: value             (added)
+# D field: value             (deleted)
+const DIFFSTAT_BAR_THRESHOLD = 16
+const DIFFSTAT_BAR_MAX = 40
+
+# Bar proportional to char lengths: new_len drives +, old_len drives -
+def diffstat_bar [new_len: int, old_len: int] {
+  let total = $new_len + $old_len
+  if $total <= $DIFFSTAT_BAR_MAX {
+    let plus = ("" | fill -c "+" -w $new_len)
+    let minus = ("" | fill -c "-" -w $old_len)
+    $"($total) ($plus)($minus)"
+  } else {
+    let scale = ($DIFFSTAT_BAR_MAX / $total)
+    let s_new = [1 ($new_len * $scale | math round | into int)] | math max
+    let s_old = [1 ($old_len * $scale | math round | into int)] | math max
+    let plus = ("" | fill -c "+" -w $s_new)
+    let minus = ("" | fill -c "-" -w $s_old)
+    $"($total) ($plus)($minus)"
+  }
+}
+
 def diffstat [before: record, after: record] {
   let keys = ($before | columns | append ($after | columns) | uniq)
-  mut changed = 0
-  mut added = 0
-  mut removed = 0
+  mut lines = []
   for key in $keys {
     let old_val = ($before | get -o $key | default null)
     let new_val = ($after | get -o $key | default null)
-    if $old_val == null and $new_val != null { $added = $added + 1 } else if $old_val != null and $new_val == null { $removed = $removed + 1 } else if ($old_val | to text) != ($new_val | to text) { $changed = $changed + 1 }
-  }
-  mut parts = []
-  if $changed > 0 { $parts = ($parts | append $"($changed) changed") }
-  if $added > 0 { $parts = ($parts | append $"($added) added") }
-  if $removed > 0 { $parts = ($parts | append $"($removed) removed") }
-  if ($parts | is-empty) { "" } else { $parts | str join ", " }
-}
-
-# --- Debug ---
-
-def debug_section [raw_input: string, task_file: string = ""] {
-  if ($env.CLAUDE_HOOK_DEBUG? | default "1") == "0" { return "" }
-  let input_dump = ($raw_input
-    | from json
-    | transpose key value
-    | each { |row|
-      if $row.key == "tool_input" {
-        let ti = ($row.value | transpose key value | each { |f| $"    ($f.key): ($f.value | to text | str substring 0..200)" } | str join "\n")
-        $"  tool_input:\n($ti)"
+    if $old_val == null and $new_val != null {
+      $lines = ($lines | append $"A ($key): ($new_val | to text)")
+    } else if $old_val != null and $new_val == null {
+      $lines = ($lines | append $"D ($key): ($old_val | to text)")
+    } else if ($old_val | to text) != ($new_val | to text) {
+      let old_str = ($old_val | to text)
+      let new_str = ($new_val | to text)
+      if ($old_str | str length) >= $DIFFSTAT_BAR_THRESHOLD or ($new_str | str length) >= $DIFFSTAT_BAR_THRESHOLD {
+        let bar = (diffstat_bar ($new_str | str length) ($old_str | str length))
+        $lines = ($lines | append $"M ($key) | ($bar)")
       } else {
-        $"  ($row.key): ($row.value | to text | str substring 0..200)"
+        $lines = ($lines | append $"M ($key): ($old_str) -> ($new_str)")
       }
     }
-    | str join "\n")
-  mut out = $"--- input:\n($input_dump)"
+  }
+  $lines | str join "\n"
+}
+
+# Debug
+def debug_section [input: record, task_file: string = ""] {
+  if ($env.CLAUDE_HOOK_DEBUG? | default "1") == "0" { return "" }
+  mut out = $"input\n($input | to json --indent 2)"
   if $task_file != "" and ($task_file | path exists) {
-    let disk_dump = (open $task_file
-      | transpose key value
-      | each { |row| $"    ($row.key): ($row.value | to text | str substring 0..200)" }
-      | str join "\n")
-    $out = $"($out)\n\n--- on disk:\n($disk_dump)"
+    $out = $"($out)\n\non disk\n(open $task_file | to json --indent 2)"
   }
   $out
 }
 
-# --- Main ---
+def emit [reason: string] {
+  print ({hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $reason}} | to json)
+}
 
+# Main
 def main [] {
   let raw = (^cat | decode utf-8 | str trim)
-  let input = ($raw | from json)
+  if ($raw | is-empty) {
+    emit "task_info: empty stdin"
+    return
+  }
+  let input = try { $raw | from json } catch {
+    emit $"task_info: invalid JSON\n($raw | str substring 0..200)"
+    return
+  }
+  if ($input | describe | str starts-with "record") == false {
+    emit $"task_info: expected record, got ($input | describe)\n($raw | str substring 0..200)"
+    return
+  }
   let tool = ($input.tool_name? | default "")
-  if $tool == "" { return }
+  if $tool == "" {
+    emit $"task_info: no tool_name\n($raw | str substring 0..200)"
+    return
+  }
+
+  try { process $input } catch { |e|
+    let debug = try { $input | to json --indent 2 } catch { $raw }
+    emit $"task_info error: ($e.msg)\n\n($debug)"
+  }
+}
+
+def process [input: record] {
+  let tool = ($input.tool_name? | default "")
+  let icons = (icon_set)
+  let act = $icons.action
+  let sess_icon = $icons.session
 
   let session_id = ($input.session_id? | default "")
   let list_id = ($env.CLAUDE_CODE_TASK_LIST_ID? | default $session_id)
   if $list_id == "" {
-    print ({hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: "task_info: no session_id in hook input"}} | to json)
+    emit "task_info: no session_id in hook input"
     return
   }
 
   let list_dir = $"($env.HOME)/.claude/tasks/($list_id)"
-  let short_sid = ($session_id | str substring 0..8)
-  let list_label = if $list_id != $session_id { $"($short_sid) \(($list_id)\)" } else { $short_sid }
+  let short_sid = ($session_id | str substring 0..7)
+  let sess_prefix = if $sess_icon == "" { "" } else { $"($sess_icon) " }
+  let list_label = if $list_id != $session_id { $"│ ($sess_prefix)($short_sid) \(($list_id)\)" } else { $"│ ($sess_prefix)($short_sid)" }
   let ti = ($input.tool_input? | default {})
 
   mut reason = ""
@@ -207,17 +294,17 @@ def main [] {
       let prio_tag = if $prio != null { $" [(priority_label $prio)]" } else { " (no priority)" }
 
       let header = if $status == "pending" {
-        $"+ Create:($prio_tag) ($subject)"
+        $"($act.create) Create($prio_tag) ($subject)"
       } else {
-        $"+ Create:($prio_tag) (status_icon $status) ($status) ($subject)"
+        $"($act.create) Create($prio_tag) (status_tag $status) ($subject)"
       }
 
       let display = (task_display $ti)
       let body = if ($display | is-empty) { "" } else {
-        $display | to yaml | str trim
+        $display | to yaml | str trim | lines | each { |l| $"+ ($l)" } | str join "\n"
       }
 
-      let debug = (debug_section $raw)
+      let debug = (debug_section $input)
       $reason = (compose $debug $header $body)
 
       $dt = 1
@@ -240,18 +327,20 @@ def main [] {
         let status_changing = ($new_status != "" and $new_status != $cur_status)
 
         let subj = if $new_subject != "" { $new_subject } else { $cur_subject }
+        let cur_tag = (status_tag $cur_status)
+        let tag_part = if $cur_tag == "" { "" } else { $" ($cur_tag)" }
         let header = if $new_status == "deleted" {
-          $"✕ Delete: #($id) ($subj)"
+          $"($act.delete)($tag_part) #($id) ($subj)"
         } else if $status_changing {
           let action = match $new_status {
-            "in_progress" => "▶ Start:"
-            "completed" => "✔ Close:"
-            "pending" => "◁ Reopen:"
-            _ => "△ Update:"
+            "in_progress" => $act.start
+            "completed" => $act.close
+            "pending" => $act.reopen
+            _ => $act.update
           }
-          $"($action) #($id) ($subj)"
+          $"($action)($tag_part) #($id) ($subj)"
         } else {
-          $"△ Update: (status_icon $cur_status) ($cur_status) #($id) ($subj)"
+          $"($act.update)($tag_part) #($id) ($subj)"
         }
 
         let before = (task_display $disk)
@@ -262,10 +351,9 @@ def main [] {
         }
 
         let stat = (diffstat $before $after)
-        let stat_line = if $stat != "" { $stat } else { "" }
 
         let diff = if $new_status == "deleted" {
-          $before | to yaml | str trim | lines | each { |l| $"- ($l)" } | str join "\n"
+          ""
         } else {
           let before_yaml = ($before | to yaml | str trim)
           let after_yaml = ($after | to yaml | str trim)
@@ -274,8 +362,8 @@ def main [] {
           }
         }
 
-        let debug = (debug_section $raw $task_file)
-        $reason = (compose $debug $header $stat_line $diff)
+        let debug = (debug_section $input $task_file)
+        $reason = (compose $debug $header $stat $diff)
 
         if $new_status == "deleted" {
           $dt = -1
@@ -297,15 +385,18 @@ def main [] {
           }
         }
       } else {
-        let debug = (debug_section $raw)
-        $reason = (compose $debug $"△ Update #($id) \(not found in session\)")
+        let debug = (debug_section $input)
+        $reason = (compose $debug $"($act.update) #($id) \(not found in session\)")
       }
     }
-    _ => { return }
+    _ => {
+      emit $"task_info: unexpected tool ($tool)"
+      return
+    }
   }
 
-  let summary = (list_summary $list_dir $dt $dd $dp $do_)
-  $reason = $"($reason)\n\n($summary) ($list_label)"
+  let summary = (list_summary $list_dir $dt $dd $dp $do_ $list_label)
+  $reason = $"($reason)\n\n($summary)"
 
-  print ({hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $reason}} | to json)
+  emit $reason
 }
