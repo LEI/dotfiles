@@ -45,6 +45,11 @@ claude_tasks() {
   npx claude-task-viewer "$@"
 }
 
+# Launch claude with task list ID set to current directory name
+claude_task() {
+  CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}" claude "$@"
+}
+
 claude_sessions() {
   if [ $# -eq 0 ]; then
     if [ -t 0 ]; then

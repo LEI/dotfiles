@@ -38,12 +38,3 @@ for name in code-mode memory utcp; do
 done
 
 claude mcp list
-
-# Register local plugin
-plugin_file=~/.claude/plugins/installed_plugins.json
-if ! jq -e '.plugins["local@local"]' "$plugin_file" >/dev/null 2>&1; then
-  echo >&2 "Registering local plugin"
-  now=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
-  jq --arg now "$now" '.plugins["local@local"] = [{"scope":"user","installPath":"{{ .chezmoi.homeDir }}/.claude/plugins/local","version":"0.1.0","installedAt":$now,"lastUpdated":$now}]' \
-    "$plugin_file" > "$plugin_file.tmp" && mv "$plugin_file.tmp" "$plugin_file"
-fi
