@@ -136,6 +136,11 @@ features:
     - .config/oage/
   otel:
     - .config/otel/
+  pc:
+    - .config/process-compose/
+    - .config/systemd/user/process-compose.*
+    - .local/bin/pc
+    - Library/LaunchAgents/com.process-compose.*
   # php: []
   python:
     - .chezmoiscripts/*install-python.sh

@@ -1,23 +1,18 @@
-# case $- in
-# *i*) ;;
-# *) return ;;
-# esac
-
-# [ -z "$PS1" ] && return
-
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-export XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
-export XDG_DATA_HOME="$XDG_DATA_HOME"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# Bootstrap: pathmunge must be available before local.sh
+source "$XDG_CONFIG_HOME/sh/functions/pathmunge.sh"
 
 # Source local environment variables
 if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
   source "$XDG_CONFIG_HOME/sh/local.sh"
 fi
 
-# TODO: path.sh?
+# Non-interactive command mode; see environment.plist (BASH_ENV)
 # https://github.com/neovide/neovide/discussions/3175
-# Darwin: launchctl load ~/Library/LaunchAgents/environment.plist
 if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
   # BASH_CONFIG="neovide"
@@ -39,7 +34,6 @@ fi
 
 # Remove default prompt command
 if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
-  # echo >&2 "Original prompt command: $PROMPT_COMMAND"
   export PROMPT_COMMAND=
 fi
 
@@ -98,8 +92,10 @@ bench() {
 source_files() {
   local dir="$1"
   local ext="${2:-sh}"
+  local exclude="${3:-}"
   if [ -d "$XDG_CONFIG_HOME/$dir" ]; then
     for file in "$XDG_CONFIG_HOME/$dir/"*".$ext"; do
+      [ -n "$exclude" ] && [ "${file##*/}" = "$exclude" ] && continue
       bench source "$file"
     done
   fi
@@ -127,12 +123,10 @@ source_plugins() {
   fi
 }
 
-# Load environment variables before other scripts
-# e.g. INPUTRC before ble.sh
-# TODO: .profile
+# Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
 source_file_if_exists "$XDG_CONFIG_HOME/sh/environment.sh"
 
-source_files "sh/functions"
+source_files "sh/functions" "sh" "pathmunge.sh"
 
 {{- if .features.ai }}
 source_file_if_exists "$XDG_CONFIG_HOME/opencode/functions.sh"
@@ -171,15 +165,15 @@ fi
 
 {{- if .features.bash }}
 
-if [ -d $brew_prefix/opt/bash/bin ]; then
-  pathmunge $brew_prefix/opt/bash/bin before replace
+if [ -d "$brew_prefix/opt/bash/bin" ]; then
+  pathmunge "$brew_prefix/opt/bash/bin" before replace
 fi
 {{- end }}
 
 {{- if .features.ruby }}
 
-if [ -d $brew_prefix/opt/ruby/bin ]; then
-  pathmunge $brew_prefix/opt/ruby/bin before replace
+if [ -d "$brew_prefix/opt/ruby/bin" ]; then
+  pathmunge "$brew_prefix/opt/ruby/bin" before replace
 fi
 
 # ruby_version="${ruby_version:-3.4.0}"

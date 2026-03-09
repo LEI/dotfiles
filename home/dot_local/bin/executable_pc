@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -eq 0 ]; then
+  set -- attach
+fi
+exec process-compose --use-uds "$@"

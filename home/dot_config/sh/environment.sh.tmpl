@@ -44,6 +44,13 @@ export VISUAL="${VISUAL:-$EDITOR}"
 export TERMINAL="${TERMINAL:-ghostty}"
 {{- end }}
 
+{{- if .features.pc }}
+
+export PC_CONFIG_FILES="$XDG_CONFIG_HOME/process-compose/global.yaml"
+export PC_LOG_FILE="$XDG_STATE_HOME/process-compose/process-compose.log"
+export PC_SOCKET_PATH="$XDG_STATE_HOME/process-compose/pc.sock"
+{{- end }}
+
 {{- if .features.otel }}
 
 export OTEL_METRICS_EXPORTER=otlp

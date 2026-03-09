@@ -4,7 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=process-compose up --config %h/.config/process-compose/global.yaml --tui=false
+Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
+Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
+Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/pc.sock
+ExecStart=process-compose up --use-uds --tui=false
 Restart=on-failure
 RestartSec=5
 
