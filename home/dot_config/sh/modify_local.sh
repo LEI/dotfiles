@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- includeTemplate "block-in-file.tmpl" (dict
   "chezmoi" .chezmoi
-  "contents" (includeTemplate "env.sh.tmpl" .)
+  "contents" (includeTemplate "local.sh.tmpl" .)
 ) -}}

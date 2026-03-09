@@ -9,6 +9,10 @@ use std assert
 $env.HOOK_PATH = ($env.FILE_PWD | path join "executable_task_info.nu")
 $env.FAKE_SID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 $env.CLAUDE_HOOK_DEBUG = "0"
+# Isolate from host env: overrides would affect task routing or display
+if "CLAUDE_CODE_TASK_LIST_ID" in $env { hide-env CLAUDE_CODE_TASK_LIST_ID }
+if "CLAUDE_HOOK_TASK_ICONS" in $env { hide-env CLAUDE_HOOK_TASK_ICONS }
+if "CLAUDE_HOOK_TASK_LOG" in $env { hide-env CLAUDE_HOOK_TASK_LOG }
 
 const ICONS = {
   pending: "◻", in_progress: "◼", completed: "✔",
@@ -43,7 +47,7 @@ mkdir $custom_dir
   | to json | save ($custom_dir | path join "1.json")
 
 # Task with priority metadata
-{id: "4", subject: "Priority task", status: "pending", description: "Has priority", metadata: {priority: 1}}
+{id: "4", subject: "Priority task", status: "pending", description: "Has priority", metadata: {priority: "P1"}}
   | to json | save ($list_dir | path join "4.json")
 
 # Helpers
@@ -78,9 +82,9 @@ def run [name: string, body: closure] {
 
 def show_examples [] {
   let examples = [
-    {action: "CREATE", input: (inp TaskCreate {subject: "Add rate limiting", description: "The /api/v2/users endpoint needs 100 req/min limit", metadata: {priority: 1}, addBlockedBy: ["1"]})}
+    {action: "CREATE", input: (inp TaskCreate {subject: "Add rate limiting", description: "The /api/v2/users endpoint needs 100 req/min limit", metadata: {priority: "P1"}, addBlockedBy: ["1"]})}
     {action: "RESUME", input: (inp TaskUpdate {taskId: "3", status: "in_progress"})}
-    {action: "UPDATE", input: (inp TaskUpdate {taskId: "2", subject: "Render: split + enum output", description: "Split into render_table and render_detail", metadata: {priority: 2}})}
+    {action: "UPDATE", input: (inp TaskUpdate {taskId: "2", subject: "Render: split + enum output", description: "Split into render_table and render_detail", metadata: {priority: "P2"}})}
     {action: "COMPLETE", input: (inp TaskUpdate {taskId: "2", status: "completed"})}
     {action: "DELETE", input: (inp TaskUpdate {taskId: "2", status: "deleted"})}
   ]
@@ -191,13 +195,13 @@ let results = [
   })
 
   (run "create: priority label" {
-    let out = (reason (inp TaskCreate {subject: "With prio", metadata: {priority: 0}}))
+    let out = (reason (inp TaskCreate {subject: "With prio", metadata: {priority: "P0"}}))
     assert ($out | str contains "P0")
     assert ($out | str contains "critical")
   })
 
   (run "create: extra metadata" {
-    let out = (reason (inp TaskCreate {subject: "Task", metadata: {priority: 2, estimate: "30m"}}))
+    let out = (reason (inp TaskCreate {subject: "Task", metadata: {priority: "P2", estimate: "30m"}}))
     assert ($out | str contains "P2")
     assert ($out | str contains "30m")
   })
@@ -300,7 +304,7 @@ let results = [
   })
 
   (run "update: added field shows A prefix" {
-    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: 2}}))
+    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: "P2"}}))
     assert ($out =~ 'A priority:')
     assert ($out | str contains "P2")
   })
@@ -308,13 +312,13 @@ let results = [
   # TaskUpdate: priority
 
   (run "update: priority change shows both" {
-    let out = (reason (inp TaskUpdate {taskId: "4", metadata: {priority: 3}}))
+    let out = (reason (inp TaskUpdate {taskId: "4", metadata: {priority: "P3"}}))
     assert ($out | str contains "P1")
     assert ($out | str contains "P3")
   })
 
   (run "update: priority added" {
-    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: 2}}))
+    let out = (reason (inp TaskUpdate {taskId: "3", metadata: {priority: "P2"}}))
     assert ($out | str contains "P2")
   })
 

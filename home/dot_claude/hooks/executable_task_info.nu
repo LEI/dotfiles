@@ -4,7 +4,7 @@
 # Matches TaskCreate, TaskUpdate
 # Debug: CLAUDE_HOOK_DEBUG=1 enables (off by default)
 
-const PRIORITY_LABELS = {0: "P0:critical", 1: "P1:high", 2: "P2:medium", 3: "P3:low", 4: "P4:backlog"}
+const PRIORITY_LABELS = {P0: "P0:critical", P1: "P1:high", P2: "P2:normal", P3: "P3:low", P4: "P4:someday", "0": "P0:critical", "1": "P1:high", "2": "P2:normal", "3": "P3:low", "4": "P4:someday"}
 # Override with CLAUDE_HOOK_TASK_ICONS=0 to disable
 const STATUS_ICONS = {pending: "◻", in_progress: "◼", completed: "✔"}
 const ACTIONS = {create: "+", resume: "▶ Resume:", complete: "✔ Complete:", revert: "◁ Revert:", update: "△ Update:", delete: "✕ Delete:"}
@@ -13,8 +13,8 @@ const DIFFSTAT_BAR_MAX = 40
 
 def priority_label [p] {
   if $p == null { return "" }
-  let n = ($p | into int)
-  $PRIORITY_LABELS | get -o ($n | into string) | default $"P($n)"
+  let key = ($p | into string)
+  $PRIORITY_LABELS | get -o $key | default $key
 }
 
 def icons_enabled [] {
@@ -183,6 +183,27 @@ def debug [msg: string] {
   if ($env.CLAUDE_HOOK_DEBUG? | default "0") == "1" { print -e $msg }
 }
 
+def log_event [input: record] {
+  if ($env.CLAUDE_HOOK_TASK_LOG? | default "0") != "1" { return }
+  let log_dir = $"($env.XDG_STATE_HOME? | default ($env.HOME | path join ".local" "state"))/claude"
+  mkdir $log_dir
+  let tool = ($input.tool_name? | default "")
+  let ti = ($input.tool_input? | default {})
+  let entry = {
+    ts: (date now | date to-timezone UTC | format date "%Y-%m-%dT%H:%M:%SZ")
+    event: $tool
+    session: ($input.session_id? | default "")
+    source: "task_info"
+    task_id: (if $tool == "TaskCreate" { null } else { $ti.taskId? | default null })
+    subject: ($ti.subject? | default null)
+    status: ($ti.status? | default null)
+    metadata: ($ti.metadata? | default null)
+  }
+  let null_cols = ($entry | transpose key val | where val == null | get key)
+  let clean = if ($null_cols | is-empty) { $entry } else { $entry | reject ...$null_cols }
+  $clean | to json --raw | save --append $"($log_dir)/hooks.jsonl"
+}
+
 # Main
 
 def main [] {
@@ -326,5 +347,6 @@ def process [input: record] {
 
   let summary = (list_summary $list_dir $dt $dd $dp $do_ $list_label)
   $reason = $"($reason)\n\n($summary)"
+  log_event $input
   emit $reason
 }

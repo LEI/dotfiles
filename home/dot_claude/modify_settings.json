@@ -27,7 +27,9 @@
     "XDG_CACHE_HOME": "{{ .chezmoi.homeDir }}/.cache",
     "XDG_CONFIG_HOME": "{{ .chezmoi.homeDir }}/.config",
     "XDG_DATA_HOME": "{{ .chezmoi.homeDir }}/.local/share",
-    "XDG_STATE_HOME": "{{ .chezmoi.homeDir }}/.local/state"
+    "XDG_STATE_HOME": "{{ .chezmoi.homeDir }}/.local/state",
+    "CLAUDE_HOOK_TASK_LOG": "1",
+    "ECC_HOOK_PROFILE": "minimal"
   },
   "permissions": {
     "allow": [
@@ -359,11 +361,12 @@
       }
     ]
   },
-  {{- $ccstatusline := lookPath "ccstatusline" }}
-  {{- if $ccstatusline }}
+  {{- $node := lookPath "node" }}
+  {{- $dashboardIndex := glob (print .chezmoi.homeDir "/.claude/plugins/cache/claude-dashboard/claude-dashboard/*/dist/index.js") | sortAlpha | last }}
+  {{- if and $node $dashboardIndex }}
   "statusLine": {
     "type": "command",
-    "command": "{{ $ccstatusline }}",
+    "command": "{{ $node }} {{ $dashboardIndex }}",
     "padding": 0
   },
   {{- end }}
@@ -397,9 +400,9 @@
   "skills": {
     "audit": true,
     "claude-automation-recommender": true,
-    "claude-dashboard:check-usage": false,
-    "claude-dashboard:setup": false,
-    "claude-dashboard:update": false,
+    "claude-dashboard:check-usage": true,
+    "claude-dashboard:setup": true,
+    "claude-dashboard:update": true,
     "claude-md-improver": true,
     "claude-md-management:revise-claude-md": true,
     "cleanup": true,

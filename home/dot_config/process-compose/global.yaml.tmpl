@@ -1,0 +1,27 @@
+version: "0.5"
+
+log_level: info
+
+processes:
+  claude-task-viewer:
+    command: npx claude-task-viewer
+    environment:
+      - PORT=3456
+    availability:
+      restart: on_failure
+      max_restarts: 5
+
+  claude-logs:
+    command: tail -f ~/.local/state/claude/*.jsonl | hl --follow
+    availability:
+      restart: on_failure
+      max_restarts: 3
+
+{{- if eq .chezmoi.os "darwin" }}
+
+  homebrew-logs:
+    command: tail -fn1 /opt/homebrew/var/log/*.log | tspin
+    availability:
+      restart: on_failure
+      max_restarts: 3
+{{- end }}

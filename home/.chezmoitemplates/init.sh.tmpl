@@ -5,8 +5,15 @@
 
 # [ -z "$PS1" ] && return
 
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
+export XDG_DATA_HOME="$XDG_DATA_HOME"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
 # Source local environment variables
-[ -f ~/.secrets ] && source ~/.secrets
+if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
+  source "$XDG_CONFIG_HOME/sh/local.sh"
+fi
 
 # TODO: path.sh?
 # https://github.com/neovide/neovide/discussions/3175
@@ -16,9 +23,9 @@ if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # BASH_CONFIG="neovide"
   PATH="$PATH:$HOME/.local/bin"
   if [ -z "${MISE_SHELL:-}" ]; then
-    PATH="$PATH:$HOME/.local/share/mise/shims"
+    PATH="$PATH:$XDG_DATA_HOME/mise/shims"
   fi
-  source "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
+  source "$XDG_CONFIG_HOME/sh/environment.sh"
   return
 fi
 
@@ -91,8 +98,8 @@ bench() {
 source_files() {
   local dir="$1"
   local ext="${2:-sh}"
-  if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/$dir" ]; then
-    for file in "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/"*".$ext"; do
+  if [ -d "$XDG_CONFIG_HOME/$dir" ]; then
+    for file in "$XDG_CONFIG_HOME/$dir/"*".$ext"; do
       bench source "$file"
     done
   fi
@@ -108,8 +115,8 @@ source_file_if_exists() {
 source_plugins() {
   local dir="$1"
   local ext="${2:-sh}"
-  if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/plugins" ]; then
-    for file in "${XDG_CONFIG_HOME:-$HOME/.config}/$dir/plugins/"*".$ext"; do
+  if [ -d "$XDG_CONFIG_HOME/$dir/plugins" ]; then
+    for file in "$XDG_CONFIG_HOME/$dir/plugins/"*".$ext"; do
       name="${file##*/}"
       name="${name%".$ext"}"
       # Only source if a command exists with the same name
@@ -123,15 +130,21 @@ source_plugins() {
 # Load environment variables before other scripts
 # e.g. INPUTRC before ble.sh
 # TODO: .profile
-source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/environment.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/sh/environment.sh"
 
 source_files "sh/functions"
-for file in "${XDG_CONFIG_HOME:-$HOME/.config}/"*/functions.sh; do
-  bench source "$file"
-done
-if [ -f ~/.claude/functions.sh ] && ! [ -f ~/.config/claude/functions.sh ]; then
-  bench source ~/.claude/functions.sh
-fi
+
+{{- if .features.ai }}
+source_file_if_exists "$XDG_CONFIG_HOME/opencode/functions.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/pi/functions.sh"
+source_file_if_exists "$HOME/.claude/functions.sh"
+{{- end }}
+{{- if get .features "oage" }}
+source_file_if_exists "$XDG_CONFIG_HOME/oage/functions.sh"
+{{- end }}
+{{- if get .features "otel" }}
+source_file_if_exists "$XDG_CONFIG_HOME/otel/functions.sh"
+{{- end }}
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin" # before replace
@@ -176,15 +189,15 @@ fi
 {{- end }}
 {{- end }}
 
-if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
-  bench source "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" --rcfile "${XDG_CONFIG_HOME:-$HOME/.config}/blesh/config.sh" # --noattach
+if [ "$BLE_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
+  bench source "$XDG_DATA_HOME/blesh/ble.sh" --rcfile "$XDG_CONFIG_HOME/blesh/config.sh" # --noattach
 fi
-if [ "$PREEXEC_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/bash-preexec.sh" ]; then
-  bench source "${XDG_DATA_HOME:-$HOME/.local/share}/bash-preexec.sh"
+if [ "$PREEXEC_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
+  bench source "$XDG_DATA_HOME/bash-preexec.sh"
 fi
 
-if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin" ]; then
-  pathmunge "${XDG_CONFIG_HOME:-$HOME/.config}/carapace/bin"
+if [ -d "$XDG_CONFIG_HOME/carapace/bin" ]; then
+  pathmunge "$XDG_CONFIG_HOME/carapace/bin"
 fi
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
@@ -237,8 +250,8 @@ if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
   pathmunge "$PNPM_HOME" # before replace
 fi
 
-if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then
-  pathmunge "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" after
+if [ -d "$XDG_DATA_HOME/nvim/mason/bin" ]; then
+  pathmunge "$XDG_DATA_HOME/nvim/mason/bin" after
 fi
 
 # Source plugins after updating PATH and activating mise
@@ -294,15 +307,15 @@ fi
 # fi
 {{- end }}
 
-source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/sh/aliases.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/sh/aliases.sh"
 
-source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/completion.sh"
-source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/environment.sh"
-source_file_if_exists "${XDG_CONFIG_HOME:-$HOME/.config}/$shell/options.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/$shell/completion.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/$shell/environment.sh"
+source_file_if_exists "$XDG_CONFIG_HOME/$shell/options.sh"
 
 source_file_if_exists "$HOME/.${shell}rc.local"
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
-if [ "$BLE_ENABLED" = true ] && [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/blesh/ble.sh" ]; then
+if [ "$BLE_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
   [[ ! ${BLE_VERSION-} ]] || ble-attach
 fi

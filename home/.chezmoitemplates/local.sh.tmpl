@@ -1,0 +1,8 @@
+# export CHEZMOI_GITHUB_ACCESS_TOKEN=""
+{{- if not (or .ephemeral .headless) }}
+# export GITHUB_ACCESS_TOKEN=""
+{{- end }}
+
+# declare -A SSHCD_DIR=([host]='/var/www/app')
+# declare -A SSHCD_LOGS=([host]='tail -f /var/log/*.log')
+# declare -A SSHCD_LOGS_FMT=([host]='tspin')

@@ -19,9 +19,6 @@ packages:
     nameOverwrite:
       windows: Anthropic.ClaudeCode
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  ccstatusline:
-    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
-    type: npm
   cc-sessions:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
     name: github:chronologos/cc-sessions
