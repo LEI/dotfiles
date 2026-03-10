@@ -1,30 +1,3 @@
-# `sheldon` configuration file
-# ----------------------------
-#
-# You can modify this file directly or you can use one of the following
-# `sheldon` commands which are provided to assist in editing the config file:
-#
-# - `sheldon add` to add a new plugin to the config file
-# - `sheldon edit` to open up the config file in the default editor
-# - `sheldon remove` to remove a plugin from the config file
-#
-# See the documentation for more https://github.com/rossmacarthur/sheldon#readme
-
-{{ $shell := env "SHELL" | default "bash" | base -}}
-
-shell = {{ $shell | quote }}
-
-[templates]
-# Add the directory after PATH
-PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
-
-[plugins]
-
-# TODO: load command aliases/environment/functions in bash and zsh
-# https://github.com/rossmacarthur/sheldon#local
-# [plugins.sh]
-# local = "~/.config/sh"
-
 {{- if .features.mise }}
 
 [plugins.mise]
@@ -36,9 +9,6 @@ BENCHFMT="mise" bench eval "$(mise activate "$shell")"
 
 [plugins.path]
 inline = """
-# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   source "${CARGO_HOME:-$HOME/.cargo}/env"
-# fi
 if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
   pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
@@ -58,14 +28,11 @@ fi
 if [ -d "$HOME/.node_modules/bin" ]; then
   pathmunge "$HOME/.node_modules/bin" after
 fi
-# if [ ! -d "$npm_config_prefix" ]; then
-#   mkdir -p "$npm_config_prefix"
-# fi
 if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
-  pathmunge "$npm_config_prefix/bin" # before replace
+  pathmunge "$npm_config_prefix/bin"
 fi
 if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
-  pathmunge "$PNPM_HOME" # before replace
+  pathmunge "$PNPM_HOME"
 fi
 
 if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin" ]; then
@@ -75,7 +42,6 @@ fi
 # Source plugins after updating PATH and activating mise
 source_plugins sh
 """
-
 {{- if .features.carapace }}
 
 # https://carapace-sh.github.io/carapace-bin/setup.html#bash
@@ -94,7 +60,6 @@ else
 fi
 """
 {{- end }}
-
 {{- if .features.direnv }}
 
 [plugins.direnv]
@@ -104,11 +69,9 @@ BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
 {{- end }}
 
 [plugins.starship]
-# github = "starship/starship"
 inline = """
 BENCHFMT="starship" bench eval "$(starship init "$shell")"
 """
-
 {{- if .features.zoxide }}
 
 [plugins.zoxide]
@@ -116,7 +79,6 @@ inline = """
 BENCHFMT="zoxide" bench eval "$(zoxide init "$shell")"
 """
 {{- end }}
-
 {{- if .features.atuin }}
 
 [plugins.atuin]
@@ -126,17 +88,4 @@ if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = t
   BENCHFMT="atuin" bench eval "$(atuin init --disable-up-arrow "$shell")"
 fi
 """
-{{- end }}
-
-# [plugins.base16]
-# github = "chriskempson/base16-shell"
-
-{{- if eq $shell "zsh" }}
-
-[plugins.zsh-autosuggestions]
-github = "zsh-users/zsh-autosuggestions"
-use = ["{{ `{{ name }}` }}.zsh"]
-
-[plugins.zsh-syntax-highlighting]
-github = "zsh-users/zsh-syntax-highlighting"
 {{- end }}

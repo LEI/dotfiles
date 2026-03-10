@@ -70,7 +70,7 @@ alias reload='exec ${SHELL} -i'
 # [ -f /proc/version ] && grep -iq microsoft /proc/version
 if command -v wslview >/dev/null; then
   alias open=wslview
-if [ -f /mnt/c/Windows/explorer.exe ]; then
+elif [ -f /mnt/c/Windows/explorer.exe ]; then
   # TODO: add /mnt/c/Windows to PATH
   alias open=/mnt/c/Windows/explorer.exe
 else

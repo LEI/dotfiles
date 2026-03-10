@@ -10,10 +10,6 @@ if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
   OSID=android
 fi
 
-cmd() {
-  msg "$@"
-  "$@"
-}
 run() {
   msg "$@"
   "$@"
@@ -61,11 +57,10 @@ get_github_release() {
 }
 
 install_archive() {
-  format="$1"
+  extract_type="$1"
   url="$2"
   bin="$3" # Path to the extracted executable relative to TMPDIR
-
-  archive="${2##*/}"
+  archive="${url##*/}"
   name="${4:-${bin##*/}}"
   dir="${5:-${TMPDIR:-/tmp}}"
   out="$dir/$archive"
@@ -79,8 +74,11 @@ install_archive() {
   echo >&2 "Downloading: $url"
   curl -LSfs "$url" -o "$out"
   echo >&2 "Extracting: $out"
-  # shellcheck disable=SC2059
-  eval "$(printf "$format" "$out" "$dir")"
+  case "$extract_type" in
+    tar.gz) tar -xzf "$out" -C "$dir" ;;
+    zip) unzip -o "$out" -d "$dir" ;;
+    *) echo >&2 "Unknown archive type: $extract_type"; return 1 ;;
+  esac
   echo >&2 "Executable: $dir/$bin"
   chmod +x "$dir/$bin"
   echo >&2 "Moving to: $bindir/$name"
@@ -88,9 +86,9 @@ install_archive() {
 }
 
 install_tar_gz() {
-  install_archive 'tar -xzf "%s" -C "%s"' "$@"
+  install_archive tar.gz "$@"
 }
 
 install_zip() {
-  install_archive 'unzip -o "%s" -d "%s"' "$@"
+  install_archive zip "$@"
 }

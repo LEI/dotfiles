@@ -1,8 +1,25 @@
 #!/bin/sh
 
+# Local process-compose wrapper; uses a per-project UDS socket to avoid port conflicts
+
 set -eu
 
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/$(basename "$PWD").sock}"
+
 if [ $# -eq 0 ]; then
-  set -- attach
+  set -- up --detached
+else
+  cmd="$1"; shift
+  case "$cmd" in
+    a) cmd=attach ;;
+    d) cmd=down ;;
+    l) cmd=list ;;
+    r) cmd=restart ;;
+    s) cmd=stop ;;
+    u) cmd=up ;;
+  esac
+  set -- "$cmd" "$@"
 fi
+
 exec process-compose --use-uds "$@"

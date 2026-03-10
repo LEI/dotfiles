@@ -12,16 +12,16 @@ fi
 if ! command -v yay >/dev/null && ! command -v paru >/dev/null && ! command -v pamac >/dev/null; then
   TMPDIR="${TMPDIR:-/tmp}"
   if [ ! -d $TMPDIR/yay-bin ]; then
-    cmd sudo -E --user="$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
+    run sudo -E --user="$USER" git clone https://aur.archlinux.org/yay-bin.git $TMPDIR/yay-bin
   fi
-  cmd cd $TMPDIR/yay-bin
+  run cd $TMPDIR/yay-bin
   if [ -n "${CI:-}" ] && grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
-    cmd sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
+    run sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
   fi
   if [ -n "${CI:-}" ] && [ "$(uname -m)" = "aarch64" ]; then
-    cmd sudo sed -e 's/^#\?LocalFileSigLevel = .*/LocalFileSigLevel = Optional/' -i /etc/pacman.conf
+    run sudo sed -e 's/^#\?LocalFileSigLevel = .*/LocalFileSigLevel = Optional/' -i /etc/pacman.conf
   fi
-  cmd sudo -E --user="$USER" makepkg --install --noconfirm --syncdeps
+  run sudo -E --user="$USER" makepkg --install --noconfirm --syncdeps
 fi
 
 {{- if eq (env "CACHE_BUST") "true" }}
@@ -48,12 +48,12 @@ aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
 {{- end }}
 
 if command -v yay >/dev/null; then
-  # cmd sudo chown -R "$USER:$USER" /tmp/yay
-  cmd sudo -E --user="$USER" yay --sync --needed --noconfirm --quiet $aur_packages
+  # run sudo chown -R "$USER:$USER" /tmp/yay
+  run sudo -E --user="$USER" yay --sync --needed --noconfirm --quiet $aur_packages
 elif command -v paru >/dev/null && ! command -v pamac >/dev/null; then
-  cmd sudo -E --user="$USER" paru --sync --needed --noconfirm --quiet $aur_packages
+  run sudo -E --user="$USER" paru --sync --needed --noconfirm --quiet $aur_packages
 elif command -v pamac >/dev/null; then
-  cmd sudo -E --user="$USER" pamac install --no-confirm --quiet $aur_packages
+  run sudo -E --user="$USER" pamac install --no-confirm --quiet $aur_packages
 else
   echo >&2 "AUR package manager not found"
   exit 1

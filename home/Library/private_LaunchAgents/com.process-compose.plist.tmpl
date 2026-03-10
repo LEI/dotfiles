@@ -4,20 +4,10 @@
 <dict>
   <key>Label</key>
   <string>com.process-compose</string>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PC_CONFIG_FILES</key>
-    <string>{{ .chezmoi.homeDir }}/.config/process-compose/global.yaml</string>
-    <key>PC_LOG_FILE</key>
-    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/process-compose.log</string>
-    <key>PC_SOCKET_PATH</key>
-    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/pc.sock</string>
-  </dict>
   <key>ProgramArguments</key>
   <array>
-    <string>/opt/homebrew/bin/process-compose</string>
+    <string>{{ .chezmoi.homeDir }}/.local/bin/pcg</string>
     <string>up</string>
-    <string>--use-uds</string>
     <string>--tui=false</string>
   </array>
   <key>RunAtLoad</key>

@@ -8,7 +8,11 @@ marketplace_file=~/.claude/plugins/known_marketplaces.json
 
 if ! jq -e '.["{{ $name }}"]' "$marketplace_file" >/dev/null 2>&1; then
   echo >&2 "Registering marketplace: {{ $name }}"
+  {{- if hasKey $info "repo" }}
   claude plugin marketplace add "{{ $info.repo }}"
+  {{- else }}
+  claude plugin marketplace add "{{ $.chezmoi.homeDir }}/{{ $info.path }}"
+  {{- end }}
 else
   echo >&2 "Marketplace already registered: {{ $name }}"
 fi
@@ -24,18 +28,3 @@ else
 fi
 {{- end }}
 {{- end }}
-
-# Local marketplace and plugin
-if ! jq -e '.["local"]' "$marketplace_file" >/dev/null 2>&1; then
-  echo >&2 "Registering marketplace: local"
-  claude plugin marketplace add "{{ .chezmoi.homeDir }}/.claude/plugins/local"
-else
-  echo >&2 "Marketplace already registered: local"
-fi
-
-if jq -e '.plugins["local@local"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
-  echo >&2 "Plugin already installed: local@local"
-else
-  echo >&2 "Installing plugin: local@local"
-  claude plugin install --scope=user "local@local"
-fi

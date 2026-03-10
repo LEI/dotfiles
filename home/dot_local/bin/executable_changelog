@@ -6,7 +6,7 @@
 set -eu
 
 cmd="${1:-}"
-shift || true
+[ $# -gt 0 ] && shift
 newline=$'\n'
 reflog="$(git reflog | grep -A1 pull | head -2 | cut -d' ' -f1)"
 case "$cmd" in

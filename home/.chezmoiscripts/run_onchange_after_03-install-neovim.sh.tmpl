@@ -4,22 +4,22 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-cmd nvim --version | head -n1
+run nvim --version | head -n1
 
 # TODO: replace system package with latest pynvim (0.4.2 to 0.5.2)
-# cmd python3 -m pip install --user --quiet pynvim
+# run python3 -m pip install --user --quiet pynvim
 
 # Debian 12: nvim 0.7.2
 # Debian 11 and Ubuntu 22: nvim 0.4.3
 if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
-  # cmd timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
-  cmd timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
+  # run timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
+  run timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
   echo
 fi
 
 {{- if and (not .features.helix) (lookPath "xdg-mime" | isExecutable) }}
 
 if [ "$(xdg-mime query default text/plain)" != "nvim.desktop" ]; then
-  cmd xdg-mime default nvim.desktop text/plain
+  run xdg-mime default nvim.desktop text/plain
 fi
 {{- end }}

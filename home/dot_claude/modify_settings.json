@@ -239,37 +239,6 @@
   },
   "enableAllProjectMcpServers": false,
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/bash_safety.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "TaskCreate|TaskUpdate",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/task_info.nu"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/lint.sh"
-          }
-        ]
-      }
-    ],
     "PreCompact": [
       {
         "matcher": "",
@@ -288,54 +257,6 @@
           {
             "type": "command",
             "command": "echo 'Before finishing: report what was completed, what remains in progress, and suggest which task to pick up next. Flag any discoveries not yet written to memory.'"
-          }
-        ]
-      }
-    ],
-    "SubagentStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/observer.sh",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/observer.sh",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/observer.sh",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/observer.sh",
-            "async": true
           }
         ]
       }
@@ -377,7 +298,9 @@
   "enabledPlugins": {{ merge $managedPlugins (get (.chezmoi.stdin | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
   {{- $extraMkts := dict -}}
   {{- range $name, $info := .claudeMarketplaces -}}
-  {{-   $_ := set $extraMkts $name (dict "source" (dict "source" "github" "repo" $info.repo)) -}}
+  {{-   if hasKey $info "repo" -}}
+  {{-     $_ := set $extraMkts $name (dict "source" (dict "source" "github" "repo" $info.repo)) -}}
+  {{-   end -}}
   {{- end }}
   "extraKnownMarketplaces": {{ merge $extraMkts (get (.chezmoi.stdin | fromJson) "extraKnownMarketplaces" | default dict) | toPrettyJson | indent 2 | trim }},
   "sandbox": {
@@ -501,7 +424,7 @@
     "hookify:writing-rules": true,
     "journal": true,
     "keybindings-help": true,
-    "local:sq": true,
+    "home:sq": true,
 {{- range .claudeDisabledSkills }}
     {{ . | quote }}: false,
 {{- end }}

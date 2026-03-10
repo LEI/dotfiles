@@ -2,30 +2,23 @@
 
 # Resume last session by default
 claude() {
-  # export CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}"
   if [ $# -eq 0 ]; then
     set -- --continue
   fi
-
   # https://code.claude.com/docs/en/memory#load-memory-from-additional-directories
   # export CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1
   # set -- "$@" --additional-directories="$XDG_DATA_HOME/memory"
-
   env claude "$@"
 }
 
 # Launch claude in a named tmux session
 claude_tmux() {
-  project="$(basename "$PWD")"
-  # if [ $# -eq 0 ]; then
-  #   set -- --resume "$project"
-  # fi
-  TMUX_SESSION_NAME="${TMUX_SESSION_NAME:-$project}"
+  TMUX_SESSION_NAME="${TMUX_SESSION_NAME:-$(basename "$PWD")}"
   tmux new-session -As "$TMUX_SESSION_NAME" claude "$@"
 }
 
-# export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 # TEAMMATE_MODE: tmux (default), in-process, auto
+# Requires CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 in environment
 claude_teams() {
   TEAMMATE_MODE="${TEAMMATE_MODE:-tmux}"
   claude_tmux --teammate-mode="$TEAMMATE_MODE" "$@"
@@ -40,23 +33,21 @@ cld() {
   fi
 }
 
-# Web kanban viewer for Claude Code tasks (localhost:3456)
-claude_tasks() {
-  npx claude-task-viewer "$@"
-}
-
 # Launch claude with task list ID set to current directory name
 claude_task() {
   CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}" claude "$@"
 }
 
 claude_sessions() {
+  if ! command -v cc-sessions > /dev/null; then
+    echo >&2 "cc-sessions not installed"
+    return 1
+  fi
   if [ $# -eq 0 ]; then
     if [ -t 0 ]; then
-      set -- --count=100 --include-forks --list --min-turns=0 "$@"
+      set -- --count=100 --include-forks --list --min-turns=0
     fi
-    project="$(basename "$PWD")"
-    set -- "$@" --project="$project"
+    set -- "$@" --project="$(basename "$PWD")"
   fi
   env cc-sessions "$@"
 }

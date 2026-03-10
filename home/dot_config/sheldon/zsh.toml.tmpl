@@ -1,0 +1,21 @@
+# `sheldon` configuration file (zsh)
+# See https://github.com/rossmacarthur/sheldon#readme
+
+shell = "zsh"
+
+[templates]
+# Add the directory after PATH
+PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
+
+[plugins]
+{{- includeTemplate "dot_config/sheldon/.plugins.toml.tmpl" . }}
+
+# [plugins.base16]
+# github = "chriskempson/base16-shell"
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+use = ["{{ `{{ name }}` }}.zsh"]
+
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"

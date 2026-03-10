@@ -3,6 +3,6 @@
 # export GITHUB_ACCESS_TOKEN=""
 {{- end }}
 
-# declare -A SSHCD_DIR=(["host"]='/var/www/app')
-# declare -A SSHCD_LOGS=(["host"]='tail -f /var/log/*.log')
-# declare -A SSHCD_LOGS_FMT=(["host"]='tspin')
+# typeset -A SSHCD_DIR=( [host]=/var/www/app )
+# typeset -A SSHCD_LOGS=( [host]='tail -f /var/log/*.log' )
+# typeset -A SSHCD_LOGS_FMT=( [host]='tspin' )

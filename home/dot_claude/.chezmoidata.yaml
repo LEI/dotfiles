@@ -1,6 +1,12 @@
 ---
 # Non-standard marketplaces (claude-plugins-official is built-in)
+# repo: git-hosted (passed as-is to `claude plugin marketplace add`)
+# path: local path relative to homeDir
 claudeMarketplaces:
+  home:
+    path: ".claude/plugins/home"
+  local:
+    path: "src/github.com/LEI/claude"
   claude-dashboard:
     repo: uppinote20/claude-dashboard
   everything-claude-code:
@@ -9,7 +15,6 @@ claudeMarketplaces:
 # Managed plugins: all handled identically by run_onchange_after_plugins.sh
 # claude-plugins-official: no version pin (latest is fine)
 # other: optional version pin
-# local: marketplace structure in plugins/local/
 # Env-local plugins via $CLAUDE_CODE_PLUGINS (comma-separated, not managed here)
 #
 # Installed but not globally enabled (per-project use):
@@ -24,6 +29,10 @@ claudeMarketplaces:
 # greptile@claude-plugins-official: needs API key
 # semgrep@claude-plugins-official: needs semgrep installed
 claudePlugins:
+  - name: home
+    marketplace: home
+  - name: local
+    marketplace: local
   - name: claude-code-setup
     marketplace: claude-plugins-official
   - name: claude-dashboard
@@ -45,9 +54,6 @@ claudePlugins:
     marketplace: claude-plugins-official
   - name: hookify
     marketplace: claude-plugins-official
-  - name: local
-    marketplace: local
-    version: "0.1.0"
   - name: security-guidance
     marketplace: claude-plugins-official
 

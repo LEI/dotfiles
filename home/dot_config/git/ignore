@@ -83,10 +83,8 @@ Thumbs.db
 **/.claude/settings.local.json
 **/.claude/*.local.*
 **/.claude/*.lock
-CLAUDE.local.md
+# CLAUDE.local.md
+*.local.md
 
-# Dev tools
-.mise.local.*
-
-# bv (beads viewer) local config and caches
-.bv/
+# .config/mise/config.local.toml
+mise.local.toml
