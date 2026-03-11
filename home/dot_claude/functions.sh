@@ -7,7 +7,7 @@ claude() {
   fi
   # https://code.claude.com/docs/en/memory#load-memory-from-additional-directories
   # export CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1
-  # set -- "$@" --additional-directories="$XDG_DATA_HOME/memory"
+  # set -- "$@" --add-dir "$XDG_DATA_HOME/memory"
   env claude "$@"
 }
 
@@ -22,15 +22,6 @@ claude_tmux() {
 claude_teams() {
   TEAMMATE_MODE="${TEAMMATE_MODE:-tmux}"
   claude_tmux --teammate-mode="$TEAMMATE_MODE" "$@"
-}
-
-cld() {
-  CLD_SCRIPT="${CLD_SCRIPT:-$HOME/src/github.com/LEI/cld/cld.nu}"
-  if [ -t 1 ]; then
-    nu "$CLD_SCRIPT" "$@"
-  else
-    NO_INTERACTIVE=1 nu "$CLD_SCRIPT" "$@"
-  fi
 }
 
 # Launch claude with task list ID set to current directory name

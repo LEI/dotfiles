@@ -1,0 +1,48 @@
+{{- /* Outputs {"plugins": [...], "marketplaces": {...}} merging chezmoidata + env vars.
+       CLAUDE_CODE_PLUGINS: comma-separated "name@marketplace"
+       CLAUDE_CODE_MARKETPLACES: comma-separated "name:path_or_repo"
+         path if value starts with /, repo otherwise
+       Marketplace paths are normalized to absolute. */ -}}
+{{- $mkts := dict -}}
+{{- range $name, $info := .claudeMarketplaces -}}
+{{-   if hasKey $info "repo" -}}
+{{-     $mkts = set $mkts $name (dict "repo" $info.repo) -}}
+{{-   else -}}
+{{-     $mkts = set $mkts $name (dict "path" (printf "%s/%s" $.chezmoi.homeDir $info.path)) -}}
+{{-   end -}}
+{{- end -}}
+{{- $envMkts := env "CLAUDE_CODE_MARKETPLACES" | trim -}}
+{{- if $envMkts -}}
+{{-   range splitList "," $envMkts -}}
+{{-     $s := trim . -}}
+{{-     if $s -}}
+{{-       $parts := splitn ":" 2 $s -}}
+{{-       if and (index $parts "_0") (index $parts "_1") -}}
+{{-         $name := index $parts "_0" -}}
+{{-         $value := index $parts "_1" -}}
+{{-         if hasPrefix "/" $value -}}
+{{-           $mkts = set $mkts $name (dict "path" $value) -}}
+{{-         else -}}
+{{-           $mkts = set $mkts $name (dict "repo" $value) -}}
+{{-         end -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $plugins := list -}}
+{{- range .claudePlugins -}}
+{{-   $plugins = append $plugins (dict "name" .name "marketplace" .marketplace) -}}
+{{- end -}}
+{{- $envPlugins := env "CLAUDE_CODE_PLUGINS" | trim -}}
+{{- if $envPlugins -}}
+{{-   range splitList "," $envPlugins -}}
+{{-     $s := trim . -}}
+{{-     if $s -}}
+{{-       $parts := splitn "@" 2 $s -}}
+{{-       if and (index $parts "_0") (index $parts "_1") -}}
+{{-         $plugins = append $plugins (dict "name" (index $parts "_0") "marketplace" (index $parts "_1")) -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- dict "plugins" $plugins "marketplaces" $mkts | toJson -}}

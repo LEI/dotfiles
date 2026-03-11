@@ -6,6 +6,7 @@
   "context7"
   "deep-wiki"
   "grep_app"
+  "open-notebook"
 -}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}
@@ -13,27 +14,35 @@
 
 set -euo pipefail
 
-{{- range $key, $value := $servers }}
-
-expected={{ $value | toJson | quote }}
-current=$(jq -Sc '.mcpServers[{{ $key | quote }}] // empty' ~/.claude.json 2>/dev/null)
-if [ "$current" != "$(echo "$expected" | jq -Sc .)" ]; then
-  echo >&2 "Updating MCP server: {{ $key }}"
-  if claude mcp get {{ $key | quote }} >/dev/null 2>&1; then
-    claude mcp remove {{ $key | quote }}
-  fi
-  claude mcp add-json --scope=user {{ $key | quote }} "$expected"
-else
-  echo >&2 "MCP server up to date: {{ $key }}"
+if ! command -v jq >/dev/null 2>&1; then
+  echo >&2 "jq required but not found"
+  exit 1
 fi
+
+mcp_sync() {
+  local name=$1 expected=$2
+  local current normalized
+  current=$(jq -Sc --arg n "$name" '.mcpServers[$n] // empty' ~/.claude.json 2>/dev/null || true)
+  normalized=$(printf '%s' "$expected" | jq -Sc .)
+  if [ "$current" = "$normalized" ]; then
+    echo >&2 "MCP server up to date: $name"
+    return
+  fi
+  echo >&2 "Updating MCP server: $name"
+  if claude mcp get "$name" >/dev/null 2>&1; then
+    claude mcp remove "$name"
+  fi
+  claude mcp add-json --scope=user "$name" "$expected"
+}
+
+{{- range (keys $servers | sortAlpha) }}
+mcp_sync {{ . | squote }} {{ index $servers . | toJson | squote }}
 {{- end }}
 
 for name in code-mode memory utcp; do
   if claude mcp get "$name" >/dev/null 2>&1; then
     echo >&2 "Removing MCP server: $name"
     claude mcp remove "$name"
-  else
-    echo >&2 "MCP server not found, skipping removal: $name"
   fi
 done
 

@@ -23,6 +23,7 @@ features:
   ai:
     - .claude/
     - .config/claude/
+    - .config/markdownlint/claude.yaml
     - .config/goose/
     - .config/mcphub/
     - .config/mcporter/
@@ -40,6 +41,8 @@ features:
     - .config/blesh/
   bat:
     - .config/bat/
+  caddy:
+    - .config/caddy/
   zsh:
     - .config/zsh/
     # - .zprofile

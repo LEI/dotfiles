@@ -175,6 +175,17 @@
       },
     },
 
+    {{- if env "OPEN_NOTEBOOK_URL" }}
+    // https://github.com/lfnovo/open-notebook
+    "open-notebook": {
+      "command": "uvx",
+      "args": ["open-notebook-mcp"],
+      "env": {
+        "OPEN_NOTEBOOK_URL": "${OPEN_NOTEBOOK_URL}",
+      },
+    },
+    {{- end }}
+
     {{- if .features.mise }}
     "mise": {
       // "enabled": false,

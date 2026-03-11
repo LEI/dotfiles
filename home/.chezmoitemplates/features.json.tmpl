@@ -15,6 +15,7 @@
     (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")
+  "caddy" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "bottom" .gui
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true

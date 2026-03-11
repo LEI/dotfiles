@@ -1,0 +1,34 @@
+{
+	default_bind 127.0.0.1
+	# Use Caddy's internal CA for all sites; run `caddy trust` once to install it
+	local_certs
+}
+
+{{ if index .chezmoi.config.data "features" | and (index .chezmoi.config.data.features "otel") -}}
+grafana.test {
+	reverse_proxy localhost:3033 {
+		transport http {
+			dial_timeout 1800s
+			response_header_timeout 1800s
+		}
+	}
+}
+
+prometheus.test {
+	reverse_proxy localhost:9090
+}
+
+alertmanager.test {
+	reverse_proxy localhost:9093
+}
+
+{{ end -}}
+{{ if index .chezmoi.config.data "features" | and (index .chezmoi.config.data.features "oage") -}}
+open-notebook.test {
+	reverse_proxy localhost:8502
+}
+
+{{ end -}}
+# Machine-local site configs (not version-controlled)
+# Example: ~/.config/caddy/sites/myproject.caddy
+import {{ .chezmoi.homeDir }}/.config/caddy/sites/*.caddy

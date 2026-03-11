@@ -49,62 +49,62 @@ services:
   #       limits:
   #         memory: 1G
 
-  # # https://github.com/lfnovo/open-notebook/tree/main/examples
-  # surrealdb:
-  #   image: surrealdb/surrealdb:v2
-  #   command: start --log info --user root --pass root rocksdb:/mydata/mydatabase.db
-  #   user: root  # Required for bind mounts on Linux
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - surreal-data:/mydata
-  #   environment:
-  #     - SURREAL_EXPERIMENTAL_GRAPHQL=true
-  #   restart: always
-  #   # pull_policy: always
-  #
-  # open_notebook:
-  #   image: lfnovo/open_notebook:v1-latest
-  #   ports:
-  #     - "8502:8502" # Web UI
-  #     - "5055:5055" # REST API
-  #   environment:
-  #     # REQUIRED: Change this to your own secret string
-  #     # This encrypts your API keys in the database
-  #     - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
-  #
-  #     # Database connection (default values - no need to change)
-  #     - SURREAL_URL=ws://surrealdb:8000/rpc
-  #     - SURREAL_USER=root
-  #     - SURREAL_PASSWORD=root
-  #     - SURREAL_NAMESPACE=open_notebook
-  #     - SURREAL_DATABASE=open_notebook
-  #   volumes:
-  #     - notebook-data:/app/data
-  #   depends_on:
-  #     - surrealdb
-  #   restart: always
-  #   # pull_policy: always
-
-  # TODO: replace default index.md and CONFIG.md
-  # http://localhost:5050/global/MEMORY
-  silverbullet:
-    image: ghcr.io/silverbulletmd/silverbullet:latest
-    restart: unless-stopped
+  # https://github.com/lfnovo/open-notebook/tree/main/examples
+  surrealdb:
+    image: surrealdb/surrealdb:v2
+    command: start --log info --user root --pass root rocksdb:/mydata/mydatabase.db
+    user: root  # Required for bind mounts on Linux
     ports:
-      - "5050:3000"
+      - "8000:8000"
     volumes:
-      - ~/.claude/projects:/space/projects
-      - ~/.local/share/memory:/space/global
+      - surreal-data:/mydata
     environment:
-      - SB_HIDE_SYNC_BUTTON=true
-      - SB_INDEX_PAGE=MEMORY
-      - SB_SPACE_IGNORE="index.md,CONFIG.md,index.page,SETTINGS.md"
-      # - SB_USER=admin:password123
+      - SURREAL_EXPERIMENTAL_GRAPHQL=true
+    restart: always
+    # pull_policy: always
 
-# volumes:
-#   sandboxed-data:
-#   claude-auth:
+  open_notebook:
+    image: lfnovo/open_notebook:v1.8.1
+    ports:
+      - "8502:8502" # Web UI
+      - "5055:5055" # REST API
+    environment:
+      # REQUIRED: Change this to your own secret string
+      # This encrypts your API keys in the database
+      - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
 
-#   notebook-data:
-#   surreal-data:
+      # Database connection (default values - no need to change)
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASSWORD=root
+      - SURREAL_NAMESPACE=open_notebook
+      - SURREAL_DATABASE=open_notebook
+    volumes:
+      - notebook-data:/app/data
+    depends_on:
+      - surrealdb
+    restart: always
+    # pull_policy: always
+
+  # # CONFIG.md, index.md
+  # # http://localhost:5050/global/MEMORY
+  # silverbullet:
+  #   image: ghcr.io/silverbulletmd/silverbullet:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5050:3000"
+  #   volumes:
+  #     - ~/.claude/projects:/space/projects
+  #     - ~/.local/share/memory:/space/global
+  #   environment:
+  #     - SB_HIDE_SYNC_BUTTON=true
+  #     - SB_INDEX_PAGE=MEMORY
+  #     - SB_SPACE_IGNORE="index.md,CONFIG.md,index.page,SETTINGS.md"
+  #     # - SB_USER=admin:password123
+
+volumes:
+  # sandboxed-data:
+  # claude-auth:
+
+  notebook-data:
+  surreal-data:

@@ -1,14 +1,12 @@
 {
-  "description": "Hooks: lint on file write",
+  "description": "Format then lint on file write",
   "hooks": {
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint.sh"
-          }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/format.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint.sh" }
         ]
       }
     ]

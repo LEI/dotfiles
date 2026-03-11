@@ -1,17 +1,9 @@
 ---
 # FIXME: manage installed_plugins.json (currently mutated by run_onchange script)
 
-# marketplace: claude-dashboard: pinned reference for chezmoi-based version control
-# plugins/claude-dashboard:
-#   type: git-repo
-#   url: https://github.com/uppinote20/claude-dashboard.git
-#   refreshPeriod: 168h
-#   clone:
-#     args: ["--branch=v1.16.1", "--depth=1"]
-
 # Everything Claude Code (github.com/affaan-m/everything-claude-code)
 # Cherry-picked rules from the full plugin (65+ skills, 50+ commands).
-# Extracted to ~/.claude/rules/ecc/<category>/ (Claude loads recursively).
+# Extracted to rules/ecc/<category>/ loaded recursively.
 # Pin option: replace /main.tar.gz with /refs/tags/vX.Y.Z.tar.gz
 # Security and quality rules are prioritized; language packs are opt-in.
 
