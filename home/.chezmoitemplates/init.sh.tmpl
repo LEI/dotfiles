@@ -1,4 +1,5 @@
-{{ includeTemplate "xdg-base.sh.tmpl" . | trim }}
+# Defensive fallback: environment.d sets these for systemd sessions; cover headless/non-systemd
+{{ includeTemplate "export-env.tmpl" (dict "ctx" . "file" "dot_config/environment.d/10-xdg.conf.tmpl") | trim }}
 
 # Bootstrap: pathmunge must be available before local.sh
 source "$XDG_CONFIG_HOME/sh/functions/pathmunge.sh"

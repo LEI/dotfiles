@@ -1,5 +1,3 @@
-export DO_NOT_TRACK=1
-
 # https://github.com/grawity/dotfiles/blob/main/.environ.notes
 {{- if .name }}
 export NAME={{ .name | quote }}
@@ -44,19 +42,6 @@ export VISUAL="${VISUAL:-$EDITOR}"
 export TERMINAL="${TERMINAL:-ghostty}"
 {{- end }}
 
-{{- if .features.otel }}
 
-export OTEL_METRICS_EXPORTER=otlp
-export OTEL_LOGS_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-export OTEL_LOG_USER_PROMPTS=1
-export OTEL_LOG_TOOL_DETAILS=1
-{{- end }}
-
-{{- if .features.oage }}
-
-export OPEN_NOTEBOOK_URL="http://localhost:5055"
-{{- end }}
 
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}

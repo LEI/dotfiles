@@ -1,0 +1,64 @@
+# XDG base dirs: fallbacks for headless/server; pam_systemd sets these on desktop
+XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+XDG_STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
+
+# Config path redirects: tools that don't follow XDG by default, alphabetical by var name
+{{- if .features.ai }}
+BEADS_DIR=$XDG_DATA_HOME/beads
+{{- end }}
+{{- if .features.rust }}
+CARGO_HOME=$XDG_DATA_HOME/cargo
+{{- end }}
+{{- if lookPath "curl" | isExecutable }}
+CURL_HOME=$XDG_CONFIG_HOME/curl
+{{- end }}
+{{- if lookPath "eza" | isExecutable }}
+EZA_CONFIG_DIR=$XDG_CONFIG_HOME/eza
+{{- end }}
+{{- if .features.ruby }}
+GEM_SPEC_CACHE=$XDG_CACHE_HOME/gem
+{{- end }}
+{{- if .features.go }}
+GOPATH=$XDG_DATA_HOME/go
+{{- end }}
+INPUTRC=$XDG_CONFIG_HOME/readline/inputrc
+{{- if .features.kube }}
+KREW_ROOT=$HOME/.krew
+KUBECONFIG=${KUBECONFIG:-$HOME/.kube/config}
+KUBERC=$XDG_CONFIG_HOME/kube/kuberc.yaml
+{{- end }}
+{{- if .features.git }}
+LG_CONFIG_FILE=$XDG_CONFIG_HOME/lazygit/theme.yml,$XDG_CONFIG_HOME/lazygit/config.yml
+{{- end }}
+{{- if lookPath "less" | isExecutable }}
+LESSHISTFILE=$XDG_STATE_HOME/less/history
+{{- end }}
+{{- if .features.node }}
+NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
+npm_config_prefix=$XDG_DATA_HOME/npm
+PNPM_HOME=$XDG_DATA_HOME/pnpm
+{{- end }}
+{{- if .features.ai }}
+PI_CONFIG_DIR=$XDG_CONFIG_HOME/pi
+PI_CODING_AGENT_DIR=$XDG_CONFIG_HOME/pi/agent
+{{- end }}
+{{- if and .features.sql (lookPath "psql" | isExecutable) }}
+PSQLRC=$XDG_CONFIG_HOME/psql/psqlrc
+{{- end }}
+{{- if lookPath "rg" | isExecutable }}
+RIPGREP_CONFIG_PATH=$XDG_CONFIG_HOME/ripgrep/config
+{{- end }}
+{{- if .features.rust }}
+RUSTUP_HOME=$XDG_DATA_HOME/rustup
+{{- end }}
+{{- if lookPath "starship" | isExecutable }}
+STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship/starship.toml
+{{- end }}
+{{- if .features.kube }}
+TALOSCONFIG=${TALOSCONFIG:-$HOME/.talos/config}
+{{- end }}
+{{- if lookPath "wget" | isExecutable }}
+WGETRC=$XDG_CONFIG_HOME/wget/wgetrc
+{{- end }}

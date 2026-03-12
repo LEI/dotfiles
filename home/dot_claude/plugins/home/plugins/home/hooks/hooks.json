@@ -5,8 +5,14 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/format.sh" },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint.sh" }
+          {
+            "type": "command",
+            "command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/format.sh"
+          },
+          {
+            "type": "command",
+            "command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/lint.sh"
+          }
         ]
       }
     ]

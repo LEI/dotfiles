@@ -4,9 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ includeTemplate "xdg-base.sh.tmpl" . | trim }}
-
-{{ includeTemplate "xdg.sh.tmpl" . | trim }}
+{{ includeTemplate "export-env.tmpl" (dict "ctx" . "file" "dot_config/environment.d/10-xdg.conf.tmpl") | trim }}
 
 {{- if .features.ai }}
 
