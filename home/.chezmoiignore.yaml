@@ -1,4 +1,6 @@
 ---
+# os: patterns ignored on all OSes EXCEPT the key (.chezmoi.os: linux, darwin, windows)
+# features: patterns ignored when the feature key is NOT enabled
 os:
   darwin:
     - .bash_profile
@@ -10,6 +12,7 @@ os:
     - .macos
     - Library/
   linux:
+    - .config/environment.d/
     - .config/systemd/
     - .hushlogin
   windows:
@@ -85,7 +88,6 @@ features:
     - .config/Kvantum/
     - .config/X11/
     # - .config/autostart/
-    - .config/environment.d/
     - .config/gtk-*/
     - .config/i3*/
     - .config/picom/
@@ -143,7 +145,6 @@ features:
   pc:
     - .config/process-compose/
     - .config/systemd/user/process-compose.*
-    - .config/systemd/user/setup-process-compose.sh
     - .local/bin/pc
     - Library/LaunchAgents/com.process-compose.*
   # php: []

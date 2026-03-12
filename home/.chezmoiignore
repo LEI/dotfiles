@@ -21,7 +21,7 @@
 {{-   end }}
 {{- end }}
 {{- range $os, $patterns := $ignore.os }}
-{{-   if ne $.osID $os }}
+{{-   if ne $.chezmoi.os $os }}
 {{-     range $patterns }}
 {{ . }}
 {{-     end }}

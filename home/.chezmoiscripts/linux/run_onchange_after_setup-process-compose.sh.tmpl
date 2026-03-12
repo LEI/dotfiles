@@ -9,6 +9,7 @@ if ! has process-compose; then
 fi
 
 if has systemctl; then
+  run systemctl --user daemon-reload
   if ! systemctl --user is-active --quiet process-compose; then
     run systemctl --user enable --now process-compose
   else
