@@ -6,24 +6,31 @@
   <string>com.process-compose</string>
   <key>ProgramArguments</key>
   <array>
-    <string>process-compose</string>
+    <string>{{ .brewPrefix }}/bin/process-compose</string>
     <string>up</string>
     <string>--use-uds</string>
     <string>--tui=false</string>
+    <string>--ordered-shutdown</string>
+    <string>--logs-truncate</string>
+    <string>--hide-disabled</string>
   </array>
   <key>EnvironmentVariables</key>
   <dict>
+    <key>PATH</key>
+    <string>{{ .chezmoi.homeDir }}/.local/bin:{{ .brewPrefix }}/bin:{{ .brewPrefix }}/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>{{ .chezmoi.homeDir }}</string>
     <key>PC_CONFIG_FILES</key>
     <string>{{ .chezmoi.homeDir }}/.config/process-compose/global.yaml</string>
     <key>PC_LOG_FILE</key>
     <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/process-compose.log</string>
     <key>PC_SOCKET_PATH</key>
-    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/pc.sock</string>
+    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/global.sock</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
   <key>KeepAlive</key>
-  <false/>
+  <true/>
   <key>StandardOutPath</key>
   <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/stdout.log</string>
   <key>StandardErrorPath</key>

@@ -5,9 +5,11 @@
 
 {{- if .features.ai }}
 
-# export CLAUDE_CODE_MARKETPLACES="local:/path/to/plugin,mymkt:owner/repo"
+# export CLAUDE_CODE_MARKETPLACES="local:/path/to/plugin,marketplace:owner/repo"
 # export CLAUDE_CODE_PLUGINS="local@local,myplugin@mymarketplace"
 {{- end }}
+
+# export SSH_PROXIES="tunnel+type://proxy/remoteHost:localPort#name"
 
 # host() { ssh-cd host /var/www/app; }
 # host-logs() { ssh-tail host /var/log 'tail -f *.log' tspin; }

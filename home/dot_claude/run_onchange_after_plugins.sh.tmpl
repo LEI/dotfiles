@@ -1,14 +1,14 @@
 {{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
-{{- $mkts := $data.marketplaces -}}
+{{- $marketplaces := $data.marketplaces -}}
 {{- $plugins := $data.plugins -}}
 #!/bin/bash
-# marketplaces: {{ $mkts | toJson | sha256sum }}
+# marketplaces: {{ $marketplaces | toJson | sha256sum }}
 # plugins: {{ $plugins | toJson | sha256sum }}
 set -euo pipefail
 
 plugin_file=~/.claude/plugins/installed_plugins.json
 marketplace_file=~/.claude/plugins/known_marketplaces.json
-{{- range $name, $info := $mkts }}
+{{- range $name, $info := $marketplaces }}
 
 if ! jq -e '.["{{ $name }}"]' "$marketplace_file" >/dev/null 2>&1; then
   echo >&2 "Registering marketplace: {{ $name }}"
@@ -22,8 +22,8 @@ else
 fi
 {{- end }}
 {{- range $plugins }}
-{{- $mkt := get $mkts .marketplace }}
-{{- if or (eq .marketplace "claude-plugins-official") $mkt }}
+{{- $marketplace := get $marketplaces .marketplace }}
+{{- if or (eq .marketplace "claude-plugins-official") $marketplace }}
 
 if jq -e '.plugins["{{ .name }}@{{ .marketplace }}"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
   echo >&2 "Plugin already installed: {{ .name }}@{{ .marketplace }}"
@@ -31,7 +31,7 @@ else
   echo >&2 "Installing plugin: {{ .name }}@{{ .marketplace }}"
   claude plugin install --scope=user "{{ .name }}@{{ .marketplace }}"
 fi
-{{- if and $mkt (not (hasKey $mkt "repo")) }}
+{{- if and $marketplace (not (hasKey $marketplace "repo")) }}
 
 echo >&2 "Updating plugin: {{ .name }}@{{ .marketplace }}"
 claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"

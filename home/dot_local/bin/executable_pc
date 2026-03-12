@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Process-compose wrapper; per-project UDS socket by default, global with -g/--global
+# Process-compose wrapper for global and project management with UDS
 
 set -eu
 
@@ -14,28 +14,36 @@ if [ "${1:-}" = "-g" ] || [ "${1:-}" = "--global" ]; then
 fi
 
 if [ "$global" = true ]; then
-  export PC_CONFIG_FILES="${PC_CONFIG_FILES:-$XDG_CONFIG_HOME/process-compose/global.yaml}"
-  export PC_LOG_FILE="${PC_LOG_FILE:-$XDG_STATE_HOME/process-compose/process-compose.log}"
-  export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/pc.sock}"
+  export PC_CONFIG_FILES="$XDG_CONFIG_HOME/process-compose/global.yaml"
+  export PC_SOCKET_PATH="$XDG_STATE_HOME/process-compose/global.sock"
 else
-  export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/$(basename "$PWD").sock}"
+  # For project mode, use temp directory like default but with hash instead of PID
+  dir_hash=$(pwd | shasum | head -c 8)
+  export PC_SOCKET_PATH="/tmp/process-compose-$dir_hash.sock"
 fi
 
 if [ $# -gt 0 ]; then
-  cmd="$1"; shift
+  cmd="$1"
+  shift
   case "$cmd" in
-    a) cmd=attach ;;
-    d) cmd=down ;;
-    l) cmd=list ;;
-    r) cmd=restart ;;
-    s) cmd=stop ;;
-    u) cmd=up ;;
+  a) cmd=attach ;;
+  d) cmd=down ;;
+  l) cmd=list ;;
+  r) cmd=restart ;;
+  s) cmd=stop ;;
+  u) cmd=up ;;
   esac
   set -- "$cmd" "$@"
 fi
 
 if [ $# -eq 0 ]; then
-  set -- up --detached
+  # process-compose --use-uds up --detached
+  set -- process list
 fi
 
-exec process-compose --use-uds "$@"
+# Always use UDS, disable TUI for up command
+if [ "${1:-}" = "up" ]; then
+  exec process-compose --use-uds --tui=false "$@"
+else
+  exec process-compose --use-uds "$@"
+fi

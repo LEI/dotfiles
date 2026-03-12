@@ -4,34 +4,118 @@ log_level: info
 
 processes:
   claude-task-viewer:
+    namespace: apps
+    description: "Claude task viewer UI"
     command: npx claude-task-viewer
     environment:
       - PORT=3456
     availability:
       restart: on_failure
       max_restarts: 5
+    readiness_probe:
+      http_get:
+        host: localhost
+        port: 3456
+        scheme: http
+      initial_delay_seconds: 5
+      period_seconds: 10
+      timeout_seconds: 3
+      failure_threshold: 3
 
-  caddy-logs:
-    command: {{ if eq .chezmoi.os "darwin" -}}
-      tail -f {{ .brewPrefix }}/var/log/caddy/*.log | hl
-    {{- else -}}
-      journalctl -u caddy -f --output=cat | hl
-    {{- end }}
+{{- /* tool map: basename → tool. Default is tspin */ -}}
+{{- $toolFor := dict
+    "caddy.log" "hl"
+    "mailpit.log" "hl"
+-}}
+
+{{- /* desc map: basename → short description */ -}}
+{{- $descFor := dict
+    "caddy.log"        "Caddy reverse proxy"
+    "mailpit.log"      "Mailpit SMTP catcher"
+    "supervisord.log"  "Supervisor daemon"
+    "php-fpm.log"      "PHP-FPM"
+    "mlx-lm.log"       "MLX LM inference server"
+    "access.log"       "Nginx access"
+    "error.log"        "Nginx error"
+-}}
+
+{{- /* extra logs outside brewPrefix: list of dicts with path, tool, name, desc */ -}}
+{{- $extraLogs := list
+    (dict "path" (printf "%s/var/mysql/*.err" .brewPrefix) "tool" "tspin" "desc" "MariaDB error log")
+-}}
+
+{{- range (glob (printf "%s/var/log/**/*.log" .brewPrefix)) }}
+{{- $base := base . }}
+{{- $tool := default "tspin" (get $toolFor $base) }}
+{{- $name := trimSuffix ".log" $base | replace "_" "-" }}
+{{- $dir := dir . | base }}
+{{- if ne $dir "log" }}{{- $name = printf "%s-%s" $dir $name }}{{- end }}
+{{- $desc := default (printf "%s log" $name) (get $descFor $base) }}
+
+  {{ $name }}-logs:
+    namespace: logs
+    description: "{{ $desc }}"
+    command: "{{ $tool }}{{ if eq $tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 3
+{{- end }}
 
-  claude-logs:
-    command: tail -f ~/.local/state/claude/*.jsonl | hl --follow
+{{- range $extra := $extraLogs }}
+{{- range (glob $extra.path) }}
+{{- $base := base . }}
+{{- $name := printf "mariadb-%s" (trimSuffix ".err" $base | trimSuffix ".log" | replace "_" "-" | replace "." "-") }}
+
+  {{ $name }}-logs:
+    namespace: logs
+    description: "{{ $extra.desc }}"
+    command: "{{ $extra.tool }}{{ if eq $extra.tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 3
+{{- end }}
+{{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
+{{- range (glob (printf "%s/.local/state/claude/*.jsonl" .chezmoi.homeDir)) }}
+{{- $name := trimSuffix ".jsonl" (base .) }}
 
-  homebrew-logs:
-    command: tail -fn1 {{ .brewPrefix }}/var/log/*.log | tspin
+  claude-{{ $name }}-logs:
+    namespace: logs
+    description: "Claude hooks log"
+    command: "hl --follow --paging=never --expansion=never --local {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 3
+{{- end }}
+
+{{- $proxies := env "SSH_PROXIES" }}
+{{- if $proxies }}
+{{- range splitList " " $proxies }}
+  {{- $uri := . -}}
+  {{- $type := regexReplaceAll "^tunnel\\+([^:]+)://.*$" $uri "${1}" -}}
+  {{- $proxy := regexReplaceAll "^tunnel\\+[^:]+://([^/]+)/.*$" $uri "${1}" -}}
+  {{- $hostport := regexReplaceAll "^tunnel\\+[^:]+://[^/]+/([^#]+).*$" $uri "${1}" -}}
+  {{- $name := regexReplaceAll "^.*#(.+)$" $uri "${1}" -}}
+  {{- $remoteHost := regexReplaceAll "^([^:]+):.*$" $hostport "${1}" -}}
+  {{- $localPort := regexReplaceAll "^[^:]+:(.+)$" $hostport "${1}" -}}
+  {{- $remotePort := "22" -}}
+  {{- if eq $type "postgres" }}{{- $remotePort = "5432" -}}{{- end -}}
+  {{- if eq $type "mysql" }}{{- $remotePort = "3306" -}}{{- end }}
+
+  {{ $name }}:
+    namespace: tunnels
+    description: "{{ $type }} tunnel → {{ $remoteHost }}:{{ $remotePort }} via {{ $proxy }}"
+    command: "ssh -N -L {{ $localPort }}:{{ $remoteHost }}:{{ $remotePort }} {{ $proxy }}"
+    availability:
+      restart: on_failure
+      backoff_seconds: 2
+      max_restarts: 5
+    readiness_probe:
+      exec:
+        command: "nc -z localhost {{ $localPort }}"
+      initial_delay_seconds: 5
+      period_seconds: 10
+      timeout_seconds: 3
+      failure_threshold: 3
+{{- end }}
 {{- end }}

@@ -1,0 +1,42 @@
+{{- if .features.pc -}}
+#!/bin/sh
+
+# Hash global: {{ include (joinPath .chezmoi.sourceDir "dot_config/process-compose/global.yaml.tmpl") | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+# Hash plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
+{{- end }}
+
+set -eu
+
+# shellcheck source=../.chezmoitemplates/helpers.sh
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+label="com.process-compose"
+socket="$HOME/.local/state/process-compose/global.sock"
+
+# If process-compose is running, try hot-reload first
+if [ -S "$socket" ]; then
+  if run timeout 10 pc -g project update; then
+    msg "Hot-reloaded $label"
+    exit 0
+  fi
+fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Full launchd restart
+plist="$HOME/Library/LaunchAgents/$label.plist"
+if [ ! -f "$plist" ]; then
+  msg "Plist not found: $plist"
+  exit 0
+fi
+if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
+  run launchctl bootout "gui/$(id -u)" "$plist" 2>/dev/null || true
+fi
+run launchctl bootstrap "gui/$(id -u)" "$plist"
+{{- else -}}
+# Full systemd restart
+run systemctl --user daemon-reload
+run systemctl --user restart "$label"
+{{- end }}
+msg "Reloaded $label"
+{{- end }}

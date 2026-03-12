@@ -296,15 +296,15 @@
   {{-   $_ := set $managedPlugins . true -}}
   {{- end }}
   "enabledPlugins": {{ merge $managedPlugins (get (.chezmoi.stdin | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
-  {{- $extraMkts := dict -}}
+  {{- $extraMarketplaces := dict -}}
   {{- range $name, $info := $data.marketplaces -}}
   {{-   if hasKey $info "repo" -}}
-  {{-     $_ := set $extraMkts $name (dict "source" (dict "repo" $info.repo "source" "github")) -}}
+  {{-     $_ := set $extraMarketplaces $name (dict "source" (dict "repo" $info.repo "source" "github")) -}}
   {{-   else if hasKey $info "path" -}}
-  {{-     $_ := set $extraMkts $name (dict "source" (dict "path" $info.path "source" "directory")) -}}
+  {{-     $_ := set $extraMarketplaces $name (dict "source" (dict "path" $info.path "source" "directory")) -}}
   {{-   end -}}
   {{- end }}
-  "extraKnownMarketplaces": {{ $extraMkts | toPrettyJson | indent 2 | trim }},
+  "extraKnownMarketplaces": {{ $extraMarketplaces | toPrettyJson | indent 2 | trim }},
   "sandbox": {
     "enabled": {{ $sandboxEnabled }},
     "autoAllowBashIfSandboxed": true,
