@@ -13,16 +13,16 @@ processes:
 
   caddy-logs:
     command: {{ if eq .chezmoi.os "darwin" -}}
-      tail -f {{ .brewPrefix }}/var/log/caddy/*.log | {{ .brewPrefix }}/bin/hl
+      tail -f {{ .brewPrefix }}/var/log/caddy/*.log | hl
     {{- else -}}
-      journalctl -u caddy -f --output=cat | {{ .brewPrefix }}/bin/hl
+      journalctl -u caddy -f --output=cat | hl
     {{- end }}
     availability:
       restart: on_failure
       max_restarts: 3
 
   claude-logs:
-    command: tail -f ~/.local/state/claude/*.jsonl | {{ .brewPrefix }}/bin/hl --follow
+    command: tail -f ~/.local/state/claude/*.jsonl | hl --follow
     availability:
       restart: on_failure
       max_restarts: 3

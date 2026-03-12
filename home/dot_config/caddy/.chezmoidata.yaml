@@ -11,18 +11,21 @@ caddySites:
     feature: otel
     dialTimeout: 1800s
     responseHeaderTimeout: 1800s
+  # - name: ntfy
+  #   port: 80
+  #   feature: otel
   - name: open-notebook
     port: 8502
     feature: oage
   - name: open-notebook-api
     port: 5055
     feature: oage
-  # - name: ntfy
-  #   port: 80
-  #   feature: otel
+  - name: prometheus
+    port: 9090
+    feature: otel
   - name: surrealdb
     port: 8000
     feature: oage
-  - name: prometheus
-    port: 9090
+  - name: tempo
+    port: 3200
     feature: otel

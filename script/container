@@ -138,16 +138,13 @@ build_container() {
 
   command=(./script/bootstrap --verbose)
   if [ "$image_name" = termux ]; then
-    prefix_command=(
+    user=system
+    command=(
       proot
       -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf"
       -b "$prefix/usr/etc/tls:/etc/ssl"
-    )
-    command=(
-      "${prefix_command[@]}"
       "${command[@]}"
     )
-    user=system
     $PROVIDER exec "$container" sh -euxc 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
     # NOTE: Cannot run 'pkg' command as root
     $PROVIDER exec --user=$user "$container" sh -euxc 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
@@ -174,38 +171,46 @@ build_container() {
   fi
   $PROVIDER exec "$container" chown -R $user:$user "$home"
 
+  # docker resolves --user by name via passwd relative to the user home path,
+  workdir="$chezmoi_root"
+
   $PROVIDER exec \
     --env=CHEZMOI_UPGRADE=true \
     --env=CI=true \
     --user="$user" \
-    --workdir="$chezmoi_root" \
+    --workdir="$workdir" \
     "$container" "${command[@]}"
 
-  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/check
-  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" "$container" ./script/update
-  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" "$container" ./script/test
+  $PROVIDER exec --user="$user" --workdir="$workdir" "$container" ./script/check
+  $PROVIDER exec --user="$user" --workdir="$workdir" "$container" ./script/update
+  $PROVIDER exec --tty --user="$user" --workdir="$workdir" "$container" ./script/test
 
   if [ $# -eq 0 ]; then
     # FIXME: override temporary directory to avoid permission issues in termux
     if [ "$image_name" = termux ]; then
       set -- bash --version
     else
-      set -- bash -ic "chezmoi package diff all"
+      set -- bash -ic "chezmoi package diff all 2>/dev/null || true"
     fi
   fi
   $PROVIDER exec \
     --interactive \
     --tty \
     --user="$user" \
-    --workdir="$chezmoi_root" \
+    --workdir="$workdir" \
     "$container" "$@"
   # $PROVIDER stop "$container"
 }
 
 if [ "$NAME" = all ]; then
-  NAME=alpine,archlinux,debian,ubuntu,fedora,termux
+  NAME=alpine,archlinux,debian,ubuntu,fedora
+  # termux image incompatible with docker (openat etc/passwd path escapes rootfs)
+  [ "$PROVIDER" != docker ] && NAME=$NAME,termux
 fi
 
 for name in ${NAME//,/ }; do
-  time build_container "$name" "$@"
+  if ! time build_container "$name" "$@"; then
+    echo >&2 "[container] ERROR: $name failed"
+    exit 1
+  fi
 done

@@ -7,6 +7,7 @@ Type=simple
 Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
 Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
 Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/pc.sock
+Environment=PATH={{ .brewPrefix }}/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=process-compose up --use-uds --tui=false
 Restart=on-failure
 RestartSec=5

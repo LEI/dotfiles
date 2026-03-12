@@ -54,7 +54,7 @@ install_packages() {
     apt-get install --no-install-recommends --quiet --yes ca-certificates curl git locales sudo unzip
   elif command -v dnf >/dev/null; then
     dnf update --assumeyes --quiet
-    dnf install --assumeyes --quiet chezmoi which unzip
+    dnf install --assumeyes --quiet chezmoi git which unzip
   elif command -v pacman >/dev/null; then
     # if [ -n "${CI:-}" ] && [ "$(uname -m)" = "aarch64" ]; then
     #   pacman-key --init # pacman-key --populate archlinux

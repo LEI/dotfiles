@@ -1,6 +1,10 @@
 #!/bin/bash
 # Caddyfile: {{ include (joinPath .chezmoi.homeDir ".config/caddy/Caddyfile") | sha256sum }}
 # sites: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.chezmoidata.yaml") | sha256sum }}
+# otel-dropin: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.otel.conf") | sha256sum }}
+# dns-dnsmasq: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.dnsmasq.conf") | sha256sum }}
+# dns-test: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.dnsmasq-test.conf") | sha256sum }}
+# dns-resolved: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.resolved.conf") | sha256sum }}
 set -euo pipefail
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -18,9 +22,9 @@ run caddy validate --config "$caddyfile"
 # - macOS: sudo brew services (needs root to bind port 443)
 # - Linux brew fallback: brew services (user-level, no port 443 without setcap)
 # - Linux system package (Fedora, Arch): root service with CAP_NET_BIND_SERVICE
-if [[ "$(uname -s)" == Darwin ]]; then
+if [ "$(uname -s)" = Darwin ]; then
   if ! sudo brew services list | grep -q "^caddy.*started"; then
-    run pkexec brew services start caddy
+    run sudo brew services start caddy
   fi
 elif has brew && brew list caddy >/dev/null 2>&1; then
   if ! brew services list | grep -q "^caddy.*started"; then
@@ -29,43 +33,72 @@ elif has brew && brew list caddy >/dev/null 2>&1; then
 elif has systemctl; then
   # Copy user Caddyfile to /etc/caddy/Caddyfile so the system caddy service
   # can read it without any home directory access.
-  if [ "$(cat /etc/caddy/Caddyfile 2>/dev/null)" != "$(cat "$caddyfile")" ]; then
+  if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
     msg "Updating /etc/caddy/Caddyfile"
+    diff -u /etc/caddy/Caddyfile "$caddyfile" || true
     run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
   fi
+
+  # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
+  # otel-collector (HTTP/4318) which forwards to Tempo.
+  otel_dropin_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
+  otel_dropin=/etc/systemd/system/caddy.service.d/otel.conf
+  if ! diff -q "$otel_dropin" "$otel_dropin_src" >/dev/null 2>&1; then
+    msg "Updating caddy OTLP drop-in"
+    diff -u "$otel_dropin" "$otel_dropin_src" || true
+    run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_dropin_src' '$otel_dropin' && systemctl daemon-reload"
+  fi
   if systemctl is-active --quiet caddy; then
-    adapted="$(caddy adapt --config "$caddyfile" 2>/dev/null | jq -S .)"
-    running="$(curl -sf http://localhost:2019/config/ | jq -S .)"
-    if [ "$adapted" != "$running" ]; then
+    adapted="$(caddy adapt --config "$caddyfile" | jq -S .)" || {
+      msg "caddy adapt failed; check Caddyfile"
+      exit 1
+    }
+    running="$(curl -sf http://localhost:2019/config/ | jq -S .)" || true
+    if [ -z "${running:-}" ]; then
+      msg "WARN: caddy admin API unavailable; skipping reload check"
+    elif [ "$adapted" != "$running" ]; then
+      msg "Config changed; reloading caddy"
       run systemctl reload caddy
+    else
+      msg "Config unchanged; skipping reload"
     fi
   fi
 
-  # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq.
+  # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
+  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+  nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
+  nm_test_src="$dns_src/.dnsmasq-test.conf"
+  resolved_src="$dns_src/.resolved.conf"
+  nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
+  nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
+  resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
   nm_changed=false
-  if [ "$(cat /etc/NetworkManager/conf.d/dnsmasq.conf 2>/dev/null)" != "$(printf '[main]\ndns=dnsmasq\n')" ]; then
-    msg "Enabling NetworkManager dnsmasq mode"
-    printf '[main]\ndns=dnsmasq\n' | run pkexec tee /etc/NetworkManager/conf.d/dnsmasq.conf >/dev/null
+  resolved_changed=false
+  if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null || \
+     ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
     nm_changed=true
   fi
-  if [ "$(cat /etc/NetworkManager/dnsmasq.d/test.conf 2>/dev/null)" != "$(printf 'address=/.test/127.0.0.1\n')" ]; then
-    msg "Updating /etc/NetworkManager/dnsmasq.d/test.conf"
-    run pkexec mkdir -p /etc/NetworkManager/dnsmasq.d
-    printf 'address=/.test/127.0.0.1\n' | run pkexec tee /etc/NetworkManager/dnsmasq.d/test.conf >/dev/null
-    nm_changed=true
-  fi
-  if [ "$nm_changed" = true ]; then
-    run systemctl restart NetworkManager
+  if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
+    resolved_changed=true
   fi
 
-  # Tell systemd-resolved to forward .test queries to dnsmasq at 127.0.0.1.
-  resolved_conf=/etc/systemd/resolved.conf.d/test.conf
-  resolved_expected=$(printf '[Resolve]\nDNS=127.0.0.1\nDomains=~test\n')
-  if [ "$(cat "$resolved_conf" 2>/dev/null)" != "$resolved_expected" ]; then
-    msg "Updating $resolved_conf"
-    run pkexec mkdir -p "$(dirname "$resolved_conf")"
-    printf '%s' "$resolved_expected" | run pkexec tee "$resolved_conf" >/dev/null
-    run systemctl restart systemd-resolved
+  if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
+    msg "Updating /etc/ DNS config"
+    diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" || true
+    diff -u "$nm_test_dest" "$nm_test_src" || true
+    diff -u "$resolved_dest" "$resolved_src" || true
+    run pkexec sh -ceux "
+      mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
+      cp '$nm_dnsmasq_src' '$nm_dnsmasq_dest'
+      cp '$nm_test_src' '$nm_test_dest'
+      cp '$resolved_src' '$resolved_dest'
+    "
+    if [ "$nm_changed" = true ]; then
+      run systemctl restart NetworkManager
+    fi
+    if [ "$resolved_changed" = true ]; then
+      run systemctl restart systemd-resolved
+    fi
   fi
 
   if ! systemctl is-active --quiet caddy; then
@@ -88,3 +121,15 @@ fi
 # sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
 #   "$(brew --prefix)/var/lib/caddy/pki/authorities/local/root.crt"
 run caddy trust --ca local # --config "$caddyfile"
+
+# caddy trust installs the root CA but not the intermediate; curl needs both to
+# build the chain. Install the intermediate into the system trust store.
+if has update-ca-trust; then
+  intermediate="$HOME/.local/share/caddy/pki/authorities/local/intermediate.crt"
+  dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
+  if ! diff -q "$dest" "$intermediate" >/dev/null 2>&1; then
+    msg "Installing caddy intermediate CA to system trust"
+    msg "  src: $(openssl x509 -noout -fingerprint -sha256 -in "$intermediate")"
+    run pkexec sh -ceux "cp '$intermediate' '$dest' && update-ca-trust"
+  fi
+fi

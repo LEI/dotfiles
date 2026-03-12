@@ -7,7 +7,7 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: [alertmanager:9093]  # routes evaluated alerts to Alertmanager for notification handling
+        - targets: [alertmanager:9093] # routes evaluated alerts to Alertmanager for notification handling
 
 rule_files:
   # Alert rules loaded from mounted volume for proactive incident detection
@@ -36,6 +36,10 @@ scrape_configs:
   - job_name: cadvisor
     static_configs:
       - targets: [cadvisor:8080]
+  - job_name: caddy
+    static_configs:
+      - targets: [host.docker.internal:2019]
+    metrics_path: /metrics
   - job_name: alertmanager
     static_configs:
       - targets: [alertmanager:9093]

@@ -11,12 +11,8 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; t
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
-# # Ensure chezmoi is available
-# BIN_DIR="$HOME/.local/bin"
-# PATH="$PATH:$BIN_DIR"
-
-# chezmoi package list mise
-if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
+if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
+  eval "$(mise activate bash)"
   PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 
