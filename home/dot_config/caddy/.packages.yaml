@@ -2,4 +2,11 @@
 enabled: "{{ .features.caddy }}"
 packages:
   caddy:
-    type: brew
+    # native on Fedora (dnf) and Arch (pacman): system service with proper capabilities
+    # brew on macOS and distros without caddy in official repos
+    type: '{{ eq .osIDLike "alpine" "debian" | ternary "brew" nil }}'
+  # nss-tools:
+  #   # certutil: required for `caddy trust` to register CA in Firefox/Chrome NSS databases
+  #   enabled: '{{ eq .os "linux" }}'
+  #   nameOverwrite:
+  #     debian: libnss3-tools
