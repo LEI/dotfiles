@@ -268,7 +268,6 @@ scriptEnv:
 {{- end }}
 
 {{- if or $features.brew (eq .chezmoi.os "darwin") }}
-  BREW_PREFIX: {{ $brewPrefix | quote }}
   HOMEBREW_BAT: "1"
   # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"

@@ -14,13 +14,10 @@ has() {
   command -v "$@" >/dev/null 2>&1
 }
 
-<<<<<<< HEAD
-=======
 cmd() {
   run "$@"
 }
 
->>>>>>> c5b12d56 (fix: claude [ci skip])
 run() {
   msg "$@"
   "$@"

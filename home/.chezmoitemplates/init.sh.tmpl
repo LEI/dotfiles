@@ -148,7 +148,7 @@ fi
 {{- if .features.brew }}
 
 # Homebrew
-brew_prefix="${BREW_PREFIX:-{{ .brewPrefix }}}"
+brew_prefix="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}"
 
 if [ -x "$brew_prefix/bin/brew" ]; then
   eval "$("$brew_prefix/bin/brew" shellenv)"
