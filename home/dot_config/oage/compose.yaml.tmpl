@@ -73,6 +73,8 @@ services:
       # This encrypts your API keys in the database
       - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
 
+      - API_URL=https://open-notebook-api.test
+
       # Database connection (default values - no need to change)
       - SURREAL_URL=ws://surrealdb:8000/rpc
       - SURREAL_USER=root

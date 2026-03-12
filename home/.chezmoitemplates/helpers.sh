@@ -10,6 +10,17 @@ if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
   OSID=android
 fi
 
+has() {
+  command -v "$@" >/dev/null 2>&1
+}
+
+<<<<<<< HEAD
+=======
+cmd() {
+  run "$@"
+}
+
+>>>>>>> c5b12d56 (fix: claude [ci skip])
 run() {
   msg "$@"
   "$@"
@@ -75,9 +86,12 @@ install_archive() {
   curl -LSfs "$url" -o "$out"
   echo >&2 "Extracting: $out"
   case "$extract_type" in
-    tar.gz) tar -xzf "$out" -C "$dir" ;;
-    zip) unzip -o "$out" -d "$dir" ;;
-    *) echo >&2 "Unknown archive type: $extract_type"; return 1 ;;
+  tar.gz) tar -xzf "$out" -C "$dir" ;;
+  zip) unzip -o "$out" -d "$dir" ;;
+  *)
+    echo >&2 "Unknown archive type: $extract_type"
+    return 1
+    ;;
   esac
   echo >&2 "Executable: $dir/$bin"
   chmod +x "$dir/$bin"

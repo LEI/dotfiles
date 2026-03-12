@@ -1,0 +1,11 @@
+---
+enabled: "{{ .features.pc }}"
+packages:
+  hl:
+    enabled: "{{ not .ephemeral }}"
+    type: brew
+  tailspin:
+    enabled: "{{ not .ephemeral }}"
+    type: >-
+      {{ eq .osIDLike "alpine" "android" "debian" "fedora"
+        | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}

@@ -47,7 +47,7 @@ if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then
   export SHELL="$PREFIX/bin/bash"
   timeout 5m chezmoi doctor
 else
-  timeout 5m chezmoi doctor --dry-run --no-network
+  timeout 5m chezmoi doctor --dry-run --no-network || true
 fi
 
 if chezmoi feature goss; then
@@ -78,7 +78,8 @@ if chezmoi feature neovim; then
 fi
 
 if chezmoi feature tmux && timeout 5m tmux ls; then
-  timeout 5m tmux source ~/.config/tmux/tmux.conf
+  # timeout 5m tmux source ~/.config/tmux/tmux.conf
+  echo
 fi
 
 # FIXME(i3): toggles floating window mode

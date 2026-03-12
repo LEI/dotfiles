@@ -10,6 +10,7 @@ os:
     - .macos
     - Library/
   linux:
+    - .config/systemd/
     - .hushlogin
   windows:
     - "*.ps1"
@@ -142,8 +143,8 @@ features:
   pc:
     - .config/process-compose/
     - .config/systemd/user/process-compose.*
+    - .config/systemd/user/setup-process-compose.sh
     - .local/bin/pc
-    - .local/bin/pcg
     - Library/LaunchAgents/com.process-compose.*
   # php: []
   python:

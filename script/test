@@ -21,7 +21,7 @@ if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
 fi
 
 if [ -z "${USER:-}" ]; then
-  USER="$(id --user --name)"
+  USER="$(id -un)"
 fi
 
 if [ "$USER" = test ] && command -v mise >/dev/null; then

@@ -4,6 +4,11 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+if [ -z "${USER:-}" ]; then
+  msg "WARN: USER is not set, falling back to id -un"
+  USER="$(id -un)"
+fi
+
 {{- if ne .os "darwin" }}
 
 # https://docs.brew.sh/Homebrew-on-Linux

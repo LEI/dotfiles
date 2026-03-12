@@ -505,10 +505,10 @@ packages:
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
     type: '{{ eq .osIDLike "arch" | ternary "uv" nil }}'
   process-compose: # hapless, mani+sake / cmdperf, mult
-    enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
+    enabled: {{ .gui }}
     nameOverwrite:
       darwin: f1bonacc1/tap/process-compose
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "mise" nil) }}'
   procps:
     enabled: {{ eq .os "android" "linux" }}
     nameOverwrite:

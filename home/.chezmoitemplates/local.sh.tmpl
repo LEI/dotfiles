@@ -3,6 +3,11 @@
 # export GITHUB_ACCESS_TOKEN=""
 {{- end }}
 
-# typeset -A SSHCD_DIR=( [host]=/var/www/app )
-# typeset -A SSHCD_LOGS=( [host]='tail -f /var/log/*.log' )
-# typeset -A SSHCD_LOGS_FMT=( [host]='tspin' )
+{{- if .features.ai }}
+
+# export CLAUDE_CODE_MARKETPLACES="local:/path/to/plugin,mymkt:owner/repo"
+# export CLAUDE_CODE_PLUGINS="local@local,myplugin@mymarketplace"
+{{- end }}
+
+# host() { ssh-cd host /var/www/app; }
+# host-logs() { ssh-tail host /var/log 'tail -f *.log' tspin; }

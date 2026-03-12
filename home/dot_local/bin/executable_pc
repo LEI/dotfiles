@@ -1,15 +1,27 @@
 #!/bin/sh
 
-# Local process-compose wrapper; uses a per-project UDS socket to avoid port conflicts
+# Process-compose wrapper; per-project UDS socket by default, global with -g/--global
 
 set -eu
 
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/$(basename "$PWD").sock}"
 
-if [ $# -eq 0 ]; then
-  set -- up --detached
+global=false
+if [ "${1:-}" = "-g" ] || [ "${1:-}" = "--global" ]; then
+  global=true
+  shift
+fi
+
+if [ "$global" = true ]; then
+  export PC_CONFIG_FILES="${PC_CONFIG_FILES:-$XDG_CONFIG_HOME/process-compose/global.yaml}"
+  export PC_LOG_FILE="${PC_LOG_FILE:-$XDG_STATE_HOME/process-compose/process-compose.log}"
+  export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/pc.sock}"
 else
+  export PC_SOCKET_PATH="${PC_SOCKET_PATH:-$XDG_STATE_HOME/process-compose/$(basename "$PWD").sock}"
+fi
+
+if [ $# -gt 0 ]; then
   cmd="$1"; shift
   case "$cmd" in
     a) cmd=attach ;;
@@ -20,6 +32,10 @@ else
     u) cmd=up ;;
   esac
   set -- "$cmd" "$@"
+fi
+
+if [ $# -eq 0 ]; then
+  set -- up --detached
 fi
 
 exec process-compose --use-uds "$@"

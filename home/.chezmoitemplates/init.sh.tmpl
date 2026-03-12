@@ -1,7 +1,4 @@
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+{{ includeTemplate "xdg-base.sh.tmpl" . | trim }}
 
 # Bootstrap: pathmunge must be available before local.sh
 source "$XDG_CONFIG_HOME/sh/functions/pathmunge.sh"
@@ -45,7 +42,7 @@ fi
 shell="{{ $shell }}" # ${SHELL##*/}
 
 if [ -z "${USER:-}" ]; then
-  USER="$(id --user --name)"
+  USER="$(id -un)"
 fi
 
 if [ "$shell" = bash ]; then IS_BASH=true; else IS_BASH=false; fi
@@ -151,13 +148,7 @@ fi
 {{- if .features.brew }}
 
 # Homebrew
-{{- if eq .os "linux" }}
-brew_prefix=/home/linuxbrew/.linuxbrew
-{{- else if eq .arch "arm64" }}
-brew_prefix=/opt/homebrew
-{{- else }}
-brew_prefix=/usr/local
-{{- end }}
+brew_prefix="${BREW_PREFIX:-{{ .brewPrefix }}}"
 
 if [ -x "$brew_prefix/bin/brew" ]; then
   eval "$("$brew_prefix/bin/brew" shellenv)"

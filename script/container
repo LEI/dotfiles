@@ -75,6 +75,7 @@ build_container() {
   chezmoi_root="$home/.local/share/chezmoi"
 
   $PROVIDER build . \
+    --file=Containerfile \
     --build-arg=IMAGE_NAME="${image_name_arg:-$image_name}" \
     --build-arg=IMAGE_VERSION="${image_version_arg:-$image_version}" \
     --tag="$container"
@@ -162,9 +163,12 @@ build_container() {
   $PROVIDER exec "$container" mkdir -p "$chezmoi_root"
   $PROVIDER container cp .chezmoiroot "$container:$chezmoi_root/"
   $PROVIDER container cp .chezmoiversion "$container:$chezmoi_root/"
-  $PROVIDER container cp --overwrite home "$container:$chezmoi_root/"
+  $PROVIDER container cp home "$container:$chezmoi_root/"
   $PROVIDER container cp script "$container:$chezmoi_root/"
   $PROVIDER container cp test "$container:$chezmoi_root/"
+  if [ -d test_helper ]; then
+    $PROVIDER container cp test_helper "$container:$chezmoi_root/"
+  fi
   if [ -d test_support ]; then
     $PROVIDER container cp test_support "$container:$chezmoi_root/"
   fi

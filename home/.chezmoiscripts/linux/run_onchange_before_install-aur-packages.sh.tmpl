@@ -4,7 +4,7 @@
 set -eu
 
 if [ -z "${USER:-}" ]; then
-  USER="$(id --user --name)"
+  USER="$(id -un)"
 fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

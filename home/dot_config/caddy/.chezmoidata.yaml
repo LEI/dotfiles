@@ -1,0 +1,28 @@
+---
+caddySites:
+  - name: alertmanager
+    port: 9093
+    feature: otel
+  - name: claude-task-viewer
+    port: 3456
+    feature: ai
+  - name: grafana
+    port: 3033
+    feature: otel
+    dialTimeout: 1800s
+    responseHeaderTimeout: 1800s
+  - name: open-notebook
+    port: 8502
+    feature: oage
+  - name: open-notebook-api
+    port: 5055
+    feature: oage
+  # - name: ntfy
+  #   port: 80
+  #   feature: otel
+  - name: surrealdb
+    port: 8000
+    feature: oage
+  - name: prometheus
+    port: 9090
+    feature: otel

@@ -4,6 +4,8 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+{{ includeTemplate "xdg-base.sh.tmpl" . | trim }}
+
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}
 
 {{- if .features.ai }}

@@ -9,6 +9,7 @@
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") -}}
 {{- $binDir := joinPath $homeDir ".local" "bin" -}}
+{{- $brewPrefix := eq .chezmoi.os "linux" | ternary "/home/linuxbrew/.linuxbrew" (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local") -}}
 
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
@@ -166,6 +167,7 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
+  brewPrefix: {{ $brewPrefix | quote }}
   theme: tokyonight
   user: {{ $user | quote }}
 {{ $data | toYaml | indent 2 }}
@@ -266,6 +268,7 @@ scriptEnv:
 {{- end }}
 
 {{- if or $features.brew (eq .chezmoi.os "darwin") }}
+  BREW_PREFIX: {{ $brewPrefix | quote }}
   HOMEBREW_BAT: "1"
   # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"
@@ -284,9 +287,6 @@ scriptEnv:
 {{-     $paths = append $paths $miseShims }}
 {{-   end }}
 {{-   if or $features.brew (eq .chezmoi.os "darwin") }}
-{{-     $brewPrefix := ne .chezmoi.os "linux" | ternary
-          (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local")
-          "/home/linuxbrew/.linuxbrew" }}
 {{-     $brewBin := joinPath $brewPrefix "bin" }}
 {{-     if not (has $brewBin $paths) }}
 {{-       $paths = prepend $paths $brewBin }}

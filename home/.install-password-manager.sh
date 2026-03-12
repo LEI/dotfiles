@@ -20,7 +20,7 @@ fi
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if [ -z "${USER:-}" ]; then
-  USER="$(id --user --name)"
+  USER="$(id -un)"
 fi
 
 echo >&2 "OSID: $OSID"

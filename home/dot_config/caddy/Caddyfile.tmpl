@@ -4,28 +4,21 @@
 	local_certs
 }
 
-{{ if index .chezmoi.config.data "features" | and (index .chezmoi.config.data.features "otel") -}}
-grafana.test {
-	reverse_proxy localhost:3033 {
+{{ range .caddySites -}}
+{{- if and .feature (not (get $.features .feature)) }}{{ continue }}{{ end -}}
+{{- $dt := get . "dialTimeout" -}}
+{{- $rht := get . "responseHeaderTimeout" -}}
+{{ .name }}.test {
+	reverse_proxy localhost:{{ .port }}{{ if or $dt $rht }} {
 		transport http {
-			dial_timeout 1800s
-			response_header_timeout 1800s
+			{{- if $dt }}
+			dial_timeout {{ $dt }}
+			{{- end }}
+			{{- if $rht }}
+			response_header_timeout {{ $rht }}
+			{{- end }}
 		}
-	}
-}
-
-prometheus.test {
-	reverse_proxy localhost:9090
-}
-
-alertmanager.test {
-	reverse_proxy localhost:9093
-}
-
-{{ end -}}
-{{ if index .chezmoi.config.data "features" | and (index .chezmoi.config.data.features "oage") -}}
-open-notebook.test {
-	reverse_proxy localhost:8502
+	}{{ end }}
 }
 
 {{ end -}}

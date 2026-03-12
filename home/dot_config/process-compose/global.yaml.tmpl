@@ -11,6 +11,16 @@ processes:
       restart: on_failure
       max_restarts: 5
 
+  caddy-logs:
+    command: {{ if eq .chezmoi.os "darwin" -}}
+      tail -f {{ .brewPrefix }}/var/log/caddy/*.log | hl
+    {{- else -}}
+      journalctl -u caddy -f --output=cat | hl
+    {{- end }}
+    availability:
+      restart: on_failure
+      max_restarts: 3
+
   claude-logs:
     command: tail -f ~/.local/state/claude/*.jsonl | hl --follow
     availability:
@@ -20,7 +30,7 @@ processes:
 {{- if eq .chezmoi.os "darwin" }}
 
   homebrew-logs:
-    command: tail -fn1 /opt/homebrew/var/log/*.log | tspin
+    command: tail -fn1 {{ .brewPrefix }}/var/log/*.log | tspin
     availability:
       restart: on_failure
       max_restarts: 3

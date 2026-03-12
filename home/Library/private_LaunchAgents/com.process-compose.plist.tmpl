@@ -6,10 +6,20 @@
   <string>com.process-compose</string>
   <key>ProgramArguments</key>
   <array>
-    <string>{{ .chezmoi.homeDir }}/.local/bin/pcg</string>
+    <string>process-compose</string>
     <string>up</string>
+    <string>--use-uds</string>
     <string>--tui=false</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PC_CONFIG_FILES</key>
+    <string>{{ .chezmoi.homeDir }}/.config/process-compose/global.yaml</string>
+    <key>PC_LOG_FILE</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/process-compose.log</string>
+    <key>PC_SOCKET_PATH</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/pc.sock</string>
+  </dict>
   <key>RunAtLoad</key>
   <true/>
   <key>KeepAlive</key>

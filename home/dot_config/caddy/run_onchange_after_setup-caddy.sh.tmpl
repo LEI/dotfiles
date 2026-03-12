@@ -1,5 +1,6 @@
 #!/bin/bash
 # Caddyfile: {{ include (joinPath .chezmoi.homeDir ".config/caddy/Caddyfile") | sha256sum }}
+# sites: {{ include (joinPath .chezmoi.sourceDir "dot_config/caddy/.chezmoidata.yaml") | sha256sum }}
 set -euo pipefail
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -19,7 +20,7 @@ run caddy validate --config "$caddyfile"
 # - Linux system package (Fedora, Arch): root service with CAP_NET_BIND_SERVICE
 if [[ "$(uname -s)" == Darwin ]]; then
   if ! sudo brew services list | grep -q "^caddy.*started"; then
-    run sudo brew services start caddy
+    run pkexec brew services start caddy
   fi
 elif has brew && brew list caddy >/dev/null 2>&1; then
   if ! brew services list | grep -q "^caddy.*started"; then
@@ -30,9 +31,13 @@ elif has systemctl; then
   # can read it without any home directory access.
   if [ "$(cat /etc/caddy/Caddyfile 2>/dev/null)" != "$(cat "$caddyfile")" ]; then
     msg "Updating /etc/caddy/Caddyfile"
-    run sudo cp "$caddyfile" /etc/caddy/Caddyfile
-    if systemctl is-active --quiet caddy; then
-      run sudo systemctl reload caddy
+    run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
+  fi
+  if systemctl is-active --quiet caddy; then
+    adapted="$(caddy adapt --config "$caddyfile" 2>/dev/null | jq -S .)"
+    running="$(curl -sf http://localhost:2019/config/ | jq -S .)"
+    if [ "$adapted" != "$running" ]; then
+      run systemctl reload caddy
     fi
   fi
 
@@ -40,17 +45,17 @@ elif has systemctl; then
   nm_changed=false
   if [ "$(cat /etc/NetworkManager/conf.d/dnsmasq.conf 2>/dev/null)" != "$(printf '[main]\ndns=dnsmasq\n')" ]; then
     msg "Enabling NetworkManager dnsmasq mode"
-    printf '[main]\ndns=dnsmasq\n' | run sudo tee /etc/NetworkManager/conf.d/dnsmasq.conf >/dev/null
+    printf '[main]\ndns=dnsmasq\n' | run pkexec tee /etc/NetworkManager/conf.d/dnsmasq.conf >/dev/null
     nm_changed=true
   fi
   if [ "$(cat /etc/NetworkManager/dnsmasq.d/test.conf 2>/dev/null)" != "$(printf 'address=/.test/127.0.0.1\n')" ]; then
     msg "Updating /etc/NetworkManager/dnsmasq.d/test.conf"
-    run sudo mkdir -p /etc/NetworkManager/dnsmasq.d
-    printf 'address=/.test/127.0.0.1\n' | run sudo tee /etc/NetworkManager/dnsmasq.d/test.conf >/dev/null
+    run pkexec mkdir -p /etc/NetworkManager/dnsmasq.d
+    printf 'address=/.test/127.0.0.1\n' | run pkexec tee /etc/NetworkManager/dnsmasq.d/test.conf >/dev/null
     nm_changed=true
   fi
   if [ "$nm_changed" = true ]; then
-    run sudo systemctl restart NetworkManager
+    run systemctl restart NetworkManager
   fi
 
   # Tell systemd-resolved to forward .test queries to dnsmasq at 127.0.0.1.
@@ -58,14 +63,14 @@ elif has systemctl; then
   resolved_expected=$(printf '[Resolve]\nDNS=127.0.0.1\nDomains=~test\n')
   if [ "$(cat "$resolved_conf" 2>/dev/null)" != "$resolved_expected" ]; then
     msg "Updating $resolved_conf"
-    run sudo mkdir -p "$(dirname "$resolved_conf")"
-    printf '%s' "$resolved_expected" | run sudo tee "$resolved_conf" >/dev/null
-    run sudo systemctl restart systemd-resolved
+    run pkexec mkdir -p "$(dirname "$resolved_conf")"
+    printf '%s' "$resolved_expected" | run pkexec tee "$resolved_conf" >/dev/null
+    run systemctl restart systemd-resolved
   fi
 
   if ! systemctl is-active --quiet caddy; then
-    run sudo systemctl enable --now caddy || {
-      sudo journalctl -u caddy -n 50 --no-pager >&2
+    run systemctl enable --now caddy || {
+      run journalctl -u caddy -n 50 --no-pager >&2
       exit 1
     }
   fi
