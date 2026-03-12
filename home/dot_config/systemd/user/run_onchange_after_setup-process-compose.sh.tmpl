@@ -1,5 +1,6 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+# service: {{ include (joinPath .chezmoi.sourceDir "dot_config/systemd/user/process-compose.service.tmpl") | sha256sum }}
+set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 

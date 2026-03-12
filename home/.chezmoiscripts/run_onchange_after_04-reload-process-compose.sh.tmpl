@@ -11,32 +11,35 @@ set -eu
 # shellcheck source=../.chezmoitemplates/helpers.sh
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+{{ if eq .chezmoi.os "darwin" -}}
 label="com.process-compose"
+{{- else -}}
+label="process-compose"
+{{- end }}
 socket="$HOME/.local/state/process-compose/global.sock"
 
-# If process-compose is running, try hot-reload first
+# Try hot-reload via project update first
 if [ -S "$socket" ]; then
   if run timeout 10 pc -g project update; then
-    msg "Hot-reloaded $label"
+    msg "$label: hot-reloaded"
     exit 0
   fi
 fi
 
 {{ if eq .chezmoi.os "darwin" -}}
-# Full launchd restart
+# Fall back to launchctl bootout + bootstrap
 plist="$HOME/Library/LaunchAgents/$label.plist"
 if [ ! -f "$plist" ]; then
-  msg "Plist not found: $plist"
-  exit 0
+  err "$label: plist not found"
 fi
 if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
   run launchctl bootout "gui/$(id -u)" "$plist" 2>/dev/null || true
 fi
 run launchctl bootstrap "gui/$(id -u)" "$plist"
 {{- else -}}
-# Full systemd restart
+# Fall back to systemctl restart
 run systemctl --user daemon-reload
 run systemctl --user restart "$label"
 {{- end }}
-msg "Reloaded $label"
+msg "$label: restarted"
 {{- end }}
