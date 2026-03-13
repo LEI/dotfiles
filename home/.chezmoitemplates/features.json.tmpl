@@ -3,6 +3,10 @@
     (ne .profile "minimal")
     (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname))
 -}}
+{{- $ollama := and $ai (or
+    (hasPrefix "fr" .hostname)
+    (and (eq .os "darwin") (eq .arch "arm64"))
+) -}}
 {{- $docker := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
 {{- $podman := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
 {{- $features := (dict
@@ -49,11 +53,13 @@
     (not (or .ephemeral .headless)))
   "nushell" .gui
   "oage" (and $ai (or $docker $podman))
+  "ollama" $ollama
   "otel" (or $docker $podman)
   "pc" $ai
   "php" false
   "podman" $podman
   "python" .gui
+  "quadlet" (and $podman (eq .os "linux"))
   "rest" false
   "ripgrep" true
   "ruby" false

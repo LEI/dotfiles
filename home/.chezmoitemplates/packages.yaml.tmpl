@@ -427,9 +427,9 @@ packages:
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
-    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not .gui) }}
+    enabled: {{ and .features.ollama (eq .osIDLike "darwin") (not .gui) }}
   ollama-app:
-    enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") .gui }}
+    enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   openssl:
     enabled: {{ eq .osIDLike "alpine" "fedora" }}

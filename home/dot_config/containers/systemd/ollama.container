@@ -1,0 +1,19 @@
+[Unit]
+Description=Ollama Service
+After=network-online.target
+
+[Container]
+Image=docker.io/ollama/ollama:0.17.7
+AddDevice=/dev/dri
+GroupAdd=keep-groups
+SecurityLabelType=container_runtime_t
+Volume=%h/.local/share/ollama:/root/.ollama:Z
+PublishPort=11434:11434
+Environment=OLLAMA_KEEP_ALIVE=-1
+Environment=OLLAMA_VULKAN=1
+
+[Service]
+ExecStartPre=-mkdir -p %h/.local/share/ollama
+
+[Install]
+WantedBy=default.target

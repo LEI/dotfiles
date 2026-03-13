@@ -120,6 +120,7 @@
 
 {{- $data := dict
   "accessToken" $accessToken
+  "arch" .chezmoi.arch
   "chassisType" $chassisType
   "chassisVendor" $chassisVendor
   "ci" $ci
@@ -219,6 +220,7 @@ data:
   packageManager: {{ $packageManager | quote }}
 {{- $_ := set . "defaultType" $packageManager }}
 {{- $packages := includeTemplate "packages-data.yaml.tmpl" (mergeOverwrite $context (dict
+  "arch" .chezmoi.arch
   "os" .chezmoi.os
   "osID" $osID
   "osIDLike" $osIDLike

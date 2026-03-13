@@ -9,6 +9,11 @@
 # export CLAUDE_CODE_PLUGINS="local@local,myplugin@mymarketplace"
 {{- end }}
 
+{{- if .features.oage }}
+
+# export OPENROUTER_API_KEY=""
+{{- end }}
+
 # export SSH_PROXIES="tunnel+type://proxy/remoteHost:localPort#name"
 
 # host() { ssh-cd host /var/www/app; }

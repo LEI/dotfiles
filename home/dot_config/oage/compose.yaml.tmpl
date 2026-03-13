@@ -1,3 +1,4 @@
+{{- $ollamaInCompose := and .features.ollama (eq .os "linux") (not .features.quadlet) -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
@@ -49,6 +50,47 @@ services:
   #       limits:
   #         memory: 1G
 
+{{- if $ollamaInCompose }}
+
+  # https://github.com/ollama/ollama
+  ollama:
+    image: docker.io/ollama/ollama:0.17.7
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    devices:
+      - /dev/dri
+    environment:
+      OLLAMA_KEEP_ALIVE: -1
+      OLLAMA_VULKAN: "1"
+
+{{- end }}
+
+  # https://github.com/maximhq/bifrost
+  bifrost:
+    image: maximhq/bifrost:v1.4.11
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./bifrost:/app/data:z
+    environment:
+      BIFROST_HOST: 0.0.0.0
+      LOG_LEVEL: info
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+
+{{- if .features.quadlet }}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+{{- end }}
+{{- if $ollamaInCompose }}
+
+    depends_on:
+      - ollama
+{{- end }}
+
   # https://github.com/lfnovo/open-notebook/tree/main/examples
   surrealdb:
     image: surrealdb/surrealdb:v2
@@ -73,6 +115,10 @@ services:
       # This encrypts your API keys in the database
       - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
 
+      # Route LLM calls through bifrost (OpenAI-compatible proxy)
+      - OPENAI_COMPATIBLE_BASE_URL=http://bifrost:8080/v1
+      - OPENAI_COMPATIBLE_API_KEY=bifrost
+
       - API_URL=https://open-notebook-api.test
 
       # Database connection (default values - no need to change)
@@ -85,6 +131,7 @@ services:
       - notebook-data:/app/data
     depends_on:
       - surrealdb
+      - bifrost
     restart: always
     # pull_policy: always
 
@@ -110,3 +157,8 @@ volumes:
 
   notebook-data:
   surreal-data:
+
+{{- if $ollamaInCompose }}
+
+  ollama-data:
+{{- end }}

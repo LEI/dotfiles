@@ -1,0 +1,26 @@
+{{- if .features.ollama -}}
+#!/bin/sh
+# container: {{ include (joinPath .chezmoi.sourceDir "dot_config/containers/systemd/ollama.container") | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has systemctl; then
+  err "systemctl not found; cannot activate ollama quadlet"
+fi
+
+if [ ! -d "$XDG_DATA_HOME/ollama" ]; then
+  run mkdir -p "$XDG_DATA_HOME/ollama"
+fi
+
+if [ ! -d "$XDG_CONFIG_HOME/oage/bifrost/logs" ]; then
+  run mkdir -p "$XDG_CONFIG_HOME/oage/bifrost/logs"
+fi
+
+run systemctl --user daemon-reload
+if systemctl --user is-active --quiet ollama; then
+  run systemctl --user restart ollama
+else
+  run systemctl --user start ollama
+fi
+{{- end }}
