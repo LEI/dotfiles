@@ -1,28 +1,7 @@
-# TODO: rework as part of shell init research (#21); move env.sh entries here as appropriate
-#
-# XDG environment.d: picked up by systemd user manager for all user services.
-# Shell init (environment.sh + init.sh) is authoritative for interactive sessions;
-# entries here are the minimal set needed by services that don't source init.sh.
-#
-# Status legend:
-#   [here]    actively set here (missing from user manager otherwise)
-#   [env.sh]  set in environment.sh, inherited by login shells but not services; TODO move here
-#   [systemd] already in user manager PATH
-#   [todo]    needs research before deciding
-
-# [here] Brew: not in user manager PATH, needed by hl, tspin, and other brew tools in services
+# Picked up by systemd user manager and load-environment-d.sh for shells.
+# Minimal PATH additions for user services that don't source init.sh.
 PATH={{ .brewPrefix }}/bin:${PATH}
+PATH=$HOME/.local/bin:${PATH}
 
-# [systemd] ~/.local/bin: mise, pc, and other user-installed binaries; already present
-# PATH=$HOME/.local/bin:${PATH}
-
-# [todo] mise shims: currently in user manager PATH via unknown source; shims are the
-#        recommended non-interactive approach but activate (shell hook) is better for shells
 # PATH=$HOME/.local/share/mise/shims:${PATH}
-
-# [todo] cargo bin: tspin lives here; not in user manager PATH but tspin is
-#        brew-installable too; decide canonical install method before adding
 # PATH=$HOME/.local/share/cargo/bin:${PATH}
-
-# [env.sh] CARGO_HOME, GOPATH, RIPGREP_CONFIG_PATH etc.: set in environment.sh for shells;
-#           services that need them should declare them in their unit file for now

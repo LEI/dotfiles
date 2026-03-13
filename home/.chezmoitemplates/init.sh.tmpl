@@ -1,5 +1,5 @@
-# Defensive fallback: environment.d sets these for systemd sessions; cover headless/non-systemd
-{{ includeTemplate "export-env.tmpl" (dict "ctx" . "file" "dot_config/environment.d/10-xdg.conf.tmpl") | trim }}
+# Sources environment.d/*.conf; on Linux systemd also loads these for user services
+source "${XDG_CONFIG_HOME:-$HOME/.config}/sh/functions/load-environment-d.sh"
 
 # Bootstrap: pathmunge must be available before local.sh
 source "$XDG_CONFIG_HOME/sh/functions/pathmunge.sh"
@@ -91,9 +91,11 @@ source_files() {
   local dir="$1"
   local ext="${2:-sh}"
   local exclude="${3:-}"
+  local name
   if [ -d "$XDG_CONFIG_HOME/$dir" ]; then
     for file in "$XDG_CONFIG_HOME/$dir/"*".$ext"; do
-      [ -n "$exclude" ] && [ "${file##*/}" = "$exclude" ] && continue
+      name="${file##*/}"
+      case " $exclude " in *" $name "*) continue ;; esac
       bench source "$file"
     done
   fi
@@ -124,7 +126,7 @@ source_plugins() {
 # Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
 source_file_if_exists "$XDG_CONFIG_HOME/sh/environment.sh"
 
-source_files "sh/functions" "sh" "pathmunge.sh"
+source_files "sh/functions" "sh" "pathmunge.sh load-environment-d.sh"
 
 {{- if .features.ai }}
 source_file_if_exists "$XDG_CONFIG_HOME/opencode/functions.sh"
@@ -140,10 +142,6 @@ source_file_if_exists "$XDG_CONFIG_HOME/otel/functions.sh"
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin"
-fi
-
-if [ -d "$HOME/.local/bin" ]; then
-  pathmunge "$HOME/.local/bin"
 fi
 
 {{- if .features.brew }}

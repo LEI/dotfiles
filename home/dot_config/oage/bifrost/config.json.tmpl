@@ -1,6 +1,14 @@
 {{- $ollamaHost := ternary "ollama" "host.docker.internal" (and .features.ollama (eq .os "linux") (not .features.quadlet)) -}}
 {
   "$schema": "https://www.getbifrost.ai/schema",
+  "virtual_keys": [
+    {
+      "id": "local",
+      "name": "local",
+      "value": "env.OAGE_BIFROST_API_KEY"
+    }
+  ],
+  "enforce_auth_on_inference": true,
   "providers": {
     "openrouter": {
       "keys": [

@@ -88,31 +88,57 @@ processes:
       max_restarts: 3
 {{- end }}
 
-{{- $proxies := env "SSH_PROXIES" }}
+{{- $proxies := env "SSH_PROXIES" | replace "\n" " " | trim | splitList " " | compact }}
 {{- if $proxies }}
-{{- range splitList " " $proxies }}
+{{- range $proxies }}
   {{- $uri := . -}}
+  {{- /* tunnel+TYPE://[dbuser@]remoteHost:localPort[/dbname]?ssh=[sshuser@]sshproxy#name */ -}}
   {{- $type := regexReplaceAll "^tunnel\\+([^:]+)://.*$" $uri "${1}" -}}
-  {{- $proxy := regexReplaceAll "^tunnel\\+[^:]+://([^/]+)/.*$" $uri "${1}" -}}
-  {{- $hostport := regexReplaceAll "^tunnel\\+[^:]+://[^/]+/([^#]+).*$" $uri "${1}" -}}
   {{- $name := regexReplaceAll "^.*#(.+)$" $uri "${1}" -}}
+  {{- /* strip fragment and query, isolate authority+path */ -}}
+  {{- $noFrag := regexReplaceAll "#.*$" $uri "" -}}
+  {{- $query := "" -}}
+  {{- if contains "?" $noFrag -}}
+    {{- $query = regexReplaceAll "^.*\\?(.+)$" $noFrag "${1}" -}}
+    {{- $noFrag = regexReplaceAll "\\?.*$" $noFrag "" -}}
+  {{- end -}}
+  {{- $afterScheme := regexReplaceAll "^tunnel\\+[^:]+://" $noFrag "" -}}
+  {{- $dbuser := "" -}}
+  {{- $hostpart := $afterScheme -}}
+  {{- if contains "@" $afterScheme -}}
+    {{- $dbuser = regexReplaceAll "^([^@]+)@.*$" $afterScheme "${1}" -}}
+    {{- $hostpart = regexReplaceAll "^[^@]+@(.+)$" $afterScheme "${1}" -}}
+  {{- end -}}
+  {{- $hostport := regexReplaceAll "^([^/]+).*$" $hostpart "${1}" -}}
+  {{- $dbname := "" -}}
+  {{- if contains "/" $hostpart -}}
+    {{- $dbname = regexReplaceAll "^[^/]+/(.+)$" $hostpart "${1}" -}}
+  {{- end -}}
   {{- $remoteHost := regexReplaceAll "^([^:]+):.*$" $hostport "${1}" -}}
   {{- $localPort := regexReplaceAll "^[^:]+:(.+)$" $hostport "${1}" -}}
+  {{- /* ?ssh=sshuser@sshproxy follows OpenSSH ProxyJump format */ -}}
+  {{- $sshTarget := regexReplaceAll "(?:^|&)ssh=([^&]+).*$" $query "${1}" -}}
   {{- $remotePort := "22" -}}
   {{- if eq $type "postgres" }}{{- $remotePort = "5432" -}}{{- end -}}
   {{- if eq $type "mysql" }}{{- $remotePort = "3306" -}}{{- end }}
 
   {{ $name }}:
     namespace: tunnels
-    description: "{{ $type }} tunnel → {{ $remoteHost }}:{{ $remotePort }} via {{ $proxy }}"
-    command: "ssh -N -L {{ $localPort }}:{{ $remoteHost }}:{{ $remotePort }} {{ $proxy }}"
+    description: "{{ $type }} :{{ $localPort }} -> {{ $remoteHost }}:{{ $remotePort }} via {{ $sshTarget }}"
+    command: "ssh -N -L {{ $localPort }}:{{ $remoteHost }}:{{ $remotePort }} {{ $sshTarget }}"
     availability:
       restart: on_failure
       backoff_seconds: 2
       max_restarts: 5
+    {{- if eq $type "postgres" }}
     readiness_probe:
       exec:
-        command: "nc -z localhost {{ $localPort }}"
+        command: "pg_isready --host=localhost --port={{ $localPort }}{{ if $dbuser }} --username={{ $dbuser }}{{ end }}{{ if $dbname }} --dbname={{ $dbname }}{{ end }}"
+    {{- else if eq $type "mysql" }}
+    readiness_probe:
+      exec:
+        command: "mysqladmin ping --host=127.0.0.1 --port={{ $localPort }} --connect-timeout=2"
+    {{- end }}
       initial_delay_seconds: 5
       period_seconds: 10
       timeout_seconds: 3

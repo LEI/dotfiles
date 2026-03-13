@@ -12,10 +12,16 @@ has() {
 case "$FILE" in
 *.md)
   MD_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/markdownlint/claude.yaml"
+  # Files outside the repo: cd to file's directory to avoid relative path crash
+  # in markdownlint's ignore library (cannot handle ../../ escaping $PWD)
+  case "$FILE" in
+  "$PWD"/*) MD_CWD="$PWD" ;;
+  *) MD_CWD=$(dirname "$FILE") ;;
+  esac
   if has markdownlint; then
-    markdownlint --config "$MD_CONFIG" "$FILE" >&2 || exit 2
+    (cd "$MD_CWD" && markdownlint --config "$MD_CONFIG" "$FILE") >&2 || exit 2
   elif has npx; then
-    npx --yes markdownlint-cli --config "$MD_CONFIG" "$FILE" >&2 || exit 2
+    (cd "$MD_CWD" && npx --yes markdownlint-cli --config "$MD_CONFIG" "$FILE") >&2 || exit 2
   fi
   ;;
 *.sh)

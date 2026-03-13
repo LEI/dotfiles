@@ -11,10 +11,21 @@
 
 {{- if .features.oage }}
 
-# export OPENROUTER_API_KEY=""
+# export OPENROUTER_API_KEY="" # routes openrouter models through bifrost
+# Generate once: openssl rand -hex 32
+# export OAGE_BIFROST_API_KEY=""
+# Generate once: openssl rand -hex 32
+# export OAGE_WEBUI_SECRET_KEY=""
+# Generate once, never change: openssl rand -hex 32
+# export OPEN_NOTEBOOK_ENCRYPTION_KEY="" # changing this corrupts stored credentials in surrealdb
 {{- end }}
 
-# export SSH_PROXIES="tunnel+type://proxy/remoteHost:localPort#name"
+# export SSH_PROXIES="
+# tunnel+mysql://db.internal:13306?ssh=deploy@sshproxy#myapp-mysql
+# tunnel+postgres://pguser@db.internal:15432/mydb?ssh=deploy@sshproxy#myapp-pg
+# "
+# Format: tunnel+TYPE://[dbuser@]remoteHost:localPort[/dbname]?ssh=[sshuser@]sshproxy#name
+# dbuser@ (postgres only): passed to pg_isready; ?ssh= follows OpenSSH ProxyJump syntax
 
 # host() { ssh-cd host /var/www/app; }
-# host-logs() { ssh-tail host /var/log 'tail -f *.log' tspin; }
+# host-logs() { ssh-cd host /var/log 'tail -f *.log' | tspin; }

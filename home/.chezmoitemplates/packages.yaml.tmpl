@@ -392,12 +392,12 @@ packages:
     type: uv
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
-  # mailpit:
-  #   enabled: {{ and .features.mail (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
-  #   restart_service: ":changed"
-  #   nameOverwrite:
-  #     arch: mailpit-bin
-  #   type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
+  mailpit:
+    enabled: {{ and .features.php (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    restart_service: ":changed"
+    nameOverwrite:
+      arch: mailpit-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   mcp-hub: # @4.2.0
     enabled: {{ .features.ai }}
     nameOverwrite:

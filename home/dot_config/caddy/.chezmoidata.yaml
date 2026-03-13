@@ -14,11 +14,20 @@ caddySites:
   # - name: ntfy
   #   port: 80
   #   feature: otel
+  - name: mailpit
+    port: 8025
+    feature: php
+  - name: ollama
+    port: 11434
+    feature: ollama
   - name: open-notebook
     port: 8502
     feature: oage
   - name: open-notebook-api
     port: 5055
+    feature: oage
+  - name: open-webui
+    port: 8503
     feature: oage
   - name: prometheus
     port: 9090
