@@ -5,7 +5,7 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/functions/pathmunge.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/lib/pathmunge.sh"
 
 if [ "${DRY_RUN:-}" = true ]; then
   set -- "$@" --dry-run

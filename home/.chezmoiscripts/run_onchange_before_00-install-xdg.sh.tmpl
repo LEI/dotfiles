@@ -3,8 +3,12 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/lib/export.sh"
 
-{{ includeTemplate "export-env.tmpl" (dict "ctx" . "file" "dot_config/environment.d/10-xdg.conf.tmpl") | trim }}
+# Load XDG vars from environment.d (rendered by chezmoi since target may not exist yet)
+set -a
+eval "$(chezmoi cat "$HOME/.config/environment.d/10-xdg.conf")"
+set +a
 
 {{- if .features.ai }}
 

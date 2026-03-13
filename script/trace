@@ -1,0 +1,23 @@
+#!/bin/sh
+# Trace sourced files during shell init (zero instrumentation in init.sh)
+# Usage: script/trace bash
+#        script/trace zsh
+set -eu
+
+shell="${1:-bash}"
+
+case "$shell" in
+  bash)
+    # xtrace shows every sourced file via BASH_SOURCE
+    PS4='+ ${BASH_SOURCE[0]##*/}:${LINENO}: ' \
+      bash -x -i -c exit 2>&1 | grep -E '\. |source '
+    ;;
+  zsh)
+    # native SOURCE_TRACE prints each sourced file
+    zsh -o source_trace -i -c exit 2>&1
+    ;;
+  *)
+    echo >&2 "Usage: script/trace bash|zsh"
+    exit 1
+    ;;
+esac

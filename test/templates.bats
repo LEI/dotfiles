@@ -10,7 +10,6 @@ setup() {
   # Paths reused per test; BATS_TEST_TMPDIR is unique per test
   BIF_WRAPPER="$BATS_TEST_TMPDIR/bif-wrapper.tmpl"
   BIF_CONTENTS="$BATS_TEST_TMPDIR/bif-contents.txt"
-  CONF_FIXTURE="$BATS_TEST_TMPDIR/fixture.conf"
 }
 
 # Run an inline chezmoi template expression and capture output.
@@ -123,52 +122,7 @@ run_block_in_file() {
   [[ "$output" == *$'### END'*$'\n\n\nafter' ]]
 }
 
-# --- export-env ---
-
-# Write a fixture .conf file and run export-env against it.
-run_export_env() {
-  local conf_content="$1"
-  local conf_fixture="$BATS_TEST_TMPDIR/fixture.conf"
-  printf "%s" "$conf_content" >"$conf_fixture"
-  local tmpl
-  tmpl="$(printf '{{- includeTemplate "export-env.tmpl" (dict "ctx" . "file" "%s") -}}' "$conf_fixture")"
-  run_template "$tmpl"
-}
-
-@test "export-env: plain assignments get export prefix" {
-  run_export_env $'FOO=bar\nBAR=baz\n'
-  assert_success
-  assert_line "export FOO=bar"
-  assert_line "export BAR=baz"
-}
-
-@test "export-env: comment lines are stripped" {
-  run_export_env $'# this is a comment\nFOO=bar\n'
-  assert_success
-  refute_line --partial "# this is a comment"
-  assert_line "export FOO=bar"
-}
-
-@test "export-env: empty lines are skipped" {
-  run_export_env $'\nFOO=bar\n\n'
-  assert_success
-  refute_line ""
-  assert_line "export FOO=bar"
-}
-
-@test "export-env: values with colons and slashes preserved" {
-  run_export_env 'PATH=/usr/bin:/bin'
-  assert_success
-  assert_line "export PATH=/usr/bin:/bin"
-}
-
-@test "export-env: empty conf produces no output" {
-  run_export_env ""
-  assert_success
-  assert_output ""
-}
-
-# --- pluck ---
+# pluck
 
 @test "pluck: extracts named field from list of dicts" {
   run_template '{{- includeTemplate "pluck.tmpl" (dict "key" "name" "values" (list (dict "name" "beta") (dict "name" "alpha"))) -}}'
@@ -209,5 +163,5 @@ run_export_env() {
   assert_output ""
 }
 
-# --- cpu-cores / cpu-threads ---
+# cpu-cores / cpu-threads
 

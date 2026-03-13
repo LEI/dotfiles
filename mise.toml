@@ -12,3 +12,27 @@ run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm
 
 [tasks.hyperfine]
 run = "hyperfine 'mise run test' --max-runs=5 --show-output"
+
+[tasks."trace bash"]
+description = "Trace sourced files in bash init"
+run = "script/trace bash"
+
+[tasks."trace zsh"]
+description = "Trace sourced files in zsh init"
+run = "script/trace zsh"
+
+[tasks."prof bash"]
+description = "Profile bash init with EPOCHREALTIME timestamps"
+run = "script/prof bash"
+
+[tasks."prof zsh"]
+description = "Profile zsh init with zprof"
+run = "script/prof zsh"
+
+[tasks."bench bash"]
+description = "Named component timing for bash init"
+run = "SHELL_BENCH=true bash -i -c exit"
+
+[tasks."bench zsh"]
+description = "Named component timing for zsh init"
+run = "SHELL_BENCH=true zsh -i -c exit"

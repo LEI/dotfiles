@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # Resume last session by default
 claude() {
   if [ $# -eq 0 ]; then

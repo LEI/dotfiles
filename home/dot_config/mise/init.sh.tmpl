@@ -21,9 +21,10 @@ export MISE_NODE_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-npm-packages"
 export MISE_PYTHON_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-python-packages"
 export MISE_RUBY_DEFAULT_PACKAGES_FILE="$HOME/.config/mise/default-gems"
 
-# if [ -z "${_MISE_GLOBAL_NODE_VERSION:-}" ]; then
-#   # mise list node --installed --json --quiet | jq --raw-output 'last .install_path' # /bin/
-#   TMPDIR="${TMPDIR:-/tmp}"
-#   _MISE_GLOBAL_NODE_VERSION="$(mise list node --cd=$TMPDIR --global --installed | awk '/^node / {print $2}')"
-#   export _MISE_GLOBAL_NODE_VERSION
-# fi
+# Must be sourced early: tools become available after activation
+if ! command -v mise >/dev/null; then
+  echo >&2 "Command 'mise' not found"
+  return 0
+fi
+
+eval "$(mise activate "$shell")"

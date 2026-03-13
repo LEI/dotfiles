@@ -1,0 +1,17 @@
+{{- $editor := "" }}
+{{- if lookPath "editor" | isExecutable }}
+{{- $editor = lookPath "editor" }}
+{{- else if lookPath "nvim" | isExecutable }}
+{{- $editor = lookPath "nvim" }}
+{{- else if lookPath "vim" | isExecutable }}
+{{- $editor = lookPath "vim" }}
+{{- else if lookPath "code" | isExecutable }}
+{{- $editor = lookPath "code" }}
+{{- else -}}
+{{- $editor = env "EDITOR" | default (lookPath "vi") }}
+{{- end }}
+EDITOR={{ $editor }}
+VISUAL={{ $editor }}
+{{- if lookPath "ghostty" | isExecutable }}
+TERMINAL=ghostty
+{{- end }}

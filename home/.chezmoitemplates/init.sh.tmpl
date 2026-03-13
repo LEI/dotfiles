@@ -1,13 +1,14 @@
-# Sources environment.d/*.conf; on Linux systemd also loads these for user services
-source "${XDG_CONFIG_HOME:-$HOME/.config}/sh/functions/load-environment-d.sh"
-
-# Bootstrap: pathmunge must be available before local.sh
-source "$XDG_CONFIG_HOME/sh/functions/pathmunge.sh"
+# Bootstrap: lib/ contains infrastructure sourced before everything else
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+source "$XDG_CONFIG_HOME/sh/lib/export.sh"
+if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
+  export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
+fi
+source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
+source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
 
 # Source local environment variables
-if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
-  source "$XDG_CONFIG_HOME/sh/local.sh"
-fi
+[ -f "$XDG_CONFIG_HOME/sh/local.sh" ] && source "$XDG_CONFIG_HOME/sh/local.sh"
 
 # Non-interactive command mode; see environment.plist (BASH_ENV)
 # https://github.com/neovide/neovide/discussions/3175
@@ -55,90 +56,30 @@ BLE_ENABLED="${BLE_ENABLED:-$IS_BASH}"
 PREEXEC_ENABLED="${PREEXEC_ENABLED:-false}"
 {{- end }}
 
-bench() {
-  if [ "${BENCH:-}" = true ] && [ "$shell" = bash ]; then
-    ORIGINAL_TIMEFORMAT="${TIMEFORMAT:-}"
-    if [ -n "${BENCHFMT:-}" ]; then
-      TIMEFORMAT="$BENCHFMT: %R"
-    else
-      TIMEFORMAT="$*: %R"
-    fi
-    time "$@"
-    TIMEFORMAT="$ORIGINAL_TIMEFORMAT"
-    unset ORIGINAL_TIMEFORMAT
-  elif [ "${BENCH:-}" = true ] && [ "$shell" = zsh ]; then
-    ORIGINAL_TIMEFMT="${TIMEFMT:-}"
-    if [ -n "${BENCHFMT:-}" ]; then
-      TIMEFMT="$BENCHFMT: %E elapsed"
-    else
-      # TIMEFMT="%J: %E"
-      TIMEFMT="$*: %E elapsed"
-    fi
-    # NOTE: zsh time does not work with other builtins like source
-    # https://unix.stackexchange.com/a/478220/223694
-    {time} 2>&1 | head -n1
-    "$@"
-    TIMEFMT="$ORIGINAL_TIMEFMT"
-    unset ORIGINAL_TIMEFMT
-    # echo >&2 "Benchmarking OFF ${BENCHFMT:-${*%% *}}"
-    # "$@"
-  else
-    "$@"
-  fi
-}
-
-source_files() {
-  local dir="$1"
-  local ext="${2:-sh}"
-  local exclude="${3:-}"
-  local name
-  if [ -d "$XDG_CONFIG_HOME/$dir" ]; then
-    for file in "$XDG_CONFIG_HOME/$dir/"*".$ext"; do
-      name="${file##*/}"
-      case " $exclude " in *" $name "*) continue ;; esac
-      bench source "$file"
-    done
-  fi
-}
-
-source_file_if_exists() {
-  local file="$1"
-  if [ -f "$file" ]; then
-    bench source "$file"
-  fi
-}
-
-source_plugins() {
-  local dir="$1"
-  local ext="${2:-sh}"
-  if [ -d "$XDG_CONFIG_HOME/$dir/plugins" ]; then
-    for file in "$XDG_CONFIG_HOME/$dir/plugins/"*".$ext"; do
-      name="${file##*/}"
-      name="${name%".$ext"}"
-      # Only source if a command exists with the same name
-      if command -v "$name" >/dev/null; then
-        bench source "$file"
-      fi
-    done
-  fi
-}
-
 # Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
-source_file_if_exists "$XDG_CONFIG_HOME/sh/environment.sh"
+[ -f "$XDG_CONFIG_HOME/sh/environment.sh" ] && . "$XDG_CONFIG_HOME/sh/environment.sh"
 
-source_files "sh/functions" "sh" "pathmunge.sh load-environment-d.sh"
-
-{{- if .features.ai }}
-source_file_if_exists "$XDG_CONFIG_HOME/opencode/functions.sh"
-source_file_if_exists "$XDG_CONFIG_HOME/pi/functions.sh"
-source_file_if_exists "$HOME/.claude/functions.sh"
+# Component init files, generated from chezmoi source tree at render time.
+# Feature-gated components are absent when the feature is off (chezmoiignore).
+# Tool activations (mise, starship, etc.) are sourced separately below in explicit order.
+{{- $src := .chezmoi.sourceDir }}
+{{- $dotcfg := joinPath $src "dot_config" }}
+{{- $toolDirs := list "atuin" "carapace" "direnv" "mise" "starship" "zoxide" }}
+for _f in \
+  "$XDG_CONFIG_HOME/sh/functions/"*.sh \
+{{- range glob (joinPath $src "dot_*/init.sh") }}
+  "$HOME/{{ . | trimPrefix $src | trimPrefix "/" | replaceAllRegex "^dot_" "." }}" \
 {{- end }}
-{{- if get .features "oage" }}
-source_file_if_exists "$XDG_CONFIG_HOME/oage/functions.sh"
+{{- range glob (joinPath $dotcfg "*/init.sh") }}
+{{-   $dir := . | trimPrefix $dotcfg | trimPrefix "/" | dir }}
+{{-   if not (has $dir $toolDirs) }}
+  "$XDG_CONFIG_HOME/{{ . | trimPrefix $dotcfg | trimPrefix "/" }}" \
+{{-   end }}
 {{- end }}
-{{- if get .features "otel" }}
-source_file_if_exists "$XDG_CONFIG_HOME/otel/functions.sh"
-{{- end }}
+; do
+  [ -f "$_f" ] && . "$_f"
+done
+unset _f
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin"
@@ -174,113 +115,24 @@ fi
 {{- end }}
 
 if [ "$BLE_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
-  bench source "$XDG_DATA_HOME/blesh/ble.sh" --rcfile "$XDG_CONFIG_HOME/blesh/config.sh" # --noattach
+  . "$XDG_DATA_HOME/blesh/ble.sh" --rcfile "$XDG_CONFIG_HOME/blesh/config.sh" # --noattach
 fi
 if [ "$PREEXEC_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
-  bench source "$XDG_DATA_HOME/bash-preexec.sh"
+  . "$XDG_DATA_HOME/bash-preexec.sh"
 fi
+
+{{- if .features.carapace }}
 
 if [ -d "$XDG_CONFIG_HOME/carapace/bin" ]; then
   pathmunge "$XDG_CONFIG_HOME/carapace/bin" after
 fi
+{{- end }}
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-BENCHFMT="sheldon" bench eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon source)"
+eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon source)"
 {{- else }}
-# WARN: this block is duplicated in sheldon plugin.toml
-
-{{- if .features.mise }}
-
-# Must be first to ensure tools are available
-if command -v mise >/dev/null; then
-  BENCHFMT="mise" bench eval "$(mise activate "$shell")"
-else
-  echo >&2 "Command 'mise' not found"
-fi
-{{- end }}
-
-# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   bench source "${CARGO_HOME:-$HOME/.cargo}/env"
-# fi
-if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
-  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
-fi
-
-if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
-  pathmunge "$GOPATH/bin" after
-fi
-
-if [ -n "$KREW_ROOT" ] && [ -d "$KREW_ROOT/bin" ]; then
-  pathmunge "$KREW_ROOT/bin" after
-fi
-
-if [ -d "$HOME/.nix-profile/bin" ]; then
-  pathmunge "$HOME/.nix-profile/bin" after
-fi
-
-if [ -d "$HOME/.node_modules/bin" ]; then
-  pathmunge "$HOME/.node_modules/bin" after
-fi
-# if [ ! -d "$npm_config_prefix" ]; then
-#   mkdir -p "$npm_config_prefix"
-# fi
-if [ -n "${npm_config_prefix:-}" ] && [ -d "$npm_config_prefix/bin" ]; then
-  pathmunge "$npm_config_prefix/bin"
-fi
-if [ -n "${PNPM_HOME:-}" ] && [ -d "$PNPM_HOME" ]; then
-  pathmunge "$PNPM_HOME"
-fi
-
-if [ -d "$XDG_DATA_HOME/nvim/mason/bin" ]; then
-  pathmunge "$XDG_DATA_HOME/nvim/mason/bin" after
-fi
-
-# Source plugins after updating PATH and activating mise
-source_plugins sh
-
-# https://carapace-sh.github.io/carapace-bin/setup.html#bash
-if command -v carapace >/dev/null; then
-  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-  if [ "$shell" = zsh ]; then
-    autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
-    zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-  fi
-  # BENCHFMT="carapace" bench source <(carapace _carapace)
-  BENCHFMT="carapace" bench source <(carapace _carapace | sed -e 's/ && +X//')
-else
-  echo >&2 "Command 'carapace' not found"
-fi
-
-if command -v direnv >/dev/null; then
-  BENCHFMT="direnv" bench eval "$(direnv hook "$shell")"
-else
-  echo >&2 "Command 'direnv' not found"
-fi
-
-if command -v starship >/dev/null; then
-  BENCHFMT="starship" bench eval "$(starship init "$shell")"
-else
-  echo >&2 "Command 'starship' not found"
-fi
-
-if command -v zoxide >/dev/null; then
-  BENCHFMT="zoxide" bench eval "$(zoxide init "$shell")"
-else
-  echo >&2 "Command 'zoxide' not found"
-fi
-
-{{- if .features.atuin }}
-
-# Must be after starship to preserve PROMPT_COMMAND
-if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
-  if command -v atuin >/dev/null; then
-    BENCHFMT="atuin" bench eval "$(atuin init --disable-up-arrow "$shell")"
-  else
-    echo >&2 "Command 'atuin' not found"
-  fi
-fi
-{{- end }}
+{{ includeTemplate "init-tools.sh.tmpl" . }}
 {{- end }}
 
 {{- if and .features.ai .features.git }}
@@ -289,13 +141,13 @@ fi
 # fi
 {{- end }}
 
-source_file_if_exists "$XDG_CONFIG_HOME/sh/aliases.sh"
+[ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
 
-source_file_if_exists "$XDG_CONFIG_HOME/$shell/completion.sh"
-source_file_if_exists "$XDG_CONFIG_HOME/$shell/environment.sh"
-source_file_if_exists "$XDG_CONFIG_HOME/$shell/options.sh"
+[ -f "$XDG_CONFIG_HOME/$shell/completion.sh" ] && . "$XDG_CONFIG_HOME/$shell/completion.sh"
+[ -f "$XDG_CONFIG_HOME/$shell/environment.sh" ] && . "$XDG_CONFIG_HOME/$shell/environment.sh"
+[ -f "$XDG_CONFIG_HOME/$shell/options.sh" ] && . "$XDG_CONFIG_HOME/$shell/options.sh"
 
-source_file_if_exists "$HOME/.${shell}rc.local"
+[ -f "$HOME/.${shell}rc.local" ] && . "$HOME/.${shell}rc.local"
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
 if [ "$BLE_ENABLED" = true ] && [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then

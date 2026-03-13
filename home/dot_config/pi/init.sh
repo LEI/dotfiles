@@ -1,5 +1,3 @@
-#!/bin/bash
-
 pi_local() {
   local pi_version="${PI_VERSION:-latest}"
   bunx "@mariozechner/pi-coding-agent@$pi_version" "$@"

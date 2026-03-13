@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Profile shell init timing
+# Usage: script/prof bash|zsh
+set -eu
+
+shell="${1:-bash}"
+
+case "$shell" in
+  bash)
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    logfile="$tmpdir/trace.log"
+    cat > "$tmpdir/env.sh" <<BASH_PROF
+exec 3>"$logfile"
+BASH_XTRACEFD=3
+PS4='+ \${EPOCHREALTIME:-} \${BASH_SOURCE[0]##*/}:\${LINENO}: '
+set -x
+BASH_PROF
+    BASH_ENV="$tmpdir/env.sh" bash -i -c 'set +x; exec 3>&-'
+    echo >&2 "Top 20 by duration:"
+    sort -t' ' -k2 -rn "$logfile" | head -20
+    ;;
+  zsh)
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    cat > "$tmpdir/.zshenv" <<'ZSH_PROF'
+zmodload zsh/zprof
+[ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
+ZSH_PROF
+    cat > "$tmpdir/.zshrc" <<'ZSH_RC'
+[ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
+ZSH_RC
+    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}" ZDOTDIR="$tmpdir" zsh -i -c 'zprof'
+    ;;
+  *)
+    echo >&2 "Usage: script/prof bash|zsh"
+    exit 1
+    ;;
+esac

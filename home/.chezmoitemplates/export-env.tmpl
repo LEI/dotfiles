@@ -1,7 +1,0 @@
-{{- /* Renders a .conf file with export prefix for shell inclusion. Usage:
-     includeTemplate "export-env.tmpl" (dict "ctx" . "file" "dot_config/environment.d/10-xdg.conf.tmpl") */ -}}
-{{- range (includeTemplate .file .ctx | splitList "\n") -}}
-{{-   if and . (not (hasPrefix "#" .)) }}
-export {{ . }}
-{{-   end }}
-{{- end }}

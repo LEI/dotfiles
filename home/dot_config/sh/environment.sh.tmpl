@@ -1,47 +1,7 @@
 # https://github.com/grawity/dotfiles/blob/main/.environ.notes
-{{- if .name }}
-export NAME={{ .name | quote }}
-{{- end }}
-{{- if .email }}
-export EMAIL={{ .email | quote }}
-{{- end }}
+# Static vars moved to environment.d/*.conf (identity, editor, pager)
 
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
-
-export MANPAGER="${MANPAGER:-less -X}"
-
-# export PAGER="less -SFX"
-# export PAGER="${PAGER:-less --chop-long-lines --no-init --quit-if-one-screen}"
-
-# https://github.com/xo/usql/issues/308
-# export LESS="-S -I -R"
-# export LESS="--chop-long-lines --IGNORE-CASE --RAW-CONTROL-CHARS"
-# export LESS="-S -X -F -I -R"
-export LESS="${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}"
-
-{{- $editor := "" }}
-{{- if lookPath "editor" | isExecutable }}
-{{- $editor = lookPath "editor" }}
-{{- else if lookPath "nvim" | isExecutable }}
-{{- $editor = lookPath "nvim" }}
-{{- else if lookPath "vim" | isExecutable }}
-{{- $editor = lookPath "vim" }}
-{{- else if lookPath "code" | isExecutable }}
-{{- $editor = lookPath "code" }}
-{{- else -}}
-{{- $editor = env "EDITOR" | default (lookPath "vi") }}
-{{- end }}
-# export EDITOR="${EDITOR:-{{ $editor }}}"
-export EDITOR="{{ $editor }}"
-export VISUAL="${VISUAL:-$EDITOR}"
-
-{{- if lookPath "ghostty" | isExecutable }}
-
-# xdg-terminal-exec
-export TERMINAL="${TERMINAL:-ghostty}"
-{{- end }}
-
-
 
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}

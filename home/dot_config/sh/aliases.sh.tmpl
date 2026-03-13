@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # Confirm before overwriting
 alias cp="cp -i" # --interactive
 
@@ -68,7 +66,7 @@ alias pbpaste=termux-clipbload-get
 
 {{- end }}
 
-if ! hash clip 2>/dev/null; then
+if ! command -v clip >/dev/null; then
   clip() {
     [ -t 0 ] && pbpaste || pbcopy
   }
@@ -133,7 +131,7 @@ fi
 
 {{- if .features.python }}
 
-if ! hash recover 2>/dev/null; then
+if ! command -v recover >/dev/null; then
   {{- if lookPath "recoverpy" | isExecutable }}
   alias recover="sudo recoverpy"
   {{- else if lookPath "uvx" | isExecutable }}

@@ -1,12 +1,4 @@
-{{- includeTemplate "init.sh.tmpl" (dict
-  "arch" .chezmoi.arch
-  "brewPrefix" .brewPrefix
-  "features" .features
-  "os" .os
-  "osID" .osID
-  "osIDLike" .osIDLike
-  "shell" "zsh"
-) -}}
+{{- includeTemplate "init.sh.tmpl" (merge (dict "shell" "zsh") .) -}}
 
 bindkey -e # Emacs
 bindkey '^[[A' up-line-or-search

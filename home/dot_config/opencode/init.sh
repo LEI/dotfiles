@@ -1,5 +1,3 @@
-#!/bin/sh
-
 export OPENCODE_EXPERIMENTAL=true
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 

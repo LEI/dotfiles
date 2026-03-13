@@ -1,12 +1,6 @@
 # https://github.com/b3nj5m1n/xdg-ninja/tree/main/programs
 # https://github.com/twpayne/dotfiles/blob/master/home/dot_zshrc.tmpl
 
-# Shell-only: pager/readline behavior and side-effects not suitable for environment.d
-{{- if lookPath "less" | isExecutable }}
-export LESSSECURE=1
-export LESSSECURE_ALLOW=edit,examine,glob,osc8,pipe,shell,stop,tags
-{{- end }}
-
 {{- if .features.node }}
 if ! [ -d "$PNPM_HOME" ]; then
   mkdir -p "$PNPM_HOME"
