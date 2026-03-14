@@ -27,11 +27,11 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bench,type:unit
-@test "script/bench" {
+# bats test_tags=startup,type:unit
+@test "script/startup" {
   export BENCH_ITERATIONS=1
   stub_seq dummy $((BENCH_ITERATIONS + 2))
-  run --separate-stderr bash ./script/bench dummy
+  run --separate-stderr bash ./script/startup dummy
   unstub dummy 2>/dev/null || true
   assert_stderr_line --partial "bench 1/$BENCH_ITERATIONS: dummy"
   assert_success

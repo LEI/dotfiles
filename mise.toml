@@ -11,12 +11,5 @@ includes = ["script"]
 run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
 
 [tasks.hyperfine]
-run = "hyperfine 'mise run test' --max-runs=5 --show-output"
+run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
-[tasks."bench bash"]
-description = "Named component timing for bash init"
-run = "SHELL_BENCH=true bash -i -c exit"
-
-[tasks."bench zsh"]
-description = "Named component timing for zsh init"
-run = "SHELL_BENCH=true zsh -i -c exit"

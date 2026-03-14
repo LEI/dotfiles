@@ -1,7 +1,8 @@
 #!/bin/sh
 #MISE description="Trace sourced files during shell init"
-# Usage: script/trace bash
-#        script/trace zsh
+#USAGE arg "<shell>" help="Shell to trace" default="bash" {
+#USAGE   choices "bash" "zsh"
+#USAGE }
 set -eu
 
 shell="${1:-bash}"
@@ -18,7 +19,7 @@ case "$shell" in
       | sed "s|$HOME|~|g"
     ;;
   *)
-    echo >&2 "Usage: script/trace bash|zsh"
-    exit 1
+    echo >&2 "trace: invalid shell '$shell', expected bash or zsh"
+    exit 2
     ;;
 esac

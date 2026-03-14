@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #MISE description="Profile shell init timing"
-# Usage: script/prof bash
-#        script/prof zsh
+#USAGE arg "<shell>" help="Shell to profile" default="bash" {
+#USAGE   choices "bash" "zsh"
+#USAGE }
 set -eu
 
 shell="${1:-bash}"
@@ -34,7 +35,7 @@ ZSH_RC
     REAL_ZDOTDIR="${ZDOTDIR:-$HOME}" ZDOTDIR="$tmpdir" zsh -ic 'zprof'
     ;;
   *)
-    echo >&2 "Usage: script/prof bash|zsh"
-    exit 1
+    echo >&2 "profile: invalid shell '$shell', expected bash or zsh"
+    exit 2
     ;;
 esac
