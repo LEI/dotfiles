@@ -75,6 +75,38 @@ setup() {
   assert_success
 }
 
+# bats test_tags=container,type:unit
+@test "container: resolve sets expected vars for alpine" {
+  source ./script/container
+  resolve alpine
+  assert_equal "$image_name" alpine
+  assert_equal "$image_version" latest
+  assert_equal "$image_name_arg" alpine
+  assert_equal "$user" test
+  assert_equal "$home" /home/test
+  assert_equal "$container" chezmoi-alpine-latest
+}
+
+# bats test_tags=container,type:unit
+@test "container: resolve sets expected vars for termux" {
+  source ./script/container
+  resolve termux
+  assert_equal "$image_name" termux
+  assert_equal "$image_name_arg" docker.io/termux/termux-docker
+  assert_equal "$user" root
+  assert_equal "$prefix" /data/data/com.termux/files
+  assert_equal "$home" /data/data/com.termux/files/home
+}
+
+# bats test_tags=container,type:unit
+@test "container: resolve handles version suffix" {
+  source ./script/container
+  resolve alpine:3.19
+  assert_equal "$image_name" alpine
+  assert_equal "$image_version" 3.19
+  assert_equal "$container" chezmoi-alpine-3.19
+}
+
 # bats test_tags=install,type:unit
 @test "install-password-manager: skips on unknown command" {
   export CHEZMOI_COMMAND=test

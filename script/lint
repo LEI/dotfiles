@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#MISE description="Lint chezmoi source files"
+
+set -euo pipefail
+
+rc=0
+
+# Syntax-check rendered shell scripts (bash -n)
+check_syntax() {
+  local src="$1"
+  local out
+  out="$(chezmoi execute-template < "$src" 2>/dev/null)" || return 0
+  [ -z "$out" ] && return 0
+  case "$src" in
+  *.sh.tmpl|*/run_onchange_*.sh.tmpl|*/run_once_*.sh.tmpl) ;;
+  *) return 0 ;;
+  esac
+  local err
+  err="$(bash -n <(printf '%s\n' "$out") 2>&1)" || {
+    echo "${err//\/dev\/fd\/[0-9]*/$src}"
+    return 1
+  }
+}
+
+# Find templates that render with consecutive blank lines
+check_blank_lines() {
+  local src="$1"
+  local out
+  out="$(chezmoi execute-template < "$src" 2>/dev/null)" || return 0
+  [ -z "$out" ] && return 0
+  if printf '%s\n' "$out" | awk '/^$/{b++; if(b>=2){found=1;exit}} NF{b=0} END{exit !found}'; then
+    echo "$src: consecutive blank lines"
+  fi
+}
+
+export -f check_syntax check_blank_lines
+
+run_checks() {
+  local src="$1"
+  check_syntax "$src" || return 1
+  check_blank_lines "$src"
+}
+export -f run_checks
+
+hits="$(fd '\.tmpl$' home --type=f --exclude='.chezmoitemplates' \
+  | xargs -P4 -I{} bash -c 'run_checks "$@"' _ {})" || rc=1
+
+if [ -n "$hits" ]; then
+  echo >&2 "$hits"
+  rc=1
+fi
+
+exit $rc

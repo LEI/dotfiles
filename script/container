@@ -1,111 +1,102 @@
 #!/usr/bin/env bash
-#MISE description="mise container"
-
-# PROFILE=minimal mise container alpine up --build --detach
-# PROFILE=minimal mise container alpine exec -it alpine-latest-minimal bash -i
+#MISE description="Build and test chezmoi in a container"
+#USAGE arg "<name>" help="Distro name(s), comma-separated, or 'all'"
+#USAGE arg "[subcommand]" help="build|sync|bootstrap|check|update|test|shell|run" default="run"
 
 # https://www.chezmoi.io/reference/commands/docker/
 
-set -euxo pipefail
+set -euo pipefail
 
-# CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-}" # minimal
-# EPHEMERAL="${EPHEMERAL:-false}"
-# HEADLESS="${HEADLESS:-false}"
-
-# PREFIX="${PREFIX:-}" # termux prefix
 PROVIDER="${PROVIDER:-podman}"
-
 tag_prefix=chezmoi
 
-if [ $# -eq 0 ]; then
-  echo >&2 "Usage: container <name[:version]>"
+usage() {
+  cat >&2 <<'EOF'
+Usage: container <name>[,<name>...] [subcommand] [args...]
+       container all [subcommand]
+
+Subcommands:
+  build      Build the image and create/start the container
+  sync       Wipe and re-copy source files into the container
+  bootstrap  Run chezmoi bootstrap inside the container
+  check      Run script/check inside the container
+  update     Run script/update inside the container
+  test       Run script/test inside the container
+  shell      Open an interactive shell (default: chezmoi package diff)
+  run        Full pipeline: build, sync, bootstrap, check, update, test (default)
+EOF
   exit 1
-fi
-
-NAME="$1"
-shift
-
-container_status() {
-  $PROVIDER container inspect --format '{{.State.Status}}' "$@"
 }
 
-build_container() {
-  name="$1"
-  shift
-  image_name="${name%:*}"
-  if [[ "$name" = *:* ]]; then
-    image_version="${name#*:}"
-  else
-    image_version=latest
-  fi
-  container="$tag_prefix-$image_name-$image_version"
-  if [ "$image_name" = archlinux ] && [ "$(uname -m)" = arm64 ]; then
-    image_name_arg=docker.io/ogarcia/archlinux
-    # base, base-devel
-  elif [ "$image_name" = macos ]; then
+container_status() {
+  $PROVIDER container inspect --format '{{.State.Status}}' "$1" 2>/dev/null || echo missing
+}
+
+# Sets: image_name, image_version, image_name_arg, image_version_arg, user, home, prefix, chezmoi_root, container
+resolve() {
+  local spec="$1"
+  image_name="${spec%:*}"
+  image_version="${spec#*:}"
+  [ "$image_version" = "$spec" ] && image_version=latest
+
+  image_name_arg="$image_name"
+  image_version_arg="$image_version"
+  prefix=""
+
+  case "$image_name" in
+  archlinux)
+    [ "$(uname -m)" = arm64 ] && image_name_arg=docker.io/ogarcia/archlinux
+    ;;
+  macos)
     image_name_arg=docker.io/sickcodes/docker-osx
-  elif [ "$image_name" = termux ]; then
+    ;;
+  termux)
     image_name_arg=docker.io/termux/termux-docker
-    # aarch64, arm, i686 (latest), x86_64
-    if [ "$(uname -m)" = arm64 ]; then
-      image_version_arg=aarch64
-    else
-      image_version_arg=x86_64
-    fi
-    # prefix=/data/data/com.termux/files/home
-    # user=a0_test
-    # TODO: prefix bootstrap only for termux in docker
-  fi
-
-  # case "$image_name" in
-  # *) ;;
-  # esac
-
-  # container_user=test
-  user="test"
-  home="/home/$user"
-  if [ "$image_name" = macos ]; then
-    home="/Users/$user"
-  elif [ "$image_name" = termux ]; then
+    image_version_arg=x86_64
+    [ "$(uname -m)" = arm64 ] && image_version_arg=aarch64
     prefix=/data/data/com.termux/files
+    ;;
+  esac
+
+  user=test
+  home="/home/$user"
+  [ "$image_name" = macos ] && home="/Users/$user"
+  if [ "$image_name" = termux ]; then
     home="$prefix/home"
-    # container_user=root
-    user=root # a0_test
+    user=root
   fi
   chezmoi_root="$home/.local/share/chezmoi"
+  container="$tag_prefix-$image_name-$image_version"
+}
+
+exec_as() {
+  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" \
+    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+    "$container" "$@"
+}
+
+exec_tty() {
+  $PROVIDER exec --tty --interactive --user="$user" --workdir="$chezmoi_root" \
+    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+    "$container" "$@"
+}
+
+cmd_build() {
+  resolve "$1"
 
   $PROVIDER build . \
     --file=Containerfile \
-    --build-arg=IMAGE_NAME="${image_name_arg:-$image_name}" \
-    --build-arg=IMAGE_VERSION="${image_version_arg:-$image_version}" \
+    --build-arg=IMAGE_NAME="$image_name_arg" \
+    --build-arg=IMAGE_VERSION="$image_version_arg" \
     --tag="$container"
-  # --build-arg=USER="$user"
 
-  # $PROVIDER run -it --name="$container" --rm "$container" "$@"
-  # --userns=keep-id
-  # --volume="$PWD:$chezmoi_root:ro"
-
-  # # Stop running container
-  # if [ "$(container_status "$container")" = running ]; then
-  #   $PROVIDER stop "$container"
-  # fi
-
-  # # Remove existing container
-  # if $PROVIDER container inspect "$container" >/dev/null; then
-  #   $PROVIDER container rm "$container"
-  # fi
-
-  # Create container
-  if ! $PROVIDER container inspect "$container" >/dev/null; then
+  $PROVIDER container inspect "$container" >/dev/null 2>&1 ||
     $PROVIDER create --name="$container" "$container"
-  fi
 
-  # https://github.com/sickcodes/Docker-OSX/issues/381
+  [ "$(container_status "$container")" = running ] ||
+    $PROVIDER start "$container"
+
   if [ "$image_name" = macos ]; then
-    # export XAUTHORITY="$HOME/.Xauthority"
-    # xhost +local:root
-    # xhost +
-    # sudo usermod -aG kvm $USER
     $PROVIDER run -it --name="$container" \
       -device /dev/kvm \
       -p 50922:10022 \
@@ -122,92 +113,165 @@ build_container() {
     return
   fi
 
-  # Start container
-  if [ "$(container_status "$container")" != running ]; then
-    $PROVIDER start "$container"
-  fi
-
-  # $PROVIDER wait "$container"
-
-  # Verify container is running
   status="$(container_status "$container")"
   if [ "$status" != running ]; then
-    echo >&2 "Container $container is not running (status: $status)"
+    echo >&2 "container $container is not running (status: $status)"
     exit 1
   fi
 
-  command=(./script/bootstrap --verbose)
-  if [ "$image_name" = termux ]; then
-    user=system
-    command=(
-      proot
-      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf"
-      -b "$prefix/usr/etc/tls:/etc/ssl"
-      "${command[@]}"
-    )
-    $PROVIDER exec "$container" sh -euxc 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
-    # NOTE: Cannot run 'pkg' command as root
-    $PROVIDER exec --user=$user "$container" sh -euxc 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
-  else
-    # Wait for test user
+  if [ "$image_name" != termux ]; then
     $PROVIDER exec "$container" sh -euxc "
       until id -u $user >/dev/null 2>&1; do
-        echo 'Waiting for $user user to be created...'
+        echo 'Waiting for $user user...'
         sleep 1
       done
     "
   fi
-  $PROVIDER exec "$container" mkdir -p "$chezmoi_root"
-  $PROVIDER container cp .chezmoiroot "$container:$chezmoi_root/"
-  $PROVIDER container cp .chezmoiversion "$container:$chezmoi_root/"
-  $PROVIDER container cp home "$container:$chezmoi_root/"
-  $PROVIDER container cp script "$container:$chezmoi_root/"
-  $PROVIDER container cp test "$container:$chezmoi_root/"
-  if [ -d test_helper ]; then
-    $PROVIDER container cp test_helper "$container:$chezmoi_root/"
-  fi
-  if [ -d test_support ]; then
-    $PROVIDER container cp test_support "$container:$chezmoi_root/"
-  fi
-  $PROVIDER exec "$container" chown -R $user:$user "$home"
-
-  # docker resolves --user by name via passwd relative to the user home path,
-  workdir="$chezmoi_root"
-
-  $PROVIDER exec \
-    --env=CHEZMOI_UPGRADE=true \
-    --env=CI=true \
-    --user="$user" \
-    --workdir="$workdir" \
-    "$container" "${command[@]}"
-
-  $PROVIDER exec --user="$user" --workdir="$workdir" "$container" ./script/check
-  $PROVIDER exec --user="$user" --workdir="$workdir" "$container" ./script/update
-  $PROVIDER exec --tty --user="$user" --workdir="$workdir" "$container" ./script/test
-
-  if [ $# -eq 0 ]; then
-    # FIXME: override temporary directory to avoid permission issues in termux
-    if [ "$image_name" = termux ]; then
-      set -- bash --version
-    else
-      set -- bash -ic "chezmoi package diff all 2>/dev/null || true"
-    fi
-  fi
-  $PROVIDER exec \
-    --interactive \
-    --tty \
-    --user="$user" \
-    --workdir="$workdir" \
-    "$container" "$@"
-  # $PROVIDER stop "$container"
 }
 
-if [ "$NAME" = all ]; then
-  NAME=alpine,archlinux,debian,ubuntu,fedora
-  # termux image incompatible with docker (openat etc/passwd path escapes rootfs)
-  [ "$PROVIDER" != docker ] && NAME=$NAME,termux
-fi
+cmd_sync() {
+  resolve "$1"
 
-for name in ${NAME//,/ }; do
-  time build_container "$name" "$@"
-done
+  $PROVIDER exec "$container" mkdir -p "$chezmoi_root"
+
+  for f in .chezmoiroot .chezmoiversion mise.toml home script test; do
+    $PROVIDER container cp "$f" "$container:$chezmoi_root/"
+  done
+  for d in test_helper test_support; do
+    [ -d "$d" ] && $PROVIDER container cp "$d" "$container:$chezmoi_root/"
+  done
+
+  $PROVIDER exec "$container" chown -R "$user:$user" "$home"
+}
+
+cmd_bootstrap() {
+  resolve "$1"
+
+  if [ "$image_name" = termux ]; then
+    $PROVIDER exec "$container" \
+      sh -euxc 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
+    $PROVIDER exec --user=system "$container" \
+      sh -euxc 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
+    $PROVIDER exec \
+      --env=CHEZMOI_UPGRADE=true \
+      --env=CI=true \
+      --user="$user" \
+      --workdir="$chezmoi_root" \
+      "$container" \
+      proot \
+      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf" \
+      -b "$prefix/usr/etc/tls:/etc/ssl" \
+      ./script/bootstrap --verbose
+  else
+    $PROVIDER exec \
+      --env=CHEZMOI_UPGRADE=true \
+      --env=CI=true \
+      --user="$user" \
+      --workdir="$chezmoi_root" \
+      "$container" ./script/bootstrap --verbose
+  fi
+}
+
+cmd_check() {
+  resolve "$1"
+  exec_as ./script/check
+}
+
+cmd_update() {
+  resolve "$1"
+  exec_as ./script/update
+}
+
+cmd_test() {
+  resolve "$1"
+  shift
+  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" "$container" ./script/test "$@"
+}
+
+cmd_shell() {
+  resolve "$1"
+  shift
+  local cmd
+  if [ "$image_name" = termux ]; then
+    cmd=(bash --version)
+  else
+    cmd=(bash -ic "chezmoi package diff all 2>/dev/null || true")
+  fi
+  [ $# -gt 0 ] && cmd=("$@")
+  $PROVIDER exec --interactive --tty --user="$user" --workdir="$chezmoi_root" "$container" "${cmd[@]}"
+}
+
+cmd_exec() {
+  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" \
+    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+    "$container" "$@"
+}
+
+cmd_pipeline() {
+  resolve "$1"
+  cmd_exec mise trust --yes
+  cmd_exec mise run pipeline
+}
+
+cmd_run() {
+  cmd_build "$1"
+  cmd_sync "$1"
+  cmd_bootstrap "$1"
+  cmd_pipeline "$1"
+}
+
+run_one() {
+  local name="$1"
+  shift
+  case "$SUBCMD" in
+  build) cmd_build "$name" ;;
+  sync) cmd_sync "$name" ;;
+  bootstrap) cmd_bootstrap "$name" ;;
+  check) cmd_check "$name" ;;
+  update) cmd_update "$name" ;;
+  test) cmd_test "$name" "$@" ;;
+  shell) cmd_shell "$name" "$@" ;;
+  pipeline) cmd_pipeline "$name" ;;
+  run) cmd_run "$name" ;;
+  *)
+    echo >&2 "Unknown subcommand: $SUBCMD"
+    usage
+    ;;
+  esac
+}
+
+SUBCMD=run
+
+main() {
+  [ $# -eq 0 ] && usage
+
+  local NAME="$1"
+  shift
+  SUBCMD="${1:-run}"
+  if [ $# -gt 0 ]; then
+    shift
+  fi
+
+  if [ "$NAME" = all ]; then
+    NAME=alpine,archlinux,debian,ubuntu,fedora
+    [ "$PROVIDER" != docker ] && NAME=$NAME,termux
+  fi
+
+  local extra=("$@")
+  local failed=()
+
+  for name in ${NAME//,/ }; do
+    local rc=0
+    time run_one "$name" "${extra[@]}" || rc=$?
+    [ $rc -ne 0 ] && failed+=("$name")
+  done
+
+  if [ ${#failed[@]} -gt 0 ]; then
+    echo >&2 "FAILED: ${failed[*]}"
+    exit 1
+  fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
