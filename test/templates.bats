@@ -11,7 +11,7 @@ setup() {
   BIF_CONTENTS="$BATS_TEST_TMPDIR/bif-contents.txt"
 }
 
-# Run an inline chezmoi template expression and capture output.
+# Run an inline chezmoi template expression and capture output
 run_template() {
   run --separate-stderr chezmoi execute-template "$@"
 }
@@ -36,7 +36,7 @@ run_block_in_file() {
     _ "$existing_file" "$BIF_WRAPPER"
 }
 
-@test "block-in-file: fresh file — block appended after existing content" {
+@test "block-in-file: appends block to fresh file" {
   run_block_in_file $'before content\n' "new"
   assert_success
   assert_line "before content"
@@ -45,7 +45,7 @@ run_block_in_file() {
   assert_line --partial "### END"
 }
 
-@test "block-in-file: empty file — block written" {
+@test "block-in-file: writes block to empty file" {
   run_block_in_file "" "body"
   assert_success
   assert_line --partial "### START"
@@ -53,40 +53,40 @@ run_block_in_file() {
   assert_line --partial "### END"
 }
 
-@test "block-in-file: block contents replaced on update" {
+@test "block-in-file: replaces block contents on update" {
   run_block_in_file $'### START x\nold\n### END x\n' "new"
   assert_success
   refute_line "old"
   assert_line "new"
 }
 
-@test "block-in-file: content before block preserved" {
+@test "block-in-file: preserves content before block" {
   run_block_in_file $'header\n### START x\nold\n### END x\n' "new"
   assert_success
   assert_line "header"
 }
 
-@test "block-in-file: blank line after END preserved" {
+@test "block-in-file: preserves blank line after END" {
   run_block_in_file $'### START x\nold\n### END x\n\nafter\n' "new"
   assert_success
   # Blank line must appear between END marker and after
   [[ "$output" == *$'### END'*$'\n\nafter' ]]
 }
 
-@test "block-in-file: content after block without blank line preserved" {
+@test "block-in-file: preserves content after block without blank line" {
   run_block_in_file $'### START x\nold\n### END x\nafter\n' "new"
   assert_success
   assert_line "after"
 }
 
-@test "block-in-file: content before and after block both preserved" {
+@test "block-in-file: preserves content before and after block" {
   run_block_in_file $'header\n### START x\nold\n### END x\n\nfooter\n' "new"
   assert_success
   assert_line "header"
   assert_line "footer"
 }
 
-@test "block-in-file: idempotent — applying twice yields same output" {
+@test "block-in-file: produces same output when applied twice" {
   run_block_in_file $'before\n' "content"
   local first_output="$output"
   run_block_in_file "$first_output" "content"
@@ -94,13 +94,13 @@ run_block_in_file() {
   assert_output "$first_output"
 }
 
-@test "block-in-file: contents with special chars preserved verbatim" {
+@test "block-in-file: preserves special chars verbatim" {
   run_block_in_file "" 'echo "$HOME" # comment'
   assert_success
   assert_line 'echo "$HOME" # comment'
 }
 
-@test "block-in-file: custom commentString changes marker prefix" {
+@test "block-in-file: uses custom commentString as marker prefix" {
   run_block_in_file "" "val" ' "commentString" "//"'
   assert_success
   assert_line --partial "/// START"
@@ -108,14 +108,14 @@ run_block_in_file() {
   refute_line --partial "### START"
 }
 
-@test "block-in-file: empty block body writes empty block" {
+@test "block-in-file: writes markers for empty block body" {
   run_block_in_file "" ""
   assert_success
   assert_line --partial "### START"
   assert_line --partial "### END"
 }
 
-@test "block-in-file: multiple blank lines after END all preserved" {
+@test "block-in-file: preserves multiple blank lines after END" {
   run_block_in_file $'### START x\nold\n### END x\n\n\nafter\n' "new"
   assert_success
   [[ "$output" == *$'### END'*$'\n\n\nafter' ]]
@@ -149,14 +149,14 @@ run_block_in_file() {
   [[ "${sorted[2]}" == "zebra" ]]
 }
 
-@test "pluck: missing field entries are skipped" {
+@test "pluck: skips entries without matching field" {
   run_template '{{- includeTemplate "pluck.tmpl" (dict "key" "name" "values" (list (dict "name" "present") (dict "other" "ignored"))) -}}'
   assert_success
   assert_line "present"
   refute_line "ignored"
 }
 
-@test "pluck: empty values list produces no output" {
+@test "pluck: produces no output for empty values" {
   run_template '{{- includeTemplate "pluck.tmpl" (dict "key" "name" "values" list) -}}'
   assert_success
   assert_output ""
@@ -177,7 +177,7 @@ run_block_in_file() {
   assert_line "# After script (brew):"
 }
 
-@test "package-hooks: empty when no matching values" {
+@test "package-hooks: produces no output without matching values" {
   run_template '{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" list) -}}'
   assert_success
   assert_output ""

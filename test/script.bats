@@ -75,7 +75,7 @@ setup() {
 }
 
 # bats test_tags=install,type:unit
-@test "install password manager: skips on unknown command" {
+@test "install-password-manager: skips on unknown command" {
   export CHEZMOI_COMMAND=test
   export CHEZMOI_WORKING_TREE="$PWD"
   run --separate-stderr bash home/.install-password-manager.sh
@@ -85,7 +85,7 @@ setup() {
 }
 
 # bats test_tags=install,type:unit
-@test "install password manager: exits if already installed" {
+@test "install-password-manager: exits if already installed" {
   stub bws "true"
   export CHEZMOI_COMMAND=apply
   export CHEZMOI_WORKING_TREE="$PWD"
