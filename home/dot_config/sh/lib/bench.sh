@@ -1,7 +1,7 @@
 # Named component timing for shell init
 # Requires wrapping individual source/eval calls
-# For zero-touch profiling, use prof.sh (SHELL_PROF=true) instead
-# For external startup benchmarks, use script/bench (hyperfine-style)
+# For per-line profiling, use script/profile instead
+# For aggregate startup benchmarks, use script/startup
 #
 # Usage: SHELL_BENCH=true in local.sh or env, then:
 #   bench . "$file"
