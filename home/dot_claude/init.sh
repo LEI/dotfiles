@@ -27,13 +27,6 @@ claude_task() {
   CLAUDE_CODE_TASK_LIST_ID="${CLAUDE_CODE_TASK_LIST_ID:-$(basename "$PWD")}" claude "$@"
 }
 
-if command -v codex >/dev/null; then
-  codex() { env codex "${@:-resume --last}"; }
-fi
-if command -v crush >/dev/null; then
-  crush() { env crush "${@:---continue}"; }
-fi
-
 claude_sessions() {
   if ! command -v cc-sessions > /dev/null; then
     echo >&2 "cc-sessions not installed"
