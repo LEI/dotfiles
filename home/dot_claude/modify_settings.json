@@ -398,7 +398,7 @@
     "hookify:writing-rules": true,
     "journal": true,
     "keybindings-help": true,
-    "home:sq": true,
+    "local:sq": true,
 {{- range .claudeDisabledSkills }}
     {{ . | quote }}: false,
 {{- end }}
