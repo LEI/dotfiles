@@ -1,14 +1,14 @@
 {
-  "name": "home",
+  "name": "chezmoi",
   "description": "Chezmoi-managed plugins",
   "owner": {
-    "name": "home"
+    "name": "chezmoi"
   },
   "plugins": [
     {
-      "name": "home",
+      "name": "local",
       "description": "Managed skills and hooks",
-      "source": "./plugins/home"
+      "source": "./plugins/local"
     }
   ]
 }

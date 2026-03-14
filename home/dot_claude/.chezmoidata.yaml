@@ -3,8 +3,8 @@
 # repo: git-hosted (passed as-is to `claude plugin marketplace add`)
 # path: local path relative to homeDir
 claudeMarketplaces:
-  home:
-    path: ".claude/plugins/home"
+  chezmoi:
+    path: ".claude/plugins/chezmoi"
   claude-dashboard:
     repo: uppinote20/claude-dashboard
   everything-claude-code:
@@ -27,8 +27,8 @@ claudeMarketplaces:
 # greptile@claude-plugins-official: needs API key
 # semgrep@claude-plugins-official: needs semgrep installed
 claudePlugins:
-  - name: home
-    marketplace: home
+  - name: local
+    marketplace: chezmoi
   - name: claude-code-setup
     marketplace: claude-plugins-official
   - name: claude-dashboard
