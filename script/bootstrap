@@ -1,5 +1,7 @@
 #!/bin/sh
-#MISE description="mise bootstrap"
+#MISE description="Install chezmoi and apply dotfiles"
+#USAGE flag "--verbose" help="Enable verbose output"
+#USAGE arg "[user]" help="GitHub user or repo URL (required outside CI)"
 
 # https://github.com/twpayne/dotfiles/blob/master/install.sh
 # https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles
@@ -29,7 +31,7 @@ if [ "${CI:-${CODESPACES:-}}" = "true" ]; then
   fi
   # set -- init --apply --source="$script_dir"
   # NOTE: the bootstrap script is in a subdirectory
-  set -- init --apply --source="$(dirname script_dir)" "$@"
+  set -- init --apply --source="$(dirname "$script_dir")" "$@"
 else
   if [ $# -eq 0 ]; then
     echo >&2 "Missing user name or repository (chezmoi init user)"

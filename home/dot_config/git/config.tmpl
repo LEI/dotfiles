@@ -148,6 +148,14 @@
 	path = {{ $name }}.ini
 {{- end }}
 
+{{- if lookPath "git-absorb" | isExecutable }}
+
+# [absorb]
+# 	maxStack = 50
+# 	autoStageIfNothingStaged = true
+# 	oneFixupPerCommit = true
+{{- end }}
+
 {{- if lookPath "ghq" | isExecutable }}
 
 [ghq]

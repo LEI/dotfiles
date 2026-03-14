@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#MISE description="Measure shell startup time (JSON output)"
-#USAGE arg "<shell>" help="Shell to measure" default="bash" {
+#MISE description="Measure aggregate shell startup time (JSON output)"
+#USAGE arg "[shell]" help="Shell to measure (default: current shell)" {
 #USAGE   choices "bash" "zsh"
 #USAGE }
 

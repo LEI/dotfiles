@@ -15,14 +15,14 @@ fi
 TMPDIR="${TMPDIR:-/tmp}"
 cd "$TMPDIR"
 
-# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# if ! has cargo && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   run . "${CARGO_HOME:-$HOME/.cargo}/env"
 # fi
-if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+if ! has cargo && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
   pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 
-if command -v rustup >/dev/null && ! rustup default >/dev/null; then
+if has rustup && ! rustup default >/dev/null; then
   # echo >&2 "No default toolchain is configured, using stable"
 
   # TODO(windows/msys2): rustup default stable-x86_64-pc-windows-gnu
@@ -41,11 +41,11 @@ fi
 #   fi
 # fi
 
-if command -v cargo >/dev/null; then
-  echo >&2 "Already installed"
+if has cargo; then
+  msg "Already installed"
   dry_run cargo --version
 else
-  echo >&2 "Installing cargo"
+  msg "Installing cargo"
 
   if [ "$CHEZMOI_ARCH" = amd64 ]; then
     ARCH=x86_64
@@ -61,7 +61,7 @@ else
   fi
   NAME="$ARCH-$OS"
 {{- if ne .os "darwin"}}
-  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)" 2>/dev/null; then
+  if ! has ldd || grep -Fq musl "$(which ldd)" 2>/dev/null; then
     NAME="$NAME-musl"
   else
     NAME="$NAME-gnu"
@@ -70,7 +70,7 @@ else
 
   BIN_DIR="$HOME/.local/bin"
   if [ ! -d "$BIN_DIR" ]; then
-    echo >&2 "Creating directory: $BIN_DIR"
+    msg "Creating $BIN_DIR"
     mkdir -p "$BIN_DIR"
   fi
 
@@ -89,7 +89,7 @@ else
   # shellcheck disable=SC2086
   dry_run "$RUSTUP_INIT" $RUSTUP_INIT_ARGS --no-modify-path --quiet -y
 
-  echo >&2 "Installed cargo"
+  msg "Installed cargo"
 fi
 
 # dry_run rustc --version
@@ -101,10 +101,10 @@ fi
 # dry_run rustup component add rust-analyzer
 {{- end }}
 
-# if ! command -v cargo >/dev/null && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   cmd . "${CARGO_HOME:-$HOME/.cargo}/env"
+# if ! has cargo && [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   run . "${CARGO_HOME:-$HOME/.cargo}/env"
 # fi
-if ! command -v cargo >/dev/null && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+if ! has cargo && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
   pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
 fi
 

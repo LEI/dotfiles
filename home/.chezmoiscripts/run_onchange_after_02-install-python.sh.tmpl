@@ -14,14 +14,14 @@ fi
 pip_packages={{ .packages.pip | keys | sortAlpha | join " " | quote }}
 if [ -n "$pip_packages" ]; then
   python=python
-  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
+  if ! has python && has python3; then
     python=python3
   fi
   run $python -m pip install --user --quiet "$@" $pip_packages
 fi
 
 pipx_packages={{ .packages.pipx | keys | sortAlpha | join " " | quote }}
-if [ -n "$pipx_packages" ] && command -v pipx >/dev/null; then
+if [ -n "$pipx_packages" ] && has pipx; then
   dry_run pipx install "$@" $pipx_packages
 fi
 
@@ -45,7 +45,7 @@ fi
   | replaceAllRegex `\[.*\]$` ""
   | replaceAllRegex `-cli$` "" }}
 {{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}
-echo >&2 "Already installed: {{ $key }}"
+msg "Already installed: {{ $key }}"
 {{-     continue }}
 run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} "$@" {{ $key }}
 {{-   end }}

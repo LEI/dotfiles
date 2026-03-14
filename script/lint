@@ -1,53 +1,98 @@
 #!/usr/bin/env bash
+#MISE alias="l"
 #MISE description="Lint chezmoi source files"
+#USAGE arg "[files]..." help="Files to lint (default: all templates under home/)"
 
 set -euo pipefail
 
-rc=0
+source_dir="$(chezmoi source-path)"
 
-# Syntax-check rendered shell scripts (bash -n)
-check_syntax() {
-  local src="$1"
-  local out
-  out="$(chezmoi execute-template < "$src" 2>/dev/null)" || return 0
-  [ -z "$out" ] && return 0
-  case "$src" in
-  *.sh.tmpl|*/run_onchange_*.sh.tmpl|*/run_once_*.sh.tmpl) ;;
-  *) return 0 ;;
+# shellcheck disable=SC2329
+relpath() {
+  local f="$1"
+  f="${f#"$source_dir"/}"
+  echo "$f"
+}
+
+# shellcheck disable=SC2329
+is_shell_template() {
+  case "$1" in
+  *.sh.tmpl) return 0 ;;
+  *) return 1 ;;
   esac
-  local err
-  err="$(bash -n <(printf '%s\n' "$out") 2>&1)" || {
-    echo "${err//\/dev\/fd\/[0-9]*/$src}"
+}
+
+# shellcheck disable=SC2329
+check_syntax() {
+  is_shell_template "$1" || return 0
+  local rel err
+  rel="$(relpath "$1")"
+  err="$(bash -n <(printf '%s\n' "$2") 2>&1)" || {
+    echo "${err//\/dev\/fd\/[0-9]*/$rel}"
     return 1
   }
 }
 
-# Find templates that render with consecutive blank lines
+# shellcheck disable=SC2329
 check_blank_lines() {
-  local src="$1"
-  local out
-  out="$(chezmoi execute-template < "$src" 2>/dev/null)" || return 0
-  [ -z "$out" ] && return 0
-  if printf '%s\n' "$out" | awk '/^$/{b++; if(b>=2){found=1;exit}} NF{b=0} END{exit !found}'; then
-    echo "$src: consecutive blank lines"
+  local rel lines
+  rel="$(relpath "$1")"
+  lines="$(printf '%s\n' "$2" | awk '/^$/{b++; if(b>=2 && !found){printf "%d ",NR; found=1}} NF{b=0; found=0}')"
+  if [ -n "$lines" ]; then
+    for ln in $lines; do
+      echo "$rel:$ln: consecutive blank lines"
+    done
   fi
 }
 
-export -f check_syntax check_blank_lines
-
+# shellcheck disable=SC2329
 run_checks() {
   local src="$1"
-  check_syntax "$src" || return 1
-  check_blank_lines "$src"
+  local out
+  out="$(chezmoi execute-template <"$src" 2>/dev/null)" || return 0
+  [ -z "$out" ] && return 0
+  check_syntax "$src" "$out"
+  check_blank_lines "$src" "$out"
 }
-export -f run_checks
 
-hits="$(fd '\.tmpl$' home --type=f --exclude='.chezmoitemplates' \
-  | xargs -P4 -I{} bash -c 'run_checks "$@"' _ {})" || rc=1
+export -f relpath is_shell_template check_syntax check_blank_lines run_checks
+export source_dir
+
+list_templates() {
+  if [ $# -gt 0 ]; then
+    for f in "$@"; do
+      case "$f" in
+      *.tmpl) [ -f "$f" ] && echo "$f" ;;
+      esac
+    done
+  else
+    chezmoi managed --include=files --path-style=source-relative |
+      rg --no-line-number '\.tmpl$' |
+      while IFS= read -r f; do echo "$source_dir/$f"; done
+  fi
+}
+
+files="$(list_templates "$@")"
+count="$(echo "$files" | wc -l | tr -d ' ')"
+echo >&2 "Linting $count template(s)..."
+
+rc=0
+hits="$(echo "$files" | xargs -P4 -I{} bash -euc 'run_checks "$@"' _ {})" || rc=1
 
 if [ -n "$hits" ]; then
-  echo >&2 "$hits"
+  echo "$hits"
   rc=1
+fi
+
+errors=0
+if [ -n "$hits" ]; then
+  errors="$(echo "$hits" | wc -l | tr -d ' ')"
+fi
+
+if [ "$rc" -eq 0 ]; then
+  echo >&2 "Done: $count file(s) checked, no issues found"
+else
+  echo >&2 "Done: $count file(s) checked, $errors issue(s) found"
 fi
 
 exit $rc

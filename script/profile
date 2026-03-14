@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-#MISE description="Profile shell init timing"
-#USAGE arg "<shell>" help="Shell to profile" default="bash" {
+#MISE description="Profile shell init with zprof (zsh) or xtrace (bash)"
+#USAGE arg "[shell]" help="Shell to profile (default: current shell)" {
 #USAGE   choices "bash" "zsh"
 #USAGE }
+
 set -eu
 
-shell="${1:-bash}"
+shell="${1:-${SHELL##*/}}"
 
 case "$shell" in
   bash)

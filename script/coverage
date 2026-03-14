@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-#MISE description="mise coverage"
+#MISE alias="cov"
+#MISE description="Run tests with kcov coverage"
+#USAGE arg "[filter]..." help="Extra arguments passed to bats via script/test"
 
 set -Eeuo pipefail
 

@@ -6,12 +6,12 @@ set -eu
 
 {{- if lookPath "launchctl" | isExecutable }}
 
-# cmd cat ~/Library/LaunchAgents/Tmux.Start.plist
-# cmd ~/.config/tmux/plugins/tmux-continuum/scripts/handle_tmux_automatic_start/osx_iterm_start_tmux.sh
+# run cat ~/Library/LaunchAgents/Tmux.Start.plist
+# run ~/.config/tmux/plugins/tmux-continuum/scripts/handle_tmux_automatic_start/osx_iterm_start_tmux.sh
 {{- else if lookPath "systemctl" | isExecutable }}
 
 # loginctl session-status
-if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && cmd systemctl --user status tmux.service; then
+if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && run systemctl --user status tmux.service; then
   exit_code="$?"
   if [ "$exit_code" -ne 0 ] && [ "$exit_code" -ne 3 ]; then # EXIT_NOTIMPLEMENTED
     exit "$exit_code"
@@ -25,19 +25,19 @@ if ! tmux ls; then
 fi
 
 if test ! -d "$HOME/.config/tmux/plugins/tpm"; then
-  cmd git clone https://github.com/tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
-  cmd "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+  run git clone https://github.com/tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
+  run "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
 else
   # FIXME: unknown variable: TMUX_PLUGIN_MANAGER_PATH
   # FATAL: Tmux Plugin Manager not configured in tmux.conf
   export TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/"
-  cmd "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all || true
+  run "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all || true
 fi
 
 # FIXME(debian 11 tmux 3.1c): tmux-which-key/plugin/init.tmux:25:
 # usage: set-environment [-gru] [-t target-session] name [value]
 # tmux-which-key config hash: {{ include (joinPath .chezmoi.homeDir ".config/tmux/plugins/tmux-which-key/config.yaml") | sha256sum }}
-cmd ~/.config/tmux/plugins/tmux-which-key/plugin.sh.tmux || true
+run ~/.config/tmux/plugins/tmux-which-key/plugin.sh.tmux || true
 
 # https://github.com/tmux-plugins/tmux-resurrect/issues/122#issuecomment-2530961970
 tmux_default_command="$(tmux show -g default-command)"

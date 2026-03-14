@@ -9,19 +9,19 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if ! cmd gh auth status; then
+if ! run gh auth status; then
   exit
 fi
 
-# cmd gh ssh-key list
+# run gh ssh-key list
 
 {{- if and (hasKey . "git") (hasKey .git "github") }}
 
 # TODO: check active profile
 # github_email="{{ .git.github.email }}"
-# if ! cmd gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then
+# if ! run gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then
 #   echo >&2 "No GPG key found for: $github_email"
-#   # cmd gh gpg-key add "$key_file"
+#   # run gh gpg-key add "$key_file"
 # fi
 {{ end }}
 
@@ -48,15 +48,15 @@ fi
 extensions="{{ $extensions | join " " }}"
 for name in $extensions; do
   if ! gh extension list 2>/dev/null | tr '\t' ' ' | cut -d' ' -f3 | grep -q "^$name\$"; then
-    cmd gh extension install "$name"
+    run gh extension install "$name"
   fi
 done
 
 if ! gh alias list | cut -d: -f1 | grep -q '^mine$'; then
-  cmd gh alias set mine 's -E -u @me'
+  run gh alias set mine 's -E -u @me'
 fi
 
 if ! gh alias list | cut -d: -f1 | grep -q '^gitignore$'; then
-  cmd gh alias set --shell gitignore 'gh api -X GET /gitignore/templates/"$1" --jq ".source"'
+  run gh alias set --shell gitignore 'gh api -X GET /gitignore/templates/"$1" --jq ".source"'
 fi
 {{- end -}}

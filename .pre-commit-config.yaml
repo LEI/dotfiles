@@ -91,3 +91,9 @@ repos:
         # exclude: ^home/(\.chezmoi\.ya?ml\.tmpl|.*/modify_.*\.sh)$
         exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
         language: system
+
+      - id: lint
+        name: lint shell templates
+        entry: ./script/lint
+        files: ^home/.*\.tmpl$
+        language: system

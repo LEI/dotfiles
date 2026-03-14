@@ -7,7 +7,7 @@ set -eu
 {{- if eq .os "darwin" }}
 
 if [ -d "$HOME/Library/Application Support/Code" ] && ! [ -L "$HOME/Library/Application Support/Code" ]; then
-  cmd rmdir "$HOME/Library/Application Support/Code"
-  cmd ln -s "$HOME/.config/Code" "$HOME/Library/Application Support/Code"
+  run rmdir "$HOME/Library/Application Support/Code"
+  run ln -s "$HOME/.config/Code" "$HOME/Library/Application Support/Code"
 fi
 {{- end }}

@@ -7,13 +7,13 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if command -v ghostty; then
-  echo >&2 "Already installed"
-  cmd ghostty --version | head -n1
+if has ghostty; then
+  msg "Ghostty already installed"
+  run ghostty --version | head -n1
   exit
 fi
 
-echo >&2 "Installing ghostty"
+msg "Installing ghostty"
 
 {{- if eq .osID "debian" }}
 
@@ -22,17 +22,19 @@ export DEBIAN_FRONTEND=noninteractive
 
 . /etc/os-release
 if [ "$VERSION_ID" -lt 13 ]; then
+  msg "Adding clayrisser repository for Debian $VERSION_CODENAME"
   version_path="$VERSION_CODENAME/Debian_$VERSION_ID"
   echo "deb http://download.opensuse.org/repositories/home:/clayrisser:/$version_path/ /" |
-    cmd sudo tee "/etc/apt/sources.list.d/home:clayrisser:$VERSION_CODENAME.list"
-  cmd curl -fsSL "https://download.opensuse.org/repositories/home:clayrisser:$version_path/Release.key" |
-    cmd gpg --dearmor |
-    cmd sudo tee "/etc/apt/trusted.gpg.d/home_clayrisser_$VERSION_CODENAME.gpg" >/dev/null
+    dry_run sudo tee "/etc/apt/sources.list.d/home:clayrisser:$VERSION_CODENAME.list"
+  dry_run curl -fsSL "https://download.opensuse.org/repositories/home:clayrisser:$version_path/Release.key" |
+    dry_run gpg --dearmor |
+    dry_run sudo tee "/etc/apt/trusted.gpg.d/home_clayrisser_$VERSION_CODENAME.gpg" >/dev/null
 else
-  cmd curl -fsSL https://download.opensuse.org/repositories/home:clayrisser:sid/Debian_Unstable/Release.key |
-    cmd gpg --dearmor |
-    cmd sudo tee /etc/apt/keyrings/home_clayrisser_sid.gpg >/dev/null
-  cmd sudo tee /etc/apt/sources.list.d/home:clayrisser:sid.sources >/dev/null <<EOF
+  msg "Adding clayrisser repository for Debian sid"
+  dry_run curl -fsSL https://download.opensuse.org/repositories/home:clayrisser:sid/Debian_Unstable/Release.key |
+    dry_run gpg --dearmor |
+    dry_run sudo tee /etc/apt/keyrings/home_clayrisser_sid.gpg >/dev/null
+  dry_run sudo tee /etc/apt/sources.list.d/home:clayrisser:sid.sources >/dev/null <<EOF
 Types: deb
 URIs: http://download.opensuse.org/repositories/home:/clayrisser:/sid/Debian_Unstable/
 Suites: /
@@ -40,8 +42,8 @@ Signed-By: /etc/apt/keyrings/home_clayrisser_sid.gpg
 EOF
 fi
 
-cmd sudo apt-get update --quiet >/dev/null
-cmd sudo -E apt-get install --quiet --yes ghostty >/dev/null
+dry_run sudo apt-get update --quiet >/dev/null
+dry_run sudo -E apt-get install --quiet --yes ghostty >/dev/null
 
 {{- else if eq .osID "ubuntu" }}
 
@@ -55,28 +57,30 @@ ARCH="$CHEZMOI_ARCH"
 . /etc/os-release
 URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/${version}-${SUFFIX}/ghostty_${version}.${SUFFIX}_${ARCH}_$VERSION_ID.deb"
 
-cmd curl -LSfs "$URL" -o "$TMPDIR/ghostty.deb"
-cmd sudo apt-get install --quiet --yes "$TMPDIR/ghostty.deb"
+msg "Downloading ghostty $version"
+dry_run curl -LSfs "$URL" -o "$TMPDIR/ghostty.deb"
+dry_run sudo apt-get install --quiet --yes "$TMPDIR/ghostty.deb"
 
 {{- else if eq .osID "fedora" }}
 
-if command -v dnf >/dev/null; then
-  cmd sudo dnf copr enable --assumeyes --quiet scottames/ghostty
-  # cmd sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
-  cmd sudo dnf install --assumeyes --quiet ghostty
-elif command -v rpm-ostree >/dev/null; then
-  cmd . /etc/os-release
+if has dnf; then
+  msg "Installing ghostty via dnf copr"
+  dry_run sudo dnf copr enable --assumeyes --quiet scottames/ghostty
+  # dry_run sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+  dry_run sudo dnf install --assumeyes --quiet ghostty
+elif has rpm-ostree; then
+  msg "Installing ghostty via rpm-ostree"
+  . /etc/os-release
   url="https://copr.fedorainfracloud.org/coprs/scottames/ghostty/repo/fedora-${VERSION_ID}/scottames-ghostty-fedora-${VERSION_ID}.repo"
   file=/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
-  cmd curl -fsSL "$url" | sudo tee "$file" >/dev/null
-  cmd rpm-ostree refresh-md
-  cmd rpm-ostree install --allow-inactive --assumeyes --idempotent ghostty
+  dry_run curl -fsSL "$url" | dry_run sudo tee "$file" >/dev/null
+  dry_run rpm-ostree refresh-md
+  dry_run rpm-ostree install --allow-inactive --assumeyes --idempotent ghostty
 else
-  echo >&2 "Unsupported package manager"
-  exit 1
+  err "unsupported package manager"
 fi
 
 {{- end }}
 
-echo >&2 "Installed ghostty"
+msg "Installed ghostty"
 {{ end -}}

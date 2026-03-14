@@ -25,7 +25,7 @@ set -- "$@" --yes
 {{- $tools := get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}
 
 # config.toml tools hash: {{ $tools | toJson | sha256sum }}
-echo >&2 "Installing tools"
+msg "Installing tools"
 
 # mise_args="--yes"
 # if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
@@ -34,7 +34,7 @@ echo >&2 "Installing tools"
 
 run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
 
-echo >&2 "Installed tools"
+msg "Installed tools"
 
 # run mise ls "$@"
 

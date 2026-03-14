@@ -21,15 +21,15 @@ set -eu
 #   echo >&2 "Installing ble.sh"
 #   BLE_NAME="ble-nightly"
 #   URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
-#   cmd curl -LSsf "$URL" | cmd tar xJf - -C "$TMPDIR"
-#   cmd bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
+#   run curl -LSsf "$URL" | run tar xJf - -C "$TMPDIR"
+#   run bash "$TMPDIR/$BLE_NAME/ble.sh" --install ~/.local/share
 #   echo >&2 "Installed ble.sh"
 # fi
 {{- end }}
 
 # if command -v atuin; then
 #   echo >&2 "Already installed"
-  cmd atuin --version
+  run atuin --version
 #   exit
 # fi
 

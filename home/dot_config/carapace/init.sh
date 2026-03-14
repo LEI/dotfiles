@@ -7,7 +7,18 @@ fi
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
 
 if [ "$shell" = zsh ]; then
-  autoload -U +X compinit && compinit # Fixes "zsh: command not found: compdef"
+  autoload -U +X compinit
+  # -C skips security check and reuses the completion dump file
+  local zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+  [ -d "${zcompdump%/*}" ] || mkdir -p "${zcompdump%/*}"
+  local compinit_flags=(-d "$zcompdump")
+  local now="$(date +%s)"
+  local mtime="$(stat -f%m "$zcompdump" 2>/dev/null || stat -c%Y "$zcompdump" 2>/dev/null || echo 0)"
+  # Reuse cached dump if less than a day old
+  if [ "$(( now - mtime ))" -lt 86400 ]; then
+    compinit_flags+=(-C)
+  fi
+  compinit "${compinit_flags[@]}"
   zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 fi
 

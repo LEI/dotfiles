@@ -1,4 +1,4 @@
-{{ includeTemplate "termux.sh.tmpl" . }}
+{{- includeTemplate "termux.sh.tmpl" . | trim }}
 # Env vars (MISE_*_DEFAULT_PACKAGES_FILE) set via environment.d/mise.conf
 
 # Must be sourced early: tools become available after activation

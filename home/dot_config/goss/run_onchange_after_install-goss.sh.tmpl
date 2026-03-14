@@ -6,15 +6,15 @@ set -eu
 
 # if command -v goss; then
 #   echo >&2 "Already installed"
-#   cmd goss --version
+#   run goss --version
 #   exit
 # fi
 
 # echo >&2 "Installing goss"
 
 # VERSION="$(get_release goss-org/goss)"
-# cmd sudo curl -LSfso /usr/local/bin/goss \
+# run sudo curl -LSfso /usr/local/bin/goss \
 #   "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-amd64"
-# cmd sudo chmod +rx /usr/local/bin/goss
+# run sudo chmod +rx /usr/local/bin/goss
 
 # echo >&2 "Installed goss"

@@ -21,7 +21,7 @@ setup() {
   run --separate-stderr bench echo hello
   assert_success
   assert_output "hello"
-  assert_stderr_line --partial "bench:"
+  assert_stderr_line --regexp "^bench:"
 }
 
 @test "bench: uses BENCHFMT label" {
@@ -29,7 +29,7 @@ setup() {
   export SHELL_BENCH=true
   BENCHFMT="custom-label" run --separate-stderr bench echo ok
   assert_success
-  assert_stderr_line --partial "custom-label"
+  assert_stderr_line --regexp "custom-label"
 }
 
 @test "bench: preserves command exit code" {

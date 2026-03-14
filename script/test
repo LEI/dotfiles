@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #MISE alias="t"
-#MISE description="`mise test` or `mise run t`"
+#MISE description="Run bats test suite"
+#USAGE arg "[filter]..." help="Extra arguments passed to bats"
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
 

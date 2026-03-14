@@ -8,12 +8,13 @@ redactions = [
 includes = ["script"]
 
 [tasks.ci]
+description = "Run CI workflow locally with act"
 run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
 
 [tasks.hyperfine]
+description = "Benchmark shell startup with hyperfine"
 run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
 [tasks.pipeline]
 description = "Run check, update, test locally"
 run = ["./script/check", "./script/update", "./script/test"]
-

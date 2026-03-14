@@ -1,5 +1,5 @@
 # Mise first: tools become available after activation
-[ -f "$XDG_CONFIG_HOME/mise/init.sh" ] && . "$XDG_CONFIG_HOME/mise/init.sh"
+[ -f "$XDG_CONFIG_HOME/mise/init.sh" ] && BENCHFMT="mise" bench . "$XDG_CONFIG_HOME/mise/init.sh"
 
 # if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
 #   . "${CARGO_HOME:-$HOME/.cargo}/env"
@@ -21,13 +21,13 @@ if [ -d "$HOME/.nix-profile/bin" ]; then
   pathmunge "$HOME/.nix-profile/bin" after
 fi
 
-# https://carapace-sh.github.io/carapace-bin/setup.html#bash
-[ -f "$XDG_CONFIG_HOME/carapace/init.sh" ] && . "$XDG_CONFIG_HOME/carapace/init.sh"
-[ -f "$XDG_CONFIG_HOME/direnv/init.sh" ] && . "$XDG_CONFIG_HOME/direnv/init.sh"
-[ -f "$XDG_CONFIG_HOME/starship/init.sh" ] && . "$XDG_CONFIG_HOME/starship/init.sh"
-[ -f "$XDG_CONFIG_HOME/zoxide/init.sh" ] && . "$XDG_CONFIG_HOME/zoxide/init.sh"
+# Tool activations, order matters: carapace before completions, starship before atuin
+[ -f "$XDG_CONFIG_HOME/carapace/init.sh" ] && BENCHFMT="carapace" bench . "$XDG_CONFIG_HOME/carapace/init.sh"
+[ -f "$XDG_CONFIG_HOME/direnv/init.sh" ] && BENCHFMT="direnv" bench . "$XDG_CONFIG_HOME/direnv/init.sh"
+[ -f "$XDG_CONFIG_HOME/starship/init.sh" ] && BENCHFMT="starship" bench . "$XDG_CONFIG_HOME/starship/init.sh"
+[ -f "$XDG_CONFIG_HOME/zoxide/init.sh" ] && BENCHFMT="zoxide" bench . "$XDG_CONFIG_HOME/zoxide/init.sh"
 # Must be after starship to preserve PROMPT_COMMAND
 # On bash, atuin needs ble.sh or bash-preexec for hook integration
 if [ "$shell" != bash ] || [ "$BLE_ENABLED" = true ] || [ "$PREEXEC_ENABLED" = true ]; then
-  [ -f "$XDG_CONFIG_HOME/atuin/init.sh" ] && . "$XDG_CONFIG_HOME/atuin/init.sh"
+  [ -f "$XDG_CONFIG_HOME/atuin/init.sh" ] && BENCHFMT="atuin" bench . "$XDG_CONFIG_HOME/atuin/init.sh"
 fi

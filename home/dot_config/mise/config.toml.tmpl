@@ -24,8 +24,9 @@ lockfile = true
 
 {{- if .features.goss }}
 [tasks.goss]
+description = "Validate system state with goss"
 dir = "~/.config/goss"
-run = "goss --vars=vars.yaml"
+run = "goss --vars=vars.yaml validate"
 {{- end }}
 
 [tools]

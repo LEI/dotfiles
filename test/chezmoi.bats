@@ -89,6 +89,7 @@ setup() {
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
   run_chezmoi .chezmoiscripts/01-install-packages.sh
+  refute_output
   assert_stderr_line --regexp "Installing .* packages"
   assert_stderr_line --regexp "^DRY-RUN"
   assert_stderr_line --regexp "Installed .* packages"
@@ -98,11 +99,10 @@ setup() {
 # bats test_tags=aur,package,type:unit
 @test "chezmoi: install aur packages" {
   check_command pacman
-  stub_seq sudo 2
   run_chezmoi .chezmoiscripts/linux/install-aur-packages.sh
-  unstub sudo 2>/dev/null || true
+  refute_output
   assert_stderr_line --regexp "Installing .* packages"
-  assert_stderr_line --regexp "^# STUB 1"
+  assert_stderr_line --regexp "^DRY-RUN: sudo"
   assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
@@ -125,6 +125,7 @@ setup() {
   stub_seq timeout 4
   run_chezmoi .chezmoiscripts/01-install-tools.sh
   unstub timeout 2>/dev/null || true
+  refute_output
   assert_stderr_line --regexp "^Installing tools"
   assert_stderr_line "Installed tools"
   assert_success
@@ -135,7 +136,7 @@ setup() {
   check_feature python
   run_chezmoi .chezmoiscripts/02-install-python.sh
   refute_output
-  assert_stderr_line --partial "Already installed"
+  assert_stderr_line --regexp "^Already installed"
   assert_success
 }
 

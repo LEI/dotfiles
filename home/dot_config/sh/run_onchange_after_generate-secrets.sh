@@ -2,6 +2,11 @@
 # Appends missing env vars and secrets to local.sh
 set -eu
 
+if ! command -v openssl >/dev/null 2>&1; then
+  echo >&2 "generate-secrets: openssl not found"
+  exit 1
+fi
+
 local_sh="${XDG_CONFIG_HOME:-$HOME/.config}/sh/local.sh"
 
 ensure_var() {

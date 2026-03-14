@@ -9,9 +9,9 @@ set -eu
 if [ ! -f ~/.vimrc ] && [ -d ~/.vim ] &&
   ! vim -u NONE -c 'if has("patch-9.1.0327") | qa! | else | cq!'; then
   if [ ! -d ~/.vim/pack ]; then
-    cmd ln -fs ~/.config/vim/pack ~/.vim/pack
+    run ln -fs ~/.config/vim/pack ~/.vim/pack
   fi
   if [ ! -f ~/.vim/vimrc ]; then
-    cmd ln -fs ~/.config/vim/vimrc ~/.vim/vimrc
+    run ln -fs ~/.config/vim/vimrc ~/.vim/vimrc
   fi
 fi

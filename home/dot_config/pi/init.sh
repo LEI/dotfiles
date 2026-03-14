@@ -4,9 +4,6 @@ pi_local() {
 }
 
 pi_compose() {
-  # local dir="$PWD"
-  # dir="${dir#$HOME/}"
-  # dir="${dir//\/./-}"
   local name
   name="workspace-$(basename "$PWD")-$(echo "${PWD}" | sha1sum | cut -c1-8)"
   # shellcheck disable=SC2295
@@ -32,7 +29,6 @@ pi_attach() {
 
 # Execute in the running container
 pi_exec() {
-  # pi_compose exec -it pi bash -c "$*"
   pi_compose exec -it pi "$@"
 }
 

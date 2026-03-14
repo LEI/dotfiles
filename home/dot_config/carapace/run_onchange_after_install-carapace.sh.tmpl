@@ -9,7 +9,7 @@ set -eu
 
 if command -v carapace; then
   echo >&2 "Already installed"
-  cmd carapace --version
+  run carapace --version
   exit
 fi
 
@@ -35,12 +35,12 @@ URL="{{ $url }}"
 
 {{- if eq .osID "alpine" }}
 
-cmd curl -LSfs "${URL%.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
-cmd sudo apk add --allow-untrusted --quiet "$TMPDIR/carapace.apk"
+run curl -LSfs "${URL%.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
+run sudo apk add --allow-untrusted --quiet "$TMPDIR/carapace.apk"
 {{- else if eq .osIDLike "debian" }}
 
-cmd curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
-cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
+run curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
+run sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
 {{- else }}
 
 # https://github.com/carapace-sh/carapace-bin/releases

@@ -8,7 +8,8 @@ shell = "zsh"
 PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
 
 [plugins]
-{{- includeTemplate "dot_config/sheldon/.plugins.toml.tmpl" . }}
+
+{{ includeTemplate "dot_config/sheldon/.plugins.toml.tmpl" . | trim }}
 
 # [plugins.base16]
 # github = "chriskempson/base16-shell"

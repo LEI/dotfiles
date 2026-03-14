@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#MISE alias="ct"
 #MISE description="Build and test chezmoi in a container"
 #USAGE arg "<name>" help="Distro name(s), comma-separated, or 'all'"
 #USAGE arg "[subcommand]" help="build|sync|bootstrap|check|update|test|shell|run" default="run"
@@ -7,8 +8,7 @@
 
 set -euo pipefail
 
-PROVIDER="${PROVIDER:-podman}"
-tag_prefix=chezmoi
+tag_prefix="${PWD##*/}"
 
 usage() {
   cat >&2 <<'EOF'
@@ -29,7 +29,7 @@ EOF
 }
 
 container_status() {
-  $PROVIDER container inspect --format '{{.State.Status}}' "$1" 2>/dev/null || echo missing
+  $CONTAINER_PROVIDER container inspect --format '{{.State.Status}}' "$1" 2>/dev/null || echo missing
 }
 
 # Sets: image_name, image_version, image_name_arg, image_version_arg, user, home, prefix, chezmoi_root, container
@@ -70,34 +70,34 @@ resolve() {
 }
 
 exec_as() {
-  $PROVIDER exec --user="$user" --workdir="$chezmoi_root" \
-    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+  $CONTAINER_PROVIDER exec --user="$user" --workdir="$chezmoi_root" \
+    --env=PATH="$home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     "$container" "$@"
 }
 
 exec_tty() {
-  $PROVIDER exec --tty --interactive --user="$user" --workdir="$chezmoi_root" \
-    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+  $CONTAINER_PROVIDER exec --tty --interactive --user="$user" --workdir="$chezmoi_root" \
+    --env=PATH="$home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     "$container" "$@"
 }
 
 cmd_build() {
   resolve "$1"
 
-  $PROVIDER build . \
+  $CONTAINER_PROVIDER build . \
     --file=Containerfile \
     --build-arg=IMAGE_NAME="$image_name_arg" \
     --build-arg=IMAGE_VERSION="$image_version_arg" \
     --tag="$container"
 
-  $PROVIDER container inspect "$container" >/dev/null 2>&1 ||
-    $PROVIDER create --name="$container" "$container"
+  $CONTAINER_PROVIDER container inspect "$container" >/dev/null 2>&1 ||
+    $CONTAINER_PROVIDER create --name="$container" "$container"
 
   [ "$(container_status "$container")" = running ] ||
-    $PROVIDER start "$container"
+    $CONTAINER_PROVIDER start "$container"
 
   if [ "$image_name" = macos ]; then
-    $PROVIDER run -it --name="$container" \
+    $CONTAINER_PROVIDER run -it --name="$container" \
       -device /dev/kvm \
       -p 50922:10022 \
       -p 22222:22 \
@@ -120,7 +120,7 @@ cmd_build() {
   fi
 
   if [ "$image_name" != termux ]; then
-    $PROVIDER exec "$container" sh -euxc "
+    $CONTAINER_PROVIDER exec "$container" sh -euxc "
       until id -u $user >/dev/null 2>&1; do
         echo 'Waiting for $user user...'
         sleep 1
@@ -132,27 +132,27 @@ cmd_build() {
 cmd_sync() {
   resolve "$1"
 
-  $PROVIDER exec "$container" mkdir -p "$chezmoi_root"
+  $CONTAINER_PROVIDER exec "$container" mkdir -p "$chezmoi_root"
 
   for f in .chezmoiroot .chezmoiversion mise.toml home script test; do
-    $PROVIDER container cp "$f" "$container:$chezmoi_root/"
+    $CONTAINER_PROVIDER container cp "$f" "$container:$chezmoi_root/"
   done
   for d in test_helper test_support; do
-    [ -d "$d" ] && $PROVIDER container cp "$d" "$container:$chezmoi_root/"
+    [ -d "$d" ] && $CONTAINER_PROVIDER container cp "$d" "$container:$chezmoi_root/"
   done
 
-  $PROVIDER exec "$container" chown -R "$user:$user" "$home"
+  $CONTAINER_PROVIDER exec "$container" chown -R "$user:$user" "$home"
 }
 
 cmd_bootstrap() {
   resolve "$1"
 
   if [ "$image_name" = termux ]; then
-    $PROVIDER exec "$container" \
+    $CONTAINER_PROVIDER exec "$container" \
       sh -euxc 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
-    $PROVIDER exec --user=system "$container" \
+    $CONTAINER_PROVIDER exec --user=system "$container" \
       sh -euxc 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
-    $PROVIDER exec \
+    $CONTAINER_PROVIDER exec \
       --env=CHEZMOI_UPGRADE=true \
       --env=CI=true \
       --user="$user" \
@@ -163,7 +163,7 @@ cmd_bootstrap() {
       -b "$prefix/usr/etc/tls:/etc/ssl" \
       ./script/bootstrap --verbose
   else
-    $PROVIDER exec \
+    $CONTAINER_PROVIDER exec \
       --env=CHEZMOI_UPGRADE=true \
       --env=CI=true \
       --user="$user" \
@@ -185,7 +185,7 @@ cmd_update() {
 cmd_test() {
   resolve "$1"
   shift
-  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" "$container" ./script/test "$@"
+  exec_tty ./script/test "$@"
 }
 
 cmd_shell() {
@@ -198,19 +198,13 @@ cmd_shell() {
     cmd=(bash -ic "chezmoi package diff all 2>/dev/null || true")
   fi
   [ $# -gt 0 ] && cmd=("$@")
-  $PROVIDER exec --interactive --tty --user="$user" --workdir="$chezmoi_root" "$container" "${cmd[@]}"
-}
-
-cmd_exec() {
-  $PROVIDER exec --tty --user="$user" --workdir="$chezmoi_root" \
-    --env=PATH="$home/.local/bin:/usr/local/bin:/usr/bin:/bin" \
-    "$container" "$@"
+  exec_tty "${cmd[@]}"
 }
 
 cmd_pipeline() {
   resolve "$1"
-  cmd_exec mise trust --yes
-  cmd_exec mise run pipeline
+  exec_as mise trust --yes
+  exec_as mise run pipeline
 }
 
 cmd_run() {
@@ -245,6 +239,8 @@ SUBCMD=run
 main() {
   [ $# -eq 0 ] && usage
 
+  CONTAINER_PROVIDER="${CONTAINER_PROVIDER:?CONTAINER_PROVIDER not set}"
+
   local NAME="$1"
   shift
   SUBCMD="${1:-run}"
@@ -254,7 +250,7 @@ main() {
 
   if [ "$NAME" = all ]; then
     NAME=alpine,archlinux,debian,ubuntu,fedora
-    [ "$PROVIDER" != docker ] && NAME=$NAME,termux
+    [ "$CONTAINER_PROVIDER" != docker ] && NAME=$NAME,termux
   fi
 
   local extra=("$@")

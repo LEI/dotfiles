@@ -40,17 +40,17 @@ run_block_in_file() {
   run_block_in_file $'before content\n' "new"
   assert_success
   assert_line "before content"
-  assert_line --partial "### START"
+  assert_line --regexp "^### START"
   assert_line "new"
-  assert_line --partial "### END"
+  assert_line --regexp "^### END"
 }
 
 @test "block-in-file: writes block to empty file" {
   run_block_in_file "" "body"
   assert_success
-  assert_line --partial "### START"
+  assert_line --regexp "^### START"
   assert_line "body"
-  assert_line --partial "### END"
+  assert_line --regexp "^### END"
 }
 
 @test "block-in-file: replaces block contents on update" {
@@ -101,18 +101,18 @@ run_block_in_file() {
 }
 
 @test "block-in-file: uses custom commentString as marker prefix" {
-  run_block_in_file "" "val" ' "commentString" "//"'
+  run_block_in_file "" "val" ' "commentString" "/"'
   assert_success
-  assert_line --partial "/// START"
-  assert_line --partial "/// END"
-  refute_line --partial "### START"
+  assert_line --regexp "^/// START"
+  assert_line --regexp "^/// END"
+  refute_line --regexp "^### START"
 }
 
 @test "block-in-file: writes markers for empty block body" {
   run_block_in_file "" ""
   assert_success
-  assert_line --partial "### START"
-  assert_line --partial "### END"
+  assert_line --regexp "^### START"
+  assert_line --regexp "^### END"
 }
 
 @test "block-in-file: preserves multiple blank lines after END" {
@@ -184,4 +184,3 @@ run_block_in_file() {
 }
 
 # cpu-cores / cpu-threads
-

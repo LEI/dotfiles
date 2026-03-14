@@ -1,13 +1,24 @@
 {{- if or .features.docker .features.podman -}}
 #!/bin/sh
+# Run docker/podman compose for a project directory
+
+set -eu
+
 dir="${1:?dir required}"
 shift
-provider="${COMPOSE_PROJECT_PROVIDER:-{{ if .features.docker }}docker{{ else }}podman{{ end }}}"
+
+provider="${CONTAINER_PROVIDER:?CONTAINER_PROVIDER not set}"
+
+compose() {
+  echo >&2 "$provider compose --project-directory=$dir $*"
+  $provider compose --project-directory="$dir" "$@"
+}
+
+# Default: start services then tail logs
 if [ $# -eq 0 ]; then
-  echo >&2 "+ $provider compose --project-directory=$dir up --build --detach"
-  $provider compose --project-directory="$dir" up --build --detach
+  compose up --build --detach
   set -- logs --follow --since=1m
 fi
-echo >&2 "+ $provider compose --project-directory=$dir $*"
-$provider compose --project-directory="$dir" "$@"
+
+compose "$@"
 {{- end -}}

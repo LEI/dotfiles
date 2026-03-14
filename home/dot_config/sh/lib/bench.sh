@@ -14,7 +14,10 @@ bench() {
   fi
   local label="${BENCHFMT:-$*}"
   local start end elapsed
-  # EPOCHREALTIME: bash 5+, zsh native
+  # EPOCHREALTIME: bash 5+, zsh needs zsh/datetime
+  if [ -n "${ZSH_VERSION:-}" ] && [ -z "${EPOCHREALTIME:-}" ]; then
+    zmodload zsh/datetime 2>/dev/null
+  fi
   start="${EPOCHREALTIME:-}"
   "$@"
   local ret=$?

@@ -28,13 +28,13 @@ echo >&2 "OSID: $OSID"
 if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
   case "$OSID" in
   alpine)
-    cmd apk update --quiet
-    cmd apk add --quiet sudo
+    run apk update --quiet
+    run apk add --quiet sudo
     ;;
   android | debian)
     # export DEBIAN_FRONTEND=noninteractive
-    cmd apt-get update --quiet >/dev/null
-    cmd apt-get install --quiet --yes sudo >/dev/null
+    run apt-get update --quiet >/dev/null
+    run apt-get install --quiet --yes sudo >/dev/null
     ;;
   arch | *)
     echo >&2 "Skipping password manager: sudo must be installed (chezmoi $CHEZMOI_COMMAND)"
@@ -49,7 +49,7 @@ case "$OS" in
 Darwin)
   OS=apple-darwin
   # export NONINTERACTIVE=1
-  # cmd brew install --quiet unzip
+  # run brew install --quiet unzip
   ;;
 Linux)
   # FIXME: alpine musl
@@ -69,15 +69,15 @@ Linux)
   OS=unknown-linux-gnu
   case "$OSID" in
   alpine)
-    cmd sudo apk add --quiet unzip
+    run sudo apk add --quiet unzip
     ;;
   arch)
-    cmd sudo pacman --sync --needed --noconfirm --quiet unzip
+    run sudo pacman --sync --needed --noconfirm --quiet unzip
     ;;
   debian)
     # export DEBIAN_FRONTEND=noninteractive
-    # cmd sudo -E apt-get install --quiet --yes unzip >/dev/null
-    cmd sudo apt-get install --quiet --yes unzip # >/dev/null
+    # run sudo -E apt-get install --quiet --yes unzip >/dev/null
+    run sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
   esac
   ;;
