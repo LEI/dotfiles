@@ -1,6 +1,9 @@
 {{- if .features.pc -}}
 #!/bin/sh
 # service: {{ include (joinPath .chezmoi.sourceDir "dot_config/systemd/user/process-compose.service.tmpl") | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+# plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
+{{- end }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -8,6 +11,19 @@ set -eu
 if ! has process-compose; then
   err "process-compose not found"
 fi
+
+{{- if eq .chezmoi.os "darwin" }}
+
+label="com.process-compose"
+plist="$HOME/Library/LaunchAgents/$label.plist"
+if [ ! -f "$plist" ]; then
+  err "$label: plist not found"
+fi
+if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
+  run launchctl bootout "gui/$(id -u)" "$plist" 2>/dev/null || true
+fi
+run launchctl bootstrap "gui/$(id -u)" "$plist"
+{{- else }}
 
 if has systemctl; then
   run systemctl --user daemon-reload
@@ -17,4 +33,5 @@ if has systemctl; then
     run systemctl --user restart process-compose
   fi
 fi
+{{- end -}}
 {{- end -}}
