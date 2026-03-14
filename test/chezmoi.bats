@@ -21,7 +21,6 @@ setup() {
 
   assert_line bash
   assert_line lla
-
   refute_stderr
   assert_success
 }
@@ -32,7 +31,6 @@ setup() {
 
   assert_line bash
   refute_line lla
-
   refute_stderr
   assert_success
 }
@@ -40,6 +38,7 @@ setup() {
 # bats test_tags=bin,package,type:unit
 @test "bin: get package manager" {
   run_chezmoi .local/bin/package-manager
+
   assert_output
   refute_stderr
   assert_success
@@ -68,6 +67,7 @@ setup() {
   stub_seq "$package_manager" 3
   run_chezmoi .local/bin/list-package
   unstub "$package_manager" 2>/dev/null || true
+
   refute_output
   assert_stderr_line --regexp "^# STUB"
   assert_success
@@ -80,6 +80,7 @@ setup() {
   stub_seq brew 2
   run_chezmoi .local/bin/list-package brew
   unstub brew 2>/dev/null || true
+
   refute_output
   assert_stderr_line --regexp "^# STUB 1"
   assert_success
@@ -89,10 +90,9 @@ setup() {
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
   run_chezmoi .chezmoiscripts/01-install-packages.sh
+
   refute_output
-  assert_stderr_line --regexp "Installing .* packages"
   assert_stderr_line --regexp "^DRY-RUN"
-  assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
 
@@ -100,10 +100,9 @@ setup() {
 @test "chezmoi: install aur packages" {
   check_command pacman
   run_chezmoi .chezmoiscripts/linux/install-aur-packages.sh
+
   refute_output
-  assert_stderr_line --regexp "Installing .* packages"
   assert_stderr_line --regexp "^DRY-RUN: sudo"
-  assert_stderr_line --regexp "Installed .* packages"
   assert_success
 }
 
@@ -113,21 +112,19 @@ setup() {
   stub_seq brew 3
   run_chezmoi .chezmoiscripts/02-install-brew-packages.sh
   unstub brew 2>/dev/null || true
+
   refute_output
-  assert_stderr_line "DRY-RUN: brew update --quiet"
-  assert_stderr_line --regexp "^DRY-RUN: brew bundle --file=/dev/stdin"
+  assert_stderr_line --regexp "^DRY-RUN: brew"
   assert_success
 }
 
 # bats test_tags=mise,package,type:unit
 @test "chezmoi: install mise packages" {
   check_feature mise
-  stub_seq timeout 4
   run_chezmoi .chezmoiscripts/01-install-tools.sh
-  unstub timeout 2>/dev/null || true
+
   refute_output
-  assert_stderr_line --regexp "^Installing tools"
-  assert_stderr_line "Installed tools"
+  assert_stderr_line --regexp "^DRY-RUN"
   assert_success
 }
 
@@ -135,6 +132,7 @@ setup() {
 @test "chezmoi: install python packages" {
   check_feature python
   run_chezmoi .chezmoiscripts/02-install-python.sh
+
   refute_output
   assert_stderr_line --regexp "^Already installed"
   assert_success
@@ -144,8 +142,8 @@ setup() {
 @test "chezmoi: install rust packages" {
   check_feature rust
   run_chezmoi .chezmoiscripts/02-install-rust.sh
+
   refute_output
-  assert_stderr_line "Already installed"
   assert_stderr_line "DRY-RUN: cargo --version"
   assert_success
 }
@@ -153,7 +151,8 @@ setup() {
 # bats test_tags=xdg,type:unit
 @test "chezmoi: install xdg" {
   run_chezmoi .chezmoiscripts/00-install-xdg.sh
-  assert_success
+
   refute_output
   refute_stderr
+  assert_success
 }

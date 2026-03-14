@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
 #MISE alias="l"
-#MISE description="Lint chezmoi source files"
+#MISE description="Lint chezmoi templates and rendered output"
 #USAGE arg "[files]..." help="Files to lint (default: all templates under home/)"
 
 set -euo pipefail
 
 source_dir="$(chezmoi source-path)"
 
-# shellcheck disable=SC2329
 relpath() {
   local f="$1"
   f="${f#"$source_dir"/}"
   echo "$f"
 }
 
-# shellcheck disable=SC2329
 is_shell_template() {
   case "$1" in
   *.sh.tmpl) return 0 ;;
@@ -22,7 +20,6 @@ is_shell_template() {
   esac
 }
 
-# shellcheck disable=SC2329
 check_syntax() {
   is_shell_template "$1" || return 0
   local rel err
@@ -33,7 +30,6 @@ check_syntax() {
   }
 }
 
-# shellcheck disable=SC2329
 check_blank_lines() {
   local rel lines
   rel="$(relpath "$1")"
@@ -45,19 +41,6 @@ check_blank_lines() {
   fi
 }
 
-# shellcheck disable=SC2329
-run_checks() {
-  local src="$1"
-  local out
-  out="$(chezmoi execute-template <"$src" 2>/dev/null)" || return 0
-  [ -z "$out" ] && return 0
-  check_syntax "$src" "$out"
-  check_blank_lines "$src" "$out"
-}
-
-export -f relpath is_shell_template check_syntax check_blank_lines run_checks
-export source_dir
-
 list_templates() {
   if [ $# -gt 0 ]; then
     for f in "$@"; do
@@ -67,7 +50,7 @@ list_templates() {
     done
   else
     chezmoi managed --include=files --path-style=source-relative |
-      rg --no-line-number '\.tmpl$' |
+      grep '\.tmpl$' |
       while IFS= read -r f; do echo "$source_dir/$f"; done
   fi
 }
@@ -76,23 +59,65 @@ files="$(list_templates "$@")"
 count="$(echo "$files" | wc -l | tr -d ' ')"
 echo >&2 "Linting $count template(s)..."
 
-rc=0
-hits="$(echo "$files" | xargs -P4 -I{} bash -euc 'run_checks "$@"' _ {})" || rc=1
-
-if [ -n "$hits" ]; then
-  echo "$hits"
-  rc=1
-fi
-
 errors=0
-if [ -n "$hits" ]; then
-  errors="$(echo "$hits" | wc -l | tr -d ' ')"
+warnings=0
+details=""
+
+while IFS= read -r src; do
+  [ -z "$src" ] && continue
+  rel="$(relpath "$src")"
+  status=.
+
+  # Render template
+  out="$(chezmoi execute-template <"$src" 2>&1)" || {
+    status=E
+    details+="$rel: template render failed"$'\n'
+    details+="$(echo "$out" | head -3 | sed "s|^|  |")"$'\n'
+    ((errors++)) || true
+    printf >&2 '%s' "$status"
+    continue
+  }
+
+  [ -z "$out" ] && { printf >&2 '%s' "$status"; continue; }
+
+  hits=""
+
+  # Shell syntax
+  if is_shell_template "$src"; then
+    err="$(bash -n <(printf '%s\n' "$out") 2>&1)" || {
+      hits+="${err//\/dev\/fd\/[0-9]*/$rel}"$'\n'
+    }
+  fi
+
+  # Consecutive blank lines
+  lines="$(printf '%s\n' "$out" | awk '/^$/{b++; if(b>=2 && !found){printf "%d ",NR; found=1}} NF{b=0; found=0}')"
+  if [ -n "$lines" ]; then
+    for ln in $lines; do
+      hits+="$rel:$ln: consecutive blank lines"$'\n'
+    done
+  fi
+
+  if [ -n "$hits" ]; then
+    status=W
+    details+="$hits"
+    hit_count="$(echo -n "$hits" | grep -c '')"
+    warnings=$((warnings + hit_count))
+  fi
+
+  printf >&2 '%s' "$status"
+done <<< "$files"
+
+echo >&2 ""
+
+if [ -n "$details" ]; then
+  echo >&2 ""
+  echo -n "$details"
 fi
 
-if [ "$rc" -eq 0 ]; then
-  echo >&2 "Done: $count file(s) checked, no issues found"
+total=$((errors + warnings))
+if [ "$total" -eq 0 ]; then
+  echo >&2 "OK ($count files)"
 else
-  echo >&2 "Done: $count file(s) checked, $errors issue(s) found"
+  echo >&2 "FAILED ($count files, $errors errors, $warnings warnings)"
+  exit 1
 fi
-
-exit $rc

@@ -18,7 +18,7 @@ packages="{{ $packageList | join " " }}"
 # Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
 {{- end }}
 msg "Installing {{ .packageManager }} packages: $packages"
-{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) | trim }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) | trim }}
 {{- if eq .osID "alpine" }}
 
 dry_run sudo apk update --quiet

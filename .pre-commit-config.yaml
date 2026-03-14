@@ -81,19 +81,9 @@ repos:
       #   exclude: "$(chezmoi unmanaged)"
       #   language: system
 
-      - id: chezmoi # -template
-        name: chezmoi # template
-        # entry: |
-        #   sh -c 'for f in "$@"; do echo "$f"; done; cat "$@" | chezmoi execute-template --dry-run --no-tty --refresh-externals=never --with-stdin >/dev/null'
-        # entry: sh -c 'for f in "$@"; do echo >&2 "$f"; sh home/dot_local/bin/executable_chezmoi-check "$f" || exit 1; done'
-        entry: sh -c 'sh home/dot_local/bin/executable_chezmoi-check "$@" || exit 1'
-        files: ^home/.*\.tmpl$
-        # exclude: ^home/(\.chezmoi\.ya?ml\.tmpl|.*/modify_.*\.sh)$
-        exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
-        language: system
-
       - id: lint
-        name: lint shell templates
+        name: lint chezmoi templates
         entry: ./script/lint
         files: ^home/.*\.tmpl$
+        exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
         language: system

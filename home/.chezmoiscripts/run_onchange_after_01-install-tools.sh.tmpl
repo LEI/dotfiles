@@ -4,8 +4,8 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ includeTemplate "termux.sh.tmpl" . }}
-{{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
+{{ includeTemplate "termux.sh.tmpl" . | trim }}
+{{- includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
 {{ includeTemplate "dot_config/environment.d/mise.conf.tmpl" . | trim }}
 
 if [ "${DRY_RUN:-}" = true ]; then
@@ -32,7 +32,7 @@ msg "Installing tools"
 #   mise_args="$mise_args --verbose"
 # fi
 
-run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
+dry_run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
 
 msg "Installed tools"
 

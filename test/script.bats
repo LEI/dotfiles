@@ -22,8 +22,9 @@ setup() {
   )
   export CI=true
   run --separate-stderr bash ./script/bootstrap "${chezmoi_args[@]}"
-  assert_stderr_line "DRY-RUN: Running 'chezmoi init --apply --source=$PWD ${chezmoi_args[*]}'"
+
   refute_output --regexp "Tip:"
+  assert_stderr_line "DRY-RUN: Running 'chezmoi init --apply --source=$PWD ${chezmoi_args[*]}'"
   assert_success
 }
 
@@ -34,6 +35,7 @@ setup() {
   stub_seq dummy $((BENCH_ITERATIONS + 2))
   run --separate-stderr bash ./script/startup
   unstub dummy 2>/dev/null || true
+
   assert_stderr_line --regexp "startup 1/$BENCH_ITERATIONS: dummy -ci exit"
   assert_success
   jq . <<<"$output" >/dev/null
@@ -44,6 +46,7 @@ setup() {
   stub_seq timeout 8
   run --separate-stderr bash ./script/check
   unstub timeout 2>/dev/null || true
+
   if has_feature brew; then
     assert_stderr_line --regexp "# STUB .: timeout 5m brew doctor"
   fi
@@ -66,6 +69,7 @@ setup() {
 # bats test_tags=update,type:unit
 @test "script/update" {
   run --separate-stderr bash ./script/update
+
   if has_feature neovim; then
     assert_stderr_line --regexp "nvim"
   fi
@@ -79,6 +83,7 @@ setup() {
 @test "container: resolve sets expected vars for alpine" {
   source ./script/container
   resolve alpine
+
   assert_equal "$image_name" alpine
   assert_equal "$image_version" latest
   assert_equal "$image_name_arg" alpine
@@ -91,6 +96,7 @@ setup() {
 @test "container: resolve sets expected vars for termux" {
   source ./script/container
   resolve termux
+
   assert_equal "$image_name" termux
   assert_equal "$image_name_arg" docker.io/termux/termux-docker
   assert_equal "$user" root
@@ -102,6 +108,7 @@ setup() {
 @test "container: resolve handles version suffix" {
   source ./script/container
   resolve alpine:3.19
+
   assert_equal "$image_name" alpine
   assert_equal "$image_version" 3.19
   assert_equal "$container" chezmoi-alpine-3.19
@@ -112,6 +119,7 @@ setup() {
   export CHEZMOI_COMMAND=test
   export CHEZMOI_WORKING_TREE="$PWD"
   run --separate-stderr bash home/.install-password-manager.sh
+
   refute_output
   refute_stderr
   assert_success
@@ -124,6 +132,7 @@ setup() {
   export CHEZMOI_WORKING_TREE="$PWD"
   run --separate-stderr bash home/.install-password-manager.sh
   unstub bws 2>/dev/null || true
+
   refute_output
   refute_stderr
   assert_success

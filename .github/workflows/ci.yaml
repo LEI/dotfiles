@@ -77,8 +77,11 @@ jobs:
             echo "/home/linuxbrew/.linuxbrew/sbin" >>"$GITHUB_PATH"
           fi
 
+      - name: Run lint
+        run: ./script/lint
+
       - name: Run check
-        run: ./script/check # ./script/check
+        run: ./script/check
 
       # - name: chezmoi data
       #   run: '"$HOME/.local/bin/chezmoi" data'
