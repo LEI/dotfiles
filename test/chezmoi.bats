@@ -2,7 +2,6 @@ setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
 
-  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
   export CHEZMOI_WORKING_TREE=.
   export DRY_RUN=true
 }
@@ -16,7 +15,7 @@ setup() {
 
 # bats file_tags=chezmoi
 
-# bats test_tags=feature
+# bats test_tags=feature,type:unit
 @test "bin: chezmoi feature list" {
   run_chezmoi .local/bin/chezmoi-feature
 
@@ -27,7 +26,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=feature
+# bats test_tags=feature,type:unit
 @test "bin: chezmoi feature enabled" {
   run_chezmoi .local/bin/chezmoi-feature enabled
 
@@ -38,7 +37,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bin,package
+# bats test_tags=bin,package,type:unit
 @test "bin: get package manager" {
   run_chezmoi .local/bin/package-manager
   assert_output
@@ -46,7 +45,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bin,package
+# bats test_tags=bin,package,type:unit
 @test "bin: list expected packages" {
   run_chezmoi .local/bin/chezmoi-package list
 
@@ -55,7 +54,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bin,package
+# bats test_tags=bin,package,type:unit
 @test "bin: list installed packages" {
   local package_manager
   package_manager="$(package-manager)"
@@ -74,7 +73,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bin,brew,package
+# bats test_tags=bin,brew,package,type:unit
 @test "bin: list installed packages (brew)" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
   check_feature brew
@@ -86,7 +85,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=system,package
+# bats test_tags=system,package,type:unit
 @test "chezmoi: install packages" {
   [ "$UNAME" != Darwin ] || skip "$UNAME"
   run_chezmoi .chezmoiscripts/01-install-packages.sh
@@ -96,7 +95,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=aur,package
+# bats test_tags=aur,package,type:unit
 @test "chezmoi: install aur packages" {
   check_command pacman
   stub_seq sudo 2
@@ -108,7 +107,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=brew,package
+# bats test_tags=brew,package,type:unit
 @test "chezmoi: install brew packages" {
   check_feature brew
   stub_seq brew 3
@@ -120,7 +119,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=mise,package
+# bats test_tags=mise,package,type:unit
 @test "chezmoi: install mise packages" {
   check_feature mise
   stub_seq timeout 4
@@ -131,7 +130,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=python,package
+# bats test_tags=python,package,type:smoke
 @test "chezmoi: install python packages" {
   check_feature python
   run_chezmoi .chezmoiscripts/02-install-python.sh
@@ -140,7 +139,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=rust,package
+# bats test_tags=rust,package,type:smoke
 @test "chezmoi: install rust packages" {
   check_feature rust
   run_chezmoi .chezmoiscripts/02-install-rust.sh
@@ -150,7 +149,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=xdg
+# bats test_tags=xdg,type:unit
 @test "chezmoi: install xdg" {
   run_chezmoi .chezmoiscripts/00-install-xdg.sh
   assert_success

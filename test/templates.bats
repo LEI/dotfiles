@@ -1,7 +1,6 @@
 setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
-  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
 }
 
 setup() {
@@ -17,7 +16,7 @@ run_template() {
   run --separate-stderr chezmoi execute-template "$@"
 }
 
-# bats file_tags=template
+# bats file_tags=template,type:unit
 
 # Run block-in-file with the given existing file content and block body.
 # Contents are written to a temp file and read via `include` to avoid quoting.
@@ -159,6 +158,27 @@ run_block_in_file() {
 
 @test "pluck: empty values list produces no output" {
   run_template '{{- includeTemplate "pluck.tmpl" (dict "key" "name" "values" list) -}}'
+  assert_success
+  assert_output ""
+}
+
+# package-hooks
+
+@test "package-hooks: emits header and body for before_script" {
+  run_template '{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (list (dict "before_script" "echo setup"))) -}}'
+  assert_success
+  assert_line "# Before script:"
+  assert_line "echo setup"
+}
+
+@test "package-hooks: includes label in header" {
+  run_template '{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (list (dict "after_script" "echo done")) "label" "brew") -}}'
+  assert_success
+  assert_line "# After script (brew):"
+}
+
+@test "package-hooks: empty when no matching values" {
+  run_template '{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" list) -}}'
   assert_success
   assert_output ""
 }

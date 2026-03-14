@@ -2,7 +2,6 @@ setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
 
-  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
   export DRY_RUN=true
 }
 
@@ -15,7 +14,7 @@ setup() {
 
 # bats file_tags=script
 
-# bats test_tags=bootstrap
+# bats test_tags=bootstrap,type:unit
 @test "script/bootstrap" {
   local chezmoi_args=(
     "--dry-run"
@@ -28,7 +27,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=bench
+# bats test_tags=bench,type:unit
 @test "script/bench" {
   export BENCH_ITERATIONS=1
   stub_seq dummy $((BENCH_ITERATIONS + 2))
@@ -39,7 +38,7 @@ setup() {
   jq . <<<"$output" >/dev/null
 }
 
-# bats test_tags=check
+# bats test_tags=check,type:unit
 @test "script/check" {
   stub_seq timeout 8
   run --separate-stderr bash ./script/check
@@ -63,7 +62,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=update
+# bats test_tags=update,type:unit
 @test "script/update" {
   run --separate-stderr bash ./script/update
   if has_feature neovim; then
@@ -75,16 +74,23 @@ setup() {
   assert_success
 }
 
-# bats test_tags=install
-@test "install password manager" {
-  skip "package manager stub conflicts with bin: list installed packages"
-
-  local package_manager
-  package_manager="$(package-manager)"
-  stub_seq "$package_manager" 3
+# bats test_tags=install,type:unit
+@test "install password manager: skips on unknown command" {
   export CHEZMOI_COMMAND=test
+  export CHEZMOI_WORKING_TREE="$PWD"
   run --separate-stderr bash home/.install-password-manager.sh
-  unstub "$package_manager" 2>/dev/null || true
+  refute_output
+  refute_stderr
+  assert_success
+}
+
+# bats test_tags=install,type:unit
+@test "install password manager: exits if already installed" {
+  stub bws "true"
+  export CHEZMOI_COMMAND=apply
+  export CHEZMOI_WORKING_TREE="$PWD"
+  run --separate-stderr bash home/.install-password-manager.sh
+  unstub bws 2>/dev/null || true
   refute_output
   refute_stderr
   assert_success
