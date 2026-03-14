@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Profile shell init timing
-# Usage: script/prof bash|zsh
+#MISE description="Profile shell init timing"
+# Usage: script/prof bash
+#        script/prof zsh
 set -eu
 
 shell="${1:-bash}"
@@ -16,7 +17,7 @@ BASH_XTRACEFD=3
 PS4='+ \${EPOCHREALTIME:-} \${BASH_SOURCE[0]##*/}:\${LINENO}: '
 set -x
 BASH_PROF
-    BASH_ENV="$tmpdir/env.sh" bash -i -c 'set +x; exec 3>&-'
+    BASH_ENV="$tmpdir/env.sh" bash -ic 'set +x; exec 3>&-'
     echo >&2 "Top 20 by duration:"
     sort -t' ' -k2 -rn "$logfile" | head -20
     ;;
@@ -30,7 +31,7 @@ ZSH_PROF
     cat > "$tmpdir/.zshrc" <<'ZSH_RC'
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
 ZSH_RC
-    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}" ZDOTDIR="$tmpdir" zsh -i -c 'zprof'
+    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}" ZDOTDIR="$tmpdir" zsh -ic 'zprof'
     ;;
   *)
     echo >&2 "Usage: script/prof bash|zsh"
