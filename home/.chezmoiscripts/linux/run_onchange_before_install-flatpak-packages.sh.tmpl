@@ -22,8 +22,7 @@ echo >&2 "Installing flatpak packages"
 
 flatpak_packages="{{ $flatpakPackages | keys | sortAlpha | join " " }}"
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.flatpak) -}}
-
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.flatpak) -}}
 run flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages
 # --user/--system
 # --installation=chezmoi

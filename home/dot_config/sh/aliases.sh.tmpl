@@ -1,3 +1,11 @@
+{{- if lookPath "eza" | isExecutable }}
+# Use alias not function: ls() causes syntax errors (builtin conflict)
+alias ls="eza --hyperlink --total-size"
+{{- else if lookPath "gls" | isExecutable }}
+# export LS_COLORS="$(vivid generate tokyonight-storm)"
+alias ls="gls --color"
+{{- end }}
+
 # Confirm before overwriting
 alias cp="cp -i" # --interactive
 

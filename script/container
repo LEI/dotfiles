@@ -209,8 +209,5 @@ if [ "$NAME" = all ]; then
 fi
 
 for name in ${NAME//,/ }; do
-  if ! time build_container "$name" "$@"; then
-    echo >&2 "[container] ERROR: $name failed"
-    exit 1
-  fi
+  time build_container "$name" "$@"
 done
