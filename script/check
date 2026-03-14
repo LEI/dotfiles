@@ -77,10 +77,10 @@ if chezmoi feature neovim; then
   # echo
 fi
 
-if chezmoi feature tmux && timeout 5m tmux ls; then
-  # timeout 5m tmux source ~/.config/tmux/tmux.conf
-  echo
-fi
+# if chezmoi feature tmux && timeout 5m tmux ls; then
+#   # FIXME: tmux must be running
+#   timeout 5m tmux source ~/.config/tmux/tmux.conf
+# fi
 
 # FIXME(i3): toggles floating window mode
 # if chezmoi feature topgrade; then

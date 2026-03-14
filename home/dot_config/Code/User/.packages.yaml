@@ -8,4 +8,6 @@ packages:
     nameOverwrite:
       arch: code
       fedora: com.visualstudio.code
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+      windows: Microsoft.VisualStudioCode
+    type: '{{ eq .osIDLike "darwin" | ternary "cask"
+      (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
