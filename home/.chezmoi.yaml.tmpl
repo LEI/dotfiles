@@ -55,9 +55,6 @@
 {{-  $chassisVendor = include $chassisVendorFile | trim -}}
 {{- end -}}
 
-{{- $cpuCores := includeTemplate "cpu-cores.tmpl" . | trim | atoi -}}
-{{- $cpuThreads := includeTemplate "cpu-threads.tmpl" . | trim | atoi -}}
-
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $lddVersion := "3" -}}
 {{- if and (eq .chezmoi.os "linux") (lookPath "sh") -}}
@@ -126,8 +123,6 @@
   "ci" $ci
   "codespaces" $codespaces
   "container" $container
-  "cpuCores" $cpuCores
-  "cpuThreads" $cpuThreads
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "glibc" $glibc

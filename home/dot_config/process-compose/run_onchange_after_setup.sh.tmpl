@@ -1,3 +1,4 @@
+{{- if .features.pc -}}
 #!/bin/sh
 # service: {{ include (joinPath .chezmoi.sourceDir "dot_config/systemd/user/process-compose.service.tmpl") | sha256sum }}
 set -eu
@@ -16,3 +17,4 @@ if has systemctl; then
     run systemctl --user restart process-compose
   fi
 fi
+{{- end -}}
