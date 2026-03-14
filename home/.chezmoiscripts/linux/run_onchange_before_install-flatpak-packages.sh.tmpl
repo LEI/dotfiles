@@ -22,29 +22,13 @@ echo >&2 "Installing flatpak packages"
 
 flatpak_packages="{{ $flatpakPackages | keys | sortAlpha | join " " }}"
 
-{{- $before := includeTemplate "pluck.tmpl" (dict
-  "key" "before_script"
-  "values" .packages.flatpak
-) | trim }}
-{{- if $before }}
-
-# Before script:
-{{ $before }}
-{{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.flatpak) -}}
 
 run flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages
 # --user/--system
 # --installation=chezmoi
 
-{{- $after := includeTemplate "pluck.tmpl" (dict
-  "key" "after_script"
-  "values" .packages.flatpak
-) | trim }}
-{{- if $after }}
-
-# After script:
-{{ $after }}
-{{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.flatpak) -}}
 
 echo >&2 "Installed flatpak packages"
 {{ end -}}

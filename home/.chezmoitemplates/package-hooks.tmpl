@@ -1,0 +1,6 @@
+{{- /* Emit before/after install hooks from package values via pluck.tmpl */ -}}
+{{- $scripts := includeTemplate "pluck.tmpl" (dict "key" .key "values" .values) | trim -}}
+{{- if $scripts }}
+# {{ if eq .key "before_script" }}Before{{ else }}After{{ end }} script{{ with get . "label" | default "" }} ({{ . }}){{ end }}:
+{{ $scripts }}
+{{ end -}}

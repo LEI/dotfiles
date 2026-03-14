@@ -18,17 +18,7 @@ packages="{{ $packageList | join " " }}"
 # Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
 {{- end }}
 echo >&2 "Installing {{ .packageManager }} packages: $packages"
-
-{{- $before := includeTemplate "pluck.tmpl" (dict
-  "key" "before_script"
-  "values" $systemPackages
-) | trim }}
-{{- if $before }}
-
-# Before script:
-{{ $before }}
-{{- end }}
-
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) -}}
 {{- if eq .osID "alpine" }}
 
 dry_run sudo apk update --quiet
@@ -135,17 +125,7 @@ dry_run winget import --import-file="$HOME/.config/winget/winget.json" --disable
 echo >&2 "Invalid OS: {{ .osID }}"
 exit 1
 {{- end }}
-
-{{- $after := includeTemplate "pluck.tmpl" (dict
-  "key" "after_script"
-  "values" $systemPackages
-) | trim }}
-{{- if $after }}
-
-# After script:
-{{ $after }}
-{{- end }}
-
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) -}}
 {{- if and .codespaces (eq .osIDLike "debian") }}
 
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"

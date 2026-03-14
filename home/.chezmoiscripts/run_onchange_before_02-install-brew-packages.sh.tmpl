@@ -64,15 +64,7 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 {{- if not (hasKey $.packages $type) }}
 {{-   continue }}
 {{- end }}
-{{- $before := includeTemplate "pluck.tmpl" (dict
-  "key" "before_script"
-  "values" (get $.packages $type)
-) | trim }}
-{{- if $before }}
-
-# Before script ({{ $type }}):
-{{ $before }}
-{{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) -}}
 {{- end }}
 
 # run brew bundle list --global
@@ -90,13 +82,5 @@ EOF
 {{- if not (hasKey $.packages $type) }}
 {{-   continue }}
 {{- end }}
-{{- $after := includeTemplate "pluck.tmpl" (dict
-  "key" "after_script"
-  "values" (get $.packages $type)
-) | trim }}
-{{- if $after }}
-
-# After script ({{ $type }}):
-{{ $after }}
-{{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) -}}
 {{- end }}
