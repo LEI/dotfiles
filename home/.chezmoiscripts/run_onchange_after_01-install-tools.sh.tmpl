@@ -4,7 +4,9 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ includeTemplate "dot_config/mise/init.sh.tmpl" . | trim }}
+{{ includeTemplate "termux.sh.tmpl" . }}
+{{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
+{{ includeTemplate "dot_config/environment.d/mise.conf.tmpl" . | trim }}
 
 if [ "${DRY_RUN:-}" = true ]; then
   set -- "$@" --dry-run

@@ -143,6 +143,10 @@ eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon sourc
 
 [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
 
+# Per-shell config: .conf for variables (via export_env), .sh for shell code
+for _f in "$XDG_CONFIG_HOME/$shell/"*.conf; do
+  [ -f "$_f" ] && export_env "$_f"
+done
 for _f in "$XDG_CONFIG_HOME/$shell/"*.sh; do
   case "${_f##*/}" in init.sh) continue ;; esac
   [ -f "$_f" ] && . "$_f"

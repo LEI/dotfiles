@@ -61,7 +61,6 @@ features:
   docker:
     - .config/carapace/specs/d.yaml
     - .config/docker/
-    - .config/sh/plugins/docker.sh
   eza:
     - .config/eza/
   podman:
@@ -75,7 +74,6 @@ features:
     # FIXME: mod.nu.tmpl loops on source directory
     # .config/nushell/modules/git.nu
     # NOTE: feature should be named "git-config"
-    # .config/sh/plugins/git.sh
     - .config/carapace/specs/g.yaml
   go:
     - .config/mise/default-go-packages
@@ -106,7 +104,6 @@ features:
     - .config/k9s/
     - .config/krew/
     - .config/kube/
-    - .config/sh/plugins/kubectl.sh
     - .local/bin/k
   lla:
     - .config/lla/

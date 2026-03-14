@@ -1,0 +1,15 @@
+{{- if .features.mise }}
+# Default packages installed with each language runtime
+{{- if get .packages.mise "go" }}
+MISE_GO_DEFAULT_PACKAGES_FILE=$XDG_CONFIG_HOME/mise/default-go-packages
+{{- end }}
+{{- if get .packages.mise "node" }}
+MISE_NODE_DEFAULT_PACKAGES_FILE=$XDG_CONFIG_HOME/mise/default-npm-packages
+{{- end }}
+{{- if get .packages.mise "python" }}
+MISE_PYTHON_DEFAULT_PACKAGES_FILE=$XDG_CONFIG_HOME/mise/default-python-packages
+{{- end }}
+{{- if get .packages.mise "ruby" }}
+MISE_RUBY_DEFAULT_PACKAGES_FILE=$XDG_CONFIG_HOME/mise/default-gems
+{{- end }}
+{{- end }}
