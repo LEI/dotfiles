@@ -53,10 +53,11 @@ main() {
     exit 2
   fi
 
-  local shell="${1:-bash}"
+  local shell="${1:-${SHELL##*/}}"
+  shell="${shell:-bash}"
 
   case "$shell" in
-    bash|zsh) ;;
+    bash|zsh|dummy) ;;
     *)
       echo >&2 "startup: invalid shell '$shell', expected bash or zsh"
       exit 2

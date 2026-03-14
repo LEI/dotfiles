@@ -30,10 +30,11 @@ setup() {
 # bats test_tags=startup,type:unit
 @test "script/startup" {
   export BENCH_ITERATIONS=1
+  export SHELL=dummy
   stub_seq dummy $((BENCH_ITERATIONS + 2))
-  run --separate-stderr bash ./script/startup dummy
+  run --separate-stderr bash ./script/startup
   unstub dummy 2>/dev/null || true
-  assert_stderr_line --partial "bench 1/$BENCH_ITERATIONS: dummy"
+  assert_stderr_line --partial "startup 1/$BENCH_ITERATIONS: dummy -ci exit"
   assert_success
   jq . <<<"$output" >/dev/null
 }

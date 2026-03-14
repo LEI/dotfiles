@@ -27,7 +27,7 @@ run flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $fla
 # --user/--system
 # --installation=chezmoi
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.flatpak) -}}
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.flatpak) }}
 
 echo >&2 "Installed flatpak packages"
 {{ end -}}

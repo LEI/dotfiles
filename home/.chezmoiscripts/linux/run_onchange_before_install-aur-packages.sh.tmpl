@@ -37,7 +37,7 @@ echo >&2 "Installing AUR packages"
 
 aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) -}}
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) }}
 
 if command -v yay >/dev/null; then
   # run sudo chown -R "$USER:$USER" /tmp/yay
@@ -51,7 +51,7 @@ else
   exit 1
 fi
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) -}}
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) }}
 
 echo >&2 "Installed AUR packages"
 {{ end -}}
