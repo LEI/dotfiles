@@ -143,9 +143,11 @@ eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon sourc
 
 [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
 
-[ -f "$XDG_CONFIG_HOME/$shell/completion.sh" ] && . "$XDG_CONFIG_HOME/$shell/completion.sh"
-[ -f "$XDG_CONFIG_HOME/$shell/environment.sh" ] && . "$XDG_CONFIG_HOME/$shell/environment.sh"
-[ -f "$XDG_CONFIG_HOME/$shell/options.sh" ] && . "$XDG_CONFIG_HOME/$shell/options.sh"
+for _f in "$XDG_CONFIG_HOME/$shell/"*.sh; do
+  case "${_f##*/}" in init.sh) continue ;; esac
+  [ -f "$_f" ] && . "$_f"
+done
+unset _f
 
 [ -f "$HOME/.${shell}rc.local" ] && . "$HOME/.${shell}rc.local"
 

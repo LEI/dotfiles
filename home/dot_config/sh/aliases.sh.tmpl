@@ -72,61 +72,8 @@ if ! command -v clip >/dev/null; then
   }
 fi
 
-{{- if .features.ai }}
-
-if command -v codex >/dev/null; then
-  codex() { env codex "${@:-resume --last}"; }
-fi
-if command -v crush >/dev/null; then
-  crush() { env crush "${@:---continue}"; }
-fi
-{{- end }}
-
-{{- if .features.docker }}
-
-if command -v lazydocker >/dev/null; then
-  alias D=lazydocker
-elif command -v oxker >/dev/null; then
-  alias D=oxker
-fi
-
-if command -v podman-tui >/dev/null; then
-  alias P=podman-tui
-fi
-{{- end }}
-
-{{- if .features.git }}
-
-if command -v lazygit >/dev/null; then
-  alias G=lazygit
-fi
-{{- end }}
-
 {{- if lookPath "lazyjournal" | isExecutable }}
 alias J=lazyjournal
-{{- end }}
-
-{{- if .features.kube }}
-
-if command -v k9s >/dev/null; then
-  alias K="k9s --all-namespaces"
-fi
-
-if command -v kubecolor >/dev/null; then
-  alias kubectl=kubecolor
-fi
-{{- end }}
-
-{{- if .features.mise }}
-
-alias m=mise
-{{- end }}
-
-{{- if .features.neovim }}
-
-if command -v nvim >/dev/null; then
-  alias dbui="nvim +DBUI"
-fi
 {{- end }}
 
 {{- if .features.python }}
@@ -144,6 +91,3 @@ if ! command -v recover >/dev/null; then
 fi
 {{- end }}
 
-{{- if lookPath "tmux" | isExecutable }}
-alias tmux="TERM=tmux-256color tmux"
-{{- end }}

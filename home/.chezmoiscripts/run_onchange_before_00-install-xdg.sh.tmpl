@@ -3,12 +3,10 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-. "$CHEZMOI_WORKING_TREE/home/dot_config/sh/lib/export.sh"
 
-# Load XDG vars from environment.d (rendered by chezmoi since target may not exist yet)
-set -a
-eval "$(chezmoi cat "$HOME/.config/environment.d/10-xdg.conf")"
-set +a
+# XDG vars inlined at template render time (target may not exist yet)
+{{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
+{{ includeTemplate "dot_config/environment.d/10-xdg.conf.tmpl" . | trim }}
 
 {{- if .features.ai }}
 
@@ -53,7 +51,7 @@ if [ -d ~/Library/pnpm ] && ! [ -d "$PNPM_HOME" ]; then
 fi
 {{- end }}
 
-{{- if .features.rust }}
+{{- if .features.ruby }}
 
 if [ -d "$XDG_DATA_HOME/gem" ] && ! [ -d ~/.gem ]; then
   ln -s "$XDG_DATA_HOME/gem" ~/.gem

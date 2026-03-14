@@ -4,6 +4,8 @@ default: true
 
 # Line length: unreasonable for prose notes
 MD013: false
+# no-missing-space-atx
+MD018: false
 # Duplicate heading text: too strict for notes with repeated section names
 MD024: false
 # Single H1: conflicts with YAML frontmatter
