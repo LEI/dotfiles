@@ -3,27 +3,14 @@ setup() {
   _common_setup
 
   source test/common/helper.sh
-
-  # brew=$(command -v brew 2>/dev/null || echo brew)
 }
 
 # bats file_tags=dotfiles,home
 
 @test "macos: script exists and is executable" {
   [ "$UNAME" = Darwin ] || skip "$UNAME"
-  # [ -f ~/.macos ]
   [ -x ~/.macos ]
 }
-
-# @test "brew installation script runs without errors" {
-#   run bash install/macos/common/brew.sh
-#   [ "$status" -eq 0 ]
-# }
-
-# @test "brew command is available after installation" {
-#   run command -v brew
-#   [ "$status" -eq 0 ]
-# }
 
 @test "feature: atuin" {
   check_feature atuin
@@ -31,7 +18,6 @@ setup() {
   assert_output
   refute_stderr
   assert_success
-  # ble.sh
 }
 
 @test "feature: bash" {
@@ -52,7 +38,6 @@ setup() {
   assert_output
   refute_stderr
   assert_success
-  # ble.sh
 }
 
 @test "feature: bottom" {
@@ -62,14 +47,6 @@ setup() {
   refute_stderr
   assert_success
 }
-
-# @test "feature: brew" {
-#   check_feature brew
-#   run --separate-stderr "$brew" --version
-#   assert_output
-#   refute_stderr
-#   assert_success
-# }
 
 @test "feature: carapace" {
   check_feature carapace
@@ -85,12 +62,11 @@ setup() {
   assert_output
   refute_stderr
   assert_success
-  # direnv export bash
 }
 
 @test "feature: eza" {
   check_feature eza
-  run --separate-stderr eza --version # | head -n2 | tail -n1
+  run --separate-stderr eza --version
   assert_output
   refute_stderr
   assert_success
@@ -103,14 +79,6 @@ setup() {
   refute_stderr
   assert_success
 }
-
-# @test "feature: mise" {
-#   check_feature mise
-#   run --separate-stderr mise --version # | head -n1
-#   assert_output
-#   # refute_stderr # mise WARN  mise version .* available
-#   assert_success
-# }
 
 @test "feature: node" {
   check_feature node
@@ -146,12 +114,11 @@ setup() {
   assert_output
   refute_stderr
   assert_success
-  # pipx, uvx
 }
 
 @test "feature: ripgrep" {
   check_feature ripgrep
-  run --separate-stderr rg --version # | head -n1
+  run --separate-stderr rg --version
   assert_output
   refute_stderr
   assert_success
