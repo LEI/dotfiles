@@ -123,13 +123,27 @@ fi
 run caddy trust --ca local # --config "$caddyfile"
 
 # caddy trust installs the root CA but not the intermediate; curl needs both to
-# build the chain. Install the intermediate into the system trust store.
+# build the chain. Install root + intermediate into the system trust store.
+pki="$HOME/.local/share/caddy/pki/authorities/local"
+root="$pki/root.crt"
+intermediate="$pki/intermediate.crt"
 if has update-ca-trust; then
-  intermediate="$HOME/.local/share/caddy/pki/authorities/local/intermediate.crt"
-  dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
-  if ! diff -q "$dest" "$intermediate" >/dev/null 2>&1; then
-    msg "Installing caddy intermediate CA to system trust"
-    msg "  src: $(openssl x509 -noout -fingerprint -sha256 -in "$intermediate")"
-    run pkexec sh -ceux "cp '$intermediate' '$dest' && update-ca-trust"
+  root_dest=/etc/pki/ca-trust/source/anchors/caddy-local-root.crt
+  intermediate_dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
+  if ! diff -q "$root_dest" "$root" >/dev/null 2>&1 || \
+     ! diff -q "$intermediate_dest" "$intermediate" >/dev/null 2>&1; then
+    msg "Installing caddy root and intermediate CA to system trust"
+    run pkexec sh -ceux "cp '$root' '$root_dest' && cp '$intermediate' '$intermediate_dest' && update-ca-trust"
+  fi
+fi
+
+# Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites.
+brew_openssl_dir="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}/etc/openssl@3"
+if [ -d "$brew_openssl_dir" ]; then
+  brew_bundle="$brew_openssl_dir/cert.pem"
+  caddy_marker="# Caddy Local Authority"
+  if ! grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+    msg "Appending caddy root CA to brew openssl bundle"
+    { echo "$caddy_marker"; cat "$root"; } >> "$brew_bundle"
   fi
 fi
