@@ -17,4 +17,4 @@ run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
 [tasks.pipeline]
 description = "Run check, update, test locally"
-run = ["./script/check", "./script/update", "./script/test"]
+run = ["./script/check", "./script/prek", "./script/test", "./script/update"]

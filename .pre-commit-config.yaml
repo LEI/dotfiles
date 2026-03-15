@@ -82,8 +82,11 @@ repos:
       #   language: system
 
       - id: lint
-        name: lint chezmoi templates
+        name: no multiple blank lines
         entry: ./script/lint
-        files: ^home/.*\.tmpl$
-        exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
         language: system
+
+      # - id: prek
+      #   name: validate templates
+      #   entry: ./script/prek
+      #   language: system

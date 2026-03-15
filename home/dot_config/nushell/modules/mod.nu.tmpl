@@ -1,5 +1,4 @@
 # Configuration modules
-
 {{ $dir := printf "%s/%s" .chezmoi.sourceDir .chezmoi.sourceFile | dir -}}
 {{- /* $out := output "find" $dir "-name" "*.nu" "-print" | trim | splitList "\n" */ -}}
 {{ $files := glob (printf "%s/%s" $dir "*.nu") -}}

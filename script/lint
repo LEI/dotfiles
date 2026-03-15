@@ -1,123 +1,50 @@
-#!/usr/bin/env bash
+#!/usr/bin/env awk -f
 #MISE alias="l"
-#MISE description="Lint chezmoi templates and rendered output"
-#USAGE arg "[files]..." help="Files to lint (default: all templates under home/)"
+#MISE description="Check for consecutive blank lines"
 
-set -euo pipefail
+# Reports every occurrence with context and a total at the end.
+# Exit code: 1 if any found, 0 otherwise.
 
-source_dir="$(chezmoi source-path)"
-
-relpath() {
-  local f="$1"
-  f="${f#"$source_dir"/}"
-  echo "$f"
+FNR == 1 {
+  flush()
+  blank = 0
+  prev = ""
 }
 
-is_shell_template() {
-  case "$1" in
-  *.sh.tmpl) return 0 ;;
-  *) return 1 ;;
-  esac
+/^$/ {
+  blank++
+  next
 }
 
-check_syntax() {
-  is_shell_template "$1" || return 0
-  local rel err
-  rel="$(relpath "$1")"
-  err="$(bash -n <(printf '%s\n' "$2") 2>&1)" || {
-    echo "${err//\/dev\/fd\/[0-9]*/$rel}"
-    return 1
+blank >= 2 {
+  total++
+  printf "%s:%d: %d consecutive blank lines\n", FILENAME, FNR - 1, blank
+  if (prev != "") printf "  %d | %s\n", FNR - blank - 1, prev
+  printf "  %d | \n", FNR - blank
+  printf "  ...\n"
+  printf "  %d | \n", FNR - 1
+  printf "  %d | %s\n", FNR, $0
+  printf "\n"
+}
+
+{ blank = 0; prev = $0 }
+
+END {
+  flush()
+  if (total > 0) {
+    printf "%d occurrence(s)\n", total
+    exit 1
   }
 }
 
-check_blank_lines() {
-  local rel lines
-  rel="$(relpath "$1")"
-  lines="$(printf '%s\n' "$2" | awk '/^$/{b++; if(b>=2 && !found){printf "%d ",NR; found=1}} NF{b=0; found=0}')"
-  if [ -n "$lines" ]; then
-    for ln in $lines; do
-      echo "$rel:$ln: consecutive blank lines"
-    done
-  fi
-}
-
-list_templates() {
-  if [ $# -gt 0 ]; then
-    for f in "$@"; do
-      case "$f" in
-      *.tmpl) [ -f "$f" ] && echo "$f" ;;
-      esac
-    done
-  else
-    chezmoi managed --include=files --path-style=source-relative |
-      grep '\.tmpl$' |
-      while IFS= read -r f; do echo "$source_dir/$f"; done
-  fi
-}
-
-files="$(list_templates "$@")"
-count="$(echo "$files" | wc -l | tr -d ' ')"
-echo >&2 "Linting $count template(s)..."
-
-errors=0
-warnings=0
-details=""
-
-while IFS= read -r src; do
-  [ -z "$src" ] && continue
-  rel="$(relpath "$src")"
-  status=.
-
-  # Render template
-  out="$(chezmoi execute-template <"$src" 2>&1)" || {
-    status=E
-    details+="$rel: template render failed"$'\n'
-    details+="$(echo "$out" | head -3 | sed "s|^|  |")"$'\n'
-    ((errors++)) || true
-    printf >&2 '%s' "$status"
-    continue
+function flush() {
+  if (blank >= 2) {
+    total++
+    printf "%s:%d: %d consecutive blank lines (at end of file)\n", FILENAME, FNR, blank
+    if (prev != "") printf "  %d | %s\n", FNR - blank, prev
+    printf "  %d | \n", FNR - blank + 1
+    printf "  ...\n"
+    printf "  %d | \n", FNR
+    printf "\n"
   }
-
-  [ -z "$out" ] && { printf >&2 '%s' "$status"; continue; }
-
-  hits=""
-
-  # Shell syntax
-  if is_shell_template "$src"; then
-    err="$(bash -n <(printf '%s\n' "$out") 2>&1)" || {
-      hits+="${err//\/dev\/fd\/[0-9]*/$rel}"$'\n'
-    }
-  fi
-
-  # Consecutive blank lines
-  lines="$(printf '%s\n' "$out" | awk '/^$/{b++; if(b>=2 && !found){printf "%d ",NR; found=1}} NF{b=0; found=0}')"
-  if [ -n "$lines" ]; then
-    for ln in $lines; do
-      hits+="$rel:$ln: consecutive blank lines"$'\n'
-    done
-  fi
-
-  if [ -n "$hits" ]; then
-    status=W
-    details+="$hits"
-    hit_count="$(echo -n "$hits" | grep -c '')"
-    warnings=$((warnings + hit_count))
-  fi
-
-  printf >&2 '%s' "$status"
-done <<< "$files"
-
-echo >&2 ""
-
-if [ -n "$details" ]; then
-  echo >&2 ""
-  echo -n "$details"
-fi
-
-total=$((errors + warnings))
-if [ "$total" -eq 0 ]; then
-  echo >&2 "OK ($count files)"
-else
-  echo >&2 "FAILED ($count files, $errors errors, $warnings warnings)"
-  exit 1
-fi
+}

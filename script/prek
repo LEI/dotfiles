@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#MISE alias="p"
+#MISE description="Lint rendered chezmoi templates via prek hooks"
+#USAGE arg "[files]..." help="Source templates to lint (default: all)"
+
+# Renders chezmoi templates then runs prek hooks on the output.
+# Delegates all file matching and linter routing to prek.
+# When called with source template paths (e.g. by prek hook),
+# only the corresponding rendered files are checked.
+
+set -euo pipefail
+
+render_dir="tmp/rendered"
+rm -rf "$render_dir"
+trap 'rm -rf "$render_dir"' EXIT
+
+chezmoi render "$render_dir" >/dev/null
+
+if [ $# -gt 0 ]; then
+  # Map source template paths to rendered target paths (single batch call)
+  abs_paths=()
+  for src in "$@"; do
+    abs_paths+=("$(cd "$(dirname "$src")" && pwd)/$(basename "$src")")
+  done
+  targets="$(chezmoi target-path "${abs_paths[@]}" 2>/dev/null)" || true
+
+  files=()
+  while IFS= read -r target; do
+    rel="${target#"$HOME"/}"
+    if [ -f "$render_dir/$rel" ]; then
+      files+=("$render_dir/$rel")
+    fi
+  done <<< "$targets"
+else
+  mapfile -t files < <(find "$render_dir" -type f)
+fi
+
+if [ ${#files[@]} -eq 0 ]; then
+  exit 0
+fi
+
+# Shellcheck config for rendered templates: suppress warnings
+# that are inherent to sourced shell configs
+cat > "$render_dir/.shellcheckrc" <<'CONF'
+disable=SC1090,SC2154
+CONF
+
+prek run --files "${files[@]}" \
+  --skip=prek \
+  --skip=zizmor

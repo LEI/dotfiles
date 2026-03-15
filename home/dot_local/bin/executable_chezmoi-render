@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Usage: chezmoi render [-f] <directory>
+# Renders all managed templates to a staging directory preserving target paths.
+# Uses execute-template for speed (~65ms/file vs ~1s/file with chezmoi cat).
+# Always prints the directory path to stdout.
+# -f: fail fast on first render error
+
+set -eu
+
+fail_fast=false
+if [ "${1:-}" = "-f" ]; then
+  fail_fast=true
+  shift
+fi
+
+dest="${1:?usage: chezmoi render [-f] <directory>}"
+mkdir -p "$dest"
+echo "$dest"
+
+source_dir="$(chezmoi source-path)"
+
+# Collect source-relative template paths
+templates="$(chezmoi managed --include=files --path-style=source-relative | grep '\.tmpl$')"
+
+if [ -z "$templates" ]; then
+  exit 0
+fi
+
+# Batch-resolve all target paths in one chezmoi call
+abs_sources="$(echo "$templates" | sed "s|^|$source_dir/|")"
+targets="$(echo "$abs_sources" | xargs chezmoi target-path)"
+
+# Render each template: paste source and target, process line by line
+paste <(echo "$templates") <(echo "$targets") |
+  while IFS="$(printf '\t')" read -r src target; do
+    rel="${target#"$HOME"/}"
+    out="$dest/$rel"
+    dir="${out%/*}"
+    if [ "$dir" != "$out" ]; then
+      mkdir -p "$dir"
+    fi
+
+    if chezmoi execute-template < "$source_dir/$src" > "$out" 2>/dev/null; then
+      printf >&2 '.'
+    else
+      printf >&2 'E'
+      echo >&2 " $rel"
+      if $fail_fast; then
+        exit 1
+      fi
+    fi
+  done
+
+echo >&2 ""

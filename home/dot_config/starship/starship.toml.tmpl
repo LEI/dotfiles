@@ -14,4 +14,4 @@
   "vimcmd_symbol" (printf "[%s](bold green)" "<")
 -}}
 {{- $_ := set $config "character" (get $config "character" | default dict | merge $character) -}}
-{{ $config | toToml }}
+{{- $config | toToml -}}
