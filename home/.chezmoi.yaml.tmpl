@@ -279,8 +279,10 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-{{-   $paths := env "PATH" | splitList ":" }}
-{{-   if not (has "/usr/bin" $paths) }}
+{{-   $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
+{{-   if eq $osID "android" }}
+{{-     $paths = prepend $paths "/data/data/com.termux/files/usr/bin" }}
+{{-   else }}
 {{-     $paths = prepend $paths "/usr/bin" }}
 {{-   end }}
 {{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}

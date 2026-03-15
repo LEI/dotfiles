@@ -23,7 +23,9 @@ fi
 
 {{- if eq .os "windows" }}
 
-if [ -d "$HOME/AppData/Roaming/topgrade.d" ] && ! [ -L "$HOME/AppData/Roaming/topgrade.d/topgrade.toml" ]; then
+if [ -d "$HOME/AppData/Roaming/topgrade.d" ] &&
+  ! [ -L "$HOME/AppData/Roaming/topgrade.d/topgrade.toml" ] &&
+  ! [ -L "$HOME/AppData/Roaming/topgrade.toml" ]; then
   # run rmdir "$HOME/AppData/Roaming/topgrade.d"
   # run ln -s "$HOME/.config/topgrade" "$HOME/AppData/Roaming/topgrade.d"
   run ln -s "$HOME/.config/topgrade/topgrade.toml" "$HOME/AppData/Roaming/topgrade.toml"

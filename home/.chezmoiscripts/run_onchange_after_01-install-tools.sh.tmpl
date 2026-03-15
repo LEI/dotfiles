@@ -4,7 +4,10 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+{{- if eq .osID "android" }}
 {{ includeTemplate "termux.sh.tmpl" . | trim }}
+alias mise="termux_prefix $MISE_BIN"
+{{- end }}
 {{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
 {{ includeTemplate "dot_config/environment.d/mise.conf.tmpl" . | trim }}
 
