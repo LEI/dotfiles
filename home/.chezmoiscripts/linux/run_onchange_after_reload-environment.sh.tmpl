@@ -4,11 +4,15 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if has systemctl; then
-  run systemctl --user daemon-reexec
-{{- if .features.pc }}
-  if systemctl --user is-active --quiet process-compose; then
-    run systemctl --user restart process-compose
-  fi
-{{- end }}
+if ! has systemctl || [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  warn "Skipping systemctl reload (no user session bus)"
+  exit 0
 fi
+
+run systemctl --user daemon-reexec
+{{- if .features.pc }}
+
+if systemctl --user is-active --quiet process-compose; then
+  run systemctl --user restart process-compose
+fi
+{{- end }}

@@ -2,7 +2,8 @@
 #MISE alias="ct"
 #MISE description="Build and test chezmoi in a container"
 #USAGE arg "<name>" help="Distro name(s), comma-separated, or 'all'"
-#USAGE arg "[subcommand]" help="build|sync|bootstrap|check|update|test|shell|run" default="run"
+#USAGE arg "[subcommand]" help="build|sync|bootstrap|check|update|test|exec|shell|run" default="run"
+#USAGE arg "[args]..." help="Extra arguments passed to the subcommand"
 
 # https://www.chezmoi.io/reference/commands/docker/
 
@@ -22,7 +23,8 @@ Subcommands:
   check      Run script/check inside the container
   update     Run script/update inside the container
   test       Run script/test inside the container
-  shell      Open an interactive shell (default: chezmoi package diff)
+  exec       Run a command in the container (non-interactive)
+  shell      Open an interactive login shell
   run        Full pipeline: build, sync, bootstrap, check, update, test (default)
 EOF
   exit 1
@@ -70,13 +72,11 @@ resolve() {
 }
 
 exec_as() {
-  $CONTAINER_PROVIDER exec --user="$user" --workdir="$chezmoi_root" \
-    --env=PATH="$home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-    "$container" "$@"
-}
-
-exec_tty() {
-  $CONTAINER_PROVIDER exec --tty --interactive --user="$user" --workdir="$chezmoi_root" \
+  local flags=()
+  if [ -t 0 ] && [ -t 1 ]; then
+    flags+=(--tty --interactive)
+  fi
+  $CONTAINER_PROVIDER exec "${flags[@]}" --user="$user" --workdir="$chezmoi_root" \
     --env=PATH="$home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     "$container" "$@"
 }
@@ -132,9 +132,11 @@ cmd_build() {
 cmd_sync() {
   resolve "$1"
 
+  # FIXME: stale files cleanup
+  # $CONTAINER_PROVIDER exec "$container" rm -rf "$chezmoi_root"
   $CONTAINER_PROVIDER exec "$container" mkdir -p "$chezmoi_root"
 
-  for f in .chezmoiroot .chezmoiversion mise.toml home script test; do
+  for f in .chezmoiroot .chezmoiversion .pre-commit-config.yaml mise.toml home script test; do
     $CONTAINER_PROVIDER container cp "$f" "$container:$chezmoi_root/"
   done
   for d in test_helper test_support; do
@@ -185,20 +187,20 @@ cmd_update() {
 cmd_test() {
   resolve "$1"
   shift
-  exec_tty ./script/test "$@"
+  exec_as ./script/test "$@"
+}
+
+cmd_exec() {
+  resolve "$1"
+  shift
+  exec_as "$@"
 }
 
 cmd_shell() {
   resolve "$1"
   shift
-  local cmd
-  if [ "$image_name" = termux ]; then
-    cmd=(bash --version)
-  else
-    cmd=(bash -ic "chezmoi package diff all 2>/dev/null || true")
-  fi
-  [ $# -gt 0 ] && cmd=("$@")
-  exec_tty "${cmd[@]}"
+  [ $# -eq 0 ] && set -- bash -l
+  exec_as "$@"
 }
 
 cmd_pipeline() {
@@ -208,10 +210,10 @@ cmd_pipeline() {
 }
 
 cmd_run() {
-  cmd_build "$1"
-  cmd_sync "$1"
-  cmd_bootstrap "$1"
-  cmd_pipeline "$1"
+  cmd_build "$1" || return $?
+  cmd_sync "$1" || return $?
+  cmd_bootstrap "$1" || return $?
+  cmd_pipeline "$1" || return $?
 }
 
 run_one() {
@@ -224,6 +226,7 @@ run_one() {
   check) cmd_check "$name" ;;
   update) cmd_update "$name" ;;
   test) cmd_test "$name" "$@" ;;
+  exec) cmd_exec "$name" "$@" ;;
   shell) cmd_shell "$name" "$@" ;;
   pipeline) cmd_pipeline "$name" ;;
   run) cmd_run "$name" ;;

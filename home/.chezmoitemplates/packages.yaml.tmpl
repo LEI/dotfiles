@@ -377,7 +377,10 @@ packages:
   wmctrl:
     enabled: {{ and (eq .sessionType "x11") (ne .profile "minimal") }}
   mailpit:
-    enabled: {{ and .features.php (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
+    enabled: {{ and .features.php
+      (eq .osIDLike "arch" "darwin")
+      (not (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64")))
+      (ne .profile "minimal") }}
     restart_service: ":changed"
     nameOverwrite:
       arch: mailpit-bin
@@ -559,7 +562,8 @@ packages:
     type: brew
   # FIXME(alpine): .rs syntax error (failed to install with aqua)
   shellcheck:
-    enabled: {{ and (not .features.neovim) (not .features.mise) }}
+    # enabled: {{ and (not .features.neovim) (not .features.mise) }}
+    enabled: {{ not .features.neovim }}
     nameOverwrite:
       windows: koalaman.shellcheck
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
@@ -837,7 +841,7 @@ osPackages:
       # gettext:
       # ghostscript:
       # gitlab-runner:
-      gitleaks: # detect-secrets
+      # gitleaks: # detect-secrets
       # gmp:
       gnu-sed:
       # gnutls:

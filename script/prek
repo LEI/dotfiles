@@ -30,7 +30,7 @@ if [ $# -gt 0 ]; then
     if [ -f "$render_dir/$rel" ]; then
       files+=("$render_dir/$rel")
     fi
-  done <<< "$targets"
+  done <<<"$targets"
 else
   mapfile -t files < <(find "$render_dir" -type f)
 fi
@@ -41,10 +41,9 @@ fi
 
 # Shellcheck config for rendered templates: suppress warnings
 # that are inherent to sourced shell configs
-cat > "$render_dir/.shellcheckrc" <<'CONF'
+cat >"$render_dir/.shellcheckrc" <<'CONF'
 disable=SC1090,SC2154
 CONF
 
 prek run --files "${files[@]}" \
-  --skip=prek \
   --skip=zizmor

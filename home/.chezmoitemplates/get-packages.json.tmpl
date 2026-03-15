@@ -19,7 +19,7 @@
 
 {{- range $path := $packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
-{{-   if and (hasKey $fileData "enabled") (not $fileData.enabled) }}
+{{-   if and (hasKey $fileData "enabled") (eq ($fileData.enabled | toString) "false") }}
 {{-     continue }}
 {{-   end }}
 {{-   $filePackages := get $fileData "packages" }}

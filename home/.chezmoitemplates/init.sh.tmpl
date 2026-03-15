@@ -139,8 +139,7 @@ eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon sourc
 # if command -v gh >/dev/null; then
 #   eval "$(gh copilot alias -- "$shell")"
 # fi
-{{- end }}
-
+{{ end }}
 [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code
