@@ -1,3 +1,4 @@
+# shellcheck disable=SC2154
 if ! command -v zoxide >/dev/null; then
   echo >&2 "Command 'zoxide' not found"
   return 0

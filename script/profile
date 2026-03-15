@@ -33,7 +33,9 @@ ZSH_PROF
     cat > "$tmpdir/.zshrc" <<'ZSH_RC'
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
 ZSH_RC
-    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}" ZDOTDIR="$tmpdir" zsh -ic 'zprof'
+    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
+    export REAL_ZDOTDIR
+    ZDOTDIR="$tmpdir" zsh -ic 'zprof'
     ;;
   *)
     echo >&2 "profile: invalid shell '$shell', expected bash or zsh"

@@ -58,7 +58,7 @@ resolve() {
     ;;
   esac
 
-  user=test
+  user="test"
   home="/home/$user"
   [ "$image_name" = macos ] && home="/Users/$user"
   if [ "$image_name" = termux ]; then
