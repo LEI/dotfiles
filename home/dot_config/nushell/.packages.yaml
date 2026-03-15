@@ -6,4 +6,4 @@ packages:
       mise: aqua:nushell/nushell # 0.111.0 broken, brew can't downgrade
       windows: Nushell.Nushell
     version: 0.110.0
-    type: mise
+    type: '{{ ne .os "windows" | ternary "mise" nil }}'
