@@ -1,5 +1,4 @@
-
 [plugins.tools]
 inline = """
-{{- includeTemplate "init-tools.sh.tmpl" . }}
+{{- includeTemplate "init-tools.sh.tmpl" . | trim }}
 """

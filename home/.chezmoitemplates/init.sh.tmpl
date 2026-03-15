@@ -132,14 +132,9 @@ fi
 # https://github.com/rossmacarthur/sheldon#loading-plugins
 eval "$(SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/$shell.toml" sheldon source)"
 {{- else }}
-{{ includeTemplate "init-tools.sh.tmpl" . }}
+{{ includeTemplate "init-tools.sh.tmpl" . | trim }}
 {{- end }}
 
-{{- if and .features.ai .features.git }}
-# if command -v gh >/dev/null; then
-#   eval "$(gh copilot alias -- "$shell")"
-# fi
-{{ end }}
 [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code

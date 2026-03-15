@@ -1,5 +1,4 @@
-ARG IMAGE_NAME
-ARG IMAGE_VERSION
-FROM $IMAGE_NAME:$IMAGE_VERSION
+ARG IMAGE
+FROM $IMAGE
 COPY script/entrypoint /usr/local/bin/
 ENTRYPOINT ["/usr/local/bin/entrypoint"]

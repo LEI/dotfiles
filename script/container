@@ -86,8 +86,7 @@ cmd_build() {
 
   $CONTAINER_PROVIDER build . \
     --file=Containerfile \
-    --build-arg=IMAGE_NAME="$image_name_arg" \
-    --build-arg=IMAGE_VERSION="$image_version_arg" \
+    --build-arg=IMAGE="$image_name_arg:$image_version_arg" \
     --tag="$container"
 
   $CONTAINER_PROVIDER container inspect "$container" >/dev/null 2>&1 ||

@@ -108,6 +108,7 @@ services:
       - WEBUI_SECRET_KEY=${OAGE_WEBUI_SECRET_KEY:?set OAGE_WEBUI_SECRET_KEY in local.sh}
       - CORS_ALLOW_ORIGIN=https://open-webui.test
       - USER_AGENT=open-webui
+      # - HF_TOKEN=
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:
