@@ -1,0 +1,4 @@
+---
+packages:
+  glab:
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

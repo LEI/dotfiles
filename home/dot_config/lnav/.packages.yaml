@@ -1,0 +1,5 @@
+---
+packages:
+  lnav:
+    enabled: '{{ and (ne .os "windows") (ne .profile "minimal") }}'
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

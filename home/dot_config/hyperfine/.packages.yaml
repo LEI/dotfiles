@@ -1,0 +1,5 @@
+---
+packages:
+  hyperfine:
+    enabled: '{{ and (eq .osIDLike "arch" "darwin" "fedora") .gui }}'
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

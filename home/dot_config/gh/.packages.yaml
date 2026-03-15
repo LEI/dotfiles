@@ -1,0 +1,4 @@
+---
+packages:
+  gh:
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

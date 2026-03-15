@@ -1,7 +1,7 @@
 ---
 packages:
-  bat:
-    enabled: "{{ .features.bat }}"
+  fzf:
+    enabled: '{{ ne .profile "minimal" }}'
     nameOverwrite:
-      windows: sharkdp.bat
+      windows: junegunn.fzf
     type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

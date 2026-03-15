@@ -174,12 +174,6 @@ packages:
   # fancy-cat:
   #   enabled: {{ eq .osIDLike "arch" "darwin" }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  fd:
-    enabled: {{ ne .profile "minimal" }}
-    nameOverwrite:
-      fedora: fd-find
-      windows: sharkdp.fd
-    type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
   ffmpeg:
     enabled: {{ ne .profile "minimal" }}
     nameOverwrite:
@@ -195,10 +189,6 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # foot:
   #   enabled: {{ and .features.sway (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
-  fzf:
-    enabled: {{ ne .profile "minimal" }}
-    nameOverwrite:
-      windows: junegunn.fzf
   envx:
     enabled: {{ and (eq .osIDLike "arch") (not (or .ephemeral .headless)) }}
     nameOverwrite:
@@ -266,8 +256,6 @@ packages:
   #   nameOverwrite:
   #     arch: hostctl-bin
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  htop:
-    enabled: {{ and (ne .os "windows") (ne .profile "minimal") }}
   httm:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
     nameOverwrite:
@@ -295,9 +283,6 @@ packages:
     enabled: {{ and (eq .osIDLike "arch" "windows") .gui }}
     nameOverwrite:
       windows: REALiX.HWiNFO
-  hyperfine:
-    enabled: {{ and (eq .osIDLike "arch" "darwin" "fedora") .gui }}
-    # type: {{ if eq .osIDLike "fedora" }}brew{{ end }}
   # intentrace:
   #   description: strace alternative
   #   enabled: {{ lookPath "strace" | isExecutable }} # x86-64
@@ -354,7 +339,6 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   llama.cpp:
     enabled: {{ and .features.ai (eq .osIDLike "darwin") (eq .chezmoi.arch "arm64") (not (or .ephemeral .headless)) }}
-  lnav: { enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} }
   logseq: # obsidian
     enabled: {{ .features.logseq }}
     nameOverwrite:
@@ -746,14 +730,6 @@ packages:
       windows: sxyazi.yazi oschwartz10612.Poppler ImageMagick.ImageMagick
   # FIXME: "extra/yq" installs "kislyuk/yq" on arch instead of "mikefarah/yq"
   # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
-  yq:
-    nameOverwrite:
-      alpine: yq-go
-      windows: MikeFarah.yq
-    type: {{ or
-        (and (eq .osID "debian") (le (int .osVersion) 11))
-        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-      | ternary "mise" nil }}
   zen:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}
     nameOverwrite:
@@ -763,11 +739,6 @@ packages:
   #   enabled: {{ eq .os "windows" }}
   #   nameOverwrite:
   #     windows: zig.zig
-  zoxide:
-    enabled: {{ .features.zoxide }}
-    nameOverwrite:
-      windows: ajeetdsouza.zoxide
-    type: '{{ and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) | ternary "mise" nil }}'
 osPackages:
   alpine:
     apk:

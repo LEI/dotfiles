@@ -254,18 +254,22 @@ main() {
   fi
 
   local extra=("$@")
-  local failed=()
+  # local failed=()
 
   for name in ${NAME//,/ }; do
     local rc=0
     time run_one "$name" "${extra[@]}" || rc=$?
-    [ $rc -ne 0 ] && failed+=("$name")
+    # [ $rc -ne 0 ] && failed+=("$name")
+    if [ $rc -ne 0 ]; then
+      echo >&2 "FAILED: $name"
+      exit 1
+    fi
   done
 
-  if [ ${#failed[@]} -gt 0 ]; then
-    echo >&2 "FAILED: ${failed[*]}"
-    exit 1
-  fi
+  # if [ ${#failed[@]} -gt 0 ]; then
+  #   echo >&2 "FAILED: ${failed[*]}"
+  #   exit 1
+  # fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

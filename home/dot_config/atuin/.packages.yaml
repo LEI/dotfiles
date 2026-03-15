@@ -3,6 +3,7 @@ packages:
   atuin: # ddworken/hishtory, dvorka/hstr
     # name: atuin atuin-sync
     enabled: "{{ .features.atuin }}"
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
   ble.sh:
     enabled: '{{ ne .osID "alpine" }}'
     name: github:akinomyoga/ble.sh
