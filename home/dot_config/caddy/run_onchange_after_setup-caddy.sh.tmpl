@@ -49,11 +49,11 @@ elif has systemctl; then
     run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_dropin_src' '$otel_dropin' && systemctl daemon-reload"
   fi
   if systemctl is-active --quiet caddy; then
-    adapted="$(caddy adapt --config "$caddyfile" | jq -S .)" || {
+    adapted="$(run caddy adapt --config "$caddyfile" | jq -S .)" || {
       msg "caddy adapt failed; check Caddyfile"
       exit 1
     }
-    running="$(curl -sf http://localhost:2019/config/ | jq -S .)" || true
+    running="$(run curl -sf http://localhost:2019/config/ | jq -S .)" || true
     if [ -z "${running:-}" ]; then
       msg "WARN: caddy admin API unavailable; skipping reload check"
     elif [ "$adapted" != "$running" ]; then
@@ -112,9 +112,8 @@ else
   exit 1
 fi
 
-if ! curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
-  msg "Caddy CA not ready; run again after caddy initializes"
-  exit 0
+if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
+  err "Caddy CA not ready; run again after caddy initializes"
 fi
 
 # macOS keychain (Safari, Chrome): uncomment if caddy trust alone is insufficient
@@ -142,8 +141,12 @@ brew_openssl_dir="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}/etc/openssl@3"
 if [ -d "$brew_openssl_dir" ]; then
   brew_bundle="$brew_openssl_dir/cert.pem"
   caddy_marker="# Caddy Local Authority"
-  if ! grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-    msg "Appending caddy root CA to brew openssl bundle"
-    { echo "$caddy_marker"; cat "$root"; } >> "$brew_bundle"
+  # Remove any existing caddy entry (marker through end-of-cert) before re-appending
+  if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+    marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
+    end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
+    run sed -i "${marker_line},${end_line}d" "$brew_bundle"
   fi
+  msg "Appending caddy root CA to brew openssl bundle"
+  run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
 fi

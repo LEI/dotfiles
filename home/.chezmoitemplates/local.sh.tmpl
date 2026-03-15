@@ -11,13 +11,8 @@
 
 {{- if .features.oage }}
 
-# export OPENROUTER_API_KEY="" # routes openrouter models through bifrost
-# Generate once: openssl rand -hex 32
-# export OAGE_BIFROST_API_KEY=""
-# Generate once: openssl rand -hex 32
-# export OAGE_WEBUI_SECRET_KEY=""
-# Generate once, never change: openssl rand -hex 32
-# export OPEN_NOTEBOOK_ENCRYPTION_KEY="" # changing this corrupts stored credentials in surrealdb
+# OpenRouter API key for cloud model access via bifrost
+# export OPENROUTER_API_KEY="sk-or-v1-..."
 {{- end }}
 
 # export SSH_PROXIES="
