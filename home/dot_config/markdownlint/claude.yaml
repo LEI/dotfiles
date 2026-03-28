@@ -1,0 +1,37 @@
+---
+# markdownlint config for Claude Code sessions
+# Applied by the Claude Code lint hook; does not affect editor or CLI use.
+default: true
+
+# Line length: unreasonable for prose notes
+MD013: false
+# no-missing-space-atx
+MD018: false
+# blanks-around-headings
+MD022: false
+# Duplicate heading text: too strict for notes with repeated section names
+MD024: false
+# Single H1: conflicts with YAML frontmatter
+MD025: false
+# blanks-around-fences
+MD031: false
+# blanks-around-lists
+MD032: false
+# Inline HTML: sometimes needed
+MD033: false
+# Bare URLs: friction for note-taking
+MD034: false
+# no-space-in-emphasis: false positives on backtick patterns
+MD037: false
+# Fenced code language: not always relevant in prose
+MD040: false
+# First line must be H1: conflicts with frontmatter and titled notes
+MD041: false
+# Proper name capitalization: too opinionated
+MD044: false
+# Single trailing newline: noisy when models edit files
+MD047: false
+# blanks-around-tables: noisy with mixed content
+MD058: false
+# Table column style: handled by prettier
+MD060: false
