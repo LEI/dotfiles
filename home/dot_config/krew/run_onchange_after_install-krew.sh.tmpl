@@ -8,7 +8,7 @@ export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
 
 if command -v kubectl-krew; then
   echo >&2 "Already installed"
-  cmd kubectl-krew version | grep GitTag
+  run kubectl-krew version | grep GitTag
   exit
 fi
 
