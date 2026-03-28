@@ -1,10 +1,12 @@
 [Unit]
 Description=Sync mail with mbsync
+After=network.target
 OnFailure=status-email-user@%n.service
 
 [Service]
 Type=oneshot
+NoNewPrivileges=yes
 Nice=10
-ExecStart=/usr/bin/mbsync --config {{ .chezmoi.homeDir }}/.config/mbsync/mbsyncrc all
+Environment=HOME=%h
+ExecStart=/usr/bin/mbsync --config %h/.config/mbsync/mbsyncrc all
 ExecStartPost=/usr/bin/notmuch new
-Environment="HOME={{ .chezmoi.homeDir }}"
