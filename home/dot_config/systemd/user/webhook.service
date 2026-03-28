@@ -1,0 +1,17 @@
+[Unit]
+Description=Webhook alert receiver for Grafana
+After=network.target
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+PrivateTmp=yes
+Environment=PATH=/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env webhook --hooks %h/.config/webhook/hooks.yaml --port 9000 --verbose
+StandardOutput=append:%h/.local/state/webhook/stdout.log
+StandardError=append:%h/.local/state/webhook/stderr.log
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
