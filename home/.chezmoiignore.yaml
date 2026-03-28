@@ -1,13 +1,18 @@
 ---
+# os: patterns ignored on all OSes EXCEPT the key (.chezmoi.os: linux, darwin, windows)
+# features: patterns ignored when the feature key is NOT enabled
 os:
   darwin:
     - .bash_profile
     - .chezmoiscripts/darwin/**
     - .config/hammerspoon/
+    - .config/iterm2/
     - .config/karabiner/
+    - .hushlogin
     - .macos
     - Library/
   linux:
+    - .config/systemd/
     - .hushlogin
   windows:
     - "*.ps1"
@@ -19,9 +24,16 @@ os:
     # - Documents/WindowsPowerShell/
 features:
   ai:
-    # - .claude/
+    - .claude/
     - .config/claude/
+    - .config/markdownlint/claude.yaml
+    - .config/goose/
     - .config/mcphub/
+    - .config/mcporter/
+    - .config/opencode/
+    - .config/pi/
+    - .config/utcp/
+    - .mcporter/
   atuin:
     - .config/atuin/
   bash:
@@ -32,6 +44,8 @@ features:
     - .config/blesh/
   bat:
     - .config/bat/
+  caddy:
+    - .config/caddy/
   zsh:
     - .config/zsh/
     # - .zprofile
@@ -39,28 +53,27 @@ features:
   carapace:
     - .config/carapace/
   brew:
-    - .brew-aliases/
     - .chezmoiscripts/*install-brew-packages.sh
     - .config/homebrew/
+  direnv:
+    - .config/direnv/
   docker:
     - .config/carapace/specs/d.yaml
     - .config/docker/
-    - .config/sh/plugins/docker.sh
   eza:
     - .config/eza/
   podman:
     - .config/carapace/specs/p.yaml
+    - .config/podman/
   ghostty:
     - .config/ghostty/
   git:
+    # NOTE: feature should be named "git-config"
     - .config/carapace/specs/g.yaml
     - .config/git/
     - .config/lazygit/
     # FIXME: mod.nu.tmpl loops on source directory
-    # .config/nushell/modules/git.nu
-    # NOTE: feature should be named "git-config"
-    # .config/sh/plugins/git.sh
-    - .config/carapace/specs/g.yaml
+    - .config/nushell/modules/git.nu
   go:
     - .config/mise/default-go-packages
   goss:
@@ -73,7 +86,6 @@ features:
     - .config/Kvantum/
     - .config/X11/
     # - .config/autostart/
-    - .config/environment.d/
     - .config/gtk-*/
     - .config/i3*/
     - .config/picom/
@@ -86,12 +98,15 @@ features:
     - .local/share/applications/
     - .xinitrc
     - .xprofile
+  logseq:
+    - .chezmoiscripts/*setup-logseq.sh
+    - .config/logseq/
+    - .logseq/
   kube:
     - .config/carapace/specs/k.yaml
     - .config/k9s/
     - .config/krew/
     - .config/kube/
-    - .config/sh/plugins/kubectl.sh
     - .local/bin/k
   lla:
     - .config/lla/
@@ -100,7 +115,7 @@ features:
     - .config/isync/
     - .config/meli/
     - .config/notmuch/
-    - .config/systemd/ # user/mbsync-run.*
+    - .config/systemd/user/mbsync-run.*
     - .local/share/applications/aerc.*
     - .local/share/applications/meli.*
   mise:
@@ -108,7 +123,6 @@ features:
     - .chezmoiscripts/*install-tools.sh
     - .chezmoiscripts/*mise-install.sh
     - .config/mise/
-    - .config/sh/plugins/mise.sh
   neovim:
     - .chezmoiscripts/*install-neovim.sh
     - .config/carapace/specs/n.yaml
@@ -124,6 +138,20 @@ features:
     # - .config/*/*.nu
     - .config/nushell/
     - "*.nu"
+  oage:
+    - .config/oage/
+  otel:
+    - .config/otel/
+    - .config/systemd/user/webhook.service
+    - .config/webhook/
+    - .local/bin/webhook-notify
+    - Library/LaunchAgents/com.webhook.alert.*
+  processCompose:
+    - .config/carapace/specs/pc.yaml
+    - .config/process-compose/
+    - .config/systemd/user/process-compose.*
+    - .local/bin/pc
+    - Library/LaunchAgents/com.process-compose.*
   # php: []
   python:
     - .chezmoiscripts/*install-python.sh
@@ -144,6 +172,10 @@ features:
   sql:
     - .config/psql/
   ssh:
+    - .config/carapace/specs/srv.yaml
+    - .config/srv/
+    - .local/bin/srv
+    - .local/bin/ssh-cd
     - .ssh/
   ripgrep:
     - .config/ripgrep/
@@ -170,3 +202,5 @@ features:
     - .config/VSCodium/
   zellij:
     - .config/zellij/
+  zoxide:
+    - .config/zoxide/

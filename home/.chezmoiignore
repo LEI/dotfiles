@@ -21,7 +21,7 @@
 {{-   end }}
 {{- end }}
 {{- range $os, $patterns := $ignore.os }}
-{{-   if ne $.osID $os }}
+{{-   if ne $.chezmoi.os $os }}
 {{-     range $patterns }}
 {{ . }}
 {{-     end }}
@@ -38,17 +38,18 @@
 {{- end }}
 {{- end }}
 
+{{- if not (or .features.docker .features.podman) }}
+.config/pi/
+{{- end }}
+
 {{- if or (not .features.helix) (ne .osID "manjaro") }}
 .config/helix/Makefile
 {{- end }}
 
 .Xresources
+.config/tmux/install-tmux-plugins.sh
 .config/tmux/plugins/tmux-which-key/
 .hushlogin
-
-{{- if not (lookPath "process-compose" | isExecutable) }}
-.config/carapace/specs/pc.yaml
-{{- end }}
 
 {{ if not .codespaces -}}
 .vscode-remote/
@@ -58,8 +59,27 @@
 .install-password-manager.sh
 {{ end -}}
 
+{{- if or .container (eq .os "android") }}
+.chezmoiscripts/reload-environment.sh
+{{- end }}
+
 {{- if not (eq .os "android" "linux") }}
 .chezmoiscripts/linux/**
+{{- end }}
+
+{{- if not (and .features.ollama .features.podman (eq .os "linux")) }}
+.config/containers/systemd/ollama.container
+{{- end }}
+
+{{- if not (and .features.ai (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64")) }}
+.config/llama-cpp/
+.config/mlx-lm/
+Library/LaunchAgents/com.llama-cpp.server.plist
+Library/LaunchAgents/com.mlx-lm.server.plist
+{{- end }}
+
+{{- if not (lookPath "gnome-keyring-daemon") }}
+.local/share/keyrings/default
 {{- end }}
 
 {{- if eq .osID "darwin" }}
@@ -72,6 +92,7 @@
 {{- end }}
 
 {{- if eq .osID "windows" }}
+!.config/topgrade/topgrade.toml
 # .chezmoiscripts/*install-xdg.sh
 # .config/*/*.sh
 # .install-password-manager.sh
