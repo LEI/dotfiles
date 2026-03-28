@@ -1,12 +1,17 @@
 ---
+enabled: "{{ .features.node }}"
 packages:
+  bun:
+    # FIXME: bun download fails in termux
+    enabled: '{{ not (eq .osIDLike "android") }}'
+    type: mise
   node-mise:
-    enabled: '{{ and .features.node (not (eq .osIDLike "alpine" "android")) }}'
+    enabled: '{{ not (eq .osIDLike "alpine" "android") }}'
     name: node
-    version: lts
+    version: lts # {{ `{{ env['NODE_VERSION'] | default(value='lts') }}` }}
     type: mise
   nodejs:
-    enabled: '{{ and .features.node (eq .osIDLike "alpine" "windows") }}'
+    enabled: '{{ eq .osIDLike "alpine" "windows" }}'
     nameOverwrite:
       alpine: node
       # android: nodejs # -lts
@@ -18,15 +23,47 @@ packages:
     # type: '{{ eq .osIDLike "alpine" | ternary nil "mise" }}'
     # version: '{{ eq .packageType "mise" | ternary "lts" "" }}'
   npm:
-    enabled: "{{ .features.node }}"
     type: '{{ eq .osIDLike "alpine" | ternary nil "npm" }}'
   pnpm:
-    enabled: "{{ .features.node }}"
     # pnpm.pnpm
     type: npm
   yarn:
-    enabled: "{{ .features.node }}"
+    type: npm
+  json5:
     type: npm
   runme:
-    # enabled: '{{ .features.node }}'
+    type: npm
+  "@fission-ai/openspec":
+    enabled: "{{ .features.ai }}"
+    type: npm
+  "@kilocode/cli":
+    enabled: "{{ .features.ai }}"
+    type: npm
+  "@qodo/command": # uv tool install pr-agent
+    enabled: "{{ .features.ai }}"
+    type: npm
+  cline: # roocode
+    enabled: "{{ .features.ai }}"
+    type: npm
+  bash-language-server:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  prettier:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  sql-language-server:
+    enabled: "{{ and .features.sql (not .features.neovim) }}"
+    type: npm
+  typescript:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  typescript-language-server:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
+  vscode-langservers-extracted@4.8:
+    enabled: "{{ not .features.neovim }}"
+    type: npm
+  yaml-language-server@next:
+    enabled: "{{ not .features.neovim }}"
     type: npm
