@@ -7,7 +7,7 @@ set -eu
 {{- /* Upgrade unless RubyGems is managed by APT + FIXME(arch): EACCES */ -}}
 {{- if and .upgrade (ne .osIDLike "debian") }}
 
-# cmd sudo gem update --system
+# run sudo gem update --system
 {{- end }}
 
 {{ $packages := list -}}
@@ -22,5 +22,5 @@ set -eu
 packages="{{ $packages | sortAlpha | join " " }}"
 
 if [ -n "$packages" ]; then
-  cmd gem install --quiet --user $packages
+  run gem install --quiet --user $packages
 fi
