@@ -1,0 +1,6 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $current := .chezmoi.stdin | trim -}}
+{{- if ne $current "login" -}}
+{{- warnf "gnome-keyring default was %q, setting to login" $current -}}
+{{- end -}}
+login
