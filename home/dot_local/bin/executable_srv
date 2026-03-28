@@ -1,0 +1,101 @@
+#!/usr/bin/env usage bash
+#USAGE bin "srv" help="SSH host dispatcher"
+#USAGE cmd "list" help="Show configured hosts"
+#USAGE cmd "connect" help="Open shell or run command on a host" {
+#USAGE   arg "<name>" help="Host name"
+#USAGE   arg "[command]" help="Command to run on host" var=#true
+#USAGE }
+#USAGE cmd "logs" help="Tail logs on a host" {
+#USAGE   arg "<name>" help="Host name"
+#USAGE   arg "[args]" help="Additional arguments for the log command" var=#true
+#USAGE }
+#USAGE arg "[name]" help="Host name (shortcut for connect)"
+#USAGE arg "[command]" help="Command to run on host" var=#true
+
+set -eu
+
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/srv/hosts.yaml"
+
+die() {
+  echo >&2 "srv: $*"
+  exit 1
+}
+
+field() {
+  val=$(yq -r ".hosts.$1.$2" "$conf")
+  if [ "$val" = "null" ]; then
+    return
+  fi
+  printf '%s' "$val"
+}
+
+if [ ! -f "$conf" ]; then
+  die "config not found: $conf"
+fi
+
+if ! command -v yq >/dev/null; then
+  die "yq required"
+fi
+
+cmd_list() {
+  yq -r '.hosts | keys[]' "$conf"
+}
+
+cmd_logs() {
+  name="${1:?name required}"
+  shift
+  host=$(field "$name" ssh)
+  if [ -z "$host" ]; then
+    die "unknown host '$name'"
+  fi
+  dir=$(field "$name" dir)
+  log_cmd=$(field "$name" logs.cmd)
+  if [ -z "$log_cmd" ]; then
+    die "no log command for '$name'"
+  fi
+  if [ $# -gt 0 ]; then
+    log_cmd="$log_cmd $*"
+  fi
+  log_pipe=$(field "$name" logs.pipe)
+  if [ -n "$log_pipe" ]; then
+    ssh "$host" "cd '$dir' && $log_cmd" | $log_pipe
+  else
+    ssh -t "$host" "cd '$dir' && $log_cmd"
+  fi
+}
+
+cmd_connect() {
+  name="${1:?name required}"
+  shift
+  host=$(field "$name" ssh)
+  if [ -z "$host" ]; then
+    die "unknown host '$name'"
+  fi
+  dir=$(field "$name" dir)
+  if [ $# -eq 0 ]; then
+    set -- "exec \$SHELL -l"
+  fi
+  ssh -t "$host" "cd '$dir' && $*"
+}
+
+cmd_help() {
+  usage bash --help "$0" "$@"
+}
+
+case "${1:-}" in
+"") cmd_list ;;
+list) cmd_list ;;
+connect)
+  shift
+  cmd_connect "$@"
+  ;;
+logs)
+  shift
+  cmd_logs "$@"
+  ;;
+help)
+  shift
+  cmd_help "$@"
+  ;;
+*) cmd_connect "$@" ;;
+esac
