@@ -1,0 +1,105 @@
+{{- if .features.oage -}}
+{{- $cred := .oage.credential -}}
+{{- /* ai.profiles.local -> open-notebook default models */ -}}
+{{- $roleMap := dict
+  "chat" (list "chat" "large_context")
+  "coding" (list "tools" "transformation")
+  "embedding" (list "embedding")
+-}}
+{{- $models := list -}}
+{{- range $role, $notebookRoles := $roleMap -}}
+{{-   $modelName := get $.ai.profiles.local $role -}}
+{{-   if not $modelName }}{{ continue }}{{ end -}}
+{{-   $ollamaId := (get $.ai.models $modelName).ollama -}}
+{{-   if not $ollamaId }}{{ continue }}{{ end -}}
+{{-   $type := eq $role "embedding" | ternary "embedding" "language" -}}
+{{-   $models = append $models (dict "name" $ollamaId "type" $type "default" $notebookRoles) -}}
+{{- end -}}
+{{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
+#!/bin/sh
+# config hash: {{ dict "credential" $cred "profiles" $.ai.profiles.local "providers" $.ai.providers | toJson | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+BASE_URL="http://127.0.0.1:5055"
+
+api() {
+  local method="$1" path="$2"
+  shift 2
+  curl -sf -X "$method" "$BASE_URL$path" \
+    -H "Content-Type: application/json" \
+    "$@"
+}
+
+ensure_credential() {
+  local name="$1" provider="$2" modalities="$3" api_key="$4" base_url="$5"
+  local existing
+  existing="$(api GET /api/credentials | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
+  if [ -n "$existing" ]; then
+    msg "open-notebook: credential '$name' already exists"
+    echo "$existing"
+    return
+  fi
+  local id
+  id="$(api POST /api/credentials -d "$(jq -n \
+    --arg name "$name" \
+    --arg provider "$provider" \
+    --arg api_key "$api_key" \
+    --arg base_url "$base_url" \
+    --argjson modalities "$modalities" \
+    '{name: $name, provider: $provider, modalities: $modalities, api_key: $api_key, base_url: $base_url}'
+  )" | jq -r '.id')"
+  msg "open-notebook: created credential '$name' ($id)"
+  echo "$id"
+}
+
+ensure_model() {
+  local name="$1" type="$2" credential_id="$3"
+  local existing
+  existing="$(api GET /api/models | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
+  if [ -n "$existing" ]; then
+    msg "open-notebook: model '$name' already exists"
+    echo "$existing"
+    return
+  fi
+  local id
+  id="$(api POST /api/models -d "$(jq -n \
+    --arg name "$name" \
+    --arg provider "openai-compatible" \
+    --arg type "$type" \
+    --arg credential "$credential_id" \
+    '{name: $name, provider: $provider, type: $type, credential: $credential}'
+  )" | jq -r '.id')"
+  msg "open-notebook: registered model '$name' ($id)"
+  echo "$id"
+}
+
+cred_id="$(ensure_credential \
+  "{{ $cred.name }}" \
+  "{{ $cred.provider }}" \
+  '{{ $types | uniq | toJson }}' \
+  "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
+  "{{ $cred.base_url }}"
+)"
+
+{{ range $models -}}
+ensure_model "ollama/{{ .name }}" "{{ .type }}" "$cred_id"
+{{ end }}
+# Build defaults: pass model config as JSON, look up IDs from API response
+models_json="$(api GET /api/models)"
+defaults="$(jq -n \
+  --argjson registered "$models_json" \
+  --argjson config '{{ $models | toJson }}' \
+  '
+    def id_for(n): $registered | map(select(.name == n)) | first | .id;
+    [ $config[] | .name as $name | .default[]? | {
+        key: ("default_" + . + "_model"),
+        value: id_for("ollama/" + $name)
+      }
+    ] | map(select(.value != null)) | from_entries
+  ')"
+run api PUT /api/models/defaults -d "$defaults" >/dev/null
+
+msg "open-notebook: defaults set"
+{{- end }}
