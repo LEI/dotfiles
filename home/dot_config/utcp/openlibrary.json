@@ -1,0 +1,27 @@
+{
+  "manual_call_templates": [
+    {
+      "name": "openlibrary",
+      "call_template_type": "http",
+      "http_method": "GET",
+      "url": "https://openlibrary.org/static/openapi.json",
+      "content_type": "application/json"
+    }
+  ],
+  "variables": {
+    "utcp__mcp_HOME": "$HOME"
+  },
+  "post_processing": [
+    {
+      "tool_post_processor_type": "filter_dict",
+      "only_include_keys": ["name", "description"],
+      "only_include_tools": ["openlibrary.*"]
+    }
+  ],
+  "tool_repository": {
+    "tool_repository_type": "in_memory"
+  },
+  "tool_search_strategy": {
+    "tool_search_strategy_type": "tag_and_description_word_match"
+  }
+}

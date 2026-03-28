@@ -1,0 +1,26 @@
+{{- $openapis := dig "utcp" "openApiUrls" (list) . -}}
+{{- /* "load_variables_from": [
+  {
+    "variable_loader_type": "dotenv",
+    "env_file_path": ".env"
+  }
+], */ -}}
+{
+  "manual_call_templates": [
+    {
+      "name": "utcp-mcp",
+      "call_template_type": "file",
+      "file_path": "manual.json",
+      "allowed_communication_protocols": ["mcp"]
+    }{{ if $openapis }},{{ end }}
+    {{- range $i, $url := $openapis }}
+    {
+      "name": {{ $url | replaceAllRegex ".*/" "" | replaceAllRegex "\\." "-" | quote }},
+      "call_template_type": "http",
+      "http_method": "GET",
+      "url": {{ $url | quote }},
+      "content_type": "application/json"
+    }{{ if lt $i (sub (len $openapis) 1) }},{{ end }}
+    {{- end }}
+  ]
+}

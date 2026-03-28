@@ -1,0 +1,29 @@
+{{- $_ := . | setValueAtPath "client" "utcp" -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $tools := list -}}
+{{- range $key, $value := pick $mcp.servers
+  "github"
+
+  "flux-operator"
+  "flux-operator-read-only"
+  "kubernetes"
+-}}
+{{- $_ := $value | setValueAtPath "transport" (get $value "type" | default "stdio") -}}
+{{- if and (hasKey $value "type") -}}
+{{-   $_ := $value | deleteValueAtPath "type" -}}
+{{- end -}}
+{{- $tools = append $tools (dict
+  "name" $key
+  "description" (printf "Manual %s" $key)
+  "tool_call_template" (dict
+    "call_template_type" "mcp"
+    "config" (dict "mcpServers" $value)
+    "register_resources_as_tools" true
+  )
+) -}}
+{{- end -}}
+{
+  "manual_version": "1.0.0",
+  "utcp_version": "1.0.1",
+  "tools": {{ $tools | toPrettyJson | indent 4 | trim }}
+}
