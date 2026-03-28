@@ -6,4 +6,7 @@ packages:
       arch: topgrade-bin
       manjaro: topgrade
       windows: topgrade-rs.topgrade
-    type: '{{ and (eq .osIDLike "arch") (ne .osID "manjaro") | ternary "aur" nil }}'
+    type: >-
+      {{ if and (eq .osIDLike "arch") (ne .osID "manjaro") }}aur
+      {{- else if eq .osIDLike "fedora" }}brew
+      {{- end }}
