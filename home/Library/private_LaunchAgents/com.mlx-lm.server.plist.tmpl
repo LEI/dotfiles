@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mlx-lm.server</string>
+  <key>KeepAlive</key>
+  <false/>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>LimitLoadToSessionType</key>
+  <array>
+    <string>Aqua</string>
+    <string>Background</string>
+    <string>LoginWindow</string>
+    <string>StandardIO</string>
+    <string>System</string>
+  </array>
+  <key>ProgramArguments</key>
+  <array>
+    <string>{{ .brewPrefix }}/opt/mlx-lm/bin/mlx_lm.server</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>{{ (get .ai.providers "mlx-lm").port }}</string>
+  </array>
+  <key>StandardErrorPath</key>
+  <string>{{ .brewPrefix }}/var/log/mlx-lm.log</string>
+  <key>StandardOutPath</key>
+  <string>{{ .brewPrefix }}/var/log/mlx-lm.log</string>
+  <key>WorkingDirectory</key>
+  <string>{{ .brewPrefix }}/var</string>
+</dict>
+</plist>
