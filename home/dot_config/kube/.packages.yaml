@@ -1,0 +1,16 @@
+---
+# Create a local cluster:
+# sudo systemctl start docker
+# sudo modprobe br_netfilter
+# talosctl cluster create docker
+# brew install controlplaneio-fluxcd/tap/flux-operator
+# flux-operator install -f flux-instance.yaml
+enabled: "{{ .features.kube }}"
+packages:
+  # flux: # fluxcd/tap/flux
+  #   type: mise
+  controlplaneio-fluxcd/tap/flux-operator:
+    type: brew
+  controlplaneio-fluxcd/tap/flux-operator-mcp:
+    enabled: "{{ .features.ai }}"
+    type: brew
