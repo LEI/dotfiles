@@ -1,0 +1,53 @@
+---
+# Everything Claude Code (github.com/affaan-m/everything-claude-code)
+# Cherry-picked rules from the full plugin (65+ skills, 50+ commands).
+# Extracted to rules/ecc/<category>/ loaded recursively.
+# Pin option: replace /main.tar.gz with /refs/tags/vX.Y.Z.tar.gz
+# Security and quality rules are prioritized; language packs are opt-in.
+
+# Common rules: agents, hooks, patterns, performance, security, testing
+rules/ecc/common:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 3
+  include:
+    - "*/rules/common/agents.md"
+    - "*/rules/common/hooks.md"
+    - "*/rules/common/patterns.md"
+    - "*/rules/common/performance.md"
+    - "*/rules/common/security.md"
+    - "*/rules/common/coding-style.md"
+    - "*/rules/common/development-workflow.md"
+    - "*/rules/common/testing.md"
+    - "*/rules/common/git-workflow.md"
+  refreshPeriod: 168h
+
+# TypeScript: coding-style, hooks, patterns, security, testing
+rules/ecc/typescript:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 3
+  include: ["*/rules/typescript/*"]
+  refreshPeriod: 168h
+
+# Language packs: all have paths: frontmatter scoped to file extensions (zero context cost)
+rules/ecc/golang:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 3
+  include: ["*/rules/golang/*"]
+  refreshPeriod: 168h
+
+rules/ecc/python:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 3
+  include: ["*/rules/python/*"]
+  refreshPeriod: 168h
+
+rules/ecc/swift:
+  type: archive
+  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+  stripComponents: 3
+  include: ["*/rules/swift/*"]
+  refreshPeriod: 168h

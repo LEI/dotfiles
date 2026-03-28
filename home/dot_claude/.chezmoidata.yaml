@@ -1,0 +1,95 @@
+---
+# Non-standard marketplaces (claude-plugins-official is built-in)
+# repo: git-hosted (passed as-is to `claude plugin marketplace add`)
+# path: local path relative to homeDir
+claudeMarketplaces:
+  chezmoi:
+    path: ".claude/plugins/chezmoi"
+  claude-dashboard:
+    repo: uppinote20/claude-dashboard
+  everything-claude-code:
+    repo: affaan-m/everything-claude-code
+
+# Managed plugins: all handled identically by run_onchange_after_plugins.sh
+# claude-plugins-official: no version pin (latest is fine)
+# other: optional version pin
+# Env-local: $CLAUDE_CODE_PLUGINS (name@marketplace,...) and $CLAUDE_CODE_MARKETPLACES (name:path,...)
+#
+# Installed but not globally enabled (per-project use):
+# agent-sdk-dev@claude-plugins-official: per-project
+# github@claude-plugins-official: per-project
+# gitlab@claude-plugins-official: per-project
+# php-lsp@claude-plugins-official: per-project
+# plugin-dev@claude-plugins-official: per-project, skills disabled below
+# typescript-lsp@claude-plugins-official: per-project
+#
+# Not installed (use CLI to re-add if needed):
+# greptile@claude-plugins-official: needs API key
+# semgrep@claude-plugins-official: needs semgrep installed
+claudePlugins:
+  - name: local
+    marketplace: chezmoi
+  - name: claude-code-setup
+    marketplace: claude-plugins-official
+  - name: claude-dashboard
+    marketplace: claude-dashboard
+  - name: claude-md-management
+    marketplace: claude-plugins-official
+  - name: code-review
+    marketplace: claude-plugins-official
+  - name: code-simplifier
+    marketplace: claude-plugins-official
+  - name: commit-commands
+    marketplace: claude-plugins-official
+  - name: everything-claude-code
+    marketplace: everything-claude-code
+    version: "1.9.0"
+  - name: feature-dev
+    marketplace: claude-plugins-official
+  - name: frontend-design
+    marketplace: claude-plugins-official
+  - name: hookify
+    marketplace: claude-plugins-official
+  - name: security-guidance
+    marketplace: claude-plugins-official
+
+# Skills disabled globally (plugin installed for per-project use)
+claudeDisabledSkills:
+  - local:beads
+  - everything-claude-code:clickhouse-io
+  - everything-claude-code:content-engine
+  - everything-claude-code:cpp-coding-standards
+  - everything-claude-code:cpp-testing
+  - everything-claude-code:django-patterns
+  - everything-claude-code:django-security
+  - everything-claude-code:django-tdd
+  - everything-claude-code:django-verification
+  - everything-claude-code:enterprise-agent-ops
+  - everything-claude-code:foundation-models-on-device
+  - everything-claude-code:investor-materials
+  - everything-claude-code:investor-outreach
+  - everything-claude-code:java-coding-standards
+  - everything-claude-code:jpa-patterns
+  - everything-claude-code:liquid-glass-design
+  - everything-claude-code:market-research
+  - everything-claude-code:nutrient-document-processing
+  - everything-claude-code:plankton-code-quality
+  - everything-claude-code:project-guidelines-example
+  - everything-claude-code:ralphinho-rfc-pipeline
+  - everything-claude-code:springboot-patterns
+  - everything-claude-code:springboot-security
+  - everything-claude-code:springboot-tdd
+  - everything-claude-code:springboot-verification
+  - everything-claude-code:swift-actor-persistence
+  - everything-claude-code:swift-concurrency-6-2
+  - everything-claude-code:swift-protocol-di-testing
+  - everything-claude-code:swiftui-patterns
+  - everything-claude-code:visa-doc-translate
+  - plugin-dev:agent-development
+  - plugin-dev:command-development
+  - plugin-dev:create-plugin
+  - plugin-dev:hook-development
+  - plugin-dev:mcp-integration
+  - plugin-dev:plugin-settings
+  - plugin-dev:plugin-structure
+  - plugin-dev:skill-development

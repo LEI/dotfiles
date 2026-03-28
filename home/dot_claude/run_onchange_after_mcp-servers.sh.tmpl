@@ -1,0 +1,61 @@
+{{- $_ := . | setValueAtPath "client" "claude" -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $servers := dict -}}
+{{- range $key, $value := pick $mcp.servers
+  "claude-context"
+  "code-mode"
+  "context7"
+  "deep-wiki"
+  "grep_app"
+  "open-notebook"
+  "utcp"
+-}}
+{{-   $_ := $servers | setValueAtPath $key $value -}}
+{{- end -}}
+#!/bin/bash
+
+set -euo pipefail
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo >&2 "jq required but not found"
+  exit 1
+fi
+
+mcp_sync() {
+  local name=$1 expected=$2
+  local current normalized
+  current=$(jq -Sc --arg n "$name" '.mcpServers[$n] // empty' ~/.claude.json 2>/dev/null || true)
+  normalized=$(printf '%s' "$expected" | jq -Sc .)
+  if [ "$current" = "$normalized" ]; then
+    echo >&2 "MCP server up to date: $name"
+    return
+  fi
+  echo >&2 "Updating MCP server: $name"
+  if claude mcp get "$name" >/dev/null 2>&1; then
+    claude mcp remove "$name"
+  fi
+  claude mcp add-json --scope=user "$name" "$expected"
+}
+
+{{- range (keys $servers | sortAlpha) }}
+mcp_sync {{ . | squote }} {{ index $servers . | toJson | squote }}
+{{- end }}
+
+{{- $omitted := list -}}
+{{- range $key := keys $mcp.servers -}}
+{{-   if not (hasKey $servers $key) -}}
+{{-     $omitted = append $omitted $key -}}
+{{-   end -}}
+{{- end -}}
+{{- if $omitted }}
+
+# Remove servers defined in mcp.jsonc but not picked above
+for name in {{ $omitted | sortAlpha | join " " }}; do
+  if claude mcp get "$name" >/dev/null 2>&1; then
+    echo >&2 "WARN: MCP server not picked: $name"
+    # claude mcp remove "$name"
+  fi
+done
+{{- end }}
+
+claude mcp list

@@ -1,0 +1,48 @@
+{{- /* Outputs {"plugins": [...], "marketplaces": {...}} merging chezmoidata + env vars.
+       CLAUDE_CODE_PLUGINS: newline-separated "name@marketplace"
+       CLAUDE_CODE_MARKETPLACES: newline-separated "name:path_or_repo"
+         path if value starts with /, repo otherwise
+       Marketplace paths are normalized to absolute. */ -}}
+{{- $marketplaces := dict -}}
+{{- range $name, $info := .claudeMarketplaces -}}
+{{-   if hasKey $info "repo" -}}
+{{-     $marketplaces = set $marketplaces $name (dict "repo" $info.repo) -}}
+{{-   else -}}
+{{-     $marketplaces = set $marketplaces $name (dict "path" (printf "%s/%s" $.chezmoi.homeDir $info.path)) -}}
+{{-   end -}}
+{{- end -}}
+{{- $envMarketplaces := env "CLAUDE_CODE_MARKETPLACES" | trim -}}
+{{- if $envMarketplaces -}}
+{{-   range splitList "\n" $envMarketplaces -}}
+{{-     $s := trim . -}}
+{{-     if $s -}}
+{{-       $parts := splitn ":" 2 $s -}}
+{{-       if and (index $parts "_0") (index $parts "_1") -}}
+{{-         $name := index $parts "_0" -}}
+{{-         $value := index $parts "_1" -}}
+{{-         if hasPrefix "/" $value -}}
+{{-           $marketplaces = set $marketplaces $name (dict "path" $value) -}}
+{{-         else -}}
+{{-           $marketplaces = set $marketplaces $name (dict "repo" $value) -}}
+{{-         end -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $plugins := list -}}
+{{- range .claudePlugins -}}
+{{-   $plugins = append $plugins (dict "name" .name "marketplace" .marketplace) -}}
+{{- end -}}
+{{- $envPlugins := env "CLAUDE_CODE_PLUGINS" | trim -}}
+{{- if $envPlugins -}}
+{{-   range splitList "\n" $envPlugins -}}
+{{-     $s := trim . -}}
+{{-     if $s -}}
+{{-       $parts := splitn "@" 2 $s -}}
+{{-       if and (index $parts "_0") (index $parts "_1") -}}
+{{-         $plugins = append $plugins (dict "name" (index $parts "_0") "marketplace" (index $parts "_1")) -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- dict "plugins" $plugins "marketplaces" $marketplaces | toJson -}}
