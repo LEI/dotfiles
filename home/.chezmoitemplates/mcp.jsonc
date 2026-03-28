@@ -1,0 +1,277 @@
+{
+  "inputs": [
+    /* {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    }, */
+  ],
+  "servers": {
+    "utcp": {
+      "command": "npx",
+      "args": ["--yes", "@utcp/mcp-bridge"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
+      },
+    },
+    // https://github.com/universal-tool-calling-protocol/typescript-utcp
+    "code-mode": {
+      "command": "npx",
+      "args": ["--yes", "@utcp/code-mode-mcp"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/25/bin:${PATH}",
+        "UTCP_CONFIG_FILE": "${XDG_CONFIG_HOME}/utcp/config.json",
+      },
+    },
+
+    // requires: ollama pull nomic-embed-text
+    // requires: milvus lite running locally (localhost:19530), file path not supported by SDK
+    "claude-context": {
+      // Offline: Ollama embeddings + local Milvus
+      // Embeddings only at index time; zero API calls at query time
+      // Package: @zilliz/claude-context-mcp (not "claude-context" which is a different tool)
+      "command": "npx",
+      "args": ["--yes", "@zilliz/claude-context-mcp"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        "EMBEDDING_PROVIDER": "Ollama",
+        "EMBEDDING_MODEL": "nomic-embed-text",
+        "MILVUS_ADDRESS": "127.0.0.1:19530",
+      },
+    },
+
+    "context7": {
+      // "enabled": {{ ne .client "opencode" }},
+      {{- if env "CONTEXT7_API_KEY" }}
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}",
+      },
+      {{- else }}
+      "command": "npx",
+      "args": ["--yes", "@upstash/context7-mcp"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+      },
+      {{- end }}
+    },
+    "deep-wiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp",
+    },
+
+    {{- if env "EXA_API_KEY" }}
+    "exa": {
+      // "enabled": {{ ne .client "opencode" }},
+      "command": "npx",
+      "args": ["--yes", "exa-mcp-server"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        "EXA_API_KEY": "${EXA_API_KEY}",
+      },
+    },
+    {{- end }}
+
+    "filesystem": {
+      "command": "npx",
+      "args": ["--yes", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+      },
+    },
+
+    {{- if env "FIRECRAWL_API_KEY" }}
+    "firecrawl": {
+      "command": "npx",
+      "args": ["--yes", "firecrawl-mcp"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}",
+      },
+    },
+    {{- end }}
+
+    {{- if lookPath "flux-operator-mcp" | isExecutable }}
+    "flux-operator": {
+      "command": "flux-operator-mcp",
+      "args": ["serve"],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}",
+      },
+    },
+    "flux-operator-read-only": {
+      "command": "flux-operator-mcp",
+      "args": ["serve", "--read-only"],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}",
+      },
+    },
+    {{- end }}
+
+    {{- if .features.kube }}
+    "kubernetes": {
+      "command": "npx",
+      "args": ["--yes", "kubernetes-mcp-server@latest"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+      },
+    },
+    {{- end }}
+
+    {{- if .features.git }}
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+    },
+    {{- end }}
+
+    {{- if env "GITHUB_TOKEN" }}
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "oauth": false, // {}
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}",
+        // "Authorization": "Bearer ${input:github_mcp_pat}",
+      },
+    },
+    "github-read-only": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}",
+        "X-MCP-Readonly": "true",
+      },
+    },
+    {{- end }}
+
+    // GitLab native MCP (beta, 18.6+)
+    {{- if and (env "GITLAB_HOST") (env "GITLAB_TOKEN") }}
+    "gitlab": {
+      "type": "http",
+      "url": "https://${GITLAB_HOST}/api/v4/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITLAB_TOKEN}",
+      },
+    },
+    // GITLAB_TOKEN_READONLY: read_api scope token for safe browsing
+    "gitlab-read-only": {
+      "type": "http",
+      "url": "https://${GITLAB_HOST}/api/v4/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITLAB_TOKEN_READONLY:-${GITLAB_TOKEN}}",
+      },
+    },
+    {{- end }}
+
+    "grep_app": {
+      // "enabled": {{ ne .client "opencode" }},
+      "type": "http",
+      "url": "https://mcp.grep.app"
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": ["--yes", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        "MEMORY_FILE_PATH": "${XDG_DATA_HOME}/memory.jsonl",
+      },
+    },
+
+    {{- if env "OPEN_NOTEBOOK_URL" }}
+    // https://github.com/lfnovo/open-notebook
+    "open-notebook": {
+      "command": "uvx",
+      "args": ["open-notebook-mcp"],
+      "env": {
+        "OPEN_NOTEBOOK_URL": "${OPEN_NOTEBOOK_URL}",
+      },
+    },
+    {{- end }}
+
+    {{- if .features.mise }}
+    "mise": {
+      // "enabled": false,
+      "command": "mise", "args": ["mcp"],
+      "env": {
+        "MISE_EXPERIMENTAL": "1",
+      },
+    },
+    {{- end }}
+
+    {{- if .gui }}
+    {{-   $chromePath := "" -}}
+    {{-   if (lookPath "chromium-browser") | isExecutable -}}
+    {{-     $chromePath = lookPath "chromium-browser" -}}
+    {{-   else if (lookPath "chrome") | isExecutable -}}
+    {{-     $chromePath = lookPath "chrome" -}}
+    {{-   else if eq .os "darwin" -}}
+    {{-     $chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" -}}
+    {{-   end -}}
+    {{-   if not $chromePath }}
+    {{      warnf "chrome-devtools: no browser found, using stable channel" }}
+    {{    end -}}
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "--yes", "chrome-devtools-mcp@latest",
+        {{- if $chromePath }}
+        "--executable-path={{ $chromePath }}",
+        {{- else }}
+        "--channel=stable",
+        {{- end }}
+        // "--headless=true",
+        "--isolated=true",
+      ],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+      },
+    },
+    {{- end }}
+
+    "qdrant-memory": {
+      // Cloud mode when QDRANT_API_KEY is set, local embedded mode otherwise
+      // fastembed supports Python 3.14 as of 0.7.x
+      "command": "uvx",
+      "args": ["mcp-server-qdrant"],
+      "env": {
+        {{- if env "QDRANT_API_KEY" }}
+        "QDRANT_URL": "${QDRANT_URL}",
+        "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+        {{- else }}
+        "QDRANT_LOCAL_PATH": "${XDG_DATA_HOME}/qdrant",
+        {{- end }}
+        "COLLECTION_NAME": "{{ .profile | default "default" }}",
+        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+        // https://github.com/qdrant/mcp-server-qdrant/blob/master/src/mcp_server_qdrant/settings.py
+        "TOOL_STORE_DESCRIPTION": "Store notes and research with semantic descriptions for future retrieval",
+        "TOOL_FIND_DESCRIPTION": "Search notes and memory using natural language",
+      },
+    },
+
+    /* "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "oauth": {}
+    }, */
+
+    "sequential-thinking": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["--yes", "@modelcontextprotocol/server-sequential-thinking"],
+      "env": {
+        "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+      },
+    },
+
+    "mcp-registry": {
+      "type": "http",
+      "url": "https://registry.run.mcp.com.ai/mcp",
+    },
+  },
+}
