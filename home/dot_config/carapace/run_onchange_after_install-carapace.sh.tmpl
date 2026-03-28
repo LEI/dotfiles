@@ -1,6 +1,6 @@
 {{- if and
-  (not (hasKey .allPackages "carapace"))
-  (not (lookPath "carapace" | isExecutable)) -}}
+  .features.carapace
+  (eq .osIDLike "alpine" "debian") -}}
 #!/bin/sh
 
 set -eu
@@ -9,11 +9,17 @@ set -eu
 
 if command -v carapace; then
   echo >&2 "Already installed"
-  cmd carapace --version
+  run carapace --version
   exit
 fi
 
 echo >&2 "Installing carapace"
+
+{{- if eq .osID "alpine" }}
+
+run sudo apk add --quiet carapace
+
+{{- else if eq .osIDLike "debian" }}
 
 # VERSION="$(get_release carapace-sh/carapace-bin)"
 # OS="$CHEZMOI_OS"
@@ -29,22 +35,12 @@ echo >&2 "Installing carapace"
   (printf "carapace-bin_*_%s_%s.tar.gz"
     (eq .chezmoi.os "android" | ternary "termux" .chezmoi.os)
     .chezmoi.arch) }}
-{{- $_ := $url | mustRegexMatch "^https" }}
 URL="{{ $url }}"
 
-{{- if eq .osID "alpine" }}
+run curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
+run sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
 
-cmd curl -LSfs "${URL%.tar.gz}.apk" -o "$TMPDIR/carapace.apk"
-cmd sudo apk add --allow-untrusted --quiet "$TMPDIR/carapace.apk"
-{{- else if eq .osIDLike "debian" }}
-
-cmd curl -LSfs "${URL%.tar.gz}.deb" -o "$TMPDIR/carapace.deb"
-cmd sudo -E apt-get install --quiet --yes "$TMPDIR/carapace.deb"
-{{- else }}
-
-# https://github.com/carapace-sh/carapace-bin/releases
-install_tar_gz "$URL" carapace
 {{- end }}
 
 echo >&2 "Installed carapace"
-{{ end -}}
+{{ end }}
