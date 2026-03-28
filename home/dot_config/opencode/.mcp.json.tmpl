@@ -1,0 +1,38 @@
+{{- /* Transform MCP config from standard format to OpenCode format */ -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $servers := dict -}}
+{{- range $key, $value := $mcp.servers -}}
+{{-   if hasKey $value "command" -}}
+{{-     $_ := $value | setValueAtPath "command" (concat (list $value.command) $value.args) -}}
+{{-     $_ := $value | deleteValueAtPath "args" -}}
+{{-   end -}}
+{{-   if hasKey $value "env" -}}
+{{-     range $k, $v := $value.env -}}
+{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
+{{-       if ne $v $val -}}
+{{-         $_ := $value.env | setValueAtPath $k $val -}}
+{{-       end -}}
+{{-     end -}}
+{{-     $_ := $value | setValueAtPath "environment" $value.env -}}
+{{-     $_ := $value | deleteValueAtPath "env" -}}
+{{-   end -}}
+{{-   if hasKey $value "headers" -}}
+{{-     range $k, $v := $value.headers -}}
+{{-       $val := $v | replaceAllRegex "\\${" "{env:" -}}
+{{-       if ne $v $val -}}
+{{-         $_ := $value.headers | setValueAtPath $k $val -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   if or (not (hasKey $value "type")) (eq $value.type "stdio") -}}
+{{-     $_ := $value | setValueAtPath "type" "local" -}}
+{{-   else if and (hasKey $value "type") (eq $value.type "http") -}}
+{{-     $_ := $value | setValueAtPath "type" "remote" -}}
+{{-   end -}}
+{{-   if hasKey $value "url" -}}
+{{-     $_ := $value | setValueAtPath "url" ($value.url | replaceAllRegex "\\${" "{env:") -}}
+{{-   end -}}
+{{- /* $_ := $value | setValueAtPath "enabled" false */ -}}
+{{-   $_ := $servers | setValueAtPath $key $value -}}
+{{- end -}}
+{{ $servers | toPrettyJson }}
