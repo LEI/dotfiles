@@ -367,7 +367,8 @@ set_from_resource $base02 i3wm.base02 #252936CC
 
 {{- if lookPath "polybar" | isExecutable }}
 
-exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+# exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+exec --no-startup-id polybar --reload
 {{- else }}
 
 bar {

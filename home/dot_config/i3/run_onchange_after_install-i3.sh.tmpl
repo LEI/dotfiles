@@ -6,12 +6,12 @@ set -eu
 
 # Check the configuration file for validity
 # config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
-cmd i3 -C -c ~/.config/i3/config
+run i3 -C -c ~/.config/i3/config
 
 {{- if lookPath "thunar" | isExecutable }}
 explorer=thunar.desktop
 if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
-  cmd xdg-mime default "$explorer" inode/directory
+  run xdg-mime default "$explorer" inode/directory
 fi
 {{- end }}
 

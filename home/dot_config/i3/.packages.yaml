@@ -57,6 +57,8 @@ packages:
     nameOverwrite:
       debian: pavucontrol alsa-utils # alsa-plugins
   # playerctl:
+  polybar:
+    enabled: "{{ .features.i3 }}"
   redshift:
     name: redshift geoclue
     nameOverwrite:
