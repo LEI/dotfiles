@@ -9,7 +9,7 @@ echo "scoop update *"
 scoop update *
 {{- end }}
 
-{{- $scoopPackages := get .packages "scoop" | default dict }}
+{{- $scoopPackages := .packages.scoop }}
 
 {{- if empty $scoopPackages }}
 {{-   warnf "missing scoop packages" }}

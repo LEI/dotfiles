@@ -4,7 +4,14 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ includeTemplate "dot_config/sh/plugins/mise.sh.tmpl" . | trim }}
+{{- if eq .osID "android" }}
+{{ includeTemplate "termux.sh.tmpl" . | trim }}
+alias mise="termux_prefix $MISE_BIN"
+{{- end }}
+{{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
+{{ includeTemplate "dot_config/environment.d/mise.conf.tmpl" . | trim }}
+
+# require_mise_version "2026.3.4" # interactive task field
 
 if [ "${DRY_RUN:-}" = true ]; then
   set -- "$@" --dry-run
@@ -23,46 +30,46 @@ set -- "$@" --yes
 {{- $tools := get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}
 
 # config.toml tools hash: {{ $tools | toJson | sha256sum }}
-echo >&2 "Installing tools"
+msg "Installing tools"
 
 # mise_args="--yes"
 # if [ "${CHEZMOI_VERBOSE:-}" = 1 ]; then
 #   mise_args="$mise_args --verbose"
 # fi
 
-run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
+dry_run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
 
-echo >&2 "Installed tools"
+msg "Installed tools"
 
 # run mise ls "$@"
 
-{{- /* $tools := list }}
+{{- $tools := list }}
 
 {{- if get .packages.mise "go" }}
 # default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "go" }}
+{{- $tools = append $tools (printf "go@%s" (get .packages.mise.go "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "node" }}
 # default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "node" }}
+{{- $tools = append $tools (printf "node@%s" (get .packages.mise.node "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "python" }}
 # default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
-{{- $tools = append $tools "python" }}
+{{- $tools = append $tools (printf "python@%s" (get .packages.mise.python "version" | default "latest")) }}
 {{- end }}
 
 {{- if get .packages.mise "ruby" }}
 # default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
-{{- $tools = append $tools "ruby" }}
+{{- $tools = append $tools (printf "ruby@%s" (get .packages.mise.ruby "version" | default "latest")) }}
 {{- end }}
 
 {{- if not (empty $tools) }}
 
-# FIXME: ensure new tools are installed and show hash diff
-run mise use --global "$@" {{ $tools | sortAlpha | join " " }}
+# FIXME: ensure new tools are installed and preserve order
+# run mise unuse --global --no-prune "$@" {{ $tools | sortAlpha | join " " }}
+# run mise use --global "$@" {{ $tools | sortAlpha | join " " }}
 {{- end }}
 
 # run mise prune "$@" # --tools
-{{- */ -}}
