@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Usage: chezmoi render <directory>
+# Renders all managed templates to a staging directory preserving target paths.
+# Uses execute-template for speed (~65ms/file vs ~1s/file with chezmoi cat).
+# Always prints the directory path to stdout.
+
+set -eu
+
+dest="${1:?usage: chezmoi render <directory>}"
+mkdir -p "$dest"
+echo "$dest"
+
+source_dir="$(chezmoi source-path)"
+
+# Collect source-relative template paths
+templates="$(chezmoi managed --include=files --path-style=source-relative | grep '\.tmpl$')"
+
+if [ -z "$templates" ]; then
+  exit 0
+fi
+
+# Batch-resolve all target paths in one chezmoi call
+abs_sources="$(echo "$templates" | sed "s|^|$source_dir/|")"
+targets="$(echo "$abs_sources" | xargs chezmoi target-path)"
+
+failed=()
+verbose="${VERBOSE:-false}"
+
+# Render each template: paste source and target, process line by line
+while IFS="$(printf '\t')" read -r src target; do
+  rel="${target#"$HOME"/}"
+  out="$dest/$rel"
+  mkdir -p "${out%/*}"
+
+  if chezmoi execute-template < "$source_dir/$src" > "$out" 2>/dev/null; then
+    if [ "$verbose" != false ]; then
+      printf >&2 '  %s\n' "$rel"
+    else
+      printf >&2 '.'
+    fi
+  else
+    printf >&2 'E'
+    failed+=("$rel")
+  fi
+done < <(paste <(echo "$templates") <(echo "$targets"))
+
+if [ "${#failed[@]}" -gt 0 ]; then
+  printf >&2 '\n'
+  echo >&2 "FAIL"
+  for rel in "${failed[@]}"; do
+    echo >&2 "  - $rel"
+  done
+  exit 1
+fi
+echo >&2 "OK"
