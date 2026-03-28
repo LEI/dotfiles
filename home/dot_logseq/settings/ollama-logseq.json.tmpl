@@ -1,0 +1,8 @@
+{{- $fastModel := (get .ai.models (get .ai.profiles.local "fast")).ollama -}}
+{
+  "host": "localhost:11434",
+  "model": {{ $fastModel | quote }},
+  "shortcut": "mod+shift+o",
+  "custom_prompt_block": "Translate in French : ",
+  "disabled": false
+}{{- /* No newline at end of file */ -}}

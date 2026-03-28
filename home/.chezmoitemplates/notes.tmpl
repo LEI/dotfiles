@@ -1,0 +1,7 @@
+{{- /* Notes graph symlink paths under ~/notes/ */ -}}
+{{- $base := printf "%s/notes" .chezmoi.homeDir -}}
+{{- $dirs := list -}}
+{{- range (dig "logseq" "graphs" (list) .) -}}
+{{-   $dirs = append $dirs (printf "%s/%s" $base .name) -}}
+{{- end -}}
+{{- $dirs | toJson -}}

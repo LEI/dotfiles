@@ -1,0 +1,217 @@
+{
+  "disabled": false,
+  "theme": "auto",
+  "lightThemeType": "green",
+  "language": "en",
+  "homePage": "gantt",
+  "defaultView": "month",
+  "weekStartDay": 0,
+  "weekHourStart": 0,
+  "weekHourEnd": 24,
+  "defaultDuration": {
+    "value": 0.5,
+    "unit": "h"
+  },
+  "logKey": {
+    "id": "Daily Log",
+    "bgColor": "#047857",
+    "textColor": "#fff",
+    "borderColor": "#047857",
+    "enabled": true
+  },
+  "journal": {
+    "id": "Journal",
+    "bgColor": "#047857",
+    "textColor": "#fff",
+    "borderColor": "#047857",
+    "enabled": true,
+    "query": [
+      {
+        "script": "\n[:find (pull ?block [*])\n:where\n[?block :block/marker ?marker]\n[(missing? $ ?block :block/deadline)]\n(not [(missing? $ ?block :block/scheduled)])\n[(contains? #{\"TODO\" \"DOING\" \"NOW\" \"LATER\" \"WAITING\" \"DONE\"} ?marker)]]\n        ",
+        "scheduleStart": "scheduled",
+        "dateFormatter": "yyyyMMdd",
+        "queryType": "advanced",
+        "isMilestone": false
+      },
+      {
+        "script": "\n[:find (pull ?block [*])\n:where\n[?block :block/marker ?marker]\n[(missing? $ ?block :block/scheduled)]\n(not [(missing? $ ?block :block/deadline)])\n[(contains? #{\"TODO\" \"DOING\" \"NOW\" \"LATER\" \"WAITING\" \"DONE\"} ?marker)]]\n        ",
+        "scheduleStart": "deadline",
+        "dateFormatter": "yyyyMMdd",
+        "queryType": "advanced",
+        "isMilestone": false
+      },
+      {
+        "script": "\n[:find (pull\n?block\n[:block/uuid\n  :db/id\n  :block/parent\n  :block/left\n  :block/collapsed?\n  :block/format\n  :block/_refs\n  :block/path-refs\n  :block/tags\n  :block/content\n  :block/marker\n  :block/priority\n  :block/properties\n  :block/pre-block?\n  :block/scheduled\n  :block/deadline\n  :block/repeated?\n  :block/created-at\n  :block/updated-at\n  :block/file\n  :block/heading-level\n  {:block/page\n  [:db/id :block/name :block/original-name :block/journal-day :block/journal?]}])\n:where\n[?block :block/page ?page]\n[?page :block/journal? true]\n[?block :block/marker ?marker]\n[(contains? #{\"TODO\" \"DOING\" \"NOW\" \"LATER\" \"WAITING\" \"DONE\"} ?marker)]\n[(missing? $ ?block :block/scheduled)]\n[(missing? $ ?block :block/deadline)]]\n        ",
+        "scheduleStart": "page.journal-day",
+        "dateFormatter": "yyyyMMdd",
+        "isMilestone": false,
+        "queryType": "advanced"
+      },
+      {
+        "script": "\n[:find (pull\n  ?block\n  [:block/uuid\n    :block/parent\n    :db/id\n    :block/left\n    :block/collapsed?\n    :block/format\n    :block/_refs\n    :block/path-refs\n    :block/tags\n    :block/content\n    :block/marker\n    :block/priority\n    :block/properties\n    :block/pre-block?\n    :block/scheduled\n    :block/deadline\n    :block/repeated?\n    :block/created-at\n    :block/updated-at\n    :block/file\n    :block/heading-level\n    {:block/page\n      [:db/id :block/name :block/original-name :block/journal-day :block/journal?]}\n    {:block/refs\n      [:block/journal-day]}])\n  :where\n  [?block :block/marker ?marker]\n  [?rp :block/journal? true]\n  [?block :block/refs ?rp]\n  [(contains? #{\"TODO\" \"DOING\" \"NOW\" \"LATER\" \"WAITING\" \"DONE\"} ?marker)]]\n        ",
+        "scheduleStart": "refs[0].journal-day",
+        "dateFormatter": "yyyyMMdd",
+        "isMilestone": false,
+        "queryType": "advanced"
+      },
+      {
+        "script": "\n[:find (pull ?block [*])\n:where\n[?rp :block/name \"milestone\"]\n[?block :block/scheduled]\n[?block :block/refs ?rp]]\n        ",
+        "scheduleStart": "scheduled",
+        "dateFormatter": "yyyyMMdd",
+        "isMilestone": true,
+        "queryType": "advanced"
+      }
+    ]
+  },
+  "projectList": [],
+  "calendarList": [],
+  "subscriptionList": [],
+  "dailyLogTagList": [],
+  "pomodoro": {
+    "pomodoro": 25,
+    "shortBreak": 5,
+    "longBreak": 15,
+    "autoStartBreaks": false,
+    "autoStartPomodoros": false,
+    "longBreakInterval": 4,
+    "commonPomodoros": [
+      10,
+      15,
+      20,
+      25,
+      40
+    ]
+  },
+  "openai": {
+    "apiBaseUrl": "https://api.openai.com"
+  },
+  "initialized": true,
+  "isInitialized": true,
+  "general": {
+    "language": "en",
+    "startOfWeek": 1,
+    "useJournalDayAsSchedule": true
+  },
+  "viewOptions": {
+    "showTimeLog": true,
+    "showFirstEventInCycleOnly": false,
+    "hideCompleted": false
+  },
+  "ignoreTag": null,
+  "todoist": {},
+  "filters": [
+    {
+      "color": "#78909c",
+      "name": "TODO",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(= ?m \"TODO\")]]",
+      "id": "FiLt07",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#2196f3",
+      "name": "DOING",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(contains? #{\"DOING\" \"NOW\" \"IN-PROGRESS\"} ?m)]]",
+      "id": "FiLt03",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#8bc34a",
+      "name": "DONE",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(= ?m \"DONE\")]]",
+      "id": "FiLt09",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#ff9800",
+      "name": "WAITING",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(contains? #{\"WAITING\" \"WAIT\"} ?m)]]",
+      "id": "FiLt05",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#9575cd",
+      "name": "LATER",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(= ?m \"LATER\")]]",
+      "id": "FiLt08",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#9e9e9e",
+      "name": "CANCELED",
+      "query": "[:find (pull ?b [*]) :where [?b :block/marker ?m] [(contains? #{\"CANCELED\" \"CANCELLED\"} ?m)]]",
+      "id": "FiLt10",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#f44336",
+      "name": "[#A]",
+      "query": "[:find (pull ?b [*]) :where [?b :block/priority \"A\"]]",
+      "id": "FiLtPA",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#ffa726",
+      "name": "[#B]",
+      "query": "[:find (pull ?b [*]) :where [?b :block/priority \"B\"]]",
+      "id": "FiLtPB",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#29b6f6",
+      "name": "[#C]",
+      "query": "[:find (pull ?b [*]) :where [?b :block/priority \"C\"]]",
+      "id": "FiLtPC",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#009688",
+      "name": "Has deadline",
+      "query": "[:find (pull ?b [*]) :where [?b :block/deadline ?d]]",
+      "id": "FiLt06",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#66bb6a",
+      "name": "flextranet",
+      "query": "[:find (pull ?b [*]) :where [?b :block/path-refs ?r] [?r :block/name \"flextranet\"]]",
+      "id": "FiLtPJ1",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#42a5f5",
+      "name": "backend",
+      "query": "[:find (pull ?b [*]) :where [?b :block/path-refs ?r] [?r :block/name \"backend\"]]",
+      "id": "FiLtPJ2",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#ab47bc",
+      "name": "infra",
+      "query": "[:find (pull ?b [*]) :where (or-join [?b] (and [?b :block/path-refs ?r] [?r :block/name \"flex/infrastructure\"]) (and [?b :block/path-refs ?r2] [?r2 :block/name \"ansible-playbook\"]))]",
+      "id": "FiLtPJ3",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "color": "#ff9800",
+      "name": "Orange",
+      "query": "[:find (pull ?b [*]) :where [?b :block/path-refs ?r] [?r :block/name \"orange\"]]",
+      "id": "FiLtPV1",
+      "chosen": false,
+      "selected": false
+    }
+  ],
+  "selectedFilters": []
+}{{- /* No newline at end of file */ -}}

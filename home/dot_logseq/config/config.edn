@@ -1,0 +1,24 @@
+;; Global config applied to all graphs.
+;; Graph-local logseq/config.edn overrides these (maps are merged).
+;; https://docs.logseq.com/#/page/config.edn
+
+{;; TODO/DOING workflow
+ :preferred-workflow :todo
+
+ ;; Markdown format
+ :preferred-format "Markdown"
+
+ ;; ISO date for journal titles (sortable, unambiguous)
+ :journal/page-title-format "yyyy-MM-dd"
+ :journal/file-name-format "yyyy-MM-dd"
+
+ ;; Week starts Monday
+ :start-of-week 0
+
+ ;; Clear default template (override per graph if needed)
+ :default-templates {:journals ""}
+
+ ;; Search and UI
+ :feature/enable-search-remove-accents? true
+ :ui/enable-tooltip? true
+ :ui/auto-expand-block-refs? true}

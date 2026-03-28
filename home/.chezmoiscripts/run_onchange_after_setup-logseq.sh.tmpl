@@ -1,0 +1,57 @@
+{{- if .features.logseq -}}
+#!/bin/sh
+# plugins.edn: {{ include (joinPath .chezmoi.sourceDir "dot_logseq/config/plugins.edn") | sha256sum }}
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has ghq; then
+  err "ghq not found, install it to set up notes graphs"
+fi
+
+notes_dir="{{ .chezmoi.homeDir }}/notes"
+
+if [ ! -d "$notes_dir" ]; then
+  run mkdir -p "$notes_dir"
+fi
+
+setup_graph() {
+  name="$1"
+  url="${2:-$name}"
+  link="$notes_dir/$name"
+
+  if [ -L "$link" ]; then
+    return
+  fi
+
+  run ghq get "$url"
+
+  path_key=$(printf '%s' "$url" | sed -E 's|^git@||; s|^https?://||; s|:|/|; s|\.git$||')
+  local_path="$(ghq root)/$path_key"
+  if [ ! -d "$local_path" ]; then
+    err "ghq could not resolve $url"
+  fi
+
+  # run git -C "$local_path" branch --set-upstream-to=origin/main
+  run ln -s "$local_path" "$link"
+  msg "Linked $name graph: $link -> $local_path"
+}
+
+{{- range (dig "logseq" "graphs" (list) .) }}
+setup_graph {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end }}
+{{- end }}
+
+# secrets_dir="${XDG_CONFIG_HOME:-$HOME/.config}/secrets.d"
+# conf="$secrets_dir/logseq.conf"
+# if ! grep -q "^LOGSEQ_API_TOKEN=" "$conf" 2>/dev/null; then
+#   if ! has openssl; then
+#     err "openssl not found, set LOGSEQ_API_TOKEN manually in $conf"
+#   fi
+#   run mkdir -p "$secrets_dir"
+#   (umask 0177 && printf 'LOGSEQ_API_TOKEN=%s\n' "$(openssl rand -hex 16)" >>"$conf")
+#   msg "Set authorizationToken in Logseq > Settings > HTTP APIs"
+# fi
+
+msg "Tip: run 'Install plugins from plugins.edn' from the Logseq command palette to restore plugins."
+{{ end -}}
