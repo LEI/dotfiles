@@ -6,7 +6,7 @@ set -eu
 
 if command -v nu; then
   echo >&2 "Already installed"
-  cmd nu --version
+  run nu --version
   exit
 fi
 
@@ -14,15 +14,15 @@ echo >&2 "Installing nushell"
 {{- if eq .osIDLike "debian" }}
 export DEBIAN_FRONTEND=noninteractive
 if [ ! -f /etc/apt/trusted.gpg.d/fury-nushell.gpg ]; then
-  cmd curl -fsSL https://apt.fury.io/nushell/gpg.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/fury-nushell.gpg
+  run curl -fsSL https://apt.fury.io/nushell/gpg.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/fury-nushell.gpg
 fi
 if [ ! -f /etc/apt/sources.list.d/fury.list ]; then
-  echo "deb https://apt.fury.io/nushell/ /" | cmd sudo tee /etc/apt/sources.list.d/fury.list
-  cmd sudo apt-get update --quiet >/dev/null
+  echo "deb https://apt.fury.io/nushell/ /" | run sudo tee /etc/apt/sources.list.d/fury.list
+  run sudo apt-get update --quiet >/dev/null
 fi
-cmd sudo -E apt-get install --quiet --yes nushell >/dev/null
+run sudo -E apt-get install --quiet --yes nushell >/dev/null
 # if [ -d "$HOME/.config/nushell" ]; then
-#   cmd sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
+#   run sudo chown -R "$USER:$USER" "$HOME/.config/nushell"
 # fi
 {{- else if eq .osID "fedora" }}
 if [ ! -f /etc/yum.repos.d/fury-nushell.repo ]; then
@@ -31,9 +31,13 @@ name=Gemfury Nushell Repo
 baseurl=https://yum.fury.io/nushell/
 enabled=1
 gpgcheck=0
-gpgkey=https://yum.fury.io/nushell/gpg.key" | cmd sudo tee /etc/yum.repos.d/fury-nushell.repo
+gpgkey=https://yum.fury.io/nushell/gpg.key" | run sudo tee /etc/yum.repos.d/fury-nushell.repo
 fi
-sudo dnf install --assumeyes --quiet nushell
+if command -v dnf >/dev/null; then
+  sudo dnf install --assumeyes --quiet nushell
+else
+  run rpm-ostree install --allow-inactive --assumeyes --idempotent nushell
+fi
 {{- end }}
 echo >&2 "Installed nushell"
 

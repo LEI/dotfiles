@@ -61,3 +61,27 @@ export alias cat = batcat
 # https://github.com/eza-community/eza/issues/472
 # export alias ls = eza
 {{- end }}
+
+{{- if .features.docker }}
+{{- if lookPath "lazydocker" | isExecutable }}
+export alias D = lazydocker
+{{- else if lookPath "oxker" | isExecutable }}
+export alias D = oxker
+{{- end }}
+{{- end }}
+
+{{- if .features.git }}
+{{- if lookPath "lazygit" | isExecutable }}
+export alias G = lazygit
+{{- end }}
+{{- end }}
+
+{{- if .features.kube }}
+{{- if lookPath "k9s" | isExecutable }}
+export alias K = k9s --all-namespaces
+{{- end }}
+{{- end }}
+
+{{- if .features.mise }}
+export alias m = mise
+{{- end }}
