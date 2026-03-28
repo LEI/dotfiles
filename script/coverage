@@ -21,9 +21,10 @@ coverage() {
     --strip-path="$PWD"
   )
 
-  if [ "$(uname -s)" = Linux ]; then
-    kcov_args+=(--bash-handle-sh-invocation)
-  fi
+  # NOTE: breaks with linuxbrew kcov even with .so files present
+  # if [ "$(uname -s)" = Linux ]; then
+  #   kcov_args+=(--bash-handle-sh-invocation)
+  # fi
 
   kcov "${kcov_args[@]}" "$COVERAGE_OUTPUT" ./script/test "$@"
 }
