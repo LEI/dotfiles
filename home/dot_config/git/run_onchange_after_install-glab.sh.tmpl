@@ -9,16 +9,17 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# cmd glab check-update
+# run glab check-update
 
-# cmd glab auth status
+# run glab auth status
 
 # hostname="$(hostname)"
-# if ! cmd glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$hostname"; then
+# if ! run glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$hostname"; then
 #   echo >&2 "No SSH key found for: $hostname"
 # fi
 
-{{ if dig "git" "gitlab" nil . -}}
+{{- if and (hasKey . "git") (hasKey .git "gitlab") (hasKey .git.gitlab "email") }}
+
 gitlab_email="{{ .git.gitlab.email }}"
-{{- end }}
-{{- end -}}
+{{ end -}}
+{{ end -}}
