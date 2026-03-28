@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "linux" -}}
+{{-   if or
+    (stat "/lib/ld-linux-x86-64.so.2")
+    (stat "/lib64/ld-linux-x86-64.so.2")
+    (stat "/lib/ld-linux-aarch64.so.1")
+    (stat "/lib64/ld-linux-aarch64.so.1")
+    (stat "/lib/ld-linux.so.2")
+  -}}gnu
+{{-   else if or
+    (stat "/lib/ld-musl-x86_64.so.1")
+    (stat "/lib64/ld-musl-x86_64.so.1")
+    (stat "/lib/ld-musl-aarch64.so.1")
+    (stat "/usr/lib/ld-musl-x86_64.so.1")
+  -}}musl
+{{-   end -}}
+{{- end -}}

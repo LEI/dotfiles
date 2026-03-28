@@ -24,8 +24,9 @@ let os = match ($kernel_name) {
   linux => "unknown-linux",
   _ => $kernel_name,
 }
+let libc = {{ .libc | quote }}
 let tag = get_release "zellij-org/zellij"
-let name = $"zellij-($arch)-($os)-musl"
+let name = $"zellij-($arch)-($os)-($libc)"
 let out = $"($env.TMPDIR)/($name).tar.gz"
 let archive = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).tar.gz"
 # let checksum = $"https://github.com/zellij-org/zellij/releases/download/($tag)/($name).sha256sum"

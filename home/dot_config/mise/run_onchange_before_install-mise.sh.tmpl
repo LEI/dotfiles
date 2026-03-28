@@ -8,7 +8,7 @@ set -eu
 
 if command -v mise; then
   echo >&2 "Already installed: {{ lookPath "mise" }}"
-  cmd mise --version | head -n1
+  run mise --version | head -n1
   exit
 fi
 
@@ -17,7 +17,7 @@ MISE_BIN="$BIN_DIR/mise"
 
 if [ ! -d "$BIN_DIR" ]; then
   # echo >&2 "Creating directory: $BIN_DIR"
-  cmd mkdir -p "$BIN_DIR"
+  run mkdir -p "$BIN_DIR"
 fi
 
 echo >&2 "Installing mise"
@@ -39,20 +39,19 @@ echo >&2 "Installing mise"
 
 os={{ $os | quote }}
 arch={{ $arch | quote }}
-if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
-  arch="$arch-musl"
-fi
+{{- if eq .libc "musl" }}
+arch="$arch-musl"
+{{- end }}
 
-cmd curl -LSfs "https://mise.jdx.dev/mise-latest-$os-$arch" -o "$MISE_BIN"
-cmd chmod +x "$MISE_BIN"
+run curl -LSfs "https://mise.jdx.dev/mise-latest-$os-$arch" -o "$MISE_BIN"
+run chmod +x "$MISE_BIN"
 
 {{- if eq .osID "android" }}
 
-# Also see home/dot_config/sh/plugins/mise.sh.tmpl
 # https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
-cmd mkdir -p "$PREFIX/etc/tls/certs"
-cmd ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
-cmd ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
+run mkdir -p "$PREFIX/etc/tls/certs"
+run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
+run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
 {{- end }}
 
 echo >&2 "Installed mise"

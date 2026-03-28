@@ -19,22 +19,22 @@ fi
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# if [ -z "${USER:-}" ]; then
-#   USER="$(id --user --name)"
-# fi
+if [ -z "${USER:-}" ]; then
+  USER="$(id -un)"
+fi
 
 echo >&2 "OSID: $OSID"
 
 if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
   case "$OSID" in
   alpine)
-    cmd apk update --quiet
-    cmd apk add --quiet sudo
+    run apk update --quiet
+    run apk add --quiet sudo
     ;;
   android | debian)
     # export DEBIAN_FRONTEND=noninteractive
-    cmd apt-get update --quiet >/dev/null
-    cmd apt-get install --quiet --yes sudo >/dev/null
+    run apt-get update --quiet >/dev/null
+    run apt-get install --quiet --yes sudo >/dev/null
     ;;
   arch | *)
     echo >&2 "Skipping password manager: sudo must be installed (chezmoi $CHEZMOI_COMMAND)"
@@ -49,35 +49,28 @@ case "$OS" in
 Darwin)
   OS=apple-darwin
   # export NONINTERACTIVE=1
-  # cmd brew install --quiet unzip
+  # run brew install --quiet unzip
   ;;
 Linux)
-  # FIXME: alpine musl
   # https://github.com/bitwarden/sdk-sm/issues/1218
-  # https://community.bitwarden.com/t/add-x86-64-unknown-linux-musl-release-to-bws-cli/57379/3
-  if ! command -v ldd >/dev/null || grep -Fq musl "$(which ldd)"; then
-    # echo >&2 "Building from source"
-    # sudo apk add --quiet curl cargo openssl-dev pkgconfig
-    # URL="https://github.com/bitwarden/sdk-sm/archive/refs/tags/bws-v$VERSION.tar.gz"
-    # curl -LSfs "$URL" | tar xzf - -C "$TMPDIR"
-    # cd "$TMPDIR/sdk-sm-bws-v$VERSION/"
-    # export OPENSSL_NO_VENDOR=Y
-    # cargo build -r --bin bws --quiet
-    echo >&2 "Skipping password manager on $OS $CHEZMOI_ARCH (chezmoi $CHEZMOI_COMMAND)"
+  # https://community.bitwarden.com/t/add-x86_64-unknown-linux-musl-release-to-bws-cli/57379/3
+  # Runtime musl detection: check for musl dynamic linker (works without CHEZMOI_LIBC env var)
+  if [ -e /lib/ld-musl-x86_64.so.1 ] || [ -e /lib64/ld-musl-x86_64.so.1 ]; then
+    echo >&2 "Skipping password manager on musl-based distro"
     exit 0
   fi
   OS=unknown-linux-gnu
   case "$OSID" in
   alpine)
-    cmd sudo apk add --quiet unzip
+    run sudo apk add --quiet unzip
     ;;
   arch)
-    cmd sudo pacman --sync --needed --noconfirm --quiet unzip
+    run sudo pacman --sync --needed --noconfirm --quiet unzip
     ;;
   debian)
     # export DEBIAN_FRONTEND=noninteractive
-    # cmd sudo -E apt-get install --quiet --yes unzip >/dev/null
-    cmd sudo apt-get install --quiet --yes unzip # >/dev/null
+    # run sudo -E apt-get install --quiet --yes unzip >/dev/null
+    run sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
   esac
   ;;
