@@ -1,504 +1,199 @@
 #!/usr/bin/env bash
-#MISE description="mise container"
-
-# PROFILE=minimal mise container alpine up --build --detach
-# PROFILE=minimal mise container alpine exec -it alpine-latest-minimal bash -i
-
-# https://www.chezmoi.io/reference/commands/docker/
+#MISE alias="ct"
+#MISE description="Run container pipeline for one image"
+#MISE hide=true
+#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)"
+#USAGE complete "image" run="mise run ct list"
+#USAGE arg "[cmd]..." help="Command to run in the container (default: full pipeline)"
 
 set -euo pipefail
 
-# EPHEMERAL="${EPHEMERAL:-false}"
-# HEADLESS="${HEADLESS:-false}"
-PROFILE="${PROFILE:-}" # minimal
+CONTAINER_PROVIDER="${CONTAINER_PROVIDER:?}"
+DEV_USER="${DEV_USER:-test}"
+tag_prefix="${PWD##*/}"
+images="alpine archlinux debian fedora opensuse termux ubuntu"
 
-# WARN: podman does not support dockerfile_inline via docker compose
-# Podman Engine 5.6.1 + Docker Compose version 2.39.4
-PROVIDER="${PROVIDER:-docker}"
-PREFIX="${PREFIX:-}" # termux prefix
+container() { "$CONTAINER_PROVIDER" "$@"; }
 
-usage() {
-  echo >&2 "Usage: container [bootstrap|<image>]"
-  echo >&2
-  echo >&2 "Examples:"
-  # echo >&2 "  container alpine ps --all"
-  echo >&2 "  container alpine up --build --detach"
-  echo >&2 "  container alpine logs --follow --since=1m"
-  # echo >&2 "  container alpine attach --no-stdin"
-  echo >&2
-  echo >&2 "Images: alpine, archlinux, debian, ubuntu, fedora, termux"
-}
+trace() { echo >&2 "+ $*"; "$@"; }
 
-container() {
-  local build=
-  local prefix="/opt" # "$HOME/.local/state"
-  # prefix="$HOME/.local/share"
-  local user=test # root
-  # Environment must contain at least one element be a mapping
-  local environment=()
-  # NOTE: container is recreated when command changes
-  local command=()
-  local volumes=()
-  local ports=()
-  local networks=("test")
-  # if [ -z "$tag" ]; then
-  #   image="$name:latest"
-  #   tag=latest
-  # fi
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    env+=("GITHUB_TOKEN=$GITHUB_TOKEN")
-  fi
-  case "${image%:*}" in
-  alpine)
-    environment+=(
-      # "LANG=C"
-    )
-    build="apk update --quiet && apk add bash chezmoi curl sudo unzip"
-    compose "$@"
-    ;;
-  android | termux)
-    export user=a0_test
-    # docker run -it --rm termux/termux-docker:latest bash -c "apt update && apt search example"
-    image=docker.io/termux/termux-docker:x86_64
-    # environment+=()
-    # TODO: pre-select mirrors with termux-change-repo
-    command+=()
-    # PREFIX=/data/data/com.termux/files/usr
-    prefix=/data/data/com.termux/files/home # /.local/state
-    compose "$@"
-    ;;
+# Resolve image-specific variables from an image arg (name or name:version).
+# Sets: image_name, version, image, image_tag, container, prefix,
+#       home, exec_user, chezmoi_root
+resolve() {
+  local arg="$1"
+  image_name="${arg%%:*}"
+  local version_arg="${arg#*:}"
+  [ "$version_arg" = "$arg" ] && version_arg=""
+
+  local repo="$image_name"
+  version="${version_arg:-latest}"
+  prefix=""
+
+  # arm64 = macOS/Darwin, aarch64 = Linux; both indicate ARM64
+  local arch
+  arch="$(uname -m)"
+
+  case "$image_name" in
   archlinux)
-    environment+=(
-      # "LANG=C"
-    )
-    # pacman -Sy --needed --noconfirm --quiet sudo which
-    build="pacman --sync --needed --noconfirm --quiet --refresh chezmoi sudo which"
-    # user=$user
-    # pacman --sync --needed --noconfirm --quiet --refresh sudo which
-    # useradd -ms /bin/bash "$user"
-    # usermod -aG wheel "$user"
-    # sed -i 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
-    # echo -n "$user:$user" | chpasswd -e "$user"
-    compose "$@"
+    [ "$arch" = arm64 ] || [ "$arch" = aarch64 ] && repo=docker.io/ogarcia/archlinux
     ;;
-  debian | ubuntu)
-    if [ "$image" = ubuntu ]; then
-      export user=ubuntu
-      environment+=(
-        "TZ=${TZ:-Etc/UTC}"
-      )
-    fi
-    environment+=(
-      "DEBIAN_FRONTEND=noninteractive"
-      # "LANG=C"
-    )
-    build="apt-get update --quiet && apt-get install --no-install-recommends --quiet --yes ca-certificates curl locales sudo unzip" #  && rm -rf /var/lib/apt/lists/*
-    compose "$@"
+  opensuse)
+    repo=opensuse/tumbleweed
     ;;
-  fedora)
-    environment+=(
-      # "LANG=C"
-    )
-    build="dnf update --assumeyes --quiet && dnf install -y -q chezmoi which unzip" # && dnf clean all
-    compose "$@"
-    ;;
-
-  # freebsd)
-  #   image=docker.io/freebsd/freebsd-runtime:15.0.beta2
-  #   compose "$@"
-  #   ;;
-
-  # macOS
-  # https://github.com/sickcodes/Docker-OSX#building-a-headless-osx-container
-  # https://github.com/sickcodes/Docker-OSX/issues/492
-  macos)
-    export user=root
-    export home="/Users/$user"
-    # export working_dir="$home/.local/share/chezmoi"
-    # Arch: sudo pacman -S xorg-xhost && xhost +
-    # Windows: /mnt/wslg/.X11-unix:/tmp/.X11-unix
-    # TODO: https://github.com/sickcodes/Docker-OSX/issues/858
-    image=docker.io/sickcodes/docker-osx:latest
-    environment+=(
-      "NOPICKER=true"
-      # "USER=$user"
-
-      "USERNAME=$user"
-      "PASSWORD=$user"
-      "OSX_COMMANDS='echo OK; ioreg -l | grep IOPlatformSerialNumber'"
-
-      # "DISPLAY=${DISPLAY:-:0.0}"
-      "GENERATE_UNIQUE=true"
-      "MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist"
-      "NONINTERACTIVE=1"
-
-      "SHORTNAME=sonoma"
-    )
-    # command+=(
-    #   "pwd"
-    #   "ls -la"
-    #   "whoami"
-    #   "uname -a"
-    #   "uname -s"
-    # )
-    volumes+=(
-      "/tmp/.X11-unix:/tmp/.X11-unix"
-      # "/tmp/mac_hdd_ng_auto.img:/image"
-    )
-    ports+=("50922:10022")
-    # --device /dev/kvm
-    # compose "$@"
-    echo >&2 "container: $name"
-    if [ "${DEBUG:-}" = true ]; then
-      echo >&2 "$PROVIDER compose --file=- $*"
-    fi
-    compose_file="$(compose_file)"
-    if [ "${DEBUG:-}" = true ]; then
-      echo "$compose_file" >&2
-    fi
-    $PROVIDER compose --file=- "$@" <<EOF
-$compose_file
-EOF
-
-    # find your containerID
-    # docker ps
-
-    # move the no picker script on top of the Launch script
-    # docker exec containerID mv ./Launch-nopicker.sh ./Launch.sh
-    ;;
-  *)
-    echo >&2 "container: invalid image: $image"
-    usage
-    exit 1
+  termux)
+    repo=docker.io/termux/termux-docker
+    [ -z "$version_arg" ] && version=x86_64
+    [ "$arch" = arm64 ] || [ "$arch" = aarch64 ] && version=aarch64
+    prefix=/data/data/com.termux/files
     ;;
   esac
+
+  image="$repo:$version"
+  image_tag="ct-$image_name-$version"
+  container="$tag_prefix-$image_name-$version"
+  home="$prefix/home/$DEV_USER"
+  [ "$image_name" = termux ] && home="$prefix/home"
+  exec_user="$DEV_USER"
+  [ "$image_name" = termux ] && exec_user=system
+  chezmoi_root="$home/.local/share/chezmoi"
 }
 
-compose() {
-  local bootstrap="./script/container bootstrap"
-  local home=/root
-  local working_dir="$home/.local/share/chezmoi"
-  if [[ "$prefix" = */home ]]; then
-    home="$prefix"
-    working_dir=/dotfiles
-  elif [ "$user" != root ]; then
-    home="/home/$user"
-  fi
-  environment+=(
-    # "CONTAINER_NAME=$name"
-    # "CONTAINER_USER=$user"
-    "USER=$user"
+container_exec() {
+  local flags=(
+    --env=CHEZMOI_UPGRADE=true
+    --env=MISE_TRUSTED_CONFIG_PATHS="$chezmoi_root"
+    ${CI:+--env=CI="$CI"}
+    ${GITHUB_TOKEN:+--env=GITHUB_TOKEN="$GITHUB_TOKEN"}
+    --user="$exec_user"
+    --workdir="$chezmoi_root"
   )
-  command+=(
-    # "[ -f $prefix/install.done ] || touch $prefix/install.done"
-    "$bootstrap"
-  )
-  volumes+=(
-    "$HOME/.local/share/chezmoi:$working_dir"
-    # "$HOME/.local/share/chezmoi:/root/.local/share/chezmoi"
-  )
-  if [ $# -eq 0 ]; then
-    set -- ps --all
-  # elif [ $# -gt 1 ] && [ "$1" = exec ]; then
-  #   shift
-  #   set -- exec -T "$name" "$@"
-  # elif [ $# -gt 1 ] && [ "$1" = run ]; then
-  #   shift
-  #   # You have to remove (or rename) that container to be able to reuse that name
-  #   local dir=chezmoi n=1
-  #   set -- run --name="$dir-$name-$n" -T "$name" "$@"
-  fi
-  echo >&2 "container: $name"
-  local dirname
-  dirname="$(basename "$PWD")"
-  local compose_file_dir="${TMPDIR:-/tmp}/$dirname"
-  local compose_file_path="$compose_file_dir/$name.compose.yaml"
-  if ! [ -d "$compose_file_dir" ]; then
-    mkdir -p "$compose_file_dir"
-  fi
-  compose_file >"$compose_file_path"
-  if [ "${DEBUG:-}" = true ]; then
-    cat >&2 "$compose_file_path"
-  fi
-  $PROVIDER compose --file="$compose_file_path" "$@"
-
-  #   # WARN: heredoc not compatible with stdin
-  #   if [ "${DEBUG:-}" = true ]; then
-  #     echo >&2 "$PROVIDER compose --file=- $*"
-  #   fi
-  #   compose_file="$(compose_file)"
-  #   # if command -v yq >/dev/null; then
-  #   #   if ! yq --output-format=yaml . >&2 <<<"$compose_file"; then
-  #   #     echo >&2 "container: yaml error in compose file"
-  #   #     echo >&2 "$compose_file"
-  #   #   fi
-  #   # else
-  #   if [ "${DEBUG:-}" = true ]; then
-  #     echo "$compose_file" >&2
-  #   fi
-  #   # fi
-  #   $PROVIDER compose --file=- "$@" <<EOF
-  # $compose_file
-  # EOF
+  [ -t 0 ] && flags+=(--interactive)
+  [ -t 1 ] && flags+=(--tty)
+  local log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
+  echo >&2 "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*"
+  container exec "${flags[@]}" "$container" "$@"
 }
 
-compose_file() {
-  local interactive=${INTERACTIVE:-true}
-  # local sh_args=eux
-  # if [ "$interactive" = true ]; then
-  #   sh_args="i$sh_args"
-  # fi
-  cat <<EOF
----
-networks:
-  test:
-services:
-  $name:
-    # container_name: "${name}"
-    hostname: "${name}"
-    # image: "$image"
-    build:
-      context: .
-$(if [ "$user" = ubuntu ]; then echo "      # network: host"; fi)
-      # no_cache: true
-      dockerfile_inline: |
-        FROM $image
-
-$(if [ -n "$build" ]; then echo "        RUN $build"; fi)
-$(if [ "$user" = test ]; then
-    echo "        USER $user"
-    echo "        ENV HOME=/home/$user"
-  fi)
-    environment:
-$(for e in "${environment[@]}"; do echo "      - $e"; done)
-    # entrypoint: ["/bin/sh", "-ceiux"]
-$(if [ -n "${command[*]}" ]; then echo "    command:"; fi)
-$(if [ -n "${command[*]}" ]; then echo "      - sh"; fi)
-$(if [ -n "${command[*]}" ]; then echo "      - -ceiux"; fi)
-$(if [ -n "${command[*]}" ]; then echo "      - |"; fi)
-$(for c in "${command[@]}"; do echo "        $c"; done)
-$(if [ -n "${volumes[*]}" ]; then echo "    volumes:"; fi)
-$(for v in "${volumes[@]}"; do echo "      - $v"; done)
-$(if [ -n "${ports[*]}" ]; then echo "    ports:"; fi)
-$(for v in "${ports[@]}"; do echo "      - $v"; done)
-$(if [ -n "${networks[*]}" ]; then echo "    networks:"; fi)
-$(for v in "${networks[@]}"; do echo "      - $v"; done)
-    stdin_open: $interactive
-    tty: $interactive
-    user: "$(if [[ "$user" = *test ]]; then echo root; else echo "$user"; fi)"
-$(if [ -n "$working_dir" ]; then echo "    working_dir: $working_dir"; fi)
-EOF
+container_exec_mise() {
+  local cmd
+  cmd="$(printf '%q ' "$@")"
+  # bash -l skips environment.d in non-interactive shells; source it explicitly
+  # eval mise activate: adds shims for mise-managed tools (check tasks use task env instead)
+  container_exec bash -l -c '
+    source ~/.config/sh/lib/export.sh
+    export_env ~/.config/environment.d/*.conf
+    eval "$(mise activate bash)"
+    '"$cmd"
 }
 
-run_command() {
-  echo >&2 "$@"
-  "$@"
+build() {
+  if container image inspect "$image_tag" >/dev/null 2>&1; then
+    echo >&2 "build $image_name: reusing $image_tag"
+    return
+  fi
+  trace container build . --file=Containerfile --build-arg=IMAGE="$image" --tag="$image_tag"
 }
 
-# Runs in container
-run_bootstrap() {
-  # printenv
-  local bootstrap=(./script/bootstrap --force --no-tty)
-  # local user="${1:-$USER}"
-  if [ -z "${USER:-}" ]; then
-    USER="$(id --user --name)"
+start() {
+  if ! container container inspect "$container" >/dev/null 2>&1; then
+    trace container create --name="$container" --env="DEV_USER=$DEV_USER" "$image_tag"
   fi
-  if [ "$USER" != root ] && [ "$HOME" = /root ]; then
-    HOME="/home/$USER"
-    # echo >&2 "Invalid $USER home: $HOME"
-    # exit 1
+  local status
+  status="$(container container inspect "$container" --format '{{.State.Status}}')"
+  if [ "$status" != running ]; then
+    trace container start "$container"
   fi
-
-  # Ensure chezmoi is available
-  BIN_DIR="$HOME/.local/bin"
-  PATH="$PATH:$BIN_DIR"
-
-  # Ensure bats is available for tests
-  if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  # Entrypoint creates the dev user asynchronously; wait for it
+  if [ "$image_name" != termux ]; then
+    trace container exec "$container" \
+      sh -c 'until id -u "$1" >/dev/null 2>&1; do sleep 1; done' -- "$DEV_USER"
   fi
+}
 
-  # chezmoi package list mise
-  if [ -z "${MISE_SHELL:-}" ]; then # && chezmoi feature mise
-    PATH="$PATH:$HOME/.local/share/mise/shims"
-  fi
+sync() {
+  trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
+  for f in .chezmoiroot .chezmoiversion .pre-commit-config.yaml mise.toml home script test; do
+    trace container cp "$f" "$container:$chezmoi_root/"
+  done
+  trace container exec "$container" chown -R "$exec_user:$exec_user" "$home"
+}
 
-  if command -v mise >/dev/null; then
-    run_command mise trust --all --quiet --yes
-    # run_command mise prune --quiet --yes
-  fi
-
-  # FIXME(termux): ble.sh: updating binders..../script/container: line 112:
-  # 2764 Segmentation fault (core dumped) bash -i
-  export BLE_ENABLED=false
-
-  export CHEZMOI_PROFILE="$PROFILE"
-  export CHEZMOI_ROOT="$PWD"
-  export CHEZMOI_UPGRADE=true
-  export CI=true
-
-  if [ "${DEBUG:-}" = true ]; then
-    set -- --debug "$@"
-  fi
-
-  if [ "${VERBOSE:-true}" = true ]; then
-    set -- --verbose "$@"
-  fi
-
-  if [ "$USER" = test ]; then
-    if ! id --user "$USER" >/dev/null 2>&1; then
-      echo >&2 "Creating user: $USER"
-      if command -v useradd >/dev/null; then
-        # useradd -ms /bin/bash "$USER"
-        useradd --create-home --shell=/bin/bash "$USER"
-        # if groups | grep -qv wheel; then
-        #   groupadd wheel
-        # fi
-      else
-        # FIXME: user 'test' in use
-        adduser -Ds /bin/bash "$USER" || true # -G wheel
-      fi
-    fi
-    if groups | grep -qv wheel; then
-      echo >&2 "Creating group: $USER"
-      if command -v groupadd >/dev/null; then
-        groups "$USER"
-        groups
-        groupadd wheel --users "$USER" || true
-      else
-        addgroup wheel || true
-      fi
-    fi
-    if command -v usermod >/dev/null; then
-      usermod -aG wheel "$USER"
-    fi
-    sed \
-      -e 's/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' \
-      -i /etc/sudoers
-  fi
-
-  if [ -n "$PREFIX" ]; then
-    # Install chezmoi with termux package manager to avoid error on tag:
-    # latest: critical %s: unsupported platform\n android/386
-    # x86_64: android/amd64
-    # i686: android/386
-    # aarch64, arm: exec format error
-    command -v chezmoi >/dev/null || pkg install --quiet --yes chezmoi
-    # "tls: failed to verify certificate: x509: certificate signed by unknown authority"
-    command -v proot >/dev/null || pkg install --quiet --yes proot
-    prefix_run_command() {
-      echo >&2 "$@"
-      proot \
-        -b "$PREFIX/etc/resolv.conf:/etc/resolv.conf" \
-        -b "$PREFIX/etc/tls:/etc/ssl" \
-        "$@"
-    }
+bootstrap() {
+  if [ "$image_name" = termux ]; then
+    trace container exec "$container" \
+      sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
+    trace container exec --user="$exec_user" "$container" \
+      sh -c 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
+    CI=true container_exec proot \
+      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf" \
+      -b "$prefix/usr/etc/tls:/etc/ssl" \
+      ./script/bootstrap --verbose --no-tty
   else
-    prefix_run_command() {
-      echo >&2 "$@"
-      "$@"
-    }
+    CI=true container_exec ./script/bootstrap --verbose --no-tty
   fi
-
-  # set -x
-  # mkdir -p "$HOME/.local/bin"
-  # mkdir -p "$HOME/.config/"{atuin,bash,bat,blesh,carapace/specs,curl,eza,helix,mise,nushell/{functions,modules,themes},procs,readline,ripgrep,sh/{functions,plugins},starship,wget,yamllint,zsh}
-  # mkdir -p "$HOME/"{.brew-aliases,.config/{homebrew,psql},.local/share,.ssh/config.d}
-  if command -v chezmoi >/dev/null; then
-    if chezmoi feature atuin; then run_command mkdir -p "$HOME/.config/atuin"; fi
-    if chezmoi feature goss; then run_command mkdir -p "$HOME/.config/goss"; fi
-    if chezmoi feature helix; then run_command mkdir -p "$HOME/.config/helix"; fi
-    if chezmoi feature nushell; then run_command mkdir -p "$HOME/.config/nushell/"{functions,modules,themes}; fi
-    if chezmoi feature zsh; then run_command mkdir -p "$HOME/.config/zsh"; fi
-  fi
-
-  # if [ "$USER" = test ]; then
-  #   # su "$USER" -c "pwd; ls -la; echo ${bootstrap[*]} $*"
-  #   sudo -E "${bootstrap[@]}" "$@"
-  # fi
-  prefix_run_command "${bootstrap[@]}" "$@"
-  # prefix_run_command mise self-update
-  run_command mise run check
-  run_command mise run update
-
-  # if command -v kcov >/dev/null; then
-  #   export COVERAGE_OUTPUT="./coverage-$HOSTNAME"
-  #   run_command ./script/coverage # --collect-only
-  # fi
-  if command -v bats >/dev/null; then
-    if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
-      set -- --pretty
-    else
-      set --
-    fi
-    run_command ./script/test "$@"
-  fi
-
-  # TODO: keep the container running after "up --build --detached"
-  # bash -i
-  # bash -l
-  # watch -n60 chezmoi status
 }
 
-run_container() {
-  local name="$1"
-  local image="$name"
-  shift
-  local tag=latest
-  if [[ "$image" = *:* ]]; then
-    tag="${image#*:}"
-    name="${image%%:*}-$tag"
-  else
-    name="$image-$tag"
-    image="$image:$tag"
-  fi
-  if [ -n "$PROFILE" ]; then
-    name="$name-$PROFILE"
-  fi
-  container "$@"
+# Persists trust so later runs skip the prompt; no-op if mise not yet installed
+trust() {
+  trace container exec --user="$exec_user" "$container" \
+    sh -c 'mise=$(command -v mise 2>/dev/null || echo "$HOME/.local/bin/mise")
+           if [ -x "$mise" ]; then
+             "$mise" trust --yes "$1"
+           fi' \
+    -- "$chezmoi_root/mise.toml"
+}
+
+list() {
+  echo "$images" | tr ' ' '\n'
+}
+
+status() {
+  for name in $images; do
+    resolve "$name"
+    local s="none"
+    if container container inspect "$container" >/dev/null 2>&1; then
+      s="$(container container inspect "$container" \
+        --format '{{.State.Status}}{{if and (eq .State.Status "exited") (ne .State.ExitCode 0)}} ({{.State.ExitCode}}){{end}}')"
+    fi
+    printf "%-12s  %-30s  %s\n" "$name" "$container" "$s"
+  done
+}
+
+pipeline() {
+  build
+  start
+  sync
+  trust
+  bootstrap
+  # word-split intentional: CONTAINER_CMD may contain flags
+  # shellcheck disable=SC2086
+  container_exec_mise ${CONTAINER_CMD:-mise run pipeline}
+  trace container stop "$container"
 }
 
 main() {
-  if [ $# -eq 0 ]; then
-    usage
-    exit
-  fi
-  case "$1" in
-  all)
-    shift
-    local images=(
-      android # termux
-      alpine
-      # archlinux
-      debian
-      ubuntu
-      fedora
-      # freebsd
-      # macos
-    )
-    for img in "${images[@]}"; do
-      # --exit-code-from "$img-latest"
-      run_container "$img" up \
-        --abort-on-container-exit \
-        --build \
-        "$@"
-      # -- --collect-only
-    done
-    # ls -la ./coverage-*
-    # kcov \
-    #   --dump-summary \
-    #   --report-only \
-    #   --merge \
-    #   ./coverage \
-    #   ./coverage-*
-    # ls -la ./coverage
+  local image="${1:-}"
+  case "$image" in
+  '' | s | st | status)
+    status
+    return
     ;;
-  bootstrap)
-    shift
-    run_bootstrap "$@"
+  l | ls | list)
+    list
+    return
     ;;
-  *) run_container "$@" ;;
   esac
+  resolve "$image"
+  shift
+  if [ $# -gt 0 ]; then
+    container_exec_mise "$@"
+  else
+    pipeline
+  fi
 }
 
-main "$@"
+# Allow sourcing for testing (e.g. bats)
+if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi
