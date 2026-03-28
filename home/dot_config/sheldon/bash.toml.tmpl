@@ -1,0 +1,11 @@
+# `sheldon` configuration file (bash)
+# See https://github.com/rossmacarthur/sheldon#readme
+
+shell = "bash"
+
+[templates]
+# Add the directory after PATH
+PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
+
+[plugins]
+{{ includeTemplate "dot_config/sheldon/.plugins.toml.tmpl" . | trim }}
