@@ -1,6 +1,7 @@
 adjust-cursor-thickness = 1
-background-opacity = {{ get (get . "i3" | default dict) "opacity" | default 0.75  }}
-# unfocused-split-opacity = 1
+# TODO: global config {{ get (get . "i3" | default dict) "opacity" | default 0.75  }}
+background-opacity = 0.95
+unfocused-split-opacity = 0.95
 
 # cursor-style = block
 # cursor-style-blink = false
@@ -33,13 +34,13 @@ macos-titlebar-style = transparent
 
 # https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
 macos-option-as-alt = left
-keybind = alt+left=unbind
-keybind = alt+right=unbind
+# keybind = alt+left=unbind
+# keybind = alt+right=unbind
 {{- else }}
 
 bell-features = system
 font-size = 10
-gtk-titlebar = false
+# gtk-titlebar = false
 maximize = true
 window-decoration = server
 {{- end }}
@@ -50,5 +51,9 @@ window-decoration = server
 # keybind = global:ctrl+grave_accent=toggle_quick_terminal
 {{- end }}
 
-# xdg-mime default nvim.desktop text/plain
 # keybind = ctrl+s>w>s=write_screen_file:open
+keybind = shift+enter=text:\x1b\r
+
+# https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/terminal-setup.md#ghostty
+# keybind = alt+backspace=text:\x1b\x7f
+# keybind = shift+enter=text:\n

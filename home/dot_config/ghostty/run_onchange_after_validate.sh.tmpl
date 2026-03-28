@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+run {{ if eq .os "darwin" }}/Applications/Ghostty.app/Contents/MacOS/{{ end }}ghostty +validate-config
