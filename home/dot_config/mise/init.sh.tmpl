@@ -1,0 +1,23 @@
+# Env vars (MISE_*_DEFAULT_PACKAGES_FILE) set via environment.d/mise.conf
+
+# Must be sourced early: tools become available after activation
+if ! command -v mise >/dev/null; then
+  echo >&2 "Command 'mise' not found"
+  return 0
+fi
+
+{{- if eq .osID "android" }}
+{{ includeTemplate "termux.sh.tmpl" . | trim }}
+
+mise() {
+  termux_prefix "$MISE_BIN" "$@"
+}
+
+topgrade() {
+  termux_prefix topgrade "$@"
+}
+{{- end }}
+
+eval "$(mise activate "$shell")"
+
+alias m=mise

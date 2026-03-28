@@ -1,3 +1,8 @@
+{{- $miseInteractive := false }}
+{{- with lookPath "mise" }}
+{{-   $ver := output . "version" "--json" | fromJson | dig "version" "" | splitList " " | first }}
+{{-   if $ver }}{{- $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{- end }}
+{{- end }}
 [settings]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
@@ -19,18 +24,91 @@ idiomatic_version_file_enable_tools = [
   # "tiny",
 ]
 
-{{- if ne .profile "work" }}
-experimental = true
+# experimental = {{ ne .profile "work" }}
+env_shell_expand = true
 lockfile = true
+
+{{- $checkDirs := list }}
+{{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
+{{-   $name := . | dir | base }}
+{{-   $feat := $name }}
+{{-   if eq $feat "nvim" }}
+{{-     $feat = "neovim" }}
+{{-   end }}
+{{-   $featVal := get $.features $feat }}
+{{-   if or (eq $featVal nil) $featVal }}
+{{-     $checkDirs = append $checkDirs $name }}
+
+[tasks."check:{{ $name }}"]
+description = {{ printf "Check %s" $feat | quote }}
+hide = true
+{{- if $miseInteractive }}
+interactive = true
+{{- end }}
+run = "{{ . }}"
+shell = "sh"
+[tasks."check:{{ $name }}".env]
+PATH = "{{ $.brewPrefix }}/bin:{{ $.brewPrefix }}/sbin:{{ $.chezmoi.homeDir }}/.local/share/mise/shims:{{ $.chezmoi.homeDir }}/.local/bin:$PATH"
+# timeout = "5m"
+{{-   end }}
 {{- end }}
 
-{{- if .features.goss }}
-[tasks.goss]
-dir = "~/.config/goss"
-run = "goss --vars=vars.yaml"
+# chezmoi feature enabled # list --output=json | jq --compact-output
+# chezmoi package diff all
+# chezmoi managed | grep '.chezmoiscript\|.local/bin\|install-'
+# PATH="$PATH:$HOME/.local/bin"
+[tasks.check]
+alias = "c"
+description = "Run all checks"
+run = [
+{{- range $checkDirs }}
+  # { task = {{ printf "check:%s" . | quote }} },
 {{- end }}
+]
+depends = [
+{{- range $checkDirs }}
+  {{ printf "check:%s" . | quote }},
+{{- end }}
+]
+
+{{- if .features.goss }}
+
+[tasks.goss]
+description = "Validate system state with goss"
+{{- if $miseInteractive }}
+interactive = true
+{{- end }}
+# Inline sh instead of shell = "sh" so arguments pass through to the script
+run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.sh") | quote }}
+{{- end }}
+
+{{- $images := list "alpine" "archlinux" "debian" "fedora" "ubuntu" }}
+{{- range $images }}
+
+[tasks."container:{{ . }}"]
+description = {{ printf "Build and test chezmoi in %s" . | quote }}
+hide = true
+run = "script/container {{ . }}"
+{{- end }}
+
+[tasks."container:all"]
+alias = "ct:all"
+description = "Build and test chezmoi in all images"
+depends = [
+{{- range $images }}
+  {{ printf "container:%s" . | quote }},
+{{- end }}
+]
 
 [tools]
 {{- range $name, $pkg := .packages.mise }}
-{{ $name }} = {{ get $pkg "version" | default "latest" | quote }}
+{{-   $parts := contains "@" $name | ternary
+  ($name | splitList "@")
+  (list $name (get $pkg "version" | default "latest")) }}
+{{-   if gt 2 (len $parts) }}
+{{-     warnf "More than 2 parts: %v" $parts }}
+{{-   end }}
+{{-   $name = index $parts 0 }}
+{{-   $version := index $parts 1 }}
+{{   contains ":" $name | ternary ($name | quote) $name }} = {{ $version | quote }}
 {{- end }}

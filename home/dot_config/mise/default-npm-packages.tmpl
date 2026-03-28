@@ -1,18 +1,3 @@
-# npm
-# pnpm
-# yarn
-{{- if not .features.neovim }}
-bash-language-server
-prettier
-{{- if .features.sql }}
-sql-language-server
-{{- end }}
-typescript
-typescript-language-server
-# https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
-vscode-langservers-extracted@4.8
-yaml-language-server@next
-{{- end }}
 {{- range .packages.npm | keys | sortAlpha }}
 {{ . }}
 {{- end }}
