@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#MISE alias="l"
+#MISE description="Render chezmoi templates and run all linters"
+
+# Renders chezmoi templates then runs prek hooks on the output.
+# modify_ and *.tmpl sources are handled directly by the validate-schema
+# hook via chezmoi cat / execute-template; this covers shellcheck, yamllint,
+# and lint on the remaining rendered output.
+
+set -euo pipefail
+
+PATH="$PATH:$HOME/.local/share/mise/shims"
+
+verbose=false
+for arg in "$@"; do
+  case "$arg" in
+  -v | --verbose) verbose=true ;;
+  esac
+done
+
+render_dir=$(mktemp -d)
+rm -rf "$render_dir"
+trap 'rm -rf "$render_dir"' EXIT
+
+if [ "$verbose" = true ]; then
+  printf >&2 'templates\n'
+  VERBOSE=true chezmoi render "$render_dir" >/dev/null
+else
+  printf >&2 'templates'
+  chezmoi render "$render_dir" >/dev/null
+fi
+
+# Suppress shellcheck warnings inherent to sourced shell configs
+cat >"$render_dir/.shellcheckrc" <<'EOF'
+disable=SC1090,SC2154
+EOF
+
+mapfile -t files < <(fd --type f . "$render_dir")
+
+# chezmoi render skips modify_ sources; include them for validate-schema
+mapfile -t modify_files < <(
+  fd --type f 'modify_' home/ \
+    --extension json --extension jsonc --extension json5 \
+    --extension toml --extension yaml --extension yml
+)
+files+=("${modify_files[@]}")
+
+[ ${#files[@]} -eq 0 ] && exit 0
+
+# check-added-large-files requires a git repo; skip in rendered temp dir
+prek run --files "${files[@]}" --skip=zizmor --skip=check-added-large-files
