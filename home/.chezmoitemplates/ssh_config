@@ -4,3 +4,7 @@ Host *
   # LocalCommand if [[ $TERM == screen* ]]; then printf "\033k%h\033\\"; fi
   # PermitLocalCommand yes
   # PubkeyAcceptedKeyTypes +ssh-rsa
+
+# https://github.com/ghostty-org/ghostty/discussions/3161#discussioncomment-11688078
+Match Final Exec "echo $TERM | grep -q xterm-ghostty" Host !my-dev-host,!other-host-I-use-often,*
+  SetEnv TERM=xterm-256color

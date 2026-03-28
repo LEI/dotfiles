@@ -21,7 +21,7 @@
   {{- if lt (len $parts) 2 }}{{- continue }}{{- end }}
   {{- $key := index $parts 0 }}
   {{- $command := join " " (slice $parts 1) | trim }}
-  {{- $map = mustMerge $map (dict $key $command) }}
+  {{- $map = merge $map (dict $key $command) }}
 {{- end }}
 
 {{- dict "list" (without $list "") "names" (without $names "") "map" $map | toJson }}

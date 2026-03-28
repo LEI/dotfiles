@@ -19,6 +19,9 @@
 
 {{- range $path := $packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
+{{-   if and (hasKey $fileData "enabled") (eq ($fileData.enabled | toString) "false") }}
+{{-     continue }}
+{{-   end }}
 {{-   $filePackages := get $fileData "packages" }}
 {{-   if not (kindIs "map" $filePackages) }}
 {{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
@@ -28,7 +31,8 @@
 {{- end }}
 
 {{- /* OS specific packages */ -}}
-{{- $osPackages := dig $.osIDLike $packageType dict $global.osPackages }}
+{{- /* FIXME: $osPackages := $global.osPackages | dig $.osIDLike $packageType | default dict */ -}}
+{{- $osPackages := get (get $global.osPackages $.osIDLike) $packageType | default dict }}
 {{- /* $packages = mergeOverwrite $packages $osPackages */ -}}
 {{- range $key, $value := $osPackages }}
 {{ $_ := set $packages $key (mergeOverwrite ($value | default dict) (dict "type" $packageType))  }}

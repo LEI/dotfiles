@@ -1,0 +1,27 @@
+# Order matters: mise first, carapace before completions, starship before atuin
+for _tool in mise carapace direnv starship zoxide atuin; do
+  if [ -f "$XDG_CONFIG_HOME/$_tool/init.sh" ]; then
+    BENCHFMT="$_tool" bench . "$XDG_CONFIG_HOME/$_tool/init.sh"
+  fi
+done
+unset _tool
+
+{{- if .features.rust }}
+
+# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
+#   . "${CARGO_HOME:-$HOME/.cargo}/env"
+# fi
+if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
+  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
+fi
+{{- end }}
+{{- if .features.go }}
+
+if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
+  pathmunge "$GOPATH/bin" after
+fi
+{{- end }}
+
+if [ -d "$HOME/.nix-profile/bin" ]; then
+  pathmunge "$HOME/.nix-profile/bin" after
+fi

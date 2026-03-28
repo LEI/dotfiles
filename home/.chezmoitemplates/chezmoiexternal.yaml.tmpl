@@ -1,6 +1,6 @@
 ---
-{{ $baseURL := get . "baseURL" | default "https://github.com" -}}
-{{ $entries := get . "entries" | default dict -}}
+{{- $baseURL := get . "baseURL" | default "https://github.com" -}}
+{{- $entries := get . "entries" | default dict -}}
 
 {{- if empty $entries }}
 {{-   warnf "missing entries: %s" .chezmoi.sourceFile }}

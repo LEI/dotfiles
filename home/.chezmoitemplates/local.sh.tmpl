@@ -1,0 +1,11 @@
+# Machine-local config and secrets
+{{- range glob (joinPath .chezmoi.sourceDir "**/create_*local.yaml*") }}
+{{-   $target := .
+        | replaceAllRegex ".*/home/" ""
+        | replace "dot_" "."
+        | replaceAllRegex "/create_.*local\\.yaml.*" "/local.yaml" }}
+# ~/{{ $target }}
+{{- end }}
+{{- range glob (joinPath .chezmoi.homeDir ".config/secrets.d/**/*.conf") }}
+# {{ . | replaceAllRegex (print $.chezmoi.homeDir "/") "~/" }}
+{{- end }}
