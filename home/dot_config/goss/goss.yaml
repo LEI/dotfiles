@@ -1,10 +1,19 @@
+# yamllint disable-file
+# prettier-ignore
 ---
 # https://github.com/goss-org/goss/blob/master/docs/goss.yaml
+{{ $ports := dict
+  "docker-plain" 2375
+  "docker-tls" 2376
+  "telnet" 23
+  "vnc" 5900 -}}
 addr:
-  tcp:
+{{- range $name := keys $ports | sortAlpha}}
+  127.0.0.1:{{ index $ports $name }}:
+    title: {{ $name }}
     reachable: false
     timeout: 500
-    # local-address: 127.0.0.1
+{{- end}}
 
 # command:
 #   test:
@@ -28,7 +37,10 @@ addr:
 dns:
   localhost:
     addrs:
+      {{- if not .Vars.wsl }}
       - ::1
+      {{- end }}
+      - 127.0.0.1
     resolvable: true
 
 # file:
@@ -95,9 +107,12 @@ dns:
 #       - " 1"
 #     mtu: 1500
 
+{{- if eq .Vars.os "linux"}}
+
 kernel-param:
   kernel.ostype:
     value: Linux
+{{- end}}
 
 matching:
   # check_instance_count:
@@ -137,22 +152,30 @@ matching:
   #       - have-key: baz
 
 # TODO: sprig syntax fails to accept upper block below
-# https://github.com/goss-org/goss/blob/master/docs/manual.md#examples-2
+# https://goss.readthedocs.io/en/stable/gossfile/#templates
 #  sping_basic:
-#    content: { { "hello!" | upper | repeat 5 }}
+#    content: {{ "hello!" | toUpper | repeat 5 }}
 #                 matches:
 #                 match-regexp: "HELLO!HELLO!HELLO!HELLO!HELLO!"
 
-# mount:
-#   /home:
-#     exists: true
-#     timeout: 1000
-#     opts:
-#       - rw
-#     source: /dev/mapper/fedora-home
-#     filesystem: xfs
-#     usage:
-#       lt: 95
+mount:
+  /:
+    exists: true
+    {{- if not .Vars.rootImmutable }}
+    usage:
+      lt: 90
+    {{- end }}
+{{- if .Vars.rootImmutable }}
+  {{ env "HOME" | dir }}:
+    exists: true
+    timeout: 1000
+    # source: /dev/mapper/fedora-home
+    # filesystem: btrfs
+    opts:
+      - rw
+    usage:
+      lt: 95
+{{- end }}
 
 # package:
 #   httpd:
@@ -221,3 +244,37 @@ port:
 #       or:
 #         - /var/empty/sshd
 #         - /var/run/sshd
+
+# System health
+{{- if or (eq .Vars.os "darwin") (and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") ""))}}
+command:
+{{- if eq .Vars.os "darwin"}}
+  docker-engine:
+    exec: docker info --format '{{`{{.ServerVersion}}`}}'
+    exit-status: 0
+    timeout: 5000
+{{- end}}
+{{- if and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") "")}}
+  container-engine:
+    exec: {{ env "CONTAINER_PROVIDER" }} info --format '{{`{{.ServerVersion}}`}}'
+    exit-status: 0
+    timeout: 5000
+{{- end}}
+{{- end}}
+
+{{- if .Vars.featureChecks }}
+gossfile:
+{{- range .Vars.featureChecks }}
+  {{ . }}: {}
+{{- end }}
+{{- end }}
+
+# Health checks from caddy.sites + ai.backends (built in vars.yaml.tmpl)
+{{- if .Vars.checks}}
+http:
+{{- range $name, $check := .Vars.checks}}
+  {{ $check.url }}:
+    status: 200
+    timeout: {{ get $check "timeout" | default 5000 }}
+{{- end}}
+{{- end}}
