@@ -4,7 +4,8 @@ packages:
     enabled: "{{ not .features.neovim }}"
     type: npm
   # cspell-dict-fr:
-  #   npm: "@cspell/dict-fr-fr"
+  #   nameOverwrite:
+  #     npm: "@cspell/dict-fr-fr"
   #   type: npm
   "@cspell/dict-fr-fr":
     type: npm
