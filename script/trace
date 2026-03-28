@@ -1,0 +1,26 @@
+#!/bin/sh
+#MISE description="Trace sourced files during shell init"
+#USAGE arg "[shell]" help="Shell to trace (default: current shell)" {
+#USAGE   choices "bash" "zsh"
+#USAGE }
+
+set -eu
+
+shell="${1:-${SHELL##*/}}"
+
+case "$shell" in
+  bash)
+    PS4='+ ${BASH_SOURCE[0]##*/}:${LINENO}: ' \
+      bash -xic exit 2>&1 \
+      | grep -E '^\+* [^:]+:[0-9]+: (\. |source )' \
+      | sed "s|$HOME|~|g"
+    ;;
+  zsh)
+    zsh --source-trace -ic exit 2>&1 \
+      | sed "s|$HOME|~|g"
+    ;;
+  *)
+    echo >&2 "trace: invalid shell '$shell', expected bash or zsh"
+    exit 2
+    ;;
+esac
