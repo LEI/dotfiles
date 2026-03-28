@@ -1,0 +1,81 @@
+#!/bin/sh
+#MISE description="Container entrypoint: provision dev user and keep running"
+#MISE hide=true
+
+set -eu
+
+if [ $# -ne 0 ]; then
+  echo >&2 "entrypoint: unexpected arguments: $*"
+  exit 2
+fi
+
+keep_running() {
+  if [ -f /entrypoint.sh ]; then
+    exec /entrypoint.sh tail -f /dev/null
+  else
+    exec tail -f /dev/null
+  fi
+}
+
+# Termux manages its own user setup
+if [ -n "${PREFIX:-}" ]; then
+  echo >&2 "entrypoint: termux, skipping provisioning"
+  keep_running
+fi
+
+user="${DEV_USER:-test}"
+
+install_packages() {
+  if command -v apk >/dev/null; then
+    apk update --quiet
+    apk add bash chezmoi curl git shadow sudo unzip
+  elif command -v apt-get >/dev/null; then
+    apt-get update --quiet
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --quiet --yes \
+      ca-certificates curl git locales sudo unzip
+  elif command -v dnf >/dev/null; then
+    dnf install --assumeyes --quiet chezmoi git sudo which unzip
+  elif command -v pacman >/dev/null; then
+    pacman --sync --needed --noconfirm --quiet --refresh chezmoi git sudo which
+  elif command -v zypper >/dev/null; then
+    zypper --quiet --non-interactive install chezmoi curl git sudo which unzip
+  else
+    echo >&2 "entrypoint: unsupported package manager"
+    exit 1
+  fi
+}
+
+create_user() {
+  id -u "$user" >/dev/null 2>&1 && return
+  echo >&2 "entrypoint: creating user $user"
+  if command -v useradd >/dev/null; then
+    useradd --create-home --shell=/bin/bash "$user"
+  else
+    # alpine: -D = no password, -s = shell
+    adduser -Ds /bin/bash "$user"
+  fi
+}
+
+grant_sudo() {
+  # sudoers drop-in works on all distros without group name guessing
+  echo "$user ALL=(root) NOPASSWD:ALL" > "/etc/sudoers.d/$user"
+  chmod 0440 "/etc/sudoers.d/$user"
+}
+
+verify() {
+  if [ "$(id -u "$user")" -eq 0 ]; then
+    echo >&2 "entrypoint: $user has UID 0, aborting"
+    exit 1
+  fi
+  if [ ! -f "/etc/sudoers.d/$user" ]; then
+    echo >&2 "entrypoint: sudoers drop-in missing for $user, aborting"
+    exit 1
+  fi
+}
+
+install_packages
+create_user
+grant_sudo
+verify
+
+keep_running
