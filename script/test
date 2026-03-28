@@ -1,18 +1,53 @@
 #!/usr/bin/env bash
 #MISE alias="t"
-#MISE description="`mise test` or `mise run t`"
+#MISE description="Run bats test suite"
+#USAGE arg "[filter]..." help="Extra arguments passed to bats"
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
 
 set -euo pipefail
 
 PATH="$PATH:$HOME/.local/bin"
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
+if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
+  eval "$(mise activate bash)"
+  # PATH="$PATH:$HOME/.local/share/mise/shims"
+fi
+
+if [ -z "${USER:-}" ]; then
+  USER="$(id -un)"
+fi
+
+if [ "${CI:-}" = true ] && command -v mise >/dev/null; then
+  mise trust --all --quiet --yes
+fi
+
+# FIXME(termux): ble.sh: updating binders..../script/container: line 112:
+# 2764 Segmentation fault (core dumped) bash -i
+# export BLE_ENABLED=false
+
+# export CHEZMOI_PROFILE="$PROFILE"
+# export CHEZMOI_ROOT="$PWD"
+# export CHEZMOI_UPGRADE=true
+# export CI=true
 
 main() {
-  local jobs="${TEST_JOBS:-1}"
-  if command -v parallel >/dev/null; then
-    jobs="${TEST_JOBS:-$(nproc)}"
+  # Files using stubs set BATS_NO_PARALLELIZE_WITHIN_FILE to avoid collisions
+  local jobs="${TEST_JOBS:-$(nproc)}"
+  # if [ "${DEBUG:-}" = true ]; then
+  #   set -- --debug "$@"
+  # fi
+  #
+  # if [ "${VERBOSE:-true}" = true ]; then
+  #   set -- --verbose "$@"
+  # fi
+  if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
+    set -- --pretty "$@"
   fi
+  # set -- --trace "$@"
   set -x
   bats \
     --jobs "$jobs" \
