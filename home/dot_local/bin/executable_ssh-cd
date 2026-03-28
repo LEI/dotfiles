@@ -1,0 +1,11 @@
+#!/bin/sh
+# host() { ssh-cd host /var/www/app; }
+# host-logs() { ssh-cd host /var/log 'tail -f *.log' | tspin; }
+host="${1:?host required}"
+dir="${2:?dir required}"
+shift 2
+qdir=$(printf '%q' "$dir")
+if [ $# -eq 0 ]; then
+  set -- "exec \$SHELL -l"
+fi
+ssh -t "$host" "cd $qdir && $*"
