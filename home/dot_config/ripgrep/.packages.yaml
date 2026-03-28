@@ -4,9 +4,9 @@ packages:
     enabled: "{{ .features.ripgrep }}"
     nameOverwrite:
       windows: BurntSushi.ripgrep.MSVC # or .GNU
-    # type: mise
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
   ripgrep-all:
-    enabled: '{{ and .features.ripgrep (eq .osIDLike "arch" "darwin") (ne .profile "minimal") (not (or .ephemeral .headless)) }}'
+    enabled: '{{ and .features.ripgrep (eq .osIDLike "arch" "darwin") .gui }}'
     # nameOverwrite:
     #   darwin: rga
     type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
