@@ -1,0 +1,14 @@
+{{- if eq .os "linux" -}}
+#!/bin/sh
+set -eu
+{{- if lookPath "gtrash" | isExecutable }}
+exec gtrash put "$@"
+{{- else if lookPath "trash-put" | isExecutable }}
+exec trash-put "$@"
+{{- else if lookPath "gio" | isExecutable }}
+exec gio trash "$@"
+{{- else }}
+printf 'trash: no trash tool found\n' >&2
+exit 1
+{{- end }}
+{{ end -}}
