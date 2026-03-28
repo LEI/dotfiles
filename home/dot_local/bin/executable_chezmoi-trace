@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -eu
+
+export CHEZMOI_TRACE=true
+
+exec chezmoi "$@"
