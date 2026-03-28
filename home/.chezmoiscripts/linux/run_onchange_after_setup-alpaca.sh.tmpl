@@ -1,0 +1,36 @@
+{{- if and .features.oage (lookPath "flatpak") -}}
+{{- $db := joinPath .chezmoi.homeDir ".var/app/com.jeffser.Alpaca/data/alpaca.db" -}}
+{{- if stat $db -}}
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+db="{{ $db }}"
+settings="{{ joinPath .chezmoi.homeDir ".var/app/com.jeffser.Alpaca/config/glib-2.0/settings/keyfile" }}"
+id="chezmoi-bifrost-local"
+base_url="https://bifrost.test/v1"
+
+# Insert bifrost instance if not already present
+existing="$(sqlite3 "$db" "SELECT id FROM instance WHERE id='$id';")"
+if [ -z "$existing" ]; then
+  props="$(jq -n \
+    --arg base_url "$base_url" \
+    --arg api "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
+    '{name:"bifrost-local",url:$base_url,api:$api,max_tokens:2048,override_parameters:true,temperature:0.7,seed:0,default_model:null,title_model:null}')"
+  props_escaped="$(printf '%s' "$props" | sed "s/'/''/g")"
+  run sqlite3 "$db" "INSERT INTO instance (id, pinned, type, properties) VALUES ('$id', 0, 'openai:generic', '$props_escaped');"
+  msg "alpaca: bifrost instance added"
+fi
+
+# Set as selected instance only if none is configured yet
+if [ -f "$settings" ]; then
+  selected="$(sed -n "s/^selected-instance='\(.*\)'/\1/p" "$settings")"
+  if [ -z "$selected" ]; then
+    run sed -i "/^\[com\/jeffser\/Alpaca\]/a selected-instance='$id'" "$settings"
+    msg "alpaca: selected instance set to $id"
+  fi
+fi
+{{- end }}
+{{- end -}}
