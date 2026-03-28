@@ -1,0 +1,9 @@
+MANPAGER=${MANPAGER:-less -X}
+# PAGER=${PAGER:-less --chop-long-lines --no-init --quit-if-one-screen}
+# https://github.com/xo/usql/issues/308
+LESS=${LESS:---chop-long-lines --no-init --quit-if-one-screen --IGNORE-CASE --RAW-CONTROL-CHARS}
+{{- if lookPath "less" | isExecutable }}
+# https://github.com/b3nj5m1n/xdg-ninja/tree/main/programs
+LESSSECURE=1
+LESSSECURE_ALLOW=edit,examine,glob,osc8,pipe,shell,stop,tags
+{{- end }}

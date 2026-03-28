@@ -1,0 +1,18 @@
+#!/bin/sh
+# environment.d: {{ glob (joinPath .chezmoi.sourceDir "dot_config/environment.d/*.tmpl") | join "\n" | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has systemctl || [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  warn "Skipping systemctl reload (no user session bus)"
+  exit 0
+fi
+
+run systemctl --user daemon-reexec
+{{- if .features.processCompose }}
+
+if systemctl --user is-active --quiet process-compose; then
+  run systemctl --user restart process-compose
+fi
+{{- end }}
