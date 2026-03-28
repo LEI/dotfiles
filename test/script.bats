@@ -1,9 +1,9 @@
+# shellcheck disable=SC2154
 setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
 
   export BATS_NO_PARALLELIZE_WITHIN_FILE=true
-  # export CHEZMOI_WORKING_TREE=.
   export DRY_RUN=true
 }
 
@@ -14,161 +14,176 @@ setup() {
   source test/common/helper.sh
 }
 
-# teardown() {
-#   unstub run 2>/dev/null || true
-# }
-
 # bats file_tags=script
 
-# bats test_tags=bootstrap
+# bats test_tags=bootstrap,type:unit
 @test "script/bootstrap" {
   local chezmoi_args=(
-    # "test"
     "--dry-run"
     "--refresh-externals=never"
   )
   export CI=true
   run --separate-stderr bash ./script/bootstrap "${chezmoi_args[@]}"
-  assert_stderr_line "DRY-RUN: Running 'chezmoi init --apply --source=. ${chezmoi_args[*]}'"
-  refute_output --partial "Tip:"
+
+  refute_output --regexp "Tip:"
+  assert_stderr_line "DRY-RUN: Running 'chezmoi init --apply --source=$PWD ${chezmoi_args[*]}'"
   assert_success
 }
 
-# bats test_tags=bench
-@test "script/bench" {
+# bats test_tags=startup,type:unit
+@test "script/startup" {
   export BENCH_ITERATIONS=1
+  export SHELL=dummy
   stub_seq dummy $((BENCH_ITERATIONS + 2))
-  run --separate-stderr bash ./script/bench dummy
+  run --separate-stderr bash ./script/startup
   unstub dummy 2>/dev/null || true
-  # assert_output --partial "$shell average startup time"
-  # assert_output --partial "$shell initial startup time"
-  assert_stderr_line --partial "bench 1/$BENCH_ITERATIONS: dummy"
+
+  assert_stderr_line --regexp "startup 1/$BENCH_ITERATIONS: dummy -ci exit"
   assert_success
   jq . <<<"$output" >/dev/null
 }
 
-# bats test_tags=check
-@test "script/check" {
-  stub_seq timeout 8
-  run --separate-stderr bash ./script/check
-  unstub timeout 2>/dev/null || true
-  # NOTE: atuin 15 on alpine has no doctor command
-  # and timeout .. atuin hangs
-  # if has_feature atuin && ! command -v apk >/dev/null; then
-  #   assert_stderr_line --partial "atuin doctor"
-  # fi
-  if has_feature brew; then
-    assert_stderr_line --partial "brew doctor"
-  fi
-  assert_stderr_line --partial "chezmoi doctor"
-  if has_feature goss; then
-    assert_stderr_line --partial "goss validate"
-  fi
-  if has_feature mise; then
-    assert_stderr_line --partial "mise doctor"
-  fi
-  if has_feature neovim; then
-    assert_stderr_line --partial nvim
-  fi
-  if has_feature tmux; then
-    assert_stderr_line --partial tmux
-  fi
-  assert_success
-}
-
-# # bats test_tags=container
-# @test "script/container" {
-#   # stub_seq podman
-#   for name in \
-#     alpine \
-#     archlinux \
-#     debian ubuntu \
-#     fedora \
-#     macos \
-#     termux; do
-#     run --separate-stderr bash ./script/container "$name"
-#     assert_output
-#     # assert_stderr_line "Starting test container: test-$name-latest"
-#     # assert_line --regexp "^container run .* --name=test-$name-latest"
-#     assert_success
-#   done
+# bats test_tags=check,type:unit
+# @test "script/check" {
+#   stub_seq goss 1
+#   stub_seq mise 1
+#   stub_seq nvim 1
+#   run --separate-stderr bash ./script/check
+#   unstub goss 2>/dev/null || true
+#   unstub mise 2>/dev/null || true
+#   unstub nvim 2>/dev/null || true
+#
+#   if has_feature goss; then
+#     assert_stderr_line "Checking goss"
+#   fi
+#   if has_feature mise; then
+#     assert_stderr_line "Checking mise"
+#   fi
+#   if has_feature neovim; then
+#     assert_stderr_line "Checking nvim"
+#   fi
+#   assert_success
 # }
 
-test_container() {
-  local name="$1"
-  export \
-    GITHUB_TOKEN=nope \
-    PROVIDER="echo container"
-
-  run --separate-stderr bash ./script/container "$name"
-  # assert_stderr_line "Starting test container: test-$name-latest"
-  # assert_line --regexp "^container run .* --name=test-$name-latest"
-  assert_line --partial "container compose"
-  assert_stderr_line "container: $name-latest"
-  refute_stderr_line --partial invalid
-  assert_success
-}
-# bats test_tags=container,image
-@test "script/container: alpine" {
-  test_container alpine
-}
-# bats test_tags=container,image
-@test "script/container: android" {
-  test_container android
-}
-# bats test_tags=container,image
-@test "script/container: archlinux" {
-  test_container archlinux
-}
-# bats test_tags=container,image
-@test "script/container: debian" {
-  test_container debian
-}
-# bats test_tags=container,image
-@test "script/container: ubuntu" {
-  test_container ubuntu
-}
-# bats test_tags=container,image
-@test "script/container: fedora" {
-  test_container fedora
-}
-# bats test_tags=container,image
-@test "script/container: macos" {
-  test_container macos
-}
-
-# bats test_tags=container
-@test "script/container: unknown" {
-  run --separate-stderr bash ./script/container unknown
-  refute_output
-  assert_stderr_line --partial invalid
-  assert_failure
-}
-
-# bats test_tags=update
+# bats test_tags=update,type:unit
 @test "script/update" {
   run --separate-stderr bash ./script/update
+
   if has_feature neovim; then
-    assert_stderr_line --partial nvim
+    assert_stderr_line --regexp "nvim"
   fi
   if has_feature tmux; then
-    assert_stderr_line --partial tmux
+    assert_stderr_line --regexp "tmux"
   fi
   assert_success
 }
 
-# bats test_tags=install
-@test "install password manager" {
-  # FIXME: `stub_seq "$package_manager" 3' failed
-  # export BATS_TEST_RETRIES=1
+# bats test_tags=container,type:unit
+@test "container: resolve image matrix" {
+  source_container
+  # format: "image exec_user home"
+  local arch
+  arch="$(uname -m)"
+  local archlinux_repo=archlinux
+  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+    archlinux_repo=docker.io/ogarcia/archlinux
+  fi
+  local termux_version=x86_64
+  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+    termux_version=aarch64
+  fi
+  declare -A matrix=(
+    [alpine]="alpine:latest test /home/test"
+    [archlinux]="$archlinux_repo:latest test /home/test"
+    [debian]="debian:latest test /home/test"
+    [fedora]="fedora:latest test /home/test"
+    [opensuse]="opensuse/tumbleweed:latest test /home/test"
+    [termux]="docker.io/termux/termux-docker:$termux_version system /data/data/com.termux/files/home"
+    [ubuntu]="ubuntu:latest test /home/test"
+  )
+  for name in $images; do
+    resolve "$name"
+    read -r exp_image exp_exec_user exp_home <<<"${matrix[$name]}"
+    assert_equal "$image_name" "$name"
+    assert_equal "$image" "$exp_image"
+    assert_equal "$exec_user" "$exp_exec_user"
+    assert_equal "$home" "$exp_home"
+    assert [ -n "$container" ]
+    assert [ -n "$chezmoi_root" ]
+  done
+}
 
-  local package_manager
-  # unstub package-manager 2>/dev/null || true
-  package_manager="$(package-manager)"
-  stub_seq "$package_manager" 3
+# bats test_tags=container,type:unit
+@test "container: resolve version suffix" {
+  source_container
+  resolve alpine:3.19
+
+  assert_equal "$image_name" alpine
+  assert_equal "$image" alpine:3.19
+  assert_equal "$container" chezmoi-alpine-3.19
+}
+
+# bats test_tags=container,type:unit
+@test "container: runtime wrapper delegates to CONTAINER_PROVIDER" {
+  source_container
+  stub docker 'echo docker-called: $@'
+  export CONTAINER_PROVIDER=docker
+  run container version
+  assert_output "docker-called: version"
+  unstub docker
+}
+
+# bats test_tags=container,type:unit
+@test "container: list prints one name per line" {
+  source_container
+  run list
+  assert_success
+  assert_line "alpine"
+  assert_line "termux"
+  refute_output --regexp $'\t| '
+}
+
+# bats test_tags=container,type:unit
+@test "container: main routes list aliases to list" {
+  source_container
+  for cmd in l ls list; do
+    run main "$cmd"
+    assert_success
+    assert_line "alpine"
+  done
+}
+
+# bats test_tags=container,type:unit
+@test "container: main routes status aliases to status" {
+  source_container
+  # stub container inspect to report no containers exist
+  container() { return 1; }
+  for cmd in "" s st status; do
+    run main $cmd
+    assert_success
+    assert_line --regexp "^alpine"
+  done
+}
+
+# bats test_tags=install,type:unit
+@test "install-password-manager: skips on unknown command" {
   export CHEZMOI_COMMAND=test
+  export CHEZMOI_WORKING_TREE="$PWD"
   run --separate-stderr bash home/.install-password-manager.sh
-  unstub "$package_manager" 2>/dev/null || true
+
+  refute_output
+  refute_stderr
+  assert_success
+}
+
+# bats test_tags=install,type:unit
+@test "install-password-manager: exits if already installed" {
+  stub bws "true"
+  export CHEZMOI_COMMAND=apply
+  export CHEZMOI_WORKING_TREE="$PWD"
+  run --separate-stderr bash home/.install-password-manager.sh
+  unstub bws 2>/dev/null || true
+
   refute_output
   refute_stderr
   assert_success

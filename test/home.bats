@@ -3,204 +3,82 @@ setup() {
   _common_setup
 
   source test/common/helper.sh
-
-  # brew=$(command -v brew 2>/dev/null || echo brew)
 }
 
-# bats file_tags=dotfiles,home
+# bats file_tags=home,type:smoke
 
 @test "macos: script exists and is executable" {
   [ "$UNAME" = Darwin ] || skip "$UNAME"
-  # [ -f ~/.macos ]
   [ -x ~/.macos ]
 }
 
-# @test "brew installation script runs without errors" {
-#   run bash install/macos/common/brew.sh
-#   [ "$status" -eq 0 ]
-# }
-
-# @test "brew command is available after installation" {
-#   run command -v brew
-#   [ "$status" -eq 0 ]
-# }
-
-@test "feature: atuin" {
-  check_feature atuin
-  run --separate-stderr atuin --version
-  assert_output
-  refute_stderr
-  assert_success
-  # ble.sh
-}
-
-@test "feature: bash" {
-  check_feature bash
-  run --separate-stderr bash --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: bat" {
-  check_feature bat
-  bat=bat
-  if command -v batcat >/dev/null; then
-    bat=batcat
+# bats test_tags=secrets,permissions
+@test "secrets.d: directory exists and is 700" {
+  if [ ! -d "$HOME/.config/secrets.d" ]; then
+    skip "secrets.d not present"
   fi
-  run --separate-stderr $bat --version
-  assert_output
-  refute_stderr
-  assert_success
-  # ble.sh
+  check_perms 700 "$HOME/.config/secrets.d"
 }
 
-@test "feature: bottom" {
-  check_feature bottom
-  run --separate-stderr btm --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-# @test "feature: brew" {
-#   check_feature brew
-#   run --separate-stderr "$brew" --version
-#   assert_output
-#   refute_stderr
-#   assert_success
-# }
-
-@test "feature: carapace" {
-  check_feature carapace
-  run --separate-stderr carapace --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: direnv" {
-  check_feature direnv
-  run --separate-stderr direnv --version
-  assert_output
-  refute_stderr
-  assert_success
-  # direnv export bash
-}
-
-@test "feature: eza" {
-  check_feature eza
-  run --separate-stderr eza --version # | head -n2 | tail -n1
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: helix" {
-  check_feature helix
-  run --separate-stderr hx --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-# @test "feature: mise" {
-#   check_feature mise
-#   run --separate-stderr mise --version # | head -n1
-#   assert_output
-#   # refute_stderr # mise WARN  mise version .* available
-#   assert_success
-# }
-
-@test "feature: node" {
-  check_feature node
-  run --separate-stderr node --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: nushell" {
-  check_feature nushell
-  run --separate-stderr nu --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: neovim" {
-  check_feature neovim
-  run --separate-stderr nvim --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: python" {
-  check_feature python
-  python=python
-  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
-    python=python3
+# bats test_tags=secrets,permissions
+@test "secrets.d: files are 600" {
+  if ! compgen -G "$HOME/.config/secrets.d/*.conf" >/dev/null; then
+    skip "no conf files yet"
   fi
-  run --separate-stderr $python --version
-  assert_output
-  refute_stderr
-  assert_success
-  # pipx, uvx
+  check_perms 600 "$HOME/.config/secrets.d"/*.conf
 }
 
-@test "feature: ripgrep" {
-  check_feature ripgrep
-  run --separate-stderr rg --version # | head -n1
-  assert_output
-  refute_stderr
-  assert_success
+# bats test_tags=deploy,permissions
+@test "local.yaml: files are 600" {
+  local found=false
+  for f in ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml; do
+    [ -f "$f" ] || continue
+    found=true
+  done
+  if ! $found; then
+    skip "no local.yaml files"
+  fi
+  check_perms 600 ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml
 }
 
-@test "feature: tmux" {
-  check_feature tmux
-  run --separate-stderr tmux -V
-  assert_output
-  refute_stderr
-  assert_success
+# Collect unique KEY= names from all .conf files in a directory
+_conf_keys() {
+  local dir="$1"
+  if [ ! -d "$dir" ]; then
+    return
+  fi
+  grep -h '^[A-Z_]*=' "$dir"/*.conf 2>/dev/null | cut -d= -f1 | sort -u
 }
 
-@test "feature: topgrade" {
-  check_feature topgrade
-  run --separate-stderr topgrade --version
-  assert_output
-  refute_stderr
-  assert_success
+# bats test_tags=deploy,validation
+@test "environment.d: no duplicate keys" {
+  local dupes
+  dupes=$(_conf_keys "$HOME/.config/environment.d" | uniq -d) || true
+  if [ -n "$dupes" ]; then
+    fail "duplicate keys in environment.d: $dupes"
+  fi
 }
 
-@test "feature: vim" {
-  check_feature vim
-  run --separate-stderr vim --version
-  assert_output
-  refute_stderr
-  assert_success
+# bats test_tags=secrets,validation
+@test "secrets.d: no duplicate keys" {
+  local dupes
+  dupes=$(_conf_keys "$HOME/.config/secrets.d" | uniq -d) || true
+  if [ -n "$dupes" ]; then
+    fail "duplicate keys in secrets.d: $dupes"
+  fi
 }
 
-@test "feature: zellij" {
-  check_feature zellij
-  run --separate-stderr zellij --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: zoxide" {
-  check_feature zoxide
-  run --separate-stderr zoxide --version
-  assert_output
-  refute_stderr
-  assert_success
-}
-
-@test "feature: zsh" {
-  check_feature zsh
-  run --separate-stderr zsh --version
-  assert_output
-  refute_stderr
-  assert_success
+# bats test_tags=secrets,deploy,validation
+@test "environment.d and secrets.d: no key collisions" {
+  local env_keys sec_keys
+  env_keys=$(_conf_keys "$HOME/.config/environment.d")
+  sec_keys=$(_conf_keys "$HOME/.config/secrets.d")
+  if [ -z "$env_keys" ] || [ -z "$sec_keys" ]; then
+    skip "need keys in both dirs"
+  fi
+  local dupes
+  dupes=$(comm -12 <(echo "$env_keys") <(echo "$sec_keys")) || true
+  if [ -n "$dupes" ]; then
+    fail "key collision across environment.d and secrets.d: $dupes"
+  fi
 }

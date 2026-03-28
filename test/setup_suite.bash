@@ -36,13 +36,20 @@ setup_bats_libs() {
   # if [ -z "$pacman" ] && command -v brew >/dev/null; then
   #   return
   # fi
-  if ! command -v git >/dev/null; then
-    # run apk add --no-cache git
-    echo >&2 "setup_suite: git is required"
-    exit 1
-  fi
-  if [ "${CI:-}" = true ]; then
-    git config --global advice.detachedHead false
+  needs_clone=false
+  for d in ./test_helper/bats-mock ./test_helper/bats-assert \
+    ./test_helper/bats-support ./test_helper/bats-file; do
+    [ -d "$d" ] || needs_clone=true
+  done
+  if [ "$needs_clone" = true ]; then
+    if ! command -v git >/dev/null; then
+      # run apk add --no-cache git
+      echo >&2 "setup_suite: git is required"
+      exit 1
+    fi
+    if [ "${CI:-}" = true ]; then
+      git config --global advice.detachedHead false
+    fi
   fi
   if ! [ -d ./test_helper/bats-mock ]; then
     git_clone --branch=v1 https://github.com/jasonkarns/bats-mock \
