@@ -1,0 +1,7 @@
+---
+packages:
+  fzf:
+    enabled: '{{ ne .profile "minimal" }}'
+    nameOverwrite:
+      windows: junegunn.fzf
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
