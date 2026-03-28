@@ -1,0 +1,18 @@
+{{- if eq .osID "alpine" -}}
+#!/bin/sh
+
+# https://github.com/akinomyoga/ble.sh#readme
+# nightly: https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+  exit 0
+fi
+
+BLE_URL="https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
+run curl -LSsf "$BLE_URL" | run tar xJf - -C "$TMPDIR"
+run bash "$TMPDIR/ble-nightly/ble.sh" --install "$HOME/.local/share"
+{{ end -}}
