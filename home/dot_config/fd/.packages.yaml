@@ -1,0 +1,9 @@
+---
+packages:
+  fd:
+    enabled: '{{ ne .profile "minimal" }}'
+    nameOverwrite:
+      debian: fd-find
+      # fedora: fd-find
+      windows: sharkdp.fd
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
