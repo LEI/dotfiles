@@ -8,7 +8,35 @@ redactions = [
 includes = ["script"]
 
 [tasks.ci]
+description = "Run CI workflow locally with act"
 run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
 
 [tasks.hyperfine]
-run = "hyperfine 'mise run test' --max-runs=5 --show-output"
+description = "Benchmark shell startup with hyperfine"
+run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
+
+[tasks."test:unit"]
+alias = "tu"
+description = "Run unit tests only"
+run = "mise run test -- --filter-tags type:unit"
+
+[tasks."test:smoke"]
+alias = "ts"
+description = "Run smoke tests (needs deployed home)"
+run = "mise run test -- --filter-tags type:smoke"
+
+[tasks.pipeline]
+alias = "pl"
+description = "Run check, update, test locally"
+depends = [
+  "check",
+  # "lint",
+  "prek",
+  "test",
+  "update",
+]
+
+[tasks.prek]
+alias = "pre-commit"
+description = "Run pre-commit hooks on all files"
+run = "prek run --all-files"
