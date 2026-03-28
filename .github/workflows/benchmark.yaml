@@ -32,7 +32,7 @@ jobs:
       # Run benchmark and store the output to a file
       - name: Run benchmark
         # run: go test -bench 'BenchmarkFib' | tee output.txt
-        run: ./script/bench | tee output.json
+        run: ./script/startup | tee output.json
 
       # gh-pages branch is updated and pushed automatically with extracted benchmark data
       - name: Store benchmark result

@@ -77,8 +77,8 @@ jobs:
             echo "/home/linuxbrew/.linuxbrew/sbin" >>"$GITHUB_PATH"
           fi
 
-      - name: Run check
-        run: ./script/check # ./script/check
+      - name: Run checks
+        run: mise run check
 
       # - name: chezmoi data
       #   run: '"$HOME/.local/bin/chezmoi" data'
@@ -143,7 +143,7 @@ jobs:
 
       # Run benchmark and store the output to a file
       - name: Run benchmark
-        run: ./script/bench | tee output.json
+        run: ./script/startup | tee output.json
 
       # # Download previous benchmark result from cache
       # - name: Download previous benchmark data
