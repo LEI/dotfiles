@@ -1,7 +1,10 @@
-#!/bin/sh
-
-# Allow aliases with sudo
-# alias sudo="sudo "
+{{- if lookPath "eza" | isExecutable }}
+# Use alias not function: ls() causes syntax errors (builtin conflict)
+alias ls="eza --hyperlink" # --total-size
+{{- else if lookPath "gls" | isExecutable }}
+# export LS_COLORS="$(vivid generate tokyonight-storm)"
+alias ls="gls --color"
+{{- end }}
 
 # Confirm before overwriting
 alias cp="cp -i" # --interactive
@@ -9,17 +12,23 @@ alias cp="cp -i" # --interactive
 # Print sizes in powers of 1024
 alias df="df -h" # --human-readable
 
+{{- if lookPath "free" | isExecutable }}
+
 # Show with human-readable units
 alias free="free --human"
+{{- end }}
 
 # Color matches
 alias grep="grep --color=auto"
 
 # List all files with colors, human-readable sizes and long format
-alias la="ls -ahl --color=auto"
+alias la="ls -ahl"
+{{- if lookPath "eza" | isExecutable }}
+alias lA="la --total-size"
+{{- end }}
 
 # Print each PATH entry on a separate line
-alias path='echo -e "${PATH//:/\\n}"'
+alias path='echo "$PATH" | tr ":" "\n"'
 
 {{- if lookPath "bat" | isExecutable }}
 alias cat=bat
@@ -27,28 +36,9 @@ alias cat=bat
 alias cat=batcat
 {{- end }}
 
-{{- if lookPath "eza" | isExecutable }}
-alias ls="eza --hyperlink"
-{{- else if lookPath "gls" | isExecutable }}
-# export LS_COLORS="$(vivid generate tokyonight-storm)"
-alias ls="gls --color"
-{{- end }}
-
 {{- if eq .os "darwin" }}
-alias beep="afplay --rate 3 --time 0.3 --volume 3 /System/Library/Sounds/Glass.aiff"
 
-if ! hash notify-send 2>/dev/null; then
-  notify-send() {
-    if [ $# -eq 0 ] || [ $# -gt 2 ]; then
-      echo >&2 "Usage: notify <title> [message]"
-      return 1
-    fi
-    # ${TERM_PROGRAM:-${SHELL##*/}}
-    title="$1"
-    message="${2:-}"
-    osascript -e "display notification \"${message//\"/\\\"}\" with title \"${title//\"/\\\"}\""
-  }
-fi
+alias beep="afplay --rate 3 --time 0.3 --volume 3 /System/Library/Sounds/Glass.aiff"
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload='exec ${SHELL} -l'
@@ -60,7 +50,7 @@ alias reload='exec ${SHELL} -i'
 # [ -f /proc/version ] && grep -iq microsoft /proc/version
 if command -v wslview >/dev/null; then
   alias open=wslview
-if [ -f /mnt/c/Windows/explorer.exe ]; then
+elif [ -f /mnt/c/Windows/explorer.exe ]; then
   # TODO: add /mnt/c/Windows to PATH
   alias open=/mnt/c/Windows/explorer.exe
 else
@@ -83,85 +73,66 @@ alias pbpaste='xsel --clipboard --output'
 {{- else if and (lookPath "wl-copy" | isExecutable) (lookPath "wl-paste" | isExecutable) }}
 alias pbcopy=wl-copy
 alias pbpaste=wl-paste
-{{- else if and (lookPath "termux-clipbload-set" | isExecutable) (lookPath "termux-clipbload-get" | isExecutable) }}
-alias pbcopy=termux-clipbload-set
-alias pbpaste=termux-clipbload-get
+{{- else if and (lookPath "termux-clipboard-set" | isExecutable) (lookPath "termux-clipboard-get" | isExecutable) }}
+alias pbcopy=termux-clipboard-set
+alias pbpaste=termux-clipboard-get
 {{- end }}
 
 {{- end }}
 
-if ! hash clip 2>/dev/null; then
+if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
   clip() {
     [ -t 0 ] && pbpaste || pbcopy
   }
 fi
 
+{{- if lookPath "lazyjournal" | isExecutable }}
+alias J=lazyjournal
+{{- end }}
+
 {{- if .features.ai }}
 
-if command -v claude >/dev/null; then
-  claude() { env claude "${@:---resume}"; }
-fi
 if command -v codex >/dev/null; then
-  codex() { env codex "${@:-resume --last}"; }
+  codex() {
+    if [ "$#" -eq 0 ]; then
+      set -- resume --last
+    fi
+    env codex "$@"
+  }
 fi
 if command -v crush >/dev/null; then
-  crush() { env crush "${@:---continue}"; }
+  crush() {
+    if [ "$#" -eq 0 ]; then
+      set -- --continue
+    fi
+    env crush "$@"
+  }
+fi
+if command -v gemini >/dev/null; then
+  gemini() {
+    if [ "$#" -eq 0 ]; then
+      set -- --resume=latest
+    fi
+    env gemini "$@"
+  }
 fi
 {{- end }}
 
-{{- if and .features.docker }}
+{{- if eq .profile "work" }}
 
-if command -v lazydocker >/dev/null; then
-  alias D=lazydocker
-elif command -v oxker >/dev/null; then
-  alias D=oxker
-fi
-
-if command -v podman-tui >/dev/null; then
-  alias P=podman-tui
-fi
-{{- end }}
-
-{{- if and .features.git }}
-
-if command -v lazygit >/dev/null; then
-  alias G=lazygit
-fi
-{{- end }}
-
-{{- if lookPath "lazyjournal" | isExecutable }}
-
-if command -v lazyjournal >/dev/null; then
-  alias J=lazyjournal
-fi
-{{- end }}
-
-{{- if and .features.kube }}
-
-if command -v k9s >/dev/null; then
-  alias K="k9s --all-namespaces"
-fi
-
-if command -v kubecolor >/dev/null; then
-  alias kubectl=kubecolor
-fi
-{{- end }}
-
-{{- if .features.mise }}
-
-alias m=mise
-{{- end }}
-
-{{- if .features.neovim }}
-
-if command -v nvim >/dev/null; then
-  alias dbui="nvim +DBUI"
-fi
+m365() (
+  if [ ! -f "$XDG_CONFIG_HOME/secrets.d/app/m365.conf" ]; then
+    echo >&2 "m365: missing $XDG_CONFIG_HOME/secrets.d/app/m365.conf"
+    return 1
+  fi
+  export_env "$XDG_CONFIG_HOME/secrets.d/app/m365.conf"
+  bunx --silent @pnp/cli-microsoft365@latest "$@"
+)
 {{- end }}
 
 {{- if .features.python }}
 
-if ! hash recover 2>/dev/null; then
+if ! command -v recover >/dev/null; then
   {{- if lookPath "recoverpy" | isExecutable }}
   alias recover="sudo recoverpy"
   {{- else if lookPath "uvx" | isExecutable }}
@@ -172,8 +143,4 @@ if ! hash recover 2>/dev/null; then
   alias recover="sudo recoverpy"
   {{- end }}
 fi
-{{- end }}
-
-{{- if lookPath "tmux" | isExecutable }}
-alias tmux="TERM=tmux-256color tmux"
 {{- end }}

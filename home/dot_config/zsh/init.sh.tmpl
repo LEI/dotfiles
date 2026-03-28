@@ -1,7 +1,15 @@
-{{- includeTemplate "init.sh.tmpl" (dict
-  "features" .features
-  "os" .os
-  "osID" .osID
-  "osIDLike" .osIDLike
-  "shell" "zsh"
-) -}}
+{{- includeTemplate "init.sh.tmpl" (merge (dict "shell" "zsh") .) -}}
+
+bindkey -e # Emacs
+
+# Searches first word only (default)
+# bindkey '^[[A' up-line-or-search
+# bindkey '^[[B' down-line-or-search
+
+# Matches full buffer prefix
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
