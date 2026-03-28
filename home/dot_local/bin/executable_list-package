@@ -21,21 +21,29 @@ aur | yay)
   # yay -? --aur
   ;;
 brew)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   # brew bundle dump --file=-
   brew list --formula --installed-on-request
   ;;
 cask)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew list --cask
   ;;
 mas)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew bundle dump --file=- --mas | cut -d' ' -f2- | cut -d, -f1 | tr -d '"'
   ;;
 vscode)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew bundle dump --file=- --vscode | cut -d' ' -f2- | tr -d '"'
   ;;
 dnf)
   # dnf list --installed | cut -d' ' -f1 | cut -d. -f1
   dnf repoquery --leaves --userinstalled | sed -e 's/-[0-9]:.*$//'
+  ;;
+flatpak)
+  # flatpak list --app --columns=application,version
+  flatpak list --app --columns=application | grep -v '^org\.fedoraproject\|^org\.gnome'
   ;;
 gem)
   gem list | cut -d' ' -f1
@@ -66,6 +74,12 @@ pip)
 pipx)
   pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
   ;;
+rpm)
+  rpm-ostree status --json | jq --raw-output '.deployments[0]["requested-packages"][]'
+  ;;
+# snap)
+#   snap list --all
+#   ;;
 termux)
   pkg list-installed | grep -v '^Listing\.\.\.' | cut -d/ -f1
   ;;
@@ -76,6 +90,7 @@ scoop)
   scoop list | tail -n+2 | cut -d' ' -f1
   ;;
 tap)
+  export HOMEBRE_NO_AUTO_UPDATE=1
   brew tap
   ;;
 winget)
