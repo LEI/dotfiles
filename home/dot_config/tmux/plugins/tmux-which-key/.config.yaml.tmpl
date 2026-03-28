@@ -35,13 +35,13 @@
       {{- $_ := set $groupNotes $subGroup ($note | replaceAllRegex (printf "\\+%s " $subGroup) "") }}
     {{- else if ne $plugin $note }}
       {{- if not (hasKey $pluginMap $plugin) }}{{- $_ := set $pluginMap $plugin list }}{{- end }}
-      {{- $_ := set $pluginMap $plugin (append (get $pluginMap $plugin) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+      {{- $_ := set $pluginMap $plugin (($pluginMap | append | get $plugin) ($key | replaceAllRegex "\\\\\"" "\"")) }}
     {{- else }}
-      {{- $include = append $include $key }}
+      {{- $include = $include | append $key }}
     {{- end }}
   {{- else }}
     {{- if not (hasKey $groupMap $group) }}{{- $_ := set $groupMap $group list }}{{- end }}
-    {{- $_ := set $groupMap $group (append (get $groupMap $group) ($key | replaceAllRegex "\\\\\"" "\"")) }}
+    {{- $_ := set $groupMap $group (($groupMap | append | get $group) ($key | replaceAllRegex "\\\\\"" "\"")) }}
   {{- end }}
 {{- end }}
 

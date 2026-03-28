@@ -23,12 +23,27 @@ set -g default-terminal xterm-256color
 set-option -g set-titles on
 set-option -g set-titles-string '#S #W - #{pane_title}'
 
+# Enable all monitoring types globally
+set-window-option -g monitor-activity on
+set-window-option -g monitor-bell on
+# set-window-option -g monitor-silence 60
+
+# Enable visual notifications
+set-option -g visual-activity on
+set-option -g visual-bell on
+
+# Customize activity highlighting
+# set-window-option -g window-status-activity-style bg=red,fg=white
+
+# Add symbols to window names
+# set-window-option -g window-status-format '#I:#W#{?window_activity_flag,!,}'
+
 if "tmux show-option -s terminal-features | grep -vq ':hyperlinks$'" {
     set -as terminal-features ",*:hyperlinks"
 }
 
-if "tmux show-option -s terminal-features | grep -vq ':Tc$'" {
-    set -ga terminal-overrides ",*-256color:Tc"
+if "tmux show-option -s terminal-overrides | grep -vq ':Tc$'" {
+    set -as terminal-overrides ",*-256color:Tc"
 }
 
 # Change the default prefix binding to Ctrl-a only when not connected via SSH
@@ -64,7 +79,7 @@ set -g @plugin 'tmux-plugins/tpm # v3.1.0'
 # set -g @plugin 'rose-pine/tmux'
 # set -g @rose_pine_variant main # Options are main, moon or dawn
 
-set -g @plugin 'janoamaral/tokyo-night-tmux # v1.6.6'
+set -g @plugin 'janoamaral/tokyo-night-tmux # v1.7.0'
 
 set -g @tokyo-night-tmux_theme storm # storm | day | default to night
 set -g @tokyo-night-tmux_transparent 1
@@ -91,9 +106,9 @@ set -g @tokyo-night-tmux_show_path 1
 # Requires playerctl (Linux) or nowplaying-cli (macOS)
 set -g @tokyo-night-tmux_show_music 0
 
-set -g @tokyo-night-tmux_show_netspeed {{ eq .osIDLike "arch" "darwin" | ternary 0 1 }}
+set -g @tokyo-night-tmux_show_netspeed 0
 # set -g @tokyo-night-tmux_netspeed_iface wlan0 # Detected via default route
-set -g @tokyo-night-tmux_netspeed_showip 1 # Display IPv4 address (default 0)
+# set -g @tokyo-night-tmux_netspeed_showip 1 # Display IPv4 address (default 0)
 # set -g @tokyo-night-tmux_netspeed_refresh 1 # Update interval in seconds (default 1)
 
 set -g @tokyo-night-tmux_show_git 1
@@ -139,6 +154,7 @@ set -g @plugin 'tmux-plugins/tmux-pain-control # v1.0.0'
 set -g @plugin "tmux-plugins/tmux-resurrect # v4.0.0"
 set -g @resurrect-capture-pane-contents on
 set -g @resurrect-dir "$XDG_DATA_HOME/tmux/resurrect" # ln -sf <file_name> last
+# set -g @resurrect-processes '~Vim -> vim'
 set -g @resurrect-processes '\
     hx vi vim nvim emacs \
     man less more tail \
@@ -162,7 +178,14 @@ set -g @continuum-boot-options iterm # ,fullscreen
 {{- else }}
 set -g @continuum-boot-options ghostty
 {{- end }}
-set -g @continuum-restore on
+# set -g @continuum-restore on
+set -g @resurrect-hook-post-save-all '\
+  last="$XDG_DATA_HOME/tmux/resurrect/last"; \
+  f="$(readlink "$last")"; \
+  if [ -n "$f" ] && [ ! -s "$f" ]; then \
+    rm "$f" "$last"; \
+    tmux display-message "Resurrect: removed empty save file"; \
+  fi'
 set -g @continuum-save-interval 60 # 1h
 # set -ga status-right 'Continuum status: #{continuum_status}'
 
@@ -219,9 +242,9 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 # set -g @thumbs-key F
 # set -g @thumbs-alphabet azerty
 
-# prefix + ?
-set -g @tmux-which-key-disable-autobuild 0
-set -g @plugin 'alexwforsythe/tmux-which-key'
+# # prefix + ?
+# set -g @tmux-which-key-disable-autobuild 0
+# set -g @plugin 'alexwforsythe/tmux-which-key'
 
 # set -g @plugin 'jaclu/tmux-menus'
 # set -g @menus_trigger Space
