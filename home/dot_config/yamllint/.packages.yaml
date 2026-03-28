@@ -1,0 +1,8 @@
+---
+packages:
+  yamllint:
+    enabled: "{{ not .features.neovim }}"
+    # nameOverwrite:
+    #   mise: pipx@latest yamllint
+    # type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "uv" nil }}'
