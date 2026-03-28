@@ -17,6 +17,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        exclude: ^home/dot_config/goss/goss\.yaml$
       - id: check-added-large-files
 
   # https://github.com/koalaman/shellcheck-precommit
@@ -72,22 +73,27 @@ repos:
 
       # - id: chezmoi-status
       #   name: chezmoi status
-      #   entry: bash -c 'for f in "$@"; do chezmoi status --dry-run --no-tty --refresh-externals=never "$(chezmoi target-path "$f")"; done'
-      #   # entry: bash -c 'chezmoi status --dry-run --no-tty --refresh-externals=never $(chezmoi target-path "$@")'
-      #   # files: ^(home/.*|\.chezmoi.*)$
-      #   # language: system
-      #   # pass_filenames: false
+      #   entry: >-
+      #     bash -c 'for f in "$@"; do chezmoi status
+      #       --dry-run --no-tty --refresh-externals=never
+      #       "$(chezmoi target-path "$f")"; done'
       #   files: ^home/.*$
       #   exclude: "$(chezmoi unmanaged)"
       #   language: system
 
-      - id: chezmoi # -template
-        name: chezmoi # template
-        # entry: |
-        #   sh -c 'for f in "$@"; do echo "$f"; done; cat "$@" | chezmoi execute-template --dry-run --no-tty --refresh-externals=never --with-stdin >/dev/null'
-        # entry: sh -c 'for f in "$@"; do echo >&2 "$f"; sh home/dot_local/bin/executable_chezmoi-check "$f" || exit 1; done'
-        entry: sh -c 'sh home/dot_local/bin/executable_chezmoi-check "$@" || exit 1'
-        files: ^home/.*\.tmpl$
-        # exclude: ^home/(\.chezmoi\.ya?ml\.tmpl|.*/modify_.*\.sh)$
-        exclude: ^home/\.chezmoi\.ya?ml\.tmpl$
+      - id: validate-schema
+        name: validate schemas
+        entry: ./script/validate-schema
         language: system
+        files: \.(json[c5]?|toml|ya?ml)(\.tmpl)?$
+        exclude: ^home/\.chezmoitemplates/
+
+      - id: lint-lines
+        name: lint lines
+        entry: ./script/lint-lines
+        language: system
+
+      # - id: prek
+      #   name: validate templates
+      #   entry: ./script/prek
+      #   language: system
