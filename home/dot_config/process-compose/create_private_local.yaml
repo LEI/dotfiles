@@ -1,0 +1,11 @@
+---
+# chezmoidata: SSH tunnel proxies
+# processCompose:
+#   sshProxies:
+#     - name: staging-db
+#       type: postgres
+#       remoteHost: db.staging.internal
+#       localPort: 25432
+#       sshTarget: deploy@bastion.example.com
+#       dbUser: app
+#       dbName: staging

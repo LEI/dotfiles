@@ -1,0 +1,18 @@
+[Unit]
+Description=Process Compose global services
+After=network.target
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+Environment=HOME=%h
+Environment=PATH=%h/.local/share/cargo/bin:%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
+Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
+Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/global.sock
+ExecStart=%h/.local/bin/mise exec process-compose -- process-compose up --use-uds --tui=false --ordered-shutdown --logs-truncate --hide-disabled
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,17 @@
+---
+enabled: "{{ .features.processCompose }}"
+packages:
+  hl:
+    enabled: "{{ not .ephemeral }}"
+    type: brew
+  process-compose: # hapless, mani+sake / cmdperf, mult
+    enabled: "{{ .gui }}"
+    nameOverwrite:
+      darwin: f1bonacc1/tap/process-compose
+    type: '{{ eq .osIDLike "arch" | ternary "aur"
+      (eq .osIDLike "android" "fedora" "windows" | ternary "mise" nil) }}'
+  tailspin:
+    enabled: "{{ not .ephemeral }}"
+    type: >-
+      {{ eq .osIDLike "alpine" "android" "debian" "fedora"
+        | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}
