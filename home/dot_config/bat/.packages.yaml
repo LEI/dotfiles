@@ -4,4 +4,4 @@ packages:
     enabled: "{{ .features.bat }}"
     nameOverwrite:
       windows: sharkdp.bat
-    # type: '{{ eq .osIDLike "windows" | ternary "winget" nil }}'
+    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
