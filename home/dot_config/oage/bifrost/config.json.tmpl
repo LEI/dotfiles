@@ -1,0 +1,122 @@
+{{- $ollamaInCompose := and .features.ollama (eq .os "linux") (not .features.podman) -}}
+{{- $ollamaHost := $ollamaInCompose | ternary "ollama" "host.docker.internal" -}}
+{{- $mlx := false -}}{{/* disabled: config_store corrupts custom providers (v1.4.14 bug) */}}
+{
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "/app/data/config.db"
+    }
+  },
+  "logs_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "/app/data/logs.db"
+    }
+  },
+  "vector_store": {
+    "enabled": true,
+    "type": "qdrant",
+    "config": {
+      "host": "qdrant",
+      "port": 6334
+    }
+  },
+  "auth_config": {
+    "is_enabled": false,
+    "admin_username": "admin",
+    "admin_password": "env.BIFROST_ADMIN_PASSWORD",
+    "disable_auth_on_inference": true
+  },
+  "client": {
+    "allowed_origins": ["https://bifrost.test"],
+    "log_retention_days": 7
+  },
+  "governance": {
+    "virtual_keys": [
+      {
+        "id": "local",
+        "name": "local",
+        "value": "env.BIFROST_API_KEY"
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "enabled": false,
+      "name": "semantic_cache",
+      "config": {
+        "default_cache_key": "global",
+        "provider": "ollama",
+        "keys": [""],
+        "embedding_model": "nomic-embed-text",
+        "dimension": 768,
+        "ttl": "24h",
+        "threshold": 0.85,
+        "cache_by_model": true,
+        "cache_by_provider": true
+      }
+    },
+    {
+      "enabled": true,
+      "name": "otel",
+      "config": {
+        "service_name": "bifrost",
+        "collector_url": "otel-collector:4317",
+        "protocol": "grpc",
+        "trace_type": "otel",
+        "insecure": true,
+        "metrics_enabled": true,
+        "metrics_endpoint": "otel-collector:4317",
+        "metrics_push_interval": 15
+      }
+    }
+  ],
+  "providers": {
+    "openrouter": {
+      "keys": [
+        {
+          "name": "OpenRouter API Key",
+          "value": "env.OPENROUTER_API_KEY",
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "default_request_timeout_in_seconds": 300
+      }
+    },
+    "ollama": {
+      "keys": [
+        {
+          "name": "ollama-local",
+          "value": "ollama",
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "base_url": "http://{{ $ollamaHost }}:11434",
+        "default_request_timeout_in_seconds": 120,
+        "max_retries": 1
+      }
+    }{{ if $mlx }},
+    "mlx-lm": {
+      "keys": [
+        {
+          "name": "mlx-local",
+          "value": "mlx",
+          "weight": 1
+        }
+      ],
+      "custom_provider_config": {
+        "base_provider_type": "openai"
+      },
+      "network_config": {
+        "base_url": "http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}",
+        "default_request_timeout_in_seconds": 120,
+        "max_retries": 1
+      }
+    }{{ end }}
+  }
+}

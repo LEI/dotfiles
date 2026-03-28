@@ -1,0 +1,96 @@
+#!/bin/sh
+# Webhook notification handler
+# terminal-notifier -sound broken on macOS Ventura+
+# https://github.com/julienXX/terminal-notifier/issues/300
+set -eu
+
+msg() { echo >&2 "webhook-notify: $*"; }
+
+notify() {
+  _title="$1" _subtitle="$2" _message="$3" _url="${4:-}" _sound="${5:-Ping}"
+  if command -v terminal-notifier >/dev/null; then
+    afplay "/System/Library/Sounds/$_sound.aiff" &
+    terminal-notifier \
+      -title "$_title" \
+      -subtitle "$_subtitle" \
+      -message "$_message" \
+      -group "$_title-$_subtitle" \
+      ${_url:+-open "$_url"}
+  elif command -v notify-send >/dev/null; then
+    notify-send "$_title: $_subtitle" "$_message"
+  else
+    msg "no notification backend"
+    exit 1
+  fi
+}
+
+payload="${WEBHOOK_PAYLOAD_FILE:?WEBHOOK_PAYLOAD_FILE not set}"
+if [ ! -f "$payload" ]; then
+  msg "payload not found: $payload"
+  exit 1
+fi
+msg "payload:"
+jq . "$payload" >&2
+
+# Common fields
+status=$(jq --raw-output '.status // "unknown"' "$payload")
+count=$(jq --raw-output '.alerts | length // 0' "$payload")
+alertname=$(jq --raw-output '
+  [.alerts[] | (((.valueString // "") | capture("alertname=(?<n>[^,} ]+)") | .n) // .labels.alertname // "Alert")]
+  | unique | join(", ")
+' "$payload")
+container=$(jq --raw-output '.alerts[0].labels.name // empty' "$payload")
+severity=$(jq --raw-output '.alerts[0].labels.severity // empty' "$payload")
+
+# Subtitle: status + alert identity (or count if multiple)
+if [ "$count" -gt 1 ]; then
+  subtitle="$status: $count alerts"
+else
+  subtitle="$status: $alertname"
+  if [ -n "$severity" ]; then subtitle="$subtitle ($severity)"; fi
+fi
+
+# Sound
+case "$status" in
+  firing) sound="Ping" ;;
+  resolved) sound="Tink" ;;
+  *) sound="Ping" ;;
+esac
+
+# Enrich: query Prometheus for real alert annotations
+prom_alerts=""
+prom_alerts=$(curl -fsS "http://localhost:9090/api/v1/alerts" 2>/dev/null) || true
+
+# Build per-alert message lines
+message=$(jq --raw-output --argjson prom "${prom_alerts:-null}" '
+  [.alerts[] |
+    (((.valueString // "") | capture("alertname=(?<n>[^,} ]+)") | .n) // .labels.alertname // "Alert") as $name |
+    (.labels.name // empty) as $target |
+    (if $prom then
+      [$prom.data.alerts[] | select(.labels.alertname == $name) |
+        .annotations.description // .annotations.summary // empty
+      ] | first // empty
+    else empty end) as $detail |
+    if $detail != "" and $detail != null then $detail
+    elif $target != "" and $target != null then "\($name) on \($target)"
+    else $name end
+  ] | unique | join("\n")
+' "$payload")
+
+# Avoid repeating alertname when it's already in subtitle
+if [ -z "$message" ] || [ "$message" = "$alertname" ]; then
+  message="${container:-$status}"
+fi
+
+# Source-specific: title and url
+if jq -e '.orgId' "$payload" >/dev/null 2>&1; then
+  title="Grafana"
+  url=$(jq --raw-output '.alerts[0].generatorURL // empty' "$payload")
+  url="${url:-https://grafana.test/alerting/list}"
+  url=$(echo "$url" | sed 's|http://localhost:3000|https://grafana.test|')
+else
+  title="Alert"
+  url=""
+fi
+
+notify "$title" "$subtitle" "$message" "$url" "$sound"

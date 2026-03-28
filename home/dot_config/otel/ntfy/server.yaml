@@ -1,0 +1,6 @@
+---
+listen-http: ":80"
+base-url: "http://localhost:8080"
+cache-file: "/var/cache/ntfy/cache.db"
+cache-duration: "12h"
+auth-default-access: "read-write"

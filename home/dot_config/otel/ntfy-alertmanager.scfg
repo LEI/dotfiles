@@ -1,0 +1,32 @@
+http-address :8080
+log-level info
+alert-mode single
+
+labels {
+    order "severity"
+
+    severity "critical" {
+        priority 5
+        tags "rotating_light"
+    }
+
+    severity "warning" {
+        priority 3
+        tags "warning"
+    }
+
+    severity "info" {
+        priority 2
+        tags "information_source"
+    }
+}
+
+resolved {
+    tags "resolved,white_check_mark"
+    priority 1
+}
+
+ntfy {
+    server http://ntfy:80
+    topic alerts
+}

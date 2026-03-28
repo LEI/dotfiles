@@ -1,0 +1,48 @@
+{
+	default_bind 127.0.0.1
+	# Use Caddy's internal CA for all sites; run `caddy trust` once to install it
+	local_certs
+	metrics
+	admin localhost:2019
+}
+
+# Metrics on 2020; use 9103 if SELinux allows
+:2020 {
+	bind 0.0.0.0
+	reverse_proxy /metrics localhost:2019
+}
+
+{{- range $feat, $sites := .caddy.sites -}}
+{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
+{{- range $name, $s := $sites -}}
+{{- $dt := get $s "dialTimeout" -}}
+{{- $rht := get $s "responseHeaderTimeout" }}
+{{ $name }}.test {
+	tracing {
+		span {{ $name }}
+	}
+	reverse_proxy localhost:{{ $s.port }}{{ if or $dt $rht }} {
+		transport http {
+			{{- if $dt }}
+			dial_timeout {{ $dt }}
+			{{- end }}
+			{{- if $rht }}
+			response_header_timeout {{ $rht }}
+			{{- end }}
+		}
+	}{{ end }}
+}
+{{ end }}
+{{- end -}}
+{{- range $name, $provider := .ai.providers }}
+{{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
+{{ $provider.domain }} {
+	tracing {
+		span {{ $name }}
+	}
+	reverse_proxy localhost:{{ $provider.port }}
+}
+{{ end -}}
+# Machine-local site configs (not version-controlled)
+# Example: ~/.config/caddy/sites/myproject.caddy
+import {{ .chezmoi.homeDir }}/.config/caddy/sites/*.caddy

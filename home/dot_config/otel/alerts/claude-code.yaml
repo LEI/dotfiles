@@ -1,0 +1,43 @@
+---
+groups:
+  - name: claude-code
+    interval: 60s
+    rules:
+      # Cache efficiency drop (below 90% means wasted tokens)
+      - alert: ClaudeCodeLowCacheHitRatio
+        expr: >
+          sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h]))
+          /
+          (sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h]))
+          + sum(rate(claude_code_token_usage_tokens_total{type="input"}[1h])))
+          < 0.9
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Claude Code cache hit ratio below 90%"
+          description: "Cache hit ratio: {{ $value | humanizePercentage }}"
+
+      # Cost spike (hourly spend above $5)
+      - alert: ClaudeCodeCostSpike
+        expr: increase(claude_code_cost_usage_USD_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Claude Code hourly cost above $5"
+          description: "Last hour: ${{ $value | humanize }}"
+
+      # High output token ratio (possible loops or excessive verbosity)
+      - alert: ClaudeCodeHighOutputRatio
+        expr: >
+          sum(rate(claude_code_token_usage_tokens_total{type="output"}[30m]))
+          /
+          sum(rate(claude_code_token_usage_tokens_total{type="input"}[30m]))
+          > 3
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Claude Code output tokens 3x input"
+          description: "Output/input ratio: {{ $value | humanize }}x"

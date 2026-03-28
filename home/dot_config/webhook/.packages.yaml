@@ -1,0 +1,9 @@
+---
+enabled: "{{ and .features.otel .gui }}"
+packages:
+  libnotify:
+    enabled: '{{ eq .os "darwin" }}'
+  terminal-notifier:
+    enabled: '{{ eq .os "darwin" }}'
+  webhook:
+    type: brew

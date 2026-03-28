@@ -1,0 +1,299 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+services:
+  # Bifrost: OpenAI-compatible LLM gateway
+  bifrost:
+    image: maximhq/bifrost:v1.4.14
+    restart: unless-stopped
+    networks:
+      - default
+      - monitoring
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "127.0.0.1:8180:8080" # API gateway
+    volumes:
+      - ./bifrost:/app/data:z
+    environment:
+      - BIFROST_HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+    env_file: secrets/bifrost.env
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+    depends_on:
+      ollama:
+        condition: service_started
+{{- end }}
+    # qdrant: semantic caching, not required to start
+
+  # Milvus: vector database for claude-context MCP
+  # https://milvus.io/docs/install_standalone-docker.md
+  milvus:
+    image: milvusdb/milvus:v2.6.12
+    command: ["milvus", "run", "standalone"]
+    restart: unless-stopped
+    networks:
+      - default
+      - monitoring
+    ports:
+      - "127.0.0.1:19530:19530" # gRPC (claude-context MILVUS_ADDRESS)
+      # - "127.0.0.1:9091:9091" # HTTP metrics/healthz
+    volumes:
+      - milvus-data:/var/lib/milvus
+    environment:
+      - COMMON_STORAGETYPE=local
+      - DEPLOY_MODE=STANDALONE
+      - ETCD_DATA_DIR=/var/lib/milvus/etcd
+      - ETCD_USE_EMBED=true
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+
+  # Ollama: local LLM inference
+  # https://github.com/ollama/ollama
+  ollama:
+    image: docker.io/ollama/ollama:0.18.2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434" # API
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+      - OLLAMA_VULKAN=1
+    devices:
+      - /dev/dri
+{{- end }}
+
+  # https://github.com/lfnovo/open-notebook/tree/main/examples
+  open-notebook:
+    image: lfnovo/open_notebook:1.8.1 # v1-latest
+    restart: unless-stopped
+    # pull_policy: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "127.0.0.1:8502:8502" # Streamlit UI
+      - "127.0.0.1:5055:5055" # REST API
+    volumes:
+      - notebook-data:/app/data
+    environment:
+      - API_URL=https://open-notebook-api.test
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OPENAI_COMPATIBLE_BASE_URL=http://bifrost:8080/v1
+      - SURREAL_DATABASE=open_notebook
+      - SURREAL_NAMESPACE=open_notebook
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+    env_file: secrets/notebook.env
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5055/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      bifrost:
+        condition: service_healthy
+      surrealdb:
+        condition: service_healthy
+
+  # https://github.com/open-webui/open-webui
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.8.10
+    restart: unless-stopped
+    networks:
+      - default
+      - monitoring
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "127.0.0.1:8503:8080" # Web UI
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      - CORS_ALLOW_ORIGIN=https://open-webui.test
+      - ENABLE_OLLAMA_API=true
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+{{- if .features.mlx }}
+      - OPENAI_API_BASE_URLS=http://bifrost:8080/v1;http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
+{{- else }}
+      - OPENAI_API_BASE_URL=http://bifrost:8080/v1
+{{- end }}
+      - AIOHTTP_CLIENT_TIMEOUT=120 # default: 30s; local models need more time for first token
+      - USER_AGENT=open-webui
+      - WEBUI_AUTH=false
+      # - HF_TOKEN=
+      {{- if .features.otel }}
+      - ENABLE_OTEL=true
+      - ENABLE_OTEL_LOGS=true
+      - ENABLE_OTEL_METRICS=true
+      - ENABLE_OTEL_TRACES=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+      {{- end }}
+    env_file: secrets/webui.env
+    deploy:
+      resources:
+        limits:
+          memory: 1200M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      bifrost:
+        condition: service_healthy
+
+  # OpenCode: bundled in sandboxed.sh v0.10.0
+  # https://opencode.ai/docs/server
+  # opencode:
+  #   image: ghcr.io/anomalyco/opencode:1.2.10
+  #   command: ["opencode", "serve", "--hostname", "0.0.0.0"]
+  #   entrypoint: []
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:4096:4096" # Server API
+  #   volumes:
+  #     - opencode-config:/data
+  #     - opencode-share:/root/.local/share/opencode
+  #     - ./opencode/auth.json:/data/auth.json:z
+
+  # Qdrant: vector store for bifrost semantic caching
+  # https://qdrant.tech/documentation/quickstart/
+  qdrant:
+    image: qdrant/qdrant:v1.17.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333" # HTTP API
+      - "127.0.0.1:6334:6334" # gRPC
+    volumes:
+      - qdrant-data:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # # https://sandboxed.sh/install-docker
+  # sandboxed-sh:
+  #   build: https://github.com/Th0rgal/sandboxed.sh.git#v0.10.0
+  #   # Starts OpenCode server for agent discovery before the original entrypoint
+  #   # v0.10.0: agents endpoint queries OpenCode /agent HTTP, not the library
+  #   entrypoint: ["/bin/bash", "-c", "opencode serve --hostname 127.0.0.1 --port 4096 & exec /entrypoint.sh"]
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:${SANDBOXED_PORT:-3030}:80" # Web UI
+  #   volumes:
+  #     - ./opencode/auth.json:/root/.local/share/opencode/auth.json:z
+  #     - claude-auth:/root/.claude
+  #     - sandboxed-data:/root/.sandboxed-sh
+  #     # - ./sandboxed/backend_config.json:/root/.sandboxed-sh/backend_config.json:z
+  #     # - ./sandboxed/model_chains.json:/root/.sandboxed-sh/model_chains.json:z
+  #     # - ~/.ssh:/root/.ssh:ro
+  #   environment:
+  #     - DEFAULT_MODEL=github-copilot/gpt-4o
+  #     - DEV_MODE=true
+  #     - HOST=0.0.0.0
+  #     - MAX_PARALLEL_MISSIONS=1
+  #     - OPENCODE_BASE_URL=http://127.0.0.1:4096
+  #     - WORKING_DIR=/root
+  #     # - DEFAULT_BACKEND=opencode
+  #     # - MAX_ITERATIONS=50
+  #     # - OPENCODE_PERMISSIVE=true
+  #     # - STALE_MISSION_HOURS=24
+  #   privileged: true
+  #   cgroup: host
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1G
+
+  # SilverBullet: markdown knowledge base
+  # silverbullet:
+  #   image: ghcr.io/silverbulletmd/silverbullet:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:5050:3000" # Web UI
+  #   volumes:
+  #     - ~/.claude/projects:/space/projects
+  #     - ~/.local/share/memory:/space/global
+  #   environment:
+  #     - SB_HIDE_SYNC_BUTTON=true
+  #     - SB_INDEX_PAGE=MEMORY
+  #     - SB_SPACE_IGNORE=index.md,CONFIG.md,index.page,SETTINGS.md
+  #     # - SB_USER=admin:password123
+
+  surrealdb:
+    image: surrealdb/surrealdb:v2.6.3 # v2
+    command: start --log info rocksdb:/mydata/mydatabase.db
+    user: root # Named volumes are root-owned; nonroot (65532) can't write
+    restart: unless-stopped
+    # pull_policy: always
+    networks:
+      - default
+      - monitoring
+    ports:
+      - "127.0.0.1:8000:8000" # HTTP API
+    volumes:
+      - surreal-data:/mydata
+    environment:
+      - SURREAL_EXPERIMENTAL_GRAPHQL=true
+      {{- if .features.otel }}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - SURREAL_TELEMETRY_PROVIDER=otlp
+      {{- end }}
+    env_file: secrets/surrealdb.env
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    healthcheck:
+      test: ["CMD", "/surreal", "isready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+  monitoring:
+    name: monitoring
+    external: true
+
+volumes:
+  # claude-auth:
+  milvus-data:
+  notebook-data:
+  # opencode-config:
+  # opencode-share:
+  open-webui-data:
+  qdrant-data:
+  # sandboxed-data:
+  surreal-data:
+{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+  ollama-data:
+{{- end }}

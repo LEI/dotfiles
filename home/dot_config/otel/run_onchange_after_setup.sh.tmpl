@@ -1,0 +1,79 @@
+{{- $compose := joinPath .chezmoi.homeDir ".config/otel/compose.yaml" -}}
+{{- $prometheusConfig := joinPath .chezmoi.homeDir ".config/otel/prometheus.yaml" -}}
+{{- $alertRulesDir := joinPath .chezmoi.homeDir ".config/otel/alerts" -}}
+{{- $otelCollectorConfig := joinPath .chezmoi.homeDir ".config/otel/otel-collector-config.yaml" -}}
+{{- $grafanaProvDir := joinPath .chezmoi.homeDir ".config/otel/grafana/provisioning" -}}
+{{- $lokiConfig := joinPath .chezmoi.homeDir ".config/otel/loki.yaml" -}}
+{{- $tempoConfig := joinPath .chezmoi.homeDir ".config/otel/tempo.yaml" -}}
+#!/bin/sh
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+compose_file="{{ $compose }}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/otel"
+mkdir -p "$state_dir"
+
+provider="${CONTAINER_PROVIDER:?}"
+
+compose_hash="{{ include $compose | fromYaml | toJson | sha256sum }}"
+run "$provider" compose --file="$compose_file" up --detach --remove-orphans
+
+check_reload() {
+  hash_file="$state_dir/$1.hash"
+  if [ "$(cat "$hash_file" 2>/dev/null)" != "$2" ]; then
+    printf '%s' "$2" >"$hash_file"
+    return 0
+  fi
+  return 1
+}
+
+prometheus_hash="{{ include $prometheusConfig | sha256sum }}{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $alertRulesDir) | sha256sum }}"
+if check_reload prometheus "$prometheus_hash"; then
+  msg "Reloading Prometheus config"
+  run curl -fsS -X POST http://localhost:9090/-/reload || warn "Prometheus reload failed"
+fi
+
+otelcol_hash="{{ include $otelCollectorConfig | sha256sum }}"
+if check_reload otel-collector "$otelcol_hash"; then
+  msg "Reloading otel-collector config via SIGHUP"
+  run "$provider" compose --file="$compose_file" exec otel-collector kill -HUP 1 || warn "otel-collector SIGHUP failed"
+fi
+
+# Per-directory Grafana provisioning reload
+grafana_netrc=""
+grafana_reload() {
+  if [ -z "$grafana_netrc" ]; then
+    grafana_secret="${XDG_CONFIG_HOME:-$HOME/.config}/otel/secrets/grafana-admin-password"
+    if ! grafana_pass=$(cat "$grafana_secret"); then
+      err "missing grafana-admin-password"
+    fi
+    grafana_netrc=$(mktemp)
+    trap 'rm -f "$grafana_netrc"' EXIT
+    (umask 177; printf 'machine localhost login admin password %s\n' "$grafana_pass" >"$grafana_netrc")
+  fi
+  msg "Reloading Grafana $1"
+  run curl -fsS --netrc-file "$grafana_netrc" -X POST "http://localhost:3033/api/admin/provisioning/$1/reload"
+  echo
+}
+
+{{- range list "alerting" "dashboards" "datasources" }}
+{{- $dir := joinPath $grafanaProvDir . }}
+
+grafana_{{ . }}="{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $dir) | sha256sum }}"
+if check_reload "grafana-{{ . }}" "$grafana_{{ . }}"; then
+  grafana_reload {{ . }} || warn "Grafana {{ . }} reload failed"
+fi
+{{- end }}
+
+loki_hash="{{ include $lokiConfig | sha256sum }}"
+if check_reload loki "$loki_hash"; then
+  msg "Restarting Loki (no hot-reload for main config)"
+  run "$provider" compose --file="$compose_file" restart loki
+fi
+
+tempo_hash="{{ include $tempoConfig | sha256sum }}"
+if check_reload tempo "$tempo_hash"; then
+  msg "Restarting Tempo (no hot-reload for main config)"
+  run "$provider" compose --file="$compose_file" restart tempo
+fi

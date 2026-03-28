@@ -1,0 +1,289 @@
+{{- $linux := eq .os "linux" -}}
+{{- $podman := and .features.podman (not .features.docker) -}}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+services:
+  # alertmanager:
+  #   image: prom/alertmanager:v0.31.1
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:9093:9093" # Web UI
+  #   volumes:
+  #     - ./alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro,Z
+  #     - alertmanager-data:/alertmanager
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/healthy"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
+
+  # cAdvisor: host and container metrics
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.56.2
+    {{- if $podman }}
+    command:
+      - --podman=unix:///var/run/podman/podman.sock
+    {{- end }}
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      {{- if $podman }}
+      # https://github.com/google/cadvisor/issues/3628
+      - {{ .chezmoi.homeDir }}/.local/share/containers:/var/lib/containers:ro
+      - /dev/disk:/dev/disk:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /run/user/{{ .chezmoi.uid }}:/run/user/{{ .chezmoi.uid }}:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+      {{- else }}
+      - /var/lib/docker:/var/lib/docker:ro
+      # Containerd socket for name resolution (Docker Desktop Engine 29+)
+      # https://github.com/google/cadvisor/pull/3709
+      - /run/containerd:/run/containerd:ro
+      # Explicit socket: macOS /var/run/docker.sock is a symlink
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      {{- end }}
+    {{- if or $linux $podman }}
+    privileged: true
+    {{- end }}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana:12.4.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3033:3000" # Web UI
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro,Z
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro,Z
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_BASIC_ENABLED=true
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana-admin-password
+    secrets:
+      - grafana-admin-password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # # Jaeger: trace backend (replaced by Tempo)
+  # jaeger:
+  #   image: cr.jaegertracing.io/jaegertracing/jaeger:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:16686:16686" # Web UI
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+
+  # Loki: log storage (healthcheck: http://localhost:3100/ready)
+  loki:
+    image: grafana/loki:3.6.7
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100" # HTTP API
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro,Z
+      - loki-data:/loki
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    # healthcheck: distroless image, no curl/wget
+    #   test: ["CMD", "curl", "-f", "http://localhost:3100/ready"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+
+  # Node Exporter: host metrics (healthcheck: http://localhost:9100/metrics)
+  node-exporter:
+    image: prom/node-exporter:v1.10.2
+    command:
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|run)($$|/)"
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    {{- if or $linux $podman }}
+    privileged: true
+    {{- end }}
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9100/"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # # ntfy: push notifications
+  # ntfy:
+  #   image: binwiederhier/ntfy:v2.19.2 # v2
+  #   command: serve
+  #   restart: unless-stopped
+  #   # ports:
+  #   #   - "127.0.0.1:8080:80" # Web UI
+  #   volumes:
+  #     - ./ntfy/server.yaml:/etc/ntfy/server.yml:ro,Z
+  #     - ntfy-cache:/var/cache/ntfy
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--tries=1", "http://localhost:80/v1/health", "-O", "-"]
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 5s
+
+  # # ntfy-alertmanager: forwards Alertmanager webhooks to ntfy
+  # ntfy-alertmanager:
+  #   image: xenrox/ntfy-alertmanager:0.5.0
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./ntfy-alertmanager.scfg:/etc/ntfy-alertmanager/config:ro,Z
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 64M
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 5s
+
+  # OTLP collector (healthcheck: http://localhost:13133)
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    restart: unless-stopped
+    networks:
+      - default
+      - monitoring
+    ports:
+      - "127.0.0.1:4317:4317" # gRPC
+      - "127.0.0.1:4318:4318" # HTTP
+      # - "127.0.0.1:8888:8888" # Metrics
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro,Z
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    # healthcheck: distroless image, no curl/wget
+    #   test: ["CMD", "curl", "-f", "http://localhost:13133"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v3.10.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=168h # 7 days (default: 15d)
+      - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver
+    restart: unless-stopped
+    networks:
+      - default
+      - monitoring
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "127.0.0.1:9090:9090" # Web UI
+    volumes:
+      - ./alerts:/etc/prometheus/alerts:ro,Z
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro,Z
+      - prometheus-data:/prometheus
+    secrets:
+      - bifrost-admin-password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Tempo: trace storage (healthcheck: http://localhost:3200/ready)
+  tempo:
+    image: grafana/tempo:2.10.3
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3200:3200" # HTTP API
+    volumes:
+      - ./tempo.yaml:/etc/tempo/tempo.yaml:ro,Z
+      - tempo-data:/var/tempo
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    # healthcheck: distroless image, no curl/wget
+    #   test: ["CMD", "curl", "-f", "http://localhost:3200/ready"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+
+networks:
+  default:
+  monitoring:
+    name: monitoring
+    external: true
+
+secrets:
+  bifrost-admin-password:
+    file: ${XDG_CONFIG_HOME}/oage/secrets/bifrost-admin-password
+  grafana-admin-password:
+    file: ${XDG_CONFIG_HOME}/otel/secrets/grafana-admin-password
+
+volumes:
+  # alertmanager-data:
+  grafana-data:
+  loki-data:
+  # ntfy-cache:
+  prometheus-data:
+  tempo-data:

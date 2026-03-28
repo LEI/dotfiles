@@ -1,0 +1,16 @@
+{{- if and .features.otel .features.oage -}}
+#!/bin/sh
+# provider: {{ env "CONTAINER_PROVIDER" }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! "$CONTAINER_PROVIDER" info >/dev/null 2>&1; then
+  msg "SKIP: $CONTAINER_PROVIDER is not running"
+  exit 0
+fi
+
+if ! "$CONTAINER_PROVIDER" network inspect monitoring >/dev/null 2>&1; then
+  run "$CONTAINER_PROVIDER" network create monitoring
+fi
+{{ end -}}

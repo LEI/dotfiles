@@ -1,0 +1,12 @@
+---
+- id: alert
+  execute-command: {{ .chezmoi.homeDir }}/.local/bin/webhook-notify
+  command-working-directory: /tmp
+  http-methods:
+    - POST
+  incoming-payload-content-type: application/json
+  pass-file-to-command:
+    - source: entire-payload
+      envname: WEBHOOK_PAYLOAD_FILE
+  response-message: ok
+  success-http-response-code: 200

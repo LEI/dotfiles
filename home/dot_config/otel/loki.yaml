@@ -1,0 +1,76 @@
+---
+# Loki local config based on the embedded default (/etc/loki/local-config.yaml)
+# with OTLP structured metadata support.
+#
+# https://grafana.com/docs/loki/latest/configure/
+# https://grafana.com/docs/loki/latest/send-data/otel/
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  http_server_read_timeout: 60s
+  http_server_write_timeout: 60s
+  log_level: warn
+
+# https://grafana.com/docs/loki/latest/configure/#common
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# https://grafana.com/docs/loki/latest/configure/#schema_config
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# https://grafana.com/docs/loki/latest/configure/#limits_config
+limits_config:
+  allow_structured_metadata: true
+  retention_period: 336h # 14 days (default: 0 = disabled)
+  # OTLP defaults: resource attrs promoted to index labels
+  # https://grafana.com/docs/loki/latest/get-started/labels/modify-default-labels/
+  otlp_config:
+    resource_attributes:
+      ignore_defaults: true
+      attributes_config:
+        - action: index_label
+          attributes:
+            # - cloud.availability_zone
+            # - cloud.region
+            - container.name
+            # - deployment.environment
+            # - deployment.environment.name
+            # - k8s.cluster.name
+            # - k8s.container.name
+            # - k8s.cronjob.name
+            # - k8s.daemonset.name
+            # - k8s.deployment.name
+            # - k8s.job.name
+            # - k8s.namespace.name
+            # - k8s.pod.name # high cardinality, one per pod
+            # - k8s.replicaset.name
+            # - k8s.statefulset.name
+            # - service.instance.id # high cardinality, one per pod
+            - service.name
+            - service.namespace
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+
+analytics:
+  reporting_enabled: false

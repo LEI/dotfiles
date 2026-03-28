@@ -1,0 +1,21 @@
+{{- $compose := joinPath .chezmoi.homeDir ".config/oage/compose.yaml" -}}
+{{- $bifrostConfig := joinPath .chezmoi.homeDir ".config/oage/bifrost/config.json" -}}
+{{- $bifrostHash := include $bifrostConfig | sha256sum -}}
+#!/bin/sh
+# compose: {{ include $compose | fromYaml | toJson | sha256sum }}
+# bifrost: {{ $bifrostHash }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+compose_file="{{ $compose }}"
+bifrost_hash="{{ $bifrostHash }}"
+bifrost_hash_file="${XDG_STATE_HOME:-$HOME/.local/state}/oage/bifrost.hash"
+
+run "${CONTAINER_PROVIDER:?}" compose --file="$compose_file" up --detach --remove-orphans
+
+mkdir -p "$(dirname "$bifrost_hash_file")"
+if [ "$(cat "$bifrost_hash_file" 2>/dev/null)" != "$bifrost_hash" ]; then
+  run "${CONTAINER_PROVIDER:?}" compose --file="$compose_file" restart bifrost
+  printf '%s' "$bifrost_hash" >"$bifrost_hash_file"
+fi

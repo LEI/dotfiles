@@ -1,0 +1,30 @@
+[
+  {
+    "id": "amp",
+    "name": "Amp",
+    "enabled": false,
+    "settings": {}
+  },
+  {
+    "id": "claudecode",
+    "name": "Claude Code",
+    "enabled": true,
+    "settings": {}
+  },
+  {
+    "id": "codex",
+    "name": "Codex",
+    "enabled": false,
+    "settings": {}
+  },
+  {
+    "id": "opencode",
+    "name": "OpenCode",
+    "enabled": false,
+    "settings": {
+      "base_url": "http://opencode:4096",
+      "default_agent": null,
+      "permissive": false
+    }
+  }
+]

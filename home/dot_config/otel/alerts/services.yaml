@@ -1,0 +1,98 @@
+---
+groups:
+  - name: bifrost
+    interval: 30s
+    rules:
+      # LLM gateway error rate
+      - alert: BifrostHighErrorRate
+        expr: >
+          rate(bifrost_error_requests_total[5m])
+          /
+          (rate(bifrost_success_requests_total[5m]) + rate(bifrost_error_requests_total[5m]))
+          > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Bifrost error rate above 10%"
+          description: "Error rate: {{ $value | humanizePercentage }}"
+
+      # LLM upstream latency
+      - alert: BifrostLatencyHigh
+        expr: histogram_quantile(0.95, rate(bifrost_upstream_latency_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Bifrost p95 latency above 30s"
+          description: "p95 upstream latency: {{ $value | humanizeDuration }}"
+
+  - name: tempo
+    interval: 30s
+    rules:
+      # Trace ingestion stopped
+      - alert: TempoIngestionStopped
+        expr: rate(tempo_distributor_spans_received_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tempo not receiving spans"
+          description: "No spans received in 10 minutes"
+
+      # Discarded spans
+      - alert: TempoDiscardedSpans
+        expr: rate(tempo_discarded_spans_total[5m]) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tempo discarding spans"
+          description: "Discarding {{ $value | humanize }} spans/sec"
+
+      # Ingester flush failures
+      - alert: TempoFlushFailures
+        expr: rate(tempo_ingester_failed_flushes_total[5m]) > 0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tempo ingester flush failures"
+          description: "{{ $value | humanize }} failures/sec"
+
+  - name: milvus
+    interval: 60s
+    rules:
+      # Search/query request errors
+      - alert: MilvusRequestErrors
+        expr: >
+          sum(rate(milvus_proxy_req_count{status="fail"}[5m]))
+          /
+          sum(rate(milvus_proxy_req_count[5m]))
+          > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Milvus request failure rate above 10%"
+          description: "Failure rate: {{ $value | humanizePercentage }}"
+
+      # Search latency high
+      - alert: MilvusSearchLatencyHigh
+        expr: histogram_quantile(0.95, rate(milvus_proxy_sq_latency_bucket[5m])) > 5000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Milvus p95 search latency above 5s"
+          description: "p95 latency: {{ $value | humanize }}ms"
+
+      # Memory pressure (jemalloc)
+      - alert: MilvusMemoryHigh
+        expr: milvus_jemalloc_resident_bytes > 1.2e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Milvus memory above 1.2GB"
+          description: "Resident: {{ $value | humanize1024 }}B (limit 1.5GB)"

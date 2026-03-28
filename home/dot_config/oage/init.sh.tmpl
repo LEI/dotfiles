@@ -1,0 +1,29 @@
+export OAGE_CONFIG_DIR="${OAGE_CONFIG_DIR:-$HOME/.config/oage}"
+# systemctl --user start podman.socket
+
+oage() { compose-project "${OAGE_CONFIG_DIR}" "$@"; }
+
+{{- if .features.ollama }}
+{{-   $quadlet := and .features.podman (eq .os "linux") }}
+{{-   $ollamaContainer := $quadlet | ternary "systemd-ollama" "oage-ollama-1" }}
+{{-   $ollamaProvider := $quadlet | ternary "podman" "$CONTAINER_PROVIDER" }}
+
+{{- if ne .os "darwin" }}
+ollama() {
+  set -- {{ $ollamaContainer }} ollama "$@"
+  [ -t 0 ] && set -- --interactive "$@"
+  [ -t 1 ] && set -- --tty "$@"
+  {{ $ollamaProvider }} exec "$@"
+}
+{{- end }}
+
+ollama_logs() {
+{{- if eq .os "darwin" }}
+  tail -f "${HOMEBREW_PREFIX:-{{ .brewPrefix }}}/var/log/ollama.log" "$@"
+{{- else if $quadlet }}
+  journalctl --user --unit=ollama.service --follow "$@"
+{{- else }}
+  {{ $ollamaProvider }} logs --follow {{ $ollamaContainer }} "$@"
+{{- end }}
+}
+{{- end }}

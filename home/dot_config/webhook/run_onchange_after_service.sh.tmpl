@@ -1,0 +1,27 @@
+{{- if .features.otel -}}
+#!/bin/sh
+# hooks: {{ joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" | include | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+# plist: {{ includeTemplate "Library/private_LaunchAgents/com.webhook.alert.plist.tmpl" . | sha256sum }}
+{{- else }}
+# service: {{ include (joinPath .chezmoi.sourceDir "dot_config/systemd/user/webhook.service") | sha256sum }}
+{{- end }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+has webhook || err "webhook not found"
+
+if [ ! -d "$HOME/.local/state/webhook" ]; then
+  run mkdir -p "$HOME/.local/state/webhook"
+fi
+
+{{ includeTemplate "service-apply.sh.tmpl" (dict
+  "unit" "webhook"
+  "label" "com.webhook.alert"
+  "os" .chezmoi.os
+) }}
+# Manual test:
+# curl -X POST http://localhost:9000/hooks/alert -H 'Content-Type: application/json' \
+#   -d '{"status":"firing","alerts":[{"labels":{"alertname":"test"},"annotations":{}}]}'
+{{- end -}}
