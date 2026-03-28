@@ -1,16 +1,16 @@
 {
   "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "vscode.json-language-features",
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
+    "editor.defaultFormatter": "redhat.vscode-yaml",
   },
   "editor.formatOnSave": true,
   "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
+    "asvetliakov.vscode-neovim": 1,
   },
   "redhat.telemetry.enabled": false,
   "syncSettings.ignoredExtensions": [
@@ -22,10 +22,11 @@
     "ms-vscode-remote.remote-containers",
     "ms-vscode-remote.remote-ssh",
     "ms-vscode-remote.remote-ssh-edit",
-    "ms-vscode.remote-explorer"
+    "ms-vscode.remote-explorer",
   ],
   "telemetry.telemetryLevel": "off",
   "vs-kubernetes": {
-    "vs-kubernetes.crd-code-completion": "enabled"
-  }
+    "vs-kubernetes.crd-code-completion": "enabled",
+  },
+  // "security.promptForLocalFileProtocolHandling": false,
 }

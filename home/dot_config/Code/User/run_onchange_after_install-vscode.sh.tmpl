@@ -1,0 +1,9 @@
+{{- if eq .osID "fedora" -}}
+#!/bin/sh
+
+set -eux
+
+flatpak run com.visualstudio.code --install-extension zokugun.sync-settings
+
+# TODO: ~/.config/Code -> /var/home/$USER/.var/app/com.visualstudio.code/config/Code
+{{- end -}}

@@ -1,0 +1,6 @@
+{{- $data := dict -}}
+{{- $_ := . | setValueAtPath "client" "vscode" -}}
+{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $_ := $data | setValueAtPath "inputs" $mcp.inputs }}
+{{- $_ := $data | setValueAtPath "mcpServers" $mcp.servers }}
+{{- $data | toPrettyJson -}}
