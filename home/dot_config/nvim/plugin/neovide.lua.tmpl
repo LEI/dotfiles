@@ -1,4 +1,4 @@
-{{ if lookPath "neovide" | isExecutable -}}
+{{ if .gui -}}
 if not vim.g.neovide then
   return
 end

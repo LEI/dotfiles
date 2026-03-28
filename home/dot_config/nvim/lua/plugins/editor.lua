@@ -85,13 +85,15 @@ return {
   },
   -- { 'tpope/vim-repeat', version = 'v1.2', event = 'VeryLazy' },
   {
-    'echasnovski/mini.ai',
-    tag = 'v0.16.0',
+    'nvim-mini/mini.ai',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     event = 'InsertEnter',
   },
   {
-    'echasnovski/mini.move',
-    tag = 'v0.16.0',
+    'nvim-mini/mini.move',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     event = 'InsertEnter',
   },
 
@@ -104,12 +106,13 @@ return {
     event = 'VeryLazy',
   },
   -- :h MiniSurround-vim-surround-config
-  -- { 'echasnovski/mini.surround', tag = 'v0.16.0', event = 'InsertEnter' },
+  -- { 'nvim-mini/mini.surround', tag = 'v0.16.0', event = 'InsertEnter' },
 
   {
     -- Alternative: windwp/nvim-autopairs
-    'echasnovski/mini.pairs',
-    tag = 'v0.16.0',
+    'nvim-mini/mini.pairs',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     event = 'VeryLazy',
     opts = {
       modes = { insert = true, command = false, terminal = false },
@@ -298,7 +301,7 @@ return {
   --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
   --   event = 'VeryLazy',
   -- },
-  -- echasnovski/mini.comment
+  -- nvim-mini/mini.comment
   -- options = {
   --   custom_commentstring = function()
   --     return require('ts_context_commentstring').calculate_commentstring() or vim.bo.commentstring
@@ -401,9 +404,10 @@ return {
   },
   {
     'gbprod/yanky.nvim',
-    enabled = vim.fn.has('nvim-0.9') == 1,
     -- tag = 'v2.0.0',
-    version = 'v2.x',
+    -- version = 'v2.x',
+    -- https://github.com/gbprod/yanky.nvim/pull/184
+    branch = 'main',
     dependencies = {
       'folke/snacks.nvim',
       'kkharji/sqlite.lua',
@@ -440,6 +444,7 @@ return {
     },
     opts = {
       highlight = { timer = 150 },
+      -- system_clipboard = { sync_with_ring = not vim.env.WAYLAND_DISPLAY },
     },
   },
 }

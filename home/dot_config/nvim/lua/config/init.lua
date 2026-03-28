@@ -5,18 +5,14 @@ vim.env.TMP = vim.env.TMP or os.getenv('TMP') or os.getenv('TMPDIR') or '/tmp'
 local mise_installs = vim.env.HOME .. '/.local/share/mise/installs'
 
 local function get_mise_node_version()
-  local node_version = nil -- vim.env._MISE_GLOBAL_NODE_VERSION
-  -- local match = vim.env.PATH:gsub('.*:' .. mise_installs .. '/node/([0-9\\.]+)/bin:.*', '%1')
-  -- if match ~= vim.env.PATH then
-  --   node_version = match
-  if node_version == '' then
-    node_version = nil
+  if vim.fn.executable('mise') ~= 1 then
+    return nil
   end
-  if not node_version and vim.fn.executable('mise') == 1 then
-    local mise_node_cmd = "mise list node --cd='" .. vim.env.TMP .. "' --global --installed | awk '/^node / {print $2}'"
-    node_version = vim.fn.system(mise_node_cmd):gsub('[\n\r]', '')
+  local node_path = vim.fn.system('mise where node@lts 2>/dev/null'):gsub('[\n\r]', '')
+  if node_path ~= '' then
+    return node_path:match('([^/]+)$')
   end
-  return node_version ~= '' and node_version or nil
+  return nil
 end
 
 local function get_node_config()
@@ -128,10 +124,17 @@ vim.g.diagnostic_signs = {
 }
 
 vim.g.features = {}
-local features_json_file = vim.env.HOME .. '/.local/share/features.json'
+local features_json_file = vim.env.HOME .. '/.local/state/chezmoi/features.json'
 if vim.fn.filereadable(features_json_file) == 1 then
-  local features_contents = vim.fn.readfile(features_json_file)
-  vim.g.features = vim.json.decode(table.concat(features_contents, '\n'))
+  local ok, result = pcall(function()
+    local contents = vim.fn.readfile(features_json_file)
+    return vim.json.decode(table.concat(contents, '\n'))
+  end)
+  if ok then
+    vim.g.features = result
+  else
+    vim.notify('features.json: ' .. tostring(result), vim.log.levels.WARN)
+  end
 end
 
 -- vim.g.profile = vim.env.CHEZMOI_PROFILE or nil

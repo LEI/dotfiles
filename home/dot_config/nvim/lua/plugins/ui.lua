@@ -26,9 +26,6 @@ vim.diagnostic.config({
   },
 })
 
--- https://github.com/stevearc/aerial.nvim
--- require('aerial').setup()
-
 -- require('bufferline').setup()
 
 return {
@@ -75,9 +72,8 @@ return {
   },
   {
     'lewis6991/gitsigns.nvim',
+    version = vim.fn.has('nvim-0.11') == 1 and 'v2.x' or 'v1.x',
     dependencies = { 'folke/snacks.nvim' },
-    -- tag = 'v1.0.2',
-    version = 'v1.x',
     cmd = 'Gitsigns',
     event = {
       -- 'CursorHold',
@@ -265,4 +261,43 @@ return {
       -- })
     end,
   },
+
+  -- https://github.com/stevearc/aerial.nvim
+  -- require('aerial').setup()
+  {
+    'hedyhli/outline.nvim',
+    version = 'v1.x',
+    cmd = { 'Outline', 'OutlineOpen' },
+    keys = {
+      { '<leader>cs', '<cmd>Outline<cr>', desc = 'Toggle Outline' },
+    },
+    opts = {},
+    -- opts = function()
+    --   local defaults = require('outline.config').defaults
+    --   local opts = {
+    --     symbols = {
+    --       icons = {},
+    --       filter = vim.deepcopy(LazyVim.config.kind_filter),
+    --     },
+    --     keymaps = {
+    --       up_and_jump = '<up>',
+    --       down_and_jump = '<down>',
+    --     },
+    --   }
+    --
+    --   for kind, symbol in pairs(defaults.symbols.icons) do
+    --     opts.symbols.icons[kind] = {
+    --       icon = LazyVim.config.icons.kinds[kind] or symbol.icon,
+    --       hl = symbol.hl,
+    --     }
+    --   end
+    --   return opts
+    -- end,
+  },
+  -- {
+  --   'folke/edgy.nvim',
+  --   dependencies = { 'outline.nvim' },
+  --   event = 'VeryLazy',
+  --   opts = {},
+  -- },
 }

@@ -2,6 +2,9 @@ if not vim.g.features.ai then
   return {}
 end
 
+local has_llama_cpp = false -- vim.fn.executable('llama-server') == 1
+local has_ollama = vim.fn.executable('ollama') == 1
+
 vim.g.ai = {
   avante = false,
   claude = true,
@@ -11,6 +14,9 @@ vim.g.ai = {
   mcphub = true,
   sidekick = true,
   windsurf = false,
+
+  llama_cpp = has_llama_cpp,
+  ollama = has_ollama,
 }
 
 vim.g.codeium_enabled = vim.g.ai.windsurf
@@ -57,18 +63,17 @@ return {
         },
       },
       nes = {
-        -- Requires GitHub Copilot subscription
+        enabled = false,
+        --[[
         enabled = function(buf)
           local bufname = vim.api.nvim_buf_get_name(buf)
           if not should_attach(bufname) then
             return false
           end
-          local enabled = vim.g.sidekick_nes ~= false and vim.b.sidekick_nes ~= false
-          -- if enabled then
-          --   vim.print('NES enabled: ' .. vim.fs.basename(bufname) or bufname)
-          -- end
-          return enabled
+          return vim.g.sidekick_nes ~= false and vim.b.sidekick_nes ~= false
         end,
+        ]]
+        --
       },
     },
     keys = {
@@ -197,8 +202,8 @@ return {
       auto_toggle_mcp_servers = true,
 
       use_bundled_binary = false,
+      -- cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
 
-      cmd = vim.env.HOME .. '/.local/share/npm/bin/mcp-hub',
       -- cmd = node_prefix .. 'node',
       -- cmdArgs = { node_prefix .. 'mcp-hub' },
 
@@ -226,7 +231,7 @@ return {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
 
-      'echasnovski/mini.icons', -- or nvim-tree/nvim-web-devicons
+      'nvim-mini/mini.icons', -- or nvim-tree/nvim-web-devicons
       'folke/snacks.nvim', -- for input provider snacks
       -- 'zbirenbaum/copilot.lua', -- for providers='copilot'
       'HakonHarnes/img-clip.nvim', -- for image pasting
@@ -249,6 +254,16 @@ return {
       },
     },
     opts = {
+      -- acp_providers = {
+      --   ['opencode'] = {
+      --     command = 'opencode',
+      --     args = { 'acp' },
+      --     env = {
+      --       OPENCODE_API_KEY = os.getenv('OPENCODE_API_KEY'),
+      --     },
+      --   },
+      -- },
+
       -- provider = 'claude',
       -- providers = {
       --   claude = {
@@ -332,11 +347,11 @@ return {
   {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
-    -- tag = 'v17.5.0',
-    version = 'v17.x',
+    -- tag = 'v18.3.1',
+    version = 'v18.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
-      -- 'echasnovski/mini.diff',
+      -- 'nvim-mini/mini.diff',
       'HakonHarnes/img-clip.nvim',
       -- https://codecompanion.olimorris.dev/installation.html#additional-plugins
       -- Alternative: https://github.com/OXY2DEV/markview.nvim
@@ -385,8 +400,7 @@ return {
     -- :Copilot auth
     'zbirenbaum/copilot.lua',
     enabled = vim.g.ai.copilot_lua,
-    -- tag = '1.338.0',
-    version = '1.x',
+    version = '2.x',
     dependencies = { 'AndreM222/copilot-lualine' },
     cmd = 'Copilot',
     event = 'VeryLazy', -- 'InsertEnter',
@@ -420,7 +434,7 @@ return {
           return true
         end,
         suggestion = {
-          auto_trigger = true, -- false,
+          auto_trigger = true,
           keymap = {
             accept = '<M-l>',
             accept_word = false,
@@ -430,6 +444,17 @@ return {
             dismiss = '<M-h>', -- '<C-]>',
           },
         },
+        nes = {
+          enabled = false, -- requires copilot-lsp as a dependency
+          auto_trigger = false,
+          keymap = {
+            accept_and_goto = false,
+            accept = false,
+            dismiss = false,
+          },
+        },
+        -- copilot_model = '',
+        disable_limit_reached_message = true,
       })
     end,
   },
@@ -458,4 +483,29 @@ return {
   -- https://github.com/A7Lavinraj/assistant.nvim
   -- https://github.com/CopilotC-Nvim/CopilotChat.nvim
   -- https://github.com/jackMort/ChatGPT.nvim
+
+  -- https://github.com/ggml-org/llama.vim#llamacpp-settings
+  -- https://huggingface.co/collections/ggml-org/llamavim
+  -- FIXME: Input types must match cooperative tensor types
+  -- llama-server --fim-qwen-7b-default
+  {
+    'ggml-org/llama.vim',
+    enabled = vim.g.ai.llama_cpp,
+    init = function()
+      vim.g.llama_config = {
+        -- endpoint = 'http://127.0.0.1:8012/infill',
+        -- api_key = '',
+        -- model = '',
+        auto_fim = false, -- Fill-In-The-Middle (FIM)
+        -- keymap_trigger = '<C-F>',
+        -- keymap_accept_full = '<Tab>',
+        -- keymap_accept_line = '<S-Tab>',
+        -- keymap_accept_word = '<C-B>',
+        -- enable_at_startup = false,
+      }
+    end,
+  },
+
+  -- NickvanDyke/opencode.nvim
+  -- sudo-tee/opencode.nvim
 }

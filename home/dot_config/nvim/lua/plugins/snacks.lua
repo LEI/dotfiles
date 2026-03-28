@@ -145,7 +145,7 @@ local function grep_picker()
   if vim.startswith(search, '\\V') then
     search = search:gsub('^\\V', '')
     if regex then
-      search = search:gsub('([%^$~+.*%[%]{}()|])', '\\%1')
+      search = search:gsub('([%^$~+.*%[%]{}()|\\?])', '\\%1')
     else
       search = search:gsub('\\\\', '\\')
     end
@@ -277,7 +277,7 @@ return {
     -- branch = 'main',
     version = 'v2.x',
     dependencies = {
-      'echasnovski/mini.icons',
+      'nvim-mini/mini.icons',
       -- {
       --   'nvim-tree/nvim-web-devicons',
       --   tag = 'v0.100',

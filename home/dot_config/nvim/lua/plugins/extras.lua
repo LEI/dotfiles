@@ -2,18 +2,12 @@ return {
   { 'MunifTanjim/nui.nvim', tag = '0.4.0', lazy = true },
   { 'nvim-lua/plenary.nvim', tag = 'v0.1.4', lazy = true },
   {
-    'nvim-neotest/nvim-nio',
-    -- tag = 'v1.10.1',
-    version = 'v1.x',
-    lazy = true,
-  },
-  {
     'MeanderingProgrammer/render-markdown.nvim',
     -- tag = 'v8.6.0',
     version = 'v8.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
-      'echasnovski/mini.icons',
+      'nvim-mini/mini.icons',
     },
     ft = 'markdown',
     opts = {
@@ -47,8 +41,9 @@ return {
     },
   },
   {
-    'echasnovski/mini.icons',
-    tag = 'v0.16.0',
+    'nvim-mini/mini.icons',
+    -- tag = 'v0.16.0',
+    version = 'v0.17.x',
     lazy = true,
     opts = {
       file = {
