@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+#MISE description="Measure aggregate shell startup time (JSON output)"
+#USAGE arg "[shell]" help="Shell to measure (default: current shell)" {
+#USAGE   choices "bash" "zsh"
+#USAGE }
+
+# https://github.com/shunk031/dotfiles/blob/master/scripts/run_benchmark.sh
+
+set -euo pipefail
+
+BENCH_ITERATIONS="${BENCH_ITERATIONS:-10}"
+UNAME="${UNAME:-$(uname -s)}"
+
+command_time() {
+  local file="$1.txt"
+  local time_args=("-a" "-o" "$file")
+  shift
+  if [ "$UNAME" = Darwin ]; then
+    TIMEFORMAT="%R"
+  else
+    time_args+=("-f" "%e")
+  fi
+  command time "${time_args[@]}" -- "$@"
+}
+
+initial_time() {
+  local output="$1"
+  shift
+
+  echo >&2 "initial startup: $*"
+  command_time "$output" "$@"
+
+  cat "$output.txt" | column -t | cut -d' ' -f1
+}
+
+average_time() {
+  local iterations="$1"
+  shift
+  local output="$1"
+  shift
+
+  for i in $(seq 1 "$iterations"); do
+    echo >&2 "startup $i/$iterations: $*"
+    command_time "$output-$i" "$@"
+  done
+
+  cat "$output-"*.txt | column -t | cut -d' ' -f1 | awk '{ total += $1 } END { print total/NR }'
+}
+
+main() {
+  if [ $# -gt 1 ]; then
+    echo >&2 "startup: expected at most 1 argument, got $#"
+    exit 2
+  fi
+
+  local shell="${1:-${SHELL##*/}}"
+  shell="${shell:-bash}"
+
+  case "$shell" in
+    bash|zsh|dummy) ;;
+    *)
+      echo >&2 "startup: invalid shell '$shell', expected bash or zsh"
+      exit 2
+      ;;
+  esac
+
+  local cmd="$shell -ci exit"
+  local name="${cmd%% *}"
+
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  local output="${tmp_dir}/startup-$name"
+
+  # shellcheck disable=SC2086
+  initial_startup_time="$(initial_time "$output" $cmd)"
+
+  # shellcheck disable=SC2086
+  average_startup_time="$(average_time "$BENCH_ITERATIONS" "$output" $cmd)"
+
+  cat <<EOF
+[
+    {
+        "name": "$name average startup time",
+        "unit": "Second",
+        "value": ${average_startup_time}
+    },
+    {
+        "name": "$name initial startup time",
+        "unit": "Second",
+        "value": ${initial_startup_time}
+    }
+]
+EOF
+}
+
+main "$@"
