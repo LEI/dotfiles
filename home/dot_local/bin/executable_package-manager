@@ -16,6 +16,8 @@ all | '')
     manager=dnf
   elif command -v pacman >/dev/null; then
     manager=pacman
+  elif command -v rpm-ostree >/dev/null; then
+    manager=rpm
   elif command -v winget >/dev/null; then
     manager=winget
   else
@@ -29,12 +31,14 @@ apk | \
   brew | \
   cask | \
   dnf | \
+  flatpak | \
   go | \
   mas | \
   mise | \
   pacman | \
   pip | \
   pipx | \
+  rpm | \
   scoop | \
   tap | \
   termux | \
