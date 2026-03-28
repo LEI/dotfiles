@@ -1,0 +1,2 @@
+{{- $config := includeTemplate "dot_config/mcporter/mcporter.jsonc" . | fromJsonc -}}
+{{- $config | toPrettyJson -}}
