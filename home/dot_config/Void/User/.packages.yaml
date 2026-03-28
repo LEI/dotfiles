@@ -1,7 +1,7 @@
 ---
+enabled: "{{ .features.void }}"
 packages:
   void:
-    enabled: "{{ and .features.void (not .headless) }}"
     nameOverwrite:
       arch: void-bin
       windows: GlassDevtools.Void
