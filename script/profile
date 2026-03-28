@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+#MISE description="Profile shell init with zprof (zsh) or xtrace (bash)"
+#USAGE arg "[shell]" help="Shell to profile (default: current shell)" {
+#USAGE   choices "bash" "zsh"
+#USAGE }
+
+set -eu
+
+shell="${1:-${SHELL##*/}}"
+
+case "$shell" in
+  bash)
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    logfile="$tmpdir/trace.log"
+    cat > "$tmpdir/env.sh" <<BASH_PROF
+exec 3>"$logfile"
+BASH_XTRACEFD=3
+PS4='+ \${EPOCHREALTIME:-} \${BASH_SOURCE[0]##*/}:\${LINENO}: '
+set -x
+BASH_PROF
+    BASH_ENV="$tmpdir/env.sh" bash -ic 'set +x; exec 3>&-'
+    echo >&2 "Top 20 by duration:"
+    sort -t' ' -k2 -rn "$logfile" | head -20
+    ;;
+  zsh)
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    cat > "$tmpdir/.zshenv" <<'ZSH_PROF'
+zmodload zsh/zprof
+[ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
+ZSH_PROF
+    cat > "$tmpdir/.zshrc" <<'ZSH_RC'
+[ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
+ZSH_RC
+    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
+    export REAL_ZDOTDIR
+    ZDOTDIR="$tmpdir" zsh -ic 'zprof'
+    ;;
+  *)
+    echo >&2 "profile: invalid shell '$shell', expected bash or zsh"
+    exit 2
+    ;;
+esac
