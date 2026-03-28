@@ -1,0 +1,18 @@
+{{- $provider := get .ai.providers "llama-server" -}}
+#!/bin/sh
+# plist: {{ joinPath .chezmoi.homeDir "Library/LaunchAgents/com.llama-cpp.server.plist" | include | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+has brew || err "brew not found"
+brew list llama.cpp >/dev/null 2>&1 || err "llama.cpp not installed"
+
+GUI="gui/$(id -u)"
+LABEL="{{ $provider.label }}"
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+# Reload service
+launchctl bootout "$GUI/$LABEL" 2>/dev/null || true
+msg "loading llama-server service (port {{ $provider.port }}, router mode)"
+run launchctl bootstrap "$GUI" "$PLIST"
