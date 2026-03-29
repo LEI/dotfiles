@@ -120,7 +120,7 @@ setup() {
 
   assert_equal "$image_name" alpine
   assert_equal "$image" alpine:3.19
-  assert_equal "$container" chezmoi-alpine-3.19
+  assert_equal "$container" "${tag_prefix}-alpine-3.19"
 }
 
 # bats test_tags=container,type:unit
