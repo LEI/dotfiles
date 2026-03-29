@@ -1,12 +1,12 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"102",},
+{"lineNum":"    3","line":"set -eu","class":"lineNoCov","hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"100",},
+{"lineNum":"    5","line":"case \"${1:-}\" in","class":"lineNoCov","hits":"0",},
 {"lineNum":"    6","line":"all | \'\')"},
-{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"1","order":"99",},
-{"lineNum":"    8","line":"    manager=brew","class":"lineCov","hits":"1","order":"101",},
+{"lineNum":"    7","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineNoCov","hits":"0",},
+{"lineNum":"    8","line":"    manager=brew","class":"lineNoCov","hits":"0",},
 {"lineNum":"    9","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineNoCov","hits":"0",},
 {"lineNum":"   10","line":"    manager=termux","class":"lineNoCov","hits":"0",},
 {"lineNum":"   11","line":"  elif command -v apk >/dev/null; then","class":"lineNoCov","hits":"0",},
@@ -57,8 +57,8 @@ var data = {lines:[
 {"lineNum":"   56","line":"  ;;"},
 {"lineNum":"   57","line":"esac"},
 {"lineNum":"   58","line":""},
-{"lineNum":"   59","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"98",},
+{"lineNum":"   59","line":"echo \"$manager\"","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-03 14:33:21", "instrumented" : 29, "covered" : 5,};
+var header = { "command" : "", "date" : "2026-03-29 08:40:19", "instrumented" : 29, "covered" : 0,};
 var merged_data = [];

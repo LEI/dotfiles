@@ -1,0 +1,31 @@
+var data = {lines:[
+{"lineNum":"    1","line":"#!/bin/sh"},
+{"lineNum":"    2","line":"#MISE description=\"Trace sourced files during shell init\""},
+{"lineNum":"    3","line":"#USAGE arg \"[shell]\" help=\"Shell to trace (default: current shell)\" {"},
+{"lineNum":"    4","line":"#USAGE   choices \"bash\" \"zsh\""},
+{"lineNum":"    5","line":"#USAGE }"},
+{"lineNum":"    6","line":""},
+{"lineNum":"    7","line":"set -eu","class":"lineNoCov","hits":"0",},
+{"lineNum":"    8","line":""},
+{"lineNum":"    9","line":"shell=\"${1:-${SHELL##*/}}\"","class":"lineNoCov","hits":"0",},
+{"lineNum":"   10","line":""},
+{"lineNum":"   11","line":"case \"$shell\" in","class":"lineNoCov","hits":"0",},
+{"lineNum":"   12","line":"  bash)"},
+{"lineNum":"   13","line":"    PS4=\'+ ${BASH_SOURCE[0]##*/}:${LINENO}: \' \\","class":"lineNoCov","hits":"0",},
+{"lineNum":"   14","line":"      bash -xic exit 2>&1 \\"},
+{"lineNum":"   15","line":"      | grep -E \'^\\+* [^:]+:[0-9]+: (\\. |source )\' \\"},
+{"lineNum":"   16","line":"      | sed \"s|$HOME|~|g\""},
+{"lineNum":"   17","line":"    ;;"},
+{"lineNum":"   18","line":"  zsh)"},
+{"lineNum":"   19","line":"    zsh --source-trace -ic exit 2>&1 \\","class":"lineNoCov","hits":"0",},
+{"lineNum":"   20","line":"      | sed \"s|$HOME|~|g\""},
+{"lineNum":"   21","line":"    ;;"},
+{"lineNum":"   22","line":"  *)"},
+{"lineNum":"   23","line":"    echo >&2 \"trace: invalid shell \'$shell\', expected bash or zsh\"","class":"lineNoCov","hits":"0",},
+{"lineNum":"   24","line":"    exit 2","class":"lineNoCov","hits":"0",},
+{"lineNum":"   25","line":"    ;;"},
+{"lineNum":"   26","line":"esac"},
+]};
+var percent_low = 25;var percent_high = 75;
+var header = { "command" : "", "date" : "2026-03-29 08:40:19", "instrumented" : 7, "covered" : 0,};
+var merged_data = [];
