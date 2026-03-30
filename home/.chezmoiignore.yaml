@@ -24,16 +24,19 @@ os:
     # - Documents/WindowsPowerShell/
 features:
   ai:
-    - .claude/
-    - .config/claude/
-    - .config/markdownlint/claude.yaml
-    - .config/goose/
     - .config/mcphub/
     - .config/mcporter/
-    - .config/opencode/
     - .config/pi/
     - .config/utcp/
     - .mcporter/
+  claude:
+    - .claude/
+    - .config/claude/
+    - .config/markdownlint/claude.yaml
+  goose:
+    - .config/goose/
+  opencode:
+    - .config/opencode/
   atuin:
     - .config/atuin/
   bash:

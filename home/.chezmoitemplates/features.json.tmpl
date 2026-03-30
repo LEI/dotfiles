@@ -21,6 +21,7 @@
   "bottom" .gui
   "brew" (not (eq .osIDLike "alpine" "android" "windows"))
   "carapace" true
+  "claude" $ai
   "direnv" true
   "docker" $docker
   "eza" (ne .profile "minimal")
@@ -53,6 +54,7 @@
   "nushell" .gui
   "oage" (and $ai (or $docker $podman))
   "ollama" $ollama
+  "opencode" $ai
   "otel" (or $docker $podman)
   "processCompose" $ai
   "php" false

@@ -6,18 +6,20 @@
   "coding" (list "tools" "transformation")
   "embedding" (list "embedding")
 -}}
+{{- $ollamaModels := list -}}
 {{- $models := list -}}
 {{- range $role, $notebookRoles := $roleMap -}}
 {{-   $modelName := get $.ai.profiles.local $role -}}
 {{-   if not $modelName }}{{ continue }}{{ end -}}
 {{-   $ollamaId := (get $.ai.models $modelName).ollama -}}
 {{-   if not $ollamaId }}{{ continue }}{{ end -}}
+{{-   $ollamaModels = append $ollamaModels $ollamaId -}}
 {{-   $type := eq $role "embedding" | ternary "embedding" "language" -}}
 {{-   $models = append $models (dict "name" $ollamaId "type" $type "default" $notebookRoles) -}}
 {{- end -}}
 {{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
-#!/bin/bash
-# config hash: {{ dict "credential" $cred "profiles" $.ai.profiles.local "providers" $.ai.providers | toJson | sha256sum }}
+#!/bin/sh
+# config hash: {{ dict "credential" $cred "profiles" $.ai.profiles.local "ollamaModels" ($ollamaModels | uniq) | toJson | sha256sum }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

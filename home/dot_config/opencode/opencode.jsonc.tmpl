@@ -46,13 +46,6 @@
   ],
   "experimental": {
     // "openTelemetry": true,
-    "quotaToast": {
-      "enabledProviders": [
-        "copilot",
-        // "google-antigravity",
-        // "openai",
-      ]
-    }
   },
   // https://opencode.ai/docs/permissions#defaults
   "permission": {
@@ -107,17 +100,13 @@
       // "git *": "ask",
       "git describe *": "allow",
       "git diff *": "allow",
-      "git diff": "allow",
       "git fetch *": "allow",
       "git log *": "allow",
       "git ls-tree *": "allow",
       "git remote -v *": "allow",
-      "git remote -v": "allow",
       "git show *": "allow",
       "git stash list *": "allow",
-      "git stash list": "allow",
       "git status *": "allow",
-      "git status": "allow",
       "git worktree list *": "allow",
       // "git wt": "allow",
 
@@ -318,6 +307,7 @@
     "websearch": "allow",
     "codesearch": "allow",
     // Triggered when a tool touches paths outside the project working directory
+    // TODO: allow ~/notes/*/{journal,pages}/**
     "external_directory": "ask",
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
