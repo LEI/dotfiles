@@ -30,5 +30,5 @@ var data = {lines:[
 {"lineNum":"   29","line":"  --skip=zizmor"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-30 06:27:09", "instrumented" : 11, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-03-30 06:40:54", "instrumented" : 11, "covered" : 0,};
 var merged_data = [];

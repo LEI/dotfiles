@@ -40,5 +40,5 @@ var data = {files:[
 {"link":"executable_shpool-select.c666840e.html","title":"executable_shpool-select","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_shpool-select","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-30 06:27:09", "instrumented" : 1003, "covered" : 82,};
+var header = { "command" : "", "date" : "2026-03-30 06:40:54", "instrumented" : 1003, "covered" : 82,};
 var merged_data = [];
