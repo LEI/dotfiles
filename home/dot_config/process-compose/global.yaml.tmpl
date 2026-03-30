@@ -82,7 +82,8 @@ processes:
   webhook-logs:
     namespace: logs
     description: "Webhook alert receiver"
-    command: "tail --follow=name --retry {{ .chezmoi.homeDir }}/.local/state/webhook/*.log | tspin --print"
+    # FIXME(macos): tail --follow=name --retry
+    command: "tail -f {{ .chezmoi.homeDir }}/.local/state/webhook/*.log | tspin --print"
     availability:
       restart: on_failure
       max_restarts: -1

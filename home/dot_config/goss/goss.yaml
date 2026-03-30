@@ -253,6 +253,18 @@ command:
     exec: docker info --format '{{`{{.ServerVersion}}`}}'
     exit-status: 0
     timeout: 5000
+{{- if .Vars.features.processCompose }}
+  launchd-process-compose:
+    exec: launchctl list com.process-compose
+    exit-status: 0
+    timeout: 3000
+{{- end }}
+{{- if .Vars.features.otel }}
+  launchd-webhook:
+    exec: launchctl list com.webhook.alert
+    exit-status: 0
+    timeout: 3000
+{{- end }}
 {{- end}}
 {{- if and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") "")}}
   container-engine:
@@ -261,6 +273,20 @@ command:
     timeout: 5000
 {{- end}}
 {{- end}}
+
+{{- if eq .Vars.os "linux"}}
+service:
+{{- if .Vars.features.processCompose }}
+  process-compose:
+    enabled: true
+    running: true
+{{- end }}
+{{- if .Vars.features.otel }}
+  webhook:
+    enabled: true
+    running: true
+{{- end }}
+{{- end }}
 
 {{- if .Vars.featureChecks }}
 gossfile:

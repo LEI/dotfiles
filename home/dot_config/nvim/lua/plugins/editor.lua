@@ -156,11 +156,12 @@ return {
   },
   {
     'nvim-treesitter/nvim-treesitter',
-    tag = 'v0.10.0',
+    -- tag = 'v0.10.0', -- NVIM v0.12.0: treesitter.lua:196: attempt to call method 'range'
+    -- branch = 'master', -- Not compatible with v0.12.0
+    branch = 'main',
     dependencies = {
       'RRethy/nvim-treesitter-endwise',
     },
-    -- branch = 'main',
     build = ':TSUpdate',
     cmd = {
       'TSBufDisable',
@@ -178,33 +179,31 @@ return {
     -- lazy = false,
     opts = {
       auto_install = vim.g.config.treesitter.auto_install,
-      ensure_installed = vim.g.config.treesitter.ensure_installed
-          and {
-            'angular',
-            'bash',
-            'c',
-            'dockerfile',
-            'hcl',
-            -- https://github.com/LazyVim/LazyVim/issues/524
-            -- 'help',
-            'html',
-            'javascript',
-            'json',
-            'jsonc',
-            'lua',
-            'markdown',
-            'markdown_inline',
-            -- 'norg',
-            'python',
-            'query',
-            'regex',
-            'tsx',
-            'typescript',
-            'vim',
-            'vimdoc',
-            'yaml',
-          }
-        or {},
+      ensure_installed = vim.g.config.treesitter.ensure_installed and {
+        'angular',
+        'bash',
+        'c',
+        'dockerfile',
+        'hcl',
+        -- https://github.com/LazyVim/LazyVim/issues/524
+        -- 'help',
+        'html',
+        'javascript',
+        'json',
+        'jsonc',
+        'lua',
+        'markdown',
+        'markdown_inline',
+        -- 'norg',
+        'python',
+        'query',
+        'regex',
+        'tsx',
+        'typescript',
+        'vim',
+        'vimdoc',
+        'yaml',
+      } or {},
 
       folds = {
         enabled = true,
@@ -256,16 +255,18 @@ return {
           or string.match(filepath, '.*mise/config%.toml%.tmpl$') ~= nil
       end, { force = true, all = false })
     end,
-    config = function(_, opts)
-      local configs = require('nvim-treesitter.configs')
-      configs.setup(opts)
-      -- if opts.folds.enabled then
-      --   LazyVim.lsp.on_supports_method('textDocument/foldingRange', function(client, buffer)
-      --     local win = vim.api.nvim_get_current_win()
-      --     vim.wo[win][0].foldexpr = 'v:lua.vim.lsp.foldexpr()'
-      --   end)
-      -- end
-    end,
+    -- config = function(_, opts)
+    --   -- v0.10.0
+    --   local configs = require('nvim-treesitter.configs')
+    --   configs.setup(opts)
+
+    --   -- if opts.folds.enabled then
+    --   --   LazyVim.lsp.on_supports_method('textDocument/foldingRange', function(client, buffer)
+    --   --     local win = vim.api.nvim_get_current_win()
+    --   --     vim.wo[win][0].foldexpr = 'v:lua.vim.lsp.foldexpr()'
+    --   --   end)
+    --   -- end
+    -- end,
   },
   {
     'nvim-treesitter/nvim-treesitter-context',

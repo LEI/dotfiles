@@ -4,7 +4,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# DISPLAY: {{ env "DISPLAY" }}
+# DISPLAY: {{ env "DISPLAY" | default "unset" }}
 if [ -z "${DISPLAY:-}" ]; then
   echo >&2 "WARN: skipping xrdb merge (no display)"
   exit 0

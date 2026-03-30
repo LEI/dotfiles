@@ -1,6 +1,6 @@
 {{- $scoopPackages := get .packages "scoop" | default dict }}
 {{- if empty $scoopPackages -}}
-{{-   warnf "missing scoop packages" }}
+{{- /*  warnf "missing scoop packages" */ -}}
 {{- else -}}
 # Set-PSDebug -Trace 1
 

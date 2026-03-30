@@ -1,4 +1,5 @@
 {{- $compose := joinPath .chezmoi.homeDir ".config/otel/compose.yaml" -}}
+{{- if stat $compose -}}
 {{- $prometheusConfig := joinPath .chezmoi.homeDir ".config/otel/prometheus.yaml" -}}
 {{- $alertRulesDir := joinPath .chezmoi.homeDir ".config/otel/alerts" -}}
 {{- $otelCollectorConfig := joinPath .chezmoi.homeDir ".config/otel/otel-collector-config.yaml" -}}
@@ -77,3 +78,4 @@ if check_reload tempo "$tempo_hash"; then
   msg "Restarting Tempo (no hot-reload for main config)"
   run "$provider" compose --file="$compose_file" restart tempo
 fi
+{{ end -}}

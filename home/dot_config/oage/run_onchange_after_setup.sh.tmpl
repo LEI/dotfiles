@@ -1,5 +1,6 @@
 {{- $compose := joinPath .chezmoi.homeDir ".config/oage/compose.yaml" -}}
 {{- $bifrostConfig := joinPath .chezmoi.homeDir ".config/oage/bifrost/config.json" -}}
+{{- if stat $bifrostConfig -}}
 {{- $bifrostHash := include $bifrostConfig | sha256sum -}}
 #!/bin/sh
 # compose: {{ include $compose | fromYaml | toJson | sha256sum }}
@@ -19,3 +20,4 @@ if [ "$(cat "$bifrost_hash_file" 2>/dev/null)" != "$bifrost_hash" ]; then
   run "${CONTAINER_PROVIDER:?}" compose --file="$compose_file" restart bifrost
   printf '%s' "$bifrost_hash" >"$bifrost_hash_file"
 fi
+{{ end -}}

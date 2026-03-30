@@ -58,12 +58,12 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 #   run brew bundle dump --file="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
 # fi
 
-{{- range $type := list "brew" "cask" "mas" "vscode" }}
-{{- if not (hasKey $.packages $type) }}
-{{-   continue }}
-{{- end }}
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) -}}
-{{- end }}
+{{- range $type := list "brew" "cask" "mas" "vscode" -}}
+{{- if not (hasKey $.packages $type) -}}
+{{-   continue -}}
+{{- end -}}
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) -}}
+{{ end -}}
 
 # run brew bundle list --global
 {{- if eq (env "CACHE_BUST") "true" }}
@@ -76,9 +76,9 @@ dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }}
 {{ includeTemplate "Brewfile" . | trim }}
 EOF
 
-{{- range $type := list "brew" "cask" "mas" "vscode" }}
-{{- if not (hasKey $.packages $type) }}
-{{-   continue }}
-{{- end }}
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) -}}
-{{- end }}
+{{- range $type := list "brew" "cask" "mas" "vscode" -}}
+{{- if not (hasKey $.packages $type) -}}
+{{-   continue -}}
+{{- end -}}
+{{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) -}}
+{{ end -}}

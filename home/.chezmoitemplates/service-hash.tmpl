@@ -6,7 +6,6 @@
 {{- $serviceDir := get . "serviceDir" | default "dot_config/systemd/user" -}}
 {{- if $hasPlist -}}
 # plist: {{ includeTemplate (printf "Library/private_LaunchAgents/%s%s" $label $plistSuffix) . | sha256sum }}
-{{- end -}}
-{{- if $hasService -}}
+{{ else if $hasService -}}
 # service: {{ include (printf "%s/%s.service" $serviceDir $unit) | sha256sum }}
-{{- end -}}
+{{ end -}}

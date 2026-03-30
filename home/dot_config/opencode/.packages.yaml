@@ -7,7 +7,16 @@ packages:
       darwin: anomalyco/tap/opencode
       # npm: opencode-ai@latest
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil)) }}'
-  # openwork:
-  #   enabled: "{{ .gui }}"
-  #   name: github:chronologos/cc-sessions
-  #   type: mise
+  # https://openpackage.dev/docs
+  openpackage:
+    name: opkg # opkg install gh@anthropics/claude-plugins-official
+    type: npm
+  # https://openworklabs.com/download
+  openwork:
+    enabled: "{{ .gui }}"
+    # name: github:different-ai/openwork
+    # type: mise
+    nameOverwrite:
+      aur: openwork
+      npm: openwork-orchestrator
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'

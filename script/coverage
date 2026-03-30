@@ -19,9 +19,13 @@ coverage() {
     --exclude-pattern=coverage
     --path-strip-level=1
     --strip-path="$PWD"
+    --dump-summary
   )
 
-  # NOTE: breaks with linuxbrew kcov even with .so files present
+  # FIXME: --bash-handle-sh-invocation loads libbash_execve_redirector.so
+  # via LD_PRELOAD, which pollutes stderr with errors when child processes
+  # change cwd (relative .so path breaks). Not needed since run_src sources
+  # scripts in-process for coverage tracking.
   # if [ "$(uname -s)" = Linux ]; then
   #   kcov_args+=(--bash-handle-sh-invocation)
   # fi
@@ -30,6 +34,7 @@ coverage() {
 }
 
 main() {
+  # FIXME: does not suppress --show-output-of-passing-tests under kcov
   export TEST_JOBS=1
 
   TEST_TMPDIR="$PWD/tmp"
@@ -41,6 +46,9 @@ main() {
 
   mkdir -p "$TEST_TMPDIR/.chezmoiscripts"
   mkdir -p "$TEST_TMPDIR/.local/bin"
+
+  # # Pre-render templates so run_chezmoi can skip chezmoi cat under kcov
+  # chezmoi-render "$TEST_TMPDIR" --quiet
 
   coverage "$@"
 }

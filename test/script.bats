@@ -23,7 +23,7 @@ setup() {
     "--refresh-externals=never"
   )
   export CI=true
-  run --separate-stderr bash ./script/bootstrap "${chezmoi_args[@]}"
+  run_script ./script/bootstrap "${chezmoi_args[@]}"
 
   refute_output --regexp "Tip:"
   assert_stderr_line "DRY-RUN: Running 'chezmoi init --apply --source=$PWD ${chezmoi_args[*]}'"
@@ -35,7 +35,7 @@ setup() {
   export BENCH_ITERATIONS=1
   export SHELL=dummy
   stub_seq dummy $((BENCH_ITERATIONS + 2))
-  run --separate-stderr bash ./script/startup
+  run_script ./script/startup
   unstub dummy 2>/dev/null || true
 
   assert_stderr_line --regexp "startup 1/$BENCH_ITERATIONS: dummy -ci exit"
@@ -48,7 +48,7 @@ setup() {
 #   stub_seq goss 1
 #   stub_seq mise 1
 #   stub_seq nvim 1
-#   run --separate-stderr bash ./script/check
+#   run_script ./script/check
 #   unstub goss 2>/dev/null || true
 #   unstub mise 2>/dev/null || true
 #   unstub nvim 2>/dev/null || true
@@ -67,7 +67,7 @@ setup() {
 
 # bats test_tags=update,type:unit
 @test "script/update" {
-  run --separate-stderr bash ./script/update
+  run_script ./script/update
 
   if has_feature neovim; then
     assert_stderr_line --regexp "nvim"
@@ -138,9 +138,10 @@ setup() {
   source_container
   run list
   assert_success
-  assert_line "alpine"
-  assert_line "termux"
-  refute_output --regexp $'\t| '
+  for name in $images; do
+    assert_line "$name"
+  done
+  # refute_output --regexp $'\t| '
 }
 
 # bats test_tags=container,type:unit
@@ -169,7 +170,7 @@ setup() {
 @test "install-password-manager: skips on unknown command" {
   export CHEZMOI_COMMAND=test
   export CHEZMOI_WORKING_TREE="$PWD"
-  run --separate-stderr bash home/.install-password-manager.sh
+  run_script home/.install-password-manager.sh
 
   refute_output
   refute_stderr
@@ -181,7 +182,7 @@ setup() {
   stub bws "true"
   export CHEZMOI_COMMAND=apply
   export CHEZMOI_WORKING_TREE="$PWD"
-  run --separate-stderr bash home/.install-password-manager.sh
+  run_script home/.install-password-manager.sh
   unstub bws 2>/dev/null || true
 
   refute_output

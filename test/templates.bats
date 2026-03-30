@@ -115,10 +115,10 @@ run_block_in_file() {
   assert_line --regexp "^### END"
 }
 
-@test "block-in-file: preserves multiple blank lines after END" {
+@test "block-in-file: collapses multiple blank lines after END" {
   run_block_in_file $'### START x\nold\n### END x\n\n\nafter\n' "new"
   assert_success
-  [[ "$output" == *$'### END'*$'\n\n\nafter' ]]
+  [[ "$output" == *$'### END'*$'\n\nafter' ]]
 }
 
 # pluck

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # host() { ssh-cd host /var/www/app; }
 # host-logs() { ssh-cd host /var/log 'tail -f *.log' | tspin; }
 host="${1:?host required}"

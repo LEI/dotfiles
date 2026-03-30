@@ -21,9 +21,34 @@ cat >"$render_dir/.shellcheckrc" <<'EOF'
 disable=SC1090,SC2034,SC2154,SC2248
 EOF
 
-[ ${#files[@]} -eq 0 ] && exit 0
+if [ ${#files[@]} -eq 0 ]; then
+  echo >&2 "lint: no files to lint"
+  exit 1
+fi
 
-prek run --cd="$render_dir" -c "$PWD/.pre-commit-config.yaml" --files "${files[@]}" \
-  --skip=check-added-large-files \
-  --skip=lint-templates \
+flags=()
+for arg in "$@"; do
+  case "$arg" in
+  -*)
+    flags+=("$arg")
+    shift
+    ;;
+  *) ;;
+  esac
+done
+args=(
+  --cd="${render_dir#"$PWD"/}"
+  # TODO: relative "${PWD/$HOME/\~}/.pre-commit-config.yaml"
+  --config="$PWD/.pre-commit-config.yaml"
+  --skip=check-added-large-files
+  --skip=lint-templates
   --skip=zizmor
+  "${flags[@]}"
+)
+set -- "${args[@]}" --files "${files[@]}"
+# echo >&2 "lint debug: prek run ${args[*]}"
+prek run "$@" && exit_code=0 || exit_code=$?
+if [ $exit_code -ne 0 ]; then
+  echo >&2 "lint failed: prek run ${args[*]}"
+fi
+exit $exit_code

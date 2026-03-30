@@ -45,24 +45,28 @@ msg "Installed tools"
 
 {{- $tools := list }}
 
-{{- if get .packages.mise "go" }}
+{{- $goPackages := get .packages.mise "go" | default dict -}}
+{{- if $goPackages }}
 # default-go-packages: includeTemplate "dot_config/mise/default-go-packages.tmpl" . | sha256sum
-{{- $tools = append $tools (printf "go@%s" (get .packages.mise.go "version" | default "latest")) }}
+{{- $tools = append $tools (printf "go@%s" (get $goPackages "version" | default "latest")) }}
 {{- end }}
 
-{{- if get .packages.mise "node" }}
+{{- $nodePackages := get .packages.mise "node" | default dict -}}
+{{- if $nodePackages }}
 # default-npm-packages: includeTemplate "dot_config/mise/default-npm-packages.tmpl" . | sha256sum
-{{- $tools = append $tools (printf "node@%s" (get .packages.mise.node "version" | default "latest")) }}
+{{- $tools = append $tools (printf "node@%s" (get $nodePackages "version" | default "latest")) }}
 {{- end }}
 
-{{- if get .packages.mise "python" }}
+{{- $pythonPackages := get .packages.mise "python" | default dict -}}
+{{- if $pythonPackages }}
 # default-python-packages: includeTemplate "dot_config/mise/default-python-packages.tmpl" . | sha256sum
-{{- $tools = append $tools (printf "python@%s" (get .packages.mise.python "version" | default "latest")) }}
+{{- $tools = append $tools (printf "python@%s" (get $pythonPackages "version" | default "latest")) }}
 {{- end }}
 
-{{- if get .packages.mise "ruby" }}
+{{- $rubyPackages := get .packages.mise "ruby" | default dict -}}
+{{- if $rubyPackages }}
 # default-gems: includeTemplate "dot_config/mise/default-gems.tmpl" . | sha256sum
-{{- $tools = append $tools (printf "ruby@%s" (get .packages.mise.ruby "version" | default "latest")) }}
+{{- $tools = append $tools (printf "ruby@%s" (get $rubyPackages "version" | default "latest")) }}
 {{- end }}
 
 {{- if not (empty $tools) }}

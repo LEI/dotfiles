@@ -4,8 +4,14 @@ plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
 if [ ! -f "$plist" ]; then
   err "{{ $label }}: plist not found"
 fi
-launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
-run launchctl bootstrap "gui/$(id -u)" "$plist"
+
+# Legacy load/unload: bootstrap/bootout fails with I/O error on some macOS versions
+# TODO switch to bootstrap/bootout when Apple fixes the regression
+# launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
+# run launchctl bootstrap "gui/$(id -u)" "$plist"
+launchctl unload "$plist" 2>/dev/null || true
+run launchctl load "$plist"
+
 if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
   err "{{ $label }}: service failed to start"
 fi

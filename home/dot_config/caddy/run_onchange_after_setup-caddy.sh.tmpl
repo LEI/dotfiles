@@ -1,5 +1,8 @@
+{{- $caddyfilePath := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
 #!/bin/bash
-# Caddyfile: {{ include (joinPath .chezmoi.homeDir ".config/caddy/Caddyfile") | sha256sum }}
+{{- if stat $caddyfilePath }}
+# Caddyfile: {{ include $caddyfilePath | sha256sum }}
+{{- end }}
 # sites: {{ include "dot_config/caddy/.chezmoidata.yaml" | sha256sum }}
 # otel-dropin: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}

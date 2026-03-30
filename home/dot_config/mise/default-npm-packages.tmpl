@@ -1,3 +1,4 @@
-{{- range .packages.npm | keys | sortAlpha -}}
+{{- $npmPackages := get .packages "npm" | default dict -}}
+{{- range $npmPackages | keys | sortAlpha -}}
 {{ . }}
 {{ end -}}

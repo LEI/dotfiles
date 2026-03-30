@@ -105,7 +105,8 @@ if ! has cargo && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
 fi
 
 {{- $list := list }}
-{{- range $name := .packages.cargo | keys }}
+{{- $cargoPackages := get .packages "cargo" | default dict -}}
+{{- range $name := $cargoPackages | keys }}
 {{- $list = append $list $name }}
 {{- end }}
 

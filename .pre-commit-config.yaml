@@ -97,8 +97,8 @@ repos:
 
       - id: lint-templates
         name: lint templates
-        entry: ./script/lint --quiet
-        # args: ["--quiet"]
+        entry: ./script/lint
+        args: ["--quiet"]
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
         exclude: ^output/|\.chezmoi\.yaml\.tmpl$

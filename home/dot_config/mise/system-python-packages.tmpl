@@ -1,17 +1,17 @@
 {{- if ne .osID "windows" -}}
 {{- if ne .osID "darwin" -}}
 # pip
-{{- end }}
+{{ end -}}
 # pipenv
 # pipx
-{{- if .features.neovim }}
-{{- if eq .osIDLike "fedora" }}
+{{- if .features.neovim -}}
+{{- if eq .osIDLike "fedora" -}}
 neovim
-{{- else if ne .osID "darwin" }}
+{{- else if ne .osID "darwin" -}}
 pynvim
 {{- end }}
 {{- end }}
-{{- if not (eq .osIDLike "android" "arch" "darwin" "debian") }}
+{{- if not (eq .osIDLike "android" "arch" "darwin" "debian") -}}
 uv
 {{- end }}
 {{- if eq .osIDLike "alpine" "arch" "darwin" "fedora" }}

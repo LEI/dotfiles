@@ -298,7 +298,7 @@
   {{- range $plugins -}}
   {{-   $_ := set $managedPlugins . true -}}
   {{- end }}
-  "enabledPlugins": {{ merge $managedPlugins (get (.chezmoi.stdin | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
+  "enabledPlugins": {{ merge $managedPlugins (get (get .chezmoi "stdin" | default "{}" | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
   {{- $extraMarketplaces := dict -}}
   {{- range $name, $info := $data.marketplaces -}}
   {{-   if hasKey $info "repo" -}}

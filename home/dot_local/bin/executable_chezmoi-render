@@ -12,19 +12,19 @@ quiet=false
 templates=()
 for arg in "$@"; do
   case "$arg" in
-    -q|--quiet)
-      quiet=true
-      ;;
-    *)
-      templates+=("$arg")
-      ;;
+  -q | --quiet)
+    quiet=true
+    ;;
+  *)
+    templates+=("$arg")
+    ;;
   esac
 done
 
 mkdir -p "$dest"
 
 if [ "$quiet" != true ]; then
-  printf 'Output: %s\n' "${dest#$PWD/}" >&2
+  printf 'Output: %s\n' "${dest#"$PWD"/}" >&2
 fi
 
 source_dir="$(chezmoi source-path)"
@@ -32,13 +32,13 @@ if [ -z "$source_dir" ]; then
   printf 'error: could not determine source directory\n' >&2
   exit 1
 fi
-prefix="${source_dir#$PWD/}"
+prefix="${source_dir#"$PWD"/}"
 
 # Strip prefix from explicit template paths
 if [ ${#templates[@]} -gt 0 ]; then
   fixed=()
   for t in "${templates[@]}"; do
-    fixed+=("${t#$prefix/}")
+    fixed+=("${t#"$prefix"/}")
   done
   templates=("${fixed[@]}")
 fi
@@ -46,7 +46,7 @@ fi
 # Get all templates if none provided (find all .tmpl files in source, excluding config)
 if [ ${#templates[@]} -eq 0 ]; then
   cd "$source_dir"
-  mapfile -t templates < <(find . -name '*.tmpl' -type f | grep -v '^./.chezmoi.yaml.tmpl$' | sort)
+  mapfile -t templates < <(find . \( -name '*.tmpl' -o -name 'modify_*' \) -type f | grep -v '^./.chezmoi.yaml.tmpl$' | sort -u)
 fi
 
 if [ ${#templates[@]} -eq 0 ]; then
@@ -82,7 +82,12 @@ render() {
     fi
   fi
 
-  "${cmd[@]}" <"$input" >"$out"
+  # echo >&2 "render debug: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}"
+  "${cmd[@]}" <"$input" >"$out" && exit_code=0 || exit_code=$?
+  if [ "$exit_code" -ne 0 ]; then
+    echo >&2 "render failed: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}"
+  fi
+  return "$exit_code"
 }
 
 export -f render
@@ -91,8 +96,8 @@ export dest source_dir
 max_jobs=$(nproc 2>/dev/null || echo 4)
 total=${#templates[@]}
 
-if ! paste <(printf '%s\n' "${templates[@]}") <(printf '%s\n' "${targets[@]}") \
-  | xargs -P "$max_jobs" -n 2 bash -c 'render "$@"' _; then
+if ! paste <(printf '%s\n' "${templates[@]}") <(printf '%s\n' "${targets[@]}") |
+  xargs -P "$max_jobs" -n 2 bash -c 'render "$@"' _; then
   printf 'error: template rendering failed\n' >&2
   exit 1
 fi

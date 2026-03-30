@@ -46,14 +46,17 @@ run_chezmoi() {
     echo >&3 "# WARN: missing directory $dir"
   fi
 
-  # shellcheck disable=SC2154
-  if ! "$chezmoi" cat --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
-    fail "run_chezmoi: chezmoi cat failed for $script"
-  elif ! [ -s "$file" ]; then
-    fail "run_chezmoi: empty file: $script"
+  # Skip rendering if already pre-rendered (e.g. by chezmoi-render in coverage)
+  if ! [ -s "$file" ]; then
+    # shellcheck disable=SC2154
+    if ! "$chezmoi" cat --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
+      fail "run_chezmoi: chezmoi cat failed for $script"
+    elif ! [ -s "$file" ]; then
+      fail "run_chezmoi: empty file: $script"
+    fi
   fi
 
-  run --separate-stderr bash "$TEST_TMPDIR/$script" "$@"
+  run_script "$TEST_TMPDIR/$script" "$@"
 }
 
 # Get file permissions as octal (cross-platform)
@@ -82,6 +85,25 @@ check_perms() {
   if [ ${#bad[@]} -gt 0 ]; then
     fail "expected $expected: ${bad[*]}"
   fi
+}
+
+# Source a script with correct $0 and positional params.
+# Runs in the caller's process so kcov can track coverage.
+run_src() {
+  local script="$1"
+  shift
+  if ! [ -f "$script" ]; then
+    echo >&2 "run_src: file not found: $script"
+    return 127
+  fi
+  # Not local: BASH_ARGV0 must be global to set $0
+  BASH_ARGV0="$script"
+  source "$script" "$@"
+}
+
+# Run a script with stderr separation (convenience wrapper for test cases)
+run_script() {
+  run --separate-stderr run_src "$@"
 }
 
 stub_seq() {
