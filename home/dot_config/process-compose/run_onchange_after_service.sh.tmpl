@@ -1,9 +1,11 @@
 {{- if .features.processCompose -}}
 #!/bin/sh
-# service: {{ include "dot_config/systemd/user/process-compose.service" | sha256sum }}
-{{- if eq .chezmoi.os "darwin" }}
-# plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
-{{- end }}
+{{ includeTemplate "service-hash.tmpl" (merge (dict
+  "label" "com.process-compose"
+  "unit" "process-compose"
+  "plist" true
+  "service" true
+) .) -}}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

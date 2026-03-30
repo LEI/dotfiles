@@ -1,0 +1,12 @@
+{{- $label := get . "label" -}}
+{{- $unit := get . "unit" -}}
+{{- $hasPlist := get . "plist" | default false -}}
+{{- $hasService := get . "service" | default false -}}
+{{- $plistSuffix := get . "plistSuffix" | default ".plist.tmpl" -}}
+{{- $serviceDir := get . "serviceDir" | default "dot_config/systemd/user" -}}
+{{- if $hasPlist -}}
+# plist: {{ includeTemplate (printf "Library/private_LaunchAgents/%s%s" $label $plistSuffix) . | sha256sum }}
+{{- end -}}
+{{- if $hasService -}}
+# service: {{ include (printf "%s/%s.service" $serviceDir $unit) | sha256sum }}
+{{- end -}}

@@ -1,6 +1,10 @@
 {{- $provider := get .ai.providers "mlx-lm" -}}
 #!/bin/sh
-# plist: {{ includeTemplate "Library/private_LaunchAgents/com.mlx-lm.server.plist.tmpl" . | sha256sum }}
+{{ includeTemplate "service-hash.tmpl" (merge (dict
+  "label" $provider.label
+  "unit" "mlx-lm"
+  "plist" true
+) .) -}}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

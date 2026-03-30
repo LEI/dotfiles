@@ -1,10 +1,10 @@
 {{- $provider := get .ai.providers "llama-server" -}}
 #!/bin/sh
-{{- if eq .chezmoi.os "darwin" }}
-# plist: {{ includeTemplate "Library/LaunchAgents/com.llama-cpp.server.plist" . | sha256sum }}
-{{- else }}
-# service: {{- /* TODO: include "dot_config/systemd/user/llama-cpp.service" | sha256sum */ -}}
-{{- end }}
+{{ includeTemplate "service-hash.tmpl" (merge (dict
+  "label" $provider.label
+  "unit" "llama-server"
+  "plist" true
+) .) -}}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

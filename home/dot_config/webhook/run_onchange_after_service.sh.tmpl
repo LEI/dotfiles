@@ -1,11 +1,12 @@
 {{- if .features.otel -}}
 #!/bin/sh
 # hooks: {{ joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" | include | sha256sum }}
-{{- if eq .chezmoi.os "darwin" }}
-# plist: {{ includeTemplate "Library/private_LaunchAgents/com.webhook.alert.plist.tmpl" . | sha256sum }}
-{{- else }}
-# service: {{ include "dot_config/systemd/user/webhook.service" | sha256sum }}
-{{- end }}
+{{ includeTemplate "service-hash.tmpl" (merge (dict
+  "label" "com.webhook.alert"
+  "unit" "webhook"
+  "plist" true
+  "service" true
+) .) -}}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
