@@ -27,7 +27,7 @@ set -eu
 BASE_URL="http://127.0.0.1:5055"
 
 api() {
-  local method="$1" path="$2"
+  method="$1" path="$2"
   shift 2
   curl -sf -X "$method" "$BASE_URL$path" \
     -H "Content-Type: application/json" \
@@ -35,15 +35,13 @@ api() {
 }
 
 ensure_credential() {
-  local name="$1" provider="$2" modalities="$3" api_key="$4" base_url="$5"
-  local existing
+  name="$1" provider="$2" modalities="$3" api_key="$4" base_url="$5"
   existing="$(api GET /api/credentials | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
   if [ -n "$existing" ]; then
     msg "open-notebook: credential '$name' already exists"
     echo "$existing"
     return
   fi
-  local id
   id="$(api POST /api/credentials -d "$(jq -n \
     --arg name "$name" \
     --arg provider "$provider" \
@@ -57,15 +55,13 @@ ensure_credential() {
 }
 
 ensure_model() {
-  local name="$1" type="$2" credential_id="$3"
-  local existing
+  name="$1" type="$2" credential_id="$3"
   existing="$(api GET /api/models | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
   if [ -n "$existing" ]; then
     msg "open-notebook: model '$name' already exists"
     echo "$existing"
     return
   fi
-  local id
   id="$(api POST /api/models -d "$(jq -n \
     --arg name "$name" \
     --arg provider "openai-compatible" \
