@@ -85,7 +85,8 @@ render() {
   # echo >&2 "render debug: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}"
   "${cmd[@]}" <"$input" >"$out" && exit_code=0 || exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
-    echo >&2 "render failed: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}"
+    echo >&2 "render failed: exit code $exit_code"
+    # ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}
   fi
   return "$exit_code"
 }

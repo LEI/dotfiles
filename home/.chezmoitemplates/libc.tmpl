@@ -7,7 +7,7 @@
   (stat "/lib/ld-linux.so.2")
 -}}
 gnu
-{{- else if or
+{{ else if or
   (stat "/lib/ld-musl-x86_64.so.1")
   (stat "/lib64/ld-musl-x86_64.so.1")
   (stat "/lib/ld-musl-aarch64.so.1")
@@ -15,4 +15,4 @@ gnu
 -}}
 musl
 {{ end -}}
-{{ end -}}
+{{- end -}}

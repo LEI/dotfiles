@@ -277,14 +277,14 @@ command:
 {{- if eq .Vars.os "linux"}}
 service:
 {{- if .Vars.features.processCompose }}
-  process-compose:
-    enabled: true
-    running: true
+  # process-compose:
+  #   enabled: true
+  #   running: true
 {{- end }}
 {{- if .Vars.features.otel }}
-  webhook:
-    enabled: true
-    running: true
+  # webhook:
+  #   enabled: true
+  #   running: true
 {{- end }}
 {{- end }}
 
