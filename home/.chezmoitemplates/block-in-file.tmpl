@@ -7,10 +7,11 @@
 {{- $after := $stdin | replaceAllRegex (printf "(?s).*%[1]s START .*%[1]s END .*?\r?\n" $prefix) "" -}}
 {{- $before -}}
 {{ $prefix }} START {{ $suffix }}
+
 {{- if not (empty $contents) }}
 
 {{ $contents | trim }}
+{{- end }}
 
-{{ end -}}
 {{ $prefix }} END {{ $suffix }}
 {{ if ne $stdin $after }}{{ $after }}{{ end -}}
