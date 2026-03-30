@@ -1,5 +1,5 @@
 var data = {files:[
-{"link":"test.67c168356ac852a7/index.html","title":"test","summary_name":"test","covered_class":"lineNoCov","covered":"8.3","covered_lines":"82","uncovered_lines":"905","total_lines" : "987"},
+{"link":"test.67c168356ac852a7/index.html","title":"test","summary_name":"test","covered_class":"lineNoCov","covered":"8.2","covered_lines":"82","uncovered_lines":"921","total_lines" : "1003"},
 ], merged_files:[]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-29 08:39:50", "instrumented" : 987, "covered" : 82,};
+var header = { "command" : "test", "date" : "2026-03-30 06:26:44", "instrumented" : 1003, "covered" : 82,};

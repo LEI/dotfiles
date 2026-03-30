@@ -1,9 +1,9 @@
 var data = {files:[
 {"link":"validate-schema.ecc5e8fd.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"43","total_lines" : "43"},
 {"link":"bench.ee302f3a.html","title":"bench","summary_name":"[...]/dotfiles/script/bench","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"6","total_lines" : "6"},
-{"link":"lint.5b326ddc.html","title":"lint","summary_name":"[...]/dotfiles/script/lint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"21","total_lines" : "21"},
+{"link":"lint.5b326ddc.html","title":"lint","summary_name":"[...]/dotfiles/script/lint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"11","total_lines" : "11"},
 {"link":"bootstrap.b4a81c6b.html","title":"bootstrap","summary_name":"[...]/dotfiles/script/bootstrap","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"25","total_lines" : "25"},
-{"link":"test.38e987d4.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"87.5","covered_lines":"14","uncovered_lines":"2","total_lines" : "16"},
+{"link":"test.38e987d4.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"89.5","covered_lines":"17","uncovered_lines":"2","total_lines" : "19"},
 {"link":"update.15a5d041.html","title":"update","summary_name":"[...]/dotfiles/script/update","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"12","total_lines" : "12"},
 {"link":"entrypoint.c422399a.html","title":"entrypoint","summary_name":"[...]/dotfiles/script/entrypoint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"43","total_lines" : "43"},
 {"link":"executable_git-P.61202720.html","title":"executable_git-P","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_git-P","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
@@ -18,7 +18,7 @@ var data = {files:[
 {"link":"executable_chezmoi-validate.c728d2f.html","title":"executable_chezmoi-validate","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-validate","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"15","total_lines" : "15"},
 {"link":"executable_iperf3-plot.7d2b319f.html","title":"executable_iperf3-plot","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_iperf3-plot","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"23","total_lines" : "23"},
 {"link":"executable_chezmoi-execute.9b5f3f3c.html","title":"executable_chezmoi-execute","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-execute","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
-{"link":"executable_chezmoi-render.c3dbbb73.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"29","total_lines" : "29"},
+{"link":"executable_chezmoi-render.c3dbbb73.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"52","total_lines" : "52"},
 {"link":"executable_srv.e5d30a7d.html","title":"executable_srv","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_srv","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"48","total_lines" : "48"},
 {"link":"bench.sh.f757acd6.html","title":"bench.sh","summary_name":"[...]/dotfiles/home/dot_config/sh/lib/bench.sh","covered_class":"lineCov","covered":"93.8","covered_lines":"15","uncovered_lines":"1","total_lines" : "16"},
 {"link":"export.sh.7e625eed.html","title":"export.sh","summary_name":"[...]/dotfiles/home/dot_config/sh/lib/export.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"10","uncovered_lines":"0","total_lines" : "10"},
@@ -40,5 +40,5 @@ var data = {files:[
 {"link":"executable_shpool-select.d2ab6c12.html","title":"executable_shpool-select","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_shpool-select","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-29 08:37:32", "instrumented" : 987, "covered" : 91,};
+var header = { "command" : "test", "date" : "2026-03-30 06:24:43", "instrumented" : 1003, "covered" : 94,};
 var merged_data = [];

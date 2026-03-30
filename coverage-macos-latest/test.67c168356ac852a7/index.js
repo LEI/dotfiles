@@ -5,7 +5,7 @@ var data = {files:[
 {"link":"executable_chezmoi-validate.864a7190.html","title":"executable_chezmoi-validate","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-validate","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"15","total_lines" : "15"},
 {"link":"executable_changelog.4ae59c86.html","title":"executable_changelog","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_changelog","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 {"link":"executable_chezmoi-profile.b85ed6f6.html","title":"executable_chezmoi-profile","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-profile","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"79","total_lines" : "79"},
-{"link":"lint.70bb7e12.html","title":"lint","summary_name":"[...]/dotfiles/script/lint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"21","total_lines" : "21"},
+{"link":"lint.70bb7e12.html","title":"lint","summary_name":"[...]/dotfiles/script/lint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"11","total_lines" : "11"},
 {"link":"executable_srv.8406c41a.html","title":"executable_srv","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_srv","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"48","total_lines" : "48"},
 {"link":"executable_git-P.37405422.html","title":"executable_git-P","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_git-P","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
 {"link":"executable_shpool-a.78bd3ea3.html","title":"executable_shpool-a","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_shpool-a","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
@@ -22,7 +22,7 @@ var data = {files:[
 {"link":"executable_compose-project.tmpl.b5170680.html","title":"executable_compose-project.tmpl","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_compose-project.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"12","total_lines" : "12"},
 {"link":"executable_k.4eee907c.html","title":"executable_k","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_k","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 {"link":"startup.d5bc996c.html","title":"startup","summary_name":"[...]/dotfiles/script/startup","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"41","total_lines" : "41"},
-{"link":"executable_chezmoi-render.9e93a289.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"29","total_lines" : "29"},
+{"link":"executable_chezmoi-render.9e93a289.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"52","total_lines" : "52"},
 {"link":"pathmunge.sh.bd035757.html","title":"pathmunge.sh","summary_name":"[...]/dotfiles/home/dot_config/sh/lib/pathmunge.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"10","uncovered_lines":"0","total_lines" : "10"},
 {"link":"entrypoint.6cc9fbbc.html","title":"entrypoint","summary_name":"[...]/dotfiles/script/entrypoint","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"43","total_lines" : "43"},
 {"link":"executable_pc.f672c772.html","title":"executable_pc","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_pc","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"28","total_lines" : "28"},
@@ -35,10 +35,10 @@ var data = {files:[
 {"link":"bench.92c7499e.html","title":"bench","summary_name":"[...]/dotfiles/script/bench","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"6","total_lines" : "6"},
 {"link":"executable_e.a956bd7b.html","title":"executable_e","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_e","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"validate-schema.bd691d74.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"43","total_lines" : "43"},
-{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"linePartCov","covered":"31.2","covered_lines":"5","uncovered_lines":"11","total_lines" : "16"},
+{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"linePartCov","covered":"26.3","covered_lines":"5","uncovered_lines":"14","total_lines" : "19"},
 {"link":"executable_chezmoi-execute.c66a6c27.html","title":"executable_chezmoi-execute","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-execute","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
 {"link":"executable_chezmoi-trace.fece112f.html","title":"executable_chezmoi-trace","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-trace","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"3","total_lines" : "3"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-29 08:39:50", "instrumented" : 987, "covered" : 82,};
+var header = { "command" : "test", "date" : "2026-03-30 06:26:44", "instrumented" : 1003, "covered" : 82,};
 var merged_data = [];
