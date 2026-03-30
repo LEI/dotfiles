@@ -59,4 +59,4 @@ fi
 if ! gh alias list | cut -d: -f1 | grep -q '^gitignore$'; then
   run gh alias set --shell gitignore 'gh api -X GET /gitignore/templates/"$1" --jq ".source"'
 fi
-{{- end -}}
+{{ end -}}

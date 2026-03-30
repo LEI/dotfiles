@@ -1,68 +1,71 @@
 #!/usr/bin/env bash
 #MISE hide=true
 #MISE description="Validate files against their declared $schema"
-# Validate files against their declared $schema.
-# Handles chezmoi modify templates (modify_* basename) via chezmoi cat,
-# chezmoi templates (*.tmpl) via chezmoi execute-template, and plain files.
-# Requires: chezmoi, jq, json5, uvx, yq
+# Validates files against their declared $schema.
+# Handles jsonc/json5 via json5, toml/yaml via yq.
+# Templates and modify scripts must be rendered before passing to this script.
+# Requires: jq, uvx, yq
+# Optional: json5 (for .jsonc/.json5 files)
 
 set -euo pipefail
+
+for cmd in jq uvx yq; do
+  command -v "$cmd" >/dev/null || {
+    printf >&2 'error: %s is required\n' "$cmd"
+    exit 1
+  }
+done
 
 passed=0
 failed=0
 skipped=0
 
-# Returns file content rendered by the appropriate chezmoi command.
-get_content() {
-  local base
-  base=$(basename "$1")
-  if [[ $base == modify_* ]]; then
-    local target
-    target=$(chezmoi target-path "$1") || return 1
-    chezmoi cat "$target"
-  elif [[ $1 == *.tmpl ]]; then
-    chezmoi execute-template < "$1"
-  else
-    cat "$1"
-  fi
-}
-
-# Returns the effective extension, stripping a trailing .tmpl suffix.
+# Returns the file extension
 file_ext() {
-  local f=${1%.tmpl}
-  echo "${f##*.}"
+  echo "${1##*.}"
 }
 
-# Reads content from stdin, extracts $schema based on effective extension.
+# Reads content from stdin, extracts $schema based on effective extension
 get_schema() {
   case "$(file_ext "$1")" in
-    json) jq -r '.["$schema"] // empty' ;;
-    jsonc|json5) json5 | jq -r '.["$schema"] // empty' ;;
-    toml) yq -p toml 'select(."$schema") | ."$schema"' ;;
-    yaml|yml) yq 'select(."$schema") | ."$schema"' ;;
-    *) cat >/dev/null; return 1 ;;
+  json) jq -r 'if type == "object" then .["$schema"] // empty else empty end' 2>/dev/null ;;
+  jsonc | json5)
+    if ! command -v json5 >/dev/null; then
+      cat >/dev/null
+      return 1
+    fi
+    json5 2>/dev/null | jq -r 'if type == "object" then .["$schema"] // empty else empty end' 2>/dev/null
+    ;;
+  toml) yq -p toml 'select(."$schema") | ."$schema"' 2>/dev/null ;;
+  yaml | yml) yq 'select(."$schema") | ."$schema"' 2>/dev/null ;;
+  *)
+    cat >/dev/null
+    return 1
+    ;;
   esac
 }
 
-# Reads content from stdin, converts to plain json for validation.
+# Reads content from stdin, converts to plain json for validation
 normalize() {
   case "$(file_ext "$1")" in
-    jsonc|json5) json5 ;;
-    toml) yq -p toml -o json ;;
-    yaml|yml) yq -o json ;;
-    *) cat ;;
+  jsonc | json5) json5 ;;
+  toml) yq -p toml -o json ;;
+  yaml | yml) yq -o json ;;
+  *) cat ;;
   esac
 }
 
 for file in "$@"; do
-  content=$(get_content "$file") || { skipped=$((skipped + 1)); continue; }
-  schema=$(get_schema "$file" <<<"$content") || { skipped=$((skipped + 1)); continue; }
+  content=$(cat "$file")
+  schema=$(get_schema "$file" <<<"$content") || {
+    skipped=$((skipped + 1))
+    continue
+  }
   if [[ -z "$schema" ]]; then
     skipped=$((skipped + 1))
     continue
   fi
 
-  # --output-format json for structured errors if needed
   if output=$(normalize "$file" <<<"$content" | uvx check-jsonschema --schemafile "$schema" - 2>&1); then
     passed=$((passed + 1))
     printf 'ok: %s\n' "$file"
@@ -73,9 +76,9 @@ for file in "$@"; do
 done
 
 total=$((passed + failed))
-if (( total > 0 || skipped > 0 )); then
+if ((total > 0 || skipped > 0)); then
   msg="${passed}/${total} ok"
-  (( skipped > 0 )) && msg+=" (${skipped} skipped, no \$schema)"
+  ((skipped > 0)) && msg+=" (${skipped} skipped)"
   printf '%s\n' "$msg"
 fi
 

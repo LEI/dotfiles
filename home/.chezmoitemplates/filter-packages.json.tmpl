@@ -3,15 +3,15 @@
 {{- $input := get . "input" | default list }}
 {{- $packageType := get . "packageType" | default "" }}
 
-{{- if empty $defaultType }}
-{{-   warnf "missing defaultType" }}
-{{- end }}
-{{- if empty $input }}
-{{-   warnf "missing input" }}
-{{- end }}
-{{- if empty $packageType }}
-{{-   warnf "missing packageType" }}
-{{- end }}
+{{- /* if empty $defaultType -}}
+{{-   warnf "filter-packages: missing defaultType" -}}
+{{- end -}}
+{{- if empty $input -}}
+{{-   warnf "filter-packages: missing input" -}}
+{{- end -}}
+{{- if empty $packageType -}}
+{{-   warnf "filter-packages: missing packageType" -}}
+{{- end */ -}}
 
 {{- range $key, $pkg := $input }}
 
@@ -20,7 +20,7 @@
 {{-   end }}
 
 {{-   if not (kindIs "map" $pkg) }}
-{{-     warnf "%s expected map: %s (%s)" $key $pkg (kindOf $pkg) -}}
+{{-     warnf "filter-packages: %s expected map: %s (%s)" $key $pkg (kindOf $pkg) -}}
 {{-   end }}
 
 {{-   $name := get $pkg "name" | default $key }}
@@ -34,7 +34,7 @@
 {{-   end }}
 
 {{-   if empty $name -}}
-{{-     warnf "%s: empty name: %s" $key $pkg -}}
+{{-     warnf "filter-packages: %s: empty name: %s" $key $pkg -}}
 {{-   end -}}
 
 {{-   $version := get $pkg "version" -}}
@@ -49,13 +49,13 @@
 {{-   if and $packageType $type }}
 {{-     if and $type (ne $packageType $type) }}
 {{- /* if $.chezmoi.conf-ig.verbose }}
-{{- warnf "Excluded package type (and): %s: got '%s' expected '%s'" $name $type $packageType -}}
+{{- warnf "filter-packages: excluded package type (and): %s: got '%s' expected '%s'" $name $type $packageType -}}
 {{- end */ -}}
 {{-       continue }}
 {{-     end }}
 {{-   else if or $packageType $type }}
 {{- if $.chezmoi.config.verbose }}
-{{- warnf "Excluded package type (or): %s: got '%s' expected '%s'" $name $type $packageType -}}
+{{- warnf "filter-packages: excluded package type (or): %s: got '%s' expected '%s'" $name $type $packageType -}}
 {{- end }}
 {{-     continue }}
 {{-   end }}
@@ -63,7 +63,7 @@
 {{-   $enabled := get $pkg "enabled" }}
 {{-   if or (and (kindIs "bool" $enabled) (ne $enabled true)) (and (kindIs "string" $enabled) (ne $enabled "true") (ne $enabled "")) }}
 {{- /* if $.chezmoi.config.verbose }}
-{{- warnf "Disabled package: %s (%v)" $name $enabled -}}
+{{- warnf "filter-packages: disabled package: %s (%v)" $name $enabled -}}
 {{- end */ -}}
 {{-     continue }}
 {{-   end }}
@@ -76,13 +76,13 @@
 {{-   range $part := $hasSpaces | ternary (list $name) ($name | splitList " ") }}
 {{-     $existing := get $output $part -}}
 {{-     if $existing -}}
-{{-       warnf "%s package %s: overriding key %s" $packageType $name $part -}}
+{{-       warnf "filter-packages: %s package %s: overriding key %s" $packageType $name $part -}}
 {{- /*       if not (deepEqual $existing $pkg) -}}
-{{-         warnf "%s package part diff %s: %s -> %s" $packageType $part $existing $pkg -}}
+{{-         warnf "filter-packages: %s package part diff %s: %s -> %s" $packageType $part $existing $pkg -}}
 {{-       end */ -}}
 {{-     end -}}
 {{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}
-{{- $output | toJson -}}
+{{- $output | toJson }}

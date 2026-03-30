@@ -17,7 +17,7 @@ if ! run ollama list >/dev/null; then
   err "ollama list: exit code $?"
 fi
 
-{{ range $ollamaModels -}}
+{{- range $ollamaModels }}
 run ollama pull {{ . }}
-{{ end -}}
 {{- end }}
+{{ end -}}

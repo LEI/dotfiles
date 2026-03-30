@@ -15,7 +15,9 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: \.ya?ml$ # yamllint trailing-spaces reports line and doesn't auto-fix
       - id: end-of-file-fixer
+        exclude: logseq/settings/.*\.json$
       - id: check-yaml
         exclude: ^home/dot_config/goss/goss\.yaml$
       - id: check-added-large-files
@@ -85,15 +87,18 @@ repos:
         name: validate schemas
         entry: ./script/validate-schema
         language: system
-        files: \.(json[c5]?|toml|ya?ml)(\.tmpl)?$
-        exclude: ^home/\.chezmoitemplates/
+        files: \.(json[c5]?|toml|ya?ml)$
+        exclude: ^home/\.chezmoitemplates/|^home/.*/modify_|winget/winget\.json$
 
-      - id: lint-lines
-        name: lint lines
-        entry: ./script/lint-lines
+      - id: blank-lines
+        name: blank lines
+        entry: ./script/blank-lines
         language: system
 
-      # - id: prek
-      #   name: validate templates
-      #   entry: ./script/prek
-      #   language: system
+      - id: lint-templates
+        name: lint templates
+        entry: ./script/lint
+        args: ["--quiet"]
+        language: system
+        files: ^home/(.*\.tmpl$|.*/modify_)
+        exclude: ^output/|\.chezmoi\.yaml\.tmpl$

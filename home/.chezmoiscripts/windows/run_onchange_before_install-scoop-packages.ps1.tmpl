@@ -1,3 +1,7 @@
+{{- $scoopPackages := get .packages "scoop" | default dict }}
+{{- if empty $scoopPackages -}}
+{{-   warnf "missing scoop packages" }}
+{{- else -}}
 # Set-PSDebug -Trace 1
 
 # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -9,12 +13,6 @@ echo "scoop update *"
 scoop update *
 {{- end }}
 
-{{- $scoopPackages := .packages.scoop }}
-
-{{- if empty $scoopPackages }}
-{{-   warnf "missing scoop packages" }}
-{{- end }}
-
 {{- $scoopPackagesList := $scoopPackages | keys | sortAlpha | join " " }}
 
 {{- if eq (env "CACHE_BUST") "true" }}
@@ -22,3 +20,4 @@ scoop update *
 {{- end }}
 echo "scoop install {{ $scoopPackagesList }}"
 scoop install {{ $scoopPackagesList }}
+{{ end -}}

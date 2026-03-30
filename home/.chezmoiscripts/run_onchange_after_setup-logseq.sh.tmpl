@@ -1,6 +1,6 @@
 {{- if .features.logseq -}}
 #!/bin/sh
-# plugins.edn: {{ include (joinPath .chezmoi.sourceDir "dot_logseq/config/plugins.edn") | sha256sum }}
+# plugins.edn: {{ include "dot_logseq/config/plugins.edn" | sha256sum }}
 
 set -eu
 

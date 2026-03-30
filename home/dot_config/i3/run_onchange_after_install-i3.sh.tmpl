@@ -5,7 +5,10 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # Check the configuration file for validity
-# config hash: {{ include (joinPath .chezmoi.homeDir ".config/i3/config") | sha256sum }}
+{{- $configPath := joinPath .chezmoi.homeDir ".config/i3/config" -}}
+{{- if stat $configPath -}}
+# config hash: {{ include $configPath | sha256sum }}
+{{- end }}
 run i3 -C -c ~/.config/i3/config
 
 {{- if lookPath "thunar" | isExecutable }}
@@ -15,13 +18,11 @@ if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
 fi
 {{- end }}
 
-{{- if .features.i3 }}
-
 {{- range $key, $value := .i3.environment }}
+
 # if ! grep -q '^{{ $key }}=' /etc/environment; then
 #   echo '{{ $key }}={{ $value | quote }}' | sudo tee --append /etc/environment
 # fi
-{{- end }}
 {{- end }}
 
 if [ -f ~/.config/qt5ct/qt5ct.conf ]; then

@@ -2,7 +2,7 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $name := eq .profile "work" | ternary "premium" "opencode-zen" -}}
+{{- $name := eq .profile "work" | ternary "premium" "z-ai-lite" -}}
 {{- $p := get .ai.profiles $name -}}
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
@@ -104,9 +104,23 @@
       "find * -fprint*": "ask",
       "find * -ok*": "ask",
 
-      // "git *": "deny",
-      // "git worktree *": "allow",
-      // "git wt *": "allow",
+      // "git *": "ask",
+      "git describe *": "allow",
+      "git diff *": "allow",
+      "git diff": "allow",
+      "git fetch *": "allow",
+      "git log *": "allow",
+      "git ls-tree *": "allow",
+      "git remote -v *": "allow",
+      "git remote -v": "allow",
+      "git show *": "allow",
+      "git stash list *": "allow",
+      "git stash list": "allow",
+      "git status *": "allow",
+      "git status": "allow",
+      "git worktree list *": "allow",
+      // "git wt": "allow",
+
       "grep *": "allow",
       "head *": "allow",
       "ls *": "allow",
@@ -120,8 +134,13 @@
       "rm *": "ask",
 
       "sed *": "allow",
-      "sed * -I*": "ask",
+      {{- if true }}
       "sed * -i*": "ask",
+      "sed -i*": "ask",
+      {{- else }}
+      "sed * -I*": "ask",
+      "sed -I*": "ask",
+      {{- end }}
 
       "sleep *": "allow",
 

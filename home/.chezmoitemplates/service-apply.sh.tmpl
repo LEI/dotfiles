@@ -1,25 +1,26 @@
-{{- /* Inline enable-or-restart for a user service. Keys: unit, label, os */ -}}
 {{- if eq .os "darwin" -}}
-_plist="$HOME/Library/LaunchAgents/{{ .label }}.plist"
-if [ ! -f "$_plist" ]; then
-  err "{{ .label }}: plist not found"
+{{- $label := get . "label" -}}
+plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
+if [ ! -f "$plist" ]; then
+  err "{{ $label }}: plist not found"
 fi
-launchctl bootout "gui/$(id -u)/{{ .label }}" 2>/dev/null || true
-run launchctl bootstrap "gui/$(id -u)" "$_plist"
-if ! launchctl list "{{ .label }}" >/dev/null 2>&1; then
-  err "{{ .label }}: service failed to start"
+launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
+run launchctl bootstrap "gui/$(id -u)" "$plist"
+if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
+  err "{{ $label }}: service failed to start"
 fi
-{{- else -}}
+{{- else }}
+{{- $unit := get . "unit" | default "UNIT" -}}
 if has systemctl; then
   run systemctl --user daemon-reload
-  if systemctl --user is-active --quiet {{ .unit }}; then
-    run systemctl --user restart {{ .unit }}
+  if systemctl --user is-active --quiet {{ $unit }}; then
+    run systemctl --user restart {{ $unit }}
   else
-    run systemctl --user enable --now {{ .unit }}
+    run systemctl --user enable --now {{ $unit }}
   fi
-  if ! systemctl --user is-active --quiet {{ .unit }}; then
-    run systemctl --user status {{ .unit }} || true
-    err "{{ .unit }} service failed to start"
+  if ! systemctl --user is-active --quiet {{ $unit }}; then
+    run systemctl --user status {{ $unit }} || true
+    err "{{ $unit }} service failed to start"
   fi
 fi
 {{- end }}

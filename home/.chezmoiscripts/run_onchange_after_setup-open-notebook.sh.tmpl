@@ -16,7 +16,7 @@
 {{-   $models = append $models (dict "name" $ollamaId "type" $type "default" $notebookRoles) -}}
 {{- end -}}
 {{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
-#!/bin/sh
+#!/bin/bash
 # config hash: {{ dict "credential" $cred "profiles" $.ai.profiles.local "providers" $.ai.providers | toJson | sha256sum }}
 set -eu
 

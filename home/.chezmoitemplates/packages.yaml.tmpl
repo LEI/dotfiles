@@ -391,6 +391,7 @@ packages:
   # bunx @mariozechner/pi-coding-agent
   # pi:
   #   enabled: {{ and .container .features.ai }}
+    #   {{ .container | toJson }}
   #   # env:
   #   #   PI_CONFIG_DIR: ~/.config/pi
   #   name: "@mariozechner/pi-coding-agent"

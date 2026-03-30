@@ -4,4 +4,4 @@
 {{- range (dig "logseq" "graphs" (list) .) -}}
 {{-   $dirs = append $dirs (printf "%s/%s" $base .name) -}}
 {{- end -}}
-{{- $dirs | toJson -}}
+{{- $dirs | toJson }}

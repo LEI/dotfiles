@@ -6,4 +6,4 @@
 {{- else if eq .chezmoi.os "windows" }}
 {{-   $cpuCores = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfCores") | trim | atoi }}
 {{- end }}
-{{- $cpuCores -}}
+{{- $cpuCores }}

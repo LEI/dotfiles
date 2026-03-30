@@ -7,15 +7,15 @@
 {{- $packageFiles := get . "packageFiles" | default list }}
 {{- $packageType := get . "packageType" | default "" }}
 
-{{- if empty $defaultType }}
-{{-   warnf "missing defaultType" }}
-{{- end }}
-{{- if empty $packageFiles }}
-{{-   warnf "missing packageFiles" }}
-{{- end }}
-{{- if empty $packageType }}
-{{-   warnf "missing packageType" }}
-{{- end }}
+{{- /* if empty $defaultType -}}
+{{-   warnf "get-packages: missing defaultType" -}}
+{{- end -}}
+{{- if empty $packageFiles -}}
+{{-   warnf "get-packages: missing packageFiles" -}}
+{{- end -}}
+{{- if empty $packageType -}}
+{{-   warnf "get-packages: missing packageType" -}}
+{{- end */ -}}
 
 {{- range $path := $packageFiles }}
 {{-   $fileData := includeTemplate $path $ | fromYaml }}
@@ -24,7 +24,7 @@
 {{-   end }}
 {{-   $filePackages := get $fileData "packages" }}
 {{-   if not (kindIs "map" $filePackages) }}
-{{-     warnf "invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
+{{-     warnf "get-packages: invalid packages type (%s) in %s" (kindOf $filePackages) $path }}
 {{-     continue }}
 {{-   end }}
 {{-   $packages = mergeOverwrite $packages $filePackages }}
@@ -56,7 +56,7 @@
 {{-     end -}}
 {{- /*     $packages = append $packages $name */ -}}
 {{-     if get $packages $name -}}
-{{-       warnf "Overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
+{{-       warnf "get-packages: overriding package (python) %s (%s -> %s)" $name (get (get $packages $name) "options") dict -}}
 {{-     end -}}
 {{-     $_ := set $packages $name dict -}}
 {{-   end -}}
@@ -66,5 +66,5 @@
   "input" $packages
 )) | fromJson -}}
 
-{{- /* warnf "%s packages: %s" $packageType ($output | keys) */ -}}
-{{- $output | toJson -}}
+{{- /* warnf "get-packages: %s packages: %s" $packageType ($output | keys) */ -}}
+{{- $output | toJson }}

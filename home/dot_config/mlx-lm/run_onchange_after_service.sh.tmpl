@@ -1,0 +1,32 @@
+{{- $provider := get .ai.providers "mlx-lm" -}}
+#!/bin/sh
+# plist: {{ includeTemplate "Library/private_LaunchAgents/com.mlx-lm.server.plist.tmpl" . | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has brew; then
+  err "brew not found"
+fi
+# brew list mlx-lm >/dev/null 2>&1 # mlx-lm not installed
+
+# TODO: prefer service-apply.sh
+GUI="gui/$(id -u)"
+# LABEL="{{ $provider.label }}"
+# PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+# Stop brew-managed service (default port 8080, conflicts with custom plist)
+if launchctl print "$GUI/homebrew.mxcl.mlx-lm" >/dev/null 2>&1; then
+  msg "stopping brew-managed mlx-lm service"
+  run launchctl bootout "$GUI/homebrew.mxcl.mlx-lm"
+fi
+
+# # Reload custom service
+# launchctl bootout "$GUI/$LABEL" 2>/dev/null || true
+# msg "loading mlx-lm service (port {{ $provider.port }})"
+# run launchctl bootstrap "$GUI" "$PLIST"
+{{ includeTemplate "service-apply.sh.tmpl" (dict
+  "unit" "mlx-lm"
+  "label" $provider.label
+  "os" .chezmoi.os
+) -}}

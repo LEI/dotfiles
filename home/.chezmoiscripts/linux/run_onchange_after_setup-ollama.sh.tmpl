@@ -1,6 +1,6 @@
 {{- if and .features.ollama .features.podman -}}
 #!/bin/sh
-# container: {{ include (joinPath .chezmoi.sourceDir "dot_config/containers/systemd/ollama.container") | sha256sum }}
+# container: {{ include "dot_config/containers/systemd/ollama.container" | sha256sum }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

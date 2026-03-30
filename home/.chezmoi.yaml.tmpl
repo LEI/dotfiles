@@ -14,7 +14,8 @@
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
 {{- $container := includeTemplate "container.tmpl" dict -}}
-{{- if and $container .chezmoi.config.verbose -}}
+{{- $isContainer := not (empty $container) -}}
+{{- if and $isContainer .chezmoi.config.verbose -}}
 {{-   warnf "container type: %s" $container -}}
 {{- end -}}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
@@ -23,7 +24,7 @@
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
-{{- if or $ci $codespaces $container $devContainer -}}
+{{- if or $ci $codespaces $isContainer $devContainer -}}
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- else if $interactive -}}
@@ -47,7 +48,7 @@
 
 {{- $variantID := get (get .chezmoi "osRelease" | default dict) "variantID" -}}
 
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) -}}
+{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) | trim -}}
 
 {{- $chassisVendor := "" -}}
 {{- $chassisVendorFile := "/sys/devices/virtual/dmi/id/chassis_vendor" -}}
@@ -99,7 +100,7 @@
 {{- end -}}
 
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
-{{- $libc := includeTemplate "libc.tmpl" . -}}
+{{- $libc := includeTemplate "libc.tmpl" . | trim -}}
 
 {{- $timezone := env "TZ" -}}
 {{- if and (not $timezone) (lookPath "sh" | isExecutable) -}}
@@ -113,7 +114,7 @@
   "chassisVendor" $chassisVendor
   "ci" $ci
   "codespaces" $codespaces
-  "container" $container
+  "container" $isContainer
   "devContainer" $devContainer
   "ephemeral" $ephemeral
   "gui" (and (ne $profile "minimal") (not (or $ephemeral $headless)))

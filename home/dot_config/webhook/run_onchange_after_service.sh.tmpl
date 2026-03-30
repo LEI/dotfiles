@@ -4,13 +4,15 @@
 {{- if eq .chezmoi.os "darwin" }}
 # plist: {{ includeTemplate "Library/private_LaunchAgents/com.webhook.alert.plist.tmpl" . | sha256sum }}
 {{- else }}
-# service: {{ include (joinPath .chezmoi.sourceDir "dot_config/systemd/user/webhook.service") | sha256sum }}
+# service: {{ include "dot_config/systemd/user/webhook.service" | sha256sum }}
 {{- end }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-has webhook || err "webhook not found"
+if ! has webhook; then
+  err "webhook not found"
+fi
 
 if [ ! -d "$HOME/.local/state/webhook" ]; then
   run mkdir -p "$HOME/.local/state/webhook"
@@ -24,4 +26,4 @@ fi
 # Manual test:
 # curl -X POST http://localhost:9000/hooks/alert -H 'Content-Type: application/json' \
 #   -d '{"status":"firing","alerts":[{"labels":{"alertname":"test"},"annotations":{}}]}'
-{{- end -}}
+{{ end -}}

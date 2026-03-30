@@ -1,0 +1,21 @@
+{{- $provider := get .ai.providers "llama-server" -}}
+#!/bin/sh
+{{- if eq .chezmoi.os "darwin" }}
+# plist: {{ includeTemplate "Library/LaunchAgents/com.llama-cpp.server.plist" . | sha256sum }}
+{{- else }}
+# service: {{- /* TODO: include "dot_config/systemd/user/llama-cpp.service" | sha256sum */ -}}
+{{- end }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has brew; then
+  err "brew not found"
+fi
+# brew list llama.cpp >/dev/null 2>&1 # llama.cpp not installed
+
+{{ includeTemplate "service-apply.sh.tmpl" (dict
+  "unit" "llama-server"
+  "label" $provider.label
+  "os" .chezmoi.os
+) -}}

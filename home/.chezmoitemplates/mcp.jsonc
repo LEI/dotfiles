@@ -1,3 +1,4 @@
+{{- $client := get . "client" -}}
 {
   "inputs": [
     /* {
@@ -43,7 +44,7 @@
     },
 
     "context7": {
-      // "enabled": {{ ne .client "opencode" }},
+      // "enabled": {{ ne $client "opencode" }},
       {{- if env "CONTEXT7_API_KEY" }}
       "type": "http",
       "url": "https://mcp.context7.com/mcp",
@@ -65,7 +66,7 @@
 
     {{- if env "EXA_API_KEY" }}
     "exa": {
-      // "enabled": {{ ne .client "opencode" }},
+      // "enabled": {{ ne $client "opencode" }},
       "command": "npx",
       "args": ["--yes", "exa-mcp-server"],
       "env": {
@@ -169,7 +170,7 @@
     {{- end }}
 
     "grep_app": {
-      // "enabled": {{ ne .client "opencode" }},
+      // "enabled": {{ ne $client "opencode" }},
       "type": "http",
       "url": "https://mcp.grep.app"
     },

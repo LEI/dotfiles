@@ -1,7 +1,7 @@
 {{- if .features.processCompose -}}
 #!/bin/sh
 
-# Hash global: {{ include (joinPath .chezmoi.sourceDir "dot_config/process-compose/global.yaml.tmpl") | sha256sum }}
+# Hash global: {{ include "dot_config/process-compose/global.yaml.tmpl" | sha256sum }}
 {{- if eq .chezmoi.os "darwin" }}
 # Hash plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
 {{- end }}

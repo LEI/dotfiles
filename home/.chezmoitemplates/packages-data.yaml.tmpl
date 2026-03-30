@@ -1,10 +1,11 @@
-{{- $ignore := list }}
-{{- range $line := includeTemplate ".chezmoiignore" . | splitList "\n" }}
-{{-   if or (eq $line "") (eq ($line | trunc 1) "#") }}
-{{-     continue }}
-{{-   end }}
-{{-   $ignore = append $ignore $line }}
-{{- end }}
+{{- $ignore := list -}}
+{{- range $line := includeTemplate ".chezmoiignore" . | splitList "\n" -}}
+{{-   if or (eq $line "") (eq ($line | trunc 1) "#") -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   $ignore = append $ignore $line -}}
+{{- end -}}
+# yamllint disable
 
 {{- $packageFiles := list }}
 {{- range $path := glob (joinPath .chezmoi.sourceDir "**" ".packages.yaml") }}

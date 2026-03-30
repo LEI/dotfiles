@@ -1,56 +1,102 @@
 #!/usr/bin/env bash
+# Usage: chezmoi-render <directory> [templates...]
+# Renders managed templates to a staging directory.
+# Use -q/--quiet to suppress output.
 
-# Usage: chezmoi render <directory>
-# Renders all managed templates to a staging directory preserving target paths.
-# Uses execute-template for speed (~65ms/file vs ~1s/file with chezmoi cat).
-# Always prints the directory path to stdout.
+set -euo pipefail
 
-set -eu
+dest="${1:?usage: chezmoi-render <directory> [templates...]}"
+shift
 
-dest="${1:?usage: chezmoi render <directory>}"
+quiet=false
+templates=()
+for arg in "$@"; do
+  case "$arg" in
+    -q|--quiet)
+      quiet=true
+      ;;
+    *)
+      templates+=("$arg")
+      ;;
+  esac
+done
+
 mkdir -p "$dest"
-echo "$dest"
+
+if [ "$quiet" != true ]; then
+  printf 'Output: %s\n' "${dest#$PWD/}" >&2
+fi
 
 source_dir="$(chezmoi source-path)"
+if [ -z "$source_dir" ]; then
+  printf 'error: could not determine source directory\n' >&2
+  exit 1
+fi
+prefix="${source_dir#$PWD/}"
 
-# Collect source-relative template paths
-templates="$(chezmoi managed --include=files --path-style=source-relative | grep '\.tmpl$')"
+# Strip prefix from explicit template paths
+if [ ${#templates[@]} -gt 0 ]; then
+  fixed=()
+  for t in "${templates[@]}"; do
+    fixed+=("${t#$prefix/}")
+  done
+  templates=("${fixed[@]}")
+fi
 
-if [ -z "$templates" ]; then
+# Get all templates if none provided (find all .tmpl files in source, excluding config)
+if [ ${#templates[@]} -eq 0 ]; then
+  cd "$source_dir"
+  mapfile -t templates < <(find . -name '*.tmpl' -type f | grep -v '^./.chezmoi.yaml.tmpl$' | sort)
+fi
+
+if [ ${#templates[@]} -eq 0 ]; then
   exit 0
 fi
 
-# Batch-resolve all target paths in one chezmoi call
-abs_sources="$(echo "$templates" | sed "s|^|$source_dir/|")"
-targets="$(echo "$abs_sources" | xargs chezmoi target-path)"
+# Resolve source paths to target paths (use absolute paths)
+cd "$source_dir"
+mapfile -t targets < <(printf '%s\n' "${templates[@]}" | sed "s|^|$source_dir/|" | xargs chezmoi target-path)
 
-failed=()
-verbose="${VERBOSE:-false}"
+render() {
+  local src="$1"
+  local target="$2"
 
-# Render each template: paste source and target, process line by line
-while IFS="$(printf '\t')" read -r src target; do
-  rel="${target#"$HOME"/}"
-  out="$dest/$rel"
+  if [ -z "$src" ] || [ -z "$target" ]; then
+    return 1
+  fi
+
+  local rel="${target#"$HOME"/}"
+  local out="$dest/$rel"
+  local base
+  base=$(basename "$src")
+
   mkdir -p "${out%/*}"
 
-  if chezmoi execute-template < "$source_dir/$src" > "$out" 2>/dev/null; then
-    if [ "$verbose" != false ]; then
-      printf >&2 '  %s\n' "$rel"
-    else
-      printf >&2 '.'
-    fi
-  else
-    printf >&2 'E'
-    failed+=("$rel")
-  fi
-done < <(paste <(echo "$templates") <(echo "$targets"))
+  local cmd=(chezmoi execute-template --file "$source_dir/$src")
+  local input="/dev/null"
 
-if [ "${#failed[@]}" -gt 0 ]; then
-  printf >&2 '\n'
-  echo >&2 "FAIL"
-  for rel in "${failed[@]}"; do
-    echo >&2 "  - $rel"
-  done
+  if [[ "$base" == modify_* ]]; then
+    cmd+=(--with-stdin)
+    if [ -f "$target" ]; then
+      input="$target"
+    fi
+  fi
+
+  "${cmd[@]}" <"$input" >"$out"
+}
+
+export -f render
+export dest source_dir
+
+max_jobs=$(nproc 2>/dev/null || echo 4)
+total=${#templates[@]}
+
+if ! paste <(printf '%s\n' "${templates[@]}") <(printf '%s\n' "${targets[@]}") \
+  | xargs -P "$max_jobs" -n 2 bash -c 'render "$@"' _; then
+  printf 'error: template rendering failed\n' >&2
   exit 1
 fi
-echo >&2 "OK"
+
+if [ "$quiet" != true ]; then
+  printf 'Rendered: %d templates\n' "$total" >&2
+fi

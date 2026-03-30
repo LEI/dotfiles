@@ -1,6 +1,6 @@
 {{- $ollamaInCompose := and .features.ollama (eq .os "linux") (not .features.podman) -}}
 {{- $ollamaHost := $ollamaInCompose | ternary "ollama" "host.docker.internal" -}}
-{{- $mlx := false -}}{{/* disabled: config_store corrupts custom providers (v1.4.14 bug) */}}
+{{- $mlx := false -}}{{- /* disabled: config_store corrupts custom providers (v1.4.14 bug) */ -}}
 {
   "config_store": {
     "enabled": true,

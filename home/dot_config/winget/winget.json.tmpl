@@ -1,5 +1,5 @@
 {{- $jsonPackages := list -}}
-{{- $wingetPackages := .packages.winget }}
+{{- $wingetPackages := get .packages "winget" | default dict }}
 
 {{- if empty $wingetPackages }}
 {{-   warnf "missing winget packages" }}

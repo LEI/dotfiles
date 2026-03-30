@@ -1,5 +1,7 @@
+# ~/.macos
+# https://github.com/kevinSuttle/macOS-Defaults
+
 {{- /* TODO: move to .chezmoiscripts/darwin/ */ -}}
-{{- /* https://github.com/kevinSuttle/macOS-Defaults */ -}}
 
 {{- if lookPath "scutil" | isExecutable }}
 # Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}

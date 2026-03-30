@@ -25,12 +25,12 @@ description = "Benchmark shell startup with hyperfine"
 run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
 [tasks."test:unit"]
-alias = "t:unit"
+alias = "tu"
 description = "Run unit tests only"
 run = "mise run test -- --filter-tags type:unit"
 
 [tasks."test:smoke"]
-alias = "t:smoke"
+alias = "ts"
 description = "Run smoke tests (needs deployed home)"
 run = "mise run test -- --filter-tags type:smoke"
 

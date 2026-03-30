@@ -42,6 +42,9 @@ ai:
     openrouter:
       base_url: https://openrouter.ai/api/v1
       key_env: OPENROUTER_API_KEY
+    z-ai:
+      base_url: https://api.z.ai/v1
+      key_env: ZAI_API_KEY
 
   # dot_config/opencode/opencode.jsonc: context window, provider IDs
   # dot_logseq/settings/ollama-logseq.json: ollama ID for fast role
@@ -133,3 +136,21 @@ ai:
       coding: huggingface/Qwen/Qwen3-Coder-30B-A3B-Instruct
       fast: huggingface/Qwen/Qwen3-8B-Instruct
       reasoning: huggingface/Qwen/Qwen3-32B-Instruct
+    z-ai-lite:
+      agentic: z-ai/GLM-4.7
+      chat: z-ai/GLM-4.7
+      coding: z-ai/GLM-4.7
+      fast: z-ai/GLM-4.6
+      reasoning: z-ai/GLM-4.7
+    z-ai-pro:
+      agentic: z-ai/GLM-5.1
+      chat: z-ai/GLM-4.7
+      coding: z-ai/GLM-5.1
+      fast: z-ai/GLM-4.6
+      reasoning: z-ai/GLM-5-Turbo
+    z-ai-max:
+      agentic: z-ai/GLM-5
+      chat: z-ai/GLM-5.1
+      coding: z-ai/GLM-5
+      fast: z-ai/GLM-4.7
+      reasoning: z-ai/GLM-5

@@ -1,11 +1,15 @@
-#!/usr/bin/env awk -f
+#!/usr/bin/env -S awk -f
 #MISE hide=true
-#MISE description="Lint lines for consecutive blanks"
+#MISE description="Check for blank lines at start/end and consecutive"
 
-# Reports every occurrence with context and a total at the end.
 # Exit code: 1 if any found, 0 otherwise.
 
 FNR == 1 {
+  # Check for blank line at start
+  if (/^$/) {
+    total++
+    printf "%s:1: blank line at start of file\n", FILENAME
+  }
   flush()
   blank = 0
   prev = ""

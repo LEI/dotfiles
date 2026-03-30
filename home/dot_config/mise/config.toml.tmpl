@@ -1,8 +1,8 @@
-{{- $miseInteractive := false }}
-{{- with lookPath "mise" }}
-{{-   $ver := output . "version" "--json" | fromJson | dig "version" "" | splitList " " | first }}
-{{-   if $ver }}{{- $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{- end }}
-{{- end }}
+{{- $miseInteractive := false -}}
+{{- with lookPath "mise" -}}
+{{-   $ver := output . "version" "--json" | fromJson | dig "version" "" | splitList " " | first -}}
+{{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
+{{- end -}}
 [settings]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
@@ -47,6 +47,7 @@ interactive = true
 {{- end }}
 run = "{{ . }}"
 shell = "sh"
+# FIXME: chezmoi PATH
 [tasks."check:{{ $name }}".env]
 PATH = "{{ $.brewPrefix }}/bin:{{ $.brewPrefix }}/sbin:{{ $.chezmoi.homeDir }}/.local/share/mise/shims:{{ $.chezmoi.homeDir }}/.local/bin:$PATH"
 # timeout = "5m"
