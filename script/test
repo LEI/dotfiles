@@ -37,6 +37,11 @@ fi
 main() {
   # Files using stubs set BATS_NO_PARALLELIZE_WITHIN_FILE to avoid collisions
   local jobs="${TEST_JOBS:-$(nproc)}"
+  set -- \
+    --jobs "$jobs" \
+    --print-output-on-failure \
+    --timing \
+    --recursive ./test "$@"
   # if [ "${DEBUG:-}" = true ]; then
   #   set -- --debug "$@"
   # fi
@@ -47,14 +52,12 @@ main() {
   if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
     set -- --pretty "$@"
   fi
+  if [ "${CI:-}" != true ]; then
+    set -- --show-output-of-passing-tests "$@"
+  fi
   # set -- --trace "$@"
-  set -x
-  bats \
-    --jobs "$jobs" \
-    --print-output-on-failure \
-    --show-output-of-passing-tests \
-    --timing \
-    --recursive ./test "$@"
+  echo >&2 "bats $*"
+  bats "$@"
 }
 
 main "$@"
