@@ -4,8 +4,6 @@
 set -eu
 
 # TODO: ignore deprecated or disabled warnings for pinned packages
-if [ "${CI:-}" = true ]; then
-  brew doctor || echo >&2 "WARN: brew doctor exited with code $?"
-else
-  brew doctor
-fi
+# and Tier 2 configuration warning on Fedora Silverblue
+# Warning: Your /home directory is a symlink.
+brew doctor || echo >&2 "WARN: brew doctor exited with code $?"
