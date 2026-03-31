@@ -44,5 +44,5 @@ var data = {files:[
 {"link":"executable_chezmoi-trace.fece112f.html","title":"executable_chezmoi-trace","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-trace","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"3","total_lines" : "3"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-31 05:46:44", "instrumented" : 1076, "covered" : 287,};
+var header = { "command" : "test", "date" : "2026-03-31 06:20:56", "instrumented" : 1076, "covered" : 287,};
 var merged_data = [];

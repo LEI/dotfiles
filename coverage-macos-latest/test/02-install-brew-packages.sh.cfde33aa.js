@@ -79,10 +79,9 @@ var data = {lines:[
 {"lineNum":"   78","line":"brew \"yamllint\""},
 {"lineNum":"   79","line":"brew \"yq\""},
 {"lineNum":"   80","line":"brew \"zoxide\""},
-{"lineNum":"   81","line":"cask \"inkscape\""},
-{"lineNum":"   82","line":"# ENV[\"SOME_ENV_VAR\"] = \"some_value\""},
-{"lineNum":"   83","line":"EOF"},
+{"lineNum":"   81","line":"# ENV[\"SOME_ENV_VAR\"] = \"some_value\""},
+{"lineNum":"   82","line":"EOF"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-31 05:46:44", "instrumented" : 16, "covered" : 7,};
+var header = { "command" : "test", "date" : "2026-03-31 06:20:56", "instrumented" : 16, "covered" : 7,};
 var merged_data = [];

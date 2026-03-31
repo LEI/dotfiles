@@ -22,5 +22,5 @@ var data = {lines:[
 {"lineNum":"   21","line":"msg \"Already installed: yamllint\"","class":"lineCov","hits":"1","order":"119","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-31 05:44:11", "instrumented" : 10, "covered" : 6,};
+var header = { "command" : "test", "date" : "2026-03-31 06:19:03", "instrumented" : 10, "covered" : 6,};
 var merged_data = [];

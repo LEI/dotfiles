@@ -8,5 +8,5 @@ var data = {lines:[
 {"lineNum":"    7","line":"chezmoi execute-template --refresh-externals=never -- \"$@\"","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-31 05:47:13", "instrumented" : 2, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-03-31 06:21:23", "instrumented" : 2, "covered" : 0,};
 var merged_data = [];
