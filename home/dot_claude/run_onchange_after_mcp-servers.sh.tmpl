@@ -1,14 +1,16 @@
 {{- $_ := . | setValueAtPath "client" "claude" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $servers := dict -}}
+{{- /*
+  "code-mode"
+  "open-notebook"
+  "utcp"
+*/ -}}
 {{- range $key, $value := pick $mcp.servers
   "claude-context"
-  "code-mode"
   "context7"
   "deep-wiki"
   "grep_app"
-  "open-notebook"
-  "utcp"
 -}}
 {{-   $_ := $servers | setValueAtPath $key $value -}}
 {{- end -}}

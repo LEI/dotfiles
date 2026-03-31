@@ -2,7 +2,7 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $name := eq .profile "work" | ternary "premium" "z-ai-lite" -}}
+{{- $name := eq .profile "work" | ternary "premium" "zai-coding-plan-lite" -}}
 {{- $p := get .ai.profiles $name -}}
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
@@ -187,6 +187,7 @@
       "fd * -x*": "ask",
       "fd *": "allow",
 
+      "gh *": "ask",
       "gh issue list *": "allow",
       "gh issue status *": "allow",
       "gh issue view *": "allow",
@@ -201,8 +202,8 @@
       "gh run list *": "allow",
       "gh run view *": "allow",
       "gh search *": "allow",
-      "gh *": "ask",
 
+      "glab *": "ask",
       "glab ci list *": "allow",
       "glab ci status *": "allow",
       "glab ci view *": "allow",
@@ -214,7 +215,6 @@
       "glab pipeline get *": "allow",
       "glab pipeline list *": "allow",
       "glab repo view *": "allow",
-      "glab *": "ask",
 
       "sq *": "allow",
       "sq * -o*": "ask",

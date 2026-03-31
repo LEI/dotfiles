@@ -9,7 +9,7 @@ mkdir -p "$prek_dir"
 rm -rf "$prek_dir"/tmp.*
 
 render_dir="$(mktemp -d -p "$prek_dir")"
-trap 'rm -rf "$render_dir"' EXIT
+# trap 'rm -rf "$render_dir"' EXIT
 
 # Pass args through to chezmoi-render
 # Use -q/--quiet to suppress output

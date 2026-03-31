@@ -423,11 +423,6 @@ packages:
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
-  # mmdc:
-  #   enabled: {{ and .features.neovim .features.node }}
-  #   nameOverwrite:
-  #     npm: "@mermaid-js/mermaid-cli"
-  #   type: npm
   mpv:
     description: Video player
     enabled: {{ and (eq .osIDLike "darwin") .gui }}
@@ -440,10 +435,10 @@ packages:
   nvtop: # nvitop, qmassa
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
-    enabled: {{ and .features.ollama (eq .osIDLike "darwin") (not .gui) }}
-  ollama-app:
-    enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+    enabled: {{ and .features.ollama (eq .osIDLike "darwin") }}
+  # ollama-app:
+  #   enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
+  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   openssl:
     enabled: {{ eq .osIDLike "alpine" "fedora" }}
     nameOverwrite:
@@ -959,12 +954,12 @@ osPackages:
     cask:
       antigravity:
         enabled: {{ and .features.ai .gui }}
-      cherry-studio:
-        enabled: {{ and .features.ai .gui }}
-      jan:
-        enabled: {{ and .features.ai .gui }}
-      lobehub:
-        enabled: {{ and .features.ai .gui }}
+      # cherry-studio:
+      #   enabled: {{ and .features.ai .gui }}
+      # jan:
+      #   enabled: {{ and .features.ai .gui }}
+      # lobehub:
+      #   enabled: {{ and .features.ai .gui }}
 
       # bruno: # postman
       # cyberduck:

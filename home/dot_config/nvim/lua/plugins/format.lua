@@ -45,7 +45,7 @@ return {
     event = {
       'BufWritePre',
       -- 'CursorHold',
-      'VeryLazy',
+      -- 'VeryLazy',
     },
     keys = {
       {
@@ -55,7 +55,6 @@ return {
         mode = '',
       },
     },
-    -- This will provide type hinting with LuaLS
     ---@module 'conform'
     ---@type conform.setupOpts
     opts = {
@@ -96,7 +95,7 @@ return {
             ignore_errors = false,
             -- Map of treesitter language to filetype
             lang_to_ft = {
-              -- bash = 'sh',
+              bash = 'sh',
             },
             -- Map of treesitter language to file extension
             -- A temporary file name with this extension will be generated during formatting
@@ -118,8 +117,8 @@ return {
             -- Map of treesitter language to formatters to use
             -- (defaults to the value from formatters_by_ft)
             lang_to_formatters = {
-              bash = { 'shfmt' },
-              sh = { 'shfmt' },
+              -- bash = { 'shfmt' },
+              -- sh = { 'shfmt' },
             },
           },
         },

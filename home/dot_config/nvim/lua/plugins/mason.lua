@@ -370,7 +370,7 @@ return {
               -- 'json',
               -- 'lua',
               'markdown',
-              'plaintext',
+              'text', -- 'plaintext',
               -- 'rust',
               -- 'ts',
               -- 'yaml',

@@ -11,6 +11,7 @@
 # macOS build version: {{ output "sw_vers" "--buildVersion" }}
 {{- end }}
 {{- /* "cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d '')" */ -}}
+{{- /* TODO: chezmoiexternal sed */ -}}
 {{- $url := "https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos" -}}
 {{- $script := output "curl" "-LSfs" $url
     | replaceAllRegex "Europe/Brussels" .timezone

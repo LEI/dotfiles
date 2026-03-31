@@ -42,7 +42,7 @@ ai:
     openrouter:
       base_url: https://openrouter.ai/api/v1
       key_env: OPENROUTER_API_KEY
-    z-ai:
+    zai:
       base_url: https://api.z.ai/v1
       key_env: ZAI_API_KEY
 
@@ -136,21 +136,21 @@ ai:
       coding: huggingface/Qwen/Qwen3-Coder-30B-A3B-Instruct
       fast: huggingface/Qwen/Qwen3-8B-Instruct
       reasoning: huggingface/Qwen/Qwen3-32B-Instruct
-    z-ai-lite:
-      agentic: z-ai/GLM-4.7
-      chat: z-ai/GLM-4.7
-      coding: z-ai/GLM-4.7
-      fast: z-ai/GLM-4.5-Air
-      reasoning: z-ai/GLM-4.7
-    z-ai-pro:
-      agentic: z-ai/GLM-5.1
-      chat: z-ai/GLM-4.7
-      coding: z-ai/GLM-5.1
-      fast: z-ai/GLM-4.6
-      reasoning: z-ai/GLM-5-Turbo
-    z-ai-max:
-      agentic: z-ai/GLM-5.1
-      chat: z-ai/GLM-4.7
-      coding: z-ai/GLM-5.1
-      fast: z-ai/GLM-4.7
-      reasoning: z-ai/GLM-5
+    zai-coding-plan-lite:
+      agentic: zai/glm-4.7
+      chat: zai-coding-plan/glm-4.7
+      coding: zai-coding-plan/glm-4.7
+      fast: zai-coding-plan/glm-4.5-air
+      reasoning: zai-coding-plan/glm-4.7
+    zai-coding-plan-pro:
+      agentic: zai-coding-plan/glm-5.1
+      chat: zai-coding-plan/glm-4.7
+      coding: zai-coding-plan/glm-5.1
+      fast: zai-coding-plan/glm-4.6
+      reasoning: zai-coding-plan/glm-5-turbo
+    zai-coding-plan-max:
+      agentic: zai-coding-plan/glm-5.1
+      chat: zai-coding-plan/glm-4.7
+      coding: zai-coding-plan/glm-5.1
+      fast: zai-coding-plan/glm-4.7
+      reasoning: zai-coding-plan/glm-5

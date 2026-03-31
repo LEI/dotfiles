@@ -53,9 +53,15 @@ vim.api.nvim_create_autocmd({ 'VimResized' }, {
 vim.api.nvim_create_autocmd('BufReadPost', {
   group = vim.api.nvim_create_augroup('last_loc', { clear = true }),
   callback = function(event)
-    local exclude = { 'gitcommit' }
+    local exclude_ft = { 'gitcommit', 'gitrebase' }
+    local exclude_name = { 'COMMIT_EDITMSG', 'MERGE_MSG', 'SQUASH_MSG', 'TAG_EDITMSG' }
     local buf = event.buf
-    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+    local fname = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ':t')
+    if
+      vim.tbl_contains(exclude_ft, vim.bo[buf].filetype)
+      or vim.tbl_contains(exclude_name, fname)
+      or vim.b[buf].lazyvim_last_loc
+    then
       return
     end
     vim.b[buf].lazyvim_last_loc = true

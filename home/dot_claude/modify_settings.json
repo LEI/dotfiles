@@ -16,7 +16,7 @@
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_HOOK_TASK_LOG": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1",
     "ECC_HOOK_PROFILE": "minimal",
     "ENABLE_TOOL_SEARCH": "auto:5",
     "MAX_THINKING_TOKENS": "8000",
@@ -325,7 +325,8 @@
   },
   "alwaysThinkingEnabled": false,
   "showClearContextOnPlanAccept": true,
-  "plansDirectory": "{{ .chezmoi.homeDir }}/notes/plans",
+  "showThinkingSummaries": true,
+  "plansDirectory": "./.claude/plans",
   "autoMemoryEnabled": true,
   "autoUpdates": false,
   "skills": {

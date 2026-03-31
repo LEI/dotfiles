@@ -58,27 +58,26 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 #   run brew bundle dump --file="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
 # fi
 
-{{- range $type := list "brew" "cask" "mas" "vscode" -}}
-{{- if not (hasKey $.packages $type) -}}
-{{-   continue -}}
-{{- end -}}
-{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) -}}
+{{- range $type := list "brew" "cask" "mas" "vscode" }}
+{{- if not (hasKey $.packages $type) -}}{{- continue -}}{{- end -}}
+{{- $hooks := includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) | trim -}}
+{{- if empty $hooks -}}{{- continue -}}{{- end }}
+{{ $hooks }}
 {{ end -}}
 
 # run brew bundle list --global
 {{- if eq (env "CACHE_BUST") "true" }}
-# brew hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "brew") | sha256sum }}
-# cask hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "cask") | sha256sum }}
-# mas hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "mas") | sha256sum }}
-# vscode hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "vscode") | sha256sum }}
+{{- range $type := list "brew" "cask" "mas" "vscode" }}
+# {{ $type }} hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") $type) | sha256sum }}
+{{- end }}
 {{- end }}
 dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
 {{ includeTemplate "Brewfile" . | trim }}
 EOF
 
 {{- range $type := list "brew" "cask" "mas" "vscode" -}}
-{{- if not (hasKey $.packages $type) -}}
-{{-   continue -}}
-{{- end -}}
-{{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) -}}
-{{- end }}
+{{- if not (hasKey $.packages $type) -}}{{- continue -}}{{- end -}}
+{{- $hooks := includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) | trim -}}
+{{- if empty $hooks -}}{{- continue -}}{{- end }}
+{{ $hooks }}
+{{ end -}}
