@@ -25,5 +25,5 @@ var data = {lines:[
 {"lineNum":"   24","line":"{{ end -}}","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-03-30 06:40:18", "instrumented" : 12, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-03-31 05:46:44", "instrumented" : 12, "covered" : 0,};
 var merged_data = [];

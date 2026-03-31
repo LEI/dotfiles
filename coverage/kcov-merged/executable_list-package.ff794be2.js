@@ -1,13 +1,13 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineNoCov","hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"236",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineNoCov","hits":"0",},
-{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineNoCov","hits":"0",},
+{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"239",},
+{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"235",},
 {"lineNum":"    7","line":"fi"},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineNoCov","hits":"0",},
+{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"234",},
 {"lineNum":"   10","line":"apk)"},
 {"lineNum":"   11","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0",},
 {"lineNum":"   12","line":"  ;;"},
@@ -22,9 +22,9 @@ var data = {lines:[
 {"lineNum":"   21","line":"  # yay -? --aur"},
 {"lineNum":"   22","line":"  ;;"},
 {"lineNum":"   23","line":"brew)"},
-{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0",},
+{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"1","order":"238",},
 {"lineNum":"   25","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineNoCov","hits":"0",},
+{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"237",},
 {"lineNum":"   27","line":"  ;;"},
 {"lineNum":"   28","line":"cask)"},
 {"lineNum":"   29","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0",},
@@ -109,5 +109,5 @@ var data = {lines:[
 {"lineNum":"  108","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-30 06:40:54", "instrumented" : 40, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-03-31 05:47:13", "instrumented" : 40, "covered" : 6,};
 var merged_data = [];
