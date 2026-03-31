@@ -3,12 +3,13 @@
 [![ci](https://github.com/LEI/dotfiles/actions/workflows/ci.yaml/badge.svg)](https://github.com/LEI/dotfiles/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/LEI/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/LEI/dotfiles)
 
+<!-- - [Bash benchmark](https://lei.github.io/dotfiles/dev/bench/) -->
+<!-- - [Test coverage](https://lei.github.io/dotfiles/coverage/kcov-merged/) -->
+
 Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io).
 
-- [Bash benchmark](https://lei.github.io/dotfiles/dev/bench/)
 - [Bash benchmark (macos)](https://lei.github.io/dotfiles/benchmark-macos-latest/)
 - [Bash benchmark (ubuntu)](https://lei.github.io/dotfiles/benchmark-ubuntu-latest/)
-- [Test coverage](https://lei.github.io/dotfiles/coverage/kcov-merged/)
 - [Test coverage (macos)](https://lei.github.io/dotfiles/coverage-macos-latest/test/)
 - [Test coverage (ubuntu)](https://lei.github.io/dotfiles/coverage-ubuntu-latest/test/)
 
