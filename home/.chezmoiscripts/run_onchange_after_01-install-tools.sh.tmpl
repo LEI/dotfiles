@@ -27,7 +27,7 @@ set -- "$@" --yes
 
 # TODO: check gpg-agent is running
 
-{{- $tools := get (includeTemplate "dot_config/mise/config.toml.tmpl" . | fromToml) "tools" }}
+{{- $tools := get (includeTemplate "dot_config/mise/tools.toml.tmpl" . | fromToml) "tools" }}
 
 # config.toml tools hash: {{ $tools | toJson | sha256sum }}
 msg "Installing tools"

@@ -1,85 +1,90 @@
 #!/usr/bin/env bash
 #MISE hide=true
 #MISE description="Validate files against their declared $schema"
-# Validates files against their declared $schema.
-# Handles jsonc/json5 via json5, toml/yaml via yq.
-# Templates and modify scripts must be rendered before passing to this script.
-# Requires: jq, uvx, yq
-# Optional: json5 (for .jsonc/.json5 files)
+# Requires: check-jsonschema, jq, yq
 
 set -euo pipefail
 
-for cmd in jq uvx yq; do
-  command -v "$cmd" >/dev/null || {
+for cmd in check-jsonschema jq yq; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
     printf >&2 'error: %s is required\n' "$cmd"
     exit 1
-  }
+  fi
 done
 
-passed=0
-failed=0
-skipped=0
+# Validator (exported for parallel execution)
+validate_schema() {
+  file="$1"
+  ext="${file##*.}"
 
-# Returns the file extension
-file_ext() {
-  echo "${1##*.}"
-}
-
-# Reads content from stdin, extracts $schema based on effective extension
-get_schema() {
-  case "$(file_ext "$1")" in
-  json) jq -r 'if type == "object" then .["$schema"] // empty else empty end' 2>/dev/null ;;
-  jsonc | json5)
-    if ! command -v json5 >/dev/null; then
-      cat >/dev/null
-      return 1
-    fi
-    json5 2>/dev/null | jq -r 'if type == "object" then .["$schema"] // empty else empty end' 2>/dev/null
-    ;;
-  toml) yq -p toml 'select(."$schema") | ."$schema"' 2>/dev/null ;;
-  yaml | yml) yq 'select(."$schema") | ."$schema"' 2>/dev/null ;;
-  *)
-    cat >/dev/null
+  # Check existence
+  if [ ! -e "$file" ]; then
+    printf "FAIL: %s (not found)\n" "$file"
     return 1
-    ;;
-  esac
-}
-
-# Reads content from stdin, converts to plain json for validation
-normalize() {
-  case "$(file_ext "$1")" in
-  jsonc | json5) json5 ;;
-  toml) yq -p toml -o json ;;
-  yaml | yml) yq -o json ;;
-  *) cat ;;
-  esac
-}
-
-for file in "$@"; do
-  content=$(cat "$file")
-  schema=$(get_schema "$file" <<<"$content") || {
-    skipped=$((skipped + 1))
-    continue
-  }
-  if [[ -z "$schema" ]]; then
-    skipped=$((skipped + 1))
-    continue
   fi
 
-  if output=$(normalize "$file" <<<"$content" | uvx check-jsonschema --schemafile "$schema" - 2>&1); then
-    passed=$((passed + 1))
-    printf 'ok: %s\n' "$file"
+  # Extract $schema - skip silently if can't parse
+  schema=""
+  if [ "$ext" = "json" ]; then
+    schema=$(jq -r '."$schema" // empty' "$file" 2>/dev/null)
+  elif [ "$ext" = "jsonc" ] || [ "$ext" = "json5" ]; then
+    if command -v json5 >/dev/null 2>&1; then
+      schema=$(json5 "$file" 2>/dev/null | jq -r '."$schema" // empty' 2>/dev/null)
+    fi
+  elif [ "$ext" = "toml" ]; then
+    # shellcheck disable=SC2016
+    schema=$(yq -p toml '."$schema"' "$file" 2>/dev/null)
+  elif [ "$ext" = "yaml" ] || [ "$ext" = "yml" ]; then
+    # shellcheck disable=SC2016
+    schema=$(yq '."$schema"' "$file" 2>/dev/null)
+  fi
+
+  # Skip if no schema
+  if [ -z "$schema" ] || [ "$schema" = "null" ]; then
+    # printf "skip: %s (no \$schema)\n" "$file"
+    return 0
+  fi
+
+  # printf "validate: %s\n" "$file"
+
+  # Normalize content
+  if [ "$ext" = "jsonc" ] || [ "$ext" = "json5" ]; then
+    content=$(json5 "$file" 2>/dev/null) || return 0
+  elif [ "$ext" = "toml" ]; then
+    content=$(yq -p toml -o json "$file" 2>/dev/null) || return 0
+  elif [ "$ext" = "yaml" ] || [ "$ext" = "yml" ]; then
+    content=$(yq -o json "$file" 2>/dev/null) || return 0
   else
-    failed=$((failed + 1))
-    printf 'FAIL: %s\n%s\n' "$file" "$output"
+    content=$(cat "$file")
   fi
-done
 
-total=$((passed + failed))
-if ((total > 0 || skipped > 0)); then
-  msg="${passed}/${total} ok"
-  ((skipped > 0)) && msg+=" (${skipped} skipped)"
-  printf '%s\n' "$msg"
+  # Validate
+  if output=$(printf "%s" "$content" | check-jsonschema --schemafile "$schema" - 2>&1); then
+    printf "ok: %s\n" "$file"
+  else
+    printf "FAIL: %s\n" "$file"
+    printf "%s\n" "$output"
+    return 1
+  fi
+}
+export -f validate_schema
+
+# Collect files
+if [ $# -eq 0 ]; then
+  mapfile -t files < <(
+    find . -type f \
+      \( -name "*.json" -o -name "*.jsonc" -o -name "*.json5" \
+         -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" \) \
+      -not -path './output/*' \
+      -not -path './.git/*' \
+      -not -path './home/.chezmoitemplates/*' \
+      -not -path '*/modify_*'
+  )
+else
+  files=("$@")
 fi
 
-exit $((failed > 0 ? 1 : 0))
+[ ${#files[@]} -eq 0 ] && exit 0
+
+printf '%s\n' "${files[@]}" \
+  | parallel --line-buffer --halt now,fail=1 -P "$(getconf _NPROCESSORS_ONLN)" validate_schema 2>/dev/null

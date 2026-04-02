@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "darwin" -}}
 {{- $storm := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Storm.itermcolors") | fromJson -}}
 {{- $day := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Day.itermcolors") | fromJson -}}
 {
@@ -5,7 +6,6 @@
     {
       "Name": "Tokyonight",
       "Guid": "3E0D4706-0984-4F11-92D0-D2F07E1401E0",
-      "Use libtickit protocol": true,
       "Use Separate Colors for Light and Dark Mode": true,
       "Terminal Type": "xterm-256color",
       "Normal Font": "HackNF-Regular 12",
@@ -37,22 +37,8 @@
       "Send New Output Alert": false,
       "Send Code When Idle": false,
       "Blur": false,
-      "Keyboard Map": {
-        "0xd-0x20000-0x24{{/* Shift+Enter: multiline (ESC CR) */}}": {
-          "Version": 2,
-          "Apply Mode": 1,
-          "Action": 11,
-          "Text": "1b 0d",
-          "Escaping": 2
-        },
-        "0xd-0x40000-0x24{{/* Ctrl+Enter: plain Enter (CR) */}}": {
-          "Version": 2,
-          "Apply Mode": 1,
-          "Action": 11,
-          "Text": "0d",
-          "Escaping": 2
-        }
-      },
+      "Keyboard Map": {},
+      "Use libtickit protocol": false,
 {{- range $key := keys $storm | sortAlpha }}
       "{{ $key }} (Dark)": {{ get $storm $key | toPrettyJson | indent 6 | trim }},
       "{{ $key }} (Light)": {{ get $day $key | toPrettyJson | indent 6 | trim }},
@@ -62,3 +48,4 @@
     }
   ]
 }
+{{ end -}}

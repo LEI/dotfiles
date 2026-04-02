@@ -44,7 +44,7 @@ run caddy validate --config "$caddyfile"
 
 # Service start handled by brew bundle (restart_service: :changed)
 # Reload config if already running
-if has brew && sudo brew services list | grep -q "^caddy.*started"; then
+if [ "${CHEZMOI_OS:?}" = darwin ] && has brew && sudo brew services list | grep -q "^caddy.*started"; then
   run caddy reload --config "$caddyfile"
 elif has systemctl; then
   # Port 2020: metrics site (SELinux http_port_t)
@@ -130,6 +130,8 @@ elif has systemctl; then
       exit 1
     }
   fi
+elif has brew && brew services list | grep -q "^caddy.*started"; then
+  run caddy reload --config "$caddyfile"
 else
   msg "Error: unable to setup Caddy"
   exit 1
@@ -160,17 +162,19 @@ if has update-ca-trust; then
 fi
 
 # Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites.
-brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
-sed="$(which gsed 2>/dev/null || which sed)"
-if [ -d "$brew_openssl_dir" ]; then
-  brew_bundle="$brew_openssl_dir/cert.pem"
-  caddy_marker="# Caddy Local Authority"
-  # Remove any existing caddy entry (marker through end-of-cert) before re-appending
-  if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-    marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
-    end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
-    run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
+if has brew; then
+  brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
+  sed="$(which gsed 2>/dev/null || which sed)"
+  if [ -d "$brew_openssl_dir" ]; then
+    brew_bundle="$brew_openssl_dir/cert.pem"
+    caddy_marker="# Caddy Local Authority"
+    # Remove any existing caddy entry (marker through end-of-cert) before re-appending
+    if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+      marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
+      end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
+      run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
+    fi
+    msg "Appending caddy root CA to brew openssl bundle"
+    run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
   fi
-  msg "Appending caddy root CA to brew openssl bundle"
-  run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
 fi

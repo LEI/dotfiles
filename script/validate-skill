@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#MISE hide=true
+#MISE description="Validate SKILL.md files against Agent Skills specification"
+# Requires: skill-validator (brew install agent-ecosystem/tap/skill-validator)
+
+set -euo pipefail
+
+if ! command -v skill-validator >/dev/null 2>&1; then
+  printf >&2 'error: skill-validator is required\n'
+  exit 1
+fi
+
+# Validator (exported for parallel execution)
+validate_skill() {
+  path="$1"
+
+  # Check existence
+  if [ ! -e "$path" ]; then
+    printf "FAIL: %s (not found)\n" "$path"
+    return 1
+  fi
+
+  # Resolve to absolute path
+  path=$(realpath "$path")
+
+  # Determine skill directory: if SKILL.md file, use parent; if dir, use as-is
+  if [ -d "$path" ]; then
+    skill_dir="$path"
+  else
+    skill_dir=$(dirname "$path")
+  fi
+
+  # Get skill name from directory
+  dir_name=$(basename "$skill_dir")
+
+  # printf "validate: %s\n" "$path"
+
+  # Run validator - show output on failure
+  output=$(skill-validator check "$skill_dir" 2>&1)
+  result=$?
+
+  if [ $result -eq 0 ] || [ $result -eq 2 ]; then
+    printf "ok: %s\n" "$dir_name"
+  else
+    printf "FAIL: %s\n" "$dir_name"
+    printf "%s\n" "$output"
+    return 1
+  fi
+}
+export -f validate_skill
+
+# Collect files: from args or auto-discover
+if [ $# -eq 0 ]; then
+  mapfile -t files < <(
+    find . -type f -name SKILL.md \
+      -not -path './output/*' \
+      -not -path './.git/*'
+  )
+else
+  files=("$@")
+fi
+
+[ ${#files[@]} -eq 0 ] && exit 0
+
+# Run with GNU parallel (streaming output, fail-fast)
+printf '%s\n' "${files[@]}" \
+  | parallel --line-buffer --halt now,fail=1 -P "$(getconf _NPROCESSORS_ONLN)" validate_skill 2>/dev/null

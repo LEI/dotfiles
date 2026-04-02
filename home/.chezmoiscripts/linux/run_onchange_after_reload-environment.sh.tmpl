@@ -1,5 +1,7 @@
 #!/bin/sh
+
 # environment.d: {{ glob (joinPath .chezmoi.sourceDir "dot_config/environment.d/*.tmpl") | join "\n" | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

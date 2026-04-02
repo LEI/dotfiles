@@ -1,54 +1,34 @@
 #!/usr/bin/env bash
 #MISE alias="l"
-#MISE description="Render chezmoi templates and run all linters"
+#MISE depends="render"
+#MISE description="Run prek on chezmoi templates"
 
 set -euo pipefail
 
-prek_dir="$PWD/output/prek"
-mkdir -p "$prek_dir"
-rm -rf "$prek_dir"/tmp.*
+render_dir="$PWD/output/prek"
 
-render_dir="$(mktemp -d -p "$prek_dir")"
-# trap 'rm -rf "$render_dir"' EXIT
-
-# Pass args through to chezmoi-render
-# Use -q/--quiet to suppress output
-chezmoi-render "$render_dir" "$@" >&2
-
-mapfile -t files < <(find "$render_dir" -type f | sed "s|$render_dir/||")
-
-cat >"$render_dir/.shellcheckrc" <<'EOF'
-disable=SC1090,SC2034,SC2154,SC2248
-EOF
-
-if [ ${#files[@]} -eq 0 ]; then
-  echo >&2 "lint: no files to lint"
+if [ ! -d "$render_dir" ]; then
+  printf >&2 'lint: %s not found, run render first\n' "$render_dir"
   exit 1
 fi
 
-flags=()
-for arg in "$@"; do
-  case "$arg" in
-  -*)
-    flags+=("$arg")
-    shift
-    ;;
-  *) ;;
-  esac
-done
-args=(
-  --cd="${render_dir#"$PWD"/}"
-  # TODO: relative "${PWD/$HOME/\~}/.pre-commit-config.yaml"
-  --config="$PWD/.pre-commit-config.yaml"
-  --skip=check-added-large-files
-  --skip=lint-templates
-  --skip=zizmor
-  "${flags[@]}"
-)
-set -- "${args[@]}" --files "${files[@]}"
-# echo >&2 "lint debug: prek run ${args[*]}"
-prek run "$@" && exit_code=0 || exit_code=$?
+mapfile -t files < <(fd --type f . "$render_dir" | sed "s|$render_dir/||")
+
+if [ ${#files[@]} -eq 0 ]; then
+  printf >&2 'lint: no files to lint\n'
+  exit 1
+fi
+
+prek run \
+  --cd="${render_dir#"$PWD"/}" \
+  --config="$PWD/.pre-commit-config.yaml" \
+  --skip=check-added-large-files \
+  --skip=lint-templates \
+  --skip=zizmor \
+  --files "${files[@]}" &&
+  exit_code=0 || exit_code=$?
+
 if [ "$exit_code" -ne 0 ]; then
-  echo >&2 "lint failed: exit code $exit_code"
+  printf >&2 'lint: failed with exit code %s\n' "$exit_code"
 fi
 exit "$exit_code"

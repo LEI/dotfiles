@@ -2,13 +2,23 @@
 {{- $marketplaces := $data.marketplaces -}}
 {{- $plugins := $data.plugins -}}
 #!/bin/bash
+
 # marketplaces: {{ $marketplaces | toJson | sha256sum }}
 # plugins: {{ $plugins | toJson | sha256sum }}
+{{- range $plugins }}
+{{- $marketplace := get $marketplaces .marketplace }}
+{{- if and $marketplace (not (hasKey $marketplace "repo")) }}
+# local:{{ .name }}@{{ .marketplace }}: {{ include (printf "%s/plugins/%s/.claude-plugin/plugin.json" $marketplace.path .name) | sha256sum }}
+{{- end }}
+{{- end }}
+
 set -euo pipefail
 
 plugin_file=~/.claude/plugins/installed_plugins.json
 marketplace_file=~/.claude/plugins/known_marketplaces.json
-{{- range $name, $info := $marketplaces }}
+{{- range (keys $marketplaces | sortAlpha) }}
+{{- $name := . }}
+{{- $info := get $marketplaces . }}
 
 if ! jq -e '.["{{ $name }}"]' "$marketplace_file" >/dev/null 2>&1; then
   echo >&2 "Registering marketplace: {{ $name }}"

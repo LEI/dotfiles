@@ -5,9 +5,17 @@
 {{-   else }}
 {{-     $chassisType = "desktop" }}
 {{-   end }}
-{{- else if and (eq .chezmoi.os "linux") (lookPath "hostnamectl" | isExecutable) ($chassisType = output "sh" "-c" "hostnamectl chassis 2>/dev/null || echo" | trim) }}
 {{- else if eq .chezmoi.os "linux" }}
-{{-   $chassisType = printf "unknown-%s" (get .chezmoi.osRelease "id" | default .chezmoi.os) }}
+{{-   $sysfsType := output "sh" "-c" "cat /sys/class/dmi/id/chassis_type 2>/dev/null || true" | trim }}
+{{-   if eq $sysfsType "8" "9" "10" "11" "14" }}
+{{-     $chassisType = "laptop" }}
+{{-   else if eq $sysfsType "3" "4" "5" "6" "7" }}
+{{-     $chassisType = "desktop" }}
+{{-   else if lookPath "hostnamectl" | isExecutable }}
+{{-     $chassisType = output "sh" "-c" "hostnamectl chassis 2>/dev/null || echo" | trim }}
+{{-   else }}
+{{-     $chassisType = printf "unknown-%s" (get .chezmoi.osRelease "id" | default .chezmoi.os) }}
+{{-   end }}
 {{- else if eq .chezmoi.os "windows" }}
 {{-   $chassisType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim }}
 {{- end }}

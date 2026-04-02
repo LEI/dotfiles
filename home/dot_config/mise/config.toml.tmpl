@@ -1,6 +1,6 @@
 {{- $miseInteractive := false -}}
 {{- with lookPath "mise" -}}
-{{-   $ver := output . "version" "--json" | fromJson | dig "version" "" | splitList " " | first -}}
+{{-   $ver := output . "--version" | splitList " " | first -}}
 {{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
 {{- end -}}
 [settings]
@@ -124,15 +124,12 @@ depends = [
 {{- end }}
 ]
 
-[tools]
-{{- range $name, $pkg := .packages.mise }}
-{{-   $parts := contains "@" $name | ternary
-  ($name | splitList "@")
-  (list $name (get $pkg "version" | default "latest")) }}
-{{-   if gt 2 (len $parts) }}
-{{-     warnf "More than 2 parts: %v" $parts }}
-{{-   end }}
-{{-   $name = index $parts 0 }}
-{{-   $version := index $parts 1 }}
-{{   contains ":" $name | ternary ($name | quote) $name }} = {{ $version | quote }}
+{{- if .features.opencode }}
+
+[tasks.opkg]
+description = "Run opkg from the local openpackage directory"
+dir = "~/.openpackage/packages/local"
+run = "npx opkg"
 {{- end }}
+
+{{ includeTemplate "dot_config/mise/tools.toml.tmpl" . -}}

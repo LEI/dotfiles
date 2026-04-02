@@ -35,6 +35,8 @@
 {{- $profileChoices := list "minimal" "personal" "work" -}}
 {{- if and $interactive (not $profile) -}}
 {{-   $profile = promptChoiceOnce . "profile" "profile" $profileChoices -}}
+{{- else if and (not $profile) (not $ephemeral) -}}
+{{-   fail "profile is required: set CHEZMOI_PROFILE or run chezmoi init interactively" -}}
 {{- end -}}
 
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}

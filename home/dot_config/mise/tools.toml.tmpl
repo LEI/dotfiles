@@ -1,0 +1,12 @@
+[tools]
+{{- range $name, $pkg := .packages.mise }}
+{{-   $parts := contains "@" $name | ternary
+  ($name | splitList "@")
+  (list $name (get $pkg "version" | default "latest")) }}
+{{-   if gt 2 (len $parts) }}
+{{-     warnf "More than 2 parts: %v" $parts }}
+{{-   end }}
+{{-   $name = index $parts 0 }}
+{{-   $version := index $parts 1 }}
+{{   contains ":" $name | ternary ($name | quote) $name }} = {{ $version | quote }}
+{{- end }}

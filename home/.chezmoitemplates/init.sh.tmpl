@@ -6,12 +6,9 @@ if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
 fi
 
-for _s in github gitlab; do
-  if [ -f "$XDG_CONFIG_HOME/secrets.d/$_s.conf" ]; then
-    export_env "$XDG_CONFIG_HOME/secrets.d/$_s.conf"
-  fi
-done
-unset _s
+if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
+  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
+fi
 
 source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
 source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
@@ -70,7 +67,7 @@ fi
 {{- $dotcfg := joinPath $src "dot_config" }}
 {{- $exclude := list "atuin" "bash" "carapace" "direnv" "mise" "starship" "zoxide" "zsh" }}
 for _f in \
-  "$XDG_CONFIG_HOME/sh/functions/"*.sh \
+  "$XDG_CONFIG_HOME/sh/functions/"*.sh{{ if eq $shell "zsh" }}(N){{ end }} \
 {{- range glob (joinPath $src "dot_*/init.sh*") }}
   {{- $name := . | dir | base | trimPrefix "dot_" }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \

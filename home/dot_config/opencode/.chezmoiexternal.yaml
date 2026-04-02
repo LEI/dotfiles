@@ -13,13 +13,13 @@
 # superpowers:
 #   type: git-repo
 #   url: https://github.com/obra/superpowers.git
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   clone:
 #     args: ["--branch=v4.1.1", "--depth=1"]
 # skills/superpowers:
 #   type: archive
 #   url: https://github.com/obra/superpowers/archive/v4.1.1.tar.gz
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   stripComponents: 2
 #   include:
 #     - "*/skills/**"
@@ -27,7 +27,7 @@
 skills/affaan-m:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/v1.4.1.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 2
   include:
     - "*/skills/backend-patterns/**"
@@ -39,7 +39,7 @@ skills/affaan-m:
 skills/anthropics:
   type: archive
   url: https://github.com/anthropics/skills/archive/main.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 2
   include:
     - "*/skills/mcp-builder/**"
@@ -48,7 +48,7 @@ skills/anthropics:
 # skills/antfu:
 #   type: archive
 #   url: https://github.com/antfu/skills/archive/main.tar.gz
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   stripComponents: 2
 #   include:
 #     - "*/skills/pnpm/**"
@@ -57,13 +57,13 @@ skills/anthropics:
 skills/github/git-commit/SKILL.md:
   type: file
   url: https://raw.githubusercontent.com/github/awesome-copilot/refs/heads/main/skills/git-commit/SKILL.md
-  refreshPeriod: 168h
+  refreshPeriod: 720h
 
 # https://github.com/openai/skills
 skills/openai:
   type: archive
   url: https://github.com/openai/skills/archive/main.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 2
   include:
     # - "*/skills/.system/skill-creator/**"
@@ -85,7 +85,7 @@ skills/openai:
 skills/supabase:
   type: archive
   url: https://github.com/supabase/agent-skills/archive/main.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 2
   include:
     - "*/skills/supabase-postgres-best-practices/**"
@@ -93,7 +93,7 @@ skills/supabase:
 # skills/vercel/ai-sdk:
 #   type: archive
 #   url: https://github.com/vercel/ai/archive/main.tar.gz
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   stripComponents: 3
 #   include:
 #     - "*/skills/use-ai-sdk/**"
@@ -101,7 +101,7 @@ skills/supabase:
 # skills/vercel-labs/react-best-practices:
 #   type: archive
 #   url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   stripComponents: 3
 #   include:
 #     - "*/skills/react-best-practices/**"
@@ -109,7 +109,7 @@ skills/supabase:
 skills/vercel-labs/web-design-guidelines:
   type: archive
   url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 3
   include:
     - "*/skills/web-design-guidelines/**"
@@ -117,7 +117,7 @@ skills/vercel-labs/web-design-guidelines:
 # skills/vercel-labs/next-best-practices:
 #   type: archive
 #   url: https://github.com/vercel-labs/next-skills/archive/main.tar.gz
-#   refreshPeriod: 168h
+#   refreshPeriod: 720h
 #   stripComponents: 3
 #   include:
 #     - "*/skills/next-best-practices/**"
@@ -125,7 +125,7 @@ skills/vercel-labs/web-design-guidelines:
 skills/wshobson:
   type: archive
   url: https://github.com/wshobson/agents/archive/main.tar.gz
-  refreshPeriod: 168h
+  refreshPeriod: 720h
   stripComponents: 4
   include:
     - "*/plugins/backend-development/skills/api-design-principles/**"

@@ -60,6 +60,8 @@ packages:
   cargo-update:
     enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "cargo" nil }}'
+  check-jsonschema:
+    type: uv
   chezmoi:
     enabled: {{ eq .osIDLike "darwin" "windows" }}
     nameOverwrite:

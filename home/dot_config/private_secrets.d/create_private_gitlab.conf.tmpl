@@ -1,0 +1,4 @@
+{{- if and .features.git (hasKey . "git") (hasKey .git "gitlab") -}}
+# GITLAB_HOST=gitlab.com
+# GITLAB_TOKEN="$(glab auth status --hostname=$GITLAB_HOST --show-token 2>&1 | grep 'Token found' | sed -e 's/.*Token found: //')"
+{{ end -}}

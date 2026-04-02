@@ -32,7 +32,7 @@ repos:
           - --exclude=SC2148
           - --severity=warning
         entry: shellcheck
-        exclude: ^home/.*/(modify_.*\.sh|.*\.tmpl)$
+        exclude: ^(home/.*/(modify_.*\.sh|.*\.tmpl)|.*/\.config/zsh/init.sh)$
         language: system
         stages:
           - pre-commit
@@ -90,9 +90,9 @@ repos:
         files: \.(json[c5]?|toml|ya?ml)$
         exclude: ^home/\.chezmoitemplates/|^home/.*/modify_|winget/winget\.json$
 
-      - id: blank-lines
-        name: blank lines
-        entry: ./script/blank-lines
+      - id: validate-blank
+        name: validate blank lines
+        entry: ./script/validate-blank
         language: system
 
       - id: lint-templates
@@ -102,3 +102,9 @@ repos:
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
         exclude: ^output/|\.chezmoi\.yaml\.tmpl$
+
+      - id: validate-skill
+        name: validate skills
+        entry: ./script/validate-skill
+        language: system
+        files: SKILL\.md$

@@ -1,0 +1,3 @@
+{{- if and .features.git (hasKey . "git") (hasKey .git "github") -}}
+# GITHUB_TOKEN="$(gh auth token)"
+{{ end -}}

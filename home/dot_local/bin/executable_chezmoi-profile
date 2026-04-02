@@ -3,18 +3,51 @@
 # Parses chezmoi --debug structured logs,
 # shows slowest operations and phase summary
 
+def phase_of [msg: string] {
+  match ($msg | split row " " | first) {
+    "defaultPreApplyFunc" | "Lstat" => "apply",
+    "Output" | "Run" => "exec",
+    "ReadDir" | "ReadFile" | "ReadLink" | "Stat" => "read",
+    "Close" | "Get" | "Set" => "state",
+    _ => "other"
+  }
+}
+
+def duration_ms [msg: string] {
+  let m = $msg | parse --regex 'duration=(?P<v>[0-9.]+)(?P<u>ms|µs|s)'
+  if ($m | is-empty) {
+    0.0
+  } else {
+    let v = $m.0.v | into float
+    if $m.0.u == "s" {
+      $v * 1000
+    } else if $m.0.u == "µs" {
+      $v / 1000
+    } else {
+      $v
+    }
+  }
+}
+
+def redact [msg: string] {
+  $msg
+    | str replace --all $env.HOME "~"
+    | str replace --regex '--access-token \S+' '--access-token [REDACTED]'
+    | str replace --regex ' (output|value|err)=.*$' ''
+}
+
 def main [
-  subcommand?: string # "init", "apply", or empty for "init --apply"
-  --lines (-n): int = 20 # Number of slowest operations to show
-  --summary (-s) # Show phase summary only
-  ...rest: string # Extra args passed to chezmoi after --
+  subcommand?: string  # "init", "apply", or empty for "init --apply"
+  --lines (-n): int = 20
+  --summary (-s)
+  ...rest: string
 ] {
   let args = match $subcommand {
     "init" => ["init"],
     "apply" => ["apply"],
     null => ["init" "--apply"],
     _ => {
-      print -e $"Error: subcommand must be 'init', 'apply', or omitted for init --apply"
+      print -e "subcommand must be 'init', 'apply', or omitted"
       exit 1
     }
   }
@@ -22,92 +55,68 @@ def main [
   let chezmoi_args = ["chezmoi" "--debug" ...$args "--dry-run" ...$rest]
   print -e $"Running: ($chezmoi_args | str join ' ')"
 
-  let debug_output = (
-    run-external ...$chezmoi_args e>| complete
-  ).stdout
+  let tmp = (mktemp)
+  run-external ...$chezmoi_args err> $tmp
+  let raw = open $tmp | collect
+  rm $tmp
 
-  let log_entries = $debug_output
+  let entries = $raw
     | lines
-    | parse "time={timestamp} level={level} msg={message}"
-    | where timestamp != ""
-    | insert datetime { |row| $row.timestamp | into datetime }
+    | parse "time={ts} level={level} msg={msg}"
+    | where ts != ""
+    | insert dt { |r| $r.ts | into datetime }
 
-  let entry_count = $log_entries | length
-  let wall_ms = (
-    ($log_entries | last).datetime - ($log_entries | first).datetime
-  ) / 1ms
+  let n = $entries | length
+  if $n < 2 {
+    print -e "No log entries parsed"
+    return
+  }
 
-  # Parse duration= from external command entries (Run, Output)
-  let external_commands = $log_entries
-    | where message =~ "duration="
-    | insert duration_ms { |row|
-        let parsed = $row.message
-          | parse --regex 'duration=(?P<value>[0-9.]+)(?P<unit>ms|µs|s)'
-        if ($parsed | is-empty) { 0.0 } else {
-          let value = $parsed.0.value | into float
-          match $parsed.0.unit {
-            "s" => { $value * 1000 },
-            "ms" => { $value },
-            "µs" => { $value / 1000 },
-            _ => { 0.0 }
-          }
-        }
-      }
+  let wall_ms = (($entries | last).dt - ($entries | first).dt) / 1ms
+  let ext = $entries | where msg =~ "duration="
+  let ext_ms = if ($ext | length) > 0 {
+    $ext | each { |r| duration_ms $r.msg } | math sum
+  } else {
+    0.0
+  }
 
-  let external_total_ms = $external_commands | get duration_ms | math sum
-  let external_count = $external_commands | length
+  print $"Wall time: ($wall_ms / 1000 | math round --precision 3)s \(($n) log entries)"
+  print $"External commands: ($ext | length) \(($ext_ms / 1000 | math round --precision 3)s)\n"
 
-  print $"Wall time: ($wall_ms / 1000 | math round --precision 3)s \(($entry_count) log entries)"
-  print $"External commands: ($external_count) \(($external_total_ms / 1000 | math round --precision 3)s)\n"
-
-  # Classify by chezmoi debug msg type
-  let classified = $log_entries
-    | insert phase { |row|
-        let msg = $row.message | split row " " | first
-        match $msg {
-          "defaultPreApplyFunc" | "Lstat" => "apply",
-          "Output" | "Run" => "exec",
-          "ReadDir" | "ReadFile" | "ReadLink" | "Stat" => "read",
-          "Close" | "Get" | "Set" => "state",
-          _ => "other"
-        }
-      }
-
-  let phase_summary = $classified
-    | group-by phase
+  let phases = $entries
+    | group-by { |r| phase_of $r.msg }
     | items { |phase, rows|
-        let span_ms = (
-          ($rows | last).datetime - ($rows | first).datetime
-        ) / 1ms
+        let span = (($rows | last).dt - ($rows | first).dt) / 1ms
         {
           phase: $phase,
           entries: ($rows | length),
-          span: $"($span_ms / 1000 | math round --precision 3)s"
+          span: $"($span / 1000 | math round --precision 3)s"
         }
       }
     | sort-by entries --reverse
 
   print "Phase summary:"
-  print ($phase_summary | table)
+  print ($phases | table)
 
   if $summary { return }
 
-  # Top N slowest gaps between consecutive log entries
-  let slowest_gaps = $log_entries
-    | window 2
+  let gaps = $entries
+    | zip ($entries | skip 1)
     | each { |pair|
-        let gap_ms = ($pair.1.datetime - $pair.0.datetime) / 1ms
-        let message = $pair.1.message
-          | str replace --all $env.HOME "~"
-          | str substring 0..120
-        { gap_ms: $gap_ms, message: $message }
+        {
+          gap: (($pair.1.dt - $pair.0.dt) / 1ms),
+          msg: (redact $pair.1.msg)
+        }
       }
-    | sort-by gap_ms --reverse
+    | sort-by gap --reverse
     | first $lines
 
   print $"\nTop ($lines) slowest gaps:"
-  for entry in $slowest_gaps {
-    let gap = $entry.gap_ms | math round --precision 1 | fill --alignment right --width 7
-    print $"  ($gap)ms  ($entry.message)"
-  }
+  $gaps
+    | each { |e|
+        let g = $e.gap | math round --precision 1 | fill --alignment right --width 7
+        $"  ($g)ms  ($e.msg)"
+      }
+    | str join "\n"
+    | print
 }

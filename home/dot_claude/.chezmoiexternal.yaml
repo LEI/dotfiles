@@ -20,7 +20,7 @@ rules/ecc/common:
     - "*/rules/common/development-workflow.md"
     - "*/rules/common/testing.md"
     - "*/rules/common/git-workflow.md"
-  refreshPeriod: 168h
+  refreshPeriod: 720h
 
 # TypeScript: coding-style, hooks, patterns, security, testing
 rules/ecc/typescript:
@@ -28,7 +28,7 @@ rules/ecc/typescript:
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
   include: ["*/rules/typescript/*"]
-  refreshPeriod: 168h
+  refreshPeriod: 720h
 
 # Language packs: all have paths: frontmatter scoped to file extensions (zero context cost)
 rules/ecc/golang:
@@ -36,18 +36,18 @@ rules/ecc/golang:
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
   include: ["*/rules/golang/*"]
-  refreshPeriod: 168h
+  refreshPeriod: 720h
 
 rules/ecc/python:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
   include: ["*/rules/python/*"]
-  refreshPeriod: 168h
+  refreshPeriod: 720h
 
 rules/ecc/swift:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
   include: ["*/rules/swift/*"]
-  refreshPeriod: 168h
+  refreshPeriod: 720h

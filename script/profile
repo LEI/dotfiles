@@ -9,36 +9,69 @@ set -eu
 shell="${1:-${SHELL##*/}}"
 
 case "$shell" in
-  bash)
-    tmpdir=$(mktemp -d)
-    trap 'rm -rf "$tmpdir"' EXIT
-    logfile="$tmpdir/trace.log"
-    cat > "$tmpdir/env.sh" <<BASH_PROF
-exec 3>"$logfile"
-BASH_XTRACEFD=3
-PS4='+ \${EPOCHREALTIME:-} \${BASH_SOURCE[0]##*/}:\${LINENO}: '
+bash)
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' EXIT
+  logfile="$tmpdir/trace.log"
+
+  cat >"$tmpdir/rcfile.sh" <<BASH_PROF
+exec 5>"$logfile"
+BASH_XTRACEFD=5
+PS4='+ \${EPOCHREALTIME} \${BASH_SOURCE[0]#\${HOME}/}:\${LINENO} '
 set -x
+[ -f "\$HOME/.bashrc" ] && source "\$HOME/.bashrc"
+set +x
+exec 5>&-
 BASH_PROF
-    BASH_ENV="$tmpdir/env.sh" bash -ic 'set +x; exec 3>&-'
-    echo >&2 "Top 20 by duration:"
-    sort -t' ' -k2 -rn "$logfile" | head -20
-    ;;
-  zsh)
-    tmpdir=$(mktemp -d)
-    trap 'rm -rf "$tmpdir"' EXIT
-    cat > "$tmpdir/.zshenv" <<'ZSH_PROF'
+
+  setsid bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
+
+  total=$(awk '
+    /^\++ [0-9]+\.[0-9]+ / {
+      ts = $2 + 0
+      if (prev_ts > 0 && prev_rest != "") {
+        d = (ts - prev_ts) * 1000
+        if (d > 1) total += d
+      }
+      prev_ts   = ts
+      prev_rest = $0
+    }
+    END { printf "%.6f", total }
+  ' "$logfile")
+
+  awk -v total="$total" '
+    /^\++ [0-9]+\.[0-9]+ / {
+      ts   = $2 + 0
+      rest = substr($0, index($0, $3))
+      gsub(/[A-Z_]*(TOKEN|SECRET|KEY|PASSWORD)=[^ ]+/, "[REDACTED]", rest)
+      if (prev_ts > 0 && prev_rest != "") {
+        delta = (ts - prev_ts) * 1000
+        if (delta > 1) {
+          label = length(prev_rest) > 100 ? substr(prev_rest, 1, 97) "..." : prev_rest
+          printf "%8.3f ms  %4.1f%%  %s\n", delta, delta / total * 100, label
+        }
+      }
+      prev_ts   = ts
+      prev_rest = rest
+    }
+  ' "$logfile" | sort -rn | head -20 | nl -w2 -s')  '
+  ;;
+zsh)
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' EXIT
+  cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
 zmodload zsh/zprof
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
 ZSH_PROF
-    cat > "$tmpdir/.zshrc" <<'ZSH_RC'
+  cat >"$tmpdir/.zshrc" <<'ZSH_RC'
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
 ZSH_RC
-    REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
-    export REAL_ZDOTDIR
-    ZDOTDIR="$tmpdir" zsh -ic 'zprof'
-    ;;
-  *)
-    echo >&2 "profile: invalid shell '$shell', expected bash or zsh"
-    exit 2
-    ;;
+  REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
+  export REAL_ZDOTDIR
+  ZDOTDIR="$tmpdir" zsh -ic 'zprof'
+  ;;
+*)
+  echo >&2 "profile: invalid shell '$shell', expected bash or zsh"
+  exit 2
+  ;;
 esac

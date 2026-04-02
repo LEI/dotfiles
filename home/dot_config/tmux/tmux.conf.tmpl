@@ -44,6 +44,10 @@ if "tmux show-option -s terminal-features | grep -vq ':hyperlinks$'" {
     set -as terminal-features ",*:hyperlinks"
 }
 
+if "tmux show-option -s terminal-features | grep -vq ':extkeys$'" {
+    set -as terminal-features ",*:extkeys"
+}
+
 if "tmux show-option -s terminal-overrides | grep -vq ':Tc$'" {
     set -as terminal-overrides ",*-256color:Tc"
 }

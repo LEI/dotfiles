@@ -2,7 +2,11 @@
 # Statusline wrapper: writes per-session context data, delegates to dashboard
 # stdin: JSON from Claude Code (context_window, session_id, ...)
 # stdout: passthrough from delegate command ("$@")
+# Teammates get a minimal dashboard preset via HOME override;
+# the dashboard reads config from $HOME/.claude/claude-dashboard.local.json
 
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+TEAMMATE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/claude-dashboard-teammate"
 INPUT=$(cat)
 DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude/sessions"
 SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
@@ -15,4 +19,37 @@ if [ -n "$SID" ]; then
   find "$DIR" -type f -name '*.json' -mtime +2 -delete 2>/dev/null
 fi
 
-printf '%s' "$INPUT" | exec "$@"
+# Resolve current pane ID: tmux (%N) or iTerm2 (wXtYpZ:UUID)
+# Team config stores bare UUIDs for iTerm2, so also extract the UUID suffix
+PANE_ID="${TMUX_PANE:-${ITERM_SESSION_ID:-}}"
+PANE_UUID="${ITERM_SESSION_ID:+${ITERM_SESSION_ID#*:}}"
+
+# Detect teammate: cross-reference pane ID against team config members
+IS_TEAMMATE=false
+if [ -n "$PANE_ID" ]; then
+  for cfg in "$CLAUDE_DIR/teams"/*/config.json; do
+    [ -f "$cfg" ] || continue
+    LEAD_PANE=$(jq -r '.members[] | select(.agentType == "team-lead") | .tmuxPaneId' "$cfg" 2>/dev/null)
+    if [ "$PANE_ID" != "${LEAD_PANE:-}" ] && {
+       jq -e --arg p "$PANE_ID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1 ||
+       { [ -n "$PANE_UUID" ] && jq -e --arg p "$PANE_UUID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1; }
+    }; then
+      IS_TEAMMATE=true
+      break
+    fi
+  done
+fi
+
+if [ "$IS_TEAMMATE" = true ]; then
+  # Ensure teammate config exists with minimal preset (model + context)
+  if [ ! -f "$TEAMMATE_HOME/.claude/claude-dashboard.local.json" ]; then
+    mkdir -p "$TEAMMATE_HOME/.claude"
+    printf '{"preset":"MC$Q|JTO","separator":"space"}\n' \
+      > "$TEAMMATE_HOME/.claude/claude-dashboard.local.json"
+  fi
+  # Override HOME so the dashboard reads the teammate config;
+  # missing credentials/settings degrade gracefully (null/defaults)
+  printf '%s' "$INPUT" | exec env HOME="$TEAMMATE_HOME" "$@"
+else
+  printf '%s' "$INPUT" | exec "$@"
+fi
