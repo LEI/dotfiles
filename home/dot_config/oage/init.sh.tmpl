@@ -19,7 +19,7 @@ ollama() {
 
 ollama_logs() {
 {{- if eq .os "darwin" }}
-  tail -f "${HOMEBREW_PREFIX:-{{ .brewPrefix }}}/var/log/ollama.log" "$@"
+  tail -f "${HOMEBREW_PREFIX:?}/var/log/ollama.log" "$@"
 {{- else if $quadlet }}
   journalctl --user --unit=ollama.service --follow "$@"
 {{- else }}

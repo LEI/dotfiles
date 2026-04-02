@@ -43,6 +43,9 @@
       "Bash(cut *)",
       "Bash(date *)",
       "Bash(date)",
+      {{- if eq .os "darwin" }}
+      "Bash(defaults read *)",
+      {{- end }}
       "Bash(diff *)",
       "Bash(dirname *)",
       "Bash(du *)",

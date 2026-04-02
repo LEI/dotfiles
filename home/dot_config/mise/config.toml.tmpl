@@ -41,16 +41,12 @@ lockfile = true
 
 [tasks."check:{{ $name }}"]
 description = {{ printf "Check %s" $feat | quote }}
-hide = true
+# file = {{ . | quote }}
+run = {{ . | quote }}
+shell = "sh"
 {{- if $miseInteractive }}
 interactive = true
 {{- end }}
-run = "{{ . }}"
-shell = "sh"
-# FIXME: chezmoi PATH
-[tasks."check:{{ $name }}".env]
-PATH = "{{ $.brewPrefix }}/bin:{{ $.brewPrefix }}/sbin:{{ $.chezmoi.homeDir }}/.local/share/mise/shims:{{ $.chezmoi.homeDir }}/.local/bin:$PATH"
-# timeout = "5m"
 {{-   end }}
 {{- end }}
 
@@ -69,6 +65,33 @@ run = [
 depends = [
 {{- range $checkDirs }}
   {{ printf "check:%s" . | quote }},
+{{- end }}
+]
+
+{{- $updateDirs := list }}
+{{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
+{{-   $name := . | dir | base }}
+{{-   $feat := $name }}
+{{-   if eq $feat "nvim" }}
+{{-     $feat = "neovim" }}
+{{-   end }}
+{{-   $featVal := get $.features $feat }}
+{{-   if or (eq $featVal nil) $featVal }}
+{{-     $updateDirs = append $updateDirs $name }}
+
+[tasks."update:{{ $name }}"]
+description = {{ printf "Update %s" $feat | quote }}
+run = {{ . | quote }}
+shell = "sh"
+{{-   end }}
+{{- end }}
+
+[tasks.update]
+alias = "u"
+description = "Update neovim and tmux plugins"
+depends = [
+{{- range $updateDirs }}
+  {{ printf "update:%s" . | quote }},
 {{- end }}
 ]
 

@@ -12,7 +12,9 @@ processes:
       - PORT=3456
     availability:
       restart: on_failure
+      backoff_seconds: 10
       max_restarts: 5
+      exponential_backoff: true
     readiness_probe:
       http_get:
         host: localhost
@@ -59,7 +61,7 @@ processes:
     command: "{{ $tool }}{{ if eq $tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
-      max_restarts: -1
+      max_restarts: 0
 {{- end }}
 
 {{- range $extra := $extraLogs }}
@@ -73,7 +75,7 @@ processes:
     command: "{{ $extra.tool }}{{ if eq $extra.tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
-      max_restarts: -1
+      max_restarts: 0
 {{- end }}
 {{- end }}
 
@@ -86,7 +88,7 @@ processes:
     command: "tail -f {{ .chezmoi.homeDir }}/.local/state/webhook/*.log | tspin --print"
     availability:
       restart: on_failure
-      max_restarts: -1
+      max_restarts: 0
 {{- end }}
 
 {{- range (glob (printf "%s/.local/state/claude/*.jsonl" .chezmoi.homeDir)) }}
@@ -98,7 +100,7 @@ processes:
     command: "hl --follow --paging=never --expansion=never --local {{ . }}"
     availability:
       restart: on_failure
-      max_restarts: -1
+      max_restarts: 0
 {{- end }}
 
 {{- /* SSH tunnel proxies from chezmoidata */ -}}
@@ -113,8 +115,9 @@ processes:
     command: "ssh -N -L {{ .localPort }}:{{ .remoteHost }}:{{ $remotePort }} {{ .sshTarget }}"
     availability:
       restart: on_failure
-      backoff_seconds: 2
-      max_restarts: 5
+      backoff_seconds: 5
+      max_restarts: 0
+      exponential_backoff: true
     {{- if eq .type "postgres" }}
     readiness_probe:
       exec:

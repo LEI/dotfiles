@@ -1,6 +1,4 @@
 #!/bin/sh
-#MISE description="Run chezmoi doctor"
-
 set -eu
 
 if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then

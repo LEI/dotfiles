@@ -36,11 +36,16 @@
 {{- end -}}
 {{- range $name, $provider := .ai.providers }}
 {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
+{{- $caddy := get $provider "caddy" }}
 {{ $provider.domain }} {
 	tracing {
 		span {{ $name }}
 	}
-	reverse_proxy localhost:{{ $provider.port }}
+	reverse_proxy localhost:{{ $provider.port }}{{ if $caddy }} {
+		{{- range $key, $value := $caddy }}
+		{{ $key }} {{ $value }}
+		{{- end }}
+	}{{ end }}
 }
 {{ end -}}
 # Machine-local site configs (not version-controlled)

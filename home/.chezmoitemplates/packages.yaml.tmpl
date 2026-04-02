@@ -436,6 +436,7 @@ packages:
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
     enabled: {{ and .features.ollama (eq .osIDLike "darwin") }}
+    restart_service: ":changed"
   # ollama-app:
   #   enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'

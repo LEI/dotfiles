@@ -1,0 +1,64 @@
+{{- $storm := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Storm.itermcolors") | fromJson -}}
+{{- $day := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Day.itermcolors") | fromJson -}}
+{
+  "Profiles": [
+    {
+      "Name": "Tokyonight",
+      "Guid": "3E0D4706-0984-4F11-92D0-D2F07E1401E0",
+      "Use libtickit protocol": true,
+      "Use Separate Colors for Light and Dark Mode": true,
+      "Terminal Type": "xterm-256color",
+      "Normal Font": "HackNF-Regular 12",
+      "Non Ascii Font": "HackNF-Regular 12",
+      "ASCII Anti Aliased": true,
+      "Non-ASCII Anti Aliased": true,
+      "ASCII Ligatures": false,
+      "Use Bold Font": false,
+      "Use Bright Bold": true,
+      "Use Italic Font": true,
+      "Use Non-ASCII Font": false,
+      "Option Key Sends": 2,
+      "Right Option Key Sends": 0,
+      "Character Encoding": 4,
+      "Mouse Reporting": true,
+      "Custom Directory": "Recycle",
+      "Working Directory": "{{ .chezmoi.homeDir }}",
+      "Custom Command": "No",
+      "Transparency": 0.15,
+      "Scrollback Lines": 1000,
+      "Unlimited Scrollback": false,
+      "Visual Bell": true,
+      "Silence Bell": false,
+      "Flashing Bell": false,
+      "Close Sessions On End": true,
+      "Prompt Before Closing 2": false,
+      "Load Shell Integration Automatically": false,
+      "Send Idle Alert": false,
+      "Send New Output Alert": false,
+      "Send Code When Idle": false,
+      "Blur": false,
+      "Keyboard Map": {
+        "0xd-0x20000-0x24{{/* Shift+Enter: multiline (ESC CR) */}}": {
+          "Version": 2,
+          "Apply Mode": 1,
+          "Action": 11,
+          "Text": "1b 0d",
+          "Escaping": 2
+        },
+        "0xd-0x40000-0x24{{/* Ctrl+Enter: plain Enter (CR) */}}": {
+          "Version": 2,
+          "Apply Mode": 1,
+          "Action": 11,
+          "Text": "0d",
+          "Escaping": 2
+        }
+      },
+{{- range $key := keys $storm | sortAlpha }}
+      "{{ $key }} (Dark)": {{ get $storm $key | toPrettyJson | indent 6 | trim }},
+      "{{ $key }} (Light)": {{ get $day $key | toPrettyJson | indent 6 | trim }},
+{{- end }}
+      "Columns": 80,
+      "Rows": 25
+    }
+  ]
+}

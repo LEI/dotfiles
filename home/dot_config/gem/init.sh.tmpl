@@ -1,0 +1,11 @@
+# ruby_version="${ruby_version:-3.4.0}"
+# if [ -n "$GEM_USER_HOME" ] && [ -d "$GEM_USER_HOME" ]; then
+#   pathmunge "$GEM_USER_HOME" replace
+# fi
+
+{{- if .features.brew }}
+
+if [ -d "{{ .brewPrefix }}/opt/ruby/bin" ]; then
+  pathmunge "{{ .brewPrefix }}/opt/ruby/bin" replace
+fi
+{{- end }}

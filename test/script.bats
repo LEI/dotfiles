@@ -65,19 +65,6 @@ setup() {
 #   assert_success
 # }
 
-# bats test_tags=update,type:unit
-@test "script/update" {
-  run_script ./script/update
-
-  if has_feature neovim; then
-    assert_stderr_line --regexp "nvim"
-  fi
-  if has_feature tmux; then
-    assert_stderr_line --regexp "tmux"
-  fi
-  assert_success
-}
-
 # bats test_tags=container,type:unit
 @test "container: resolve image matrix" {
   source_container

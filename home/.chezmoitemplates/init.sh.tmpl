@@ -17,7 +17,9 @@ source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
 source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
 
 # Source local environment variables
-[ -f "$XDG_CONFIG_HOME/sh/local.sh" ] && source "$XDG_CONFIG_HOME/sh/local.sh"
+if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
+  source "$XDG_CONFIG_HOME/sh/local.sh"
+fi
 
 # Non-interactive command mode; see environment.plist (BASH_ENV)
 # https://github.com/neovide/neovide/discussions/3175
@@ -28,7 +30,9 @@ if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   if [ -z "${MISE_SHELL:-}" ]; then
     PATH="$PATH:$XDG_DATA_HOME/mise/shims"
   fi
-  source "$XDG_CONFIG_HOME/sh/environment.sh"
+  if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
+    source "$XDG_CONFIG_HOME/sh/environment.sh"
+  fi
   return
 fi
 
@@ -57,7 +61,9 @@ if [ -z "${USER:-}" ]; then
 fi
 
 # Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
-[ -f "$XDG_CONFIG_HOME/sh/environment.sh" ] && . "$XDG_CONFIG_HOME/sh/environment.sh"
+if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
+  source "$XDG_CONFIG_HOME/sh/environment.sh"
+fi
 
 # Feature init files; order-sensitive tools are sourced explicitly below
 {{- $src := .chezmoi.sourceDir }}
@@ -76,7 +82,9 @@ for _f in \
   {{- end }}
 {{- end }}
 ; do
-  [ -f "$_f" ] && . "$_f"
+  if [ -f "$_f" ]; then
+    source "$_f"
+  fi
 done
 unset _f
 
@@ -99,18 +107,6 @@ if [ -d "$brew_prefix/opt/bash/bin" ]; then
   pathmunge "$brew_prefix/opt/bash/bin" replace
 fi
 {{- end }}
-
-{{- if .features.ruby }}
-
-if [ -d "$brew_prefix/opt/ruby/bin" ]; then
-  pathmunge "$brew_prefix/opt/ruby/bin" replace
-fi
-
-# ruby_version="${ruby_version:-3.4.0}"
-# if [ -n "$GEM_USER_HOME" ] && [ -d "$GEM_USER_HOME" ]; then
-#   pathmunge "$GEM_USER_HOME" replace
-# fi
-{{- end }}
 {{- end }}
 
 {{- if and (ne .osID "alpine") (ne .os "windows") }}
@@ -118,11 +114,10 @@ fi
 if [ "$shell" = bash ]; then
   # ble.sh includes its own preexec; never load both
   if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
-    . "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
+    source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
   elif [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
-    . "$XDG_DATA_HOME/bash-preexec.sh"
+    source "$XDG_DATA_HOME/bash-preexec.sh"
   fi
-  unset _ble
 fi
 {{- end }}
 
@@ -143,19 +138,27 @@ eval "$(sheldon source)"
 {{ includeTemplate "init-tools.sh.tmpl" . | trim }}
 {{- end }}
 
-[ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ] && . "$XDG_CONFIG_HOME/sh/aliases.sh"
+if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
+  source "$XDG_CONFIG_HOME/sh/aliases.sh"
+fi
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code
 for _f in "$XDG_CONFIG_HOME/$shell/"*.conf; do
-  [ -f "$_f" ] && export_env "$_f"
+  if [ -f "$_f" ]; then
+    export_env "$_f"
+  fi
 done
 for _f in "$XDG_CONFIG_HOME/$shell/"*.sh; do
   case "${_f##*/}" in init.sh) continue ;; esac
-  [ -f "$_f" ] && . "$_f"
+  if [ -f "$_f" ]; then
+    source "$_f"
+  fi
 done
 unset _f
 
-[ -f "$HOME/.${shell}rc.local" ] && . "$HOME/.${shell}rc.local"
+if [ -f "$HOME/.${shell}rc.local" ]; then
+  source "$HOME/.${shell}rc.local"
+fi
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
 if [[ ${BLE_VERSION-} ]]; then

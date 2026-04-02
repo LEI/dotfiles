@@ -55,7 +55,15 @@ fi
 
 # Resolve source paths to target paths (use absolute paths)
 cd "$source_dir"
-mapfile -t targets < <(printf '%s\n' "${templates[@]}" | sed "s|^|$source_dir/|" | xargs chezmoi target-path)
+sources=()
+for t in "${templates[@]}"; do
+  sources+=("$source_dir/$t")
+done
+if ! mapfile -t targets < <(printf '%s\0' "${sources[@]}" | xargs -0 chezmoi target-path); then
+  echo >&2 "error: chezmoi target-path failed for:"
+  printf '  %s\n' "${sources[@]}" >&2
+  exit 1
+fi
 
 render() {
   local src="$1"
@@ -97,9 +105,12 @@ export dest source_dir
 max_jobs=$(nproc 2>/dev/null || echo 4)
 total=${#templates[@]}
 
-if ! paste <(printf '%s\n' "${templates[@]}") <(printf '%s\n' "${targets[@]}") |
-  xargs -P "$max_jobs" -n 2 bash -c 'render "$@"' _; then
-  printf 'error: template rendering failed\n' >&2
+failed=0
+for i in "${!templates[@]}"; do
+  render "${templates[$i]}" "${targets[$i]}" || failed=$((failed + 1))
+done
+if [ "$failed" -gt 0 ]; then
+  printf 'error: %d template(s) failed to render\n' "$failed" >&2
   exit 1
 fi
 

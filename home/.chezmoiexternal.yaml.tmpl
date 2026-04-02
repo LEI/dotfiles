@@ -30,6 +30,40 @@
   type: git-repo
   url: {{ .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
   refreshPeriod: 168h
+
+.local/share/macos/defaults.sh:
+  type: file
+  url: https://raw.githubusercontent.com/mathiasbynens/dotfiles/refs/heads/master/.macos
+  sha256: 25cc5269d5f4e6cb15c4e246609bb8590ba33f04d5ecfecee777828ccbd122bb
+  refreshPeriod: 168h
+  executable: true
+  filter:
+    command: sed
+    args:
+      - -e # Timezone
+      - "s|Europe/Brussels|{{ .timezone }}|g"
+      - -e # Language
+      - 's/"nl"/"fr"/g'
+      - -e # Enable launchctl lines
+      - "s/^#launchctl/launchctl/"
+      - -e # Disable mds kill
+      - "s/^killall mds/# killall mds/"
+      - -e # Disable mdutil
+      - "s/^sudo mdutil/# sudo mdutil/"
+      - -e # Comment out open HOME init
+      - 's/^\([[:space:]]*\)\(.*open.*HOME.*init.*\)/\1# \2/'
+      - -e # Natural scroll
+      - 's/\(defaults write NSGlobalDomain com.apple.swipescrolldirection -bool \)false/\1true/'
+      - -e # Minimize to application
+      - 's/\(defaults write com.apple.dock minimize-to-application -bool \)true/\1false/'
+      - -e # Disable systemsetup calls (deprecated on macOS 15)
+      - "s/^sudo systemsetup/# sudo systemsetup/"
+      - -e # Disable Address Book defaults (TCC-protected on macOS 15)
+      - "s/^defaults write com.apple.addressbook/# defaults write com.apple.addressbook/"
+      - -e # Disable Address Book killall
+      - 's/^killall "Address Book"/# killall "Address Book"/'
+      - -e # Disable Terminal theme osascript imports
+      - "s/^osascript -e.*Solarized Dark.*/# &/"
 {{- end }}
 
 {{- if eq .os "linux" }}

@@ -102,6 +102,7 @@
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $libc := includeTemplate "libc.tmpl" . | trim -}}
 
+{{- /* cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d ' ') */ -}}
 {{- $timezone := env "TZ" -}}
 {{- if and (not $timezone) (lookPath "sh" | isExecutable) -}}
 {{-   $timezone = output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim -}}
@@ -266,12 +267,13 @@ scriptEnv:
   DEBIAN_FRONTEND: noninteractive
 {{- end }}
 
-{{- if or $features.brew (eq .chezmoi.os "darwin") }}
+{{- if $features.brew }}
   HOMEBREW_BAT: "1"
   # HOMEBREW_GITHUB_API_TOKEN: ""
   HOMEBREW_NO_ANALYTICS: "1"
   HOMEBREW_NO_AUTO_UPDATE: "1"
   HOMEBREW_NO_ENV_HINTS: "1"
+  HOMEBREW_PREFIX: {{ env "HOMEBREW_PREFIX" | default $brewPrefix | quote }}
   NONINTERACTIVE: "1"
 {{- end }}
 

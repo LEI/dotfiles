@@ -36,13 +36,13 @@ run = "mise run test -- --filter-tags type:smoke"
 
 [tasks.pipeline]
 alias = "pl"
-description = "Run check, update, test locally"
+description = "Run check, prek and test locally"
 depends = [
   "check",
-  "test",
   # "lint",
   "prek",
-  "update",
+  "test",
+  # "update",
 ]
 
 [tasks.prek]

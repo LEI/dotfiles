@@ -5,6 +5,7 @@ packages:
     # native on Fedora (dnf) and Arch (pacman): system service with proper capabilities
     # brew on macOS and distros without caddy in official repos
     type: '{{ eq .osIDLike "alpine" "debian" | ternary "brew" nil }}'
+    restart_service: ":changed"
   # nss-tools:
   #   # certutil: required for `caddy trust` to register CA in Firefox/Chrome NSS databases
   #   enabled: '{{ eq .os "linux" }}'

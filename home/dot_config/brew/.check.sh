@@ -1,6 +1,4 @@
 #!/bin/sh
-#MISE description="Run brew doctor"
-
 set -eu
 
 # TODO: ignore deprecated or disabled warnings for pinned packages
