@@ -59,6 +59,7 @@ BASH_PROF
       prev_rest = rest
     }
   ' "$logfile" | sort -rn | head -20 | nl -w2 -s')  '
+  # TODO: add a second table aggregating total ms per source file (zprof-style self time)
   ;;
 zsh)
   tmpdir=$(mktemp -d)

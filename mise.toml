@@ -24,16 +24,6 @@ depends = [
 description = "Benchmark shell startup with hyperfine"
 run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
-[tasks."test:unit"]
-alias = "tu"
-description = "Run unit tests only"
-run = "mise run test -- --filter-tags type:unit"
-
-[tasks."test:smoke"]
-alias = "ts"
-description = "Run smoke tests (needs deployed home)"
-run = "mise run test -- --filter-tags type:smoke"
-
 [tasks.pipeline]
 alias = "pl"
 description = "Run check, prek and test locally"
@@ -49,3 +39,17 @@ depends = [
 alias = "pre-commit"
 description = "Run pre-commit hooks on all files"
 run = "prek run --all-files"
+
+[tasks."test:unit"]
+alias = "tu"
+description = "Run unit tests only"
+run = "mise run test -- --filter-tags type:unit"
+
+[tasks."test:smoke"]
+alias = "ts"
+description = "Run smoke tests (needs deployed home)"
+run = "mise run test -- --filter-tags type:smoke"
+
+[tasks.timep]
+description = "Profile bash init with timep (call-stack tree)"
+run = "bash -c 'source ~/.local/share/timep.bash && timep +F -c \"source ~/.bashrc\"'"
