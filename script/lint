@@ -1,33 +1,59 @@
 #!/usr/bin/env bash
 #MISE alias="l"
-#MISE description="Run prek on chezmoi templates"
+#MISE description="Render and lint chezmoi templates"
 
 set -euo pipefail
 
-render_dir="$PWD/output/prek"
+render_dir="$PWD/output/prek.$$"
+config="$PWD/.pre-commit-config.yaml"
+script_dir="$PWD/script"
+prek_args=()
 
-if [ ! -d "$render_dir" ]; then
-  printf >&2 'lint: %s not found, run render first\n' "$render_dir"
-  exit 1
+cleanup() { rm -rf "$render_dir"; }
+trap cleanup EXIT
+mkdir -p "$render_dir"
+
+# Separate our flags from template paths
+templates=()
+for arg in "$@"; do
+  case "$arg" in
+  --quiet) prek_args+=(--quiet) ;;
+  *) templates+=("$arg") ;;
+  esac
+done
+
+chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
+
+if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
+  echo >&2 "lint: no rendered files"
+  exit 0
 fi
 
-mapfile -t files < <(fd --type f . "$render_dir" | sed "s|$render_dir/||")
+# # prek needs a git repo to discover files
+# git -C "$render_dir" init --quiet
+# git -C "$render_dir" add --all
 
-if [ ${#files[@]} -eq 0 ]; then
-  printf >&2 'lint: no files to lint\n'
-  exit 1
-fi
+# prek resolves hook entries and config paths relative to --cd
+cp -a "$script_dir" "$render_dir/script"
+ln -s "$PWD/home" "$render_dir/home"
+
+# Warn about files prek cannot handle (spaces in path)
+while IFS= read -r f; do
+  echo >&2 "lint: skip (space in path): $f"
+  git -C "$render_dir" rm --quiet --cached "$f"
+done < <(git -C "$render_dir" ls-files | grep ' ')
 
 prek run \
-  --cd="${render_dir#"$PWD"/}" \
-  --config="$PWD/.pre-commit-config.yaml" \
+  "${prek_args[@]}" \
+  --cd="$render_dir" \
+  --config="$config" \
   --skip=check-added-large-files \
   --skip=lint-templates \
   --skip=zizmor \
-  --files "${files[@]}" &&
+  --all-files &&
   exit_code=0 || exit_code=$?
 
 if [ "$exit_code" -ne 0 ]; then
-  printf >&2 'lint: failed with exit code %s\n' "$exit_code"
+  echo >&2 "lint: failed with exit code $exit_code"
 fi
 exit "$exit_code"
