@@ -2,7 +2,7 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $name := eq .profile "work" | ternary "premium" "zai-coding-plan-lite" -}}
+{{- $name := eq .profile "work" | ternary "premium" "opencode-zen" -}}
 {{- $p := get .ai.profiles $name -}}
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
@@ -309,8 +309,10 @@
     "websearch": "allow",
     "codesearch": "allow",
     // Triggered when a tool touches paths outside the project working directory
-    // TODO: allow ~/notes/*/{journal,pages}/**
-    "external_directory": "ask",
+    "external_directory": {
+      "*": "ask",
+      "~/notes/{{ .profile }}/{journal,pages}/**": "allow"
+    },
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
     // Ask the user questions during execution

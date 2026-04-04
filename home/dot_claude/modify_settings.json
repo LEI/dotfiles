@@ -131,7 +131,7 @@
       {{- if and .features.sql (eq .os "darwin") }}
       "Read(~/Library/DBeaverData/workspace*/General/Scripts/**)",
       {{- end }}
-      "Read(~/notes/*/pages/**)",
+      "Read(~/notes/{{ .profile }}/{journal,pages}/**)",
       "Skill(hookify:list)",
       "TaskCreate",
       "TaskGet",
