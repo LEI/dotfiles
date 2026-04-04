@@ -50,6 +50,26 @@ repos:
         stages:
           - pre-commit
 
+  # https://github.com/python-jsonschema/check-jsonschema
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.32.1
+    hooks:
+      - id: check-github-workflows
+        name: check-github-workflows
+      - id: check-github-actions
+        name: check-github-actions
+      - id: check-dependabot
+        name: check-dependabot
+      - id: check-compose-spec
+        name: check-compose-spec
+        files: (^|/)compose\.ya?ml$
+      # - id: v8r
+      #   name: v8r schema validation
+      #   entry: npx v8r --ignore-errors
+      #   language: system
+      #   exclude: ^home/(.*\.tmpl$|.*/modify_)
+      #   files: \.(json[c5]?|toml|ya?ml)$
+
   # https://docs.zizmor.sh/integrations/#pre-commit
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.15.2
@@ -101,7 +121,7 @@ repos:
         args: ["--quiet"]
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
-        exclude: ^output/|\.chezmoi\.yaml\.tmpl$
+        exclude: \.chezmoi\.yaml\.tmpl$
 
       - id: validate-skill
         name: validate skills

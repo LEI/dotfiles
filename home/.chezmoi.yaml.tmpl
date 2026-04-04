@@ -302,7 +302,7 @@ scriptEnv:
 {{-   end }}
 {{-   $paths = append $paths $binDir }}
 
-  PATH: {{ $paths | uniq | join ":" | quote }}
+  # PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 
   TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}

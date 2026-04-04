@@ -61,6 +61,7 @@ packages:
     enabled: {{ and .features.rust (not (eq .osIDLike "alpine")) }}
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "cargo" nil }}'
   check-jsonschema:
+    enabled: {{ and .features.git (ne .osIDLike "android") }}
     type: uv
   chezmoi:
     enabled: {{ eq .osIDLike "darwin" "windows" }}

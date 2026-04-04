@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 #MISE description="Validate files against their declared $schema"
-# Requires: check-jsonschema, jq, yq
+# Validates files with an inline $schema against it.
+# Files without $schema are skipped (use check-jsonschema builtin hooks
+# in .pre-commit-config.yaml for SchemaStore auto-detection).
 
 set -euo pipefail
 
+for cmd in check-jsonschema jq yq; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo >&2 "error: $cmd is required"
+    exit 1
+  fi
+done
+
+# shellcheck disable=SC2329
 validate_schema() {
   local path="$1" base ext content schema output
   base="$(basename "$path")"
   ext="${path##*.}"
-
-  if [[ "$path" == *"/sandboxed/"* ]]; then
-    echo "SKIP $path"
-    return 0
-  fi
 
   if [ ! -e "$path" ]; then
     echo "FAIL $path (not found)"
@@ -36,6 +41,11 @@ validate_schema() {
     schema=
   fi
 
+  if [ -z "$schema" ]; then
+    echo "SKIP $path"
+    return 0
+  fi
+
   # Normalize content to JSON
   case "$ext" in
   jsonc | json5) content=$(json5 "$path" 2>/dev/null) ;;
@@ -47,15 +57,7 @@ validate_schema() {
     content='{}'
   fi
 
-  # Skip files without a declared $schema
-  if [ -z "$schema" ]; then
-    echo "SKIP $path"
-    return 0
-  fi
-
-  local args=(--schemafile "$schema")
-
-  if output=$(printf '%s' "$content" | check-jsonschema "${args[@]}" - 2>&1); then
+  if output=$(printf '%s' "$content" | check-jsonschema --schemafile "$schema" - 2>&1); then
     echo "PASS $path"
   else
     printf 'FAIL %s\n%s\n' "$path" "$output"
@@ -64,23 +66,14 @@ validate_schema() {
 }
 export -f validate_schema
 
-for cmd in check-jsonschema jq yq; do
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo >&2 "error: $cmd is required"
-    exit 1
-  fi
-done
-
 # Collect files: from args (pre-commit) or find all
 if [ $# -eq 0 ]; then
   mapfile -t files < <(
-    find . -type f \
-      \( -name "*.json" -o -name "*.jsonc" -o -name "*.json5" \
-      -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" \) \
-      -not -path './output/*' \
-      -not -path './.git/*' \
-      -not -path './home/.chezmoitemplates/*' \
-      -not -name 'modify_*'
+    git ls-files -z \
+      '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
+      ':(exclude)home/.chezmoitemplates/' \
+      ':(exclude)**/modify_*' |
+      tr '\0' '\n'
   )
   set -- "${files[@]}"
 fi
@@ -90,6 +83,7 @@ if [ $# -eq 0 ]; then
   exit 0
 fi
 
+# shellcheck disable=SC2016
 results=$(printf '%s\n' "$@" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n1 bash -c 'validate_schema "$1"' _ 2>&1 || true)
 
 passed=$(echo "$results" | grep -c '^PASS ' || true)

@@ -4,23 +4,26 @@
 
 set -euo pipefail
 
-render_dir="$PWD/output/prek.$$"
-config="$PWD/.pre-commit-config.yaml"
-script_dir="$PWD/script"
+repo_dir="$PWD"
+render_dir=$(mktemp -d)
 prek_args=()
 
+# shellcheck disable=SC2329
 cleanup() { rm -rf "$render_dir"; }
 trap cleanup EXIT
-mkdir -p "$render_dir"
 
 # Separate our flags from template paths
 templates=()
 for arg in "$@"; do
   case "$arg" in
-  --quiet) prek_args+=(--quiet) ;;
+  --quiet)
+    prek_args+=(--quiet)
+    ;;
   *) templates+=("$arg") ;;
   esac
 done
+
+printf 'disable=SC1090,SC2034,SC2154,SC2248\n' >"$render_dir/.shellcheckrc"
 
 chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
 
@@ -29,15 +32,15 @@ if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
   exit 0
 fi
 
-# # prek needs a git repo to discover files
-# git -C "$render_dir" init --quiet
-# git -C "$render_dir" add --all
+# Isolated git repo outside the main repo so prek can discover files
+git -C "$render_dir" init --quiet
+git -C "$render_dir" add --all
 
 # prek resolves hook entries and config paths relative to --cd
-cp -a "$script_dir" "$render_dir/script"
-ln -s "$PWD/home" "$render_dir/home"
+cp -a "$repo_dir/script" "$render_dir/script"
+ln -s "$repo_dir/home" "$render_dir/home"
 
-# Warn about files prek cannot handle (spaces in path)
+# prek splits --files on spaces; remove affected files with a warning
 while IFS= read -r f; do
   echo >&2 "lint: skip (space in path): $f"
   git -C "$render_dir" rm --quiet --cached "$f"
@@ -46,7 +49,7 @@ done < <(git -C "$render_dir" ls-files | grep ' ')
 prek run \
   "${prek_args[@]}" \
   --cd="$render_dir" \
-  --config="$config" \
+  --config="$repo_dir/.pre-commit-config.yaml" \
   --skip=check-added-large-files \
   --skip=lint-templates \
   --skip=zizmor \

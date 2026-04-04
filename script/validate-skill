@@ -37,11 +37,7 @@ export -f validate_skill
 
 # Collect files: from args (pre-commit) or find all
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(
-    find . -type f -name SKILL.md \
-      -not -path './output/*' \
-      -not -path './.git/*'
-  )
+  mapfile -t files < <(git ls-files -z 'SKILL.md' '**/SKILL.md' | tr '\0' '\n')
   set -- "${files[@]}"
 fi
 
