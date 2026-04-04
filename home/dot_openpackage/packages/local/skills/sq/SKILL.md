@@ -66,12 +66,12 @@ This is sq's primary advantage: no ETL needed to correlate data across file type
 
 ## Output formats
 
-| Flag | Format |
-|------|--------|
-| (none) | table, printed to stdout |
-| `-j` | JSON array |
-| `--csv` | CSV |
-| `--xlsx` | Excel |
+| Flag          | Format                                         |
+| ------------- | ---------------------------------------------- |
+| (none)        | table, printed to stdout                       |
+| `-j`          | JSON array                                     |
+| `--csv`       | CSV                                            |
+| `--xlsx`      | Excel                                          |
 | `-o file.ext` | write to file (format inferred from extension) |
 
 ```bash
@@ -99,3 +99,6 @@ When asked to query or explore a data source:
 - Export to the format the user needs (`-o file.ext`)
 
 For cross-source joins, inspect both sources first to confirm the join key names match.
+
+<!-- ./references/claude-detailed.md -->
+<!-- ./references/opencode-simple.md -->

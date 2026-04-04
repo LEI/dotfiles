@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#MISE hide=true
 #MISE description="Validate SKILL.md files against Agent Skills specification"
 # Requires: skill-validator (brew install agent-ecosystem/tap/skill-validator)
 
@@ -14,9 +13,8 @@ fi
 validate_skill() {
   path="$1"
 
-  # Check existence
   if [ ! -e "$path" ]; then
-    printf "FAIL: %s (not found)\n" "$path"
+    printf >&2 "FAIL: %s (not found)\n" "$path"
     return 1
   fi
 
@@ -33,23 +31,21 @@ validate_skill() {
   # Get skill name from directory
   dir_name=$(basename "$skill_dir")
 
-  # printf "validate: %s\n" "$path"
+  # printf >&2 "validating skill: %s\n" "$skill_dir"
 
-  # Run validator - show output on failure
-  output=$(skill-validator check "$skill_dir" 2>&1)
-  result=$?
-
-  if [ $result -eq 0 ] || [ $result -eq 2 ]; then
-    printf "ok: %s\n" "$dir_name"
+  # Validate one file
+  # NOTE: exit code 2 means warnings
+  if output=$(skill-validator check "$skill_dir" 2>&1); then
+    printf >&2 "ok: %s\n" "$path"
   else
-    printf "FAIL: %s\n" "$dir_name"
-    printf "%s\n" "$output"
+    printf >&2 "FAIL: %s (content: %s)\n" "$path" "$content"
+    printf >&2 "%s\n" "$output"
     return 1
   fi
 }
 export -f validate_skill
 
-# Collect files: from args or auto-discover
+# Collect skill files
 if [ $# -eq 0 ]; then
   mapfile -t files < <(
     find . -type f -name SKILL.md \
@@ -60,8 +56,14 @@ else
   files=("$@")
 fi
 
-[ ${#files[@]} -eq 0 ] && exit 0
+if [ ${#files[@]} -eq 0 ]; then
+  printf >&2 "No skills to validate\n"
+  exit 0
+fi
 
-# Run with GNU parallel (streaming output, fail-fast)
-printf '%s\n' "${files[@]}" \
-  | parallel --line-buffer --halt now,fail=1 -P "$(getconf _NPROCESSORS_ONLN)" validate_skill 2>/dev/null
+# TODO: --halt now,fail=1
+printf '%s\n' "${files[@]}" |
+  parallel --line-buffer -P "$(getconf _NPROCESSORS_ONLN)" validate_skill 2>/dev/null
+
+# TODO: count errors, warnings, skipped...
+printf >&2 "%d skill(s) validated\n" "${#files[@]}"
