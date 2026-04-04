@@ -24,7 +24,11 @@ set +x
 exec 5>&-
 BASH_PROF
 
-  setsid bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
+  if command -v setsid >/dev/null; then
+    setsid bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
+  else
+    bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
+  fi
 
   total=$(awk '
     /^\++ [0-9]+\.[0-9]+ / {

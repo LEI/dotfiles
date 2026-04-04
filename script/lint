@@ -50,7 +50,7 @@ prek run \
   "${prek_args[@]}" \
   --cd="$render_dir" \
   --config="$repo_dir/.pre-commit-config.yaml" \
-  --skip=check-added-large-files \
+  --skip=gitleaks \
   --skip=lint-templates \
   --skip=zizmor \
   --all-files &&
