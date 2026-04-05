@@ -6,6 +6,9 @@ packages:
     # brew on macOS and distros without caddy in official repos
     type: '{{ eq .osIDLike "alpine" "debian" | ternary "brew" nil }}'
     restart_service: ":changed"
+  dnsmasq:
+    enabled: '{{ eq .chezmoi.os "darwin" }}'
+    restart_service: ":changed"
   # nss-tools:
   #   # certutil: required for `caddy trust` to register CA in Firefox/Chrome NSS databases
   #   enabled: '{{ eq .os "linux" }}'

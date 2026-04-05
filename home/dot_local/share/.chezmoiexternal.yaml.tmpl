@@ -1,4 +1,4 @@
-{{- if .features.bash }}
+{{- if .features.bash -}}
 ---
 {{- if ne .osID "alpine" }}
 # commit aab0589addedb9966721e1e1922a8d87ad1c13ab
@@ -8,8 +8,7 @@ bash-preexec.sh:
   sha256: db2a03a836cea4d5c38fa6ef745f7b0dcb5ea0201824ae56b309d599fb206aee
   refreshPeriod: 168h
 
-{{ end -}}
-
+{{- end }}
 # v1.10.1
 timep.bash:
   type: file

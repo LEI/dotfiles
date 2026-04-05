@@ -46,6 +46,22 @@ run caddy validate --config "$caddyfile"
 # Reload config if already running
 if [ "${CHEZMOI_OS:?}" = darwin ] && has brew && sudo brew services list | grep -q "^caddy.*started"; then
   run caddy reload --config "$caddyfile"
+
+  # Route .test queries to 127.0.0.1 via standalone dnsmasq
+  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+  dnsmasq_conf="${HOMEBREW_PREFIX:?}/etc/dnsmasq.d/test.conf"
+  resolver_conf=/etc/resolver/test
+  if ! diff -u "$dnsmasq_conf" "$dns_src/.dnsmasq-test.conf" 2>/dev/null; then
+    msg "Updating dnsmasq .test config"
+    run mkdir -p "$(dirname "$dnsmasq_conf")"
+    run cp "$dns_src/.dnsmasq-test.conf" "$dnsmasq_conf"
+    run sudo brew services restart dnsmasq
+  fi
+  if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf"; then
+    msg "Creating /etc/resolver/test"
+    run sudo mkdir -p /etc/resolver
+    run sudo sh -c 'echo "nameserver 127.0.0.1" >/etc/resolver/test'
+  fi
 elif has systemctl; then
   # Port 2020: metrics site (SELinux http_port_t)
   if has semanage && ! semanage port -l 2>/dev/null | grep -q "^http_port_t.*2020"; then

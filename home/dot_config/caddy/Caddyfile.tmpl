@@ -1,7 +1,7 @@
 {
 	default_bind 127.0.0.1
-	# Use Caddy's internal CA for all sites; run `caddy trust` once to install it
-	local_certs
+	local_certs # run `caddy trust` once to install the CA
+	cert_lifetime 168h
 	metrics
 	admin localhost:2019
 }
