@@ -1,13 +1,19 @@
 # ~/.macos
 # https://github.com/kevinSuttle/macOS-Defaults
 
-{{- if lookPath "scutil" | isExecutable }}
+{{ if lookPath "scutil" | isExecutable -}}
+
 # Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
-{{- end }}
+{{ end -}}
 # Local host name: {{ .hostname }}
-{{- if lookPath "sw_vers" | isExecutable }}
-# macOS build version: {{ output "sw_vers" "--buildVersion" }}
-{{- end }}
+
+{{ if lookPath "sw_vers" | isExecutable -}}
+
+{{ output "sw_vers"
+  | replaceAllRegex "\\t\\t" " "
+  | comment "# " }}
+{{ end -}}
+
 # Always show hidden files
 defaults write com.apple.finder AppleShowAllFiles -boolean true
 

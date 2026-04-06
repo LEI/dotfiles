@@ -6,10 +6,13 @@
 # marketplaces: {{ $marketplaces | toJson | sha256sum }}
 # plugins: {{ $plugins | toJson | sha256sum }}
 {{- range $plugins }}
-{{- $marketplace := get $marketplaces .marketplace }}
-{{- if and $marketplace (not (hasKey $marketplace "repo")) }}
-# local:{{ .name }}@{{ .marketplace }}: {{ include (printf "%s/plugins/%s/.claude-plugin/plugin.json" $marketplace.path .name) | sha256sum }}
-{{- end }}
+{{-   $marketplace := get $marketplaces .marketplace }}
+{{-   if and $marketplace (not (hasKey $marketplace "repo")) }}
+{{-     $path := printf "%s/plugins/%s/.claude-plugin/plugin.json" $marketplace.path .name }}
+{{-     if stat $path }}
+# local:{{ .name }}@{{ .marketplace }}: {{ include $path | sha256sum }}
+{{-     end }}
+{{-   end }}
 {{- end }}
 
 set -euo pipefail

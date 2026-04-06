@@ -1,12 +1,18 @@
 {{- if .features.otel -}}
+{{- $path := joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" -}}
 #!/bin/sh
-# hooks: {{ joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" | include | sha256sum }}
+
+{{- if stat $path }}
+
+# hooks: {{ include $path | sha256sum }}
+{{- end }}
 {{ includeTemplate "service-hash.tmpl" (merge (dict
   "label" "com.webhook.alert"
   "unit" "webhook"
   "plist" true
   "service" true
 ) .) -}}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

@@ -55,3 +55,11 @@ claude_teams_tmux() {
   local session_name="${TMUX_SESSION:-$(basename "$PWD")}"
   tmux_session "$session_name" claude --teammate-mode=tmux "$@"
 }
+
+# Pop Kitty keyboard protocol if an app exited without cleanup
+# https://github.com/anthropics/claude-code/issues/38761
+_kitty_keyboard_reset() { printf '\e[<u'; }
+case "${ZSH_VERSION:+z}${BASH_VERSION:+b}" in
+z) precmd_functions+=(_kitty_keyboard_reset) ;;
+b) PROMPT_COMMAND="_kitty_keyboard_reset${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+esac

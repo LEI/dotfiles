@@ -33,6 +33,7 @@ if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
 fi
 
 # Isolated git repo outside the main repo so prek can discover files
+# FIXME: add+commit alias = git diff exit status 128 (unable to read)
 git -C "$render_dir" init --quiet
 git -C "$render_dir" add --all
 

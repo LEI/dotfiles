@@ -5,7 +5,13 @@
 {{- $plistSuffix := get . "plistSuffix" | default ".plist.tmpl" -}}
 {{- $serviceDir := get . "serviceDir" | default "dot_config/systemd/user" -}}
 {{- if $hasPlist -}}
-# plist: {{ includeTemplate (printf "Library/private_LaunchAgents/%s%s" $label $plistSuffix) . | sha256sum }}
+{{-   $path := printf "Library/private_LaunchAgents/%s%s" $label $plistSuffix -}}
+{{-   if stat $path }}
+# plist: {{ includeTemplate $path . | sha256sum }}
+{{-   end }}
 {{ else if $hasService -}}
-# service: {{ include (printf "%s/%s.service" $serviceDir $unit) | sha256sum }}
+{{-   $path := printf "%s/%s.service" $serviceDir $unit -}}
+{{-   if stat $path }}
+# service: {{ include $path | sha256sum }}
+{{-   end }}
 {{ end -}}

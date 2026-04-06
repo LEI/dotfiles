@@ -1,4 +1,4 @@
-{{- if and .features.opencode (not .ephemeral) -}}
+{{- if and .features.opencode (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
 
 # sq: {{ include "dot_openpackage/packages/local/skills/sq/SKILL.md" | sha256sum }}

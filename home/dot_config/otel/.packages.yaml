@@ -3,6 +3,6 @@ enabled: "{{ .features.otel }}"
 packages:
   otel-cli:
     type: brew
-  otel-tui:
+  ymtdzzz/tap/otel-tui:
     enabled: '{{ eq .os "darwin" }}'
     type: brew

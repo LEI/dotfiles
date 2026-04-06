@@ -1,6 +1,8 @@
-{{- if eq .chezmoi.os "darwin" -}}
-{{- $storm := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Storm.itermcolors") | fromJson -}}
-{{- $day := output "plutil" "-convert" "json" "-o" "-" (joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Day.itermcolors") | fromJson -}}
+{{- $stormPath := joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Storm.itermcolors" -}}
+{{- $dayPath := joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Day.itermcolors" -}}
+{{- if and (eq .chezmoi.os "darwin") (stat $stormPath) (stat $dayPath) -}}
+{{- $storm := output "plutil" "-convert" "json" "-o" "-" $stormPath | fromJson -}}
+{{- $day := output "plutil" "-convert" "json" "-o" "-" $dayPath | fromJson -}}
 {
   "Profiles": [
     {
