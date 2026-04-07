@@ -65,23 +65,34 @@ fi
 # Feature init files; order-sensitive tools are sourced explicitly below
 {{- $src := .chezmoi.sourceDir }}
 {{- $dotcfg := joinPath $src "dot_config" }}
-{{- $exclude := list "atuin" "bash" "carapace" "direnv" "mise" "starship" "zoxide" "zsh" }}
+{{- $init := list "bash" "zsh" }}
+{{- $ordered := list "atuin" "carapace" "direnv" "mise" "starship" "zoxide" }}
+{{- $exclude := concat $init $ordered }}
 for _f in \
   "$XDG_CONFIG_HOME/sh/functions/"*.sh{{ if eq $shell "zsh" }}(N){{ end }} \
+{{- range $o := $ordered }}
+  {{- range glob (joinPath $dotcfg $o "init.sh*") }}
+  "$XDG_CONFIG_HOME/{{ $o }}/{{ . | base | trimSuffix ".tmpl" }}" \
+  {{- end }}
+{{- end }}
 {{- range glob (joinPath $src "dot_*/init.sh*") }}
   {{- $name := . | dir | base | trimPrefix "dot_" }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
 {{- end }}
 {{- range glob (joinPath $dotcfg "*/init.sh*") }}
   {{- $name := . | dir | base }}
-  {{- if not (has $name $exclude) }}
-  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
+  {{- if has $name $exclude }}
+  {{-   warnf "skipping %s (excluded)" $name }}
+  {{-   continue }}
   {{- end }}
+  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
 {{- end }}
 ; do
-  if [ -f "$_f" ]; then
-    source "$_f"
+  if ! [ -f "$_f" ]; then
+    echo >&2 "warning: init file not found: $_f"
+    continue
   fi
+  source "$_f"
 done
 unset _f
 

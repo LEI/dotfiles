@@ -36,15 +36,15 @@ packages:
   "@fission-ai/openspec":
     enabled: "{{ .features.ai }}"
     type: npm
-  "@kilocode/cli":
-    enabled: "{{ .features.ai }}"
-    type: npm
-  "@qodo/command": # uv tool install pr-agent
-    enabled: "{{ .features.ai }}"
-    type: npm
-  cline: # roocode
-    enabled: "{{ .features.ai }}"
-    type: npm
+  # "@kilocode/cli":
+  #   enabled: "{{ .features.ai }}"
+  #   type: npm
+  # "@qodo/command": # uv tool install pr-agent
+  #   enabled: "{{ .features.ai }}"
+  #   type: npm
+  # cline: # roocode
+  #   enabled: "{{ .features.ai }}"
+  #   type: npm
   bash-language-server:
     enabled: "{{ not .features.neovim }}"
     type: npm
