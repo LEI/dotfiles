@@ -280,7 +280,9 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
+
 {{-   $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
+{{ $paths | uniq | join "\n" | comment "# " | indent 2 }}
 {{-   if eq $osID "android" }}
 {{-     $paths = prepend $paths "/data/data/com.termux/files/usr/bin" }}
 {{-   else }}

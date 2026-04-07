@@ -1,5 +1,5 @@
-{{- $stormPath := joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Storm.itermcolors" -}}
-{{- $dayPath := joinPath .chezmoi.homeDir ".local/share/iterm2/Tokyonight Day.itermcolors" -}}
+{{- $stormPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-night.itermcolors" -}}
+{{- $dayPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-day.itermcolors" -}}
 {{- if and (eq .chezmoi.os "darwin") (stat $stormPath) (stat $dayPath) -}}
 {{- $storm := output "plutil" "-convert" "json" "-o" "-" $stormPath | fromJson -}}
 {{- $day := output "plutil" "-convert" "json" "-o" "-" $dayPath | fromJson -}}
@@ -26,7 +26,7 @@
       "Custom Directory": "Recycle",
       "Working Directory": "{{ .chezmoi.homeDir }}",
       "Custom Command": "No",
-      "Transparency": 0.15,
+      "Transparency": 0.05,
       "Scrollback Lines": 1000,
       "Unlimited Scrollback": false,
       "Visual Bell": true,

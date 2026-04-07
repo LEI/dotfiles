@@ -2,11 +2,11 @@
 vim.filetype.add({
   extension = {
     -- conf = 'conf',
-    env = 'dotenv',
+    env = 'dotenv.sh',
   },
   filename = {
     -- ['.dockerignore'] = 'gitignore',
-    ['.env'] = 'dotenv',
+    ['.env'] = 'dotenv.sh',
     -- ['.eslintrc.json'] = 'jsonc',
     -- ['.ignore'] = 'gitignore',
     ['.yamlfmt'] = 'yaml',
@@ -19,7 +19,7 @@ vim.filetype.add({
     -- ['%.conf'] = {
     --   ['/%.ssh/.*%.conf$'] = 'sshconfig',
     -- },
-    ['%.env%.[%w_.-]+'] = 'dotenv',
+    ['%.env%.[%w_.-]+'] = 'dotenv.sh',
     ['.*/private_dot_ssh/.*%.conf'] = 'sshconfig',
     ['.vscode/*.json'] = 'jsonc',
     -- ['compose.y.?ml'] = 'yaml.docker-compose',
