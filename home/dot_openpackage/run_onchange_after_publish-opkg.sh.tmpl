@@ -1,7 +1,9 @@
 {{- if and .features.opencode (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
 
-# sq: {{ include "dot_openpackage/packages/local/skills/sq/SKILL.md" | sha256sum }}
+{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/SKILL.md") }}
+# {{ dir . | base }}: {{ . | include | sha256sum }}
+{{- end }}
 
 set -eu
 
@@ -9,6 +11,13 @@ set -eu
 
 LOCAL_PACKAGE_PATH="{{ .chezmoi.homeDir }}/.openpackage/packages/local"
 PACKAGE_NAME="local"
+
+# Returns true if the package is already installed globally
+opkg_installed() {
+  npx opkg list --global --json 2>/dev/null \
+    | jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
+    >/dev/null 2>&1
+}
 
 if [ ! -d "$LOCAL_PACKAGE_PATH" ]; then
   err "Package directory not found: $LOCAL_PACKAGE_PATH"
@@ -19,12 +28,20 @@ if [ ! -f "$LOCAL_PACKAGE_PATH/openpackage.yml" ]; then
 fi
 
 # Publish local opkg package to registry
-# TODO: replace with after_script: mise run opkg publish --local --force local
+# TODO: replace cd + npx with: mise run opkg -- publish --local --force "$PACKAGE_NAME"
+# TODO: pin npx opkg to a specific version via mise (npm:opkg@<version>)
 cd "$LOCAL_PACKAGE_PATH"
 run npx opkg publish --local --force "$PACKAGE_NAME"
 
-# Install to opencode
-run npx opkg install --local --platforms opencode --global "$PACKAGE_NAME"
+# Uninstall first so renamed or deleted resources are removed
+if opkg_installed "$PACKAGE_NAME"; then
+  run npx opkg uninstall --global --recursive "$PACKAGE_NAME"
+fi
+
+# Install to platforms enabled in features
+run npx opkg install --local --platforms
+{{- if .features.opencode }} opencode{{ end }}
+{{- if .features.claude }} claude{{ end }} --global "$PACKAGE_NAME"
 
 # Clean up workspace created by opkg
 trash "$CHEZMOI_WORKING_TREE/.openpackage" 2>/dev/null || true

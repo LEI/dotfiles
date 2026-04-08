@@ -4,6 +4,7 @@
 # Use -q/--quiet to suppress output.
 
 set -euo pipefail
+shopt -s lastpipe
 
 if ((BASH_VERSINFO[0] < 4)); then
   echo >&2 "bash 4+ required, found $BASH_VERSION"
@@ -64,9 +65,14 @@ sources=()
 for t in "${templates[@]}"; do
   sources+=("$source_dir/$t")
 done
-if ! mapfile -t targets < <(printf '%s\0' "${sources[@]}" | xargs -0 chezmoi target-path); then
+printf '%s\0' "${sources[@]}" | xargs -0 chezmoi target-path | mapfile -t targets
+if [ "${PIPESTATUS[1]}" -ne 0 ]; then
   echo >&2 "error: chezmoi target-path failed for:"
   printf '  %s\n' "${sources[@]}" >&2
+  exit 1
+fi
+if [ "${#targets[@]}" -ne "${#templates[@]}" ]; then
+  echo >&2 "error: target-path returned ${#targets[@]} paths for ${#templates[@]} templates"
   exit 1
 fi
 
@@ -104,15 +110,11 @@ render() {
   return "$exit_code"
 }
 
-export -f render
-export dest source_dir
-
-max_jobs=$(nproc 2>/dev/null || echo 4)
 total=${#templates[@]}
 
 failed=0
 for i in "${!templates[@]}"; do
-  render "${templates[$i]}" "${targets[$i]}" || failed=$((failed + 1))
+  render "${templates[$i]}" "${targets[$i]}" || ((++failed))
 done
 if [ "$failed" -gt 0 ]; then
   printf 'error: %d template(s) failed to render\n' "$failed" >&2

@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- includeTemplate "block-in-file.tmpl" (dict
   "chezmoi" .chezmoi
-  "contents" "[[ -f ~/.config/bash/init.sh ]] && source ~/.config/bash/init.sh"
+  "contents" "[[ -f ~/.config/bash/init.bash ]] && source ~/.config/bash/init.bash"
 ) -}}

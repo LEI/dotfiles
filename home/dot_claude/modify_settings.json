@@ -265,7 +265,7 @@
       "ExitPlanMode",
       "NotebookEdit"
     ],
-    "defaultMode": "plan",
+    "defaultMode": "{{ true | ternary "plan" "default" }}",
     "disableBypassPermissionsMode": "disable",
     {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
     "additionalDirectories": {{ $notesDirs | toPrettyJson | indent 4 | trim }}

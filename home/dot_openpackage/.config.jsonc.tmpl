@@ -1,0 +1,17 @@
+{
+  "defaults": {
+    "license": "MIT"
+  },
+  "platforms": {
+    {{- if .features.opencode }}
+    "opencode": {
+      "enabled": true
+    },
+    {{- end }}
+    {{- if .features.claude }}
+    "claude": {
+      "enabled": true
+    },
+    {{- end }}
+  }
+}

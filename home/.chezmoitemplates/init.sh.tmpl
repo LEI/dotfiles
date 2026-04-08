@@ -69,7 +69,6 @@ fi
 {{- $ordered := list "atuin" "carapace" "direnv" "mise" "starship" "zoxide" }}
 {{- $exclude := concat $init $ordered }}
 for _f in \
-  "$XDG_CONFIG_HOME/sh/functions/"*.sh{{ if eq $shell "zsh" }}(N){{ end }} \
 {{- range $o := $ordered }}
   {{- range glob (joinPath $dotcfg $o "init.sh*") }}
   "$XDG_CONFIG_HOME/{{ $o }}/{{ . | base | trimSuffix ".tmpl" }}" \
