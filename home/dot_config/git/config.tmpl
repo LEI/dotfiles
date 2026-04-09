@@ -1,3 +1,4 @@
+{{- $difft := "difft --override=*.blade.php:html" -}}
 # https://github.com/twpayne/dotfiles/blob/master/home/dot_config/git/config.tmpl
 
 [alias]
@@ -18,9 +19,6 @@
 	ri = rebase --interactive
 	s = status --branch --short
 
-	log = log{{ if lookPath "difft" | isExecutable }} --ext-diff{{ end }}
-	show = show{{ if lookPath "difft" | isExecutable }} --ext-diff{{ end }}
-
 	branches = branch -a
 	remotes = remote -v
 	tags = tag -l
@@ -40,7 +38,13 @@
 
 	# Show the diff between the latest commit and the current state
 	# d = "!git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+{{- if lookPath "difft" | isExecutable }}
+	d = -c diff.external="{{ $difft }}" diff
+	log = -c diff.external="{{ $difft }}" log --ext-diff
+	show = -c diff.external="{{ $difft }}" show --ext-diff
+{{- else }}
 	d = diff
+{{- end }}
 
 	# 'git di $number' shows the diff between the state '$number' revisions ago and the current state
 	di = "!d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
@@ -103,8 +107,8 @@
 
 {{- if lookPath "difft" | isExecutable }}
 
-[diff]
-	external = difft --override=*.blade.php:html
+# [diff]
+# 	external = {{ $difft }}
 {{- else if lookPath "delta" | isExecutable }}
 
 [include]
