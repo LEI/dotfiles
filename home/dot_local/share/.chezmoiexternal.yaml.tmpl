@@ -1,11 +1,12 @@
 {{- if .features.bash -}}
 ---
 {{- if ne .osID "alpine" }}
-# commit aab0589addedb9966721e1e1922a8d87ad1c13ab
+# commit a220343bf206372d4b90275eb30866c409f22f79
 bash-preexec.sh:
   type: file
   url: https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-  sha256: db2a03a836cea4d5c38fa6ef745f7b0dcb5ea0201824ae56b309d599fb206aee
+  checksum:
+    sha256: "48cec2856dc0342f7518ed1583158ec11c2c9d9ede64c6fce59c2c7ab983feee"
   refreshPeriod: 168h
 
 {{- end }}
@@ -13,6 +14,7 @@ bash-preexec.sh:
 timep.bash:
   type: file
   url: {{ gitHubLatestReleaseAssetURL "jkool702/timep" "timep.bash" | quote }}
-  sha256: 1ddfa4d223a836f0bd29c1e9bcb2d6e402ffb301b5724f1f12956c831d05a6d6
+  checksum:
+    sha256: "1ddfa4d223a836f0bd29c1e9bcb2d6e402ffb301b5724f1f12956c831d05a6d6"
   refreshPeriod: 168h
 {{ end -}}

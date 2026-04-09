@@ -30,6 +30,16 @@ validate_skill() {
     skill_dir=$(dirname "$path")
   fi
 
+  # Resolve effective name via chezmoi (strips exact_, dot_, etc.)
+  local effective_name tmp_dir=""
+  effective_name=$(basename "$(chezmoi target-path "$skill_dir" 2>/dev/null || echo "$skill_dir")")
+  if [ "$effective_name" != "$(basename "$skill_dir")" ]; then
+    tmp_dir=$(mktemp --directory)
+    trap 'rm -rf "$tmp_dir"' RETURN
+    ln -s "$skill_dir" "$tmp_dir/$effective_name"
+    skill_dir="$tmp_dir/$effective_name"
+  fi
+
   # NOTE: exit code 2 means warnings
   if output=$(skill-validator check "$skill_dir" 2>&1); then
     echo "PASS $path"

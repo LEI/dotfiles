@@ -39,9 +39,9 @@
 	# Show the diff between the latest commit and the current state
 	# d = "!git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 {{- if lookPath "difft" | isExecutable }}
-	d = -c diff.external="{{ $difft }}" diff
-	log = -c diff.external="{{ $difft }}" log --ext-diff
-	show = -c diff.external="{{ $difft }}" show --ext-diff
+	d = "!git -c diff.external=\"{{ $difft }}\" diff \"$@\""
+	log = "!git -c diff.external=\"{{ $difft }}\" log --ext-diff \"$@\""
+	show = "!git -c diff.external=\"{{ $difft }}\" show --ext-diff \"$@\""
 {{- else }}
 	d = diff
 {{- end }}

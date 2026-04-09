@@ -1,6 +1,12 @@
 ---
 name: sq
-description: Query MySQL, PostgreSQL, SQLite, Excel, CSV with sq CLI. Use when user asks to query databases, inspect data sources, join across sources, export results, or mentions sq CLI.
+description: >
+  This skill should be used when the user asks to "query a database", "query a CSV", "query Excel",
+  "use sq", "inspect a data source", "join two data sources", "export query results", "run SQL against
+  a file", "copy data between sources", or mentions sq CLI for MySQL, PostgreSQL, SQLite, CSV, or
+  Excel data queries. Also use when the user wants to explore an unknown schema or compare data across
+  files.
+allowed-tools: "Bash(sq *)"
 ---
 
 # sq data query CLI
@@ -99,6 +105,3 @@ When asked to query or explore a data source:
 - Export to the format the user needs (`-o file.ext`)
 
 For cross-source joins, inspect both sources first to confirm the join key names match.
-
-<!-- ./references/claude-detailed.md -->
-<!-- ./references/opencode-simple.md -->
