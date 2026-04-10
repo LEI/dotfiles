@@ -10,59 +10,64 @@ setup() {
   mkdir -p "$BATS_TEST_TMPDIR/srv"
   cat >"$BATS_TEST_TMPDIR/srv/hosts.yaml" <<'YAML'
 hosts:
-  a:
-    ssh: u@a
-    dir: /d
+  web:
+    ssh: u@web
+    dir: /var/www
     logs:
-      cmd: tail -f log
-  b:
-    ssh: u@b
-    dir: /d
+      cmd: tail --follow log
+      pipe: cat -n
+  api:
+    ssh: u@api
+    dir: /srv
 YAML
 }
 
 # bats file_tags=srv,type:unit
 
+# Listing
+
 @test "srv: no args lists hosts" {
   run_script "$srv"
   assert_success
-  assert_line "a"
-  assert_line "b"
+  assert_line "web"
+  assert_line "api"
 }
 
-@test "srv: list subcommand" {
-  run_script "$srv" list
+# Help
+
+@test "srv: -h shows usage" {
+  run_script "$srv" -h
   assert_success
-  assert_line "a"
+  assert_line --regexp "^Usage: srv"
 }
 
-@test "srv: connect defaults to shell" {
+@test "srv: --help shows usage" {
+  run_script "$srv" --help
+  assert_success
+  assert_line --regexp "^Usage: srv"
+}
+
+# Connect
+
+@test "srv: host opens interactive shell" {
   stub ssh 'echo "$*"'
-  run_script "$srv" connect a
+  run_script "$srv" web
   unstub ssh
   assert_success
   assert_line --regexp 'exec \$SHELL -l$'
 }
 
-@test "srv: connect with command" {
+@test "srv: host with command runs it" {
   stub ssh 'echo "$*"'
-  run_script "$srv" connect a echo ok
+  run_script "$srv" web echo ok
   unstub ssh
   assert_success
   assert_line --regexp "echo ok$"
 }
 
-@test "srv: shorthand connect" {
-  stub ssh 'echo "$*"'
-  run_script "$srv" a echo ok
-  unstub ssh
-  assert_success
-  assert_line --regexp "echo ok"
-}
-
 @test "srv: flags pass through to remote" {
   stub ssh 'echo "$*"'
-  run_script "$srv" a ls -h
+  run_script "$srv" web ls -h
   unstub ssh
   assert_success
   assert_line --regexp "ls -h$"
@@ -74,38 +79,54 @@ YAML
   assert_stderr_line --regexp "^srv: unknown host"
 }
 
-@test "srv: logs tails on host" {
+# Logs
+
+@test "srv: host logs streams log command" {
   stub ssh 'echo "$*"'
-  run_script "$srv" logs a
+  run_script "$srv" web logs
   unstub ssh
   assert_success
-  assert_line --regexp "tail -f log$"
+  assert_line --regexp "tail --follow log$"
 }
 
-@test "srv: logs passes extra args" {
+@test "srv: host logs passes extra args" {
   stub ssh 'echo "$*"'
-  run_script "$srv" logs a -n 50
+  run_script "$srv" web logs --lines=50
   unstub ssh
   assert_success
-  assert_line --regexp "tail -f log -n 50$"
+  assert_line --regexp "tail --follow log --lines=50$"
 }
 
-@test "srv: logs without name fails" {
-  run_script "$srv" logs
+@test "srv: logs without config fails" {
+  stub ssh 'echo "$*"'
+  run_script "$srv" api logs
+  unstub ssh || true
   assert_failure
+  assert_stderr_line --regexp "^srv: no log command"
 }
 
-@test "srv: help shows usage" {
-  run_script "$srv" help
+# Debug
+
+@test "srv: -d prints ssh command without executing" {
+  run_script "$srv" -d web
   assert_success
-  assert_line --regexp "^Usage: srv"
+  assert_line --regexp '^ssh -t u@web "cd '
 }
 
-@test "srv: help subcommand shows subcommand usage" {
-  run_script "$srv" help logs
+@test "srv: -d logs shows command without -t" {
+  run_script "$srv" -d web logs
   assert_success
-  assert_line --regexp "^Usage: srv logs"
+  assert_line --regexp '^ssh u@web "cd '
+  refute_output --regexp ' -t '
 }
+
+@test "srv: -d logs with args omits pipe" {
+  run_script "$srv" -d web logs --lines=50
+  assert_success
+  refute_output --regexp "cat -n"
+}
+
+# Config
 
 @test "srv: missing config fails" {
   export XDG_CONFIG_HOME="$BATS_TEST_TMPDIR/empty"

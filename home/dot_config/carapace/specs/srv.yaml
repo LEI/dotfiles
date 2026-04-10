@@ -4,17 +4,5 @@ name: srv
 description: SSH host dispatcher
 completion:
   positional:
-    - ["$(srv list)"]
-commands:
-  - name: list
-    description: Show configured hosts
-  - name: connect
-    description: Open shell or run command on a host
-    completion:
-      positional:
-        - ["$(srv list)"]
-  - name: logs
-    description: Tail logs on a host
-    completion:
-      positional:
-        - ["$(srv list)"]
+    - ["$(srv)"]
+    - - logs

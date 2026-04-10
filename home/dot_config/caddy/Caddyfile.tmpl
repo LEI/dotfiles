@@ -1,7 +1,12 @@
 {
 	default_bind 127.0.0.1
 	local_certs # run `caddy trust` once to install the CA
-	cert_lifetime 168h
+	cert_lifetime 30d # 168h
+	# pki {
+	# 	ca local {
+	# 		intermediate_lifetime 730d
+	# 	}
+	# }
 	metrics
 	admin localhost:2019
 }
@@ -18,6 +23,11 @@
 {{- $dt := get $s "dialTimeout" -}}
 {{- $rht := get $s "responseHeaderTimeout" }}
 {{ $name }}.test {
+	# tls {
+	# 	issuer internal {
+	# 		lifetime 365d
+	# 	}
+	# }
 	tracing {
 		span {{ $name }}
 	}

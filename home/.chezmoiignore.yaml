@@ -151,7 +151,6 @@ features:
     - .local/bin/webhook-notify
     - Library/LaunchAgents/com.webhook.alert.*
   processCompose:
-    - .config/carapace/specs/pc.yaml
     - .config/process-compose/
     - .config/systemd/user/process-compose.*
     - .local/bin/pc
