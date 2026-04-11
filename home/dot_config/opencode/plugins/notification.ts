@@ -9,9 +9,9 @@ export const NotificationPlugin: Plugin = async ({ project, client, $, directory
       message: "Sending notification",
       extra: { title, message },
     })
-    if (process.platform === "darwin") {
+    /* if (process.platform === "darwin") {
       return $`osascript -e 'display notification "${message}" with title "${title}"'`
-    }
+    } */
     return $`notify-send "${title}" "${message}"`
   }
   return {
