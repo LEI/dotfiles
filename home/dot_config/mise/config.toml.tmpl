@@ -129,7 +129,7 @@ depends = [
 [tasks.opkg]
 description = "Run opkg from the local openpackage directory"
 dir = "~/.openpackage/packages/local"
-run = "npx opkg"
+run = "opkg"
 {{- end }}
 
 {{ includeTemplate "dot_config/mise/tools.toml.tmpl" . -}}

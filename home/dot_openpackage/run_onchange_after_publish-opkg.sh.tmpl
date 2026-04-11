@@ -23,7 +23,7 @@ PACKAGE_NAME="local"
 
 # Returns true if the package is already installed globally
 opkg_installed() {
-  npx opkg list --global --json 2>/dev/null \
+  opkg list --global --json 2>/dev/null \
     | jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
     >/dev/null 2>&1
 }
@@ -37,18 +37,18 @@ if [ ! -f "$LOCAL_PACKAGE_PATH/openpackage.yml" ]; then
 fi
 
 # Publish local opkg package to registry
-# TODO: replace cd + npx with: mise run opkg -- publish --local --force "$PACKAGE_NAME"
-# TODO: pin npx opkg to a specific version via mise (npm:opkg@<version>)
+# TODO: replace cd with: mise run opkg -- publish --local --force "$PACKAGE_NAME"
+# eventually pin opkg to a specific version via mise (npm:opkg@<version>)
 cd "$LOCAL_PACKAGE_PATH"
-run npx opkg publish --local --force "$PACKAGE_NAME"
+run opkg publish --local --force "$PACKAGE_NAME"
 
 # Uninstall first so renamed or deleted resources are removed
 if opkg_installed "$PACKAGE_NAME"; then
-  run npx opkg uninstall --global --recursive "$PACKAGE_NAME"
+  run opkg uninstall --global --recursive "$PACKAGE_NAME"
 fi
 
 # Install to platforms enabled in features
-run npx opkg install --local --platforms
+run opkg install --local --platforms
 {{- if .features.opencode }} opencode{{ end }}
 {{- if .features.claude }} claude{{ end }} --global "$PACKAGE_NAME"
 

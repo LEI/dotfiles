@@ -86,6 +86,7 @@ skills/supabase:
   type: archive
   url: https://github.com/supabase/agent-skills/archive/main.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 2
   include:
     - "*/skills/supabase-postgres-best-practices/**"
