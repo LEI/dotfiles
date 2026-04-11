@@ -32,8 +32,8 @@ if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
   exit 0
 fi
 
-# Isolate from parent git environment (GIT_INDEX_FILE is set during hooks)
-unset GIT_INDEX_FILE GIT_DIR
+# Isolate from parent git environment set during hooks
+unset GIT_INDEX_FILE # GIT_DIR
 
 # Isolated git repo outside the main repo so prek can discover files
 git -C "$render_dir" init --quiet
