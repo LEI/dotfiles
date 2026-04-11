@@ -6,15 +6,15 @@ var data = {lines:[
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"# https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh"},
 {"lineNum":"    7","line":""},
-{"lineNum":"    8","line":"set -euo pipefail","class":"lineCov","hits":"1","order":"193",},
+{"lineNum":"    8","line":"set -euo pipefail","class":"lineCov","hits":"1","order":"30",},
 {"lineNum":"    9","line":""},
-{"lineNum":"   10","line":"PATH=\"$PATH:$HOME/.local/bin\"","class":"lineCov","hits":"1","order":"192",},
-{"lineNum":"   11","line":"if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then","class":"lineCov","hits":"1","order":"190",},
+{"lineNum":"   10","line":"PATH=\"$PATH:$HOME/.local/bin\"","class":"lineCov","hits":"1","order":"29",},
+{"lineNum":"   11","line":"if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then","class":"lineCov","hits":"1","order":"27",},
 {"lineNum":"   12","line":"  eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"","class":"lineNoCov","hits":"0",},
 {"lineNum":"   13","line":"fi"},
 {"lineNum":"   14","line":""},
-{"lineNum":"   15","line":"if [ -z \"${MISE_SHELL:-}\" ] && command -v mise >/dev/null; then","class":"lineCov","hits":"1","order":"191",},
-{"lineNum":"   16","line":"  eval \"$(mise activate bash)\"","class":"lineCov","hits":"1","order":"189",},
+{"lineNum":"   15","line":"if [ -z \"${MISE_SHELL:-}\" ] && command -v mise >/dev/null; then","class":"lineCov","hits":"1","order":"28",},
+{"lineNum":"   16","line":"  eval \"$(mise activate bash)\"","class":"lineCov","hits":"1","order":"26",},
 {"lineNum":"   17","line":"  # PATH=\"$PATH:$HOME/.local/share/mise/shims\""},
 {"lineNum":"   18","line":"fi"},
 {"lineNum":"   19","line":""},
@@ -64,5 +64,5 @@ var data = {lines:[
 {"lineNum":"   63","line":"main \"$@\"","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-31 06:21:23", "instrumented" : 19, "covered" : 5,};
+var header = { "command" : "", "date" : "2026-04-11 02:06:05", "instrumented" : 19, "covered" : 5,};
 var merged_data = [];

@@ -8,5 +8,5 @@ var data = {lines:[
 {"lineNum":"    7","line":"exec chezmoi \"$@\"","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-03-31 06:21:23", "instrumented" : 3, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-04-11 02:06:05", "instrumented" : 3, "covered" : 0,};
 var merged_data = [];
