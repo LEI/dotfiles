@@ -37,7 +37,7 @@ depends = [
   # "update",
 ]
 run = [
-  # Avoid chezmoi lock
+  # Avoid chezmoi timeout obtaining persistent state lock when running tests
   "prek",
 ]
 

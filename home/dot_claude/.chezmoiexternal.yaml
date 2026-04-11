@@ -10,6 +10,7 @@ rules/ecc/common:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
+  exact: true
   include:
     - "*/rules/common/agents.md"
     - "*/rules/common/hooks.md"
@@ -27,6 +28,7 @@ rules/ecc/typescript:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
+  exact: true
   include: ["*/rules/typescript/*"]
   refreshPeriod: 720h
 
@@ -35,6 +37,7 @@ rules/ecc/golang:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
+  exact: true
   include: ["*/rules/golang/*"]
   refreshPeriod: 720h
 
@@ -42,6 +45,7 @@ rules/ecc/python:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
+  exact: true
   include: ["*/rules/python/*"]
   refreshPeriod: 720h
 
@@ -49,5 +53,6 @@ rules/ecc/swift:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
   stripComponents: 3
+  exact: true
   include: ["*/rules/swift/*"]
   refreshPeriod: 720h

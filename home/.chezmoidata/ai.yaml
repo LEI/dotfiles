@@ -1,4 +1,5 @@
 ---
+# https://models.dev/api.json
 ai:
   # dot_config/caddy/Caddyfile: reverse proxy sites from domain + port
   # dot_config/caddy/setup-caddy: valet proxy setup
@@ -36,17 +37,20 @@ ai:
       port: 11436
       domain: vllm-mlx.test
     # Cloud
-    github-copilot: {}
-    huggingface:
-      base_url: https://router.huggingface.co/v1
-      key_env: HF_TOKEN
-    opencode: {}
-    openrouter:
-      base_url: https://openrouter.ai/api/v1
-      key_env: OPENROUTER_API_KEY
-    zai:
-      base_url: https://api.z.ai/v1
-      key_env: ZAI_API_KEY
+    # github-copilot: {} # free, pro, pro+
+    # huggingface:
+    #   base_url: https://router.huggingface.co/v1
+    #   key_env: HF_TOKEN
+    # ollama-cloud: # free, pro, max
+    #   base_url: https://ollama.com/v1
+    #   key_env: OLLAMA_API_KEY
+    # opencode: {}
+    # openrouter:
+    #   base_url: https://openrouter.ai/api/v1
+    #   key_env: OPENROUTER_API_KEY
+    # zai:
+    #   base_url: https://api.z.ai/v1
+    #   key_env: ZAI_API_KEY
 
   # dot_config/opencode/opencode.jsonc: context window, provider IDs
   # dot_logseq/settings/ollama-logseq.json: ollama ID for fast role
@@ -102,6 +106,12 @@ ai:
       coding: github-copilot/claude-sonnet-4.6
       fast: github-copilot/gpt-4o
       reasoning: github-copilot/claude-opus-4.6
+    ollama-cloud:
+      agentic: ollama-cloud/qwen3-coder:480b
+      chat: ollama-cloud/gpt-oss:120b
+      coding: ollama-cloud/qwen3-coder:480b
+      fast: ollama-cloud/gpt-oss:20b
+      reasoning: ollama-cloud/deepseek-v3.1:671b
     opencode-zen:
       agentic: opencode/big-pickle
       chat: opencode/big-pickle
@@ -109,17 +119,17 @@ ai:
       fast: opencode/gpt-5-nano
       reasoning: opencode/big-pickle
     opencode-go:
-      agentic: opencode/glm-5
-      chat: opencode/kimi-k2.5
-      coding: opencode/glm-5
-      fast: opencode/minimax-m2.5
-      reasoning: opencode/minimax-m2.7
+      agentic: opencode-go/glm-5
+      chat: opencode-go/kimi-k2.5
+      coding: opencode-go/glm-5
+      fast: opencode-go/minimax-m2.5
+      reasoning: opencode-go/minimax-m2.7
     openrouter:
-      agentic: openrouter/qwen/qwen3-coder-480b-a35b-instruct
-      chat: openrouter/qwen/qwen3-32b-instruct
-      coding: openrouter/qwen/qwen3-coder-480b-a35b-instruct
-      fast: openrouter/qwen/qwen3-8b-instruct
-      reasoning: openrouter/deepseek/deepseek-r1
+      agentic: openrouter/qwen/qwen3-coder
+      chat: openrouter/qwen/qwen3-coder-30b-a3b-instruct
+      coding: openrouter/qwen/qwen3-coder
+      fast: openrouter/qwen/qwen3-coder-30b-a3b-instruct
+      reasoning: openrouter/deepseek/deepseek-r1-distill-llama-70b
     openrouter-auto:
       agentic: openrouter/auto
       chat: openrouter/auto
@@ -133,11 +143,11 @@ ai:
       fast: openrouter/free
       reasoning: openrouter/free
     huggingface:
-      agentic: huggingface/Qwen/Qwen3-Coder-30B-A3B-Instruct
-      chat: huggingface/Qwen/Qwen3-32B-Instruct
-      coding: huggingface/Qwen/Qwen3-Coder-30B-A3B-Instruct
-      fast: huggingface/Qwen/Qwen3-8B-Instruct
-      reasoning: huggingface/Qwen/Qwen3-32B-Instruct
+      agentic: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
+      chat: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
+      coding: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
+      fast: huggingface/Qwen/Qwen3-Coder-Next
+      reasoning: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
     zai-coding-plan-lite:
       agentic: zai/glm-4.7
       chat: zai-coding-plan/glm-4.7

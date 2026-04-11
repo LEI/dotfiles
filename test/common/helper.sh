@@ -98,6 +98,7 @@ run_src() {
   fi
   # Not local: BASH_ARGV0 must be global to set $0
   BASH_ARGV0="$script"
+  # shellcheck disable=SC1090
   source "$script" "$@"
 }
 
