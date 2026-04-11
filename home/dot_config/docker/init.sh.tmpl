@@ -1,0 +1,37 @@
+{{- if .features.ai -}}
+export SBX_NO_TELEMETRY=1
+exprt DOCKER_SANDBOXES_DOCKER_SIZE=10g # Default: 50 GB
+
+# sbx run shell -- -c "echo 'Hello from sandbox'"
+
+# claude-code
+# claude-code-minimal (no Node.js, Python, Go, or Java)
+# codex
+# copilot
+# docker-agent
+# gemini
+# kiro
+# opencode
+# shell
+
+# cp -r ~/.claude/skills .claude/skills
+# sbx create claude
+# sbx exec -d claude bash -c "echo 'export BRAVE_API_KEY=your_key' >>/etc/sandbox-persistent.sh"
+# sbx exec -it claude bash
+
+# Non-docker variant (lighter, non-privileged environment):
+# sbx run claude --template docker.io/docker/sandbox-templates:claude-code
+
+# sbx policy allow network "*.example.com:443,example.com:443"
+
+{{ end -}}
+
+if command -v lazydocker >/dev/null; then
+  alias D=lazydocker
+elif command -v oxker >/dev/null; then
+  alias D=oxker
+fi
+
+if command -v podman-tui >/dev/null; then
+  alias P=podman-tui
+fi

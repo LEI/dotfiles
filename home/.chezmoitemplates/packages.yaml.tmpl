@@ -118,10 +118,6 @@ packages:
       {{- else if eq .variantID "silverblue" -}}
       flatpak
       {{- end }}
-  dcv: # dtop
-    enabled: {{ and .features.docker (eq .osIDLike "darwin") }}
-    nameOverwrite:
-      darwin: tokuhirom/tap/dcv
   devpod:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
     nameOverwrite:
@@ -140,21 +136,6 @@ packages:
     # type: mise
   distrobox:
     enabled: {{ and (eq .osIDLike "fedora") .gui }}
-  dive: # sou
-    enabled: {{ and .features.docker (not (eq .osIDLike "alpine" "debian" "fedora")) }}
-    nameOverwrite:
-      windows: wagoodman.dive # scoop: main/dive
-  docker: # python-docker
-    enabled: {{ and .features.docker }}
-    nameOverwrite:
-      rpm: docker-cli
-  docker-buildx: # docker-buildkit
-    enabled: {{ and .features.docker }}
-  docker-compose:
-    enabled: {{ and .features.docker }}
-  docker-desktop:
-    enabled: {{ and .features.docker (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
   # dog, doggo, mtr, trippy, oryx / tshark termshark
   dolphie:
     description: MySQL monitoring TUI
@@ -325,11 +306,6 @@ packages:
     nameOverwrite:
       windows: Kubecolor.kubecolor
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
-  lazydocker: # dry, sen
-    enabled: {{ and .features.docker .gui }}
-    nameOverwrite:
-      arch: lazydocker-bin
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (ne .os "darwin" | ternary "mise" nil) }}'
   lazyjournal:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
     nameOverwrite:
@@ -394,7 +370,6 @@ packages:
   # bunx @mariozechner/pi-coding-agent
   # pi:
   #   enabled: {{ and .container .features.ai }}
-    #   {{ .container | toJson }}
   #   # env:
   #   #   PI_CONFIG_DIR: ~/.config/pi
   #   name: "@mariozechner/pi-coding-agent"
@@ -493,25 +468,6 @@ packages:
     nameOverwrite:
       # fedora: copr enable rusty-jack/pik
     # repo: jacek-kurlit/pik
-  podman:
-    enabled: {{ .features.podman }}
-    nameOverwrite:
-      arch: podman
-      windows: RedHat.Podman
-  podman-compose:
-    enabled: {{ and .features.podman (ne .os "windows") }}
-    nameOverwrite:
-      windows: RedHat.Podman
-  # podman-desktop:
-  #   enabled: {{ and .features.podman (ne .profile "minimal") }}
-  #   nameOverwrite:
-  #     windows: RedHat.Podman-Desktop
-  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  podman-tui:
-    enabled: {{ and .features.podman (not (eq .osIDLike "debian")) }}
-    nameOverwrite:
-      arch: podman-tui-bin
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   posting: # slumber, resterm (.http/.rest)
     enabled: {{ and .features.rest (eq .osIDLike "arch" "darwin") .gui }}
     # type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

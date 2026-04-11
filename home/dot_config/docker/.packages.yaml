@@ -1,0 +1,44 @@
+---
+enabled: "{{ .features.docker }}"
+packages:
+  dcv: # dtop
+    enabled: '{{ eq .osIDLike "darwin" }}'
+    nameOverwrite:
+      darwin: tokuhirom/tap/dcv
+  dive: # sou
+    enabled: '{{ not (eq .osIDLike "alpine" "debian" "fedora") }}'
+    nameOverwrite:
+      windows: wagoodman.dive # scoop: main/dive
+  docker: # python-docker
+    nameOverwrite:
+      rpm: docker-cli
+
+  # TODO: https://docs.docker.com/ai/model-runner/
+  # https://github.com/docker/docker-agent/blob/main/examples/README.md
+  # docker-agent CLI plugin is pre-installed with Docker Desktop
+  # https://github.com/docker/docker-agent#install
+  docker-agent:
+    enabled: '{{ and .features.ai (not (eq .osIDLike "arch" "darwin")) }}'
+    # nameOverwrite:
+    #   mise: github:docker/docker-agent
+    type: brew
+
+  docker-buildx: # docker-buildkit
+  docker-compose:
+  docker-desktop:
+    enabled: '{{ and (eq .osIDLike "arch" "darwin") .gui }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" nil) }}'
+  lazydocker: # dry, sen
+    enabled: "{{ .gui }}"
+    nameOverwrite:
+      arch: lazydocker-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (ne .os "darwin" | ternary "mise" nil) }}'
+  # sbx login
+  # sbx run claude|opencode
+  # https://docs.docker.com/ai/sandboxes/get-started/#install-and-sign-in
+  sbx:
+    enabled: false # "{{ .features.ai }}"
+    nameOverwrite:
+      cask: docker/tap/sbx
+      mise: github:docker/sbx-releases
+    type: '{{ eq .os "darwin" | ternary "cask" "mise" }}'

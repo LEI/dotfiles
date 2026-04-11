@@ -1,0 +1,21 @@
+---
+enabled: "{{ .features.podman }}"
+packages:
+  podman:
+    nameOverwrite:
+      arch: podman
+      windows: RedHat.Podman
+  podman-compose:
+    enabled: '{{ ne .os "windows" }}'
+    nameOverwrite:
+      windows: RedHat.Podman
+  # podman-desktop:
+  #   enabled: '{{ ne .profile "minimal" }}'
+  #   nameOverwrite:
+  #     windows: RedHat.Podman-Desktop
+  #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+  podman-tui:
+    enabled: '{{ not (eq .osIDLike "debian") }}'
+    nameOverwrite:
+      arch: podman-tui-bin
+    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
