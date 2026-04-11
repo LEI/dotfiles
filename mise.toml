@@ -17,7 +17,8 @@ depends = [
   # "bootstrap",
   "check",
   "coverage",
-  "startup",
+  "startup bash",
+  "startup zsh",
 ]
 
 [tasks.hyperfine]
@@ -30,6 +31,8 @@ description = "Run checks and tests locally"
 depends = [
   "check",
   # "lint",
+  "profile bash",
+  "profile zsh",
   "test",
   # "update",
 ]
