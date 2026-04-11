@@ -1,4 +1,6 @@
 ---
+# prek splits filenames on spaces; exclude paths containing whitespace globally
+exclude: '\s'
 repos:
   # https://github.com/gitleaks/gitleaks#pre-commit
   - repo: https://github.com/gitleaks/gitleaks

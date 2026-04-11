@@ -32,20 +32,16 @@ if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
   exit 0
 fi
 
+# Isolate from parent git environment (GIT_INDEX_FILE is set during hooks)
+unset GIT_INDEX_FILE GIT_DIR
+
 # Isolated git repo outside the main repo so prek can discover files
-# FIXME: add+commit alias = git diff exit status 128 (unable to read)
 git -C "$render_dir" init --quiet
 git -C "$render_dir" add --all
 
 # prek resolves hook entries and config paths relative to --cd
 cp -a "$repo_dir/script" "$render_dir/script"
 ln -s "$repo_dir/home" "$render_dir/home"
-
-# prek splits --files on spaces; remove affected files with a warning
-while IFS= read -r f; do
-  echo >&2 "lint: skip (space in path): $f"
-  git -C "$render_dir" rm --quiet --cached "$f"
-done < <(git -C "$render_dir" ls-files | grep ' ')
 
 prek run \
   "${prek_args[@]}" \

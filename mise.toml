@@ -26,13 +26,16 @@ run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 
 [tasks.pipeline]
 alias = "pl"
-description = "Run check, prek and test locally"
+description = "Run checks and tests locally"
 depends = [
   "check",
   # "lint",
-  "prek",
   "test",
   # "update",
+]
+run = [
+  # Avoid chezmoi lock
+  "prek",
 ]
 
 [tasks.prek]

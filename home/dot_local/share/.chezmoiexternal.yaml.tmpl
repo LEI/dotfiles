@@ -1,13 +1,12 @@
 {{- if .features.bash -}}
 ---
 {{- if ne .osID "alpine" }}
-# commit a220343bf206372d4b90275eb30866c409f22f79
+# https://github.com/rcaloras/bash-preexec/commit/a220343bf206372d4b90275eb30866c409f22f79
 bash-preexec.sh:
   type: file
-  url: https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+  url: https://raw.githubusercontent.com/rcaloras/bash-preexec/a220343bf206372d4b90275eb30866c409f22f79/bash-preexec.sh
   checksum:
-    # sha256: "48cec2856dc0342f7518ed1583158ec11c2c9d9ede64c6fce59c2c7ab983feee"
-    sha256: "db2a03a836cea4d5c38fa6ef745f7b0dcb5ea0201824ae56b309d599fb206aee"
+    sha256: "48cec2856dc0342f7518ed1583158ec11c2c9d9ede64c6fce59c2c7ab983feee"
   refreshPeriod: 168h
 
 {{- end }}
