@@ -28,6 +28,7 @@ skills/affaan-m:
   type: archive
   url: https://github.com/affaan-m/everything-claude-code/archive/v1.4.1.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 2
   include:
     - "*/skills/backend-patterns/**"
@@ -40,6 +41,7 @@ skills/anthropics:
   type: archive
   url: https://github.com/anthropics/skills/archive/main.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 2
   include:
     - "*/skills/mcp-builder/**"
@@ -64,6 +66,7 @@ skills/openai:
   type: archive
   url: https://github.com/openai/skills/archive/main.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 2
   include:
     # - "*/skills/.system/skill-creator/**"
@@ -111,6 +114,7 @@ skills/vercel-labs/web-design-guidelines:
   type: archive
   url: https://github.com/vercel-labs/agent-skills/archive/main.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 3
   include:
     - "*/skills/web-design-guidelines/**"
@@ -127,6 +131,7 @@ skills/wshobson:
   type: archive
   url: https://github.com/wshobson/agents/archive/main.tar.gz
   refreshPeriod: 720h
+  exact: true
   stripComponents: 4
   include:
     - "*/plugins/backend-development/skills/api-design-principles/**"
