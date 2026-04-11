@@ -37,5 +37,5 @@ var data = {lines:[
 {"lineNum":"   36","line":"# run mise prune \"$@\" # --tools"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-11 02:03:54", "instrumented" : 12, "covered" : 12,};
+var header = { "command" : "test", "date" : "2026-04-11 02:17:07", "instrumented" : 12, "covered" : 12,};
 var merged_data = [];

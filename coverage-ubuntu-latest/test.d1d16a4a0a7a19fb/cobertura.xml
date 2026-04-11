@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.254" lines-covered="307" lines-valid="1211" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1775873034">
+<coverage line-rate="0.254" lines-covered="307" lines-valid="1211" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1775873827">
 	<sources>
 		<source>/home/runner/work/dotfiles/dotfiles/</source>
 	</sources>
 	<packages>
 		<package name="test" line-rate="0.254" lines-covered="307" lines-valid="1211" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="01_install_packages_sh__225" filename="tmp/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="01_install_packages_sh__181" filename="tmp/.chezmoiscripts/01-install-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="5" hits="1"/>
 						<line number="7" hits="1"/>
@@ -18,7 +18,7 @@
 						<line number="20" hits="1"/>
 					</lines>
 				</class>
-				<class name="container__226" filename="script/container" branch-rate="1.0" complexity="1.0" line-rate="0.420">
+				<class name="container__182" filename="script/container" branch-rate="1.0" complexity="1.0" line-rate="0.420">
 					<lines>
 						<line number="9" hits="12"/>
 						<line number="11" hits="12"/>
@@ -122,7 +122,7 @@
 						<line number="198" hits="0"/>
 					</lines>
 				</class>
-				<class name="bench__227" filename="script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="bench__183" filename="script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -132,7 +132,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="lint__228" filename="script/lint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="lint__184" filename="script/lint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -159,7 +159,7 @@
 						<line number="59" hits="0"/>
 					</lines>
 				</class>
-				<class name="validate_blank__229" filename="script/validate-blank" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_blank__185" filename="script/validate-blank" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="4" hits="0"/>
 						<line number="6" hits="0"/>
@@ -175,7 +175,7 @@
 						<line number="23" hits="0"/>
 					</lines>
 				</class>
-				<class name="validate_schema__230" filename="script/validate-schema" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_schema__186" filename="script/validate-schema" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -234,7 +234,7 @@
 						<line number="102" hits="0"/>
 					</lines>
 				</class>
-				<class name="02_install_brew_packages_sh__231" filename="tmp/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.350">
+				<class name="02_install_brew_packages_sh__187" filename="tmp/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.350">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -258,7 +258,7 @@
 						<line number="39" hits="1"/>
 					</lines>
 				</class>
-				<class name="validate_skill__232" filename="script/validate-skill" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_skill__188" filename="script/validate-skill" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -302,7 +302,7 @@
 						<line number="73" hits="0"/>
 					</lines>
 				</class>
-				<class name="02_install_python_sh__233" filename="tmp/.chezmoiscripts/02-install-python.sh" branch-rate="1.0" complexity="1.0" line-rate="0.692">
+				<class name="02_install_python_sh__189" filename="tmp/.chezmoiscripts/02-install-python.sh" branch-rate="1.0" complexity="1.0" line-rate="0.692">
 					<lines>
 						<line number="5" hits="1"/>
 						<line number="7" hits="1"/>
@@ -319,7 +319,7 @@
 						<line number="25" hits="1"/>
 					</lines>
 				</class>
-				<class name="bootstrap__234" filename="script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.440">
+				<class name="bootstrap__190" filename="script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.440">
 					<lines>
 						<line number="9" hits="1"/>
 						<line number="11" hits="1"/>
@@ -348,7 +348,7 @@
 						<line number="49" hits="0"/>
 					</lines>
 				</class>
-				<class name="entrypoint__235" filename="script/entrypoint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="entrypoint__191" filename="script/entrypoint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -395,7 +395,7 @@
 						<line number="81" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_k__236" filename="home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_k__192" filename="home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -407,7 +407,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_t__237" filename="home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_t__193" filename="home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -425,7 +425,7 @@
 						<line number="28" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_e__238" filename="home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_e__194" filename="home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -439,7 +439,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="trace__239" filename="script/trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="trace__195" filename="script/trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -450,7 +450,7 @@
 						<line number="24" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_shpool_a__240" filename="home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_shpool_a__196" filename="home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -464,7 +464,7 @@
 						<line number="26" hits="0"/>
 					</lines>
 				</class>
-				<class name="startup__241" filename="script/startup" branch-rate="1.0" complexity="1.0" line-rate="0.854">
+				<class name="startup__197" filename="script/startup" branch-rate="1.0" complexity="1.0" line-rate="0.854">
 					<lines>
 						<line number="9" hits="1"/>
 						<line number="11" hits="1"/>
@@ -509,7 +509,7 @@
 						<line number="96" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_list_package__242" filename="home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.175">
+				<class name="executable_list_package__198" filename="home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.175">
 					<lines>
 						<line number="3" hits="2"/>
 						<line number="5" hits="2"/>
@@ -553,7 +553,7 @@
 						<line number="106" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_ssh_cd__243" filename="home/dot_local/bin/executable_ssh-cd" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_ssh_cd__199" filename="home/dot_local/bin/executable_ssh-cd" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="4" hits="0"/>
 						<line number="5" hits="0"/>
@@ -564,7 +564,7 @@
 						<line number="11" hits="0"/>
 					</lines>
 				</class>
-				<class name="profile__244" filename="script/profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="profile__200" filename="script/profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -609,7 +609,7 @@
 						<line number="80" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_profile__245" filename="home/dot_local/bin/executable_chezmoi-profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_profile__201" filename="home/dot_local/bin/executable_chezmoi-profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="7" hits="0"/>
@@ -698,7 +698,7 @@
 						<line number="121" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_srv__246" filename="home/dot_local/bin/executable_srv" branch-rate="1.0" complexity="1.0" line-rate="0.941">
+				<class name="executable_srv__202" filename="home/dot_local/bin/executable_srv" branch-rate="1.0" complexity="1.0" line-rate="0.941">
 					<lines>
 						<line number="3" hits="14"/>
 						<line number="5" hits="14"/>
@@ -753,13 +753,13 @@
 						<line number="100" hits="5"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_execute__247" filename="home/dot_local/bin/executable_chezmoi-execute" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_execute__203" filename="home/dot_local/bin/executable_chezmoi-execute" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_render__248" filename="home/dot_local/bin/executable_chezmoi-render" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_render__204" filename="home/dot_local/bin/executable_chezmoi-render" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="7" hits="0"/>
@@ -831,7 +831,7 @@
 						<line number="125" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_repeat_last_command__249" filename="home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_repeat_last_command__205" filename="home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
@@ -840,13 +840,13 @@
 						<line number="10" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_git_P__250" filename="home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_git_P__206" filename="home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
 					</lines>
 				</class>
-				<class name="00_install_xdg_sh__251" filename="tmp/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="00_install_xdg_sh__207" filename="tmp/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -863,7 +863,7 @@
 						<line number="20" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_validate__252" filename="home/dot_local/bin/executable_chezmoi-validate" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_validate__208" filename="home/dot_local/bin/executable_chezmoi-validate" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="6" hits="0"/>
@@ -882,7 +882,7 @@
 						<line number="38" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_iperf3_plot__253" filename="home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_iperf3_plot__209" filename="home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="9" hits="0"/>
@@ -909,7 +909,7 @@
 						<line number="76" hits="0"/>
 					</lines>
 				</class>
-				<class name="validate_blank_awk__254" filename="script/validate-blank.awk" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_blank_awk__210" filename="script/validate-blank.awk" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="3" hits="0"/>
@@ -945,7 +945,7 @@
 						<line number="52" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_webhook_notify__255" filename="home/dot_local/bin/executable_webhook-notify" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_webhook_notify__211" filename="home/dot_local/bin/executable_webhook-notify" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="10" hits="0"/>
@@ -1005,7 +1005,7 @@
 						<line number="96" hits="0"/>
 					</lines>
 				</class>
-				<class name="pathmunge_sh__256" filename="home/dot_config/sh/lib/pathmunge.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="pathmunge_sh__212" filename="home/dot_config/sh/lib/pathmunge.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="2" hits="26"/>
 						<line number="3" hits="3"/>
@@ -1019,7 +1019,7 @@
 						<line number="20" hits="6"/>
 					</lines>
 				</class>
-				<class name="export_sh__257" filename="home/dot_config/sh/lib/export.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="export_sh__213" filename="home/dot_config/sh/lib/export.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="5" hits="4"/>
 						<line number="6" hits="1"/>
@@ -1033,7 +1033,7 @@
 						<line number="18" hits="3"/>
 					</lines>
 				</class>
-				<class name="bench_sh__258" filename="home/dot_config/sh/lib/bench.sh" branch-rate="1.0" complexity="1.0" line-rate="0.938">
+				<class name="bench_sh__214" filename="home/dot_config/sh/lib/bench.sh" branch-rate="1.0" complexity="1.0" line-rate="0.938">
 					<lines>
 						<line number="11" hits="4"/>
 						<line number="12" hits="2"/>
@@ -1053,7 +1053,7 @@
 						<line number="30" hits="2"/>
 					</lines>
 				</class>
-				<class name="executable_nvim_sh__259" filename="home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_nvim_sh__215" filename="home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -1076,7 +1076,7 @@
 						<line number="34" hits="0"/>
 					</lines>
 				</class>
-				<class name="01_install_tools_sh__260" filename="tmp/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="01_install_tools_sh__216" filename="tmp/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="1"/>
@@ -1092,7 +1092,7 @@
 						<line number="32" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_pc__261" filename="home/dot_local/bin/executable_pc" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_pc__217" filename="home/dot_local/bin/executable_pc" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -1124,7 +1124,7 @@
 						<line number="48" hits="0"/>
 					</lines>
 				</class>
-				<class name="test__262" filename="script/test" branch-rate="1.0" complexity="1.0" line-rate="0.947">
+				<class name="test__218" filename="script/test" branch-rate="1.0" complexity="1.0" line-rate="0.947">
 					<lines>
 						<line number="8" hits="1"/>
 						<line number="10" hits="1"/>
@@ -1147,7 +1147,7 @@
 						<line number="63" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_compose_project_tmpl__263" filename="home/dot_local/bin/executable_compose-project.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_compose_project_tmpl__219" filename="home/dot_local/bin/executable_compose-project.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="5" hits="0"/>
@@ -1163,7 +1163,7 @@
 						<line number="24" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_trash_tmpl__264" filename="home/dot_local/bin/executable_trash.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_trash_tmpl__220" filename="home/dot_local/bin/executable_trash.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="3" hits="0"/>
@@ -1180,7 +1180,7 @@
 						<line number="14" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_changelog__265" filename="home/dot_local/bin/executable_changelog" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_changelog__221" filename="home/dot_local/bin/executable_changelog" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="8" hits="0"/>
@@ -1192,7 +1192,7 @@
 						<line number="14" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_package__266" filename="home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.337">
+				<class name="executable_chezmoi_package__222" filename="home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.337">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="2"/>
@@ -1285,7 +1285,7 @@
 						<line number="186" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_package_manager__267" filename="home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.276">
+				<class name="executable_package_manager__223" filename="home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.276">
 					<lines>
 						<line number="3" hits="1"/>
 						<line number="5" hits="2"/>
@@ -1318,14 +1318,14 @@
 						<line number="59" hits="1"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_trace__268" filename="home/dot_local/bin/executable_chezmoi-trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_trace__224" filename="home/dot_local/bin/executable_chezmoi-trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_shpool_select__269" filename="home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_shpool_select__225" filename="home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="3" hits="0"/>
 						<line number="11" hits="0"/>
@@ -1337,7 +1337,7 @@
 						<line number="21" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_feature__270" filename="home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.410">
+				<class name="executable_chezmoi_feature__226" filename="home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.410">
 					<lines>
 						<line number="3" hits="2"/>
 						<line number="6" hits="0"/>
