@@ -1,0 +1,21 @@
+FROM docker/sandbox-templates:shell
+
+ARG PI_VERSION={{ .pi.version }}
+
+USER root
+RUN apt-get update --quiet && \
+    apt-get install --assume-yes --no-install-recommends --quiet ca-certificates curl && \
+    install -dm 755 /etc/apt/keyrings && \
+    curl -LSfs https://mise.jdx.dev/gpg-key.pub \
+      --output /etc/apt/keyrings/mise-archive-keyring.asc && \
+    echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.asc] https://mise.jdx.dev/deb stable main" \
+      >/etc/apt/sources.list.d/mise.list && \
+    apt-get update --quiet && \
+    apt-get install --assume-yes --no-install-recommends --quiet mise && \
+    rm -rf /var/lib/apt/lists/*
+
+USER agent
+# ENV PATH="/home/agent/.local/share/mise/shims:$PATH"
+RUN mise use --global --quiet \
+    node@lts \
+    "npm:@mariozechner/pi-coding-agent@${PI_VERSION}"

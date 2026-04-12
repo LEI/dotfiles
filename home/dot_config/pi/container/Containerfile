@@ -27,12 +27,14 @@ RUN set -eux && \
     mise exec rust@stable -- dpkg-buildpackage --unsigned-changes --unsigned-source --build=binary --no-check-builddeps && \
     dpkg -i ../shpool_*.deb
 
-# Create a non-root user
-RUN groupadd --gid 1000 coder \
-    && useradd --uid 1000 --gid coder --shell /bin/bash --create-home coder
+# Create a non-root user matching the host UID/GID
+ARG UID=1000
+ARG GID=1000
+RUN groupadd --gid "$GID" coder \
+    && useradd --uid "$UID" --gid coder --shell /bin/bash --create-home coder
 USER coder
 ENV HOME /home/coder
-ENV PATH "/home/coder/.local/share/mise/shims:$PATH"
+# ENV PATH "/home/coder/.local/share/mise/shims:$PATH"
 
 # Install pi-coding-agent globally
 # RUN npm install --global @mariozechner/pi-coding-agent@${PI_VERSION:?}

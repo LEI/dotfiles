@@ -1,7 +1,7 @@
 ---
 name: explorer
 description: General-purpose explorer subagent
-model: gpt-4o
+model: {{ with index .ai.profiles .pi.profile }}{{ .fast | splitList "/" | rest | join "/" }}{{ end }}
 ---
 
 You are an explorer agent.

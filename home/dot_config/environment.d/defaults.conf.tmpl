@@ -1,7 +1,11 @@
 # https://consented.io/do-not-track
 DO_NOT_TRACK=1
-{{- $caBundle := "/etc/pki/tls/certs/ca-bundle.crt" }}
-{{- if and (eq .osIDLike "arch" "fedora") (stat $caBundle) }}
+
+{{- if and (eq .osIDLike "arch" "fedora") }}
+
 # Point curl (and brew openssl) at the system CA bundle so caddy .test certs are trusted.
-CURL_CA_BUNDLE={{ $caBundle }}
+{{- $caBundle := "/etc/pki/tls/certs/ca-bundle.crt" }}
+if [ -f {{ $caBundle }} ]; then
+  CURL_CA_BUNDLE={{ $caBundle }}
+fi
 {{- end }}

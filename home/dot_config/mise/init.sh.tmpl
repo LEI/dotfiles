@@ -2,7 +2,7 @@
 
 # Must be sourced early: tools become available after activation
 if ! command -v mise >/dev/null; then
-  echo >&2 "Command 'mise' not found"
+  # echo >&2 "Command 'mise' not found"
   return 0
 fi
 
@@ -18,6 +18,6 @@ topgrade() {
 }
 {{- end }}
 
-eval "$(mise activate "$shell")"
+eval "$(mise activate "${SHELL##*/}")"
 
 alias m=mise

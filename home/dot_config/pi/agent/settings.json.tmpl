@@ -1,7 +1,11 @@
+{{- $profile := index .ai.profiles .pi.profile }}
+{{- $parts := splitList "/" $profile.coding }}
+{{- $provider := first $parts }}
+{{- $model := join "/" (rest $parts) }}
 {
-  "lastChangelogVersion": "{{ .piVersion }}",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "gpt-4o",
+  "lastChangelogVersion": "{{ .pi.version }}",
+  "defaultProvider": {{ $provider | quote }},
+  "defaultModel": {{ $model | quote }},
   "defaultThinkingLevel": "off",
   "packages": ["npm:pi-telemetry-otel@0.1.1"]
 }

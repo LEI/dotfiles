@@ -12,6 +12,6 @@ zel() {
 }
 
 # TODO: replace with carapace spec
-# if [ "$shell" = bash ] && command -v _zellij >/dev/null; then
+# if [ "${SHELL##*/}" = bash ] && command -v _zellij >/dev/null; then
 #   complete -F _zellij zel
 # fi

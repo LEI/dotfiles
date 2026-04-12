@@ -1,0 +1,21 @@
+{
+  "name": "pi",
+  "build": {
+    "dockerfile": "Containerfile",
+    "args": {
+      "PI_VERSION": "{{ .pi.version }}",
+      "SHPOOL_VERSION": "0.9.3",
+      "WORKSPACE": "/workspace"
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localEnv:HOME}/.config/pi/agent,target=/home/coder/.pi/agent,type=bind"
+  ],
+  "remoteUser": "root",
+  "containerEnv": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://host.docker.internal:4317",
+    "OTEL_SERVICE_NAME": "pi-agent"
+  }
+}

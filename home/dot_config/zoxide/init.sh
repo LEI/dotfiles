@@ -1,7 +1,3 @@
-# shellcheck disable=SC2154
-if ! command -v zoxide >/dev/null; then
-  echo >&2 "Command 'zoxide' not found"
-  return 0
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init "${SHELL##*/}")"
 fi
-
-eval "$(zoxide init "$shell")"

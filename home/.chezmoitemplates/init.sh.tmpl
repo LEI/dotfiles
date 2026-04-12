@@ -24,9 +24,9 @@ if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
   # BASH_CONFIG="neovide"
   PATH="$PATH:$HOME/.local/bin"
-  if [ -z "${MISE_SHELL:-}" ]; then
-    PATH="$PATH:$XDG_DATA_HOME/mise/shims"
-  fi
+  # if [ -z "${MISE_SHELL:-}" ]; then
+  #   PATH="$PATH:$XDG_DATA_HOME/mise/shims"
+  # fi
   if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
     source "$XDG_CONFIG_HOME/sh/environment.sh"
   fi
@@ -45,13 +45,6 @@ fi
 if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
   export PROMPT_COMMAND=
 fi
-
-{{- $shell := get . "shell" }}
-{{- if empty $shell }}
-{{-   warnf "missing shell (bash or zsh)" }}
-{{- end }}
-
-shell="{{ $shell }}" # ${SHELL##*/}
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
@@ -118,7 +111,7 @@ fi
 
 {{- if and (ne .osID "alpine") (ne .os "windows") }}
 
-if [ "$shell" = bash ]; then
+if [ "${SHELL##*/}" = bash ]; then
   # ble.sh includes its own preexec; never load both
   if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
     source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
@@ -137,10 +130,12 @@ fi
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-if [ "$shell" = bash ]; then
+if [ "${SHELL##*/}" = bash ]; then
   export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
 fi
-eval "$(sheldon source)"
+if command -v sheldon >/dev/null; then
+  eval "$(sheldon source)"
+fi
 {{- else }}
 {{ includeTemplate "init-tools.sh.tmpl" . | trim }}
 {{- end }}
@@ -150,12 +145,12 @@ if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
 fi
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code
-for _f in "$XDG_CONFIG_HOME/$shell/"*.conf; do
+for _f in "$XDG_CONFIG_HOME/${SHELL##*/}/"*.conf; do
   if [ -f "$_f" ]; then
     export_env "$_f"
   fi
 done
-for _f in "$XDG_CONFIG_HOME/$shell/"*.sh; do
+for _f in "$XDG_CONFIG_HOME/${SHELL##*/}/"*.sh; do
   case "${_f##*/}" in init.sh) continue ;; esac
   if [ -f "$_f" ]; then
     source "$_f"
@@ -163,8 +158,8 @@ for _f in "$XDG_CONFIG_HOME/$shell/"*.sh; do
 done
 unset _f
 
-if [ -f "$HOME/.${shell}rc.local" ]; then
-  source "$HOME/.${shell}rc.local"
+if [ -f "$HOME/.${SHELL##*/}rc.local" ]; then
+  source "$HOME/.${SHELL##*/}rc.local"
 fi
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc

@@ -1,7 +1,3 @@
-# shellcheck disable=SC2154
-if ! command -v starship >/dev/null; then
-  echo >&2 "Command 'starship' not found"
-  return 0
+if command -v starship >/dev/null; then
+  eval "$(starship init "${SHELL##*/}")"
 fi
-
-eval "$(starship init "$shell")"

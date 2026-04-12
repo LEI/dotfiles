@@ -1,4 +1,3 @@
-# shellcheck disable=SC2154
 setup_file() {
   source test/common/setup-file.sh
   _common_setup_file

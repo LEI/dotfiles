@@ -48,8 +48,7 @@ run_chezmoi() {
 
   # Skip rendering if already pre-rendered (e.g. by chezmoi-render in coverage)
   if ! [ -s "$file" ]; then
-    # shellcheck disable=SC2154
-    if ! "$chezmoi" cat --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
+    if ! chezmoi cat --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
       fail "run_chezmoi: chezmoi cat failed for $script"
     elif ! [ -s "$file" ]; then
       fail "run_chezmoi: empty file: $script"

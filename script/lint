@@ -23,7 +23,7 @@ for arg in "$@"; do
   esac
 done
 
-printf 'disable=SC1090,SC2034,SC2154,SC2248\n' >"$render_dir/.shellcheckrc"
+printf 'disable=SC1090,SC2034,SC2248\n' >"$render_dir/.shellcheckrc"
 
 chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
 
