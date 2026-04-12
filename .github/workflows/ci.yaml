@@ -105,8 +105,8 @@ jobs:
           # BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
           COVERAGE_OUTPUT: ./coverage-${{ matrix.os }}
           TERM: xterm
-        # run: ./script/coverage # --collect-only
-        run: ./script/coverage --formatter junit >junit.xml
+        # run: ./script/coverage # --collect-only --recursive ./test
+        run: ./script/coverage --formatter junit --recursive ./test >junit.xml
 
       - name: Upload coverage
         uses: actions/upload-artifact@v5

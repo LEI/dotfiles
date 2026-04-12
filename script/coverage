@@ -39,6 +39,8 @@ main() {
 
   TEST_TMPDIR="$PWD/tmp"
   mkdir -p "$TEST_TMPDIR"
+  # FIXME: merged coverage common path
+  # TEST_TMPDIR="$(mktemp -d)"
   export TEST_TMPDIR
   trap 'rm -rf "$TEST_TMPDIR"' ERR EXIT
 

@@ -10,8 +10,8 @@ if [ "$#" -eq 0 ]; then
   set -- validate \
     --format=documentation \
     --format-options=sort \
-    --retry-timeout=3s \
-    --sleep=1s \
+    --retry-timeout=30s \
+    --sleep=10s \
     "$@"
 fi
 

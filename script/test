@@ -7,19 +7,17 @@
 
 set -euo pipefail
 
-PATH="$PATH:$HOME/.local/bin"
+# PATH="$PATH:$HOME/.local/bin"
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
-
 if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
   eval "$(mise activate bash)"
   # PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
-
-if [ -z "${USER:-}" ]; then
-  USER="$(id -un)"
-fi
+# if [ -z "${USER:-}" ]; then
+#   USER="$(id -un)"
+# fi
 
 if [ "${CI:-}" = true ] && command -v mise >/dev/null; then
   mise trust --all --quiet --yes
@@ -37,11 +35,14 @@ fi
 main() {
   # Files using stubs set BATS_NO_PARALLELIZE_WITHIN_FILE to avoid collisions
   local jobs="${TEST_JOBS:-$(nproc)}"
+  if [ $# -eq 0 ]; then
+    set -- --recursive ./test "$@"
+  fi
   set -- \
     --jobs "$jobs" \
     --print-output-on-failure \
     --timing \
-    --recursive ./test "$@"
+    "$@"
   # if [ "${DEBUG:-}" = true ]; then
   #   set -- --debug "$@"
   # fi

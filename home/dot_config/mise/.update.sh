@@ -2,10 +2,15 @@
 
 set -eu
 
-# TODO: detect mise installation method
-mise="$(command -v mise 2>/dev/null)"
-if [ "$mise" != "$HOME/.local/bin/mise" ]; then
-  echo >&2 "update: skipping mise self-update: not in in $HOME/.local/bin/mise"
+# mise="$(command -v mise 2>/dev/null)"
+# if [ "$mise" != "$HOME/.local/bin/mise" ]; then
+#   echo >&2 "update: skipping mise self-update: not in in $HOME/.local/bin/mise"
+#   exit
+# fi
+
+# mise doctor | grep -qv 'self_update_available: yes'
+if [ "$(mise doctor --json | jq .self_update_available)" != true ]; then
+  echo >&2 "update: skipping mise, self-update not available"
   exit
 fi
 

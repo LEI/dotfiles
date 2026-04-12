@@ -32,7 +32,8 @@ depends = [
   "check",
   # "lint",
   "profile bash",
-  "profile zsh",
+  # FIXME: exits current zsh shell
+  # "profile zsh",
   "test",
   # "update",
 ]
