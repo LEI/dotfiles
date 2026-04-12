@@ -4,6 +4,9 @@ if ! command -v mise >/dev/null; then
   return
 fi
 
+# Must be sourced early: tools become available after activation
+eval "$(mise activate "${SHELL##*/}")"
+
 {{- if eq .osID "android" }}
 {{ includeTemplate "termux.sh.tmpl" . | trim }}
 
@@ -15,8 +18,5 @@ topgrade() {
   termux_prefix topgrade "$@"
 }
 {{- end }}
-
-# Must be sourced early: tools become available after activation
-eval "$(mise activate "${SHELL##*/}")"
 
 alias m=mise
