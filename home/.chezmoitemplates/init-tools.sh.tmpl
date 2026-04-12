@@ -1,3 +1,5 @@
+{{- $shell := get . "shell" }}
+{{- $init := list "bash" "zsh" }}
 {{- $ordered := list "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
 {{- if .features.brew }}
 {{-   $ordered = prepend $ordered "homebrew" }}
@@ -24,17 +26,16 @@ unset _tool
 # Feature init files
 {{- $src := .chezmoi.sourceDir }}
 {{- $dotcfg := joinPath $src "dot_config" }}
-{{- $init := list "bash" "zsh" }}
 {{- $exclude := concat $init $ordered }}
 for _feat in \
 {{- range glob (joinPath $src "dot_*/init.sh*") }}
   {{- $name := . | dir | base | trimPrefix "dot_" }}
   {{- if has $name $exclude }}
-  {{-   warnf "skipping %s (excluded)" $name }}
+  {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
   {{-   continue }}
   {{- end }}
   {{- if not (get $.features (get $featureMap $name | default $name)) }}
-  {{-   warnf "skipping %s (disabled)" $name }}
+  {{-   warnf "disabled: %s .%s/init.sh" $shell $name }}
   {{-   continue }}
   {{- end }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
@@ -42,11 +43,11 @@ for _feat in \
 {{- range glob (joinPath $dotcfg "*/init.sh*") }}
   {{- $name := . | dir | base }}
   {{- if has $name $exclude }}
-  {{-   warnf "skipping %s (excluded)" $name }}
+  {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
   {{-   continue }}
   {{- end }}
   {{- if not (get $.features (get $featureMap $name | default $name)) }}
-  {{-   warnf "skipping %s (disabled)" $name }}
+  {{-   warnf "disabled: %s .%s/init.sh" $shell $name }}
   {{-   continue }}
   {{- end }}
   "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \

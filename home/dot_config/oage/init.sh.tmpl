@@ -27,3 +27,17 @@ ollama_logs() {
 {{- end }}
 }
 {{- end }}
+
+ollama_list() {
+  ollama list
+}
+
+ollama_rm_all() {
+  # shellcheck disable=SC2046
+  ollama rm $(ollama list | tail -n+2 | cut -d' ' -f1)
+}
+
+# TODO: mlx-lm
+# run hf cache ls
+# hf cache rm $(hf cache ls --format=json | jq -r '.[] | "\(.repo_type)/\(.repo_id)"')
+# huggingface-cli delete-cache

@@ -18,6 +18,9 @@ services:
     # working_dir: ${WORKSPACE:?}
     extra_hosts:
       - host.docker.internal:host-gateway
+    # networks:
+    #   - default
+    #   - monitoring
     volumes:
       # - "${PI_CONFIG_DIR:-$HOME/.config/pi}:/home/coder/.pi:ro,z"
       - "${PI_CODING_AGENT_DIR:-$HOME/.config/pi/agent}:/home/coder/.pi/agent:z"
@@ -57,3 +60,7 @@ services:
   #   volumes:
   #     - ./jaeger.yaml:/etc/jaeger/config.yaml
   #     - ./jaeger-ui.json:/etc/jaeger/ui-config.json
+
+# networks:
+#   monitoring:
+#     external: true

@@ -1,7 +1,7 @@
-# Bootstrap: lib/ contains infrastructure sourced before everything else
-{{- if lookPath .shell | isExecutable }}
+{{- $shell := get . "shell" -}}
+{{- if and $shell (lookPath .shell | isExecutable) -}}
 SHELL={{ lookPath .shell | quote }}
-{{- end }}
+{{ end -}}
 shell="${SHELL##*/}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -22,7 +22,6 @@ fi
 if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
 fi
-
 
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin"
@@ -61,7 +60,7 @@ if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
   source "$XDG_CONFIG_HOME/sh/environment.sh"
 fi
 
-{{- if and (eq .shell "bash") (ne .osID "alpine") (ne .os "windows") }}
+{{- if and (eq $shell "bash") (ne .osID "alpine") (ne .os "windows") }}
 
 # ble.sh includes its own preexec; never load both
 if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
@@ -111,10 +110,10 @@ if [ -f "$HOME/.${shell}rc.local" ]; then
   source "$HOME/.${shell}rc.local"
 fi
 
-{{- if and (eq .shell "bash") (ne .osID "alpine") (ne .os "windows") }}
+{{- if and (eq $shell "bash") (ne .osID "alpine") (ne .os "windows") }}
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
 if [[ ${BLE_VERSION-} ]]; then
   ble-attach
 fi
-{{ end -}}
+{{- end }}

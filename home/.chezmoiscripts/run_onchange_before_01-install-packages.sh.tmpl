@@ -116,8 +116,14 @@ dry_run winget upgrade --all --disable-interactivity --silent
 {{- end }}
 
 # NOTE: winget.json is updated after apply
-# Winget packages hash: {{ includeTemplate "dot_config/winget/winget.json.tmpl" . | sha256sum }}
-dry_run winget import --import-file="$HOME/.config/winget/winget.json" --disable-interactivity
+# Winget packages hash: {{ includeTemplate "winget.json.tmpl" . | sha256sum }}
+# dry_run winget import --disable-interactivity --import-file="$HOME/.config/winget/winget.json"
+
+import_file="$(mktemp)"
+cat >"$import_file" <<'EOF'
+{{ includeTemplate "winget.json.tmpl" . | fromJson | toPrettyJson | trim }}
+EOF
+dry_run winget import --disable-interactivity --import-file="$import_file"
 {{- if not .upgrade }} --no-upgrade{{ end }}
 # --accept-package-agreements --accept-source-agreements
 {{- else }}

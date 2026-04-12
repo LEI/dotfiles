@@ -38,7 +38,7 @@
 {{-   end -}}
 
 {{-   $version := get $pkg "version" -}}
-{{-   if and $version (ne $packageType "mise") -}}
+{{-   if and $version (ne $packageType "mise") (ne $packageType "winget") -}}
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 

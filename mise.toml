@@ -39,9 +39,9 @@ depends = [
 ]
 run = [
   # Update after check
-  "mise update",
+  "mise update", # ./home/dot_config/mise/config.toml.tmpl
   # Avoid chezmoi timeout obtaining persistent state lock when running tests
-  "prek",
+  "mise prek", # ./script/prek
 ]
 
 [tasks.prek]

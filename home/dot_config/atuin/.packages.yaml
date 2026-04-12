@@ -2,6 +2,8 @@
 packages:
   atuin: # ddworken/hishtory, dvorka/hstr
     # name: atuin atuin-sync
+    nameOverwrite:
+      winget: Atuinsh.Atuin
     enabled: "{{ .features.atuin }}"
     type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
   # ble.sh:

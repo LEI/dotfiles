@@ -3,7 +3,7 @@ packages:
   nushell:
     enabled: '{{ and .features.nushell (not (eq .osIDLike "debian")) }}'
     nameOverwrite:
-      mise: aqua:nushell/nushell # 0.111.0 broken, brew can't downgrade
+      mise: aqua:nushell/nushell # 0.111.0 help broken
       windows: Nushell.Nushell
     version: 0.110.0
-    type: '{{ ne .os "windows" | ternary "mise" nil }}'
+    type: '{{ ne .os "windows" | ternary "mise" nil }}' # brew can't downgrade

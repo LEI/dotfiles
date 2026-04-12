@@ -13,7 +13,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 . "${XDG_CONFIG_HOME:-$HOME/.config}/oage/init.sh"
 
-if ! run ollama list >/dev/null; then
+if ! run ollama list; then
   err "ollama list: exit code $?"
 fi
 

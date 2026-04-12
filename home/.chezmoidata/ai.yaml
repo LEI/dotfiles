@@ -27,6 +27,7 @@ ai:
       port: 11435
       domain: mlx-lm.test
     ollama:
+      enabled: true
       port: 11434
       domain: ollama.test
       caddy:
@@ -49,7 +50,10 @@ ai:
     #   base_url: https://openrouter.ai/api/v1
     #   key_env: OPENROUTER_API_KEY
     # zai:
-    #   base_url: https://api.z.ai/v1
+    #   base_url: https://api.z.ai/api/paas/v4
+    #   key_env: ZAI_API_KEY
+    # zai-coding-plan:
+    #   base_url: https://api.z.ai/api/coding/paas/v4
     #   key_env: ZAI_API_KEY
 
   # dot_config/opencode/opencode.jsonc: context window, provider IDs
@@ -149,7 +153,7 @@ ai:
       fast: huggingface/Qwen/Qwen3-Coder-Next
       reasoning: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
     zai-coding-plan-lite:
-      agentic: zai/glm-4.7
+      agentic: zai-coding-plan/glm-4.7
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-4.7
       fast: zai-coding-plan/glm-4.5-air

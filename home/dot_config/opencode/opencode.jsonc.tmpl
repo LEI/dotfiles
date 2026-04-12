@@ -7,6 +7,9 @@
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
 {{- $reasoning := $p.reasoning -}}
+
+{{- $bindNetwork := true -}}
+{{- $hostname := $bindNetwork | ternary "0.0.0.0" "127.0.0.1" -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": "notify", // false,
@@ -14,9 +17,9 @@
   "small_model": {{ $smallModel | quote }},
   "default_agent": "plan",
   // https://github.com/anomalyco/opencode/pull/8562
-  // "server": {
-  //   "hostname": "localhost"
-  // },
+  "server": {
+    "hostname": {{ $hostname | quote }}
+  },
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [
     // ".cursor/rules/*.md",
@@ -737,9 +740,6 @@
     }, */
     // FIXME: some mlx models emit raw channel tokens in output
     //   <|channel|>analysis<|message|>[...] <|end|><|start|>assistant<|channel|>final<|message|>[...]
-    // hf cache ls
-    // hf cache rm $(hf cache ls --format=json | jq -r '.[] | "\(.repo_type)/\(.repo_id)"')
-    // huggingface-cli delete-cache
     "mlx-lm": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "MLX LM (local)",
@@ -764,8 +764,6 @@
     {{- end }}
     {{- if .features.ollama }}
     // https://opencode.ai/docs/providers#ollama
-    // ollama list
-    // ollama rm $(ollama list | tail -n+2 | cut -d’ ‘ -f1)
     // If tool calls aren’t working, try increasing num_ctx in Ollama (16k-32k)
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",

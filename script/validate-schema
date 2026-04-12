@@ -62,6 +62,16 @@ validate_schema() {
     content='{}'
   fi
 
+  case "$schema" in
+  https://aka.ms/winget-packages.schema.2.0.json)
+    # Delete WinGetVersion property
+    # SchemaError: '^[0-9]+\\.[0-9]+\\.[0-9]+(\\-preview)?$' is not a 'regex'
+    schema=$(mktemp)
+    trap 'rm -f "$schema"' EXIT
+    jq 'del(.WinGetVersion)' <<<"$content" >"$schema"
+    ;;
+  esac
+
   if output=$(printf '%s' "$content" | check-jsonschema --schemafile "$schema" - 2>&1); then
     echo "PASS $path"
   else
