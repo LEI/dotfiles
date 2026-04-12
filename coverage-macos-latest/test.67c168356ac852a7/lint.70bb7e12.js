@@ -24,7 +24,7 @@ var data = {lines:[
 {"lineNum":"   23","line":"  esac"},
 {"lineNum":"   24","line":"done"},
 {"lineNum":"   25","line":""},
-{"lineNum":"   26","line":"printf \'disable=SC1090,SC2034,SC2154,SC2248\\n\' >\"$render_dir/.shellcheckrc\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   26","line":"printf \'disable=SC1090,SC2034,SC2248\\n\' >\"$render_dir/.shellcheckrc\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   27","line":""},
 {"lineNum":"   28","line":"chezmoi-render \"$render_dir\" --quiet \"${templates[@]}\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   29","line":""},
@@ -60,5 +60,5 @@ var data = {lines:[
 {"lineNum":"   59","line":"exit \"$exit_code\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-11 02:19:11", "instrumented" : 23, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-12 06:32:45", "instrumented" : 23, "covered" : 0,};
 var merged_data = [];

@@ -29,5 +29,5 @@ var data = {lines:[
 {"lineNum":"   28","line":"exec tmux -- \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-11 02:17:07", "instrumented" : 14, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-12 06:30:50", "instrumented" : 14, "covered" : 0,};
 var merged_data = [];

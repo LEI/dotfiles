@@ -24,5 +24,5 @@ var data = {lines:[
 {"lineNum":"   23","line":"awk -f \"$script_dir/validate-blank.awk\" \"$@\" >&2","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-04-11 02:19:44", "instrumented" : 12, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-04-12 06:33:15", "instrumented" : 12, "covered" : 0,};
 var merged_data = [];
