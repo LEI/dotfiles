@@ -1,4 +1,5 @@
 #!/bin/sh
-set -eu
 
-timeout 5m nvim --headless try \| +LazyUpdate! \| +quitall \| catch \| +cquitall \| end
+set -eux
+
+timeout 5m nvim --headless try \| +LazyUpdate! \| +quitall \| catch \| +cquitall \| end >/dev/null

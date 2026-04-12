@@ -37,6 +37,8 @@ depends = [
   # "update",
 ]
 run = [
+  # Update after check
+  "mise update",
   # Avoid chezmoi timeout obtaining persistent state lock when running tests
   "prek",
 ]
@@ -58,4 +60,4 @@ run = "mise run test -- --filter-tags type:smoke"
 
 [tasks.timep]
 description = "Profile bash init with timep (call-stack tree)"
-run = "bash -c 'source ~/.local/share/timep.bash && timep +F -c \"source ~/.bashrc\"'"
+run = 'source ~/.local/share/timep.bash && timep +F -c "source ~/.bashrc"'
