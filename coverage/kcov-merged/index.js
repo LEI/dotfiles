@@ -18,7 +18,7 @@ var data = {files:[
 {"link":"startup.f4c48cc.html","title":"startup","summary_name":"[...]/dotfiles/dotfiles/script/startup","covered_class":"lineCov","covered":"85.4","covered_lines":"35","uncovered_lines":"6","total_lines" : "41"},
 {"link":"validate-schema.cc478ce8.html","title":"validate-schema","summary_name":"[...]/dotfiles/dotfiles/script/validate-schema","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"55","total_lines" : "55"},
 {"link":"validate-skill.2622c4f4.html","title":"validate-skill","summary_name":"[...]/dotfiles/dotfiles/script/validate-skill","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"40","total_lines" : "40"},
-{"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"linePartCov","covered":"26.3","covered_lines":"5","uncovered_lines":"14","total_lines" : "19"},
+{"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"lineNoCov","covered":"22.2","covered_lines":"4","uncovered_lines":"14","total_lines" : "18"},
 {"link":"executable_chezmoi-trace.ca0101c9.html","title":"executable_chezmoi-trace","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-trace","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"3","total_lines" : "3"},
 {"link":"executable_t.53910469.html","title":"executable_t","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"14","total_lines" : "14"},
 {"link":"executable_repeat-last-command.b87ec709.html","title":"executable_repeat-last-command","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_repeat-last-command","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"5","total_lines" : "5"},
@@ -42,5 +42,5 @@ var data = {files:[
 {"link":"executable_chezmoi-package.f2f26bad.html","title":"executable_chezmoi-package","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-package","covered_class":"linePartCov","covered":"34.8","covered_lines":"31","uncovered_lines":"58","total_lines" : "89"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-04-12 06:33:15", "instrumented" : 1150, "covered" : 243,};
+var header = { "command" : "", "date" : "2026-04-12 07:39:52", "instrumented" : 1149, "covered" : 242,};
 var merged_data = [];

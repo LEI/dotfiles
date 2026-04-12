@@ -3,15 +3,15 @@ var data = {lines:[
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"# NOTE: after install-packages.sh (system)"},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"115","possible_hits":"0",},
+{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"112","possible_hits":"0",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
+{"lineNum":"    7","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"113","possible_hits":"0",},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"XDG_DATA_HOME=\"${XDG_DATA_HOME:-$HOME/.local/share}\"","class":"lineCov","hits":"1","order":"117","possible_hits":"0",},
-{"lineNum":"   10","line":"PATH=\"${MISE_DATA_DIR:-$XDG_DATA_HOME/mise}/shims:$PATH\"","class":"lineCov","hits":"1","order":"118","possible_hits":"0",},
+{"lineNum":"    9","line":"XDG_DATA_HOME=\"${XDG_DATA_HOME:-$HOME/.local/share}\"","class":"lineCov","hits":"1","order":"114","possible_hits":"0",},
+{"lineNum":"   10","line":"PATH=\"${MISE_DATA_DIR:-$XDG_DATA_HOME/mise}/shims:$PATH\"","class":"lineCov","hits":"1","order":"115","possible_hits":"0",},
 {"lineNum":"   11","line":""},
-{"lineNum":"   12","line":"pip_packages=\"\"","class":"lineCov","hits":"1","order":"119","possible_hits":"0",},
-{"lineNum":"   13","line":"if [ -n \"$pip_packages\" ]; then","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
+{"lineNum":"   12","line":"pip_packages=\"\"","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
+{"lineNum":"   13","line":"if [ -n \"$pip_packages\" ]; then","class":"lineCov","hits":"1","order":"117","possible_hits":"0",},
 {"lineNum":"   14","line":"  python=python","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   15","line":"  if ! has python && has python3; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   16","line":"    python=python3","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -21,10 +21,10 @@ var data = {lines:[
 {"lineNum":"   20","line":""},
 {"lineNum":"   21","line":"# https://github.com/astral-sh/uv/issues/13750"},
 {"lineNum":"   22","line":"# run uv tool install --quiet $uv_packages"},
-{"lineNum":"   23","line":"msg \"Already installed: check-jsonschema\"","class":"lineCov","hits":"1","order":"121","possible_hits":"0",},
-{"lineNum":"   24","line":"msg \"Already installed: recoverpy\"","class":"lineCov","hits":"1","order":"122","possible_hits":"0",},
-{"lineNum":"   25","line":"msg \"Already installed: yamllint\"","class":"lineCov","hits":"1","order":"123","possible_hits":"0",},
+{"lineNum":"   23","line":"msg \"Already installed: check-jsonschema\"","class":"lineCov","hits":"1","order":"118","possible_hits":"0",},
+{"lineNum":"   24","line":"msg \"Already installed: recoverpy\"","class":"lineCov","hits":"1","order":"119","possible_hits":"0",},
+{"lineNum":"   25","line":"msg \"Already installed: yamllint\"","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:30:50", "instrumented" : 13, "covered" : 9,};
+var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 13, "covered" : 9,};
 var merged_data = [];

@@ -36,7 +36,7 @@ var data = {files:[
 {"link":"executable_nvim-sh.e7924d9.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 {"link":"01-install-tools.sh.4e449c2d.html","title":"01-install-tools.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/01-install-tools.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"12","uncovered_lines":"0","total_lines" : "12"},
 {"link":"executable_pc.484373ac.html","title":"executable_pc","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_pc","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"28","total_lines" : "28"},
-{"link":"test.38e987d4.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"94.7","covered_lines":"18","uncovered_lines":"1","total_lines" : "19"},
+{"link":"test.38e987d4.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineCov","covered":"83.3","covered_lines":"15","uncovered_lines":"3","total_lines" : "18"},
 {"link":"executable_compose-project.tmpl.562a043d.html","title":"executable_compose-project.tmpl","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_compose-project.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"12","total_lines" : "12"},
 {"link":"executable_trash.tmpl.82a137e2.html","title":"executable_trash.tmpl","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_trash.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 {"link":"executable_changelog.51ae1d62.html","title":"executable_changelog","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_changelog","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
@@ -47,5 +47,5 @@ var data = {files:[
 {"link":"executable_chezmoi-feature.7beb5a84.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"41.0","covered_lines":"25","uncovered_lines":"36","total_lines" : "61"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:30:50", "instrumented" : 1215, "covered" : 307,};
+var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 1214, "covered" : 304,};
 var merged_data = [];

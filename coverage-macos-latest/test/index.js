@@ -41,10 +41,10 @@ var data = {files:[
 {"link":"executable_e.a956bd7b.html","title":"executable_e","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_e","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"10","total_lines" : "10"},
 {"link":"00-install-xdg.sh.d9c46f8d.html","title":"00-install-xdg.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/00-install-xdg.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"13","uncovered_lines":"0","total_lines" : "13"},
 {"link":"validate-schema.bd691d74.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"55","total_lines" : "55"},
-{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"linePartCov","covered":"26.3","covered_lines":"5","uncovered_lines":"14","total_lines" : "19"},
+{"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineNoCov","covered":"22.2","covered_lines":"4","uncovered_lines":"14","total_lines" : "18"},
 {"link":"executable_chezmoi-execute.c66a6c27.html","title":"executable_chezmoi-execute","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-execute","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"2","total_lines" : "2"},
 {"link":"executable_chezmoi-trace.fece112f.html","title":"executable_chezmoi-trace","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-trace","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"3","total_lines" : "3"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:32:45", "instrumented" : 1204, "covered" : 284,};
+var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 1203, "covered" : 283,};
 var merged_data = [];

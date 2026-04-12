@@ -1,13 +1,13 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"67","possible_hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"66","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"68","possible_hits":"0",},
-{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"2","order":"69","possible_hits":"0",},
+{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"67","possible_hits":"0",},
+{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"2","order":"68","possible_hits":"0",},
 {"lineNum":"    7","line":"fi"},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"70","possible_hits":"0",},
+{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"69","possible_hits":"0",},
 {"lineNum":"   10","line":"apk)"},
 {"lineNum":"   11","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   12","line":"  ;;"},
@@ -22,9 +22,9 @@ var data = {lines:[
 {"lineNum":"   21","line":"  # yay -? --aur"},
 {"lineNum":"   22","line":"  ;;"},
 {"lineNum":"   23","line":"brew)"},
-{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"71","possible_hits":"0",},
+{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"70","possible_hits":"0",},
 {"lineNum":"   25","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"72","possible_hits":"0",},
+{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"71","possible_hits":"0",},
 {"lineNum":"   27","line":"  ;;"},
 {"lineNum":"   28","line":"cask)"},
 {"lineNum":"   29","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -109,5 +109,5 @@ var data = {lines:[
 {"lineNum":"  108","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:32:45", "instrumented" : 40, "covered" : 6,};
+var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 40, "covered" : 6,};
 var merged_data = [];

@@ -1,20 +1,20 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"2","order":"82","possible_hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"2","order":"79","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"2","order":"83","possible_hits":"0",},
-{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"2","order":"84","possible_hits":"0",},
+{"lineNum":"    5","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"2","order":"80","possible_hits":"0",},
+{"lineNum":"    6","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"2","order":"81","possible_hits":"0",},
 {"lineNum":"    7","line":"fi"},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"5","order":"85","possible_hits":"0",},
+{"lineNum":"    9","line":"case \"${1:-}\" in","class":"lineCov","hits":"5","order":"82","possible_hits":"0",},
 {"lineNum":"   10","line":"apk)"},
 {"lineNum":"   11","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   12","line":"  ;;"},
 {"lineNum":"   13","line":"apt)"},
 {"lineNum":"   14","line":"  # apt list --installed"},
 {"lineNum":"   15","line":"  # dpkg --get-selections"},
-{"lineNum":"   16","line":"  apt-mark showmanual | tr -s \'\\n\' \' \' | cut -d\' \' -f1","class":"lineCov","hits":"3","order":"86","possible_hits":"0",},
+{"lineNum":"   16","line":"  apt-mark showmanual | tr -s \'\\n\' \' \' | cut -d\' \' -f1","class":"lineCov","hits":"3","order":"83","possible_hits":"0",},
 {"lineNum":"   17","line":"  ;;"},
 {"lineNum":"   18","line":"aur | yay)"},
 {"lineNum":"   19","line":"  pacman -Qqm","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -22,9 +22,9 @@ var data = {lines:[
 {"lineNum":"   21","line":"  # yay -? --aur"},
 {"lineNum":"   22","line":"  ;;"},
 {"lineNum":"   23","line":"brew)"},
-{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"87","possible_hits":"0",},
+{"lineNum":"   24","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"84","possible_hits":"0",},
 {"lineNum":"   25","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"88","possible_hits":"0",},
+{"lineNum":"   26","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"85","possible_hits":"0",},
 {"lineNum":"   27","line":"  ;;"},
 {"lineNum":"   28","line":"cask)"},
 {"lineNum":"   29","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -109,5 +109,5 @@ var data = {lines:[
 {"lineNum":"  108","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:30:50", "instrumented" : 40, "covered" : 7,};
+var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 40, "covered" : 7,};
 var merged_data = [];

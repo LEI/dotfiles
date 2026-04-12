@@ -1,16 +1,16 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"73","possible_hits":"0",},
+{"lineNum":"    3","line":"set -eu","class":"lineCov","hits":"1","order":"72","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"74","possible_hits":"0",},
+{"lineNum":"    5","line":". \"$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh\"","class":"lineCov","hits":"1","order":"73","possible_hits":"0",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":"if [ -z \"${USER:-}\" ]; then","class":"lineCov","hits":"1","order":"75","possible_hits":"0",},
+{"lineNum":"    7","line":"if [ -z \"${USER:-}\" ]; then","class":"lineCov","hits":"1","order":"74","possible_hits":"0",},
 {"lineNum":"    8","line":"  warn \"USER is not set, falling back to id -un\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"  USER=\"$(id -un)\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   10","line":"fi"},
 {"lineNum":"   11","line":""},
-{"lineNum":"   12","line":"if ! has brew; then","class":"lineCov","hits":"1","order":"76","possible_hits":"0",},
+{"lineNum":"   12","line":"if ! has brew; then","class":"lineCov","hits":"1","order":"75","possible_hits":"0",},
 {"lineNum":"   13","line":"  msg \"Installing homebrew\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   14","line":"  # FIXME: Need sudo access on macOS"},
 {"lineNum":"   15","line":"  dry_run sudo echo","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -23,14 +23,14 @@ var data = {lines:[
 {"lineNum":"   22","line":"fi"},
 {"lineNum":"   23","line":""},
 {"lineNum":"   24","line":"# https://docs.brew.sh/Installation#unattended-installation"},
-{"lineNum":"   25","line":"export NONINTERACTIVE=1","class":"lineCov","hits":"2","order":"77","possible_hits":"0",},
+{"lineNum":"   25","line":"export NONINTERACTIVE=1","class":"lineCov","hits":"2","order":"76","possible_hits":"0",},
 {"lineNum":"   26","line":""},
-{"lineNum":"   27","line":"dry_run brew update --quiet \"$@\"","class":"lineCov","hits":"1","order":"78","possible_hits":"0",},
+{"lineNum":"   27","line":"dry_run brew update --quiet \"$@\"","class":"lineCov","hits":"1","order":"77","possible_hits":"0",},
 {"lineNum":"   28","line":""},
 {"lineNum":"   29","line":"# if ! [ -f ~/.config/homebrew/Brewfile ]; then"},
 {"lineNum":"   30","line":"#   run brew bundle dump --file=\"${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile\""},
 {"lineNum":"   31","line":"# fi# run brew bundle list --global"},
-{"lineNum":"   32","line":"dry_run brew bundle --file=/dev/stdin --no-upgrade \"$@\" <<EOF","class":"lineCov","hits":"1","order":"79","possible_hits":"0",},
+{"lineNum":"   32","line":"dry_run brew bundle --file=/dev/stdin --no-upgrade \"$@\" <<EOF","class":"lineCov","hits":"1","order":"78","possible_hits":"0",},
 {"lineNum":"   33","line":"tap \"clevercloud/misc\""},
 {"lineNum":"   34","line":"tap \"k1LoW/tap\""},
 {"lineNum":"   35","line":"brew \"bash\""},
@@ -83,5 +83,5 @@ var data = {lines:[
 {"lineNum":"   82","line":"EOF"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 06:32:45", "instrumented" : 16, "covered" : 7,};
+var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 16, "covered" : 7,};
 var merged_data = [];
