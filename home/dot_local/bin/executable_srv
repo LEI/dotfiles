@@ -1,8 +1,12 @@
 #!/bin/bash
+#MISE description="Manage remote hosts via SSH"
+#USAGE flag "-d --debug" help="Print SSH command instead of running it"
+#USAGE arg "[name]" help="Host name from config"
+#USAGE arg "[command]..." help="Command to run (or 'logs' for log streaming)"
 
 set -euo pipefail
 
-conf="${XDG_CONFIG_HOME:-$HOME/.config}/srv/hosts.yaml"
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}/srv/hosts.yaml"
 
 die() {
   echo >&2 "srv: $*"
@@ -10,92 +14,87 @@ die() {
 }
 
 field() {
-  val=$(yq -r ".hosts.$1.$2" "$conf")
+  local val
+  val=$(yq -r ".hosts.$1.$2" "$CONF")
   if [ "$val" = "null" ]; then
     return
   fi
   printf '%s' "$val"
 }
 
-if [ ! -f "$conf" ]; then
-  die "config not found: $conf"
-fi
-
-if ! command -v yq >/dev/null; then
-  die "yq required"
-fi
-
-usage() {
-  cat <<'EOF'
-Usage: srv [name] [logs|command...]
-
-  srv              list configured hosts
-  srv <name>       open interactive shell
-  srv <name> logs  stream logs (pipeable)
-  srv <name> cmd   run command on host
-EOF
-}
+[ -f "$CONF" ] || die "config not found: $CONF"
+command -v yq >/dev/null || die "yq required"
 
 debug=false
-case "${1:-}" in
-  -d|--debug) debug=true; shift ;;
-  -h|--help) usage; exit ;;
-esac
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -d | --debug)
+    debug=true
+    shift
+    ;;
+  -h | --help)
+    echo "Usage: srv [-d] [name] [logs|command...]"
+    exit
+    ;;
+  *) break ;;
+  esac
+done
 
-# No args: list hosts
 if [ $# -eq 0 ]; then
-  yq -r '.hosts | keys[]' "$conf"
+  yq -r '.hosts | keys[]' "$CONF"
   exit
 fi
 
 name="$1"
 shift
 
+# Fall back to using name as hostname if not in config
 host=$(field "$name" ssh)
 if [ -z "$host" ]; then
-  die "unknown host '$name'"
+  host="$name"
 fi
 dir=$(field "$name" dir)
 
-tty_flag="-t"
+ssh_opts=(-t)
+pipe=""
 
 if [ "${1:-}" = "logs" ]; then
   shift
   cmd=$(field "$name" logs.cmd)
-  if [ -z "$cmd" ]; then
-    die "no log command for '$name'"
-  fi
-  # Default pipe from config when no extra args and stdout is a terminal
-  pipe=""
-  if [ $# -eq 0 ] && [ -t 1 ]; then
-    pipe=$(field "$name" logs.pipe)
-  fi
+  [ -n "$cmd" ] || die "no log command for '$name'"
+
   if [ $# -gt 0 ]; then
     cmd="$cmd $*"
   fi
-  # Omit -t when piped (caller or config pipe) to avoid \r\n stair effect
-  if [ ! -t 1 ] || [ -n "$pipe" ]; then
-    tty_flag=""
+
+  # Use config pipe when no extra args and stdout is a terminal
+  if [ $# -eq 0 ] && [ -t 1 ]; then
+    pipe=$(field "$name" logs.pipe)
   fi
-  set -- "$cmd"
-elif [ $# -eq 0 ]; then
-  set -- "exec \$SHELL -l"
+
+  # Omit -t when piped to avoid \r\n stair effect
+  if [ ! -t 1 ] || [ -n "$pipe" ]; then
+    ssh_opts=()
+  fi
+elif [ $# -gt 0 ]; then
+  cmd="$*"
+else
+  cmd='exec $SHELL -l'
 fi
 
-ssh_args=(ssh)
-[ -n "$tty_flag" ] && ssh_args+=("$tty_flag")
-ssh_args+=("$host" "cd '$dir' && $*")
-
-run() {
-  if [ -n "${pipe:-}" ]; then
-    "$@" | $pipe
-  else
-    "$@"
-  fi
-}
+if [ -n "$dir" ]; then
+  remote="cd $(printf '%q' "$dir") && $cmd"
+else
+  remote="$cmd"
+fi
 
 if [ "$debug" = true ]; then
-  echo "ssh${tty_flag:+ $tty_flag} $host \"cd '$dir' && $*\"${pipe:+ | $pipe}"
+  echo "ssh${ssh_opts[*]:+ ${ssh_opts[*]}} $host \"$remote\"${pipe:+ | $pipe}"
+  exit
+fi
+
+if [ -n "$pipe" ]; then
+  ssh ${ssh_opts[@]+"${ssh_opts[@]}"} "$host" "$remote" | eval "$pipe"
 else
-  run "${ssh_args[@]}"
+  ssh ${ssh_opts[@]+"${ssh_opts[@]}"} "$host" "$remote"
 fi

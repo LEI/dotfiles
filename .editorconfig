@@ -7,6 +7,10 @@ indent_style = space
 indent_size = 2
 quote_type = single
 
-[*.sh]
+[*.{sh,bash,bats}]
+indent_style = space
+indent_size = 2
+
+[{script/*,*/.local/bin/*}]
 indent_style = space
 indent_size = 2

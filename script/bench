@@ -9,11 +9,11 @@ set -eu
 shell="${1:-${SHELL##*/}}"
 
 case "$shell" in
-  bash|zsh)
-    SHELL_BENCH=true "$shell" -ic exit
-    ;;
-  *)
-    echo >&2 "bench: invalid shell '$shell', expected bash or zsh"
-    exit 2
-    ;;
+bash | zsh)
+  SHELL_BENCH=true "$shell" -ic exit
+  ;;
+*)
+  echo >&2 "bench: invalid shell '$shell', expected bash or zsh"
+  exit 2
+  ;;
 esac

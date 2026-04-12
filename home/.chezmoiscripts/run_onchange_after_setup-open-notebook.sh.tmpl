@@ -42,13 +42,14 @@ ensure_credential() {
     echo "$existing"
     return
   fi
-  id="$(api POST /api/credentials -d "$(jq -n \
-    --arg name "$name" \
-    --arg provider "$provider" \
-    --arg api_key "$api_key" \
-    --arg base_url "$base_url" \
-    --argjson modalities "$modalities" \
-    '{name: $name, provider: $provider, modalities: $modalities, api_key: $api_key, base_url: $base_url}'
+  id="$(api POST /api/credentials -d "$(
+    jq -n \
+      --arg name "$name" \
+      --arg provider "$provider" \
+      --arg api_key "$api_key" \
+      --arg base_url "$base_url" \
+      --argjson modalities "$modalities" \
+      '{name: $name, provider: $provider, modalities: $modalities, api_key: $api_key, base_url: $base_url}'
   )" | jq -r '.id')"
   msg "open-notebook: created credential '$name' ($id)"
   echo "$id"
@@ -62,23 +63,25 @@ ensure_model() {
     echo "$existing"
     return
   fi
-  id="$(api POST /api/models -d "$(jq -n \
-    --arg name "$name" \
-    --arg provider "openai-compatible" \
-    --arg type "$type" \
-    --arg credential "$credential_id" \
-    '{name: $name, provider: $provider, type: $type, credential: $credential}'
+  id="$(api POST /api/models -d "$(
+    jq -n \
+      --arg name "$name" \
+      --arg provider "openai-compatible" \
+      --arg type "$type" \
+      --arg credential "$credential_id" \
+      '{name: $name, provider: $provider, type: $type, credential: $credential}'
   )" | jq -r '.id')"
   msg "open-notebook: registered model '$name' ($id)"
   echo "$id"
 }
 
-cred_id="$(ensure_credential \
-  "{{ $cred.name }}" \
-  "{{ $cred.provider }}" \
-  '{{ $types | uniq | toJson }}' \
-  "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
-  "{{ $cred.base_url }}"
+cred_id="$(
+  ensure_credential \
+    "{{ $cred.name }}" \
+    "{{ $cred.provider }}" \
+    '{{ $types | uniq | toJson }}' \
+    "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
+    "{{ $cred.base_url }}"
 )"
 
 {{ range $models -}}

@@ -7,11 +7,20 @@
 set -eu
 
 shell="${1:-${SHELL##*/}}"
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
+# Run in a new session to avoid terminal contention in parallel tasks
+detach() {
+  if command -v setsid >/dev/null; then
+    setsid "$@"
+  else
+    script -q /dev/null "$@"
+  fi
+}
 
 case "$shell" in
 bash)
-  tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
   logfile="$tmpdir/trace.log"
 
   cat >"$tmpdir/rcfile.sh" <<BASH_PROF
@@ -24,11 +33,7 @@ set +x
 exec 5>&-
 BASH_PROF
 
-  if command -v setsid >/dev/null; then
-    setsid bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
-  else
-    bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
-  fi
+  detach bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
 
   total=$(awk '
     /^\++ [0-9]+\.[0-9]+ / {
@@ -62,8 +67,6 @@ BASH_PROF
   # TODO: add a second table aggregating total ms per source file (zprof-style self time)
   ;;
 zsh)
-  tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
   cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
 zmodload zsh/zprof
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
@@ -71,9 +74,8 @@ ZSH_PROF
   cat >"$tmpdir/.zshrc" <<'ZSH_RC'
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
 ZSH_RC
-  REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
-  export REAL_ZDOTDIR
-  ZDOTDIR="$tmpdir" zsh -ic 'zprof'
+  export REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
+  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof'
   ;;
 *)
   echo >&2 "profile: invalid shell '$shell', expected bash or zsh"

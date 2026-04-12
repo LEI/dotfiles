@@ -51,7 +51,10 @@ grafana_reload() {
     fi
     grafana_netrc=$(mktemp)
     trap 'rm -f "$grafana_netrc"' EXIT
-    (umask 177; printf 'machine localhost login admin password %s\n' "$grafana_pass" >"$grafana_netrc")
+    (
+      umask 177
+      printf 'machine localhost login admin password %s\n' "$grafana_pass" >"$grafana_netrc"
+    )
   fi
   msg "Reloading Grafana $1"
   run curl -fsS --netrc-file "$grafana_netrc" -X POST "http://localhost:3033/api/admin/provisioning/$1/reload"

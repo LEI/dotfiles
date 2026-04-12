@@ -39,6 +39,7 @@ jobs:
         #   # - base:debian
         #   # - base:ubuntu
     runs-on: ${{ matrix.os }}
+    # environment: ci
     # container:
     #   # https://github.com/devcontainers/images/releases
     #   image: mcr.microsoft.com/vscode/devcontainers/${{ matrix.image }}@sha256:51961964f65dd75cb55e846b6e0cd16c364148452a2d73df933e68394129ea24 # v0.4.19
@@ -52,7 +53,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
 
@@ -65,7 +66,7 @@ jobs:
         env:
           CHEZMOI_PROFILE: minimal
           # CODESPACES: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # zizmor: ignore[secrets-outside-env]
         run: |
           set -x
           echo "$HOME/.local/bin" >>"$GITHUB_PATH"
@@ -109,7 +110,7 @@ jobs:
         run: ./script/coverage --formatter junit --recursive ./test >junit.xml
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: coverage-${{ matrix.os }}
           path: coverage-${{ matrix.os }}/**/*
@@ -126,7 +127,7 @@ jobs:
           # files: ./coverage/kcov-merged/cobertura.xml
           flags: ${{ matrix.os }} # ,${{ matrix.system }}
           # name: codecov-dotfiles
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }} # zizmor: ignore[secrets-outside-env]
           # verbose: true
 
       - name: Upload test results to Codecov
@@ -137,7 +138,7 @@ jobs:
           # files: junit.xml
           flags: ${{ matrix.os }} # ,${{ matrix.system }}
           report_type: test_results
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }} # zizmor: ignore[secrets-outside-env]
 
       - name: Cleanup
         run: rm -r coverage* junit.xml test_helper
@@ -186,7 +187,7 @@ jobs:
           # external-data-json-path: ./cache/benchmark-data.json
 
       # - name: Switch branch
-      #   uses: actions/checkout@v5
+      #   uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       #   with:
       #     persist-credentials: false
       #     ref: gh-pages
@@ -195,7 +196,7 @@ jobs:
         run: git switch gh-pages
 
       - name: Upload benchmark
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: benchmark-${{ matrix.os }}
           path: benchmark-${{ matrix.os }}/**/*
@@ -227,12 +228,12 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     container:
-      image: kcov/kcov:latest-alpine
+      image: kcov/kcov:latest-alpine@sha256:38605c447c7475573cb21b6e6c5339628931bde7abbc8753edd5e321801e2b66
     permissions:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
           # ref: gh-pages
@@ -244,14 +245,14 @@ jobs:
       #   run: rm -frv coverage*
 
       - name: Download benchmark
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           pattern: benchmark-*
           path: ./
           merge-multiple: false
 
       - name: Download coverage
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           pattern: coverage-*
           path: ./

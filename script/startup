@@ -57,11 +57,11 @@ main() {
   shell="${shell:-bash}"
 
   case "$shell" in
-    bash|zsh|dummy) ;;
-    *)
-      echo >&2 "startup: invalid shell '$shell', expected bash or zsh"
-      exit 2
-      ;;
+  bash | zsh | dummy) ;;
+  *)
+    echo >&2 "startup: invalid shell '$shell', expected bash or zsh"
+    exit 2
+    ;;
   esac
 
   local cmd="$shell -ci exit"

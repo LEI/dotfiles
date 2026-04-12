@@ -28,8 +28,8 @@ unset _tool
 {{- $dotcfg := joinPath $src "dot_config" }}
 {{- $exclude := concat $init $ordered }}
 for _feat in \
-{{- range glob (joinPath $src "dot_*/init.sh*") }}
-  {{- $name := . | dir | base | trimPrefix "dot_" }}
+{{- range $index, $path := glob (joinPath $src "dot_*/init.sh*") }}
+  {{- $name := $path | dir | base | trimPrefix "dot_" }}
   {{- if has $name $exclude }}
   {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
   {{-   continue }}
@@ -40,8 +40,9 @@ for _feat in \
   {{- end }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
 {{- end }}
-{{- range glob (joinPath $dotcfg "*/init.sh*") }}
-  {{- $name := . | dir | base }}
+{{- $list := glob (joinPath $dotcfg "*/init.sh*") -}}
+{{- range $index, $path := $list }}
+  {{- $name := $path | dir | base }}
   {{- if has $name $exclude }}
   {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
   {{-   continue }}
@@ -50,9 +51,9 @@ for _feat in \
   {{-   warnf "disabled: %s .%s/init.sh" $shell $name }}
   {{-   continue }}
   {{- end }}
-  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
-{{- end }}
-; do
+  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}"
+  {{- if ne (add $index 2) (len $list) }} \{{ end }}
+{{- end }}; do
   if ! [ -f "$_feat" ]; then
     echo >&2 "warning: init file not found: $_feat"
     continue

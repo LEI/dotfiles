@@ -17,10 +17,10 @@ jobs:
     container:
       # image: alpine
       # image: bats/bats:1.12.0
-      image: kcov/kcov:latest-alpine
+      image: kcov/kcov:latest-alpine@sha256:38605c447c7475573cb21b6e6c5339628931bde7abbc8753edd5e321801e2b66
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
 

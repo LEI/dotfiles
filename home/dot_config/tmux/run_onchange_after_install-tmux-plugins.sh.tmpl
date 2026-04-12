@@ -41,6 +41,6 @@ fi
 # https://github.com/tmux-plugins/tmux-resurrect/issues/122#issuecomment-2530961970
 tmux_default_command="$(tmux show -g default-command)"
 if echo "$tmux_default_command" | grep -q '&\||\|;'; then
-  echo >&2 "WARN: invalid character(s) in `tmux show -g default-command`: "
+  echo >&2 "WARN: invalid character(s) in \`tmux show -g default-command\`: $tmux_default_command"
   exit 1
 fi

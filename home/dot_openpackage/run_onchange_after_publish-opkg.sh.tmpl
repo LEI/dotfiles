@@ -23,9 +23,9 @@ PACKAGE_NAME="local"
 
 # Returns true if the package is already installed globally
 opkg_installed() {
-  opkg list --global --json 2>/dev/null \
-    | jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
-    >/dev/null 2>&1
+  opkg list --global --json 2>/dev/null |
+    jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
+      >/dev/null 2>&1
 }
 
 if [ ! -d "$LOCAL_PACKAGE_PATH" ]; then

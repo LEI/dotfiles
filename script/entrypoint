@@ -58,7 +58,7 @@ create_user() {
 
 grant_sudo() {
   # sudoers drop-in works on all distros without group name guessing
-  echo "$user ALL=(root) NOPASSWD:ALL" > "/etc/sudoers.d/$user"
+  echo "$user ALL=(root) NOPASSWD:ALL" >"/etc/sudoers.d/$user"
   chmod 0440 "/etc/sudoers.d/$user"
 }
 

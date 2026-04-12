@@ -1,5 +1,6 @@
 {{- if .features.bash -}}
 ---
+
 {{- if ne .osID "alpine" }}
 # https://github.com/rcaloras/bash-preexec/commit/a220343bf206372d4b90275eb30866c409f22f79
 bash-preexec.sh:
@@ -10,6 +11,8 @@ bash-preexec.sh:
   refreshPeriod: 168h
 
 {{- end }}
+
+{{- if eq .os "linux" }}
 # v1.10.1
 timep.bash:
   type: file
@@ -17,4 +20,6 @@ timep.bash:
   checksum:
     sha256: "1ddfa4d223a836f0bd29c1e9bcb2d6e402ffb301b5724f1f12956c831d05a6d6"
   refreshPeriod: 168h
+
+{{- end }}
 {{ end -}}

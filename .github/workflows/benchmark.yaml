@@ -10,17 +10,19 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 permissions:
-  # deployments permission to deploy GitHub pages website
-  deployments: write
-  # contents permission to update benchmark contents in gh-pages branch
-  contents: write
+  contents: read
 
 jobs:
   benchmark:
     name: Performance regression check
     runs-on: ubuntu-latest
+    permissions:
+      # deployments permission to deploy GitHub pages website
+      deployments: write
+      # contents permission to update benchmark contents in gh-pages branch
+      contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
 
@@ -42,7 +44,7 @@ jobs:
           tool: customSmallerIsBetter
           output-file-path: output.json
           # Access token to deploy GitHub Pages branch or make a commit comment
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }} # zizmor: ignore[secrets-outside-env]
           # Push and deploy GitHub pages branch automatically
           auto-push: true
           # Workflow will fail when an alert happens

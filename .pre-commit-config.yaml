@@ -4,7 +4,7 @@ exclude: '\s'
 repos:
   # https://github.com/gitleaks/gitleaks#pre-commit
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.30.1
     hooks:
       - id: gitleaks
         name: gitleaks # Detect hardcoded secrets
@@ -39,9 +39,46 @@ repos:
         stages:
           - pre-commit
 
+  # https://github.com/scop/pre-commit-shfmt#readme
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt
+        name: shfmt
+        args:
+          - --diff
+        language: system
+        exclude: ^(home/.*(\.tmpl|/modify_))
+        stages:
+          - pre-commit
+
+  # https://opendev.org/openstack/bashate
+  - repo: local
+    hooks:
+      - id: bashate
+        name: bashate
+        entry: bashate
+        # args:
+        #   - --ignore=E003,E006
+        language: system
+        types:
+          - shell
+        exclude: ^(home/.*(\.tmpl|/modify_))
+        stages:
+          - pre-commit
+
+  # https://github.com/JohnnyMorganz/StyLua#pre-commit
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: v2.4.1
+    hooks:
+      - id: stylua-github
+        name: stylua
+        args:
+          - --check
+
   # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args:
@@ -54,7 +91,7 @@ repos:
 
   # https://github.com/python-jsonschema/check-jsonschema
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.32.1
+    rev: 0.37.1
     hooks:
       - id: check-github-workflows
         name: check-github-workflows
@@ -74,9 +111,12 @@ repos:
 
   # https://docs.zizmor.sh/integrations/#pre-commit
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.15.2
+    rev: v1.23.1
     hooks:
       - id: zizmor
+        args:
+          - --persona=auditor
+          - --min-severity=medium
         files: ^.github/workflows/.*\.ya?ml$
 
   - repo: local
@@ -124,6 +164,16 @@ repos:
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
         exclude: \.chezmoi\.yaml\.tmpl$
+
+      # TODO: usage lint only works on .usage.kdl files, not embedded #USAGE comments
+      # - id: usage-lint
+      #   name: usage lint
+      #   entry: usage lint
+      #   language: system
+      #   types:
+      #     - shell
+      #   stages:
+      #     - pre-commit
 
       - id: validate-skill
         name: validate skills

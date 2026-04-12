@@ -10,7 +10,7 @@ fi
 # Check if value is truthy (1 or true)
 truthy() {
   case "$1" in
-  1|true) return 0 ;;
+  1 | true) return 0 ;;
   *) return 1 ;;
   esac
 }
@@ -46,9 +46,9 @@ run() {
     _run_out=""
     for _run_arg in "$@"; do
       case $_run_arg in
-        '') _run_out="$_run_out ''" ;;
-        *[[:space:]\"\'\*\?\$\`\&\;\|]*) _run_out="$_run_out '$_run_arg'" ;;
-        *) _run_out="$_run_out $_run_arg" ;;
+      '') _run_out="$_run_out ''" ;;
+      *[[:space:]\"\'\*\?\$\`\&\;\|]*) _run_out="$_run_out '$_run_arg'" ;;
+      *) _run_out="$_run_out $_run_arg" ;;
       esac
     done
     msg "${_run_out# }"

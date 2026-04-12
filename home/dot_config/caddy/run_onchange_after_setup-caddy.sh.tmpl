@@ -113,8 +113,8 @@ elif has systemctl; then
   resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
   nm_changed=false
   resolved_changed=false
-  if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null || \
-     ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
+  if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null ||
+    ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
     nm_changed=true
   fi
   if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
@@ -170,8 +170,8 @@ intermediate="$pki/intermediate.crt"
 if has update-ca-trust; then
   root_dest=/etc/pki/ca-trust/source/anchors/caddy-local-root.crt
   intermediate_dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
-  if ! diff -q "$root_dest" "$root" >/dev/null 2>&1 || \
-     ! diff -q "$intermediate_dest" "$intermediate" >/dev/null 2>&1; then
+  if ! diff -q "$root_dest" "$root" >/dev/null 2>&1 ||
+    ! diff -q "$intermediate_dest" "$intermediate" >/dev/null 2>&1; then
     msg "Installing caddy root and intermediate CA to system trust"
     run pkexec sh -ceux "cp '$root' '$root_dest' && cp '$intermediate' '$intermediate_dest' && update-ca-trust"
   fi

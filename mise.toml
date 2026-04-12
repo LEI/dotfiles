@@ -32,8 +32,7 @@ depends = [
   "check",
   # "lint",
   "profile bash",
-  # FIXME: exits current zsh shell
-  # "profile zsh",
+  "profile zsh",
   "test",
   # "update",
 ]
@@ -58,7 +57,3 @@ run = "mise run test -- --filter-tags type:unit"
 alias = "ts"
 description = "Run smoke tests (needs deployed home)"
 run = "mise run test -- --filter-tags type:smoke"
-
-[tasks.timep]
-description = "Profile bash init with timep (call-stack tree)"
-run = 'source ~/.local/share/timep.bash && timep +F -c "source ~/.bashrc"'

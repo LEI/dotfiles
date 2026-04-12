@@ -23,9 +23,17 @@ for arg in "$@"; do
   esac
 done
 
+{
+  printf 'root = true\n\n'
+  cat "$repo_dir/.editorconfig"
+  printf '\n[*]\nindent_style = space\nindent_size = 2\ninsert_final_newline = false\n'
+} >"$render_dir/.editorconfig"
 printf 'disable=SC1090,SC2034,SC2248\n' >"$render_dir/.shellcheckrc"
 
 chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
+
+# Remove empty files (templates that render to nothing on this OS)
+find "$render_dir" -type f -empty -delete
 
 if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
   echo >&2 "lint: no rendered files"
