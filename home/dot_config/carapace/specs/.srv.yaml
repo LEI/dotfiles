@@ -1,8 +1,0 @@
-# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
----
-name: srv
-description: SSH host dispatcher
-completion:
-  positional:
-    - ["$(srv)"]
-    - - logs

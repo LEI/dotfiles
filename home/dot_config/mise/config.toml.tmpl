@@ -42,7 +42,8 @@ lockfile = true
 [tasks."check:{{ $name }}"]
 description = {{ printf "Check %s" $feat | quote }}
 # file = {{ . | quote }}
-run = {{ . | quote }}
+dir = {{ . | dir | quote }}
+run = {{ . | base | quote }}
 shell = "sh"
 {{- if $miseInteractive }}
 interactive = true
@@ -81,7 +82,8 @@ depends = [
 
 [tasks."update:{{ $name }}"]
 description = {{ printf "Update %s" $feat | quote }}
-run = {{ . | quote }}
+dir = {{ . | dir | quote }}
+run = {{ . | base | quote }}
 shell = "sh"
 {{-   end }}
 {{- end }}
