@@ -1,6 +1,7 @@
 # TODO: replace with carapace spec
-if command -v zel >/dev/null; then
-  return 0
+if ! command -v zellij >/dev/null; then
+  echo "init: command not found: zellij" >&2
+  return
 fi
 
 zel() {

@@ -1,7 +1,11 @@
 # https://carapace-sh.github.io/carapace-bin/setup.html#bash
 if ! command -v carapace >/dev/null; then
-  # echo >&2 "Command 'carapace' not found"
-  return 0
+  echo "init: command not found: carapace" >&2
+  return
+fi
+
+if [ -d "$XDG_CONFIG_HOME/carapace/bin" ]; then
+  pathmunge "$XDG_CONFIG_HOME/carapace/bin" after
 fi
 
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional

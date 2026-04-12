@@ -8,4 +8,7 @@ shell = "bash"
 PATH = 'export PATH="$PATH:{{ `{{ dir }}` }}"'
 
 [plugins]
-{{ includeTemplate "dot_config/sheldon/.plugins.toml.tmpl" . | trim }}
+
+# [plugins.inline]
+# inline = """
+# """

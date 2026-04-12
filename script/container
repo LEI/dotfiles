@@ -15,7 +15,10 @@ images="alpine archlinux debian fedora opensuse termux ubuntu"
 
 container() { "$CONTAINER_PROVIDER" "$@"; }
 
-trace() { echo >&2 "+ $*"; "$@"; }
+trace() {
+  echo >&2 "+ $*"
+  "$@"
+}
 
 # Resolve image-specific variables from an image arg (name or name:version).
 # Sets: image_name, version, image, image_tag, container, prefix,
@@ -80,10 +83,14 @@ container_exec_mise() {
   cmd="$(printf '%q ' "$@")"
   # bash -l skips environment.d in non-interactive shells; source it explicitly
   # eval mise activate: adds shims for mise-managed tools (check tasks use task env instead)
-  container_exec bash -l -c '
+  # shellcheck disable=SC2016
+  container_exec bash -c -l '
     source ~/.config/sh/lib/export.sh
+    source ~/.config/sh/lib/pathmunge.sh
     export_env ~/.config/environment.d/*.conf
-    eval "$(mise activate bash)"
+    source ~/.config/sh/environment.sh
+    # eval "$(mise activate bash)"
+    source ~/.config/mise/init.sh
     '"$cmd"
 }
 
@@ -106,12 +113,14 @@ start() {
   fi
   # Entrypoint creates the dev user asynchronously; wait for it
   if [ "$image_name" != termux ]; then
+    # shellcheck disable=SC2016
     trace container exec "$container" \
       sh -c 'until id -u "$1" >/dev/null 2>&1; do sleep 1; done' -- "$DEV_USER"
   fi
 }
 
 sync() {
+  # shellcheck disable=SC2016
   trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
   for f in .chezmoiroot .chezmoiversion .pre-commit-config.yaml mise.toml home script test; do
     trace container cp "$f" "$container:$chezmoi_root/"
@@ -121,6 +130,7 @@ sync() {
 
 bootstrap() {
   if [ "$image_name" = termux ]; then
+    # shellcheck disable=SC2016
     trace container exec "$container" \
       sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
     trace container exec --user="$exec_user" "$container" \
@@ -136,11 +146,12 @@ bootstrap() {
 
 # Persists trust so later runs skip the prompt; no-op if mise not yet installed
 trust() {
+  # shellcheck disable=SC2016
   trace container exec --user="$exec_user" "$container" \
     sh -c 'mise=$(command -v mise 2>/dev/null || echo "$HOME/.local/bin/mise")
-           if [ -x "$mise" ]; then
-             "$mise" trust --yes "$1"
-           fi' \
+if [ -x "$mise" ]; then
+  "$mise" trust --yes "$1"
+fi' \
     -- "$chezmoi_root/mise.toml"
 }
 

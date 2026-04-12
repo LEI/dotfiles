@@ -1,7 +1,9 @@
+# TODO: avoid duplicates
 # Picked up by systemd user manager and export_env for shells.
 # Minimal PATH additions for user services that don't source init.sh.
-PATH={{ .brewPrefix }}/bin:${PATH}
-PATH=$HOME/.local/bin:${PATH}
+# PATH={{ .brewPrefix }}/sbin:$PATH
+# PATH={{ .brewPrefix }}/bin:$PATH
+# PATH=$HOME/.local/bin:$PATH
 
-# PATH=$HOME/.local/share/mise/shims:${PATH}
-# PATH=$HOME/.local/share/cargo/bin:${PATH}
+# PATH=$HOME/.local/share/mise/shims:$PATH
+# PATH=$HOME/.local/share/cargo/bin:$PATH

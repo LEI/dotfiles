@@ -1,6 +1,19 @@
 # Bootstrap: lib/ contains infrastructure sourced before everything else
+{{- if lookPath .shell | isExecutable }}
+SHELL={{ lookPath .shell | quote }}
+{{- end }}
+shell="${SHELL##*/}"
+
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-source "$XDG_CONFIG_HOME/sh/lib/export.sh"
+# source "$XDG_CONFIG_HOME/sh/lib/export.sh"
+# source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+# source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
+for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh; do
+  if [ -f "$_lib" ]; then
+    source "$_lib"
+  fi
+done
+unset _lib
 
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
@@ -10,8 +23,10 @@ if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
 fi
 
-source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
-source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+
+if [ -d "$HOME/bin" ]; then
+  pathmunge "$HOME/bin"
+fi
 
 # Source local environment variables
 if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
@@ -23,10 +38,6 @@ fi
 if [[ $- == *c* ]] && [[ $- != *i* ]]; then
   # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
   # BASH_CONFIG="neovide"
-  PATH="$PATH:$HOME/.local/bin"
-  # if [ -z "${MISE_SHELL:-}" ]; then
-  #   PATH="$PATH:$XDG_DATA_HOME/mise/shims"
-  # fi
   if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
     source "$XDG_CONFIG_HOME/sh/environment.sh"
   fi
@@ -41,11 +52,6 @@ if [[ $- != *i* ]]; then
   return
 fi
 
-# Remove default prompt command
-if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
-  export PROMPT_COMMAND=
-fi
-
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
 fi
@@ -55,89 +61,32 @@ if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
   source "$XDG_CONFIG_HOME/sh/environment.sh"
 fi
 
-# Feature init files; order-sensitive tools are sourced explicitly below
-{{- $src := .chezmoi.sourceDir }}
-{{- $dotcfg := joinPath $src "dot_config" }}
-{{- $init := list "bash" "zsh" }}
-{{- $ordered := list "atuin" "carapace" "direnv" "mise" "starship" "zoxide" }}
-{{- $exclude := concat $init $ordered }}
-for _f in \
-{{- range $o := $ordered }}
-  {{- range glob (joinPath $dotcfg $o "init.sh*") }}
-  "$XDG_CONFIG_HOME/{{ $o }}/{{ . | base | trimSuffix ".tmpl" }}" \
-  {{- end }}
-{{- end }}
-{{- range glob (joinPath $src "dot_*/init.sh*") }}
-  {{- $name := . | dir | base | trimPrefix "dot_" }}
-  "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
-{{- end }}
-{{- range glob (joinPath $dotcfg "*/init.sh*") }}
-  {{- $name := . | dir | base }}
-  {{- if has $name $exclude }}
-  {{-   warnf "skipping %s (excluded)" $name }}
-  {{-   continue }}
-  {{- end }}
-  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
-{{- end }}
-; do
-  if ! [ -f "$_f" ]; then
-    echo >&2 "warning: init file not found: $_f"
-    continue
+{{- if and (eq .shell "bash") (ne .osID "alpine") (ne .os "windows") }}
+
+# ble.sh includes its own preexec; never load both
+if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
+  # Remove default prompt command
+  if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
+    export PROMPT_COMMAND=
   fi
-  source "$_f"
-done
-unset _f
-
-if [ -d "$HOME/bin" ]; then
-  pathmunge "$HOME/bin"
-fi
-
-{{- if .features.brew }}
-
-# Homebrew
-brew_prefix="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}"
-
-if [ -x "$brew_prefix/bin/brew" ]; then
-  eval "$("$brew_prefix/bin/brew" shellenv)"
-fi
-
-{{- if .features.bash }}
-
-if [ -d "$brew_prefix/opt/bash/bin" ]; then
-  pathmunge "$brew_prefix/opt/bash/bin" replace
-fi
-{{- end }}
-{{- end }}
-
-{{- if and (ne .osID "alpine") (ne .os "windows") }}
-
-if [ "${SHELL##*/}" = bash ]; then
-  # ble.sh includes its own preexec; never load both
-  if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
-    source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
-  elif [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
-    source "$XDG_DATA_HOME/bash-preexec.sh"
-  fi
+  source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
+elif [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
+  source "$XDG_DATA_HOME/bash-preexec.sh"
 fi
 {{- end }}
 
-{{- if .features.carapace }}
-
-if [ -d "$XDG_CONFIG_HOME/carapace/bin" ]; then
-  pathmunge "$XDG_CONFIG_HOME/carapace/bin" after
-fi
-{{- end }}
+{{ includeTemplate "init-tools.sh.tmpl" . | trim }}
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-if [ "${SHELL##*/}" = bash ]; then
+if [ "$shell" = bash ]; then
   export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
 fi
 if command -v sheldon >/dev/null; then
   eval "$(sheldon source)"
+else
+  echo "init: command not found: sheldon" >&2
 fi
-{{- else }}
-{{ includeTemplate "init-tools.sh.tmpl" . | trim }}
 {{- end }}
 
 if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
@@ -145,24 +94,27 @@ if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
 fi
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code
-for _f in "$XDG_CONFIG_HOME/${SHELL##*/}/"*.conf; do
-  if [ -f "$_f" ]; then
-    export_env "$_f"
+for _conf in "$XDG_CONFIG_HOME/$shell/"*.conf; do
+  if [ -f "$_conf" ]; then
+    export_env "$_conf"
   fi
 done
-for _f in "$XDG_CONFIG_HOME/${SHELL##*/}/"*.sh; do
-  case "${_f##*/}" in init.sh) continue ;; esac
-  if [ -f "$_f" ]; then
-    source "$_f"
+for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
+  case "${_conf##*/}" in init.sh) continue ;; esac
+  if [ -f "$_conf" ]; then
+    source "$_conf"
   fi
 done
-unset _f
+unset _conf
 
-if [ -f "$HOME/.${SHELL##*/}rc.local" ]; then
-  source "$HOME/.${SHELL##*/}rc.local"
+if [ -f "$HOME/.${shell}rc.local" ]; then
+  source "$HOME/.${shell}rc.local"
 fi
+
+{{- if and (eq .shell "bash") (ne .osID "alpine") (ne .os "windows") }}
 
 # https://github.com/akinomyoga/ble.sh#13-set-up-bashrc
 if [[ ${BLE_VERSION-} ]]; then
   ble-attach
 fi
+{{ end -}}

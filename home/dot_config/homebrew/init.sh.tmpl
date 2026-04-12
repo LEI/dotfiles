@@ -1,0 +1,24 @@
+# Homebrew
+brew_prefix="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}"
+
+if [ -x "$brew_prefix/bin/brew" ]; then
+  eval "$("$brew_prefix/bin/brew" shellenv)"
+fi
+
+if ! command -v brew >/dev/null; then
+  echo "init: command not found: brew" >&2
+  return 0
+fi
+
+{{- if .features.bash }}
+
+if [ -d "$brew_prefix/opt/bash/bin" ]; then
+  pathmunge "$brew_prefix/opt/bash/bin" replace
+fi
+{{- end }}
+
+brew_i() { brew install "$@"; }
+brew_installed() { brew list --installed-on-request "$@"; }
+brew_tree() { brew deps --tree --installed "$@"; }
+brew_u() { brew update "$@" && brew upgrade "$@"; }
+brew_why() { brew uses --installed "$@"; }

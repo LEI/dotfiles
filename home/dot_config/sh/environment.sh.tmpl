@@ -4,4 +4,11 @@
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
+# PATH="$PATH:$HOME/.local/bin"
+pathmunge "$HOME/.local/bin"
+
+# if [ -z "${MISE_SHELL:-}" ]; then
+#   PATH="$PATH:$XDG_DATA_HOME/mise/shims"
+# fi
+
 {{ includeTemplate "xdg.sh.tmpl" . | trim }}

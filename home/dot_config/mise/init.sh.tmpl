@@ -1,9 +1,7 @@
 # Env vars (MISE_*_DEFAULT_PACKAGES_FILE) set via environment.d/mise.conf
-
-# Must be sourced early: tools become available after activation
 if ! command -v mise >/dev/null; then
-  # echo >&2 "Command 'mise' not found"
-  return 0
+  echo "init: command not found: mise" >&2
+  return
 fi
 
 {{- if eq .osID "android" }}
@@ -18,6 +16,7 @@ topgrade() {
 }
 {{- end }}
 
+# Must be sourced early: tools become available after activation
 eval "$(mise activate "${SHELL##*/}")"
 
 alias m=mise

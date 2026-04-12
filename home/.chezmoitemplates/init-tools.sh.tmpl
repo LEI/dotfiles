@@ -1,10 +1,41 @@
+{{- $ordered := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+
 # Order matters: mise first, carapace before completions, starship before atuin
-for _tool in mise carapace direnv starship zoxide atuin; do
-  if [ -f "$XDG_CONFIG_HOME/$_tool/init.sh" ]; then
-    BENCHFMT="$_tool" bench . "$XDG_CONFIG_HOME/$_tool/init.sh"
+for _tool in {{ $ordered | join " " }}; do
+  if ! [ -f "$XDG_CONFIG_HOME/$_tool/init.sh" ]; then
+    echo >&2 "warning: init file not found for $_tool: $XDG_CONFIG_HOME/$_tool/init.sh"
+    continue
   fi
+  BENCHFMT="$_tool" bench source "$XDG_CONFIG_HOME/$_tool/init.sh"
 done
 unset _tool
+
+# Feature init files
+{{- $src := .chezmoi.sourceDir }}
+{{- $dotcfg := joinPath $src "dot_config" }}
+{{- $init := list "bash" "zsh" }}
+{{- $exclude := concat $init $ordered }}
+for _feat in \
+{{- range glob (joinPath $src "dot_*/init.sh*") }}
+  {{- $name := . | dir | base | trimPrefix "dot_" }}
+  "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
+{{- end }}
+{{- range glob (joinPath $dotcfg "*/init.sh*") }}
+  {{- $name := . | dir | base }}
+  {{- if has $name $exclude }}
+  {{-   warnf "skipping %s (excluded)" $name }}
+  {{-   continue }}
+  {{- end }}
+  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
+{{- end }}
+; do
+  if ! [ -f "$_feat" ]; then
+    echo >&2 "warning: init file not found: $_feat"
+    continue
+  fi
+  source "$_feat"
+done
+unset _feat
 
 {{- if .features.rust }}
 

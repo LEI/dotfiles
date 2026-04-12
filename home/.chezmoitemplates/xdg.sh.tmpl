@@ -2,10 +2,11 @@
 # https://github.com/twpayne/dotfiles/blob/master/home/dot_zshrc.tmpl
 
 {{- if .features.node }}
-if ! [ -d "$PNPM_HOME" ]; then
+
+if ! [ -d "${PNPM_HOME:-}" ]; then
   mkdir -p "$PNPM_HOME"
 fi
-if ! [ -d "$npm_config_prefix" ]; then
+if ! [ -d "${npm_config_prefix:-}" ]; then
   mkdir -p "$npm_config_prefix"
 fi
 {{- end }}
