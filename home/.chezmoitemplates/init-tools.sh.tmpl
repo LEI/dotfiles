@@ -1,4 +1,15 @@
-{{- $ordered := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- $ordered := list "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- if .features.brew }}
+{{-   $ordered = prepend $ordered "homebrew" }}
+{{- end }}
+{{- $featureMap := dict
+  "claude" "ai"
+  "gem" "ruby"
+  "krew" "kube"
+  "npm" "node"
+  "nvim" "neovim"
+  "pi" "ai"
+-}}
 
 # Order matters: mise first, carapace before completions, starship before atuin
 for _tool in {{ $ordered | join " " }}; do
@@ -18,12 +29,24 @@ unset _tool
 for _feat in \
 {{- range glob (joinPath $src "dot_*/init.sh*") }}
   {{- $name := . | dir | base | trimPrefix "dot_" }}
+  {{- if has $name $exclude }}
+  {{-   warnf "skipping %s (excluded)" $name }}
+  {{-   continue }}
+  {{- end }}
+  {{- if not (get $.features (get $featureMap $name | default $name)) }}
+  {{-   warnf "skipping %s (disabled)" $name }}
+  {{-   continue }}
+  {{- end }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
 {{- end }}
 {{- range glob (joinPath $dotcfg "*/init.sh*") }}
   {{- $name := . | dir | base }}
   {{- if has $name $exclude }}
   {{-   warnf "skipping %s (excluded)" $name }}
+  {{-   continue }}
+  {{- end }}
+  {{- if not (get $.features (get $featureMap $name | default $name)) }}
+  {{-   warnf "skipping %s (disabled)" $name }}
   {{-   continue }}
   {{- end }}
   "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
