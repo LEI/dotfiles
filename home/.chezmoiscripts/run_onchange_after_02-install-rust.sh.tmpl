@@ -23,7 +23,7 @@ if ! has cargo && [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
 fi
 
 if has rustup && ! rustup default >/dev/null; then
-  # echo >&2 "No default toolchain is configured, using stable"
+  # echo "No default toolchain is configured, using stable" >&2
 
   # TODO(windows/msys2): rustup default stable-x86_64-pc-windows-gnu
   # error: linking with `x86_64-w64-mingw32-gcc` failed

@@ -1,4 +1,5 @@
 #!/bin/sh
+# Run iperf3 and plot bandwidth results
 
 set -eu
 
@@ -7,7 +8,7 @@ set -eu
 # set -euo pipefail
 
 if [ $# -eq 0 ]; then
-  echo >&2 "Usage: perf <ip>"
+  echo "Usage: perf <ip>" >&2
   return 1
 fi
 
@@ -21,11 +22,11 @@ fi
 #   local ip="$1"
 #   shift
 #   set -- iperf3 --client "$ip" --json "$@"
-#   echo >&2 "Running: $*"
+#   echo "Running: $*" >&2
 #   local json
 #   json="$("$@")"
 #   if [ -z "$json" ]; then
-#     echo >&2 "Failed: $*"
+#     echo "Failed: $*" >&2
 #     return 1
 #   fi
 #   # format='"\("Down")\t\(.end.sum_received.bits_per_second)"'

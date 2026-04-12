@@ -1,19 +1,18 @@
 #!/bin/sh
-
-# Attach to an existing session or create a new session
+# Attach to or create a tmux session
 
 set -eu
 
 TERM=tmux-256color
 
 if [ $# -eq 0 ]; then
-	if [ -n "${TMUX:-}" ]; then
-		set -- ls
-	elif tmux has-session 2>/dev/null; then
-		set -- attach
-	else
-		set -- new-session \; run-shell '#{@resurrect-restore-script-path}'
-	fi
+  if [ -n "${TMUX:-}" ]; then
+    set -- ls
+  elif tmux has-session 2>/dev/null; then
+    set -- attach
+  else
+    set -- new-session \; run-shell '#{@resurrect-restore-script-path}'
+  fi
 fi
 
 case "$*" in
@@ -21,7 +20,7 @@ case "$*" in
 esac
 
 case "$1" in
-current-config) set -- -Lfoo -f/dev/null start\; show -g ;; # start-server; show-options --global
+current-config) set -- -Lfoo -f/dev/null start\; show -g ;;  # start-server; show-options --global
 default-config) set -- -Lfoo -f/dev/null start\; show -gw ;; # start-server; show-window-options --global
 esac
 

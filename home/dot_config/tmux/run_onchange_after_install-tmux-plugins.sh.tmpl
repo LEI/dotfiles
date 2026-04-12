@@ -20,7 +20,7 @@ fi
 {{- end }}
 
 if ! tmux ls; then
-  echo >&2 "Starting a detached tmux session"
+  echo "Starting a detached tmux session" >&2
   tmux new-session -d
 fi
 
@@ -41,6 +41,6 @@ fi
 # https://github.com/tmux-plugins/tmux-resurrect/issues/122#issuecomment-2530961970
 tmux_default_command="$(tmux show -g default-command)"
 if echo "$tmux_default_command" | grep -q '&\||\|;'; then
-  echo >&2 "WARN: invalid character(s) in \`tmux show -g default-command\`: $tmux_default_command"
+  echo "WARN: invalid character(s) in \`tmux show -g default-command\`: $tmux_default_command" >&2
   exit 1
 fi

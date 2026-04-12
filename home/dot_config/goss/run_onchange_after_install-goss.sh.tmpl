@@ -5,16 +5,16 @@ set -eu
 # . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # if command -v goss; then
-#   echo >&2 "Already installed"
+#   echo "Already installed" >&2
 #   run goss --version
 #   exit
 # fi
 
-# echo >&2 "Installing goss"
+# echo "Installing goss" >&2
 
 # VERSION="$(get_release goss-org/goss)"
 # run sudo curl -LSfso /usr/local/bin/goss \
 #   "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-amd64"
 # run sudo chmod +rx /usr/local/bin/goss
 
-# echo >&2 "Installed goss"
+# echo "Installed goss" >&2

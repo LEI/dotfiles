@@ -24,14 +24,14 @@ marketplace_file=~/.claude/plugins/known_marketplaces.json
 {{- $info := get $marketplaces . }}
 
 if ! jq -e '.["{{ $name }}"]' "$marketplace_file" >/dev/null 2>&1; then
-  echo >&2 "Registering marketplace: {{ $name }}"
+  echo "Registering marketplace: {{ $name }}" >&2
   {{- if hasKey $info "repo" }}
   claude plugin marketplace add "{{ $info.repo }}"
   {{- else }}
   claude plugin marketplace add "{{ $info.path }}"
   {{- end }}
 else
-  echo >&2 "Marketplace already registered: {{ $name }}"
+  echo "Marketplace already registered: {{ $name }}" >&2
 fi
 {{- end }}
 {{- range $plugins }}
@@ -39,14 +39,14 @@ fi
 {{- if or (eq .marketplace "claude-plugins-official") $marketplace }}
 
 if jq -e '.plugins["{{ .name }}@{{ .marketplace }}"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
-  echo >&2 "Plugin already installed: {{ .name }}@{{ .marketplace }}"
+  echo "Plugin already installed: {{ .name }}@{{ .marketplace }}" >&2
 else
-  echo >&2 "Installing plugin: {{ .name }}@{{ .marketplace }}"
+  echo "Installing plugin: {{ .name }}@{{ .marketplace }}" >&2
   claude plugin install --scope=user "{{ .name }}@{{ .marketplace }}"
 fi
 {{- if and $marketplace (not (hasKey $marketplace "repo")) }}
 
-echo >&2 "Updating plugin: {{ .name }}@{{ .marketplace }}"
+echo "Updating plugin: {{ .name }}@{{ .marketplace }}" >&2
 claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"
 {{- end }}
 {{- end }}

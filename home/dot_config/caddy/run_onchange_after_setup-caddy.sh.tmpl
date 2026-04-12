@@ -154,7 +154,7 @@ else
 fi
 
 if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
-  err "Caddy CA not ready; run again after caddy initializes"
+  die "Caddy CA not ready; run again after caddy initializes"
 fi
 
 # macOS keychain (Safari, Chrome): uncomment if caddy trust alone is insufficient

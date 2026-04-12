@@ -19,7 +19,7 @@ claude_resume() {
 # Browse project sessions via cc-sessions
 claude_sessions() {
   if ! command -v cc-sessions >/dev/null; then
-    echo >&2 "cc-sessions not installed"
+    echo "cc-sessions not installed" >&2
     return 1
   fi
   if [ $# -eq 0 ] && [ -t 0 ]; then
@@ -49,7 +49,7 @@ claude_teams() {
 # Override: TMUX_SESSION=custom claude_teams_tmux
 claude_teams_tmux() {
   if ! type tmux_session >/dev/null 2>&1; then
-    echo >&2 "tmux_session not defined; source tmux/init.sh"
+    echo "tmux_session not defined; source tmux/init.sh" >&2
     return 1
   fi
   local session_name="${TMUX_SESSION:-$(basename "$PWD")}"

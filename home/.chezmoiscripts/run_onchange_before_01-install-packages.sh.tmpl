@@ -128,7 +128,7 @@ dry_run winget import --disable-interactivity --import-file="$import_file"
 # --accept-package-agreements --accept-source-agreements
 {{- else }}
 
-err "invalid OS: {{ .osID }}"
+die "invalid OS: {{ .osID }}"
 {{- end }}
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) -}}
 {{- if and .codespaces (eq .osIDLike "debian") }}

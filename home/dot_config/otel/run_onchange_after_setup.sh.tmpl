@@ -47,7 +47,7 @@ grafana_reload() {
   if [ -z "$grafana_netrc" ]; then
     grafana_secret="${XDG_CONFIG_HOME:-$HOME/.config}/otel/secrets/grafana-admin-password"
     if ! grafana_pass=$(cat "$grafana_secret"); then
-      err "missing grafana-admin-password"
+      die "missing grafana-admin-password"
     fi
     grafana_netrc=$(mktemp)
     trap 'rm -f "$grafana_netrc"' EXIT

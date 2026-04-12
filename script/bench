@@ -13,7 +13,7 @@ bash | zsh)
   SHELL_BENCH=true "$shell" -ic exit
   ;;
 *)
-  echo >&2 "bench: invalid shell '$shell', expected bash or zsh"
+  echo "bench: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac

@@ -12,7 +12,7 @@ run flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flath
 {{- if eq (env "CACHE_BUST") "true" }}
 # flatpak hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "flatpak" | sha256sum }}
 {{- end }}
-echo >&2 "Installing flatpak packages"
+echo "Installing flatpak packages" >&2
 
 {{- $flatpakPackages := .packages.flatpak }}
 
@@ -30,5 +30,5 @@ run flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $fla
 
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.flatpak) | trim }}
 
-echo >&2 "Installed flatpak packages"
+echo "Installed flatpak packages" >&2
 {{ end -}}

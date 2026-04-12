@@ -16,7 +16,7 @@
 # Order matters: mise first, carapace before completions, starship before atuin
 for _tool in {{ $ordered | join " " }}; do
   if ! [ -f "$XDG_CONFIG_HOME/$_tool/init.sh" ]; then
-    echo >&2 "warning: init file not found for $_tool: $XDG_CONFIG_HOME/$_tool/init.sh"
+    echo "warning: init file not found for $_tool: $XDG_CONFIG_HOME/$_tool/init.sh" >&2
     continue
   fi
   BENCHFMT="$_tool" bench source "$XDG_CONFIG_HOME/$_tool/init.sh"
@@ -24,11 +24,9 @@ done
 unset _tool
 
 # Feature init files
-{{- $src := .chezmoi.sourceDir }}
-{{- $dotcfg := joinPath $src "dot_config" }}
 {{- $exclude := concat $init $ordered }}
 for _feat in \
-{{- range $index, $path := glob (joinPath $src "dot_*/init.sh*") }}
+{{- range $index, $path := glob (joinPath .chezmoi.sourceDir "dot_*/init.sh*") }}
   {{- $name := $path | dir | base | trimPrefix "dot_" }}
   {{- if has $name $exclude }}
   {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
@@ -40,7 +38,7 @@ for _feat in \
   {{- end }}
   "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
 {{- end }}
-{{- $list := glob (joinPath $dotcfg "*/init.sh*") -}}
+{{- $list := glob (joinPath (joinPath .chezmoi.sourceDir "dot_config") "*/init.sh*") -}}
 {{- range $index, $path := $list }}
   {{- $name := $path | dir | base }}
   {{- if has $name $exclude }}
@@ -48,14 +46,14 @@ for _feat in \
   {{-   continue }}
   {{- end }}
   {{- if not (get $.features (get $featureMap $name | default $name)) }}
-  {{-   warnf "disabled: %s .%s/init.sh" $shell $name }}
+  {{-   warnf "disabled: %s .config/%s/init.sh" $shell $name }}
   {{-   continue }}
   {{- end }}
   "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}"
   {{- if ne (add $index 2) (len $list) }} \{{ end }}
 {{- end }}; do
   if ! [ -f "$_feat" ]; then
-    echo >&2 "warning: init file not found: $_feat"
+    echo "warning: init file not found: $_feat" >&2
     continue
   fi
   source "$_feat"

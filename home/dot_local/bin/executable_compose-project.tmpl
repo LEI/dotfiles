@@ -10,7 +10,7 @@ shift
 provider="${CONTAINER_PROVIDER:?}"
 
 compose() {
-  echo >&2 "$provider compose --project-directory=$dir $*"
+  echo "$provider compose --project-directory=$dir $*" >&2
   $provider compose --project-directory="$dir" "$@"
 }
 

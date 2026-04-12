@@ -25,17 +25,17 @@ has() {
 
 # Print message to stderr
 msg() {
-  echo >&2 "$@"
+  printf '%s\n' "$*" >&2
 }
 
 # Print warning to stderr with script name
 warn() {
-  msg "WARN: ${0##*/}: $*"
+  msg "${0##*/}: $*"
 }
 
-# Print error to stderr with script name and exit 1
-err() {
-  msg "ERR: ${0##*/}: $*"
+# Print fatal error to stderr and exit
+die() {
+  msg "${0##*/}: $*"
   exit 1
 }
 
@@ -71,7 +71,7 @@ require_mise_version() {
   _min="$1"
   _ver="$(mise version --json | jq -r '.version')"
   if ! printf '%s\n%s\n' "$_min" "$_ver" | sort -V -C; then
-    err "mise >= $_min required (found ${_ver:-unknown})"
+    die "mise >= $_min required (found ${_ver:-unknown})"
   fi
 }
 
@@ -86,9 +86,9 @@ get_release() {
   redirect_url="$(run curl -s -w %{redirect_url} "$url")"
   version="${redirect_url##*/}"
   if [ -z "$version" ]; then
-    err "invalid tag for URL: $url"
+    die "invalid tag for URL: $url"
   elif [ "$version" = "Not Found" ]; then
-    err "invalid URL: $url"
+    die "invalid URL: $url"
   fi
   msg "Resolved $repo $version"
   echo "$version"
@@ -116,7 +116,7 @@ install_archive() {
   case "$extract_type" in
   tar.gz) run tar -xzf "$out" -C "$dir" ;;
   zip) run unzip -o "$out" -d "$dir" ;;
-  *) err "unknown archive type: $extract_type" ;;
+  *) die "unknown archive type: $extract_type" ;;
   esac
   run chmod +x "$dir/$bin"
   msg "Installing $name to $bindir"

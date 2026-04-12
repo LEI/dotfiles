@@ -30,10 +30,13 @@ if [ -n "$PANE_ID" ]; then
   for cfg in "$CLAUDE_DIR/teams"/*/config.json; do
     [ -f "$cfg" ] || continue
     LEAD_PANE=$(jq -r '.members[] | select(.agentType == "team-lead") | .tmuxPaneId' "$cfg" 2>/dev/null)
-    if [ "$PANE_ID" != "${LEAD_PANE:-}" ] && {
-      jq -e --arg p "$PANE_ID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1 ||
-        { [ -n "$PANE_UUID" ] && jq -e --arg p "$PANE_UUID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1; }
-    }; then
+    if [ "$PANE_ID" = "${LEAD_PANE:-}" ]; then
+      continue
+    fi
+    if jq -e --arg p "$PANE_ID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1; then
+      IS_TEAMMATE=true
+      break
+    elif [ -n "$PANE_UUID" ] && jq -e --arg p "$PANE_UUID" '.members[] | select(.tmuxPaneId == $p)' "$cfg" >/dev/null 2>&1; then
       IS_TEAMMATE=true
       break
     fi

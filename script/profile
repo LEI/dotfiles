@@ -78,7 +78,7 @@ ZSH_RC
   ZDOTDIR="$tmpdir" detach zsh -ic 'zprof'
   ;;
 *)
-  echo >&2 "profile: invalid shell '$shell', expected bash or zsh"
+  echo "profile: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac

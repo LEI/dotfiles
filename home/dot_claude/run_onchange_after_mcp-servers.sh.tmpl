@@ -19,7 +19,7 @@
 set -euo pipefail
 
 if ! command -v jq >/dev/null 2>&1; then
-  echo >&2 "jq required but not found"
+  echo "jq required but not found" >&2
   exit 1
 fi
 
@@ -29,10 +29,10 @@ mcp_sync() {
   current=$(jq -Sc --arg n "$name" '.mcpServers[$n] // empty' ~/.claude.json 2>/dev/null || true)
   normalized=$(printf '%s' "$expected" | jq -Sc .)
   if [ "$current" = "$normalized" ]; then
-    echo >&2 "MCP server up to date: $name"
+    echo "MCP server up to date: $name" >&2
     return
   fi
-  echo >&2 "Updating MCP server: $name"
+  echo "Updating MCP server: $name" >&2
   if claude mcp get "$name" >/dev/null 2>&1; then
     claude mcp remove "$name"
   fi
@@ -54,7 +54,7 @@ mcp_sync {{ . | squote }} {{ index $servers . | toJson | squote }}
 # Remove servers defined in mcp.jsonc but not picked above
 for name in {{ $omitted | sortAlpha | join " " }}; do
   if claude mcp get "$name" >/dev/null 2>&1; then
-    echo >&2 "WARN: MCP server not picked: $name"
+    echo "WARN: MCP server not picked: $name" >&2
     # claude mcp remove "$name"
   fi
 done

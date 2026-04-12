@@ -58,12 +58,12 @@ repos:
       - id: bashate
         name: bashate
         entry: bashate
-        # args:
-        #   - --ignore=E003,E006
+        args:
+          - --ignore=E003,E006
         language: system
         types:
           - shell
-        exclude: ^(home/.*(\.tmpl|/modify_))
+        exclude: ^(home/.*(\.tmpl|/modify_)|test/)
         stages:
           - pre-commit
 
@@ -165,15 +165,13 @@ repos:
         files: ^home/(.*\.tmpl$|.*/modify_)
         exclude: \.chezmoi\.yaml\.tmpl$
 
-      # TODO: usage lint only works on .usage.kdl files, not embedded #USAGE comments
-      # - id: usage-lint
-      #   name: usage lint
-      #   entry: usage lint
-      #   language: system
-      #   types:
-      #     - shell
-      #   stages:
-      #     - pre-commit
+      - id: validate-usage
+        name: validate usage specs
+        entry: ./script/validate-usage
+        args: ["--quiet"]
+        language: system
+        types:
+          - shell
 
       - id: validate-skill
         name: validate skills

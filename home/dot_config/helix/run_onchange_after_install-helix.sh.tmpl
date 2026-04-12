@@ -6,11 +6,11 @@ set -eu
 
 {{- if eq .osIDLike "debian" }}
 if command -v hx; then
-  echo >&2 "Already installed"
+  echo "Already installed" >&2
   run hx --version
 else
   {{- if eq .osID "debian" }}
-  echo >&2 "Installing helix"
+  echo "Installing helix" >&2
   export DEBIAN_FRONTEND=noninteractive
   # https://docs.helix-editor.com/install.html#pre-built-binaries
   VERSION="$(get_release helix-editor/helix)"
@@ -37,7 +37,7 @@ else
   run sudo apt-get update --quiet >/dev/null
   run sudo -E apt-get install --quiet --yes helix >/dev/null
   run sudo update-alternatives --set editor /usr/bin/hx
-  echo >&2 "Installed helix"
+  echo "Installed helix" >&2
   {{- end }}
 fi
 {{- end }}

@@ -6,10 +6,10 @@ set -eu
 
 {{- if eq .osIDLike "debian" }}
 if command -v topgrade; then
-  echo >&2 'Already installed'
+  echo 'Already installed' >&2
   run topgrade --version
 else
-  echo >&2 "Installing topgrade"
+  echo "Installing topgrade" >&2
   export DEBIAN_FRONTEND=noninteractive
   VERSION="$(get_release topgrade-rs/topgrade)"
   # TODO: ARCH="$(uname -m)" # aarch64, x86_64
@@ -17,7 +17,7 @@ else
   URL="https://github.com/topgrade-rs/topgrade/releases/download/$VERSION/$NAME.deb"
   run curl -LSfs "$URL" -o "$TMPDIR/$NAME.deb"
   run sudo -E apt-get install --quiet --yes "$TMPDIR/$NAME.deb"
-  echo >&2 "Installed topgrade"
+  echo "Installed topgrade" >&2
 fi
 {{- end }}
 

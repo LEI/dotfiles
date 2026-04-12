@@ -5,7 +5,7 @@
 set -eu
 
 if [ $# -ne 0 ]; then
-  echo >&2 "entrypoint: unexpected arguments: $*"
+  echo "entrypoint: unexpected arguments: $*" >&2
   exit 2
 fi
 
@@ -19,7 +19,7 @@ keep_running() {
 
 # Termux manages its own user setup
 if [ -n "${PREFIX:-}" ]; then
-  echo >&2 "entrypoint: termux, skipping provisioning"
+  echo "entrypoint: termux, skipping provisioning" >&2
   keep_running
 fi
 
@@ -40,14 +40,14 @@ install_packages() {
   elif command -v zypper >/dev/null; then
     zypper --quiet --non-interactive install chezmoi curl git sudo which unzip
   else
-    echo >&2 "entrypoint: unsupported package manager"
+    echo "entrypoint: unsupported package manager" >&2
     exit 1
   fi
 }
 
 create_user() {
   id -u "$user" >/dev/null 2>&1 && return
-  echo >&2 "entrypoint: creating user $user"
+  echo "entrypoint: creating user $user" >&2
   if command -v useradd >/dev/null; then
     useradd --create-home --shell=/bin/bash "$user"
   else
@@ -64,11 +64,11 @@ grant_sudo() {
 
 verify() {
   if [ "$(id -u "$user")" -eq 0 ]; then
-    echo >&2 "entrypoint: $user has UID 0, aborting"
+    echo "entrypoint: $user has UID 0, aborting" >&2
     exit 1
   fi
   if [ ! -f "/etc/sudoers.d/$user" ]; then
-    echo >&2 "entrypoint: sudoers drop-in missing for $user, aborting"
+    echo "entrypoint: sudoers drop-in missing for $user, aborting" >&2
     exit 1
   fi
 }

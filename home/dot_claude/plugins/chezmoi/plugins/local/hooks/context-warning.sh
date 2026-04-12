@@ -44,7 +44,7 @@ else
   exit 0
 fi
 
-echo >&2 "context-warning: $MSG"
+echo "context-warning: $MSG" >&2
 
 jq -n --arg msg "$MSG" '{
   hookSpecificOutput: {

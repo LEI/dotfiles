@@ -101,8 +101,18 @@ run_src() {
   source "$script" "$@"
 }
 
-# Run a script with stderr separation (convenience wrapper for test cases)
+# Run a script with stderr separation
 run_script() {
+  local file="$1"
+  shift
+  if [[ "$file" = */executable_* ]]; then
+    local name="${file##*/}"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local tmp_file="$tmp_dir/${name#executable_}"
+    cat >"$tmp_file" <"$file"
+  fi
+  set -- "${tmp_file:-$file}" "$@"
   run --separate-stderr run_src "$@"
 }
 

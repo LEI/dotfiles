@@ -26,7 +26,7 @@ pi_up() {
 }
 
 pi_attach() {
-  echo >&2 "Detach with ^P^Q"
+  echo "Detach with ^P^Q" >&2
   pi_compose attach pi "$@"
 }
 

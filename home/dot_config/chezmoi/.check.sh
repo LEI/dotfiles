@@ -11,4 +11,4 @@ if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then
   export SHELL="$PREFIX/bin/bash"
 fi
 
-chezmoi doctor --dry-run --no-network # || echo >&2 "WARN: chezmoi doctor exited with code $?"
+chezmoi doctor --dry-run --no-network # || echo "WARN: chezmoi doctor exited with code $?" >&2

@@ -27,7 +27,7 @@ initial_time() {
   local output="$1"
   shift
 
-  echo >&2 "initial startup: $*"
+  echo "initial startup: $*" >&2
   command_time "$output" "$@"
 
   cat "$output.txt" | column -t | cut -d' ' -f1
@@ -40,7 +40,7 @@ average_time() {
   shift
 
   for i in $(seq 1 "$iterations"); do
-    echo >&2 "startup $i/$iterations: $*"
+    echo "startup $i/$iterations: $*" >&2
     command_time "$output-$i" "$@"
   done
 
@@ -49,7 +49,7 @@ average_time() {
 
 main() {
   if [ $# -gt 1 ]; then
-    echo >&2 "startup: expected at most 1 argument, got $#"
+    echo "startup: expected at most 1 argument, got $#" >&2
     exit 2
   fi
 
@@ -59,7 +59,7 @@ main() {
   case "$shell" in
   bash | zsh | dummy) ;;
   *)
-    echo >&2 "startup: invalid shell '$shell', expected bash or zsh"
+    echo "startup: invalid shell '$shell', expected bash or zsh" >&2
     exit 2
     ;;
   esac

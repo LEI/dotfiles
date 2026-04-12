@@ -2,7 +2,7 @@
 {{- $label := get . "label" -}}
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
 if [ ! -f "$plist" ]; then
-  err "{{ $label }}: plist not found"
+  die "{{ $label }}: plist not found"
 fi
 
 # Legacy load/unload: bootstrap/bootout fails with I/O error on some macOS versions
@@ -13,7 +13,7 @@ launchctl unload "$plist" 2>/dev/null || true
 run launchctl load "$plist"
 
 if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
-  err "{{ $label }}: service failed to start"
+  die "{{ $label }}: service failed to start"
 fi
 {{- else }}
 {{- $unit := get . "unit" | default "UNIT" -}}
@@ -26,7 +26,7 @@ if has systemctl; then
   fi
   if ! systemctl --user is-active --quiet {{ $unit }}; then
     run systemctl --user status {{ $unit }} || true
-    err "{{ $unit }} service failed to start"
+    die "{{ $unit }} service failed to start"
   fi
 fi
 {{- end }}

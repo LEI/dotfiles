@@ -3,7 +3,7 @@
 set -eu
 
 run() {
-  echo >&2 "+ $*"
+  echo "+ $*" >&2
   "$@"
 }
 
@@ -16,7 +16,7 @@ mise trust --all
 
 # Run the agent
 if ! run pi --continue "$@"; then
-  echo >&2 "exit code: $?"
+  echo "exit code: $?" >&2
 fi
 
 # Ensure the container keeps running

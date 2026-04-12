@@ -20,7 +20,7 @@ zsh)
     sed "s|$HOME|~|g"
   ;;
 *)
-  echo >&2 "trace: invalid shell '$shell', expected bash or zsh"
+  echo "trace: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac

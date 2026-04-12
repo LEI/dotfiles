@@ -2,7 +2,7 @@
 
 # Sandboxed child processes may fail to resolve cwd
 if ! cd "$(dirname "$0")" 2>/dev/null; then
-  echo >&2 "format: cwd fallback to /tmp"
+  echo "format: cwd fallback to /tmp" >&2
   cd /tmp || exit
 fi
 

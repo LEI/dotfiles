@@ -29,11 +29,11 @@ opkg_installed() {
 }
 
 if [ ! -d "$LOCAL_PACKAGE_PATH" ]; then
-  err "Package directory not found: $LOCAL_PACKAGE_PATH"
+  die "Package directory not found: $LOCAL_PACKAGE_PATH"
 fi
 
 if [ ! -f "$LOCAL_PACKAGE_PATH/openpackage.yml" ]; then
-  err "Package manifest not found: $LOCAL_PACKAGE_PATH/openpackage.yml"
+  die "Package manifest not found: $LOCAL_PACKAGE_PATH/openpackage.yml"
 fi
 
 # Publish local opkg package to registry

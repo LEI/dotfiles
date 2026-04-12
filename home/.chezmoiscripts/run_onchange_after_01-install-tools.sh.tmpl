@@ -21,7 +21,7 @@ set -- "$@" --yes
 {{- if .upgrade }}
 
 # if ! run mise self-update "$@"; then
-#   echo >&2 "mise self-update failed with exit code $?"
+#   echo "mise self-update failed with exit code $?" >&2
 # fi
 {{- end }}
 

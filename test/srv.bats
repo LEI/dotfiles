@@ -47,6 +47,12 @@ YAML
   assert_line --regexp "^Usage: srv"
 }
 
+@test "srv: --usage prints usage directives" {
+  run_script "$srv" --usage
+  assert_success
+  assert_line --regexp '^flag '
+}
+
 # Connect
 
 @test "srv: host opens interactive shell" {

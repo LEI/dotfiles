@@ -24,7 +24,7 @@ bench() {
   end="${EPOCHREALTIME:-}"
   if [ -n "$start" ] && [ -n "$end" ]; then
     elapsed=$(awk "BEGIN {printf \"%.3f\", $end - $start}")
-    echo >&2 "bench: $label: ${elapsed}s"
+    echo "bench: $label: ${elapsed}s" >&2
   fi
   unset BENCHFMT
   return $ret

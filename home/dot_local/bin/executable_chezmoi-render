@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Usage: chezmoi-render <directory> [templates...]
-# Renders managed templates to a staging directory.
-# Use -q/--quiet to suppress output.
+# Render managed templates to a staging directory
+#USAGE flag "-q --quiet" help="Suppress output"
+#USAGE arg "<directory>" help="Output directory"
+#USAGE arg "[templates]..." help="Templates to render"
 
 set -euo pipefail
 shopt -s lastpipe
 
 if ((BASH_VERSINFO[0] < 4)); then
-  echo >&2 "bash 4+ required, found $BASH_VERSION"
+  echo "bash 4+ required, found $BASH_VERSION" >&2
   exit 1
 fi
 
@@ -67,12 +68,12 @@ for t in "${templates[@]}"; do
 done
 printf '%s\0' "${sources[@]}" | xargs -0 chezmoi target-path | mapfile -t targets
 if [ "${PIPESTATUS[1]}" -ne 0 ]; then
-  echo >&2 "error: chezmoi target-path failed for:"
+  echo "error: chezmoi target-path failed for:" >&2
   printf '  %s\n' "${sources[@]}" >&2
   exit 1
 fi
 if [ "${#targets[@]}" -ne "${#templates[@]}" ]; then
-  echo >&2 "error: target-path returned ${#targets[@]} paths for ${#templates[@]} templates"
+  echo "error: target-path returned ${#targets[@]} paths for ${#templates[@]} templates" >&2
   exit 1
 fi
 
@@ -101,10 +102,10 @@ render() {
     fi
   fi
 
-  # echo >&2 "render debug: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}"
+  # echo "render debug: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}" >&2
   "${cmd[@]}" <"$input" >"$out" && exit_code=0 || exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
-    echo >&2 "render failed: exit code $exit_code"
+    echo "render failed: exit code $exit_code" >&2
     # ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}
   fi
   return "$exit_code"

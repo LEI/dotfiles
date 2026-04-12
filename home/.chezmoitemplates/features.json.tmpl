@@ -24,6 +24,7 @@
   "direnv" true
   "docker" $docker
   "eza" (ne .profile "minimal")
+  "fd" (ne .profile "minimal")
   "ghostty" (and
     (or (eq .libc "gnu") (eq .os "darwin"))
     (not (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04)))

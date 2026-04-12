@@ -1,10 +1,18 @@
 #!/bin/sh
+# List and check enabled chezmoi features
+#USAGE arg "[action]" help="Action to perform" {
+#USAGE   choices "list" "enabled"
+#USAGE }
+#USAGE flag "-o --output <format>" help="Output format" {
+#USAGE   choices "text" "json" "yaml"
+#USAGE }
+#USAGE arg "[feature]..." help="Features to check"
 
 set -eu
 
 usage() {
-  echo >&2 "Usage: chezmoi feature [list|enabled] [-h|--help]"
-  echo >&2 "  [-o|--output=text|json|yaml]"
+  echo "Usage: chezmoi feature [list|enabled] [-h|--help]" >&2
+  echo "  [-o|--output=text|json|yaml]" >&2
 }
 
 get_format() {
@@ -14,7 +22,7 @@ get_format() {
   json) format="toPrettyJson" ;;
   yaml) format="toYaml" ;;
   *)
-    echo >&2 "chezmoi package: invalid output format: $output"
+    echo "chezmoi package: invalid output format: $output" >&2
     usage
     return 1
     ;;
@@ -92,13 +100,13 @@ while [ $# -gt 0 ]; do
   *)
     value="$(get_feature "$1")"
     if [ "$value" = false ]; then
-      echo >&2 "chezmoi feature: feature disabled: $1"
+      echo "chezmoi feature: feature disabled: $1" >&2
       exit 1
     elif [ "$value" != true ]; then
-      echo >&2 "chezmoi feature: unknown value: $1 ($value)"
+      echo "chezmoi feature: unknown value: $1 ($value)" >&2
       exit 2
     fi
-    # echo >&2 "chezmoi feature: feature enabled: $1"
+    # echo "chezmoi feature: feature enabled: $1" >&2
     shift
     ;;
   esac
@@ -115,7 +123,7 @@ enabled)
   list_enabled_features "$output"
   ;;
 *)
-  echo >&2 "chezmoi feature: invalid action: $action"
+  echo "chezmoi feature: invalid action: $action" >&2
   usage
   exit 1
   ;;

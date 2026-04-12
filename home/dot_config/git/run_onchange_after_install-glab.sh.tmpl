@@ -15,7 +15,7 @@ fi
 
 # hostname="$(hostname)"
 # if ! run glab ssh-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$hostname"; then
-#   echo >&2 "No SSH key found for: $hostname"
+#   echo "No SSH key found for: $hostname" >&2
 # fi
 
 {{- if and (hasKey . "git") (hasKey .git "gitlab") (hasKey .git.gitlab "email") }}

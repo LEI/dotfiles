@@ -57,7 +57,7 @@ main() {
     set -- --show-output-of-passing-tests "$@"
   fi
   # set -- --trace "$@"
-  echo >&2 "bats $*"
+  echo "bats $*" >&2
   bats "$@"
 }
 

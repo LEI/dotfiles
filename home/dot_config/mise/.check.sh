@@ -5,7 +5,7 @@ if [ -f /etc/arch-release ] && { [ -f /.dockerenv ] || [ -f /run/.containerenv ]
   mise reshim # shims point to stale mise path after pacman updates
 fi
 if [ "${CI:-}" = true ]; then
-  mise doctor || echo >&2 "WARN: mise doctor exited with code $?"
+  mise doctor || echo "WARN: mise doctor exited with code $?" >&2
 else
   mise doctor
 fi

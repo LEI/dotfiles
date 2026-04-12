@@ -5,12 +5,12 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if command -v nu; then
-  echo >&2 "Already installed"
+  echo "Already installed" >&2
   run nu --version
   exit
 fi
 
-echo >&2 "Installing nushell"
+echo "Installing nushell" >&2
 {{- if eq .osIDLike "debian" }}
 export DEBIAN_FRONTEND=noninteractive
 if [ ! -f /etc/apt/trusted.gpg.d/fury-nushell.gpg ]; then
@@ -39,7 +39,7 @@ else
   run rpm-ostree install --allow-inactive --assumeyes --idempotent nushell
 fi
 {{- end }}
-echo >&2 "Installed nushell"
+echo "Installed nushell" >&2
 
 # # https://github.com/idanarye/nu_plugin_skim
 # cargo install --locked nu_plugin_skim

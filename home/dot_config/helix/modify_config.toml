@@ -2,5 +2,5 @@
 {{- $config := includeTemplate "dot_config/helix/.config.yaml" | fromYaml -}}
 {{ includeTemplate "block-in-file.tmpl" (dict
 "chezmoi" .chezmoi
-	"contents" ($config | toToml)
+  "contents" ($config | toToml)
 ) -}}

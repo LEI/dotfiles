@@ -23,12 +23,12 @@ case "$(uname -s)" in
     elif command -v unbound-control >/dev/null; then
       sudo unbound-control flush_zone .
     else
-      echo >&2 "flush-dns: no supported resolver found"
+      echo "flush-dns: no supported resolver found" >&2
       exit 1
     fi
     ;;
   *)
-    echo >&2 "flush-dns: unsupported OS"
+    echo "flush-dns: unsupported OS" >&2
     exit 1
     ;;
 esac

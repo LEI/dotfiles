@@ -1,4 +1,6 @@
 #!/bin/sh
+# List installed packages for the detected package manager
+#USAGE arg "[manager]" help="Package manager (default: auto-detect)"
 
 set -eu
 
@@ -102,7 +104,7 @@ winget)
   jq --raw-output '.Sources[0].Packages[].PackageIdentifier' winget-export.json
   ;;
 *)
-  echo >&2 "list-package: invalid argument: $1"
+  echo "list-package: invalid argument: $1" >&2
   exit 1
   ;;
 esac

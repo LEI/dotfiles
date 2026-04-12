@@ -13,7 +13,7 @@ esac
 # exit immediately if bws is already in $PATH
 # type bws >/dev/null 2>&1 && exit
 if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
-  # echo >&2 "Already installed"
+  # echo "Already installed" >&2
   exit
 fi
 
@@ -23,7 +23,7 @@ if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
 fi
 
-echo >&2 "OSID: $OSID"
+echo "OSID: $OSID" >&2
 
 if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
   case "$OSID" in
@@ -37,7 +37,7 @@ if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
     run apt-get install --quiet --yes sudo >/dev/null
     ;;
   arch | *)
-    echo >&2 "Skipping password manager: sudo must be installed (chezmoi $CHEZMOI_COMMAND)"
+    echo "Skipping password manager: sudo must be installed (chezmoi $CHEZMOI_COMMAND)" >&2
     exit
     ;;
   esac
@@ -56,7 +56,7 @@ Linux)
   # https://community.bitwarden.com/t/add-x86_64-unknown-linux-musl-release-to-bws-cli/57379/3
   # Runtime musl detection: check for musl dynamic linker (works without CHEZMOI_LIBC env var)
   if [ -e /lib/ld-musl-x86_64.so.1 ] || [ -e /lib64/ld-musl-x86_64.so.1 ]; then
-    echo >&2 "Skipping password manager on musl-based distro"
+    echo "Skipping password manager on musl-based distro" >&2
     exit 0
   fi
   OS=unknown-linux-gnu
@@ -75,7 +75,7 @@ Linux)
   esac
   ;;
 *)
-  echo >&2 "Unsupported OS: $OS"
+  echo "Unsupported OS: $OS" >&2
   exit 1
   ;;
 esac
@@ -85,7 +85,7 @@ case "$ARCH" in
 amd64 | x86_64) ARCH=x86_64 ;;
 arm64 | aarch64) ARCH=aarch64 ;;
 *)
-  echo >&2 "Unsupported architecture: $ARCH"
+  echo "Unsupported architecture: $ARCH" >&2
   exit 1
   ;;
 esac

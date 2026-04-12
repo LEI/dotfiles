@@ -5,12 +5,12 @@
 set -euo pipefail
 
 if ((BASH_VERSINFO[0] < 4)); then
-  echo >&2 "bash 4+ required, found $BASH_VERSION"
+  echo "bash 4+ required, found $BASH_VERSION" >&2
   exit 1
 fi
 
 if ! command -v skill-validator >/dev/null 2>&1; then
-  echo >&2 'error: skill-validator is required'
+  echo 'error: skill-validator is required' >&2
   exit 1
 fi
 
@@ -57,7 +57,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ $# -eq 0 ]; then
-  echo >&2 "no files to validate"
+  echo "no files to validate" >&2
   exit 0
 fi
 
@@ -69,5 +69,5 @@ failed=$(echo "$results" | grep -c '^FAIL ' || true)
 if [ "$failed" -gt 0 ]; then
   echo "$results" | grep -v '^PASS ' >&2
 fi
-echo >&2 "$passed passed, $failed failed"
+echo "$passed passed, $failed failed" >&2
 exit $((failed > 0 ? 1 : 0))

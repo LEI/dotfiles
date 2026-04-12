@@ -5,11 +5,11 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! command -v tmux >/dev/null; then
-  echo >&2 "Not installed: tmux"
+  echo "Not installed: tmux" >&2
   exit 1
 fi
 
-echo >&2 "Already installed"
+echo "Already installed" >&2
 run tmux -V
 
 # NOTE: clone patched plugins to avoid error on tpm install

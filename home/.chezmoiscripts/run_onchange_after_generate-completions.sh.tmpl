@@ -1,0 +1,54 @@
+{{- if or .features.bash .features.zsh -}}
+{{- $scripts := list -}}
+{{- $hashes := list -}}
+{{- range glob (joinPath .chezmoi.sourceDir "dot_local/bin/executable_*") -}}
+{{-   $content := include . -}}
+{{-   if contains "#USAGE " $content -}}
+{{-     $scripts = append $scripts (. | base | trimPrefix "executable_") -}}
+{{-     $hashes = append $hashes ($content | sha256sum) -}}
+{{-   end -}}
+{{- end -}}
+{{- if $scripts -}}
+#!/bin/sh
+# Generate shell completions for scripts with #USAGE directives
+
+# scripts: {{ $scripts | join " " }}
+# hash: {{ $hashes | join " " }}
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
+
+if ! has usage; then
+  warn "usage not found, skipping completion generation"
+  exit 0
+fi
+
+{{- if .features.bash }}
+
+bash_dir="{{ .chezmoi.homeDir }}/.local/share/bash-completion/completions"
+mkdir -p "$bash_dir"
+{{- end }}
+
+{{- if .features.zsh }}
+
+zsh_dir="{{ .chezmoi.homeDir }}/.local/share/zsh/completions"
+mkdir -p "$zsh_dir"
+{{- end }}
+
+bin_dir="{{ .chezmoi.homeDir }}/.local/bin"
+
+{{- range $scripts }}
+
+spec=$(grep '^#USAGE' "$bin_dir/{{ . }}" | sed 's/^#USAGE //')
+{{- if $.features.bash }}
+printf '%s\n' "$spec" | run usage generate completion bash {{ . }} --file - >"$bash_dir/{{ . }}"
+{{- end }}
+{{- if $.features.zsh }}
+printf '%s\n' "$spec" | run usage generate completion zsh {{ . }} --file - >"$zsh_dir/_{{ . }}"
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

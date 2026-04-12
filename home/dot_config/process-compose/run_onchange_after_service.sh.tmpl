@@ -11,7 +11,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has process-compose; then
-  err "process-compose not found"
+  die "process-compose not found"
 fi
 
 {{ includeTemplate "service-apply.sh.tmpl" (dict

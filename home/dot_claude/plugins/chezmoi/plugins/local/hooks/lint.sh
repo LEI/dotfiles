@@ -2,7 +2,7 @@
 
 # Sandboxed child processes may fail to resolve cwd
 if ! cd "$(dirname "$0")" 2>/dev/null; then
-  echo >&2 "lint: cwd fallback to /tmp"
+  echo "lint: cwd fallback to /tmp" >&2
   cd /tmp || exit
 fi
 
@@ -11,7 +11,7 @@ if [ -z "$FILE" ]; then
   exit 0
 fi
 if ! [ -f "$FILE" ]; then
-  echo >&2 "lint: file not found: $FILE"
+  echo "lint: file not found: $FILE" >&2
   exit 2
 fi
 
@@ -49,6 +49,6 @@ lint() {
 lint
 rc=$?
 if [ "$rc" -ne 0 ]; then
-  echo >&2 "lint: $(basename "$FILE") failed (exit $rc)"
+  echo "lint: $(basename " >&2$FILE") failed (exit $rc)"
   exit 2
 fi

@@ -16,7 +16,7 @@ images="alpine archlinux debian fedora opensuse termux ubuntu"
 container() { "$CONTAINER_PROVIDER" "$@"; }
 
 trace() {
-  echo >&2 "+ $*"
+  echo "+ $*" >&2
   "$@"
 }
 
@@ -74,7 +74,7 @@ container_exec() {
   [ -t 0 ] && flags+=(--interactive)
   [ -t 1 ] && flags+=(--tty)
   local log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
-  echo >&2 "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*"
+  echo "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*" >&2
   container exec "${flags[@]}" "$container" "$@"
 }
 
@@ -96,7 +96,7 @@ container_exec_mise() {
 
 build() {
   if container image inspect "$image_tag" >/dev/null 2>&1; then
-    echo >&2 "build $image_name: reusing $image_tag"
+    echo "build $image_name: reusing $image_tag" >&2
     return
   fi
   trace container build . --file=Containerfile --build-arg=IMAGE="$image" --tag="$image_tag"

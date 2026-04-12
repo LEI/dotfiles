@@ -22,7 +22,7 @@ if ! has brew; then
     # NOTE: Homebrew/install/HEAD/install.sh -> 404
     install_script="$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     if [ -z "$install_script" ]; then
-      err "failed to download install script"
+      die "failed to download install script"
     fi
     /bin/bash -c "$install_script"
     msg "Installed homebrew"
@@ -37,7 +37,7 @@ if ! has brew; then
   dry_run sudo echo
   install_script="$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   if [ -z "$install_script" ]; then
-    err "failed to download install script"
+    die "failed to download install script"
   fi
   /bin/bash -c "$install_script"
   msg "Installed homebrew"

@@ -1,4 +1,6 @@
 #!/bin/sh
+# Detect the system package manager
+#USAGE arg "[query]" help="Query type: all, check, or package manager name"
 
 set -eu
 
@@ -21,7 +23,7 @@ all | '')
   elif command -v winget >/dev/null; then
     manager=winget
   else
-    echo >&2 "unknown package manager"
+    echo "unknown package manager" >&2
     exit 1
   fi
   ;;
@@ -51,7 +53,7 @@ python | uv) manager="uv" ;;
 ruby | gem) manager="gem" ;;
 rust | cargo) manager="cargo" ;;
 *)
-  echo >&2 "package-manager: invalid argument: $1"
+  echo "package-manager: invalid argument: $1" >&2
   exit 1
   ;;
 esac

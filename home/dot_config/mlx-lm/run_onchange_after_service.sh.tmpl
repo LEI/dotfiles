@@ -10,7 +10,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has brew; then
-  err "brew not found"
+  die "brew not found"
 fi
 # brew list mlx-lm >/dev/null 2>&1 # mlx-lm not installed
 

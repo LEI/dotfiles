@@ -2,14 +2,16 @@
 #MISE description="Manage remote hosts via SSH"
 #USAGE flag "-d --debug" help="Print SSH command instead of running it"
 #USAGE arg "[name]" help="Host name from config"
+#USAGE complete "name" run="srv"
 #USAGE arg "[command]..." help="Command to run (or 'logs' for log streaming)"
+#USAGE complete "command" run="echo logs"
 
 set -euo pipefail
 
 CONF="${XDG_CONFIG_HOME:-$HOME/.config}/srv/hosts.yaml"
 
 die() {
-  echo >&2 "srv: $*"
+  echo "srv: $*" >&2
   exit 1
 }
 
@@ -33,7 +35,15 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    echo "Usage: srv [-d] [name] [logs|command...]"
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: srv [-d] [name] [logs|command...]"
+    fi
+    exit
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
     exit
     ;;
   *) break ;;
@@ -48,10 +58,9 @@ fi
 name="$1"
 shift
 
-# Fall back to using name as hostname if not in config
 host=$(field "$name" ssh)
 if [ -z "$host" ]; then
-  host="$name"
+  die "unknown host: $name"
 fi
 dir=$(field "$name" dir)
 

@@ -20,7 +20,7 @@ fi
 # TODO: check active profile
 # github_email="{{ .git.github.email }}"
 # if ! run gh gpg-key list | tr '\t' ' ' | cut -d' ' -f1 | grep -q "$github_email"; then
-#   echo >&2 "No GPG key found for: $github_email"
+#   echo "No GPG key found for: $github_email" >&2
 #   # run gh gpg-key add "$key_file"
 # fi
 {{ end }}

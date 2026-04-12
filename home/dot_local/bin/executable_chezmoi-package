@@ -1,12 +1,20 @@
 #!/bin/sh
+# List and diff configured vs installed packages
+#USAGE arg "[action]" help="Action to perform" {
+#USAGE   choices "list" "diff"
+#USAGE }
+#USAGE arg "[type]" help="Package manager or 'all'"
+#USAGE flag "-o --output <format>" help="Output format" {
+#USAGE   choices "text" "json" "yaml"
+#USAGE }
 
 set -eu
 
 uname="$(uname -s)"
 
 usage() {
-  echo >&2 "Usage: chezmoi package [list|diff] [all|<package-manager>] [-h|--help]"
-  echo >&2 "  [-o|--output=text|json|yaml]"
+  echo "Usage: chezmoi package [list|diff] [all|<package-manager>] [-h|--help]" >&2
+  echo "  [-o|--output=text|json|yaml]" >&2
 }
 
 action=list
@@ -49,7 +57,7 @@ while [ $# -gt 0 ]; do
     ;;
   *)
     if [ -n "$type" ]; then
-      echo >&2 "chezmoi package: invalid argument (type '$type' already defined): $1"
+      echo "chezmoi package: invalid argument (type '$type' already defined): $1" >&2
       usage
       exit 1
     fi
@@ -61,9 +69,9 @@ done
 
 list_packages() {
   key="$1"
-  # echo >&2 "Listing $key packages..."
+  # echo "Listing $key packages..." >&2
   if [ "$output" = text ]; then
-    echo >&2 "# $key packages"
+    echo "# $key packages" >&2
   fi
   case "$output" in
   text)
@@ -100,12 +108,12 @@ EOF
   json) format="toPrettyJson" ;;
   yaml) format="toYaml" ;;
   *)
-    echo >&2 "chezmoi package: invalid output format: $output"
+    echo "chezmoi package: invalid output format: $output" >&2
     usage
     return 1
     ;;
   esac
-  # echo >&2 "Executing .packages.$key | $format"
+  # echo "Executing .packages.$key | $format" >&2
   chezmoi execute "{{ .packages.$key | $format | trim }}"
 }
 
@@ -131,8 +139,8 @@ diff_packages() {
     chezmoi-package list "$key" | sort >"$expected"
   fi
   list-package "$key" | sort >"$current"
-  # echo >&2 "Diffing $key packages..."
-  $diff "$expected" "$current" || echo >&2 "Exit code: $?"
+  # echo "Diffing $key packages..." >&2
+  $diff "$expected" "$current" || echo "Exit code: $?" >&2
 }
 
 main() {
@@ -181,7 +189,7 @@ main() {
 case "$action" in
 list | diff) main "$action" ;;
 *)
-  echo >&2 "chezmoi package: invalid action: $action"
+  echo "chezmoi package: invalid action: $action" >&2
   usage
   exit 1
   ;;

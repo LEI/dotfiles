@@ -7,7 +7,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if command -v mise; then
-  echo >&2 "Already installed: {{ lookPath "mise" }}"
+  echo "Already installed: {{ lookPath " >&2mise" }}"
   run mise --version | head -n1
   exit
 fi
@@ -16,11 +16,11 @@ BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
 
 if [ ! -d "$BIN_DIR" ]; then
-  # echo >&2 "Creating directory: $BIN_DIR"
+  # echo "Creating directory: $BIN_DIR" >&2
   run mkdir -p "$BIN_DIR"
 fi
 
-echo >&2 "Installing mise"
+echo "Installing mise" >&2
 
 {{- $os := .chezmoi.os }}
 {{- if eq .os "android" }}
@@ -54,4 +54,4 @@ run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
 run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
 {{- end }}
 
-echo >&2 "Installed mise"
+echo "Installed mise" >&2

@@ -58,7 +58,7 @@ elif has paru && ! has pamac; then
 elif has pamac; then
   dry_run as_user pamac install --no-confirm --quiet $aur_packages
 else
-  err "AUR package manager not found"
+  die "AUR package manager not found"
 fi
 
 {{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) }}

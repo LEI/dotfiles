@@ -18,7 +18,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has webhook; then
-  err "webhook not found"
+  die "webhook not found"
 fi
 
 if [ ! -d "$HOME/.local/state/webhook" ]; then

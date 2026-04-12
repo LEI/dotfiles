@@ -6,7 +6,7 @@ set -eu
 
 # DISPLAY: {{ env "DISPLAY" | default "unset" }}
 if [ -z "${DISPLAY:-}" ]; then
-  echo >&2 "WARN: skipping xrdb merge (no display)"
+  echo "WARN: skipping xrdb merge (no display)" >&2
   exit 0
 fi
 

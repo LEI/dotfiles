@@ -4,7 +4,7 @@
 # https://github.com/julienXX/terminal-notifier/issues/300
 set -eu
 
-msg() { echo >&2 "webhook-notify: $*"; }
+msg() { echo "webhook-notify: $*" >&2; }
 
 notify() {
   _title="$1" _subtitle="$2" _message="$3" _url="${4:-}" _sound="${5:-Ping}"

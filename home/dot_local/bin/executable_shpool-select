@@ -1,4 +1,5 @@
 #!/bin/sh
+# Select and attach to a shpool session
 
 set -eu
 
@@ -8,7 +9,7 @@ set -eu
 # fi
 # ssh -t "-oRemoteCommand=shpool attach -f $2" "$1"
 
-bind="ctrl-x:execute(shpool detach '{}' && echo >&2 'Detached session: {}')+refresh-preview,ctrl-q:execute(shpool kill '{}' && echo >&2 'Killed session: {}')+refresh-cmd"
+bind="ctrl-x:execute(shpool detach '{}' && echo 'Detached session: {}')+refresh-preview,ctrl-q:execute(shpool kill '{}' && echo 'Killed session: {}' >&2)+refresh-cmd"
 cmd="shpool list | tail -n+2 | tr '\t' ' ' | cut -d' ' -f1"
 preview="shpool list | tr '\t' ' ' | grep '^{} '"
 name="$(sk --bind="$bind" --cmd="$cmd" --preview="$preview" --preview-window=down:2)"

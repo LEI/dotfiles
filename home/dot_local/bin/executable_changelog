@@ -1,7 +1,8 @@
 #!/bin/bash
-
-# Show changes since last pull
-# Usage: changelog [diff]
+# Show changes since the last git pull
+#USAGE arg "[command]" help="Command to run (default: log)" {
+#USAGE   choices "log" "diff"
+#USAGE }
 
 set -eu
 

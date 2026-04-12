@@ -30,7 +30,7 @@ fi
 # Fall back to launchctl bootout + bootstrap
 plist="$HOME/Library/LaunchAgents/$label.plist"
 if [ ! -f "$plist" ]; then
-  err "$label: plist not found"
+  die "$label: plist not found"
 fi
 if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
   run launchctl bootout "gui/$(id -u)" "$plist" 2>/dev/null || true

@@ -126,7 +126,7 @@ fi
 
 m365() (
   if [ ! -f "$XDG_CONFIG_HOME/secrets.d/app/m365.conf" ]; then
-    echo >&2 "m365: missing $XDG_CONFIG_HOME/secrets.d/app/m365.conf"
+    echo "m365: missing $XDG_CONFIG_HOME/secrets.d/app/m365.conf" >&2
     return 1
   fi
   export_env "$XDG_CONFIG_HOME/secrets.d/app/m365.conf"

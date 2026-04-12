@@ -1,4 +1,5 @@
 #!/bin/sh
+# Re-execute the last command in tmux
 
 set -eu
 
@@ -6,6 +7,6 @@ if [ -n "${TMUX:-}" ]; then
   # Send C-m twice to ensure '!!' is expanded
   tmux send-keys -t:.! '!!' C-m C-m
 else
-  echo >&2 "Unknown environment"
+  echo "Unknown environment" >&2
   exit 1
 fi

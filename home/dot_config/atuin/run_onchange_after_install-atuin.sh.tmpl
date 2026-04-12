@@ -18,14 +18,14 @@ set -eu
 {{- end }}
 
 # if command -v atuin; then
-#   echo >&2 "Already installed"
+#   echo "Already installed" >&2
 run atuin --version
 #   exit
 # fi
 
 {{- if not (empty (get (get .packages .packageManager) "atuin")) }}
 
-# echo >&2 "Installing atuin"
+# echo "Installing atuin" >&2
 # # https://github.com/atuinsh/atuin/releases
 # ARCH='{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}'
 # OS=unknown-linux
@@ -34,7 +34,7 @@ run atuin --version
 # URL="https://github.com/atuinsh/atuin/releases/download/$VERSION/$NAME.tar.gz"
 # BIN="$NAME/atuin"
 # install_tar_gz "$URL" "$BIN"
-# echo >&2 "Installed atuin"
+# echo "Installed atuin" >&2
 {{- end }}
 
 # atuin import auto

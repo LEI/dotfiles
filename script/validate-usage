@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#MISE description="Lint #USAGE specs and shell script conventions"
+#USAGE flag "-q --quiet" help="Only print errors and summary"
+#USAGE flag "-v --verbose" help="Print full usage spec for each file"
+#USAGE arg "[file]..." help="Files to check (default: git ls-files)"
+
+set -euo pipefail
+
+if ((BASH_VERSINFO[0] < 4)); then
+  echo "bash 4+ required, found $BASH_VERSION" >&2
+  exit 1
+fi
+
+if ! command -v usage >/dev/null; then
+  exit 0
+fi
+
+quiet=false
+verbose=false
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -q | --quiet)
+    quiet=true
+    shift
+    ;;
+  -v | --verbose)
+    verbose=true
+    shift
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *) break ;;
+  esac
+done
+
+if [ $# -eq 0 ]; then
+  mapfile -t files < <(git ls-files '*.sh' '*.bash' '*.bats' 'script/*' 'home/dot_local/bin/executable_*')
+  set -- "${files[@]}"
+fi
+
+warnings=0
+errors=0
+checked=0
+
+for f in "$@"; do
+  case "$f" in *.awk) continue ;; esac
+  ((++checked))
+
+  has_shebang=$(head -1 "$f" | grep '^#!' || true)
+  if [ -z "$has_shebang" ]; then
+    continue
+  fi
+
+  # #MISE description required in script/ (mise tasks)
+  case "$f" in
+  script/*)
+    mise_desc=$(grep '^#MISE description=' "$f" || true)
+    if [ -z "$mise_desc" ]; then
+      echo "$f: error: missing #MISE description" >&2
+      ((++errors))
+    fi
+    ;;
+  esac
+
+  # Description comment required after shebang
+  case "$f" in
+  script/* | */executable_*)
+    desc=$(sed -n '2p' "$f" | grep '^#' || true)
+    if [ -z "$desc" ]; then
+      if [ "$quiet" != true ]; then
+        echo "$f: warning: missing description comment after shebang" >&2
+      fi
+      ((++warnings))
+    fi
+    ;;
+  esac
+
+  # Lint #USAGE spec
+  spec=$(grep '^#USAGE ' "$f" | sed 's/^#USAGE //' || true)
+  if [ -n "$spec" ] && ! usage lint <(echo "$spec") >/dev/null; then
+    ((++errors))
+    continue
+  fi
+
+  if [ "$quiet" = true ]; then
+    continue
+  fi
+
+  if [ "$verbose" = true ] && [ -n "$spec" ]; then
+    echo "$f: ok"
+    echo "$spec" | sed 's/^/  /'
+  else
+    echo "$f: ok"
+  fi
+done
+
+if ((errors > 0 || warnings > 0)); then
+  echo "$checked checked, $errors error(s), $warnings warning(s)" >&2
+elif [ "$quiet" != true ]; then
+  echo "$checked checked, all passed" >&2
+fi
+exit "$((errors > 0))"
