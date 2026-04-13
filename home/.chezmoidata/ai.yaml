@@ -21,13 +21,16 @@ ai:
       port: 11437
       domain: llama-cpp.test
     mlx-lm:
-      enabled: false
+      enabled: true
       health: /v1/models
       label: com.mlx-lm.server
+      # server: mlx_lm.server, mlx-omni-server, mlx-openai-server
+      server: mlx-omni-server
       port: 11435
       domain: mlx-lm.test
+      requires: mlx
     ollama:
-      enabled: true
+      enabled: false
       port: 11434
       domain: ollama.test
       caddy:
@@ -37,6 +40,7 @@ ai:
       health: /v1/models
       port: 11436
       domain: vllm-mlx.test
+      requires: mlx
     # Cloud
     # github-copilot: {} # free, pro, pro+
     # huggingface:
@@ -62,6 +66,7 @@ ai:
   models:
     nomic-embed:
       context: 8192
+      mlx-lm: mlx-community/all-MiniLM-L6-v2-4bit
       ollama: nomic-embed-text
     qwen3-4b:
       context: 262144
@@ -75,11 +80,20 @@ ai:
       cpu: true
       mlx-lm: mlx-community/Qwen3.5-9B-MLX-4bit
       ollama: qwen3.5:9b
-    qwen3-coder-30b:
-      context: 262144
-      output: 65536
-      mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
-      # ollama: qwen3-coder:30b-a3b-q4_K_M
+    gemma4:
+      context: 131072
+      output: 8192
+      mlx-lm: mlx-community/gemma-4-e4b-it-4bit
+      ollama: gemma4
+      params:
+        reasoning_tags:
+          - "<|channel>thought"
+          - "<channel|>"
+    # qwen3-coder-30b:
+    #   context: 262144
+    #   output: 65536
+    #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
+    #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
   # dot_config/opencode/opencode.jsonc: cloud profile selection
   # dot_logseq/settings/ollama-logseq.json: local.fast
@@ -92,6 +106,18 @@ ai:
       embedding: nomic-embed
       fast: qwen3-4b
       reasoning: qwen3-9b # qwen3-coder-30b
+    mlx-local:
+      agentic: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
+      chat: mlx-lm/mlx-community/gemma-4-e4b-it-4bit
+      coding: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
+      fast: mlx-lm/mlx-community/Qwen3.5-4B-MLX-4bit
+      reasoning: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
+    ollama-local:
+      agentic: ollama/qwen3.5:9b
+      chat: ollama/gemma4
+      coding: ollama/qwen3.5:9b
+      fast: ollama/qwen3.5:4b
+      reasoning: ollama/qwen3.5:9b
     copilot-pro:
       agentic: github-copilot/gpt-4.1
       chat: github-copilot/gpt-4o

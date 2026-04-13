@@ -1,0 +1,38 @@
+{{- if .features.oage -}}
+{{- $key := .features.mlx | ternary "mlx-lm" "ollama" -}}
+{{- $configs := list -}}
+{{- range $name, $meta := .ai.models -}}
+{{-   $id := get $meta $key -}}
+{{-   if not (and $id (hasKey $meta "params")) }}{{ continue }}{{ end -}}
+{{-   $configs = append $configs (dict
+    "id" $id
+    "name" $name
+    "base_model_id" $id
+    "params" $meta.params
+    "is_active" true) -}}
+{{- end -}}
+{{- $payload := dict "models" $configs -}}
+#!/bin/sh
+# config hash: {{ $payload | toJson | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+BASE_URL="http://127.0.0.1:8503"
+
+TOKEN="$(curl -sf "$BASE_URL/api/v1/auths/signin" \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"","password":""}' | jq -r '.token')"
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+  warn "open-webui: could not authenticate, skipping"
+  exit 0
+fi
+
+curl -sf -X POST "$BASE_URL/api/v1/models/import" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{{ $payload | toJson }}' >/dev/null
+
+msg "open-webui: imported {{ len $configs }} model config(s)"
+{{- end }}

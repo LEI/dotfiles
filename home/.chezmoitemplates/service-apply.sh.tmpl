@@ -1,24 +1,34 @@
+{{- $enabled := ne (get . "enabled" | toString) "false" -}}
 {{- if eq .os "darwin" -}}
 {{- $label := get . "label" -}}
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
+GUI="gui/$(id -u)"
+
+{{- if $enabled }}
 if [ ! -f "$plist" ]; then
   die "{{ $label }}: plist not found"
 fi
 
-# Legacy load/unload: bootstrap/bootout fails with I/O error on some macOS versions
-# TODO switch to bootstrap/bootout when Apple fixes the regression
-# launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
-# run launchctl bootstrap "gui/$(id -u)" "$plist"
-launchctl unload "$plist" 2>/dev/null || true
-run launchctl load "$plist"
+if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
+  run launchctl load "$plist"
+fi
+run launchctl kickstart -kp "$GUI/{{ $label }}"
 
 if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
   die "{{ $label }}: service failed to start"
 fi
 {{- else }}
+if launchctl list "{{ $label }}" >/dev/null 2>&1; then
+  msg "stopping disabled service {{ $label }}"
+  run launchctl kill SIGTERM "$GUI/{{ $label }}" 2>/dev/null || true
+  run launchctl unload "$plist" 2>/dev/null || true
+fi
+{{- end }}
+{{- else }}
 {{- $unit := get . "unit" | default "UNIT" -}}
 if has systemctl; then
   run systemctl --user daemon-reload
+{{- if $enabled }}
   if systemctl --user is-active --quiet {{ $unit }}; then
     run systemctl --user restart {{ $unit }}
   else
@@ -28,5 +38,11 @@ if has systemctl; then
     run systemctl --user status {{ $unit }} || true
     die "{{ $unit }} service failed to start"
   fi
+{{- else }}
+  if systemctl --user is-active --quiet {{ $unit }}; then
+    msg "stopping disabled service {{ $unit }}"
+    run systemctl --user disable --now {{ $unit }}
+  fi
+{{- end }}
 fi
 {{- end }}

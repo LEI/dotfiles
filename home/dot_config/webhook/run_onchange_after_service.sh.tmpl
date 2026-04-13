@@ -26,9 +26,10 @@ if [ ! -d "$HOME/.local/state/webhook" ]; then
 fi
 
 {{ includeTemplate "service-apply.sh.tmpl" (dict
-  "unit" "webhook"
+  "enabled" true
   "label" "com.webhook.alert"
   "os" .chezmoi.os
+  "unit" "webhook"
 ) }}
 # Manual test:
 # curl -X POST http://localhost:9000/hooks/alert -H 'Content-Type: application/json' \

@@ -6,20 +6,24 @@
   "coding" (list "tools" "transformation")
   "embedding" (list "embedding")
 -}}
-{{- $ollamaModels := list -}}
+{{- $key := $.features.mlx | ternary "mlx-lm" "ollama" -}}
+{{- $provider := get $.ai.providers $key -}}
+{{- $isOllama := eq $key "ollama" -}}
+{{- $localModels := list -}}
 {{- $models := list -}}
 {{- range $role, $notebookRoles := $roleMap -}}
 {{-   $modelName := get $.ai.profiles.local $role -}}
 {{-   if not $modelName }}{{ continue }}{{ end -}}
-{{-   $ollamaId := (get $.ai.models $modelName).ollama -}}
-{{-   if not $ollamaId }}{{ continue }}{{ end -}}
-{{-   $ollamaModels = append $ollamaModels $ollamaId -}}
+{{-   $modelId := get (get $.ai.models $modelName) $key -}}
+{{-   if not $modelId }}{{ continue }}{{ end -}}
+{{-   $localModels = append $localModels $modelId -}}
+{{-   $displayName := $isOllama | ternary (printf "ollama/%s" $modelId) $modelId -}}
 {{-   $type := eq $role "embedding" | ternary "embedding" "language" -}}
-{{-   $models = append $models (dict "name" $ollamaId "type" $type "default" $notebookRoles) -}}
+{{-   $models = append $models (dict "name" $displayName "type" $type "default" $notebookRoles) -}}
 {{- end -}}
 {{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
 #!/bin/sh
-# config hash: {{ dict "credential" $cred "profiles" $.ai.profiles.local "ollamaModels" ($ollamaModels | uniq) | toJson | sha256sum }}
+# config hash: {{ dict "credential" $cred "provider" $key "profiles" $.ai.profiles.local "models" ($localModels | uniq) | toJson | sha256sum }}
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -75,17 +79,19 @@ ensure_model() {
   echo "$id"
 }
 
+{{- $credName := $isOllama | ternary $cred.name (printf "%s-local" $key) }}
+{{- $credBaseUrl := $isOllama | ternary $cred.base_url (printf "http://host.docker.internal:%v/v1" $provider.port) }}
 cred_id="$(
   ensure_credential \
-    "{{ $cred.name }}" \
+    "{{ $credName }}" \
     "{{ $cred.provider }}" \
     '{{ $types | uniq | toJson }}' \
     "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
-    "{{ $cred.base_url }}"
+    "{{ $credBaseUrl }}"
 )"
 
 {{ range $models -}}
-ensure_model "ollama/{{ .name }}" "{{ .type }}" "$cred_id"
+ensure_model "{{ .name }}" "{{ .type }}" "$cred_id"
 {{ end }}
 # Build defaults: pass model config as JSON, look up IDs from API response
 models_json="$(api GET /api/models)"
@@ -96,7 +102,7 @@ defaults="$(jq -n \
     def id_for(n): $registered | map(select(.name == n)) | first | .id;
     [ $config[] | .name as $name | .default[]? | {
         key: ("default_" + . + "_model"),
-        value: id_for("ollama/" + $name)
+        value: id_for($name)
       }
     ] | map(select(.value != null)) | from_entries
   ')"

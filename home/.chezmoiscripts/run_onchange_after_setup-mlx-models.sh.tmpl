@@ -1,0 +1,24 @@
+{{- if .features.mlx -}}
+{{- $mlxModels := list -}}
+{{- range $name, $meta := .ai.models -}}
+{{-   $id := get $meta "mlx-lm" -}}
+{{-   if $id -}}
+{{-     $mlxModels = append $mlxModels $id -}}
+{{-   end -}}
+{{- end -}}
+#!/bin/sh
+# models: {{ $mlxModels | toJson | sha256sum }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has hf; then
+  warn "hf not found, skipping mlx model setup"
+  exit 0
+fi
+
+{{- range $mlxModels }}
+msg "ensuring {{ . }}"
+run hf download {{ . }}
+{{- end }}
+{{ end -}}

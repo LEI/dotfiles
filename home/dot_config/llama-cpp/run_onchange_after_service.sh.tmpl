@@ -15,7 +15,8 @@ fi
 # brew list llama.cpp >/dev/null 2>&1 # llama.cpp not installed
 
 {{ includeTemplate "service-apply.sh.tmpl" (dict
-  "unit" "llama-server"
+  "enabled" $provider.enabled
   "label" $provider.label
   "os" .chezmoi.os
+  "unit" "llama-server"
 ) -}}

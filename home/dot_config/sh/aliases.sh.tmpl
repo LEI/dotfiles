@@ -2,8 +2,17 @@
 
 {{- if lookPath "eza" | isExecutable }}
 
-# Use alias not function: ls() causes syntax errors (builtin conflict)
-alias ls="eza --hyperlink" # --total-size
+# alias ls="eza --hyperlink"
+# Hyperlink OSC 8 escapes leak through pipes in iTerm2
+# https://github.com/eza-community/eza/issues/1156
+_eza() {
+  if [ "$LC_TERMINAL" = "iTerm2" ] && [ ! -t 1 ]; then
+    eza "$@"
+  else
+    eza --hyperlink "$@"
+  fi
+}
+alias ls=_eza
 {{- else if lookPath "gls" | isExecutable }}
 
 # export LS_COLORS="$(vivid generate tokyonight-storm)"

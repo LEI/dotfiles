@@ -30,7 +30,8 @@ fi
 # msg "loading mlx-lm service (port {{ $provider.port }})"
 # run launchctl bootstrap "$GUI" "$PLIST"
 {{ includeTemplate "service-apply.sh.tmpl" (dict
-  "unit" "mlx-lm"
+  "enabled" $provider.enabled
   "label" $provider.label
   "os" .chezmoi.os
+  "unit" "mlx-lm"
 ) -}}

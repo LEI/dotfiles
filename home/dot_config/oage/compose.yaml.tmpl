@@ -92,7 +92,9 @@ services:
       - notebook-data:/app/data
     environment:
       - API_URL=https://open-notebook-api.test
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+{{- if (get .ai.providers "ollama").enabled }}
+      - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
+{{- end }}
       - OPENAI_COMPATIBLE_BASE_URL=http://bifrost:8080/v1
       - SURREAL_DATABASE=open_notebook
       - SURREAL_NAMESPACE=open_notebook
@@ -116,7 +118,7 @@ services:
 
   # https://github.com/open-webui/open-webui
   open-webui:
-    image: ghcr.io/open-webui/open-webui:v0.8.10
+    image: ghcr.io/open-webui/open-webui:v0.8.12
     restart: unless-stopped
     networks:
       - default
@@ -129,8 +131,12 @@ services:
       - open-webui-data:/app/backend/data
     environment:
       - CORS_ALLOW_ORIGIN=https://open-webui.test
+{{- if (get .ai.providers "ollama").enabled }}
       - ENABLE_OLLAMA_API=true
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
+{{- else }}
+      - ENABLE_OLLAMA_API=false
+{{- end }}
 {{- if .features.mlx }}
       - OPENAI_API_BASE_URLS=http://bifrost:8080/v1;http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
 {{- else }}

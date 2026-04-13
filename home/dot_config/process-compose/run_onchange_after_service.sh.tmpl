@@ -15,8 +15,9 @@ if ! has process-compose; then
 fi
 
 {{ includeTemplate "service-apply.sh.tmpl" (dict
-  "unit" "process-compose"
+  "enabled" true
   "label" "com.process-compose"
   "os" .chezmoi.os
+  "unit" "process-compose"
 ) }}
 {{- end -}}

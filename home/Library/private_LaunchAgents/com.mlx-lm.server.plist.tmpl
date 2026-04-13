@@ -19,11 +19,17 @@
   </array>
   <key>ProgramArguments</key>
   <array>
+{{- $provider := get .ai.providers "mlx-lm" -}}
+{{- $server := get $provider "server" | default "mlx_lm.server" }}
+{{- if eq $server "mlx_lm.server" }}
     <string>{{ .brewPrefix }}/opt/mlx-lm/bin/mlx_lm.server</string>
+{{- else }}
+    <string>{{ .chezmoi.homeDir }}/.local/bin/{{ $server }}</string>
+{{- end }}
     <string>--host</string>
     <string>127.0.0.1</string>
     <string>--port</string>
-    <string>{{ (get .ai.providers "mlx-lm").port }}</string>
+    <string>{{ $provider.port }}</string>
   </array>
   <key>StandardErrorPath</key>
   <string>{{ .brewPrefix }}/var/log/mlx-lm.log</string>

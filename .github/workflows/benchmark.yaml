@@ -44,7 +44,7 @@ jobs:
           tool: customSmallerIsBetter
           output-file-path: output.json
           # Access token to deploy GitHub Pages branch or make a commit comment
-          github-token: ${{ secrets.GITHUB_TOKEN }} # zizmor: ignore[secrets-outside-env]
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           # Push and deploy GitHub pages branch automatically
           auto-push: true
           # Workflow will fail when an alert happens

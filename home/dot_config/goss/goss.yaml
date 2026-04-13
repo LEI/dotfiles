@@ -195,9 +195,15 @@ mount:
 port:
   tcp:22:
     listening: false
-    # ip:
-    #   - "1"
     skip: false
+# goss port checks broken on macOS for 127.0.0.1-bound services
+{{- range $name, $p := .Vars.ai.providers }}
+{{- if hasKey $p "port" }}
+{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+#  "tcp:127.0.0.1:{{ $p.port }}":
+#    listening: {{ $enabled }}
+{{- end }}
+{{- end }}
 # process:
 #   chrome:
 #     # required attributes
@@ -265,6 +271,31 @@ command:
     exit-status: 0
     timeout: 3000
 {{- end }}
+{{- range $name, $p := .Vars.ai.providers }}
+{{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
+{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+  launchd-{{ $name }}:
+    exec: launchctl list {{ $p.label }}
+    exit-status: {{ if $enabled }}0{{ else }}{ gt: 0 }{{ end }}
+    timeout: 3000
+{{- end }}
+{{- $provider := index .Vars.ai.providers .Vars.localProvider }}
+{{- if index $provider "enabled" }}
+{{- $fast := index .Vars.ai.profiles.local "fast" }}
+{{- $chatModel := index (index .Vars.ai.models $fast) .Vars.localProvider }}
+  completions:
+    exec: "curl -sf -X POST http://localhost:{{ $provider.port }}/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"{{ $chatModel }}\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"max_tokens\":2}' | jq -e '.choices[0]'"
+    exit-status: 0
+    timeout: 60000
+{{- $embed := index .Vars.ai.profiles.local "embedding" }}
+{{- if $embed }}
+{{- $embedModel := index (index .Vars.ai.models $embed) .Vars.localProvider }}
+  embeddings:
+    exec: "curl -sf -X POST http://localhost:{{ $provider.port }}/v1/embeddings -H 'Content-Type: application/json' -d '{\"model\":\"{{ $embedModel }}\",\"input\":\"test\"}' | jq -e '.data[0].embedding | length > 0'"
+    exit-status: 0
+    timeout: 30000
+{{- end }}
+{{- end }}
 {{- end}}
 {{- if and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") "")}}
   container-engine:
@@ -285,6 +316,15 @@ service:
   # webhook:
   #   enabled: true
   #   running: true
+{{- end }}
+{{- if .Vars.features.ai }}
+{{- range $name, $p := .Vars.ai.providers }}
+{{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
+{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+  {{ $name }}:
+    enabled: {{ $enabled }}
+    running: {{ $enabled }}
+{{- end }}
 {{- end }}
 {{- end }}
 

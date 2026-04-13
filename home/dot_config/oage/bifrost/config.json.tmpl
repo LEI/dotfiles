@@ -86,7 +86,7 @@
       "network_config": {
         "default_request_timeout_in_seconds": 300
       }
-    },
+    }{{ if (get .ai.providers "ollama").enabled }},
     "ollama": {
       "keys": [
         {
@@ -100,7 +100,7 @@
         "default_request_timeout_in_seconds": 120,
         "max_retries": 1
       }
-    }{{ if $mlx }},
+    }{{ end }}{{ if $mlx }},
     "mlx-lm": {
       "keys": [
         {
