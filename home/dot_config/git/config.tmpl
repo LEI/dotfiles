@@ -159,6 +159,13 @@
 	# oneFixupPerCommit = true
 {{- end }}
 
+{{- $gpg := lookPath "gpg" -}}
+{{- if $gpg | isExecutable }}
+
+[gpg]
+	program = {{ $gpg }}
+{{- end }}
+
 {{- if lookPath "ghq" | isExecutable }}
 
 [ghq]

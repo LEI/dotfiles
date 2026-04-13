@@ -2,6 +2,7 @@
 {{- includeTemplate "gitconfig" (merge .git.github (dict "name" .name)) -}}
 
 {{- if get .git.github "user" }}
+# TODO: override per profile config
 [github]
 	user = {{ .git.github.user | quote }}
 	{{- /* token = {{ keyring "github" .git.github.user | quote }} */ -}}

@@ -43,6 +43,36 @@ run = [
   "mise prek", # ./script/prek
 ]
 
+[tasks.renovate]
+description = "Dry-run Renovate locally"
+run = "bunx renovate --platform=local --dry-run=${RENOVATE_DRY_RUN:-full}"
+[tasks.renovate.env]
+GITHUB_COM_TOKEN = "$(gh auth token)" # --user "$(git config github.user)"
+
+[tasks."renovate:config"]
+description = "Print resolved Renovate config (managers, fileMatch patterns)"
+run = "bunx renovate --platform=local --print-config | jq -Rn '[inputs | try fromjson | select(.err == null)] | last'"
+[tasks."renovate:config".env]
+GITHUB_COM_TOKEN = "$(gh auth token)"
+LOG_FORMAT = "json"
+LOG_LEVEL = "debug"
+
+[tasks."renovate:extract"]
+description = "Detect dependencies without API calls"
+run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFiles)'"
+[tasks."renovate:extract".env]
+LOG_FORMAT = "json"
+LOG_LEVEL = "info"
+RENOVATE_DRY_RUN = "extract"
+
+[tasks."renovate:missed"]
+description = "Show per-file manager matching at debug level"
+run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFile) | {msg, manager, packageFile}'"
+[tasks."renovate:missed".env]
+LOG_FORMAT = "json"
+LOG_LEVEL = "debug"
+RENOVATE_DRY_RUN = "extract"
+
 [tasks.prek]
 alias = "pre-commit"
 description = "Run pre-commit hooks on all files"

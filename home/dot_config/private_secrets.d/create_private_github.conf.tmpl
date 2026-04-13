@@ -1,3 +1,4 @@
 {{- if and .features.git (hasKey . "git") (hasKey .git "github") -}}
+{{- /* TODO: keyring "github" .git.github.user */ -}}
 # GITHUB_TOKEN="$(gh auth token)"
 {{ end -}}

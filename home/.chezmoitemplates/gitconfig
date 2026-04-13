@@ -1,5 +1,4 @@
 {{- $signingKey := get . "signingkey" | default (includeTemplate "gpg-signing-key.tmpl" (dict "email" .email)) -}}
-{{- $gpg := lookPath "gpg" -}}
 
 [user]
 	name = {{ .name | trim | quote }}
@@ -8,9 +7,3 @@
 
 [commit]
 	gpgsign = {{ $signingKey | not | not }}
-
-{{- if and $signingKey ($gpg | isExecutable) }}
-
-[gpg]
-	program = {{ $gpg }}
-{{- end }}
