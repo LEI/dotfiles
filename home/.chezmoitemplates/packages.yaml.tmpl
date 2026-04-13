@@ -401,7 +401,8 @@ packages:
     enabled: {{ and .features.php
       (eq .osIDLike "arch" "darwin")
       (not (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64")))
-      (ne .profile "minimal") }}
+      (ne .profile "minimal")
+      (not .ephemeral) }}
     restart_service: ":changed"
     nameOverwrite:
       arch: mailpit-bin

@@ -13,6 +13,8 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+# . "$CHEZMOI_WORKING_TREE/home/dot_ollama/init.sh"
+{{ includeTemplate "dot_ollama/init.sh.tmpl" . -}}
 
 if ! run ollama list; then
   die "ollama list: exit code $?"
