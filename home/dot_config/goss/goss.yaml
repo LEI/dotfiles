@@ -279,24 +279,15 @@ command:
     exit-status: {{ if $enabled }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{- end }}
-{{- $provider := index .Vars.ai.providers .Vars.localProvider }}
-{{- if index $provider "enabled" }}
-{{- $fast := index .Vars.ai.profiles.local "fast" }}
-{{- $chatModel := index (index .Vars.ai.models $fast) .Vars.localProvider }}
-  completions:
-    exec: "curl -sf -X POST http://localhost:{{ $provider.port }}/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"{{ $chatModel }}\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"max_tokens\":2}' | jq -e '.choices[0]'"
-    exit-status: 0
-    timeout: 60000
-{{- $embed := index .Vars.ai.profiles.local "embedding" }}
-{{- if $embed }}
-{{- $embedModel := index (index .Vars.ai.models $embed) .Vars.localProvider }}
-  embeddings:
-    exec: "curl -sf -X POST http://localhost:{{ $provider.port }}/v1/embeddings -H 'Content-Type: application/json' -d '{\"model\":\"{{ $embedModel }}\",\"input\":\"test\"}' | jq -e '.data[0].embedding | length > 0'"
-    exit-status: 0
-    timeout: 30000
-{{- end }}
-{{- end }}
 {{- end}}
+{{- if hasKey .Vars "scripts" }}
+{{- range .Vars.scripts }}
+  check-{{ trimSuffix ".sh" . }}:
+    exec: sh check/{{ . }}
+    exit-status: 0
+    timeout: 120000
+{{- end }}
+{{- end }}
 {{- if and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") "")}}
   container-engine:
     exec: {{ env "CONTAINER_PROVIDER" }} info --format '{{`{{.ServerVersion}}`}}'

@@ -1,4 +1,3 @@
-{{- if .features.oage -}}
 {{- $cred := .oage.credential -}}
 {{- /* ai.profiles.local -> open-notebook default models */ -}}
 {{- $roleMap := dict
@@ -23,7 +22,9 @@
 {{- end -}}
 {{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
 #!/bin/sh
+
 # config hash: {{ dict "credential" $cred "provider" $key "profiles" $.ai.profiles.local "models" ($localModels | uniq) | toJson | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -109,4 +110,3 @@ defaults="$(jq -n \
 run api PUT /api/models/defaults -d "$defaults" >/dev/null
 
 msg "open-notebook: defaults set"
-{{- end }}

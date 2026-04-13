@@ -4,6 +4,7 @@ export OAGE_CONFIG_DIR="${OAGE_CONFIG_DIR:-$HOME/.config/oage}"
 oage() { compose-project "${OAGE_CONFIG_DIR}" "$@"; }
 
 {{- if .features.ollama }}
+
 {{-   $quadlet := and .features.podman (eq .os "linux") }}
 {{-   $ollamaContainer := $quadlet | ternary "systemd-ollama" "oage-ollama-1" }}
 {{-   $ollamaProvider := $quadlet | ternary "podman" "$CONTAINER_PROVIDER" }}
@@ -38,6 +39,7 @@ ollama_rm_all() {
 }
 
 {{- if .features.mlx }}
+
 mlx_list() {
   mlx_lm manage --scan 2>/dev/null
 }

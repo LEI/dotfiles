@@ -21,5 +21,5 @@ fi
 {{- if and (hasKey . "git") (hasKey .git "gitlab") (hasKey .git.gitlab "email") }}
 
 gitlab_email="{{ .git.gitlab.email }}"
-{{ end -}}
+{{- end }}
 {{ end -}}

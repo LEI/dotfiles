@@ -1,4 +1,3 @@
-{{- if .features.processCompose -}}
 #!/bin/sh
 
 # Hash global: {{ include "dot_config/process-compose/global.yaml.tmpl" | sha256sum }}
@@ -42,4 +41,3 @@ run systemctl --user daemon-reload
 run systemctl --user restart "$label"
 {{- end }}
 msg "$label: restarted"
-{{- end }}

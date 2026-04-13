@@ -1,0 +1,31 @@
+{{- $connections := list -}}
+{{- range $id, $api := .apis -}}
+{{-   $parsed := urlParse $api.url -}}
+{{-   $dockerHost := replace "localhost" "host.docker.internal" $parsed.host -}}
+{{-   $connections = append $connections (dict
+      "type" "openapi"
+      "url" (printf "%s://%s" $parsed.scheme $dockerHost)
+      "path" $api.spec
+      "auth_type" "none"
+      "key" ""
+      "headers" (dict)
+      "config" (dict "enable" true "function_name_filter_list" "" "access_grants" (list))
+      "info" (dict "id" $id "name" (get $api "name" | default $id) "description" (get $api "description" | default ""))) -}}
+{{- end -}}
+{{- $payload := dict "TOOL_SERVER_CONNECTIONS" $connections -}}
+#!/bin/sh
+
+# config hash: {{ $payload | toJson | sha256sum }}
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/oage/.open-webui.sh"
+
+open_webui_auth || exit 0
+
+open_webui_post "configs/tool_servers" <<'EOF'
+{{ $payload | toPrettyJson | trim }}
+EOF
+
+msg "open-webui: configured {{ len $connections }} tool server(s)"

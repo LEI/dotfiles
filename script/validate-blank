@@ -15,6 +15,15 @@ if [ $# -eq 0 ]; then
   set -- "${files[@]}"
 fi
 
+# Skip binary files
+text_files=()
+for f in "$@"; do
+  [ -f "$f" ] || continue
+  file --brief --mime-encoding "$f" | grep -q binary && continue
+  text_files+=("$f")
+done
+set -- "${text_files[@]}"
+
 if [ $# -eq 0 ]; then
   echo "no files to validate" >&2
   exit 0

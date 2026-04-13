@@ -1,4 +1,5 @@
 {{- $ai := and
+    (not .container)
     (eq .osIDLike "arch" "darwin" "fedora")
     (ne .profile "minimal")
     (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname))

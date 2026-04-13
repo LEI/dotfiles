@@ -1,4 +1,4 @@
-{{- if .features.ollama -}}
+{{- if (get .ai.providers "ollama").enabled -}}
 {{- $ollamaModels := list -}}
 {{- range $name, $meta := .ai.models -}}
 {{-   $id := get $meta "ollama" -}}
@@ -7,14 +7,15 @@
 {{-   end -}}
 {{- end -}}
 #!/bin/sh
+
 # models: {{ $ollamaModels | toJson | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-. "${XDG_CONFIG_HOME:-$HOME/.config}/oage/init.sh"
 
 if ! run ollama list; then
-  err "ollama list: exit code $?"
+  die "ollama list: exit code $?"
 fi
 
 {{- range $ollamaModels }}

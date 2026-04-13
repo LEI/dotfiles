@@ -1,4 +1,5 @@
 #!/bin/sh
+
 set -eu
 
 if [ -f /etc/arch-release ] && { [ -f /.dockerenv ] || [ -f /run/.containerenv ]; }; then

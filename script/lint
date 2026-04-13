@@ -1,33 +1,62 @@
 #!/usr/bin/env bash
 #MISE alias="l"
 #MISE description="Render and lint chezmoi templates"
+#USAGE flag "-q --quiet" help="Suppress prek output"
+#USAGE flag "-v --verbose" help="Show render dir and file list"
+#USAGE arg "[templates]..." help="Template paths to render (default: all)"
+#USAGE complete "templates" run="chezmoi managed --path-style=relative"
+# FIXME: carapace timeout
 
 set -euo pipefail
 
 repo_dir="$PWD"
 render_dir=$(mktemp -d)
 prek_args=()
+verbose=false
 
-# shellcheck disable=SC2329
-cleanup() { rm -rf "$render_dir"; }
-trap cleanup EXIT
-
-# Separate our flags from template paths
-templates=()
-for arg in "$@"; do
-  case "$arg" in
-  --quiet)
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -q | --quiet)
     prek_args+=(--quiet)
+    shift
     ;;
-  *) templates+=("$arg") ;;
+  -v | --verbose)
+    prek_args+=(--verbose)
+    verbose=true
+    shift
+    ;;
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: lint [-q] [-v] [templates...]"
+    fi
+    exit
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    exit
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *) break ;;
   esac
 done
+templates=("$@")
 
-{
-  printf 'root = true\n\n'
-  cat "$repo_dir/.editorconfig"
-  printf '\n[*]\nindent_style = space\nindent_size = 2\ninsert_final_newline = false\n'
-} >"$render_dir/.editorconfig"
+# shellcheck disable=SC2329
+cleanup() {
+  if [ "$verbose" = true ]; then
+    echo "cat $render_dir/.chezmoitemplates/packages.yaml" >&2
+  else
+    rm -rf "$render_dir"
+  fi
+}
+trap cleanup EXIT
+
+cp "$repo_dir/.editorconfig" "$render_dir/.editorconfig"
 printf 'disable=SC1090,SC2034,SC2248\n' >"$render_dir/.shellcheckrc"
 
 chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
@@ -50,6 +79,11 @@ git -C "$render_dir" add --all
 # prek resolves hook entries and config paths relative to --cd
 cp -a "$repo_dir/script" "$render_dir/script"
 ln -s "$repo_dir/home" "$render_dir/home"
+
+if [ "$verbose" = true ]; then
+  echo "lint: render dir $render_dir" >&2
+  git -C "$render_dir" ls-files >&2
+fi
 
 prek run \
   "${prek_args[@]}" \

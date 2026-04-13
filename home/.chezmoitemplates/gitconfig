@@ -9,7 +9,7 @@
 [commit]
 	gpgsign = {{ $signingKey | not | not }}
 
-{{- if and $signingKey $gpg }}
+{{- if and $signingKey ($gpg | isExecutable) }}
 
 [gpg]
 	program = {{ $gpg }}

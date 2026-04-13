@@ -1,4 +1,5 @@
 #!/bin/sh
+
 set -eu
 
 if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then

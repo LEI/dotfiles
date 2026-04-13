@@ -21,4 +21,6 @@
 {{- else if stat "/.dockerenv" -}}
 {{-   $container = "Docker" -}}
 {{- end -}}
-{{- $container -}}
+{{- if $container -}}
+{{ $container | trim }}
+{{ end -}}

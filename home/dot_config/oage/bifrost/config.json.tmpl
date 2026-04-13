@@ -1,6 +1,13 @@
 {{- $ollamaInCompose := and .features.ollama (eq .os "linux") (not .features.podman) -}}
 {{- $ollamaHost := $ollamaInCompose | ternary "ollama" "host.docker.internal" -}}
 {{- $mlx := false -}}{{- /* disabled: config_store corrupts custom providers (v1.4.14 bug) */ -}}
+{{- $openrouterKey := "" -}}
+{{- $openrouterConf := joinPath .chezmoi.homeDir ".config/secrets.d/openrouter.conf" -}}
+{{- if stat $openrouterConf -}}
+{{-   $openrouterKey = include $openrouterConf
+      | regexFind "(?m)^OPENROUTER_API_KEY=(.+)$"
+      | trimPrefix "OPENROUTER_API_KEY=" -}}
+{{- end -}}
 {
   "config_store": {
     "enabled": true,
@@ -75,6 +82,9 @@
     }
   ],
   "providers": {
+{{- $sep := "" }}
+{{- if $openrouterKey }}
+{{- $sep = "," }}
     "openrouter": {
       "keys": [
         {
@@ -86,7 +96,10 @@
       "network_config": {
         "default_request_timeout_in_seconds": 300
       }
-    }{{ if (get .ai.providers "ollama").enabled }},
+    }
+{{- end }}
+{{- if (get .ai.providers "ollama").enabled }}{{ $sep }}
+{{- $sep = "," }}
     "ollama": {
       "keys": [
         {
@@ -100,7 +113,9 @@
         "default_request_timeout_in_seconds": 120,
         "max_retries": 1
       }
-    }{{ end }}{{ if $mlx }},
+    }
+{{- end }}
+{{- if $mlx }}{{ $sep }}
     "mlx-lm": {
       "keys": [
         {

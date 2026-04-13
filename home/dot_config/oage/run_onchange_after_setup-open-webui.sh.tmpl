@@ -1,4 +1,3 @@
-{{- if .features.oage -}}
 {{- $key := .features.mlx | ternary "mlx-lm" "ollama" -}}
 {{- $configs := list -}}
 {{- range $name, $meta := .ai.models -}}
@@ -13,26 +12,18 @@
 {{- end -}}
 {{- $payload := dict "models" $configs -}}
 #!/bin/sh
+
 # config hash: {{ $payload | toJson | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+. "$CHEZMOI_WORKING_TREE/home/dot_config/oage/.open-webui.sh"
 
-BASE_URL="http://127.0.0.1:8503"
+open_webui_auth || exit 0
 
-TOKEN="$(curl -sf "$BASE_URL/api/v1/auths/signin" \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"","password":""}' | jq -r '.token')"
-
-if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-  warn "open-webui: could not authenticate, skipping"
-  exit 0
-fi
-
-curl -sf -X POST "$BASE_URL/api/v1/models/import" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{{ $payload | toJson }}' >/dev/null
+open_webui_post "models/import" <<'EOF'
+{{ $payload | toPrettyJson | trim }}
+EOF
 
 msg "open-webui: imported {{ len $configs }} model config(s)"
-{{- end }}

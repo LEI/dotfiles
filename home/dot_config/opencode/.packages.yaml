@@ -20,5 +20,3 @@ packages:
       aur: openwork
       npm: openwork-orchestrator
     type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
-  agent-ecosystem/tap/skill-validator:
-    type: brew

@@ -17,7 +17,6 @@ services:
     environment:
       - BIFROST_HOST=0.0.0.0
       - LOG_LEVEL=info
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
     env_file: secrets/bifrost.env
     deploy:
       resources:
@@ -129,6 +128,7 @@ services:
       - "127.0.0.1:8503:8080" # Web UI
     volumes:
       - open-webui-data:/app/backend/data
+    # https://docs.openwebui.com/reference/env-configuration
     environment:
       - CORS_ALLOW_ORIGIN=https://open-webui.test
 {{- if (get .ai.providers "ollama").enabled }}
@@ -143,8 +143,16 @@ services:
       - OPENAI_API_BASE_URL=http://bifrost:8080/v1
 {{- end }}
       - AIOHTTP_CLIENT_TIMEOUT=120 # default: 30s; local models need more time for first token
+      - ENABLE_API_KEYS=true
+      # - ENABLE_CHANNELS=true
+      - ENABLE_IMAGE_GENERATION=true
+      # - ENABLE_USER_WEBHOOKS=true
+      - ENABLE_WEB_SEARCH=true
       - USER_AGENT=open-webui
       - WEBUI_AUTH=false
+      - WEB_LOADER_ENGINE=firecrawl
+      - WEB_SEARCH_ENGINE=exa
+      # - EXA_API_KEY=
       # - HF_TOKEN=
       {{- if .features.otel }}
       - ENABLE_OTEL=true

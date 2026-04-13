@@ -56,6 +56,21 @@ claude_teams_tmux() {
   tmux_session "$session_name" claude --teammate-mode=tmux "$@"
 }
 
+claude_plan() {
+  local name="$1"
+  shift
+  local plan=".claude/plans/$name"
+  if [ ! -f "$plan" ]; then
+    echo "claude_plan: not found: $plan" >&2
+    return 1
+  fi
+  command claude --permission-mode=default /plan "$plan" "$@"
+}
+
+# claude_print() {
+#   command claude --print "$@"
+# }
+
 # # Pop Kitty keyboard protocol if an app exited without cleanup
 # # https://github.com/anthropics/claude-code/issues/38761
 # _kitty_keyboard_reset() { printf '\e[<u'; }

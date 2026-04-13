@@ -2,6 +2,7 @@
 #MISE alias="cov"
 #MISE description="Run tests with kcov coverage"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats via script/test"
+#USAGE complete "filter" run="fd --extension bats --base-directory test"
 
 set -Eeuo pipefail
 

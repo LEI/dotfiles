@@ -3,6 +3,7 @@
 #USAGE flag "-q --quiet" help="Only print errors and summary"
 #USAGE flag "-v --verbose" help="Print full usage spec for each file"
 #USAGE arg "[file]..." help="Files to check (default: git ls-files)"
+#USAGE complete "file" run="git ls-files 'script/*' 'home/dot_local/bin/executable_*'"
 
 set -euo pipefail
 
@@ -26,6 +27,18 @@ while [ $# -gt 0 ]; do
   -v | --verbose)
     verbose=true
     shift
+    ;;
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: validate-usage [-q] [-v] [file...]"
+    fi
+    exit
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    exit
     ;;
   --)
     shift

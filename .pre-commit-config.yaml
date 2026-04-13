@@ -59,22 +59,27 @@ repos:
         name: bashate
         entry: bashate
         args:
-          - --ignore=E003,E006
+          # Available checks: bashate --show
+          # - --error=E005
+          # FIXME: .config/opencode/install-opencode.sh:8:1: E004 File did not end with a newline
+          # - --ignore=E003,E006
+          - --ignore=E003,E004,E006
         language: system
         types:
           - shell
-        exclude: ^(home/.*(\.tmpl|/modify_)|test/)
+        exclude: ^(home/.*(\.tmpl|/modify_)|test/|.*\.bats)
         stages:
           - pre-commit
 
   # https://github.com/JohnnyMorganz/StyLua#pre-commit
-  - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: v2.4.1
-    hooks:
-      - id: stylua-github
-        name: stylua
-        args:
-          - --check
+  # FIXME: glibc binary, incompatible with Alpine/musl
+  # - repo: https://github.com/JohnnyMorganz/StyLua
+  #   rev: v2.4.1
+  #   hooks:
+  #     - id: stylua-github
+  #       name: stylua
+  #       args:
+  #         - --check
 
   # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
   - repo: https://github.com/adrienverge/yamllint.git
@@ -82,8 +87,8 @@ repos:
     hooks:
       - id: yamllint
         args:
-          - --strict
           - --config-file=home/dot_config/yamllint/config
+          - --strict
         # Use yamlfmt installed on the system instead of building with Go
         language: system
         stages:

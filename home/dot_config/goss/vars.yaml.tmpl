@@ -22,16 +22,6 @@ featureChecks:
 {{- end }}
 {{- end }}
 
-{{- if and (hasKey . "ai") (not (hasKey .ai "localProvider")) }}
-{{- $localProvider := .features.mlx | ternary "mlx-lm" "ollama" }}
-{{- $_ := set .ai "localProvider" $localProvider }}
-{{- $_ := set (get .ai.providers $localProvider) "enabled" (or (get (get .ai.providers "mlx-lm") "enabled") (get (get .ai.providers "ollama") "enabled")) }}
-{{- range $name, $p := .ai.providers }}
-{{- if or (not (hasKey $p "requires")) (index $.features (get $p "requires")) }}{{ continue }}{{ end }}
-{{- $_ := set $p "enabled" false }}
-{{- end }}
-{{- end }}
-
 # Health checks: merged from caddy.sites + ai.providers
 # url = https://<name>.test<health>; status defaults to 200
 checks:
@@ -54,7 +44,15 @@ checks:
 {{- end }}
 {{- end }}
 
+{{- $scripts := glob (joinPath .chezmoi.sourceDir "dot_config/goss/exact_check/*.sh*") }}
+{{- if $scripts }}
+scripts:
+{{- range $scripts }}
+  - {{ base . | trimSuffix ".tmpl" }}
+{{- end }}
+{{- end }}
+
 {{- if hasKey . "ai" }}
-localProvider: {{ get .ai "localProvider" }}
+localProvider: {{ get .ai "localProvider" | quote }}
 ai: {{- .ai | toYaml | trim | nindent 2 }}
 {{- end }}

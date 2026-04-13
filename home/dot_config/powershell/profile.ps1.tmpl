@@ -22,7 +22,9 @@ $newPath = $currentPath.Replace(";" + $shimPath, "") + ";" + $shimPath
 [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
 
 # https://docs.atuin.sh/cli/guide/installation/#on-windows
-Invoke-Expression (& { (atuin init --disable-up-arrow powershell | Out-String) })
+if ($PSVersionTable.PSVersion.ToString() -ge "7.0.0") {
+  Invoke-Expression (& { (atuin init --disable-up-arrow powershell | Out-String) })
+}
 
 # https://carapace-sh.github.io/carapace-bin/setup.html#powershell
 if ($PSVersionTable.PSVersion.ToString() -ge "7.0.0") {

@@ -12,6 +12,7 @@ os:
     - .macos
     - Library/
   linux:
+    - .chezmoiscripts/linux/**
     - .config/systemd/
     - .hushlogin
   windows:
@@ -146,6 +147,8 @@ features:
     - "*.nu"
   oage:
     - .config/oage/
+  ollama:
+    - .ollama/
   otel:
     - .config/otel/
     - .config/systemd/user/webhook.service

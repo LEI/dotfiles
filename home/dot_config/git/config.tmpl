@@ -97,13 +97,22 @@
 	detachedHead = false
 {{- end }}
 
+[include]
+	path = "~/.gitconfig.local"
+
 [pull]
 	ff = only
 	# NOTE: use git pull --rebase=merges
 	# rebase = false
 
-[include]
-	path = "~/.gitconfig.local"
+[rebase]
+	autoSquash = true
+
+{{- if .container }}
+
+[safe]
+	directory = {{ .chezmoi.homeDir }}/.local/share/chezmoi
+{{- end }}
 
 {{- if lookPath "difft" | isExecutable }}
 
@@ -149,9 +158,6 @@
 	# autoStageIfNothingStaged = true
 	# oneFixupPerCommit = true
 {{- end }}
-
-[rebase]
-	autoSquash = true
 
 {{- if lookPath "ghq" | isExecutable }}
 

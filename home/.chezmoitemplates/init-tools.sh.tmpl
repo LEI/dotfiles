@@ -23,35 +23,24 @@ for _tool in {{ $ordered | join " " }}; do
 done
 unset _tool
 
-# Feature init files
 {{- $exclude := concat $init $ordered }}
-for _feat in \
-{{- range $index, $path := glob (joinPath .chezmoi.sourceDir "dot_*/init.sh*") }}
-  {{- $name := $path | dir | base | trimPrefix "dot_" }}
+{{- $homeInit := glob (joinPath .chezmoi.sourceDir "dot_*/init.sh*") -}}
+{{- $configInit := glob (joinPath (joinPath .chezmoi.sourceDir "dot_config") "*/init.sh*") -}}
+{{- $files := list -}}
+{{- range $index, $path := concat $homeInit $configInit }}
+  {{- $name := $path | dir | base | trimPrefix "dot_" | trimSuffix "/init.sh" | trimSuffix "/init.sh.tmpl" }}
   {{- if has $name $exclude }}
-  {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
   {{-   continue }}
   {{- end }}
   {{- if not (get $.features (get $featureMap $name | default $name)) }}
-  {{-   warnf "disabled: %s .%s/init.sh" $shell $name }}
   {{-   continue }}
   {{- end }}
-  "$HOME/.{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}" \
+  {{- $files = append $files ($path | trimSuffix ".tmpl"
+    | replaceAllRegex "/dot_" "/."
+    | replace (joinPath $.chezmoi.sourceDir "dot_config") "$XDG_CONFIG_HOME"
+    | replace (joinPath $.chezmoi.sourceDir) "$HOME") -}}
 {{- end }}
-{{- $list := glob (joinPath (joinPath .chezmoi.sourceDir "dot_config") "*/init.sh*") -}}
-{{- range $index, $path := $list }}
-  {{- $name := $path | dir | base }}
-  {{- if has $name $exclude }}
-  {{- /*  warnf "excluded: %s .%s/init.sh" $shell $name */ -}}
-  {{-   continue }}
-  {{- end }}
-  {{- if not (get $.features (get $featureMap $name | default $name)) }}
-  {{-   warnf "disabled: %s .config/%s/init.sh" $shell $name }}
-  {{-   continue }}
-  {{- end }}
-  "$XDG_CONFIG_HOME/{{ $name }}/{{ . | base | trimSuffix ".tmpl" }}"
-  {{- if ne (add $index 2) (len $list) }} \{{ end }}
-{{- end }}; do
+for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
   if ! [ -f "$_feat" ]; then
     echo "warning: init file not found: $_feat" >&2
     continue

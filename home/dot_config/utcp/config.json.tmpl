@@ -1,4 +1,7 @@
-{{- $openapis := dig "utcp" "openApiUrls" (list) . -}}
+{{- $openapis := list -}}
+{{- range $id, $api := dig "apis" dict . -}}
+{{-   $openapis = append $openapis (printf "%s%s" $api.url $api.spec) -}}
+{{- end -}}
 {{- /* "load_variables_from": [
   {
     "variable_loader_type": "dotenv",

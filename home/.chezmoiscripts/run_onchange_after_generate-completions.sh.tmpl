@@ -1,19 +1,28 @@
 {{- if or .features.bash .features.zsh -}}
-{{- $scripts := list -}}
-{{- $hashes := list -}}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_local/bin/executable_*") -}}
+{{- $dict := dict -}}
+{{- $bin := glob (joinPath .chezmoi.sourceDir "dot_local" "bin" "executable_*") -}}
+{{- $scripts := glob (joinPath .chezmoi.sourceDir ".." "script" "*") -}}
+{{- range concat $bin $scripts -}}
 {{-   $content := include . -}}
 {{-   if contains "#USAGE " $content -}}
-{{-     $scripts = append $scripts (. | base | trimPrefix "executable_") -}}
-{{-     $hashes = append $hashes ($content | sha256sum) -}}
+{{-     $hash := $content | sha256sum -}}
+{{-     $name := . | base | trimPrefix "executable_" -}}
+{{-     if get $dict $name -}}
+{{-       warnf "duplicate #USAGE for %s, skipping\n" $name -}}
+{{-       continue -}}
+{{-     end -}}
+{{-     $relative := trimPrefix (printf "%s/" $.chezmoi.sourceDir) . -}}
+{{-     $dict = merge $dict (dict $name (dict
+  "path" $relative
+  "hash" $hash
+)) -}}
 {{-   end -}}
 {{- end -}}
-{{- if $scripts -}}
+{{- if not (empty $dict) -}}
 #!/bin/sh
 # Generate shell completions for scripts with #USAGE directives
 
-# scripts: {{ $scripts | join " " }}
-# hash: {{ $hashes | join " " }}
+# hash:{{ range $dict | keys | sortAlpha }} {{ . }}{{ get (get $dict .) "hash" }}{{ end }}
 
 set -eu
 
@@ -38,17 +47,39 @@ zsh_dir="{{ .chezmoi.homeDir }}/.local/share/zsh/completions"
 mkdir -p "$zsh_dir"
 {{- end }}
 
-bin_dir="{{ .chezmoi.homeDir }}/.local/bin"
+rc=0
+{{- range $dict | keys | sortAlpha }}
+{{- $item := get $dict . }}
 
-{{- range $scripts }}
-
-spec=$(grep '^#USAGE' "$bin_dir/{{ . }}" | sed 's/^#USAGE //')
+# TODO: use --usage
+# spec=$(run grep '^#USAGE' {{ $item.path | quote }} | sed 's/^#USAGE //')
+spec=$(
+  cat <<'EOF'
+{{ $content := include $item.path -}}
+{{- range $line := $content | splitList "\n" -}}
+{{-   if not (hasPrefix "#USAGE " $line) -}}
+{{-     continue -}}
+{{-   end -}}
+{{-   printf "%s\n" (trimPrefix "#USAGE " $line) -}}
+{{- end }}
+EOF
+)
+if [ -n "$spec" ]; then
+  msg "generate-completions: {{ . }}"
 {{- if $.features.bash }}
-printf '%s\n' "$spec" | run usage generate completion bash {{ . }} --file - >"$bash_dir/{{ . }}"
+  printf '%s\n' "$spec" |
+    usage generate completion bash {{ . | quote }} --file - >"$bash_dir/{{ . }}"
 {{- end }}
 {{- if $.features.zsh }}
-printf '%s\n' "$spec" | run usage generate completion zsh {{ . }} --file - >"$zsh_dir/_{{ . }}"
+  printf '%s\n' "$spec" |
+    usage generate completion zsh {{ . | quote }} --file - >"$zsh_dir/_{{ . }}"
 {{- end }}
+else
+  warn "generate-completions: #USAGE not found: {{ $item.path }}"
+  rc=1
+fi
 {{- end }}
+
+exit $rc
 {{- end }}
 {{- end }}

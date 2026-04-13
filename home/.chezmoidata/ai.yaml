@@ -10,8 +10,7 @@ ai:
   # dot_config/mlx-lm/setup: mlx-lm port and label
   # dot_config/llama-cpp/setup: llama-server port
   # Library/LaunchAgents/*.plist: mlx-lm and llama-server ports
-  # .chezmoiscripts/setup-ollama-models: ollama port
-  # .chezmoiscripts/setup-open-notebook: provider iteration
+  # dot_ollama, .chezmoiscripts
   providers:
     # Local
     llama-server:
@@ -20,15 +19,20 @@ ai:
       label: com.llama-cpp.server
       port: 11437
       domain: llama-cpp.test
+    mlx-embed:
+      enabled: false
+      health: /v1/models
+      label: com.mlx-embed.server
+      server: mlx-openai-server
+      port: 11445
     mlx-lm:
-      enabled: true
+      enabled: false
       health: /v1/models
       label: com.mlx-lm.server
       # server: mlx_lm.server, mlx-omni-server, mlx-openai-server
-      server: mlx-omni-server
+      server: mlx_lm.server
       port: 11435
       domain: mlx-lm.test
-      requires: mlx
     ollama:
       enabled: false
       port: 11434
@@ -40,7 +44,6 @@ ai:
       health: /v1/models
       port: 11436
       domain: vllm-mlx.test
-      requires: mlx
     # Cloud
     # github-copilot: {} # free, pro, pro+
     # huggingface:
@@ -110,12 +113,14 @@ ai:
       agentic: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
       chat: mlx-lm/mlx-community/gemma-4-e4b-it-4bit
       coding: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
+      embedding: mlx-embed/mlx-community/all-MiniLM-L6-v2-4bit
       fast: mlx-lm/mlx-community/Qwen3.5-4B-MLX-4bit
       reasoning: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
     ollama-local:
       agentic: ollama/qwen3.5:9b
       chat: ollama/gemma4
       coding: ollama/qwen3.5:9b
+      embedding: ollama/nomic-embed-text
       fast: ollama/qwen3.5:4b
       reasoning: ollama/qwen3.5:9b
     copilot-pro:

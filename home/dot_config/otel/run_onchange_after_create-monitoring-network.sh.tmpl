@@ -1,6 +1,8 @@
 {{- if and .features.otel .features.oage -}}
 #!/bin/sh
+
 # provider: {{ env "CONTAINER_PROVIDER" }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

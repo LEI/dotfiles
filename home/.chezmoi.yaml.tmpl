@@ -13,7 +13,7 @@
 
 {{- $ci := eq (env "CI") "true" -}}
 {{- $codespaces := env "CODESPACES" | not | not -}}
-{{- $container := includeTemplate "container.tmpl" dict -}}
+{{- $container := includeTemplate "container.tmpl" dict | trim -}}
 {{- $isContainer := not (empty $container) -}}
 {{- if and $isContainer .chezmoi.config.verbose -}}
 {{-   warnf "container type: %s" $container -}}
@@ -172,6 +172,18 @@ data:
     prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
   # term: truecolor
+{{- if $features.ai }}
+  ai:
+    localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
+    localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
+    providers:
+      mlx-embed:
+        enabled: {{ $features.mlx }}
+      mlx-lm:
+        enabled: {{ $features.mlx }}
+      ollama:
+        enabled: {{ $features.ollama }}
+{{- end }}
 
 {{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}
 

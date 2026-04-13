@@ -1,4 +1,5 @@
 #!/bin/sh
+
 set -eu
 
 # TODO: ignore deprecated or disabled warnings for pinned packages

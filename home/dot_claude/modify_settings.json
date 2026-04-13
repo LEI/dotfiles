@@ -337,7 +337,7 @@
     }
   },
   "alwaysThinkingEnabled": false,
-  "showClearContextOnPlanAccept": true,
+  "showClearContextOnPlanAccept": true{{/* https://github.com/anthropics/claude-code/issues/37688 */}},
   "plansDirectory": "./.claude/plans",
   "autoMemoryEnabled": true,
   "showThinkingSummaries": true,

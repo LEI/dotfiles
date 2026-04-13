@@ -37,7 +37,7 @@ packages:
   # sbx run claude|opencode
   # https://docs.docker.com/ai/sandboxes/get-started/#install-and-sign-in
   sbx:
-    enabled: false # "{{ .features.ai }}"
+    enabled: "{{ and .features.ai .features.mlx }}"
     nameOverwrite:
       cask: docker/tap/sbx
       mise: github:docker/sbx-releases

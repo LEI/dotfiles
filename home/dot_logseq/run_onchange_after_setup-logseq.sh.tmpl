@@ -1,5 +1,5 @@
-{{- if .features.logseq -}}
 #!/bin/sh
+
 # plugins.edn: {{ include "dot_logseq/config/plugins.edn" | sha256sum }}
 
 set -eu
@@ -54,4 +54,3 @@ setup_graph {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end 
 # fi
 
 msg "Tip: run 'Install plugins from plugins.edn' from the Logseq command palette to restore plugins."
-{{ end -}}

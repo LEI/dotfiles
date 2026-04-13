@@ -122,10 +122,16 @@ start() {
 sync() {
   # shellcheck disable=SC2016
   trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
-  for f in .chezmoiroot .chezmoiversion .pre-commit-config.yaml mise.toml home script test; do
+  for f in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
     trace container cp "$f" "$container:$chezmoi_root/"
   done
   trace container exec "$container" chown -R "$exec_user:$exec_user" "$home"
+  # Pre-commit expects a git repo
+  # trace container exec "$container" git config --global --add safe.directory "$chezmoi_root"
+  if ! container exec "$container" test -d "$chezmoi_root/.git"; then
+    trace container exec "$container" git -C "$chezmoi_root" init --quiet
+    trace container exec "$container" git -C "$chezmoi_root" add --all
+  fi
 }
 
 bootstrap() {

@@ -3,8 +3,10 @@
 {{- if stat $bifrostConfig -}}
 {{- $bifrostHash := include $bifrostConfig | sha256sum -}}
 #!/bin/sh
+
 # compose: {{ include $compose | fromYaml | toJson | sha256sum }}
 # bifrost: {{ $bifrostHash }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

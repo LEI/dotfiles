@@ -7,7 +7,9 @@
 {{-   end -}}
 {{- end -}}
 #!/bin/sh
+
 # models: {{ $mlxModels | toJson | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"

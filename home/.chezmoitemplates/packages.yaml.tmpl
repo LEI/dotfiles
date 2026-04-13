@@ -90,7 +90,8 @@ packages:
       npm: "@github/copilot"
       darwin: copilot-cli
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
-  coreutils: { enabled: {{ eq .os "android" "linux" }} }
+  coreutils:
+    enabled: {{ eq .os "android" "linux" }}
   # cotp:
   #   enabled: {{ ne .profile "minimal" }}
   # uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
@@ -117,6 +118,8 @@ packages:
       cask
       {{- else if eq .variantID "silverblue" -}}
       flatpak
+      {{- else -}}
+      ''
       {{- end }}
   devpod:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
@@ -340,8 +343,8 @@ packages:
     enabled: {{ and .features.neovim (not (eq .osIDLike "alpine" "android" "debian" "fedora" "windows")) (ne .profile "minimal") }}
     nameOverwrite:
       arch: lua51
-    version: '{{ ne .osIDLike "arch" | ternary "5.1" "" }}'
-    type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
+    version: {{ ne .osIDLike "arch" | ternary "5.1" "" | quote }}
+    type: {{ ne .osIDLike "arch" | ternary "mise" nil | quote }}
   macchina:
     enabled: {{ ne .profile "minimal" }}
     type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
@@ -564,13 +567,19 @@ packages:
       windows: koalaman.shellcheck
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shfmt:
-    enabled: {{ and (not .features.neovim) (not .features.mise) }}
+    enabled: {{ not .features.neovim }}
     nameOverwrite:
       windows: mvdan.shfmt
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shpool: # abduco, dtach
     enabled: {{ and .features.shpool (not (eq .osIDLike "darwin" "windows")) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
+  skill-validator:
+    enabled: "{{ ne .profile "minimal" }}" # "{{ .features.ai }}"
+    nameOverwrite:
+      brew: agent-ecosystem/tap/skill-validator
+      mise: github:agent-ecosystem/skill-validator
+    type: '{{ .features.brew | ternary "brew" "mise" }}'
   # https://github.com/skim-rs/skim#shell-completions
   skim:
     enabled: {{ and (not (eq .osIDLike "android" "fedora" "windows")) (ne .profile "minimal") }}
@@ -596,6 +605,9 @@ packages:
       fedora: com.valvesoftware.SteamLink
       windows: Valve.SteamLink
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+  stylua:
+    enabled: {{ and (not .features.neovim) (ne .profile "minimal") }}
+    type: mise
   subliminal:
     enabled: {{ and (eq .osIDLike "android" "arch" "darwin" "windows") (eq .profile "personal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "uv" }}'
