@@ -261,13 +261,13 @@ command:
     timeout: 5000
 {{- if .Vars.features.processCompose }}
   launchd-process-compose:
-    exec: launchctl list com.process-compose
+    exec: launchctl list com.process-compose | grep -q PID
     exit-status: 0
     timeout: 3000
 {{- end }}
 {{- if .Vars.features.otel }}
   launchd-webhook:
-    exec: launchctl list com.webhook.alert
+    exec: launchctl list com.webhook.alert | grep -q PID
     exit-status: 0
     timeout: 3000
 {{- end }}
@@ -275,7 +275,7 @@ command:
 {{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
 {{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
   launchd-{{ $name }}:
-    exec: launchctl list {{ $p.label }}
+    exec: launchctl list {{ $p.label }} | grep -q PID
     exit-status: {{ if $enabled }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{- end }}

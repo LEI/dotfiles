@@ -132,15 +132,16 @@ services:
     environment:
       - CORS_ALLOW_ORIGIN=https://open-webui.test
 {{- if (get .ai.providers "ollama").enabled }}
-      - ENABLE_OLLAMA_API=true
+      - ENABLE_OLLAMA_API={{ not .features.mlx }}
       - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
 {{- else }}
       - ENABLE_OLLAMA_API=false
 {{- end }}
 {{- if .features.mlx }}
-      - OPENAI_API_BASE_URLS=http://bifrost:8080/v1;http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
+      # - OPENAI_API_BASE_URLS=http://bifrost:8080/v1;http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
+      - OPENAI_API_BASE_URLS=http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
 {{- else }}
-      - OPENAI_API_BASE_URL=http://bifrost:8080/v1
+      # - OPENAI_API_BASE_URL=http://bifrost:8080/v1
 {{- end }}
       - AIOHTTP_CLIENT_TIMEOUT=120 # default: 30s; local models need more time for first token
       - ENABLE_API_KEYS=true
@@ -148,11 +149,11 @@ services:
       - ENABLE_IMAGE_GENERATION=true
       # - ENABLE_USER_WEBHOOKS=true
       - ENABLE_WEB_SEARCH=true
+      - SEARXNG_QUERY_URL=http://searxng:8080/search?q=<query>
       - USER_AGENT=open-webui
       - WEBUI_AUTH=false
-      - WEB_LOADER_ENGINE=firecrawl
-      - WEB_SEARCH_ENGINE=exa
-      # - EXA_API_KEY=
+      # - WEB_LOADER_ENGINE=firecrawl
+      - WEB_SEARCH_ENGINE=searxng
       # - HF_TOKEN=
       {{- if .features.otel }}
       - ENABLE_OTEL=true
@@ -176,6 +177,28 @@ services:
     depends_on:
       bifrost:
         condition: service_healthy
+      searxng:
+        condition: service_healthy
+
+  # SearXNG: meta search engine for open-webui web search
+  # https://docs.searxng.org
+  searxng:
+    image: docker.io/searxng/searxng:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8080" # Search UI/API
+    volumes:
+      - ./searxng/settings.yaml:/etc/searxng/settings.yml:z
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # OpenCode: bundled in sandboxed.sh v0.10.0
   # https://opencode.ai/docs/server

@@ -9,7 +9,7 @@ failures=0
 jqr() { printf '%s' "$data" | jq -r "$@"; }
 
 post() {
-  curl --silent --fail --max-time 10 "$1" \
+  curl --silent --fail --max-time 60 "$1" \
     -H 'Content-Type: application/json' \
     -d "$2"
 }

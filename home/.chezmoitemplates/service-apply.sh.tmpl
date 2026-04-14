@@ -14,7 +14,7 @@ if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
 fi
 run launchctl kickstart -kp "$GUI/{{ $label }}"
 
-if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
+if ! launchctl list "{{ $label }}" | grep -q PID; then
   die "{{ $label }}: service failed to start"
 fi
 {{- else }}

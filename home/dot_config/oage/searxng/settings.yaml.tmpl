@@ -1,0 +1,19 @@
+{{- $secretPath := joinPath .chezmoi.homeDir ".config/oage/secrets/searxng-secret-key" -}}
+use_default_settings: true
+
+server:
+  {{- if stat $secretPath }}
+  secret_key: {{ include $secretPath | trim | quote }}
+  {{- end }}
+  limiter: false
+
+search:
+  formats:
+    - html
+    - json
+
+engines:
+  - name: karmasearch
+    disabled: true
+  - name: karmasearch videos
+    disabled: true
