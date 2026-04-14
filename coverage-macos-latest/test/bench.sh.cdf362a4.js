@@ -25,12 +25,12 @@ var data = {lines:[
 {"lineNum":"   24","line":"  end=\"${EPOCHREALTIME:-}\"","class":"lineCov","hits":"2","order":"122","possible_hits":"0",},
 {"lineNum":"   25","line":"  if [ -n \"$start\" ] && [ -n \"$end\" ]; then","class":"lineCov","hits":"4","order":"123","possible_hits":"0",},
 {"lineNum":"   26","line":"    elapsed=$(awk \"BEGIN {printf \\\"%.3f\\\", $end - $start}\")","class":"lineCov","hits":"4","order":"124","possible_hits":"0",},
-{"lineNum":"   27","line":"    echo >&2 \"bench: $label: ${elapsed}s\"","class":"lineCov","hits":"2","order":"125","possible_hits":"0",},
+{"lineNum":"   27","line":"    echo \"bench: $label: ${elapsed}s\" >&2","class":"lineCov","hits":"2","order":"125","possible_hits":"0",},
 {"lineNum":"   28","line":"  fi"},
 {"lineNum":"   29","line":"  unset BENCHFMT","class":"lineCov","hits":"2","order":"126","possible_hits":"0",},
 {"lineNum":"   30","line":"  return $ret","class":"lineCov","hits":"2","order":"127","possible_hits":"0",},
 {"lineNum":"   31","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 16, "covered" : 15,};
+var header = { "command" : "test", "date" : "2026-04-14 06:21:50", "instrumented" : 16, "covered" : 15,};
 var merged_data = [];

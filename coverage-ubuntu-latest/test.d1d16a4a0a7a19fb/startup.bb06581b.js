@@ -28,7 +28,7 @@ var data = {lines:[
 {"lineNum":"   27","line":"  local output=\"$1\"","class":"lineCov","hits":"1","order":"194","possible_hits":"0",},
 {"lineNum":"   28","line":"  shift","class":"lineCov","hits":"1","order":"195","possible_hits":"0",},
 {"lineNum":"   29","line":""},
-{"lineNum":"   30","line":"  echo >&2 \"initial startup: $*\"","class":"lineCov","hits":"1","order":"196","possible_hits":"0",},
+{"lineNum":"   30","line":"  echo \"initial startup: $*\" >&2","class":"lineCov","hits":"1","order":"196","possible_hits":"0",},
 {"lineNum":"   31","line":"  command_time \"$output\" \"$@\"","class":"lineCov","hits":"1","order":"197","possible_hits":"0",},
 {"lineNum":"   32","line":""},
 {"lineNum":"   33","line":"  cat \"$output.txt\" | column -t | cut -d\' \' -f1","class":"lineCov","hits":"3","order":"204","possible_hits":"0",},
@@ -41,7 +41,7 @@ var data = {lines:[
 {"lineNum":"   40","line":"  shift","class":"lineCov","hits":"1","order":"209","possible_hits":"0",},
 {"lineNum":"   41","line":""},
 {"lineNum":"   42","line":"  for i in $(seq 1 \"$iterations\"); do","class":"lineCov","hits":"2","order":"210","possible_hits":"0",},
-{"lineNum":"   43","line":"    echo >&2 \"startup $i/$iterations: $*\"","class":"lineCov","hits":"1","order":"211","possible_hits":"0",},
+{"lineNum":"   43","line":"    echo \"startup $i/$iterations: $*\" >&2","class":"lineCov","hits":"1","order":"211","possible_hits":"0",},
 {"lineNum":"   44","line":"    command_time \"$output-$i\" \"$@\"","class":"lineCov","hits":"1","order":"212","possible_hits":"0",},
 {"lineNum":"   45","line":"  done"},
 {"lineNum":"   46","line":""},
@@ -50,7 +50,7 @@ var data = {lines:[
 {"lineNum":"   49","line":""},
 {"lineNum":"   50","line":"main() {"},
 {"lineNum":"   51","line":"  if [ $# -gt 1 ]; then","class":"lineCov","hits":"1","order":"184","possible_hits":"0",},
-{"lineNum":"   52","line":"    echo >&2 \"startup: expected at most 1 argument, got $#\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   52","line":"    echo \"startup: expected at most 1 argument, got $#\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   53","line":"    exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   54","line":"  fi"},
 {"lineNum":"   55","line":""},
@@ -58,11 +58,11 @@ var data = {lines:[
 {"lineNum":"   57","line":"  shell=\"${shell:-bash}\"","class":"lineCov","hits":"1","order":"186","possible_hits":"0",},
 {"lineNum":"   58","line":""},
 {"lineNum":"   59","line":"  case \"$shell\" in","class":"lineCov","hits":"1","order":"187","possible_hits":"0",},
-{"lineNum":"   60","line":"    bash|zsh|dummy) ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   61","line":"    *)"},
-{"lineNum":"   62","line":"      echo >&2 \"startup: invalid shell \'$shell\', expected bash or zsh\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   63","line":"      exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   64","line":"      ;;"},
+{"lineNum":"   60","line":"  bash | zsh | dummy) ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   61","line":"  *)"},
+{"lineNum":"   62","line":"    echo \"startup: invalid shell \'$shell\', expected bash or zsh\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   63","line":"    exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   64","line":"    ;;"},
 {"lineNum":"   65","line":"  esac"},
 {"lineNum":"   66","line":""},
 {"lineNum":"   67","line":"  local cmd=\"$shell -ci exit\"","class":"lineCov","hits":"1","order":"188","possible_hits":"0",},
@@ -97,5 +97,5 @@ var data = {lines:[
 {"lineNum":"   96","line":"main \"$@\"","class":"lineCov","hits":"1","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 41, "covered" : 35,};
+var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 41, "covered" : 35,};
 var merged_data = [];

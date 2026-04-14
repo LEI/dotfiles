@@ -21,7 +21,7 @@ var data = {lines:[
 {"lineNum":"   20","line":"    # NOTE: Homebrew/install/HEAD/install.sh -> 404"},
 {"lineNum":"   21","line":"    install_script=\"$(run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   22","line":"    if [ -z \"$install_script\" ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   23","line":"      err \"failed to download install script\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   23","line":"      die \"failed to download install script\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   24","line":"    fi"},
 {"lineNum":"   25","line":"    /bin/bash -c \"$install_script\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   26","line":"    msg \"Installed homebrew\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -47,5 +47,5 @@ var data = {lines:[
 {"lineNum":"   46","line":"EOF"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 20, "covered" : 7,};
+var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 20, "covered" : 7,};
 var merged_data = [];

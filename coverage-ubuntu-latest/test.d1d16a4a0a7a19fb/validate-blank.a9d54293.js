@@ -5,7 +5,7 @@ var data = {lines:[
 {"lineNum":"    4","line":"set -euo pipefail","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"if ((BASH_VERSINFO[0] < 4)); then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"    7","line":"  echo >&2 \"bash 4+ required, found $BASH_VERSION\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    7","line":"  echo \"bash 4+ required, found $BASH_VERSION\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    8","line":"  exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"fi"},
 {"lineNum":"   10","line":""},
@@ -16,13 +16,22 @@ var data = {lines:[
 {"lineNum":"   15","line":"  set -- \"${files[@]}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   16","line":"fi"},
 {"lineNum":"   17","line":""},
-{"lineNum":"   18","line":"if [ $# -eq 0 ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   19","line":"  echo >&2 \"no files to validate\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   20","line":"  exit 0","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   21","line":"fi"},
-{"lineNum":"   22","line":""},
-{"lineNum":"   23","line":"awk -f \"$script_dir/validate-blank.awk\" \"$@\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   18","line":"# Skip binary files"},
+{"lineNum":"   19","line":"text_files=()"},
+{"lineNum":"   20","line":"for f in \"$@\"; do","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   21","line":"  [ -f \"$f\" ] || continue","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   22","line":"  file --brief --mime-encoding \"$f\" | grep -q binary && continue","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   23","line":"  text_files+=(\"$f\")","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   24","line":"done"},
+{"lineNum":"   25","line":"set -- \"${text_files[@]}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   26","line":""},
+{"lineNum":"   27","line":"if [ $# -eq 0 ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   28","line":"  echo \"no files to validate\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   29","line":"  exit 0","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   30","line":"fi"},
+{"lineNum":"   31","line":""},
+{"lineNum":"   32","line":"awk -f \"$script_dir/validate-blank.awk\" \"$@\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 12, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 17, "covered" : 0,};
 var merged_data = [];

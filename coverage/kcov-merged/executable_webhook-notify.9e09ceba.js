@@ -5,7 +5,7 @@ var data = {lines:[
 {"lineNum":"    4","line":"# https://github.com/julienXX/terminal-notifier/issues/300"},
 {"lineNum":"    5","line":"set -eu","class":"lineNoCov","hits":"0",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":"msg() { echo >&2 \"webhook-notify: $*\"; }"},
+{"lineNum":"    7","line":"msg() { echo \"webhook-notify: $*\" >&2; }"},
 {"lineNum":"    8","line":""},
 {"lineNum":"    9","line":"notify() {"},
 {"lineNum":"   10","line":"  _title=\"$1\" _subtitle=\"$2\" _message=\"$3\" _url=\"${4:-}\" _sound=\"${5:-Ping}\"","class":"lineNoCov","hits":"0",},
@@ -97,5 +97,5 @@ var data = {lines:[
 {"lineNum":"   96","line":"notify \"$title\" \"$subtitle\" \"$message\" \"$url\" \"$sound\"","class":"lineNoCov","hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-04-12 07:39:52", "instrumented" : 56, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-04-14 06:22:27", "instrumented" : 56, "covered" : 0,};
 var merged_data = [];

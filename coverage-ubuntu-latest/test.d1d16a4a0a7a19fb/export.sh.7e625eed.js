@@ -4,7 +4,7 @@ var data = {lines:[
 {"lineNum":"    3","line":"#        export_env \"$file1\" \"$file2\""},
 {"lineNum":"    4","line":"export_env() {"},
 {"lineNum":"    5","line":"  if [ $# -eq 0 ]; then","class":"lineCov","hits":"4","order":"149","possible_hits":"0",},
-{"lineNum":"    6","line":"    echo >&2 \"export_env: missing arguments\"","class":"lineCov","hits":"1","order":"157","possible_hits":"0",},
+{"lineNum":"    6","line":"    echo \"export_env: missing arguments\" >&2","class":"lineCov","hits":"1","order":"157","possible_hits":"0",},
 {"lineNum":"    7","line":"    return 1","class":"lineCov","hits":"1","order":"158","possible_hits":"0",},
 {"lineNum":"    8","line":"  fi"},
 {"lineNum":"    9","line":"  local _f _rc=0","class":"lineCov","hits":"3","order":"150","possible_hits":"0",},
@@ -20,5 +20,5 @@ var data = {lines:[
 {"lineNum":"   19","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 10, "covered" : 10,};
+var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 10, "covered" : 10,};
 var merged_data = [];

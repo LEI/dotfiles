@@ -10,15 +10,15 @@ var data = {lines:[
 {"lineNum":"    9","line":"shell=\"${1:-${SHELL##*/}}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   10","line":""},
 {"lineNum":"   11","line":"case \"$shell\" in","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   12","line":"  bash|zsh)"},
-{"lineNum":"   13","line":"    SHELL_BENCH=true \"$shell\" -ic exit","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   14","line":"    ;;"},
-{"lineNum":"   15","line":"  *)"},
-{"lineNum":"   16","line":"    echo >&2 \"bench: invalid shell \'$shell\', expected bash or zsh\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   17","line":"    exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   18","line":"    ;;"},
+{"lineNum":"   12","line":"bash | zsh)"},
+{"lineNum":"   13","line":"  SHELL_BENCH=true \"$shell\" -ic exit","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   14","line":"  ;;"},
+{"lineNum":"   15","line":"*)"},
+{"lineNum":"   16","line":"  echo \"bench: invalid shell \'$shell\', expected bash or zsh\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   17","line":"  exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   18","line":"  ;;"},
 {"lineNum":"   19","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 6, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-14 06:21:50", "instrumented" : 6, "covered" : 0,};
 var merged_data = [];

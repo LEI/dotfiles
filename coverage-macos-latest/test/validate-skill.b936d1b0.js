@@ -6,12 +6,12 @@ var data = {lines:[
 {"lineNum":"    5","line":"set -euo pipefail","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    6","line":""},
 {"lineNum":"    7","line":"if ((BASH_VERSINFO[0] < 4)); then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"    8","line":"  echo >&2 \"bash 4+ required, found $BASH_VERSION\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"    8","line":"  echo \"bash 4+ required, found $BASH_VERSION\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"  exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   10","line":"fi"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"if ! command -v skill-validator >/dev/null 2>&1; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   13","line":"  echo >&2 \'error: skill-validator is required\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   13","line":"  echo \'error: skill-validator is required\' >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   14","line":"  exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   15","line":"fi"},
 {"lineNum":"   16","line":""},
@@ -58,7 +58,7 @@ var data = {lines:[
 {"lineNum":"   57","line":"fi"},
 {"lineNum":"   58","line":""},
 {"lineNum":"   59","line":"if [ $# -eq 0 ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   60","line":"  echo >&2 \"no files to validate\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   60","line":"  echo \"no files to validate\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   61","line":"  exit 0","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   62","line":"fi"},
 {"lineNum":"   63","line":""},
@@ -70,9 +70,9 @@ var data = {lines:[
 {"lineNum":"   69","line":"if [ \"$failed\" -gt 0 ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   70","line":"  echo \"$results\" | grep -v \'^PASS \' >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   71","line":"fi"},
-{"lineNum":"   72","line":"echo >&2 \"$passed passed, $failed failed\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   72","line":"echo \"$passed passed, $failed failed\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   73","line":"exit $((failed > 0 ? 1 : 0))","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:39:21", "instrumented" : 40, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-14 06:21:50", "instrumented" : 40, "covered" : 0,};
 var merged_data = [];

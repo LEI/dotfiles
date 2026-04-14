@@ -20,7 +20,7 @@ var data = {lines:[
 {"lineNum":"   19","line":""},
 {"lineNum":"   20","line":"# TODO: check gpg-agent is running"},
 {"lineNum":"   21","line":""},
-{"lineNum":"   22","line":"# config.toml tools hash: 27fea026eb6734433e797b7c35f9d9b2e90551b6c4dbd11adc78e483503ca970"},
+{"lineNum":"   22","line":"# config.toml tools hash: 37ef048bc5b0e2a6a04f7a1b0f9b214b2d0c5a532d1e210cf04a49378405ac12"},
 {"lineNum":"   23","line":"msg \"Installing tools\"","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
 {"lineNum":"   24","line":""},
 {"lineNum":"   25","line":"# mise_args=\"--yes\""},
@@ -37,5 +37,5 @@ var data = {lines:[
 {"lineNum":"   36","line":"# run mise prune \"$@\" # --tools"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-12 07:36:48", "instrumented" : 12, "covered" : 12,};
+var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 12, "covered" : 12,};
 var merged_data = [];
