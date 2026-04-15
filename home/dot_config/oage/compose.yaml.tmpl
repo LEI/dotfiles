@@ -91,7 +91,7 @@ services:
       - notebook-data:/app/data
     environment:
       - API_URL=https://open-notebook-api.test
-{{- if (get .ai.providers "ollama").enabled }}
+{{- if .features.ollama }}
       - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
 {{- end }}
       - OPENAI_COMPATIBLE_BASE_URL=http://bifrost:8080/v1
@@ -131,7 +131,7 @@ services:
     # https://docs.openwebui.com/reference/env-configuration
     environment:
       - CORS_ALLOW_ORIGIN=https://open-webui.test
-{{- if (get .ai.providers "ollama").enabled }}
+{{- if .features.ollama }}
       - ENABLE_OLLAMA_API={{ not .features.mlx }}
       - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
 {{- else }}

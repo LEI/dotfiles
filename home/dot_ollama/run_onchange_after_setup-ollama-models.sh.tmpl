@@ -1,4 +1,4 @@
-{{- if (get .ai.providers "ollama").enabled -}}
+{{- if .features.ollama -}}
 {{- $ollamaModels := list -}}
 {{- range $name, $meta := .ai.models -}}
 {{-   $id := get $meta "ollama" -}}

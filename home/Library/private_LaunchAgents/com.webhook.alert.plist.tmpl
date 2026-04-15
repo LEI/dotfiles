@@ -1,32 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.webhook.alert</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>{{ .brewPrefix }}/bin/webhook</string>
-    <string>--hooks</string>
-    <string>{{ .chezmoi.homeDir }}/.config/webhook/hooks.yaml</string>
-    <string>--port</string>
-    <string>9000</string>
-    <string>--verbose</string>
-  </array>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PATH</key>
-    <string>{{ .chezmoi.homeDir }}/.local/bin:{{ .brewPrefix }}/bin:{{ .brewPrefix }}/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-    <key>HOME</key>
-    <string>{{ .chezmoi.homeDir }}</string>
-  </dict>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>StandardOutPath</key>
-  <string>{{ .chezmoi.homeDir }}/.local/state/webhook/stdout.log</string>
-  <key>StandardErrorPath</key>
-  <string>{{ .chezmoi.homeDir }}/.local/state/webhook/stderr.log</string>
-</dict>
-</plist>
+{{- $svc := .services.webhook -}}
+{{- $site := get (get .caddy.sites "otel") "webhook" -}}
+{{- $stateDir := printf "%s/.local/state/webhook" .chezmoi.homeDir -}}
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+      "label" $svc.label
+      "args" (list
+        (printf "%s/bin/webhook" .brewPrefix)
+        "--hooks" (printf "%s/.config/webhook/hooks.yaml" .chezmoi.homeDir)
+        "--port" ($site.port | toString)
+        "--verbose")
+      "env" (dict
+        "HOME" .chezmoi.homeDir
+        "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
+      "stdout" (printf "%s/stdout.log" $stateDir)
+      "stderr" (printf "%s/stderr.log" $stateDir)) -}}

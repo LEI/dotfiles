@@ -1,0 +1,39 @@
+{{- $enabled := ne (get . "enabled" | toString) "false" -}}
+{{- $label := get . "label" -}}
+{{- $health := get . "health" -}}
+{{- $port := get . "port" -}}
+{{- $plistFile := printf "%s/Library/LaunchAgents/%s.plist" .chezmoi.homeDir $label -}}
+{{- if stat $plistFile -}}
+# plist: {{ include $plistFile | sha256sum }}
+{{ end -}}
+plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
+GUI="gui/$(id -u)"
+
+{{- if $enabled }}
+if [ ! -f "$plist" ]; then
+  die "{{ $label }}: plist not found"
+fi
+
+# Load if not loaded yet
+if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
+  run launchctl load "$plist"
+fi
+
+# Health check; reload plist if unhealthy (picks up config changes)
+if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
+  msg "{{ $label }}: unhealthy, reloading"
+  if launchctl list "{{ $label }}" >/dev/null 2>&1; then
+    run launchctl unload "$plist"
+  fi
+  run launchctl load "$plist"
+  if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
+    die "{{ $label }}: unhealthy after retries"
+  fi
+fi
+{{- else }}
+if launchctl list "{{ $label }}" >/dev/null 2>&1; then
+  msg "stopping disabled service {{ $label }}"
+  run launchctl kill SIGTERM "$GUI/{{ $label }}" 2>/dev/null || true
+  run launchctl unload "$plist" 2>/dev/null || true
+fi
+{{- end }}

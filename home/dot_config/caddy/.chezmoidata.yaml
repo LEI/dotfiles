@@ -6,39 +6,54 @@ caddy:
   sites:
     ai:
       claude-task-viewer:
+        body: html
         port: 3456
     oage:
       bifrost:
+        body: html
         port: 8180
       open-notebook:
+        body: html
         port: 8502
       open-notebook-api:
+        body: '{"status":"healthy"}'
         port: 5055
         health: /health
       open-webui:
+        body: '{"status":true}'
         port: 8503
         health: /health
       surrealdb:
         port: 8000
         health: /health
+    processCompose:
+      process-compose:
+        body: '{"status":"alive"}'
+        health: /live
+        port: 8484
     otel:
       # alertmanager:
       #   port: 9093
       #   health: /-/healthy
       grafana:
+        body: '"database": "ok"'
         port: 3033
         health: /api/health
         dialTimeout: 1800s
         responseHeaderTimeout: 1800s
       prometheus:
+        body: Healthy
         port: 9090
         health: /-/healthy
       tempo:
+        body: ready
         port: 3200
         health: /ready
       webhook:
-        port: 9000
+        body: OK
         health: /
+        port: 9000
     php:
       mailpit:
+        body: html
         port: 8025

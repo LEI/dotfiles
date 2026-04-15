@@ -1,19 +1,20 @@
-# yamllint disable-file
-# prettier-ignore
----
+{{- $rootImmutable := has (get .chezmoi.osRelease "variantID") (list "silverblue" "kinoite" "sericea" "onyx" "lazurite" "bazzite" "aurora" "bluefin") -}}
+{{- $localProvider := get .ai "localProvider" | default "" -}}
+# yamllint disable rule:indentation
 # https://github.com/goss-org/goss/blob/master/docs/goss.yaml
+---
 {{ $ports := dict
   "docker-plain" 2375
   "docker-tls" 2376
   "telnet" 23
   "vnc" 5900 -}}
 addr:
-{{- range $name := keys $ports | sortAlpha}}
+{{- range $name := keys $ports | sortAlpha }}
   127.0.0.1:{{ index $ports $name }}:
     title: {{ $name }}
     reachable: false
     timeout: 500
-{{- end}}
+{{- end }}
 
 # command:
 #   test:
@@ -37,9 +38,9 @@ addr:
 dns:
   localhost:
     addrs:
-      {{- if not .Vars.wsl }}
+{{- if not .wsl }}
       - ::1
-      {{- end }}
+{{- end }}
       - 127.0.0.1
     resolvable: true
 
@@ -59,18 +60,16 @@ dns:
 #     linked-to: /usr/sbin/sendmail.sendmail
 #     skip: false
 
-# Inline templates are not valid json/yaml that could be validated as-in by json schema
-# Instead, run `goss --vars ./vars.yaml render > rendered_goss.yaml` to render them
-# and apply the schema validation on the rendered file.
-
-# {{- range mkSlice "/etc/passwd" "/etc/group"}}
-#   {{.}}:
-#     exists: true
-#     mode: "0644"
-#     owner: root
-#     group: root
-#     filetype: file
-# {{end}}
+{{- /* goss template examples (render with goss --vars ./vars.yaml render)
+{{- range mkSlice "/etc/passwd" "/etc/group" }}
+  {{ . }}:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+{{- end }}
+*/ -}}
 
 # gossfile:
 #   myapplication:
@@ -107,23 +106,23 @@ dns:
 #       - " 1"
 #     mtu: 1500
 
-{{- if eq .Vars.os "linux"}}
+{{- if eq .os "linux" }}
 
 kernel-param:
   kernel.ostype:
     value: Linux
-{{- end}}
+{{- end }}
 
 matching:
   # check_instance_count:
-  #   content: { { .Vars.instance_count } }
+  #   content: ...
   #   matches:
   #     gt: 0
   # check_failure_count_from_all_instance:
-  #   content: { { .Vars.failures } }
+  #   content: ...
   #   matches: 0
   # check_status:
-  #   content: { { .Vars.status } }
+  #   content: ...
   #   matches:
   #     - not: FAIL
   example:
@@ -151,21 +150,14 @@ matching:
   #           foo: bar
   #       - have-key: baz
 
-# TODO: sprig syntax fails to accept upper block below
-# https://goss.readthedocs.io/en/stable/gossfile/#templates
-#  sping_basic:
-#    content: {{ "hello!" | toUpper | repeat 5 }}
-#                 matches:
-#                 match-regexp: "HELLO!HELLO!HELLO!HELLO!HELLO!"
-
 mount:
   /:
     exists: true
-    {{- if not .Vars.rootImmutable }}
+{{- if not $rootImmutable }}
     usage:
       lt: 90
-    {{- end }}
-{{- if .Vars.rootImmutable }}
+{{- end }}
+{{- if $rootImmutable }}
   {{ env "HOME" | dir }}:
     exists: true
     timeout: 1000
@@ -197,13 +189,14 @@ port:
     listening: false
     skip: false
 # goss port checks broken on macOS for 127.0.0.1-bound services
-{{- range $name, $p := .Vars.ai.providers }}
+{{- range $name, $p := .ai.providers }}
 {{- if hasKey $p "port" }}
-{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+{{- $active := or (eq $name $localProvider) (eq (get $p "parent" | default "") $localProvider) }}
 #  "tcp:127.0.0.1:{{ $p.port }}":
-#    listening: {{ $enabled }}
+#    listening: {{ $active }}
 {{- end }}
 {{- end }}
+
 # process:
 #   chrome:
 #     # required attributes
@@ -251,87 +244,116 @@ port:
 #         - /var/empty/sshd
 #         - /var/run/sshd
 
+{{- $scripts := glob (joinPath .chezmoi.sourceDir "dot_config/goss/exact_check/*.sh*") }}
+{{- $hasCommands := or
+    (eq .os "darwin")
+    (and (eq .os "linux") (ne (env "CONTAINER_PROVIDER") ""))
+    $scripts }}
+
 # System health
-{{- if or (eq .Vars.os "darwin") (and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") ""))}}
+{{- if $hasCommands }}
 command:
-{{- if eq .Vars.os "darwin"}}
+{{- if eq .os "darwin" }}
   docker-engine:
-    exec: docker info --format '{{`{{.ServerVersion}}`}}'
+    exec: docker info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
     exit-status: 0
     timeout: 5000
-{{- if .Vars.features.processCompose }}
-  launchd-process-compose:
-    exec: launchctl list com.process-compose | grep -q PID
-    exit-status: 0
-    timeout: 3000
-{{- end }}
-{{- if .Vars.features.otel }}
-  launchd-webhook:
-    exec: launchctl list com.webhook.alert | grep -q PID
-    exit-status: 0
-    timeout: 3000
-{{- end }}
-{{- range $name, $p := .Vars.ai.providers }}
-{{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
-{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+{{- range $name, $svc := get . "services" | default dict }}
+{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
   launchd-{{ $name }}:
-    exec: launchctl list {{ $p.label }} | grep -q PID
-    exit-status: {{ if $enabled }}0{{ else }}{ gt: 0 }{{ end }}
+    exec: launchctl print gui/$(id -u)/{{ $svc.label }} 2>/dev/null | grep -q 'pid ='
+    exit-status: 0
     timeout: 3000
 {{- end }}
-{{- end}}
-{{- if hasKey .Vars "scripts" }}
-{{- range .Vars.scripts }}
-  check-{{ trimSuffix ".sh" . }}:
-    exec: sh check/{{ . }}
+{{- range $name, $p := .ai.providers }}
+{{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
+{{- $active := or (eq $name $localProvider) (eq (get $p "parent" | default "") $localProvider) }}
+  launchd-{{ $name }}:
+    exec: launchctl print gui/$(id -u)/{{ $p.label }} 2>/dev/null | grep -q 'pid ='
+    exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
+    timeout: 3000
+{{- end }}
+{{- end }}
+{{- if and (eq .os "linux") (ne (env "CONTAINER_PROVIDER") "") }}
+  container-engine:
+    exec: {{ env "CONTAINER_PROVIDER" }} info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
+    exit-status: 0
+    timeout: 5000
+{{- end }}
+{{- range $scripts }}
+  check-{{ trimSuffix ".sh" (trimSuffix ".tmpl" (base .)) }}:
+    exec: sh check/{{ trimSuffix ".tmpl" (base .) }}
     exit-status: 0
     timeout: 120000
 {{- end }}
 {{- end }}
-{{- if and (eq .Vars.os "linux") (ne (env "CONTAINER_PROVIDER") "")}}
-  container-engine:
-    exec: {{ env "CONTAINER_PROVIDER" }} info --format '{{`{{.ServerVersion}}`}}'
-    exit-status: 0
-    timeout: 5000
-{{- end}}
-{{- end}}
 
-{{- if eq .Vars.os "linux"}}
+{{- if eq .os "linux" }}
 service:
-{{- if .Vars.features.processCompose }}
-  # process-compose:
+{{- range $name, $svc := get . "services" | default dict }}
+{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+  # {{ $name }}:
   #   enabled: true
   #   running: true
 {{- end }}
-{{- if .Vars.features.otel }}
-  # webhook:
-  #   enabled: true
-  #   running: true
-{{- end }}
-{{- if .Vars.features.ai }}
-{{- range $name, $p := .Vars.ai.providers }}
+{{- if .features.ai }}
+{{- range $name, $p := .ai.providers }}
 {{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
-{{- $enabled := true }}{{ if hasKey $p "enabled" }}{{ $enabled = index $p "enabled" }}{{ end }}
+{{- $active := or (eq $name $localProvider) (eq (get $p "parent" | default "") $localProvider) }}
   {{ $name }}:
-    enabled: {{ $enabled }}
-    running: {{ $enabled }}
+    enabled: {{ $active }}
+    running: {{ $active }}
 {{- end }}
 {{- end }}
 {{- end }}
 
-{{- if .Vars.featureChecks }}
+{{- $src := joinPath .chezmoi.sourceDir "dot_config" }}
+{{- $gossFiles := glob (printf "%s/*/.goss.yaml" $src) }}
+{{- $enabledFiles := list }}
+{{- range $gossFiles }}
+{{- if not (get $.features (base (dir .))) }}{{ continue }}{{ end }}
+{{- $enabledFiles = append $enabledFiles . }}
+{{- end }}
+{{- if $enabledFiles }}
+
 gossfile:
-{{- range .Vars.featureChecks }}
+{{- range $enabledFiles }}
   {{ . }}: {}
 {{- end }}
 {{- end }}
 
-# Health checks from caddy.sites + ai.backends (built in vars.yaml.tmpl)
-{{- if .Vars.checks}}
+# Health checks from caddy.sites + ai.providers
+{{- $checks := dict }}
+{{- if hasKey . "caddy" }}
+{{- range $feat, $sites := .caddy.sites }}
+{{- if not (get $.features $feat) }}{{ continue }}{{ end }}
+{{- range $name, $site := $sites }}
+{{- if hasKey $site "enabled" }}{{ if not (get $site "enabled") }}{{ continue }}{{ end }}{{ end }}
+{{- $entry := dict "url" (printf "https://%s.test%s" $name (get $site "health" | default "")) }}
+{{- if get $site "body" }}{{ $_ := set $entry "body" (get $site "body") }}{{ end }}
+{{- $_ := set $checks $name $entry }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if and (hasKey . "ai") (get $.features "caddy") }}
+{{- range $name, $provider := .ai.providers }}
+{{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
+{{- if not (or (eq $name $localProvider) (eq (get $provider "parent") $localProvider)) }}{{ continue }}{{ end }}
+{{- $entry := dict "url" (printf "https://%s%s" $provider.domain (get $provider "health" | default "")) }}
+{{- if get $provider "body" }}{{ $_ := set $entry "body" (get $provider "body") }}{{ end }}
+{{- $_ := set $checks $name $entry }}
+{{- end }}
+{{- end }}
+{{- if $checks }}
+
 http:
-{{- range $name, $check := .Vars.checks}}
+{{- range $name, $check := $checks }}
   {{ $check.url }}:
     status: 200
-    timeout: {{ get $check "timeout" | default 5000 }}
-{{- end}}
-{{- end}}
+    timeout: 5000
+{{- if hasKey $check "body" }}
+    body:
+      - {{ index $check "body" | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

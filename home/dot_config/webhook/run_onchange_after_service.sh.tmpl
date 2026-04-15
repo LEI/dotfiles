@@ -1,4 +1,6 @@
 {{- if .features.otel -}}
+{{- $svc := .services.webhook -}}
+{{- $site := get (get .caddy.sites "otel") "webhook" -}}
 {{- $path := joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" -}}
 #!/bin/sh
 
@@ -6,13 +8,6 @@
 
 # hooks: {{ include $path | sha256sum }}
 {{- end }}
-{{ includeTemplate "service-hash.tmpl" (merge (dict
-  "label" "com.webhook.alert"
-  "unit" "webhook"
-  "plist" true
-  "service" true
-) .) -}}
-
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -25,12 +20,7 @@ if [ ! -d "$HOME/.local/state/webhook" ]; then
   run mkdir -p "$HOME/.local/state/webhook"
 fi
 
-{{ includeTemplate "service-apply.sh.tmpl" (dict
-  "enabled" true
-  "label" "com.webhook.alert"
-  "os" .chezmoi.os
-  "unit" "webhook"
-) }}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
 # Manual test:
 # curl -X POST http://localhost:9000/hooks/alert -H 'Content-Type: application/json' \
 #   -d '{"status":"firing","alerts":[{"labels":{"alertname":"test"},"annotations":{}}]}'

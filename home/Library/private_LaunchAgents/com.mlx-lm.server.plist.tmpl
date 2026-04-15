@@ -5,6 +5,9 @@
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
         "label" $p.label
         "args" (list $bin "--host" "127.0.0.1" "--port" ($p.port | toString) "--chat-template-args" `{"enable_thinking":true}`)
+        "env" (dict
+          "HOME" .chezmoi.homeDir
+          "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
         "log" (printf "%s/var/log/mlx-lm.log" .brewPrefix)
         "workdir" (printf "%s/var" .brewPrefix)) }}
 {{- else -}}
@@ -12,6 +15,9 @@
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
         "label" $p.label
         "args" (list $bin "--host" "127.0.0.1" "--port" ($p.port | toString))
+        "env" (dict
+          "HOME" .chezmoi.homeDir
+          "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
         "log" (printf "%s/var/log/mlx-lm.log" .brewPrefix)
         "workdir" (printf "%s/var" .brewPrefix)) }}
 {{- end -}}

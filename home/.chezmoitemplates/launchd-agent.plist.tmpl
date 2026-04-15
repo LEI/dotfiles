@@ -1,4 +1,3 @@
-{{- /* Input: dict with label (string), args (list), log (string), workdir (string) */ -}}
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
   "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -6,29 +5,41 @@
 <dict>
   <key>Label</key>
   <string>{{ get . "label" | default "" }}</string>
-  <key>KeepAlive</key>
-  <false/>
-  <key>RunAtLoad</key>
-  <false/>
-  <key>LimitLoadToSessionType</key>
-  <array>
-    <string>Aqua</string>
-    <string>Background</string>
-    <string>LoginWindow</string>
-    <string>StandardIO</string>
-    <string>System</string>
-  </array>
   <key>ProgramArguments</key>
   <array>
 {{- range (get . "args" | default list) }}
     <string>{{ . }}</string>
 {{- end }}
   </array>
-{{- with (get . "log") }}
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>{{ get . "throttle" | default 30 }}</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+{{- with (get . "env") }}
+  <key>EnvironmentVariables</key>
+  <dict>
+{{-   range $k, $v := . }}
+    <key>{{ $k }}</key>
+    <string>{{ $v }}</string>
+{{-   end }}
+  </dict>
+{{- end }}
+{{- if (get . "log") }}
+  <key>StandardErrorPath</key>
+  <string>{{ get . "log" }}</string>
+  <key>StandardOutPath</key>
+  <string>{{ get . "log" }}</string>
+{{- else }}
+{{-   with (get . "stderr") }}
   <key>StandardErrorPath</key>
   <string>{{ . }}</string>
+{{-   end }}
+{{-   with (get . "stdout") }}
   <key>StandardOutPath</key>
   <string>{{ . }}</string>
+{{-   end }}
 {{- end }}
 {{- with (get . "workdir") }}
   <key>WorkingDirectory</key>

@@ -1,18 +1,8 @@
 {{- $provider := get .ai.providers "mlx-embed" -}}
 #!/bin/sh
-{{ includeTemplate "service-hash.tmpl" (merge (dict
-  "label" $provider.label
-  "unit" "mlx-embed"
-  "plist" true
-) .) -}}
 
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{ includeTemplate "service-apply.sh.tmpl" (dict
-  "enabled" $provider.enabled
-  "label" $provider.label
-  "os" .chezmoi.os
-  "unit" "mlx-embed"
-) -}}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "mlx-lm") "chezmoi" .chezmoi) $provider) -}}

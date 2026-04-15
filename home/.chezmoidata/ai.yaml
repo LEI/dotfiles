@@ -14,19 +14,18 @@ ai:
   providers:
     # Local
     llama-server:
-      enabled: false
       health: /health
       label: com.llama-cpp.server
       port: 11437
       domain: llama-cpp.test
     mlx-embed:
-      enabled: false
       health: /v1/models
       label: com.mlx-embed.server
+      parent: mlx-lm
       server: mlx-openai-server
       port: 11445
     mlx-lm:
-      enabled: false
+      body: '{"object": "list"'
       health: /v1/models
       label: com.mlx-lm.server
       # server: mlx_lm.server, mlx-omni-server, mlx-openai-server
@@ -34,13 +33,11 @@ ai:
       port: 11435
       domain: mlx-lm.test
     ollama:
-      enabled: false
       port: 11434
       domain: ollama.test
       caddy:
         header_up: Host localhost
     vllm-mlx:
-      enabled: false
       health: /v1/models
       port: 11436
       domain: vllm-mlx.test

@@ -82,7 +82,7 @@ if [ "$shell" = bash ]; then
   export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
 fi
 if command -v sheldon >/dev/null; then
-  eval "$(sheldon source)"
+  BENCHFMT=sheldon bench eval "$(sheldon source)"
 else
   echo "init: command not found: sheldon" >&2
 fi

@@ -8,6 +8,14 @@ set -eu
 
 shell="${1:-${SHELL##*/}}"
 
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+sheldon_data="${SHELDON_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/sheldon}"
+if [ -d "$sheldon_data" ]; then
+  cp -R "$sheldon_data" "$tmpdir/sheldon-data"
+fi
+export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
+
 case "$shell" in
 bash | zsh)
   SHELL_BENCH=true "$shell" -ic exit

@@ -30,7 +30,7 @@ initial_time() {
   echo "initial startup: $*" >&2
   command_time "$output" "$@"
 
-  cat "$output.txt" | column -t | cut -d' ' -f1
+  column -t <"$output.txt" | cut -d' ' -f1
 }
 
 average_time() {
@@ -44,7 +44,7 @@ average_time() {
     command_time "$output-$i" "$@"
   done
 
-  cat "$output-"*.txt | column -t | cut -d' ' -f1 | awk '{ total += $1 } END { print total/NR }'
+  awk '{ total += $1 } END { print total/NR }' "$output-"*.txt
 }
 
 main() {
@@ -67,9 +67,11 @@ main() {
   local cmd="$shell -ci exit"
   local name="${cmd%% *}"
 
-  local tmp_dir
-  tmp_dir="$(mktemp -d)"
-  local output="${tmp_dir}/startup-$name"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  local output="${tmpdir}/startup-$name"
+
+  export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
 
   # shellcheck disable=SC2086
   initial_startup_time="$(initial_time "$output" $cmd)"

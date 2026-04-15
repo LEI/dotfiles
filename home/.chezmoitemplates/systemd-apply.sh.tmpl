@@ -1,0 +1,26 @@
+{{- $enabled := ne (get . "enabled" | toString) "false" -}}
+{{- $unit := get . "unit" | default "UNIT" -}}
+{{- $serviceDir := printf "%s/.config/systemd/user" .chezmoi.homeDir -}}
+{{- $serviceFile := printf "%s/%s.service" $serviceDir $unit -}}
+{{- if stat $serviceFile -}}
+# service: {{ include $serviceFile | sha256sum }}
+{{ end -}}
+if has systemctl; then
+  run systemctl --user daemon-reload
+{{- if $enabled }}
+  if systemctl --user is-active --quiet {{ $unit }}; then
+    run systemctl --user restart {{ $unit }}
+  else
+    run systemctl --user enable --now {{ $unit }}
+  fi
+  if ! systemctl --user is-active --quiet {{ $unit }}; then
+    run systemctl --user status {{ $unit }} || true
+    die "{{ $unit }} service failed to start"
+  fi
+{{- else }}
+  if systemctl --user is-active --quiet {{ $unit }}; then
+    msg "stopping disabled service {{ $unit }}"
+    run systemctl --user disable --now {{ $unit }}
+  fi
+{{- end }}
+fi

@@ -11,7 +11,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 {{ if eq .chezmoi.os "darwin" -}}
-label="com.process-compose"
+label="{{ (get .services "process-compose").label }}"
 {{- else -}}
 label="process-compose"
 {{- end }}

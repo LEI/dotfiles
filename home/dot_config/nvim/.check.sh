@@ -1,5 +1,5 @@
 #!/bin/sh
 
-set -eu
+set -eux
 
-nvim --headless try \| +checkhealth \| +quitall \| catch \| +cquitall \| end >/dev/null
+nvim --headless -c 'lua local ok = pcall(vim.cmd, "checkhealth"); os.exit(ok and 0 or 1)' >/dev/null

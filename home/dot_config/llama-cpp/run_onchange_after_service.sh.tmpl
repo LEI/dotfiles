@@ -1,10 +1,5 @@
 {{- $provider := get .ai.providers "llama-server" -}}
 #!/bin/sh
-{{ includeTemplate "service-hash.tmpl" (merge (dict
-  "label" $provider.label
-  "unit" "llama-server"
-  "plist" true
-) .) -}}
 
 set -eu
 
@@ -15,9 +10,4 @@ if ! has brew; then
 fi
 # brew list llama.cpp >/dev/null 2>&1 # llama.cpp not installed
 
-{{ includeTemplate "service-apply.sh.tmpl" (dict
-  "enabled" $provider.enabled
-  "label" $provider.label
-  "os" .chezmoi.os
-  "unit" "llama-server"
-) -}}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "llama-server") "chezmoi" .chezmoi) $provider) -}}

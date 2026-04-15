@@ -12,8 +12,9 @@ run nvim --version | head -n1
 # Debian 12: nvim 0.7.2
 # Debian 11 and Ubuntu 22: nvim 0.4.3
 if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
-  # run timeout 5m nvim --headless +LazyInstall! +qa # >/dev/null
-  run timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
+  # run timeout 5m nvim --headless +LazyInstall! +qa
+  # run timeout 5m nvim --headless try \| +LazyInstall! \| +quitall \| catch \| +cquitall \| end
+  run timeout 5m nvim --headless -c 'lua local ok = pcall(vim.cmd, "LazyInstall!"); os.exit(ok and 0 or 1)'
   echo
 fi
 

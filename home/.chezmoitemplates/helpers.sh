@@ -66,6 +66,21 @@ dry_run() {
   run "$@"
 }
 
+# Retry a command with delay between attempts
+# Usage: retry <attempts> <delay> <command...>
+retry() {
+  _attempts="$1"
+  _delay="$2"
+  shift 2
+  _i=0
+  while [ "$_i" -lt "$_attempts" ]; do
+    "$@" && return 0
+    _i=$((_i + 1))
+    [ "$_i" -lt "$_attempts" ] && sleep "$_delay"
+  done
+  return 1
+}
+
 # Fail if mise version is older than the required minimum (YYYY.M.D format)
 require_mise_version() {
   _min="$1"

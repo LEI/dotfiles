@@ -176,13 +176,6 @@ data:
   ai:
     localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
     localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
-    providers:
-      mlx-embed:
-        enabled: {{ $features.mlx }}
-      mlx-lm:
-        enabled: {{ $features.mlx }}
-      ollama:
-        enabled: {{ $features.ollama }}
 {{- end }}
 
 {{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}

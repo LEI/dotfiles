@@ -98,7 +98,7 @@
       }
     }
 {{- end }}
-{{- if (get .ai.providers "ollama").enabled }}{{ $sep }}
+{{- if .features.ollama }}{{ $sep }}
 {{- $sep = "," }}
     "ollama": {
       "keys": [

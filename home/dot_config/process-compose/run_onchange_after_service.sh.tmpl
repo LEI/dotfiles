@@ -1,11 +1,8 @@
 {{- if .features.processCompose -}}
+{{- $svc := get .services "process-compose" -}}
+{{- $site := get (get .caddy.sites "processCompose") "process-compose" -}}
 #!/bin/sh
-{{ includeTemplate "service-hash.tmpl" (merge (dict
-  "label" "com.process-compose"
-  "unit" "process-compose"
-  "plist" true
-  "service" true
-) .) -}}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
@@ -14,10 +11,5 @@ if ! has process-compose; then
   die "process-compose not found"
 fi
 
-{{ includeTemplate "service-apply.sh.tmpl" (dict
-  "enabled" true
-  "label" "com.process-compose"
-  "os" .chezmoi.os
-  "unit" "process-compose"
-) }}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
 {{- end -}}

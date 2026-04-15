@@ -1,3 +1,5 @@
+{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $uds := get $pc "uds" -}}
 #!/bin/sh
 # Process-compose wrapper for global and project management
 
@@ -14,9 +16,12 @@ fi
 
 if [ "$global" = true ]; then
   export PC_CONFIG_FILES="$XDG_CONFIG_HOME/process-compose/global.yaml"
+{{- if $uds }}
   export PC_SOCKET_PATH="$XDG_STATE_HOME/process-compose/global.sock"
+{{- else }}
+  export PC_PORT_NUM={{ $pc.port }}
+{{- end }}
 else
-  # For project mode, use temp directory like default but with hash instead of PID
   dir_hash=$(pwd | shasum | head -c 8)
   export PC_SOCKET_PATH="/tmp/process-compose-$dir_hash.sock"
 fi
@@ -36,12 +41,15 @@ if [ $# -gt 0 ]; then
 fi
 
 if [ $# -eq 0 ]; then
-  # process-compose --use-uds up --detached
   set -- process list
 fi
 
-# Always use UDS, disable TUI for up command
-if [ "${1:-}" = "up" ]; then
+# Global: {{ if $uds }}UDS{{ else }}TCP port {{ $pc.port }}{{ end }}; project always UDS
+if [ "$global" = true ] && [ "${1:-}" = "up" ]; then
+  exec process-compose {{ if $uds }}--use-uds {{ end }}--tui=false "$@"
+elif [ "$global" = true ]; then
+  exec process-compose {{ if $uds }}--use-uds {{ end }}"$@"
+elif [ "${1:-}" = "up" ]; then
   exec process-compose --use-uds --tui=false "$@"
 else
   exec process-compose --use-uds "$@"

@@ -1,6 +1,6 @@
 {{- $miseInteractive := false -}}
 {{- with lookPath "mise" -}}
-{{-   $ver := output . "--version" | splitList " " | first -}}
+{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version" .) | splitList " " | first -}}
 {{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
 {{- end -}}
 [settings]

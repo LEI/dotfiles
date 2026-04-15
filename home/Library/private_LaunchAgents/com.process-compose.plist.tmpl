@@ -1,39 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.process-compose</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>{{ .brewPrefix }}/bin/process-compose</string>
-    <string>up</string>
-    <string>--use-uds</string>
-    <string>--tui=false</string>
-    <string>--ordered-shutdown</string>
-    <string>--logs-truncate</string>
-    <string>--hide-disabled</string>
-  </array>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PATH</key>
-    <string>{{ .chezmoi.homeDir }}/.local/bin:{{ .brewPrefix }}/bin:{{ .brewPrefix }}/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-    <key>HOME</key>
-    <string>{{ .chezmoi.homeDir }}</string>
-    <key>PC_CONFIG_FILES</key>
-    <string>{{ .chezmoi.homeDir }}/.config/process-compose/global.yaml</string>
-    <key>PC_LOG_FILE</key>
-    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/process-compose.log</string>
-    <key>PC_SOCKET_PATH</key>
-    <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/global.sock</string>
-  </dict>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>StandardOutPath</key>
-  <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/stdout.log</string>
-  <key>StandardErrorPath</key>
-  <string>{{ .chezmoi.homeDir }}/.local/state/process-compose/stderr.log</string>
-</dict>
-</plist>
+{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $uds := get $pc "uds" -}}
+{{- $stateDir := printf "%s/.local/state/process-compose" .chezmoi.homeDir -}}
+{{- $args := list
+      (printf "%s/bin/process-compose" .brewPrefix)
+      "up" "--tui=false"
+      "--ordered-shutdown" "--logs-truncate" "--hide-disabled" -}}
+{{- if $uds -}}
+{{-   $args = append $args "--use-uds" -}}
+{{- else -}}
+{{-   $args = concat $args (list "--port" ($pc.port | toString)) -}}
+{{- end -}}
+{{- $env := dict
+      "HOME" .chezmoi.homeDir
+      "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix)
+      "PC_CONFIG_FILES" (printf "%s/.config/process-compose/global.yaml" .chezmoi.homeDir)
+      "PC_LOG_FILE" (printf "%s/process-compose.log" $stateDir) -}}
+{{- if $uds -}}
+{{-   $_ := set $env "PC_SOCKET_PATH" (printf "%s/global.sock" $stateDir) -}}
+{{- end -}}
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+      "label" "com.process-compose"
+      "args" $args
+      "env" $env
+      "stdout" (printf "%s/stdout.log" $stateDir)
+      "stderr" (printf "%s/stderr.log" $stateDir)) -}}

@@ -76,7 +76,13 @@ RENOVATE_DRY_RUN = "extract"
 [tasks.prek]
 alias = "pre-commit"
 description = "Run pre-commit hooks on all files"
-run = "prek run --all-files"
+run = """
+case "$(uname -s)" in
+  Darwin | Linux) ;;
+  *) export SKIP=validate-skill ;;
+esac
+prek run --all-files
+"""
 
 [tasks."test:unit"]
 alias = "tu"
