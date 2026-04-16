@@ -11,11 +11,11 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "workspaceFolder": "/workspace",
   "mounts": [
-    "source=${localEnv:HOME}/.config/pi/agent,target=/home/coder/.pi/agent,type=bind"
+    "source=${localEnv:HOME}/.config/pi/agent,target=/home/coder/.pi/agent,type=bind,relabel=shared"
   ],
   "remoteUser": "root",
   "containerEnv": {
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://host.docker.internal:4317",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
     "OTEL_SERVICE_NAME": "pi-agent"
   }
 }

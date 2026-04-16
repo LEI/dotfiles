@@ -156,7 +156,9 @@ setup() {
 
 # bats test_tags=install,type:unit
 @test "install-password-manager: skips on unknown command" {
+  # shellcheck disable=SC2030,SC2031
   export CHEZMOI_COMMAND=test
+  # shellcheck disable=SC2030,SC2031
   export CHEZMOI_WORKING_TREE="$PWD"
   run_script home/.install-password-manager.sh
 
@@ -168,7 +170,9 @@ setup() {
 # bats test_tags=install,type:unit
 @test "install-password-manager: exits if already installed" {
   stub bws "true"
+  # shellcheck disable=SC2030,SC2031
   export CHEZMOI_COMMAND=apply
+  # shellcheck disable=SC2030,SC2031
   export CHEZMOI_WORKING_TREE="$PWD"
   run_script home/.install-password-manager.sh
   unstub bws 2>/dev/null || true

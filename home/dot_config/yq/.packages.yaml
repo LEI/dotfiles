@@ -4,7 +4,7 @@ packages:
     nameOverwrite:
       alpine: yq-go
       windows: MikeFarah.yq
-    type: '{{ or
-      (and (eq .osID "debian") (le (int .osVersion) 11))
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-      | ternary "mise" (eq .osIDLike "fedora" | ternary "brew" nil) }}'
+    # or (and (eq .osID "debian") (le (int .osVersion) 11))
+    #   (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
+    #   | ternary "mise" (eq .osIDLike "fedora" | ternary "brew" nil)
+    type: '{{ eq .osIDLike "archlinux" "debian" "fedora" | ternary "brew" nil }}'

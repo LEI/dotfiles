@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #MISE alias="l"
 #MISE description="Render and lint chezmoi templates"
-#USAGE flag "-q --quiet" help="Suppress prek output"
+#USAGE flag "-k --keep" help="Keep render dir for debugging"
+#USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show render dir and file list"
 #USAGE arg "[templates]..." help="Template paths to render (default: all)"
 #USAGE complete "templates" run="chezmoi managed --path-style=relative"
@@ -11,25 +12,35 @@ set -euo pipefail
 
 repo_dir="$PWD"
 render_dir=$(mktemp -d)
+render_args=()
 prek_args=()
-verbose=false
+keep="${LINT_KEEP:-false}"
+quiet="${LINT_QUIET:-false}"
+verbose="${LINT_VERBOSE:-false}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -k | --keep)
+    keep=true
+    shift
+    ;;
   -q | --quiet)
+    quiet=true
+    render_args+=(--quiet)
     prek_args+=(--quiet)
     shift
     ;;
   -v | --verbose)
-    prek_args+=(--verbose)
     verbose=true
+    render_args+=(--verbose)
+    prek_args+=(--verbose)
     shift
     ;;
   -h | --help)
     if command -v usage >/dev/null; then
       usage exec --help bash "$0"
     else
-      echo "Usage: lint [-q] [-v] [templates...]"
+      echo "Usage: lint [-k] [-q] [-v] [templates...]"
     fi
     exit
     ;;
@@ -48,18 +59,21 @@ templates=("$@")
 
 # shellcheck disable=SC2329
 cleanup() {
-  if [ "$verbose" = true ]; then
-    echo "cat $render_dir/.chezmoitemplates/packages.yaml" >&2
+  if [ "$keep" = true ]; then
+    echo "lint: render dir kept: $render_dir" >&2
   else
+    if [ "$verbose" = true ]; then
+      echo "lint: cleanup $render_dir" >&2
+    fi
     rm -rf "$render_dir"
   fi
 }
 trap cleanup EXIT
 
 cp "$repo_dir/.editorconfig" "$render_dir/.editorconfig"
-printf 'disable=SC1090,SC2034,SC2248\n' >"$render_dir/.shellcheckrc"
+printf 'disable=SC1090,SC1091,SC2034,SC2317\n' >"$render_dir/.shellcheckrc"
 
-chezmoi-render "$render_dir" --quiet "${templates[@]}" >&2
+chezmoi-render "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 
 # Remove empty files (templates that render to nothing on this OS)
 find "$render_dir" -type f -empty -delete
@@ -80,11 +94,11 @@ git -C "$render_dir" add --all
 cp -a "$repo_dir/script" "$render_dir/script"
 ln -s "$repo_dir/home" "$render_dir/home"
 
-if [ "$verbose" = true ]; then
-  echo "lint: render dir $render_dir" >&2
-  git -C "$render_dir" ls-files >&2
-fi
+export VALIDATE_KEEP="$keep"
+export VALIDATE_QUIET="$quiet"
+export VALIDATE_VERBOSE="$verbose"
 
+exit_code=0
 prek run \
   "${prek_args[@]}" \
   --cd="$render_dir" \
@@ -92,10 +106,9 @@ prek run \
   --skip=gitleaks \
   --skip=lint-templates \
   --skip=zizmor \
-  --all-files &&
-  exit_code=0 || exit_code=$?
+  --all-files || exit_code=$?
 
-if [ "$exit_code" -ne 0 ]; then
+if [ "$exit_code" -ne 0 ] && [ "$quiet" = false ]; then
   echo "lint: failed with exit code $exit_code" >&2
 fi
 exit "$exit_code"

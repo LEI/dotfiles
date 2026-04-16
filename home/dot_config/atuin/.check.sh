@@ -1,5 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eu
+set -euo pipefail
 
-atuin doctor | tail -n+7 | jq --compact-output
+atuin doctor | tail -n+7 | yq --colors --prettyPrint | sed -r '/^\s*$/d'

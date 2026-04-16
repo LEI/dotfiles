@@ -5,6 +5,7 @@
 
 set -eu
 
+# shellcheck source=/dev/null
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 run flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -24,6 +25,7 @@ flatpak_packages="{{ $flatpakPackages | keys | sortAlpha | join " " }}"
 
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.flatpak) | trim }}
 
+# shellcheck disable=SC2086
 run flatpak install --app --assumeyes{{ if .upgrade }} --or-update{{ end }} $flatpak_packages
 # --user/--system
 # --installation=chezmoi

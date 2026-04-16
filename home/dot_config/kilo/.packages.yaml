@@ -1,0 +1,7 @@
+---
+enabled: "{{ .features.kilo }}"
+packages:
+  kilo:
+    nameOverwrite:
+      npm: "@kilocode/cli"
+    type: npm

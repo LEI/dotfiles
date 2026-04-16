@@ -9,7 +9,7 @@ set -eu
 
 if [ $# -eq 0 ]; then
   echo "Usage: perf <ip>" >&2
-  return 1
+  exit 1
 fi
 
 # format() {
@@ -27,7 +27,7 @@ fi
 #   json="$("$@")"
 #   if [ -z "$json" ]; then
 #     echo "Failed: $*" >&2
-#     return 1
+#     exit 1
 #   fi
 #   # format='"\("Down")\t\(.end.sum_received.bits_per_second)"'
 #   # jq "$format" <<<"$json"

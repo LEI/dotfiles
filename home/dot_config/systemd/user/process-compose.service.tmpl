@@ -1,3 +1,5 @@
+{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $uds := get $pc "uds" -}}
 [Unit]
 Description=Process Compose global services
 After=network.target
@@ -9,8 +11,10 @@ Environment=HOME=%h
 Environment=PATH=%h/.local/share/cargo/bin:%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
 Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
 Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
+{{- if $uds }}
 Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/global.sock
-ExecStart=%h/.local/bin/mise exec process-compose -- process-compose up --use-uds --tui=false --ordered-shutdown --logs-truncate --hide-disabled
+{{- end }}
+ExecStart=%h/.local/bin/mise exec process-compose -- process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled
 Restart=on-failure
 RestartSec=5
 

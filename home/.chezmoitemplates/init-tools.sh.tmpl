@@ -45,6 +45,7 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
     echo "warning: init file not found: $_feat" >&2
     continue
   fi
+  # shellcheck disable=SC1090
   source "$_feat"
 done
 unset _feat

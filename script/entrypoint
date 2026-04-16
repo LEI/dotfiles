@@ -4,6 +4,13 @@
 
 set -eu
 
+# Verify running in a container to prevent accidental host execution
+if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ] && [ ! -d /proc/1/cgroup ]; then
+  echo "ERROR: This entrypoint must only run inside a container" >&2
+  echo "Refusing to execute on host system" >&2
+  exit 1
+fi
+
 if [ $# -ne 0 ]; then
   echo "entrypoint: unexpected arguments: $*" >&2
   exit 2

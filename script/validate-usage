@@ -16,8 +16,9 @@ if ! command -v usage >/dev/null; then
   exit 0
 fi
 
-quiet=false
-verbose=false
+quiet="${VALIDATE_USAGE_QUIET:-${VALIDATE_QUIET:-false}}"
+verbose="${VALIDATE_USAGE_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+
 while [ $# -gt 0 ]; do
   case "$1" in
   -q | --quiet)
@@ -59,20 +60,18 @@ checked=0
 
 for f in "$@"; do
   case "$f" in *.awk) continue ;; esac
-  ((++checked))
+  checked=$((checked + 1))
 
-  has_shebang=$(head -1 "$f" | grep '^#!' || true)
-  if [ -z "$has_shebang" ]; then
+  if ! head -1 "$f" | grep -q '^#!'; then
     continue
   fi
 
   # #MISE description required in script/ (mise tasks)
   case "$f" in
   script/*)
-    mise_desc=$(grep '^#MISE description=' "$f" || true)
-    if [ -z "$mise_desc" ]; then
+    if ! grep -q '^#MISE description=' "$f"; then
       echo "$f: error: missing #MISE description" >&2
-      ((++errors))
+      errors=$((errors + 1))
     fi
     ;;
   esac
@@ -80,20 +79,22 @@ for f in "$@"; do
   # Description comment required after shebang
   case "$f" in
   script/* | */executable_*)
-    desc=$(sed -n '2p' "$f" | grep '^#' || true)
-    if [ -z "$desc" ]; then
+    if ! sed -n '2p' "$f" | grep -q '^#'; then
       if [ "$quiet" != true ]; then
         echo "$f: warning: missing description comment after shebang" >&2
       fi
-      ((++warnings))
+      warnings=$((warnings + 1))
     fi
     ;;
   esac
 
   # Lint #USAGE spec
-  spec=$(grep '^#USAGE ' "$f" | sed 's/^#USAGE //' || true)
+  spec=
+  if grep -q '^#USAGE ' "$f"; then
+    spec=$(grep '^#USAGE ' "$f" | sed 's/^#USAGE //')
+  fi
   if [ -n "$spec" ] && ! usage lint <(echo "$spec") >/dev/null; then
-    ((++errors))
+    errors=$((errors + 1))
     continue
   fi
 
@@ -103,7 +104,7 @@ for f in "$@"; do
 
   if [ "$verbose" = true ] && [ -n "$spec" ]; then
     echo "$f: ok"
-    echo "$spec" | sed 's/^/  /'
+    echo "  ${spec//$'\n'/$'\n  '}"
   else
     echo "$f: ok"
   fi

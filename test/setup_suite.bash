@@ -74,6 +74,7 @@ setup_bats_libs() {
 
 setup_suite() {
   setup_bats
+  bash --version | head -n1 >&3
   bats --version >&3
   chezmoi --version >&3
 

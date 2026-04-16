@@ -40,7 +40,9 @@
     (not (and (eq .osIDLike "debian") (eq .libc "gnu")))
     (not (or .ephemeral .headless)))
   "i3" (and (eq .osIDLike "arch") .gui)
+  "iterm2" (eq .os "darwin")
   "kube" false
+  "kilo" $ai
   "lla" false
   "logseq" false
   "mail" (and (eq .osIDLike "arch") (not (empty .accessToken)))

@@ -1,17 +1,13 @@
 # ~/.macos
 # https://github.com/kevinSuttle/macOS-Defaults
 
-{{ if lookPath "scutil" | isExecutable -}}
-
-# Computer name: {{ output "scutil" "--get" "ComputerName" | trim }}
+{{ if .computerName -}}
+# Computer name: {{ .computerName }}
 {{ end -}}
 # Local host name: {{ .hostname }}
 
-{{ if lookPath "sw_vers" | isExecutable -}}
-
-{{ output "sw_vers"
-  | replaceAllRegex "\\t\\t" " "
-  | comment "# " }}
+{{ if .softwareVersion -}}
+{{ .softwareVersion | toPrettyJson | comment "# " }}
 {{ end -}}
 
 # Always show hidden files
@@ -43,17 +39,6 @@ defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
 
 # auth     optional     /opt/homebrew/lib/pam/pam_reattach.so
 # auth     sufficient   pam_tid.so
-
-# FIXME: set default text editor, to change manually:
-# Right click, Get Info, Open with: Change All...
-editor="com.neovide.neovide" # osascript -e 'id of app "Neovide"'
-# defaults write com.apple.LaunchServices/com.apple.launchservices.secure \
-#   LSHandlers -array-add \
-#   "{LSHandlerContentType=public.plain-text;LSHandlerRoleAll=$editor;}"
-# TODO: ~/.duti
-# for ext in .bash .json .md .sh .toml .yaml public.data public.plain-text public.unix-executable; do
-#   duti -s "$editor" "$ext" all
-# done
 
 # Mathias Bynens defaults, overides below
 source "$HOME/.local/share/macos/defaults.sh"

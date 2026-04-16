@@ -95,7 +95,11 @@ alias pbpaste=termux-clipboard-get
 
 if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
   clip() {
-    [ -t 0 ] && pbpaste || pbcopy
+    if [ -t 0 ]; then
+      pbpaste
+    else
+      pbcopy
+    fi
   }
 fi
 

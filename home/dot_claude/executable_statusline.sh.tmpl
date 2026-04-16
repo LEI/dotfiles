@@ -47,6 +47,7 @@ if [ "$IS_TEAMMATE" = true ]; then
   # Ensure teammate config exists with minimal preset (model + context)
   if [ ! -f "$TEAMMATE_HOME/.claude/claude-dashboard.local.json" ]; then
     mkdir -p "$TEAMMATE_HOME/.claude"
+    # shellcheck disable=SC2016
     printf '{"preset":"MC$Q|JTO","separator":"space"}\n' \
       >"$TEAMMATE_HOME/.claude/claude-dashboard.local.json"
   fi

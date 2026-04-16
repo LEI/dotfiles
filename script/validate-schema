@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 #MISE description="Validate files against their declared $schema"
-# Validates files with an inline $schema against it.
-# Files without $schema are skipped (use check-jsonschema builtin hooks
-# in .pre-commit-config.yaml for SchemaStore auto-detection).
+#MISE alias="vs"
+#USAGE flag "-k --keep" help="Keep temp files for debugging"
+#USAGE flag "-q --quiet" help="Suppress output"
+#USAGE flag "-v --verbose" help="Show validation details"
+#USAGE arg "[files]..." help="Files to validate (default: all tracked)"
+#USAGE complete "files" run="git ls-files '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml'"
 
 set -euo pipefail
 
@@ -11,77 +14,196 @@ if ((BASH_VERSINFO[0] < 4)); then
   exit 1
 fi
 
-for cmd in check-jsonschema jq yq; do
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "error: $cmd is required" >&2
-    exit 1
-  fi
+keep="${VALIDATE_SCHEMA_KEEP:-${VALIDATE_KEEP:-false}}"
+quiet="${VALIDATE_SCHEMA_QUIET:-${VALIDATE_QUIET:-false}}"
+verbose="${VALIDATE_SCHEMA_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -k | --keep)
+    keep=true
+    shift
+    ;;
+  -q | --quiet)
+    quiet=true
+    shift
+    ;;
+  -v | --verbose)
+    verbose=true
+    shift
+    ;;
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: validate-schema [-k] [-q] [-v] [files...]"
+    fi
+    exit
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    exit
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *) break ;;
+  esac
 done
 
 # shellcheck disable=SC2329
-validate_schema() {
-  local path="$1" base ext content schema output
+validate_file() {
+  local path="$1" base ext json5 content schema tmp_dir="" schema_path content_path
   base="$(basename "$path")"
   ext="${path##*.}"
 
   if [ ! -e "$path" ]; then
-    echo "FAIL $path (not found)"
+    echo "FAIL $path schema= (file not found)"
     return 1
   fi
 
+  if command -v json5 >/dev/null; then
+    json5="json5"
+  else
+    json5="npx json5"
+  fi
+
   case "$base" in
-  cspell.json | devcontainer.json) ext=jsonc ;;
+  cspell.json | devcontainer.json)
+    ext=jsonc
+    ;;
   esac
 
-  # Extract $schema
-  schema=
-  # shellcheck disable=SC2016
   case "$ext" in
-  json) schema=$(jq -r '."$schema" // empty' "$path" 2>/dev/null) ;;
-  jsonc | json5) command -v json5 >/dev/null 2>&1 && schema=$(json5 "$path" 2>/dev/null | jq -r '."$schema" // empty' 2>/dev/null) ;;
-  toml) schema=$(yq -p toml '."$schema"' "$path" 2>/dev/null) ;;
-  yaml | yml) schema=$(yq '."$schema"' "$path" 2>/dev/null) ;;
+  json)
+    schema=$(jq -r '."$schema" // empty' "$path")
+    ;;
+  jsonc | json5)
+    schema=$($json5 "$path" | jq -r '."$schema" // empty' || jq -r '."$schema" // empty' "$path")
+    ;;
+  toml)
+    # shellcheck disable=SC2016
+    schema=$(yq '."$schema"' "$path")
+    ;;
+  yaml | yml)
+    # shellcheck disable=SC2016
+    schema=$(yq '."$schema"' "$path")
+    ;;
   esac
-  if [ "${schema:-null}" = "null" ]; then
+  if [ "$schema" = "null" ]; then
     schema=
   fi
 
   if [ -z "$schema" ]; then
-    echo "SKIP $path"
+    if [ "$quiet" = false ]; then
+      echo "SKIP $path (no \$schema)"
+    fi
     return 0
   fi
 
-  # Normalize content to JSON
+  # Convert .jsonc/.json5 to .json for validation
   case "$ext" in
-  jsonc | json5) content=$(json5 "$path" 2>/dev/null) ;;
-  toml) content=$(yq -p toml -o json "$path" 2>/dev/null) ;;
-  yaml | yml) content=$(yq -o json "$path" 2>/dev/null) ;;
-  *) content=$(<"$path") ;;
-  esac
-  if [ "$content" = "null" ]; then
-    content='{}'
-  fi
-
-  case "$schema" in
-  https://aka.ms/winget-packages.schema.2.0.json)
-    # Delete WinGetVersion property
-    # SchemaError: '^[0-9]+\\.[0-9]+\\.[0-9]+(\\-preview)?$' is not a 'regex'
-    schema=$(mktemp)
-    trap 'rm -f "$schema"' EXIT
-    jq 'del(.WinGetVersion)' <<<"$content" >"$schema"
+  jsonc | json5)
+    content=$($json5 "$path" || jq '.' "$path")
+    if [ "$content" = "null" ]; then
+      content='{}'
+    fi
+    tmp_dir=$(mktemp -d)
+    # shellcheck disable=SC2064
+    trap "rm -rf '$tmp_dir'" EXIT
+    content_path="$tmp_dir/${path#/}"
+    content_path="${content_path%.*}.json"
+    mkdir -p "$(dirname "$content_path")"
+    printf '%s' "$content" >"$content_path"
+    ;;
+  *)
+    content_path="$path"
     ;;
   esac
 
-  if output=$(printf '%s' "$content" | check-jsonschema --schemafile "$schema" - 2>&1); then
-    echo "PASS $path"
+  schema_path="$schema"
+  case "$schema" in
+  https://aka.ms/winget-packages.schema.2.0.json)
+    case "$(uname -s)" in
+    MINGW* | MSYS* | CYGWIN* | Windows*) ;;
+    *)
+      if [ "$quiet" = false ]; then
+        echo "SKIP $path (windows)"
+      fi
+      return 0
+      ;;
+    esac
+    if [ -z "${tmp_dir:-}" ]; then
+      tmp_dir=$(mktemp -d)
+      # shellcheck disable=SC2064
+      trap "rm -rf '$tmp_dir'" EXIT
+    fi
+    schema_path="$tmp_dir/schema.json"
+    if ! curl -fsSL "$schema" -o "$schema_path"; then
+      echo "FAIL $path schema=$schema: failed to download schema"
+      return 1
+    fi
+    jq 'del(.properties.WinGetVersion)' "$schema_path" >"$schema_path.tmp"
+    mv "$schema_path.tmp" "$schema_path"
+    if [ "$verbose" = true ]; then
+      echo "validate-schema: downloaded and modified schema: $schema_path" >&2
+    fi
+    ;;
+  esac
+
+  if [ "$verbose" = true ]; then
+    echo "validate-schema: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
+  fi
+
+  local result
+  if result=$(check-jsonschema --schemafile "$schema_path" "$content_path" 2>&1); then
+    if [ "$quiet" = false ]; then
+      echo "PASS $path schema=$schema"
+    fi
+    return 0
   else
-    printf 'FAIL %s\n%s\n' "$path" "$output"
+    echo "FAIL $path schema=$schema"
+    if [ "$keep" = true ]; then
+      [ -n "$tmp_dir" ] && echo "Temp dir kept: $tmp_dir" >&2
+      [ -n "$tmp_dir" ] && trap - EXIT
+    fi
+    echo "$result"
     return 1
   fi
 }
+export -f validate_file
+
+# shellcheck disable=SC2329
+validate_schema() {
+  local output exit_code=0
+  output=$(validate_file "$1") || exit_code=$?
+  echo "$output"
+  if [ "$exit_code" -ne 0 ]; then
+    if ! echo "$output" | grep -qE '^FAIL '; then
+      echo "FAIL $1 schema= (crashed with exit $exit_code)" >&2
+    fi
+    return 1
+  fi
+  if ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
+    echo "FAIL $1 schema= (no output)" >&2
+    return 1
+  fi
+  return 0
+}
 export -f validate_schema
 
-# Collect files: from args (pre-commit) or find all
+for cmd in check-jsonschema jq yq; do
+  if ! command -v "$cmd" >/dev/null; then
+    echo "error: $cmd is required" >&2
+    exit 1
+  fi
+done
+if ! yq --version 2>&1 | grep -q 'mikefarah/yq'; then
+  echo "error: yq (mikefarah/yq) is required; found $(yq --version 2>&1 | head -1)" >&2
+  exit 1
+fi
+
 if [ $# -eq 0 ]; then
   mapfile -t files < <(
     git ls-files -z \
@@ -93,20 +215,36 @@ if [ $# -eq 0 ]; then
   set -- "${files[@]}"
 fi
 
+n="$(nproc 2>/dev/null || echo 4)"
+if [ "$verbose" = true ]; then
+  echo "validate-schema: Validating $# files with nproc: $n" >&2
+fi
+
 if [ $# -eq 0 ]; then
-  echo "no files to validate" >&2
+  if [ "$quiet" = false ]; then
+    echo "validate-schema: no files to validate" >&2
+  fi
   exit 0
 fi
 
+export quiet verbose keep
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n1 bash -c 'validate_schema "$1"' _ 2>&1 || true)
+results=$(printf '%s\n' "$@" | xargs -P "$n" -n1 bash -euc 'validate_schema "$1"' _ || true)
 
 passed=$(echo "$results" | grep -c '^PASS ' || true)
 failed=$(echo "$results" | grep -c '^FAIL ' || true)
 skipped=$(echo "$results" | grep -c '^SKIP ' || true)
 
-if [ "$failed" -gt 0 ]; then
-  echo "$results" | grep -v '^PASS \|^SKIP ' >&2
+if [ "$quiet" = false ]; then
+  echo "$results" | grep -E '^(PASS|FAIL|SKIP) ' || true
 fi
-echo "$passed passed, $failed failed, $skipped skipped" >&2
-exit $((failed > 0 ? 1 : 0))
+if [ "$failed" -gt 0 ]; then
+  echo "$results" | grep -vE '^(PASS|FAIL|SKIP) ' || true
+fi
+if [ "$quiet" = false ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
+  echo "validate-schema: $passed passed, $failed failed, $skipped skipped"
+fi
+if [ "$failed" -gt 0 ]; then
+  exit 1
+fi
+exit 0

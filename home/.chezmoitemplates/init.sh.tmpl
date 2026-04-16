@@ -10,6 +10,7 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 # source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
 for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh; do
   if [ -f "$_lib" ]; then
+    # shellcheck disable=SC1090
     source "$_lib"
   fi
 done
@@ -101,12 +102,14 @@ done
 for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
   case "${_conf##*/}" in init.sh) continue ;; esac
   if [ -f "$_conf" ]; then
+    # shellcheck disable=SC1090
     source "$_conf"
   fi
 done
 unset _conf
 
 if [ -f "$HOME/.${shell}rc.local" ]; then
+  # shellcheck disable=SC1090
   source "$HOME/.${shell}rc.local"
 fi
 

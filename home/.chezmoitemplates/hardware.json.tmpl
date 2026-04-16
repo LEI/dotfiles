@@ -1,0 +1,38 @@
+{{- $gpuVendor := "none" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   if eq .chezmoi.arch "arm64" -}}
+{{-     $gpuVendor = "apple" -}}
+{{-   else -}}
+{{-     $gpuVendor = "intel" -}}
+{{-   end -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   if or (stat "/dev/nvidia0") (lookPath "nvidia-smi" | isExecutable) -}}
+{{-     $gpuVendor = "nvidia" -}}
+{{-   else if or (stat "/dev/kfd") (output "sh" "-c" "lspci 2>/dev/null | grep -qi 'amd\\|radeon' && echo yes || true" | trim | eq "yes") -}}
+{{-     $gpuVendor = "amd" -}}
+{{-   else if stat "/dev/dri/renderD128" -}}
+{{-     $gpuVendor = "intel" -}}
+{{-   end -}}
+{{- else if eq .chezmoi.os "windows" -}}
+{{-   $gpuName := output "powershell" "-NoProfile" "-NonInteractive" "-Command" "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty Name" | trim | lower -}}
+{{-   if contains "nvidia" $gpuName -}}
+{{-     $gpuVendor = "nvidia" -}}
+{{-   else if or (contains "amd" $gpuName) (contains "radeon" $gpuName) -}}
+{{-     $gpuVendor = "amd" -}}
+{{-   else if contains "intel" $gpuName -}}
+{{-     $gpuVendor = "intel" -}}
+{{-   end -}}
+{{- end -}}
+{{- $memoryGiB := 0 -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $memoryGiB = output "sh" "-c" "sysctl -n hw.memsize | awk '{print int($1/1024/1024/1024)}'" | trim | int -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   $memoryGiB = output "sh" "-c" "awk '/MemTotal/{print int($2/1024/1024)}' /proc/meminfo" | trim | int -}}
+{{- else if eq .chezmoi.os "windows" -}}
+{{-   $memoryGiB = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)" | trim | int -}}
+{{- end -}}
+{{- $gpuAccelerated := or (eq $gpuVendor "nvidia") (eq $gpuVendor "amd") (eq $gpuVendor "apple") -}}
+{{- dict
+  "gpuAccelerated" $gpuAccelerated
+  "gpuVendor" $gpuVendor
+  "memoryGiB" $memoryGiB | toJson }}

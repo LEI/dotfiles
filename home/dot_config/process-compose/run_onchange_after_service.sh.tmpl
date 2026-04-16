@@ -1,6 +1,7 @@
 {{- if .features.processCompose -}}
-{{- $svc := get .services "process-compose" -}}
-{{- $site := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $name := "process-compose" -}}
+{{- $svc := get .services $name -}}
+{{- $site := get (get .caddy.sites "processCompose") $name -}}
 #!/bin/sh
 
 set -eu
@@ -11,5 +12,9 @@ if ! has process-compose; then
   die "process-compose not found"
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
 {{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
+{{- else }}
+{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
+{{- end }}
 {{- end -}}

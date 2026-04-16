@@ -2,11 +2,18 @@
 {{- $label := get . "label" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
+
 {{- $plistFile := printf "%s/Library/LaunchAgents/%s.plist" .chezmoi.homeDir $label -}}
 {{- if stat $plistFile -}}
-# plist: {{ include $plistFile | sha256sum }}
+# plist hash: {{ include $plistFile | sha256sum }}
+{{- $pid := output "sh" "-c" (printf "launchctl print gui/$(id -u)/%s 2>/dev/null | grep 'pid =' || true" $label) | trim -}}
+{{- if $pid }}
+# {{ $pid }}
+{{ end }}
 {{ end -}}
+
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
+# shellcheck disable=SC2034
 GUI="gui/$(id -u)"
 
 {{- if $enabled }}

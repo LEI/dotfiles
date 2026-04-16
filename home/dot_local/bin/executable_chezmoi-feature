@@ -37,6 +37,7 @@ list_features() {
   if [ -n "$format" ]; then
     chezmoi execute "{{ .features | $format }}"
   else
+    # shellcheck disable=SC2016
     chezmoi execute '{{ range $key, $value := .features }}{{ $key }}
 {{ end -}}'
   fi
@@ -46,10 +47,10 @@ list_enabled_features() {
   output="$1"
   shift
   format="$(get_format "$output")"
-  # shellcheck disable=SC2016
   if [ -n "$format" ]; then
     chezmoi execute "{{ .features | $format }}"
   else
+    # shellcheck disable=SC2016
     chezmoi execute '{{ range $key, $value := .features }}{{ if $value }}{{ $key }}
 {{ end }}{{ end -}}'
   fi

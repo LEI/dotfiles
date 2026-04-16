@@ -1,5 +1,7 @@
 {{- $enabled := ne (get . "enabled" | toString) "false" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
+{{- $health := get . "health" -}}
+{{- $port := get . "port" -}}
 {{- $serviceDir := printf "%s/.config/systemd/user" .chezmoi.homeDir -}}
 {{- $serviceFile := printf "%s/%s.service" $serviceDir $unit -}}
 {{- if stat $serviceFile -}}
@@ -17,6 +19,15 @@ if has systemctl; then
     run systemctl --user status {{ $unit }} || true
     die "{{ $unit }} service failed to start"
   fi
+{{- if and $port $health }}
+  if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
+    msg "{{ $unit }}: unhealthy, restarting"
+    run systemctl --user restart {{ $unit }}
+    if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
+      die "{{ $unit }}: unhealthy after retries"
+    fi
+  fi
+{{- end }}
 {{- else }}
   if systemctl --user is-active --quiet {{ $unit }}; then
     msg "stopping disabled service {{ $unit }}"

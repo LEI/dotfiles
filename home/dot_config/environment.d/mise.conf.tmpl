@@ -1,5 +1,6 @@
 {{- if .features.mise -}}
 # Default packages installed with each language runtime
+# shellcheck disable=SC2034
 {{- if get .packages.mise "go" }}
 MISE_GO_DEFAULT_PACKAGES_FILE=$XDG_CONFIG_HOME/mise/default-go-packages
 {{- end }}

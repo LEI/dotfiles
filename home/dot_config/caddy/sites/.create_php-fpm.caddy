@@ -1,0 +1,11 @@
+# Start FPM: brew services start php
+
+# (example_php) {
+# 	root * /srv/example/public
+# 	php_fastcgi unix//tmp/php-fpm.sock
+# 	file_server
+# }
+
+# example.test {
+# 	import example_php
+# }

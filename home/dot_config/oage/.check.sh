@@ -2,59 +2,117 @@
 
 set -euo pipefail
 
-data="$(chezmoi data --format=json)"
+if ((BASH_VERSINFO[0] < 5)); then
+  echo >&2 "bash 5+ required, found $BASH_VERSION"
+  exit 1
+fi
+
+# TAP 14 helpers
+
 test_num=0
 failures=0
+
+tap_header='TAP version 14'
+
+tap_plan() {
+  [[ $1 -eq 0 && $# -gt 1 ]] && set -- "0 # SKIP ${*:2}"
+  printf '%s\n1..%s\n' "$tap_header" "$1"
+}
+
+tap_bail() {
+  printf 'Bail out! %s\n' "$1"
+}
+
+tap_ok() {
+  test_num=$((test_num + 1))
+  [[ $# -gt 1 ]] && set -- "$1 # SKIP ${*:2}"
+  printf 'ok %d - %s\n' "$test_num" "$1"
+}
+
+tap_not_ok() {
+  test_num=$((test_num + 1))
+  [[ $# -gt 1 ]] && set -- "$1 # TODO ${*:2}"
+  printf 'not ok %d - %s\n' "$test_num" "$1"
+  failures=$((failures + 1))
+}
+
+tap_diag() {
+  printf '  ---\n'
+  jq --raw-output 'to_entries[] | "  \(.key): \(
+    if .value | type == "string" then .value | @json
+    else .value end
+  )"'
+  printf '  ...\n'
+}
+
+tap_diag_kv() {
+  printf '  ---\n'
+  local kv
+  for kv in "$@"; do
+    printf '  %s\n' "$kv"
+  done
+  printf '  ...\n'
+}
+
+# Oage check
+
+if [[ "$(hostname)" == fr* ]]; then
+  tap_plan 0 "oage check"
+  exit 0
+fi
+
+MAX_TIME="${MAX_TIME:-60}"
+
+data="$(chezmoi data --format=json)"
 
 jqr() { printf '%s' "$data" | jq --raw-output "$@"; }
 
 post() {
-  curl --silent --fail --max-time 10 "$1" \
+  local url="$1" body="$2"
+  shift 2
+  curl --silent --fail --max-time "$MAX_TIME" "$url" \
     --header 'Content-Type: application/json' \
-    --data "$2"
+    --data "$body" "$@"
 }
 
-# Emit TAP 14 YAML diagnostic block (2-space indented, --- to ...)
-diagnostic() {
-  printf '  ---\n'
-  printf '  %s\n' "$@"
-  printf '  ...\n'
-}
+# shellcheck disable=SC2016
+metrics_filter='def elapsed: ($t1|tonumber) - ($t0|tonumber);
+def round2: (. * 100 | round / 100);
+FIELDS + {url: $url, elapsed_s: (elapsed | round2)}
++ if .usage then
+    { prompt_tokens: .usage.prompt_tokens,
+      completion_tokens: .usage.completion_tokens }
+    + if .usage.completion_tokens > 0 and elapsed > 0 then
+        {tok_per_s: ((.usage.completion_tokens / elapsed) | round2)}
+      else {} end
+  else {} end'
 
 check() {
-  local label="$1" assert="$2" diag_expr="$3" url="$4" body="$5"
-  local response rc=0
-  test_num=$((test_num + 1))
-  SECONDS=0
+  local label="$1" assert="$2" fields="$3" url="$4" body="$5"
+  local response rc=0 t0 t1
+  t0=$EPOCHREALTIME
   response="$(post "$url" "$body")" || rc=$?
+  t1=$EPOCHREALTIME
   if [[ $rc -ne 0 ]]; then
-    printf 'not ok %d - %s # time=%dms\n' "$test_num" "$label" "$((SECONDS * 1000))"
-    diagnostic \
-      "severity: fail" \
-      "message: curl exit $rc" \
-      "url: $url"
-    printf 'Bail out! %s unreachable\n' "$url"
+    tap_not_ok "$label"
+    tap_diag_kv "severity: fail" "message: curl exit $rc" "url: $url"
+    tap_bail "$url unreachable"
     exit 1
   fi
   if ! printf '%s' "$response" | jq --exit-status "$assert" >/dev/null 2>&1; then
-    printf 'not ok %d - %s # time=%dms\n' "$test_num" "$label" "$((SECONDS * 1000))"
-    printf '  ---\n'
-    printf '  severity: fail\n'
-    printf '  message: assertion failed\n'
-    printf '%s' "$response" | jq --raw-output 'to_entries[] | "  \(.key): \(.value | tostring | .[0:80])"'
-    printf '  ...\n'
-    failures=$((failures + 1))
+    tap_not_ok "$label"
+    tap_diag_kv "severity: fail" "message: assertion failed" "url: $url"
     return 0
   fi
-  printf 'ok %d - %s # time=%dms\n' "$test_num" "$label" "$((SECONDS * 1000))"
-  printf '  ---\n'
-  printf '%s' "$response" | jq --raw-output "$diag_expr"
-  printf '  ...\n'
+  tap_ok "$label"
+  printf '%s' "$response" | jq --raw-output \
+    --arg t0 "$t0" --arg t1 "$t1" --arg url "$url" \
+    "${metrics_filter//FIELDS/(${fields})}" | tap_diag
 }
 
 chat() {
-  local label="$1" assert="$2" diag_expr="$3" body="$4"
-  check "$label" "$assert" "$diag_expr" \
+  local label="$1" assert="$2" fields="$3" body="$4"
+  check "$label" "$assert" "$fields" \
     "$chat_url/v1/chat/completions" \
     "$(printf '%s' "$body" | jq --compact-output --arg m "$chat_model" '. + {model: $m}')"
 }
@@ -64,44 +122,49 @@ chat() {
 local_provider="$(jqr '.ai.localProvider')"
 
 if [[ -z "$local_provider" ]]; then
-  printf 'TAP version 14\n1..0 # SKIP local provider disabled\n'
+  tap_plan 0 "local provider disabled"
   exit 0
 fi
 
+# shellcheck disable=SC2016
 port="$(jqr --arg p "$local_provider" '.ai.providers[$p].port')"
 fast="$(jqr '.ai.profiles.local.fast')"
+# shellcheck disable=SC2016
 chat_model="$(jqr --arg m "$fast" --arg p "$local_provider" '.ai.models[$m][$p]')"
 chat_url="http://localhost:$port"
 
 embed_ref="$(jqr '.ai.profiles[.ai.localProfile].embedding')"
 embed_provider="${embed_ref%%/*}"
 embed_model="${embed_ref#*/}"
+# shellcheck disable=SC2016
 embed_port="$(jqr --arg p "$embed_provider" '.ai.providers[$p].port')"
 
 # Tests
 
-printf 'TAP version 14\n1..4\n'
+tap_plan 4
 
-chat "chat completion returns assistant message" \
+chat "completions" \
   '.choices[0] | has("finish_reason") and .message.role == "assistant"' \
-  '"  model: \(.model)\n  finish_reason: \(.choices[0].finish_reason)"' \
+  '{model, finish_reason: .choices[0].finish_reason}' \
   '{"messages": [{"role": "user", "content": "hi"}], "max_tokens": 2}'
 
-chat "reasoning produces correct answer" \
+chat "reasoning" \
   '.choices[0].message |
     has("reasoning", "content", "role") and
     (.reasoning | length > 0) and
     (.content | test("2"))' \
-  '"  model: \(.model)\n  content: \"\(.choices[0].message.content | gsub("\\n";" ") | gsub("\""; "\\\"") | .[0:50])\""' \
+  '{model, content: .choices[0].message.content[0:50]}' \
   '{"messages": [{"role": "user", "content": "What is 1+1?"}], "max_tokens": 500}'
 
-chat "tool call extracts function arguments" \
+chat "tool calling" \
   '.choices[0].message |
     has("tool_calls") and
     (.tool_calls | length > 0) and
     .tool_calls[0].function.name == "get_weather" and
     (.tool_calls[0].function.arguments | fromjson | has("city"))' \
-  '"  model: \(.model)\n  calls: \(.choices[0].message.tool_calls | length)\n  function: \(.choices[0].message.tool_calls[0].function.name)"' \
+  '{model,
+    calls: (.choices[0].message.tool_calls | length),
+    function: .choices[0].message.tool_calls[0].function.name}' \
   '{
     "messages": [{"role": "user", "content": "Get weather in Paris"}],
     "max_tokens": 100,
@@ -119,15 +182,16 @@ chat "tool call extracts function arguments" \
     }]
   }'
 
-check "embedding returns vector dimensions" \
+check "embeddings" \
   '(.data | length > 0) and (.data[0].embedding | length > 0) and .model' \
-  '"  model: \(.model)\n  dimensions: \(.data[0].embedding | length)"' \
+  '{model, dimensions: (.data[0].embedding | length)}' \
   "http://localhost:$embed_port/v1/embeddings" \
   "{\"model\": \"$embed_model\", \"input\": \"test\"}"
 
 # Restart hung services on failure (KeepAlive restarts them)
 if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   gui="gui/$(id -u)"
+  # shellcheck disable=SC2016
   label="$(jqr --arg p "$local_provider" '.ai.providers[$p].label')"
   if [[ -n "$label" ]] && launchctl print "$gui/$label" 2>/dev/null | grep -q 'pid ='; then
     printf '# restarting %s\n' "$label"

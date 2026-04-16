@@ -22,5 +22,6 @@ set -eu
 packages="{{ $packages | sortAlpha | join " " }}"
 
 if [ -n "$packages" ]; then
+  # shellcheck disable=SC2086
   run gem install --quiet --user $packages
 fi

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Render managed templates to a staging directory
 #USAGE flag "-q --quiet" help="Suppress output"
+#USAGE flag "-v --verbose" help="Print each file as it is rendered"
 #USAGE arg "<directory>" help="Output directory"
 #USAGE arg "[templates]..." help="Templates to render"
 
@@ -16,11 +17,15 @@ dest="${1:?usage: chezmoi-render <directory> [templates...]}"
 shift
 
 quiet=false
+verbose=false
 templates=()
 for arg in "$@"; do
   case "$arg" in
   -q | --quiet)
     quiet=true
+    ;;
+  -v | --verbose)
+    verbose=true
     ;;
   *)
     templates+=("$arg")
@@ -31,7 +36,7 @@ done
 mkdir -p "$dest"
 
 if [ "$quiet" != true ]; then
-  printf 'Output: %s\n' "${dest#"$PWD"/}" >&2
+  printf 'chezmoi-render: output dir: %s\n' "${dest#"$PWD"/}" >&2
 fi
 
 source_dir="$(chezmoi source-path)"
@@ -89,6 +94,12 @@ render() {
   local out="$dest/$rel"
   local base
   base=$(basename "$src")
+
+  if [ "$verbose" = true ]; then
+    printf 'render: %s -> %s\n' "$src" "$out" >&2
+  elif [ "$quiet" != true ]; then
+    printf 'render: %s -> %s\n' "${src#./}" "$rel" >&2
+  fi
 
   mkdir -p "${out%/*}"
 

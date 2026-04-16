@@ -15,6 +15,7 @@ if [ -n "$pip_packages" ]; then
   if ! has python && has python3; then
     python=python3
   fi
+  # shellcheck disable=SC2086
   dry_run $python -m pip install --user --quiet $pip_packages
 fi
 

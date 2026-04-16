@@ -1,9 +1,11 @@
 setup_file() {
+  # shellcheck source=test/common/setup-file.sh
   source test/common/setup-file.sh
   _common_setup_file
 }
 
 setup() {
+  # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
   _common_setup
   # Paths reused per test; BATS_TEST_TMPDIR is unique per test
@@ -31,6 +33,7 @@ run_block_in_file() {
   printf '{{- includeTemplate "block-in-file.tmpl" (dict "chezmoi" .chezmoi "contents" (include "%s")%s) -}}' \
     "$BIF_CONTENTS" "$extra_dict_args" >"$BIF_WRAPPER"
 
+  # shellcheck disable=SC2016
   run --separate-stderr bash -c \
     'printf "%s" "$1" | chezmoi execute-template --with-stdin -f "$2"' \
     _ "$existing_file" "$BIF_WRAPPER"
@@ -95,8 +98,10 @@ run_block_in_file() {
 }
 
 @test "block-in-file: preserves special chars verbatim" {
+  # shellcheck disable=SC2016
   run_block_in_file "" 'echo "$HOME" # comment'
   assert_success
+  # shellcheck disable=SC2016
   assert_line 'echo "$HOME" # comment'
 }
 

@@ -48,20 +48,23 @@ msg "Installing AUR packages"
 
 aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
 
-{{ includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) | trim }}
 
 if has yay; then
   # run sudo chown -R "$USER:$USER" /tmp/yay
+  # shellcheck disable=SC2086
   dry_run as_user yay --sync --needed --noconfirm --quiet $aur_packages
 elif has paru && ! has pamac; then
+  # shellcheck disable=SC2086
   dry_run as_user paru --sync --needed --noconfirm --quiet $aur_packages
 elif has pamac; then
+  # shellcheck disable=SC2086
   dry_run as_user pamac install --no-confirm --quiet $aur_packages
 else
   die "AUR package manager not found"
 fi
 
-{{ includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) | trim }}
 
 msg "Installed AUR packages"
 {{ end -}}

@@ -1,4 +1,5 @@
 setup() {
+  # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
   _common_setup
 }
@@ -8,6 +9,7 @@ setup() {
 # bench
 
 @test "bench: passes through command when disabled" {
+  # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
   unset SHELL_BENCH
   run bench echo hello
@@ -16,7 +18,9 @@ setup() {
 }
 
 @test "bench: prints timing when enabled" {
+  # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
+  # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   run --separate-stderr bench echo hello
   assert_success
@@ -25,7 +29,9 @@ setup() {
 }
 
 @test "bench: uses BENCHFMT label" {
+  # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
+  # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   BENCHFMT="custom-label" run --separate-stderr bench echo ok
   assert_success
@@ -33,6 +39,7 @@ setup() {
 }
 
 @test "bench: preserves command exit code" {
+  # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
   unset SHELL_BENCH
   run bench false
@@ -44,6 +51,7 @@ setup() {
 @test "export_env: sources conf and exports variables" {
   local conf="$BATS_TEST_TMPDIR/test.conf"
   printf 'FOO=bar\nBAZ=qux\n' >"$conf"
+  # shellcheck source=home/dot_config/sh/lib/export.sh
   source home/dot_config/sh/lib/export.sh
   export_env "$conf"
   [ "$FOO" = bar ]
@@ -51,12 +59,14 @@ setup() {
 }
 
 @test "export_env: missing file is silently skipped" {
+  # shellcheck source=home/dot_config/sh/lib/export.sh
   source home/dot_config/sh/lib/export.sh
   run export_env "$BATS_TEST_TMPDIR/nonexistent.conf"
   assert_success
 }
 
 @test "export_env: fails with no arguments" {
+  # shellcheck source=home/dot_config/sh/lib/export.sh
   source home/dot_config/sh/lib/export.sh
   run export_env
   assert_failure
@@ -65,6 +75,7 @@ setup() {
 # pathmunge
 
 setup_pathmunge() {
+  # shellcheck source=home/dot_config/sh/lib/pathmunge.sh
   source home/dot_config/sh/lib/pathmunge.sh
   # Use a controlled PATH so tests are deterministic
   PATH="/usr/bin:/bin"

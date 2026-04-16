@@ -8,7 +8,9 @@ export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
 export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=true
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
 
-opencode() { env opencode "${@:---continue}"; }
+opencode() {
+  command opencode "${@:---continue}"
+}
 alias oc=opencode
 
 # # openwork start --workspace /path/to/your/workspace --approval auto

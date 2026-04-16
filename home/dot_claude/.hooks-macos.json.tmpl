@@ -1,0 +1,198 @@
+{{- $claudeDir := env "CLAUDE_CONFIG_DIR" | default (joinPath .chezmoi.homeDir ".claude") -}}
+{
+  "Notification": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "PermissionDenied": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "PermissionRequest": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "timeout": 86400,
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "PostCompact": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "auto"
+    },
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "manual"
+    }
+  ],
+  "PostToolUse": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "PostToolUseFailure": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "PreCompact": [
+    {
+      "hooks": [
+        {
+          "command": "echo 'Summarize each active task: what was done, what remains, and the concrete next step. Persist key discoveries.'",
+          "type": "command"
+        }
+      ],
+      "matcher": ""
+    },
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "auto"
+    },
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "manual"
+    }
+  ],
+  "PreToolUse": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ],
+  "SessionEnd": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo 'Check TaskList for pending tasks. Use AskUserQuestion for important decisions.'"
+        }
+      ]
+    },
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "StopFailure": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "SubagentStart": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "SubagentStop": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ],
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
+          "type": "command"
+        }
+      ]
+    }
+  ]
+}

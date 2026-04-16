@@ -44,7 +44,7 @@ description = {{ printf "Check %s" $feat | quote }}
 # file = {{ . | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
-shell = "sh"
+shell = "bash"
 {{- if $miseInteractive }}
 interactive = true
 {{- end }}

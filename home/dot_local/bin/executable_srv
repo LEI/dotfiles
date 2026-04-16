@@ -88,6 +88,7 @@ if [ "${1:-}" = "logs" ]; then
 elif [ $# -gt 0 ]; then
   cmd="$*"
 else
+  # shellcheck disable=SC2016
   cmd='exec $SHELL -l'
 fi
 
@@ -103,7 +104,9 @@ if [ "$debug" = true ]; then
 fi
 
 if [ -n "$pipe" ]; then
+  # shellcheck disable=SC2029
   ssh ${ssh_opts[@]+"${ssh_opts[@]}"} "$host" "$remote" | eval "$pipe"
 else
+  # shellcheck disable=SC2029
   ssh ${ssh_opts[@]+"${ssh_opts[@]}"} "$host" "$remote"
 fi

@@ -14,8 +14,12 @@ if ! command -v skill-validator >/dev/null 2>&1; then
   exit 1
 fi
 
+quiet="${VALIDATE_SKILL_QUIET:-${VALIDATE_QUIET:-false}}"
+verbose="${VALIDATE_SKILL_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+
+# shellcheck disable=SC2329
 validate_skill() {
-  local path="$1" skill_dir output
+  local path="$1" skill_dir target_path name output
 
   if [ ! -e "$path" ]; then
     echo "FAIL $path (not found)"
@@ -31,20 +35,28 @@ validate_skill() {
   fi
 
   # Resolve effective name via chezmoi (strips exact_, dot_, etc.)
-  local effective_name tmp_dir=""
-  effective_name=$(basename "$(chezmoi target-path "$skill_dir" 2>/dev/null || echo "$skill_dir")")
-  if [ "$effective_name" != "$(basename "$skill_dir")" ]; then
+  target_path="$(chezmoi target-path "$skill_dir" 2>/dev/null || echo "$skill_dir")"
+  name=$(basename "$target_path")
+  if [ "$name" != "$(basename "$skill_dir")" ]; then
+    local tmp_dir
     tmp_dir=$(mktemp --directory)
     trap 'rm -rf "$tmp_dir"' RETURN
-    ln -s "$skill_dir" "$tmp_dir/$effective_name"
-    skill_dir="$tmp_dir/$effective_name"
+    ln -s "$skill_dir" "$tmp_dir/$name"
+    skill_dir="$tmp_dir/$name"
+  fi
+
+  if [ "$verbose" = true ]; then
+    echo "validate-skill: $name" >&2
   fi
 
   # NOTE: exit code 2 means warnings
   if output=$(skill-validator check "$skill_dir" 2>&1); then
-    echo "PASS $path"
+    if [ "$quiet" = false ]; then
+      echo "PASS $path"
+    fi
   else
-    printf 'FAIL %s\n%s\n' "$path" "$output"
+    echo "FAIL $path"
+    echo "$output"
     return 1
   fi
 }
@@ -57,17 +69,24 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ $# -eq 0 ]; then
-  echo "no files to validate" >&2
+  echo "validate-skill: no files to validate" >&2
   exit 0
 fi
 
-results=$(printf '%s\n' "$@" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n1 bash -c 'validate_skill "$1"' _ 2>&1 || true)
+export quiet verbose
+# shellcheck disable=SC2016
+results=$(printf '%s\n' "$@" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n1 bash -euc 'validate_skill "$1"' _ || true)
 
-passed=$(echo "$results" | grep -c '^PASS ' || true)
-failed=$(echo "$results" | grep -c '^FAIL ' || true)
+passed=$(grep -c '^PASS ' <<<"$results") || passed=0
+failed=$(grep -c '^FAIL ' <<<"$results") || failed=0
 
-if [ "$failed" -gt 0 ]; then
-  echo "$results" | grep -v '^PASS ' >&2
+if [ "$quiet" = false ]; then
+  echo "$results" | grep -E '^(PASS|FAIL) ' || true
 fi
-echo "$passed passed, $failed failed" >&2
+if [ "$failed" -gt 0 ]; then
+  echo "$results" | grep -vE '^(PASS|FAIL) ' || true
+fi
+if [ "$quiet" = false ] && [ "$((passed + failed))" -gt 0 ]; then
+  echo "validate-skill: $passed passed, $failed failed"
+fi
 exit $((failed > 0 ? 1 : 0))

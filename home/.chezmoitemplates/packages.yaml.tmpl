@@ -256,6 +256,8 @@ packages:
   # httpstat
   huggingface-cli:
     enabled: {{ and .features.ai .features.mlx }}
+    nameOverwrite:
+      brew: hf
     # type: brew
   hurl:
     enabled: {{ and
@@ -344,7 +346,7 @@ packages:
     nameOverwrite:
       arch: lua51
     version: {{ ne .osIDLike "arch" | ternary "5.1" "" | quote }}
-    type: {{ ne .osIDLike "arch" | ternary "mise" nil | quote }}
+    type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
   macchina:
     enabled: {{ ne .profile "minimal" }}
     type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
@@ -479,8 +481,8 @@ packages:
     nameOverwrite:
       arch: python-pipx
     type: {{ and
-        (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora")
-        (not (and (eq .osID "debian") (le (int .osVersion) 11)))
+      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora")
+      (not (and (eq .osID "debian") (le (int .osVersion) 11)))
       | ternary nil "pip" }}
   pik:
     enabled: {{ eq .osIDLike "arch" }}
@@ -576,7 +578,7 @@ packages:
     enabled: {{ and .features.shpool (not (eq .osIDLike "darwin" "windows")) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
   skill-validator:
-    enabled: "{{ ne .profile "minimal" }}" # "{{ .features.ai }}"
+    enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} # .features.ai
     nameOverwrite:
       brew: agent-ecosystem/tap/skill-validator
       mise: github:agent-ecosystem/skill-validator
@@ -703,7 +705,7 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   usage:
     enabled: {{ .features.mise }}
-    type: {{ eq .os "darwin" | ternary "brew" "mise" }}
+    type: {{ eq .os "darwin" | ternary "brew" "mise" | quote }}
   uv:
     enabled: {{ .features.python }}
     nameOverwrite:
@@ -962,7 +964,7 @@ osPackages:
       inkscape:
         enabled: {{ .gui }}
       iterm2:
-        enabled: {{ .gui }}
+        enabled: {{ and .features.iterm2 .gui }}
         after_script: defaults write com.googlecode.iterm2 EnableAPIServer -bool true
       karabiner-elements:
         enabled: {{ .gui }}
@@ -1000,6 +1002,9 @@ osPackages:
         enabled: {{ .gui }}
       # sequel-ace:
       # soapui:
+      # thaw: # jordanbaird-ice
+      #   description: Menu bar manager
+      #   enabled: {{ and (get (get . "softwareVersion") "productVersion") (ge .softwareVersion.productVersion (float64 26)) }} # Tahoe
       # xquartz:
     mas:
       Keynote:

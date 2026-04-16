@@ -8,7 +8,6 @@ os:
     - .config/hammerspoon/
     - .config/karabiner/
     - .hushlogin
-    - .local/share/iterm2/
     - .macos
     - Library/
   linux:
@@ -34,6 +33,7 @@ features:
     - .claude/
     - .config/claude/
     - .config/markdownlint/claude.yaml
+    - Library/Application Support/Claude/
   goose:
     - .config/goose/
   opencode:
@@ -105,6 +105,11 @@ features:
     - .local/share/applications/
     - .xinitrc
     - .xprofile
+  iterm2:
+    - .local/share/iterm2/
+    - Library/Application Support/iTerm2/
+  kilo:
+    - .config/kilo/
   logseq:
     - .chezmoiscripts/*setup-logseq.sh
     - .config/logseq/

@@ -17,7 +17,7 @@ mkdir -p "$state_dir"
 
 provider="${CONTAINER_PROVIDER:?}"
 
-compose_hash="{{ include $compose | fromYaml | toJson | sha256sum }}"
+# compose hash: "{{ include $compose | fromYaml | toJson | sha256sum }}"
 run "$provider" compose --file="$compose_file" up --detach --remove-orphans
 
 check_reload() {

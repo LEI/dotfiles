@@ -68,6 +68,7 @@ dry_run sudo dnf update --assumeyes --quiet
 dry_run sudo dnf upgrade --assumeyes --quiet
 {{- end }}
 
+# shellcheck disable=SC2086
 dry_run sudo dnf install --assumeyes --quiet $packages
 {{- else if eq .osID "fedora" }}
 
@@ -77,6 +78,7 @@ dry_run rpm-ostree refresh-md # --quiet
 dry_run rpm-ostree upgrade # --quiet
 {{- end }}
 
+# shellcheck disable=SC2086
 dry_run rpm-ostree install --allow-inactive --assumeyes --idempotent $packages
 # --apply-live --quiet
 {{- else if eq .osID "android" }}

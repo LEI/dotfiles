@@ -2,6 +2,7 @@
 
 set -eu
 
+# shellcheck source=/dev/null
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 # Vim 9.1.0016 on Ubuntu 24.04.02 (https://packages.ubuntu.com/noble/vim)

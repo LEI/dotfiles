@@ -1,0 +1,97 @@
+{{- if .gui -}}
+{{- $fa := .macos.fileAssociations -}}
+#!/bin/sh
+
+# associations: {{ $fa | toJson | sha256sum }}
+
+set -eu
+
+# defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has duti; then
+  die "duti not found"
+fi
+
+# TODO: remove DRY_RUN once validated
+DRY_RUN="${DRY_RUN:-true}"
+
+ok=0
+skip=0
+
+set_uti() {
+  _bundle="$1"
+  _uti="$2"
+  _current="$(duti -d "$_uti" 2>/dev/null || true)"
+  if [ "$_current" = "$_bundle" ]; then
+    skip=$((skip + 1))
+    return
+  fi
+  if [ -n "$_current" ]; then
+    msg "  $_uti: $_current -> $_bundle"
+  else
+    msg "  $_uti: (unset) -> $_bundle"
+  fi
+  dry_run duti -s "$_bundle" "$_uti" all
+  ok=$((ok + 1))
+}
+
+set_ext() {
+  _bundle="$1"
+  _ext="$2"
+  # duti -x returns three lines: App.app, /path, bundle.id
+  _current="$(duti -x "${_ext#.}" 2>/dev/null | sed -n '3p' || true)"
+  if [ "$_current" = "$_bundle" ]; then
+    skip=$((skip + 1))
+    return
+  fi
+  if [ -n "$_current" ]; then
+    msg "  $_ext: $_current -> $_bundle"
+  else
+    msg "  $_ext: (unset) -> $_bundle"
+  fi
+  dry_run duti -s "$_bundle" "$_ext" all
+  ok=$((ok + 1))
+}
+
+set_scheme() {
+  _bundle="$1"
+  _scheme="$2"
+  _current="$(duti -d "$_scheme" 2>/dev/null || true)"
+  if [ "$_current" = "$_bundle" ]; then
+    skip=$((skip + 1))
+    return
+  fi
+  if [ -n "$_current" ]; then
+    msg "  $_scheme: $_current -> $_bundle"
+  else
+    msg "  $_scheme: (unset) -> $_bundle"
+  fi
+  dry_run duti -s "$_bundle" "$_scheme"
+  ok=$((ok + 1))
+}
+
+msg "File associations (UTIs)"
+{{ range $bundle, $utis := $fa.utis -}}
+{{ range $utis -}}
+set_uti "{{ $bundle }}" "{{ . }}"
+{{ end -}}
+{{ end -}}
+
+msg "File associations (extensions)"
+{{ range $bundle, $exts := $fa.extensions -}}
+{{ range $exts -}}
+set_ext "{{ $bundle }}" ".{{ . }}"
+{{ end -}}
+{{ end -}}
+
+msg "URL scheme associations"
+{{ range $bundle, $schemes := $fa.schemes -}}
+{{ range $schemes -}}
+set_scheme "{{ $bundle }}" "{{ . }}"
+{{ end -}}
+{{ end -}}
+
+msg "Done: $ok changed, $skip already correct"
+{{ end -}}

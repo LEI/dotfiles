@@ -1,7 +1,9 @@
 setup() {
+  # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
   _common_setup
 
+  # shellcheck source=test/common/helper.sh
   source test/common/helper.sh
 }
 

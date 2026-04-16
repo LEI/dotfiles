@@ -1,0 +1,26 @@
+// https://kilo.ai/docs/code-with-ai/platforms/cli
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  // "model": "github-copilot/gpt-4o",
+  // "small_model": "github-copilot/gpt-4o",
+  "default_agent": "plan",
+  "agent": {
+    "code": {
+      "model": "github-copilot/gemini-3-flash-preview",
+    },
+  },
+  "experimental": {
+    "batch_tool": false,
+    "codebase_search": true,
+    "disable_paste_summary": false,
+    "mcp_timeout": 30000,
+    "openTelemetry": false,
+  },
+  "permission": {
+    "*": "ask",
+    "bash": "allow",
+    "edit": "deny",
+  },
+  "remote_control": true,
+  "snapshot": true,
+}

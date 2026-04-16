@@ -12,6 +12,6 @@
 {{- end -}}
 EDITOR={{ $editor }}
 VISUAL={{ $editor }}
-{{- if lookPath "ghostty" | isExecutable }}
+{{- if or (lookPath "ghostty" | isExecutable) ("/Applications/Ghostty.app/Contents/MacOS/ghostty" | isExecutable) }}
 TERMINAL=ghostty
 {{- end }}

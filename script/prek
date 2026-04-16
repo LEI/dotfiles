@@ -1,0 +1,23 @@
+#!/bin/sh
+#MISE alias="pre-commit"
+#MISE description="Run pre-commit hooks on all files"
+
+set -eu
+
+case "$(uname -s)" in
+Darwin | Linux) ;;
+*) export SKIP=validate-skill ;;
+esac
+
+# See ./script/test
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+# if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
+#   eval "$(mise activate bash)"
+#   PATH="$PATH:$HOME/.local/share/mise/shims"
+# fi
+
+set -x
+
+prek run --all-files

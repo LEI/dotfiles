@@ -117,5 +117,6 @@ packages="{{ $list | sortAlpha | join " " }}"
 # fi
 
 if [ -n "$packages" ]; then
+  # shellcheck disable=SC2086
   dry_run cargo binstall --disable-telemetry --no-confirm --quiet "$@" $packages
 fi

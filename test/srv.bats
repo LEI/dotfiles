@@ -1,7 +1,9 @@
 setup() {
+  # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
   _common_setup
 
+  # shellcheck source=test/common/helper.sh
   source test/common/helper.sh
 
   srv="$PWD/home/dot_local/bin/executable_srv"
@@ -60,6 +62,7 @@ YAML
   run_script "$srv" web
   unstub ssh
   assert_success
+  # shellcheck disable=SC2016
   assert_line --regexp 'exec \$SHELL -l$'
 }
 

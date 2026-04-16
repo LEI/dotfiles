@@ -64,7 +64,7 @@ services:
   # Ollama: local LLM inference
   # https://github.com/ollama/ollama
   ollama:
-    image: docker.io/ollama/ollama:0.18.2
+    image: docker.io/ollama/ollama:0.20.7
     restart: unless-stopped
     ports:
       - "127.0.0.1:11434:11434" # API
@@ -131,18 +131,46 @@ services:
     # https://docs.openwebui.com/reference/env-configuration
     environment:
       - CORS_ALLOW_ORIGIN=https://open-webui.test
+      - WEBUI_AUTH=false
+      - WEBUI_URL=https://open-webui.test
+      # - WEBHOOK_URL=
+
 {{- if .features.ollama }}
-      - ENABLE_OLLAMA_API={{ not .features.mlx }}
+      - ENABLE_OLLAMA_API={{ and .features.ollama (not .features.mlx) }}
       - OLLAMA_BASE_URL=http://host.docker.internal:{{ (get .ai.providers "ollama").port }}
-{{- else }}
-      - ENABLE_OLLAMA_API=false
+      # - OLLAMA_BASE_URLS=
+      # - USE_OLLAMA_DOCKER=true
+      # - K8S_FLAG=true # http://ollama-service.open-webui.svc.cluster.local:11434
+
+      # - RAG_OLLAMA_BASE_URL=
+      # - RAG_OLLAMA_API_KEY=
 {{- end }}
+
+      - ENABLE_OPENAI_API=true
+      # - OPENAI_API_BASE_URL=http://bifrost:8080/v1
 {{- if .features.mlx }}
       # - OPENAI_API_BASE_URLS=http://bifrost:8080/v1;http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
       - OPENAI_API_BASE_URLS=http://host.docker.internal:{{ (get .ai.providers "mlx-lm").port }}/v1
-{{- else }}
-      # - OPENAI_API_BASE_URL=http://bifrost:8080/v1
 {{- end }}
+      # - OPENAI_API_KEYS=
+
+      # - RAG_OPENAI_API_BASE_URL=
+      # - RAG_OPENAI_API_KEY=
+
+      # - AUDIO_STT_ENGINE=
+      # - AUDIO_STT_MODEL=whisper-1
+      # - AUDIO_STT_OPENAI_API_BASE_URL=
+      # - AUDIO_STT_OPENAI_API_KEY=
+
+      # - IMAGES_OPENAI_API_BASE_URL=
+      # - IMAGES_OPENAI_API_VERSION=
+      # - IMAGES_OPENAI_API_KEY=
+      # - IMAGES_OPENAI_API_PARAMS=
+
+      # - IMAGES_EDIT_OPENAI_API_BASE_URL
+      # - IMAGES_EDIT_OPENAI_API_VERSION=
+      # - IMAGES_EDIT_OPENAI_API_KEY=
+
       - AIOHTTP_CLIENT_TIMEOUT=120 # default: 30s; local models need more time for first token
       - ENABLE_API_KEYS=true
       # - ENABLE_CHANNELS=true
@@ -151,7 +179,6 @@ services:
       - ENABLE_WEB_SEARCH=true
       - SEARXNG_QUERY_URL=http://searxng:8080/search?q=<query>
       - USER_AGENT=open-webui
-      - WEBUI_AUTH=false
       # - WEB_LOADER_ENGINE=firecrawl
       - WEB_SEARCH_ENGINE=searxng
       # - HF_TOKEN=

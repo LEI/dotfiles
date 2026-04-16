@@ -8,7 +8,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has systemctl; then
-  err "systemctl not found; cannot activate ollama service"
+  die "systemctl not found; cannot activate ollama service"
 fi
 
 run systemctl --user daemon-reload

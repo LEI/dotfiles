@@ -10,7 +10,7 @@ set -eu
 
 # mise doctor | grep -qv 'self_update_available: yes'
 if [ "$(mise doctor --json | jq .self_update_available)" != true ]; then
-  echo "update: skipping mise, self-update not available" >&2
+  echo "update: mise self-update not available" >&2
   exit
 fi
 

@@ -7,7 +7,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has ghq; then
-  err "ghq not found, install it to set up notes graphs"
+  die "ghq not found, install it to set up notes graphs"
 fi
 
 notes_dir="{{ .chezmoi.homeDir }}/notes"
@@ -30,7 +30,7 @@ setup_graph() {
   path_key=$(printf '%s' "$url" | sed -E 's|^git@||; s|^https?://||; s|:|/|; s|\.git$||')
   local_path="$(ghq root)/$path_key"
   if [ ! -d "$local_path" ]; then
-    err "ghq could not resolve $url"
+    die "ghq could not resolve $url"
   fi
 
   # run git -C "$local_path" branch --set-upstream-to=origin/main
@@ -46,7 +46,7 @@ setup_graph {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end 
 # conf="$secrets_dir/logseq.conf"
 # if ! grep -q "^LOGSEQ_API_TOKEN=" "$conf" 2>/dev/null; then
 #   if ! has openssl; then
-#     err "openssl not found, set LOGSEQ_API_TOKEN manually in $conf"
+#     die "openssl not found, set LOGSEQ_API_TOKEN manually in $conf"
 #   fi
 #   run mkdir -p "$secrets_dir"
 #   (umask 0177 && printf 'LOGSEQ_API_TOKEN=%s\n' "$(openssl rand -hex 16)" >>"$conf")
