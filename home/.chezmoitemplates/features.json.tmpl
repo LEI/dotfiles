@@ -75,6 +75,7 @@
   "sway" false
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
+  "toolbox" (eq .osIDLike "fedora")
   "topgrade" (and .gui (or (eq .os "android") (ne .libc "musl")))
   "vim" (and
     (not (eq .osIDLike "alpine"))
