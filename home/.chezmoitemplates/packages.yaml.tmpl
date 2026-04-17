@@ -294,9 +294,15 @@ packages:
       arch: ipinfo-cli-bin
       windows: ipinfo.ipinfo
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  json5:
+    nameOverwrite:
+      mise: node@lts npm:json5 # github:json5/json5
+    type: '{{ .features.node | ternary "npm" "mise" }}'
   jq: # sq
     nameOverwrite:
       windows: jqlang.jq
+    # debian/ubuntu apt has jq 1.7, jq-1.8.1 required
+    type: '{{ eq .osIDLike "debian" | ternary "brew" nil }}'
     # type: mise
   kmon: # systeroid:
     enabled: {{ and (eq .os "linux") (not (eq .osID "fedora")) (not (or

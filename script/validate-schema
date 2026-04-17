@@ -54,19 +54,13 @@ done
 
 # shellcheck disable=SC2329
 validate_file() {
-  local path="$1" base ext json5 content schema tmp_dir="" schema_path content_path
+  local path="$1" base ext content schema tmp_dir="" schema_path content_path
   base="$(basename "$path")"
   ext="${path##*.}"
 
   if [ ! -e "$path" ]; then
     echo "FAIL $path schema= (file not found)"
     return 1
-  fi
-
-  if command -v json5 >/dev/null; then
-    json5="json5"
-  else
-    json5="npx json5"
   fi
 
   case "$base" in
@@ -80,7 +74,7 @@ validate_file() {
     schema=$(jq -r '."$schema" // empty' "$path")
     ;;
   jsonc | json5)
-    schema=$($json5 "$path" | jq -r '."$schema" // empty' || jq -r '."$schema" // empty' "$path")
+    schema=$(json5 "$path" | jq -r '."$schema" // empty') # || jq -r '."$schema" // empty' "$path"
     ;;
   toml)
     # shellcheck disable=SC2016
@@ -105,7 +99,7 @@ validate_file() {
   # Convert .jsonc/.json5 to .json for validation
   case "$ext" in
   jsonc | json5)
-    content=$($json5 "$path" || jq '.' "$path")
+    content=$(json5 "$path") # || jq '.' "$path"
     if [ "$content" = "null" ]; then
       content='{}'
     fi
@@ -193,12 +187,13 @@ validate_schema() {
 }
 export -f validate_schema
 
-for cmd in check-jsonschema jq yq; do
+for cmd in check-jsonschema jq json5 yq; do
   if ! command -v "$cmd" >/dev/null; then
     echo "error: $cmd is required" >&2
     exit 1
   fi
 done
+
 if ! yq --version 2>&1 | grep -q 'mikefarah/yq'; then
   echo "error: yq (mikefarah/yq) is required; found $(yq --version 2>&1 | head -1)" >&2
   exit 1
