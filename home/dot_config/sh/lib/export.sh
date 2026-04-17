@@ -3,8 +3,7 @@
 #        export_env "$file1" "$file2"
 export_env() {
   if [ $# -eq 0 ]; then
-    echo "export_env: missing arguments" >&2
-    return 1
+    return 0
   fi
   local _f _rc=0
   set -a

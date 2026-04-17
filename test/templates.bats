@@ -28,10 +28,10 @@ run_block_in_file() {
   local block_body="$2"
   local extra_dict_args="${3:-}"
 
-  printf "%s" "$block_body" >"$BIF_CONTENTS"
+  printf "%s" "$block_body" >|"$BIF_CONTENTS"
 
   printf '{{- includeTemplate "block-in-file.tmpl" (dict "chezmoi" .chezmoi "contents" (include "%s")%s) -}}' \
-    "$BIF_CONTENTS" "$extra_dict_args" >"$BIF_WRAPPER"
+    "$BIF_CONTENTS" "$extra_dict_args" >|"$BIF_WRAPPER"
 
   # shellcheck disable=SC2016
   run --separate-stderr bash -c \

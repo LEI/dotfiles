@@ -16,6 +16,11 @@ for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh; do
 done
 unset _lib
 
+# Shell options early, before any glob expansion
+if [ -f "$XDG_CONFIG_HOME/$shell/options.sh" ]; then
+  source "$XDG_CONFIG_HOME/$shell/options.sh"
+fi
+
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
 fi
@@ -100,7 +105,7 @@ for _conf in "$XDG_CONFIG_HOME/$shell/"*.conf; do
   fi
 done
 for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
-  case "${_conf##*/}" in init.sh) continue ;; esac
+  case "${_conf##*/}" in init.sh | options.sh) continue ;; esac
   if [ -f "$_conf" ]; then
     # shellcheck disable=SC1090
     source "$_conf"

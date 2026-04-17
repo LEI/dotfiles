@@ -65,11 +65,11 @@ setup() {
   assert_success
 }
 
-@test "export_env: fails with no arguments" {
+@test "export_env: succeeds with no arguments" {
   # shellcheck source=home/dot_config/sh/lib/export.sh
   source home/dot_config/sh/lib/export.sh
   run export_env
-  assert_failure
+  assert_success
 }
 
 # pathmunge
