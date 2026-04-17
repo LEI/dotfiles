@@ -18,7 +18,7 @@ setup() {
 
 # bats file_tags=script,validate-schema
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: passes file with valid schema" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/valid.json"
@@ -31,7 +31,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: fails invalid file and surfaces error" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/invalid.json"
@@ -45,7 +45,7 @@ setup() {
   assert_failure
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: skips file without schema" {
   local file="$BATS_TEST_TMPDIR/no-schema.json"
 
@@ -57,7 +57,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: summary counts mixed results correctly" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local valid="$BATS_TEST_TMPDIR/valid.json"
@@ -72,7 +72,7 @@ setup() {
   assert_failure
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles yaml files" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/test.yaml"
@@ -85,7 +85,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles toml files" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/test.toml"
@@ -99,7 +99,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles json5 files" {
   check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"
@@ -113,7 +113,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles jsonc files" {
   check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"
@@ -127,7 +127,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles cspell.json as jsonc" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/cspell.json"
@@ -140,7 +140,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles schema with null value" {
   local file="$BATS_TEST_TMPDIR/null-schema.json"
 
@@ -151,14 +151,14 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: --help shows usage" {
   run_script ./script/validate-schema --help
   assert_line --regexp "^Usage:"
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: --usage shows usage specs" {
   run_script ./script/validate-schema --usage
   assert_line --partial "--keep"
@@ -167,7 +167,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: --separator handles argument separator" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/valid.json"
@@ -180,7 +180,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles no files case" {
   local empty_dir script
   empty_dir=$(mktemp -d)
@@ -192,14 +192,14 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: fails on file not found" {
   run_script ./script/validate-schema "/nonexistent/file.json"
   assert_line "FAIL /nonexistent/file.json schema= (file not found)"
   assert_failure
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: --keep retains temp dir for jsonc files" {
   check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"
@@ -213,7 +213,7 @@ setup() {
   assert_failure
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: --verbose shows validation details" {
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/valid.json"
@@ -226,7 +226,7 @@ setup() {
   assert_success
 }
 
-# bats test_tags=validate-schema,type:unit
+# bats test_tags=type:unit
 @test "validate-schema: handles jsonc with null content" {
   check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"

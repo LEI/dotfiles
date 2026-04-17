@@ -74,7 +74,11 @@ validate_file() {
     schema=$(jq -r '."$schema" // empty' "$path")
     ;;
   jsonc | json5)
-    schema=$(json5 "$path" | jq -r '."$schema" // empty') # || jq -r '."$schema" // empty' "$path"
+    if command -v json5 >/dev/null; then
+      schema=$(json5 "$path" | jq -r '."$schema" // empty')
+    else
+      schema=$(jq -r '."$schema" // empty' "$path")
+    fi
     ;;
   toml)
     # shellcheck disable=SC2016
@@ -99,7 +103,11 @@ validate_file() {
   # Convert .jsonc/.json5 to .json for validation
   case "$ext" in
   jsonc | json5)
-    content=$(json5 "$path") # || jq '.' "$path"
+    if command -v json5 >/dev/null; then
+      content=$(json5 "$path")
+    else
+      content=$(jq '.' "$path")
+    fi
     if [ "$content" = "null" ]; then
       content='{}'
     fi
@@ -187,7 +195,7 @@ validate_schema() {
 }
 export -f validate_schema
 
-for cmd in check-jsonschema jq json5 yq; do
+for cmd in check-jsonschema jq yq; do
   if ! command -v "$cmd" >/dev/null; then
     echo "error: $cmd is required" >&2
     exit 1

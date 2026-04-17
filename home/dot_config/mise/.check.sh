@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Required for yq on debian/ubuntu
+# Required on debian/ubuntu if /usr/bin/yq is present
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
@@ -12,9 +12,6 @@ if [ -f /etc/arch-release ] && { [ -f /.dockerenv ] || [ -f /run/.containerenv ]
 fi
 
 mise_doctor() {
-  # set -x
-  # which yq
-  # yq --version
   mise doctor --json | yq --colors --prettyPrint '.warnings[]'
   # jq --raw-output '.warnings[]'
 }

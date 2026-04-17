@@ -295,9 +295,11 @@ packages:
       windows: ipinfo.ipinfo
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   json5:
-    nameOverwrite:
-      mise: node@lts npm:json5 # github:json5/json5
-    type: '{{ .features.node | ternary "npm" "mise" }}'
+    enabled: {{ .features.node }}
+    type: npm
+    # nameOverwrite:
+    #   mise: node@lts npm:json5 # github:json5/json5
+    # type: '{{ .features.node | ternary "npm" "mise" }}'
   jq: # sq
     nameOverwrite:
       windows: jqlang.jq
