@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #MISE description="Show per-component shell init timing via SHELL_BENCH"
 #USAGE arg "[shell]" help="Shell to benchmark (default: current shell)" {
 #USAGE   choices "bash" "zsh"
@@ -39,8 +39,7 @@ export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
 
 case "$shell" in
 bash | zsh)
-  export SHELL_BENCH_PREFIX=total
-  SHELL_BENCH=true bench "$shell" -ic exit
+  SHELL_BENCH=true bench total "$shell" -ic exit
   ;;
 *)
   echo "bench: invalid shell '$shell', expected bash or zsh" >&2

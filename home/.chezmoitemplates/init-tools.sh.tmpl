@@ -19,7 +19,7 @@ for _tool in {{ $ordered | join " " }}; do
     echo "warning: init file not found for $_tool: $XDG_CONFIG_HOME/$_tool/init.sh" >&2
     continue
   fi
-  BENCHFMT="$_tool" bench source "$XDG_CONFIG_HOME/$_tool/init.sh"
+  bench "$_tool" source "$XDG_CONFIG_HOME/$_tool/init.sh"
 done
 unset _tool
 

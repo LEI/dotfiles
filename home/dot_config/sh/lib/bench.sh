@@ -3,34 +3,31 @@
 # For per-line profiling, use script/profile instead
 # For aggregate startup benchmarks, use script/startup
 #
-# Usage: SHELL_BENCH=true in local.sh or env, then:
-#   bench . "$file"
-#   BENCHFMT="mise" bench eval "$(mise activate bash)"
+# Usage: SHELL_BENCH=true, then:
+#   bench label command args...
+#   bench mise eval "$(mise activate bash)"
+#   bench_source "$file"
 
 bench() {
-  local label prefix start ret end elapsed
+  local label="$1"
+  shift
   if [ "${SHELL_BENCH:-}" != true ]; then
     "$@"
     return
-  fi
-  label="${BENCHFMT:-$*}"
-  prefix="${SHELL_BENCH_PREFIX:-bench}"
-  if [ -n "${SHELL_BENCH_PREFIX:-}" ]; then
-    unset SHELL_BENCH_PREFIX
   fi
   # EPOCHREALTIME: bash 5+, zsh needs zsh/datetime
   if [ -n "${ZSH_VERSION:-}" ] && [ -z "${EPOCHREALTIME:-}" ]; then
     zmodload zsh/datetime 2>/dev/null
   fi
-  start="${EPOCHREALTIME:-}"
+  local start="${EPOCHREALTIME:-}"
   "$@"
   local ret=$?
-  end="${EPOCHREALTIME:-}"
+  local end="${EPOCHREALTIME:-}"
   if [ -n "$start" ] && [ -n "$end" ]; then
+    local elapsed
     elapsed=$(awk "BEGIN {printf \"%.3f\", $end - $start}")
-    echo "$prefix: $label: ${elapsed}s" >&2
+    echo "bench: $label: ${elapsed}s" >&2
   fi
-  unset BENCHFMT
   return $ret
 }
 
@@ -41,14 +38,8 @@ bench_source() {
     echo "bench_source: file not found: $file" >&2
     return 1
   fi
-  local home name
-  home="$(realpath "$HOME")"
-  name="${BENCHFMT:-${file#"$home/"}}"
-  # local name="${file##*/}"
-  # if [ "$name" = init.sh ]; then
-  #   name="${file%/init.sh}"
-  #   name="${name##*/}"
-  # fi
+  local name
+  name="${file#"$(realpath "$HOME")/"}"
   # shellcheck disable=SC1090
-  BENCHFMT="$name" bench source "$file" "$@"
+  bench "$name" source "$file" "$@"
 }

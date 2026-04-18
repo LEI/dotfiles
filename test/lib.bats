@@ -12,7 +12,7 @@ setup() {
   # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
   unset SHELL_BENCH
-  run bench echo hello
+  run bench test-label echo hello
   assert_success
   assert_output "hello"
 }
@@ -22,18 +22,18 @@ setup() {
   source home/dot_config/sh/lib/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
-  run --separate-stderr bench echo hello
+  run --separate-stderr bench test-label echo hello
   assert_success
   assert_output "hello"
-  assert_stderr_line --regexp "^bench:"
+  assert_stderr_line --regexp "^bench: test-label:"
 }
 
-@test "bench: uses BENCHFMT label" {
+@test "bench: uses first arg as label" {
   # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
-  BENCHFMT="custom-label" run --separate-stderr bench echo ok
+  run --separate-stderr bench custom-label echo ok
   assert_success
   assert_stderr_line --regexp "custom-label"
 }
@@ -42,7 +42,7 @@ setup() {
   # shellcheck source=home/dot_config/sh/lib/bench.sh
   source home/dot_config/sh/lib/bench.sh
   unset SHELL_BENCH
-  run bench false
+  run bench test-label false
   assert_failure
 }
 
