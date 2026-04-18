@@ -73,7 +73,7 @@ gen_completions() {
   spec=$(cat)
   msg "generate-completions: $name"
 {{- if .features.bash }}
-  usage generate completion bash "$name" --file - <<<"$spec" >"$bash_dir/$name" || rc=1
+  usage generate completion bash "$name" --file - <<<"$spec" >|"$bash_dir/$name" || rc=1
   if grep -q 'run=' <<<"$spec"; then
     if ! patch_bash_mapfile "$bash_dir/$name"; then
       echo >&2 "generate-completions: patch failed for $name"
@@ -86,7 +86,7 @@ gen_completions() {
   fi
 {{- end }}
 {{- if .features.zsh }}
-  usage generate completion zsh "$name" --file - <<<"$spec" >"$zsh_dir/_$name" || rc=1
+  usage generate completion zsh "$name" --file - <<<"$spec" >|"$zsh_dir/_$name" || rc=1
 {{- end }}
 }
 {{ range $dict | keys | sortAlpha }}
