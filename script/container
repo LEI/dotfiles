@@ -2,18 +2,29 @@
 #MISE alias="ct"
 #MISE description="Run container pipeline for one image"
 #MISE hide=true
-#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)"
-#USAGE complete "image" run="mise run ct list"
-#USAGE arg "[cmd]..." help="Command to run in the container (default: full pipeline)"
+#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)" {
+#USAGE   choices "alpine" "archlinux" "debian" "fedora" "opensuse" "termux" "ubuntu"
+#USAGE }
+#USAGE flag "-l --list" help="List available images"
+#USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"
 
 set -euo pipefail
 
-CONTAINER_PROVIDER="${CONTAINER_PROVIDER:?}"
-DEV_USER="${DEV_USER:-test}"
-tag_prefix="${PWD##*/}"
-images="alpine archlinux debian fedora opensuse termux ubuntu"
+if ((BASH_VERSINFO[0] < 4)); then
+  echo "container: bash 4+ required, found $BASH_VERSION" >&2
+  exit 1
+fi
+
+readonly CONTAINER_PROVIDER="${CONTAINER_PROVIDER:?}"
+readonly DEV_USER="${DEV_USER:-test}"
+readonly tag_prefix="${PWD##*/}"
+readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
 container() { "$CONTAINER_PROVIDER" "$@"; }
+
+log() {
+  echo "container: $*" >&2
+}
 
 trace() {
   echo "+ $*" >&2
@@ -25,30 +36,37 @@ trace() {
 #       home, exec_user, chezmoi_root
 resolve() {
   local arg="$1"
+  local version_arg repo arch
+
   image_name="${arg%%:*}"
-  local version_arg="${arg#*:}"
+  version_arg="${arg#*:}"
   [ "$version_arg" = "$arg" ] && version_arg=""
 
-  local repo="$image_name"
+  repo="$image_name"
   version="${version_arg:-latest}"
   prefix=""
 
   # arm64 = macOS/Darwin, aarch64 = Linux; both indicate ARM64
-  local arch
   arch="$(uname -m)"
 
   case "$image_name" in
   archlinux)
-    [ "$arch" = arm64 ] || [ "$arch" = aarch64 ] && repo=docker.io/ogarcia/archlinux
+    if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+      repo="docker.io/ogarcia/archlinux"
+    fi
     ;;
   opensuse)
-    repo=opensuse/tumbleweed
+    repo="opensuse/tumbleweed"
     ;;
   termux)
-    repo=docker.io/termux/termux-docker
-    [ -z "$version_arg" ] && version=x86_64
-    [ "$arch" = arm64 ] || [ "$arch" = aarch64 ] && version=aarch64
-    prefix=/data/data/com.termux/files
+    repo="docker.io/termux/termux-docker"
+    if [ -z "$version_arg" ]; then
+      version="x86_64"
+    fi
+    if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+      version="aarch64"
+    fi
+    prefix="/data/data/com.termux/files"
     ;;
   esac
 
@@ -56,31 +74,49 @@ resolve() {
   image_tag="ct-$image_name-$version"
   container="$tag_prefix-$image_name-$version"
   home="$prefix/home/$DEV_USER"
-  [ "$image_name" = termux ] && home="$prefix/home"
+  if [ "$image_name" = termux ]; then
+    home="$prefix/home"
+  fi
   exec_user="$DEV_USER"
-  [ "$image_name" = termux ] && exec_user=system
+  if [ "$image_name" = termux ]; then
+    exec_user="system"
+  fi
   chezmoi_root="$home/.local/share/chezmoi"
 }
 
 container_exec() {
-  local flags=(
-    --env=CHEZMOI_UPGRADE=true
-    --env=MISE_TRUSTED_CONFIG_PATHS="$chezmoi_root"
-    ${CI:+--env=CI="$CI"}
-    ${GITHUB_TOKEN:+--env=GITHUB_TOKEN="$GITHUB_TOKEN"}
+  local flags log
+  flags=(
+    --env="CHEZMOI_UPGRADE=true"
+    --env="MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
     --user="$exec_user"
     --workdir="$chezmoi_root"
   )
-  [ -t 0 ] && flags+=(--interactive)
-  [ -t 1 ] && flags+=(--tty)
-  local log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
+  if [ -n "${CI:-}" ]; then
+    flags+=(--env="CI=$CI")
+  fi
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    flags+=(--env="GITHUB_TOKEN=$GITHUB_TOKEN")
+  fi
+  if [ -t 0 ]; then
+    flags+=(--interactive)
+  fi
+  if [ -t 1 ]; then
+    flags+=(--tty)
+  fi
+
+  # Redact GITHUB_TOKEN in logs
+  log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
   echo "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*" >&2
   container exec "${flags[@]}" "$container" "$@"
 }
 
 container_exec_mise() {
   local cmd
+
+  # Quote all arguments for safe shell execution
   cmd="$(printf '%q ' "$@")"
+
   # bash -l skips environment.d in non-interactive shells; source it explicitly
   # eval mise activate: adds shims for mise-managed tools (check tasks use task env instead)
   # shellcheck disable=SC2016
@@ -89,28 +125,30 @@ container_exec_mise() {
     source ~/.config/sh/lib/pathmunge.sh
     export_env ~/.config/environment.d/*.conf
     source ~/.config/sh/environment.sh
-    # eval "$(mise activate bash)"
     source ~/.config/mise/init.sh
     '"$cmd"
 }
 
 build() {
   if container image inspect "$image_tag" >/dev/null 2>&1; then
-    echo "build $image_name: reusing $image_tag" >&2
-    return
+    log "build $image_name: reusing $image_tag"
+    return 0
   fi
-  trace container build . --file=Containerfile --build-arg=IMAGE="$image" --tag="$image_tag"
+  trace container build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
 }
 
 start() {
+  local status
+
   if ! container container inspect "$container" >/dev/null 2>&1; then
     trace container create --name="$container" --env="DEV_USER=$DEV_USER" "$image_tag"
   fi
-  local status
+
   status="$(container container inspect "$container" --format '{{.State.Status}}')"
   if [ "$status" != running ]; then
     trace container start "$container"
   fi
+
   # Entrypoint creates the dev user asynchronously; wait for it
   if [ "$image_name" != termux ]; then
     # shellcheck disable=SC2016
@@ -120,12 +158,17 @@ start() {
 }
 
 sync() {
+  local item
+
   # shellcheck disable=SC2016
   trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
-  for f in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
-    trace container cp "$f" "$container:$chezmoi_root/"
+
+  for item in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
+    trace container cp "$item" "$container:$chezmoi_root/"
   done
+
   trace container exec "$container" chown -R "$exec_user:$exec_user" "$home"
+
   # Pre-commit expects a git repo
   if ! container exec "$container" test -d "$chezmoi_root/.git"; then
     trace container exec "$container" git config --global --add safe.directory "$chezmoi_root"

@@ -4,17 +4,32 @@
 
 set -eu
 
-# Verify running in a container to prevent accidental host execution
-if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ] && [ ! -d /proc/1/cgroup ]; then
-  echo "ERROR: This entrypoint must only run inside a container" >&2
-  echo "Refusing to execute on host system" >&2
-  exit 1
-fi
+readonly user="${DEV_USER:-test}"
 
-if [ $# -ne 0 ]; then
-  echo "entrypoint: unexpected arguments: $*" >&2
-  exit 2
-fi
+log() {
+  echo "entrypoint: $*" >&2
+}
+
+error() {
+  echo "entrypoint: ERROR: $*" >&2
+}
+
+# Verify running in a container to prevent accidental host execution
+verify_container() {
+  if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ] && [ ! -d /proc/1/cgroup ]; then
+    error "must only run inside a container"
+    error "refusing to execute on host system"
+    exit 1
+  fi
+}
+
+# Check for unexpected arguments
+verify_arguments() {
+  if [ $# -ne 0 ]; then
+    error "unexpected arguments: $*"
+    exit 2
+  fi
+}
 
 keep_running() {
   if [ -f /entrypoint.sh ]; then
@@ -26,11 +41,11 @@ keep_running() {
 
 # Termux manages its own user setup
 if [ -n "${PREFIX:-}" ]; then
-  echo "entrypoint: termux, skipping provisioning" >&2
+  log "termux, skipping provisioning"
+  verify_container
+  verify_arguments "$@"
   keep_running
 fi
-
-user="${DEV_USER:-test}"
 
 install_packages() {
   if command -v apk >/dev/null; then
@@ -47,14 +62,17 @@ install_packages() {
   elif command -v zypper >/dev/null; then
     zypper --quiet --non-interactive install chezmoi curl git sudo which unzip
   else
-    echo "entrypoint: unsupported package manager" >&2
+    error "unsupported package manager"
     exit 1
   fi
 }
 
 create_user() {
-  id -u "$user" >/dev/null 2>&1 && return
-  echo "entrypoint: creating user $user" >&2
+  if id -u "$user" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  log "creating user $user"
   if command -v useradd >/dev/null; then
     useradd --create-home --shell=/bin/bash "$user"
   else
@@ -69,20 +87,21 @@ grant_sudo() {
   chmod 0440 "/etc/sudoers.d/$user"
 }
 
-verify() {
+verify_setup() {
   if [ "$(id -u "$user")" -eq 0 ]; then
-    echo "entrypoint: $user has UID 0, aborting" >&2
+    error "$user has UID 0, aborting"
     exit 1
   fi
   if [ ! -f "/etc/sudoers.d/$user" ]; then
-    echo "entrypoint: sudoers drop-in missing for $user, aborting" >&2
+    error "sudoers drop-in missing for $user, aborting"
     exit 1
   fi
 }
 
+verify_container
+verify_arguments "$@"
 install_packages
 create_user
 grant_sudo
-verify
-
+verify_setup
 keep_running

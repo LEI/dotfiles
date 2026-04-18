@@ -6,6 +6,9 @@
 
 set -eu
 
+# shellcheck disable=SC1091
+. "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+
 shell="${1:-${SHELL##*/}}"
 
 tmpdir=$(mktemp -d)
@@ -18,7 +21,8 @@ export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
 
 case "$shell" in
 bash | zsh)
-  SHELL_BENCH=true "$shell" -ic exit
+  export SHELL_BENCH_PREFIX=total
+  SHELL_BENCH=true bench "$shell" -ic exit
   ;;
 *)
   echo "bench: invalid shell '$shell', expected bash or zsh" >&2

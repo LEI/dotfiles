@@ -1,7 +1,7 @@
 # Homebrew
 brew_prefix="${HOMEBREW_PREFIX:-{{ .brewPrefix }}}"
 
-if [ -x "$brew_prefix/bin/brew" ]; then
+if [ -z "$HOMEBREW_PREFIX" ] && [ -x "$brew_prefix/bin/brew" ]; then
   eval "$("$brew_prefix/bin/brew" shellenv)"
 fi
 

@@ -53,6 +53,12 @@ ai:
     # openrouter:
     #   base_url: https://openrouter.ai/api/v1
     #   key_env: OPENROUTER_API_KEY
+
+    # https://dev.synthetic.new/docs/api/overview
+    # synthetic:
+    #   base_url: https://api.synthetic.new/openai/v1
+    #   key_env: SYNTHETIC_API_KEY
+
     # zai:
     #   base_url: https://api.z.ai/api/paas/v4
     #   key_env: ZAI_API_KEY
@@ -180,6 +186,14 @@ ai:
       coding: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
       fast: huggingface/Qwen/Qwen3-Coder-Next
       reasoning: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
+
+    synthetic:
+      agentic: synthetic/glm-4.7
+      chat: synthetic/glm-4.7
+      coding: synthetic/glm-4.7
+      fast: synthetic/glm-4.5-air
+      reasoning: synthetic/glm-4.7
+
     zai-coding-plan-lite:
       agentic: zai-coding-plan/glm-4.7
       chat: zai-coding-plan/glm-4.7

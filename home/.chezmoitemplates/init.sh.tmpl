@@ -63,7 +63,7 @@ fi
 
 # Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
 if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
-  source "$XDG_CONFIG_HOME/sh/environment.sh"
+  bench_source "$XDG_CONFIG_HOME/sh/environment.sh"
 fi
 
 {{- if and (eq $shell "bash") (ne .osID "alpine") (ne .os "windows") }}
@@ -74,9 +74,9 @@ if [ -f "$XDG_DATA_HOME/blesh/ble.sh" ]; then
   if [ -n "${PROMPT_COMMAND:-}" ] && [[ "$PROMPT_COMMAND" = *"\033]0;"* ]]; then
     export PROMPT_COMMAND=
   fi
-  source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
+  bench_source "$XDG_DATA_HOME/blesh/ble.sh" --attach=none --rcfile "$XDG_CONFIG_HOME/blesh/config.sh"
 elif [ -f "$XDG_DATA_HOME/bash-preexec.sh" ]; then
-  source "$XDG_DATA_HOME/bash-preexec.sh"
+  bench_source "$XDG_DATA_HOME/bash-preexec.sh"
 fi
 {{- end }}
 
@@ -95,7 +95,7 @@ fi
 {{- end }}
 
 if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
-  source "$XDG_CONFIG_HOME/sh/aliases.sh"
+  bench_source "$XDG_CONFIG_HOME/sh/aliases.sh"
 fi
 
 # Per-shell config: .conf for variables (via export_env), .sh for shell code
@@ -107,15 +107,14 @@ done
 for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
   case "${_conf##*/}" in init.sh | options.sh) continue ;; esac
   if [ -f "$_conf" ]; then
-    # shellcheck disable=SC1090
-    source "$_conf"
+    bench_source "$_conf"
   fi
 done
 unset _conf
 
 if [ -f "$HOME/.${shell}rc.local" ]; then
   # shellcheck disable=SC1090
-  source "$HOME/.${shell}rc.local"
+  bench_source "$HOME/.${shell}rc.local"
 fi
 
 {{- if and (eq $shell "bash") (ne .osID "alpine") (ne .os "windows") }}

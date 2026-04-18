@@ -31,12 +31,3 @@ fi
 
 # shellcheck disable=SC1090 # dynamic completion output
 . <(carapace _carapace | sed -e 's/ && +X//')
-
-# Override carapace's generic registration for usage-generated completions
-if [ "${SHELL##*/}" = bash ] && [ -d "$HOME/.local/share/bash-completion/completions" ]; then
-  for _f in "$HOME/.local/share/bash-completion/completions/"*; do
-    # shellcheck disable=SC1090
-    [ -f "$_f" ] && . "$_f"
-  done
-  unset _f
-fi
