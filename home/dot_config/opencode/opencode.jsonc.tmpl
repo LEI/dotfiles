@@ -17,8 +17,18 @@
   "small_model": {{ $smallModel | quote }},
   "default_agent": "plan",
   // https://github.com/anomalyco/opencode/pull/8562
+  // https://opencode.ai/docs/config/#server
+  // https://opencode.ai/docs/server
   "server": {
-    "hostname": {{ $hostname | quote }}
+    "port": 4096,
+    "hostname": {{ $hostname | quote }},
+    "mdns": true,
+    "mdnsDomain": "opencode.local",
+    "cors": [
+      "http://localhost:5173",
+      "http://opencode.local",
+      "https://opencode.test"
+    ]
   },
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [

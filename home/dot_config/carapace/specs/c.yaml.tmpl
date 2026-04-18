@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+{{- $render := include (joinPath .chezmoi.sourceDir "dot_local/bin/executable_chezmoi-render") | splitList "\n" }}
 ---
 name: c
 description: chezmoi
@@ -49,7 +50,5 @@ commands:
     run: "[chezmoi-package]"
   - name: render
     aliases: [r]
-    description: Render managed templates to a staging directory
+    description: "{{ index $render 1 | trimPrefix "# " }}"
     run: "[chezmoi-render]"
-    # completion:
-    #   positionalany: ["$carapace.bridge.CarapaceBin([chezmoi-render])"]

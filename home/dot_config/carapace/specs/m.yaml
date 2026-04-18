@@ -3,7 +3,7 @@
 name: m
 description: mise alias
 run: "[mise]"
+parsing: disabled
 completion:
   positionalany:
     - "$carapace.bridge.Bash([mise])"
-    # - "$carapace.bridge.Zsh([mise])"

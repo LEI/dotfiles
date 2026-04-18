@@ -37,7 +37,7 @@ export const NotificationPlugin: Plugin = async ({ project, client, $, directory
         async execute(args, context) {
           // const { agent, sessionID, messageID } = context
           // `Agent: ${agent}, Session: ${sessionID}, Message: ${messageID}`
-          return notify(args.title, args.message)
+          // return notify(args.title, args.message)
         },
       }),
     },

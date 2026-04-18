@@ -10,8 +10,8 @@ if [[ $- != *i* ]]; then
   return
 fi
 
+{{ includeTemplate ".profile.tmpl" . | trim }}
 source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
-bench_source "$HOME/.profile"
 
 # Shell options
 if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then

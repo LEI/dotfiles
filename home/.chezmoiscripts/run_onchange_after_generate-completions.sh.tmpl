@@ -1,6 +1,6 @@
 {{- if and (or .features.bash .features.zsh) (lookPath "usage" | isExecutable) -}}
 {{- $dict := dict -}}
-{{- $bin := glob (joinPath .chezmoi.sourceDir "dot_local" "bin" "executable_*") -}}
+{{- $bin := concat (glob (joinPath .chezmoi.sourceDir "dot_local" "bin" "executable_*")) (glob (joinPath .chezmoi.sourceDir "script" "*")) -}}
 {{- range $bin -}}
 {{-   $content := include . -}}
 {{-   if contains "#USAGE " $content -}}
@@ -19,11 +19,8 @@
 {{- end -}}
 {{- if not (empty $dict) -}}
 #!/usr/bin/env bash
-# Generate shell completions for dot_local/bin scripts with #USAGE directives
+# Generate shell completions for scripts with #USAGE directives (dot_local/bin/* and script/*)
 # patch_bash_mapfile fixes compgen -W word-splitting on paths with spaces (usage bug)
-
-# TODO: script/ tasks (m lint, m test) go through carapace->_mise bridge which has
-# the same compgen -W issue; would need upstream fix in usage or carapace bash bridge
 
 {{- range $dict | keys | sortAlpha }}
 # {{ . }}: {{ get (get $dict .) "hash" }}
