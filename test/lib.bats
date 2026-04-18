@@ -54,8 +54,8 @@ setup() {
   # shellcheck source=home/dot_config/sh/lib/export.sh
   source home/dot_config/sh/lib/export.sh
   export_env "$conf"
-  [ "$FOO" = bar ]
-  [ "$BAZ" = qux ]
+  assert_equal "bar" "$FOO"
+  assert_equal "qux" "$BAZ"
 }
 
 @test "export_env: missing file is silently skipped" {
@@ -63,6 +63,7 @@ setup() {
   source home/dot_config/sh/lib/export.sh
   run export_env "$BATS_TEST_TMPDIR/nonexistent.conf"
   assert_success
+  refute_output
 }
 
 @test "export_env: succeeds with no arguments" {

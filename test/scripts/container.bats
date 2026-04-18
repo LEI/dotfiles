@@ -114,36 +114,16 @@ setup() {
 # bats test_tags=type:unit
 @test "container: list outputs all images one per line" {
   source_container
-
   run list
   assert_success
-  assert_line "alpine"
-  assert_line "archlinux"
-  assert_line "debian"
-  assert_line "fedora"
-  assert_line "opensuse"
-  assert_line "termux"
-  assert_line "ubuntu"
+  for name in $images; do
+    assert_line "$name"
+  done
 }
 
 # bats test_tags=type:unit
-@test "container: main with no arguments runs status" {
+@test "container: main routes list aliases to list" {
   source_container
-
-  # Mock container inspect to return failure
-  # shellcheck disable=SC2329
-  container() { return 1; }
-
-  run main
-  assert_success
-  assert_line --regexp "^alpine"
-  assert_line --regexp "^archlinux"
-}
-
-# bats test_tags=type:unit
-@test "container: main with 'list' or 'l' runs list command" {
-  source_container
-
   for cmd in l ls list; do
     run main "$cmd"
     assert_success
@@ -152,15 +132,13 @@ setup() {
 }
 
 # bats test_tags=type:unit
-@test "container: main with 'status' or 's' runs status command" {
+@test "container: main routes status aliases to status" {
   source_container
-
-  # Mock container inspect to return failure
+  # stub container inspect to report no containers exist
   # shellcheck disable=SC2329
   container() { return 1; }
-
-  for cmd in s st status; do
-    run main "$cmd"
+  for cmd in "" s st status; do
+    run main $cmd
     assert_success
     assert_line --regexp "^alpine"
   done
@@ -213,6 +191,7 @@ setup() {
   export GITHUB_TOKEN="secret-token-123"
 
   # Mock container exec to capture arguments
+  # shellcheck disable=SC2329
   container() {
     local args
     args=$(printf '%s\n' "$@")
@@ -223,7 +202,6 @@ setup() {
   assert_success
   # Should not contain the actual token in output
   refute_output "secret-token-123"
-  # But should contain the redacted version in the logs (if we were capturing stderr)
 }
 
 # bats test_tags=type:unit
@@ -232,6 +210,7 @@ setup() {
   resolve alpine
 
   # Mock container_exec to capture command
+  # shellcheck disable=SC2329
   container_exec() {
     echo "$@"
   }
@@ -253,4 +232,49 @@ setup() {
   source_container
 
   assert_equal "$tag_prefix" "chezmoi"
+}
+
+# bats test_tags=type:unit
+@test "container: resolve image matrix" {
+  source_container
+  # format: "image exec_user home"
+  local arch
+  arch="$(uname -m)"
+  local archlinux_repo=archlinux
+  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+    archlinux_repo=docker.io/ogarcia/archlinux
+  fi
+  local termux_version=x86_64
+  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+    termux_version=aarch64
+  fi
+  declare -A matrix=(
+    [alpine]="alpine:latest test /home/test"
+    [archlinux]="$archlinux_repo:latest test /home/test"
+    [debian]="debian:latest test /home/test"
+    [fedora]="fedora:latest test /home/test"
+    [opensuse]="opensuse/tumbleweed:latest test /home/test"
+    [termux]="docker.io/termux/termux-docker:$termux_version system /data/data/com.termux/files/home"
+    [ubuntu]="ubuntu:latest test /home/test"
+  )
+  for name in $images; do
+    resolve "$name"
+    read -r exp_image exp_exec_user exp_home <<<"${matrix[$name]}"
+    assert_equal "$image_name" "$name"
+    assert_equal "$image" "$exp_image"
+    assert_equal "$exec_user" "$exp_exec_user"
+    assert_equal "$home" "$exp_home"
+    assert [ -n "$container" ]
+    assert [ -n "$chezmoi_root" ]
+  done
+}
+
+# bats test_tags=type:unit
+@test "container: resolve version suffix" {
+  source_container
+  resolve alpine:3.19
+
+  assert_equal "$image_name" alpine
+  assert_equal "$image" alpine:3.19
+  assert_equal "$container" "${tag_prefix}-alpine-3.19"
 }

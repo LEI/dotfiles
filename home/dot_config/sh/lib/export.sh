@@ -9,7 +9,7 @@ export_env() {
   set -a
   for _f in "$@"; do
     if [ -f "$_f" ]; then
-      # shellcheck source=/dev/null
+      # shellcheck disable=SC1090
       . "$_f" || _rc=$?
     fi
   done

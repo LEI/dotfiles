@@ -17,7 +17,6 @@ if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
   exit
 fi
 
-# shellcheck source=/dev/null
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if [ -z "${USER:-}" ]; then

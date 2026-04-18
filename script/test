@@ -2,7 +2,7 @@
 #MISE alias="t"
 #MISE description="Run bats test suite"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats"
-#USAGE complete "filter" run="fd --extension bats"
+#USAGE complete "filter" run="git ls-files 'test/**/*.bats'"
 # TODO: --base-directory test
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
@@ -35,6 +35,37 @@ fi
 # export CI=true
 
 main() {
+  case "${1:-}" in
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: test [filter...]"
+    fi
+    return
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    return
+    ;;
+  --)
+    shift
+    ;;
+  esac
+
+  # Set BATS_LIB_PATH: local test_helper + system libs (if available)
+  # Allow override: BATS_LIB_PATH=my/custom/path bats ...
+  if [ -z "${BATS_LIB_PATH:-}" ]; then
+    local path="${PWD}/test_helper"
+    if [ -d /usr/lib/bats ]; then
+      path="$path:/usr/lib/bats"
+    elif [ "$(uname -s)" = Darwin ] && [ -d "$(brew --prefix)/lib/bats" ]; then
+      path="$path:$(brew --prefix)/lib/bats"
+    fi
+    path="$path:$PWD/test"
+    export BATS_LIB_PATH="$path"
+  fi
+
   # Files using stubs set BATS_NO_PARALLELIZE_WITHIN_FILE to avoid collisions
   local jobs="${TEST_JOBS:-$(nproc)}"
   if [ $# -eq 0 ]; then
@@ -45,18 +76,8 @@ main() {
     --print-output-on-failure \
     --timing \
     "$@"
-  # if [ "${DEBUG:-}" = true ]; then
-  #   set -- --debug "$@"
-  # fi
-  #
-  # if [ "${VERBOSE:-true}" = true ]; then
-  #   set -- --verbose "$@"
-  # fi
   if [ -n "${TERM:-}" ] && [ "$TERM" != dumb ]; then
     set -- --pretty "$@"
-  fi
-  if [ "${CI:-}" != true ]; then
-    set -- --show-output-of-passing-tests "$@"
   fi
   # set -- --trace "$@"
   echo "bats $*" >&2

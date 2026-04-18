@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-#MISE alias="l"
+#MISE alias="lint-templates"
 #MISE description="Render and lint chezmoi templates"
 #USAGE flag "-k --keep" help="Keep render dir for debugging"
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show render dir and file list"
 #USAGE arg "[templates]..." help="Template paths to render (default: all)"
-#USAGE complete "templates" run="chezmoi managed --path-style=relative"
-# FIXME: carapace timeout
+#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
 
 set -euo pipefail
 

@@ -5,7 +5,6 @@
 #USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)" {
 #USAGE   choices "alpine" "archlinux" "debian" "fedora" "opensuse" "termux" "ubuntu"
 #USAGE }
-#USAGE flag "-l --list" help="List available images"
 #USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"
 
 set -euo pipefail
@@ -15,7 +14,7 @@ if ((BASH_VERSINFO[0] < 4)); then
   exit 1
 fi
 
-readonly CONTAINER_PROVIDER="${CONTAINER_PROVIDER:?}"
+: "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"
 readonly tag_prefix="${PWD##*/}"
 readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
@@ -233,6 +232,24 @@ pipeline() {
 }
 
 main() {
+  case "${1:-}" in
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: container [image] [cmd...]"
+    fi
+    return
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    return
+    ;;
+  --)
+    shift
+    ;;
+  esac
+
   local image="${1:-}"
   case "$image" in
   '' | s | st | status)

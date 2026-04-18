@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 source_container() {
-  # shellcheck source=/dev/null
-  CONTAINER_PROVIDER=dummy source ./script/container
+  export CONTAINER_PROVIDER=dummy
+  source ./script/container
 }
 
 has_feature() {

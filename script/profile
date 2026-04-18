@@ -4,7 +4,25 @@
 #USAGE   choices "bash" "zsh"
 #USAGE }
 
-set -eu
+set -euo pipefail
+
+case "${1:-}" in
+-h | --help)
+  if command -v usage >/dev/null; then
+    usage exec --help bash "$0"
+  else
+    echo "Usage: profile [shell]"
+  fi
+  exit
+  ;;
+--usage)
+  grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+  exit
+  ;;
+--)
+  shift
+  ;;
+esac
 
 shell="${1:-${SHELL##*/}}"
 tmpdir=$(mktemp -d)

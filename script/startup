@@ -48,6 +48,24 @@ average_time() {
 }
 
 main() {
+  case "${1:-}" in
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: startup [shell]"
+    fi
+    return
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    return
+    ;;
+  --)
+    shift
+    ;;
+  esac
+
   if [ $# -gt 1 ]; then
     echo "startup: expected at most 1 argument, got $#" >&2
     exit 2

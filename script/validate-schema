@@ -5,7 +5,7 @@
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show validation details"
 #USAGE arg "[files]..." help="Files to validate (default: all tracked)"
-#USAGE complete "files" run="git ls-files '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml'"
+#USAGE complete "files" run="git ls-files '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' ':(exclude)home/.chezmoitemplates/' ':(exclude)**/modify_*'"
 
 set -euo pipefail
 

@@ -50,7 +50,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(git ls-files '*.sh' '*.bash' '*.bats' 'script/*' 'home/dot_local/bin/executable_*')
+  mapfile -t files < <(git ls-files 'script/*' 'home/dot_local/bin/executable_*')
   set -- "${files[@]}"
 fi
 

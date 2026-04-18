@@ -2,7 +2,7 @@ setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
 
-  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
+  # export BATS_NO_PARALLELIZE_WITHIN_FILE=true
   export CHEZMOI_WORKING_TREE=.
   export DRY_RUN=true
 }

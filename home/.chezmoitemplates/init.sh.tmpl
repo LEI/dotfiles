@@ -17,8 +17,8 @@ done
 unset _lib
 
 # Shell options early, before any glob expansion
-if [ -f "$XDG_CONFIG_HOME/$shell/options.sh" ]; then
-  source "$XDG_CONFIG_HOME/$shell/options.sh"
+if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
+  source "$XDG_CONFIG_HOME/$shell/options.$shell"
 fi
 
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then

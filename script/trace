@@ -6,6 +6,24 @@
 
 set -eu
 
+case "${1:-}" in
+-h | --help)
+  if command -v usage >/dev/null; then
+    usage exec --help sh "$0"
+  else
+    echo "Usage: trace [shell]"
+  fi
+  exit
+  ;;
+--usage)
+  grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+  exit
+  ;;
+--)
+  shift
+  ;;
+esac
+
 shell="${1:-${SHELL##*/}}"
 
 case "$shell" in

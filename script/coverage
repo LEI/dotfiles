@@ -2,7 +2,7 @@
 #MISE alias="cov"
 #MISE description="Run tests with kcov coverage"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats via script/test"
-#USAGE complete "filter" run="fd --extension bats --base-directory test"
+#USAGE complete "filter" run="git ls-files 'test/**/*.bats'"
 
 set -Eeuo pipefail
 
@@ -35,7 +35,24 @@ coverage() {
 }
 
 main() {
-  # FIXME: does not suppress --show-output-of-passing-tests under kcov
+  case "${1:-}" in
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: coverage [filter...]"
+    fi
+    return
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    return
+    ;;
+  --)
+    shift
+    ;;
+  esac
+
   export TEST_JOBS=1
 
   TEST_TMPDIR="$PWD/tmp"
