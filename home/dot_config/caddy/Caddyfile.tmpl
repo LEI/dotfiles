@@ -1,5 +1,13 @@
 {
+	debug
 	default_bind 127.0.0.1
+	admin localhost:2019
+	metrics
+	# log default {
+	# 	output stdout
+	# 	format json
+	# 	include http.log.access admin.api
+	# }
 	local_certs # run `caddy trust` once to install the CA
 	cert_lifetime 30d # 168h
 	# pki {
@@ -7,8 +15,6 @@
 	# 		intermediate_lifetime 730d
 	# 	}
 	# }
-	metrics
-	admin localhost:2019
 }
 
 # Metrics on 2020; use 9103 if SELinux allows
@@ -17,47 +23,28 @@
 	reverse_proxy /metrics localhost:2019
 }
 
-{{- range $feat, $sites := .caddy.sites -}}
-{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
-{{- range $name, $s := $sites -}}
-{{- $dt := get $s "dialTimeout" -}}
-{{- $rht := get $s "responseHeaderTimeout" }}
-{{ $name }}.test {
-	# tls {
-	# 	issuer internal {
-	# 		lifetime 365d
-	# 	}
-	# }
-	tracing {
-		span {{ $name }}
+(logging) {
+	log {
+		# output file /var/log/caddy.log
+		# format json
+    level debug
 	}
-	reverse_proxy localhost:{{ $s.port }}{{ if or $dt $rht }} {
-		transport http {
-			{{- if $dt }}
-			dial_timeout {{ $dt }}
-			{{- end }}
-			{{- if $rht }}
-			response_header_timeout {{ $rht }}
-			{{- end }}
-		}
-	}{{ end }}
 }
-{{ end }}
-{{- end -}}
-{{- range $name, $provider := .ai.providers }}
-{{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
-{{- $caddy := get $provider "caddy" }}
-{{ $provider.domain }} {
-	tracing {
-		span {{ $name }}
-	}
-	reverse_proxy localhost:{{ $provider.port }}{{ if $caddy }} {
-		{{- range $key, $value := $caddy }}
-		{{ $key }} {{ $value }}
-		{{- end }}
-	}{{ end }}
-}
-{{ end -}}
-# Machine-local site configs (not version-controlled)
-# Example: ~/.config/caddy/sites/myproject.caddy
+
+# (example_php) {
+# 	root * /srv/example/public
+# 	php_fastcgi unix//tmp/php-fpm.sock
+# 	file_server
+# }
+
+# example.test {
+# 	tls {
+# 		issuer internal {
+# 			lifetime 365d
+# 		}
+# 	}
+# 	import example_php
+# 	import logging
+# }
+
 import {{ .chezmoi.homeDir }}/.config/caddy/sites/*.caddy

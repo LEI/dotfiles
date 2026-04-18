@@ -10,7 +10,11 @@ export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=true
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
 
 opencode() {
-  command opencode "${@:---continue}"
+  # command opencode "${@:---continue}"
+  if [ $# -eq 0 ]; then
+    set -- --continue
+  fi
+  command opencode attach "${OPENCODE_URL:-https://opencode.test}" "$@"
 }
 alias oc=opencode
 

@@ -4,17 +4,20 @@
 # health: path for liveness checks (goss, monitoring); omit if root returns 200
 caddy:
   sites:
-    ai:
+    claude:
       claude-task-viewer:
         body: html
         port: 3456
+        health: /
     oage:
       bifrost:
         body: html
         port: 8180
+        health: /
       open-notebook:
         body: html
         port: 8502
+        health: /
       open-notebook-api:
         body: '{"status":"healthy"}'
         port: 5055
@@ -26,11 +29,12 @@ caddy:
       surrealdb:
         port: 8000
         health: /health
-    processCompose:
-      process-compose:
-        body: '{"status":"alive"}'
-        health: /live
-        port: 8484
+    opencode:
+      opencode:
+        body: Unauthorized
+        port: 4096
+        health: /
+        status: 401
     otel:
       # alertmanager:
       #   port: 9093
@@ -57,3 +61,9 @@ caddy:
       mailpit:
         body: html
         port: 8025
+        health: /
+    processCompose:
+      process-compose:
+        body: '{"status":"alive"}'
+        health: /live
+        port: 8484

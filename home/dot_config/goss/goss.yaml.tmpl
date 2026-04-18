@@ -329,8 +329,11 @@ gossfile:
 {{- if not (get $.features $feat) }}{{ continue }}{{ end }}
 {{- range $name, $site := $sites }}
 {{- if hasKey $site "enabled" }}{{ if not (get $site "enabled") }}{{ continue }}{{ end }}{{ end }}
-{{- $entry := dict "url" (printf "https://%s.test%s" $name (get $site "health" | default "")) }}
+{{- $health := get $site "health" }}
+{{- if not $health }}{{ continue }}{{ end }}
+{{- $entry := dict "url" (printf "https://%s.test%s" $name $health) }}
 {{- if get $site "body" }}{{ $_ := set $entry "body" (get $site "body") }}{{ end }}
+{{- if get $site "status" }}{{ $_ := set $entry "status" (get $site "status") }}{{ end }}
 {{- $_ := set $checks $name $entry }}
 {{- end }}
 {{- end }}
@@ -349,7 +352,8 @@ gossfile:
 http:
 {{- range $name, $check := $checks }}
   {{ $check.url }}:
-    status: 200
+{{- $status := get $check "status" | default 200 }}
+    status: {{ $status }}
     timeout: 5000
 {{- if hasKey $check "body" }}
     body:

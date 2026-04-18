@@ -2,16 +2,16 @@
 #!/bin/sh
 
 {{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/commands/*.md") }}
-# commands/{{ base . }}: {{ . | include | sha256sum }}
+# commands/{{ base . }}: {{ include . | sha256sum }}
 {{- end }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/rules/*.md") }}
-# rules/{{ base . }}: {{ . | include | sha256sum }}
+# rules/{{ base . }}: {{ include . | sha256sum }}
 {{- end }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/agents/*.md") }}
-# agents/{{ base . }}: {{ . | include | sha256sum }}
+# agents/{{ base . }}: {{ include . | sha256sum }}
 {{- end }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/SKILL.md") }}
-# skills/{{ dir . | base }}: {{ . | include | sha256sum }}
+# skills/{{ dir . | base }}: {{ include . | sha256sum }}
 {{- end }}
 
 set -eu

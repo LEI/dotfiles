@@ -15,18 +15,22 @@ label="{{ (get .services "process-compose").label }}"
 {{- else -}}
 label="process-compose"
 {{- end }}
-socket="$HOME/.local/state/process-compose/global.sock"
 
-# Try hot-reload via project update first
-if [ -S "$socket" ]; then
-  if run timeout 10 pc -g project update; then
-    msg "$label: hot-reloaded"
-    exit 0
-  fi
+# socket="$HOME/.local/state/process-compose/global.sock"
+# # Try hot-reload via project update first
+# if [ -S "$socket" ]; then
+#   if run timeout 10 pc -g project update; then
+#     msg "$label: hot-reloaded"
+#     exit 0
+#   fi
+# fi
+
+if run timeout 10 pc -g project update; then
+  # Project updated successfully / No processes were updated
+  exit 0
 fi
 
 {{ if eq .chezmoi.os "darwin" -}}
-# Fall back to launchctl bootout + bootstrap
 plist="$HOME/Library/LaunchAgents/$label.plist"
 if [ ! -f "$plist" ]; then
   die "$label: plist not found"
@@ -36,7 +40,6 @@ if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
 fi
 run launchctl bootstrap "gui/$(id -u)" "$plist"
 {{- else -}}
-# Fall back to systemctl restart
 run systemctl --user daemon-reload
 run systemctl --user restart "$label"
 {{- end }}

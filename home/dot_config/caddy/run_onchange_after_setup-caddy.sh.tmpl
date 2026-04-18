@@ -3,11 +3,15 @@
 {{- if stat $caddyfilePath }}
 # Caddyfile: {{ include $caddyfilePath | sha256sum }}
 {{- end }}
-# sites: {{ include "dot_config/caddy/.chezmoidata.yaml" | sha256sum }}
+# sites:{{/* include "dot_config/caddy/.chezmoidata.yaml" | sha256sum */}}
+{{- range glob (joinPath .chezmoi.homeDir ".config/caddy/sites/*.caddy") }}
+# {{ base . }}: {{ include . | sha256sum }}
+{{- end }}
 # otel-dropin: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
 # dns-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
+
 set -euo pipefail
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
