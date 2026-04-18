@@ -1,3 +1,4 @@
+# TODO: ../private_secrets.d/private_opencode.conf.tmpl
 export OPENCODE_EXPERIMENTAL=true
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 

@@ -27,7 +27,7 @@ setup() {
   printf '{"$schema":"%s","name":"ok"}' "$schema" >"$file"
 
   run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_line "PASS $file schema=$schema"
   assert_success
 }
 
@@ -200,7 +200,7 @@ setup() {
 }
 
 # bats test_tags=type:unit
-@test "validate-schema: --keep retains temp dir for jsonc files" {
+@test "validate-schema: --keep shows file and schema paths on failure" {
   check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/test.jsonc"
@@ -209,7 +209,8 @@ setup() {
   printf '{\n  $schema: "%s",\n  /* comment */\n}' "$schema" >"$file"
 
   run_script ./script/validate-schema --keep "$file"
-  assert_stderr_line --regexp "^Temp dir kept: /.*tmp"
+  assert_stderr_line --partial "file: "
+  assert_stderr_line --partial "schema: "
   assert_failure
 }
 

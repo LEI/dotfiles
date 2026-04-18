@@ -71,22 +71,22 @@ validate_file() {
 
   case "$ext" in
   json)
-    schema=$(jq -r '."$schema" // empty' "$path")
+    schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
     ;;
   jsonc | json5)
     if command -v json5 >/dev/null; then
-      schema=$(json5 "$path" | jq -r '."$schema" // empty')
+      schema=$(json5 "$path" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || schema=
     else
-      schema=$(jq -r '."$schema" // empty' "$path")
+      schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
     fi
     ;;
   toml)
     # shellcheck disable=SC2016
-    schema=$(yq '."$schema"' "$path")
+    schema=$(yq '."$schema"' "$path") || schema=
     ;;
   yaml | yml)
     # shellcheck disable=SC2016
-    schema=$(yq '."$schema"' "$path")
+    schema=$(yq '."$schema"' "$path") || schema=
     ;;
   esac
   if [ "$schema" = "null" ]; then
@@ -166,9 +166,10 @@ validate_file() {
     return 0
   else
     echo "FAIL $path schema=$schema"
-    if [ "$keep" = true ]; then
-      [ -n "$tmp_dir" ] && echo "Temp dir kept: $tmp_dir" >&2
-      [ -n "$tmp_dir" ] && trap - EXIT
+    if [ "$keep" = true ] && [ -n "$tmp_dir" ]; then
+      echo "  file: $content_path" >&2
+      echo "  schema: $schema_path" >&2
+      trap - EXIT
     fi
     echo "$result"
     return 1
@@ -187,7 +188,8 @@ validate_schema() {
     fi
     return 1
   fi
-  if ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
+  # quiet mode suppresses SKIP lines; treat silent exit 0 as a valid skip
+  if [ "${quiet:-false}" = false ] && ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
     echo "FAIL $1 schema= (no output)" >&2
     return 1
   fi

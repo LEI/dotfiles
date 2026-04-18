@@ -2,6 +2,7 @@
 #!/bin/sh
 
 # container: {{ include "dot_config/containers/systemd/ollama.container" | sha256sum }}
+# status: {{ output "sh" "-c" "systemctl --user is-active ollama || true" | trim }}
 
 set -eu
 

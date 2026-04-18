@@ -4,9 +4,11 @@ version: "0.5"
 log_level: info
 
 processes:
+  {{- if .features.claude }}
+
   claude-task-viewer:
     namespace: apps
-    description: "Claude task viewer UI"
+    description: Claude task viewer UI
     command: npx claude-task-viewer
     environment:
       - PORT=3456
@@ -24,6 +26,20 @@ processes:
       period_seconds: 10
       timeout_seconds: 3
       failure_threshold: 3
+  {{- end }}
+
+  {{- $opencodeConf := joinPath .chezmoi.homeDir ".config" "secrets.d" "opencode.conf" }}
+  {{- if and .features.opencode (stat $opencodeConf) }}
+
+  opencode-server:
+    namespace: apps
+    description: OpenCode server
+    command: opencode serve
+    environment:
+      {{- range include $opencodeConf | trim | splitList "\n" }}
+      - {{ . }}
+      {{- end }}
+  {{- end }}
 
 {{- /* tool map: basename → tool. Default is tspin */ -}}
 {{- $toolFor := dict
@@ -57,7 +73,7 @@ processes:
 
   {{ $name }}-logs:
     namespace: logs
-    description: "{{ $desc }}"
+    description: {{ $desc | quote }}
     command: "{{ $tool }}{{ if eq $tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
@@ -71,7 +87,7 @@ processes:
 
   {{ $name }}-logs:
     namespace: logs
-    description: "{{ $extra.desc }}"
+    description: {{ $extra.desc | quote }}
     command: "{{ $extra.tool }}{{ if eq $extra.tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
     availability:
       restart: on_failure
@@ -83,7 +99,7 @@ processes:
 
   webhook-logs:
     namespace: logs
-    description: "Webhook alert receiver"
+    description: Webhook alert receiver
     # FIXME(macos): tail --follow=name --retry
     command: "tail -f {{ .chezmoi.homeDir }}/.local/state/webhook/*.log | tspin --print"
     availability:
@@ -96,7 +112,7 @@ processes:
 
   claude-{{ $name }}-logs:
     namespace: logs
-    description: "Claude hooks log"
+    description: Claude hooks log
     command: "hl --follow --paging=never --expansion=never --local {{ . }}"
     availability:
       restart: on_failure
