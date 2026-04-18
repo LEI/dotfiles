@@ -1,5 +1,9 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- $lines := list
+  "[[ -f ~/.profile ]] && . ~/.profile"
+  "[[ -f ~/.bashrc ]] && source ~/.bashrc"
+-}}
 {{- includeTemplate "block-in-file.tmpl" (dict
   "chezmoi" .chezmoi
-  "contents" (eq .os "darwin" | ternary "[[ -f ~/.bashrc ]] && source ~/.bashrc" "")
+  "contents" ($lines | join "\n")
 ) -}}

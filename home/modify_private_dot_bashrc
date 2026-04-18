@@ -1,5 +1,9 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- $lines := list
+  "[[ $- != *i* ]] && return"
+  "[[ -f ~/.config/bash/init.bash ]] && source ~/.config/bash/init.bash"
+-}}
 {{- includeTemplate "block-in-file.tmpl" (dict
   "chezmoi" .chezmoi
-  "contents" "[[ -f ~/.config/bash/init.bash ]] && source ~/.config/bash/init.bash"
+  "contents" ($lines | join "\n")
 ) -}}

@@ -1,1 +1,20 @@
-# TODO: .profile
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+. "$XDG_CONFIG_HOME/sh/lib/export.sh"
+. "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
+
+if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
+  export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
+fi
+
+if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
+  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
+fi
+
+if [ -d "$HOME/.local/bin" ]; then
+  pathmunge "$HOME/.local/bin"
+fi
+
+if [ -d "$HOME/bin" ]; then
+  pathmunge "$HOME/bin"
+fi

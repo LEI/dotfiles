@@ -5,54 +5,15 @@ SHELL={{ lookPath .shell | quote }}
 shell="${SHELL##*/}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-# source "$XDG_CONFIG_HOME/sh/lib/export.sh"
-# source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
-# source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
-for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh{{ if eq $shell "zsh" }}(N){{ end }}; do
-  if [ -f "$_lib" ]; then
-    # shellcheck disable=SC1090
-    source "$_lib"
-  fi
-done
-unset _lib
-
-if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
-  export_env "$XDG_CONFIG_HOME/environment.d/"*.conf{{ if eq $shell "zsh" }}(N){{ end }}
-fi
-
-if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
-  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf{{ if eq $shell "zsh" }}(N){{ end }}
-fi
-
-if [ -d "$HOME/bin" ]; then
-  pathmunge "$HOME/bin"
-fi
-
-# Source local environment variables
-if [ -f "$XDG_CONFIG_HOME/sh/local.sh" ]; then
-  source "$XDG_CONFIG_HOME/sh/local.sh"
-fi
-
-# Non-interactive command mode; see environment.plist (BASH_ENV)
-# https://github.com/neovide/neovide/discussions/3175
-if [[ $- == *c* ]] && [[ $- != *i* ]]; then
-  # [[ "${BASH_EXECUTION_STRING:-}" == "{{ lookPath "nvim" }} --embed -p" ]]
-  # BASH_CONFIG="neovide"
-  if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
-    source "$XDG_CONFIG_HOME/sh/environment.sh"
-  fi
-  return
-fi
 
 if [[ $- != *i* ]]; then
-  # We are being invoked from a non-interactive shell.  If this
-  # is an SSH session (as in "ssh host command"), source
-  # /etc/profile so we get PATH and other essential variables.
-  [[ -n "${SSH_CLIENT:-}" ]] && source /etc/profile
   return
 fi
 
-# Shell options (interactive only)
+source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+bench_source "$HOME/.profile"
+
+# Shell options
 if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
   source "$XDG_CONFIG_HOME/$shell/options.$shell"
 fi
@@ -105,7 +66,6 @@ for _conf in "$XDG_CONFIG_HOME/$shell/"*.conf; do
   fi
 done
 for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
-  case "${_conf##*/}" in init.sh | options.sh) continue ;; esac
   if [ -f "$_conf" ]; then
     bench_source "$_conf"
   fi
