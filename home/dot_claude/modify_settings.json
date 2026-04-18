@@ -274,7 +274,7 @@
     "additionalDirectories": {{ $notesDirs | toPrettyJson | indent 4 | trim }}
   },
   "enableAllProjectMcpServers": false,
-  "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 4 | trim }},
+  "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},
   {{- $node := lookPath "node" }}
   {{- if .features.mise }}
   {{-   $node = "mise exec node@lts --" }}
@@ -320,6 +320,11 @@
   "alwaysThinkingEnabled": false,
   "showClearContextOnPlanAccept": true{{/* https://github.com/anthropics/claude-code/issues/37688 */}},
   "plansDirectory": "./.claude/plans",
+  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
   "autoMemoryEnabled": true,
   "showThinkingSummaries": true,
   "autoUpdates": false,
@@ -405,10 +410,5 @@
     "local:quality": true,
     "reflect": true,
     "standup": true
-  },
-  "voiceEnabled": true,
-  "voice": {
-    "enabled": true,
-    "mode": "hold"
   }
 }
