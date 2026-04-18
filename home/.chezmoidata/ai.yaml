@@ -92,9 +92,9 @@ ai:
       mlx-lm: mlx-community/gemma-4-e4b-it-4bit
       ollama: gemma4
       params:
-        reasoning_tags: []
-          # - "<|channel>thought"
-          # - "<channel|>"
+        reasoning_tags:
+          - "<|channel>thought"
+          - "<channel|>"
     # qwen3-coder-30b:
     #   context: 262144
     #   output: 65536

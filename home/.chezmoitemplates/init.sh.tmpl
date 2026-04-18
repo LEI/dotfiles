@@ -8,7 +8,7 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 # source "$XDG_CONFIG_HOME/sh/lib/export.sh"
 # source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
 # source "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
-for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh; do
+for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh{{ if eq $shell "zsh" }}(N){{ end }}; do
   if [ -f "$_lib" ]; then
     # shellcheck disable=SC1090
     source "$_lib"
@@ -16,17 +16,12 @@ for _lib in "$XDG_CONFIG_HOME/sh/lib/"*.sh; do
 done
 unset _lib
 
-# Shell options early, before any glob expansion
-if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
-  source "$XDG_CONFIG_HOME/$shell/options.$shell"
-fi
-
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
-  export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
+  export_env "$XDG_CONFIG_HOME/environment.d/"*.conf{{ if eq $shell "zsh" }}(N){{ end }}
 fi
 
 if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
-  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
+  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf{{ if eq $shell "zsh" }}(N){{ end }}
 fi
 
 if [ -d "$HOME/bin" ]; then
@@ -55,6 +50,11 @@ if [[ $- != *i* ]]; then
   # /etc/profile so we get PATH and other essential variables.
   [[ -n "${SSH_CLIENT:-}" ]] && source /etc/profile
   return
+fi
+
+# Shell options (interactive only)
+if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
+  source "$XDG_CONFIG_HOME/$shell/options.$shell"
 fi
 
 if [ -z "${USER:-}" ]; then
