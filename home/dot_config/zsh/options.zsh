@@ -1,8 +1,9 @@
 # Allow # for comments anywhere on the line
 setopt INTERACTIVE_COMMENTS
 
-# Don't save duplicate consecutive commands
-setopt HIST_IGNORE_DUPS
+# Remove older copy when a duplicate is added
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
 
 # Keep more history, append on shell exit
 setopt APPEND_HISTORY
