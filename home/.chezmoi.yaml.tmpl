@@ -100,8 +100,8 @@
 {{-   $email = promptString "email" $email }}
 {{- end }}
 
-{{- if hasKey . "accessToken" }}
-{{-   $accessToken = .accessToken }}
+{{- if and (hasKey . "passwordManager") (hasKey .passwordManager "accessToken") }}
+{{-   $accessToken = .passwordManager.accessToken }}
 {{- else if env "BWS_ACCESS_TOKEN" }}
 {{-   $accessToken = env "BWS_ACCESS_TOKEN" }}
 {{- else if and $interactive }}
@@ -122,7 +122,6 @@
 {{- end }}
 
 {{- $data := dict
-  "accessToken" $accessToken
   "arch" .chezmoi.arch
   "chassisType" $chassisType
   "chassisVendor" $chassisVendor
@@ -141,6 +140,7 @@
   "osID" $osID
   "osIDLike" $osIDLike
   "osVersion" $osVersion
+  "passwordManager" (dict "accessToken" $accessToken)
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
   "softwareVersion" $softwareVersion

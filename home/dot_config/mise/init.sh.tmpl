@@ -19,4 +19,7 @@ topgrade() {
 }
 {{- end }}
 
+{{- if not .features.carapace }}
+
 alias m=mise
+{{- end }}

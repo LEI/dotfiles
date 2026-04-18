@@ -1,8 +1,7 @@
 {{- if and (or .features.bash .features.zsh) (lookPath "usage" | isExecutable) -}}
 {{- $dict := dict -}}
 {{- $bin := glob (joinPath .chezmoi.sourceDir "dot_local" "bin" "executable_*") -}}
-{{- $scripts := glob (joinPath .chezmoi.sourceDir ".." "script" "*") -}}
-{{- range concat $bin $scripts -}}
+{{- range $bin -}}
 {{-   $content := include . -}}
 {{-   if contains "#USAGE " $content -}}
 {{-     $hash := $content | sha256sum -}}
@@ -19,14 +18,17 @@
 {{-   end -}}
 {{- end -}}
 {{- if not (empty $dict) -}}
-#!/bin/sh
-# Generate shell completions for scripts with #USAGE directives
+#!/usr/bin/env bash
+# Generate shell completions for dot_local/bin scripts with #USAGE directives
+# patch_bash_mapfile fixes compgen -W word-splitting on paths with spaces (usage bug)
+# TODO: script/ tasks (m lint, m test) go through carapace->_mise bridge which has
+# the same compgen -W issue; would need upstream fix in usage or carapace bash bridge
 
 {{- range $dict | keys | sortAlpha }}
 # {{ . }}: {{ get (get $dict .) "hash" }}
 {{- end }}
 
-set -eu
+set -euo pipefail
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
@@ -44,15 +46,47 @@ mkdir -p "$zsh_dir"
 
 rc=0
 
+{{- if .features.bash }}
+patch_bash_mapfile() {
+  local file="$1" tmp="$1.tmp" line inner
+  while IFS= read -r line; do
+    # shellcheck disable=SC2016
+    if [[ "$line" == *'_comp_compgen -- -W "$(command '* ]]; then
+      inner="${line#*\"\$(}"
+      inner="${inner%)\"}"
+      cat <<EOF
+	if (( BASH_VERSINFO[0] >= 4 )); then
+		mapfile -t COMPREPLY < <($inner)
+	else
+		echo >&2 "generate-completions: bash 4+ required for path completions in $file"
+	fi
+EOF
+    else
+      printf '%s\n' "$line"
+    fi
+  done <"$file" >"$tmp" && mv "$tmp" "$file"
+}
+{{- end }}
+
 gen_completions() {
   name="$1"
   spec=$(cat)
   msg "generate-completions: $name"
 {{- if .features.bash }}
-  printf '%s\n' "$spec" | usage generate completion bash "$name" --file - >"$bash_dir/$name" || rc=1
+  usage generate completion bash "$name" --file - <<<"$spec" >"$bash_dir/$name" || rc=1
+  if grep -q 'run=' <<<"$spec"; then
+    if ! patch_bash_mapfile "$bash_dir/$name"; then
+      echo >&2 "generate-completions: patch failed for $name"
+      rc=1
+    fi
+    if grep -q '_comp_compgen -- -W' "$bash_dir/$name"; then
+      echo >&2 "generate-completions: patch did not apply for $name -- usage output format may have changed"
+      rc=1
+    fi
+  fi
 {{- end }}
 {{- if .features.zsh }}
-  printf '%s\n' "$spec" | usage generate completion zsh "$name" --file - >"$zsh_dir/_$name" || rc=1
+  usage generate completion zsh "$name" --file - <<<"$spec" >"$zsh_dir/_$name" || rc=1
 {{- end }}
 }
 {{ range $dict | keys | sortAlpha }}

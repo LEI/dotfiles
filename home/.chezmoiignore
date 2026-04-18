@@ -55,7 +55,7 @@
 .vscode-remote/
 {{ end -}}
 
-{{ if or .ephemeral (empty .accessToken) -}}
+{{ if or .ephemeral (empty .passwordManager.accessToken) -}}
 .install-password-manager.sh
 {{ end -}}
 

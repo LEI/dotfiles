@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Render managed templates to a staging directory
+#USAGE flag "-o --output <directory>" help="Output directory (default: mktemp -d)"
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Print each file as it is rendered"
-#USAGE arg "<directory>" help="Output directory"
 #USAGE arg "[templates]..." help="Templates to render"
+#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
+# TODO: consider accepting directories and expanding to contained templates;
+# if added, update completion to also offer dirs (type=path or git ls-files -d)
 
 set -euo pipefail
 shopt -s lastpipe
@@ -13,25 +16,55 @@ if ((BASH_VERSINFO[0] < 4)); then
   exit 1
 fi
 
-dest="${1:?usage: chezmoi-render <directory> [templates...]}"
-shift
+case "${1:-}" in
+-h | --help)
+  if command -v usage >/dev/null; then
+    usage exec --help bash "$0"
+  else
+    echo "Usage: chezmoi-render [-o <directory>] [-q] [-v] [templates...]"
+  fi
+  exit 0
+  ;;
+--usage)
+  grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+  exit 0
+  ;;
+esac
 
+dest=""
 quiet=false
 verbose=false
 templates=()
-for arg in "$@"; do
-  case "$arg" in
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -o | --output)
+    dest="$2"
+    shift 2
+    ;;
   -q | --quiet)
     quiet=true
+    shift
     ;;
   -v | --verbose)
     verbose=true
+    shift
+    ;;
+  --)
+    shift
+    break
     ;;
   *)
-    templates+=("$arg")
+    templates+=("$1")
+    shift
     ;;
   esac
 done
+templates+=("$@")
+
+if [ -z "$dest" ]; then
+  dest="$(mktemp -d)"
+  printf '%s\n' "$dest"
+fi
 
 mkdir -p "$dest"
 
@@ -55,7 +88,7 @@ if [ ${#templates[@]} -gt 0 ]; then
   templates=("${fixed[@]}")
 fi
 
-# Get all templates if none provided (find all .tmpl files in source, excluding config)
+# Get all templates if none provided
 if [ ${#templates[@]} -eq 0 ]; then
   cd "$source_dir"
   mapfile -t templates < <(find . \( -name '*.tmpl' -o -name 'modify_*' \) -type f | grep -v '^./.chezmoi.yaml.tmpl$' | sort -u)
@@ -65,7 +98,7 @@ if [ ${#templates[@]} -eq 0 ]; then
   exit 0
 fi
 
-# Resolve source paths to target paths (use absolute paths)
+# Resolve source paths to target paths
 cd "$source_dir"
 sources=()
 for t in "${templates[@]}"; do
@@ -113,11 +146,9 @@ render() {
     fi
   fi
 
-  # echo "render debug: ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}" >&2
   "${cmd[@]}" <"$input" >"$out" && exit_code=0 || exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
     echo "render failed: exit code $exit_code" >&2
-    # ${cmd[*]} <${input#"$PWD"/}> -> ${out#"$PWD"/}
   fi
   return "$exit_code"
 }

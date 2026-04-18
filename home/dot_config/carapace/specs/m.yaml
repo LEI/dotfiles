@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+---
+name: m
+description: mise alias
+run: "[mise]"
+completion:
+  positionalany:
+    - "$carapace.bridge.Bash([mise])"
+    # - "$carapace.bridge.Zsh([mise])"

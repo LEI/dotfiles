@@ -5,7 +5,7 @@
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show render dir and file list"
 #USAGE arg "[templates]..." help="Template paths to render (default: all)"
-#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
+#USAGE complete "templates" type=path
 
 set -euo pipefail
 
@@ -72,7 +72,7 @@ trap cleanup EXIT
 cp "$repo_dir/.editorconfig" "$render_dir/.editorconfig"
 printf 'disable=SC1090,SC1091,SC2034,SC2317\n' >"$render_dir/.shellcheckrc"
 
-chezmoi-render "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
+chezmoi-render --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 
 # Remove empty files (templates that render to nothing on this OS)
 find "$render_dir" -type f -empty -delete

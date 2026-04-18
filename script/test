@@ -2,7 +2,7 @@
 #MISE alias="t"
 #MISE description="Run bats test suite"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats"
-#USAGE complete "filter" run="git ls-files 'test/**/*.bats'"
+#USAGE complete "filter" run="git ls-files 'test/*.bats'"
 # TODO: --base-directory test
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
@@ -66,7 +66,7 @@ main() {
     export BATS_LIB_PATH="$path"
   fi
 
-  # Files using stubs set BATS_NO_PARALLELIZE_WITHIN_FILE to avoid collisions
+  # chezmoi.bats uses BATS_NO_PARALLELIZE_WITHIN_FILE due to chezmoi state lock
   local jobs="${TEST_JOBS:-$(nproc)}"
   if [ $# -eq 0 ]; then
     set -- --recursive ./test "$@"

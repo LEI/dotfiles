@@ -47,3 +47,9 @@ commands:
   - name: package
     aliases: [p]
     run: "[chezmoi-package]"
+  - name: render
+    aliases: [r]
+    description: Render managed templates to a staging directory
+    run: "[chezmoi-render]"
+    # completion:
+    #   positionalany: ["$carapace.bridge.CarapaceBin([chezmoi-render])"]

@@ -2,7 +2,8 @@ setup_file() {
   source test/common/setup-file.sh
   _common_setup_file
 
-  # export BATS_NO_PARALLELIZE_WITHIN_FILE=true
+  # Must run sequentially: chezmoi cat uses a state lock that conflicts
+  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
   export CHEZMOI_WORKING_TREE=.
   export DRY_RUN=true
 }
