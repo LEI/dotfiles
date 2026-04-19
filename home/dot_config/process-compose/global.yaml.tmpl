@@ -1,3 +1,5 @@
+{{- $hlFollow := "hl --follow --paging=never --expansion=never --local" -}}
+{{- $tspinFollow := "tspin --follow --print" -}}
 ---
 version: "0.5"
 
@@ -5,6 +7,17 @@ log_level: info
 
 processes:
   {{- if .features.claude }}
+  {{- range glob (joinPath .chezmoi.homeDir ".local/state/claude/*.jsonl") }}
+  {{- $name := trimSuffix ".jsonl" (base .) }}
+
+  claude-{{ $name }}-logs:
+    namespace: logs
+    description: Claude hooks log
+    command: "{{ $hlFollow }} {{ . }}"
+    availability:
+      restart: on_failure
+      max_restarts: 0
+  {{- end }}
 
   claude-task-viewer:
     namespace: apps
@@ -44,7 +57,7 @@ processes:
     description: OpenCode server
     # https://github.com/anomalyco/opencode/issues/19078
     command: >-
-      test -n OPENCODE_SERVER_PASSWORD &&
+      test -n "$OPENCODE_SERVER_PASSWORD" &&
       opencode serve
       {{- range $key, $value := $server }}
       {{-   if kindIs "slice" $value }}
@@ -80,85 +93,59 @@ processes:
     #   failure_threshold: 3
   {{- end }}
 
-{{- /* tool map: basename → tool. Default is tspin */ -}}
-{{- $toolFor := dict
-  "caddy.log" "hl"
-  "mailpit.log" "hl"
--}}
-
-# TODO: journalctl --unit=caddy --follow
-{{- /* desc map: basename → short description */ -}}
-{{- $descFor := dict
-  "caddy.log" "Caddy reverse proxy"
-  "mailpit.log" "Mailpit SMTP catcher"
-  "supervisord.log" "Supervisor daemon"
-  "php-fpm.log" "PHP-FPM"
-  "mlx-lm.log" "MLX LM inference server"
-  "access.log" "Nginx access"
-  "error.log" "Nginx error"
--}}
-
-{{- range glob (printf "%s/var/log/**/*.log" .brewPrefix) }}
-{{- $base := base . }}
-{{- $tool := default "tspin" (get $toolFor $base) }}
-{{- $name := trimSuffix ".log" $base | replace "_" "-" }}
-{{- $dir := dir . | base }}
-{{- if ne $dir "log" }}{{- $name = printf "%s-%s" $dir $name }}{{- end }}
-{{- $desc := default (printf "%s log" $name) (get $descFor $base) }}
+  {{- if .features.brew }}
+  {{- $brew := dig "processCompose" "brew" dict . }}
+  {{- range glob (joinPath .brewPrefix "var/log/**/*.log") }}
+  {{- $base := base . }}
+  {{- $dir := dir . | base }}
+  {{- $key := ternary (printf "%s/%s" $dir $base) $base (ne $dir "log") }}
+  {{- $meta := get $brew $key | default dict }}
+  {{- $tool := get $meta "tool" | default "tspin" }}
+  {{- $name := trimSuffix ".log" $base | replace "_" "-" }}
+  {{- if ne $dir "log" }}{{ $name = printf "%s-%s" $dir $name }}{{ end }}
+  {{- $desc := get $meta "description" | default (printf "%s log" $name) }}
 
   {{ $name }}-logs:
     namespace: logs
     description: {{ $desc | quote }}
-    command: "{{ $tool }}{{ if eq $tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
+    command: "{{ eq $tool "hl" | ternary $hlFollow $tspinFollow }} {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 0
-{{- end }}
+  {{- end }}
+  {{- end }}
 
-{{- if .features.sql }}
-{{- range glob (joinPath .brewPrefix "var/mysql/*.err") }}
-{{- $base := base . }}
-{{- $name := printf "mariadb-%s" (trimSuffix ".err" $base | trimSuffix ".log" | replace "_" "-" | replace "." "-") }}
+  {{- if and .features.brew .features.sql }}
+  {{- range glob (joinPath .brewPrefix "var/mysql/*.err") }}
+  {{- $base := base . }}
+  {{- $name := printf "mariadb-%s" (trimSuffix ".err" $base | trimSuffix ".log" | replace "_" "-" | replace "." "-") }}
 
   {{ $name }}-logs:
     namespace: logs
     description: "MariaDB logs"
-    command: "tspin --follow --print {{ . }}"
+    command: "{{ $tspinFollow }} {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 0
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
 
-{{- if .features.otel }}
+  {{- if .features.otel }}
 
   webhook-logs:
     namespace: logs
     description: Webhook alert receiver
-    # FIXME(macos): tail --follow=name --retry
-    command: "tail -f {{ .chezmoi.homeDir }}/.local/state/webhook/*.log | tspin --print"
+    # tspin only accepts a single file; tail -f handles the glob
+    command: "tail -f ~/.local/state/webhook/*.log | tspin --print"
     availability:
       restart: on_failure
       max_restarts: 0
-{{- end }}
+  {{- end }}
 
-{{- range glob (printf "%s/.local/state/claude/*.jsonl" .chezmoi.homeDir) }}
-{{- $name := trimSuffix ".jsonl" (base .) }}
-
-  claude-{{ $name }}-logs:
-    namespace: logs
-    description: Claude hooks log
-    command: "hl --follow --paging=never --expansion=never --local {{ . }}"
-    availability:
-      restart: on_failure
-      max_restarts: 0
-{{- end }}
-
-{{- /* SSH tunnel proxies from chezmoidata */ -}}
-{{- range dig "processCompose" "sshProxies" (list) . -}}
-{{-   $remotePort := "22" -}}
-{{-   if eq .type "postgres" }}{{- $remotePort = "5432" -}}{{- end -}}
-{{-   if eq .type "mysql" }}{{- $remotePort = "3306" -}}{{- end }}
+  {{- range dig "processCompose" "sshProxies" (list) . }}
+  {{-   $remotePort := "22" }}
+  {{-   if eq .type "postgres" }}{{ $remotePort = "5432" }}{{ end }}
+  {{-   if eq .type "mysql" }}{{ $remotePort = "3306" }}{{ end }}
 
   {{ .name }}:
     namespace: tunnels
@@ -167,7 +154,7 @@ processes:
     availability:
       restart: on_failure
       backoff_seconds: 5
-      max_restarts: 0
+      max_restarts: 0 # unlimited
       exponential_backoff: true
     {{- if eq .type "postgres" }}
     readiness_probe:
@@ -182,4 +169,4 @@ processes:
       period_seconds: 10
       timeout_seconds: 3
       failure_threshold: 3
-{{- end }}
+  {{- end }}

@@ -4,3 +4,23 @@ services:
     feature: processCompose
     label: com.process-compose
     unit: process-compose
+
+processCompose:
+  # $HOMEBRE_PREFIX/var/log/*
+  brew:
+    caddy.log:
+      tool: hl
+      description: Caddy reverse proxy
+    mailpit.log:
+      tool: hl
+      description: Mailpit SMTP catcher
+    supervisord.log:
+      description: Supervisor daemon
+    php-fpm.log:
+      description: PHP-FPM
+    mlx-lm.log:
+      description: MLX LM inference server
+    nginx/access.log:
+      description: Nginx access
+    nginx/error.log:
+      description: Nginx error
