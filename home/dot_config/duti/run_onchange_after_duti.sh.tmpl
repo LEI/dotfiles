@@ -1,8 +1,8 @@
-{{- if .gui -}}
-{{- $fa := .macos.fileAssociations -}}
+{{- if and .gui (eq .os "darwin") -}}
+{{- $duti := .duti -}}
 #!/bin/sh
 
-# associations: {{ $fa | toJson | sha256sum }}
+# associations: {{ $duti | toJson | sha256sum }}
 
 set -eu
 
@@ -73,21 +73,21 @@ set_scheme() {
 }
 
 msg "File associations (UTIs)"
-{{ range $bundle, $utis := $fa.utis -}}
+{{ range $bundle, $utis := $duti.utis -}}
 {{ range $utis -}}
 set_uti "{{ $bundle }}" "{{ . }}"
 {{ end -}}
 {{ end -}}
 
 msg "File associations (extensions)"
-{{ range $bundle, $exts := $fa.extensions -}}
+{{ range $bundle, $exts := $duti.extensions -}}
 {{ range $exts -}}
 set_ext "{{ $bundle }}" ".{{ . }}"
 {{ end -}}
 {{ end -}}
 
 msg "URL scheme associations"
-{{ range $bundle, $schemes := $fa.schemes -}}
+{{ range $bundle, $schemes := $duti.schemes -}}
 {{ range $schemes -}}
 set_scheme "{{ $bundle }}" "{{ . }}"
 {{ end -}}
