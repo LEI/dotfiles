@@ -258,6 +258,17 @@ data:
   ai:
     localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
     localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
+    providers:
+      llama-server:
+        active: false
+      mlx-embed:
+        active: {{ $features.mlx }}
+      mlx-lm:
+        active: {{ $features.mlx }}
+      ollama:
+        active: {{ not $features.mlx }}
+      vllm-mlx:
+        active: false
 {{- end }}
 
 {{- if $features.ollama }}

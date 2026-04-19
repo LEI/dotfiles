@@ -1,5 +1,4 @@
 {{- if and (eq .os "linux") (stat "/run/systemd/system") -}}
-{{- $localProvider := get .ai "localProvider" | default "" -}}
 ---
 command:
   systemctl-failed:
@@ -9,24 +8,25 @@ command:
     stdout: ['!/failed/']
     timeout: 3000
 {{- range $name, $svc := get . "services" | default dict }}
-{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
-{{- $unit := get $svc "unit" }}
-{{- if not $unit }}{{ continue }}{{ end }}
+{{-   if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+{{-   $active := get $svc "active" }}
+{{-   $unit := get $svc "unit" }}
+{{-   if not $unit }}{{ continue }}{{ end }}
   systemd-{{ $name }}:
-    title: {{ $name }} systemd user service running
+    title: {{ $name }} systemd user service ({{ if $active }}active{{ else }}inactive{{ end }})
     exec: systemctl --user is-active --quiet {{ $unit }}
-    exit-status: 0
-    timeout: 3000
-{{- end }}
-{{- if .features.ai }}
-{{- range $name, $p := .ai.providers }}
-{{- if not (hasKey $p "unit") }}{{ continue }}{{ end }}
-{{- $active := or (eq $name $localProvider) (eq (get $p "parent" | default "") $localProvider) }}
-  systemd-{{ $name }}:
-    title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})
-    exec: systemctl --user is-active --quiet {{ $p.unit }}
     exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{- end }}
+{{- if .features.ai }}
+{{-   range $name, $provider := .ai.providers }}
+{{-     if not (hasKey $provider "unit") }}{{ continue }}{{ end }}
+{{-     $active := get $provider "active" }}
+  systemd-{{ $name }}:
+    title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})
+    exec: systemctl --user is-active --quiet {{ $provider.unit }}
+    exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
+    timeout: 3000
+{{-   end }}
 {{- end }}
 {{ end -}}

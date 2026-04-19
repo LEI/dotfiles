@@ -1,8 +1,8 @@
 {{- $provider := get .ai.providers "ollama" -}}
 {{- $ollama := get . "ollama" | default dict -}}
 {{- $service := get $ollama "service" -}}
-{{- $enabled := eq (get .ai "localProvider") "ollama" -}}
-{{- if or $enabled (eq $service "quadlet") -}}
+{{- $active := get $provider "active" -}}
+{{- if $service -}}
 #!/bin/sh
 
 {{- if eq $service "quadlet" }}
@@ -13,17 +13,26 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if eq $service "quadlet" }}
+{{- if eq $service "brew" }}
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" $active
+  "formula" "ollama"
+  "port" $provider.port
+  "health" $provider.health) }}
+{{- else if eq $service "compose" }}
+{{-   if $active }}
+
+# Compose manages its own lifecycle; health check only
+if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $provider.port }}{{ $provider.health }}" >/dev/null; then
+  die "ollama: unhealthy after retries"
+fi
+{{-   end }}
+{{- else if eq $service "quadlet" }}
 {{ includeTemplate "systemd-apply.sh.tmpl" (dict
-  "enabled" $enabled
+  "active" $active
   "unit" "ollama"
   "port" $provider.port
   "health" $provider.health
   "chezmoi" .chezmoi) }}
-{{- else if $enabled }}
-
-if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $provider.port }}{{ $provider.health }}" >/dev/null; then
-  die "ollama: unhealthy after retries"
-fi
-{{- end }}
+{{ end -}}
 {{ end -}}

@@ -1,24 +1,24 @@
 {{- if eq .os "darwin" -}}
-{{- $localProvider := get .ai "localProvider" | default "" -}}
 ---
 command:
 {{- range $name, $svc := get . "services" | default dict }}
-{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+{{-   if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+{{-   $active := get $svc "active" }}
   launchd-{{ $name }}:
-    title: {{ $name }} launchd agent running
+    title: {{ $name }} launchd agent ({{ if $active }}active{{ else }}inactive{{ end }})
     exec: launchctl print gui/$(id -u)/{{ $svc.label }} 2>/dev/null | grep -q 'pid ='
-    exit-status: 0
-    timeout: 3000
-{{- end }}
-{{- if .features.ai }}
-{{- range $name, $p := .ai.providers }}
-{{- if not (hasKey $p "label") }}{{ continue }}{{ end }}
-{{- $active := or (eq $name $localProvider) (eq (get $p "parent" | default "") $localProvider) }}
-  launchd-{{ $name }}:
-    title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})
-    exec: launchctl print gui/$(id -u)/{{ $p.label }} 2>/dev/null | grep -q 'pid ='
     exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{- end }}
+{{- if .features.ai }}
+{{-   range $name, $provider := .ai.providers }}
+{{-     if not (hasKey $provider "label") }}{{ continue }}{{ end }}
+{{-     $active := get $provider "active" }}
+  launchd-{{ $name }}:
+    title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})
+    exec: launchctl print gui/$(id -u)/{{ $provider.label }} 2>/dev/null | grep -q 'pid ='
+    exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
+    timeout: 3000
+{{-   end }}
 {{- end }}
 {{ end -}}

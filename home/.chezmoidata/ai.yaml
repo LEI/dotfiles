@@ -127,6 +127,7 @@ ai:
       embedding: ollama/nomic-embed-text
       fast: ollama/qwen3.5:4b
       reasoning: ollama/qwen3.5:9b
+
     copilot-pro:
       agentic: github-copilot/gpt-4.1
       chat: github-copilot/gpt-4o
@@ -145,12 +146,14 @@ ai:
       coding: github-copilot/claude-sonnet-4.6
       fast: github-copilot/gpt-4o
       reasoning: github-copilot/claude-opus-4.6
+
     ollama-cloud:
       agentic: ollama-cloud/qwen3-coder:480b
       chat: ollama-cloud/gpt-oss:120b
       coding: ollama-cloud/qwen3-coder:480b
       fast: ollama-cloud/gpt-oss:20b
       reasoning: ollama-cloud/deepseek-v3.1:671b
+
     opencode-zen:
       agentic: opencode/big-pickle
       chat: opencode/big-pickle
@@ -163,6 +166,7 @@ ai:
       coding: opencode-go/glm-5
       fast: opencode-go/minimax-m2.5
       reasoning: opencode-go/minimax-m2.7
+
     openrouter:
       agentic: openrouter/qwen/qwen3-coder
       chat: openrouter/qwen/qwen3-coder-30b-a3b-instruct
@@ -181,6 +185,7 @@ ai:
       coding: openrouter/free
       fast: openrouter/free
       reasoning: openrouter/free
+
     huggingface:
       agentic: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
       chat: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct

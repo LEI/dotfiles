@@ -2,10 +2,16 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $p := get .ai.profiles .opencode.profile -}}
-{{- $model := $p.coding -}}
-{{- $smallModel := $p.fast -}}
-{{- $reasoning := $p.reasoning -}}
+{{- $opencodeProfile := get .opencode "profile" -}}
+{{- if empty $opencodeProfile -}}
+{{-   warnf "empty .opencode.profile" -}}
+{{- end -}}
+
+{{- $preset := get .ai.profiles $opencodeProfile | default dict -}}
+{{- $model := get $preset "coding" -}}
+{{- $smallModel := get $preset "fast" -}}
+{{- $reasoning := get $preset "reasoning" -}}
+
 {{- $server := .opencode.server -}}
 {{- if and .features.tailscale .tailscale.tailnet -}}
 {{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) -}}

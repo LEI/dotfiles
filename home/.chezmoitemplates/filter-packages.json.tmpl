@@ -1,7 +1,7 @@
 {{- $output := dict }}
-{{- $defaultType := get . "defaultType" | default "" }}
+{{- $defaultType := get . "defaultType" }}
 {{- $input := get . "input" | default list }}
-{{- $packageType := get . "packageType" | default "" }}
+{{- $packageType := get . "packageType" }}
 
 {{- /* if empty $defaultType -}}
 {{-   warnf "filter-packages: missing defaultType" -}}
@@ -42,7 +42,7 @@
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 
-{{-   $type := get $pkg "type" | default "" | trim }}
+{{-   $type := get $pkg "type"  | trim }}
 {{-   if or (empty $type) (eq $type "nil" "null" "<no value>") }}
 {{-     $type = $defaultType }}
 {{-   end }}

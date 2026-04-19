@@ -1,5 +1,5 @@
 {{- if or .features.docker .features.podman -}}
-{{- $active := env "CONTAINER_PROVIDER" -}}
+{{- $active := .containerProvider -}}
 ---
 command:
 {{- if .features.docker }}

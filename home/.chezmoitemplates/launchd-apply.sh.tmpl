@@ -1,4 +1,4 @@
-{{- $enabled := ne (get . "enabled" | toString) "false" -}}
+{{- $active := eq (get . "active" | toString) "true" -}}
 {{- $label := get . "label" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
@@ -14,7 +14,7 @@
 
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
 
-{{- if $enabled }}
+{{- if $active }}
 if [ ! -f "$plist" ]; then
   die "{{ $label }}: plist not found"
 fi
@@ -42,7 +42,7 @@ fi
 {{- end }}
 {{- else }}
 if launchctl list "{{ $label }}" >/dev/null 2>&1; then
-  msg "stopping disabled service {{ $label }}"
+  msg "unloading service {{ $label }}"
   run launchctl kill SIGTERM "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
   run launchctl unload "$plist" 2>/dev/null || true
   # run launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true

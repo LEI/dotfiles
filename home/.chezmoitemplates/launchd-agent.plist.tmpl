@@ -4,7 +4,7 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>{{ get . "label" | default "" }}</string>
+  <string>{{ get . "label" }}</string>
   <key>ProgramArguments</key>
   <array>
 {{- range (get . "args" | default list) }}

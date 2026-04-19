@@ -1,4 +1,4 @@
-{{- $enabled := ne (get . "enabled" | toString) "false" -}}
+{{- $active := eq (get . "active" | toString) "true" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
@@ -9,7 +9,7 @@
 {{ end -}}
 if has systemctl; then
   run systemctl --user daemon-reload
-{{- if $enabled }}
+{{- if $active }}
   if systemctl --user is-active --quiet {{ $unit }}; then
     run systemctl --user restart {{ $unit }}
   else
@@ -30,7 +30,7 @@ if has systemctl; then
 {{- end }}
 {{- else }}
   if systemctl --user is-enabled --quiet {{ $unit }} 2>/dev/null; then
-    msg "stopping disabled service {{ $unit }}"
+    msg "disabling service {{ $unit }}"
     run systemctl --user disable --now {{ $unit }}
   fi
 {{- end }}

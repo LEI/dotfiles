@@ -1,4 +1,4 @@
-{{- if .features.mlx -}}
+{{- if get (get .ai.providers "mlx-lm") "active" -}}
 {{- $mlxModels := list -}}
 {{- range $name, $meta := .ai.models -}}
 {{-   $id := get $meta "mlx-lm" -}}

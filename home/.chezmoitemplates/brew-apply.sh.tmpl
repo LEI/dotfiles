@@ -1,0 +1,26 @@
+{{- $active := eq (get . "active" | toString) "true" -}}
+{{- $formula := get . "formula" | default "FORMULA" -}}
+{{- $health := get . "health" -}}
+{{- $port := get . "port" -}}
+if ! has brew; then
+  die "brew not found"
+fi
+{{- if $active }}
+if ! brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+  run brew services start {{ $formula }}
+fi
+{{- if and $port $health }}
+if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
+  msg "{{ $formula }}: unhealthy, restarting"
+  run brew services restart {{ $formula }}
+  if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
+    die "{{ $formula }}: unhealthy after retries"
+  fi
+fi
+{{- end }}
+{{- else }}
+if brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+  msg "stopping service {{ $formula }}"
+  run brew services stop {{ $formula }}
+fi
+{{- end }}

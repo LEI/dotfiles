@@ -114,7 +114,19 @@ mount:
 port:
   tcp:22:
     listening: false
-    skip: false
+{{- if .features.ai }}
+{{-   range $name, $provider := .ai.providers }}
+{{-     if not (hasKey $provider "port") }}{{ continue }}{{ end }}
+{{-     $active := hasKey $provider "active" | ternary (get $provider "active") false }}
+  tcp:{{ $provider.port }}:
+    title: {{ $name }} ({{ $active | ternary "active" "inactive" }})
+    listening: {{ $active }}
+{{-     if eq $.os "darwin" }}
+    # https://github.com/goss-org/goss/issues/1006
+    skip: true
+{{-     end }}
+{{-   end }}
+{{- end }}
 
 # process:
 #   chrome:
@@ -125,14 +137,14 @@ port:
 {{- if eq .os "linux" }}
 
 # service:
-{{- range $name, $svc := get . "services" | default dict }}
-{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
-{{- $unit := get $svc "unit" }}
-{{- if not $unit }}{{ continue }}{{ end }}
+{{-   range $name, $svc := get . "services" | default dict }}
+{{-     if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+{{-     $unit := get $svc "unit" }}
+{{-     if not $unit }}{{ continue }}{{ end }}
 #   {{ $unit }}:
 #     enabled: true
 #     running: true
-{{- end }}
+{{-   end }}
 {{- end }}
 
 # user:

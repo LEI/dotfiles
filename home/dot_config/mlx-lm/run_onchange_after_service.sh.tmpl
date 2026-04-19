@@ -15,4 +15,6 @@ if launchctl print "gui/$(id -u)/homebrew.mxcl.mlx-lm" >/dev/null 2>&1; then
   run launchctl bootout "gui/$(id -u)/homebrew.mxcl.mlx-lm"
 fi
 
-{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "mlx-lm") "chezmoi" .chezmoi) $provider) -}}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $provider) -}}

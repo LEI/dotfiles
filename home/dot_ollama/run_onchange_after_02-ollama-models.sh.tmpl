@@ -1,5 +1,5 @@
 {{- $hardware := get . "hardware" | default dict -}}
-{{- if .features.ollama -}}
+{{- if get (get .ai.providers "ollama") "active" -}}
 {{- $ollamaModels := list -}}
 {{- range $name, $meta := .ai.models -}}
 {{-   $id := get $meta "ollama" -}}

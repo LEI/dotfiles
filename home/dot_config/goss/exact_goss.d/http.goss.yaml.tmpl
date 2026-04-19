@@ -1,4 +1,3 @@
-{{- $localProvider := get .ai "localProvider" | default "" -}}
 {{- $checks := dict -}}
 {{- if hasKey . "caddy" -}}
 {{- range $feat, $sites := .caddy.sites -}}
@@ -17,8 +16,8 @@
 {{- if and (hasKey . "ai") (get $.features "caddy") -}}
 {{- range $name, $provider := .ai.providers -}}
 {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end -}}
-{{- if not (or (eq $name $localProvider) (eq (get $provider "parent") $localProvider)) }}{{ continue }}{{ end -}}
-{{- $entry := dict "url" (printf "https://%s%s" $provider.domain (get $provider "health" | default "")) -}}
+{{- if not (get $provider "active") }}{{ continue }}{{ end -}}
+{{- $entry := dict "url" (printf "https://%s%s" $provider.domain (get $provider "health" )) -}}
 {{- if get $provider "body" }}{{ $_ := set $entry "body" (get $provider "body") }}{{ end -}}
 {{- $_ := set $checks $name $entry -}}
 {{- end -}}

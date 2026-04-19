@@ -9,4 +9,6 @@ if ! has llama-server; then
   die "llama-server not found"
 fi
 
-{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "llama-server") "chezmoi" .chezmoi) $provider) -}}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $provider) -}}
