@@ -16,9 +16,11 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if ne .os "darwin" }}
+{{- $ollama := get . "ollama" | default dict }}
+{{- $container := get $ollama "container" }}
+{{- if $container }}
 
-ollama() { {{ .ollama.runtime }} exec {{ .ollama.container }} ollama "$@"; }
+ollama() { {{ get . "containerProvider" }} exec {{ $container }} ollama "$@"; }
 {{- end }}
 
 if ! run ollama list; then

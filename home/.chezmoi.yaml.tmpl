@@ -9,7 +9,10 @@
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") }}
 {{- $binDir := joinPath $homeDir ".local" "bin" }}
-{{- $brewPrefix := eq .chezmoi.os "linux" | ternary "/home/linuxbrew/.linuxbrew" (eq .chezmoi.arch "arm64" | ternary "/opt/homebrew" "/usr/local") }}
+{{- $brewPrefix := "/usr/local" }}
+{{- if eq .chezmoi.os "linux" }}{{ $brewPrefix = "/home/linuxbrew/.linuxbrew" }}
+{{- else if eq .chezmoi.arch "arm64" }}{{ $brewPrefix = "/opt/homebrew" }}
+{{- end }}
 
 {{- $ci := eq (env "CI") "true" }}
 {{- $codespaces := env "CODESPACES" | not | not }}
@@ -154,6 +157,12 @@
 }}
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson }}
 {{- $_ := set $data "features" $features }}
+{{- $containerProvider := env "CONTAINER_PROVIDER" }}
+{{- if not $containerProvider }}
+{{-   if $features.podman }}{{ $containerProvider = "podman" }}
+{{-   else if $features.docker }}{{ $containerProvider = "docker" }}
+{{-   end }}
+{{- end }}
 {{- $context := mergeOverwrite . $data }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
@@ -178,6 +187,7 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
   brewPrefix: {{ $brewPrefix | quote }}
+  containerProvider: {{ $containerProvider | quote }}
   theme: tokyonight
   user: {{ $user | quote }}
 {{ $data | toYaml | indent 2 }}
@@ -194,8 +204,15 @@ data:
 {{- if $features.ollama }}
 {{-   $quadlet := and (eq .chezmoi.os "linux") $features.podman }}
   ollama:
-    container: {{ $quadlet | ternary "systemd-ollama" "oage-ollama-1" }}
-    runtime: {{ $quadlet | ternary "podman" (env "CONTAINER_PROVIDER" | default "docker") }}
+{{-   if eq .chezmoi.os "darwin" }}
+    service: brew
+{{-   else if $quadlet }}
+    container: systemd-ollama
+    service: quadlet
+{{-   else }}
+    container: oage-ollama-1
+    service: compose
+{{-   end }}
 {{- end }}
 
 {{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}

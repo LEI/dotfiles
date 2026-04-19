@@ -1,7 +1,3 @@
-{{- if env "CONTAINER_PROVIDER" -}}
-CONTAINER_PROVIDER={{ env "CONTAINER_PROVIDER" }}
-{{ else if .features.podman -}}
-CONTAINER_PROVIDER=podman
-{{ else if .features.docker -}}
-CONTAINER_PROVIDER=docker
+{{- if .containerProvider -}}
+CONTAINER_PROVIDER={{ .containerProvider }}
 {{ end -}}

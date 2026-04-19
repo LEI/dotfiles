@@ -1,24 +1,25 @@
-{{- $ollama := dig "ollama" dict . -}}
+{{- $ollama := get . "ollama" | default dict -}}
+{{- $service := get $ollama "service" | default "brew" -}}
 {{- $container := get $ollama "container" -}}
-{{- $runtime := get $ollama "runtime" -}}
+{{- $provider := get . "containerProvider" -}}
 
-{{- if and $container (ne .os "darwin") -}}
+{{- if $container -}}
 ollama() {
   set -- {{ $container }} ollama "$@"
   [ -t 0 ] && set -- --interactive "$@"
   [ -t 1 ] && set -- --tty "$@"
-  {{ $runtime }} exec "$@"
+  {{ $provider }} exec "$@"
 }
 
 {{ end -}}
 
 ollama_logs() {
-{{- if eq .os "darwin" }}
+{{- if eq $service "brew" }}
   tail -f "${HOMEBREW_PREFIX:?}/var/log/ollama.log" "$@"
-{{- else if and $container (eq $runtime "podman") }}
-  journalctl --user --unit=ollama.service --follow "$@"
 {{- else if $container }}
-  {{ $runtime }} logs --follow {{ $container }} "$@"
+  {{ $provider }} logs --follow {{ $container }} "$@"
+{{- else }}
+  journalctl --user --unit=ollama --follow "$@"
 {{- end }}
 }
 

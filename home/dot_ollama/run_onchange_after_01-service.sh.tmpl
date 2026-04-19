@@ -1,10 +1,11 @@
 {{- $provider := get .ai.providers "ollama" -}}
+{{- $ollama := get . "ollama" | default dict -}}
+{{- $service := get $ollama "service" -}}
 {{- $enabled := eq (get .ai "localProvider") "ollama" -}}
-{{- $quadlet := and (eq .os "linux") .features.podman -}}
-{{- if or $enabled $quadlet -}}
+{{- if or $enabled (eq $service "quadlet") -}}
 #!/bin/sh
 
-{{- if $quadlet }}
+{{- if eq $service "quadlet" }}
 # container: {{ include "dot_config/containers/systemd/ollama.container" | sha256sum }}
 {{- end }}
 
@@ -12,7 +13,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-{{- if $quadlet }}
+{{- if eq $service "quadlet" }}
 {{ includeTemplate "systemd-apply.sh.tmpl" (dict
   "enabled" $enabled
   "unit" "ollama"
