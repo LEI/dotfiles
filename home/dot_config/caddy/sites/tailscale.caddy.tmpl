@@ -1,4 +1,7 @@
 {{- if and .features.tailscale .tailscale.tailnet -}}
+# https://github.com/tailscale/caddy-tailscale
+
+# TODO: exclude opencode and sites that can't configure base path
 http://{{ .tailscale.tailnet }} {
 	import logging
 	{{- range $feat, $sites := .caddy.sites }}

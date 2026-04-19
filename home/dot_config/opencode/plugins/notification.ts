@@ -2,6 +2,9 @@ import { type Plugin, tool } from "@opencode-ai/plugin"
 
 // https://opencode.ai/docs/plugins/#send-notifications
 export const NotificationPlugin: Plugin = async ({ project, client, $, directory, worktree }) => {
+  // See @mohak34/opencode-notifier plugin
+  return {}
+
   async function notify(title: string, message: string) {
     await client.app.log({
       service: "notification",
@@ -37,7 +40,7 @@ export const NotificationPlugin: Plugin = async ({ project, client, $, directory
         async execute(args, context) {
           // const { agent, sessionID, messageID } = context
           // `Agent: ${agent}, Session: ${sessionID}, Message: ${messageID}`
-          // return notify(args.title, args.message)
+          return notify(args.title, args.message)
         },
       }),
     },
