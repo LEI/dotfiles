@@ -35,6 +35,7 @@ ai:
     ollama:
       port: 11434
       domain: ollama.test
+      health: /
       caddy:
         header_up: Host localhost
     vllm-mlx:

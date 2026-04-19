@@ -191,6 +191,12 @@ data:
     localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
     localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
 {{- end }}
+{{- if $features.ollama }}
+{{-   $quadlet := and (eq .chezmoi.os "linux") $features.podman }}
+  ollama:
+    container: {{ $quadlet | ternary "systemd-ollama" "oage-ollama-1" }}
+    runtime: {{ $quadlet | ternary "podman" (env "CONTAINER_PROVIDER" | default "docker") }}
+{{- end }}
 
 {{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}
 

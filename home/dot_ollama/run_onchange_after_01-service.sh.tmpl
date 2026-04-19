@@ -1,0 +1,28 @@
+{{- $provider := get .ai.providers "ollama" -}}
+{{- $enabled := eq (get .ai "localProvider") "ollama" -}}
+{{- $quadlet := and (eq .os "linux") .features.podman -}}
+{{- if or $enabled $quadlet -}}
+#!/bin/sh
+
+{{- if $quadlet }}
+# container: {{ include "dot_config/containers/systemd/ollama.container" | sha256sum }}
+{{- end }}
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+{{- if $quadlet }}
+{{ includeTemplate "systemd-apply.sh.tmpl" (dict
+  "enabled" $enabled
+  "unit" "ollama"
+  "port" $provider.port
+  "health" $provider.health
+  "chezmoi" .chezmoi) }}
+{{- else if $enabled }}
+
+if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $provider.port }}{{ $provider.health }}" >/dev/null; then
+  die "ollama: unhealthy after retries"
+fi
+{{- end }}
+{{ end -}}

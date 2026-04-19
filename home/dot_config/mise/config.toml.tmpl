@@ -28,13 +28,14 @@ idiomatic_version_file_enable_tools = [
 env_shell_expand = true
 lockfile = true
 
+{{- $featMap := dict
+  "homebrew" "brew"
+  "nvim" "neovim"
+}}
 {{- $checkDirs := list }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
 {{-   $name := . | dir | base }}
-{{-   $feat := $name }}
-{{-   if eq $feat "nvim" }}
-{{-     $feat = "neovim" }}
-{{-   end }}
+{{-   $feat := get $featMap $name | default $name }}
 {{-   $featVal := get $.features $feat }}
 {{-   if or (eq $featVal nil) $featVal }}
 {{-     $checkDirs = append $checkDirs $name }}
@@ -72,10 +73,7 @@ depends = [
 {{- $updateDirs := list }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
 {{-   $name := . | dir | base }}
-{{-   $feat := $name }}
-{{-   if eq $feat "nvim" }}
-{{-     $feat = "neovim" }}
-{{-   end }}
+{{-   $feat := get $featMap $name | default $name }}
 {{-   $featVal := get $.features $feat }}
 {{-   if or (eq $featVal nil) $featVal }}
 {{-     $updateDirs = append $updateDirs $name }}

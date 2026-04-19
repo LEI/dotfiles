@@ -930,7 +930,7 @@ osPackages:
       # sops:
       # sponge: # Extracted from moreutils
       supervisor:
-        enabled: {{ .gui }}
+        enabled: {{ .features.php }}
         restart_service: ":changed"
       gromgit/brewtils/taproom:
         enabled: {{ .gui }}

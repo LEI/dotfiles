@@ -7,6 +7,7 @@
 {{-     $ollamaModels = append $ollamaModels $id -}}
 {{-   end -}}
 {{- end -}}
+{{- if $ollamaModels -}}
 #!/bin/sh
 
 # models: {{ $ollamaModels | toJson | sha256sum }}
@@ -14,8 +15,11 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-# . "$CHEZMOI_WORKING_TREE/home/dot_ollama/init.sh"
-{{ includeTemplate "dot_ollama/init.sh.tmpl" . -}}
+
+{{- if ne .os "darwin" }}
+
+ollama() { {{ .ollama.runtime }} exec {{ .ollama.container }} ollama "$@"; }
+{{- end }}
 
 if ! run ollama list; then
   die "ollama list: exit code $?"
@@ -24,4 +28,5 @@ fi
 {{- range $ollamaModels }}
 run ollama pull {{ . }}
 {{- end }}
+{{ end -}}
 {{ end -}}

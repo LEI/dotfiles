@@ -1,13 +1,13 @@
-{{- $quadlet := and .features.podman (eq .os "linux") -}}
-{{- $ollamaContainer := $quadlet | ternary "systemd-ollama" "oage-ollama-1" -}}
-{{- $ollamaProvider := $quadlet | ternary "podman" "$CONTAINER_PROVIDER" -}}
+{{- $ollama := dig "ollama" dict . -}}
+{{- $container := get $ollama "container" -}}
+{{- $runtime := get $ollama "runtime" -}}
 
-{{- if ne .os "darwin" -}}
+{{- if and $container (ne .os "darwin") -}}
 ollama() {
-  set -- {{ $ollamaContainer }} ollama "$@"
+  set -- {{ $container }} ollama "$@"
   [ -t 0 ] && set -- --interactive "$@"
   [ -t 1 ] && set -- --tty "$@"
-  {{ $ollamaProvider }} exec "$@"
+  {{ $runtime }} exec "$@"
 }
 
 {{ end -}}
@@ -15,10 +15,10 @@ ollama() {
 ollama_logs() {
 {{- if eq .os "darwin" }}
   tail -f "${HOMEBREW_PREFIX:?}/var/log/ollama.log" "$@"
-{{- else if $quadlet }}
+{{- else if and $container (eq $runtime "podman") }}
   journalctl --user --unit=ollama.service --follow "$@"
-{{- else }}
-  {{ $ollamaProvider }} logs --follow {{ $ollamaContainer }} "$@"
+{{- else if $container }}
+  {{ $runtime }} logs --follow {{ $container }} "$@"
 {{- end }}
 }
 
