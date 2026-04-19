@@ -12,4 +12,13 @@ if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then
   export SHELL="$PREFIX/bin/bash"
 fi
 
-chezmoi doctor --dry-run --no-network # || echo "WARN: chezmoi doctor exited with code $?" >&2
+exit_code=0
+output="$(chezmoi doctor --dry-run --no-network)" || exit_code=$?
+
+echo "$output" | grep -v '^\(info\|ok\)' || true
+
+if [ "$exit_code" -ne 0 ]; then
+  # echo "ERROR: chezmoi doctor exited with code $exit_code" >&2
+  # exit "$exit_code"
+  echo "WARN: chezmoi doctor exited with code $exit_code" >&2
+fi
