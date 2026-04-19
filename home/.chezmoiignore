@@ -67,7 +67,7 @@
 .chezmoiscripts/linux/**
 {{- end }}
 
-{{- if not (and .features.ollama .features.podman (eq .os "linux")) }}
+{{- if ne (dig "ollama" "service" "" .) "quadlet" }}
 .config/containers/systemd/ollama.container
 {{- end }}
 

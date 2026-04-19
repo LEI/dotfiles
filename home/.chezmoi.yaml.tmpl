@@ -159,8 +159,8 @@
 {{- $_ := set $data "features" $features }}
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}
-{{-   if $features.podman }}{{ $containerProvider = "podman" }}
-{{-   else if $features.docker }}{{ $containerProvider = "docker" }}
+{{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
+{{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
 {{-   end }}
 {{- end }}
 {{- $context := mergeOverwrite . $data }}
@@ -202,14 +202,13 @@ data:
     localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
 {{- end }}
 {{- if $features.ollama }}
-{{-   $quadlet := and (eq .chezmoi.os "linux") $features.podman }}
   ollama:
 {{-   if eq .chezmoi.os "darwin" }}
     service: brew
-{{-   else if $quadlet }}
+{{-   else if and (lookPath "podman" | isExecutable) (stat "/run/systemd/system") }}
     container: systemd-ollama
     service: quadlet
-{{-   else }}
+{{-   else if $containerProvider }}
     container: oage-ollama-1
     service: compose
 {{-   end }}
