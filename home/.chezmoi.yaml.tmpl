@@ -192,27 +192,12 @@ data:
   user: {{ $user | quote }}
 {{ $data | toYaml | indent 2 }}
   preset: {{ $preset | quote }}
+  upgrade: {{ $upgrade }}
+
   symbols:
     prompt: {{ eq $preset "font" | ternary " " ">" | quote }}
     error: {{ eq $preset "font" | ternary " " "x" | quote }}
   # term: truecolor
-{{- if $features.ai }}
-  ai:
-    localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
-    localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
-{{- end }}
-{{- if $features.ollama }}
-  ollama:
-{{-   if eq .chezmoi.os "darwin" }}
-    service: brew
-{{-   else if and (lookPath "podman" | isExecutable) (stat "/run/systemd/system") }}
-    container: systemd-ollama
-    service: quadlet
-{{-   else if $containerProvider }}
-    container: oage-ollama-1
-    service: compose
-{{-   end }}
-{{- end }}
 
 {{- if and .features.git $accessToken (lookPath "bws" | isExecutable) }}
 
@@ -269,8 +254,29 @@ data:
     ips: {{ output "sh" "-c" "tailscale status --json 2>/dev/null | jq -r '.Self.TailscaleIPs' || true" | fromJson }}
 {{- end }}
 
-  # Upgrade packages
-  upgrade: {{ $upgrade }}
+{{- if $features.ai }}
+  ai:
+    localProfile: {{ $features.mlx | ternary "mlx-local" "ollama-local" }}
+    localProvider: {{ $features.mlx | ternary "mlx-lm" "ollama" }}
+{{- end }}
+
+{{- if $features.ollama }}
+  ollama:
+{{-   if eq .chezmoi.os "darwin" }}
+    service: brew
+{{-   else if and (lookPath "podman" | isExecutable) (stat "/run/systemd/system") }}
+    container: systemd-ollama
+    service: quadlet
+{{-   else if $containerProvider }}
+    container: oage-ollama-1
+    service: compose
+{{-   end }}
+{{- end }}
+
+{{- if $features.opencode }}
+  opencode:
+    profile: {{ env "OPENCODE_PROFILE" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") }}
+{{- end }}
 
 {{- /* Machine-local data: local.yaml in each feature's config dir */ -}}
 {{- range glob (joinPath .chezmoi.sourceDir "**/create_*local.yaml*") -}}

@@ -2,8 +2,7 @@
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $name := eq .profile "work" | ternary "copilot-pro" "opencode-zen" -}}
-{{- $p := get .ai.profiles $name -}}
+{{- $p := get .ai.profiles .opencode.profile -}}
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
 {{- $reasoning := $p.reasoning -}}
