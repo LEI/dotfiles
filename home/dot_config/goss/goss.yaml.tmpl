@@ -35,6 +35,16 @@ addr:
     reachable: false
     timeout: 500
 {{- end }}
+{{- if .features.ai }}
+{{-   range $name, $provider := .ai.providers }}
+{{-     if not (hasKey $provider "port") }}{{ continue }}{{ end }}
+{{-     $active := hasKey $provider "active" | ternary (get $provider "active") false }}
+  127.0.0.1:{{ $provider.port }}:
+    title: {{ $name }} ({{ $active | ternary "active" "inactive" }})
+    reachable: {{ $active }}
+    timeout: 1000
+{{-   end }}
+{{- end }}
 
 file:
   /etc/hosts:
@@ -114,19 +124,6 @@ mount:
 port:
   tcp:22:
     listening: false
-{{- if .features.ai }}
-{{-   range $name, $provider := .ai.providers }}
-{{-     if not (hasKey $provider "port") }}{{ continue }}{{ end }}
-{{-     $active := hasKey $provider "active" | ternary (get $provider "active") false }}
-  tcp:{{ $provider.port }}:
-    title: {{ $name }} ({{ $active | ternary "active" "inactive" }})
-    listening: {{ $active }}
-{{-     if eq $.os "darwin" }}
-    # https://github.com/goss-org/goss/issues/1006
-    skip: true
-{{-     end }}
-{{-   end }}
-{{- end }}
 
 # process:
 #   chrome:
