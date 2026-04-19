@@ -36,8 +36,7 @@ lockfile = true
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
 {{-   $name := . | dir | base }}
 {{-   $feat := get $featMap $name | default $name }}
-{{-   $featVal := get $.features $feat }}
-{{-   if or (eq $featVal nil) $featVal }}
+{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
 {{-     $checkDirs = append $checkDirs $name }}
 
 [tasks."check:{{ $name }}"]
@@ -74,8 +73,7 @@ depends = [
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
 {{-   $name := . | dir | base }}
 {{-   $feat := get $featMap $name | default $name }}
-{{-   $featVal := get $.features $feat }}
-{{-   if or (eq $featVal nil) $featVal }}
+{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
 {{-     $updateDirs = append $updateDirs $name }}
 
 [tasks."update:{{ $name }}"]

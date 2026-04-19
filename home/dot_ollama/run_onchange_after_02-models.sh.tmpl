@@ -15,13 +15,7 @@
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
-{{- $ollama := get . "ollama" | default dict }}
-{{- $container := get $ollama "container" }}
-{{- if $container }}
-
-ollama() { {{ get . "containerProvider" }} exec {{ $container }} ollama "$@"; }
-{{- end }}
+. "$HOME/.ollama/init.sh"
 
 if ! run ollama list; then
   die "ollama list: exit code $?"

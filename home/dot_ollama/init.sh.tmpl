@@ -1,15 +1,17 @@
 {{- $ollama := get . "ollama" | default dict -}}
 {{- $service := get $ollama "service" | default "brew" -}}
 {{- $container := get $ollama "container" -}}
-{{- $provider := get . "containerProvider" -}}
+{{- $provider := eq $service "quadlet" | ternary "podman" (get . "containerProvider") -}}
 
 {{- if $container -}}
-ollama() {
-  set -- {{ $container }} ollama "$@"
-  [ -t 0 ] && set -- --interactive "$@"
-  [ -t 1 ] && set -- --tty "$@"
-  {{ $provider }} exec "$@"
-}
+if ! command -v ollama >/dev/null; then
+  ollama() {
+    set -- {{ $container }} ollama "$@"
+    [ -t 0 ] && set -- --interactive "$@"
+    [ -t 1 ] && set -- --tty "$@"
+    {{ $provider }} exec "$@"
+  }
+fi
 
 {{ end -}}
 
