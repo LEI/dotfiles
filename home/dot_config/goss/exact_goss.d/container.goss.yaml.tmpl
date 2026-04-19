@@ -1,0 +1,17 @@
+{{- if or .features.docker .features.podman -}}
+{{- $active := env "CONTAINER_PROVIDER" -}}
+---
+command:
+{{- if .features.docker }}
+  docker-engine:
+    exec: docker info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
+    exit-status: {{ eq $active "docker" | ternary 0 "{ gt: 0 }" }}
+    timeout: 5000
+{{- end }}
+{{- if .features.podman }}
+  podman-engine:
+    exec: podman info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
+    exit-status: {{ eq $active "podman" | ternary 0 "{ gt: 0 }" }}
+    timeout: 5000
+{{- end }}
+{{ end -}}

@@ -1,6 +1,13 @@
 {{- $hlFollow := "hl --follow --paging=never --expansion=never --local" -}}
 {{- $tspinFollow := "tspin --follow --print" -}}
 ---
+# TODO: migrate to native launchd/systemd units per service, retire process-compose
+# Apps: opencode-server and claude-task-viewer as individual launchd agents + systemd user units
+# Logs: replace with lnav (multi-file, JSON-aware, cross-platform log viewer)
+# Tunnels: ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes
+#   per-tunnel launchd agent / systemd unit; autossh adds monitoring but ssh keepalive
+#   options may suffice (autossh -M 0 just delegates to ssh keepalive anyway);
+#   evaluate whether the extra dependency is worth it
 version: "0.5"
 
 log_level: info

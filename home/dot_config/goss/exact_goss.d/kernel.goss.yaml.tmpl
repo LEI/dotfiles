@@ -1,0 +1,8 @@
+{{- if eq .os "linux" -}}
+---
+kernel-param:
+  kernel.ostype:
+    value: Linux
+  net.ipv4.ip_forward:
+    value: "1"
+{{ end -}}

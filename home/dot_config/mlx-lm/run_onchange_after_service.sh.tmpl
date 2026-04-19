@@ -11,10 +11,9 @@ fi
 # brew list mlx-lm >/dev/null 2>&1 # mlx-lm not installed
 
 # Stop brew-managed service (default port 8080, conflicts with custom plist)
-GUI="gui/$(id -u)"
-if launchctl print "$GUI/homebrew.mxcl.mlx-lm" >/dev/null 2>&1; then
+if launchctl print "gui/$(id -u)/homebrew.mxcl.mlx-lm" >/dev/null 2>&1; then
   msg "stopping brew-managed mlx-lm service"
-  run launchctl bootout "$GUI/homebrew.mxcl.mlx-lm"
+  run launchctl bootout "gui/$(id -u)/homebrew.mxcl.mlx-lm"
 fi
 
 {{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "mlx-lm") "chezmoi" .chezmoi) $provider) -}}

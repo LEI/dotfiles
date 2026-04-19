@@ -13,8 +13,6 @@
 {{ end -}}
 
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
-# shellcheck disable=SC2034
-GUI="gui/$(id -u)"
 
 {{- if $enabled }}
 if [ ! -f "$plist" ]; then
@@ -24,23 +22,29 @@ fi
 # Load if not loaded yet
 if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
   run launchctl load "$plist"
+  # run launchctl bootstrap "gui/$(id -u)" "$plist"
 fi
+{{- if and $port $health }}
 
 # Health check; reload plist if unhealthy (picks up config changes)
 if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
   msg "{{ $label }}: unhealthy, reloading"
   if launchctl list "{{ $label }}" >/dev/null 2>&1; then
     run launchctl unload "$plist"
+    # run launchctl bootout "gui/$(id -u)" "$plist" 2>/dev/null || true
   fi
   run launchctl load "$plist"
+  # run launchctl bootstrap "gui/$(id -u)" "$plist"
   if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
     die "{{ $label }}: unhealthy after retries"
   fi
 fi
+{{- end }}
 {{- else }}
 if launchctl list "{{ $label }}" >/dev/null 2>&1; then
   msg "stopping disabled service {{ $label }}"
-  run launchctl kill SIGTERM "$GUI/{{ $label }}" 2>/dev/null || true
+  run launchctl kill SIGTERM "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
   run launchctl unload "$plist" 2>/dev/null || true
+  # run launchctl bootout "gui/$(id -u)/{{ $label }}" 2>/dev/null || true
 fi
 {{- end }}

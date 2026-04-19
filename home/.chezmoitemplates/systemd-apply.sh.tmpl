@@ -16,8 +16,8 @@ if has systemctl; then
     run systemctl --user enable --now {{ $unit }}
   fi
   if ! systemctl --user is-active --quiet {{ $unit }}; then
-    run systemctl --user status {{ $unit }} || true
-    die "{{ $unit }} service failed to start"
+    run systemctl --user status {{ $unit }} --no-pager || true
+    die "{{ $unit }}: failed to start"
   fi
 {{- if and $port $health }}
   if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
@@ -29,7 +29,7 @@ if has systemctl; then
   fi
 {{- end }}
 {{- else }}
-  if systemctl --user is-active --quiet {{ $unit }}; then
+  if systemctl --user is-enabled --quiet {{ $unit }} 2>/dev/null; then
     msg "stopping disabled service {{ $unit }}"
     run systemctl --user disable --now {{ $unit }}
   fi
