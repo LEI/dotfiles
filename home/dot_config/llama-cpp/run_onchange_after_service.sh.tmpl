@@ -5,9 +5,8 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if ! has brew; then
-  die "brew not found"
+if ! has llama-server; then
+  die "llama-server not found"
 fi
-# brew list llama.cpp >/dev/null 2>&1 # llama.cpp not installed
 
 {{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "enabled" (eq (get .ai "localProvider") "llama-server") "chezmoi" .chezmoi) $provider) -}}

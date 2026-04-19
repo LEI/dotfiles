@@ -5,10 +5,9 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if ! has brew; then
-  die "brew not found"
+if ! has {{ $provider.server }}; then
+  die "{{ $provider.server }} not found"
 fi
-# brew list mlx-lm >/dev/null 2>&1 # mlx-lm not installed
 
 # Stop brew-managed service (default port 8080, conflicts with custom plist)
 if launchctl print "gui/$(id -u)/homebrew.mxcl.mlx-lm" >/dev/null 2>&1; then

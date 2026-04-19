@@ -1,0 +1,25 @@
+{{- $unit := get . "unit" -}}
+{{- $description := get . "description" | default $unit -}}
+{{- $args := get . "args" | default list -}}
+{{- $env := get . "env" | default dict -}}
+{{- $stateDir := get . "stateDir" -}}
+[Unit]
+Description={{ $description }}
+After=network.target
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+{{- range $k, $v := $env }}
+Environment={{ $k }}={{ $v }}
+{{- end }}
+ExecStart={{ join " " $args }}
+{{- if $stateDir }}
+StandardOutput=append:{{ $stateDir }}/stdout.log
+StandardError=append:{{ $stateDir }}/stderr.log
+{{- end }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
