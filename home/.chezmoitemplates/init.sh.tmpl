@@ -10,13 +10,13 @@ if [[ $- != *i* ]]; then
   return
 fi
 
-{{ includeTemplate ".profile.tmpl" . | trim }}
-source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
-
 # Shell options
 if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
   source "$XDG_CONFIG_HOME/$shell/options.$shell"
 fi
+
+{{ includeTemplate ".profile.tmpl" . | trim }}
+source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"

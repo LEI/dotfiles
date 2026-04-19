@@ -43,6 +43,15 @@ detach() {
   fi
 }
 
+check_stderr() {
+  local log="$tmpdir/stderr.log"
+  "$@" 2>"$log"
+  if [ -s "$log" ]; then
+    cat "$log" >&2
+    return 1
+  fi
+}
+
 case "$shell" in
 bash)
   logfile="$tmpdir/trace.log"
