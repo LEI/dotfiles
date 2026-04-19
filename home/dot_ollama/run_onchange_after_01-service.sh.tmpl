@@ -33,6 +33,7 @@ fi
   "unit" "ollama"
   "port" $provider.port
   "health" $provider.health
-  "chezmoi" .chezmoi) }}
-{{ end -}}
+  "chezmoi" .chezmoi
+) | trim }}
+{{- end }}
 {{ end -}}

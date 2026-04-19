@@ -13,8 +13,12 @@ if ! has process-compose; then
 fi
 
 {{- if eq .chezmoi.os "darwin" }}
-{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc $site) }}
 {{- else }}
-{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc $site) }}
+{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc $site) }}
 {{- end }}
 {{- end -}}
