@@ -1,0 +1,12 @@
+{{- $dir := get . "dir" -}}
+{{- $dataFile := joinPath $dir ".data.yaml" -}}
+{{- $data := dict -}}
+{{- if stat (joinPath .chezmoi.sourceDir $dataFile) -}}
+{{-   $data = include $dataFile | fromYaml -}}
+{{- end -}}
+{{- $targetDir := $dir | replace "dot_" "." -}}
+{{- $localFile := joinPath .chezmoi.homeDir $targetDir "local.yaml" -}}
+{{- if stat $localFile -}}
+{{-   $data = mergeOverwrite $data (include $localFile | fromYaml) -}}
+{{- end -}}
+{{ $data | toYaml | trim }}

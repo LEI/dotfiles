@@ -2,6 +2,12 @@
 {{- $formula := get . "formula" | default "FORMULA" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
+{{- if lookPath "brew" | isExecutable -}}
+{{-   $status := output "sh" "-c" (printf "brew services info %s --json 2>/dev/null | jq -r '.[0].status // empty' || true" $formula) | trim -}}
+{{-   if $status }}
+# status: {{ $status }}
+{{   end -}}
+{{ end -}}
 if ! has brew; then
   die "brew not found"
 fi

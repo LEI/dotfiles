@@ -1,6 +1,12 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- $claude := get . "claude" | default dict -}}
+{{- $claudeTiers := get $claude "tiers" | default dict -}}
 {{- $sandboxEnabled := false -}}
-{{- $model := "" -}}
+{{- $tierName := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
+{{- $tier := get $claudeTiers $tierName | default dict -}}
+{{- $model := get $tier "model" -}}
+{{- $subagent := get $tier "subagent" -}}
+{{- $effort := get $tier "effort" -}}
 {{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
 {{- $plugins := list -}}
 {{- range $data.plugins -}}
@@ -16,7 +22,9 @@
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_NO_FLICKER": "1",
+    {{- if not (empty $subagent) }}
+    "CLAUDE_CODE_SUBAGENT_MODEL": {{ $subagent | quote }},
+    {{- end }}
     "DISABLE_AUTOUPDATER": "1",
     "ECC_HOOK_PROFILE": "minimal",
     "ENABLE_TOOL_SEARCH": "true",
@@ -317,6 +325,10 @@
       ]
     }
   },
+  "tui": "fullscreen",
+  {{- if not (empty $effort) }}
+  "effortLevel": {{ $effort | quote }},
+  {{- end }}
   "alwaysThinkingEnabled": false,
   "showClearContextOnPlanAccept": true{{/* https://github.com/anthropics/claude-code/issues/37688 */}},
   "plansDirectory": "./.claude/plans",
@@ -404,7 +416,7 @@
     "journal": true,
     "keybindings-help": true,
     "local:sq": true,
-{{- range .claudeDisabledSkills }}
+{{- range get $claude "disabledSkills" | default list }}
     {{ . | quote }}: false,
 {{- end }}
     "local:quality": true,

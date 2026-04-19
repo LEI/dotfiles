@@ -7,6 +7,12 @@
 {{- if stat $serviceFile -}}
 # service: {{ include $serviceFile | sha256sum }}
 {{ end -}}
+{{- if lookPath "systemctl" | isExecutable -}}
+{{-   $status := output "sh" "-c" (printf "systemctl --user show %s --property=ActiveState --value 2>/dev/null || true" $unit) | trim -}}
+{{-   if $status }}
+# status: {{ $status }}
+{{   end -}}
+{{ end -}}
 if has systemctl; then
   run systemctl --user daemon-reload
 {{- if $active }}

@@ -1,8 +1,26 @@
 ---
+tiers:
+  pro:
+    model: # sonnet
+    subagent: # claude-haiku-4-5
+    effort:
+  max:
+    model: opusplan # opus
+    subagent: # claude-haiku-4-5
+    effort: # medium
+  team-standard:
+    model: # sonnet
+    subagent: # claude-haiku-4-5
+    effort:
+  team-premium:
+    model: opusplan # opus
+    subagent: # claude-haiku-4-5
+    effort: # medium
+
 # Non-standard marketplaces (claude-plugins-official is built-in)
 # repo: git-hosted (passed as-is to `claude plugin marketplace add`)
 # path: local path relative to homeDir
-claudeMarketplaces:
+marketplaces:
   chezmoi:
     path: ".claude/plugins/chezmoi"
   claude-dashboard:
@@ -25,7 +43,7 @@ claudeMarketplaces:
 # Not installed (use CLI to re-add if needed):
 # greptile@claude-plugins-official: needs API key
 # semgrep@claude-plugins-official: needs semgrep installed
-claudePlugins:
+plugins:
   chezmoi:
     - local
   claude-dashboard:
@@ -45,7 +63,7 @@ claudePlugins:
       version: "1.9.0"
 
 # Skills disabled globally (plugin installed for per-project use)
-claudeDisabledSkills:
+disabledSkills:
   - local:beads
   - everything-claude-code:clickhouse-io
   - everything-claude-code:content-engine

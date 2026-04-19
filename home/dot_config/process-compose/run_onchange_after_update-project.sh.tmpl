@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Hash global: {{ include "dot_config/process-compose/global.yaml.tmpl" | sha256sum }}
+# global: {{ includeTemplate "dot_config/process-compose/global.yaml.tmpl" . | sha256sum }}
 {{- if eq .chezmoi.os "darwin" }}
-# Hash plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
+# plist: {{ includeTemplate "Library/private_LaunchAgents/com.process-compose.plist.tmpl" . | sha256sum }}
 {{- end }}
 
 set -eu

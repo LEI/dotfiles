@@ -286,21 +286,23 @@ data:
 
 {{- if $features.opencode }}
   opencode:
-    profile: {{ env "OPENCODE_PROFILE" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") }}
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
-
-{{- /* Machine-local data: local.yaml in each feature's config dir */ -}}
-{{- range glob (joinPath .chezmoi.sourceDir "**/create_*local.yaml*") -}}
-{{-   $rel := .
-        | replaceAllRegex ".*/home/" ""
-        | replace "dot_" "."
-        | replaceAllRegex "/create_.*local\\.yaml.*" "/local.yaml" -}}
-{{-   $target := joinPath $.chezmoi.homeDir $rel -}}
-{{-   if stat $target -}}
-{{-     range $key, $value := include $target | fromYaml }}
+{{- if $features.claude }}
+  claude:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_claude" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+  apis:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
+  logseq:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_logseq" "chezmoi" .chezmoi) | indent 4 }}
+  pi:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
+{{- $pcLocal := joinPath .chezmoi.homeDir ".config/process-compose/local.yaml" -}}
+{{- if stat $pcLocal -}}
+{{-   range $key, $value := include $pcLocal | fromYaml }}
   {{ $key }}:
 {{ $value | toYaml | indent 4 }}
-{{-     end }}
 {{-   end }}
 {{- end }}
 

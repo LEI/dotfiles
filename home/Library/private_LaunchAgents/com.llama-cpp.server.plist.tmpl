@@ -1,10 +1,10 @@
-{{- $p := get .ai.providers "llama-server" -}}
+{{- $provider := get .ai.providers "llama-server" -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
-      "label" $p.label
+      "label" $provider.label
       "args" (list
         (printf "%s/opt/llama.cpp/bin/llama-server" .brewPrefix)
         "--host" "127.0.0.1"
-        "--port" ($p.port | toString)
+        "--port" ($provider.port | toString)
         "--models-dir" (printf "%s/Library/Caches/llama.cpp" .chezmoi.homeDir))
       "env" (dict
         "HOME" .chezmoi.homeDir

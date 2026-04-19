@@ -1,9 +1,8 @@
-{{- /* Outputs {"plugins": [...], "marketplaces": {...}} from chezmoidata.
-       claudePlugins: {marketplace: [name | {name, version}]}, dict, merged across chezmoidata files.
-       claudeMarketplaces: {name: {repo|path}}, same merge behavior.
-       Marketplace paths are normalized to absolute. */ -}}
+{{- $claude := get . "claude" | default dict -}}
+{{- $claudeMarketplaces := get $claude "marketplaces" | default dict -}}
+{{- $claudePlugins := get $claude "plugins" | default dict -}}
 {{- $marketplaces := dict -}}
-{{- range $name, $info := .claudeMarketplaces -}}
+{{- range $name, $info := $claudeMarketplaces -}}
 {{-   if hasKey $info "repo" -}}
 {{-     $marketplaces = set $marketplaces $name (dict "repo" $info.repo) -}}
 {{-   else -}}
@@ -11,9 +10,9 @@
 {{-   end -}}
 {{- end -}}
 {{- $plugins := list -}}
-{{- range (keys .claudePlugins | sortAlpha) -}}
+{{- range (keys $claudePlugins | sortAlpha) -}}
 {{-   $marketplace := . -}}
-{{-   range (get $.claudePlugins $marketplace) -}}
+{{-   range (get $claudePlugins $marketplace) -}}
 {{-     if kindIs "string" . -}}
 {{-       $plugins = append $plugins (dict "name" . "marketplace" $marketplace) -}}
 {{-     else -}}

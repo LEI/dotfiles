@@ -1,10 +1,10 @@
-{{- $p := get .ai.providers "mlx-lm" -}}
-{{- $server := get $p "server" | default "mlx_lm.server" -}}
+{{- $provider := get .ai.providers "mlx-lm" -}}
+{{- $server := get $provider "server" | default "mlx_lm.server" -}}
 {{- if eq $server "mlx_lm.server" -}}
 {{-   $bin := printf "%s/opt/mlx-lm/bin/mlx_lm.server" .brewPrefix -}}
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
-        "label" $p.label
-        "args" (list $bin "--host" "127.0.0.1" "--port" ($p.port | toString) "--chat-template-args" `{"enable_thinking":true}`)
+        "label" $provider.label
+        "args" (list $bin "--host" "127.0.0.1" "--port" ($provider.port | toString) "--chat-template-args" `{"enable_thinking":true}`)
         "env" (dict
           "HOME" .chezmoi.homeDir
           "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
@@ -13,8 +13,8 @@
 {{- else -}}
 {{-   $bin := printf "%s/.local/bin/%s" .chezmoi.homeDir $server -}}
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
-        "label" $p.label
-        "args" (list $bin "--host" "127.0.0.1" "--port" ($p.port | toString))
+        "label" $provider.label
+        "args" (list $bin "--host" "127.0.0.1" "--port" ($provider.port | toString))
         "env" (dict
           "HOME" .chezmoi.homeDir
           "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))

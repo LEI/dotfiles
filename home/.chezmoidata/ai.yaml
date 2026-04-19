@@ -1,30 +1,36 @@
 ---
 # https://models.dev/api.json
 ai:
-  # dot_config/caddy/Caddyfile: reverse proxy sites from domain + port
-  # dot_config/caddy/setup-caddy: valet proxy setup
-  # dot_config/goss/vars.yaml: health check URLs
+  # Provider: inference source identified by api protocol
+  # Local: port + health for service management, optional domain for reverse proxy
+  # Cloud: base_url + env for client config
+  # See .chezmoi.yaml.tmpl for computed active flags and service type
+  #
+  # dot_config/caddy: reverse proxy from domain + port
+  # dot_config/goss: health check via addr + port + http
   # dot_config/opencode/opencode.jsonc: local provider blocks
   # dot_config/oage/bifrost/config.json: mlx-lm port
-  # dot_config/oage/compose.yaml: mlx-lm port
+  # dot_config/oage/compose.yaml: mlx-lm and ollama port
   # dot_config/mlx-lm/setup: mlx-lm port and label
   # dot_config/llama-cpp/setup: llama-server port
-  # Library/LaunchAgents/*.plist: mlx-lm and llama-server ports
+  # Library/LaunchAgents/*.plist: mlx-lm, mlx-embed, llama-server ports
   # dot_ollama, .chezmoiscripts
   providers:
     # Local
     llama-server:
+      api: openai
       health: /health
       label: com.llama-cpp.server
       port: 11437
       domain: llama-cpp.test
     mlx-embed:
+      api: openai
       health: /v1/models
       label: com.mlx-embed.server
-      parent: mlx-lm
       server: mlx-openai-server
       port: 11445
     mlx-lm:
+      api: openai
       body: '{"object": "list"'
       health: /v1/models
       label: com.mlx-lm.server
@@ -33,63 +39,92 @@ ai:
       port: 11435
       domain: mlx-lm.test
     ollama:
+      api: ollama
       port: 11434
       domain: ollama.test
       health: /
       caddy:
         header_up: Host localhost
     vllm-mlx:
+      api: openai
       health: /v1/models
       port: 11436
       domain: vllm-mlx.test
+
     # Cloud
-    # github-copilot: {} # free, pro, pro+
-    # huggingface:
-    #   base_url: https://router.huggingface.co/v1
-    #   key_env: HF_TOKEN
-    # ollama-cloud: # free, pro, max
-    #   base_url: https://ollama.com/v1
-    #   key_env: OLLAMA_API_KEY
-    # opencode: {}
-    # openrouter:
-    #   base_url: https://openrouter.ai/api/v1
-    #   key_env: OPENROUTER_API_KEY
-
+    anthropic:
+      api: anthropic
+      env: ANTHROPIC_API_KEY
+    github-copilot:
+      api: copilot
+    huggingface:
+      api: openai
+      base_url: https://router.huggingface.co/v1
+      env: HF_TOKEN
+    ollama-cloud:
+      api: openai
+      base_url: https://ollama.com/v1
+      env: OLLAMA_API_KEY
+    openrouter:
+      api: openai
+      base_url: https://openrouter.ai/api/v1
+      env: OPENROUTER_API_KEY
     # https://dev.synthetic.new/docs/api/overview
-    # synthetic:
-    #   base_url: https://api.synthetic.new/openai/v1
-    #   key_env: SYNTHETIC_API_KEY
+    synthetic:
+      api: openai
+      base_url: https://api.synthetic.new/openai/v1
+      env: SYNTHETIC_API_KEY
+    zai:
+      api: openai
+      base_url: https://api.z.ai/api/paas/v4
+      env: ZAI_API_KEY
+    zai-coding-plan:
+      api: openai
+      base_url: https://api.z.ai/api/coding/paas/v4
+      env: ZAI_API_KEY
+    # Built-in providers (no config needed, referenced in profiles only):
+    # opencode, opencode-go
 
-    # zai:
-    #   base_url: https://api.z.ai/api/paas/v4
-    #   key_env: ZAI_API_KEY
-    # zai-coding-plan:
-    #   base_url: https://api.z.ai/api/coding/paas/v4
-    #   key_env: ZAI_API_KEY
-
+  # Model: shared metadata and per-provider IDs
+  # type: chat (generation) or embedding
+  # reasoning: supports extended thinking / chain of thought
+  # tool_call: supports function calling
+  # cpu: can run on CPU without GPU acceleration
+  # Per-provider keys (mlx-lm, ollama): provider-specific model ID
+  #
   # dot_config/opencode/opencode.jsonc: context window, provider IDs
   # dot_logseq/settings/ollama-logseq.json: ollama ID for fast role
-  # .chezmoiscripts/setup-open-notebook: ollama IDs for role mapping
+  # dot_config/oage/setup-open-notebook: provider IDs for role mapping
   models:
     nomic-embed:
+      type: embedding
       context: 8192
       mlx-lm: mlx-community/all-MiniLM-L6-v2-4bit
       ollama: nomic-embed-text
     qwen3-4b:
+      type: chat
       context: 262144
       output: 65536
+      reasoning: true
+      tool_call: true
       cpu: true
       mlx-lm: mlx-community/Qwen3.5-4B-MLX-4bit
       ollama: qwen3.5:4b
     qwen3-9b:
+      type: chat
       context: 262144
       output: 65536
+      reasoning: true
+      tool_call: true
       cpu: true
       mlx-lm: mlx-community/Qwen3.5-9B-MLX-4bit
       ollama: qwen3.5:9b
     gemma4:
+      type: chat
       context: 131072
       output: 8192
+      reasoning: true
+      tool_call: true
       mlx-lm: mlx-community/gemma-4-e4b-it-4bit
       ollama: gemma4
       params:
@@ -97,31 +132,36 @@ ai:
           - "<|channel>thought"
           - "<channel|>"
     # qwen3-coder-30b:
+    #   type: chat
     #   context: 262144
     #   output: 65536
+    #   reasoning: true
+    #   tool_call: true
     #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
     #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
-  # dot_config/opencode/opencode.jsonc: cloud profile selection
-  # dot_logseq/settings/ollama-logseq.json: local.fast
-  # .chezmoiscripts/setup-open-notebook: local role mapping
+  # Profile: named set of role-to-model mappings
+  # Roles: chat, coding, embedding, fast, reasoning
+  # Format: "provider/model-id" for cloud, bare model name for local
+  #
+  # dot_config/opencode/opencode.jsonc: coding, fast, reasoning
+  # dot_config/pi/agent/settings.json: coding (split on / for provider + model)
+  # dot_config/oage/setup-open-notebook: chat, coding, embedding
+  # dot_logseq/settings/ollama-logseq.json: fast
   profiles:
     local:
-      agentic: qwen3-9b # qwen3-coder-30b
       chat: qwen3-9b
-      coding: qwen3-9b # qwen3-coder-30b
+      coding: qwen3-9b
       embedding: nomic-embed
       fast: qwen3-4b
-      reasoning: qwen3-9b # qwen3-coder-30b
+      reasoning: qwen3-9b
     mlx-local:
-      agentic: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
       chat: mlx-lm/mlx-community/gemma-4-e4b-it-4bit
       coding: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
       embedding: mlx-embed/mlx-community/all-MiniLM-L6-v2-4bit
       fast: mlx-lm/mlx-community/Qwen3.5-4B-MLX-4bit
       reasoning: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
     ollama-local:
-      agentic: ollama/qwen3.5:9b
       chat: ollama/gemma4
       coding: ollama/qwen3.5:9b
       embedding: ollama/nomic-embed-text
@@ -129,91 +169,77 @@ ai:
       reasoning: ollama/qwen3.5:9b
 
     copilot-pro:
-      agentic: github-copilot/gpt-4.1
       chat: github-copilot/gpt-4o
       coding: github-copilot/gpt-4.1
       fast: github-copilot/gpt-5-mini
       reasoning: github-copilot/gpt-4o
     copilot-pro-standard:
-      agentic: github-copilot/claude-haiku-4.5
       chat: github-copilot/gpt-4o
       coding: github-copilot/gpt-5.1-codex
       fast: github-copilot/gpt-4o
       reasoning: github-copilot/gpt-4o
     copilot-pro-premium:
-      agentic: github-copilot/claude-sonnet-4.6
       chat: github-copilot/gpt-4o
       coding: github-copilot/claude-sonnet-4.6
       fast: github-copilot/gpt-4o
       reasoning: github-copilot/claude-opus-4.6
 
     ollama-cloud:
-      agentic: ollama-cloud/qwen3-coder:480b
       chat: ollama-cloud/gpt-oss:120b
       coding: ollama-cloud/qwen3-coder:480b
       fast: ollama-cloud/gpt-oss:20b
       reasoning: ollama-cloud/deepseek-v3.1:671b
 
     opencode-zen:
-      agentic: opencode/big-pickle
       chat: opencode/big-pickle
       coding: opencode/big-pickle
       fast: opencode/gpt-5-nano
       reasoning: opencode/big-pickle
     opencode-go:
-      agentic: opencode-go/glm-5
       chat: opencode-go/kimi-k2.5
       coding: opencode-go/glm-5
       fast: opencode-go/minimax-m2.5
       reasoning: opencode-go/minimax-m2.7
 
     openrouter:
-      agentic: openrouter/qwen/qwen3-coder
       chat: openrouter/qwen/qwen3-coder-30b-a3b-instruct
       coding: openrouter/qwen/qwen3-coder
       fast: openrouter/qwen/qwen3-coder-30b-a3b-instruct
       reasoning: openrouter/deepseek/deepseek-r1-distill-llama-70b
     openrouter-auto:
-      agentic: openrouter/auto
       chat: openrouter/auto
       coding: openrouter/auto
       fast: openrouter/auto
       reasoning: openrouter/auto
     openrouter-free:
-      agentic: openrouter/free
       chat: openrouter/free
       coding: openrouter/free
       fast: openrouter/free
       reasoning: openrouter/free
 
     huggingface:
-      agentic: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
       chat: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
       coding: huggingface/Qwen/Qwen3-Coder-480B-A35B-Instruct
       fast: huggingface/Qwen/Qwen3-Coder-Next
       reasoning: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
 
     synthetic:
-      agentic: synthetic/glm-4.7
       chat: synthetic/glm-4.7
       coding: synthetic/glm-4.7
       fast: synthetic/glm-4.5-air
       reasoning: synthetic/glm-4.7
 
     zai-coding-plan-lite:
-      agentic: zai-coding-plan/glm-4.7
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-4.7
       fast: zai-coding-plan/glm-4.5-air
       reasoning: zai-coding-plan/glm-4.7
     zai-coding-plan-pro:
-      agentic: zai-coding-plan/glm-5.1
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-5.1
       fast: zai-coding-plan/glm-4.6
       reasoning: zai-coding-plan/glm-5-turbo
     zai-coding-plan-max:
-      agentic: zai-coding-plan/glm-5.1
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-5.1
       fast: zai-coding-plan/glm-4.7

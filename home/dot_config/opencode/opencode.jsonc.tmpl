@@ -1,18 +1,17 @@
+{{- $opencode := get . "opencode " | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $opencodeProfile := get .opencode "profile" -}}
-{{- if empty $opencodeProfile -}}
-{{-   warnf "empty .opencode.profile" -}}
-{{- end -}}
+{{- $profile := env "OPENCODE_PROFILE" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
 
-{{- $preset := get .ai.profiles $opencodeProfile | default dict -}}
+{{- $preset := get .ai.profiles $profile | default dict -}}
 {{- $model := get $preset "coding" -}}
 {{- $smallModel := get $preset "fast" -}}
 {{- $reasoning := get $preset "reasoning" -}}
 
-{{- $server := .opencode.server -}}
 {{- if and .features.tailscale .tailscale.tailnet -}}
 {{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) -}}
 {{-   $server = mergeOverwrite $server (dict "cors" $cors) -}}

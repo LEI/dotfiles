@@ -1,11 +1,11 @@
-{{- $p := get .ai.providers "mlx-embed" -}}
+{{- $provider := get .ai.providers "mlx-embed" -}}
 {{- $embed := (index .ai.profiles "mlx-local").embedding | trimPrefix "mlx-embed/" -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
-      "label" $p.label
+      "label" $provider.label
       "args" (list
-        (printf "%s/.local/bin/%s" .chezmoi.homeDir $p.server)
+        (printf "%s/.local/bin/%s" .chezmoi.homeDir $provider.server)
         "launch" "--model-type" "embeddings" "--model-path" $embed
-        "--host" "127.0.0.1" "--port" ($p.port | toString)
+        "--host" "127.0.0.1" "--port" ($provider.port | toString)
         "--no-log-file")
       "env" (dict
         "HOME" .chezmoi.homeDir
