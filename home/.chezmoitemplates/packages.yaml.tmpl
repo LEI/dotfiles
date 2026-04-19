@@ -627,16 +627,17 @@ packages:
     # enabled: {{ eq .osIDLike "android" "windows" }}
     # type: '{{ eq .osIDLike "windows" | ternary "scoop" nil }}'
   # swaptop
-  # systemctl-tui:
-  #   enabled: {{ and (eq .osIDLike "arch") .gui }}
-  #   nameOverwrite:
-  #     arch: systemd-manager-tui-bin
-  #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  systemctl-tui:
+    enabled: {{ and (eq .os "linux") (ne .profile "minimal") (not .ephemeral) }}
+    nameOverwrite:
+      # arch: systemd-manager-tui-bin
+      mise: github:rgwood/systemctl-tui
+    type: mise # '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   tailspin:
     enabled: {{ .gui }}
     type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "cargo" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
   taplo:
-    enabled: {{ and (not .features.neovim) (not (eq .profile "minimal")) }}
+    enabled: {{ and (not .features.neovim) (ne .profile "minimal") }}
     # nameOverwrite:
     #   arch: taplo-cli
     #   cargo: install taplo-cli --locked --features lsp --quiet
@@ -1033,8 +1034,12 @@ osPackages:
       Pages:
         id: 409201541
         enabled: {{ .gui }}
-      # Tailscale: { id: 1475387142 }
-      # WireGuard: { id: 1451685025 }
+      # Tailscale:
+      #   id: 1475387142
+      #   enabled: {{ and .features.tailscale .gui }}
+      # WireGuard:
+      #   id: 1451685025
+      #   enabled: {{ .gui }}
       Xcode:
         id: 497799835
         enabled: {{ .gui }}
@@ -1096,15 +1101,20 @@ osPackages:
         enabled: {{ .gui }}
       steam-devices:
         enabled: {{ .features.steam }}
-      tailscale trayscale:
-        enabled: {{ and (eq .profile "personal") (not (or .ephemeral .headless)) }}
+      tailscale:
+        enabled: {{ .features.tailscale }}
         # TODO: approve new device and accept routes
-        # after_script: |
-        #   sudo systemctl enable # tailscaled
-        #   sudo systemctl start tailscaled
-        #   sudo tailscale set --operator=$USER
+        # sudo systemctl enable # tailscaled
+        # sudo systemctl start tailscaled
+        # sudo tailscale set --operator=$USER
+
+        # FIXME: "after_script" should not run in chezmoi.bats install packages test
+        # See ../dot_config/tailscale/run_onchange_after_setup-tailscale-serve.sh
+        # after_script: run tailscale serve status
       thunderbird:
         enabled: {{ not (or .ephemeral .headless) }}
+      trayscale:
+        enabled: {{ and .features.tailscale .gui }}
       waydroid:
         enabled: {{ not (or .ephemeral .headless) }}
     flatpak:

@@ -4,7 +4,7 @@ opencode:
     hostname: 127.0.0.1 # localhost
     port: 4096
     # WARN: forces binding to 0.0.0.0
-    # mdns: true
+    mdns: false
     # mdnsDomain: opencode.local
     cors:
       # - http://localhost:5173

@@ -35,6 +35,7 @@ caddy:
         port: 4096
         health: /
         status: 401
+        tailscale: true
     otel:
       # alertmanager:
       #   port: 9093
@@ -43,8 +44,9 @@ caddy:
         body: '"database": "ok"'
         port: 3033
         health: /api/health
-        dialTimeout: 1800s
-        responseHeaderTimeout: 1800s
+        caddy:
+          dialTimeout: 1800s
+          responseHeaderTimeout: 1800s
       prometheus:
         body: Healthy
         port: 9090

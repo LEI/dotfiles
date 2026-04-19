@@ -1,20 +1,15 @@
 {{- range $feat, $sites := .caddy.sites -}}
 {{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
 {{- range $name, $s := $sites -}}
-{{- /* TODO: $caddy := get $s "caddy" */ -}}
-{{- $dt := get $s "dialTimeout" -}}
-{{- $rht := get $s "responseHeaderTimeout" -}}
+{{- $caddy := get $s "caddy" -}}
 {{ $name }}.test {
 	tracing {
 		span {{ $name }}
 	}
-	reverse_proxy localhost:{{ $s.port }}{{ if or $dt $rht }} {
+	reverse_proxy localhost:{{ $s.port }}{{ if $caddy }} {
 		transport http {
-			{{- if $dt }}
-			dial_timeout {{ $dt }}
-			{{- end }}
-			{{- if $rht }}
-			response_header_timeout {{ $rht }}
+			{{- range $key, $value := $caddy }}
+			{{ $key | snakecase }} {{ $value }}
 			{{- end }}
 		}
 	}{{ end }}

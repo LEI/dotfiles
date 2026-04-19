@@ -1,4 +1,5 @@
 # TODO: ../private_secrets.d/private_opencode.conf.tmpl
+export OPENCODE_URL="https://opencode.test" # http://localhost:4096
 export OPENCODE_EXPERIMENTAL=true
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
@@ -12,9 +13,14 @@ export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
 opencode() {
   # command opencode "${@:---continue}"
   if [ $# -eq 0 ]; then
-    set -- --continue
+    # https://github.com/anomalyco/opencode/issues/17322
+    if curl --silent "$OPENCODE_URL" >/dev/null; then
+      echo "Attaching to local opencode server" >&2
+      set -- attach "$OPENCODE_URL" "$@"
+    fi
+    set -- "$@" --continue
   fi
-  command opencode attach "${OPENCODE_URL:-https://opencode.test}" "$@"
+  command opencode "$@"
 }
 alias oc=opencode
 

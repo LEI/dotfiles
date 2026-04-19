@@ -1,0 +1,14 @@
+{{- if and .features.tailscale .tailscale.tailnet -}}
+http://{{ .tailscale.tailnet }} {
+	import logging
+	{{- range $feat, $sites := .caddy.sites }}
+	{{- if not (get $.features $feat) }}{{ continue }}{{ end }}
+	{{- range $name, $s := $sites }}
+
+	handle_path /{{ $name }}* {
+		reverse_proxy localhost:{{ $s.port }}
+	}
+	{{- end }}
+	{{- end }}
+}
+{{ end -}}

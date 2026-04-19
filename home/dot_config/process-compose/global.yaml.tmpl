@@ -32,13 +32,31 @@ processes:
   {{- $opencodeSettings := joinPath .chezmoi.homeDir ".config" "opencode" "opencode.jsonc" }}
   {{- if and .features.opencode (stat $opencodeConf) }}
 
+  {{- $server := .opencode.server }}
+  {{- if and .features.tailscale .tailscale.tailnet }}
+  {{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) }}
+  {{-   $server = mergeOverwrite $server (dict "cors" $cors) }}
+  {{- end }}
+
   # opencode attach http://127.0.0.1:4096
-  # server config hash: {{ .opencode.server | toJson | sha256sum }}
   opencode-server:
     namespace: apps
     description: OpenCode server
-    command: test -n OPENCODE_SERVER_PASSWORD && opencode serve
-    # --hostname {{ .opencode.server.hostname }} --port {{ .opencode.server.port }}
+    # https://github.com/anomalyco/opencode/issues/19078
+    command: >-
+      test -n OPENCODE_SERVER_PASSWORD &&
+      opencode serve
+      {{- range $key, $value := $server }}
+      {{-   if kindIs "slice" $value }}
+      {{-   range $value }}
+      --{{ $key }}={{ . | quote }}
+      {{-   end }}
+      {{-   else }}
+      {{-   $isInt := or (kindIs "int64" $value) (kindIs "uint64" $value) }}
+      --{{ $key }}={{ $isInt | ternary $value ($value | quote) }}
+      {{-   end }}
+      {{- end }}
+      --print-logs
     environment:
       {{- range include $opencodeConf | trim | splitList "\n" }}
       - {{ . }}
@@ -50,8 +68,8 @@ processes:
       exponential_backoff: true
     # readiness_probe:
     #   http_get:
-    #     host: {{ .opencode.server.hostname }}
-    #     port: {{ .opencode.server.port }}
+    #     host: {{ $server.hostname }}
+    #     port: {{ $server.port }}
     #     scheme: http
     #     # headers: {}
     #     # FIXME: Error: readiness check fail - Received status code '401' does not match expected status code '200'   ║│
@@ -64,27 +82,23 @@ processes:
 
 {{- /* tool map: basename → tool. Default is tspin */ -}}
 {{- $toolFor := dict
-    "caddy.log" "hl"
-    "mailpit.log" "hl"
+  "caddy.log" "hl"
+  "mailpit.log" "hl"
 -}}
 
+# TODO: journalctl --unit=caddy --follow
 {{- /* desc map: basename → short description */ -}}
 {{- $descFor := dict
-    "caddy.log"        "Caddy reverse proxy"
-    "mailpit.log"      "Mailpit SMTP catcher"
-    "supervisord.log"  "Supervisor daemon"
-    "php-fpm.log"      "PHP-FPM"
-    "mlx-lm.log"       "MLX LM inference server"
-    "access.log"       "Nginx access"
-    "error.log"        "Nginx error"
+  "caddy.log" "Caddy reverse proxy"
+  "mailpit.log" "Mailpit SMTP catcher"
+  "supervisord.log" "Supervisor daemon"
+  "php-fpm.log" "PHP-FPM"
+  "mlx-lm.log" "MLX LM inference server"
+  "access.log" "Nginx access"
+  "error.log" "Nginx error"
 -}}
 
-{{- /* extra logs outside brewPrefix: list of dicts with path, tool, name, desc */ -}}
-{{- $extraLogs := list
-    (dict "path" (printf "%s/var/mysql/*.err" .brewPrefix) "tool" "tspin" "desc" "MariaDB error log")
--}}
-
-{{- range (glob (printf "%s/var/log/**/*.log" .brewPrefix)) }}
+{{- range glob (printf "%s/var/log/**/*.log" .brewPrefix) }}
 {{- $base := base . }}
 {{- $tool := default "tspin" (get $toolFor $base) }}
 {{- $name := trimSuffix ".log" $base | replace "_" "-" }}
@@ -101,15 +115,15 @@ processes:
       max_restarts: 0
 {{- end }}
 
-{{- range $extra := $extraLogs }}
-{{- range (glob $extra.path) }}
+{{- if .features.sql }}
+{{- range glob (joinPath .brewPrefix "var/mysql/*.err") }}
 {{- $base := base . }}
 {{- $name := printf "mariadb-%s" (trimSuffix ".err" $base | trimSuffix ".log" | replace "_" "-" | replace "." "-") }}
 
   {{ $name }}-logs:
     namespace: logs
-    description: {{ $extra.desc | quote }}
-    command: "{{ $extra.tool }}{{ if eq $extra.tool "hl" }} --follow --paging=never --expansion=never --local{{ else }} --follow --print{{ end }} {{ . }}"
+    description: "MariaDB logs"
+    command: "tspin --follow --print {{ . }}"
     availability:
       restart: on_failure
       max_restarts: 0
@@ -128,7 +142,7 @@ processes:
       max_restarts: 0
 {{- end }}
 
-{{- range (glob (printf "%s/.local/state/claude/*.jsonl" .chezmoi.homeDir)) }}
+{{- range glob (printf "%s/.local/state/claude/*.jsonl" .chezmoi.homeDir) }}
 {{- $name := trimSuffix ".jsonl" (base .) }}
 
   claude-{{ $name }}-logs:
@@ -141,7 +155,7 @@ processes:
 {{- end }}
 
 {{- /* SSH tunnel proxies from chezmoidata */ -}}
-{{- range (dig "processCompose" "sshProxies" (list) .) -}}
+{{- range dig "processCompose" "sshProxies" (list) . -}}
 {{-   $remotePort := "22" -}}
 {{-   if eq .type "postgres" }}{{- $remotePort = "5432" -}}{{- end -}}
 {{-   if eq .type "mysql" }}{{- $remotePort = "3306" -}}{{- end }}

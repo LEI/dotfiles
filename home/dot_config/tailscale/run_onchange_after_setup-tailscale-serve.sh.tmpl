@@ -1,0 +1,54 @@
+{{- $expected := dict 443 "http://127.0.0.1:80" -}}
+{{- $caddy := get . "caddy" | default dict -}}
+{{- range $feat, $sites := get $caddy "sites" | default dict -}}
+{{-   if not (get $.features $feat) }}{{ continue }}{{ end -}}
+{{-   range $name, $s := $sites -}}
+{{-     if or (not (hasKey $s "tailscale")) (not $s.tailscale) }}{{ continue }}{{ end -}}
+{{-     $expected = merge $expected (dict $s.port (printf "http://127.0.0.1:%d" $s.port)) -}}
+{{-   end -}}
+{{- end -}}
+#!/bin/bash
+# tailscale serve:
+{{- range $port, $url := $expected }}
+# - {{ $port }}: {{ $url }}
+{{- end -}}
+
+set -euo pipefail
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has tailscale; then
+  msg "tailscale not found; skipping serve setup"
+  exit 0
+fi
+
+status=$(tailscale serve status --json 2>/dev/null || echo '{}')
+
+declare -A expected
+{{- range $port, $url := $expected }}
+expected[{{ $port }}]="{{ $url }}"
+{{- end }}
+
+# Remove stale entries
+while IFS= read -r port; do
+  [ -z "$port" ] && continue
+  if [ -z "${expected[$port]+x}" ]; then
+    msg "Removing stale tailscale serve --https=$port"
+    run tailscale serve --https="$port" off
+  fi
+done < <(echo "$status" | jq -r '.TCP | to_entries[] | select(.value.HTTPS == true) | .key' 2>/dev/null || true)
+
+# Add or update entries
+for port in "${!expected[@]}"; do
+  target="${expected[$port]}"
+  current=$(echo "$status" | jq -r --arg p "$port" '.Web[$p].Handlers["/"].Proxy // ""' 2>/dev/null || true)
+  if [ "$current" = "$target" ]; then
+    continue
+  fi
+  if [ -n "$current" ]; then
+    msg "Updating tailscale serve --https=$port: $current -> $target"
+    run tailscale serve --https="$port" off
+  else
+    msg "Adding tailscale serve --https=$port -> $target"
+  fi
+  run tailscale serve --bg --yes --https="$port" "$target"
+done

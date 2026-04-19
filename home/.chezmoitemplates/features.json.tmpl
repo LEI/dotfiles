@@ -73,6 +73,7 @@
   "ssh" false
   "steam" (and (eq .osIDLike "arch" "fedora" "windows") (eq .profile "personal"))
   "sway" false
+  "tailscale" (and (eq .profile "personal") (not (or .ephemeral .headless)))
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
   "toolbox" (eq .osIDLike "fedora")

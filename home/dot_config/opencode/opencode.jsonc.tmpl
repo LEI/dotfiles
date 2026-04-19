@@ -7,6 +7,11 @@
 {{- $model := $p.coding -}}
 {{- $smallModel := $p.fast -}}
 {{- $reasoning := $p.reasoning -}}
+{{- $server := .opencode.server -}}
+{{- if and .features.tailscale .tailscale.tailnet -}}
+{{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) -}}
+{{-   $server = mergeOverwrite $server (dict "cors" $cors) -}}
+{{- end -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": "notify", // false,
@@ -16,7 +21,7 @@
   // https://github.com/anomalyco/opencode/pull/8562
   // https://opencode.ai/docs/config/#server
   // https://opencode.ai/docs/server
-  "server": {{ .opencode.server | toPrettyJson | indent 2 | trim }},
+  /* "server": {{ $server | toPrettyJson | indent 2 | trim }}, */
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [
     // ".cursor/rules/*.md",
