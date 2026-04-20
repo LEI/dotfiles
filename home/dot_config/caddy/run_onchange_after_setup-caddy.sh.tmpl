@@ -44,6 +44,9 @@ fi
 
 caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
 
+# Format and show diff to catch issues early
+run caddy fmt --diff --config "$caddyfile"
+
 run caddy validate --config "$caddyfile"
 
 # Service start handled by brew bundle (restart_service: :changed)
@@ -89,6 +92,12 @@ elif has systemctl; then
     run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_dropin_src' '$otel_dropin' && systemctl daemon-reload"
   fi
   if systemctl is-active --quiet caddy; then
+    # Verify caddy is listening on expected ports
+    if ! ss -tlnp 2>/dev/null | grep -q '127.0.0.1:443'; then
+      msg "Caddy not listening on 127.0.0.1:443; reloading config"
+      run caddy reload --config /etc/caddy/Caddyfile
+    fi
+
     adapted="$(run caddy adapt --config "$caddyfile" | jq -S .)" || {
       msg "caddy adapt failed; check Caddyfile"
       exit 1

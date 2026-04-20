@@ -1,3 +1,4 @@
+{{- if .features.caddy -}}
 {{- $expected := dict 443 "http://127.0.0.1:80" -}}
 {{- $caddy := get . "caddy" | default dict -}}
 {{- range $feat, $sites := get $caddy "sites" | default dict -}}
@@ -54,3 +55,4 @@ for port in "${!expected[@]}"; do
   fi
   run tailscale serve --bg --yes --https="$port" "$target"
 done
+{{ end -}}

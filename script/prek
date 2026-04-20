@@ -21,7 +21,7 @@ done
 
 skip=""
 case "$(uname -o)" in
-Android) skip="${skip:+$skip,}zizmor" ;;
+Android) skip="${skip:+$skip,}check-github-workflows,check-compose-spec,validate-schema,zizmor" ;;
 esac
 case "$(uname -s)" in
 Darwin | Linux) ;;
