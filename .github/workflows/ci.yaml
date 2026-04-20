@@ -118,7 +118,7 @@ jobs:
           # include-hidden-files: true
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
         with:
           # directory: ./coverage/
           env_vars: OS # ,SYSTEM
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload test results to Codecov
         # if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4
         with:
           env_vars: OS # ,SYSTEM
           # files: junit.xml
