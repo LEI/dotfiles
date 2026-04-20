@@ -45,8 +45,13 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
     echo "warning: init file not found: $_feat" >&2
     continue
   fi
-  # shellcheck disable=SC1090
-  bench_source "$_feat"
+  if hash bench_source 2>/dev/null; then
+    # shellcheck disable=SC1090
+    bench_source "$_feat"
+  else
+    # shellcheck disable=SC1090
+    source "$_feat"
+  fi
 done
 unset _feat
 

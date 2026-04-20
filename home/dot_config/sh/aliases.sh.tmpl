@@ -59,16 +59,14 @@ alias reload='exec ${SHELL} -l'
 
 alias reload='exec ${SHELL} -i'
 
-{{- if .wsl }}
+{{- if and .wsl (lookPath "wslview" | isExecutable) }}
 # [ -f /proc/version ] && grep -iq microsoft /proc/version
-if command -v wslview >/dev/null; then
-  alias open=wslview
-elif [ -f /mnt/c/Windows/explorer.exe ]; then
-  # TODO: add /mnt/c/Windows to PATH
-  alias open=/mnt/c/Windows/explorer.exe
-else
-  alias open=explorer.exe
-fi
+alias open=wslview
+{{- else if and .wsl (stat "/mnt/c/Windows/explorer.exe") }}
+# TODO: add /mnt/c/Windows to PATH
+alias open=/mnt/c/Windows/explorer.exe
+{{- else if .wsl }}
+alias open=explorer.exe
 {{- else if lookPath "xdg-open" | isExecutable }}
 alias open=xdg-open
 {{- else if and (eq .os "android") (lookPath "termux-open" | isExecutable) }}
@@ -77,20 +75,28 @@ alias open=termux-open
 alias open=code
 {{- end }}
 
-{{- if lookPath "xclip" | isExecutable }}
+{{- if and
+  (eq .os "linux")
+  (lookPath "xclip" | isExecutable) }}
 alias pbcopy="xclip -selection clipboard"
 alias pbpaste="xclip -selection clipboard -o"
-{{- else if lookPath "xsel" | isExecutable }}
+{{- else if and
+  (eq .os "linux")
+  (lookPath "xsel" | isExecutable) }}
 alias pbcopy='xsel --clipboard --input'
 alias pbpaste='xsel --clipboard --output'
-{{- else if and (lookPath "wl-copy" | isExecutable) (lookPath "wl-paste" | isExecutable) }}
+{{- else if and
+  (eq .os "linux")
+  (lookPath "wl-copy" | isExecutable)
+  (lookPath "wl-paste" | isExecutable) }}
 alias pbcopy=wl-copy
 alias pbpaste=wl-paste
-{{- else if and (lookPath "termux-clipboard-set" | isExecutable) (lookPath "termux-clipboard-get" | isExecutable) }}
+{{- else if and
+  (eq .os "android")
+  (lookPath "termux-clipboard-set" | isExecutable)
+  (lookPath "termux-clipboard-get" | isExecutable) }}
 alias pbcopy=termux-clipboard-set
 alias pbpaste=termux-clipboard-get
-{{- end }}
-
 {{- end }}
 
 if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
@@ -103,36 +109,40 @@ if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
   }
 fi
 
+{{- end }}
+
 {{- if lookPath "lazyjournal" | isExecutable }}
 alias J=lazyjournal
 {{- end }}
 
-{{- if .features.ai }}
+{{- if and .features.ai (lookPath "codex" | isExecutable) }}
 
-if command -v codex >/dev/null; then
-  codex() {
-    if [ "$#" -eq 0 ]; then
-      set -- resume --last
-    fi
-    command codex "$@"
-  }
-fi
-if command -v crush >/dev/null; then
-  crush() {
-    if [ "$#" -eq 0 ]; then
-      set -- --continue
-    fi
-    command crush "$@"
-  }
-fi
-if command -v gemini >/dev/null; then
-  gemini() {
-    if [ "$#" -eq 0 ]; then
-      set -- --resume=latest
-    fi
-    command gemini "$@"
-  }
-fi
+codex() {
+  if [ "$#" -eq 0 ]; then
+    set -- resume --last
+  fi
+  command codex "$@"
+}
+{{- end }}
+
+{{- if and .features.ai (lookPath "crush" | isExecutable) }}
+
+crush() {
+  if [ "$#" -eq 0 ]; then
+    set -- --continue
+  fi
+  command crush "$@"
+}
+{{- end }}
+
+{{- if and .features.ai (lookPath "gemini" | isExecutable) }}
+
+gemini() {
+  if [ "$#" -eq 0 ]; then
+    set -- --resume=latest
+  fi
+  command gemini "$@"
+}
 {{- end }}
 
 {{- if eq .profile "work" }}
