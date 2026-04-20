@@ -156,7 +156,7 @@ jobs:
 
       # gh-pages branch is updated and pushed automatically with extracted benchmark data
       - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@4bdcce38c94cec68da58d012ac24b7b1155efe8b # v1.20.7
+        uses: benchmark-action/github-action-benchmark@a60cea5bc7b49e15c1f58f411161f99e0df48372 # v1.22.0
         with:
           name: Bash benchmark (${{ matrix.os }})
           tool: customSmallerIsBetter
