@@ -1,5 +1,6 @@
 #!/bin/sh
 # Validate chezmoi templates by rendering them
+#USAGE arg "[files]..." help="Template files to validate"
 
 set -eu
 

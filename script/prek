@@ -1,13 +1,39 @@
 #!/bin/sh
 #MISE alias="pre-commit"
 #MISE description="Run pre-commit hooks on all files"
+#USAGE flag "--skip <hook>" help="Skip the specified hooks"
+#USAGE flag "-v --verbose" help="Use verbose output"
+#USAGE flag "-q --quiet" help="Use quiet output"
+#USAGE flag "--fail-fast" help="Stop after the first failure"
+#USAGE flag "--show-diff-on-failure" help="Run git diff after failure"
+#USAGE arg "[hooks]..." help="Include only the specified hooks"
+#USAGE complete "hooks" run="prek list 2>/dev/null | sed 's/^[^:]*://'"
 
 set -eu
 
+# Map flags to hook verbosity; prek flags only control prek output
+for arg in "$@"; do
+  case "$arg" in
+  -v | --verbose) export VALIDATE_VERBOSITY=2 ;;
+  -q | --quiet) export VALIDATE_VERBOSITY=0 ;;
+  esac
+done
+
+skip=""
+case "$(uname -o)" in
+Android) skip="${skip:+$skip,}zizmor" ;;
+esac
 case "$(uname -s)" in
 Darwin | Linux) ;;
-*) export SKIP=validate-skill ;;
+*) skip="${skip:+$skip,}validate-skill" ;;
 esac
+if [ -f /etc/alpine-release ]; then
+  skip="${skip:+$skip,}stylua-github"
+fi
+if [ -n "$skip" ]; then
+  echo "Skipping hooks: $skip" >&2
+  export SKIP="$skip"
+fi
 
 # See ./script/test
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
@@ -18,6 +44,6 @@ fi
 #   PATH="$PATH:$HOME/.local/share/mise/shims"
 # fi
 
-set -x
-
-prek run --all-files
+set -- prek run --all-files "$@"
+echo "+ $*" >&2
+"$@"

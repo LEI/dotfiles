@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
+#MISE alias="vb"
 #MISE description="Check for blank lines at start/end and consecutive"
+#USAGE arg "[files]..." help="Files to check (default: all tracked)"
+#USAGE complete "files" run="git ls-files"
 
 set -euo pipefail
 
@@ -11,7 +14,7 @@ fi
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(git ls-files -z | tr '\0' '\n')
+  mapfile -t -d '' files < <(git ls-files -z)
   set -- "${files[@]}"
 fi
 

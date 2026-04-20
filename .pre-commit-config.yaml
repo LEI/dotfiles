@@ -2,16 +2,7 @@
 # prek splits filenames on spaces; exclude paths containing whitespace globally
 exclude: '\s'
 repos:
-  # https://github.com/gitleaks/gitleaks#pre-commit
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.1
-    hooks:
-      - id: gitleaks
-        name: gitleaks # Detect hardcoded secrets
-        language: system
-        stages:
-          - pre-commit
-
+  # Auto-fixers first
   # https://pre-commit.com/hooks.html
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -23,40 +14,44 @@ repos:
       - id: check-yaml
         exclude: ^home/dot_config/goss/goss\.yaml$
       - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
 
+  # Formatters (before linters to avoid cascading failures)
+  # https://github.com/scop/pre-commit-shfmt#readme
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt
+        language: system
+        args:
+          - --diff
+        # TODO: ignore rendered modify_ templates (e.g. system ~/.bashrc indent)
+        exclude: ^(home/.*(\.tmpl|/modify_)|.*\.zsh)
+        stages:
+          - pre-commit
+
+  # Linters
   # https://github.com/koalaman/shellcheck-precommit
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
     hooks:
       - id: shellcheck
         name: shellcheck
+        entry: shellcheck
+        language: system
         args:
           - --external-sources
           - --exclude=SC2148
           - --severity=info
-        entry: shellcheck
         exclude: |
           (?x)^(
             home/(.*/)?(modify_.*|.*\.tmpl)
             |.*\.awk
+            |.*\.zsh
             |home/dot_local/bin/executable_chezmoi-profile
             |\.config/tmux/plugins.*
           )$
-        language: system
-        stages:
-          - pre-commit
-
-  # https://github.com/scop/pre-commit-shfmt#readme
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.13.1-1
-    hooks:
-      - id: shfmt
-        name: shfmt
-        args:
-          - --diff
-        language: system
-        # TODO: ignore rendered modify_ templates (e.g. system ~/.bashrc indent)
-        exclude: ^(home/.*(\.tmpl|/modify_))
         stages:
           - pre-commit
 
@@ -66,53 +61,53 @@ repos:
       - id: bashate
         name: bashate
         entry: bashate
+        language: system
         args:
           # Available checks: bashate --show
           # - --error=E005
-          - --ignore=E003,E006
+          - --ignore=E003,E005,E006
           - --error=E042,E043
-        language: system
+        exclude: ^(home/.*(\.tmpl|/modify_)|test/|.*\.bats)
         types:
           - shell
-        exclude: ^(home/.*(\.tmpl|/modify_)|test/|.*\.bats)
         stages:
           - pre-commit
-
-  # https://github.com/JohnnyMorganz/StyLua#pre-commit
-  # FIXME: glibc binary, incompatible with Alpine/musl
-  # - repo: https://github.com/JohnnyMorganz/StyLua
-  #   rev: v2.4.1
-  #   hooks:
-  #     - id: stylua-github
-  #       name: stylua
-  #       args:
-  #         - --check
 
   # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.38.0
     hooks:
       - id: yamllint
+        language: system
         args:
           - --config-file=home/dot_config/yamllint/config
           - --strict
-        # Use yamlfmt installed on the system instead of building with Go
-        language: system
         stages:
           - pre-commit
 
+  # https://github.com/JohnnyMorganz/StyLua#pre-commit
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: v2.4.1
+    hooks:
+      - id: stylua-github
+        name: stylua
+        language: system
+        args:
+          - --check
+
+  # Schema and workflow validation
   # https://github.com/python-jsonschema/check-jsonschema
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.1
     hooks:
       - id: check-github-workflows
-        name: check-github-workflows
-      - id: check-github-actions
-        name: check-github-actions
-      - id: check-dependabot
-        name: check-dependabot
+        name: check github workflows
+      # - id: check-github-actions
+      #   name: check github actions
+      # - id: check-dependabot
+      #   name: check dependabot
       - id: check-compose-spec
-        name: check-compose-spec
+        name: check compose spec
         files: (^|/)compose\.ya?ml$
       # - id: v8r
       #   name: v8r schema validation
@@ -120,6 +115,17 @@ repos:
       #   language: system
       #   exclude: ^home/(.*\.tmpl$|.*/modify_)
       #   files: \.(json[c5]?|toml|ya?ml)$
+
+  # Security
+  # https://github.com/gitleaks/gitleaks#pre-commit
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        name: gitleaks
+        language: system
+        stages:
+          - pre-commit
 
   # https://docs.zizmor.sh/integrations/#pre-commit
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
@@ -129,22 +135,24 @@ repos:
         args:
           - --persona=auditor
           - --min-severity=medium
+          - --no-progress
         files: ^.github/workflows/.*\.ya?ml$
 
+  # Project-specific
   - repo: local
     hooks:
       # - id: chezmoi-config
       #   name: chezmoi config
       #   entry: chezmoi cat-config --dry-run --no-tty --refresh-externals=never
-      #   files: ^(home/.*|\.chezmoi.*)$
       #   language: system
+      #   files: ^(home/.*|\.chezmoi.*)$
       #   pass_filenames: false
 
       # - id: chezmoi-init
       #   name: chezmoi init
       #   entry: chezmoi init --dry-run --no-tty --refresh-externals=never
-      #   files: ^(\.chezmoi.*|home/\.chezmoi\.ya?ml\.tmpl)$
       #   language: system
+      #   files: ^(\.chezmoi.*|home/\.chezmoi\.ya?ml\.tmpl)$
       #   pass_filenames: false
 
       # - id: chezmoi-status
@@ -153,9 +161,46 @@ repos:
       #     bash -c 'for f in "$@"; do chezmoi status
       #       --dry-run --no-tty --refresh-externals=never
       #       "$(chezmoi target-path "$f")"; done'
+      #   language: system
       #   files: ^home/.*$
       #   exclude: "$(chezmoi unmanaged)"
-      #   language: system
+
+      - id: check-scripts-executable
+        name: check scripts executable
+        entry: >-
+          sh -c '
+            rc=0
+            for f do
+              if ! test -x "$f"; then
+                echo "not executable: $f"
+                rc=1
+              fi
+            done
+            exit $rc
+          ' --
+        language: system
+        files: ^script/
+        exclude: \.awk$
+        stages:
+          - pre-commit
+
+      - id: check-file-permissions
+        name: check file permissions
+        entry: >-
+          sh -c '
+            rc=0
+            for f do
+              if test -x "$f"; then
+                echo "unexpected executable: $f"
+                rc=1
+              fi
+            done
+            exit $rc
+          ' --
+        language: system
+        exclude: ^(script/|home/\.install-password-manager\.sh$)
+        stages:
+          - pre-commit
 
       - id: validate-schema
         name: validate schemas
@@ -163,30 +208,38 @@ repos:
         language: system
         files: \.(json[c5]?|toml|ya?ml)$
         exclude: ^home/(\.chezmoitemplates/|.*/modify_.*)
+        stages:
+          - pre-commit
 
       - id: validate-blank
         name: validate blank lines
         entry: ./script/validate-blank
         language: system
+        stages:
+          - pre-commit
 
       - id: lint-templates
-        name: lint templates
-        entry: ./script/lint
-        args: ["--quiet"]
+        name: validate templates
+        entry: ./script/lint-templates
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
         exclude: \.chezmoi\.yaml\.tmpl$
+        stages:
+          - pre-commit
 
       - id: validate-usage
         name: validate usage specs
         entry: ./script/validate-usage
-        args: ["--quiet"]
         language: system
-        types:
-          - shell
+        files: ^(script/|\.local/bin/|home/dot_local/bin/executable_)
+        # exclude: \.awk$
+        stages:
+          - pre-commit
 
       - id: validate-skill
         name: validate skills
         entry: ./script/validate-skill
         language: system
         files: SKILL\.md$
+        stages:
+          - pre-commit

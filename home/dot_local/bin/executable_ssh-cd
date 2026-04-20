@@ -1,4 +1,8 @@
 #!/bin/bash
+# Connect to SSH host in a specific directory
+#USAGE arg "<host>" help="SSH host"
+#USAGE arg "<dir>" help="Remote directory"
+#USAGE arg "[command]..." help="Command to run (default: interactive shell)"
 # host() { ssh-cd host /var/www/app; }
 # host-logs() { ssh-cd host /var/log 'tail -f *.log' | tspin; }
 host="${1:?host required}"

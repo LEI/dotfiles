@@ -1,7 +1,6 @@
 #!/bin/sh
 # Execute chezmoi template expressions
-
-# Usage: chezmoi execute '{{ expr }}'
+#USAGE arg "<expr>..." help="Template expressions to evaluate"
 
 set -eu
 

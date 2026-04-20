@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
+#MISE alias="vsk"
 #MISE description="Validate SKILL.md files against Agent Skills specification"
-# Requires: skill-validator (brew install agent-ecosystem/tap/skill-validator)
+# Requires skill-validator: brew install agent-ecosystem/tap/skill-validator
+#USAGE flag "-q --quiet" help="Only print errors and summary"
+#USAGE flag "-v --verbose" help="Show validation details"
+#USAGE arg "[files]..." help="SKILL.md files to validate (default: all tracked)"
+#USAGE complete "files" run="git ls-files 'SKILL.md' '**/SKILL.md'"
 
 set -euo pipefail
 
@@ -10,23 +15,61 @@ if ((BASH_VERSINFO[0] < 4)); then
 fi
 
 if ! command -v skill-validator >/dev/null 2>&1; then
-  echo 'error: skill-validator is required' >&2
+  echo "error: skill-validator is required" >&2
   exit 1
 fi
 
-quiet="${VALIDATE_SKILL_QUIET:-${VALIDATE_QUIET:-false}}"
-verbose="${VALIDATE_SKILL_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+jobs=${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}
+
+verbosity=${VALIDATE_SKILL_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -q | --quiet)
+    verbosity=0
+    shift
+    ;;
+  -v | --verbose)
+    verbosity=2
+    shift
+    ;;
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: validate-skill [-q] [-v] [files...]"
+    fi
+    exit
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    exit
+    ;;
+  --)
+    shift
+    break
+    ;;
+  -*)
+    echo "validate-skill: unknown option: $1" >&2
+    exit 2
+    ;;
+  *) break ;;
+  esac
+done
 
 # shellcheck disable=SC2329
 validate_skill() {
-  local path="$1" skill_dir target_path name output
+  local path="$1"
+  local skill_dir target_path name output display_path
+
+  path=$(realpath "$path" 2>/dev/null || echo "$path")
+  display_path="${path#"$PWD/"}"
+  display_path="${display_path/#"$HOME"/\~}"
 
   if [ ! -e "$path" ]; then
-    echo "FAIL $path (not found)"
+    echo "FAIL $display_path (not found)"
     return 1
   fi
-
-  path=$(realpath "$path")
 
   if [ -d "$path" ]; then
     skill_dir="$path"
@@ -34,37 +77,38 @@ validate_skill() {
     skill_dir=$(dirname "$path")
   fi
 
-  # Resolve effective name via chezmoi (strips exact_, dot_, etc.)
-  target_path="$(chezmoi target-path "$skill_dir" 2>/dev/null || echo "$skill_dir")"
+  # Resolve effective name via chezmoi: strips exact_, dot_, etc.
+  if ! target_path="$(chezmoi target-path "$skill_dir")"; then
+    echo "FAIL $display_path (chezmoi target-path failed)"
+    return 1
+  fi
   name=$(basename "$target_path")
   if [ "$name" != "$(basename "$skill_dir")" ]; then
     local tmp_dir
-    tmp_dir=$(mktemp --directory)
+    tmp_dir=$(mktemp -d)
     trap 'rm -rf "$tmp_dir"' RETURN
     ln -s "$skill_dir" "$tmp_dir/$name"
     skill_dir="$tmp_dir/$name"
   fi
 
-  if [ "$verbose" = true ]; then
+  if [ "$verbosity" -ge 2 ]; then
     echo "validate-skill: $name" >&2
   fi
 
-  # NOTE: exit code 2 means warnings
+  # exit code 2 means warnings
   if output=$(skill-validator check "$skill_dir" 2>&1); then
-    if [ "$quiet" = false ]; then
-      echo "PASS $path"
-    fi
+    echo "PASS $display_path"
   else
-    echo "FAIL $path"
+    echo "FAIL $display_path"
     echo "$output"
     return 1
   fi
 }
 export -f validate_skill
 
-# Collect files: from args (pre-commit) or find all
+# Collect files: from args or find all
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(git ls-files -z 'SKILL.md' '**/SKILL.md' | tr '\0' '\n')
+  mapfile -t -d '' files < <(git ls-files -z 'SKILL.md' '**/SKILL.md')
   set -- "${files[@]}"
 fi
 
@@ -73,20 +117,22 @@ if [ $# -eq 0 ]; then
   exit 0
 fi
 
-export quiet verbose
+export verbosity
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n1 bash -euc 'validate_skill "$1"' _ || true)
+results=$(printf '%s\n' "$@" | xargs -P "$jobs" -n1 bash -euc 'validate_skill "$1"' _ || true)
 
 passed=$(grep -c '^PASS ' <<<"$results") || passed=0
 failed=$(grep -c '^FAIL ' <<<"$results") || failed=0
 
-if [ "$quiet" = false ]; then
+if [ "$verbosity" -ge 2 ]; then
   echo "$results" | grep -E '^(PASS|FAIL) ' || true
+else
+  echo "$results" | grep -E '^FAIL ' || true
 fi
 if [ "$failed" -gt 0 ]; then
   echo "$results" | grep -vE '^(PASS|FAIL) ' || true
 fi
-if [ "$quiet" = false ] && [ "$((passed + failed))" -gt 0 ]; then
-  echo "validate-skill: $passed passed, $failed failed"
+if [ "$verbosity" -ge 1 ] && [ "$((passed + failed))" -gt 0 ]; then
+  echo "validate-skill: $passed passed, $failed failed" >&2
 fi
 exit $((failed > 0 ? 1 : 0))

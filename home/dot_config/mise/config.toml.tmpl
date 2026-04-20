@@ -86,7 +86,7 @@ shell = "sh"
 
 [tasks.update]
 alias = "u"
-description = "Update neovim and tmux plugins"
+description = "Run all updates"
 depends = [
 {{- range $updateDirs }}
   {{ printf "update:%s" . | quote }},

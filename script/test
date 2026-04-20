@@ -67,7 +67,16 @@ main() {
   fi
 
   # chezmoi.bats uses BATS_NO_PARALLELIZE_WITHIN_FILE due to chezmoi state lock
-  local jobs="${TEST_JOBS:-$(nproc)}"
+  local jobs
+  if [ -n "${TEST_JOBS:-}" ]; then
+    jobs="$TEST_JOBS"
+  elif command -v nproc >/dev/null; then
+    jobs=$(nproc)
+  elif command -v sysctl >/dev/null; then
+    jobs=$(sysctl -n hw.ncpu)
+  else
+    jobs=4
+  fi
   if [ $# -eq 0 ]; then
     set -- --recursive ./test "$@"
   fi

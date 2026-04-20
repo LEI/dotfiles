@@ -5,7 +5,12 @@
 {{- $prefix := printf "%[1]s%[1]s%[1]s" $commentString -}}
 {{- $before := $stdin | replaceAllRegex (printf "(?s)(\r?\n?)%[1]s START .*%[1]s END .*" $prefix) "${1}" -}}
 {{- $after := $stdin | replaceAllRegex (printf "(?s).*%[1]s START .*%[1]s END .*?\r?\n" $prefix) "" -}}
-{{- $before -}}
+{{- $hadBlock := ne $stdin $after -}}
+{{- $before = trim $before -}}
+{{- $after = trim $after -}}
+{{- if $before }}{{ $before }}
+
+{{ end -}}
 {{ $prefix }} START {{ $suffix }}
 
 {{- if not (empty $contents) }}
@@ -14,4 +19,7 @@
 {{- end }}
 
 {{ $prefix }} END {{ $suffix }}
-{{ if ne $stdin $after }}{{ $after }}{{ end -}}
+{{- if and $after $hadBlock }}
+
+{{ $after }}
+{{- end }}

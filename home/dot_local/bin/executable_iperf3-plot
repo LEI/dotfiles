@@ -1,5 +1,7 @@
 #!/bin/sh
 # Run iperf3 and plot bandwidth results
+#USAGE arg "<ip>" help="Target IP address"
+#USAGE arg "[options]..." help="Additional iperf3 options"
 
 set -eu
 

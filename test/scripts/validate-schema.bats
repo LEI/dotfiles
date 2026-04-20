@@ -26,7 +26,7 @@ setup() {
   printf '{"type":"object","properties":{"name":{"type":"string"}}}' >"$schema"
   printf '{"$schema":"%s","name":"ok"}' "$schema" >"$file"
 
-  run_script ./script/validate-schema "$file"
+  run_script ./script/validate-schema --verbose "$file"
   assert_line "PASS $file schema=$schema"
   assert_success
 }
@@ -41,7 +41,7 @@ setup() {
 
   run_script ./script/validate-schema "$file"
   assert_line "FAIL $file schema=$schema"
-  assert_line "validate-schema: 0 passed, 1 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 0 passed, 1 failed, 0 skipped"
   assert_failure
 }
 
@@ -51,9 +51,9 @@ setup() {
 
   printf '{"name":"test"}' >"$file"
 
-  run_script ./script/validate-schema "$file"
+  run_script ./script/validate-schema --verbose "$file"
   assert_line "SKIP $file (no \$schema)"
-  assert_line "validate-schema: 0 passed, 0 failed, 1 skipped"
+  assert_stderr_line "validate-schema: 0 passed, 0 failed, 1 skipped"
   assert_success
 }
 
@@ -68,7 +68,7 @@ setup() {
   printf '{"$schema":"%s","other":"value"}' "$schema" >"$invalid"
 
   run_script ./script/validate-schema "$valid" "$invalid"
-  assert_line "validate-schema: 1 passed, 1 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 1 failed, 0 skipped"
   assert_failure
 }
 
@@ -81,7 +81,7 @@ setup() {
   printf '$schema: "%s"\nname: ok' "$schema" >"$file"
 
   run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 
@@ -93,9 +93,9 @@ setup() {
   printf '{"type":"object","properties":{"name":{"type":"string"}}}' >"$schema"
   printf '"$schema" = "%s"\nname = "ok"' "$schema" >"$file"
 
-  run_script ./script/validate-schema "$file"
+  run_script ./script/validate-schema --verbose "$file"
   assert_line "PASS $file schema=$schema"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 
@@ -109,7 +109,7 @@ setup() {
   printf '{\n  $schema: "%s",\n  name: "ok",\n  // comment\n}' "$schema" >"$file"
 
   run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 
@@ -123,7 +123,7 @@ setup() {
   printf '{\n  $schema: "%s",\n  name: "ok",\n  /* comment */\n}' "$schema" >"$file"
 
   run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 
@@ -136,7 +136,7 @@ setup() {
   printf '{"$schema":"%s","version":"0.2"}' "$schema" >"$file"
 
   run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 
@@ -146,8 +146,8 @@ setup() {
 
   printf '{"$schema":null,"name":"ok"}' >"$file"
 
-  run_script ./script/validate-schema "$file"
-  assert_line "validate-schema: 0 passed, 0 failed, 1 skipped"
+  run_script ./script/validate-schema --verbose "$file"
+  assert_stderr_line "validate-schema: 0 passed, 0 failed, 1 skipped"
   assert_success
 }
 
@@ -176,7 +176,7 @@ setup() {
   printf '{"$schema":"%s","name":"ok"}' "$schema" >"$file"
 
   run_script ./script/validate-schema -- "$file"
-  assert_line "validate-schema: 1 passed, 0 failed, 0 skipped"
+  assert_stderr_line "validate-schema: 1 passed, 0 failed, 0 skipped"
   assert_success
 }
 

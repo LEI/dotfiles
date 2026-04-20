@@ -15,8 +15,7 @@ if ((BASH_VERSINFO[0] < 4)); then
 fi
 
 keep="${VALIDATE_SCHEMA_KEEP:-${VALIDATE_KEEP:-false}}"
-quiet="${VALIDATE_SCHEMA_QUIET:-${VALIDATE_QUIET:-false}}"
-verbose="${VALIDATE_SCHEMA_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+verbosity=${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -25,11 +24,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -q | --quiet)
-    quiet=true
+    verbosity=0
     shift
     ;;
   -v | --verbose)
-    verbose=true
+    verbosity=2
     shift
     ;;
   -h | --help)
@@ -47,6 +46,10 @@ while [ $# -gt 0 ]; do
   --)
     shift
     break
+    ;;
+  -*)
+    echo "validate-schema: unknown option: $1" >&2
+    exit 2
     ;;
   *) break ;;
   esac
@@ -86,7 +89,7 @@ validate_file() {
     ;;
   yaml | yml)
     # shellcheck disable=SC2016
-    schema=$(yq '."$schema"' "$path") || schema=
+    schema=$(yq 'select(kind == "map") | ."$schema"' "$path") || schema=
     ;;
   esac
   if [ "$schema" = "null" ]; then
@@ -94,9 +97,7 @@ validate_file() {
   fi
 
   if [ -z "$schema" ]; then
-    if [ "$quiet" = false ]; then
-      echo "SKIP $path (no \$schema)"
-    fi
+    echo "SKIP $path (no \$schema)"
     return 0
   fi
 
@@ -130,9 +131,7 @@ validate_file() {
     case "$(uname -s)" in
     MINGW* | MSYS* | CYGWIN* | Windows*) ;;
     *)
-      if [ "$quiet" = false ]; then
-        echo "SKIP $path (windows)"
-      fi
+      echo "SKIP $path (windows)"
       return 0
       ;;
     esac
@@ -148,21 +147,19 @@ validate_file() {
     fi
     jq 'del(.properties.WinGetVersion)' "$schema_path" >"$schema_path.tmp"
     mv "$schema_path.tmp" "$schema_path"
-    if [ "$verbose" = true ]; then
+    if [ "$verbosity" -ge 2 ]; then
       echo "validate-schema: downloaded and modified schema: $schema_path" >&2
     fi
     ;;
   esac
 
-  if [ "$verbose" = true ]; then
+  if [ "$verbosity" -ge 2 ]; then
     echo "validate-schema: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
   fi
 
   local result
   if result=$(check-jsonschema --schemafile "$schema_path" "$content_path" 2>&1); then
-    if [ "$quiet" = false ]; then
-      echo "PASS $path schema=$schema"
-    fi
+    echo "PASS $path schema=$schema"
     return 0
   else
     echo "FAIL $path schema=$schema"
@@ -188,9 +185,9 @@ validate_schema() {
     fi
     return 1
   fi
-  # quiet mode suppresses SKIP lines; treat silent exit 0 as a valid skip
-  if [ "${quiet:-false}" = false ] && ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
-    echo "FAIL $1 schema= (no output)" >&2
+  # Silent exit 0 is valid when SKIP lines are suppressed in non-verbose mode
+  if [ -n "$output" ] && ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
+    echo "FAIL $1 schema= (unexpected output)" >&2
     return 1
   fi
   return 0
@@ -210,44 +207,45 @@ if ! yq --version 2>&1 | grep -q 'mikefarah/yq'; then
 fi
 
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(
+  mapfile -t -d '' files < <(
     git ls-files -z \
       '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
       ':(exclude)home/.chezmoitemplates/' \
-      ':(exclude)**/modify_*' |
-      tr '\0' '\n'
+      ':(exclude)**/modify_*'
   )
   set -- "${files[@]}"
 fi
 
-n="$(nproc 2>/dev/null || echo 4)"
-if [ "$verbose" = true ]; then
-  echo "validate-schema: Validating $# files with nproc: $n" >&2
+jobs=${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}
+if [ "$verbosity" -ge 2 ]; then
+  echo "validate-schema: validating $# files (jobs=$jobs)" >&2
 fi
 
 if [ $# -eq 0 ]; then
-  if [ "$quiet" = false ]; then
+  if [ "$verbosity" -ge 1 ]; then
     echo "validate-schema: no files to validate" >&2
   fi
   exit 0
 fi
 
-export quiet verbose keep
+export verbosity keep
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$n" -n1 bash -euc 'validate_schema "$1"' _ || true)
+results=$(printf '%s\n' "$@" | xargs -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
 
 passed=$(echo "$results" | grep -c '^PASS ' || true)
 failed=$(echo "$results" | grep -c '^FAIL ' || true)
 skipped=$(echo "$results" | grep -c '^SKIP ' || true)
 
-if [ "$quiet" = false ]; then
+if [ "$verbosity" -ge 2 ]; then
   echo "$results" | grep -E '^(PASS|FAIL|SKIP) ' || true
+else
+  echo "$results" | grep -E '^FAIL ' || true
 fi
 if [ "$failed" -gt 0 ]; then
   echo "$results" | grep -vE '^(PASS|FAIL|SKIP) ' || true
 fi
-if [ "$quiet" = false ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
-  echo "validate-schema: $passed passed, $failed failed, $skipped skipped"
+if [ "$verbosity" -ge 1 ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
+  echo "validate-schema: $passed passed, $failed failed, $skipped skipped" >&2
 fi
 if [ "$failed" -gt 0 ]; then
   exit 1

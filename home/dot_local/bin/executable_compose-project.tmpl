@@ -1,6 +1,8 @@
 {{- if or .features.docker .features.podman -}}
 #!/bin/sh
 # Run docker/podman compose for a project directory
+#USAGE arg "<dir>" help="Project directory"
+#USAGE arg "[command]..." help="Compose subcommand (default: up then logs)"
 
 set -eu
 

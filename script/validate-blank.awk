@@ -30,7 +30,7 @@ blank >= 2 {
 
 END {
   flush()
-  printf "%d passed, %d failed\n", files - failed, failed
+  printf "validate-blank: %d passed, %d failed\n", files - failed, failed >"/dev/stderr"
   if (failed > 0) exit 1
 }
 

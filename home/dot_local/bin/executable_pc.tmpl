@@ -2,6 +2,9 @@
 {{- $uds := get $pc "uds" -}}
 #!/bin/sh
 # Process-compose wrapper for global and project management
+#USAGE flag "-g --global" help="Target the global instance"
+#USAGE arg "[command]" help="Subcommand: a/attach, d/down, l/list, r/restart, s/stop, u/up"
+#USAGE arg "[args]..." help="Arguments passed to process-compose"
 
 set -eu
 

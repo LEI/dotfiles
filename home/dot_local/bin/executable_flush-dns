@@ -1,34 +1,35 @@
 #!/bin/sh
+
 # Flush the system DNS cache
-#
+
 # macOS: dscacheutil + mDNSResponder (Ventura+)
 # Linux: resolvectl > systemd-resolve > nscd > dnsmasq > unbound
 
 set -eu
 
 case "$(uname -s)" in
-  Darwin)
-    sudo dscacheutil -flushcache
-    sudo killall -HUP mDNSResponder
-    ;;
-  Linux)
-    if command -v resolvectl >/dev/null; then
-      sudo resolvectl flush-caches
-    elif command -v systemd-resolve >/dev/null; then
-      sudo systemd-resolve --flush-caches
-    elif command -v nscd >/dev/null; then
-      sudo nscd -i hosts
-    elif pidof dnsmasq >/dev/null 2>&1; then
-      sudo killall -HUP dnsmasq
-    elif command -v unbound-control >/dev/null; then
-      sudo unbound-control flush_zone .
-    else
-      echo "flush-dns: no supported resolver found" >&2
-      exit 1
-    fi
-    ;;
-  *)
-    echo "flush-dns: unsupported OS" >&2
+Darwin)
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder
+  ;;
+Linux)
+  if command -v resolvectl >/dev/null; then
+    sudo resolvectl flush-caches
+  elif command -v systemd-resolve >/dev/null; then
+    sudo systemd-resolve --flush-caches
+  elif command -v nscd >/dev/null; then
+    sudo nscd -i hosts
+  elif pidof dnsmasq >/dev/null 2>&1; then
+    sudo killall -HUP dnsmasq
+  elif command -v unbound-control >/dev/null; then
+    sudo unbound-control flush_zone .
+  else
+    echo "flush-dns: no supported resolver found" >&2
     exit 1
-    ;;
+  fi
+  ;;
+*)
+  echo "flush-dns: unsupported OS" >&2
+  exit 1
+  ;;
 esac

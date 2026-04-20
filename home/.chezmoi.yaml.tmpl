@@ -186,6 +186,7 @@ hooks:
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
+  prefix: {{ eq .os "android" | ternary "/data/data/com.termux/files" "" | quote }}
   brewPrefix: {{ $brewPrefix | quote }}
   containerProvider: {{ $containerProvider | quote }}
   theme: tokyonight
@@ -372,6 +373,7 @@ scriptEnv:
 {{-   end }}
 {{-   $paths = append $paths $binDir }}
 
+  # WARN: do not alter path
   # PATH: {{ $paths | uniq | join ":" | quote }}
 {{- end }}
 

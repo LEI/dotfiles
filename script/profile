@@ -6,6 +6,11 @@
 
 set -euo pipefail
 
+if ((BASH_VERSINFO[0] < 5)); then
+  echo "bash 5+ required for EPOCHREALTIME, found $BASH_VERSION" >&2
+  exit 1
+fi
+
 case "${1:-}" in
 -h | --help)
   if command -v usage >/dev/null; then
@@ -33,6 +38,15 @@ if [ -d "$sheldon_data" ]; then
   cp -R "$sheldon_data" "$tmpdir/sheldon-data"
 fi
 export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
+export SHELDON_QUIET=1
+
+# Pre-lock sheldon plugins so profiling measures source time, not network
+if command -v sheldon >/dev/null; then
+  if [ "$shell" = bash ]; then
+    export SHELDON_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/bash.toml"
+  fi
+  sheldon --quiet lock 2>/dev/null || true
+fi
 
 # Avoid terminal contention when run in parallel tasks
 detach() {
@@ -43,14 +57,16 @@ detach() {
   fi
 }
 
-check_stderr() {
-  local log="$tmpdir/stderr.log"
-  "$@" 2>"$log"
-  if [ -s "$log" ]; then
-    cat "$log" >&2
-    return 1
-  fi
+format_table() {
+  local label="$1" limit="$2"
+  printf "      %10s  %5s  %5s  %s\n" "total" "pct" "calls" "$label"
+  sort -t$'\t' -k2 -rn | head -"$limit" | awk -F'\t' '{
+    printf "%3d)  %8.3f ms  %5.1f%%  %4d  %s\n", NR, $2, $3, $4, $5
+  }'
 }
+
+shell_exit=0
+stderrlog="$tmpdir/init-stderr.log"
 
 case "$shell" in
 bash)
@@ -59,59 +75,103 @@ bash)
   cat >"$tmpdir/rcfile.sh" <<BASH_PROF
 exec 5>"$logfile"
 BASH_XTRACEFD=5
-PS4='+ \${EPOCHREALTIME} \${BASH_SOURCE[0]#\${HOME}/}:\${LINENO} '
+PS4='+ \${EPOCHREALTIME} ~/\${BASH_SOURCE[0]#\${HOME}/}:\${LINENO} '
 set -x
-[ -f "\$HOME/.bashrc" ] && source "\$HOME/.bashrc"
+[ -f "\$HOME/.bashrc" ] && source "\$HOME/.bashrc" 2>"$stderrlog"
+_rc=\$?
 set +x
 exec 5>&-
+echo \$_rc >"$tmpdir/exit_code"
 BASH_PROF
 
   detach bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
 
-  total=$(awk '
+  # Single pass: aggregate by command and by file, output with C/F prefix
+  awk -v home="$HOME" '
     /^\++ [0-9]+\.[0-9]+ / {
       ts = $2 + 0
-      if (prev_ts > 0 && prev_rest != "") {
-        d = (ts - prev_ts) * 1000
-        if (d > 1) total += d
-      }
-      prev_ts   = ts
-      prev_rest = $0
-    }
-    END { printf "%.6f", total }
-  ' "$logfile")
-
-  awk -v total="$total" '
-    /^\++ [0-9]+\.[0-9]+ / {
-      ts   = $2 + 0
       rest = substr($0, index($0, $3))
+      gsub(home, "~", rest)
       gsub(/[A-Z_]*(TOKEN|SECRET|KEY|PASSWORD)=[^ ]+/, "[REDACTED]", rest)
-      if (prev_ts > 0 && prev_rest != "") {
-        delta = (ts - prev_ts) * 1000
-        if (delta > 1) {
-          label = length(prev_rest) > 100 ? substr(prev_rest, 1, 97) "..." : prev_rest
-          printf "%8.3f ms  %4.1f%%  %s\n", delta, delta / total * 100, label
+      split(rest, p, ":"); file = p[1]
+      if (prev_ts > 0) {
+        d = (ts - prev_ts) * 1000
+        if (d > 1) {
+          total += d
+          label = prev_rest
+          # Commands that suppress tracing create unattributable gaps
+          if (label ~ /(set \+x|_ble_bash_xtrace)/)
+            label = prev_file " (untraced)"
+          else if (length(label) > 100)
+            label = substr(label, 1, 97) "..."
+          ct[label] += d; cc[label]++
+          ft[prev_file] += d; fc[prev_file]++
         }
       }
-      prev_ts   = ts
-      prev_rest = rest
+      prev_ts = ts; prev_rest = rest; prev_file = file
     }
-  ' "$logfile" | sort -rn | head -20 | nl -w2 -s')  '
-  # TODO: add a second table aggregating total ms per source file (zprof-style self time)
+    END {
+      for (l in ct) {
+        printf "C\t%.3f\t%.1f\t%d\t%s\n", ct[l], ct[l] / total * 100, cc[l], l
+      }
+      for (f in ft)
+        printf "F\t%.3f\t%.1f\t%d\t%s\n", ft[f], ft[f] / total * 100, fc[f], f
+    }
+  ' "$logfile" >"$tmpdir/tables"
+
+  grep '^C' "$tmpdir/tables" | format_table "command" 20
+  echo
+  grep '^F' "$tmpdir/tables" | format_table "file" 15
   ;;
 zsh)
   cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
 zmodload zsh/zprof
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
 ZSH_PROF
-  cat >"$tmpdir/.zshrc" <<'ZSH_RC'
-[ -f "${REAL_ZDOTDIR:-$HOME}/.zshrc" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshrc"
+  cat >"$tmpdir/.zshrc" <<ZSH_RC
+[ -f "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" ] && source "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" 2>"$stderrlog"
+echo \$? >"$tmpdir/exit_code"
 ZSH_RC
   export REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
-  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof'
+  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof' 2>/dev/null
   ;;
 *)
   echo "profile: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac
+
+if [ -f "$tmpdir/exit_code" ]; then
+  shell_exit=$(cat "$tmpdir/exit_code")
+fi
+
+report_stderr() {
+  while IFS= read -r line; do
+    echo >&2 "  $line"
+    # Trace back to source using the xtrace log (bash only)
+    cmd="${line%%:*}"
+    if [ -n "$cmd" ] && [ -f "${logfile:-}" ]; then
+      grep -E ":[0-9]+ ${cmd}\\b" "$logfile" |
+        sed 's/^+* [0-9.]*  *//' |
+        sed 's/^/    /' >&2 || true
+    fi
+  done <"$stderrlog"
+}
+
+if [ "$shell_exit" -ne 0 ]; then
+  echo >&2
+  echo >&2 "profile: $shell init exited with code $shell_exit"
+  report_stderr
+  exit 1
+fi
+
+# atuin init calls stty -g which fails without a tty
+grep -v \
+  -e "^stty: 'standard input': Not a tty$" \
+  "$stderrlog" >"$stderrlog.filtered" 2>/dev/null || true
+
+if [ -s "$stderrlog.filtered" ]; then
+  echo >&2
+  echo >&2 "profile: $shell init stderr:"
+  stderrlog="$stderrlog.filtered" report_stderr
+fi

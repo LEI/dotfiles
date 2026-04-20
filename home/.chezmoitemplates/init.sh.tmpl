@@ -10,10 +10,11 @@ if [[ $- != *i* ]]; then
   return
 fi
 
-# Shell options
-if [ -f "$XDG_CONFIG_HOME/$shell/options.$shell" ]; then
-  source "$XDG_CONFIG_HOME/$shell/options.$shell"
-fi
+for _conf in completion history options; do
+  _conf="$XDG_CONFIG_HOME/$shell/$_conf.$shell"
+  [ -f "$_conf" ] && source "$_conf"
+done
+unset _conf
 
 {{ includeTemplate ".profile.tmpl" . | trim }}
 source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
@@ -49,7 +50,7 @@ if [ "$shell" = bash ]; then
   export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
 fi
 if command -v sheldon >/dev/null; then
-  bench sheldon eval "$(sheldon source)"
+  bench sheldon eval "$(sheldon ${SHELDON_QUIET:+--quiet} source)"
 else
   echo "init: command not found: sheldon" >&2
 fi
@@ -59,12 +60,6 @@ if [ -f "$XDG_CONFIG_HOME/sh/aliases.sh" ]; then
   bench_source "$XDG_CONFIG_HOME/sh/aliases.sh"
 fi
 
-# Per-shell config: .conf for variables (via export_env), .sh for shell code
-for _conf in "$XDG_CONFIG_HOME/$shell/"*.conf; do
-  if [ -f "$_conf" ]; then
-    export_env "$_conf"
-  fi
-done
 for _conf in "$XDG_CONFIG_HOME/$shell/"*.sh; do
   if [ -f "$_conf" ]; then
     bench_source "$_conf"

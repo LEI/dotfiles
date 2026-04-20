@@ -64,7 +64,7 @@ services:
   # Ollama: local LLM inference
   # https://github.com/ollama/ollama
   ollama:
-    image: docker.io/ollama/ollama:{{ .ollama.version }}
+    image: docker.io/ollama/ollama:{{ dig "ollama" "version" "latest" . }}
     restart: unless-stopped
     ports:
       - "127.0.0.1:11434:11434" # API

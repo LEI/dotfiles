@@ -1,8 +1,8 @@
-{{- $stormPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-night.itermcolors" -}}
-{{- $dayPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-day.itermcolors" -}}
-{{- if and (eq .chezmoi.os "darwin") (stat $stormPath) (stat $dayPath) -}}
-{{- $storm := output "plutil" "-convert" "json" "-o" "-" $stormPath | fromJson -}}
-{{- $day := output "plutil" "-convert" "json" "-o" "-" $dayPath | fromJson -}}
+{{- $darkPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-night.itermcolors" -}}
+{{- $lightPath := joinPath .chezmoi.homeDir ".local/share/iterm2/tokyonight-day.itermcolors" -}}
+{{- if and (eq .chezmoi.os "darwin") (stat $darkPath) (stat $lightPath) -}}
+{{- $dark := output "plutil" "-convert" "json" "-o" "-" $darkPath | fromJson -}}
+{{- $light := output "plutil" "-convert" "json" "-o" "-" $lightPath | fromJson -}}
 {
   "Profiles": [
     {
@@ -27,23 +27,23 @@
       "Working Directory": "{{ .chezmoi.homeDir }}",
       "Custom Command": "No",
       "Transparency": 0.05,
-      "Scrollback Lines": 1000,
-      "Unlimited Scrollback": false,
+      "Scrollback Lines": 0,
+      "Unlimited Scrollback": true,
       "Visual Bell": true,
       "Silence Bell": false,
       "Flashing Bell": false,
       "Close Sessions On End": true,
       "Prompt Before Closing 2": false,
-      "Load Shell Integration Automatically": false,
+      "Load Shell Integration Automatically": true,
       "Send Idle Alert": false,
       "Send New Output Alert": false,
       "Send Code When Idle": false,
       "Blur": false,
       "Keyboard Map": {},
       "Use libtickit protocol": false,
-{{- range $key := keys $storm | sortAlpha }}
-      "{{ $key }} (Dark)": {{ get $storm $key | toPrettyJson | indent 6 | trim }},
-      "{{ $key }} (Light)": {{ get $day $key | toPrettyJson | indent 6 | trim }},
+{{- range $key := keys $dark | sortAlpha }}
+      "{{ $key }} (Dark)": {{ get $dark $key | toPrettyJson | indent 6 | trim }},
+      "{{ $key }} (Light)": {{ get $light $key | toPrettyJson | indent 6 | trim }},
 {{- end }}
       "Columns": 80,
       "Rows": 25

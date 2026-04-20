@@ -3,7 +3,7 @@ Description=Ollama Service
 After=network-online.target
 
 [Container]
-Image=docker.io/ollama/ollama:{{ .ollama.version }}
+Image=docker.io/ollama/ollama:{{ dig "ollama" "version" "latest" . }}
 AddDevice=/dev/dri
 GroupAdd=keep-groups
 # PublishPort=127.0.0.1:11434:11434

@@ -8,12 +8,14 @@
 {{-   end -}}
 {{- end -}}
 #!/bin/bash
+
 # tailscale serve:
 {{- range $port, $url := $expected }}
 # - {{ $port }}: {{ $url }}
-{{- end -}}
+{{- end }}
 
 set -euo pipefail
+
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if ! has tailscale; then

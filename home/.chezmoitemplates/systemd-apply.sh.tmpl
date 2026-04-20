@@ -1,4 +1,4 @@
-{{- $active := get . "active" -}}
+{{- $active := eq (get . "active" | toString) "true" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
@@ -51,13 +51,14 @@ if ! systemctl --user is-active --quiet {{ $name }}; then
   die "{{ $unit }}: failed to start"
 fi
 
-# FIXME: no tpl
 {{-   if and $port $health }}
-{{-     $url := printf "http://localhost:%d%s" $port $health }}
-{{-     if not (output "sh" "-c" (printf "curl --silent --fail --max-time 5 %s >/dev/null 2>&1" $url) | trim) }}
-msg "{{ $unit }}: unhealthy, restarting"
-run systemctl --user restart {{ $name }}
-{{-     end }}
+if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
+  msg "{{ $unit }}: unhealthy, restarting"
+  run systemctl --user restart {{ $name }}
+  if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
+    die "{{ $unit }}: unhealthy after retries"
+  fi
+fi
 {{-   end }}
 {{- else }}
 {{-   if not $isQuadlet }}

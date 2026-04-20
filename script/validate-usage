@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#MISE alias="vu"
 #MISE description="Lint #USAGE specs and shell script conventions"
 #USAGE flag "-q --quiet" help="Only print errors and summary"
 #USAGE flag "-v --verbose" help="Print full usage spec for each file"
@@ -16,17 +17,16 @@ if ! command -v usage >/dev/null; then
   exit 0
 fi
 
-quiet="${VALIDATE_USAGE_QUIET:-${VALIDATE_QUIET:-false}}"
-verbose="${VALIDATE_USAGE_VERBOSE:-${VALIDATE_VERBOSE:-false}}"
+verbosity=${VALIDATE_USAGE_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
 
 while [ $# -gt 0 ]; do
   case "$1" in
   -q | --quiet)
-    quiet=true
+    verbosity=0
     shift
     ;;
   -v | --verbose)
-    verbose=true
+    verbosity=2
     shift
     ;;
   -h | --help)
@@ -45,6 +45,10 @@ while [ $# -gt 0 ]; do
     shift
     break
     ;;
+  -*)
+    echo "validate-usage: unknown option: $1" >&2
+    exit 2
+    ;;
   *) break ;;
   esac
 done
@@ -54,39 +58,61 @@ if [ $# -eq 0 ]; then
   set -- "${files[@]}"
 fi
 
-warnings=0
 errors=0
+warnings=0
 checked=0
 
 for f in "$@"; do
   case "$f" in *.awk) continue ;; esac
   checked=$((checked + 1))
 
-  if ! head -1 "$f" | grep -q '^#!'; then
+  shebang=$(head -1 "$f")
+  case "$shebang" in
+  '#!'*sh*) ;;
+  '#!'*)
+    [ "$verbosity" -ge 2 ] && echo "SKIP $f: non-shell shebang"
+    continue
+    ;;
+  *) continue ;;
+  esac
+
+  ok=true
+
+  if grep -q '^#MISE hide=true' "$f"; then
+    [ "$verbosity" -ge 2 ] && echo "SKIP $f: hidden"
     continue
   fi
 
-  # #MISE description required in script/ (mise tasks)
   case "$f" in
   script/*)
     if ! grep -q '^#MISE description=' "$f"; then
-      echo "$f: error: missing #MISE description" >&2
+      echo "FAIL $f: missing #MISE description"
       errors=$((errors + 1))
+      ok=false
     fi
     ;;
   esac
 
-  # Description comment required after shebang
-  case "$f" in
-  script/* | */executable_*)
-    if ! sed -n '2p' "$f" | grep -q '^#'; then
-      if [ "$quiet" != true ]; then
-        echo "$f: warning: missing description comment after shebang" >&2
-      fi
-      warnings=$((warnings + 1))
-    fi
-    ;;
-  esac
+  if ! grep -q '^#USAGE' "$f"; then
+    # echo "FAIL $f: missing #USAGE directives"
+    # errors=$((errors + 1))
+    # ok=false
+    [ "$verbosity" -ge 1 ] && echo "WARN $f: missing #USAGE directives"
+    warnings=$((warnings + 1))
+    continue
+  fi
+
+  if ! sed -n '2p' "$f" | grep -q '^#'; then
+    [ "$verbosity" -ge 1 ] && echo "WARN $f: no description after shebang"
+    warnings=$((warnings + 1))
+  fi
+
+  if grep -q '^#USAGE arg ' "$f" &&
+    ! grep -q '^#USAGE \s*choices ' "$f" &&
+    ! grep -q '^#USAGE complete ' "$f"; then
+    [ "$verbosity" -ge 1 ] && echo "WARN $f: has args but no choices or complete directive"
+    warnings=$((warnings + 1))
+  fi
 
   # Lint #USAGE spec
   spec=
@@ -95,24 +121,20 @@ for f in "$@"; do
   fi
   if [ -n "$spec" ] && ! usage lint <(echo "$spec") >/dev/null; then
     errors=$((errors + 1))
-    continue
+    ok=false
   fi
 
-  if [ "$quiet" = true ]; then
-    continue
-  fi
-
-  if [ "$verbose" = true ] && [ -n "$spec" ]; then
-    echo "$f: ok"
-    echo "  ${spec//$'\n'/$'\n  '}"
-  else
-    echo "$f: ok"
+  if [ "$ok" = true ] && [ "$verbosity" -ge 2 ]; then
+    echo "PASS $f"
+    # [ -n "$spec" ] && echo "  ${spec//$'\n'/$'\n  '}"
   fi
 done
 
-if ((errors > 0 || warnings > 0)); then
-  echo "$checked checked, $errors error(s), $warnings warning(s)" >&2
-elif [ "$quiet" != true ]; then
-  echo "$checked checked, all passed" >&2
+if [ "$verbosity" -ge 1 ]; then
+  summary="$((checked - errors)) passed, $errors failed"
+  if [ "$warnings" -gt 0 ]; then
+    summary="$summary, $warnings warnings"
+  fi
+  echo "validate-usage: $summary" >&2
 fi
 exit "$((errors > 0))"

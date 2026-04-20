@@ -1,6 +1,6 @@
 {{- $claude := get . "claude" | default dict -}}
 {{- $claudeMarketplaces := get $claude "marketplaces" | default dict -}}
-{{- $claudePlugins := get $claude "plugins" | default list -}}
+{{- $claudePlugins := get $claude "plugins" | default dict -}}
 {{- $marketplaces := dict -}}
 {{- range $name, $info := $claudeMarketplaces -}}
 {{-   if hasKey $info "repo" -}}

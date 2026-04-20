@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
-# Parses chezmoi --debug structured logs,
-# shows slowest operations and phase summary
+# Parse chezmoi --debug structured logs,
+# show slowest operations and phase summary
 
 def phase_of [msg: string] {
   match ($msg | split row " " | first) {

@@ -1,5 +1,8 @@
 {{- if eq .os "linux" -}}
 #!/bin/sh
+#MISE description="Move files to trash"
+#USAGE arg "<file>..." help="Files to trash"
+
 set -eu
 {{- if lookPath "gtrash" | isExecutable }}
 exec gtrash put "$@"

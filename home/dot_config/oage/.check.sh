@@ -7,52 +7,8 @@ if ((BASH_VERSINFO[0] < 5)); then
   exit 1
 fi
 
-# TAP 14 helpers
-
-test_num=0
-failures=0
-
-tap_header='TAP version 14'
-
-tap_plan() {
-  [[ $1 -eq 0 && $# -gt 1 ]] && set -- "0 # SKIP ${*:2}"
-  printf '%s\n1..%s\n' "$tap_header" "$1"
-}
-
-tap_bail() {
-  printf 'Bail out! %s\n' "$1"
-}
-
-tap_ok() {
-  test_num=$((test_num + 1))
-  [[ $# -gt 1 ]] && set -- "$1 # SKIP ${*:2}"
-  printf 'ok %d - %s\n' "$test_num" "$1"
-}
-
-tap_not_ok() {
-  test_num=$((test_num + 1))
-  [[ $# -gt 1 ]] && set -- "$1 # TODO ${*:2}"
-  printf 'not ok %d - %s\n' "$test_num" "$1"
-  failures=$((failures + 1))
-}
-
-tap_diag() {
-  printf '  ---\n'
-  jq --raw-output 'to_entries[] | "  \(.key): \(
-    if .value | type == "string" then .value | @json
-    else .value end
-  )"'
-  printf '  ...\n'
-}
-
-tap_diag_kv() {
-  printf '  ---\n'
-  local kv
-  for kv in "$@"; do
-    printf '  %s\n' "$kv"
-  done
-  printf '  ...\n'
-}
+# shellcheck disable=SC1091
+. "${XDG_CONFIG_HOME:-$HOME/.config}/sh/lib/tap.sh"
 
 # Oage check
 
@@ -107,7 +63,7 @@ check() {
   tap_ok "$label"
   printf '%s' "$response" | jq --raw-output \
     --arg t0 "$t0" --arg t1 "$t1" --arg url "$url" \
-    "${metrics_filter//FIELDS/(${fields})}" | tap_diag
+    "${metrics_filter//FIELDS/(${fields})}" | tap_diag_json
 }
 
 chat() {
@@ -189,6 +145,7 @@ check "embeddings" \
   "{\"model\": \"$embed_model\", \"input\": \"test\"}"
 
 # Restart hung services on failure (KeepAlive restarts them)
+# shellcheck disable=SC2154 # failures is set by tap.sh
 if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   gui="gui/$(id -u)"
   # shellcheck disable=SC2016

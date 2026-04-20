@@ -1,7 +1,9 @@
 #!/bin/sh
+
 # Webhook notification handler
 # terminal-notifier -sound broken on macOS Ventura+
 # https://github.com/julienXX/terminal-notifier/issues/300
+
 set -eu
 
 msg() { echo "webhook-notify: $*" >&2; }
@@ -52,9 +54,9 @@ fi
 
 # Sound
 case "$status" in
-  firing) sound="Ping" ;;
-  resolved) sound="Tink" ;;
-  *) sound="Ping" ;;
+firing) sound="Ping" ;;
+resolved) sound="Tink" ;;
+*) sound="Ping" ;;
 esac
 
 # Enrich: query Prometheus for real alert annotations

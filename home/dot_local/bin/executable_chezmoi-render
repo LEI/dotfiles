@@ -77,7 +77,7 @@ if [ -z "$source_dir" ]; then
   printf 'error: could not determine source directory\n' >&2
   exit 1
 fi
-prefix="${source_dir#"$PWD"/}"
+prefix="${source_dir#"${source_dir%/*}"/}"
 
 # Strip prefix from explicit template paths
 if [ ${#templates[@]} -gt 0 ]; then
@@ -128,11 +128,11 @@ render() {
   local base
   base=$(basename "$src")
 
-  if [ "$verbose" = true ]; then
-    printf 'render: %s -> %s\n' "$src" "$out" >&2
-  elif [ "$quiet" != true ]; then
-    printf 'render: %s -> %s\n' "${src#./}" "$rel" >&2
-  fi
+  # if [ "$verbose" = true ]; then
+  #   printf 'render: %s -> %s\n' "$src" "$out" >&2
+  # elif [ "$quiet" != true ]; then
+  #   printf 'render: %s -> %s\n' "${src#./}" "$rel" >&2
+  # fi
 
   mkdir -p "${out%/*}"
 
