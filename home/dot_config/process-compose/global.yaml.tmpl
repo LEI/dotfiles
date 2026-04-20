@@ -142,7 +142,7 @@ processes:
       max_restarts: 0
   {{- end }}
 
-  {{- range dig "processCompose" "sshProxies" (list) . }}
+  {{- range dig "processCompose" "sshProxies" list . }}
   {{-   $remotePort := "22" }}
   {{-   if eq .type "postgres" }}{{ $remotePort = "5432" }}{{ end }}
   {{-   if eq .type "mysql" }}{{ $remotePort = "3306" }}{{ end }}

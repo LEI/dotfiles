@@ -1,4 +1,4 @@
-{{- $opencode := get . "opencode " | default dict -}}
+{{- $opencode := get . "opencode" | default dict -}}
 {{- $server := get $opencode "server" | default dict -}}
 
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
@@ -13,7 +13,8 @@
 {{- $reasoning := get $preset "reasoning" -}}
 
 {{- if and .features.tailscale .tailscale.tailnet -}}
-{{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) -}}
+{{-   $cors := append ($server.cors | default list)
+        (printf "https://%s" .tailscale.tailnet) -}}
 {{-   $server = mergeOverwrite $server (dict "cors" $cors) -}}
 {{- end -}}
 {
@@ -125,6 +126,7 @@
       // "mkdir *": "allow",
       // "mv *": "deny",
       "printenv *": "ask",
+      "ps": "allow",
       "pwd": "allow",
       "readlink *": "allow",
       "realpath *": "allow",

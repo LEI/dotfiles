@@ -7,6 +7,14 @@
 {{- $targetDir := $dir | replace "dot_" "." -}}
 {{- $localFile := joinPath .chezmoi.homeDir $targetDir "local.yaml" -}}
 {{- if stat $localFile -}}
-{{-   $data = mergeOverwrite $data (include $localFile | fromYaml) -}}
+{{-   $local := include $localFile | fromYaml -}}
+{{-   range $key, $localValue := $local -}}
+{{-     $dataValue := get $data $key -}}
+{{-     if and (kindIs "map" $dataValue) (kindIs "map" $localValue) -}}
+{{-       $data = set $data $key (merge $dataValue $localValue) -}}
+{{-     else -}}
+{{-       $data = set $data $key $localValue -}}
+{{-     end -}}
+{{-   end -}}
 {{- end -}}
 {{ $data | toYaml | trim }}

@@ -18,7 +18,7 @@
 {{- $map := dict }}
 {{- range $list }}
   {{- $parts := . | splitList " " }}
-  {{- if lt (len $parts) 2 }}{{- continue }}{{- end }}
+  {{- if lt (len $parts) 2 }}{{ continue }}{{ end }}
   {{- $key := index $parts 0 }}
   {{- $command := join " " (slice $parts 1) | trim }}
   {{- $map = merge $map (dict $key $command) }}

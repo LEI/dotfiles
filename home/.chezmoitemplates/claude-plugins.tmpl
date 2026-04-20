@@ -1,6 +1,6 @@
 {{- $claude := get . "claude" | default dict -}}
 {{- $claudeMarketplaces := get $claude "marketplaces" | default dict -}}
-{{- $claudePlugins := get $claude "plugins" | default dict -}}
+{{- $claudePlugins := get $claude "plugins" | default list -}}
 {{- $marketplaces := dict -}}
 {{- range $name, $info := $claudeMarketplaces -}}
 {{-   if hasKey $info "repo" -}}
@@ -17,7 +17,7 @@
 {{-       $plugins = append $plugins (dict "name" . "marketplace" $marketplace) -}}
 {{-     else -}}
 {{-       $entry := dict "name" .name "marketplace" $marketplace -}}
-{{-       if .version -}}{{- $entry = set $entry "version" .version -}}{{- end -}}
+{{-       if get . "version" }}{{ $entry = set $entry "version" .version }}{{ end -}}
 {{-       $plugins = append $plugins $entry -}}
 {{-     end -}}
 {{-   end -}}

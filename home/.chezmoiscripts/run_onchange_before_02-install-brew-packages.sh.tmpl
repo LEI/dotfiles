@@ -61,9 +61,9 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 # fi
 
 {{- range $type := list "brew" "cask" "mas" "vscode" }}
-{{- if not (hasKey $.packages $type) -}}{{- continue -}}{{- end -}}
+{{- if not (hasKey $.packages $type) }}{{ continue }}{{ end -}}
 {{- $hooks := includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" (get $.packages $type) "label" $type) | trim -}}
-{{- if empty $hooks -}}{{- continue -}}{{- end }}
+{{- if empty $hooks }}{{ continue }}{{ end }}
 {{ $hooks }}
 {{ end -}}
 
@@ -78,8 +78,8 @@ dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }}
 EOF
 
 {{- range $type := list "brew" "cask" "mas" "vscode" -}}
-{{- if not (hasKey $.packages $type) -}}{{- continue -}}{{- end -}}
+{{- if not (hasKey $.packages $type) }}{{ continue }}{{ end -}}
 {{- $hooks := includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" (get $.packages $type) "label" $type) | trim -}}
-{{- if empty $hooks -}}{{- continue -}}{{- end }}
+{{- if empty $hooks }}{{ continue }}{{ end }}
 {{ $hooks }}
 {{- end }}

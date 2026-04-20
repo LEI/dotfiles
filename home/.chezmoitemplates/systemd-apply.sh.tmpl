@@ -1,43 +1,69 @@
-{{- $active := eq (get . "active" | toString) "true" -}}
+{{- $active := get . "active" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
 {{- $health := get . "health" -}}
 {{- $port := get . "port" -}}
-{{- $serviceDir := printf "%s/.config/systemd/user" .chezmoi.homeDir -}}
-{{- $serviceFile := printf "%s/%s.service" $serviceDir $unit -}}
-{{- if stat $serviceFile -}}
-# service: {{ include $serviceFile | sha256sum }}
-{{ end -}}
+{{- $dir := get . "dir" -}}
+
+{{- $suffix := $unit | splitList "." | last -}}
+{{- if not (eq $suffix ".container" ".service") -}}
+{{-   $suffix = "service" -}}
+{{-   $unit = printf "%s.%s" $unit $suffix -}}
+{{- end -}}
+{{- $name := $unit | splitList "." | first -}}
+
+{{- $isQuadlet := hasSuffix $unit ".container" -}}
+{{- if not $dir -}}
+{{-   if $isQuadlet -}}
+{{-     $dir = joinPath .chezmoi.homeDir ".config/containers/systemd" -}}
+{{-   else -}}
+{{-     $dir = joinPath .chezmoi.homeDir ".config/systemd/user" -}}
+{{-   end -}}
+{{- end -}}
+
+{{- $sourceFile := joinPath $dir $unit -}}
+{{- $status := "" -}}
 {{- if lookPath "systemctl" | isExecutable -}}
-{{-   $status := output "sh" "-c" (printf "systemctl --user show %s --property=ActiveState --value 2>/dev/null || true" $unit) | trim -}}
-{{-   if $status }}
+{{-   $status = output "sh" "-c" (printf "systemctl --user show %s --property=ActiveState --value 2>/dev/null || true" $name) | trim -}}
+{{-   if $status -}}
 # status: {{ $status }}
 {{   end -}}
-{{ end -}}
-if has systemctl; then
-  run systemctl --user daemon-reload
-{{- if $active }}
-  if systemctl --user is-active --quiet {{ $unit }}; then
-    run systemctl --user restart {{ $unit }}
-  else
-    run systemctl --user enable --now {{ $unit }}
-  fi
-  if ! systemctl --user is-active --quiet {{ $unit }}; then
-    run systemctl --user status {{ $unit }} --no-pager || true
-    die "{{ $unit }}: failed to start"
-  fi
-{{- if and $port $health }}
-  if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
-    msg "{{ $unit }}: unhealthy, restarting"
-    run systemctl --user restart {{ $unit }}
-    if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
-      die "{{ $unit }}: unhealthy after retries"
-    fi
-  fi
-{{- end }}
-{{- else }}
-  if systemctl --user is-enabled --quiet {{ $unit }} 2>/dev/null; then
-    msg "disabling service {{ $unit }}"
-    run systemctl --user disable --now {{ $unit }}
-  fi
-{{- end }}
+{{- end -}}
+
+if ! command -v systemctl >/dev/null; then
+  die "systemctl not found"
 fi
+
+run systemctl --user daemon-reload
+{{- if $active }}
+{{-   if not $isQuadlet }}
+if systemctl --user is-active --quiet {{ $name }}; then
+  run systemctl --user restart {{ $name }}
+else
+  run systemctl --user enable --now {{ $name }}
+fi
+{{-   else }}
+if ! systemctl --user is-active --quiet {{ $name }}; then
+  run systemctl --user start {{ $name }}
+fi
+{{-   end }}
+if ! systemctl --user is-active --quiet {{ $name }}; then
+  run systemctl --user status {{ $name }} --no-pager || true
+  die "{{ $unit }}: failed to start"
+fi
+
+# FIXME: no tpl
+{{-   if and $port $health }}
+{{-     $url := printf "http://localhost:%d%s" $port $health }}
+{{-     if not (output "sh" "-c" (printf "curl --silent --fail --max-time 5 %s >/dev/null 2>&1" $url) | trim) }}
+msg "{{ $unit }}: unhealthy, restarting"
+run systemctl --user restart {{ $name }}
+{{-     end }}
+{{-   end }}
+{{- else }}
+{{-   if not $isQuadlet }}
+if systemctl --user is-enabled --quiet {{ $name }} 2>/dev/null; then
+  msg "disabling service {{ $unit }}"
+  run systemctl --user disable --now {{ $name }}
+fi
+{{-   end }}
+{{- end }}

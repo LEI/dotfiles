@@ -273,6 +273,7 @@ data:
 
 {{- if $features.ollama }}
   ollama:
+    version: "0.21.0"
 {{-   if eq .chezmoi.os "darwin" }}
     service: brew
 {{-   else if and (lookPath "podman" | isExecutable) (stat "/run/systemd/system") }}

@@ -15,7 +15,7 @@ opencode() {
   if [ $# -eq 0 ]; then
     # https://github.com/anomalyco/opencode/issues/17322
     if curl --silent "$OPENCODE_URL" >/dev/null; then
-      echo "Attaching to local opencode server" >&2
+      echo "Attaching to server: $OPENCODE_URL" >&2
       set -- attach "$OPENCODE_URL" "$@"
     fi
     set -- "$@" --continue

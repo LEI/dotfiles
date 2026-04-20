@@ -290,19 +290,19 @@ set $ws{{ $i }} "{{ $i }}"
 
 # Switch to workspace
 {{- range $i, $e :=  until 10 }}
-{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+{{- $i = add $i 1 }}{{ $index := $i }}{{ if eq $index 10 }}{{ $index = 0 }}{{ end }}
 bindsym $mod+{{ $index }} workspace number $ws{{ $i }}
 {{- end }}
 
 # Move focused container to workspace
 {{- range $i, $e :=  until 10 }}
-{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+{{- $i = add $i 1 }}{{ $index := $i }}{{ if eq $index 10 }}{{ $index = 0 }}{{ end }}
 bindsym $mod+Shift+{{ $index }} move container to workspace number $ws{{ $i }}
 {{- end }}
 
 # Keep floating windows on active workspace
 {{- range $i, $e :=  until 10 }}
-{{- $i = add $i 1 }}{{- $index := $i }}{{- if eq $index 10 }}{{- $index = 0 }}{{- end }}
+{{- $i = add $i 1 }}{{ $index := $i }}{{ if eq $index 10 }}{{ $index = 0 }}{{ end }}
 bindsym $mod+Control+{{ $index }} [title="Picture-in-Picture"] move workspace number {{ $i }}; workspace number {{ $i }}
 {{- end }}
 
