@@ -13,6 +13,13 @@ $env:Path += ";$env:UserProfile\.local\bin"
 $ENV:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
 
 # Set-Alias -Name g -Value git
+# function g {
+#   if ($args.Count -eq 0) {
+#     git status --branch --short
+#   } else {
+#     git @args
+#   }
+# }
 
 # https://mise.jdx.dev/getting-started.html#activate-mise
 $shimPath = "$env:USERPROFILE\AppData\Local\mise\shims"
@@ -23,7 +30,11 @@ $newPath = $currentPath.Replace(";" + $shimPath, "") + ";" + $shimPath
 
 # https://docs.atuin.sh/cli/guide/installation/#on-windows
 if ($PSVersionTable.PSVersion.ToString() -ge "7.0.0") {
-  Invoke-Expression (& { (atuin init --disable-up-arrow powershell | Out-String) })
+  if (Get-Module -ListAvailable -Name PSReadLine) {
+    Invoke-Expression (& { (atuin init --disable-up-arrow powershell | Out-String) })
+  } else {
+    Write-Host "PSReadLine not found. Please run: Install-Module PSReadLine" -ForegroundColor Yellow
+  }
 }
 
 # https://carapace-sh.github.io/carapace-bin/setup.html#powershell

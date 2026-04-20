@@ -86,7 +86,7 @@ local dashboard_sections = {
     enabled = function()
       return (not vim.g.neovide) and Snacks.git.get_root() ~= nil
     end,
-    cmd = 'echo && git status --short --branch --renames && echo && git --no-pager diff --stat -B -M -C',
+    cmd = 'echo && git status --branch --short --renames && echo && git --no-pager diff --stat -B -M -C',
     -- height = 28,
     padding = 1,
     ttl = 5 * 60,

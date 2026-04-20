@@ -2,7 +2,10 @@
 ---
 name: g
 description: git
-run: '$(if [ $# -eq 0 ]; then git status --short --branch; else git "$@"; fi)'
+# run: '$[git, status, --branch, --short]'
+# run: '$(if [ $# -eq 0 ]; then git status --branch --short; else git "$@"; fi)'
+# run: '{{ if eq .Args "" }}git status --branch --short{{ else }}git {{ .Args }}{{ end }}'
+run: '$(bash -c "if [ $# -eq 0 ]; then git status --branch --short; else git \"\$@\"; fi" -- "$@")'
 parsing: disabled
 completion:
   positionalany: ["$carapace.bridge.CarapaceBin([git])"]
