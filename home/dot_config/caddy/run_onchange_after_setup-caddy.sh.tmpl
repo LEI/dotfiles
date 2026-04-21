@@ -1,18 +1,24 @@
 {{- $caddyfilePath := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
-#!/bin/bash
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
+#!/bin/sh
 {{- if stat $caddyfilePath }}
+
 # Caddyfile: {{ include $caddyfilePath | sha256sum }}
 {{- end }}
 # sites:{{/* include "dot_config/caddy/.chezmoidata.yaml" | sha256sum */}}
 {{- range glob (joinPath .chezmoi.homeDir ".config/caddy/sites/*.caddy") }}
 # {{ base . }}: {{ include . | sha256sum }}
 {{- end }}
-# otel-dropin: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
+# dnsmasq-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
+{{- if .features.otel }}
+# otel-conf: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
-# dns-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
+{{- end }}
 
-set -euo pipefail
+set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
@@ -21,9 +27,11 @@ if ! has caddy; then
   exit 0
 fi
 
-# On macOS, if valet is running, sync proxies via nginx instead of caddy
+{{- if eq .chezmoi.os "darwin" }}
+
+# If valet is running, sync proxies via nginx instead of caddy
 valet_dir="$HOME/.config/valet"
-if [ "${CHEZMOI_OS:?}" = darwin ] && pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
+if pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
   msg "Valet detected; configuring .test proxies via nginx instead of caddy"
   {{- range $feat, $sites := .caddy.sites }}
   {{- if not (get $.features $feat) }}{{ continue }}{{ end }}
@@ -42,130 +50,116 @@ if [ "${CHEZMOI_OS:?}" = darwin ] && pgrep -q nginx && [ -f "$valet_dir/config.j
   exit 0
 fi
 
+{{- end }}
+
 caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
 
 # Format and show diff to catch issues early
 run caddy fmt --diff --config "$caddyfile"
 
-run caddy validate --config "$caddyfile"
-
-# Service start handled by brew bundle (restart_service: :changed)
-# Reload config if already running
-if [ "${CHEZMOI_OS:?}" = darwin ] && has brew && sudo brew services list | grep -q "^caddy.*started"; then
-  run caddy reload --config "$caddyfile"
-
-  # Route .test queries to 127.0.0.1 via standalone dnsmasq
-  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
-  dnsmasq_conf="${HOMEBREW_PREFIX:?}/etc/dnsmasq.d/test.conf"
-  resolver_conf=/etc/resolver/test
-  if ! diff -u "$dnsmasq_conf" "$dns_src/.dnsmasq-test.conf" 2>/dev/null; then
-    msg "Updating dnsmasq .test config"
-    run mkdir -p "$(dirname "$dnsmasq_conf")"
-    run cp "$dns_src/.dnsmasq-test.conf" "$dnsmasq_conf"
-    run sudo brew services restart dnsmasq
-  fi
-  if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf"; then
-    msg "Creating /etc/resolver/test"
-    run sudo mkdir -p /etc/resolver
-    run sudo sh -c 'echo "nameserver 127.0.0.1" >/etc/resolver/test'
-  fi
-elif has systemctl; then
-  # Port 2020: metrics site (SELinux http_port_t)
-  if has semanage && ! semanage port -l 2>/dev/null | grep -q "^http_port_t.*2020"; then
-    run pkexec semanage port -a -t http_port_t -p tcp 2020
-  fi
-
-  # System caddy reads /etc/caddy/Caddyfile; copy from user config
-  if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
-    msg "Updating /etc/caddy/Caddyfile"
-    diff -u /etc/caddy/Caddyfile "$caddyfile" || true
-    run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
-  fi
-
-  # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
-  # otel-collector (HTTP/4318) which forwards to Tempo.
-  otel_dropin_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
-  otel_dropin=/etc/systemd/system/caddy.service.d/otel.conf
-  if ! diff -q "$otel_dropin" "$otel_dropin_src" >/dev/null 2>&1; then
-    msg "Updating caddy OTLP drop-in"
-    diff -u "$otel_dropin" "$otel_dropin_src" || true
-    run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_dropin_src' '$otel_dropin' && systemctl daemon-reload"
-  fi
-  if systemctl is-active --quiet caddy; then
-    # Verify caddy is listening on expected ports
-    if ! ss -tlnp 2>/dev/null | grep -q '127.0.0.1:443'; then
-      msg "Caddy not listening on 127.0.0.1:443; reloading config"
-      run caddy reload --config /etc/caddy/Caddyfile
-    fi
-
-    adapted="$(run caddy adapt --config "$caddyfile" | jq -S .)" || {
-      msg "caddy adapt failed; check Caddyfile"
-      exit 1
-    }
-    running="$(run curl -sf http://localhost:2019/config/ | jq -S .)" || true
-    if [ -z "${running:-}" ]; then
-      msg "WARN: caddy admin API unavailable; skipping reload check"
-    elif [ "$adapted" != "$running" ]; then
-      msg "Config changed; reloading caddy"
-      if ! run caddy reload --config /etc/caddy/Caddyfile; then
-        msg "Reload failed; restarting caddy"
-        run systemctl restart caddy
-      fi
-    else
-      msg "Config unchanged; skipping reload"
-    fi
-  fi
-
-  # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
-  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
-  nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
-  nm_test_src="$dns_src/.dnsmasq-test.conf"
-  resolved_src="$dns_src/.resolved.conf"
-  nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
-  nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
-  resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
-  nm_changed=false
-  resolved_changed=false
-  if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null ||
-    ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
-    nm_changed=true
-  fi
-  if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
-    resolved_changed=true
-  fi
-
-  if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
-    msg "Updating /etc/ DNS config"
-    diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" || true
-    diff -u "$nm_test_dest" "$nm_test_src" || true
-    diff -u "$resolved_dest" "$resolved_src" || true
-    run pkexec sh -ceux "
-      mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
-      cp '$nm_dnsmasq_src' '$nm_dnsmasq_dest'
-      cp '$nm_test_src' '$nm_test_dest'
-      cp '$resolved_src' '$resolved_dest'
-    "
-    if [ "$nm_changed" = true ]; then
-      run systemctl restart NetworkManager
-    fi
-    if [ "$resolved_changed" = true ]; then
-      run systemctl restart systemd-resolved
-    fi
-  fi
-
-  if ! systemctl is-active --quiet caddy; then
-    run systemctl enable --now caddy || {
-      run journalctl -u caddy -n 50 --no-pager >&2
-      exit 1
-    }
-  fi
-elif has brew && brew services list | grep -q "^caddy.*started"; then
-  run caddy reload --config "$caddyfile"
-else
-  msg "Error: unable to setup Caddy"
-  exit 1
+if ! caddy validate --config "$caddyfile" >/dev/null 2>&1; then
+  run caddy validate --config "$caddyfile"
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
+
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" true
+  "system" true
+  "formula" "caddy"
+  "check" `curl --silent --fail --max-time 5 http://localhost:2019/config/ >/dev/null`
+  "reload" `caddy reload --config "$caddyfile"`
+) -}}
+
+# Route .test queries to 127.0.0.1 via standalone dnsmasq
+dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+dnsmasq_conf="${HOMEBREW_PREFIX:?}/etc/dnsmasq.d/test.conf"
+resolver_conf=/etc/resolver/test
+if ! diff -u "$dnsmasq_conf" "$dns_src/.dnsmasq-test.conf" 2>/dev/null; then
+  msg "Updating dnsmasq .test config"
+  run mkdir -p "$(dirname "$dnsmasq_conf")"
+  run cp "$dns_src/.dnsmasq-test.conf" "$dnsmasq_conf"
+  run sudo brew services restart dnsmasq
+fi
+if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf"; then
+  msg "Creating /etc/resolver/test"
+  run sudo mkdir -p /etc/resolver
+  run sudo sh -c 'echo "nameserver 127.0.0.1" >/etc/resolver/test'
+fi
+
+{{- else if eq .chezmoi.os "linux" }}
+
+if [ ! -d /etc/caddy ]; then
+  die "/etc/caddy not found; install caddy system package first"
+fi
+
+# Port 2020: metrics site (SELinux http_port_t)
+if has semanage && ! semanage port -l 2>/dev/null | grep -q "^http_port_t.*2020"; then
+  run pkexec semanage port -a -t http_port_t -p tcp 2020
+fi
+
+# System caddy reads /etc/caddy/Caddyfile; copy from user config
+if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
+  msg "Updating /etc/caddy/Caddyfile"
+  diff -u /etc/caddy/Caddyfile "$caddyfile" || true
+  run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
+fi
+
+# OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
+# otel-collector (HTTP/4318) which forwards to Tempo.
+otel_conf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
+otel_conf=/etc/systemd/system/caddy.service.d/otel.conf
+if ! diff -q "$otel_conf" "$otel_conf_src" >/dev/null 2>&1; then
+  msg "Updating caddy OTLP drop-in"
+  diff -u "$otel_conf" "$otel_conf_src" || true
+  run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_conf_src' '$otel_conf' && systemctl daemon-reload"
+fi
+# Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
+dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
+nm_test_src="$dns_src/.dnsmasq-test.conf"
+resolved_src="$dns_src/.resolved.conf"
+nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
+nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
+resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
+nm_changed=false
+resolved_changed=false
+if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null ||
+  ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
+  nm_changed=true
+fi
+if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
+  resolved_changed=true
+fi
+
+if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
+  msg "Updating /etc/ DNS config"
+  diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" || true
+  diff -u "$nm_test_dest" "$nm_test_src" || true
+  diff -u "$resolved_dest" "$resolved_src" || true
+  run pkexec sh -ceux "
+    mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
+    cp '$nm_dnsmasq_src' '$nm_dnsmasq_dest'
+    cp '$nm_test_src' '$nm_test_dest'
+    cp '$resolved_src' '$resolved_dest'
+  "
+  if [ "$nm_changed" = true ]; then
+    run systemctl restart NetworkManager
+  fi
+  if [ "$resolved_changed" = true ]; then
+    run systemctl restart systemd-resolved
+  fi
+fi
+
+{{ includeTemplate "systemd-apply.sh.tmpl" (dict
+  "chezmoi" .chezmoi
+  "active" true
+  "system" true
+  "unit" "caddy"
+  "check" `curl --silent --fail --max-time 5 http://localhost:2019/config/ >/dev/null`
+) -}}
+
+{{- end }}
 if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
   die "Caddy CA not ready; run again after caddy initializes"
 fi
@@ -174,6 +168,8 @@ fi
 # sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
 #   "$(brew --prefix)/var/lib/caddy/pki/authorities/local/root.crt"
 run caddy trust --ca local # --config "$caddyfile"
+
+{{- if eq .chezmoi.os "linux" }}
 
 # caddy trust installs the root CA but not the intermediate; curl needs both to
 # build the chain. Install root + intermediate into the system trust store.
@@ -190,20 +186,27 @@ if has update-ca-trust; then
   fi
 fi
 
-# Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites.
-if has brew; then
-  brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
-  sed="$(which gsed 2>/dev/null || which sed)"
-  if [ -d "$brew_openssl_dir" ]; then
-    brew_bundle="$brew_openssl_dir/cert.pem"
-    caddy_marker="# Caddy Local Authority"
-    # Remove any existing caddy entry (marker through end-of-cert) before re-appending
-    if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-      marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
-      end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
-      run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
-    fi
-    msg "Appending caddy root CA to brew openssl bundle"
-    run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
+{{- end }}
+
+{{- if lookPath "brew" | isExecutable }}
+
+# Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites
+pki="$HOME/.local/share/caddy/pki/authorities/local"
+root="$pki/root.crt"
+brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
+sed="$(which gsed 2>/dev/null || which sed)"
+if [ -d "$brew_openssl_dir" ]; then
+  brew_bundle="$brew_openssl_dir/cert.pem"
+  caddy_marker="# Caddy Local Authority"
+  # Remove any existing caddy entry (marker through end-of-cert) before re-appending
+  if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+    marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
+    end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
+    run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
   fi
+  msg "Appending caddy root CA to brew openssl bundle"
+  run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
 fi
+
+{{- end }}
+{{ end -}}

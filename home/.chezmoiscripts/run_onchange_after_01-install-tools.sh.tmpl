@@ -7,6 +7,7 @@ set -eu
 
 {{- if eq .osID "android" }}
 {{ includeTemplate "termux.sh.tmpl" . | trim }}
+# shellcheck disable=SC2139
 alias mise="termux_prefix $MISE_BIN"
 {{- end }}
 {{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}

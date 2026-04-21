@@ -2,10 +2,11 @@
 #MISE alias="vsk"
 #MISE description="Validate SKILL.md files against Agent Skills specification"
 # Requires skill-validator: brew install agent-ecosystem/tap/skill-validator
+#USAGE flag "-l --list" help="List SKILL.md files"
 #USAGE flag "-q --quiet" help="Only print errors and summary"
 #USAGE flag "-v --verbose" help="Show validation details"
 #USAGE arg "[files]..." help="SKILL.md files to validate (default: all tracked)"
-#USAGE complete "files" run="git ls-files 'SKILL.md' '**/SKILL.md'"
+#USAGE complete "files" run="./script/validate-skill --list"
 
 set -euo pipefail
 
@@ -19,12 +20,17 @@ if ! command -v skill-validator >/dev/null 2>&1; then
   exit 1
 fi
 
-jobs=${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}
+jobs="${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 
-verbosity=${VALIDATE_SKILL_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+prog="${0##*/}"
+verbosity="${VALIDATE_SKILL_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -l | --list)
+    git ls-files 'SKILL.md' '**/SKILL.md'
+    exit
+    ;;
   -q | --quiet)
     verbosity=0
     shift
@@ -37,7 +43,7 @@ while [ $# -gt 0 ]; do
     if command -v usage >/dev/null; then
       usage exec --help bash "$0"
     else
-      echo "Usage: validate-skill [-q] [-v] [files...]"
+      echo "Usage: validate-skill [-l] [-q] [-v] [files...]"
     fi
     exit
     ;;
@@ -50,7 +56,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "validate-skill: unknown option: $1" >&2
+    echo "${0##*/}: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -92,7 +98,7 @@ validate_skill() {
   fi
 
   if [ "$verbosity" -ge 2 ]; then
-    echo "validate-skill: $name" >&2
+    echo "$prog: $name" >&2
   fi
 
   # exit code 2 means warnings
@@ -108,18 +114,18 @@ export -f validate_skill
 
 # Collect files: from args or find all
 if [ $# -eq 0 ]; then
-  mapfile -t -d '' files < <(git ls-files -z 'SKILL.md' '**/SKILL.md')
+  mapfile -t files < <("$0" --list)
   set -- "${files[@]}"
 fi
 
 if [ $# -eq 0 ]; then
-  echo "validate-skill: no files to validate" >&2
+  echo "${0##*/}: no files to validate" >&2
   exit 0
 fi
 
-export verbosity
+export prog verbosity
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$jobs" -n1 bash -euc 'validate_skill "$1"' _ || true)
+results=$(printf '%s\0' "$@" | xargs -0 -P "$jobs" -n1 bash -euc 'validate_skill "$1"' _ || true)
 
 passed=$(grep -c '^PASS ' <<<"$results") || passed=0
 failed=$(grep -c '^FAIL ' <<<"$results") || failed=0
@@ -133,6 +139,6 @@ if [ "$failed" -gt 0 ]; then
   echo "$results" | grep -vE '^(PASS|FAIL) ' || true
 fi
 if [ "$verbosity" -ge 1 ] && [ "$((passed + failed))" -gt 0 ]; then
-  echo "validate-skill: $passed passed, $failed failed" >&2
+  echo "${0##*/}: $passed passed, $failed failed" >&2
 fi
 exit $((failed > 0 ? 1 : 0))

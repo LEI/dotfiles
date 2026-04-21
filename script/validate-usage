@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #MISE alias="vu"
 #MISE description="Lint #USAGE specs and shell script conventions"
+#USAGE flag "-l --list" help="List candidate files"
 #USAGE flag "-q --quiet" help="Only print errors and summary"
 #USAGE flag "-v --verbose" help="Print full usage spec for each file"
-#USAGE arg "[file]..." help="Files to check (default: git ls-files)"
-#USAGE complete "file" run="git ls-files 'script/*' 'home/dot_local/bin/executable_*'"
+#USAGE arg "[files]..." help="Files to check (default: git ls-files)"
+#USAGE complete "files" run="./script/validate-usage --list"
 
 set -euo pipefail
 
@@ -14,13 +15,18 @@ if ((BASH_VERSINFO[0] < 4)); then
 fi
 
 if ! command -v usage >/dev/null; then
-  exit 0
+  echo "${0##*/}: usage command not found" >&2
+  exit 1
 fi
 
-verbosity=${VALIDATE_USAGE_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+verbosity="${VALIDATE_USAGE_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -l | --list)
+    git ls-files 'script/*' 'home/dot_local/bin/executable_*'
+    exit
+    ;;
   -q | --quiet)
     verbosity=0
     shift
@@ -33,7 +39,7 @@ while [ $# -gt 0 ]; do
     if command -v usage >/dev/null; then
       usage exec --help bash "$0"
     else
-      echo "Usage: validate-usage [-q] [-v] [file...]"
+      echo "Usage: validate-usage [-l] [-q] [-v] [file...]"
     fi
     exit
     ;;
@@ -46,7 +52,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "validate-usage: unknown option: $1" >&2
+    echo "${0##*/}: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -54,7 +60,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ $# -eq 0 ]; then
-  mapfile -t files < <(git ls-files 'script/*' 'home/dot_local/bin/executable_*')
+  mapfile -t files < <("$0" --list)
   set -- "${files[@]}"
 fi
 
@@ -94,10 +100,7 @@ for f in "$@"; do
   esac
 
   if ! grep -q '^#USAGE' "$f"; then
-    # echo "FAIL $f: missing #USAGE directives"
-    # errors=$((errors + 1))
-    # ok=false
-    [ "$verbosity" -ge 1 ] && echo "WARN $f: missing #USAGE directives"
+    [ "$verbosity" -ge 1 ] && echo "WARN $f: no #USAGE directive"
     warnings=$((warnings + 1))
     continue
   fi
@@ -113,6 +116,16 @@ for f in "$@"; do
     [ "$verbosity" -ge 1 ] && echo "WARN $f: has args but no choices or complete directive"
     warnings=$((warnings + 1))
   fi
+
+  # Reserved arg names (file, dir, path) override custom complete directives
+  for reserved in file dir path; do
+    if grep -q "^#USAGE complete \"$reserved\"" "$f" &&
+      grep -q "^#USAGE arg.*[<[]${reserved}[>\\]]" "$f"; then
+      echo "FAIL $f: complete \"$reserved\" ignored, reserved arg name triggers built-in completion"
+      errors=$((errors + 1))
+      ok=false
+    fi
+  done
 
   # Lint #USAGE spec
   spec=
@@ -135,6 +148,6 @@ if [ "$verbosity" -ge 1 ]; then
   if [ "$warnings" -gt 0 ]; then
     summary="$summary, $warnings warnings"
   fi
-  echo "validate-usage: $summary" >&2
+  echo "${0##*/}: $summary" >&2
 fi
 exit "$((errors > 0))"

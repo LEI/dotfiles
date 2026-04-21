@@ -97,7 +97,7 @@ setup() {
   source_container
 
   run log "test message"
-  assert_output "container: test message"
+  assert_output "bats-exec-test: test message"
   assert_success
 }
 
@@ -230,8 +230,9 @@ setup() {
 # bats test_tags=type:unit
 @test "container: tag_prefix uses current directory name" {
   source_container
-
-  assert_equal "$tag_prefix" "chezmoi"
+  local dir_name
+  dir_name="$(basename "$PWD")" # chezmoi locally, dotfiles in CI
+  assert_equal "$tag_prefix" "$dir_name"
 }
 
 # bats test_tags=type:unit

@@ -1,12 +1,12 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $claude := get . "claude" | default dict -}}
-{{- $claudeTiers := get $claude "tiers" | default dict -}}
+{{- $tiers := get $claude "tiers" | default dict -}}
 {{- $sandboxEnabled := false -}}
 {{- $tierName := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
-{{- $tier := get $claudeTiers $tierName | default dict -}}
-{{- $model := get $tier "model" -}}
-{{- $subagent := get $tier "subagent" -}}
-{{- $effort := get $tier "effort" -}}
+{{- $settings := get $tiers $tierName | default dict -}}
+{{- $model := get $settings "model" -}}
+{{- $subagent := get $settings "subagent" -}}
+{{- $effort := get $settings "effort" -}}
 {{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
 {{- $plugins := list -}}
 {{- range $data.plugins -}}
@@ -36,6 +36,7 @@
     "OTEL_LOG_USER_PROMPTS": "1",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_TRACES_EXPORTER": "otlp",
     "XDG_CACHE_HOME": "{{ .chezmoi.homeDir }}/.cache",
     "XDG_CONFIG_HOME": "{{ .chezmoi.homeDir }}/.config",
     "XDG_DATA_HOME": "{{ .chezmoi.homeDir }}/.local/share",
@@ -280,7 +281,7 @@
       "ExitPlanMode",
       "NotebookEdit"
     ],
-    "defaultMode": "{{ true | ternary "plan" "default" }}",
+    "defaultMode": "{{ env "CLAUDE_DEFAULT_MODE" | default "default" }}",
     "disableBypassPermissionsMode": "disable",
     {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
     "additionalDirectories": {{ $notesDirs | toPrettyJson | indent 4 | trim }}

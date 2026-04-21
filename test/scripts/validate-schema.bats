@@ -193,6 +193,27 @@ setup() {
 }
 
 # bats test_tags=type:unit
+@test "validate-schema: skips file with unknown extension" {
+  local file="$BATS_TEST_TMPDIR/config.tmpl"
+  printf 'some content' >"$file"
+  run_script ./script/validate-schema --verbose "$file"
+  assert_line "SKIP $file (no \$schema)"
+  assert_success
+}
+
+# bats test_tags=type:unit
+@test "validate-schema: handles path with spaces" {
+  local dir="$BATS_TEST_TMPDIR/path with spaces"
+  local schema="$dir/schema.json"
+  local file="$dir/valid.json"
+  mkdir -p "$dir"
+  printf '{"type":"object"}' >"$schema"
+  printf '{"$schema":"%s"}' "$schema" >"$file"
+  run_script ./script/validate-schema "$file"
+  assert_success
+}
+
+# bats test_tags=type:unit
 @test "validate-schema: fails on file not found" {
   run_script ./script/validate-schema "/nonexistent/file.json"
   assert_line "FAIL /nonexistent/file.json schema= (file not found)"

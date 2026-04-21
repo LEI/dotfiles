@@ -6,6 +6,18 @@ version: "0.5"
 log_level: info
 
 processes:
+  {{- if .features.neovim }}
+
+  nvim-logs:
+    namespace: logs
+    description: Neovim logs
+    # command: '{{ $tspinFollow }} "${XDG_STATE_HOME:-$HOME/.local/state}/nvim/log"'
+    command: "tail -f ~/.cache/nvim/{log,*.log} ~/.local/state/nvim/{log,*.log} | tspin --print"
+    availability:
+      restart: on_failure
+      max_restarts: 0
+  {{- end }}
+
   {{- if .features.claude }}
   {{- range glob (joinPath .chezmoi.homeDir ".local/state/claude/*.jsonl") }}
   {{- $name := trimSuffix ".jsonl" (base .) }}
@@ -43,7 +55,8 @@ processes:
 
   {{- $opencodeConf := joinPath .chezmoi.homeDir ".config" "secrets.d" "opencode.conf" }}
   {{- $opencodeSettings := joinPath .chezmoi.homeDir ".config" "opencode" "opencode.jsonc" }}
-  {{- if and .features.opencode (stat $opencodeConf) }}
+  {{- if and false .features.opencode (stat $opencodeConf) }}
+  # FIXME: high I/O wait on Linux BRTFS
 
   {{- $server := .opencode.server }}
   {{- if and .features.tailscale .tailscale.tailnet }}

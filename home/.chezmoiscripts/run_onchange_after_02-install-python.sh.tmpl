@@ -48,6 +48,6 @@ fi
 {{-   if and (not $.upgrade) ((lookPath $command) | isExecutable) }}
 msg "Already installed: {{ $key }}"
 {{-   else }}
-dry_run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} {{ $key }}
+dry_run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} {{ $key | quote }}
 {{-   end }}
 {{- end }}

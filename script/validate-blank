@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #MISE alias="vb"
 #MISE description="Check for blank lines at start/end and consecutive"
+#USAGE flag "-l --list" help="List tracked files"
 #USAGE arg "[files]..." help="Files to check (default: all tracked)"
-#USAGE complete "files" run="git ls-files"
+#USAGE complete "files" run="./script/validate-blank --list"
 
 set -euo pipefail
 
@@ -13,8 +14,40 @@ fi
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -l | --list)
+    git ls-files
+    exit 0
+    ;;
+  -h | --help)
+    if command -v usage >/dev/null; then
+      usage exec --help bash "$0"
+    else
+      echo "Usage: validate-blank [-l] [files...]"
+    fi
+    exit 0
+    ;;
+  --usage)
+    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    exit 0
+    ;;
+  --)
+    shift
+    break
+    ;;
+  -*)
+    echo "${0##*/}: unknown option: $1" >&2
+    exit 2
+    ;;
+  *)
+    break
+    ;;
+  esac
+done
+
 if [ $# -eq 0 ]; then
-  mapfile -t -d '' files < <(git ls-files -z)
+  mapfile -t files < <("$0" --list)
   set -- "${files[@]}"
 fi
 

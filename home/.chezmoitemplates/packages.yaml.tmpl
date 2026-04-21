@@ -363,7 +363,7 @@ packages:
   mlx-lm:
     enabled: {{ and .features.ai .features.mlx }}
     # brew services start mlx-lm
-    restart_service: ":changed"
+    restart_service: false # ":changed"
     # FIXME(brew): RuntimeError: [metal::Device] Unable to load kernel
     # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
     # command: mlx_lm.server
@@ -443,7 +443,7 @@ packages:
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
     enabled: {{ and .features.ollama (eq .osIDLike "darwin") }}
-    restart_service: ":changed"
+    restart_service: false # ":changed"
   # ollama-app:
   #   enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
@@ -847,7 +847,6 @@ osPackages:
       # automake:
       # bison:
       # bzip2:
-      # caddy:
       # catimg:
       # cdrtools:
       # cheat:

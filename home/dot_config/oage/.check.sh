@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if ((BASH_VERSINFO[0] < 5)); then
-  echo >&2 "bash 5+ required, found $BASH_VERSION"
+  echo "bash 5+ required, found $BASH_VERSION" >&2
   exit 1
 fi
 

@@ -4,7 +4,7 @@ tiers:
     model: # sonnet
     subagent: # claude-haiku-4-5
     effort:
-  max:
+  max: # 5x, 20x
     model: opusplan # opus
     subagent: # claude-haiku-4-5
     effort: # medium
@@ -13,7 +13,7 @@ tiers:
     subagent: # claude-haiku-4-5
     effort:
   team-premium:
-    model: opusplan # opus
+    model: # opus
     subagent: # claude-haiku-4-5
     effort: # medium
 

@@ -36,8 +36,10 @@ lockfile = true
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
 {{-   $name := . | dir | base }}
 {{-   $feat := get $featMap $name | default $name }}
-{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
-{{-     $checkDirs = append $checkDirs $name }}
+{{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
+{{-     continue }}
+{{-   end }}
+{{-   $checkDirs = append $checkDirs $name }}
 
 [tasks."check:{{ $name }}"]
 description = {{ printf "Check %s" $feat | quote }}
@@ -45,9 +47,8 @@ description = {{ printf "Check %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
 shell = "bash"
-{{- if $miseInteractive }}
+{{-   if $miseInteractive }}
 interactive = true
-{{- end }}
 {{-   end }}
 {{- end }}
 
@@ -73,14 +74,18 @@ depends = [
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
 {{-   $name := . | dir | base }}
 {{-   $feat := get $featMap $name | default $name }}
-{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
-{{-     $updateDirs = append $updateDirs $name }}
+{{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
+{{-     continue }}
+{{-   end }}
+{{-   $updateDirs = append $updateDirs $name }}
 
 [tasks."update:{{ $name }}"]
 description = {{ printf "Update %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
 shell = "sh"
+{{-   if $miseInteractive }}
+interactive = true
 {{-   end }}
 {{- end }}
 
@@ -111,6 +116,9 @@ run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.
 description = {{ printf "Build and test chezmoi in %s" . | quote }}
 hide = true
 run = "script/container {{ . }}"
+{{-   if $miseInteractive }}
+interactive = true
+{{-   end }}
 {{- end }}
 
 [tasks."container:all"]
@@ -121,6 +129,9 @@ depends = [
   {{ printf "container:%s" . | quote }},
 {{- end }}
 ]
+{{- if $miseInteractive }}
+interactive = true
+{{- end }}
 
 {{- if .features.opencode }}
 

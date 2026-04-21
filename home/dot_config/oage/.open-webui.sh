@@ -5,15 +5,15 @@ open_webui_auth() {
     -H 'Content-Type: application/json' \
     -d '{"email":"","password":""}' | jq -r '.token')"
   if [ -z "$OPEN_WEBUI_TOKEN" ] || [ "$OPEN_WEBUI_TOKEN" = "null" ]; then
-    echo >&2 "warning: open-webui: could not authenticate"
+    echo "warning: open-webui: could not authenticate" >&2
     return 1
   fi
-  echo >&2 "open-webui: authenticated"
+  echo "open-webui: authenticated" >&2
 }
 
 open_webui_post() {
   _url="$OPEN_WEBUI_API/$1"
-  echo >&2 "open-webui: POST $_url"
+  echo "open-webui: POST $_url" >&2
   curl -sf -X POST "$_url" \
     -H "Authorization: Bearer $OPEN_WEBUI_TOKEN" \
     -H "Content-Type: application/json" \

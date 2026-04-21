@@ -136,7 +136,7 @@ ZSH_RC
   ZDOTDIR="$tmpdir" detach zsh -ic 'zprof' 2>/dev/null
   ;;
 *)
-  echo "profile: invalid shell '$shell', expected bash or zsh" >&2
+  echo "${0##*/}: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac
@@ -160,7 +160,7 @@ report_stderr() {
 
 if [ "$shell_exit" -ne 0 ]; then
   echo >&2
-  echo >&2 "profile: $shell init exited with code $shell_exit"
+  echo >&2 "${0##*/}: $shell init exited with code $shell_exit"
   report_stderr
   exit 1
 fi
@@ -172,6 +172,6 @@ grep -v \
 
 if [ -s "$stderrlog.filtered" ]; then
   echo >&2
-  echo >&2 "profile: $shell init stderr:"
+  echo >&2 "${0##*/}: $shell init stderr:"
   stderrlog="$stderrlog.filtered" report_stderr
 fi

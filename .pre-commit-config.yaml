@@ -1,24 +1,21 @@
 ---
-# prek splits filenames on spaces; exclude paths containing whitespace globally
-exclude: '\s'
 repos:
-  # Auto-fixers first
+  # Auto-fixers
   # https://pre-commit.com/hooks.html
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: \.ya?ml$ # yamllint trailing-spaces reports line and doesn't auto-fix
+        exclude: \.(sh|ya?ml)$ # shfmt and yamllint trailing-spaces reports exact line
       - id: end-of-file-fixer
-        exclude: logseq/settings/.*\.json$
+        exclude: (claude_desktop_config\.json|logseq/settings/.*\.json)$
       - id: check-yaml
         exclude: ^home/dot_config/goss/goss\.yaml$
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: detect-private-key
 
-  # Formatters (before linters to avoid cascading failures)
-  # https://github.com/scop/pre-commit-shfmt#readme
+  # Formatters
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.13.1-1
     hooks:
@@ -26,13 +23,11 @@ repos:
         language: system
         args:
           - --diff
-        # TODO: ignore rendered modify_ templates (e.g. system ~/.bashrc indent)
-        exclude: ^(home/.*(\.tmpl|/modify_)|.*\.zsh)
+        exclude: ^(home/.*(\.tmpl$|/modify_)|.*\.zsh$)
         stages:
           - pre-commit
 
   # Linters
-  # https://github.com/koalaman/shellcheck-precommit
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
     hooks:
@@ -44,14 +39,10 @@ repos:
           - --external-sources
           - --exclude=SC2148
           - --severity=info
-        exclude: |
-          (?x)^(
-            home/(.*/)?(modify_.*|.*\.tmpl)
-            |.*\.awk
-            |.*\.zsh
-            |home/dot_local/bin/executable_chezmoi-profile
-            |\.config/tmux/plugins.*
-          )$
+        files: \.(sh|bash|bats)$|^(script/|\.local/bin/|home/dot_local/bin/executable_)
+        exclude: ^(.*\.(awk|zsh|tmpl)$|home/dot_config/tmux/plugins|home/dot_local/bin/executable_(chezmoi-profile|lspan)$)
+        types:
+          - text
         stages:
           - pre-commit
 
@@ -67,7 +58,7 @@ repos:
           # - --error=E005
           - --ignore=E003,E005,E006
           - --error=E042,E043
-        exclude: ^(home/.*(\.tmpl|/modify_)|test/|.*\.bats)
+        exclude: ^(home/.*(\.tmpl$|/modify_)|test)
         types:
           - shell
         stages:
@@ -85,7 +76,6 @@ repos:
         stages:
           - pre-commit
 
-  # https://github.com/JohnnyMorganz/StyLua#pre-commit
   - repo: https://github.com/JohnnyMorganz/StyLua
     rev: v2.4.1
     hooks:
@@ -96,7 +86,6 @@ repos:
           - --check
 
   # Schema and workflow validation
-  # https://github.com/python-jsonschema/check-jsonschema
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.1
     hooks:
@@ -117,7 +106,6 @@ repos:
       #   files: \.(json[c5]?|toml|ya?ml)$
 
   # Security
-  # https://github.com/gitleaks/gitleaks#pre-commit
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
@@ -207,7 +195,8 @@ repos:
         entry: ./script/validate-schema
         language: system
         files: \.(json[c5]?|toml|ya?ml)$
-        exclude: ^home/(\.chezmoitemplates/|.*/modify_.*)
+        # FIXME: starship.toml has unknown properties (maven); schema version mismatch?
+        exclude: ^(home/(\.chezmoitemplates/|.*/modify_.*)|\.config/starship/starship\.toml)$
         stages:
           - pre-commit
 
@@ -215,15 +204,6 @@ repos:
         name: validate blank lines
         entry: ./script/validate-blank
         language: system
-        stages:
-          - pre-commit
-
-      - id: lint-templates
-        name: validate templates
-        entry: ./script/lint-templates
-        language: system
-        files: ^home/(.*\.tmpl$|.*/modify_)
-        exclude: \.chezmoi\.yaml\.tmpl$
         stages:
           - pre-commit
 
@@ -241,5 +221,14 @@ repos:
         entry: ./script/validate-skill
         language: system
         files: SKILL\.md$
+        stages:
+          - pre-commit
+
+      - id: lint-templates
+        name: lint templates
+        entry: ./script/lint-templates
+        language: system
+        files: ^home/(.*\.tmpl$|.*/modify_)
+        exclude: \.chezmoi\.yaml\.tmpl$
         stages:
           - pre-commit

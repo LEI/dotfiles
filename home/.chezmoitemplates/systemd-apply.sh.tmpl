@@ -1,7 +1,9 @@
 {{- $active := eq (get . "active" | toString) "true" -}}
+{{- $check := get . "check" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
-{{- $health := get . "health" -}}
-{{- $port := get . "port" -}}
+{{- $reload := get . "reload" -}}
+{{- $system := eq (get . "system" | toString) "true" -}}
+{{- $ctl := $system | ternary "systemctl" "systemctl --user" -}}
 {{- $dir := get . "dir" -}}
 
 {{- $suffix := $unit | splitList "." | last -}}
@@ -20,51 +22,50 @@
 {{-   end -}}
 {{- end -}}
 
-{{- $sourceFile := joinPath $dir $unit -}}
-{{- $status := "" -}}
+{{- $status := "unknown" -}}
 {{- if lookPath "systemctl" | isExecutable -}}
-{{-   $status = output "sh" "-c" (printf "systemctl --user show %s --property=ActiveState --value 2>/dev/null || true" $name) | trim -}}
-{{-   if $status -}}
-# status: {{ $status }}
-{{   end -}}
+{{-   $status = output "sh" "-c" (printf "%s show %s --property=ActiveState --value 2>/dev/null || true" $ctl $name) | trim | default "not found" -}}
 {{- end -}}
+# status: {{ $status }}
 
 if ! command -v systemctl >/dev/null; then
   die "systemctl not found"
 fi
 
-run systemctl --user daemon-reload
+run {{ $ctl }} daemon-reload
 {{- if $active }}
-{{-   if not $isQuadlet }}
-if systemctl --user is-active --quiet {{ $name }}; then
-  run systemctl --user restart {{ $name }}
+if {{ $ctl }} is-active --quiet {{ $name }}; then
+{{- if $reload }}
+  if ! run {{ $reload }}; then
+    msg "{{ $name }}: reload failed"
+    run {{ $ctl }} reload-or-restart {{ $name }}
+  fi
+{{- else }}
+  run {{ $ctl }} reload-or-restart {{ $name }}
+{{- end }}
 else
-  run systemctl --user enable --now {{ $name }}
-fi
+{{-   if $isQuadlet }}
+  run {{ $ctl }} start {{ $name }}
 {{-   else }}
-if ! systemctl --user is-active --quiet {{ $name }}; then
-  run systemctl --user start {{ $name }}
-fi
+  run {{ $ctl }} enable --now {{ $name }}
 {{-   end }}
-if ! systemctl --user is-active --quiet {{ $name }}; then
-  run systemctl --user status {{ $name }} --no-pager || true
+fi
+if ! {{ $ctl }} is-active --quiet {{ $name }}; then
+  run {{ $ctl }} status {{ $name }} --no-pager || true
   die "{{ $unit }}: failed to start"
 fi
 
-{{-   if and $port $health }}
-if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
-  msg "{{ $unit }}: unhealthy, restarting"
-  run systemctl --user restart {{ $name }}
-  if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
-    die "{{ $unit }}: unhealthy after retries"
-  fi
+{{-   if $check }}
+
+if ! run retry 10 3 {{ $check }}; then
+  die "{{ $unit }}: unhealthy after retries"
 fi
 {{-   end }}
 {{- else }}
 {{-   if not $isQuadlet }}
-if systemctl --user is-enabled --quiet {{ $name }} 2>/dev/null; then
+if {{ $ctl }} is-enabled --quiet {{ $name }} 2>/dev/null; then
   msg "disabling service {{ $unit }}"
-  run systemctl --user disable --now {{ $name }}
+  run {{ $ctl }} disable --now {{ $name }}
 fi
 {{-   end }}
 {{- end }}

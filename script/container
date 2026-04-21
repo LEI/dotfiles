@@ -10,7 +10,7 @@
 set -euo pipefail
 
 if ((BASH_VERSINFO[0] < 4)); then
-  echo "container: bash 4+ required, found $BASH_VERSION" >&2
+  echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2
   exit 1
 fi
 
@@ -22,7 +22,7 @@ readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 container() { "$CONTAINER_PROVIDER" "$@"; }
 
 log() {
-  echo "container: $*" >&2
+  echo "${0##*/}: $*" >&2
 }
 
 trace() {

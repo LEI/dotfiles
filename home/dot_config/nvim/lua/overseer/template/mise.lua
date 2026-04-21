@@ -60,6 +60,7 @@ local provider = {
         for _, value in pairs(data) do
           table.insert(
             ret,
+            -- FIXME: wrap_template removed in 2.0.0
             overseer.wrap_template(tmpl, {
               name = string.format('mise %s', value.name),
               desc = value.description ~= '' and value.description or nil,

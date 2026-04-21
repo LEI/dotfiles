@@ -11,6 +11,18 @@ includes = ["script"]
 description = "Run CI workflow locally with act"
 run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
 
+[tasks.all]
+description = "Run CI workflow locally with act"
+interactive = true
+run = [
+  # c a --init
+  "chezmoi apply --init --verbose",
+  # m pl
+  "mise pipeline",
+  # m ct:all
+  "mise container alpine",
+]
+
 [tasks.ci]
 description = "Run CI steps locally"
 depends = [
@@ -28,6 +40,7 @@ run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 [tasks.pipeline]
 alias = "pl"
 description = "Run checks and tests locally"
+# FIXME: Ctrl-C leaves orphaned depends processes (mise signal propagation bug)
 depends = [
   "check",
   # "lint",

@@ -5,7 +5,7 @@
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show render dir and file list"
 #USAGE arg "[templates]..." help="Template paths to render (default: all)"
-#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
+#USAGE complete "templates" run="chezmoi-render --list"
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ render_dir=$(mktemp -d)
 render_args=()
 prek_args=()
 keep="${LINT_KEEP:-false}"
-verbosity=${LINT_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+verbosity="${LINT_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -47,7 +47,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "lint-templates: unknown option: $1" >&2
+    echo "${0##*/}: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -65,10 +65,10 @@ fi
 # shellcheck disable=SC2329
 cleanup() {
   if [ "$keep" = true ]; then
-    echo "lint: render dir kept: $render_dir" >&2
+    echo "${0##*/}: render dir kept: $render_dir" >&2
   else
     if [ "$verbosity" -ge 2 ]; then
-      echo "lint: cleanup $render_dir" >&2
+      echo "${0##*/}: cleanup $render_dir" >&2
     fi
     rm -rf "$render_dir"
   fi
@@ -84,7 +84,7 @@ chezmoi-render --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 find "$render_dir" -type f -empty -delete
 
 if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
-  echo "lint: no rendered files" >&2
+  echo "${0##*/}: no rendered files" >&2
   exit 0
 fi
 
@@ -112,6 +112,6 @@ prek run \
   --all-files || exit_code=$?
 
 if [ "$exit_code" -ne 0 ] && [ "$verbosity" -ge 1 ]; then
-  echo "lint: failed with exit code $exit_code" >&2
+  echo "${0##*/}: failed with exit code $exit_code" >&2
 fi
 exit "$exit_code"

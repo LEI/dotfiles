@@ -11,7 +11,10 @@ vim.g.ai = {
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
-  mcphub = true,
+  -- FIXME: Error loading extension mcphub:
+  -- ...mcphub.nvim/lua/mcphub/extensions/codecompanion/init.lua:27:
+  -- attempt to index field 'strategies' (a nil value)
+  mcphub = false,
   sidekick = true,
   windsurf = false,
 
@@ -348,7 +351,7 @@ return {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
     -- tag = 'v18.3.1',
-    version = 'v18.x',
+    version = 'v19.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       -- 'nvim-mini/mini.diff',

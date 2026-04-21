@@ -7,11 +7,11 @@ set -eu
 readonly user="${DEV_USER:-test}"
 
 log() {
-  echo "entrypoint: $*" >&2
+  echo "${0##*/}: $*" >&2
 }
 
 error() {
-  echo "entrypoint: ERROR: $*" >&2
+  echo "${0##*/}: ERROR: $*" >&2
 }
 
 # Verify running in a container to prevent accidental host execution

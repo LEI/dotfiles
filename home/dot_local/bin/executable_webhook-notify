@@ -6,7 +6,7 @@
 
 set -eu
 
-msg() { echo "webhook-notify: $*" >&2; }
+msg() { echo "${0##*/}: $*" >&2; }
 
 notify() {
   _title="$1" _subtitle="$2" _message="$3" _url="${4:-}" _sound="${5:-Ping}"

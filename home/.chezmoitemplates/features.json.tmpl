@@ -1,11 +1,13 @@
+{{- $fr := hasPrefix "fr" .hostname }}
+{{- $mb := hasPrefix "mb" .hostname }}
 {{- $ai := and
     (not .container)
     (eq .osIDLike "arch" "darwin" "fedora")
     (ne .profile "minimal")
-    (or (hasPrefix "fr" .hostname) (hasPrefix "mb" .hostname))
+    (or $fr $mb)
 -}}
 {{- $mlx := and (eq .os "darwin") (eq .arch "arm64") -}}
-{{- $ollama := and $ai (or (hasPrefix "fr" .hostname) $mlx) -}}
+{{- $ollama := and $ai .hardware.gpuAccelerated -}}
 {{- $docker := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
 {{- $podman := and (eq .osIDLike "arch" "darwin" "fedora") .gui -}}
 {{- $features := (dict
@@ -55,10 +57,10 @@
     (not (eq .osIDLike "alpine"))
     (not (or .ephemeral .headless)))
   "nushell" .gui
-  "oage" (and $ai (or $docker $podman))
+  "oage" (and $mb (or $docker $podman))
   "ollama" $ollama
   "opencode" $ai
-  "otel" (or $docker $podman)
+  "otel" (and $mb (or $docker $podman))
   "processCompose" $ai
   "php" false
   "podman" $podman
@@ -73,7 +75,7 @@
   "ssh" false
   "steam" (and (eq .osIDLike "arch" "fedora" "windows") (eq .profile "personal"))
   "sway" false
-  "tailscale" (and (eq .profile "personal") (not (or .ephemeral .headless)))
+  "tailscale" (and (ne .os "android") (eq .profile "personal") (not (or .ephemeral .headless)))
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
   "tofu" false
   "toolbox" (eq .osIDLike "fedora")

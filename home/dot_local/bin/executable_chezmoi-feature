@@ -22,7 +22,7 @@ get_format() {
   json) format="toPrettyJson" ;;
   yaml) format="toYaml" ;;
   *)
-    echo "chezmoi package: invalid output format: $output" >&2
+    echo "${0##*/}: invalid output format: $output" >&2
     usage
     return 1
     ;;
@@ -101,10 +101,10 @@ while [ $# -gt 0 ]; do
   *)
     value="$(get_feature "$1")"
     if [ "$value" = false ]; then
-      echo "chezmoi feature: feature disabled: $1" >&2
+      echo "${0##*/}: feature disabled: $1" >&2
       exit 1
     elif [ "$value" != true ]; then
-      echo "chezmoi feature: unknown value: $1 ($value)" >&2
+      echo "${0##*/}: unknown value: $1 ($value)" >&2
       exit 2
     fi
     # echo "chezmoi feature: feature enabled: $1" >&2
@@ -124,7 +124,7 @@ enabled)
   list_enabled_features "$output"
   ;;
 *)
-  echo "chezmoi feature: invalid action: $action" >&2
+  echo "${0##*/}: invalid action: $action" >&2
   usage
   exit 1
   ;;

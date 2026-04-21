@@ -1,3 +1,4 @@
+# FIXME: https://github.com/caddyserver/caddy/issues/6475#issuecomment-2268984122
 {
 	debug
 	default_bind 127.0.0.1
@@ -10,17 +11,25 @@
 	# }
 	local_certs # run `caddy trust` once to install the CA
 	cert_lifetime 30d # 168h
-	# pki {
-	# 	ca local {
-	# 		intermediate_lifetime 730d
-	# 	}
-	# }
+	pki {
+		ca local {
+			intermediate_lifetime 730d
+		}
+	}
 }
 
 # Metrics on 2020; use 9103 if SELinux allows
 :2020 host.docker.internal:2020 {
 	bind 0.0.0.0
 	reverse_proxy /metrics localhost:2019
+}
+
+(cert_lifetime) {
+	tls {
+		issuer internal {
+			lifetime 365d
+		}
+	}
 }
 
 (logging) {
@@ -31,20 +40,12 @@
 	}
 }
 
-# (example_php) {
+# php.test {
+# 	import cert_lifetime
+# 	import logging
 # 	root * /srv/example/public
 # 	php_fastcgi unix//tmp/php-fpm.sock
 # 	file_server
-# }
-
-# example.test {
-# 	tls {
-# 		issuer internal {
-# 			lifetime 365d
-# 		}
-# 	}
-# 	import example_php
-# 	import logging
 # }
 
 import {{ .chezmoi.homeDir }}/.config/caddy/sites/*.caddy

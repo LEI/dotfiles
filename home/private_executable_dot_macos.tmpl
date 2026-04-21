@@ -37,13 +37,22 @@ defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
 # WARN: path must be specified when the module is not installed in
 # /usr/lib/pam or /usr/local/lib/pam (uname -m -> arm64)
 
-# auth     optional     /opt/homebrew/lib/pam/pam_reattach.so
+# auth     optional     {{ .brewPrefix }}/lib/pam/pam_reattach.so
 # auth     sufficient   pam_tid.so
 
 # Mathias Bynens defaults, overides below
 source "$HOME/.local/share/macos/defaults.sh"
 
+set -x
+
 # iTerm2
-defaults write com.googlecode.iterm2 AllowClipboardAccess -boolean true
-# defaults write com.googlecode.iterm2 PromptOnQuit -bool false
+
+defaults write com.googlecode.iterm2 AllowClipboardAccess -bool true
 defaults write com.googlecode.iterm2 WindowPlacement -int 2 # 0=system 1=smart 2=size+position 3=position
+defaults write com.googlecode.iterm2 ClickToSelectCommand -bool false # clicking a command does not restrict find/filter
+# defaults write com.googlecode.iterm2 PromptOnQuit -bool false
+
+# Appearance > Dimming
+# defaults write com.googlecode.iterm2 DimBackgroundWindows -int 0
+# defaults write com.googlecode.iterm2 DimOnlyText -int 1
+# defaults write com.googlecode.iterm2 SplitPaneDimmingAmount 0.25

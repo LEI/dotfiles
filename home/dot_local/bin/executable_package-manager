@@ -53,7 +53,7 @@ python | uv) manager="uv" ;;
 ruby | gem) manager="gem" ;;
 rust | cargo) manager="cargo" ;;
 *)
-  echo "package-manager: invalid argument: $1" >&2
+  echo "${0##*/}: invalid argument: $1" >&2
   exit 1
   ;;
 esac

@@ -155,10 +155,30 @@ return {
     end,
   },
   {
+    'romus204/tree-sitter-manager.nvim',
+    commit = '540c6dc',
+    enabled = vim.fn.has('nvim-0.12') == 1,
+    opts = {},
+    init = function()
+      -- FIXME: chezmoi modify_ scripts filetype
+      --[[
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(ev)
+          if vim.bo[ev.buf].filetype:find('chezmoitmpl', 1, true) then
+            vim.treesitter.stop(ev.buf)
+          end
+        end,
+      })
+      ]]
+      --
+    end,
+  },
+  {
+    -- TODO: TSUninstall all, romus204/tree-sitter-manager.nvim
     'nvim-treesitter/nvim-treesitter',
+    enabled = vim.fn.has('nvim-0.12') == 0,
+    branch = vim.fn.has('nvim-0.12') == 1 and 'main' or 'master',
     -- tag = 'v0.10.0', -- NVIM v0.12.0: treesitter.lua:196: attempt to call method 'range'
-    -- branch = 'master', -- Not compatible with v0.12.0
-    branch = 'main',
     dependencies = {
       'RRethy/nvim-treesitter-endwise',
     },
@@ -244,6 +264,8 @@ return {
         vim.opt.foldmethod = 'indent'
         vim.opt.foldtext = 'v:lua.vim.treesitter.foldexpr()'
       end
+      --[[
+      -- FIXME: ../../after/queries/toml/injections.scm
       -- https://mise.jdx.dev/mise-cookbook/neovim.html
       require('vim.treesitter.query').add_predicate('is-mise?', function(_, _, bufnr, _)
         local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
@@ -253,6 +275,8 @@ return {
           or string.match(filepath, '.*mise/config%.toml$') ~= nil
           or string.match(filepath, '.*mise/config%.toml%.tmpl$') ~= nil
       end, { force = true, all = false })
+      ]]
+      --
     end,
     -- config = function(_, opts)
     --   -- v0.10.0

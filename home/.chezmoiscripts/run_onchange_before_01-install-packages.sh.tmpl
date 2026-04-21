@@ -110,6 +110,7 @@ dry_run pkg update --quiet
 dry_run pkg upgrade --quiet --yes
 {{- end }}
 
+# shellcheck disable=SC2086
 dry_run pkg install --quiet --yes $packages # >/dev/null
 {{- else if eq .os "windows" }}
 {{- if .upgrade }}

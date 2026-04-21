@@ -3,6 +3,7 @@
 
 # TODO: exclude opencode and sites that can't configure base path
 http://{{ .tailscale.tailnet }} {
+	import cert_lifetime
 	import logging
 	{{- range $feat, $sites := .caddy.sites }}
 	{{- if not (get $.features $feat) }}{{ continue }}{{ end }}

@@ -2,10 +2,11 @@
 #MISE description="Validate files against their declared $schema"
 #MISE alias="vs"
 #USAGE flag "-k --keep" help="Keep temp files for debugging"
+#USAGE flag "-l --list" help="List validatable files"
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show validation details"
 #USAGE arg "[files]..." help="Files to validate (default: all tracked)"
-#USAGE complete "files" run="git ls-files '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' ':(exclude)home/.chezmoitemplates/' ':(exclude)**/modify_*'"
+#USAGE complete "files" run="./script/validate-schema --list"
 
 set -euo pipefail
 
@@ -14,14 +15,22 @@ if ((BASH_VERSINFO[0] < 4)); then
   exit 1
 fi
 
+prog="${0##*/}"
 keep="${VALIDATE_SCHEMA_KEEP:-${VALIDATE_KEEP:-false}}"
-verbosity=${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+verbosity="${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
   -k | --keep)
     keep=true
     shift
+    ;;
+  -l | --list)
+    git ls-files \
+      '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
+      ':(exclude)home/.chezmoitemplates/' \
+      ':(exclude)**/modify_*'
+    exit
     ;;
   -q | --quiet)
     verbosity=0
@@ -35,7 +44,7 @@ while [ $# -gt 0 ]; do
     if command -v usage >/dev/null; then
       usage exec --help bash "$0"
     else
-      echo "Usage: validate-schema [-k] [-q] [-v] [files...]"
+      echo "Usage: validate-schema [-k] [-l] [-q] [-v] [files...]"
     fi
     exit
     ;;
@@ -48,7 +57,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "validate-schema: unknown option: $1" >&2
+    echo "${0##*/}: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -57,7 +66,7 @@ done
 
 # shellcheck disable=SC2329
 validate_file() {
-  local path="$1" base ext content schema tmp_dir="" schema_path content_path
+  local path="$1" base ext content schema="" tmp_dir="" schema_path content_path
   base="$(basename "$path")"
   ext="${path##*.}"
 
@@ -148,13 +157,13 @@ validate_file() {
     jq 'del(.properties.WinGetVersion)' "$schema_path" >"$schema_path.tmp"
     mv "$schema_path.tmp" "$schema_path"
     if [ "$verbosity" -ge 2 ]; then
-      echo "validate-schema: downloaded and modified schema: $schema_path" >&2
+      echo "$prog: downloaded and modified schema: $schema_path" >&2
     fi
     ;;
   esac
 
   if [ "$verbosity" -ge 2 ]; then
-    echo "validate-schema: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
+    echo "$prog: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
   fi
 
   local result
@@ -207,30 +216,26 @@ if ! yq --version 2>&1 | grep -q 'mikefarah/yq'; then
 fi
 
 if [ $# -eq 0 ]; then
-  mapfile -t -d '' files < <(
-    git ls-files -z \
-      '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
-      ':(exclude)home/.chezmoitemplates/' \
-      ':(exclude)**/modify_*'
-  )
+  mapfile -t files < <("$0" --list)
   set -- "${files[@]}"
 fi
 
-jobs=${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}
+jobs="${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+
 if [ "$verbosity" -ge 2 ]; then
-  echo "validate-schema: validating $# files (jobs=$jobs)" >&2
+  echo "${0##*/}: validating $# files (jobs=$jobs)" >&2
 fi
 
 if [ $# -eq 0 ]; then
   if [ "$verbosity" -ge 1 ]; then
-    echo "validate-schema: no files to validate" >&2
+    echo "${0##*/}: no files to validate" >&2
   fi
   exit 0
 fi
 
-export verbosity keep
+export prog verbosity keep
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
+results=$(printf '%s\0' "$@" | xargs -0 -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
 
 passed=$(echo "$results" | grep -c '^PASS ' || true)
 failed=$(echo "$results" | grep -c '^FAIL ' || true)
@@ -245,7 +250,7 @@ if [ "$failed" -gt 0 ]; then
   echo "$results" | grep -vE '^(PASS|FAIL|SKIP) ' || true
 fi
 if [ "$verbosity" -ge 1 ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
-  echo "validate-schema: $passed passed, $failed failed, $skipped skipped" >&2
+  echo "${0##*/}: $passed passed, $failed failed, $skipped skipped" >&2
 fi
 if [ "$failed" -gt 0 ]; then
   exit 1

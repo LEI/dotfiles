@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Render managed templates to a staging directory
+#USAGE flag "-l --list" help="List available templates"
 #USAGE flag "-o --output <directory>" help="Output directory (default: mktemp -d)"
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Print each file as it is rendered"
-#USAGE arg "[templates]..." help="Templates to render"
-#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
-# TODO: consider accepting directories and expanding to contained templates;
-# if added, update completion to also offer dirs (type=path or git ls-files -d)
+#USAGE arg "[templates]..." help="Templates to render (use -- to pass flags to chezmoi execute-template)"
+#USAGE complete "templates" run="chezmoi-render --list"
 
 set -euo pipefail
 shopt -s lastpipe
@@ -21,7 +20,7 @@ case "${1:-}" in
   if command -v usage >/dev/null; then
     usage exec --help bash "$0"
   else
-    echo "Usage: chezmoi-render [-o <directory>] [-q] [-v] [templates...]"
+    echo "Usage: chezmoi-render [-l] [-o dir] [-q] [-v] [templates...] [-- chezmoi-flags...]"
   fi
   exit 0
   ;;
@@ -29,12 +28,27 @@ case "${1:-}" in
   grep '^#USAGE' "$0" | sed 's/^#USAGE //'
   exit 0
   ;;
+-l | --list)
+  prefix="${2:-}"
+  git ls-files \
+    'home/**/*.tmpl' \
+    'home/**/modify_*' \
+    ':(exclude)home/.chezmoi.yaml.tmpl' |
+    if [ -n "$prefix" ]; then
+      sed -n "s|^${prefix%/}/||p" | sed 's|/.*|/|' | sort -u |
+        sed "s|^|${prefix%/}/|"
+    else
+      cat
+    fi
+  exit 0
+  ;;
 esac
 
 dest=""
-quiet=false
-verbose=false
 templates=()
+chezmoi_args=()
+verbosity="${CHEZMOI_RENDER_VERBOSITY:-1}"
+
 while [ $# -gt 0 ]; do
   case "$1" in
   -o | --output)
@@ -42,15 +56,16 @@ while [ $# -gt 0 ]; do
     shift 2
     ;;
   -q | --quiet)
-    quiet=true
+    verbosity=0
     shift
     ;;
   -v | --verbose)
-    verbose=true
+    verbosity=2
     shift
     ;;
   --)
     shift
+    chezmoi_args=("$@")
     break
     ;;
   *)
@@ -59,7 +74,6 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 done
-templates+=("$@")
 
 if [ -z "$dest" ]; then
   dest="$(mktemp -d)"
@@ -68,8 +82,8 @@ fi
 
 mkdir -p "$dest"
 
-if [ "$quiet" != true ]; then
-  printf 'chezmoi-render: output dir: %s\n' "${dest#"$PWD"/}" >&2
+if [ "$verbosity" -ge 1 ]; then
+  printf '%s: output dir: %s\n' "${0##*/}" "${dest#"$PWD"/}" >&2
 fi
 
 source_dir="$(chezmoi source-path)"
@@ -79,19 +93,35 @@ if [ -z "$source_dir" ]; then
 fi
 prefix="${source_dir#"${source_dir%/*}"/}"
 
-# Strip prefix from explicit template paths
+# Strip prefix and expand directories to contained templates
 if [ ${#templates[@]} -gt 0 ]; then
   fixed=()
   for t in "${templates[@]}"; do
-    fixed+=("${t#"$prefix"/}")
+    t="${t#"$prefix"/}"
+    if [ -d "$source_dir/$t" ]; then
+      while IFS= read -r f; do
+        fixed+=("$f")
+      done < <(
+        find "$source_dir/$t" \( -name '*.tmpl' -o -name 'modify_*' \) -type f |
+          sed "s|^$source_dir/||" |
+          grep -v '\.chezmoi\.yaml\.tmpl$' |
+          sort -u
+      )
+    else
+      fixed+=("$t")
+    fi
   done
   templates=("${fixed[@]}")
 fi
 
-# Get all templates if none provided
+# Discover all templates when none provided
 if [ ${#templates[@]} -eq 0 ]; then
   cd "$source_dir"
-  mapfile -t templates < <(find . \( -name '*.tmpl' -o -name 'modify_*' \) -type f | grep -v '^./.chezmoi.yaml.tmpl$' | sort -u)
+  mapfile -t templates < <(
+    find . \( -name '*.tmpl' -o -name 'modify_*' \) -type f |
+      grep -v '^./.chezmoi.yaml.tmpl$' |
+      sort -u
+  )
 fi
 
 if [ ${#templates[@]} -eq 0 ]; then
@@ -104,7 +134,9 @@ sources=()
 for t in "${templates[@]}"; do
   sources+=("$source_dir/$t")
 done
-printf '%s\0' "${sources[@]}" | xargs -0 chezmoi target-path | mapfile -t targets
+printf '%s\0' "${sources[@]}" |
+  xargs -0 chezmoi target-path |
+  mapfile -t targets
 if [ "${PIPESTATUS[1]}" -ne 0 ]; then
   echo "error: chezmoi target-path failed for:" >&2
   printf '  %s\n' "${sources[@]}" >&2
@@ -128,15 +160,19 @@ render() {
   local base
   base=$(basename "$src")
 
-  # if [ "$verbose" = true ]; then
-  #   printf 'render: %s -> %s\n' "$src" "$out" >&2
-  # elif [ "$quiet" != true ]; then
-  #   printf 'render: %s -> %s\n' "${src#./}" "$rel" >&2
-  # fi
+  if [ "$verbosity" -ge 2 ]; then
+    printf 'render: %s -> %s\n' "$src" "$out" >&2
+  elif [ "$verbosity" -ge 1 ]; then
+    printf 'render: %s\n' "$rel" >&2
+  fi
 
   mkdir -p "${out%/*}"
 
-  local cmd=(chezmoi execute-template --file "$source_dir/$src")
+  local cmd=(
+    chezmoi execute-template
+    ${chezmoi_args[@]+"${chezmoi_args[@]}"}
+    --file "$source_dir/$src"
+  )
   local input="/dev/null"
 
   if [[ "$base" == modify_* ]]; then
@@ -164,6 +200,6 @@ if [ "$failed" -gt 0 ]; then
   exit 1
 fi
 
-if [ "$quiet" != true ]; then
+if [ "$verbosity" -ge 1 ]; then
   printf 'Rendered: %d templates\n' "$total" >&2
 fi

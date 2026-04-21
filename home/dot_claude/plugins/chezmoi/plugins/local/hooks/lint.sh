@@ -49,6 +49,6 @@ lint() {
 lint
 rc=$?
 if [ "$rc" -ne 0 ]; then
-  echo "lint: $(basename " >&2$FILE") failed (exit $rc)"
+  echo "lint: $(basename "$FILE") failed (exit $rc)" >&2
   exit 2
 fi

@@ -7,7 +7,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 if command -v mise; then
-  echo "Already installed: {{ lookPath " >&2mise" }}"
+  echo "Already installed: {{ lookPath "mise" }}" >&2
   run mise --version | head -n1
   exit
 fi

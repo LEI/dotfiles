@@ -104,7 +104,7 @@ winget)
   jq --raw-output '.Sources[0].Packages[].PackageIdentifier' winget-export.json
   ;;
 *)
-  echo "list-package: invalid argument: $1" >&2
+  echo "${0##*/}: invalid argument: $1" >&2
   exit 1
   ;;
 esac

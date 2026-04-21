@@ -10,7 +10,7 @@
 #   exit "$failures"
 #
 # Usage (parallel collector):
-#   results=$(... | xargs -P4 -n1 bash -c '...' _ || true)
+#   results=$(... | xargs -0 -P4 -n1 bash -c '...' _ || true)
 #   tap_collect "$results"
 #   tap_summary "validate-schema" "$quiet"
 

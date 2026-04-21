@@ -11,27 +11,37 @@
 
 set -eu
 
+verbosity="${VALIDATE_VERBOSITY:-1}"
+
 # Map flags to hook verbosity; prek flags only control prek output
 for arg in "$@"; do
   case "$arg" in
-  -v | --verbose) export VALIDATE_VERBOSITY=2 ;;
-  -q | --quiet) export VALIDATE_VERBOSITY=0 ;;
+  -v | --verbose) verbosity=2 ;;
+  -q | --quiet) verbosity=0 ;;
   esac
 done
 
+export VALIDATE_VERBOSITY="${VALIDATE_VERBOSITY:-$verbosity}"
+
 skip=""
+
 case "$(uname -o)" in
-Android) skip="${skip:+$skip,}check-github-workflows,check-compose-spec,validate-schema,zizmor" ;;
+Android) skip="${skip:+$skip,}check-compose-spec,check-github-workflows,gitleaks,stylua-github,validate-schema,zizmor" ;;
 esac
+
 case "$(uname -s)" in
 Darwin | Linux) ;;
 *) skip="${skip:+$skip,}validate-skill" ;;
 esac
+
 if [ -f /etc/alpine-release ]; then
   skip="${skip:+$skip,}stylua-github"
 fi
+
 if [ -n "$skip" ]; then
-  echo "Skipping hooks: $skip" >&2
+  if [ "$verbosity" -ge 1 ]; then
+    echo "${0##*/}: skipping hooks: $skip" >&2
+  fi
   export SKIP="$skip"
 fi
 
@@ -45,5 +55,5 @@ fi
 # fi
 
 set -- prek run --all-files "$@"
-echo "+ $*" >&2
+echo "$*" >&2
 "$@"

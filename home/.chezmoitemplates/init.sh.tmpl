@@ -23,6 +23,18 @@ if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
 fi
 
+# Machine-local config and secrets
+{{- range glob (joinPath .chezmoi.sourceDir "**/create_*local.yaml*") }}
+{{-   $target := .
+        | replaceAllRegex ".*/home/" ""
+        | replace "dot_" "."
+        | replaceAllRegex "/create_.*local\\.yaml.*" "/local.yaml" }}
+# ~/{{ $target }}
+{{- end }}
+{{- range glob (joinPath .chezmoi.homeDir ".config/secrets.d/**/*.conf") }}
+# {{ . | replaceAllRegex (print $.chezmoi.homeDir "/") "~/" }}
+{{- end }}
+
 # Load environment variables before other scripts (e.g. INPUTRC before ble.sh)
 if [ -f "$XDG_CONFIG_HOME/sh/environment.sh" ]; then
   bench_source "$XDG_CONFIG_HOME/sh/environment.sh"
@@ -48,6 +60,7 @@ fi
 # https://github.com/rossmacarthur/sheldon#loading-plugins
 if [ "$shell" = bash ]; then
   export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
+  export SHELDON_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/bash"
 fi
 if command -v sheldon >/dev/null; then
   bench sheldon eval "$(sheldon ${SHELDON_QUIET:+--quiet} source)"

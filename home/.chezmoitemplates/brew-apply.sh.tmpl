@@ -1,32 +1,43 @@
 {{- $active := eq (get . "active" | toString) "true" -}}
+{{- $check := get . "check" -}}
 {{- $formula := get . "formula" | default "FORMULA" -}}
-{{- $health := get . "health" -}}
-{{- $port := get . "port" -}}
-{{- if lookPath "brew" | isExecutable -}}
-{{-   $status := output "sh" "-c" (printf "brew services info %s --json 2>/dev/null | jq -r '.[0].status // empty' || true" $formula) | trim -}}
-{{-   if $status }}
+{{- $reload := get . "reload" -}}
+{{- $system := eq (get . "system" | toString) "true" -}}
+{{- $sudo := $system | ternary "sudo " "" -}}
+{{- $domain := $system | ternary "system" (printf "gui/%s" (output "id" "-u" | trim)) -}}
+{{- $svcName := output "sh" "-c" (printf "brew services info %s --json 2>/dev/null | jq -r '.[0].service_name // empty' || true" $formula) | trim -}}
+{{- $status := "unknown" -}}
+{{- if $svcName -}}
+{{-   $status = output "sh" "-c" (printf "launchctl print %s/%s 2>/dev/null | grep -m1 'state = ' | sed 's/.*state = //' || true" $domain $svcName) | trim | default "not loaded" -}}
+{{- end -}}
 # status: {{ $status }}
-{{   end -}}
-{{ end -}}
+
 if ! has brew; then
   die "brew not found"
 fi
 {{- if $active }}
-if ! brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
-  run brew services start {{ $formula }}
-fi
-{{- if and $port $health }}
-if ! curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null 2>&1; then
-  msg "{{ $formula }}: unhealthy, restarting"
-  run brew services restart {{ $formula }}
-  if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $port }}{{ $health }}" >/dev/null; then
-    die "{{ $formula }}: unhealthy after retries"
+if ! {{ $sudo }}brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+  run {{ $sudo }}brew services start {{ $formula }}
+{{- if $reload }}
+else
+  if ! run {{ $reload }}; then
+    msg "{{ $formula }}: reload failed, restarting"
+    run {{ $sudo }}brew services restart {{ $formula }}
   fi
+{{- else }}
+else
+  run {{ $sudo }}brew services restart {{ $formula }}
+{{- end }}
+fi
+{{- if $check }}
+
+if ! run retry 10 3 {{ $check }}; then
+  die "{{ $formula }}: unhealthy after retries"
 fi
 {{- end }}
 {{- else }}
-if brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+if {{ $sudo }}brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
   msg "stopping service {{ $formula }}"
-  run brew services stop {{ $formula }}
+  run {{ $sudo }}brew services stop {{ $formula }}
 fi
 {{- end }}

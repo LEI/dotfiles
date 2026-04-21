@@ -5,7 +5,11 @@ packages:
     # native on Fedora (dnf) and Arch (pacman): system service with proper capabilities
     # brew on macOS and distros without caddy in official repos
     type: '{{ eq .osIDLike "alpine" "debian" | ternary "brew" nil }}'
-    restart_service: ":changed"
+    # restart_service: ":always"
+    restart_service: false
+    # after_install:
+    #   - caddy trust --ca local
+    #   - sudo brew services start caddy
   dnsmasq:
     enabled: '{{ eq .chezmoi.os "darwin" }}'
     restart_service: ":changed"

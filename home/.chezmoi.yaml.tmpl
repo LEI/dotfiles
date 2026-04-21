@@ -286,20 +286,37 @@ data:
 {{-   end }}
 {{- end }}
 
-{{- if $features.opencode }}
-  opencode:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
+  # TODO: remove home/.chezmoidata/apis.yaml
+  # loop over feature data map dict
+  # and allow .data.yaml.tmpl
+  apis:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
+
 {{- if $features.claude }}
+
   claude:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_claude" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
-  apis:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
+
+{{/*- if $features.i3 */}}
+
+  i3:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/i3" "chezmoi" .chezmoi) | indent 4 }}
+{{/*- end */}}
+
+{{- if $features.logseq }}
+
   logseq:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_logseq" "chezmoi" .chezmoi) | indent 4 }}
-  pi:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+
+{{- if $features.opencode }}
+
+  opencode:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+
+  # TODO: process-compose/.data.yaml
 {{- $pcLocal := joinPath .chezmoi.homeDir ".config/process-compose/local.yaml" -}}
 {{- if stat $pcLocal -}}
 {{-   range $key, $value := include $pcLocal | fromYaml }}
@@ -307,6 +324,12 @@ data:
 {{ $value | toYaml | indent 4 }}
 {{-   end }}
 {{- end }}
+
+{{/*- if $features.ai */}}
+
+  pi:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
+{{/*- end */}}
 
 diff:
   # exclude:

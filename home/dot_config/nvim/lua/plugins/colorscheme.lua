@@ -40,10 +40,9 @@ return {
   },
   {
     'catppuccin/nvim',
-    -- tag = 'v1.11.0',
-    version = 'v1.x',
+    version = 'v2.x',
     lazy = true,
-    name = 'catppuccin',
+    name = 'catppuccin-nvim',
     opts = {
       flavour = 'macchiato',
       integrations = {
@@ -61,29 +60,32 @@ return {
         leap = true,
         lsp_trouble = true,
         mason = true,
-        markdown = true,
         mini = true,
-        native_lsp = {
-          enabled = true,
-          underlines = {
-            errors = { 'undercurl' },
-            hints = { 'undercurl' },
-            warnings = { 'undercurl' },
-            information = { 'undercurl' },
-          },
-        },
         navic = { enabled = true, custom_bg = 'lualine' },
         neotest = true,
         neotree = true,
         noice = true,
         notify = true,
-        semantic_tokens = true,
         snacks = true,
         telescope = true,
-        treesitter = true,
         treesitter_context = true,
         which_key = true,
       },
+      --[[ lsp_styles = {
+        virtual_text = {
+          hints = { 'italic' },
+          information = { 'italic' },
+          ok = { 'italic' },
+        },
+        underlines = {
+          errors = { 'underline' },
+          warnings = { 'underline' },
+        },
+        inlay_hints = {
+          background = false,
+        },
+      }, ]]
+      --
     },
   },
 }

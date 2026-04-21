@@ -19,6 +19,9 @@ setopt NO_NOMATCH
 # Move cursor into the word on completion, not just the end
 setopt COMPLETE_IN_WORD
 
+# Move cursor to end of word after completing
+# setopt ALWAYS_TO_END
+
 # Zsh 5.2+ options
 autoload -Uz is-at-least
 if is-at-least 5.2; then

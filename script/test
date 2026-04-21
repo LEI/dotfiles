@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #MISE alias="t"
 #MISE description="Run bats test suite"
+#USAGE flag "-l --list" help="List test files"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats"
-#USAGE complete "filter" run="git ls-files 'test/*.bats'"
+#USAGE complete "filter" run="./script/test --list"
 # TODO: --base-directory test
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
@@ -35,23 +36,33 @@ fi
 # export CI=true
 
 main() {
-  case "${1:-}" in
-  -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: test [filter...]"
-    fi
-    return
-    ;;
-  --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
-    return
-    ;;
-  --)
-    shift
-    ;;
-  esac
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -l | --list)
+      git ls-files 'test/*.bats'
+      return
+      ;;
+    -h | --help)
+      if command -v usage >/dev/null; then
+        usage exec --help bash "$0"
+      else
+        echo "Usage: test [-l] [filter...]"
+      fi
+      return
+      ;;
+    --usage)
+      grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+      return
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+    esac
+  done
 
   # Set BATS_LIB_PATH: local test_helper + system libs (if available)
   # Allow override: BATS_LIB_PATH=my/custom/path bats ...
