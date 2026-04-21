@@ -3,18 +3,18 @@ var data = {lines:[
 {"lineNum":"    2","line":"# Detect the system package manager"},
 {"lineNum":"    3","line":"#USAGE arg \"[query]\" help=\"Query type: all, check, or package manager name\""},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"41","possible_hits":"0",},
+{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"52","possible_hits":"0",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":"case \"${1:-}\" in","class":"lineCov","hits":"2","order":"42","possible_hits":"0",},
+{"lineNum":"    7","line":"case \"${1:-}\" in","class":"lineCov","hits":"2","order":"53","possible_hits":"0",},
 {"lineNum":"    8","line":"all | \'\')"},
-{"lineNum":"    9","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"2","order":"43","possible_hits":"0",},
+{"lineNum":"    9","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"2","order":"54","possible_hits":"0",},
 {"lineNum":"   10","line":"    manager=brew","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   11","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineCov","hits":"1","order":"44","possible_hits":"0",},
+{"lineNum":"   11","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineCov","hits":"1","order":"55","possible_hits":"0",},
 {"lineNum":"   12","line":"    manager=termux","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   13","line":"  elif command -v apk >/dev/null; then","class":"lineCov","hits":"1","order":"45","possible_hits":"0",},
+{"lineNum":"   13","line":"  elif command -v apk >/dev/null; then","class":"lineCov","hits":"1","order":"56","possible_hits":"0",},
 {"lineNum":"   14","line":"    manager=apk","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   15","line":"  elif command -v apt >/dev/null; then","class":"lineCov","hits":"1","order":"46","possible_hits":"0",},
-{"lineNum":"   16","line":"    manager=apt","class":"lineCov","hits":"1","order":"47","possible_hits":"0",},
+{"lineNum":"   15","line":"  elif command -v apt >/dev/null; then","class":"lineCov","hits":"1","order":"57","possible_hits":"0",},
+{"lineNum":"   16","line":"    manager=apt","class":"lineCov","hits":"1","order":"58","possible_hits":"0",},
 {"lineNum":"   17","line":"  elif command -v dnf >/dev/null; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   18","line":"    manager=dnf","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   19","line":"  elif command -v pacman >/dev/null; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -59,8 +59,8 @@ var data = {lines:[
 {"lineNum":"   58","line":"  ;;"},
 {"lineNum":"   59","line":"esac"},
 {"lineNum":"   60","line":""},
-{"lineNum":"   61","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"48","possible_hits":"0",},
+{"lineNum":"   61","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"59","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 29, "covered" : 8,};
+var header = { "command" : "test", "date" : "2026-04-21 05:14:05", "instrumented" : 29, "covered" : 8,};
 var merged_data = [];

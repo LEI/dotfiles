@@ -3,13 +3,13 @@ var data = {lines:[
 {"lineNum":"    2","line":"# List installed packages for the detected package manager"},
 {"lineNum":"    3","line":"#USAGE arg \"[manager]\" help=\"Package manager (default: auto-detect)\""},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"207",},
+{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"275",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"210",},
-{"lineNum":"    8","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"206",},
+{"lineNum":"    7","line":"if [ $# -eq 0 ]; then","class":"lineCov","hits":"1","order":"278",},
+{"lineNum":"    8","line":"  set -- \"$(package-manager)\"","class":"lineCov","hits":"1","order":"274",},
 {"lineNum":"    9","line":"fi"},
 {"lineNum":"   10","line":""},
-{"lineNum":"   11","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"205",},
+{"lineNum":"   11","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"273",},
 {"lineNum":"   12","line":"apk)"},
 {"lineNum":"   13","line":"  apk list --installed --quiet","class":"lineNoCov","hits":"0",},
 {"lineNum":"   14","line":"  ;;"},
@@ -24,9 +24,9 @@ var data = {lines:[
 {"lineNum":"   23","line":"  # yay -? --aur"},
 {"lineNum":"   24","line":"  ;;"},
 {"lineNum":"   25","line":"brew)"},
-{"lineNum":"   26","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"1","order":"209",},
+{"lineNum":"   26","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"1","order":"277",},
 {"lineNum":"   27","line":"  # brew bundle dump --file=-"},
-{"lineNum":"   28","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"208",},
+{"lineNum":"   28","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"276",},
 {"lineNum":"   29","line":"  ;;"},
 {"lineNum":"   30","line":"cask)"},
 {"lineNum":"   31","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0",},
@@ -111,5 +111,5 @@ var data = {lines:[
 {"lineNum":"  110","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-04-14 06:22:27", "instrumented" : 40, "covered" : 6,};
+var header = { "command" : "", "date" : "2026-04-21 05:17:37", "instrumented" : 40, "covered" : 6,};
 var merged_data = [];

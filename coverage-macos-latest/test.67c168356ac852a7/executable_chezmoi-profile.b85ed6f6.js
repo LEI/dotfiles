@@ -1,8 +1,8 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env nu"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"# Parses chezmoi --debug structured logs,"},
-{"lineNum":"    4","line":"# shows slowest operations and phase summary"},
+{"lineNum":"    3","line":"# Parse chezmoi --debug structured logs,"},
+{"lineNum":"    4","line":"# show slowest operations and phase summary"},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"def phase_of [msg: string] {","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    7","line":"  match ($msg | split row \" \" | first) {","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -123,5 +123,5 @@ var data = {lines:[
 {"lineNum":"  122","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-14 06:21:50", "instrumented" : 85, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-21 05:17:05", "instrumented" : 85, "covered" : 0,};
 var merged_data = [];

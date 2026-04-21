@@ -16,15 +16,16 @@ var data = {lines:[
 {"lineNum":"   15","line":"  if ! has python && has python3; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   16","line":"    python=python3","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   17","line":"  fi"},
-{"lineNum":"   18","line":"  dry_run $python -m pip install --user --quiet $pip_packages","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   19","line":"fi"},
-{"lineNum":"   20","line":""},
-{"lineNum":"   21","line":"# https://github.com/astral-sh/uv/issues/13750"},
-{"lineNum":"   22","line":"# run uv tool install --quiet $uv_packages"},
-{"lineNum":"   23","line":"msg \"Already installed: check-jsonschema\"","class":"lineCov","hits":"1","order":"97","possible_hits":"0",},
-{"lineNum":"   24","line":"msg \"Already installed: it2\"","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
-{"lineNum":"   25","line":"msg \"Already installed: recoverpy\"","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"   18","line":"  # shellcheck disable=SC2086"},
+{"lineNum":"   19","line":"  dry_run $python -m pip install --user --quiet $pip_packages","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   20","line":"fi"},
+{"lineNum":"   21","line":""},
+{"lineNum":"   22","line":"# https://github.com/astral-sh/uv/issues/13750"},
+{"lineNum":"   23","line":"# run uv tool install --quiet $uv_packages"},
+{"lineNum":"   24","line":"msg \"Already installed: check-jsonschema\"","class":"lineCov","hits":"1","order":"97","possible_hits":"0",},
+{"lineNum":"   25","line":"msg \"Already installed: it2\"","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
+{"lineNum":"   26","line":"msg \"Already installed: recoverpy\"","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-14 06:21:50", "instrumented" : 13, "covered" : 9,};
+var header = { "command" : "test", "date" : "2026-04-21 05:17:05", "instrumented" : 13, "covered" : 9,};
 var merged_data = [];

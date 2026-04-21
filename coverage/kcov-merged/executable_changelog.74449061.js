@@ -13,9 +13,9 @@ var data = {lines:[
 {"lineNum":"   12","line":"reflog=\"$(git reflog | grep -A1 pull | head -2 | cut -d\' \' -f1)\"","class":"lineNoCov","hits":"0",},
 {"lineNum":"   13","line":"case \"$cmd\" in","class":"lineNoCov","hits":"0",},
 {"lineNum":"   14","line":"  diff) git diff \"$@\" \"${reflog//$newline/..}\" ;;","class":"lineNoCov","hits":"0",},
-{"lineNum":"   15","line":"  *) git log --oneline \"${reflog//*$newline/}~1..${reflog//$newline*/}\" ;;","class":"lineNoCov","hits":"0",},
+{"lineNum":"   15","line":"  *) git log --oneline \"$@\" \"${reflog//*$newline/}~1..${reflog//$newline*/}\" ;;","class":"lineNoCov","hits":"0",},
 {"lineNum":"   16","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-04-14 06:22:27", "instrumented" : 8, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-04-21 05:17:37", "instrumented" : 8, "covered" : 0,};
 var merged_data = [];

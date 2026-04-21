@@ -1,8 +1,8 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/bin/sh"},
-{"lineNum":"    2","line":"# Resolve Neovim plugin source URL for xdg-open"},
-{"lineNum":"    3","line":""},
-{"lineNum":"    4","line":"# Usage: xdg-open \"https://github.com/$(nvim-sh)\""},
+{"lineNum":"    2","line":""},
+{"lineNum":"    3","line":"# Resolve Neovim plugin source URL for xdg-open"},
+{"lineNum":"    4","line":"# xdg-open \"https://github.com/$(nvim-sh)\""},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"set -eu","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    7","line":""},
@@ -36,5 +36,5 @@ var data = {lines:[
 {"lineNum":"   35","line":"echo \"$name\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-14 06:18:32", "instrumented" : 19, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-04-21 05:14:04", "instrumented" : 19, "covered" : 0,};
 var merged_data = [];
