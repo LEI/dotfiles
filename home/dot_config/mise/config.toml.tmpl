@@ -42,6 +42,7 @@ lockfile = true
 {{-   $checkDirs = append $checkDirs $name }}
 
 [tasks."check:{{ $name }}"]
+alias = "c:{{ $name }}"
 description = {{ printf "Check %s" $feat | quote }}
 # file = {{ . | quote }}
 dir = {{ . | dir | quote }}
@@ -80,6 +81,7 @@ depends = [
 {{-   $updateDirs = append $updateDirs $name }}
 
 [tasks."update:{{ $name }}"]
+# alias = "u"
 description = {{ printf "Update %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
@@ -101,6 +103,7 @@ depends = [
 {{- if .features.goss }}
 
 [tasks.goss]
+alias = "go"
 description = "Validate system state with goss"
 {{- if $miseInteractive }}
 interactive = true
@@ -113,6 +116,7 @@ run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.
 {{- range $images }}
 
 [tasks."container:{{ . }}"]
+# alias = "ct:{{ . }}"
 description = {{ printf "Build and test chezmoi in %s" . | quote }}
 hide = true
 run = "script/container {{ . }}"
@@ -136,6 +140,7 @@ interactive = true
 {{- if .features.opencode }}
 
 [tasks.opkg]
+# alias = "op"
 description = "Run opkg from the local openpackage directory"
 dir = "~/.openpackage/packages/local"
 run = "opkg"
@@ -144,6 +149,7 @@ run = "opkg"
 {{- if eq .os "linux" }}
 
 [tasks.timep]
+# alias = ""
 description = "Profile bash init with timep (call-stack tree)"
 run = "bash -c 'source ~/.local/share/timep.bash && timep +F -c \"source ~/.bashrc\"'"
 # shell = "bash"

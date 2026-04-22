@@ -173,6 +173,23 @@ return {
       --
     end,
   },
+
+  -- FIXME: v0.11.6
+
+  -- Error in decoration provider "win" (ns=nvim.treesitter.highlighter):
+  -- Error executing lua: /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:208: /usr/share/nvim/runtime/lua/v
+  -- im/treesitter/query.lua:880: No handler for is-mise?
+  -- stack traceback:
+  --         [C]: in function 'f'
+  --         /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:208: in function 'tcall'
+  --         /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:530: in function 'parse'
+  --         /usr/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:524: in function </usr/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:517>
+
+  -- nvim-treesitter[latex]: Error during "tree-sitter generate"
+  -- error: unexpected argument '--no-bindings' found
+  --   tip: to pass '--no-bindings' as a value, use '-- --no-bindings'
+  -- Usage: tree-sitter generate [OPTIONS] [GRAMMAR_PATH]
+
   {
     -- TODO: TSUninstall all, romus204/tree-sitter-manager.nvim
     'nvim-treesitter/nvim-treesitter',

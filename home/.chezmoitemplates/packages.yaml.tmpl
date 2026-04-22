@@ -424,9 +424,10 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
   mise:
     # FIXME(alpine): mise 2025.8.20 does not support named tasks
-    enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "windows") }}
+    enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "fedora" "windows") }}
     nameOverwrite:
       windows: jdx.mise
+    type: {{ eq .osIDLike "fedora" | ternary "brew" nil }}
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'

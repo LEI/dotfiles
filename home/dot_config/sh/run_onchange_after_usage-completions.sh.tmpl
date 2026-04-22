@@ -8,6 +8,7 @@
 {{-     continue -}}
 {{-   end -}}
 {{-   $content := include . -}}
+{{-   if not (hasPrefix "#!" $content) -}}{{ continue }}{{ end -}}
 {{-   if not (contains "#USAGE " $content) -}}{{ continue }}{{ end -}}
 {{-   $name := . | base -}}
 {{-   if get $dict $name -}}

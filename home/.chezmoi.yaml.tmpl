@@ -267,7 +267,7 @@ data:
       mlx-lm:
         active: {{ $features.mlx }}
       ollama:
-        active: {{ not $features.mlx }}
+        active: {{ and $features.ollama (not $features.mlx) }}
       vllm-mlx:
         active: false
 {{- end }}
