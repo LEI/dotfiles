@@ -53,9 +53,13 @@ fi
 {{- end }}
 
 caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
+pki="$HOME/.local/share/caddy/pki/authorities/local"
+root="$pki/root.crt"
+intermediate="$pki/intermediate.crt"
 
-# Format and show diff to catch issues early
-run caddy fmt --diff --config "$caddyfile"
+if ! caddy fmt --config "$caddyfile" --diff >/dev/null; then
+  run caddy fmt --config "$caddyfile" --diff
+fi
 
 if ! caddy validate --config "$caddyfile" >/dev/null 2>&1; then
   run caddy validate --config "$caddyfile"
@@ -94,8 +98,15 @@ if [ ! -d /etc/caddy ]; then
 fi
 
 # Port 2020: metrics site (SELinux http_port_t)
-if has semanage && ! semanage port -l 2>/dev/null | grep -q "^http_port_t.*2020"; then
-  run pkexec semanage port -a -t http_port_t -p tcp 2020
+enforcing=false
+if has getenforce && [ "$(getenforce)" = "Enforcing" ]; then
+  enforcing=true
+fi
+if [ "$enforcing" = true ]; then
+  msg "SELinux: ensuring http_port_t includes 2020"
+  if ! run pkexec semanage port -l | grep -q "^http_port_t.*2020"; then
+    run pkexec semanage port -a -t http_port_t -p tcp 2020
+  fi
 fi
 
 # System caddy reads /etc/caddy/Caddyfile; copy from user config
@@ -110,9 +121,10 @@ fi
 otel_conf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
 otel_conf=/etc/systemd/system/caddy.service.d/otel.conf
 if ! diff -q "$otel_conf" "$otel_conf_src" >/dev/null 2>&1; then
-  msg "Updating caddy OTLP drop-in"
   diff -u "$otel_conf" "$otel_conf_src" || true
-  run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_conf_src' '$otel_conf' && systemctl daemon-reload"
+  run pkexec mkdir -p /etc/systemd/system/caddy.service.d
+  run pkexec cp "$otel_conf_src" "$otel_conf"
+  run systemctl daemon-reload
 fi
 # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
 dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
@@ -122,27 +134,30 @@ resolved_src="$dns_src/.resolved.conf"
 nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
 nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
 resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
+
 nm_changed=false
 resolved_changed=false
-if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null ||
-  ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
+nm_diff=""
+resolved_diff=""
+
+nm_diff=$(diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>&1)
+if [ -n "$nm_diff" ]; then
   nm_changed=true
 fi
-if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
+
+resolved_diff=$(diff -u "$resolved_dest" "$resolved_src" 2>&1)
+if [ -n "$resolved_diff" ]; then
   resolved_changed=true
 fi
 
 if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
   msg "Updating /etc/ DNS config"
-  diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" || true
-  diff -u "$nm_test_dest" "$nm_test_src" || true
-  diff -u "$resolved_dest" "$resolved_src" || true
-  run pkexec sh -ceux "
-    mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
-    cp '$nm_dnsmasq_src' '$nm_dnsmasq_dest'
-    cp '$nm_test_src' '$nm_test_dest'
-    cp '$resolved_src' '$resolved_dest'
-  "
+  [ -n "$nm_diff" ] && printf '%s\n' "$nm_diff"
+  [ -n "$resolved_diff" ] && printf '%s\n' "$resolved_diff"
+  run pkexec mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
+  [ "$nm_changed" = true ] && run pkexec cp "$nm_dnsmasq_src" "$nm_dnsmasq_dest"
+  [ "$nm_changed" = true ] && run pkexec cp "$nm_test_src" "$nm_test_dest"
+  [ "$resolved_changed" = true ] && run pkexec cp "$resolved_src" "$resolved_dest"
   if [ "$nm_changed" = true ]; then
     run systemctl restart NetworkManager
   fi
@@ -164,26 +179,50 @@ if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
   die "Caddy CA not ready; run again after caddy initializes"
 fi
 
+# Only trust if not already trusted
+if ! curl -sf http://localhost:2019/pki/ca/local/trusted | grep -q . 2>/dev/null; then
+  run caddy trust --ca local # --config "$caddyfile"
+fi
+
 # macOS keychain (Safari, Chrome): uncomment if caddy trust alone is insufficient
 # sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
 #   "$(brew --prefix)/var/lib/caddy/pki/authorities/local/root.crt"
-run caddy trust --ca local # --config "$caddyfile"
 
 {{- if eq .chezmoi.os "linux" }}
 
 # caddy trust installs the root CA but not the intermediate; curl needs both to
 # build the chain. Install root + intermediate into the system trust store.
-pki="$HOME/.local/share/caddy/pki/authorities/local"
-root="$pki/root.crt"
-intermediate="$pki/intermediate.crt"
+
 if has update-ca-trust; then
-  root_dest=/etc/pki/ca-trust/source/anchors/caddy-local-root.crt
-  intermediate_dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
-  if ! diff -q "$root_dest" "$root" >/dev/null 2>&1 ||
-    ! diff -q "$intermediate_dest" "$intermediate" >/dev/null 2>&1; then
-    msg "Installing caddy root and intermediate CA to system trust"
-    run pkexec sh -ceux "cp '$root' '$root_dest' && cp '$intermediate' '$intermediate_dest' && update-ca-trust"
-  fi
+  # shellcheck disable=SC2016
+  run pkexec \
+    env root="$root" intermediate="$intermediate" \
+    root_dest=/etc/pki/ca-trust/source/anchors/caddy-local-root.crt \
+    intermediate_dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt \
+    sh -euc 'changed=false
+
+if [ ! -f "$root_dest" ]; then
+  changed=true
+elif ! diff -q "$root_dest" "$root" >/dev/null; then
+  changed=true
+  echo "Root CA differs from system trust store version" >&2
+  diff -u "$root_dest" "$root"
+fi
+
+if [ ! -f "$intermediate_dest" ]; then
+  changed=true
+elif ! diff -q "$intermediate_dest" "$intermediate" >/dev/null; then
+  changed=true
+  echo "Intermediate CA differs from system trust store version" >&2
+  diff -u "$intermediate_dest" "$intermediate"
+fi
+
+if [ "$changed" = true ]; then
+  set -x
+  cp "$root" "$root_dest"
+  cp "$intermediate" "$intermediate_dest"
+  update-ca-trust
+fi'
 fi
 
 {{- end }}
@@ -191,21 +230,22 @@ fi
 {{- if lookPath "brew" | isExecutable }}
 
 # Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites
-pki="$HOME/.local/share/caddy/pki/authorities/local"
-root="$pki/root.crt"
 brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
 sed="$(which gsed 2>/dev/null || which sed)"
 if [ -d "$brew_openssl_dir" ]; then
   brew_bundle="$brew_openssl_dir/cert.pem"
   caddy_marker="# Caddy Local Authority"
-  # Remove any existing caddy entry (marker through end-of-cert) before re-appending
-  if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-    marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
-    end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
-    run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
+  # Only update if cert not already present
+  if ! grep -qF "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+    # Remove any existing caddy entry (marker through end-of-cert) before re-appending
+    if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
+      marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
+      end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
+      run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
+    fi
+    msg "Appending caddy root CA to brew openssl bundle"
+    run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
   fi
-  msg "Appending caddy root CA to brew openssl bundle"
-  run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
 fi
 
 {{- end }}

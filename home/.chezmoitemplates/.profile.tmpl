@@ -18,3 +18,7 @@ fi
 if [ -d "$HOME/bin" ]; then
   pathmunge "$HOME/bin"
 fi
+
+# Enable mise for systemd user services (login shell via bash -lc)
+# shellcheck disable=SC1091
+[ -f "$XDG_CONFIG_HOME/mise/init.sh" ] && . "$XDG_CONFIG_HOME/mise/init.sh"

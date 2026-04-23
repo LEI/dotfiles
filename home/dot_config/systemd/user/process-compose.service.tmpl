@@ -8,13 +8,13 @@ After=network.target
 Type=simple
 NoNewPrivileges=yes
 Environment=HOME=%h
-Environment=PATH=%h/.local/share/cargo/bin:%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+Environment=PATH=%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
 Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
 Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
 {{- if $uds }}
 Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/global.sock
 {{- end }}
-ExecStart=%h/.local/bin/mise exec process-compose -- process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled
+ExecStart=/bin/bash -lc 'exec process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled'
 Restart=on-failure
 RestartSec=5
 

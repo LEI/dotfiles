@@ -5,11 +5,12 @@
 {{- $reload := get . "reload" -}}
 {{- $uid := output "id" "-u" | trim -}}
 
-{{- $plistFile := printf "%s/Library/LaunchAgents/%s.plist" .chezmoi.homeDir $label -}}
-{{- $status := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
+{{- $plistFile := joinPath .chezmoi.homeDir "Library/LaunchAgents" (printf "%s.plist" $label) -}}
 {{- if stat $plistFile -}}
-# plist hash: {{ include $plistFile | sha256sum }}
+# plist: {{ include $plistFile | sha256sum }}
 {{ end -}}
+
+{{- $status := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
 # status: {{ $status }}
 
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"

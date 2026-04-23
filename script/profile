@@ -167,18 +167,15 @@ fi
 
 # atuin init calls stty -g which fails without a tty
 
-# TODO Fedora:
-# [profile bash] profile: bash init stderr:
-# [profile bash]   ble.sh: cannot find a controlling TTY/PTY in this session.
-# [profile bash]   stty: 'standard input': Inappropriate ioctl for device
-# [profile bash]     ~/.config/atuin/init.sh:29 stty -g
-
 grep -v \
+  -e "^ble.sh: cannot find a controlling TTY/PTY in this session\.$" \
   -e "^stty: 'standard input': Not a tty$" \
+  -e "^stty: 'standard input': Inappropriate ioctl for device$" \
   "$stderrlog" >"$stderrlog.filtered" 2>/dev/null || true
 
 if [ -s "$stderrlog.filtered" ]; then
   echo >&2
   echo >&2 "${0##*/}: $shell init stderr:"
   stderrlog="$stderrlog.filtered" report_stderr
+  exit 1
 fi

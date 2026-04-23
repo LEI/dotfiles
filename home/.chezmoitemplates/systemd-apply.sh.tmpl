@@ -21,6 +21,10 @@
 {{-     $dir = joinPath .chezmoi.homeDir ".config/systemd/user" -}}
 {{-   end -}}
 {{- end -}}
+{{- $unitFile := joinPath $dir $unit -}}
+{{- if stat $unitFile }}
+# unit: {{ include $unitFile | sha256sum }}
+{{ end -}}
 
 {{- $status := "unknown" -}}
 {{- if lookPath "systemctl" | isExecutable -}}
@@ -34,15 +38,16 @@ fi
 
 run {{ $ctl }} daemon-reload
 {{- if $active }}
+
 if {{ $ctl }} is-active --quiet {{ $name }}; then
-{{- if $reload }}
+{{-   if $reload }}
   if ! run {{ $reload }}; then
     msg "{{ $name }}: reload failed"
     run {{ $ctl }} reload-or-restart {{ $name }}
   fi
-{{- else }}
+{{-   else }}
   run {{ $ctl }} reload-or-restart {{ $name }}
-{{- end }}
+{{-   end }}
 else
 {{-   if $isQuadlet }}
   run {{ $ctl }} start {{ $name }}
@@ -50,6 +55,14 @@ else
   run {{ $ctl }} enable --now {{ $name }}
 {{-   end }}
 fi
+
+# Ensure boot-enabled for system services (not preset-disabled)
+{{- if $system }}
+if ! {{ $ctl }} is-enabled --quiet {{ $name }} 2>/dev/null; then
+  run {{ $ctl }} enable {{ $name }}
+fi
+{{- end }}
+
 if ! {{ $ctl }} is-active --quiet {{ $name }}; then
   run {{ $ctl }} status {{ $name }} --no-pager || true
   die "{{ $unit }}: failed to start"
@@ -62,7 +75,14 @@ if ! run retry 10 3 {{ $check }}; then
 fi
 {{-   end }}
 {{- else }}
-{{-   if not $isQuadlet }}
+{{-   if $isQuadlet }}
+
+if {{ $ctl }} is-active --quiet {{ $name }} 2>/dev/null; then
+  msg "stopping quadlet {{ $unit }}"
+  run {{ $ctl }} stop {{ $name }}
+fi
+{{-   else }}
+
 if {{ $ctl }} is-enabled --quiet {{ $name }} 2>/dev/null; then
   msg "disabling service {{ $unit }}"
   run {{ $ctl }} disable --now {{ $name }}

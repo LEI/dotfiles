@@ -24,7 +24,8 @@ if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $prov
 fi
 {{-   end }}
 {{- else if eq $service "quadlet" }}
-# container: {{ includeTemplate "dot_config/containers/systemd/ollama.container.tmpl" . | sha256sum }}
+{{- $containerFile := joinPath .chezmoi.homeDir ".config/containers/systemd/ollama.container" -}}
+# container: {{ include $containerFile | sha256sum }}
 # Pre-pull image to avoid systemd timeout
 {{-   $version := $ollama.version | default "0.21.0" }}
 msg "ollama: pulling image docker.io/ollama/ollama:{{ $version }}..."
