@@ -643,6 +643,13 @@ packages:
     #   arch: taplo-cli
     #   cargo: install taplo-cli --locked --features lsp --quiet
     type: '{{ ne .osIDLike "alpine" | ternary "brew" nil }}'
+  cirruslabs/cli/tart:
+    description: macOS and Linux VMs on Apple Silicon
+    enabled: {{ and (eq .os "darwin") (eq .arch "arm64") (ne .profile "minimal") }}
+    type: brew
+    # after_install:
+    #   # https://tart.run/faq/#changing-the-default-dhcp-lease-time
+    #   - run sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.InternetSharing.default.plist bootpd -dict DHCPLeaseTimeSecs -int 600
   termscp: # aim, zrok
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
   # tidy:

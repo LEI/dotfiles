@@ -146,6 +146,47 @@ dir = "~/.openpackage/packages/local"
 run = "opkg"
 {{- end }}
 
+{{- if eq .os "darwin" }}
+
+[tasks.tart]
+alias = "ta"
+description = "Tart 2.32.1"
+# Images: admin/admin
+# ssh admin@$(tart ip tahoe-base)
+# https://github.com/orgs/cirruslabs/packages?repo_name=linux-image-templates
+
+env.NAME = "tahoe-base"
+# env.DISK = 24 # 50
+# env.SOURCE = "ghcr.io/cirruslabs/macos-tahoe-base:latest"
+
+interactive = true
+run = [
+  # "tart clone $SOURCE $NAME",
+  # "tart set $NAME --disk-size $DISK",
+
+  # "tart run --dir=dotfiles:.:ro {{ `{{ env.NAME }}` }}",
+
+  # https://github.com/cirruslabs/tart/issues/303#issuecomment-1476468726
+  # https://github.com/cirruslabs/tart/issues/374#issuecomment-1536518622
+  "nohup tart run --dir=dotfiles:.:ro --no-graphics {{ `{{ env.NAME }}` }} &",
+  # "rm nohup.out",
+
+  # https://github.com/cirruslabs/tart/issues/374#issuecomment-1747125229
+  "tart ip --wait 60 {{ `{{ env.NAME }}` }}",
+  # brew install sshpass
+  # sshpass -p admin ssh -o "StrictHostKeyChecking no" admin@$(tart ip sonoma-base) "uname -a"
+
+  "tart get --format=json {{ `{{ env.NAME }}` }}",
+  # tart get --format=json {{ `{{ env.NAME }}` }} | jq --raw-output .State
+  # "until ...; do sleep 1; done",
+
+  "ssh username@$(tart ip {{ `{{ env.NAME }}` }}) ls -la '/Volumes/My Shared Files/dotfiles'",
+
+  # "tart stop {{ `{{ env.NAME }}` }}",
+  # "tart prune --older-than=0",
+]
+{{- end }}
+
 {{- if eq .os "linux" }}
 
 [tasks.timep]
