@@ -160,6 +160,13 @@ port:
 #         - /var/empty/sshd
 #         - /var/run/sshd
 
+# TODO: if .features.ai (and others applicable), check private_ files
+# and also unmanaged files like ~/.local/share/opencode/auth.json
+
+# TODO: add tests to fail on chezmoi unmanaged files only where it makes sense
+# in prevision to add exact_ prefix to those, meaning removing unmanaged
+# environment.d, secrets.d (maybe not subdirs), etc
+
 gossfile:
   {{ joinPath $gossDir "goss.d/*.goss.yaml" }}: {}
 {{- range $gossDirFiles }}

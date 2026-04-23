@@ -81,7 +81,7 @@ depends = [
 {{-   $updateDirs = append $updateDirs $name }}
 
 [tasks."update:{{ $name }}"]
-# alias = "u"
+# alias = "upd:{{ $name }}"
 description = {{ printf "Update %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
@@ -92,7 +92,7 @@ interactive = true
 {{- end }}
 
 [tasks.update]
-alias = "u"
+alias = "upt"
 description = "Run all updates"
 depends = [
 {{- range $updateDirs }}
@@ -116,7 +116,7 @@ run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.
 {{- range $images }}
 
 [tasks."container:{{ . }}"]
-# alias = "ct:{{ . }}"
+alias = "ct:{{ . }}"
 description = {{ printf "Build and test chezmoi in %s" . | quote }}
 hide = true
 run = "script/container {{ . }}"
@@ -140,7 +140,7 @@ interactive = true
 {{- if .features.opencode }}
 
 [tasks.opkg]
-# alias = "op"
+alias = "op"
 description = "Run opkg from the local openpackage directory"
 dir = "~/.openpackage/packages/local"
 run = "opkg"
@@ -149,7 +149,7 @@ run = "opkg"
 {{- if eq .os "linux" }}
 
 [tasks.timep]
-# alias = ""
+# alias = "tp"
 description = "Profile bash init with timep (call-stack tree)"
 run = "bash -c 'source ~/.local/share/timep.bash && timep +F -c \"source ~/.bashrc\"'"
 # shell = "bash"

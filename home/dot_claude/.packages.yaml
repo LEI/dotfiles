@@ -10,7 +10,8 @@ packages:
     nameOverwrite:
       npm: "@anthropic-ai/claude-code"
       windows: Anthropic.Claude
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" "npm") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" |
+      ternary "cask" "npm") }}'
   # WARN: requires recent node and no custom config location
   claude-monitor:
     type: uv

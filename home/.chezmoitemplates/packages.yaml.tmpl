@@ -461,7 +461,7 @@ packages:
     nameOverwrite:
       debian: openssh-client
   openvpn-connect: # tunnelblick
-    enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
+    enabled: {{ and (eq .osIDLike "darwin" "windows") (eq .profile "work") (not .headless) }}
     nameOverwrite:
       windows: OpenVPNTechnologies.OpenVPN
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
@@ -857,6 +857,7 @@ osPackages:
       coreutils: # timeout
       # cpanminus:
       cronboard:
+        enabled: {{ not (or .ephemeral .headless) }}
       # daemonize:
       # dbus:
       # diffutils:
@@ -893,6 +894,7 @@ osPackages:
       # jpeg:
       # k6:
       kind:
+        enabled: {{ .features.kube }}
       # kustomize:
       # git-cc: { enabled: {{ .features.git }} }
       # libedit: # readline, rlwrap
@@ -904,6 +906,7 @@ osPackages:
       markdownlint-cli: # NOTE: also installed via mason.nvim
       mas:
       clevercloud/misc/mdr:
+        enabled: {{ and .features.ai .gui }}
       # mercurial:
       # mosh:
       # msgpack:
@@ -927,7 +930,7 @@ osPackages:
       # sops:
       # sponge: # Extracted from moreutils
       supervisor:
-        enabled: {{ .features.php }}
+        enabled: {{ and .features.php (eq .profile "work") }}
         restart_service: ":changed"
       gromgit/brewtils/taproom:
         enabled: {{ .gui }}

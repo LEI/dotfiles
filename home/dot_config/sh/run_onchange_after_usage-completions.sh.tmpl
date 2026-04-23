@@ -32,7 +32,7 @@
 #!{{ .prefix }}/usr/bin/env bash
 
 # Generate shell completions for scripts with #USAGE directives
-# hash: {{ $dict | toJson | sha256sum }}
+# hash: {{ $dict | toJson | sha256sum }} usage={{ output "usage" "--version" | trim }} mise={{ output "mise" "version" | trim | splitList " " | first }}
 
 set -euo pipefail
 
@@ -132,8 +132,10 @@ warn_stale() {
       fi
     done
     if [ "$found" = false ]; then
-      echo "${0##*/}: stale completion: $name ($file)" >&2
-      rc=1
+      rel="${file#"$HOME/"}"
+      echo "${0##*/}: stale completion: $name ($rel)" >&2
+      # rc=1
+      run rm -f "$file"
     fi
   done
 }
@@ -143,6 +145,30 @@ warn_stale "$bash_dir" ""
 {{- if .features.zsh }}
 warn_stale "$zsh_dir" "_"
 {{- end }}
+{{- end }}
+
+{{- if not .features.brew }}
+{{- $miseShells := list }}
+{{- if .features.bash }}{{ $miseShells = append $miseShells "bash" }}{{ end }}
+{{- if .features.zsh }}{{ $miseShells = append $miseShells "zsh" }}{{ end }}
+
+# Generate mise completions (brew handles this on brew-managed systems)
+# TODO: ensure this brew the only case where "mise completion" is needed,
+# if it even is required for brew? (didnt look like so on macos)
+if command -v mise >/dev/null; then
+{{- range $miseShells }}
+{{-   $prefix := "" }}{{ if eq . "zsh" }}{{ $prefix = "_" }}{{ end }}
+{{-   $dir := printf "$%s_dir" . }}
+  if ! run mise completion {{ . }} >|"{{ $dir }}/{{ $prefix }}mise"; then
+    echo "${0##*/}: mise completion {{ . }} failed" >&2
+    rc=1
+  fi
+{{- end }}
+{{- if .features.zsh }}
+  # TODO: only brew or not?
+  run rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+{{- end }}
+fi
 {{- end }}
 
 exit $rc

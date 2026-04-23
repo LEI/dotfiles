@@ -20,7 +20,7 @@
 # TODO: vscode extension install
 # .vscode-remote/User/globalStorage/zokugun.sync-settings/repository:
 #   type: git-repo
-#   url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
+#   url: {{ and .headless (not .git) | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
 #   refreshPeriod: 168h
 {{- end }}
 
@@ -28,7 +28,7 @@
 
 .config/hammerspoon:
   type: git-repo
-  url: {{ .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
+  url: {{ and .headless (not .git) | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
   refreshPeriod: 168h
 
 .local/share/macos/defaults.sh:

@@ -1,10 +1,24 @@
 ---
+# https://docs.z.ai/devpack/tool/claude
+# FIXME: CLAUDE_PROVIDER zai -> anthropic = API Error: 400 (invalid_request_error)
+# messages.5.content.40: Invalid `signature` in `thinking` block
+providers:
+  # anthropic:
+  #   url: https://api.anthropic.com
+  zai:
+    url: https://api.z.ai/api/anthropic
+    # models:
+    #   opus: GLM-5.1 # Default: GLM-4.7
+    #   sonnet: GLM-5-Turbo # Default: GLM-4.7
+    #   haiku: GLM-4.5-Air # Default: GLM-4.5-Air
+
 tiers:
   pro:
     model: # sonnet
     subagent: # claude-haiku-4-5
     effort:
-  max: # 5x, 20x
+  max:
+    # 5x, 20x
     model: opusplan # opus
     subagent: # claude-haiku-4-5
     effort: # medium
@@ -15,11 +29,12 @@ tiers:
   team-premium:
     model: # opus
     subagent: # claude-haiku-4-5
-    effort: # medium
+    effort:
+      # medium
 
-# Non-standard marketplaces (claude-plugins-official is built-in)
-# repo: git-hosted (passed as-is to `claude plugin marketplace add`)
-# path: local path relative to homeDir
+      # Non-standard marketplaces (claude-plugins-official is built-in)
+      # repo: git-hosted (passed as-is to `claude plugin marketplace add`)
+      # path: local path relative to homeDir
 marketplaces:
   chezmoi:
     path: ".claude/plugins/chezmoi"

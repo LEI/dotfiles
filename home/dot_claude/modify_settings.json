@@ -1,17 +1,34 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $claude := get . "claude" | default dict -}}
+
 {{- $tiers := get $claude "tiers" | default dict -}}
+
+{{- $providers := get $claude "providers" | default dict -}}
+{{- $provider := env "CLAUDE_PROVIDER" -}}
+{{- $prefix := $provider | splitList "-" | first -}}
+{{- $endpoint := get $providers $prefix | default dict -}}
+
 {{- $sandboxEnabled := false -}}
-{{- $tierName := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
-{{- $settings := get $tiers $tierName | default dict -}}
+
+{{- $tier := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
+{{- $settings := get $tiers $tier | default dict -}}
+
+{{- if and $prefix (not (hasPrefix $tier $prefix)) }}
+{{-   warnf "Claude tier '%s' does not match provider '%s'" $tier $prefix }}
+{{- end }}
+
+{{- $scriptPath := joinPath .chezmoi.homeDir ".claude/api-key-helper.sh" }}
+
 {{- $model := get $settings "model" -}}
 {{- $subagent := get $settings "subagent" -}}
 {{- $effort := get $settings "effort" -}}
+
 {{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
+
 {{- $plugins := list -}}
-{{- range $data.plugins -}}
-{{-   $plugins = append $plugins (printf "%s@%s" .name .marketplace) -}}
-{{- end -}}
+{{- range $data.plugins }}
+{{-   $plugins = append $plugins (printf "%s@%s" .name .marketplace) }}
+{{- end }}
 {{- $plugins = sortAlpha $plugins -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
@@ -25,6 +42,23 @@
     {{- if not (empty $subagent) }}
     "CLAUDE_CODE_SUBAGENT_MODEL": {{ $subagent | quote }},
     {{- end }}
+    {{- if $endpoint }}
+    "ANTHROPIC_BASE_URL": {{ get $endpoint "url" | quote }},
+    {{- if hasKey $endpoint "models" }}
+    {{-   $models := get $endpoint "models" }}
+    {{-   if get $models "opus" }}
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": {{ get $models "opus" | quote }},
+    {{-   end }}
+    {{-   if get $models "sonnet" }}
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": {{ get $models "sonnet" | quote }},
+    {{-   end }}
+    {{-   if get $models "haiku" }}
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": {{ get $models "haiku" | quote }},
+    {{-   end }}
+    {{- end }}
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    {{- end }}
     "DISABLE_AUTOUPDATER": "1",
     "ECC_HOOK_PROFILE": "minimal",
     "ENABLE_TOOL_SEARCH": "true",
@@ -37,11 +71,14 @@
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_TRACES_EXPORTER": "otlp",
-    "XDG_CACHE_HOME": "{{ .chezmoi.homeDir }}/.cache",
-    "XDG_CONFIG_HOME": "{{ .chezmoi.homeDir }}/.config",
-    "XDG_DATA_HOME": "{{ .chezmoi.homeDir }}/.local/share",
-    "XDG_STATE_HOME": "{{ .chezmoi.homeDir }}/.local/state"
+    "XDG_CACHE_HOME": {{ joinPath .chezmoi.homeDir ".cache" | quote }},
+    "XDG_CONFIG_HOME": {{ joinPath .chezmoi.homeDir ".config" | quote }},
+    "XDG_DATA_HOME": {{ joinPath .chezmoi.homeDir ".local/share" | quote }},
+    "XDG_STATE_HOME": {{ joinPath .chezmoi.homeDir ".local/state" | quote }}
   },
+  {{- if and $provider (stat $scriptPath) }}
+  "apiKeyHelper": {{ printf "%s %s" $scriptPath $provider | quote }},
+  {{- end }}
   "includeGitInstructions": true,
   "permissions": {
     "allow": [

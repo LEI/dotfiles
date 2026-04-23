@@ -174,7 +174,7 @@ return {
     end,
   },
 
-  -- FIXME: v0.11.6
+  -- FIXME: nvim v0.11.6, tree-sitter 0.26.8
 
   -- Error in decoration provider "win" (ns=nvim.treesitter.highlighter):
   -- Error executing lua: /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:208: /usr/share/nvim/runtime/lua/v
