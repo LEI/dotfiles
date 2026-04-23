@@ -9,17 +9,32 @@ packages:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" "windows" }}'
     nameOverwrite:
       npm: "@anthropic-ai/claude-code"
-      windows: Anthropic.Claude
+      windows: Anthropic.ClaudeCode
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" |
       ternary "cask" "npm") }}'
-  # WARN: requires recent node and no custom config location
+
+  claude-desktop:
+    enabled: '{{ and .gui (eq .osIDLike "debian" "darwin" "fedora" "windows") }}'
+    nameOverwrite:
+      cask: claude
+      mise: github:aaddrick/claude-desktop-debian
+      windows: Anthropic.Claude
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" |
+      ternary "mise" nil) }}'
+    # before_script: |
+    #   if command -v dnf >/dev/null || command -v rpm-ostree >/dev/null; then
+    #     # run sudo curl -fsSL https://aaddrick.github.io/claude-desktop-debian/rpm/claude-desktop.repo -o /etc/yum.repos.d/claude-desktop.repo
+    #     # run rpm-ostree install claude-desktop
+    #
+    #     run mise use -g github:aaddrick/claude-desktop-debian
+    #     run rpm-ostree install "$(which claude-desktop-1.3883.0-2.0.3-1.x86_64.rpm)"
+    #
+    #     # run mise use -g rpm:aaddrick/claude-desktop-debian
+    #   fi
+
+    # WARN: requires recent node and no custom config location
   claude-monitor:
     type: uv
-  claude:
-    enabled: '{{ and .gui (eq .osIDLike "darwin" "windows") }}'
-    nameOverwrite:
-      windows: Anthropic.ClaudeCode
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   cc-sessions:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'
     name: github:chronologos/cc-sessions

@@ -28,7 +28,9 @@
 {{-   end }}
 {{- end }}
 
+# TODO: minimal/server profile, do not install bash/zsh init.sh
 {{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
+.profile
 .config/curl/
 .config/readline/
 .config/sh/

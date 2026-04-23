@@ -44,7 +44,7 @@ features:
     - .config/atuin/
   bash:
     # - .bash_aliases
-    # - .bash_profile
+    - .bash_profile
     - .bashrc
     - .config/bash/
     - .config/blesh/
@@ -54,7 +54,7 @@ features:
     - .config/caddy/
   zsh:
     - .config/zsh/
-    # - .zprofile
+    - .zprofile
     - .zshrc
   carapace:
     - .config/carapace/
