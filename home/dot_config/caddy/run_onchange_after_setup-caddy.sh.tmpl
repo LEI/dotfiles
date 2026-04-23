@@ -116,6 +116,28 @@ if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
   run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
 fi
 
+# Copy site configs to /etc/caddy/sites/ (relative import path)
+sites_src="$HOME/.config/caddy/sites"
+sites_dest="/etc/caddy/sites"
+sites_changed=false
+sites_diff=""
+
+for src in "$sites_src"/*.caddy; do
+  if [ -f "$src" ]; then
+    dest="$sites_dest/$(basename "$src")"
+    if ! diff -q "$dest" "$src" >/dev/null 2>&1; then
+      sites_changed=true
+      sites_diff="${sites_diff}$(diff -u "$dest" "$src" 2>&1 || true)"
+    fi
+  fi
+done
+
+if [ "$sites_changed" = true ]; then
+  msg "Updating /etc/caddy/sites/"
+  printf '%s\n' "$sites_diff"
+  run pkexec sh -c "mkdir -p '$sites_dest' && cp '$sites_src'/*.caddy '$sites_dest/'"
+fi
+
 # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
 # otel-collector (HTTP/4318) which forwards to Tempo.
 otel_conf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
