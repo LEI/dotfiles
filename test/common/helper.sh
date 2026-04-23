@@ -60,31 +60,35 @@ run_chezmoi() {
   run_script "$TEST_TMPDIR/$script" "$@"
 }
 
-# Get file permissions as octal (cross-platform)
-file_perms() {
-  if [ "$(uname -s)" = Darwin ]; then
-    stat -f '%A' "$1"
-  else
+# Probe once at source time; define both stat functions for the detected variant
+if stat --version >/dev/null 2>&1; then
+  function file_perms {
     stat -c '%a' "$1"
-  fi
-}
+  }
+else
+  function file_perms {
+    stat -f '%A' "$1"
+  }
+fi
 
 # Assert all files matching a glob have expected permissions
 # Usage: check_perms 600 ~/.config/secrets.d/*.conf
 check_perms() {
   local expected="$1"
   shift
-  local bad=()
+  local fix=()
   for f in "$@"; do
     [ -e "$f" ] || continue
     local perm
     perm=$(file_perms "$f")
     if [ "$perm" != "$expected" ]; then
-      bad+=("$f:$perm")
+      fix+=("chmod $expected ${f/$HOME/\~}") # actual: $perm
     fi
   done
-  if [ ${#bad[@]} -gt 0 ]; then
-    fail "expected $expected: ${bad[*]}"
+  if [ ${#fix[@]} -gt 0 ]; then
+    local IFS=$'\n'
+    # fail "expected $expected:"$'\n'"${fix[*]}"
+    fail $'\n'"${fix[*]}"
   fi
 }
 

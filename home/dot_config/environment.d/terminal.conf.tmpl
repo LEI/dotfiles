@@ -1,0 +1,16 @@
+{{- $terminal := "" -}}
+{{- if and .features.ghostty (or
+  (lookPath "ghostty" | isExecutable)
+  (and (eq .os "darwin") ("/Applications/Ghostty.app/Contents/MacOS/ghostty" | isExecutable))
+) -}}
+{{-   $terminal = "ghostty" -}}
+{{- else if and .features.iterm2 (eq .os "darwin") (or
+  (lookPath "it2api" | isExecutable)
+  ("/Applications/iTerm.app/Contents/Resources/utilities/it2api" | isExecutable)
+) -}}
+{{-   $terminal = "iterm2" -}}
+{{ end -}}
+
+{{- if $terminal -}}
+TERMINAL={{ $terminal }}
+{{ end -}}

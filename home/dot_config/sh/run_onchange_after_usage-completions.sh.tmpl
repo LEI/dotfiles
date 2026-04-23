@@ -152,9 +152,7 @@ warn_stale "$zsh_dir" "_"
 {{- if .features.bash }}{{ $miseShells = append $miseShells "bash" }}{{ end }}
 {{- if .features.zsh }}{{ $miseShells = append $miseShells "zsh" }}{{ end }}
 
-# Generate mise completions (brew handles this on brew-managed systems)
-# TODO: ensure this brew the only case where "mise completion" is needed,
-# if it even is required for brew? (didnt look like so on macos)
+# Install method does not bundle completions for mise
 if command -v mise >/dev/null; then
 {{- range $miseShells }}
 {{-   $prefix := "" }}{{ if eq . "zsh" }}{{ $prefix = "_" }}{{ end }}
@@ -165,7 +163,6 @@ if command -v mise >/dev/null; then
   fi
 {{- end }}
 {{- if .features.zsh }}
-  # TODO: only brew or not?
   run rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 {{- end }}
 fi

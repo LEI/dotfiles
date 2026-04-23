@@ -23,24 +23,55 @@ setup() {
 }
 
 # bats test_tags=secrets,permissions
-@test "secrets.d: files are 600" {
+@test "secrets.d: files are private" {
   if ! compgen -G "$HOME/.config/secrets.d/*.conf" >/dev/null; then
     skip "no conf files yet"
   fi
   check_perms 600 "$HOME/.config/secrets.d"/*.conf
 }
 
+# NOTE: SSH config, config.d/*.conf and id_*.pub may be 644
+# bats test_tags=ssh,permissions
+@test "ssh: files are private" {
+  check_feature ssh
+  [ -d "$HOME/.ssh" ] || skip ".ssh not present"
+  check_perms 700 "$HOME/.ssh"
+  local -a files
+  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f -print0 2>/dev/null)
+  check_perms 600 "${files[@]}"
+}
+
 # bats test_tags=deploy,permissions
-@test "local.yaml: files are 600" {
-  local found=false
-  for f in ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml; do
-    [ -f "$f" ] || continue
-    found=true
-  done
-  if ! $found; then
-    skip "no local.yaml files"
-  fi
-  check_perms 600 ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml
+@test "local.yaml: files are private" {
+  # local found=false
+  # for f in ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml; do
+  #   [ -f "$f" ] || continue
+  #   found=true
+  # done
+  # if ! $found; then
+  #   skip "no local.yaml files"
+  # fi
+  local -a files
+  mapfile -d '' -t files < <(find "$HOME" -maxdepth 2 -type f -name local.yaml -print0 2>/dev/null)
+  [ ${#files[@]} -gt 0 ] || skip "no local.yaml files"
+  check_perms 600 "${files[@]}"
+}
+
+# bats test_tags=deploy,validation
+@test "environment.d: no unmanaged files" {
+  [ -d "$HOME/.config/environment.d" ] || skip "environment.d not present"
+  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never "$HOME/.config/environment.d"
+  assert_success
+  refute_output
+}
+
+# bats test_tags=deploy,validation
+@test "secrets.d: no unmanaged files" {
+  [ "${STRICT:-}" = true ] || skip "STRICT not set"
+  [ -d "$HOME/.config/secrets.d" ] || skip "secrets.d not present"
+  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never "$HOME/.config/secrets.d"
+  assert_success
+  refute_output
 }
 
 # Collect unique KEY= names from all .conf files in a directory

@@ -30,8 +30,3 @@
 {{- end }}
 
 # .wgetrc
-
-{{- if or (not .features.ollama) (ne (dig "ollama" "service" "" .) "quadlet") }}
-# TODO: stop on remove
-# .config/containers/systemd/ollama.container
-{{- end }}

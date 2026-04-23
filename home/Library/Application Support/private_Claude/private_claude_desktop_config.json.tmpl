@@ -1,16 +1,19 @@
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local" "share") -}}
+{{- $dataDir := env "CLAUDE_DATA_DIR" | default (joinPath $dataHome "claude") -}}
 {
   "preferences": {
     "quickEntryShortcut": {
       "accelerator": "Alt+Space"
     },
     "chillingSlothLocation": {
-      "customPath": "$HOME/worktrees"
+      "customPath": {{ joinPath $dataDir "worktrees" | quote }}
     },
     "coworkScheduledTasksEnabled": true,
     "ccdScheduledTasksEnabled": true,
     "sidebarMode": "epitaxy",
     "dockBounceEnabled": true,
     "coworkWebSearchEnabled": true,
+    "launchPreviewpersistSession": true,
     "keepAwakeEnabled": false
   }
 }

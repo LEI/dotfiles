@@ -4,7 +4,6 @@
 #USAGE flag "-l --list" help="List test files"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats"
 #USAGE complete "filter" run="./script/test --list"
-# TODO: --base-directory test
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
 

@@ -7,11 +7,11 @@
 {{- $editor = lookPath "vim" -}}
 {{- else if lookPath "code" | isExecutable -}}
 {{- $editor = lookPath "code" -}}
-{{- else -}}
-{{- $editor = env "EDITOR" | default (lookPath "vi") -}}
+{{/*- else -}}
+{{- $editor = env "EDITOR" | default (lookPath "vi") -*/}}
 {{- end -}}
+
+{{- if $editor -}}
 EDITOR={{ $editor }}
 VISUAL={{ $editor }}
-{{- if or (lookPath "ghostty" | isExecutable) ("/Applications/Ghostty.app/Contents/MacOS/ghostty" | isExecutable) }}
-TERMINAL=ghostty
-{{- end }}
+{{ end -}}
