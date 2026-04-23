@@ -8,14 +8,14 @@ log_level: info
 processes:
   {{- if .features.neovim }}
 
-  nvim-logs:
-    namespace: logs
-    description: Neovim logs
-    # command: '{{ $tspinFollow }} "${XDG_STATE_HOME:-$HOME/.local/state}/nvim/log"'
-    command: "tail -f ~/.cache/nvim/{log,*.log} ~/.local/state/nvim/{log,*.log} | tspin --print"
-    availability:
-      restart: on_failure
-      max_restarts: 0
+  # nvim-logs:
+  #   namespace: logs
+  #   description: Neovim logs
+  #   # command: '{{ $tspinFollow }} "${XDG_STATE_HOME:-$HOME/.local/state}/nvim/log"'
+  #   command: "tail -f ~/.cache/nvim/{log,*.log} ~/.local/state/nvim/{log,*.log} | tspin --print"
+  #   availability:
+  #     restart: on_failure
+  #     max_restarts: 0
   {{- end }}
 
   {{- if .features.claude }}

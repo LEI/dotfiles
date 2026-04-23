@@ -13,10 +13,6 @@
 {{- $tier := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
 {{- $settings := get $tiers $tier | default dict -}}
 
-{{- if and $prefix (not (hasPrefix $tier $prefix)) }}
-{{-   warnf "Claude tier '%s' does not match provider '%s'" $tier $prefix }}
-{{- end }}
-
 {{- $scriptPath := joinPath .chezmoi.homeDir ".claude/api-key-helper.sh" }}
 
 {{- $model := get $settings "model" -}}

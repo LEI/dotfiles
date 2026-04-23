@@ -12,7 +12,7 @@
 {{- end -}}
 {{- $env := dict
       "HOME" .chezmoi.homeDir
-      "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix)
+      "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/share/cargo/bin" .chezmoi.homeDir .brewPrefix .brewPrefix)
       "PC_CONFIG_FILES" (printf "%s/.config/process-compose/global.yaml" .chezmoi.homeDir)
       "PC_LOG_FILE" (printf "%s/process-compose.log" $stateDir) -}}
 {{- if $uds -}}
