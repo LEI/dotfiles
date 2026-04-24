@@ -43,4 +43,4 @@ packages:
     # type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
     type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
     # type: brew
-  zizmor:
+  # zizmor:

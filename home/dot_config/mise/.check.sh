@@ -7,12 +7,10 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; t
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
-# Ensure mise shims take precedence over brew paths, as in an interactive shell
-shims="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims"
-if [ -d "$shims" ]; then
-  PATH="$shims:$PATH"
+# Activate mise if not already active (sets MISE_SHELL and prepends shims to PATH)
+if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
+  eval "$(mise activate bash)"
 fi
-unset shims
 
 # if [ -f /etc/arch-release ] && { [ -f /.dockerenv ] || [ -f /run/.containerenv ]; }; then
 #   mise reshim # shims point to stale mise path after pacman updates
