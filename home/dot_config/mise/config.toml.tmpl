@@ -148,6 +148,20 @@ run = "opkg"
 
 {{- if eq .os "darwin" }}
 
+[tasks.debian]
+alias = "ta:debian"
+description = "Tart debian"
+interactive = true
+run = [
+  # "tart clone ghcr.io/cirruslabs/debian:latest debian",
+  # "tart set debian --disk-size 20",
+  # "nohup tart run --dir=dotfiles:.:ro --no-graphics debian &",
+  "tart ip --wait=60 debian",
+  "tart get --format=json debian",
+  "ssh admin@$(tart ip debian) pwd",
+  # "tart stop debian",
+]
+
 [tasks.tart]
 alias = "ta"
 description = "Tart 2.32.1"
@@ -172,7 +186,7 @@ run = [
   # "rm nohup.out",
 
   # https://github.com/cirruslabs/tart/issues/374#issuecomment-1747125229
-  "tart ip --wait 60 {{ `{{ env.NAME }}` }}",
+  "tart ip --wait=60 {{ `{{ env.NAME }}` }}",
   # brew install sshpass
   # sshpass -p admin ssh -o "StrictHostKeyChecking no" admin@$(tart ip sonoma-base) "uname -a"
 
@@ -180,7 +194,7 @@ run = [
   # tart get --format=json {{ `{{ env.NAME }}` }} | jq --raw-output .State
   # "until ...; do sleep 1; done",
 
-  "ssh username@$(tart ip {{ `{{ env.NAME }}` }}) ls -la '/Volumes/My Shared Files/dotfiles'",
+  "ssh admin@$(tart ip {{ `{{ env.NAME }}` }}) ls -la '/Volumes/My Shared Files/dotfiles'",
 
   # "tart stop {{ `{{ env.NAME }}` }}",
   # "tart prune --older-than=0",

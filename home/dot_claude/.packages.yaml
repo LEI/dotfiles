@@ -10,11 +10,12 @@ packages:
     nameOverwrite:
       npm: "@anthropic-ai/claude-code"
       windows: Anthropic.ClaudeCode
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" |
+    type:
+      '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" |
       ternary "cask" "npm") }}'
 
   claude-desktop:
-    enabled: '{{ and .gui (eq .osIDLike "debian" "darwin" "fedora" "windows") }}'
+    enabled: '{{ and .gui (eq .osIDLike "darwin" "fedora" "windows") }}'
     nameOverwrite:
       cask: claude
       mise: github:aaddrick/claude-desktop-debian
@@ -31,7 +32,10 @@ packages:
     #
     #     # run mise use -g rpm:aaddrick/claude-desktop-debian
     #   fi
-
+    after_script: |
+      if command -v claude-desktop >/dev/null; then
+        claude-desktop --doctor
+      fi
     # WARN: requires recent node and no custom config location
   claude-monitor:
     type: uv

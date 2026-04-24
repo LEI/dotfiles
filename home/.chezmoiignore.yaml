@@ -13,6 +13,7 @@ os:
     - Library/
   linux:
     - .chezmoiscripts/linux/**
+    - .config/Claude/ # Fedora
     - .config/systemd/
     - .hushlogin
   windows:
@@ -33,6 +34,7 @@ features:
   claude:
     - .claude/
     - .config/claude/
+    - .config/Claude/
     - .config/markdownlint/claude.yaml
     - Library/Application Support/Claude/
   goose:
