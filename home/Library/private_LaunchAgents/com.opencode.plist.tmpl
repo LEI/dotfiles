@@ -14,10 +14,7 @@
 
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
   "label" "com.opencode"
-  "args" (list
-    (printf "%s/bin/bash" .brewPrefix)
-    "-lc"
-    (printf "${OPENCODE_SERVER_PASSWORD:?}; exec opencode serve --hostname=%s --port=%s" $server.hostname $server.port))
+  "args" (list (printf "%s/.config/opencode/opencode-serve.sh" .chezmoi.homeDir))
   "env" $env
   "stdout" (printf "%s/stdout.log" $stateDir)
   "stderr" (printf "%s/stderr.log" $stateDir))

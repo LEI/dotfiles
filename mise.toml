@@ -116,4 +116,5 @@ description = "Run smoke tests (needs deployed home)"
 run = "mise run test -- --filter-tags type:smoke"
 
 [tools]
-prek = "latest"
+# prek = "latest"
+usage = "latest"

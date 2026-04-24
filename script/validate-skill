@@ -85,6 +85,8 @@ validate_skill() {
 
   # Resolve effective name via chezmoi: strips exact_, dot_, etc.
   if ! target_path="$(chezmoi target-path --no-tty "$skill_dir")"; then
+    # persistent_state="$(mktemp -d)/chezmoi-state.json"
+    # --persistent-state="$persistent_state"
     echo "FAIL $display_path (chezmoi target-path failed)"
     return 1
   fi

@@ -39,8 +39,8 @@ packages:
     nameOverwrite:
       windows: JesseDuffield.lazygit
     type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "windows") | ternary "mise" nil }}'
-  # prek: # pre-commit
-  #   # type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
-  #   type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
-  #   # type: brew
-  # zizmor:
+  prek: # pre-commit
+    # type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
+    # type: brew
+  zizmor:

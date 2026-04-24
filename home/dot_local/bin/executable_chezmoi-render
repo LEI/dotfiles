@@ -134,8 +134,9 @@ sources=()
 for t in "${templates[@]}"; do
   sources+=("$source_dir/$t")
 done
+persistent_state="$(mktemp -d)/chezmoi-state.json"
 printf '%s\0' "${sources[@]}" |
-  xargs -0 chezmoi target-path |
+  xargs -0 chezmoi target-path --no-tty --persistent-state="$persistent_state" |
   mapfile -t targets
 if [ "${PIPESTATUS[1]}" -ne 0 ]; then
   echo "error: chezmoi target-path failed for:" >&2
