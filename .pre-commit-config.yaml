@@ -8,7 +8,7 @@ repos:
       - id: trailing-whitespace
         exclude: \.(sh|ya?ml)$ # shfmt and yamllint trailing-spaces reports exact line
       - id: end-of-file-fixer
-        exclude: (claude.desktop.config\.json|logseq/settings/.*\.json)$
+        exclude: (\.sh|claude.desktop.config\.json|logseq/settings/.*\.json)$
       - id: check-yaml
         exclude: ^home/dot_config/goss/goss\.yaml$
       - id: check-added-large-files

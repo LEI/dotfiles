@@ -41,7 +41,9 @@ features:
     - .config/goose/
   opencode:
     - .config/opencode/
+    - .config/systemd/user/opencode.service
     - .openpackage/
+    - Library/LaunchAgents/com.opencode.plist
   atuin:
     - .config/atuin/
   bash:

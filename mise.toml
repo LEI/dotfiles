@@ -18,19 +18,26 @@ run = [
   # c a --init
   "chezmoi apply --init --verbose",
   # m pl
-  "mise pipeline",
+  { task = "pipeline" },
   # m ct:all
-  "mise container alpine",
+  { task = "container alpine" },
 ]
 
 [tasks.ci]
 description = "Run CI steps locally"
 depends = [
-  # "bootstrap",
-  "check",
-  "coverage",
-  "startup bash",
-  "startup zsh",
+  # # "bootstrap",
+  # "check",
+  # "coverage",
+  # "startup bash",
+  # "startup zsh",
+]
+run = [
+  # { task = "bootstrap" },
+  { task = "check" },
+  { task = "coverage" },
+  { task = "startup bash" },
+  { task = "startup zsh" },
 ]
 
 [tasks.hyperfine]
@@ -41,48 +48,60 @@ run = "hyperfine 'mise run startup' --max-runs=5 --show-output"
 alias = "pl"
 description = "Run checks and tests locally"
 # FIXME: Ctrl-C leaves orphaned depends processes (mise signal propagation bug)
-depends = [
-  "check",
-  # "lint",
-  "profile bash",
-  "profile zsh",
-  "test",
-  # "update",
-]
+# depends = [
+#   "check",
+#   # "lint",
+#   "prek",
+#   "profile bash",
+#   "profile zsh",
+#   "test",
+#   # "update",
+# ]
+# run = [
+#   # Update after check
+#   "mise update", # ./home/dot_config/mise/config.toml.tmpl
+#   # Avoid chezmoi timeout obtaining persistent state lock when running tests
+#   # "mise prek", # ./script/prek
+# ]
 run = [
-  # Update after check
-  "mise update", # ./home/dot_config/mise/config.toml.tmpl
-  # Avoid chezmoi timeout obtaining persistent state lock when running tests
-  "mise prek", # ./script/prek
+  { task = "test" },
+  { task = "check" },
+  # { task = "lint" },
+  { task = "prek" },
+  { task = "profile bash" },
+  { task = "profile zsh" },
+  # { task = "update" },
 ]
 
 [tasks.renovate]
-description = "Dry-run Renovate locally"
+description = "Dry-run Renovate locally (default: full, set RENOVATE_DRY_RUN to override)"
 run = "bunx renovate --platform=local --dry-run=${RENOVATE_DRY_RUN:-full}"
 [tasks.renovate.env]
-GITHUB_COM_TOKEN = "$(gh auth token)" # --user "$(git config github.user)"
+GITHUB_COM_TOKEN = "$(gh auth token)"
+LOG_FORMAT = "json"
+# Suppress OTLP exporter connection errors (no local collector)
+OTEL_SDK_DISABLED = "true"
 
 [tasks."renovate:config"]
-description = "Print resolved Renovate config (managers, fileMatch patterns)"
+description = "Print resolved config (active managers, fileMatch patterns)"
 run = "bunx renovate --platform=local --print-config | jq -Rn '[inputs | try fromjson | select(.err == null)] | last'"
 [tasks."renovate:config".env]
 GITHUB_COM_TOKEN = "$(gh auth token)"
 LOG_FORMAT = "json"
 LOG_LEVEL = "debug"
+OTEL_SDK_DISABLED = "true"
 
 [tasks."renovate:extract"]
-description = "Detect dependencies without API calls"
-run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFiles)'"
+description = "Show detected managers and dependency counts (extract mode)"
+run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.stats) | .stats.managers'"
 [tasks."renovate:extract".env]
-LOG_FORMAT = "json"
 LOG_LEVEL = "info"
 RENOVATE_DRY_RUN = "extract"
 
 [tasks."renovate:missed"]
-description = "Show per-file manager matching at debug level"
-run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFile) | {msg, manager, packageFile}'"
+description = "Show parse errors and lookup failures (extract + debug)"
+run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFile and (.msg | test(\"Error|Failed\"; \"i\"))) | {msg, manager, packageFile}'"
 [tasks."renovate:missed".env]
-LOG_FORMAT = "json"
 LOG_LEVEL = "debug"
 RENOVATE_DRY_RUN = "extract"
 
@@ -95,3 +114,6 @@ run = "mise run test -- --filter-tags type:unit"
 alias = "ts"
 description = "Run smoke tests (needs deployed home)"
 run = "mise run test -- --filter-tags type:smoke"
+
+[tools]
+prek = "latest"

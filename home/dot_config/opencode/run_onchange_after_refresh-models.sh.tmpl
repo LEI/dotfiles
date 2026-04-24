@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has opencode; then
+  die "opencode not found"
+fi
+
+# Providers: {{ get (includeTemplate "dot_config/opencode/opencode.jsonc.tmpl" . | fromJsonc) "provider" | keys | sortAlpha | join ", " }}
+run opencode models --refresh

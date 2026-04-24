@@ -1,0 +1,25 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+
+{{- $svc := get .services "opencode" -}}
+
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
+
+{{- $stateDir := printf "%s/.local/state/opencode" .chezmoi.homeDir -}}
+
+{{- $env := dict
+  "HOME" .chezmoi.homeDir
+-}}
+
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+  "label" "com.opencode"
+  "args" (list
+    (printf "%s/bin/bash" .brewPrefix)
+    "-lc"
+    (printf "${OPENCODE_SERVER_PASSWORD:?}; exec opencode serve --hostname=%s --port=%s" $server.hostname $server.port))
+  "env" $env
+  "stdout" (printf "%s/stdout.log" $stateDir)
+  "stderr" (printf "%s/stderr.log" $stateDir))
+-}}
+{{- end -}}

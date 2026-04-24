@@ -1,11 +1,11 @@
 {{- if .features.caddy -}}
-{{- $expected := dict 443 "http://127.0.0.1:80" -}}
+{{- $expected := dict 443 "http://localhost:80" -}}
 {{- $caddy := get . "caddy" | default dict -}}
 {{- range $feat, $sites := get $caddy "sites" | default dict -}}
 {{-   if not (get $.features $feat) }}{{ continue }}{{ end -}}
 {{-   range $name, $s := $sites -}}
 {{-     if or (not (hasKey $s "tailscale")) (not $s.tailscale) }}{{ continue }}{{ end -}}
-{{-     $expected = merge $expected (dict $s.port (printf "http://127.0.0.1:%d" $s.port)) -}}
+{{-     $expected = merge $expected (dict $s.port (printf "http://localhost:%d" $s.port)) -}}
 {{-   end -}}
 {{- end -}}
 #!/bin/bash
@@ -22,6 +22,15 @@ set -euo pipefail
 if ! has tailscale; then
   msg "tailscale not found; skipping serve setup"
   exit 0
+fi
+
+{{- if lookPath "tailscale" | isExecutable }}
+{{-   $status := output "sh" "-c" "tailscale status --json 2>/dev/null || true" | default dict | fromJson }}
+
+# status: {{ get $status "BackendState" }}
+{{- end }}
+if ! run tailscale status; then
+  die "tailscale status failed"
 fi
 
 status=$(tailscale serve status --json 2>/dev/null || echo '{}')

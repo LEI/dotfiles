@@ -1,7 +1,37 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+
+{{- $svc := get .services "opencode" -}}
+
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
 #!/bin/sh
 
-set -eux
+set -eu
 
-# Providers: {{ get (includeTemplate "dot_config/opencode/opencode.jsonc.tmpl" . | fromJsonc) "provider" | keys | sortAlpha | join ", " }}
-# opencode models --refresh --verbose
-opencode models --refresh
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has opencode; then
+  die "opencode not found"
+fi
+
+run opencode debug config >/dev/null
+
+if [ ! -d "$HOME/.local/state/opencode" ]; then
+  run mkdir -p "$HOME/.local/state/opencode"
+fi
+
+{{- if eq .os "darwin" }}
+
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc) | trim }}
+
+{{- else if eq .os "linux" }}
+
+{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc) | trim }}
+
+{{- end }}
+{{ end -}}

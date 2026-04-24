@@ -774,8 +774,6 @@ packages:
       # debian: 7zip ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
       # fedora: # dnf copr enable lihaohong/yazi
       windows: sxyazi.yazi oschwartz10612.Poppler ImageMagick.ImageMagick
-  # FIXME: "extra/yq" installs "kislyuk/yq" on arch instead of "mikefarah/yq"
-  # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
   zen:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}
     nameOverwrite:

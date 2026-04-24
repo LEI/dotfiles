@@ -49,8 +49,11 @@ run_chezmoi() {
 
   # Skip rendering if already pre-rendered (e.g. by chezmoi-render in coverage)
   if ! [ -s "$file" ]; then
+    # Use a per-test persistent state file to avoid lock contention
+    local persistent_state="$TEST_TMPDIR/chezmoi-state.json"
+
     # Use chezmoi cat from the target path (HOME-relative)
-    if ! chezmoi cat --no-tty --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
+    if ! chezmoi cat --no-tty --persistent-state="$persistent_state" --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
       fail "run_chezmoi: chezmoi cat failed for $script"
     elif ! [ -s "$file" ]; then
       fail "run_chezmoi: empty file: $script"
@@ -60,13 +63,12 @@ run_chezmoi() {
   run_script "$TEST_TMPDIR/$script" "$@"
 }
 
-# Probe once at source time; define both stat functions for the detected variant
 if stat --version >/dev/null 2>&1; then
-  function file_perms {
+  file_perms() {
     stat -c '%a' "$1"
   }
 else
-  function file_perms {
+  file_perms() {
     stat -f '%A' "$1"
   }
 fi

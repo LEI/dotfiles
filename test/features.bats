@@ -198,3 +198,17 @@ setup() {
   refute_stderr
   assert_success
 }
+
+@test "feature: jq" {
+  check_command jq
+  run --separate-stderr jq --version
+  assert_output --partial 'jq-'
+  assert_success
+}
+
+@test "feature: yq" {
+  check_command yq
+  run --separate-stderr yq --version
+  assert_output --partial 'yq (https://github.com/mikefarah/yq/) version'
+  assert_success
+}

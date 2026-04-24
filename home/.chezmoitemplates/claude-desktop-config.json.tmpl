@@ -13,13 +13,12 @@
     "sidebarMode": "epitaxy",
     "coworkWebSearchEnabled": true,
     "keepAwakeEnabled": false,
+    "dockBounceEnabled": true,
     {{- if eq .os "darwin" }}
     "quickEntryShortcut": {
       "accelerator": "Alt+Space"
     },
-    "dockBounceEnabled": true
     {{- else if eq .osIDLike "fedora" }}
-    "coworkOnboardingResumeStep": null,
     "localAgentModeTrustedFolders": [
       "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"
     ]

@@ -60,14 +60,14 @@ interactive = true
 [tasks.check]
 alias = "c"
 description = "Run all checks"
-run = [
-{{- range $checkDirs }}
-  # { task = {{ printf "check:%s" . | quote }} },
-{{- end }}
-]
 depends = [
 {{- range $checkDirs }}
-  {{ printf "check:%s" . | quote }},
+  # {{ printf "check:%s" . | quote }},
+{{- end }}
+]
+run = [
+{{- range $checkDirs }}
+  { task = {{ printf "check:%s" . | quote }} },
 {{- end }}
 ]
 
@@ -92,11 +92,12 @@ interactive = true
 {{- end }}
 
 [tasks.update]
-alias = "upt"
+# alias = "U"
 description = "Run all updates"
-depends = [
+# depends = []
+run = [
 {{- range $updateDirs }}
-  {{ printf "update:%s" . | quote }},
+  { task = {{ printf "update:%s" . | quote }} },
 {{- end }}
 ]
 
@@ -112,7 +113,7 @@ interactive = true
 run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.sh") | quote }}
 {{- end }}
 
-{{- $images := list "alpine" "archlinux" "debian" "fedora" "ubuntu" }}
+{{- $images := list "alpine" "archlinux" "debian" "fedora" "termux" "ubuntu" }}
 {{- range $images }}
 
 [tasks."container:{{ . }}"]
@@ -128,9 +129,10 @@ interactive = true
 [tasks."container:all"]
 alias = "ct:all"
 description = "Build and test chezmoi in all images"
-depends = [
+# depends = []
+run = [
 {{- range $images }}
-  {{ printf "container:%s" . | quote }},
+  { task = {{ printf "container:%s" . | quote }} },
 {{- end }}
 ]
 {{- if $miseInteractive }}

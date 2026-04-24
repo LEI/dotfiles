@@ -29,13 +29,13 @@ caddy:
       surrealdb:
         port: 8000
         health: /health
-    # opencode:
-    #   opencode:
-    #     body: Unauthorized
-    #     port: 4096
-    #     health: /
-    #     status: 401
-    #     tailscale: true
+    opencode:
+      opencode:
+        body: Unauthorized
+        port: 4096
+        health: /
+        status: 401
+        tailscale: true
     otel:
       # alertmanager:
       #   port: 9093

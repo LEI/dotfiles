@@ -1,9 +1,6 @@
 #!/bin/sh
-# Statusline wrapper: writes per-session context data, delegates to dashboard
+# Statusline: writes per-session context, delegates to claude-dashboard
 # stdin: JSON from Claude Code (context_window, session_id, ...)
-# stdout: passthrough from delegate command ("$@")
-# Teammates get a minimal dashboard preset via HOME override;
-# the dashboard reads config from $HOME/.claude/claude-dashboard.local.json
 
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 TEAMMATE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/claude-dashboard-teammate"
@@ -14,10 +11,13 @@ SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
 if [ -n "$SID" ]; then
   mkdir -p "$DIR"
   printf '%s' "$INPUT" >"$DIR/$SID.json"
-
-  # Prune stale session files older than 2 days
   find "$DIR" -type f -name '*.json' -mtime +2 -delete 2>/dev/null
 fi
+
+# Glob expands in alphabetical order; for fixed-digit semver that equals version order
+set -- "$CLAUDE_DIR/plugins/cache/claude-dashboard/claude-dashboard/"*/dist/index.js
+eval "DASHBOARD=\${$#}"
+[ -f "$DASHBOARD" ] || exit 0
 
 # Resolve current pane ID: tmux (%N) or iTerm2 (wXtYpZ:UUID)
 # Team config stores bare UUIDs for iTerm2, so also extract the UUID suffix
@@ -43,6 +43,12 @@ if [ -n "$PANE_ID" ]; then
   done
 fi
 
+if command -v mise >/dev/null 2>&1; then
+  NODE_RUN="mise exec node@lts --"
+else
+  NODE_RUN="node"
+fi
+
 if [ "$IS_TEAMMATE" = true ]; then
   # Ensure teammate config exists with minimal preset (model + context)
   if [ ! -f "$TEAMMATE_HOME/.claude/claude-dashboard.local.json" ]; then
@@ -53,7 +59,9 @@ if [ "$IS_TEAMMATE" = true ]; then
   fi
   # Override HOME so the dashboard reads the teammate config;
   # missing credentials/settings degrade gracefully (null/defaults)
-  printf '%s' "$INPUT" | exec env HOME="$TEAMMATE_HOME" "$@"
+  # shellcheck disable=SC2086
+  printf '%s' "$INPUT" | exec env HOME="$TEAMMATE_HOME" $NODE_RUN "$DASHBOARD"
 else
-  printf '%s' "$INPUT" | exec "$@"
+  # shellcheck disable=SC2086
+  printf '%s' "$INPUT" | exec $NODE_RUN "$DASHBOARD"
 fi

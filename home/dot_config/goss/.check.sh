@@ -18,4 +18,4 @@ fi
 set -- goss --vars=vars.yaml "$@"
 
 echo "$@" >&2
-exec "$@"
+"$@"

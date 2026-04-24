@@ -37,7 +37,7 @@ setup() {
   [ -d "$HOME/.ssh" ] || skip ".ssh not present"
   check_perms 700 "$HOME/.ssh"
   local -a files
-  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f -print0 2>/dev/null)
+  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f -not -name '*.pub' -print0 2>/dev/null)
   check_perms 600 "${files[@]}"
 }
 

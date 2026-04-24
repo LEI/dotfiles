@@ -38,7 +38,7 @@ setup_graph() {
   msg "Linked $name graph: $link -> $local_path"
 }
 
-{{- range (dig "logseq" "graphs" (list) .) }}
+{{- range (dig "logseq" "graphs" list .) }}
 setup_graph {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end }}
 {{- end }}
 

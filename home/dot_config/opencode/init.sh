@@ -1,6 +1,3 @@
-# TODO: ../private_secrets.d/private_opencode.conf.tmpl
-export OPENCODE_URL=http://localhost:4096
-# export OPENCODE_URL=https://opencode.test
 export OPENCODE_EXPERIMENTAL=true
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
@@ -14,13 +11,15 @@ export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
 opencode() {
   # command opencode "${@:---continue}"
   if [ $# -eq 0 ]; then
-    set -- --continue
-    # # https://github.com/anomalyco/opencode/issues/17322
-    # if curl --silent "$OPENCODE_URL" >/dev/null; then
+    # https://github.com/anomalyco/opencode/issues/17322
+    # curl --fail --show-error --silent "$OPENCODE_URL" >/dev/null
+    # if [ -n "$OPENCODE_URL" ]; then
     #   echo "Attaching to server: $OPENCODE_URL" >&2
-    #   set -- attach "$OPENCODE_URL" "$@"
+    #   set -- attach "$OPENCODE_URL"
+    # else
+    set -- --continue
     # fi
-    # set -- "$@" --continue
+    echo "+ opencode $*" >&2
   fi
   command opencode "$@"
 }
@@ -32,7 +31,7 @@ alias oc=opencode
 #   if ! command openwork daemon status --opencode-port=$port; then
 #     command openwork serve --detach --opencode-port=$port
 #   fi
-#   # echo >&2 opencode attach http://127.0.0.1:$port "$@"
+#   # echo >&2 opencode attach http://localhost:$port "$@"
 # }
 # # Log-only mode: openwork serve or start --no-tui
 # openwork_serve() {

@@ -13,8 +13,6 @@
 {{- $tier := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
 {{- $settings := get $tiers $tier | default dict -}}
 
-{{- $scriptPath := joinPath .chezmoi.homeDir ".claude/api-key-helper.sh" }}
-
 {{- $model := get $settings "model" -}}
 {{- $subagent := get $settings "subagent" -}}
 {{- $effort := get $settings "effort" -}}
@@ -39,6 +37,7 @@
     "CLAUDE_CODE_SUBAGENT_MODEL": {{ $subagent | quote }},
     {{- end }}
     {{- if $endpoint }}
+    "ANTHROPIC_AUTH_TOKEN": ""{{/* Force apiKeyHelper in /status */}},
     "ANTHROPIC_BASE_URL": {{ get $endpoint "url" | quote }},
     {{- if hasKey $endpoint "models" }}
     {{-   $models := get $endpoint "models" }}
@@ -72,6 +71,7 @@
     "XDG_DATA_HOME": {{ joinPath .chezmoi.homeDir ".local/share" | quote }},
     "XDG_STATE_HOME": {{ joinPath .chezmoi.homeDir ".local/state" | quote }}
   },
+  {{- $scriptPath := joinPath .chezmoi.homeDir ".claude/api-key-helper.sh" }}
   {{- if and $provider (stat $scriptPath) }}
   "apiKeyHelper": {{ printf "%s %s" $scriptPath $provider | quote }},
   {{- end }}
@@ -321,16 +321,11 @@
   },
   "enableAllProjectMcpServers": false,
   "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},
-  {{- $node := lookPath "node" }}
-  {{- if .features.mise }}
-  {{-   $node = "mise exec node@lts --" }}
-  {{- end }}
-  {{- $dashboard := glob (print .chezmoi.homeDir "/.claude/plugins/cache/claude-dashboard/claude-dashboard/*/dist/index.js") | sortAlpha | last }}
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
-  {{- if and $node $dashboard }}
+  {{- if stat $statusline }}
   "statusLine": {
     "type": "command",
-    "command": {{ printf "%s %s %s" $statusline $node $dashboard | toJson }},
+    "command": {{ $statusline | toJson }},
     "padding": 0
   },
   {{- end }}

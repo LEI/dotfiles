@@ -10,6 +10,8 @@ init | apply | update) ;;
 *) exit ;;
 esac
 
+# TODO: upgrade to https://github.com/bitwarden/sdk-sm/releases/tag/bws-v2.0.0
+
 # exit immediately if bws is already in $PATH
 # type bws >/dev/null 2>&1 && exit
 if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then

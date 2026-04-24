@@ -9,7 +9,7 @@
       "auth_type" "none"
       "key" ""
       "headers" (dict)
-      "config" (dict "enable" false "function_name_filter_list" "" "access_grants" (list))
+      "config" (dict "enable" false "function_name_filter_list" "" "access_grants" list)
       "info" (dict "id" $id "name" (get $api "name" | default $id) "description" (get $api "description" ))) -}}
 {{- end -}}
 {{- $payload := dict "TOOL_SERVER_CONNECTIONS" $connections -}}

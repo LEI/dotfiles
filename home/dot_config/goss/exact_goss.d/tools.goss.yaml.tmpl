@@ -1,0 +1,58 @@
+{{- $jqCheck := lookPath "jq" | isExecutable -}}
+{{- $yqCheck := lookPath "yq" | isExecutable -}}
+{{- $jqVersion := "" -}}
+{{- $yqVersion := "" -}}
+{{- if $jqCheck -}}
+{{-   $jqVersion = output "sh" "-c" "jq --version | cut -d'-' -f2" -}}
+{{-   if eq $jqVersion "" }}{{ $jqVersion = "VERSION_EXTRACTION_FAILED" }}{{ end -}}
+{{- end -}}
+{{- if $yqCheck -}}
+{{-   $yqVersion = output "sh" "-c" "yq --version | awk '{print $4}' | tr -d 'v'" -}}
+{{-   if eq $yqVersion "" }}{{ $yqVersion = "VERSION_EXTRACTION_FAILED" }}{{ end -}}
+{{- end -}}
+---
+{{- if or $jqCheck $yqCheck }}
+matching:
+{{- end }}
+
+{{- if $jqCheck }}
+
+  jq_version:
+    title: Check jq version matches semver constraint
+    content:
+      - {{ $jqVersion | trim | quote }}
+    matches:
+      semver-constraint: ">= 1.8.0 < 2.0.0"
+{{- end }}
+
+{{- if $yqCheck }}
+
+  yq_version:
+    title: Check yq version matches semver constraint
+    content:
+      - {{ $yqVersion | trim | quote }}
+    matches:
+      semver-constraint: ">= 4.0.0 < 5.0.0"
+{{- end }}
+
+command:
+
+  jq:
+    title: Verify jq is installed
+    {{- if eq .osIDLike "debian" "fedora" }}
+    exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" jq --version'
+    {{- else }}
+    exec: jq --version
+    {{- end }}
+    exit-status: 0
+    timeout: 2000
+
+  yq:
+    title: Verify yq is installed
+    {{- if eq .osIDLike "debian" "fedora" }}
+    exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" yq --version'
+    {{- else }}
+    exec: yq --version
+    {{- end }}
+    exit-status: 0
+    timeout: 2000

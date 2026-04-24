@@ -19,7 +19,7 @@ fi
 
 MAX_TIME="${MAX_TIME:-60}"
 
-data="$(chezmoi data --format=json)"
+data="$(chezmoi data --format=json --no-tty)"
 
 jqr() { printf '%s' "$data" | jq --raw-output "$@"; }
 
