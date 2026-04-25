@@ -76,6 +76,21 @@ repos:
         stages:
           - pre-commit
 
+  # # https://github.com/google/yamlfmt/blob/main/docs/pre-commit.md
+  # - repo: https://github.com/google/yamlfmt
+  #   rev: v0.19.0
+  #   hooks:
+  #     - id: yamlfmt
+  #       language: system
+  #       args:
+  #         - -dry
+  #         # - -global_conf
+  #         - -lint
+  #       exclude: ^home/.*/modify_
+  #       # files: \.ya?ml$
+  #       # Run with configuration
+  #       # pass_filenames: false
+
   - repo: https://github.com/JohnnyMorganz/StyLua
     rev: v2.4.1
     hooks:
@@ -105,7 +120,7 @@ repos:
       #   exclude: ^home/(.*\.tmpl$|.*/modify_)
       #   files: \.(json[c5]?|toml|ya?ml)$
 
-      # Security
+  # Security
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:

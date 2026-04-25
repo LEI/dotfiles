@@ -1,18 +1,19 @@
 #!/bin/sh
-# List and check enabled chezmoi features
+# List, check, and toggle chezmoi features
 #USAGE arg "[action]" help="Action to perform" {
-#USAGE   choices "list" "enabled"
+#USAGE   choices "list" "enabled" "toggle"
 #USAGE }
 #USAGE flag "-o --output <format>" help="Output format" {
 #USAGE   choices "text" "json" "yaml"
 #USAGE }
-#USAGE arg "[feature]..." help="Features to check"
+#USAGE arg "[feature]..." help="Features to check or toggle"
 
 set -eu
 
 usage() {
-  echo "Usage: chezmoi feature [list|enabled] [-h|--help]" >&2
+  echo "Usage: chezmoi feature [list|enabled|toggle] [-h|--help]" >&2
   echo "  [-o|--output=text|json|yaml]" >&2
+  echo "  [feature...]" >&2
 }
 
 get_format() {
@@ -64,6 +65,33 @@ get_feature() {
   jq ".$key == true" "$HOME/.local/state/chezmoi/features.json"
 }
 
+toggle_feature() {
+  key="$1"
+  features_file="$HOME/.local/state/chezmoi/features.json"
+
+  if ! jq -e ". | has(\"$key\")" "$features_file" >/dev/null; then
+    echo "${0##*/}: unknown feature: $key" >&2
+    return 2
+  fi
+
+  # Get current state before toggle
+  current_state=$(jq ".$key" "$features_file")
+
+  if command -v sponge >/dev/null; then
+    jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" | sponge "$features_file"
+  else
+    tmp=$(mktemp)
+    jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" > "$tmp" && mv "$tmp" "$features_file"
+  fi
+
+  # Report the new state (inverted from current_state)
+  if [ "$current_state" = "true" ]; then
+    echo "$key: disabled"
+  else
+    echo "$key: enabled"
+  fi
+}
+
 if [ $# -eq 0 ]; then
   # usage
   # exit 0
@@ -74,10 +102,10 @@ action=
 output=text
 while [ $# -gt 0 ]; do
   case "$1" in
-  list | enabled)
+  list | enabled | toggle)
     action="$1"
     shift
-    # continue
+    break
     ;;
   -*=*)
     key="${1%%=*}"
@@ -122,6 +150,16 @@ list)
   ;;
 enabled)
   list_enabled_features "$output"
+  ;;
+toggle)
+  if [ $# -eq 0 ]; then
+    echo "${0##*/}: toggle requires at least one feature" >&2
+    usage
+    exit 1
+  fi
+  for feature in "$@"; do
+    toggle_feature "$feature" || exit $?
+  done
   ;;
 *)
   echo "${0##*/}: invalid action: $action" >&2

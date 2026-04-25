@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 ---
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: s
 description: shpool
 run: '$(if [ $# -eq 0 ]; then if [ -n "${SHPOOL_SESSION_NAME:-}" ]; then shpool list; else s select; fi; else shpool "$@"; fi)'

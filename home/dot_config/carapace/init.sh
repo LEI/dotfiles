@@ -1,7 +1,4 @@
 # https://carapace-sh.github.io/carapace-bin/setup.html#bash
-if [ "${DISABLE_CARAPACE:-0}" = "1" ]; then
-  return
-fi
 
 if ! command -v carapace >/dev/null; then
   echo "init: command not found: carapace" >&2

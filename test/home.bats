@@ -69,16 +69,19 @@ setup() {
 
 # bats test_tags=deploy,validation,strict
 @test "claude/rules: no unmanaged files" {
+  check_feature claude
   no_unmanaged "$HOME/.claude/rules"
 }
 
 # bats test_tags=deploy,validation,strict
 @test "nvim: no unmanaged files" {
+  check_feature neovim
   no_unmanaged "$HOME/.config/nvim"
 }
 
 # bats test_tags=deploy,validation,strict
 @test "opencode: no unmanaged files" {
+  check_feature opencode
   no_unmanaged "$HOME/.config/opencode"
 }
 

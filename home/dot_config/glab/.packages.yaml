@@ -2,10 +2,12 @@
 enabled: "{{ .features.git }}"
 packages:
   glab:
-    enabled: '{{ and (ne .os "android") (not (or
-      (and (eq .osID "debian") (le (int .osVersion) 12))
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
-      )) (ne .profile "minimal") }}'
+    enabled: '{{ and
+      (ne .os "android")
+      (not (or
+        (and (eq .osID "debian") (le (int .osVersion) 12))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))))
+      (ne .profile "minimal") }}'
     nameOverwrite:
       windows: GLab.GLab
     type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'

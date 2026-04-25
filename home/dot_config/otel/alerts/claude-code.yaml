@@ -5,12 +5,8 @@ groups:
     rules:
       # Cache efficiency drop (below 90% means wasted tokens)
       - alert: ClaudeCodeLowCacheHitRatio
-        expr: >
-          sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h]))
-          /
-          (sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h]))
-          + sum(rate(claude_code_token_usage_tokens_total{type="input"}[1h])))
-          < 0.9
+        # yamllint disable-line rule:line-length
+        expr: sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h])) / (sum(rate(claude_code_token_usage_tokens_total{type="cacheRead"}[1h])) + sum(rate(claude_code_token_usage_tokens_total{type="input"}[1h]))) < 0.9
         for: 15m
         labels:
           severity: info
@@ -31,10 +27,7 @@ groups:
       # High output token ratio (possible loops or excessive verbosity)
       - alert: ClaudeCodeHighOutputRatio
         expr: >
-          sum(rate(claude_code_token_usage_tokens_total{type="output"}[30m]))
-          /
-          sum(rate(claude_code_token_usage_tokens_total{type="input"}[30m]))
-          > 3
+          sum(rate(claude_code_token_usage_tokens_total{type="output"}[30m])) / sum(rate(claude_code_token_usage_tokens_total{type="input"}[30m])) > 3
         for: 15m
         labels:
           severity: info

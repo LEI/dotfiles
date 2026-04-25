@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 ---
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: d
 description: docker
 run: '$(if [ $# -eq 0 ]; then docker ps --all; else docker "$@"; fi)'

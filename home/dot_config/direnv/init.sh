@@ -1,7 +1,3 @@
-if [ "${DISABLE_DIRENV:-0}" = "1" ]; then
-  return
-fi
-
 if ! command -v direnv >/dev/null; then
   echo "init: command not found: direnv" >&2
   return

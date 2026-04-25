@@ -2,11 +2,12 @@
 enabled: "{{ .features.git }}"
 packages:
   gh:
-    enabled: '{{ and (not (or
-      (eq .osIDLike "alpine")
-      (and (eq .osID "debian") (le (int .osVersion) 11))
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-      )) (ne .profile "minimal") }}'
+    enabled: '{{ and
+      (not (or
+        (eq .osIDLike "alpine")
+        (and (eq .osID "debian") (le (int .osVersion) 11))
+        (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))))
+      (ne .profile "minimal") }}'
     nameOverwrite:
       arch: github-cli
       windows: GitHub.cli

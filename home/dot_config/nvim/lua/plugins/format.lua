@@ -140,7 +140,6 @@ return {
       },
       formatters_by_ft = {
         yaml = { 'yamlfmt' },
-        yml = { 'yamlfmt' },
         json5 = prettier,
         markdown = {
           'prettier',

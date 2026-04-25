@@ -4,9 +4,9 @@ global:
 
 route:
   group_by: ['alertname', 'cluster', 'service']
-  group_wait: 10s       # Wait before sending first notification
-  group_interval: 10s   # Wait before sending batch update
-  repeat_interval: 12h  # Resend if still firing
+  group_wait: 10s # Wait before sending first notification
+  group_interval: 10s # Wait before sending batch update
+  repeat_interval: 12h # Resend if still firing
   receiver: 'default'
 
 receivers:

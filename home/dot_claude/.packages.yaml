@@ -10,9 +10,8 @@ packages:
     nameOverwrite:
       npm: "@anthropic-ai/claude-code"
       windows: Anthropic.ClaudeCode
-    type:
-      '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" |
-      ternary "cask" "npm") }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur"
+      (eq .osIDLike "darwin" "fedora" | ternary "cask" "npm") }}'
 
   claude-desktop:
     enabled: '{{ and .gui (eq .osIDLike "darwin" "fedora" "windows") }}'
@@ -20,8 +19,8 @@ packages:
       cask: claude
       mise: github:aaddrick/claude-desktop-debian
       windows: Anthropic.Claude
-    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" |
-      ternary "mise" nil) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask"
+      (eq .osIDLike "fedora" | ternary "mise" nil) }}'
     # before_script: |
     #   if command -v dnf >/dev/null || command -v rpm-ostree >/dev/null; then
     #     # run sudo curl -fsSL https://aaddrick.github.io/claude-desktop-debian/rpm/claude-desktop.repo -o /etc/yum.repos.d/claude-desktop.repo

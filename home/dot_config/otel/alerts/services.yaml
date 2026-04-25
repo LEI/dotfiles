@@ -6,10 +6,7 @@ groups:
       # LLM gateway error rate
       - alert: BifrostHighErrorRate
         expr: >
-          rate(bifrost_error_requests_total[5m])
-          /
-          (rate(bifrost_success_requests_total[5m]) + rate(bifrost_error_requests_total[5m]))
-          > 0.1
+          rate(bifrost_error_requests_total[5m]) / (rate(bifrost_success_requests_total[5m]) + rate(bifrost_error_requests_total[5m])) > 0.1
         for: 3m
         labels:
           severity: warning
@@ -66,10 +63,7 @@ groups:
       # Search/query request errors
       - alert: MilvusRequestErrors
         expr: >
-          sum(rate(milvus_proxy_req_count{status="fail"}[5m]))
-          /
-          sum(rate(milvus_proxy_req_count[5m]))
-          > 0.1
+          sum(rate(milvus_proxy_req_count{status="fail"}[5m])) / sum(rate(milvus_proxy_req_count[5m])) > 0.1
         for: 3m
         labels:
           severity: warning

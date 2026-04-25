@@ -13,6 +13,7 @@ setup() {
   # shellcheck source=test/common/helper.sh
   source test/common/helper.sh
 
+  check_feature claude
   check_command jq
 }
 

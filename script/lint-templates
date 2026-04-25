@@ -102,7 +102,7 @@ ln -s "$repo_dir/home" "$render_dir/home"
 export VALIDATE_KEEP="$keep"
 export VALIDATE_VERBOSITY="$verbosity"
 
-export SKIP="gitleaks,lint-templates,zizmor${SKIP:+,$SKIP}"
+export SKIP="gitleaks,lint-templates,yamlfmt,zizmor${SKIP:+,$SKIP}"
 
 exit_code=0
 prek run \
