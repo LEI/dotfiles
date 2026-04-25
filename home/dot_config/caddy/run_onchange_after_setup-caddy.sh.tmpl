@@ -22,6 +22,7 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
+# TODO: check linuxbrew path
 if ! has caddy; then
   msg "caddy not found; skipping setup"
   exit 0

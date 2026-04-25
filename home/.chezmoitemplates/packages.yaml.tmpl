@@ -26,6 +26,10 @@ packages:
       (not (eq .osIDLike "android" "debian" "fedora" "windows"))
       (ne .profile "minimal")
       (not (or .ephemeral .headless)) }}
+  bitwarden-secrets-manager:
+    enabled: {{ not (empty (get .passwordManager "accessToken")) }}
+    type: mise
+    # version: 2.0.0
   bitwarden-cli:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
   bitwarden:
@@ -643,13 +647,26 @@ packages:
     #   arch: taplo-cli
     #   cargo: install taplo-cli --locked --features lsp --quiet
     type: '{{ ne .osIDLike "alpine" | ternary "brew" nil }}'
+
   cirruslabs/cli/tart:
     description: macOS and Linux VMs on Apple Silicon
-    enabled: {{ and (eq .os "darwin") (eq .arch "arm64") (ne .profile "minimal") }}
+    enabled: {{ and (eq .os "darwin") (eq .arch "arm64") (ne .profile "minimal") .gui }}
     type: brew
-    # after_install:
+    # after_install: |
     #   # https://tart.run/faq/#changing-the-default-dhcp-lease-time
-    #   - run sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.InternetSharing.default.plist bootpd -dict DHCPLeaseTimeSecs -int 600
+    #   run sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.InternetSharing.default.plist bootpd -dict DHCPLeaseTimeSecs -int 600
+  # https://github.com/cirruslabs/vetu/blob/main/INSTALL.md
+  vetu:
+    enabled: {{ and (ne .profile "minimal") .gui }}
+    # vetu clone ghcr.io/cirruslabs/ubuntu:latest ubuntu
+    # vetu run ubuntu
+    # ssh admin@$(vetu ip ubuntu)
+    nameOverwrite:
+      mise: github:cirruslabs/vetu
+    type: mise
+    # after_install: |
+    #   run sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which vetu)
+
   termscp: # aim, zrok
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
   # tidy:

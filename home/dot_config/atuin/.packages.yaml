@@ -5,8 +5,7 @@ packages:
     nameOverwrite:
       winget: Atuinsh.Atuin
     enabled: "{{ .features.atuin }}"
-    # FIXME: linuxbrew path in non interactive scripts
-    # type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
+    type: '{{ eq .osID "ubuntu" | ternary "brew" nil }}'
   # ble.sh:
   #   enabled: '{{ ne .osID "alpine" }}'
   #   name: github:akinomyoga/ble.sh

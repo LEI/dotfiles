@@ -15,7 +15,7 @@
   "atuin" (and
     (not (or
       (and (eq .osID "debian") (le (int .osVersion) 12))
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))))
+      (and (eq .osID "ubuntu") (lt (float64 .osVersion) 24.04))))
     (ne .profile "minimal"))
   "bash" (or .ci (ne .profile "minimal"))
   "bat" (ne .profile "minimal")

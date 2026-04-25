@@ -113,7 +113,14 @@ interactive = true
 run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.sh") | quote }}
 {{- end }}
 
-{{- $images := list "alpine" "archlinux" "debian" "fedora" "termux" "ubuntu" }}
+{{- $images := list
+  "alpine"
+  "archlinux"
+  "debian"
+  "fedora"
+  "termux"
+  "ubuntu"
+}}
 {{- range $images }}
 
 [tasks."container:{{ . }}"]
