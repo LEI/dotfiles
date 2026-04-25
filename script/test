@@ -87,7 +87,11 @@ main() {
   else
     jobs=4
   fi
-  if [ $# -eq 0 ]; then
+  local has_path=false
+  for arg in "$@"; do
+    case "$arg" in -*) ;; *) [ -e "$arg" ] && has_path=true && break ;; esac
+  done
+  if ! $has_path; then
     set -- --recursive ./test "$@"
   fi
   set -- \

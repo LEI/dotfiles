@@ -59,19 +59,27 @@ setup() {
 
 # bats test_tags=deploy,validation
 @test "environment.d: no unmanaged files" {
-  [ -d "$HOME/.config/environment.d" ] || skip "environment.d not present"
-  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never "$HOME/.config/environment.d"
-  assert_success
-  refute_output
+  no_unmanaged "$HOME/.config/environment.d"
 }
 
-# bats test_tags=deploy,validation
+# bats test_tags=deploy,validation,strict
 @test "secrets.d: no unmanaged files" {
-  [ "${STRICT:-}" = true ] || skip "STRICT not set"
-  [ -d "$HOME/.config/secrets.d" ] || skip "secrets.d not present"
-  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never "$HOME/.config/secrets.d"
-  assert_success
-  refute_output
+  no_unmanaged "$HOME/.config/secrets.d"
+}
+
+# bats test_tags=deploy,validation,strict
+@test "claude/rules: no unmanaged files" {
+  no_unmanaged "$HOME/.claude/rules"
+}
+
+# bats test_tags=deploy,validation,strict
+@test "nvim: no unmanaged files" {
+  no_unmanaged "$HOME/.config/nvim"
+}
+
+# bats test_tags=deploy,validation,strict
+@test "opencode: no unmanaged files" {
+  no_unmanaged "$HOME/.config/opencode"
 }
 
 # Collect unique KEY= names from all .conf files in a directory

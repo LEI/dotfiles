@@ -43,15 +43,15 @@ marketplaces:
   # everything-claude-code:
   #   repo: affaan-m/everything-claude-code
 
-# Managed plugins: all handled identically by run_onchange_after_plugins.sh
-# claude-plugins-official: no version pin (latest is fine)
-# other: optional version pin via {name, version} dict item
-#
-# Not installed (use CLI to re-add if needed):
-# greptile@claude-plugins-official: needs API key
-# semgrep@claude-plugins-official: needs semgrep installed
-#
-# Per-project: installed manually, not managed, not uninstalled
+  # Managed plugins: all handled identically by run_onchange_after_plugins.sh
+  # claude-plugins-official: no version pin (latest is fine)
+  # other: optional version pin via {name, version} dict item
+  #
+  # Not installed (use CLI to re-add if needed):
+  # greptile@claude-plugins-official: needs API key
+  # semgrep@claude-plugins-official: needs semgrep installed
+  #
+  # Per-project: installed manually, not managed, not uninstalled
 keepPlugins:
   - agent-sdk-dev@claude-plugins-official
   - github@claude-plugins-official
@@ -75,11 +75,11 @@ plugins:
     - frontend-design
     # - hookify
     # - security-guidance
-  # everything-claude-code:
-  #   - name: everything-claude-code
-  #     version: "1.9.0"
+    # everything-claude-code:
+    #   - name: everything-claude-code
+    #     version: "1.9.0"
 
-# Skills disabled globally (plugin installed for per-project use)
+    # Skills disabled globally (plugin installed for per-project use)
 disabledSkills:
   - local:beads
   # - everything-claude-code:clickhouse-io

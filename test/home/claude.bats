@@ -18,9 +18,9 @@ setup() {
 
 # bats file_tags=home,claude
 
-# bats test_tags=type:smoke,rules
-@test "claude: no ECC rule directories remain" {
-  assert_dir_not_exists "$HOME/.claude/rules/ecc"
+# bats test_tags=type:smoke,managed
+@test "claude: plugins/chezmoi has no unmanaged files" {
+  no_unmanaged "$HOME/.claude/plugins/chezmoi"
 }
 
 # bats test_tags=type:smoke,plugins

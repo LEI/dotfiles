@@ -64,7 +64,7 @@ description = "Run checks and tests locally"
 #   # "mise prek", # ./script/prek
 # ]
 run = [
-  { task = "test" },
+  { task = "test --filter-tags '!strict'" },
   { task = "check" },
   # { task = "lint" },
   { task = "prek" },
@@ -114,6 +114,10 @@ run = "mise run test -- --filter-tags type:unit"
 alias = "ts"
 description = "Run smoke tests (needs deployed home)"
 run = "mise run test -- --filter-tags type:smoke"
+
+[tasks."test:strict"]
+description = "Run strict managed-files tests (needs clean deployed home)"
+run = "mise run test -- --filter-tags strict"
 
 [tools]
 # prek = "latest"

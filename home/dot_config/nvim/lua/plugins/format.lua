@@ -25,7 +25,7 @@ local prettier_filetypes = {
   'typescript',
   'typescriptreact',
   'vue',
-  'yaml',
+  -- 'yaml',  -- Use yamlls LSP formatter instead
 }
 
 return {
@@ -89,6 +89,10 @@ return {
       end,
       -- https://github.com/stevearc/conform.nvim/tree/master/lua/conform/formatters
       formatters = {
+        yamlfmt = {
+          command = 'yamlfmt',
+          stdin = false,
+        },
         injected = {
           options = {
             -- Set to true to ignore errors
@@ -135,6 +139,8 @@ return {
         -- },
       },
       formatters_by_ft = {
+        yaml = { 'yamlfmt' },
+        yml = { 'yamlfmt' },
         json5 = prettier,
         markdown = {
           'prettier',

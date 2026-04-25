@@ -124,6 +124,15 @@ run_script() {
   run --separate-stderr run_src "$@"
 }
 
+no_unmanaged() {
+  local path="$1"
+  [ -d "$path" ] || skip "not present: $path"
+  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never \
+    --persistent-state="$BATS_TEST_TMPDIR/chezmoi-state.boltdb" "$path"
+  assert_success
+  refute_output
+}
+
 stub_seq() {
   local name="$1"
   shift
