@@ -426,12 +426,6 @@ packages:
     nameOverwrite:
       arch: nodejs-mcp-hub
     type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
-  mise:
-    # FIXME(alpine): mise 2025.8.20 does not support named tasks
-    enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "fedora" "windows") }}
-    nameOverwrite:
-      windows: jdx.mise
-    type: {{ eq .osIDLike "fedora" | ternary "brew" nil }}
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
@@ -621,6 +615,8 @@ packages:
       fedora: com.valvesoftware.SteamLink
       windows: Valve.SteamLink
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+  strace:
+    enabled: {{ and (eq .os "linux") (ne .profile "minimal") (not .ephemeral) }}
   stylua:
     enabled: {{ and (not .features.neovim) (ne .profile "minimal") }}
     type: mise
@@ -657,7 +653,7 @@ packages:
     #   run sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.InternetSharing.default.plist bootpd -dict DHCPLeaseTimeSecs -int 600
   # https://github.com/cirruslabs/vetu/blob/main/INSTALL.md
   vetu:
-    enabled: {{ and (ne .profile "minimal") .gui }}
+    enabled: {{ and (eq .os "linux") (ne .profile "minimal") .gui }}
     # vetu clone ghcr.io/cirruslabs/ubuntu:latest ubuntu
     # vetu run ubuntu
     # ssh admin@$(vetu ip ubuntu)

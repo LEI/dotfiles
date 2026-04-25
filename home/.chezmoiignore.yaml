@@ -137,8 +137,8 @@ features:
     - .local/share/applications/meli.*
   mise:
     # - .chezmoiscripts/{*,*/*}mise-install.sh
+    - .chezmoiscripts/*install-mise.sh
     - .chezmoiscripts/*install-tools.sh
-    - .chezmoiscripts/*mise-install.sh
     - .config/carapace/specs/m.yaml
     - .config/mise/
   neovim:

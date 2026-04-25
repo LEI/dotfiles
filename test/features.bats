@@ -210,5 +210,27 @@ setup() {
   check_command yq
   run --separate-stderr yq --version
   assert_output --partial 'yq (https://github.com/mikefarah/yq/) version'
+  refute_stderr
   assert_success
+}
+
+@test "binary: bws is unique in PATH" {
+  check_command bws
+  run --separate-stderr which -a bws
+  assert_output --regexp '^.+$'
+  refute_stderr
+  local count
+  count=$(echo "$output" | wc -l | tr -d ' ')
+  assert_equal 1 "$count"
+}
+
+@test "binary: zellij is unique in PATH" {
+  # check_command zellij
+  check_feature zellij
+  run --separate-stderr which -a zellij
+  assert_output --regexp '^.+$'
+  refute_stderr
+  local count
+  count=$(echo "$output" | wc -l | tr -d ' ')
+  assert_equal 1 "$count"
 }

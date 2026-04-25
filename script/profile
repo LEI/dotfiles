@@ -151,6 +151,8 @@ report_stderr() {
     # Trace back to source using the xtrace log (bash only)
     cmd="${line%%:*}"
     if [ -n "$cmd" ] && [ -f "${logfile:-}" ]; then
+      # cmd="${cmd//(/\\(}" # grep: Unmatched ( or \(
+      # -e "^  \[WARN\] - (starship::config): Error in 'StarshipRoot' at 'battery': Unknown key$"
       grep -E ":[0-9]+ ${cmd}\\b" "$logfile" |
         sed 's/^+* [0-9.]*  *//' |
         sed 's/^/    /' >&2 || true
@@ -168,9 +170,11 @@ fi
 # atuin init calls stty -g which fails without a tty
 
 grep -v \
+  -e ".starship::config.: Error in 'StarshipRoot' at 'battery': Unknown key$" \
   -e "^ble.sh: cannot find a controlling TTY/PTY in this session\.$" \
-  -e "^stty: 'standard input': Not a tty$" \
   -e "^stty: 'standard input': Inappropriate ioctl for device$" \
+  -e "^stty: 'standard input': Not a tty$" \
+  -e "^stty: 'standard input': Not a typewriter$" \
   "$stderrlog" >"$stderrlog.filtered" 2>/dev/null || true
 
 if [ -s "$stderrlog.filtered" ]; then

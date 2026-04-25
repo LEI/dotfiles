@@ -1,4 +1,7 @@
 ---
 packages:
+  # TODO: which -a bats test to detect stale ~/.local/bin/zellij
   zellij:
-    enabled: '{{ and .features.zellij (not (eq .osIDLike "debian" "fedora")) }}'
+    # enabled: '{{ and .features.zellij (not (eq .osIDLike "debian" "fedora")) }}'
+    enabled: "{{ .features.zellij }}"
+    type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}' # or mise

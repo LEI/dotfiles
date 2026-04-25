@@ -40,6 +40,21 @@ local function should_attach(bufname)
     return false
   end
   local basename = vim.fs.basename(bufname)
+  -- Exclude git-related files to prevent hangs during git commits
+  local git_files = {
+    'COMMIT_EDITMSG',
+    'MERGE_MSG',
+    'SQUASH_MSG',
+    'TAG_EDITMSG',
+    'EDITMSG',
+    'NOTES_EDITMSG',
+    'PULLREQ_EDITMSG',
+  }
+  for _, git_file in ipairs(git_files) do
+    if basename == git_file then
+      return false
+    end
+  end
   return not (basename:match('local.') or basename:match('.local'))
 end
 

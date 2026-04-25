@@ -51,14 +51,14 @@ file:
     exists: true
     mode: "0644"
     owner: root
-    group: {{ eq .os "linux" | ternary "root" "wheel" }}
+    group: {{ eq .os "android" "linux" | ternary "root" "wheel" }}
     filetype: file
   /etc/passwd:
     exists: true
-    mode: "0644"
+    mode: {{ eq .os "android" | ternary "0777" "0644" | quote }}
     owner: root
-    group: {{ eq .os "linux" | ternary "root" "wheel" }}
-    filetype: file
+    group: {{ eq .os "android" "linux" | ternary "root" "wheel" }}
+    filetype: {{ eq .os "android" | ternary "symlink" "file" }}
 
 dns:
   localhost:

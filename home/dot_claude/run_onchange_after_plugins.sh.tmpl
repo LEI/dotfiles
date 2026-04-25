@@ -51,3 +51,42 @@ claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{- $claude := get . "claude" | default dict -}}
+{{- $keep := dict -}}
+{{- range $plugins -}}
+{{-   $_ := set $keep (printf "%s@%s" .name .marketplace) true -}}
+{{- end -}}
+{{- range get $claude "keepPlugins" | default list -}}
+{{-   $_ := set $keep . true -}}
+{{- end }}
+
+# Remove user-scoped plugins not in managed or keep set
+stale_found=false
+while IFS= read -r key; do
+  [ -n "$key" ] || continue
+  marketplace="${key##*@}"
+  [ "$marketplace" = "private" ] && continue
+  case "$key" in
+  {{- range (keys $keep | sortAlpha) }}
+  {{ . }}) continue ;;
+  {{- end }}
+  esac
+  if [ "${CHEZMOI_PLUGIN_UNINSTALL:-}" = true ]; then
+    echo "Uninstalling plugin: $key" >&2
+    claude plugin uninstall --scope=user "$key"
+  else
+    echo "  claude plugin uninstall --scope=user \"$key\"" >&2
+    stale_found=true
+  fi
+done < <(jq -r '
+  .plugins | to_entries[]
+  | select(.value | map(select(.scope == "user")) | length > 0)
+  | .key
+' "$plugin_file")
+if [ "$stale_found" = true ]; then
+  echo >&2 "Stale plugins found, run: CHEZMOI_PLUGIN_UNINSTALL=true chezmoi apply"
+  exit 1
+fi
+
+claude plugin list

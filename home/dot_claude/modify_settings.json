@@ -55,7 +55,9 @@
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     {{- end }}
     "DISABLE_AUTOUPDATER": "1",
+    {{- if has "everything-claude-code@everything-claude-code" $plugins }}
     "ECC_HOOK_PROFILE": "minimal",
+    {{- end }}
     "ENABLE_TOOL_SEARCH": "true",
     "MAX_THINKING_TOKENS": "8000",
     "MCP_CONNECTION_NONBLOCKING": "true",
@@ -358,14 +360,12 @@
       ]
     }
   },
-  "tui": "fullscreen",
   {{- if not (empty $effort) }}
   "effortLevel": {{ $effort | quote }},
   {{- end }}
   "alwaysThinkingEnabled": false,
   "showClearContextOnPlanAccept": true{{/* https://github.com/anthropics/claude-code/issues/37688 */}},
   "plansDirectory": "./.claude/plans",
-  "voiceEnabled": true,
   "voice": {
     "enabled": true,
     "mode": "hold"
@@ -375,7 +375,9 @@
   "autoUpdates": false,
   "skills": {
     "audit": true,
+{{- if has "claude-code-setup@claude-plugins-official" $plugins }}
     "claude-automation-recommender": true,
+{{- end }}
     "claude-dashboard:check-usage": true,
     "claude-dashboard:setup": true,
     "claude-dashboard:update": true,
@@ -387,6 +389,7 @@
     "commit-commands:clean_gone": true,
     "commit-commands:commit": true,
     "commit-commands:commit-push-pr": true,
+{{- if has "everything-claude-code@everything-claude-code" $plugins }}
     "everything-claude-code:agentic-engineering": true,
     "everything-claude-code:agent-harness-construction": true,
     "everything-claude-code:ai-first-engineering": true,
@@ -439,13 +442,16 @@
     "everything-claude-code:tdd": true,
     "everything-claude-code:tdd-workflow": true,
     "everything-claude-code:verification-loop": true,
+{{- end }}
     "feature-dev:feature-dev": true,
     "frontend-design": true,
+{{- if has "hookify@claude-plugins-official" $plugins }}
     "hookify:configure": true,
     "hookify:help": true,
     "hookify:hookify": true,
     "hookify:list": true,
     "hookify:writing-rules": true,
+{{- end }}
     "journal": true,
     "keybindings-help": true,
     "local:sq": true,

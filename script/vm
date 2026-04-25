@@ -1,0 +1,186 @@
+#!/bin/sh
+#MISE alias="ubuntu"
+#MISE description="VM"
+#USAGE flag "-v --verbose" help="Use verbose output"
+#USAGE flag "-q --quiet" help="Use quiet output"
+#USAGE arg "[command]..." help="Command to run in the VM"
+
+set -eu
+
+msg() {
+  if [ "$verbosity" -ge 2 ]; then
+    echo "${0##*/}: $*" >&2
+  fi
+}
+
+run() {
+  if [ "$verbosity" -ge 2 ]; then
+    msg "$*"
+  fi
+  "$@"
+}
+
+vm_init() {
+  # NOTE: default ubuntu VM is built to run on "arm64"
+  vetu clone "$image" "$name"
+  vetu set "$name" --disk-size 40
+}
+
+vm_running() {
+  # [ "$(vetu list | grep "$name" | cut -d' ' -f2 | tr -d '\n\t ')" = "$name" ]
+  # [ "$(vetu list | awk '/\t'"$name"' / {print $4}')" = running ]
+  if vetu list | awk '/\t'"$name"' / {print $4}' | grep -q running; then
+    return 0
+  else
+    vetu list
+    return 1
+  fi
+}
+
+vm_start() {
+  msg "starting $name"
+  if [ "$tmux" = true ] && ! tmux ls | grep '^vm: '; then
+    run tmux new-session -d -s vm "vetu run $name"
+    # tmux attach -t vm
+  else
+    # run vetu run "$name" >/dev/null &
+    run nohup vetu run "$name" &
+    sleep 1
+  fi
+}
+
+# Increase sleep or connect timeout in case of error:
+# "ssh: connect to host 10.0.0.2 port 22: Connection refused"
+vm_wait() {
+  ip="$(vetu ip --wait=30 "$name")"
+
+  # msg "waiting 30 seconds"
+  # run sleep 30
+
+  msg "waiting for SSH"
+  timeout 500 sh -c 'until nc -z -w2 "$@"; do
+    sleep 2
+  done' -- "$ip" 22
+}
+
+vm_ssh() {
+  echo "vm: running command: $*" >&2
+  sshpass -padmin ssh \
+    -o StrictHostKeyChecking=no \
+    -o ConnectTimeout=60 \
+    "admin@$ip" "$@"
+}
+
+vm_stop() {
+  msg "stopping $name"
+  run vetu stop "$name"
+}
+
+cleanup() {
+  if [ "$tmux" = true ] && tmux ls | grep -q '^vm: '; then
+    msg "killing tmux session"
+    run tmux kill-session -t vm
+  elif [ -f nohup.out ]; then
+    msg "removing nohup.out"
+    run rm nohup.out
+  fi
+  vm_stop
+}
+
+main() {
+  image="${VM_IMAGE:-ghcr.io/cirruslabs/ubuntu-runner-amd64:22.04}"
+  keep="${VM_KEEP:-false}"
+  name="${VM_NAME:-ubuntu-runner}"
+  tmux="${VM_TMUX:-false}"
+  verbosity="${VM_VERBOSITY:-1}"
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -h | --help)
+      if command -v usage >/dev/null; then
+        usage exec --help bash "$0"
+      else
+        echo "Usage: coverage [-l] [filter...]"
+      fi
+      return
+      ;;
+    -i | --image)
+      image="$2"
+      shift 2
+      ;;
+    -k | --keep)
+      keep=true
+      shift
+      ;;
+    -n | --name)
+      name="$2"
+      shift 2
+      ;;
+    -q | --quiet)
+      verbosity=0
+      shift
+      ;;
+    -t | --tmux)
+      tmux=true
+      shift
+      ;;
+    --usage)
+      grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+      return
+      ;;
+    -v | --verbose)
+      verbosity=2
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      msg "unknown option: $1"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+    esac
+  done
+
+  if ! command -v vetu >/dev/null; then
+    msg "vetu is not installed"
+    exit 1
+  fi
+
+  # vetu --version
+  if ! vm_running; then
+    vm_init
+    if [ "$keep" != true ]; then
+      trap cleanup EXIT
+    fi
+    vm_start
+  fi
+  vm_wait
+
+  if [ "$#" -eq 0 ]; then
+    # CHEZMOI_PROFILE=minimal sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply --no-tty LEI
+    # curl -LSfs --proto '=https' --tlsv1.2 https://dotfiles.lei.sh/script/bootstrap | sh -s -- --no-tty LEI
+
+    bin_dir=.local/bin
+    msg "copying bootstrap script to $bin_dir"
+    vm_ssh sh -c "test -d '$bin_dir' || mkdir -p '$bin_dir'"
+    sshpass -padmin scp -o StrictHostKeyChecking=no ./script/bootstrap "admin@$ip:$bin_dir/bootstrap"
+    set -- env CHEZMOI_PROFILE=minimal "$bin_dir/bootstrap" --no-tty --verbose LEI
+
+    # FIXME: set -- bash -i
+    # bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+    # bash: no job control in this shell
+  fi
+
+  vm_ssh "$@"
+
+  if [ "$verbosity" -ge 2 ]; then
+    run vetu list
+  fi
+}
+
+main "$@"

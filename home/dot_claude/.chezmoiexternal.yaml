@@ -4,55 +4,57 @@
 # Extracted to rules/ecc/<category>/ loaded recursively.
 # Pin option: replace /main.tar.gz with /refs/tags/vX.Y.Z.tar.gz
 # Security and quality rules are prioritized; language packs are opt-in.
+#
+# Manual cleanup needed: trash ~/.claude/rules/ecc/
 
-# Common rules: agents, hooks, patterns, performance, security, testing
-rules/ecc/common:
-  type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
-  stripComponents: 3
-  exact: true
-  include:
-    - "*/rules/common/agents.md"
-    - "*/rules/common/hooks.md"
-    - "*/rules/common/patterns.md"
-    - "*/rules/common/performance.md"
-    - "*/rules/common/security.md"
-    - "*/rules/common/coding-style.md"
-    - "*/rules/common/development-workflow.md"
-    - "*/rules/common/testing.md"
-    - "*/rules/common/git-workflow.md"
-  refreshPeriod: 720h
-
-# TypeScript: coding-style, hooks, patterns, security, testing
-rules/ecc/typescript:
-  type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
-  stripComponents: 3
-  exact: true
-  include: ["*/rules/typescript/*"]
-  refreshPeriod: 720h
-
-# Language packs: all have paths: frontmatter scoped to file extensions (zero context cost)
-rules/ecc/golang:
-  type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
-  stripComponents: 3
-  exact: true
-  include: ["*/rules/golang/*"]
-  refreshPeriod: 720h
-
-rules/ecc/python:
-  type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
-  stripComponents: 3
-  exact: true
-  include: ["*/rules/python/*"]
-  refreshPeriod: 720h
-
-rules/ecc/swift:
-  type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
-  stripComponents: 3
-  exact: true
-  include: ["*/rules/swift/*"]
-  refreshPeriod: 720h
+# # Common rules: agents, hooks, patterns, performance, security, testing
+# rules/ecc/common:
+#   type: archive
+#   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+#   stripComponents: 3
+#   exact: true
+#   include:
+#     - "*/rules/common/agents.md"
+#     - "*/rules/common/hooks.md"
+#     - "*/rules/common/patterns.md"
+#     - "*/rules/common/performance.md"
+#     - "*/rules/common/security.md"
+#     - "*/rules/common/coding-style.md"
+#     - "*/rules/common/development-workflow.md"
+#     - "*/rules/common/testing.md"
+#     - "*/rules/common/git-workflow.md"
+#   refreshPeriod: 720h
+#
+# # TypeScript: coding-style, hooks, patterns, security, testing
+# rules/ecc/typescript:
+#   type: archive
+#   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+#   stripComponents: 3
+#   exact: true
+#   include: ["*/rules/typescript/*"]
+#   refreshPeriod: 720h
+#
+# # Language packs: all have paths: frontmatter scoped to file extensions (zero context cost)
+# rules/ecc/golang:
+#   type: archive
+#   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+#   stripComponents: 3
+#   exact: true
+#   include: ["*/rules/golang/*"]
+#   refreshPeriod: 720h
+#
+# rules/ecc/python:
+#   type: archive
+#   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+#   stripComponents: 3
+#   exact: true
+#   include: ["*/rules/python/*"]
+#   refreshPeriod: 720h
+#
+# rules/ecc/swift:
+#   type: archive
+#   url: https://github.com/affaan-m/everything-claude-code/archive/main.tar.gz
+#   stripComponents: 3
+#   exact: true
+#   include: ["*/rules/swift/*"]
+#   refreshPeriod: 720h

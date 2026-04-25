@@ -1,13 +1,13 @@
 {
   "PreCompact": [
     {
+      "matcher": "",
       "hooks": [
         {
-          "command": "echo 'Summarize each active task: what was done, what remains, and the concrete next step. Persist key discoveries.'",
-          "type": "command"
+          "type": "command",
+          "command": "echo 'Summarize each active task: what was done, what remains, and the concrete next step. Persist key discoveries.'"
         }
-      ],
-      "matcher": ""
+      ]
     }
   ],
   "SessionStart": [

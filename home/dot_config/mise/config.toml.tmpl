@@ -1,6 +1,6 @@
 {{- $miseInteractive := false -}}
 {{- with lookPath "mise" -}}
-{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version" .) | splitList " " | first -}}
+{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version || true" .) | splitList " " | first -}}
 {{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
 {{- end -}}
 [settings]
@@ -118,6 +118,7 @@ run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.
   "archlinux"
   "debian"
   "fedora"
+  "opensuse"
   "termux"
   "ubuntu"
 }}
@@ -157,20 +158,7 @@ run = "opkg"
 
 {{- if eq .os "darwin" }}
 
-[tasks.debian]
-alias = "ta:debian"
-description = "Tart debian"
-interactive = true
-run = [
-  # "tart clone ghcr.io/cirruslabs/debian:latest debian",
-  # "tart set debian --disk-size 20",
-  # "nohup tart run --dir=dotfiles:.:ro --no-graphics debian &",
-  "tart ip --wait=60 debian",
-  "tart get --format=json debian",
-  "ssh admin@$(tart ip debian) pwd",
-  # "tart stop debian",
-]
-
+# TODO: move to script/vm
 [tasks.tart]
 alias = "ta"
 description = "Tart 2.32.1"
@@ -191,8 +179,8 @@ run = [
 
   # https://github.com/cirruslabs/tart/issues/303#issuecomment-1476468726
   # https://github.com/cirruslabs/tart/issues/374#issuecomment-1536518622
-  "nohup tart run --dir=dotfiles:.:ro --no-graphics {{ `{{ env.NAME }}` }} &",
-  # "rm nohup.out",
+  # nohup tart run --dir=dotfiles:.:ro --no-graphics tahoe-base 2>&1 >&2 &
+  "tart run --dir=dotfiles:.:ro --no-graphics {{ `{{ env.NAME }}` }} &",
 
   # https://github.com/cirruslabs/tart/issues/374#issuecomment-1747125229
   "tart ip --wait=60 {{ `{{ env.NAME }}` }}",
@@ -208,9 +196,28 @@ run = [
   # "tart stop {{ `{{ env.NAME }}` }}",
   # "tart prune --older-than=0",
 ]
-{{- end }}
 
-{{- if eq .os "linux" }}
+[tasks."tart:debian"]
+alias = "ta:debian"
+description = "Tart debian"
+interactive = true
+run = [
+  "tart --version",
+
+  # "tart clone ghcr.io/cirruslabs/debian:latest debian",
+  # "tart set debian --disk-size 20",
+
+  # "nohup tart run --dir=dotfiles:.:ro --no-graphics debian &",
+  "tart run --dir=dotfiles:.:ro --no-graphics debian &",
+
+  "tart ip --wait=60 debian",
+  "tart get --format=json debian",
+  "ssh admin@$(tart ip debian) pwd",
+
+  # "tart stop debian",
+]
+
+{{- else if eq .os "linux" }}
 
 [tasks.timep]
 # alias = "tp"

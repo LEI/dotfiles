@@ -88,7 +88,8 @@ setup() {
     assert_equal "$version" "x86_64"
     assert_equal "$image" "docker.io/termux/termux-docker:x86_64"
   fi
-  assert_equal "$exec_user" "system"
+  assert_equal "$exec_user" ""
+  assert_equal "$file_owner" "system"
   assert_equal "$home" "/data/data/com.termux/files/home"
 }
 
@@ -238,32 +239,35 @@ setup() {
 # bats test_tags=type:unit
 @test "container: resolve image matrix" {
   source_container
-  # format: "image exec_user home"
   local arch
   arch="$(uname -m)"
-  local archlinux_repo=archlinux
-  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
-    archlinux_repo=docker.io/ogarcia/archlinux
-  fi
-  local termux_version=x86_64
-  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
-    termux_version=aarch64
-  fi
-  declare -A matrix=(
-    [alpine]="alpine:latest test /home/test"
-    [archlinux]="$archlinux_repo:latest test /home/test"
-    [debian]="debian:latest test /home/test"
-    [fedora]="fedora:latest test /home/test"
-    [opensuse]="opensuse/tumbleweed:latest test /home/test"
-    [termux]="docker.io/termux/termux-docker:$termux_version system /data/data/com.termux/files/home"
-    [ubuntu]="ubuntu:latest test /home/test"
-  )
   for name in $images; do
     resolve "$name"
-    read -r exp_image exp_exec_user exp_home <<<"${matrix[$name]}"
+    local exp_image="$name:latest" exp_exec_user=test exp_file_owner=test exp_home=/home/test
+    case "$name" in
+    archlinux)
+      local archlinux_repo=archlinux
+      if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+        archlinux_repo=docker.io/ogarcia/archlinux
+      fi
+      exp_image="$archlinux_repo:latest"
+      ;;
+    opensuse) exp_image="opensuse/tumbleweed:latest" ;;
+    termux)
+      local termux_version=x86_64
+      if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+        termux_version=aarch64
+      fi
+      exp_image="docker.io/termux/termux-docker:$termux_version"
+      exp_exec_user=""
+      exp_file_owner=system
+      exp_home=/data/data/com.termux/files/home
+      ;;
+    esac
     assert_equal "$image_name" "$name"
     assert_equal "$image" "$exp_image"
     assert_equal "$exec_user" "$exp_exec_user"
+    assert_equal "$file_owner" "$exp_file_owner"
     assert_equal "$home" "$exp_home"
     assert [ -n "$container" ]
     assert [ -n "$chezmoi_root" ]

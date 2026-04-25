@@ -6,21 +6,24 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-if command -v mise; then
-  echo "Already installed: {{ lookPath "mise" }}" >&2
-  run mise --version | head -n1
+if command -v mise >/dev/null && version=$(mise --version | head -n1); then
+  echo "mise: already installed: {{ lookPath "mise" }}" >&2
+  echo "mise: version $version" >&2
   exit
 fi
 
 BIN_DIR="$HOME/.local/bin"
 MISE_BIN="$BIN_DIR/mise"
 
-if [ ! -d "$BIN_DIR" ]; then
-  # echo "Creating directory: $BIN_DIR" >&2
-  run mkdir -p "$BIN_DIR"
+if [ -x "$MISE_BIN" ] && version=$("$MISE_BIN" --version | head -n1); then
+  echo "mise: already installed: $MISE_BIN" >&2
+  echo "mise: version $version" >&2
+  exit
 fi
 
-echo "Installing mise" >&2
+if [ ! -d "$BIN_DIR" ]; then
+  run mkdir -p "$BIN_DIR"
+fi
 
 {{- $os := .chezmoi.os }}
 {{- if eq .os "android" }}
@@ -37,13 +40,13 @@ echo "Installing mise" >&2
 {{- /* else armv{6,7} */ -}}
 {{- end }}
 
-os={{ $os | quote }}
-arch={{ $arch | quote }}
-{{- if eq .libc "musl" }}
-arch="$arch-musl"
+{{- $variant := printf "%s-%s" $os $arch }}
+{{- if or (eq .libc "musl") (eq .os "android") }}
+{{-   $variant = printf "%s-musl" $variant }}
 {{- end }}
 
-run curl -LSfs "https://mise.jdx.dev/mise-latest-$os-$arch" -o "$MISE_BIN"
+echo "mise: installing ({{ $variant }})" >&2
+run curl --location --fail --show-error --silent "https://mise.jdx.dev/mise-latest-{{ $variant }}" --output "$MISE_BIN"
 run chmod +x "$MISE_BIN"
 
 {{- if eq .osID "android" }}
@@ -54,4 +57,5 @@ run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
 run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
 {{- end }}
 
-echo "Installed mise" >&2
+echo "mise: installed" >&2
+"$MISE_BIN" --version | head -n1 >&2

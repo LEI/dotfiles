@@ -77,8 +77,10 @@ resolve() {
     home="$prefix/home"
   fi
   exec_user="$DEV_USER"
+  file_owner="$DEV_USER"
   if [ "$image_name" = termux ]; then
-    exec_user="system"
+    exec_user=""
+    file_owner="system"
   fi
   chezmoi_root="$home/.local/share/chezmoi"
 }
@@ -87,10 +89,13 @@ container_exec() {
   local flags log
   flags=(
     --env="CHEZMOI_UPGRADE=true"
+    --env="HOME=$home"
     --env="MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-    --user="$exec_user"
     --workdir="$chezmoi_root"
   )
+  if [ -n "$exec_user" ]; then
+    flags+=(--user="$exec_user")
+  fi
   if [ -n "${CI:-}" ]; then
     flags+=(--env="CI=$CI")
   fi
@@ -116,10 +121,12 @@ container_exec_mise() {
   # Quote all arguments for safe shell execution
   cmd="$(printf '%q ' "$@")"
 
-  # bash -l skips environment.d in non-interactive shells; source it explicitly
-  # eval mise activate: adds shims for mise-managed tools (check tasks use task env instead)
   # shellcheck disable=SC2016
-  container_exec bash -c -l '
+  container_exec bash -lc '
+    if [ "$BASH" != "$SHELL" ]; then
+      echo "container: warning: BASH ($BASH) != SHELL ($SHELL)" >&2
+      export SHELL="$BASH"
+    fi
     source ~/.config/sh/lib/export.sh
     source ~/.config/sh/lib/pathmunge.sh
     export_env ~/.config/environment.d/*.conf
@@ -154,6 +161,7 @@ start() {
     trace container exec "$container" \
       sh -c 'until id -u "$1" >/dev/null 2>&1; do sleep 1; done' -- "$DEV_USER"
   fi
+
 }
 
 sync() {
@@ -166,14 +174,7 @@ sync() {
     trace container cp "$item" "$container:$chezmoi_root/"
   done
 
-  trace container exec "$container" chown -R "$exec_user:$exec_user" "$home"
-
-  # Pre-commit expects a git repo
-  if ! container exec "$container" test -d "$chezmoi_root/.git"; then
-    trace container exec "$container" git config --global --add safe.directory "$chezmoi_root"
-    trace container exec "$container" git -C "$chezmoi_root" init --quiet
-    trace container exec "$container" git -C "$chezmoi_root" add --all
-  fi
+  trace container exec "$container" chown -R "$file_owner:$file_owner" "$home"
 }
 
 bootstrap() {
@@ -181,25 +182,38 @@ bootstrap() {
     # shellcheck disable=SC2016
     trace container exec "$container" \
       sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
-    trace container exec --user="$exec_user" "$container" \
-      sh -c 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
-    CI=true container_exec proot \
-      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf" \
-      -b "$prefix/usr/etc/tls:/etc/ssl" \
-      ./script/bootstrap --verbose --no-tty
+    local env="export PATH=$prefix/usr/bin:/usr/bin:/bin HOME=$home CI=true CHEZMOI_UPGRADE=true MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
+    trace container exec "$container" \
+      su system -c "$env; pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
+    trace container exec "$container" \
+      su system -c "$env; cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --verbose --no-tty"
   else
     CI=true container_exec ./script/bootstrap --verbose --no-tty
   fi
 }
 
+init_repo() {
+  if container exec "$container" test -d "$chezmoi_root/.git"; then
+    return 0
+  fi
+  local flags=()
+  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
+  # shellcheck disable=SC2016
+  trace container exec "${flags[@]}" "$container" \
+    sh -c '
+      git config --global --add safe.directory "$1"
+      git -C "$1" init --quiet
+      git -C "$1" add --all
+    ' -- "$chezmoi_root"
+}
+
 # Persists trust so later runs skip the prompt; no-op if mise not yet installed
 trust() {
+  local flags=()
+  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
   # shellcheck disable=SC2016
-  trace container exec --user="$exec_user" "$container" \
-    sh -c 'mise=$(command -v mise 2>/dev/null || echo "$HOME/.local/bin/mise")
-if [ -x "$mise" ]; then
-  "$mise" trust --yes "$1"
-fi' \
+  trace container exec "${flags[@]}" "$container" \
+    sh -c 'if command -v mise >/dev/null; then mise trust --yes "$@"; fi' \
     -- "$chezmoi_root/mise.toml"
 }
 
@@ -225,6 +239,7 @@ pipeline() {
   sync
   trust
   bootstrap
+  init_repo
   # word-split intentional: CONTAINER_CMD may contain flags
   # shellcheck disable=SC2086
   container_exec_mise ${CONTAINER_CMD:-mise run pipeline}
