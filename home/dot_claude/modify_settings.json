@@ -61,13 +61,14 @@
     "ENABLE_TOOL_SEARCH": "true",
     "MAX_THINKING_TOKENS": "8000",
     "MCP_CONNECTION_NONBLOCKING": "true",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
-    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+{{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+{{- $keys := keys $otel | sortAlpha -}}
+{{- range $i, $key := $keys -}}
+{{- if $i }},{{ end }}
+    "{{ $key }}": "{{ index $otel $key }}"
+{{- end }},
     "OTEL_LOG_TOOL_DETAILS": "1",
     "OTEL_LOG_USER_PROMPTS": "1",
-    "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_METRICS_EXPORTER": "otlp",
-    "OTEL_TRACES_EXPORTER": "otlp",
     "XDG_CACHE_HOME": {{ joinPath .chezmoi.homeDir ".cache" | quote }},
     "XDG_CONFIG_HOME": {{ joinPath .chezmoi.homeDir ".config" | quote }},
     "XDG_DATA_HOME": {{ joinPath .chezmoi.homeDir ".local/share" | quote }},

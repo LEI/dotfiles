@@ -78,9 +78,9 @@ extensions:
     enabled: true
     type: builtin
     name: developer
-    description: Code editing and shell access
-    display_name: Developer Tools
-    timeout: 300
+    description: Write and edit files, and execute shell commands
+    display_name: Developer
+    timeout: null
     bundled: true
     available_tools: []
   memory:
@@ -90,6 +90,38 @@ extensions:
     description: Tools to save and retrieve durable memories
     display_name: Memory
     timeout: 300
+    bundled: true
+    available_tools: []
+  analyze:
+    enabled: true
+    type: platform
+    name: analyze
+    description: 'Analyze code structure with tree-sitter: directory overviews, file details, symbol call graphs'
+    display_name: Analyze
+    bundled: true
+    available_tools: []
+  orchestrator:
+    enabled: false
+    type: platform
+    name: orchestrator
+    description: 'Manage agent sessions: list, view, start, send messages, interrupt, and stop agents'
+    display_name: Orchestrator
+    bundled: true
+    available_tools: []
+  skills:
+    enabled: true
+    type: platform
+    name: skills
+    description: Discover and provide skill instructions from filesystem and builtins
+    display_name: Skills
+    bundled: true
+    available_tools: []
+  summarize:
+    enabled: false
+    type: platform
+    name: summarize
+    description: Load files/directories and get an LLM summary in a single call
+    display_name: Summarize
     bundled: true
     available_tools: []
 GOOSE_PROVIDER: github_copilot

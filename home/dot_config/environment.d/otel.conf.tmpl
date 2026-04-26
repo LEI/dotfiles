@@ -1,6 +1,6 @@
 {{- if .features.otel -}}
-OTEL_METRICS_EXPORTER=otlp
-OTEL_LOGS_EXPORTER=otlp
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+{{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+{{- range $key, $value := $otel -}}
+{{ $key }}={{ $value }}
+{{ end -}}
 {{ end -}}

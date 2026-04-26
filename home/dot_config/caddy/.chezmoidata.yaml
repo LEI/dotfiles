@@ -14,21 +14,21 @@ caddy:
         body: html
         port: 8180
         health: /
-      open-notebook:
-        body: html
-        port: 8502
-        health: /
-      open-notebook-api:
-        body: '{"status":"healthy"}'
-        port: 5055
-        health: /health
+      # open-notebook:
+      #   body: html
+      #   port: 8502
+      #   health: /
+      # open-notebook-api:
+      #   body: '{"status":"healthy"}'
+      #   port: 5055
+      #   health: /health
       open-webui:
         body: '{"status":true}'
         port: 8503
         health: /health
-      surrealdb:
-        port: 8000
-        health: /health
+      # surrealdb:
+      #   port: 8000
+      #   health: /health
     opencode:
       opencode:
         body: Unauthorized

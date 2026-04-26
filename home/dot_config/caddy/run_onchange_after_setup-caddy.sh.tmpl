@@ -140,7 +140,7 @@ if [ "$sites_changed" = true ]; then
 fi
 
 # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
-# otel-collector (HTTP/4318) which forwards to Tempo.
+# otel-collector (HTTP/protobuf on port 4318) which forwards to Tempo.
 otel_conf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
 otel_conf=/etc/systemd/system/caddy.service.d/otel.conf
 if ! diff -q "$otel_conf" "$otel_conf_src" >/dev/null 2>&1; then

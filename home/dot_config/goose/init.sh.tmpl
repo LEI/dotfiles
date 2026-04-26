@@ -1,0 +1,8 @@
+{{- $otel := includeTemplate "otel.yaml.tmpl" (dict "protocol" "http/protobuf") | fromYaml -}}
+goose() {
+  OTEL_SERVICE_NAME=goose \
+    {{- range $key, $value := $otel }}
+    {{ $key }}={{ $value }} \
+    {{- end }}
+    command goose "$@"
+}

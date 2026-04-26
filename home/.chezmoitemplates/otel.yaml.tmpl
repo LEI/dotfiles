@@ -1,0 +1,12 @@
+{{- $protocol := get . "protocol" | default "grpc" -}}
+{{- $endpoint := get . "endpoint" | default "localhost" -}}
+{{- $ports := dict "grpc" 4317 "http/protobuf" 4318 -}}
+{{- $port := get $ports $protocol -}}
+---
+OTEL_METRICS_EXPORTER: otlp
+OTEL_LOGS_EXPORTER: otlp
+OTEL_TRACES_EXPORTER: otlp
+OTEL_EXPORTER_OTLP_PROTOCOL: {{ $protocol }}
+OTEL_EXPORTER_OTLP_ENDPOINT: http://{{ $endpoint }}:{{ $port }}
+OTEL_EXPORTER_OTLP_COMPRESSION: gzip
+OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local

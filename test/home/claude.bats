@@ -19,7 +19,7 @@ setup() {
 
 # bats file_tags=home,claude
 
-# bats test_tags=type:smoke,managed
+# bats test_tags=type:smoke,managed,strict
 @test "claude: plugins/chezmoi has no unmanaged files" {
   no_unmanaged "$HOME/.claude/plugins/chezmoi"
 }

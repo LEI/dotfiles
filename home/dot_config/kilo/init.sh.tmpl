@@ -1,0 +1,9 @@
+{{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+kilo() {
+  OTEL_SERVICE_NAME=kilo \
+    {{- range $key, $value := $otel }}
+    {{ $key }}={{ $value }} \
+    {{- end }}
+    command kilo "${@:---continue}"
+}
+alias kl=kilo

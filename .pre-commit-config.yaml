@@ -211,7 +211,7 @@ repos:
         language: system
         files: \.(json[c5]?|toml|ya?ml)$
         # FIXME: starship.toml has unknown properties (maven); schema version mismatch?
-        exclude: ^(home/(\.chezmoitemplates/|.*/modify_.*)|\.config/starship/starship\.toml)$
+        exclude: ^(home/.*/modify_.*|\.config/starship/starship\.toml)$
         stages:
           - pre-commit
 
