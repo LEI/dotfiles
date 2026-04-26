@@ -6,7 +6,15 @@ fi
 
 {{- if eq .osID "android" }}
 {{ includeTemplate "termux.sh.tmpl" . | trim }}
+{{- end }}
 
+# Must be sourced early: tools become available after activation
+{{- if eq .osID "android" }}
+# shellcheck disable=SC2218
+{{- end }}
+eval "$(mise activate "${SHELL##*/}")"
+
+{{- if eq .osID "android" }}
 mise() {
   termux_prefix "$MISE_BIN" "$@"
 }
@@ -15,9 +23,6 @@ topgrade() {
   termux_prefix topgrade "$@"
 }
 {{- end }}
-
-# Must be sourced early: tools become available after activation
-eval "$(mise activate "${SHELL##*/}")"
 
 {{- if not .features.carapace }}
 

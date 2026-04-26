@@ -3,6 +3,10 @@
 {{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version || true" .) | splitList " " | first -}}
 {{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
 {{- end -}}
+{{- $openpackage := get . "openpackage" | default dict -}}
+{{- $platforms := get $openpackage "platforms" | default list -}}
+{{- $claudeData := get . "claude" | default dict -}}
+{{- $claudeMarkets := get $claudeData "marketplaces" | default dict -}}
 [settings]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
@@ -154,6 +158,50 @@ alias = "op"
 description = "Run opkg from the local openpackage directory"
 dir = "~/.openpackage/packages/local"
 run = "opkg"
+
+[tasks."opkg:list"]
+alias = "ol"
+description = "List opkg resources (tree)"
+run = "opkg list --global"
+
+[tasks."opkg:managed"]
+alias = "om"
+description = "Tracked file paths, absolute, one per line"
+run = """
+opkg list --global --json \
+  | jq -r '[.. | objects | select(.status == "tracked" and (.files | type == "array")) \
+    | .files[] | select(.status == "tracked") | .target] | unique | .[]' \
+  | sed "s|^|$HOME/|"
+"""
+
+[tasks."opkg:unmanaged"]
+alias = "ou"
+description = "Files in opkg dirs not tracked by any package"
+run = """
+opkg list --global --json \
+  | jq -r '[.. | objects | select(.status == "untracked" and .name \
+    and (.files | type == "array")) | .files[] | .target] | unique | .[]' \
+  | sed "s|^|$HOME/|"
+"""
+
+[tasks."opkg:install"]
+alias = "oi"
+description = "Publish and install all opkg packages globally"
+run = """
+cd ~/.openpackage/packages/local
+opkg publish --local --force local
+opkg uninstall --global --recursive local 2>/dev/null || true
+opkg install --local --platforms {{ join " " $platforms }} --global local
+{{- range $name, $mkt := $claudeMarkets }}
+{{- $path := get $mkt "path" }}
+{{- if and $path (stat (joinPath $.chezmoi.homeDir $path "packages" $name)) }}
+cd $HOME/{{ $path }}/packages/{{ $name }}
+opkg publish --local --force {{ $name }}
+opkg uninstall --global --recursive {{ $name }} 2>/dev/null || true
+opkg install --local --platforms {{ join " " $platforms }} --global {{ $name }}
+{{- end }}
+{{- end }}
+"""
 {{- end }}
 
 {{- if eq .os "darwin" }}

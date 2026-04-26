@@ -116,7 +116,7 @@ run_script() {
   if [[ "$file" = */executable_* ]]; then
     local name="${file##*/}"
     local tmp_dir
-    tmp_dir="$(mktemp -d)"
+    tmp_dir="$(mktemp -d "$BATS_TEST_TMPDIR/XXXXXX")"
     local tmp_file="$tmp_dir/${name#executable_}"
     cat >"$tmp_file" <"$file"
   fi

@@ -93,7 +93,7 @@ main() {
   local name="${cmd%% *}"
 
   local tmpdir
-  tmpdir="$(mktemp -d)"
+  tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/startup.XXXXXX")"
   local output="${tmpdir}/startup-$name"
 
   export SHELDON_DATA_DIR="$tmpdir/sheldon-data"
@@ -118,6 +118,8 @@ main() {
     }
 ]
 EOF
+
+  rm -rf "$tmpdir"
 }
 
 main "$@"

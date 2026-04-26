@@ -214,9 +214,6 @@
     {{-   else if eq .os "darwin" -}}
     {{-     $chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" -}}
     {{-   end -}}
-    {{-   if not $chromePath }}
-    {{      warnf "chrome-devtools: no browser found, using stable channel" }}
-    {{    end -}}
     "chrome-devtools": {
       "command": "npx",
       "args": [

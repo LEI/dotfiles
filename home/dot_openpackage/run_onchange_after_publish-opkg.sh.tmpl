@@ -18,9 +18,6 @@
 {{- end -}}
 {{- end -}}
 {{- if .features.opencode -}}
-{{- range glob (joinPath .chezmoi.homeDir ".config/opencode/rules/**/*.md") -}}
-{{- $installed = append $installed (include . | sha256sum) -}}
-{{- end -}}
 {{- range glob (joinPath .chezmoi.homeDir ".config/opencode/agents/*.md") -}}
 {{- $installed = append $installed (include . | sha256sum) -}}
 {{- end -}}
@@ -57,17 +54,18 @@ install_package() {
     run opkg uninstall --global --recursive "$name"
   fi
 
-  run opkg install --local --platforms
-{{- if .features.claude }} claude{{ end }}
-{{- if .features.opencode }} opencode{{ end }} --global "$name"
+  run opkg install --local --platforms {{ join " " .openpackage.platforms }} --global "$name"
 
   echo "Package '$name' published and installed"
 }
 
 install_package "local" "{{ .chezmoi.homeDir }}/.openpackage/packages/local"
 
-{{- range $name, $mkt := dig "marketplaces" (dict) . }}
-install_package "{{ $name }}" "{{ $.chezmoi.homeDir }}/{{ $mkt.path }}/packages/{{ $name }}"
+{{- range $name, $mkt := .claude.marketplaces }}
+{{- $path := get $mkt "path" }}
+{{- if and $path (stat (joinPath $.chezmoi.homeDir $path "packages" $name)) }}
+install_package "{{ $name }}" "{{ $.chezmoi.homeDir }}/{{ $path }}/packages/{{ $name }}"
+{{- end }}
 {{- end }}
 
 # Clean up workspace created by opkg

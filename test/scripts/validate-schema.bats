@@ -182,12 +182,11 @@ setup() {
 
 # bats test_tags=type:unit
 @test "validate-schema: handles no files case" {
-  local empty_dir script
-  empty_dir=$(mktemp -d)
-  script="$BATS_TEST_DIRNAME/../../script/validate-schema"
+  local empty_dir
+  empty_dir=$(mktemp -d "$BATS_TEST_TMPDIR/XXXXXX")
   cd "$empty_dir"
   git init --quiet
-  run_script "$script"
+  run_script "$BATS_TEST_DIRNAME/../../script/validate-schema"
   assert_stderr_line --regexp "^validate-schema: no files to validate$"
   assert_success
 }

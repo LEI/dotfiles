@@ -36,6 +36,7 @@ setup() {
   check_command time
   export BENCH_ITERATIONS=1
   export SHELL=dummy
+  export TMPDIR="$BATS_TEST_TMPDIR"
   stub_seq dummy $((BENCH_ITERATIONS + 2))
   run_script ./script/startup
   unstub dummy 2>/dev/null || true

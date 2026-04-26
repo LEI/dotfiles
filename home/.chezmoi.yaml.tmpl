@@ -323,6 +323,17 @@ data:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
 
+{{- if or $features.claude $features.opencode }}
+{{-   $platforms := list }}
+{{-   if $features.claude }}{{- $platforms = append $platforms "claude" }}{{- end }}
+{{-   if $features.opencode }}{{- $platforms = append $platforms "opencode" }}{{- end }}
+{{-   $opkgData := includeTemplate "data.tmpl" (dict "dir" "dot_openpackage" "chezmoi" .chezmoi) | fromYaml | default dict }}
+{{-   $_ := set $opkgData "platforms" $platforms }}
+
+  openpackage:
+{{ $opkgData | toYaml | indent 4 }}
+{{- end }}
+
   # TODO: process-compose/.data.yaml
 {{- $pcLocal := joinPath .chezmoi.homeDir ".config/process-compose/local.yaml" -}}
 {{- if stat $pcLocal -}}

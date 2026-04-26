@@ -11,7 +11,6 @@ permission:
   grep: allow
   list: allow
   git_git_*: deny
-  git_git_branch: allow
   git_git_diff*: allow
   git_git_log: allow
   git_git_show: allow
