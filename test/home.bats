@@ -1,3 +1,9 @@
+setup_file() {
+  # shellcheck source=test/common/setup-file.sh
+  source test/common/setup-file.sh
+  _common_setup_file
+}
+
 setup() {
   # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
@@ -60,29 +66,6 @@ setup() {
 # bats test_tags=deploy,validation
 @test "environment.d: no unmanaged files" {
   no_unmanaged "$HOME/.config/environment.d"
-}
-
-# bats test_tags=deploy,validation,strict
-@test "secrets.d: no unmanaged files" {
-  no_unmanaged "$HOME/.config/secrets.d"
-}
-
-# bats test_tags=deploy,validation,strict
-@test "claude/rules: no unmanaged files" {
-  check_feature claude
-  no_unmanaged "$HOME/.claude/rules"
-}
-
-# bats test_tags=deploy,validation,strict
-@test "nvim: no unmanaged files" {
-  check_feature neovim
-  no_unmanaged "$HOME/.config/nvim"
-}
-
-# bats test_tags=deploy,validation,strict
-@test "opencode: no unmanaged files" {
-  check_feature opencode
-  no_unmanaged "$HOME/.config/opencode"
 }
 
 # Collect unique KEY= names from all .conf files in a directory

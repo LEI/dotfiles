@@ -1,0 +1,13 @@
+{{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
+# opkg-managed: agents
+{{- range glob (joinPath $pkg "exact_agents/*.md") }}
+agents/{{ base . }}
+{{- end }}
+# opkg-managed: skills
+{{- range glob (joinPath $pkg "skills/*") }}
+skills/{{ base . | trimPrefix "exact_" }}
+{{- end }}
+# opkg-managed: rules (local package + marketplace packages)
+rules/**
+# Runtime-generated
+plugins/chezmoi/plugins/local/skills

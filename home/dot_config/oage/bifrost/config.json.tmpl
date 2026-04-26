@@ -9,6 +9,7 @@
       | trimPrefix "OPENROUTER_API_KEY=" -}}
 {{- end -}}
 {
+  "$schema":"https://www.getbifrost.ai/schema",
   "config_store": {
     "enabled": true,
     "type": "sqlite",
@@ -71,12 +72,12 @@
       "name": "otel",
       "config": {
         "service_name": "bifrost",
-        "collector_url": "otel-collector:4317",
+        "collector_url": "http://otel-collector:4317",
         "protocol": "grpc",
-        "trace_type": "otel",
+        "trace_type": "open_inference",
         "insecure": true,
         "metrics_enabled": true,
-        "metrics_endpoint": "otel-collector:4317",
+        "metrics_endpoint": "http://otel-collector:4317",
         "metrics_push_interval": 15
       }
     }

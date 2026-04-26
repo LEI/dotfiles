@@ -1,5 +1,6 @@
 # Runtime and generated files
 *.bak
+.gitignore
 bun.lock
 node_modules
 oh-my-opencode.json
@@ -7,3 +8,7 @@ oh-my-opencode.jsonc
 opencode-notifier-state.json
 package-lock.json
 package.json
+# opkg-managed
+agents/
+rules/
+skills/

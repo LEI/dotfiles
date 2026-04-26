@@ -1,8 +1,13 @@
 {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "protocol" "http/protobuf") | fromYaml -}}
 goose() {
-  OTEL_SERVICE_NAME=goose \
-    {{- range $key, $value := $otel }}
-    {{ $key }}={{ $value }} \
-    {{- end }}
-    command goose "$@"
+  # FIXME(134): set -m  # Enable job control
+  export OTEL_SERVICE_NAME=goose
+  {{- range $key, $value := $otel }}
+  export {{ $key }}={{ $value }}
+  {{- end }}
+  if [ $# -eq 0 ]; then
+    set -- session --resume
+  fi
+  command goose "$@"
 }
+# alias gs=goose

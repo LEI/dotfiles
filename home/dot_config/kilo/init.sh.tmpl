@@ -1,9 +1,12 @@
 {{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
 kilo() {
-  OTEL_SERVICE_NAME=kilo \
-    {{- range $key, $value := $otel }}
-    {{ $key }}={{ $value }} \
-    {{- end }}
-    command kilo "${@:---continue}"
+  if [ $# -eq 0 ]; then
+    set -- --continue
+  fi
+  export OTEL_SERVICE_NAME=kilo
+  {{- range $key, $value := $otel }}
+  export {{ $key }}={{ $value }}
+  {{- end }}
+  command kilo "$@"
 }
 alias kl=kilo

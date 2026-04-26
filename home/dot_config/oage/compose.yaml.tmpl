@@ -1,3 +1,7 @@
+{{- $milvus := or .features.ollama .features.mlx -}}
+{{- $notebook := false -}}
+{{- $ollama := and .features.ollama (eq .os "linux") (not .features.podman) -}}
+{{- $sandboxed := false -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
@@ -22,11 +26,12 @@ services:
       resources:
         limits:
           memory: 512M
-{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+{{- if $ollama }}
     depends_on:
       ollama:
         condition: service_started
     # qdrant: semantic caching, not required to start
+{{- end }}
 
   # Qdrant: vector store for bifrost semantic caching
   # https://qdrant.tech/documentation/quickstart/
@@ -48,6 +53,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+{{- if $milvus }}
 
   # Milvus: vector database for claude-context MCP
   # https://milvus.io/docs/install_standalone-docker.md
@@ -80,7 +87,7 @@ services:
       start_period: 90s
 {{- end }}
 
-{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+{{- if $ollama }}
 
   # Ollama: local LLM inference
   # https://github.com/ollama/ollama
@@ -227,7 +234,7 @@ services:
   #     - opencode-share:/root/.local/share/opencode
   #     - ./opencode/auth.json:/data/auth.json:z
 
-{{- if false }}
+{{- if $sandboxed }}
 
   # # https://sandboxed.sh/install-docker
   # sandboxed-sh:
@@ -279,7 +286,7 @@ services:
   #     # - SB_USER=admin:password123
 {{- end }}
 
-{{- if false }}
+{{- if $notebook }}
 
   # https://github.com/lfnovo/open-notebook/tree/main/examples
   open-notebook:
@@ -370,6 +377,6 @@ volumes:
   qdrant-data:
   # sandboxed-data:
   surreal-data:
-{{- if and .features.ollama (eq .os "linux") (not .features.podman) }}
+{{- if $ollama }}
   ollama-data:
 {{- end }}

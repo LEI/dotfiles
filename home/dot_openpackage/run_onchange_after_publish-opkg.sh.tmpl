@@ -8,12 +8,28 @@
 {{- end }}
 # local: {{ join "\n" $hashes | sha256sum }}
 
+{{- $installed := list -}}
+{{- if .features.claude -}}
+{{- range glob (joinPath .chezmoi.homeDir ".claude/rules/**/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- range glob (joinPath .chezmoi.homeDir ".claude/agents/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- end -}}
+{{- if .features.opencode -}}
+{{- range glob (joinPath .chezmoi.homeDir ".config/opencode/rules/**/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- range glob (joinPath .chezmoi.homeDir ".config/opencode/agents/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- end }}
+# installed: {{ join "\n" $installed | sha256sum }}
+
 set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
-
-LOCAL_PACKAGE_PATH="{{ .chezmoi.homeDir }}/.openpackage/packages/local"
-PACKAGE_NAME="local"
 
 # Returns true if the package is already installed globally
 opkg_installed() {
@@ -22,32 +38,38 @@ opkg_installed() {
       >/dev/null 2>&1
 }
 
-if [ ! -d "$LOCAL_PACKAGE_PATH" ]; then
-  die "Package directory not found: $LOCAL_PACKAGE_PATH"
-fi
+install_package() {
+  name="$1" path="$2"
 
-if [ ! -f "$LOCAL_PACKAGE_PATH/openpackage.yml" ]; then
-  die "Package manifest not found: $LOCAL_PACKAGE_PATH/openpackage.yml"
-fi
+  if [ ! -d "$path" ]; then
+    echo "Package not found, skipping: $path"
+    return 0
+  fi
+  if [ ! -f "$path/openpackage.yml" ]; then
+    echo "No manifest at $path, skipping"
+    return 0
+  fi
 
-# Publish local opkg package to registry
-# TODO: replace cd with: mise run opkg -- publish --local --force "$PACKAGE_NAME"
-# eventually pin opkg to a specific version via mise (npm:opkg@<version>)
-cd "$LOCAL_PACKAGE_PATH"
-run opkg publish --local --force "$PACKAGE_NAME"
+  cd "$path"
+  run opkg publish --local --force "$name"
 
-# Uninstall first so renamed or deleted resources are removed
-if opkg_installed "$PACKAGE_NAME"; then
-  run opkg uninstall --global --recursive "$PACKAGE_NAME"
-fi
+  if opkg_installed "$name"; then
+    run opkg uninstall --global --recursive "$name"
+  fi
 
-# Install to platforms enabled in features
-run opkg install --local --platforms
+  run opkg install --local --platforms
 {{- if .features.claude }} claude{{ end }}
-{{- if .features.opencode }} opencode{{ end }} --global "$PACKAGE_NAME"
+{{- if .features.opencode }} opencode{{ end }} --global "$name"
+
+  echo "Package '$name' published and installed"
+}
+
+install_package "local" "{{ .chezmoi.homeDir }}/.openpackage/packages/local"
+
+{{- range $name, $mkt := dig "marketplaces" (dict) . }}
+install_package "{{ $name }}" "{{ $.chezmoi.homeDir }}/{{ $mkt.path }}/packages/{{ $name }}"
+{{- end }}
 
 # Clean up workspace created by opkg
 trash "$CHEZMOI_WORKING_TREE/.openpackage" 2>/dev/null || true
-
-echo "Package '$PACKAGE_NAME' published and installed"
 {{ end -}}
