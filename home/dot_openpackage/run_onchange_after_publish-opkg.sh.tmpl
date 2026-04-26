@@ -1,18 +1,12 @@
-{{- if and .features.opencode (lookPath "node" | isExecutable) (not .ephemeral) -}}
+{{- if and (or .features.claude .features.opencode) (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
 
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/commands/*.md") }}
-# commands/{{ base . }}: {{ include . | sha256sum }}
+{{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
+{{- $hashes := list -}}
+{{- range glob (joinPath $pkg "**/*.md") -}}
+{{- $hashes = append $hashes (include . | sha256sum) -}}
 {{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/rules/*.md") }}
-# rules/{{ base . }}: {{ include . | sha256sum }}
-{{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/agents/*.md") }}
-# agents/{{ base . }}: {{ include . | sha256sum }}
-{{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/SKILL.md") }}
-# skills/{{ dir . | base }}: {{ include . | sha256sum }}
-{{- end }}
+# local: {{ join "\n" $hashes | sha256sum }}
 
 set -eu
 
@@ -49,8 +43,8 @@ fi
 
 # Install to platforms enabled in features
 run opkg install --local --platforms
-{{- if .features.opencode }} opencode{{ end }}
-{{- if .features.claude }} claude{{ end }} --global "$PACKAGE_NAME"
+{{- if .features.claude }} claude{{ end }}
+{{- if .features.opencode }} opencode{{ end }} --global "$PACKAGE_NAME"
 
 # Clean up workspace created by opkg
 trash "$CHEZMOI_WORKING_TREE/.openpackage" 2>/dev/null || true
