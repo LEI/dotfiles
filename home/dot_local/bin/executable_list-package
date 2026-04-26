@@ -67,11 +67,15 @@ pacman)
     echo
   ;;
 pip)
-  python=python
-  if ! command -v python >/dev/null && command -v python3 >/dev/null; then
-    python=python3
+  pip=pip
+  if ! command -v pip >/dev/null; then
+    python=python
+    if ! command -v python >/dev/null && command -v python3 >/dev/null; then
+      python=python3
+    fi
+    pip="$python -m pip"
   fi
-  $python -m pip install --user --quiet list
+  $pip install --user --quiet list
   ;;
 pipx)
   pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
@@ -102,6 +106,12 @@ winget)
     winget export --source=winget --output=winget-export.json
   fi
   jq --raw-output '.Sources[0].Packages[].PackageIdentifier' winget-export.json
+  ;;
+zypper)
+  zypper packages --userinstalled | cut -d'|' -f3
+  # --installed-only
+  # --orphaned
+  # --unneeded
   ;;
 *)
   echo "${0##*/}: invalid argument: $1" >&2

@@ -105,6 +105,19 @@ main() {
   # set -- --trace "$@"
   echo "bats $*" >&2
   bats "$@"
+  local exit_code=$?
+
+  # Fail if 0 tests were run
+  if [ $exit_code -eq 0 ]; then
+    local test_count
+    test_count=$(bats --count "$@" 2>/dev/null)
+    if [ "$test_count" = "0" ]; then
+      echo "bats error: 0 tests found ($*)" >&2
+      exit 1
+    fi
+  fi
+
+  exit $exit_code
 }
 
 main "$@"

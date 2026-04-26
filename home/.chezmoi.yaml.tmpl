@@ -45,7 +45,13 @@
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}
 
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os }}
-{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID }}
+{{- $osIDLikeRaw := get .chezmoi.osRelease "idLike" | default $osID }}
+{{- $osIDLike := $osIDLikeRaw }}
+{{- if kindIs "array" $osIDLikeRaw }}
+{{-   $osIDLike = first $osIDLikeRaw }}
+{{- else if kindIs "string" $osIDLikeRaw }}
+{{-   $osIDLike = $osIDLikeRaw | splitList " " | first }}
+{{- end }}
 {{- $osVersion := get .chezmoi.osRelease "versionID" }}
 {{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") }}
 {{-   $osID = "android" }}
@@ -231,6 +237,7 @@ data:
   "darwin" "brew"
   "debian" "apt"
   "fedora" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
+  "opensuse" "zypper"
   "windows" "winget"
 }}
 {{- $packageManager := get $packageManagerMap $osIDLike }}

@@ -26,8 +26,7 @@ groups:
 
       # High output token ratio (possible loops or excessive verbosity)
       - alert: ClaudeCodeHighOutputRatio
-        expr: >
-          sum(rate(claude_code_token_usage_tokens_total{type="output"}[30m])) / sum(rate(claude_code_token_usage_tokens_total{type="input"}[30m])) > 3
+        expr: sum(rate(claude_code_token_usage_tokens_total{type="output"}[30m])) / sum(rate(claude_code_token_usage_tokens_total{type="input"}[30m])) > 3
         for: 15m
         labels:
           severity: info

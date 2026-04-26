@@ -10,7 +10,7 @@ packages:
   ghq:
     nameOverwrite:
       windows: x-motemen.ghq
-    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" "opensuse" | ternary "mise" nil }}'
   git:
     nameOverwrite:
       windows: Git.Git
@@ -20,7 +20,7 @@ packages:
       windows: tummychow.git-absorb
   # git-cal:
   git-extras:
-    enabled: '{{ not (eq .osIDLike "alpine" "windows") }}'
+    enabled: '{{ not (eq .osIDLike "alpine" "opensuse" "windows") }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   git-filter-repo:
     enabled: '{{ not (eq .osIDLike "android" "windows") }}'

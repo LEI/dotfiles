@@ -40,7 +40,7 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
   bkt:
     enabled: {{ and
-      (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows"))
+      (not (eq .osIDLike "android" "alpine" "debian" "fedora" "opensuse" "windows"))
       (not (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64")))
       (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -311,7 +311,7 @@ packages:
     type: '{{ eq .osIDLike "debian" | ternary "brew" nil }}'
     # type: mise
   kmon: # systeroid:
-    enabled: {{ and (eq .os "linux") (not (eq .osID "fedora")) (not (or
+    enabled: {{ and (eq .os "linux") (not (eq .osIDLike "fedora" "opensuse")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
     )) (ne .profile "minimal") }}
@@ -361,7 +361,7 @@ packages:
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
   macchina:
     enabled: {{ ne .profile "minimal" }}
-    type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" "opensuse" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
 
   # https://github.com/ml-explore/mlx-lm (v0.31.2)
   mlx-lm:
@@ -467,6 +467,7 @@ packages:
   #   enabled: {{ not (empty .passwordManager.accessToken) }}
   parallel: # Conflicts with moreutils on darwin
     enabled: {{ ne .os "windows" }}
+    type: {{ eq .osIDLike "opensuse" | ternary "brew" nil }}
   pastel: # termpicker
     enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
@@ -483,14 +484,6 @@ packages:
   #   # version: "8.3"
   #   # type: brew
 
-  pipx:
-    enabled: {{ .features.python }}
-    nameOverwrite:
-      arch: python-pipx
-    type: {{ and
-      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora")
-      (not (and (eq .osID "debian") (le (int .osVersion) 11)))
-      | ternary nil "pip" }}
   pik:
     enabled: {{ eq .osIDLike "arch" }}
     nameOverwrite:
@@ -695,7 +688,7 @@ packages:
     link: true
 
   tre-command:
-    enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora")) (not (or
+    enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora" "opensuse")) (not (or
       (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64"))
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
@@ -736,14 +729,30 @@ packages:
   usage:
     enabled: {{ .features.mise }}
     type: {{ eq .os "darwin" | ternary "brew" "mise" | quote }}
+
+  # pip:
+  #   enabled: {{ and .features.python (eq .osIDLike "opensuse") }}
+  #   nameOverwrite:
+  #     zypper: python314-pip
+  pipx:
+    enabled: {{ .features.python }}
+    nameOverwrite:
+      arch: python-pipx
+      zypper: python314-pipx
+    type: {{ and
+      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora" "opensuse")
+      (not (and (eq .osID "debian") (le (int .osVersion) 11)))
+      | ternary nil "pip" }}
   uv:
     enabled: {{ .features.python }}
     nameOverwrite:
       # pipx: uv uvx
       windows: astral-sh.uv
+      zypper: python314-uv
     # https://docs.astral.sh/uv/getting-started/installation
     # type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "fedora" "windows") | ternary "pipx" nil }}'
     type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
+
   util-linux: # lsblk
     enabled: {{ eq .os "android" "linux" }}
   viddy: # watch
@@ -1166,6 +1175,13 @@ osPackages:
       page.tesk.Refine:
         description: GNOME tweaks
         enabled: {{ and (eq .variantID "silverblue") (not (or .ephemeral .headless)) }}
+  opensuse:
+    zypper:
+      awk:
+      find:
+      gcc: # brew git-wt and skill-validator are built from source (clang)
+        enabled: {{ ne .profile "minimal" }}
+      time:
   windows:
     scoop:
       7zip:

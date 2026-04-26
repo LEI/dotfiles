@@ -60,7 +60,7 @@ install_packages() {
   elif command -v pacman >/dev/null; then
     pacman --sync --needed --noconfirm --quiet --refresh chezmoi git sudo which
   elif command -v zypper >/dev/null; then
-    zypper --quiet --non-interactive install chezmoi curl git sudo which unzip
+    zypper --non-interactive --quiet install chezmoi curl git sudo which unzip
   else
     error "unsupported package manager"
     exit 1

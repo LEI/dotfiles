@@ -33,6 +33,7 @@ setup() {
 
 # bats test_tags=startup,type:unit
 @test "script/startup" {
+  check_command time
   export BENCH_ITERATIONS=1
   export SHELL=dummy
   stub_seq dummy $((BENCH_ITERATIONS + 2))

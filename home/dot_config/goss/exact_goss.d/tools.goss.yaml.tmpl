@@ -1,21 +1,17 @@
-{{- $jqCheck := lookPath "jq" | isExecutable -}}
-{{- $yqCheck := lookPath "yq" | isExecutable -}}
 {{- $jqVersion := "" -}}
 {{- $yqVersion := "" -}}
-{{- if $jqCheck -}}
+{{- if lookPath "jq" | isExecutable -}}
 {{-   $jqVersion = output "sh" "-c" "jq --version | cut -d'-' -f2" -}}
-{{-   if eq $jqVersion "" }}{{ $jqVersion = "VERSION_EXTRACTION_FAILED" }}{{ end -}}
 {{- end -}}
-{{- if $yqCheck -}}
+{{- if lookPath "yq" | isExecutable -}}
 {{-   $yqVersion = output "sh" "-c" "yq --version | awk '{print $4}' | tr -d 'v'" -}}
-{{-   if eq $yqVersion "" }}{{ $yqVersion = "VERSION_EXTRACTION_FAILED" }}{{ end -}}
 {{- end -}}
 ---
-{{- if or $jqCheck $yqCheck }}
+{{- if or $jqVersion $yqVersion }}
 matching:
 {{- end }}
 
-{{- if $jqCheck }}
+{{- if $jqVersion }}
 
   jq_version:
     title: Check jq version matches semver constraint
@@ -25,7 +21,7 @@ matching:
       semver-constraint: ">= 1.8.0 < 2.0.0"
 {{- end }}
 
-{{- if $yqCheck }}
+{{- if $yqVersion }}
 
   yq_version:
     title: Check yq version matches semver constraint

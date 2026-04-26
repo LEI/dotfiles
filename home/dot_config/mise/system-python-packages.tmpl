@@ -15,13 +15,13 @@ pynvim
 {{- end }}
 {{- end }}
 
-{{- if not (eq .osIDLike "android" "arch" "darwin" "debian") }}
+{{- if not (eq .osIDLike "android" "arch" "darwin" "debian" "opensuse") }}
 uv
 {{- end }}
 
 {{- if eq .osIDLike "alpine" "arch" "darwin" "fedora" }}
 virtualenv
-{{- else if ne .os "android" }}
+{{- else if and (ne .os "android") (ne .osIDLike "opensuse") }}
 venv
 {{- end }}
 

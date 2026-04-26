@@ -7,6 +7,10 @@
 {{- $packageFiles := get . "packageFiles" | default list }}
 {{- $packageType := get . "packageType" }}
 
+{{- if empty $packageType }}
+{{-   warnf "get-packages: empty packageType" -}}
+{{- end }}
+
 {{- /* if empty $defaultType -}}
 {{-   warnf "get-packages: missing defaultType" -}}
 {{- end -}}
@@ -31,8 +35,8 @@
 {{- end }}
 
 {{- /* OS specific packages */ -}}
-{{- /* FIXME: $osPackages := $global.osPackages | dig $.osIDLike $packageType | default dict */ -}}
-{{- $osPackages := get (get $global.osPackages $.osIDLike) $packageType | default dict }}
+{{- $osPackagesMap := get $global.osPackages $.osIDLike | default dict }}
+{{- $osPackages := get $osPackagesMap $packageType | default dict }}
 {{- /* $packages = mergeOverwrite $packages $osPackages */ -}}
 {{- range $key, $value := $osPackages }}
 {{ $_ := set $packages $key (mergeOverwrite ($value | default dict) (dict "type" $packageType)) }}

@@ -174,22 +174,6 @@ return {
     end,
   },
 
-  -- FIXME: nvim v0.11.6, tree-sitter 0.26.8
-
-  -- Error in decoration provider "win" (ns=nvim.treesitter.highlighter):
-  -- Error executing lua: /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:208: /usr/share/nvim/runtime/lua/v
-  -- im/treesitter/query.lua:880: No handler for is-mise?
-  -- stack traceback:
-  --         [C]: in function 'f'
-  --         /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:208: in function 'tcall'
-  --         /usr/share/nvim/runtime/lua/vim/treesitter/languagetree.lua:530: in function 'parse'
-  --         /usr/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:524: in function </usr/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:517>
-
-  -- nvim-treesitter[latex]: Error during "tree-sitter generate"
-  -- error: unexpected argument '--no-bindings' found
-  --   tip: to pass '--no-bindings' as a value, use '-- --no-bindings'
-  -- Usage: tree-sitter generate [OPTIONS] [GRAMMAR_PATH]
-
   {
     -- TODO: TSUninstall all, romus204/tree-sitter-manager.nvim
     'nvim-treesitter/nvim-treesitter',
@@ -281,8 +265,6 @@ return {
         vim.opt.foldmethod = 'indent'
         vim.opt.foldtext = 'v:lua.vim.treesitter.foldexpr()'
       end
-      --[[
-      -- FIXME: ../../after/queries/toml/injections.scm
       -- https://mise.jdx.dev/mise-cookbook/neovim.html
       require('vim.treesitter.query').add_predicate('is-mise?', function(_, _, bufnr, _)
         local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
@@ -292,8 +274,6 @@ return {
           or string.match(filepath, '.*mise/config%.toml$') ~= nil
           or string.match(filepath, '.*mise/config%.toml%.tmpl$') ~= nil
       end, { force = true, all = false })
-      ]]
-      --
     end,
     -- config = function(_, opts)
     --   -- v0.10.0

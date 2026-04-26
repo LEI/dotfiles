@@ -26,7 +26,7 @@
 {{- $memoryGiB := 0 -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $memoryGiB = output "sh" "-c" "sysctl -n hw.memsize | awk '{print int($1/1024/1024/1024)}'" | trim | int -}}
-{{- else if eq .chezmoi.os "linux" -}}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "awk" | isExecutable) -}}
 {{-   $memoryGiB = output "sh" "-c" "awk '/MemTotal/{print int($2/1024/1024)}' /proc/meminfo" | trim | int -}}
 {{- else if eq .chezmoi.os "windows" -}}
 {{-   $memoryGiB = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)" | trim | int -}}

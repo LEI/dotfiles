@@ -7,4 +7,4 @@ packages:
     enabled: '{{ not (eq .osIDLike "alpine" "android" "debian") }}'
     nameOverwrite:
       windows: jdx.mise
-    type: '{{ eq .osIDLike "fedora" | ternary "brew" nil }}'
+    type: '{{ eq .osIDLike "fedora" "opensuse" | ternary "brew" nil }}'

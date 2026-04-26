@@ -81,6 +81,16 @@ dry_run rpm-ostree upgrade # --quiet
 # shellcheck disable=SC2086
 dry_run rpm-ostree install --allow-inactive --assumeyes --idempotent $packages
 # --apply-live --quiet
+{{- else if eq .osIDLike "opensuse" }}
+
+dry_run sudo zypper --quiet ref
+{{- if .upgrade }}
+
+dry_run sudo zypper --quiet update --no-confirm
+{{- end }}
+
+# shellcheck disable=SC2086
+dry_run sudo zypper --quiet install --no-confirm $packages
 {{- else if eq .osID "android" }}
 
 {{- if not .container }}

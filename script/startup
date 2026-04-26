@@ -8,6 +8,13 @@
 
 set -euo pipefail
 
+for cmd in awk time; do
+  if ! command -v $cmd >/dev/null; then
+    echo "${0##*/}: $cmd command not found" >&2
+    exit 1
+  fi
+done
+
 BENCH_ITERATIONS="${BENCH_ITERATIONS:-10}"
 UNAME="${UNAME:-$(uname -s)}"
 

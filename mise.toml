@@ -64,7 +64,7 @@ description = "Run checks and tests locally"
 #   # "mise prek", # ./script/prek
 # ]
 run = [
-  { task = "test --filter-tags '!strict'" },
+  { task = "test", args = ["--filter-tags", "!strict"] },
   { task = "check" },
   # { task = "lint" },
   { task = "prek" },
