@@ -1,6 +1,9 @@
 #!/bin/sh
 # Shared preamble for chezmoi scripts
 
+# shellcheck source=home/dot_config/sh/lib/common.sh
+. "${CHEZMOI_WORKING_TREE-}/home/dot_config/sh/lib/common.sh"
+
 # Collapsed OS identifier: id_like or id or os, android for termux
 OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
 if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
@@ -23,19 +26,9 @@ has() {
   command -v "$@" >/dev/null 2>&1
 }
 
-# Print message to stderr
-msg() {
-  printf '%s\n' "$*" >&2
-}
-
-# Print warning to stderr with script name
-warn() {
-  msg "${0##*/}: $*"
-}
-
-# Print fatal error to stderr and exit
+# Print prefixed error to stderr and exit
 die() {
-  msg "${0##*/}: $*"
+  warn "$@"
   exit 1
 }
 
@@ -43,17 +36,10 @@ die() {
 # CHEZMOI_VERBOSE is set to 1 by chezmoi --verbose (native)
 run() {
   if truthy "${CHEZMOI_VERBOSE:-}"; then
-    _run_out=""
-    for _run_arg in "$@"; do
-      case $_run_arg in
-      '') _run_out="$_run_out ''" ;;
-      *[[:space:]\"\'\*\?\$\`\&\;\|]*) _run_out="$_run_out '$_run_arg'" ;;
-      *) _run_out="$_run_out $_run_arg" ;;
-      esac
-    done
-    msg "${_run_out# }"
+    trace "$@"
+  else
+    "$@"
   fi
-  "$@"
 }
 
 # Like run but skip execution in dry run mode

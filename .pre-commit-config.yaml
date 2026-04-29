@@ -37,7 +37,6 @@ repos:
         language: system
         args:
           - --external-sources
-          - --exclude=SC2148
           - --severity=info
         files: \.(sh|bash|bats)$|^(script/|\.local/bin/|home/dot_local/bin/executable_)
         exclude: ^(.*\.(awk|zsh|tmpl)$|home/dot_config/tmux/plugins|home/dot_local/bin/executable_(chezmoi-profile|lspan)$)
@@ -113,12 +112,12 @@ repos:
       - id: check-compose-spec
         name: check compose spec
         files: (^|/)compose\.ya?ml$
-      # - id: v8r
-      #   name: v8r schema validation
-      #   entry: npx v8r --ignore-errors
-      #   language: system
-      #   exclude: ^home/(.*\.tmpl$|.*/modify_)
-      #   files: \.(json[c5]?|toml|ya?ml)$
+        # - id: v8r
+        #   name: v8r schema validation
+        #   entry: npx v8r --ignore-errors
+        #   language: system
+        #   exclude: ^home/(.*\.tmpl$|.*/modify_)
+        #   files: \.(json[c5]?|toml|ya?ml)$
 
   # Security
   - repo: https://github.com/gitleaks/gitleaks

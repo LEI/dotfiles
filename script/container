@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# shellcheck source=home/dot_config/sh/lib/common.sh
+. "$XDG_CONFIG_HOME/sh/lib/common.sh"
+
 if ((BASH_VERSINFO[0] < 4)); then
   echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2
   exit 1
@@ -20,15 +23,6 @@ readonly tag_prefix="${PWD##*/}"
 readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
 container() { "$CONTAINER_PROVIDER" "$@"; }
-
-log() {
-  echo "${0##*/}: $*" >&2
-}
-
-trace() {
-  echo "+ $*" >&2
-  "$@"
-}
 
 # Resolve image-specific variables from an image arg (name or name:version).
 # Sets: image_name, version, image, image_tag, container, prefix,

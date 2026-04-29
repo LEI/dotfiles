@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # TAP version 14 helpers
 # https://testanything.org/tap-version-14-specification.html
 #

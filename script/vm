@@ -1,106 +1,176 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #MISE alias="ubuntu"
 #MISE description="VM"
-#USAGE flag "-v --verbose" help="Use verbose output"
+#USAGE flag "-d... --dir <dir>" help="Mount host directory in the VM (name:path)"
+#USAGE flag "-i --image <image>" help="OCI image to clone (default: ubuntu-runner-<arch>:24.04)"
+#USAGE flag "-k --keep" help="Keep VM running after exit"
+#USAGE flag "-n --name <name>" help="VM name (default: ubuntu-runner)"
 #USAGE flag "-q --quiet" help="Use quiet output"
+#USAGE flag "-t --tmux" help="Run VM in a tmux session"
+#USAGE flag "-v --verbose" help="Use verbose output"
 #USAGE arg "[command]..." help="Command to run in the VM"
 
-set -eu
+set -euo pipefail
 
-msg() {
-  if [ "$verbosity" -ge 2 ]; then
-    echo "${0##*/}: $*" >&2
-  fi
-}
+# shellcheck source=home/dot_config/sh/lib/common.sh
+. "$XDG_CONFIG_HOME/sh/lib/common.sh"
 
-run() {
-  if [ "$verbosity" -ge 2 ]; then
-    msg "$*"
-  fi
-  "$@"
-}
+if [ -z "${VM_PROVIDER:-}" ]; then
+  case "$(uname -s)" in
+  Darwin) VM_PROVIDER=tart ;;
+  Linux) VM_PROVIDER=vetu ;;
+  *)
+    echo "${0##*/}: unsupported OS: $(uname -s)" >&2
+    exit 1
+    ;;
+  esac
+fi
+
+case "$(uname -m)" in
+x86_64) ARCH=amd64 ;;
+aarch64 | arm64) ARCH=arm64 ;;
+*)
+  echo "${0##*/}: unsupported arch: $(uname -m)" >&2
+  exit 1
+  ;;
+esac
+
+vm() { "$VM_PROVIDER" "$@"; }
 
 vm_init() {
+  log "cloning $image as $name"
   # NOTE: default ubuntu VM is built to run on "arm64"
-  vetu clone "$image" "$name"
-  vetu set "$name" --disk-size 40
+  vm clone "$image" "$name"
+  vm set "$name" --disk-size 40
 }
 
-vm_running() {
-  # [ "$(vetu list | grep "$name" | cut -d' ' -f2 | tr -d '\n\t ')" = "$name" ]
-  # [ "$(vetu list | awk '/\t'"$name"' / {print $4}')" = running ]
-  if vetu list | awk '/\t'"$name"' / {print $4}' | grep -q running; then
-    return 0
+vm_state() {
+  if [ "$VM_PROVIDER" = tart ]; then
+    vm list --format json | jq --raw-output --arg name "$name" '.[] | select(.Name==$name) | .State'
   else
-    vetu list
-    return 1
+    vm list | awk '/\t'"$name"' / {print $4}'
   fi
 }
 
 vm_start() {
-  msg "starting $name"
-  if [ "$tmux" = true ] && ! tmux ls | grep '^vm: '; then
-    run tmux new-session -d -s vm "vetu run $name"
-    # tmux attach -t vm
+  log "starting $name"
+  local run_args=()
+  if [ "$VM_PROVIDER" = tart ]; then
+    run_args+=(--no-graphics)
+    for entry in $dirs; do
+      run_args+=("--dir=$entry")
+    done
+  fi
+  if [ "$tmux" = true ] && ! tmux ls 2>/dev/null | grep -q '^vm: '; then
+    trace tmux new-session -d -s vm "$VM_PROVIDER run ${run_args[*]} $name"
   else
-    # run vetu run "$name" >/dev/null &
-    run nohup vetu run "$name" &
+    local vm_log="/tmp/${VM_PROVIDER}-${name}.log"
+    if [ "$verbosity" -ge 2 ]; then
+      vm run "${run_args[@]}" "$name" 2>&1 | tee "$vm_log" &
+    else
+      vm run "${run_args[@]}" "$name" 2>&1 1>/dev/null | tee "$vm_log" >&2 &
+    fi
     sleep 1
   fi
 }
 
-# Increase sleep or connect timeout in case of error:
-# "ssh: connect to host 10.0.0.2 port 22: Connection refused"
 vm_wait() {
-  ip="$(vetu ip --wait=30 "$name")"
-
-  # msg "waiting 30 seconds"
-  # run sleep 30
-
-  msg "waiting for SSH"
-  timeout 500 sh -c 'until nc -z -w2 "$@"; do
-    sleep 2
-  done' -- "$ip" 22
+  if [ "$VM_PROVIDER" = tart ]; then
+    log "waiting for guest agent"
+    # shellcheck disable=SC2016
+    timeout 500 sh -c 'until "$1" exec "$2" true >/dev/null 2>&1; do sleep 2; done' -- "$VM_PROVIDER" "$name"
+  else
+    log "waiting for IP"
+    ssh_host="$(vm ip --wait=30 "$name")"
+    log "waiting for SSH on $ssh_host:$ssh_port"
+    # shellcheck disable=SC2016
+    timeout 500 sh -c 'until nc -z -w2 "$@"; do sleep 2; done' -- "$ssh_host" "$ssh_port"
+  fi
 }
 
-vm_ssh() {
-  echo "vm: running command: $*" >&2
-  sshpass -padmin ssh \
-    -o StrictHostKeyChecking=no \
-    -o ConnectTimeout=60 \
-    "admin@$ip" "$@"
+vm_mount() {
+  [ -n "$dirs" ] || return 0
+  if [ "$VM_PROVIDER" != tart ]; then
+    warn "$VM_PROVIDER does not support host directory sharing"
+    return 0
+  fi
+  local entry tag
+  for entry in $dirs; do
+    case "$entry" in
+    *:*) tag="${entry%%:*}" ;;
+    *) tag="${entry##*/}" ;;
+    esac
+    log "mounting $tag"
+    vm exec "$name" sh -c "mp=\$HOME/.local/share/$tag && mkdir -p \"\$mp\" && mount -t virtiofs $tag \"\$mp\""
+  done
+}
+
+vm_exec() {
+  log "running command: $*"
+  # shellcheck disable=SC2016
+  local shell_cmd='cd "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi" && exec "$@"'
+  if [ "$VM_PROVIDER" = tart ]; then
+    if [ -t 0 ]; then
+      vm exec -it "$name" sh -l -c "$shell_cmd" -- "$@"
+    else
+      vm exec -i "$name" sh -l -c "$shell_cmd" -- "$@"
+    fi
+  else
+    if [ -t 0 ]; then
+      sshpass -padmin ssh -t \
+        -o StrictHostKeyChecking=no \
+        -o ConnectTimeout=60 \
+        -p "$ssh_port" \
+        "admin@$ssh_host" \
+        sh -l -c "$shell_cmd" -- "$@"
+    else
+      sshpass -padmin ssh \
+        -o StrictHostKeyChecking=no \
+        -o ConnectTimeout=60 \
+        -p "$ssh_port" \
+        "admin@$ssh_host" \
+        sh -l -c "$shell_cmd" -- "$@"
+    fi
+  fi
 }
 
 vm_stop() {
-  msg "stopping $name"
-  run vetu stop "$name"
+  log "stopping $name"
+  trace vm stop "$name"
 }
 
 cleanup() {
-  if [ "$tmux" = true ] && tmux ls | grep -q '^vm: '; then
-    msg "killing tmux session"
-    run tmux kill-session -t vm
-  elif [ -f nohup.out ]; then
-    msg "removing nohup.out"
-    run rm nohup.out
+  if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
+    log "killing tmux session"
+    trace tmux kill-session -t vm
   fi
   vm_stop
 }
 
 main() {
-  image="${VM_IMAGE:-ghcr.io/cirruslabs/ubuntu-runner-amd64:22.04}"
-  keep="${VM_KEEP:-false}"
+  if [ "$VM_PROVIDER" = vetu ]; then
+    ssh_host=""
+    ssh_port=22
+  fi
+
+  dirs="${VM_DIRS:-}"
+  image="${VM_IMAGE:-ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04}"
   name="${VM_NAME:-ubuntu-runner}"
+  keep="${VM_KEEP:-false}"
   tmux="${VM_TMUX:-false}"
   verbosity="${VM_VERBOSITY:-1}"
 
   while [ $# -gt 0 ]; do
     case "$1" in
+    -d | --dir)
+      dirs="${dirs:+$dirs }$2"
+      shift 2
+      ;;
     -h | --help)
       if command -v usage >/dev/null; then
         usage exec --help bash "$0"
       else
-        echo "Usage: coverage [-l] [filter...]"
+        echo "Usage: ${0##*/} [-l] [filter...]"
       fi
       return
       ;;
@@ -136,9 +206,38 @@ main() {
       shift
       break
       ;;
-    -*)
-      msg "unknown option: $1"
+    --*)
+      echo "${0##*/}: unknown option: $1" >&2
       exit 1
+      ;;
+    -*)
+      opt="${1#-}"
+      shift
+      while [ -n "$opt" ]; do
+        case "${opt:0:1}" in
+        d)
+          dirs="${dirs:+$dirs }$1"
+          shift
+          ;;
+        i)
+          image="$1"
+          shift
+          ;;
+        k) keep=true ;;
+        n)
+          name="$1"
+          shift
+          ;;
+        q) verbosity=0 ;;
+        t) tmux=true ;;
+        v) verbosity=2 ;;
+        *)
+          echo "${0##*/}: unknown option: -${opt:0:1}" >&2
+          exit 1
+          ;;
+        esac
+        opt="${opt:1}"
+      done
       ;;
     *)
       break
@@ -146,41 +245,53 @@ main() {
     esac
   done
 
-  if ! command -v vetu >/dev/null; then
-    msg "vetu is not installed"
+  if ! command -v "$VM_PROVIDER" >/dev/null; then
+    echo "${0##*/}: $VM_PROVIDER is not installed" >&2
     exit 1
   fi
 
-  # vetu --version
-  if ! vm_running; then
+  state="$(vm_state)"
+  if [ -z "$state" ]; then
     vm_init
+  fi
+  if [ "$state" != running ]; then
     if [ "$keep" != true ]; then
       trap cleanup EXIT
     fi
     vm_start
+    vm_wait
+    vm_mount
+  elif [ -n "$dirs" ]; then
+    log "VM already running; --dir mounts require a fresh start"
   fi
-  vm_wait
 
   if [ "$#" -eq 0 ]; then
-    # CHEZMOI_PROFILE=minimal sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply --no-tty LEI
-    # curl -LSfs --proto '=https' --tlsv1.2 https://dotfiles.lei.sh/script/bootstrap | sh -s -- --no-tty LEI
-
-    bin_dir=.local/bin
-    msg "copying bootstrap script to $bin_dir"
-    vm_ssh sh -c "test -d '$bin_dir' || mkdir -p '$bin_dir'"
-    sshpass -padmin scp -o StrictHostKeyChecking=no ./script/bootstrap "admin@$ip:$bin_dir/bootstrap"
-    set -- env CHEZMOI_PROFILE=minimal "$bin_dir/bootstrap" --no-tty --verbose LEI
-
-    # FIXME: set -- bash -i
-    # bash: cannot set terminal process group (-1): Inappropriate ioctl for device
-    # bash: no job control in this shell
+    local vm_home bin_dir
+    if [ "$VM_PROVIDER" = tart ]; then
+      # shellcheck disable=SC2016
+      vm_home="$(vm exec "$name" sh -c 'echo $HOME')"
+    else
+      vm_home="/home/admin"
+    fi
+    bin_dir="$vm_home/.local/bin"
+    log "copying bootstrap script to $bin_dir"
+    vm_exec mkdir -p "$bin_dir"
+    if [ "$VM_PROVIDER" = tart ]; then
+      vm exec -i "$name" sh -c "cat > '$bin_dir/bootstrap' && chmod +x '$bin_dir/bootstrap'" <./script/bootstrap
+    else
+      sshpass -padmin scp -o StrictHostKeyChecking=no -P "$ssh_port" ./script/bootstrap "admin@$ssh_host:$bin_dir/bootstrap"
+    fi
+    set -- env CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" "$bin_dir/bootstrap" --no-tty --verbose LEI
   fi
 
-  vm_ssh "$@"
+  vm_exec "$@"
 
   if [ "$verbosity" -ge 2 ]; then
-    run vetu list
+    trace vm list
   fi
 }
 
-main "$@"
+# Allow sourcing for testing (e.g. bats)
+if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi

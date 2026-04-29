@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # Named component timing for shell init
 # Requires wrapping individual source/eval calls
 # For per-line profiling, use script/profile instead

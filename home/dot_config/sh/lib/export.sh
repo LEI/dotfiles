@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # Source files and export their assignments
 # Usage: export_env "$dir"/*.conf
 #        export_env "$file1" "$file2"
