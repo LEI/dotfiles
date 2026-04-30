@@ -17,5 +17,8 @@ Environment=OLLAMA_CONTEXT_LENGTH=8192
 ExecStartPre=-mkdir -p %h/.local/share/ollama
 TimeoutStopSec=10
 
+{{- if .features.ollama }}
+
 [Install]
 WantedBy=default.target
+{{- end }}

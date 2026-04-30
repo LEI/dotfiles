@@ -29,7 +29,7 @@
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $vm = eq (output "sysctl" "-n" "kern.hv_vmm_present" | trim) "1" }}
 {{- else if lookPath "systemd-detect-virt" | isExecutable }}
-{{-   $vm = ne (output "sh" "-c" "systemd-detect-virt 2>/dev/null || true" | trim) "" }}
+{{-   $vm = ne (output "sh" "-c" "systemd-detect-virt 2>/dev/null || true" | trim) "none" }}
 {{- end }}
 
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}

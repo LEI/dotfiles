@@ -38,7 +38,7 @@ reload_if_changed() {
 
 prometheus_hash="{{ include $prometheusConfig | sha256sum }}{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $alertRulesDir) | sha256sum }}"
 reload_if_changed prometheus "$prometheus_hash" \
-  curl -fsS -X POST http://localhost:9090/-/reload
+  retry 10 2 curl -fsS -X POST http://localhost:9090/-/reload
 
 # /-/reload can return 200 while the container still reads a stale bind-mount,
 # so verify the running config via the self-metric and restart on drift.

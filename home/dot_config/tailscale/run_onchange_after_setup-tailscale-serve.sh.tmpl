@@ -30,7 +30,8 @@ fi
 # status: {{ get $status "BackendState" }}
 {{- end }}
 if ! run tailscale status; then
-  die "tailscale status failed"
+  msg "tailscale not running; skipping serve setup"
+  exit 0
 fi
 
 status=$(tailscale serve status --json 2>/dev/null || echo '{}')

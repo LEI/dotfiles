@@ -1,4 +1,6 @@
-{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $caddy := get . "caddy" | default dict -}}
+{{- $sites := get $caddy "sites" | default dict -}}
+{{- $pc := get (get $sites "processCompose" | default dict) "process-compose" | default dict -}}
 {{- $uds := get $pc "uds" -}}
 [Unit]
 Description=Process Compose global services

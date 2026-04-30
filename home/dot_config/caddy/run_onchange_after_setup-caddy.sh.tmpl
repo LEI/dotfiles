@@ -10,9 +10,7 @@
 # {{ base . }}: {{ include . | sha256sum }}
 {{- end }}
 # dnsmasq-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
-{{- if .features.otel }}
-# otel-conf: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
-{{- end }}
+
 {{- if eq .chezmoi.os "linux" }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
@@ -117,38 +115,49 @@ if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
   run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
 fi
 
-# Copy site configs to /etc/caddy/sites/ (relative import path)
+# Sync site configs to /etc/caddy/sites/
 sites_src="$HOME/.config/caddy/sites"
 sites_dest="/etc/caddy/sites"
-sites_changed=false
-sites_diff=""
+sites_cmd=""
+
+[ -d "$sites_dest" ] || sites_cmd="mkdir -p '$sites_dest'; "
 
 for src in "$sites_src"/*.caddy; do
-  if [ -f "$src" ]; then
-    dest="$sites_dest/$(basename "$src")"
-    if ! diff -q "$dest" "$src" >/dev/null 2>&1; then
-      sites_changed=true
-      sites_diff="${sites_diff}$(diff -u "$dest" "$src" 2>&1 || true)"
-    fi
+  [ -s "$src" ] || continue
+  dest="$sites_dest/$(basename "$src")"
+  if ! diff -q "$dest" "$src" >/dev/null 2>&1; then
+    msg "Updating $(basename "$src")"
+    diff -u "$dest" "$src" 2>&1 || true
+    sites_cmd="${sites_cmd}cp '$src' '$dest'; "
   fi
 done
 
-if [ "$sites_changed" = true ]; then
-  msg "Updating /etc/caddy/sites/"
-  printf '%s\n' "$sites_diff"
-  run pkexec sh -c "mkdir -p '$sites_dest' && cp '$sites_src'/*.caddy '$sites_dest/'"
-fi
+for dest in "$sites_dest"/*.caddy; do
+  [ -f "$dest" ] || continue
+  src="$sites_src/$(basename "$dest")"
+  if [ ! -s "$src" ]; then
+    msg "Removing stale $(basename "$dest")"
+    sites_cmd="${sites_cmd}rm '$dest'; "
+  fi
+done
 
+[ -z "$sites_cmd" ] || run pkexec sh -c "$sites_cmd"
+{{- if .features.otel }}
+
+{{ $otelEnv := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
 # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
 # otel-collector (HTTP/protobuf on port 4318) which forwards to Tempo.
-otel_conf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
 otel_conf=/etc/systemd/system/caddy.service.d/otel.conf
-if ! diff -q "$otel_conf" "$otel_conf_src" >/dev/null 2>&1; then
-  diff -u "$otel_conf" "$otel_conf_src" || true
-  run pkexec mkdir -p /etc/systemd/system/caddy.service.d
-  run pkexec cp "$otel_conf_src" "$otel_conf"
+otel_content='[Service]
+{{- range $key := keys $otelEnv | sortAlpha }}
+Environment={{ $key }}={{ get $otelEnv $key }}
+{{- end }}
+Environment=OTEL_SERVICE_NAME=caddy'
+if [ "$(cat "$otel_conf" 2>/dev/null)" != "$otel_content" ]; then
+  printf '%s\n' "$otel_content" | run pkexec sh -c "mkdir -p $(dirname "$otel_conf") && tee '$otel_conf' >/dev/null"
   run systemctl daemon-reload
 fi
+{{- end }}
 # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
 dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
 nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
