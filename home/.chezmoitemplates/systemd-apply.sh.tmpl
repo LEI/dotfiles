@@ -21,15 +21,21 @@
 {{-     $dir = joinPath .chezmoi.homeDir ".config/systemd/user" -}}
 {{-   end -}}
 {{- end -}}
+
 {{- $unitFile := joinPath $dir $unit -}}
-{{- if stat $unitFile }}
-# unit: {{ include $unitFile | sha256sum }}
-{{ end -}}
 
 {{- $status := "unknown" -}}
 {{- if lookPath "systemctl" | isExecutable -}}
 {{-   $status = output "sh" "-c" (printf "%s show %s --property=ActiveState --value 2>/dev/null || true" $ctl $name) | trim | default "not found" -}}
 {{- end -}}
+
+# shellcheck shell=sh
+
+{{- if stat $unitFile }}
+
+# unit: {{ include $unitFile | sha256sum }}
+{{- end }}
+
 # status: {{ $status }}
 
 if ! command -v systemctl >/dev/null; then

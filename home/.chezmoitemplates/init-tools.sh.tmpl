@@ -12,6 +12,7 @@
   "nvim" "neovim"
   "pi" "ai"
 -}}
+# shellcheck shell=bash
 
 # Order matters: mise first, carapace before completions, starship before atuin
 for _tool in {{ $ordered | join " " }}; do

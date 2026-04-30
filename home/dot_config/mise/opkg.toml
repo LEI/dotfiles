@@ -1,0 +1,48 @@
+[opkg]
+alias = "op"
+description = "Run opkg in the local package"
+dir = "~/.openpackage/packages/local"
+run = "opkg"
+
+["opkg:list"]
+alias = "ol"
+description = "List opkg resources"
+run = "opkg list --global"
+
+["opkg:managed"]
+alias = "om"
+description = "List tracked target paths"
+run = """
+opkg list --global --json \
+  | jq -r '.data.resources[] | select(.resourceType == "packages") | .resources[] \
+    | recurse(.children[]?) | select(.status == "tracked") \
+    | .files[]? | select(.status == "tracked") | .target' \
+  | sort -u \
+  | sed "s|^|$HOME/|"
+"""
+
+["opkg:unmanaged"]
+alias = "ou"
+description = "List untracked target paths"
+run = """
+opkg list --global --json \
+  | jq -r '.data.resources[] | .resources[] | select(.status == "untracked") \
+    | .files[]? | select(.status == "untracked") | .target \
+    | select(. != ".claude.json" \
+      and (startswith(".pi/") | not))' \
+  | sort -u \
+  | sed "s|^|$HOME/|"
+"""
+
+["opkg:tracked"]
+alias = "ot"
+description = "Check if a resource is tracked"
+usage = 'arg "<name>" help="Resource name (e.g. packages/local)"'
+run = """
+opkg list --global --json \
+  | jq -e --arg name "$usage_name" \
+    '[.data.resources[] | select(.resourceType == "packages") | .resources[] \
+      | recurse(.children[]?) | select(.name == $name and .status == "tracked")] \
+    | length > 0' \
+  >/dev/null
+"""

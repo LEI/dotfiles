@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # shellcheck source=home/dot_config/sh/lib/common.sh
-. "$XDG_CONFIG_HOME/sh/lib/common.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_config/sh/lib/common.sh"
 
 if ((BASH_VERSINFO[0] < 4)); then
   echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2

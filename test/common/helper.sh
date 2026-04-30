@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-source_container() {
-  export CONTAINER_PROVIDER=dummy
-  source ./script/container
-}
-
 has_feature() {
   local name="$1"
   local feature
@@ -122,6 +117,25 @@ run_script() {
   fi
   set -- "${tmp_file:-$file}" "$@"
   run --separate-stderr run_src "$@"
+}
+
+exclude_under_symlink() {
+  local line d skip
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    d="$line"
+    skip=
+    while :; do
+      d="${d%/*}"
+      case "$d" in "" | "$HOME" | "/") break ;; esac
+      if [ -L "$d" ]; then
+        skip=1
+        break
+      fi
+    done
+    [ -z "$skip" ] && printf '%s\n' "$line"
+  done
+  return 0
 }
 
 no_unmanaged() {

@@ -75,7 +75,7 @@ run = [
 
 [tasks.renovate]
 description = "Dry-run Renovate locally (default: full, set RENOVATE_DRY_RUN to override)"
-run = "bunx renovate --platform=local --dry-run=${RENOVATE_DRY_RUN:-full}"
+run = 'bunx renovate --platform=local --dry-run="${RENOVATE_DRY_RUN:-full}"'
 [tasks.renovate.env]
 GITHUB_COM_TOKEN = "$(gh auth token)"
 LOG_FORMAT = "json"
@@ -100,7 +100,9 @@ RENOVATE_DRY_RUN = "extract"
 
 [tasks."renovate:missed"]
 description = "Show parse errors and lookup failures (extract + debug)"
-run = "mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFile and (.msg | test(\"Error|Failed\"; \"i\"))) | {msg, manager, packageFile}'"
+run = """
+mise run renovate 2>&1 | jq -Rrc 'try fromjson | select(.packageFile and (.msg | test("Error|Failed"; "i"))) | {msg, manager, packageFile}'
+"""
 [tasks."renovate:missed".env]
 LOG_LEVEL = "debug"
 RENOVATE_DRY_RUN = "extract"

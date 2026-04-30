@@ -3,6 +3,7 @@
 {{- range $name, $s := $sites -}}
 {{- $caddy := get $s "caddy" -}}
 {{ $name }}.test {
+	import common
 	tracing {
 		span {{ $name }}
 	}
@@ -13,8 +14,6 @@
 			{{- end }}
 		}
 	}{{ end }}
-	import cert_lifetime
-	import logging
 }
 {{ end -}}
 {{ end -}}

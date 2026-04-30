@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 if ! command -v starship >/dev/null; then
   echo "init: command not found: starship" >&2
   return

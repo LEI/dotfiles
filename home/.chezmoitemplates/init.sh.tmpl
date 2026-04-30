@@ -1,7 +1,10 @@
 {{- $shell := get . "shell" -}}
-{{- if and $shell (lookPath .shell | isExecutable) -}}
-SHELL={{ lookPath .shell | quote }}
-{{ end -}}
+# shellcheck shell=bash
+
+{{- if and $shell (lookPath $shell | isExecutable) }}
+
+SHELL={{ lookPath $shell | quote }}
+{{- end }}
 shell="${SHELL##*/}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"

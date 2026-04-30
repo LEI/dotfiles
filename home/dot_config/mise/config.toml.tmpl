@@ -7,6 +7,9 @@
 {{- $platforms := get $openpackage "platforms" | default list -}}
 {{- $claudeData := get . "claude" | default dict -}}
 {{- $claudeMarkets := get $claudeData "marketplaces" | default dict -}}
+[task_config]
+includes = ["{{ .chezmoi.homeDir }}/.config/mise/opkg.toml"]
+
 [settings]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
@@ -152,37 +155,6 @@ interactive = true
 {{- end }}
 
 {{- if .features.opencode }}
-
-[tasks.opkg]
-alias = "op"
-description = "Run opkg from the local openpackage directory"
-dir = "~/.openpackage/packages/local"
-run = "opkg"
-
-[tasks."opkg:list"]
-alias = "ol"
-description = "List opkg resources (tree)"
-run = "opkg list --global"
-
-[tasks."opkg:managed"]
-alias = "om"
-description = "Tracked file paths, absolute, one per line"
-run = """
-opkg list --global --json \
-  | jq -r '[.. | objects | select(.status == "tracked" and (.files | type == "array")) \
-    | .files[] | select(.status == "tracked") | .target] | unique | .[]' \
-  | sed "s|^|$HOME/|"
-"""
-
-[tasks."opkg:unmanaged"]
-alias = "ou"
-description = "Files in opkg dirs not tracked by any package"
-run = """
-opkg list --global --json \
-  | jq -r '[.. | objects | select(.status == "untracked" and .name \
-    and (.files | type == "array")) | .files[] | .target] | unique | .[]' \
-  | sed "s|^|$HOME/|"
-"""
 
 [tasks."opkg:install"]
 alias = "oi"

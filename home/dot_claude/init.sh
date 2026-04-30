@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # Resume last session by default
 claude() {
   if [ $# -eq 0 ]; then
@@ -46,14 +48,14 @@ claude-teams() {
 }
 
 # Teams in a tmux session using directory basename
-# Override: TMUX_SESSION=custom claude-teams-tmux
+# Usage: TMUX_SESSION=custom claude-teams-tmux
 claude-teams-tmux() {
-  if ! type tmux_session >/dev/null 2>&1; then
-    echo "tmux_session not defined; source tmux/init.sh" >&2
+  if ! type tmux-session >/dev/null 2>&1; then
+    echo "tmux-session not defined; source tmux/init.sh" >&2
     return 1
   fi
   local session_name="${TMUX_SESSION:-$(basename "$PWD")}"
-  tmux_session "$session_name" claude --teammate-mode=tmux "$@"
+  tmux-session "$session_name" claude --teammate-mode=tmux "$@"
 }
 
 claude-plan() {

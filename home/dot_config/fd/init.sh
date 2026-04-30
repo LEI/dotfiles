@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 # FIXME: config file, environment variable or bin wrapper for non-interactive shells
 # https://github.com/sharkdp/fd/issues/362
 fd() {

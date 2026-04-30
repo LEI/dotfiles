@@ -36,7 +36,7 @@ scrape_configs:
   - job_name: cadvisor
     static_configs:
       - targets: [cadvisor:8080]
-{{- if eq .os "linux" }}
+{{- if .features.caddy }}
   - job_name: caddy
     static_configs:
       - targets: [host.docker.internal:2020]

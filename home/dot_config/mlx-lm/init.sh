@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 mlx_list() {
   mlx_lm manage --scan 2>/dev/null
 }

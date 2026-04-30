@@ -1,5 +1,3 @@
 {{- if .features.i3 -}}
-{{- range $key, $value := .i3.environment }}
-{{ $key }}={{ $value | quote }}
-{{- end }}
-{{- end -}}
+{{ includeTemplate "env-conf.tmpl" (dict "env" .i3.environment) }}
+{{ end -}}

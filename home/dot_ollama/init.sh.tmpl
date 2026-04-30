@@ -2,8 +2,9 @@
 {{- $service := get $ollama "service" | default "brew" -}}
 {{- $container := get $ollama "container" -}}
 {{- $provider := eq $service "quadlet" | ternary "podman" (get . "containerProvider") -}}
+# shellcheck shell=sh
 
-{{- if $container -}}
+{{ if $container -}}
 if ! command -v ollama >/dev/null; then
   ollama() {
     set -- {{ $container }} ollama "$@"

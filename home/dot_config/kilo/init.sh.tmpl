@@ -1,4 +1,6 @@
 {{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+# shellcheck shell=sh
+
 kilo() {
   if [ $# -eq 0 ]; then
     set -- --continue

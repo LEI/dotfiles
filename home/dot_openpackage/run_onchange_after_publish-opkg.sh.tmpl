@@ -28,7 +28,10 @@ set -eu
 
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
-# Returns true if the package is already installed globally
+opkg() {
+  command opkg "$@" </dev/null
+}
+
 opkg_installed() {
   opkg list --global --json 2>/dev/null |
     jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
@@ -61,13 +64,39 @@ install_package() {
 
 install_package "local" "{{ .chezmoi.homeDir }}/.openpackage/packages/local"
 
-{{- range $name, $mkt := .claude.marketplaces }}
-{{- $path := get $mkt "path" }}
-{{- if and $path (stat (joinPath $.chezmoi.homeDir $path "packages" $name)) }}
-install_package "{{ $name }}" "{{ $.chezmoi.homeDir }}/{{ $path }}/packages/{{ $name }}"
-{{- end }}
-{{- end }}
+# Trash install dirs left by an opkg package no longer managed
+purge_install() {
+  name="$1"
+  for base in "$HOME/.claude" "$HOME/.config/opencode"; do
+    for type in rules agents skills; do
+      target="$base/$type/$name"
+      [ -L "$target" ] && continue
+      [ -d "$target" ] || continue
+      trace trash "$target"
+    done
+  done
+}
+
+# Repo owns global opkg install: anything in registry not in managed list is stale
+managed=" local "
+registry_dir="$HOME/.openpackage/registry"
+if [ -d "$registry_dir" ]; then
+  for entry in "$registry_dir"/*; do
+    [ -d "$entry" ] || continue
+    name="${entry##*/}"
+    case "$managed" in *" $name "*) continue ;; esac
+    msg "Removing stale opkg registry: $name"
+    if opkg_installed "$name"; then
+      trace opkg uninstall --global --recursive "$name"
+    fi
+    purge_install "$name"
+    trace trash "$entry"
+  done
+fi
 
 # Clean up workspace created by opkg
-trash "$CHEZMOI_WORKING_TREE/.openpackage" 2>/dev/null || true
+workspace="$CHEZMOI_WORKING_TREE/.openpackage"
+if [ -e "$workspace" ]; then
+  trace trash "$workspace"
+fi
 {{ end -}}

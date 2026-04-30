@@ -14,6 +14,12 @@ setup() {
   source test/common/helper.sh
 }
 
+source_container() {
+  export CONTAINER_PROVIDER=dummy
+  # shellcheck source=script/container
+  source ./script/container
+}
+
 # bats file_tags=script,container
 
 # bats test_tags=type:unit

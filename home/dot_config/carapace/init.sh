@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # https://carapace-sh.github.io/carapace-bin/setup.html#bash
 
 if ! command -v carapace >/dev/null; then

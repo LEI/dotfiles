@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 if [ -d "$XDG_DATA_HOME/nvim/mason/bin" ]; then
   pathmunge "$XDG_DATA_HOME/nvim/mason/bin" after
 fi

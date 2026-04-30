@@ -89,7 +89,7 @@ usage_generate_completion() {
     echo "${0##*/}: no #USAGE directive in $file" >&2
     return 1
   fi
-  msg "${0##*/}: $name"
+  log "generating $name"
   generated+=("$name")
 {{- if .features.bash }}
   usage generate completion bash "$name" --file - <<<"$spec" >|"$bash_dir/$name" || rc=1

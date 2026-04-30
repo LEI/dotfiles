@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 if [ -d "$HOME/.node_modules/bin" ]; then
   pathmunge "$HOME/.node_modules/bin" after
 fi

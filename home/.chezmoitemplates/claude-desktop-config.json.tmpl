@@ -2,6 +2,11 @@
 {{- $stateDir := env "CLAUDE_STATE_DIR" | default (joinPath $stateHome "claude") -}}
 {
   "preferences": {
+    {{- if eq .os "darwin" }}
+    "quickEntryShortcut": {
+      "accelerator": "Alt+Space"
+    },
+    {{- end }}
     "chillingSlothLocation": {
       "customPath": {{ joinPath $stateDir "worktrees" | quote }}
     },
@@ -11,14 +16,10 @@
     "coworkScheduledTasksEnabled": true,
     "ccdScheduledTasksEnabled": true,
     "sidebarMode": "epitaxy",
-    "coworkWebSearchEnabled": true,
-    "keepAwakeEnabled": false,
     "dockBounceEnabled": true,
-    {{- if eq .os "darwin" }}
-    "quickEntryShortcut": {
-      "accelerator": "Alt+Space"
-    },
-    {{- else if eq .osIDLike "fedora" }}
+    "coworkWebSearchEnabled": true,
+    "keepAwakeEnabled": false
+    {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [
       "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"
     ]

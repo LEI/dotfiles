@@ -1,4 +1,6 @@
 {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "protocol" "http/protobuf") | fromYaml -}}
+# shellcheck shell=sh
+
 goose() {
   # FIXME(134): set -m  # Enable job control
   export OTEL_SERVICE_NAME=goose

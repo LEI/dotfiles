@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 # Must be after starship to preserve PROMPT_COMMAND
 
 if ! command -v atuin >/dev/null; then

@@ -1,72 +1,70 @@
 ---
-# Default file and URL scheme handlers for macOS (duti)
-# Enforced by run_onchange_after_service.sh.tmpl
 duti:
+  # Apps allowed in LSHandlers ContentType entries
+  # Script fails if anything else is found; URL schemes skipped (app-specific)
+  allowedHandlers:
+    - com.aone.keka
+    - com.apple.calendarfilehandler
+    - com.apple.ical
+    - com.apple.mail
+    - com.apple.QuickTimePlayerX
+    - com.google.Chrome
+    - com.microsoft.Excel
+    - com.neovide.neovide
   utis:
+    com.google.Chrome:
+      - public.html
+    com.microsoft.Excel:
+      - public.comma-separated-values-text
     com.neovide.neovide:
+      - com.microsoft.ini
+      - com.microsoft.typescript
+      - com.netscape.javascript-source
+      - com.sun.java-source
+      - net.daringfireball.markdown
+      - org.iso.sql
+      - org.lua.lua-source
+      - org.vim.cfg-file
       - public.bash-script
+      - public.css
       - public.data
       - public.json
+      - public.patch-file
+      - public.perl-script
+      - public.php-script
       - public.plain-text
+      - public.python-script
+      - public.ruby-script
+      - public.script
       - public.shell-script
+      - public.source-code
+      - public.text
+      - public.toml
       - public.unix-executable
+      - public.xml
       - public.yaml
+  # Extensions without a standard UTI
   extensions:
     com.neovide.neovide:
-      - bash
-      # - c # Xcode default
-      - cfg
       - cmake
-      - conf
-      # - cpp # Xcode default
-      - css
       - dart
-      - diff
       - dockerfile
       - gemspec
       - go
-      # - h # Xcode default
-      # - hpp # Xcode default
-      - ini
-      - java
-      - js
-      - json
       - jsx
       - kt
       - lock
-      # - log # Console.app default
-      - lua
       - makefile
-      - md
       - ml
-      - patch
-      - pl
-      - pm
-      # - proto # TextEdit default
-      - py
-      - rb
       - rs
-      - sh
-      - sql
       - svelte
-      # - swift # Xcode default
-      - tmpl # Default: unset
-      - toml
       - ts
       - tsx
-      - txt
       - vue
-      - xml
-      - yaml
-      - yml
-      - zsh # Default: com.apple.dt.Xcode
-    com.google.Chrome:
-      - html
-    com.microsoft.Excel:
-      - csv
+      - zsh
   schemes:
+    com.apple.mail:
+      - mailto
     com.google.Chrome:
       - http
       - https
-    com.apple.mail:
-      - mailto

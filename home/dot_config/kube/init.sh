@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 if command -v k9s >/dev/null; then
   alias K="k9s --all-namespaces"
 fi

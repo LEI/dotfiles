@@ -33,6 +33,8 @@ bench() {
   return $ret
 }
 
+BENCH_HOME_REAL="$(realpath "$HOME")"
+
 bench_source() {
   local file="$1"
   shift
@@ -40,8 +42,7 @@ bench_source() {
     echo "bench_source: file not found: $file" >&2
     return 1
   fi
-  local name
-  name="${file#"$(realpath "$HOME")/"}"
+  local name="${file#"$BENCH_HOME_REAL/"}"
   # shellcheck disable=SC1090
   bench "$name" source "$file" "$@"
 }

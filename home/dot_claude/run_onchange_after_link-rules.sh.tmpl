@@ -1,0 +1,42 @@
+{{- if and .features.claude (not .ephemeral) -}}
+{{- $rules := list -}}
+{{- range $mktName, $mkt := .claude.marketplaces -}}
+{{-   $path := get $mkt "path" -}}
+{{-   if not $path -}}{{- continue -}}{{- end -}}
+{{-   $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
+{{-   if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
+{{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
+{{-     $pkgName := base $pkgDir -}}
+{{-     $rulesDir := joinPath $pkgDir "rules" $pkgName -}}
+{{-     if stat $rulesDir -}}
+{{-       $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- if not $rules -}}
+#!/bin/sh
+# rules: {{ $rules | toJson | sha256sum }}
+
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+# Symlink target to src; refuse to overwrite a real directory
+link_rules() {
+  name="$1" src="$2"
+  target="$HOME/.claude/rules/$name"
+
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    die "$target is not a symlink
+  Run: trash $target"
+  fi
+
+  run ln -sfn "$src" "$target"
+}
+
+mkdir -p "$HOME/.claude/rules"
+{{- range $entry := $rules }}
+link_rules {{ $entry.name | quote }} {{ $entry.src | quote }}
+{{- end }}
+{{ end -}}
+{{ end -}}

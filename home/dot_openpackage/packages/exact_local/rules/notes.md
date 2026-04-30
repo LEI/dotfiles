@@ -1,3 +1,7 @@
+---
+description: Logseq notes location
+---
+
 # Notes
 
-Personal notes at `~/notes/personal/`, work notes at `~/notes/work/` (when available).
+Logseq notes at `~/notes/*`.

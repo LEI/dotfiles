@@ -1,4 +1,3 @@
-# FIXME: https://github.com/caddyserver/caddy/issues/6475#issuecomment-2268984122
 {
 	# debug
 	default_bind 127.0.0.1
@@ -9,8 +8,12 @@
 	# 	format json
 	# 	include http.log.access admin.api
 	# }
-	local_certs # run `caddy trust` once to install the CA
-	cert_lifetime 30d # 168h
+	# run `caddy trust` once to install the CA
+	# cert_lifetime global option does not apply to the internal issuer, so set it on the issuer directly
+	# https://github.com/caddyserver/caddy/issues/6475#issuecomment-2268984122
+	cert_issuer internal {
+		lifetime 30d
+	}
 	pki {
 		ca local {
 			intermediate_lifetime 730d
@@ -18,13 +21,34 @@
 	}
 }
 
-# Metrics on 2020; use 9103 if SELinux allows
-:2020 host.docker.internal:2020 {
+# Metrics scraped by the prometheus container via host.docker.internal:2020.
+# Plain HTTP on purpose: prometheus.yaml.tmpl uses the default http scheme; adding a
+# hostname site address would force auto-HTTPS and break the scrape.
+# bind 0.0.0.0 is needed because docker host-gateway can't reach the host's loopback;
+# remote_ip restricts actual access to RFC1918 sources (docker bridge, lan).
+# Port 9103 falls inside SELinux's default http_port_t if rebinding is ever needed.
+http://:2020 {
 	bind 0.0.0.0
-	reverse_proxy /metrics localhost:2019
+	@prom {
+		path /metrics
+		remote_ip private_ranges
+	}
+	handle @prom {
+		reverse_proxy localhost:2019 {
+			header_up Host {upstream_hostport}
+		}
+	}
+	handle {
+		respond 404
+	}
 }
 
-(cert_lifetime) {
+(common) {
+	log {
+		# output file /var/log/caddy.log
+		# format json
+		level info
+	}
 	tls {
 		issuer internal {
 			lifetime 365d
@@ -32,17 +56,8 @@
 	}
 }
 
-(logging) {
-	log {
-		# output file /var/log/caddy.log
-		# format json
-		level info
-	}
-}
-
 # php.test {
-# 	import cert_lifetime
-# 	import logging
+# 	import common
 # 	root * /srv/example/public
 # 	php_fastcgi unix//tmp/php-fpm.sock
 # 	file_server

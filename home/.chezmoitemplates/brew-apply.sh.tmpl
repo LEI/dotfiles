@@ -10,6 +10,8 @@
 {{- if $svcName -}}
 {{-   $status = output "sh" "-c" (printf "launchctl print %s/%s 2>/dev/null | grep -m1 'state = ' | sed 's/.*state = //' || true" $domain $svcName) | trim | default "not loaded" -}}
 {{- end -}}
+# shellcheck shell=sh
+
 # status: {{ $status }}
 
 if ! has brew; then

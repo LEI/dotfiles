@@ -6,11 +6,15 @@
 {{- $uid := output "id" "-u" | trim -}}
 
 {{- $plistFile := joinPath .chezmoi.homeDir "Library/LaunchAgents" (printf "%s.plist" $label) -}}
-{{- if stat $plistFile -}}
-# plist: {{ include $plistFile | sha256sum }}
-{{ end -}}
 
 {{- $status := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
+
+# shellcheck shell=sh
+
+{{- if stat $plistFile }}
+
+# plist: {{ include $plistFile | sha256sum }}
+{{- end }}
 # status: {{ $status }}
 
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"

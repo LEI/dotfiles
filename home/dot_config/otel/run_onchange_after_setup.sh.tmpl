@@ -16,32 +16,46 @@ state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/otel"
 mkdir -p "$state_dir"
 
 provider="${CONTAINER_PROVIDER:?}"
+compose() {
+  run "$provider" compose --file="$compose_file" "$@"
+}
 
 # compose hash: "{{ include $compose | fromYaml | toJson | sha256sum }}"
-run "$provider" compose --file="$compose_file" up --detach --remove-orphans
+compose up --detach --remove-orphans
 
-check_reload() {
-  hash_file="$state_dir/$1.hash"
-  if [ "$(cat "$hash_file" 2>/dev/null)" != "$2" ]; then
-    printf '%s' "$2" >"$hash_file"
+reload_if_changed() {
+  name="$1"
+  hash="$2"
+  shift 2
+  hash_file="$state_dir/$name.hash"
+  if [ "$(cat "$hash_file" 2>/dev/null || true)" = "$hash" ]; then
     return 0
   fi
-  return 1
+  log "reloading $name config"
+  run "$@"
+  printf '%s' "$hash" >"$hash_file"
 }
 
 prometheus_hash="{{ include $prometheusConfig | sha256sum }}{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $alertRulesDir) | sha256sum }}"
-if check_reload prometheus "$prometheus_hash"; then
-  msg "Reloading Prometheus config"
-  run curl -fsS -X POST http://localhost:9090/-/reload || warn "Prometheus reload failed"
+reload_if_changed prometheus "$prometheus_hash" \
+  curl -fsS -X POST http://localhost:9090/-/reload
+
+# /-/reload can return 200 while the container still reads a stale bind-mount,
+# so verify the running config via the self-metric and restart on drift.
+prometheus_loaded() {
+  curl -fsS http://localhost:9090/metrics 2>/dev/null |
+    grep -qE '^prometheus_config_last_reload_successful 1$'
+}
+if ! retry 30 1 prometheus_loaded; then
+  log "prometheus running a stale or invalid config, restarting"
+  compose restart prometheus
+  retry 30 1 prometheus_loaded || die "prometheus config never loaded"
 fi
 
 otelcol_hash="{{ include $otelCollectorConfig | sha256sum }}"
-if check_reload otel-collector "$otelcol_hash"; then
-  msg "Reloading otel-collector config via SIGHUP"
-  run "$provider" compose --file="$compose_file" exec otel-collector kill -HUP 1 || warn "otel-collector SIGHUP failed"
-fi
+reload_if_changed otel-collector "$otelcol_hash" \
+  compose exec otel-collector kill -HUP 1
 
-# Per-directory Grafana provisioning reload
 grafana_netrc=""
 grafana_reload() {
   if [ -z "$grafana_netrc" ]; then
@@ -56,7 +70,6 @@ grafana_reload() {
       printf 'machine localhost login admin password %s\n' "$grafana_pass" >"$grafana_netrc"
     )
   fi
-  msg "Reloading Grafana $1"
   run curl -fsS --netrc-file "$grafana_netrc" -X POST "http://localhost:3033/api/admin/provisioning/$1/reload"
   echo
 }
@@ -64,21 +77,16 @@ grafana_reload() {
 {{- range list "alerting" "dashboards" "datasources" }}
 {{- $dir := joinPath $grafanaProvDir . }}
 
-grafana_{{ . }}="{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $dir) | sha256sum }}"
-if check_reload "grafana-{{ . }}" "$grafana_{{ . }}"; then
-  grafana_reload {{ . }} || warn "Grafana {{ . }} reload failed"
-fi
+grafana_{{ . }}_hash="{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $dir) | sha256sum }}"
+reload_if_changed "grafana-{{ . }}" "$grafana_{{ . }}_hash" \
+  grafana_reload {{ . }}
 {{- end }}
 
 loki_hash="{{ include $lokiConfig | sha256sum }}"
-if check_reload loki "$loki_hash"; then
-  msg "Restarting Loki (no hot-reload for main config)"
-  run "$provider" compose --file="$compose_file" restart loki
-fi
+reload_if_changed loki "$loki_hash" \
+  compose restart loki
 
 tempo_hash="{{ include $tempoConfig | sha256sum }}"
-if check_reload tempo "$tempo_hash"; then
-  msg "Restarting Tempo (no hot-reload for main config)"
-  run "$provider" compose --file="$compose_file" restart tempo
-fi
+reload_if_changed tempo "$tempo_hash" \
+  compose restart tempo
 {{ end -}}

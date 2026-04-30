@@ -27,15 +27,15 @@ groups:
   - name: tempo
     interval: 30s
     rules:
-      # Trace ingestion stopped
+      # Trace ingestion stopped, 30m tolerates idle workstation periods
       - alert: TempoIngestionStopped
         expr: rate(tempo_distributor_spans_received_total[5m]) == 0
-        for: 10m
+        for: 30m
         labels:
           severity: warning
         annotations:
           summary: "Tempo not receiving spans"
-          description: "No spans received in 10 minutes"
+          description: "No spans received in 30 minutes"
 
       # Discarded spans
       - alert: TempoDiscardedSpans

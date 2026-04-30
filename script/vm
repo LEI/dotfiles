@@ -13,7 +13,7 @@
 set -euo pipefail
 
 # shellcheck source=home/dot_config/sh/lib/common.sh
-. "$XDG_CONFIG_HOME/sh/lib/common.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_config/sh/lib/common.sh"
 
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in

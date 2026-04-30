@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 toolbox() {
   if [ "$#" -eq 0 ]; then
     set -- enter "$(basename "$PWD")"

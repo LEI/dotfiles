@@ -1,6 +1,8 @@
 # shellcheck shell=bash
 
-# Source files and export their assignments
+# Source files and export their assignments.
+# Files must contain bare KEY=VALUE lines (no quotes, no shell features)
+# to stay portable with systemd's environment.d parser.
 # Usage: export_env "$dir"/*.conf
 #        export_env "$file1" "$file2"
 export_env() {

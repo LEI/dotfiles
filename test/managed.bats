@@ -17,13 +17,6 @@ setup() {
 
 # bats file_tags=managed,strict
 
-# Checks whether an opkg package is tracked globally
-_opkg_tracked() {
-  opkg list --global --json 2>/dev/null |
-    jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
-      >/dev/null 2>&1
-}
-
 # bats test_tags=secrets
 @test "secrets.d: no unmanaged files" {
   no_unmanaged "$HOME/.config/secrets.d"
@@ -44,8 +37,9 @@ _opkg_tracked() {
 # bats test_tags=claude,opkg
 @test "claude: opkg local package is installed" {
   check_feature claude
-  check_command opkg jq
-  _opkg_tracked "local" || fail "opkg package 'local' is not tracked"
+  check_command opkg jq mise
+  run --separate-stderr mise run opkg:tracked packages/local
+  assert_success
 }
 
 # bats test_tags=neovim
@@ -63,6 +57,18 @@ _opkg_tracked() {
 # bats test_tags=opencode,opkg
 @test "opencode: opkg local package is installed" {
   check_feature opencode
-  check_command opkg jq
-  _opkg_tracked "local" || fail "opkg package 'local' is not tracked"
+  check_command opkg jq mise
+  run --separate-stderr mise run opkg:tracked packages/local
+  assert_success
+}
+
+# bats test_tags=opkg
+@test "openpackage: no unmanaged files" {
+  check_command opkg jq mise
+  run --separate-stderr mise run opkg:unmanaged
+  assert_success
+  run --separate-stderr exclude_under_symlink <<<"$output"
+  assert_success
+  refute_stderr
+  refute_output
 }

@@ -1,0 +1,7 @@
+{{- $env := get . "env" | default dict -}}
+{{- range $key, $value := $env -}}
+{{- $value = toString $value -}}
+{{- if contains " " $value }}{{ warnf "env-conf: %s value %q contains a space" $key $value }}{{ end -}}
+{{- if contains "\"" $value }}{{ warnf "env-conf: %s value %q contains a quote" $key $value }}{{ end -}}
+{{ $key }}={{ $value }}
+{{ end -}}

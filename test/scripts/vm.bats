@@ -16,7 +16,6 @@ setup() {
 
 source_vm() {
   export VM_PROVIDER="${VM_PROVIDER:-tart}"
-  export XDG_CONFIG_HOME="$PWD/home/dot_config"
   # shellcheck source=script/vm
   source ./script/vm
   dirs=""

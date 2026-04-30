@@ -13,8 +13,8 @@ matching:
 
 {{- if $jqVersion }}
 
-  jq_version:
-    title: Check jq version matches semver constraint
+  jq:
+    # title: Check jq version matches semver constraint
     content:
       - {{ $jqVersion | trim | quote }}
     matches:
@@ -23,8 +23,8 @@ matching:
 
 {{- if $yqVersion }}
 
-  yq_version:
-    title: Check yq version matches semver constraint
+  yq:
+    # title: Check yq version matches semver constraint
     content:
       - {{ $yqVersion | trim | quote }}
     matches:

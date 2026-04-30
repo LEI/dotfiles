@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 OPEN_WEBUI_API="${OPEN_WEBUI_URL:-http://127.0.0.1:8503}/api/v1"
 
 open_webui_auth() {

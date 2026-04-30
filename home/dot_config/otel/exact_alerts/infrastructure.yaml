@@ -3,15 +3,34 @@ groups:
   - name: infrastructure
     interval: 30s
     rules:
-      # Service availability
+      # Service availability across every scraped job
       - alert: ServiceDown
-        expr: up{job=~"otel-collector|prometheus|tempo|loki|grafana"} == 0
+        expr: up == 0
         for: 1m
         labels:
           severity: critical
         annotations:
           summary: "{{ $labels.job }} is down"
           description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+      # Config reload regression caught at metric layer
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus config reload failed"
+          description: "Last reload of {{ $labels.instance }} did not load successfully"
+
+      - alert: CaddyConfigReloadFailed
+        expr: caddy_config_last_reload_successful == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Caddy config reload failed"
+          description: "Last reload of {{ $labels.instance }} did not load successfully"
 
       # Container memory pressure
       - alert: ContainerMemoryHigh
