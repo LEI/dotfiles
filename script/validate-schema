@@ -4,19 +4,25 @@
 #USAGE flag "-k --keep" help="Keep temp files for debugging"
 #USAGE flag "-l --list" help="List validatable files"
 #USAGE flag "-q --quiet" help="Suppress output"
+#USAGE flag "-r --refresh" help="Wipe schema cache before validating"
+#USAGE flag "-t --tap" help="Emit TAP version 14 output"
 #USAGE flag "-v --verbose" help="Show validation details"
 #USAGE arg "[files]..." help="Files to validate (default: all tracked)"
 #USAGE complete "files" run="./script/validate-schema --list"
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+# shellcheck source=home/dot_local/lib/sh/validate.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/validate.sh"
+# shellcheck source=home/dot_local/lib/sh/report.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/report.sh"
+
+require_bash 4
 
 prog="${0##*/}"
 keep="${VALIDATE_SCHEMA_KEEP:-${VALIDATE_KEEP:-false}}"
+refresh=false
+tap=false
 verbosity="${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
@@ -36,20 +42,24 @@ while [ $# -gt 0 ]; do
     verbosity=0
     shift
     ;;
+  -r | --refresh)
+    refresh=true
+    shift
+    ;;
+  -t | --tap)
+    tap=true
+    shift
+    ;;
   -v | --verbose)
     verbosity=2
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: validate-schema [-k] [-l] [-q] [-v] [files...]"
-    fi
+    usage_help "[-k] [-l] [-q] [-r] [-t] [-v] [files...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   --)
@@ -57,30 +67,31 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "${0##*/}: unknown option: $1" >&2
+    echo "$prog: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
   esac
 done
 
+case "$(uname -s)" in
+Darwin) cache_dir="$HOME/Library/Caches/check_jsonschema" ;;
+*) cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/check_jsonschema" ;;
+esac
+
+if [ "$refresh" = true ] && [ -d "$cache_dir" ]; then
+  find "$cache_dir" -type f -delete
+fi
+
+# Read the $schema URL from a file; empty when absent or on parse error
 # shellcheck disable=SC2329
-validate_file() {
-  local path="$1" base ext content schema="" tmp_dir="" schema_path content_path
+extract_schema() {
+  local path="$1" base ext schema=""
   base="$(basename "$path")"
   ext="${path##*.}"
-
-  if [ ! -e "$path" ]; then
-    echo "FAIL $path schema= (file not found)"
-    return 1
-  fi
-
   case "$base" in
-  cspell.json | devcontainer.json)
-    ext=jsonc
-    ;;
+  cspell.json | devcontainer.json) ext=jsonc ;;
   esac
-
   case "$ext" in
   json)
     schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
@@ -101,16 +112,61 @@ validate_file() {
     schema=$(yq 'select(kind == "map") | ."$schema"' "$path") || schema=
     ;;
   esac
-  if [ "$schema" = "null" ]; then
-    schema=
+  [ "$schema" = "null" ] && schema=
+  printf '%s\n' "$schema"
+}
+export -f extract_schema
+
+# Invalidate the cached schema for a URL when its ETag/Last-Modified changed
+# check-jsonschema's Last-Modified-only freshness misses changes when servers
+# omit that header (e.g. bifrost, Vercel-hosted schemas); offline: keep cache
+preflight_schema() {
+  local url="$1" hash basename ext cache_file meta_file
+  local headers etag last_mod current
+  hash=$(printf '%s' "$url" | shasum -a 256 | awk '{print $1}')
+  basename="${url##*/}"
+  case "$basename" in
+  *.*) ext=".${basename##*.}" ;;
+  *) ext="" ;;
+  esac
+  cache_file="$cache_dir/schemas/$hash$ext"
+  meta_file="$cache_dir/schemas/$hash.meta"
+  [ -f "$cache_file" ] || return 0
+  if ! headers=$(curl --silent --head --location --max-time 5 "$url"); then
+    return 0
+  fi
+  # Normalize so weak (W/"abc") and strong ("abc") forms compare equal
+  etag=$(printf '%s\n' "$headers" | awk -F': ' 'tolower($1)=="etag"{print $2; exit}' | tr -d '\r"' | sed 's|^W/||')
+  last_mod=$(printf '%s\n' "$headers" | awk -F': ' 'tolower($1)=="last-modified"{print $2; exit}' | tr -d '\r')
+  current="$etag|$last_mod"
+  if [ -f "$meta_file" ] && [ "$(cat "$meta_file")" = "$current" ]; then
+    return 0
+  fi
+  rm -f "$cache_file"
+  printf '%s\n' "$current" >"$meta_file"
+}
+
+# shellcheck disable=SC2329
+validate_file() {
+  local path="$1" ext content schema tmp_dir="" schema_path content_path
+  ext="${path##*.}"
+
+  if [ ! -e "$path" ]; then
+    echo "FAIL $path schema= (file not found)"
+    return 1
   fi
 
+  schema=$(extract_schema "$path")
+
   if [ -z "$schema" ]; then
-    echo "SKIP $path (no \$schema)"
+    echo "SKIP $path # no \$schema"
     return 0
   fi
 
-  # Convert .jsonc/.json5 to .json for validation
+  case "$(basename "$path")" in
+  cspell.json | devcontainer.json) ext=jsonc ;;
+  esac
+
   case "$ext" in
   jsonc | json5)
     if command -v json5 >/dev/null; then
@@ -140,7 +196,7 @@ validate_file() {
     case "$(uname -s)" in
     MINGW* | MSYS* | CYGWIN* | Windows*) ;;
     *)
-      echo "SKIP $path (windows)"
+      echo "SKIP $path # windows-only schema"
       return 0
       ;;
     esac
@@ -194,7 +250,6 @@ validate_schema() {
     fi
     return 1
   fi
-  # Silent exit 0 is valid when SKIP lines are suppressed in non-verbose mode
   if [ -n "$output" ] && ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
     echo "FAIL $1 schema= (unexpected output)" >&2
     return 1
@@ -220,39 +275,37 @@ if [ $# -eq 0 ]; then
   set -- "${files[@]}"
 fi
 
-jobs="${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+jobs="$(default_jobs)"
 
 if [ "$verbosity" -ge 2 ]; then
-  echo "${0##*/}: validating $# files (jobs=$jobs)" >&2
+  echo "$prog: validating $# files (jobs=$jobs)" >&2
 fi
 
 if [ $# -eq 0 ]; then
   if [ "$verbosity" -ge 1 ]; then
-    echo "${0##*/}: no files to validate" >&2
+    echo "$prog: no files to validate" >&2
   fi
   exit 0
+fi
+
+# Pre-flight: invalidate cached schemas whose ETag/Last-Modified shifted upstream
+if [ "$refresh" != true ] && [ -d "$cache_dir/schemas" ]; then
+  for f in "$@"; do
+    extract_schema "$f"
+  done | sort -u | while IFS= read -r url; do
+    if [ -n "$url" ]; then
+      preflight_schema "$url"
+    fi
+  done
 fi
 
 export prog verbosity keep
 # shellcheck disable=SC2016
 results=$(printf '%s\0' "$@" | xargs -0 -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
 
-passed=$(echo "$results" | grep -c '^PASS ' || true)
-failed=$(echo "$results" | grep -c '^FAIL ' || true)
-skipped=$(echo "$results" | grep -c '^SKIP ' || true)
-
-if [ "$verbosity" -ge 2 ]; then
-  echo "$results" | grep -E '^(PASS|FAIL|SKIP) ' || true
+report_collect "$results"
+if [ "$tap" = true ]; then
+  report_tap "$prog"
 else
-  echo "$results" | grep -E '^FAIL ' || true
+  report_human "$prog" "$verbosity"
 fi
-if [ "$failed" -gt 0 ]; then
-  echo "$results" | grep -vE '^(PASS|FAIL|SKIP) ' || true
-fi
-if [ "$verbosity" -ge 1 ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
-  echo "${0##*/}: $passed passed, $failed failed, $skipped skipped" >&2
-fi
-if [ "$failed" -gt 0 ]; then
-  exit 1
-fi
-exit 0

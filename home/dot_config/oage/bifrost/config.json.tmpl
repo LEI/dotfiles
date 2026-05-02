@@ -1,5 +1,3 @@
-{{- $ollamaInCompose := and .features.ollama (eq .os "linux") (not .features.podman) -}}
-{{- $ollamaHost := $ollamaInCompose | ternary "ollama" "host.docker.internal" -}}
 {{- $mlx := false -}}{{- /* disabled: config_store corrupts custom providers (v1.4.14 bug) */ -}}
 {{- $openrouterKey := "" -}}
 {{- $openrouterConf := joinPath .chezmoi.homeDir ".config/secrets.d/openrouter.conf" -}}
@@ -58,7 +56,6 @@
       "config": {
         "default_cache_key": "global",
         "provider": "ollama",
-        "keys": [""],
         "embedding_model": "nomic-embed-text",
         "dimension": 768,
         "ttl": "24h",
@@ -101,16 +98,22 @@
 {{- end }}
 {{- if .features.ollama }}{{ $sep }}
 {{- $sep = "," }}
+{{- $ollamaInCompose := and (eq .os "linux") (not .features.podman) }}
+{{- $ollamaHost := $ollamaInCompose | ternary "ollama" "host.docker.internal" }}
+{{- $ollamaURL := printf "http://%s:%v" $ollamaHost (get .ai.providers "ollama").port }}
     "ollama": {
       "keys": [
         {
           "name": "ollama-local",
           "value": "ollama",
-          "weight": 1
+          "weight": 1,
+          "ollama_key_config": {
+            "url": "{{ $ollamaURL }}"
+          }
         }
       ],
       "network_config": {
-        "base_url": "http://{{ $ollamaHost }}:11434",
+        "base_url": "{{ $ollamaURL }}",
         "default_request_timeout_in_seconds": 120,
         "max_retries": 1
       }

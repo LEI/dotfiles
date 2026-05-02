@@ -52,7 +52,7 @@ setup() {
   printf '{"name":"test"}' >"$file"
 
   run_script ./script/validate-schema --verbose "$file"
-  assert_line "SKIP $file (no \$schema)"
+  assert_line "SKIP $file # no \$schema"
   assert_stderr_line "validate-schema: 0 passed, 0 failed, 1 skipped"
   assert_success
 }
@@ -196,7 +196,7 @@ setup() {
   local file="$BATS_TEST_TMPDIR/config.tmpl"
   printf 'some content' >"$file"
   run_script ./script/validate-schema --verbose "$file"
-  assert_line "SKIP $file (no \$schema)"
+  assert_line "SKIP $file # no \$schema"
   assert_success
 }
 

@@ -9,8 +9,8 @@ setup() {
 # bench
 
 @test "bench: passes through command when disabled" {
-  # shellcheck source=home/dot_config/sh/lib/bench.sh
-  source home/dot_config/sh/lib/bench.sh
+  # shellcheck source=home/dot_local/lib/sh/bench.sh
+  source home/dot_local/lib/sh/bench.sh
   unset SHELL_BENCH
   run bench test-label echo hello
   assert_success
@@ -18,8 +18,8 @@ setup() {
 }
 
 @test "bench: prints timing when enabled" {
-  # shellcheck source=home/dot_config/sh/lib/bench.sh
-  source home/dot_config/sh/lib/bench.sh
+  # shellcheck source=home/dot_local/lib/sh/bench.sh
+  source home/dot_local/lib/sh/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   run --separate-stderr bench test-label echo hello
@@ -29,8 +29,8 @@ setup() {
 }
 
 @test "bench: uses first arg as label" {
-  # shellcheck source=home/dot_config/sh/lib/bench.sh
-  source home/dot_config/sh/lib/bench.sh
+  # shellcheck source=home/dot_local/lib/sh/bench.sh
+  source home/dot_local/lib/sh/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   run --separate-stderr bench custom-label echo ok
@@ -39,8 +39,8 @@ setup() {
 }
 
 @test "bench: preserves command exit code" {
-  # shellcheck source=home/dot_config/sh/lib/bench.sh
-  source home/dot_config/sh/lib/bench.sh
+  # shellcheck source=home/dot_local/lib/sh/bench.sh
+  source home/dot_local/lib/sh/bench.sh
   unset SHELL_BENCH
   run bench test-label false
   assert_failure
@@ -51,24 +51,24 @@ setup() {
 @test "export_env: sources conf and exports variables" {
   local conf="$BATS_TEST_TMPDIR/test.conf"
   printf 'FOO=bar\nBAZ=qux\n' >"$conf"
-  # shellcheck source=home/dot_config/sh/lib/export.sh
-  source home/dot_config/sh/lib/export.sh
+  # shellcheck source=home/dot_local/lib/sh/export.sh
+  source home/dot_local/lib/sh/export.sh
   export_env "$conf"
   assert_equal "bar" "$FOO"
   assert_equal "qux" "$BAZ"
 }
 
 @test "export_env: missing file is silently skipped" {
-  # shellcheck source=home/dot_config/sh/lib/export.sh
-  source home/dot_config/sh/lib/export.sh
+  # shellcheck source=home/dot_local/lib/sh/export.sh
+  source home/dot_local/lib/sh/export.sh
   run export_env "$BATS_TEST_TMPDIR/nonexistent.conf"
   assert_success
   refute_output
 }
 
 @test "export_env: succeeds with no arguments" {
-  # shellcheck source=home/dot_config/sh/lib/export.sh
-  source home/dot_config/sh/lib/export.sh
+  # shellcheck source=home/dot_local/lib/sh/export.sh
+  source home/dot_local/lib/sh/export.sh
   run export_env
   assert_success
 }
@@ -76,8 +76,8 @@ setup() {
 # pathmunge
 
 setup_pathmunge() {
-  # shellcheck source=home/dot_config/sh/lib/pathmunge.sh
-  source home/dot_config/sh/lib/pathmunge.sh
+  # shellcheck source=home/dot_local/lib/sh/pathmunge.sh
+  source home/dot_local/lib/sh/pathmunge.sh
   # Use a controlled PATH so tests are deterministic
   PATH="/usr/bin:/bin"
 }
@@ -105,7 +105,7 @@ setup_pathmunge() {
   pathmunge "$dir"
   local first_path="$PATH"
   run pathmunge "$dir"
-  assert_failure 2
+  assert_success
   [ "$PATH" = "$first_path" ]
 }
 
@@ -135,4 +135,118 @@ setup_pathmunge() {
   setup_pathmunge
   run pathmunge ""
   assert_failure 1
+}
+
+# results
+
+setup_report() {
+  # shellcheck source=home/dot_local/lib/sh/report.sh
+  source home/dot_local/lib/sh/report.sh
+}
+
+@test "report_human: empty input is silent and returns success" {
+  setup_report
+  report_collect ""
+  run --separate-stderr report_human label 1
+  assert_success
+  refute_output
+  refute_stderr
+}
+
+@test "report_human: default verbosity prints FAIL lines and summary" {
+  setup_report
+  report_collect "PASS a
+FAIL b
+SKIP c # reason"
+  run --separate-stderr report_human v 1
+  assert_failure
+  assert_output "FAIL b"
+  assert_stderr_line "v: 1 passed, 1 failed, 1 skipped"
+}
+
+@test "report_human: verbosity 2 prints all PASS/FAIL/SKIP" {
+  setup_report
+  report_collect "PASS a
+FAIL b"
+  run --separate-stderr report_human v 2
+  assert_failure
+  assert_line "PASS a"
+  assert_line "FAIL b"
+}
+
+@test "report_human: verbosity 0 suppresses summary" {
+  setup_report
+  report_collect "PASS a"
+  run --separate-stderr report_human v 0
+  assert_success
+  refute_stderr
+}
+
+@test "report_tap: emits TAP 14 plan and ok/not ok" {
+  setup_report
+  report_collect "PASS a
+FAIL b
+SKIP c # no schema"
+  run report_tap label
+  assert_failure
+  assert_line --index 0 "TAP version 14"
+  assert_line --index 1 "1..3"
+  assert_line "ok 1 - a"
+  assert_line "not ok 2 - b"
+  assert_line "ok 3 - c # SKIP no schema"
+}
+
+@test "report_tap: SKIP without reason emits bare # SKIP" {
+  setup_report
+  report_collect "SKIP only"
+  run report_tap l
+  assert_success
+  assert_line "ok 1 - only # SKIP"
+}
+
+@test "report_tap: diagnostic lines after FAIL emit as # comments" {
+  setup_report
+  report_collect "FAIL bad
+  schema mismatch
+  on line 5"
+  run report_tap l
+  assert_failure
+  assert_line "not ok 1 - bad"
+  assert_line "#   schema mismatch"
+  assert_line "#   on line 5"
+}
+
+# validate
+
+setup_validate() {
+  # shellcheck source=home/dot_local/lib/sh/validate.sh
+  source home/dot_local/lib/sh/validate.sh
+}
+
+@test "default_jobs: returns NPROC override when set" {
+  setup_validate
+  NPROC=42 run default_jobs
+  assert_success
+  assert_output "42"
+}
+
+@test "default_jobs: returns a positive integer without override" {
+  setup_validate
+  unset NPROC
+  run default_jobs
+  assert_success
+  [[ "$output" =~ ^[1-9][0-9]*$ ]]
+}
+
+@test "usage_spec: extracts #USAGE lines stripped of prefix" {
+  local lib="$PWD/home/dot_local/lib/sh/validate.sh"
+  local file="$BATS_TEST_TMPDIR/sample.sh"
+  cat >"$file" <<'EOF'
+#USAGE flag "-x" help="Test"
+#USAGE arg "[file]"
+EOF
+  run bash -c "source '$lib'; usage_spec" "$file"
+  assert_success
+  assert_line 'flag "-x" help="Test"'
+  assert_line 'arg "[file]"'
 }

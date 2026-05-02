@@ -10,7 +10,7 @@ set -Eeuo pipefail
 COVERAGE_OUTPUT="${COVERAGE_OUTPUT:-./coverage}"
 
 coverage() {
-  local dir="$TEST_TMPDIR/.chezmoiscripts,home/dot_config/sh/lib,home/dot_local/bin,script"
+  local dir="$TEST_TMPDIR/.chezmoiscripts,home/dot_local/lib/sh,home/dot_local/bin,script"
 
   local kcov_args=(
     --clean

@@ -9,6 +9,9 @@
 
 set -euo pipefail
 
+# shellcheck source=home/dot_local/lib/sh/validate.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/validate.sh"
+
 # PATH="$PATH:$HOME/.local/bin"
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -77,16 +80,7 @@ main() {
   fi
 
   # chezmoi.bats uses BATS_NO_PARALLELIZE_WITHIN_FILE due to chezmoi state lock
-  local jobs
-  if [ -n "${TEST_JOBS:-}" ]; then
-    jobs="$TEST_JOBS"
-  elif command -v nproc >/dev/null; then
-    jobs=$(nproc)
-  elif command -v sysctl >/dev/null; then
-    jobs=$(sysctl -n hw.ncpu)
-  else
-    jobs=4
-  fi
+  local jobs="${TEST_JOBS:-$(default_jobs)}"
   local has_path=false
   for arg in "$@"; do
     case "$arg" in -*) ;; *) [ -e "$arg" ] && has_path=true && break ;; esac

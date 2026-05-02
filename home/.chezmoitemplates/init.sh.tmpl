@@ -20,7 +20,7 @@ done
 unset _conf
 
 {{ includeTemplate ".profile.tmpl" . | trim }}
-source "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+source "$HOME/.local/lib/sh/bench.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"

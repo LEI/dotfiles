@@ -1,8 +1,8 @@
 #!/bin/sh
 # Shared preamble for chezmoi scripts
 
-# shellcheck source=home/dot_config/sh/lib/common.sh
-. "${CHEZMOI_WORKING_TREE-}/home/dot_config/sh/lib/common.sh"
+# shellcheck source=home/dot_local/lib/sh/common.sh
+. "${CHEZMOI_WORKING_TREE-}/home/dot_local/lib/sh/common.sh"
 
 # Collapsed OS identifier: id_like or id or os, android for termux
 OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"

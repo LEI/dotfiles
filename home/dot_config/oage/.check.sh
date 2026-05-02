@@ -8,7 +8,7 @@ if ((BASH_VERSINFO[0] < 5)); then
 fi
 
 # shellcheck disable=SC1091
-. "${XDG_CONFIG_HOME:-$HOME/.config}/sh/lib/tap.sh"
+. "$HOME/.local/lib/sh/tap.sh"
 
 # Oage check
 

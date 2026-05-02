@@ -9,13 +9,15 @@
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+# shellcheck source=home/dot_local/lib/sh/validate.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/validate.sh"
+
+require_bash 4
+
+prog="${0##*/}"
 
 if ! command -v usage >/dev/null; then
-  echo "${0##*/}: usage command not found" >&2
+  echo "$prog: usage command not found" >&2
   exit 1
 fi
 
@@ -36,15 +38,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: validate-usage [-l] [-q] [-v] [file...]"
-    fi
+    usage_help "[-l] [-q] [-v] [files...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   --)
@@ -52,7 +50,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "${0##*/}: unknown option: $1" >&2
+    echo "$prog: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -148,6 +146,6 @@ if [ "$verbosity" -ge 1 ]; then
   if [ "$warnings" -gt 0 ]; then
     summary="$summary, $warnings warnings"
   fi
-  echo "${0##*/}: $summary" >&2
+  echo "$prog: $summary" >&2
 fi
 exit "$((errors > 0))"

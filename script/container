@@ -9,8 +9,8 @@
 
 set -euo pipefail
 
-# shellcheck source=home/dot_config/sh/lib/common.sh
-. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_config/sh/lib/common.sh"
+# shellcheck source=home/dot_local/lib/sh/common.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/common.sh"
 
 if ((BASH_VERSINFO[0] < 4)); then
   echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2
@@ -121,8 +121,8 @@ container_exec_mise() {
       echo "container: warning: BASH ($BASH) != SHELL ($SHELL)" >&2
       export SHELL="$BASH"
     fi
-    source ~/.config/sh/lib/export.sh
-    source ~/.config/sh/lib/pathmunge.sh
+    source ~/.local/lib/sh/export.sh
+    source ~/.local/lib/sh/pathmunge.sh
     export_env ~/.config/environment.d/*.conf
     source ~/.config/sh/environment.sh
     source ~/.config/mise/init.sh

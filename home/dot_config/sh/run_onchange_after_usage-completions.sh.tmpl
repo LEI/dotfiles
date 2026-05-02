@@ -89,7 +89,7 @@ usage_generate_completion() {
     echo "${0##*/}: no #USAGE directive in $file" >&2
     return 1
   fi
-  log "generating $name"
+  truthy "${CHEZMOI_VERBOSE:-}" && log "generating $name"
   generated+=("$name")
 {{- if .features.bash }}
   usage generate completion bash "$name" --file - <<<"$spec" >|"$bash_dir/$name" || rc=1
@@ -115,6 +115,7 @@ generated=()
 {{- range $dict | keys | sortAlpha }}
 usage_generate_completion {{ . | quote }} {{ (get (get $dict .) "path") | quote }}
 {{- end }}
+log "generated ${#generated[@]} completions"
 
 # Warn about stale completions
 warn_stale() {

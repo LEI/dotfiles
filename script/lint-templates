@@ -9,6 +9,12 @@
 
 set -euo pipefail
 
+# shellcheck source=home/dot_local/lib/sh/validate.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/validate.sh"
+
+require_bash 4
+
+prog="${0##*/}"
 repo_dir="$PWD"
 render_dir=$(mktemp -d)
 render_args=()
@@ -31,15 +37,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: lint [-k] [-q] [-v] [templates...]"
-    fi
+    usage_help "[-k] [-q] [-v] [templates...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   --)
@@ -47,7 +49,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "${0##*/}: unknown option: $1" >&2
+    echo "$prog: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -65,10 +67,10 @@ fi
 # shellcheck disable=SC2329
 cleanup() {
   if [ "$keep" = true ]; then
-    echo "${0##*/}: render dir kept: $render_dir" >&2
+    echo "$prog: render dir kept: $render_dir" >&2
   else
     if [ "$verbosity" -ge 2 ]; then
-      echo "${0##*/}: cleanup $render_dir" >&2
+      echo "$prog: cleanup $render_dir" >&2
     fi
     rm -rf "$render_dir"
   fi
@@ -84,7 +86,7 @@ chezmoi-render --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 find "$render_dir" -type f -empty -delete
 
 if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
-  echo "${0##*/}: no rendered files" >&2
+  echo "$prog: no rendered files" >&2
   exit 0
 fi
 
@@ -112,6 +114,6 @@ prek run \
   --all-files || exit_code=$?
 
 if [ "$exit_code" -ne 0 ] && [ "$verbosity" -ge 1 ]; then
-  echo "${0##*/}: failed with exit code $exit_code" >&2
+  echo "$prog: failed with exit code $exit_code" >&2
 fi
 exit "$exit_code"
