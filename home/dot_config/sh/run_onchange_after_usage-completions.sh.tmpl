@@ -36,12 +36,11 @@
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+source "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+require_bash 4
 
 {{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
 

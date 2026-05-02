@@ -9,9 +9,9 @@
 
 set -euo pipefail
 
-script_dir="${BASH_SOURCE[0]%/*}"
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/bash/validate.sh
-source "$script_dir/../home/dot_local/lib/bash/validate.sh"
+source "$lib_dir/bash/validate.sh"
 
 require_bash 4
 

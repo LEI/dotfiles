@@ -1,9 +1,10 @@
 # shellcheck shell=bash
 
+lib_dir="${BASH_SOURCE[0]%/*}/.."
 # shellcheck source=home/dot_local/lib/bash/log.sh
-source "${BASH_SOURCE[0]%/*}/log.sh"
+source "$lib_dir/bash/log.sh"
 # shellcheck source=home/dot_local/lib/sh/clamp.sh
-source "${BASH_SOURCE[0]%/*}/../sh/clamp.sh"
+source "$lib_dir/sh/clamp.sh"
 
 # Get CPU count from system, respecting NPROC override
 get_cpu_count() {

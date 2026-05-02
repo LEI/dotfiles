@@ -21,7 +21,7 @@ done
 unset _conf
 
 {{ includeTemplate ".profile.tmpl" . | trim }}
-source "$HOME/.local/lib/bash/bench.sh"
+source "$lib_dir/bash/bench.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"

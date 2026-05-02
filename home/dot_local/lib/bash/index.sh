@@ -4,6 +4,6 @@
 for _f in "${BASH_SOURCE[0]%/*}"/*.sh; do
   [ "$_f" = "${BASH_SOURCE[0]}" ] && continue
   # shellcheck source=/dev/null
-  . "$_f"
+  source "$_f"
 done
 unset _f

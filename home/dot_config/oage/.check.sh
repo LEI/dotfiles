@@ -2,13 +2,13 @@
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 5)); then
-  echo "bash 5+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
-
+lib_dir="$HOME/.local/lib"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
 # shellcheck source=home/dot_local/lib/sh/tap.sh
-. "$HOME/.local/lib/sh/tap.sh"
+source "$lib_dir/sh/tap.sh"
+
+require_bash 5
 
 # Oage check
 

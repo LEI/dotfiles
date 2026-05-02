@@ -1,7 +1,8 @@
 # shellcheck shell=bash
 
+lib_dir="${BASH_SOURCE[0]%/*}/.."
 # shellcheck source=home/dot_local/lib/bash/require.sh
-source "${BASH_SOURCE[0]%/*}/require.sh"
+source "$lib_dir/bash/require.sh"
 
 # Render --help via the `usage` tool, falling back to "Usage: <prog> [args...]"
 usage_help() {

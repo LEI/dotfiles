@@ -24,8 +24,9 @@ case "${1:-}" in
   ;;
 esac
 
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/bash/bench.sh
-source "${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash/bench.sh"
+source "$lib_dir/bash/bench.sh"
 
 shell="${1:-${SHELL##*/}}"
 

@@ -1,7 +1,8 @@
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-. "$HOME/.local/lib/sh/export.sh"
-. "$HOME/.local/lib/bash/pathmunge.sh"
+lib_dir="$HOME/.local/lib"
+. "$lib_dir/sh/export.sh"
+. "$lib_dir/bash/pathmunge.sh"
 
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
