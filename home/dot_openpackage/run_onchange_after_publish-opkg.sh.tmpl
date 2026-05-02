@@ -1,5 +1,6 @@
 {{- if and (or .features.claude .features.opencode) (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
+# marketplace packages: {{ .claude.marketplaces | toJson | sha256sum }}
 
 {{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
 {{- $hashes := list -}}
@@ -64,6 +65,24 @@ install_package() {
 
 install_package "local" "{{ .chezmoi.homeDir }}/.openpackage/packages/local"
 
+# Discover packages from marketplace paths
+{{- if hasKey .claude "marketplaces" }}
+{{-   range $mktName, $mkt := .claude.marketplaces }}
+{{-     $path := get $mkt "path" }}
+{{-     if $path }}
+{{-       $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" }}
+{{-       if stat $packagesRoot }}
+{{-         range glob (joinPath $packagesRoot "*") }}
+{{-           $pkgName := base . }}
+{{-           if ne $pkgName "local" }}
+install_package {{ $pkgName | quote }} {{ . | quote }}
+{{-           end }}
+{{-         end }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
 # Trash install dirs left by an opkg package no longer managed
 purge_install() {
   name="$1"
@@ -77,8 +96,26 @@ purge_install() {
   done
 }
 
-# Repo owns global opkg install: anything in registry not in managed list is stale
+# Build managed packages list (local + marketplace packages)
 managed=" local "
+{{- if hasKey .claude "marketplaces" }}
+{{-   range $mktName, $mkt := .claude.marketplaces }}
+{{-     $path := get $mkt "path" }}
+{{-     if $path }}
+{{-       $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" }}
+{{-       if stat $packagesRoot }}
+{{-         range glob (joinPath $packagesRoot "*") }}
+{{-           $pkgName := base . }}
+{{-           if ne $pkgName "local" }}
+managed="$managed {{ $pkgName }} "
+{{-           end }}
+{{-         end }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
+# Repo owns global opkg install: anything in registry not in managed list is stale
 registry_dir="$HOME/.openpackage/registry"
 if [ -d "$registry_dir" ]; then
   for entry in "$registry_dir"/*; do
