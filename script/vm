@@ -15,6 +15,11 @@ set -euo pipefail
 script_dir="${BASH_SOURCE[0]%/*}"
 # shellcheck source=home/dot_local/lib/bash/log.sh
 source "$script_dir/../home/dot_local/lib/bash/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$script_dir/../home/dot_local/lib/bash/require.sh"
+
+require_bash 4
+err_trap
 
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in

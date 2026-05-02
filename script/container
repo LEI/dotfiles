@@ -16,6 +16,7 @@ source "$lib_dir/bash/log.sh"
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
+err_trap
 
 : "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"

@@ -7,7 +7,7 @@ ai:
   # See .chezmoi.yaml.tmpl for computed active flags and service type
   #
   # dot_config/caddy: reverse proxy from domain + port
-  # dot_config/goss: health check via addr + port + http
+  # dot_config/goss: liveness check via addr + port + http
   # dot_config/opencode/opencode.jsonc: local provider blocks
   # dot_config/oage/bifrost/config.json: mlx-lm port
   # dot_config/oage/compose.yaml: mlx-lm and ollama port

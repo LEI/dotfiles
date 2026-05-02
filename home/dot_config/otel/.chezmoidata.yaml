@@ -3,6 +3,7 @@ services:
   process-exporter:
     active: true
     feature: otel
+    host: 0.0.0.0
     liveness: /metrics
     port: 9256
     unit: process-exporter

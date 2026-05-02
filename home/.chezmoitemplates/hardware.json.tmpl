@@ -39,14 +39,22 @@
 {{- $cpuCores := 1 }}
 {{- $cpuThreads := 1 }}
 {{- if eq .chezmoi.os "darwin" }}
-{{-   $cpuCores = output "sysctl" "-n" "hw.physicalcpu_max" | trim | int }}
-{{-   $cpuThreads = output "sysctl" "-n" "hw.logicalcpu_max" | trim | int }}
+{{-   $cpuStats := without (output "sysctl" "-n" "hw.physicalcpu_max" "hw.logicalcpu_max" | trim | splitList "\n") "" }}
+{{-   $cpuCores = index $cpuStats 0 | int }}
+{{-   $cpuThreads = index $cpuStats 1 | int }}
 {{- else if eq .chezmoi.os "linux" }}
-{{-   $cpuCores = output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | sort --field-separator=',' --key='2,4' --unique | wc --lines" | trim | int }}
-{{-   $cpuThreads = output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | wc --lines" | trim | int }}
+{{-   $lscpuLines := without (output "sh" "-c" "lscpu --online --parse | grep -v '^#'" | trim | splitList "\n") "" }}
+{{-   $coreKeys := list }}
+{{-   range $lscpuLines }}
+{{-     $f := splitList "," . }}
+{{-     $coreKeys = append $coreKeys (printf "%s,%s" (index $f 1) (index $f 2)) }}
+{{-   end }}
+{{-   $cpuCores = $coreKeys | sortAlpha | uniq | len }}
+{{-   $cpuThreads = len $lscpuLines }}
 {{- else if eq .chezmoi.os "windows" }}
-{{-   $cpuCores = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfCores" | trim | int }}
-{{-   $cpuThreads = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfLogicalProcessors" | trim | int }}
+{{-   $cpuStats := output "powershell" "-NoProfile" "-NonInteractive" "-Command" "$p=Get-CimInstance Win32_Processor;\"$($p.NumberOfCores) $($p.NumberOfLogicalProcessors)\"" | trim | splitList " " }}
+{{-   $cpuCores = index $cpuStats 0 | int }}
+{{-   $cpuThreads = index $cpuStats 1 | int }}
 {{- end }}
 
 {{- $gpuVendor := "none" }}
@@ -88,9 +96,10 @@
 
 {{- $memGiB := 0 }}
 {{- if eq .chezmoi.os "linux" }}
-{{-   $memGiB = output "awk" "/MemTotal/{print int($2/1024/1024)}" "/proc/meminfo" | trim | int }}
+{{-   $memKiB := output "sh" "-c" "grep '^MemTotal:' /proc/meminfo" | regexFind "[0-9]+" }}
+{{-   $memGiB = div $memKiB (mul 1024 1024) }}
 {{- else if eq .chezmoi.os "darwin" }}
-{{-   $memGiB = output "sh" "-c" "sysctl -n hw.memsize | awk '{print int($1/1024/1024/1024)}'" | trim | int }}
+{{-   $memGiB = div (output "sysctl" "-n" "hw.memsize" | trim) (mul 1024 1024 1024) }}
 {{- else if eq .chezmoi.os "windows" }}
 {{-   $memGiB = output "powershell" "-NoProfile" "-Command" "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)" | trim | int }}
 {{- end }}

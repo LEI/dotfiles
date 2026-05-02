@@ -7,10 +7,15 @@
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash"
+# shellcheck source=home/dot_local/lib/bash/log.sh
+source "$lib_dir/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/require.sh"
+# shellcheck source=home/dot_local/lib/bash/usage.sh
+source "$lib_dir/usage.sh"
+
+require_bash 4
 
 script_dir="${BASH_SOURCE[0]%/*}"
 
@@ -21,16 +26,12 @@ while [ $# -gt 0 ]; do
     exit 0
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: validate-blank [-l] [files...]"
-    fi
-    exit 0
+    usage_help "[-l] [files...]"
+    exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
-    exit 0
+    usage_spec
+    exit
     ;;
   --)
     shift

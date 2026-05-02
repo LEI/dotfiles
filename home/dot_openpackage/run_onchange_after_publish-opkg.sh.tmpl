@@ -30,7 +30,7 @@ set -eu
 . "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
 
 opkg() {
-  command opkg "$@" </dev/null
+  command opkg "$@" | cat
 }
 
 opkg_installed() {

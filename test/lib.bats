@@ -263,14 +263,14 @@ setup_parallel() {
 
 # validate
 
-setup_validate() {
-  # shellcheck source=home/dot_local/lib/bash/validate.sh
-  source home/dot_local/lib/bash/validate.sh
+setup_usage() {
+  # shellcheck source=home/dot_local/lib/bash/usage.sh
+  source home/dot_local/lib/bash/usage.sh
 }
 
 @test "usage_spec: extracts #USAGE lines stripped of prefix" {
-  setup_validate
-  local lib="$PWD/home/dot_local/lib/bash/validate.sh"
+  setup_usage
+  local lib="$PWD/home/dot_local/lib/bash/usage.sh"
   local file="$BATS_TEST_TMPDIR/sample.sh"
   cat >"$file" <<'EOF'
 #USAGE flag "-x" help="Test"

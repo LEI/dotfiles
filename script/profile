@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# TODO: require awk
 #MISE description="Profile shell init with zprof (zsh) or xtrace (bash)"
 #USAGE arg "[shell]" help="Shell to profile (default: current shell)" {
 #USAGE   choices "bash" "zsh"
@@ -14,6 +13,10 @@ source "$lib_dir/bash/log.sh"
 source "$lib_dir/bash/require.sh"
 err_trap
 require_bash 5
+if ! command -v awk >/dev/null; then
+  log "awk is required"
+  exit 1
+fi
 
 case "${1:-}" in
 -h | --help)
