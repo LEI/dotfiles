@@ -22,6 +22,8 @@
 {{- end -}}
 {{- range $name, $svc := get . "services" | default dict -}}
 {{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end -}}
+{{- if and (eq $.os "darwin") (not (get $svc "label")) }}{{ continue }}{{ end -}}
+{{- if and (eq $.os "linux") (not (get $svc "unit")) }}{{ continue }}{{ end -}}
 {{- $probe := includeTemplate "probe.yaml.tmpl" (dict
   "probe" (get $svc "liveness")
   "port" (get $svc "port")) | fromYaml -}}
@@ -35,6 +37,7 @@
 http:
 {{- range $name, $check := $checks }}
   {{ $check.url }}:
+    title: {{ $name }}
 {{- $status := get $check "status" | default 200 }}
     status: {{ $status }}
     timeout: 5000

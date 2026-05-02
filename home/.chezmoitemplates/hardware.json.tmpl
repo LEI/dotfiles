@@ -3,8 +3,12 @@
 {{- $chassisTypeStr := "desktop" }}
 
 {{- if eq .chezmoi.os "linux" }}
-{{-   $sysVendor = include "/sys/class/dmi/id/board_vendor" | trim | lower }}
-{{-   $chassisType = include "/sys/class/dmi/id/chassis_type" | trim }}
+{{-   if stat "/sys/class/dmi/id/board_vendor" }}
+{{-     $sysVendor = include "/sys/class/dmi/id/board_vendor" | trim | lower }}
+{{-   end }}
+{{-   if stat "/sys/class/dmi/id/chassis_type" }}
+{{-     $chassisType = include "/sys/class/dmi/id/chassis_type" | trim }}
+{{-   end }}
 {{- else if eq .chezmoi.os "darwin" }}
 {{-   $sysVendor = "apple" }}
 {{-   if contains "MacBook" (output "sysctl" "-n" "hw.model") }}

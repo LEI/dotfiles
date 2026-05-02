@@ -1,23 +1,36 @@
 {{- $probe := get . "probe" -}}
+{{- $proto := get . "proto" | default "http" -}}
+{{- $host := get . "host" | default "localhost" -}}
 {{- $port := get . "port" -}}
 {{- $code := get . "statusCode" | default 200 -}}
 {{- $auth := "" -}}
-{{- $url := "" -}}
+{{- $retries := 10 -}}
+{{- $delay := 3 -}}
+{{- $path := "" -}}
 {{- if kindIs "map" $probe -}}
+{{-   if get $probe "proto" }}{{- $proto = get $probe "proto" -}}{{- end -}}
+{{-   if get $probe "host" }}{{- $host = get $probe "host" -}}{{- end -}}
 {{-   if get $probe "port" }}{{- $port = get $probe "port" -}}{{- end -}}
 {{-   if get $probe "statusCode" }}{{- $code = get $probe "statusCode" -}}{{- end -}}
 {{-   if get $probe "auth" }}{{- $auth = get $probe "auth" -}}{{- end -}}
-{{-   $path := get $probe "path" | default "/" | toString -}}
-{{-   if hasPrefix "/" $path -}}{{- $url = printf "http://localhost:%v%s" $port $path -}}{{- end -}}
+{{-   if get $probe "retries" }}{{- $retries = get $probe "retries" -}}{{- end -}}
+{{-   if get $probe "delay" }}{{- $delay = get $probe "delay" -}}{{- end -}}
+{{-   $path = get $probe "path" | default "/" | toString -}}
 {{- else -}}
-{{-   $path := $probe | toString -}}
-{{-   if and $port (eq $path "true") -}}{{- $url = printf "http://localhost:%v" $port -}}
-{{-   else if and $port (hasPrefix "/" $path) -}}{{- $url = printf "http://localhost:%v%s" $port $path -}}
+{{-   $p := $probe | toString -}}
+{{-   if eq $p "true" -}}{{- $path = "/" -}}
+{{-   else if hasPrefix "/" $p -}}{{- $path = $p -}}
 {{-   end -}}
+{{- end -}}
+{{- $url := "" -}}
+{{- if and $port (hasPrefix "/" $path) -}}
+{{-   $url = printf "%s://%s:%v%s" $proto $host $port $path -}}
 {{- end -}}
 ---
 statusCode: {{ $code }}
 url: {{ $url | quote }}
+retries: {{ $retries }}
+delay: {{ $delay }}
 {{- if $auth }}
 auth: {{ $auth | quote }}
 {{- end }}

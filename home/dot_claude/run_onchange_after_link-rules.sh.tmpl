@@ -7,13 +7,13 @@
 {{-   if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
 {{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
 {{-     $pkgName := base $pkgDir -}}
-{{-     $rulesDir := joinPath $pkgDir "rules" $pkgName -}}
+{{-     $rulesDir := joinPath $pkgDir "rules" -}}
 {{-     if stat $rulesDir -}}
 {{-       $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
-{{- if not $rules -}}
+{{- if $rules -}}
 #!/bin/sh
 # rules: {{ $rules | toJson | sha256sum }}
 

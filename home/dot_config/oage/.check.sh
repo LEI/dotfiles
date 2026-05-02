@@ -145,8 +145,7 @@ check "embeddings" \
   "{\"model\": \"$embed_model\", \"input\": \"test\"}"
 
 # Restart hung services on failure (KeepAlive restarts them)
-# shellcheck disable=SC2154 # failures is set by tap.sh
-if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
+if [[ "$TAP_FAILS" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   gui="gui/$(id -u)"
   # shellcheck disable=SC2016
   label="$(jqr --arg p "$local_provider" '.ai.providers[$p].label')"
@@ -156,4 +155,4 @@ if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   fi
 fi
 
-exit "$failures"
+exit "$TAP_FAILS"

@@ -6,14 +6,14 @@
 {{- end -}}
 {{- if $liveness.url }}
 
-if ! run retry 10 3 http_check {{ $liveness.url }} {{ $liveness.statusCode }}
+if ! run retry {{ $liveness.retries }} {{ $liveness.delay }} http_check {{ $liveness.url }} {{ $liveness.statusCode }}
   {{- if hasKey $liveness "auth" }} "{{ $liveness.auth }}"{{ end }}; then
   die "{{ $name }}: unhealthy after retries"
 fi
 {{- end }}
 {{- if $readiness.url }}
 
-if ! run retry 10 3 http_check {{ $readiness.url }} {{ $readiness.statusCode }}
+if ! run retry {{ $readiness.retries }} {{ $readiness.delay }} http_check {{ $readiness.url }} {{ $readiness.statusCode }}
   {{- if hasKey $readiness "auth" }} "{{ $readiness.auth }}"{{ end }}; then
   die "{{ $name }}: not ready after retries"
 fi

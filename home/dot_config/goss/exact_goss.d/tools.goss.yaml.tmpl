@@ -34,7 +34,6 @@ matching:
 command:
 
   jq:
-    title: Verify jq is installed
     {{- if eq .osIDLike "debian" "fedora" }}
     exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" jq --version'
     {{- else }}
@@ -44,7 +43,6 @@ command:
     timeout: 2000
 
   yq:
-    title: Verify yq is installed
     {{- if eq .osIDLike "debian" "fedora" }}
     exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" yq --version'
     {{- else }}
