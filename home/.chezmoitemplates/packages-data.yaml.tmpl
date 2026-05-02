@@ -82,27 +82,27 @@ aur: {{ $aurPackages | toJson }}
 {{-     if and (get $taps $name) (get (get $taps $name) "options") -}}
 {{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $taps $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $taps $name (dict "options" $options) }}
+{{-     $_ := set $taps $name (merge (dict "options" $options) (get $taps $name | default dict)) }}
 {{-   else if eq $type "brew" }}
 {{-     if and (get $brewPackages $name) (get (get $brewPackages $name) "options") -}}
 {{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $brewPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $brewPackages $name (dict "options" $options) }}
+{{-     $_ := set $brewPackages $name (merge (dict "options" $options) (get $brewPackages $name | default dict)) }}
 {{-   else if eq $type "cask" }}
 {{-     if and (get $caskPackages $name) (get (get $caskPackages $name) "options") -}}
 {{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $caskPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $caskPackages $name (dict "options" $options) }}
+{{-     $_ := set $caskPackages $name (merge (dict "options" $options) (get $caskPackages $name | default dict)) }}
 {{-   else if eq $type "mas" }}
 {{-     if and (get $masPackages $name) (get (get $masPackages $name) "options") -}}
 {{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $masPackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $masPackages $name (dict "options" $options) }}
+{{-     $_ := set $masPackages $name (merge (dict "options" $options) (get $masPackages $name | default dict)) }}
 {{-   else if eq $type "vscode" }}
 {{-     if and (get $vscodePackages $name) (get (get $vscodePackages $name) "options") -}}
 {{-       warnf "Overriding %s options: %s (%s -> %s)" $type $name (get (get $vscodePackages $name) "options") $options -}}
 {{-     end -}}
-{{-     $_ := set $vscodePackages $name (dict "options" $options) }}
+{{-     $_ := set $vscodePackages $name (merge (dict "options" $options) (get $vscodePackages $name | default dict)) }}
 {{-   end }}
 {{- end }}
 tap: {{ $taps | toJson }}

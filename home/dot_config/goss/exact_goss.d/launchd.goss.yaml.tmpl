@@ -24,4 +24,16 @@ command:
     timeout: 3000
 {{-   end }}
 {{- end }}
+{{- /* Brew services with restart_service set; system flag selects launchd domain */ -}}
+{{- range $name, $pkg := .packages.brew }}
+{{-   $rs := get $pkg "restart_service" }}
+{{-   if not $rs }}{{ continue }}{{ end }}
+{{-   if eq (printf "%v" $rs) "false" }}{{ continue }}{{ end }}
+{{-   $domain := get $pkg "system" | default false | ternary "system" (printf "gui/$(id -u)") }}
+  launchd-{{ $name }}:
+    title: {{ $name }} brew service
+    exec: launchctl print {{ $domain }}/homebrew.mxcl.{{ $name }} 2>/dev/null | grep -q 'pid ='
+    exit-status: 0
+    timeout: 3000
+{{- end }}
 {{ end -}}
