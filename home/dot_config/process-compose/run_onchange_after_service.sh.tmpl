@@ -1,7 +1,7 @@
 {{- if .features.processCompose -}}
 {{- $name := "process-compose" -}}
 {{- $svc := get .services $name -}}
-{{- $site := get (get .caddy.sites "processCompose") $name -}}
+{{- $site := get .caddy.sites $name -}}
 #!/bin/sh
 
 set -eu

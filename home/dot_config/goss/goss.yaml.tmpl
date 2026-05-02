@@ -38,6 +38,7 @@ addr:
 {{- if .features.ai }}
 {{-   range $name, $provider := .ai.providers }}
 {{-     if not (hasKey $provider "port") }}{{ continue }}{{ end }}
+{{-     if and (hasKey $.features $name) (not (get $.features $name)) }}{{ continue }}{{ end }}
 {{-     $active := hasKey $provider "active" | ternary (get $provider "active") false }}
   127.0.0.1:{{ $provider.port }}:
     title: {{ $name }} ({{ $active | ternary "active" "inactive" }})

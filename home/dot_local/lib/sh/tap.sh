@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=sh
 
 # TAP version 14 helpers
 # https://testanything.org/tap-version-14-specification.html
@@ -9,10 +9,10 @@
 #   tap_ok "first test"
 #   tap_not_ok "second test"
 #   tap_ok "third test" "SKIP not supported"
-#   exit "$failures"
+#   exit "$TAP_FAILS"
 
-test_num=0
-failures=0
+TAP_COUNT=0
+TAP_FAILS=0
 
 tap_plan() {
   if [ "$1" -eq 0 ] && [ $# -gt 1 ]; then
@@ -27,21 +27,21 @@ tap_bail() {
 }
 
 tap_ok() {
-  test_num=$((test_num + 1))
+  TAP_COUNT=$((TAP_COUNT + 1))
   if [ $# -gt 1 ]; then
-    printf 'ok %d - %s # %s\n' "$test_num" "$1" "$2"
+    printf 'ok %d - %s # %s\n' "$TAP_COUNT" "$1" "$2"
   else
-    printf 'ok %d - %s\n' "$test_num" "$1"
+    printf 'ok %d - %s\n' "$TAP_COUNT" "$1"
   fi
 }
 
 tap_not_ok() {
-  test_num=$((test_num + 1))
-  failures=$((failures + 1))
+  TAP_COUNT=$((TAP_COUNT + 1))
+  TAP_FAILS=$((TAP_FAILS + 1))
   if [ $# -gt 1 ]; then
-    printf 'not ok %d - %s # %s\n' "$test_num" "$1" "$2"
+    printf 'not ok %d - %s # %s\n' "$TAP_COUNT" "$1" "$2"
   else
-    printf 'not ok %d - %s\n' "$test_num" "$1"
+    printf 'not ok %d - %s\n' "$TAP_COUNT" "$1"
   fi
 }
 

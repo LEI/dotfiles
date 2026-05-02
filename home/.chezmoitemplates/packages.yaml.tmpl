@@ -180,6 +180,22 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # foot:
   #   enabled: {{ and .features.sway (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
+
+  # alias framework_tool="sudo $(brew --prefix)/bin/framework_tool"
+  framework-tool:
+    enabled: {{ and (eq .hardware.system.vendor "framework") (not .container) }}
+    nameOverwrite:
+      arch: framework-system
+      # cargo: framework_tool # --locked
+      cask: ublue-os/homebrew-tap/framework-tool
+      debian: rust-framework-tool
+      # dnf: framework-system
+      # emerge: framework_tool
+      # mise: github:FrameworkComputer/framework-system # FIXME: downloads .deb
+      # nix: framework-tool
+      zypper: framework_tool
+    type: '{{ eq .osIDLike "fedora" | ternary "cask" nil }}'
+
   envx:
     enabled: {{ and (eq .osIDLike "arch") (not (or .ephemeral .headless)) }}
     nameOverwrite:

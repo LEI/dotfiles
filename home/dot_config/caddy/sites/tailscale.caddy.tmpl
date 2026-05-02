@@ -4,14 +4,12 @@
 # TODO: exclude opencode and sites that can't configure base path
 http://{{ .tailscale.tailnet }} {
 	import common
-	{{- range $feat, $sites := .caddy.sites }}
-	{{- if not (get $.features $feat) }}{{ continue }}{{ end }}
-	{{- range $name, $s := $sites }}
+	{{- range $name, $s := .caddy.sites }}
+	{{- if not (get $.features (get $s "feature")) }}{{ continue }}{{ end }}
 
 	handle_path /{{ $name }}* {
 		reverse_proxy localhost:{{ $s.port }}
 	}
-	{{- end }}
 	{{- end }}
 }
 {{ end -}}

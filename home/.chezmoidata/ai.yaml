@@ -19,20 +19,20 @@ ai:
     # Local
     llama-server:
       api: openai
-      health: /health
+      liveness: /health
       label: com.llama-cpp.server
       port: 11437
       domain: llama-cpp.test
     mlx-embed:
       api: openai
-      health: /v1/models
+      liveness: /v1/models
       label: com.mlx-embed.server
       server: mlx-openai-server
       port: 11445
     mlx-lm:
       api: openai
       body: '{"object": "list"'
-      health: /v1/models
+      liveness: /v1/models
       label: com.mlx-lm.server
       # server: mlx_lm.server, mlx-omni-server, mlx-openai-server
       server: mlx_lm.server
@@ -42,12 +42,12 @@ ai:
       api: ollama
       port: 11434
       domain: ollama.test
-      health: /
+      liveness: /
       caddy:
         header_up: Host localhost
     vllm-mlx:
       api: openai
-      health: /v1/models
+      liveness: /v1/models
       port: 11436
       domain: vllm-mlx.test
 
@@ -82,8 +82,8 @@ ai:
       api: openai
       base_url: https://api.z.ai/api/coding/paas/v4
       env: ZAI_API_KEY
-    # Built-in providers (no config needed, referenced in profiles only):
-    # opencode, opencode-go
+      # Built-in providers (no config needed, referenced in profiles only):
+      # opencode, opencode-go
 
   # Model: shared metadata and per-provider IDs
   # type: chat (generation) or embedding
@@ -131,14 +131,14 @@ ai:
         reasoning_tags:
           - "<|channel>thought"
           - "<channel|>"
-    # qwen3-coder-30b:
-    #   type: chat
-    #   context: 262144
-    #   output: 65536
-    #   reasoning: true
-    #   tool_call: true
-    #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
-    #   ollama: qwen3-coder:30b-a3b-q4_K_M
+          # qwen3-coder-30b:
+          #   type: chat
+          #   context: 262144
+          #   output: 65536
+          #   reasoning: true
+          #   tool_call: true
+          #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
+          #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
   # Profile: named set of role-to-model mappings
   # Roles: chat, coding, embedding, fast, reasoning

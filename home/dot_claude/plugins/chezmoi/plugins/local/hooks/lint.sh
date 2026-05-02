@@ -47,8 +47,8 @@ lint() {
 }
 
 lint
-rc=$?
-if [ "$rc" -ne 0 ]; then
-  echo "lint: $(basename "$FILE") failed (exit $rc)" >&2
+exit_code=$?
+if [ "$exit_code" -ne 0 ]; then
+  echo "lint: $(basename "$FILE") failed (exit $exit_code)" >&2
   exit 2
 fi

@@ -32,13 +32,11 @@ fi
 valet_dir="$HOME/.config/valet"
 if pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
   msg "Valet detected; configuring .test proxies via nginx instead of caddy"
-  {{- range $feat, $sites := .caddy.sites }}
-  {{- if not (get $.features $feat) }}{{ continue }}{{ end }}
-  {{- range $name, $s := $sites }}
-  if ! grep -q 'proxy_pass http://localhost:{{ $s.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
-    run valet proxy {{ $name }} http://localhost:{{ $s.port }} --secure
+  {{- range $name, $site := .caddy.sites }}
+  {{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end }}
+  if ! grep -q 'proxy_pass http://localhost:{{ $site.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
+    run valet proxy {{ $name }} http://localhost:{{ $site.port }} --secure
   fi
-  {{- end }}
   {{- end }}
   {{- range $name, $provider := .ai.providers }}
   {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
@@ -70,7 +68,8 @@ fi
   "active" true
   "system" true
   "formula" "caddy"
-  "check" `curl --silent --fail --max-time 5 http://localhost:2019/config/ >/dev/null`
+  "liveness" "/config/"
+  "port" .caddy.admin.port
   "reload" `caddy reload --config "$caddyfile"`
 ) -}}
 
@@ -203,16 +202,17 @@ fi
   "active" true
   "system" true
   "unit" "caddy"
-  "check" `curl --silent --fail --max-time 5 http://localhost:2019/config/ >/dev/null`
+  "liveness" "/config/"
+  "port" .caddy.admin.port
 ) -}}
 
 {{- end }}
-if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
+if ! run curl -sf http://localhost:{{ .caddy.admin.port }}/pki/ca/local >/dev/null 2>&1; then
   die "Caddy CA not ready; run again after caddy initializes"
 fi
 
 # Only trust if not already trusted
-if ! curl -sf http://localhost:2019/pki/ca/local/trusted | grep -q . 2>/dev/null; then
+if ! curl -sf http://localhost:{{ .caddy.admin.port }}/pki/ca/local/trusted | grep -q . 2>/dev/null; then
   run caddy trust --ca local # --config "$caddyfile"
 fi
 

@@ -1,6 +1,11 @@
 ---
 enabled: "{{ .features.otel }}"
 packages:
+  process-exporter:
+    enabled: '{{ eq .os "linux" }}'
+    type: mise
+    nameOverwrite:
+      mise: github:ncabatoff/process-exporter
   otel-cli:
     type: brew
   ymtdzzz/tap/otel-tui:

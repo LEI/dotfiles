@@ -14,14 +14,10 @@ set -eu
   "active" $active
   "formula" "ollama"
   "port" $provider.port
-  "health" $provider.health) }}
+  "liveness" $provider.liveness) }}
 {{- else if eq $service "compose" }}
 {{-   if $active }}
-
-# Compose manages its own lifecycle; health check only
-if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $provider.port }}{{ $provider.health }}" >/dev/null; then
-  die "ollama: unhealthy after retries"
-fi
+{{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" "ollama" "active" $active) $provider) }}
 {{-   end }}
 {{- else if eq $service "quadlet" }}
 {{- $containerFile := joinPath .chezmoi.homeDir ".config/containers/systemd/ollama.container" -}}
@@ -35,7 +31,7 @@ run podman pull "docker.io/ollama/ollama:{{ $version }}"
   "active" $active
   "unit" "ollama.container"
   "port" $provider.port
-  "health" $provider.health
+  "liveness" $provider.liveness
 ) | trim }}
 {{ end -}}
 {{ end -}}

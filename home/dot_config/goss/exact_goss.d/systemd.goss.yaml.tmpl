@@ -21,6 +21,7 @@ command:
 {{- if .features.ai }}
 {{-   range $name, $provider := .ai.providers }}
 {{-     if not (hasKey $provider "unit") }}{{ continue }}{{ end }}
+{{-     if and (hasKey $.features $name) (not (get $.features $name)) }}{{ continue }}{{ end }}
 {{-     $active := get $provider "active" }}
   systemd-{{ $name }}:
     title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})

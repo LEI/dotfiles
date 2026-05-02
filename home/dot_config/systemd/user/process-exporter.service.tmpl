@@ -1,0 +1,19 @@
+{{- $services := get . "services" | default dict -}}
+{{- $svc := get $services "process-exporter" | default dict -}}
+{{- if and .features.otel (eq .os "linux") $svc -}}
+[Unit]
+Description=Process exporter for Prometheus
+After=network.target
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+ExecStart=%h/.local/share/mise/shims/process-exporter --web.listen-address=127.0.0.1:{{ $svc.port }} --config.path=%h/.config/otel/process-exporter.yaml
+StandardOutput=append:%h/.local/state/process-exporter/stdout.log
+StandardError=append:%h/.local/state/process-exporter/stderr.log
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+{{ end -}}

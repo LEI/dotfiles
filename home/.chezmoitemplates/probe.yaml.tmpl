@@ -1,0 +1,23 @@
+{{- $probe := get . "probe" -}}
+{{- $port := get . "port" -}}
+{{- $code := get . "statusCode" | default 200 -}}
+{{- $auth := "" -}}
+{{- $url := "" -}}
+{{- if kindIs "map" $probe -}}
+{{-   if get $probe "port" }}{{- $port = get $probe "port" -}}{{- end -}}
+{{-   if get $probe "statusCode" }}{{- $code = get $probe "statusCode" -}}{{- end -}}
+{{-   if get $probe "auth" }}{{- $auth = get $probe "auth" -}}{{- end -}}
+{{-   $path := get $probe "path" | default "/" | toString -}}
+{{-   if hasPrefix "/" $path -}}{{- $url = printf "http://localhost:%v%s" $port $path -}}{{- end -}}
+{{- else -}}
+{{-   $path := $probe | toString -}}
+{{-   if and $port (eq $path "true") -}}{{- $url = printf "http://localhost:%v" $port -}}
+{{-   else if and $port (hasPrefix "/" $path) -}}{{- $url = printf "http://localhost:%v%s" $port $path -}}
+{{-   end -}}
+{{- end -}}
+---
+statusCode: {{ $code }}
+url: {{ $url | quote }}
+{{- if $auth }}
+auth: {{ $auth | quote }}
+{{- end }}

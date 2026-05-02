@@ -1,5 +1,5 @@
 {{- $svc := .services.webhook -}}
-{{- $site := get (get .caddy.sites "otel") "webhook" -}}
+{{- $site := get .caddy.sites "webhook" -}}
 {{- $stateDir := printf "%s/.local/state/webhook" .chezmoi.homeDir -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
       "label" $svc.label

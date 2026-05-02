@@ -1,38 +1,116 @@
-{{- $gpuVendor := "none" -}}
-{{- if eq .chezmoi.os "darwin" -}}
-{{-   if eq .chezmoi.arch "arm64" -}}
-{{-     $gpuVendor = "apple" -}}
-{{-   else -}}
-{{-     $gpuVendor = "intel" -}}
-{{-   end -}}
-{{- else if eq .chezmoi.os "linux" -}}
-{{-   if or (stat "/dev/nvidia0") (lookPath "nvidia-smi" | isExecutable) -}}
-{{-     $gpuVendor = "nvidia" -}}
-{{-   else if or (stat "/dev/kfd") (output "sh" "-c" "lspci 2>/dev/null | grep -qi 'amd\\|radeon' && echo yes || true" | trim | eq "yes") -}}
-{{-     $gpuVendor = "amd" -}}
-{{-   else if stat "/dev/dri/renderD128" -}}
-{{-     $gpuVendor = "intel" -}}
-{{-   end -}}
-{{- else if eq .chezmoi.os "windows" -}}
-{{-   $gpuName := output "powershell" "-NoProfile" "-NonInteractive" "-Command" "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty Name" | trim | lower -}}
-{{-   if contains "nvidia" $gpuName -}}
-{{-     $gpuVendor = "nvidia" -}}
-{{-   else if or (contains "amd" $gpuName) (contains "radeon" $gpuName) -}}
-{{-     $gpuVendor = "amd" -}}
-{{-   else if contains "intel" $gpuName -}}
-{{-     $gpuVendor = "intel" -}}
-{{-   end -}}
-{{- end -}}
-{{- $memoryGiB := 0 -}}
-{{- if eq .chezmoi.os "darwin" -}}
-{{-   $memoryGiB = output "sh" "-c" "sysctl -n hw.memsize | awk '{print int($1/1024/1024/1024)}'" | trim | int -}}
-{{- else if and (eq .chezmoi.os "linux") (lookPath "awk" | isExecutable) -}}
-{{-   $memoryGiB = output "sh" "-c" "awk '/MemTotal/{print int($2/1024/1024)}' /proc/meminfo" | trim | int -}}
-{{- else if eq .chezmoi.os "windows" -}}
-{{-   $memoryGiB = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)" | trim | int -}}
-{{- end -}}
-{{- $gpuAccelerated := or (eq $gpuVendor "nvidia") (eq $gpuVendor "amd") (eq $gpuVendor "apple") -}}
+{{- $sysVendor := "unknown" }}
+{{- $chassisType := "0" }}
+{{- $chassisTypeStr := "desktop" }}
+
+{{- if eq .chezmoi.os "linux" }}
+{{-   $sysVendor = include "/sys/class/dmi/id/board_vendor" | trim | lower }}
+{{-   $chassisType = include "/sys/class/dmi/id/chassis_type" | trim }}
+{{- else if eq .chezmoi.os "darwin" }}
+{{-   $sysVendor = "apple" }}
+{{-   if contains "MacBook" (output "sysctl" "-n" "hw.model") }}
+{{-     $chassisType = "10" }}
+{{-   end }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $sysVendor = output "powershell" "-NoProfile" "-Command" "Get-CimInstance Win32_ComputerSystem | Select-Object -ExpandProperty Manufacturer" | trim | lower }}
+{{-   if (output "powershell" "-NoProfile" "-Command" "if ((Get-CimInstance Win32_Battery | Measure-Object).Count -gt 0) { Write-Output '10' }") }}
+{{-     $chassisType = "10" }}
+{{-   end }}
+{{- end }}
+
+{{- $chassisTypeStr = (list "8" "9" "10" "11" "14" | has $chassisType) | ternary "laptop" "desktop" }}
+
+{{- $cpuVendor := "unknown" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+{{-     $cpuVendor = "apple" }}
+{{-   else if contains "intel" $sysVendor }}
+{{-     $cpuVendor = "intel" }}
+{{-   end }}
+{{- else if contains "intel" $sysVendor }}
+{{-   $cpuVendor = "intel" }}
+{{- else if contains "amd" $sysVendor }}
+{{-   $cpuVendor = "amd" }}
+{{- end }}
+
+{{- $cpuCores := 1 }}
+{{- $cpuThreads := 1 }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $cpuCores = output "sysctl" "-n" "hw.physicalcpu_max" | trim | int }}
+{{-   $cpuThreads = output "sysctl" "-n" "hw.logicalcpu_max" | trim | int }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   $cpuCores = output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | sort --field-separator=',' --key='2,4' --unique | wc --lines" | trim | int }}
+{{-   $cpuThreads = output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | wc --lines" | trim | int }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $cpuCores = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfCores" | trim | int }}
+{{-   $cpuThreads = output "powershell" "-NoProfile" "-NonInteractive" "-Command" "(Get-CimInstance -ClassName 'Win32_Processor').NumberOfLogicalProcessors" | trim | int }}
+{{- end }}
+
+{{- $gpuVendor := "none" }}
+{{- $gpuVendorId := "unknown" }}
+
+{{- if eq .chezmoi.os "linux" }}
+{{-   if stat "/sys/class/drm/card0/device/vendor" }}
+{{-     $gpuVendorId = include "/sys/class/drm/card0/device/vendor" | trim | trimPrefix "0x" }}
+{{-   end }}
+
+{{-   if or (eq $gpuVendorId "10de") (stat "/dev/nvidia0") (lookPath "nvidia-smi" | isExecutable) }}
+{{-     $gpuVendor = "nvidia" }}
+{{-   else if or (eq $gpuVendorId "1002") (stat "/dev/kfd") }}
+{{-     $gpuVendor = "amd" }}
+{{-   else if or (eq $gpuVendorId "8086") (glob "/dev/dri/renderD*") }}
+{{-     $gpuVendor = "intel" }}
+{{-   end }}
+{{- else if eq .chezmoi.os "darwin" }}
+{{-   $gpuVendor = (eq .chezmoi.arch "arm64" | ternary "apple" "intel") }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $gpuName := output "powershell" "-NoProfile" "-NonInteractive" "-Command" "Get-CimInstance Win32_VideoController | Select-Object -First 1 -ExpandProperty Name" | trim | lower }}
+{{-   if contains "nvidia" $gpuName }}
+{{-     $gpuVendor = "nvidia" }}
+{{-   else if or (contains "amd" $gpuName) (contains "radeon" $gpuName) }}
+{{-     $gpuVendor = "amd" }}
+{{-   else if contains "intel" $gpuName }}
+{{-     $gpuVendor = "intel" }}
+{{-   end }}
+{{- end }}
+
+{{- $gpuAccelerated := or (eq $gpuVendor "nvidia") (eq $gpuVendor "amd") (eq $gpuVendor "apple") }}
+
+{{- $gpuType := "none" }}
+{{- if or (eq $gpuVendor "intel") (eq $gpuVendor "amd") }}
+{{-   $gpuType = "integrated" }}
+{{- else if eq $gpuVendor "nvidia" }}
+{{-   $gpuType = "discrete" }}
+{{- end }}
+
+{{- $memGiB := 0 }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   $memGiB = output "awk" "/MemTotal/{print int($2/1024/1024)}" "/proc/meminfo" | trim | int }}
+{{- else if eq .chezmoi.os "darwin" }}
+{{-   $memGiB = output "sh" "-c" "sysctl -n hw.memsize | awk '{print int($1/1024/1024/1024)}'" | trim | int }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $memGiB = output "powershell" "-NoProfile" "-Command" "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)" | trim | int }}
+{{- end }}
+
 {{- dict
+  "system" (dict
+    "vendor" $sysVendor
+    "chassisType" $chassisTypeStr
+  )
+  "cpu" (dict
+    "vendor" $cpuVendor
+    "architecture" .chezmoi.arch
+    "cores" $cpuCores
+    "threads" $cpuThreads
+  )
+  "gpu" (dict
+    "vendor" $gpuVendor
+    "type" $gpuType
+    "accelerated" $gpuAccelerated
+  )
+  "memory" (dict
+    "totalGiB" $memGiB
+  )
   "gpuAccelerated" $gpuAccelerated
   "gpuVendor" $gpuVendor
-  "memoryGiB" $memoryGiB | toJson }}
+  "memoryGiB" $memGiB
+| toJson }}

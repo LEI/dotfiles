@@ -12,7 +12,9 @@
   "nvim" "neovim"
   "pi" "ai"
 -}}
+{{- if ne $shell "zsh" -}}
 # shellcheck shell=bash
+{{ end -}}
 
 # Order matters: mise first, carapace before completions, starship before atuin
 for _tool in {{ $ordered | join " " }}; do
@@ -47,10 +49,10 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
     continue
   fi
   if hash bench_source 2>/dev/null; then
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     bench_source "$_feat"
   else
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     source "$_feat"
   fi
 done

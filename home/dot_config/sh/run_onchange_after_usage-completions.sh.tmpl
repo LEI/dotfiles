@@ -45,7 +45,7 @@ fi
 
 {{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
 
-rc=0
+exit_code=0
 {{- if .features.bash }}
 
 bash_dir="$XDG_DATA_HOME/bash-completion/completions"
@@ -92,20 +92,20 @@ usage_generate_completion() {
   truthy "${CHEZMOI_VERBOSE:-}" && log "generating $name"
   generated+=("$name")
 {{- if .features.bash }}
-  usage generate completion bash "$name" --file - <<<"$spec" >|"$bash_dir/$name" || rc=1
+  usage generate completion bash "$name" --file - <<<"$spec" >|"$bash_dir/$name" || exit_code=1
   if grep -q 'run=' <<<"$spec"; then
     if ! patch_bash_mapfile "$bash_dir/$name"; then
       echo "${0##*/}: patch failed for $name" >&2
-      rc=1
+      exit_code=1
     fi
     if grep -q '_comp_compgen -- -W' "$bash_dir/$name"; then
       echo "${0##*/}: unpatched compgen -W in $name" >&2
-      rc=1
+      exit_code=1
     fi
   fi
 {{- end }}
 {{- if .features.zsh }}
-  usage generate completion zsh "$name" --file - <<<"$spec" >|"$zsh_dir/_$name" || rc=1
+  usage generate completion zsh "$name" --file - <<<"$spec" >|"$zsh_dir/_$name" || exit_code=1
 {{- end }}
 }
 
@@ -135,7 +135,7 @@ warn_stale() {
     if [ "$found" = false ]; then
       rel="${file#"$HOME/"}"
       echo "${0##*/}: stale completion: $name ($rel)" >&2
-      # rc=1
+      # exit_code=1
       run rm -f "$file"
     fi
   done
@@ -160,7 +160,7 @@ if command -v mise >/dev/null; then
 {{-   $dir := printf "$%s_dir" . }}
   if ! run mise completion {{ . }} >|"{{ $dir }}/{{ $prefix }}mise"; then
     echo "${0##*/}: mise completion {{ . }} failed" >&2
-    rc=1
+    exit_code=1
   fi
 {{- end }}
 {{- if .features.zsh }}
@@ -169,5 +169,5 @@ if command -v mise >/dev/null; then
 fi
 {{- end }}
 
-exit $rc
+exit $exit_code
 {{ end -}}

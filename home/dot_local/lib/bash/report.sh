@@ -14,10 +14,10 @@
 #   report_human "$prog" "$verbosity" # default
 #   report_tap "$prog" # pipeable to TAP consumers like prove or tap2junit
 
-report_data=""
+REPORT_DATA=""
 
 report_collect() {
-  report_data="$1"
+  REPORT_DATA="$1"
 }
 
 # Human-readable summary (matches the validate-schema legacy contract)
@@ -25,19 +25,20 @@ report_collect() {
 report_human() {
   local label="${1:-test}"
   local verbosity="${2:-1}"
-  local passed failed skipped
+  local passed failed skipped data
 
-  passed=$(printf '%s\n' "$report_data" | grep -c '^PASS ' || [ $? -eq 1 ])
-  failed=$(printf '%s\n' "$report_data" | grep -c '^FAIL ' || [ $? -eq 1 ])
-  skipped=$(printf '%s\n' "$report_data" | grep -c '^SKIP ' || [ $? -eq 1 ])
+  data="$REPORT_DATA"
+  passed=$(printf '%s\n' "$data" | grep -c '^PASS ' || [ $? -eq 1 ])
+  failed=$(printf '%s\n' "$data" | grep -c '^FAIL ' || [ $? -eq 1 ])
+  skipped=$(printf '%s\n' "$data" | grep -c '^SKIP ' || [ $? -eq 1 ])
 
   if [ "$verbosity" -ge 2 ]; then
-    printf '%s\n' "$report_data" | grep -E '^(PASS|FAIL|SKIP) ' || [ $? -eq 1 ]
+    printf '%s\n' "$data" | grep -E '^(PASS|FAIL|SKIP) ' || [ $? -eq 1 ]
   else
-    printf '%s\n' "$report_data" | grep -E '^FAIL ' || [ $? -eq 1 ]
+    printf '%s\n' "$data" | grep -E '^FAIL ' || [ $? -eq 1 ]
   fi
   if [ "$failed" -gt 0 ]; then
-    printf '%s\n' "$report_data" | grep -vE '^(PASS|FAIL|SKIP) ' | grep -v '^$' || [ $? -eq 1 ]
+    printf '%s\n' "$data" | grep -vE '^(PASS|FAIL|SKIP) ' | grep -v '^$' || [ $? -eq 1 ]
   fi
   if [ "$verbosity" -ge 1 ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
     printf '%s: %d passed, %d failed, %d skipped\n' "$label" "$passed" "$failed" "$skipped" >&2
@@ -50,11 +51,12 @@ report_human() {
 report_tap() {
   local label="${1:-test}"
   local passed failed skipped total n=0
-  local line desc in_diag=false
+  local line desc in_diag=false data
 
-  passed=$(printf '%s\n' "$report_data" | grep -c '^PASS ' || [ $? -eq 1 ])
-  failed=$(printf '%s\n' "$report_data" | grep -c '^FAIL ' || [ $? -eq 1 ])
-  skipped=$(printf '%s\n' "$report_data" | grep -c '^SKIP ' || [ $? -eq 1 ])
+  data="$REPORT_DATA"
+  passed=$(printf '%s\n' "$data" | grep -c '^PASS ' || [ $? -eq 1 ])
+  failed=$(printf '%s\n' "$data" | grep -c '^FAIL ' || [ $? -eq 1 ])
+  skipped=$(printf '%s\n' "$data" | grep -c '^SKIP ' || [ $? -eq 1 ])
   total=$((passed + failed + skipped))
 
   printf 'TAP version 14\n1..%d\n' "$total"
@@ -93,7 +95,7 @@ report_tap() {
       fi
       ;;
     esac
-  done < <(printf '%s\n' "$report_data")
+  done < <(printf '%s\n' "$data")
   printf '# %s: %d passed, %d failed, %d skipped\n' "$label" "$passed" "$failed" "$skipped"
   [ "$failed" -eq 0 ]
 }

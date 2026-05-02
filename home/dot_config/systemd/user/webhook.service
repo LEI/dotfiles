@@ -1,12 +1,12 @@
 [Unit]
 Description=Webhook alert receiver for Grafana
-After=network.target
+After=network.target graphical-session.target
 
 [Service]
 Type=simple
 NoNewPrivileges=yes
-PrivateTmp=yes
 Environment=PATH=/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus
 ExecStart=/usr/bin/env webhook --hooks %h/.config/webhook/hooks.yaml --port 9000 --verbose
 StandardOutput=append:%h/.local/state/webhook/stdout.log
 StandardError=append:%h/.local/state/webhook/stderr.log

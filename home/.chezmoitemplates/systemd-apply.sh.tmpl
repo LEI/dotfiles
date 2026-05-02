@@ -1,5 +1,4 @@
 {{- $active := eq (get . "active" | toString) "true" -}}
-{{- $check := get . "check" -}}
 {{- $unit := get . "unit" | default "UNIT" -}}
 {{- $reload := get . "reload" -}}
 {{- $system := eq (get . "system" | toString) "true" -}}
@@ -24,9 +23,9 @@
 
 {{- $unitFile := joinPath $dir $unit -}}
 
-{{- $status := "unknown" -}}
+{{- $state := "unknown" -}}
 {{- if lookPath "systemctl" | isExecutable -}}
-{{-   $status = output "sh" "-c" (printf "%s show %s --property=ActiveState --value 2>/dev/null || true" $ctl $name) | trim | default "not found" -}}
+{{-   $state = output "sh" "-c" (printf "%s show %s --property=ActiveState --value 2>/dev/null || true" $ctl $name) | trim | default "not found" -}}
 {{- end -}}
 
 # shellcheck shell=sh
@@ -36,7 +35,7 @@
 # unit: {{ include $unitFile | sha256sum }}
 {{- end }}
 
-# status: {{ $status }}
+# status: {{ $state }}
 
 if ! command -v systemctl >/dev/null; then
   die "systemctl not found"
@@ -74,12 +73,7 @@ if ! {{ $ctl }} is-active --quiet {{ $name }}; then
   die "{{ $unit }}: failed to start"
 fi
 
-{{-   if $check }}
-
-if ! run retry 10 3 {{ $check }}; then
-  die "{{ $unit }}: unhealthy after retries"
-fi
-{{-   end }}
+{{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" $name) .) }}
 {{- else }}
 {{-   if $isQuadlet }}
 

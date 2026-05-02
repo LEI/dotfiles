@@ -12,8 +12,9 @@
 
 set -euo pipefail
 
-# shellcheck source=home/dot_local/lib/sh/common.sh
-. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/common.sh"
+script_dir="${BASH_SOURCE[0]%/*}"
+# shellcheck source=home/dot_local/lib/bash/log.sh
+source "$script_dir/../home/dot_local/lib/bash/log.sh"
 
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in

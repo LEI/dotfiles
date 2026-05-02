@@ -1,8 +1,8 @@
 #!/bin/sh
 # Shared preamble for chezmoi scripts
 
-# shellcheck source=home/dot_local/lib/sh/common.sh
-. "${CHEZMOI_WORKING_TREE-}/home/dot_local/lib/sh/common.sh"
+# shellcheck source=home/dot_local/lib/bash/log.sh
+. "${CHEZMOI_WORKING_TREE-}/home/dot_local/lib/bash/log.sh"
 
 # Collapsed OS identifier: id_like or id or os, android for termux
 OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
@@ -52,17 +52,33 @@ dry_run() {
   run "$@"
 }
 
+# Check HTTP endpoint returns expected status code
+# Usage: http_check <url> [expected_status]
+http_check() {
+  url="$1"
+  expected="${2:-200}"
+  auth="${3:-}"
+  code=$(curl --silent --show-error --max-time 5 -o /dev/null -w "%{http_code}" \
+    ${auth:+--user "$auth"} "$url")
+  if [ "$code" = "$expected" ]; then
+    msg "http_check $url: ok ($code)"
+    return 0
+  fi
+  warn "http_check $url: expected $expected, got ${code:-no response}"
+  return 1
+}
+
 # Retry a command with delay between attempts
 # Usage: retry <attempts> <delay> <command...>
 retry() {
-  _attempts="$1"
-  _delay="$2"
+  attempts="$1"
+  delay="$2"
   shift 2
-  _i=0
-  while [ "$_i" -lt "$_attempts" ]; do
+  i=0
+  while [ "$i" -lt "$attempts" ]; do
     "$@" && return 0
-    _i=$((_i + 1))
-    [ "$_i" -lt "$_attempts" ] && sleep "$_delay"
+    i=$((i + 1))
+    [ "$i" -lt "$attempts" ] && sleep "$delay"
   done
   return 1
 }

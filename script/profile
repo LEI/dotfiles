@@ -5,12 +5,14 @@
 #USAGE   choices "bash" "zsh"
 #USAGE }
 
-set -euo pipefail
+set -Eeuo pipefail
 
-if ((BASH_VERSINFO[0] < 5)); then
-  echo "bash 5+ required for EPOCHREALTIME, found $BASH_VERSION" >&2
-  exit 1
-fi
+# shellcheck source=home/dot_local/lib/bash/log.sh
+source "${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash/require.sh"
+err_trap
+require_bash 5
 
 case "${1:-}" in
 -h | --help)
@@ -61,12 +63,12 @@ detach() {
 format_table() {
   local label="$1" limit="$2"
   printf "      %10s  %5s  %5s  %s\n" "total" "pct" "calls" "$label"
-  sort -t$'\t' -k2 -rn | head -"$limit" | awk -F'\t' '{
+  sort -t$'\t' -k2 -rn | awk -F'\t' -v n="$limit" 'NR <= n {
     printf "%3d)  %8.3f ms  %5.1f%%  %4d  %s\n", NR, $2, $3, $4, $5
   }'
 }
 
-shell_exit=0
+exit_code=0
 stderrlog="$tmpdir/init-stderr.log"
 
 case "$shell" in
@@ -76,13 +78,13 @@ bash)
   cat >"$tmpdir/rcfile.sh" <<BASH_PROF
 exec 5>"$logfile"
 BASH_XTRACEFD=5
-PS4='+ \${EPOCHREALTIME} ~/\${BASH_SOURCE[0]#\${HOME}/}:\${LINENO} '
+PS4='+ \${EPOCHREALTIME} \${BASH_SOURCE[0]/#\${HOME}\//~/}:\${LINENO} '
 set -x
 [ -f "\$HOME/.bashrc" ] && source "\$HOME/.bashrc" 2>"$stderrlog"
-_rc=\$?
+exit_code=\$?
 set +x
 exec 5>&-
-echo \$_rc >"$tmpdir/exit_code"
+echo \$exit_code >"$tmpdir/status"
 BASH_PROF
 
   detach bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
@@ -121,9 +123,13 @@ BASH_PROF
     }
   ' "$logfile" >"$tmpdir/tables"
 
-  grep '^C' "$tmpdir/tables" | format_table "command" 20
+  if ! grep '^C' "$tmpdir/tables" | format_table "command" 20; then
+    warn "no command timing data"
+  fi
   echo
-  grep '^F' "$tmpdir/tables" | format_table "file" 15
+  if ! grep '^F' "$tmpdir/tables" | format_table "file" 15; then
+    warn "no file timing data"
+  fi
   ;;
 zsh)
   cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
@@ -132,24 +138,24 @@ zmodload zsh/zprof
 ZSH_PROF
   cat >"$tmpdir/.zshrc" <<ZSH_RC
 [ -f "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" ] && source "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" 2>"$stderrlog"
-echo \$? >"$tmpdir/exit_code"
+echo \$? >"$tmpdir/status"
 ZSH_RC
   export REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
   ZDOTDIR="$tmpdir" detach zsh -ic 'zprof' 2>/dev/null
   ;;
 *)
-  echo "${0##*/}: invalid shell '$shell', expected bash or zsh" >&2
+  log "invalid shell '$shell', expected bash or zsh"
   exit 2
   ;;
 esac
 
-if [ -f "$tmpdir/exit_code" ]; then
-  shell_exit=$(cat "$tmpdir/exit_code")
+if [ -f "$tmpdir/status" ]; then
+  exit_code=$(cat "$tmpdir/status")
 fi
 
 report_stderr() {
   while IFS= read -r line; do
-    echo >&2 "  $line"
+    echo "  $line" >&2
     # Trace back to source using the xtrace log (bash only)
     cmd="${line%%:*}"
     if [ -n "$cmd" ] && [ -f "${logfile:-}" ]; then
@@ -162,9 +168,9 @@ report_stderr() {
   done <"$stderrlog"
 }
 
-if [ "$shell_exit" -ne 0 ]; then
+if [ "$exit_code" -ne 0 ]; then
   echo >&2
-  echo >&2 "${0##*/}: $shell init exited with code $shell_exit"
+  log "$shell init exited with code $exit_code"
   report_stderr
   exit 1
 fi
@@ -181,7 +187,7 @@ grep -v \
 
 if [ -s "$stderrlog.filtered" ]; then
   echo >&2
-  echo >&2 "${0##*/}: $shell init stderr:"
+  log "$shell init stderr:"
   stderrlog="$stderrlog.filtered" report_stderr
   exit 1
 fi

@@ -1,4 +1,4 @@
-{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $pc := get .caddy.sites "process-compose" -}}
 {{- $uds := get $pc "uds" -}}
 {{- $stateDir := printf "%s/.local/state/process-compose" .chezmoi.homeDir -}}
 {{- $args := list

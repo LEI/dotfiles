@@ -41,6 +41,11 @@ scrape_configs:
     static_configs:
       - targets: [host.docker.internal:2020]
 {{- end }}
+{{- if eq .os "linux" }}
+  - job_name: process-exporter
+    static_configs:
+      - targets: [host.docker.internal:9256]
+{{- end }}
   # - job_name: alertmanager
   #   static_configs:
   #     - targets: [alertmanager:9093]

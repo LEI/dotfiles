@@ -1,10 +1,11 @@
 {{- $shell := get . "shell" -}}
+{{- if ne $shell "zsh" -}}
 # shellcheck shell=bash
 
-{{- if and $shell (lookPath $shell | isExecutable) }}
-
+{{ end -}}
+{{- if and $shell (lookPath $shell | isExecutable) -}}
 SHELL={{ lookPath $shell | quote }}
-{{- end }}
+{{ end -}}
 shell="${SHELL##*/}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -20,7 +21,7 @@ done
 unset _conf
 
 {{ includeTemplate ".profile.tmpl" . | trim }}
-source "$HOME/.local/lib/sh/bench.sh"
+source "$HOME/.local/lib/bash/bench.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
@@ -84,7 +85,7 @@ done
 unset _conf
 
 if [ -f "$HOME/.${shell}rc.local" ]; then
-  # shellcheck disable=SC1090
+  # shellcheck source=/dev/null
   bench_source "$HOME/.${shell}rc.local"
 fi
 

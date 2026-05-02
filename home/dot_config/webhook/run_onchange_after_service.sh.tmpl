@@ -1,7 +1,7 @@
 {{- if .features.otel -}}
 {{- $name := "webhook" -}}
 {{- $svc := get .services $name -}}
-{{- $site := get (get .caddy.sites "otel") $name -}}
+{{- $site := get .caddy.sites $name -}}
 {{- $path := joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml" -}}
 #!/bin/sh
 

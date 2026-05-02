@@ -160,6 +160,21 @@ grafana/dashboards/Infrastructure/alertmanager.json:
   type: file
   url: https://grafana.com/api/dashboards/9578/revisions/4/download
   refreshPeriod: 168h
+{{- if eq .os "linux" }}
+
+# Per-process CPU/IO metrics
+# Data: namedprocess_* (host service on :9256)
+# https://grafana.com/grafana/dashboards/249-named-processes/
+grafana/dashboards/Infrastructure/process-exporter.json:
+  type: file
+  url: https://grafana.com/api/dashboards/249/revisions/1/download
+  refreshPeriod: 168h
+  filter:
+    command: sed
+    args:
+      - -e # Fix datasource UID
+      - "s/${DS_PROMETHEUS}/prometheus/g"
+{{- end }}
 
 # Log analysis with pattern matching and service correlation
 # Data: Loki log streams with service_name label (OTLP logs or container logs)

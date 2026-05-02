@@ -17,7 +17,7 @@ zai) PLAN=zai-coding-plan ;;
 esac
 
 if [ -f "$SECRETS_FILE" ]; then
-  # shellcheck disable=SC1090
+  # shellcheck source=/dev/null
   . "$SECRETS_FILE" 2>/dev/null || true
   KEY_VAR=$(printf '%s_API_KEY' "$PROVIDER" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   eval "KEY_VALUE=\"\${$KEY_VAR:-}\""

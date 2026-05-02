@@ -9,13 +9,13 @@
 
 set -euo pipefail
 
-# shellcheck source=home/dot_local/lib/sh/common.sh
-. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/common.sh"
+script_dir="${BASH_SOURCE[0]%/*}"
+# shellcheck source=home/dot_local/lib/bash/log.sh
+source "$script_dir/../home/dot_local/lib/bash/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$script_dir/../home/dot_local/lib/bash/require.sh"
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "${0##*/}: bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+require_bash 4
 
 : "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"
@@ -122,7 +122,7 @@ container_exec_mise() {
       export SHELL="$BASH"
     fi
     source ~/.local/lib/sh/export.sh
-    source ~/.local/lib/sh/pathmunge.sh
+    source ~/.local/lib/bash/pathmunge.sh
     export_env ~/.config/environment.d/*.conf
     source ~/.config/sh/environment.sh
     source ~/.config/mise/init.sh

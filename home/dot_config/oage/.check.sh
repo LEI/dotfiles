@@ -7,7 +7,7 @@ if ((BASH_VERSINFO[0] < 5)); then
   exit 1
 fi
 
-# shellcheck disable=SC1091
+# shellcheck source=home/dot_local/lib/sh/tap.sh
 . "$HOME/.local/lib/sh/tap.sh"
 
 # Oage check
@@ -45,13 +45,13 @@ FIELDS + {url: $url, elapsed_s: (elapsed | round2)}
 
 check() {
   local label="$1" assert="$2" fields="$3" url="$4" body="$5"
-  local response rc=0 t0 t1
+  local response exit_code=0 t0 t1
   t0=$EPOCHREALTIME
-  response="$(post "$url" "$body")" || rc=$?
+  response="$(post "$url" "$body")" || exit_code=$?
   t1=$EPOCHREALTIME
-  if [[ $rc -ne 0 ]]; then
+  if [[ $exit_code -ne 0 ]]; then
     tap_not_ok "$label"
-    tap_diag_kv "severity: fail" "message: curl exit $rc" "url: $url"
+    tap_diag_kv "severity: fail" "message: curl exit $exit_code" "url: $url"
     tap_bail "$url unreachable"
     exit 1
   fi

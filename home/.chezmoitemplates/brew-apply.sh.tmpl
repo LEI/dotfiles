@@ -1,18 +1,17 @@
 {{- $active := eq (get . "active" | toString) "true" -}}
-{{- $check := get . "check" -}}
 {{- $formula := get . "formula" | default "FORMULA" -}}
 {{- $reload := get . "reload" -}}
 {{- $system := eq (get . "system" | toString) "true" -}}
 {{- $sudo := $system | ternary "sudo " "" -}}
 {{- $domain := $system | ternary "system" (printf "gui/%s" (output "id" "-u" | trim)) -}}
 {{- $svcName := output "sh" "-c" (printf "brew services info %s --json 2>/dev/null | jq -r '.[0].service_name // empty' || true" $formula) | trim -}}
-{{- $status := "unknown" -}}
+{{- $state := "unknown" -}}
 {{- if $svcName -}}
-{{-   $status = output "sh" "-c" (printf "launchctl print %s/%s 2>/dev/null | grep -m1 'state = ' | sed 's/.*state = //' || true" $domain $svcName) | trim | default "not loaded" -}}
+{{-   $state = output "sh" "-c" (printf "launchctl print %s/%s 2>/dev/null | grep -m1 'state = ' | sed 's/.*state = //' || true" $domain $svcName) | trim | default "not loaded" -}}
 {{- end -}}
 # shellcheck shell=sh
 
-# status: {{ $status }}
+# status: {{ $state }}
 
 if ! has brew; then
   die "brew not found"
@@ -31,12 +30,7 @@ else
   run {{ $sudo }}brew services restart {{ $formula }}
 {{- end }}
 fi
-{{- if $check }}
-
-if ! run retry 10 3 {{ $check }}; then
-  die "{{ $formula }}: unhealthy after retries"
-fi
-{{- end }}
+{{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" $formula) .) }}
 {{- else }}
 if {{ $sudo }}brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
   msg "stopping service {{ $formula }}"

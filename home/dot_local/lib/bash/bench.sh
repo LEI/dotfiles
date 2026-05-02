@@ -23,14 +23,14 @@ bench() {
   fi
   local start="${EPOCHREALTIME:-}"
   "$@"
-  local ret=$?
+  local return_code=$?
   local end="${EPOCHREALTIME:-}"
   if [ -n "$start" ] && [ -n "$end" ]; then
     local elapsed
     elapsed=$(awk "BEGIN {printf \"%.3f\", $end - $start}")
     echo "bench: $label: ${elapsed}s" >&2
   fi
-  return $ret
+  return $return_code
 }
 
 BENCH_HOME_REAL="$(realpath "$HOME")"
@@ -43,6 +43,6 @@ bench_source() {
     return 1
   fi
   local name="${file#"$BENCH_HOME_REAL/"}"
-  # shellcheck disable=SC1090
+  # shellcheck source=/dev/null
   bench "$name" source "$file" "$@"
 }

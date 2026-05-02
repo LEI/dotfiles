@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=sh
 
 # Source files and export their assignments.
 # Files must contain bare KEY=VALUE lines (no quotes, no shell features)
@@ -9,14 +9,16 @@ export_env() {
   if [ $# -eq 0 ]; then
     return 0
   fi
-  local _f _rc=0
+  file=
+  return_code=0
   set -a
-  for _f in "$@"; do
-    if [ -f "$_f" ]; then
-      # shellcheck disable=SC1090
-      . "$_f" || _rc=$?
+  for file in "$@"; do
+    if [ -f "$file" ]; then
+      # shellcheck source=/dev/null
+      . "$file" || return_code=$?
     fi
   done
   set +a
-  return $_rc
+  unset file
+  return "$return_code"
 }

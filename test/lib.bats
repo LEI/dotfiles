@@ -9,8 +9,8 @@ setup() {
 # bench
 
 @test "bench: passes through command when disabled" {
-  # shellcheck source=home/dot_local/lib/sh/bench.sh
-  source home/dot_local/lib/sh/bench.sh
+  # shellcheck source=home/dot_local/lib/bash/bench.sh
+  source home/dot_local/lib/bash/bench.sh
   unset SHELL_BENCH
   run bench test-label echo hello
   assert_success
@@ -18,8 +18,8 @@ setup() {
 }
 
 @test "bench: prints timing when enabled" {
-  # shellcheck source=home/dot_local/lib/sh/bench.sh
-  source home/dot_local/lib/sh/bench.sh
+  # shellcheck source=home/dot_local/lib/bash/bench.sh
+  source home/dot_local/lib/bash/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   run --separate-stderr bench test-label echo hello
@@ -29,8 +29,8 @@ setup() {
 }
 
 @test "bench: uses first arg as label" {
-  # shellcheck source=home/dot_local/lib/sh/bench.sh
-  source home/dot_local/lib/sh/bench.sh
+  # shellcheck source=home/dot_local/lib/bash/bench.sh
+  source home/dot_local/lib/bash/bench.sh
   # shellcheck disable=SC2030,SC2031
   export SHELL_BENCH=true
   run --separate-stderr bench custom-label echo ok
@@ -39,8 +39,8 @@ setup() {
 }
 
 @test "bench: preserves command exit code" {
-  # shellcheck source=home/dot_local/lib/sh/bench.sh
-  source home/dot_local/lib/sh/bench.sh
+  # shellcheck source=home/dot_local/lib/bash/bench.sh
+  source home/dot_local/lib/bash/bench.sh
   unset SHELL_BENCH
   run bench test-label false
   assert_failure
@@ -76,8 +76,8 @@ setup() {
 # pathmunge
 
 setup_pathmunge() {
-  # shellcheck source=home/dot_local/lib/sh/pathmunge.sh
-  source home/dot_local/lib/sh/pathmunge.sh
+  # shellcheck source=home/dot_local/lib/bash/pathmunge.sh
+  source home/dot_local/lib/bash/pathmunge.sh
   # Use a controlled PATH so tests are deterministic
   PATH="/usr/bin:/bin"
 }
@@ -140,8 +140,8 @@ setup_pathmunge() {
 # results
 
 setup_report() {
-  # shellcheck source=home/dot_local/lib/sh/report.sh
-  source home/dot_local/lib/sh/report.sh
+  # shellcheck source=home/dot_local/lib/bash/report.sh
+  source home/dot_local/lib/bash/report.sh
 }
 
 @test "report_human: empty input is silent and returns success" {
@@ -216,30 +216,61 @@ SKIP c # no schema"
   assert_line "#   on line 5"
 }
 
-# validate
+# parallel
 
-setup_validate() {
-  # shellcheck source=home/dot_local/lib/sh/validate.sh
-  source home/dot_local/lib/sh/validate.sh
+setup_parallel() {
+  # shellcheck source=home/dot_local/lib/bash/parallel.sh
+  source home/dot_local/lib/bash/parallel.sh
 }
 
-@test "default_jobs: returns NPROC override when set" {
-  setup_validate
-  NPROC=42 run default_jobs
-  assert_success
-  assert_output "42"
+@test "clamp: clamps value to min and max bounds" {
+  setup_parallel
+  assert_equal "$(clamp 5 1 10)" "5"
+  assert_equal "$(clamp 0 1 10)" "1"
+  assert_equal "$(clamp 20 1 10)" "10"
 }
 
-@test "default_jobs: returns a positive integer without override" {
-  setup_validate
+@test "clamp: uses defaults when bounds not provided" {
+  setup_parallel
+  assert_equal "$(clamp 50)" "32"
+  assert_equal "$(clamp 100 1)" "32"
+  assert_equal "$(clamp 5)" "5"
+}
+
+@test "get_cpu_count: respects NPROC override and validates input" {
+  setup_parallel
+  assert_equal "$(NPROC=16 get_cpu_count)" "16"
+  assert_equal "$(NPROC=0 get_cpu_count)" "1"
+  assert_equal "$(NPROC=-5 get_cpu_count)" "1"
+  assert_equal "$(NPROC=abc get_cpu_count)" "1"
   unset NPROC
-  run default_jobs
+  run get_cpu_count
   assert_success
   [[ "$output" =~ ^[1-9][0-9]*$ ]]
 }
 
+@test "default_jobs: caps at 32 and handles edge cases" {
+  setup_parallel
+  assert_equal "$(NPROC=100 default_jobs)" "32"
+  assert_equal "$(NPROC=42 default_jobs)" "32"
+  assert_equal "$(NPROC=0 default_jobs)" "1"
+  unset NPROC
+  run default_jobs
+  assert_success
+  [[ "$output" =~ ^[1-9][0-9]*$ ]]
+  [ "$output" -le 32 ]
+}
+
+# validate
+
+setup_validate() {
+  # shellcheck source=home/dot_local/lib/bash/validate.sh
+  source home/dot_local/lib/bash/validate.sh
+}
+
 @test "usage_spec: extracts #USAGE lines stripped of prefix" {
-  local lib="$PWD/home/dot_local/lib/sh/validate.sh"
+  setup_validate
+  local lib="$PWD/home/dot_local/lib/bash/validate.sh"
   local file="$BATS_TEST_TMPDIR/sample.sh"
   cat >"$file" <<'EOF'
 #USAGE flag "-x" help="Test"

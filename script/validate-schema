@@ -12,10 +12,13 @@
 
 set -euo pipefail
 
-# shellcheck source=home/dot_local/lib/sh/validate.sh
-. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/validate.sh"
-# shellcheck source=home/dot_local/lib/sh/report.sh
-. "$(dirname "${BASH_SOURCE[0]}")/../home/dot_local/lib/sh/report.sh"
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash"
+# shellcheck source=home/dot_local/lib/bash/parallel.sh
+source "$lib_dir/parallel.sh"
+# shellcheck source=home/dot_local/lib/bash/report.sh
+source "$lib_dir/report.sh"
+# shellcheck source=home/dot_local/lib/bash/validate.sh
+source "$lib_dir/validate.sh"
 
 require_bash 4
 

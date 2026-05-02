@@ -67,14 +67,6 @@
 
 {{- $variantID := get (get .chezmoi "osRelease" | default dict) "variantID" }}
 
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) | trim }}
-
-{{- $chassisVendor := "" }}
-{{- $chassisVendorFile := "/sys/devices/virtual/dmi/id/chassis_vendor" }}
-{{- if stat $chassisVendorFile }}
-{{-  $chassisVendor = include $chassisVendorFile | trim }}
-{{- end }}
-
 {{- $hardware := includeTemplate "hardware.json.tmpl" (dict "chezmoi" .chezmoi) | fromJson }}
 
 {{- $hostname := .chezmoi.hostname }}
@@ -140,8 +132,8 @@
 
 {{- $data := dict
   "arch" .chezmoi.arch
-  "chassisType" $chassisType
-  "chassisVendor" $chassisVendor
+  "chassisType" $hardware.system.chassisType
+  "chassisVendor" $hardware.system.vendor
   "computerName" $computerName
   "ci" $ci
   "codespaces" $codespaces

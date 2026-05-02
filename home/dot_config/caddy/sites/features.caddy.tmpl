@@ -1,6 +1,5 @@
-{{- range $feat, $sites := .caddy.sites -}}
-{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
-{{- range $name, $s := $sites -}}
+{{- range $name, $s := .caddy.sites -}}
+{{- if not (get $.features (get $s "feature")) }}{{ continue }}{{ end -}}
 {{- $caddy := get $s "caddy" -}}
 {{ $name }}.test {
 	import common
@@ -15,5 +14,4 @@
 		}
 	}{{ end }}
 }
-{{ end -}}
 {{ end -}}

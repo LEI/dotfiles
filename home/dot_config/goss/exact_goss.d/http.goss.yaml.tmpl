@@ -1,26 +1,34 @@
 {{- $checks := dict -}}
 {{- if hasKey . "caddy" -}}
-{{- range $feat, $sites := .caddy.sites -}}
-{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
-{{- range $name, $site := $sites -}}
+{{- range $name, $site := .caddy.sites -}}
+{{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end -}}
 {{- if hasKey $site "enabled" }}{{ if not (get $site "enabled") }}{{ continue }}{{ end }}{{ end -}}
-{{- $health := get $site "health" -}}
+{{- $health := get $site "liveness" -}}
 {{- if not $health }}{{ continue }}{{ end -}}
 {{- $entry := dict "url" (printf "https://%s.test%s" $name $health) -}}
 {{- if get $site "body" }}{{ $_ := set $entry "body" (get $site "body") }}{{ end -}}
-{{- if get $site "status" }}{{ $_ := set $entry "status" (get $site "status") }}{{ end -}}
+{{- if get $site "statusCode" }}{{ $_ := set $entry "status" (get $site "statusCode") }}{{ end -}}
 {{- $_ := set $checks $name $entry -}}
-{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- if and (hasKey . "ai") (get $.features "caddy") -}}
 {{- range $name, $provider := .ai.providers -}}
 {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end -}}
 {{- if not (get $provider "active") }}{{ continue }}{{ end -}}
-{{- $entry := dict "url" (printf "https://%s%s" $provider.domain (get $provider "health" )) -}}
+{{- $entry := dict "url" (printf "https://%s%s" $provider.domain (get $provider "liveness")) -}}
 {{- if get $provider "body" }}{{ $_ := set $entry "body" (get $provider "body") }}{{ end -}}
 {{- $_ := set $checks $name $entry -}}
 {{- end -}}
+{{- end -}}
+{{- range $name, $svc := get . "services" | default dict -}}
+{{- if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end -}}
+{{- $probe := includeTemplate "probe.yaml.tmpl" (dict
+  "probe" (get $svc "liveness")
+  "port" (get $svc "port")) | fromYaml -}}
+{{- if not $probe.url }}{{ continue }}{{ end -}}
+{{- $_ := set $checks $name (dict
+  "url" $probe.url
+  "status" $probe.statusCode) -}}
 {{- end -}}
 {{- if $checks -}}
 ---

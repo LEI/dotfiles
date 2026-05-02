@@ -1,5 +1,4 @@
 {{- $active := eq (get . "active" | toString) "true" -}}
-{{- $check := get . "check" -}}
 {{- $label := get . "label" -}}
 {{- $bootstrap := eq (get . "bootstrap" | toString) "true" -}}
 {{- $reload := get . "reload" -}}
@@ -7,7 +6,7 @@
 
 {{- $plistFile := joinPath .chezmoi.homeDir "Library/LaunchAgents" (printf "%s.plist" $label) -}}
 
-{{- $status := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
+{{- $state := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
 
 # shellcheck shell=sh
 
@@ -15,7 +14,7 @@
 
 # plist: {{ include $plistFile | sha256sum }}
 {{- end }}
-# status: {{ $status }}
+# status: {{ $state }}
 
 plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
 
@@ -49,12 +48,7 @@ else
   run launchctl load "$plist"
 {{- end }}
 fi
-{{- if $check }}
-
-if ! run retry 10 3 {{ $check }}; then
-  die "{{ $label }}: unhealthy after retries"
-fi
-{{- end }}
+{{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" $label) .) }}
 {{- else }}
 if launchctl list "{{ $label }}" >/dev/null 2>&1; then
   msg "unloading service {{ $label }}"

@@ -24,8 +24,8 @@ case "${1:-}" in
   ;;
 esac
 
-# shellcheck disable=SC1091
-. "$HOME/.local/lib/sh/bench.sh"
+# shellcheck source=home/dot_local/lib/bash/bench.sh
+source "${BASH_SOURCE[0]%/*}/../home/dot_local/lib/bash/bench.sh"
 
 shell="${1:-${SHELL##*/}}"
 

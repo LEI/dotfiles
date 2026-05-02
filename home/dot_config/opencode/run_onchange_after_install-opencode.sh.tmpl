@@ -2,6 +2,7 @@
 {{- $server := get $opencode "server" | default dict -}}
 
 {{- $svc := get .services "opencode" -}}
+{{- $site := get .caddy.sites "opencode" | default dict -}}
 
 {{- $enabled := get $server "enabled" | default false -}}
 {{- if $enabled -}}
@@ -25,13 +26,13 @@ fi
 
 {{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
   "chezmoi" .chezmoi
-) $svc) | trim }}
+) $svc $site) | trim }}
 
 {{- else if eq .os "linux" }}
 
 {{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict
   "chezmoi" .chezmoi
-) $svc) | trim }}
+) $svc $site) | trim }}
 
 {{- end }}
 {{ end -}}

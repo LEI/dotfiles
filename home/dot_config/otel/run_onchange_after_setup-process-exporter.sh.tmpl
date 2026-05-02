@@ -1,0 +1,24 @@
+{{- $services := get . "services" | default dict -}}
+{{- $svc := get $services "process-exporter" | default dict -}}
+{{- if and .features.otel (eq .os "linux") $svc -}}
+{{- $path := joinPath .chezmoi.homeDir ".config/otel/process-exporter.yaml" -}}
+#!/bin/sh
+
+{{- if stat $path }}
+
+# config: {{ include $path | sha256sum }}
+{{- end }}
+set -eu
+
+. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+
+if ! has process-exporter; then
+  die "process-exporter not found"
+fi
+
+if [ ! -d "$HOME/.local/state/process-exporter" ]; then
+  run mkdir -p "$HOME/.local/state/process-exporter"
+fi
+
+{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict "chezmoi" .chezmoi) $svc) -}}
+{{ end -}}

@@ -1,7 +1,7 @@
 ---
 # https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
 
-{{- if and (eq .os "linux") (eq .chassisVendor "Framework") }}
+{{- if and (eq .os "linux") (contains .chassisVendor "framework") }}
 
 # Framework: sudo dmidecode | grep -A1 'System Information' | tail -n1 | cut -d: -f2 | tr -d ' '
 .local/share/backgrounds/framework-dark.svg:
