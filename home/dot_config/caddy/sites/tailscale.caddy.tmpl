@@ -1,15 +1,15 @@
-{{- if and .features.tailscale .tailscale.tailnet -}}
-# https://github.com/tailscale/caddy-tailscale
+{{- if and .features.tailscale .caddy.tailscale.oauthSecret -}}
+{{- range $name, $s := .caddy.sites -}}
+{{- if not (get $.features (get $s "feature")) }}{{ continue }}{{ end -}}
+{{- if not (get $s "tailscale") }}{{ continue }}{{ end -}}
 
-# TODO: exclude opencode and sites that can't configure base path
-http://{{ .tailscale.tailnet }} {
-	import common
-	{{- range $name, $s := .caddy.sites }}
-	{{- if not (get $.features (get $s "feature")) }}{{ continue }}{{ end }}
-
-	handle_path /{{ $name }}* {
-		reverse_proxy localhost:{{ $s.port }}
+:443 {
+	bind tailscale/{{ $name }}
+	tls {
+		get_certificate tailscale
 	}
-	{{- end }}
+	tailscale_auth
+	reverse_proxy localhost:{{ $s.port }}
 }
 {{ end -}}
+{{- end -}}

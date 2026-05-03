@@ -63,8 +63,9 @@ ai:
       env: HF_TOKEN
     ollama-cloud:
       api: openai
-      base_url: https://ollama.com/v1
+      base_url: https://ollama.com/api
       env: OLLAMA_API_KEY
+      endpoint: /tags
     openrouter:
       api: openai
       base_url: https://openrouter.ai/api/v1
@@ -82,10 +83,18 @@ ai:
       api: openai
       base_url: https://api.z.ai/api/coding/paas/v4
       env: ZAI_API_KEY
-      # Built-in providers (no config needed, referenced in profiles only):
-      # opencode, opencode-go
+    # https://docs.mistral.ai/api
+    mistral:
+      api: mistral
+      env: MISTRAL_API_KEY
+    # Fallback: OpenAI-compatible Mistral endpoint
+    # mistral-openai:
+    #   api: openai
+    #   base_url: https://api.mistral.ai/v1
+    #   env: MISTRAL_API_KEY
 
   # Model: shared metadata and per-provider IDs
+
   # type: chat (generation) or embedding
   # reasoning: supports extended thinking / chain of thought
   # tool_call: supports function calling
@@ -131,14 +140,66 @@ ai:
         reasoning_tags:
           - "<|channel>thought"
           - "<channel|>"
-          # qwen3-coder-30b:
-          #   type: chat
-          #   context: 262144
-          #   output: 65536
-          #   reasoning: true
-          #   tool_call: true
-          #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
-          #   ollama: qwen3-coder:30b-a3b-q4_K_M
+    # Mistral models: https://docs.mistral.ai/api
+    mistral-small:
+      type: chat
+      context: 256000
+      output: 256000
+      reasoning: false
+      tool_call: true
+      mistral: mistral-small-latest
+    mistral-medium:
+      type: chat
+      context: 262144
+      output: 262144
+      reasoning: false
+      tool_call: true
+      mistral: mistral-medium-latest
+    mistral-large:
+      type: chat
+      context: 262144
+      output: 262144
+      reasoning: false
+      tool_call: true
+      mistral: mistral-large-latest
+    # Code generation and FIM
+    codestral:
+      type: chat
+      context: 256000
+      output: 4096
+      reasoning: false
+      tool_call: true
+      mistral: codestral-latest
+    # Agentic tool use for software development
+    devstral-small:
+      type: chat
+      context: 128000
+      output: 128000
+      reasoning: false
+      tool_call: true
+      mistral: devstral-small-latest
+    devstral-medium:
+      type: chat
+      context: 262144
+      output: 262144
+      reasoning: false
+      tool_call: true
+      mistral: devstral-medium-latest
+    devstral-small-free:
+      type: chat
+      context: 256000
+      output: 256000
+      reasoning: false
+      tool_call: true
+      mistral: labs-devstral-small-2512
+    # qwen3-coder-30b:
+    #   type: chat
+    #   context: 262144
+    #   output: 65536
+    #   reasoning: true
+    #   tool_call: true
+    #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
+    #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
   # Profile: named set of role-to-model mappings
   # Roles: chat, coding, embedding, fast, reasoning
@@ -244,3 +305,20 @@ ai:
       coding: zai-coding-plan/glm-5.1
       fast: zai-coding-plan/glm-4.7
       reasoning: zai-coding-plan/glm-5
+
+    # Mistral: https://mistral.ai/pricing
+    mistral-free:
+      chat: mistral/devstral-small-free
+      coding: mistral/devstral-small-free
+      fast: mistral/devstral-small-free
+      reasoning: mistral/devstral-small-free
+    mistral:
+      chat: mistral/mistral-small-latest
+      coding: mistral/devstral-medium-latest
+      fast: mistral/mistral-small-latest
+      reasoning: mistral/mistral-medium-latest
+    mistral-pro:
+      chat: mistral/mistral-large-latest
+      coding: mistral/devstral-medium-latest
+      fast: mistral/mistral-small-latest
+      reasoning: mistral/mistral-large-latest

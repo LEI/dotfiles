@@ -1,5 +1,5 @@
 {{- $checks := dict -}}
-{{- if hasKey . "caddy" -}}
+{{- if and (hasKey . "caddy") (hasKey .caddy "sites") -}}
 {{- range $name, $site := .caddy.sites -}}
 {{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end -}}
 {{- if hasKey $site "enabled" }}{{ if not (get $site "enabled") }}{{ continue }}{{ end }}{{ end -}}

@@ -72,3 +72,6 @@ caddy:
       body: OK
       liveness: /
       port: 9000
+  tailscale:
+    oauthSecret: ""
+    stateDir: ""

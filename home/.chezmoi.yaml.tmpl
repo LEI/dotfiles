@@ -117,6 +117,11 @@
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken }}
 {{- end }}
 
+{{- $caddyTailscaleOauthSecret := "" -}}
+{{- if not $headless -}}
+{{-   $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
+{{- end -}}
+
 {{- if $interactive }}
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" }}
 {{- end }}
@@ -130,6 +135,15 @@
 {{-   $timezone = output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim }}
 {{- end }}
 
+{{- $featureMap := dict
+  "homebrew" "brew"
+  "gem" "ruby"
+  "krew" "kube"
+  "npm" "node"
+  "nvim" "neovim"
+  "pi" "ai"
+-}}
+
 {{- $data := dict
   "arch" .chezmoi.arch
   "chassisType" $hardware.system.chassisType
@@ -140,6 +154,7 @@
   "container" $isContainer
   "devContainer" $devContainer
   "ephemeral" $ephemeral
+  "featureMap" $featureMap
   "gui" (and (ne $profile "minimal") (not (or $ephemeral $headless)))
   "hardware" $hardware
   "headless" $headless
@@ -149,6 +164,7 @@
   "osID" $osID
   "osIDLike" $osIDLike
   "osVersion" $osVersion
+  "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret))
   "passwordManager" (dict "accessToken" $accessToken)
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
@@ -161,14 +177,17 @@
   "email" $email
   "name" $name
 }}
+
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson }}
 {{- $_ := set $data "features" $features }}
+
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}
 {{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
 {{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
 {{-   end }}
 {{- end }}
+
 {{- $context := mergeOverwrite . $data }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/

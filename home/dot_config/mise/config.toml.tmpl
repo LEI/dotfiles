@@ -35,14 +35,11 @@ idiomatic_version_file_enable_tools = [
 env_shell_expand = true
 lockfile = true
 
-{{- $featMap := dict
-  "homebrew" "brew"
-  "nvim" "neovim"
-}}
 {{- $checkDirs := list }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
+{{- $checks := glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
+{{- range $checks }}
 {{-   $name := . | dir | base }}
-{{-   $feat := get $featMap $name | default $name }}
+{{-   $feat := get $.featureMap $name | default $name }}
 {{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
 {{-     continue }}
 {{-   end }}
@@ -81,7 +78,7 @@ run = [
 {{- $updateDirs := list }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
 {{-   $name := . | dir | base }}
-{{-   $feat := get $featMap $name | default $name }}
+{{-   $feat := get $.featureMap $name | default $name }}
 {{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
 {{-     continue }}
 {{-   end }}
@@ -117,7 +114,7 @@ description = "Validate system state with goss"
 interactive = true
 {{- end }}
 # Inline sh instead of shell = "sh" so arguments pass through to the script
-run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.sh") | quote }}
+run = {{ printf "sh '%s'" $checks | quote }}
 {{- end }}
 
 {{- $images := list

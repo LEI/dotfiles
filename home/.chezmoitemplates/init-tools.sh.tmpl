@@ -4,14 +4,6 @@
 {{- if .features.brew }}
 {{-   $ordered = prepend $ordered "homebrew" }}
 {{- end }}
-{{- $featureMap := dict
-  "claude" "ai"
-  "gem" "ruby"
-  "krew" "kube"
-  "npm" "node"
-  "nvim" "neovim"
-  "pi" "ai"
--}}
 {{- if ne $shell "zsh" -}}
 # shellcheck shell=bash
 {{ end -}}
@@ -35,7 +27,7 @@ unset _tool
   {{- if has $name $exclude }}
   {{-   continue }}
   {{- end }}
-  {{- if not (get $.features (get $featureMap $name | default $name)) }}
+  {{- if not (get $.features (get $.featureMap $name | default $name)) }}
   {{-   continue }}
   {{- end }}
   {{- $files = append $files ($path | trimSuffix ".tmpl"

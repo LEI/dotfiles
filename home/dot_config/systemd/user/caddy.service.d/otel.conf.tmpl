@@ -1,0 +1,8 @@
+{{- if .features.otel -}}
+{{- $otelEnv := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+[Service]
+{{- range $key := keys $otelEnv | sortAlpha }}
+Environment={{ $key }}={{ get $otelEnv $key }}
+{{- end }}
+Environment=OTEL_SERVICE_NAME=caddy
+{{ end -}}

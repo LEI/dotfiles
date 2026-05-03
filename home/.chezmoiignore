@@ -88,6 +88,8 @@ Library/LaunchAgents/com.mlx-lm.server.plist
 .chezmoiscripts/*install-packages.sh
 {{- end }}
 
+.config/caddy/setup-caddy-system.sh
+
 {{- if and (ne .osID "windows") (not .wsl) }}
 .config/powershell/
 {{- end }}

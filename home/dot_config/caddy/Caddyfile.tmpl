@@ -3,6 +3,13 @@
 	default_bind 127.0.0.1
 	admin localhost:2019
 	metrics
+	{{- if and .features.tailscale .caddy.tailscale.oauthSecret }}
+	tailscale {
+		auth_key {env.TS_CADDY_AUTH_KEY}
+		ephemeral false
+		state_dir {{ .caddy.tailscale.stateDir | default (joinPath .chezmoi.homeDir ".local/share/caddy-tailscale") }}
+	}
+	{{- end }}
 	# log default {
 	# 	output stdout
 	# 	format json

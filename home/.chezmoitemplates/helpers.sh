@@ -1,7 +1,7 @@
 #!/bin/sh
 # Shared preamble for chezmoi scripts
 
-lib_dir="${CHEZMOI_WORKING_TREE-}/home/dot_local/lib"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/bash/log.sh
 . "$lib_dir/bash/log.sh"
 
