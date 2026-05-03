@@ -1,32 +1,39 @@
 #!/usr/bin/env bash
-#MISE alias="ubuntu"
-#MISE description="VM"
+#MISE alias="vm"
+#MISE description="Run a tart (macOS) or vetu (Linux) VM by alias, or pass through to provider"
 #USAGE flag "-d... --dir <dir>" help="Mount host directory in the VM (name:path)"
-#USAGE flag "-i --image <image>" help="OCI image to clone (default: ubuntu-runner-<arch>:24.04)"
+#USAGE flag "-g --gui" help="Open native window (tart only; default headless)"
 #USAGE flag "-k --keep" help="Keep VM running after exit"
-#USAGE flag "-n --name <name>" help="VM name (default: ubuntu-runner)"
+#USAGE flag "-n --name <name>" help="VM name (default: from image alias)"
 #USAGE flag "-q --quiet" help="Use quiet output"
 #USAGE flag "-t --tmux" help="Run VM in a tmux session"
 #USAGE flag "-v --verbose" help="Use verbose output"
-#USAGE arg "[command]..." help="Command to run in the VM"
+#USAGE arg "[target]" help="Image alias or provider subcommand (default: --help)"
+#USAGE complete "target" run="./script/vm --list-aliases"
+#USAGE arg "[args]..." help="Command to run in the VM (alias mode), or provider args (passthrough)"
 
 set -euo pipefail
+shopt -s inherit_errexit
 
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/log.sh
 source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
 # shellcheck source=home/dot_local/lib/bash/require.sh
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
 trap 'log "error at line $LINENO"' ERR
 
+readonly PROG="${0##*/}"
+
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in
   Darwin) VM_PROVIDER=tart ;;
   Linux) VM_PROVIDER=vetu ;;
   *)
-    echo "${0##*/}: unsupported OS: $(uname -s)" >&2
+    msg "$PROG: unsupported OS: $(uname -s)"
     exit 1
     ;;
   esac
@@ -36,55 +43,69 @@ case "$(uname -m)" in
 x86_64) ARCH=amd64 ;;
 aarch64 | arm64) ARCH=arm64 ;;
 *)
-  echo "${0##*/}: unsupported arch: $(uname -m)" >&2
+  msg "$PROG: unsupported arch: $(uname -m)"
   exit 1
   ;;
 esac
 
+# Image aliases: alias -> "url|default-name|guest-os"
+declare -gA IMAGES=(
+  ["debian"]="ghcr.io/cirruslabs/debian:latest|debian|linux"
+  ["fedora"]="ghcr.io/cirruslabs/fedora:latest|fedora|linux"
+  ["rocky"]="ghcr.io/cirruslabs/rocky:latest|rocky|linux"
+  ["tahoe"]="ghcr.io/cirruslabs/macos-tahoe-base:latest|tahoe-base|darwin"
+  ["ubuntu"]="ghcr.io/cirruslabs/ubuntu:latest|ubuntu|linux"
+  ["ubuntu-runner"]="ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04|ubuntu-runner|linux"
+  ["ubuntu-runner-gpu"]="ghcr.io/cirruslabs/ubuntu-runner-amd64-gpu:latest|ubuntu-runner-gpu|linux"
+)
+readonly IMAGES
+
 vm() { "$VM_PROVIDER" "$@"; }
 
-vm_init() {
-  log "cloning $image as $name"
-  # NOTE: default ubuntu VM is built to run on "arm64"
-  vm clone "$image" "$name"
-  vm set "$name" --disk-size 40
+vm_state() {
+  case "$VM_PROVIDER" in
+  tart) vm list --format json |
+    jq --raw-output --arg name "$1" '.[] | select(.Name==$name) | .State' ;;
+  *) vm list | awk -v n="$1" '$0 ~ ("\t" n " ") {print $4}' ;;
+  esac
 }
 
-vm_state() {
-  if [ "$VM_PROVIDER" = tart ]; then
-    vm list --format json | jq --raw-output --arg name "$name" '.[] | select(.Name==$name) | .State'
-  else
-    vm list | awk '/\t'"$name"' / {print $4}'
-  fi
+vm_clone() {
+  log "cloning $image as $name"
+  trace vm clone "$image" "$name"
 }
 
 vm_start() {
   log "starting $name"
-  local run_args=()
+  local args=()
   if [ "$VM_PROVIDER" = tart ]; then
-    run_args+=(--no-graphics)
+    [ "$gui" = true ] || args+=(--no-graphics)
+    local entry
     for entry in $dirs; do
-      run_args+=("--dir=$entry")
+      args+=("--dir=$entry")
     done
+  elif [ "$gui" = true ]; then
+    warn "$VM_PROVIDER: --gui not supported, running headless"
   fi
   if [ "$tmux" = true ] && ! tmux ls 2>/dev/null | grep -q '^vm: '; then
-    trace tmux new-session -d -s vm "$VM_PROVIDER run ${run_args[*]} $name"
-  else
-    local vm_log="/tmp/${VM_PROVIDER}-${name}.log"
-    if [ "$verbosity" -ge 2 ]; then
-      vm run "${run_args[@]}" "$name" 2>&1 | tee "$vm_log" &
-    else
-      vm run "${run_args[@]}" "$name" 2>&1 1>/dev/null | tee "$vm_log" >&2 &
-    fi
-    sleep 1
+    trace tmux new-session -d -s vm "$VM_PROVIDER run ${args[*]} $name"
+    return
   fi
+  local vm_log="/tmp/${VM_PROVIDER}-${name}.log"
+  if [ "$verbosity" -ge 2 ]; then
+    vm run "${args[@]}" "$name" 2>&1 | tee "$vm_log" &
+  else
+    vm run "${args[@]}" "$name" 2>&1 1>/dev/null | tee "$vm_log" >&2 &
+  fi
+  sleep 1
 }
 
 vm_wait() {
   if [ "$VM_PROVIDER" = tart ]; then
     log "waiting for guest agent"
     # shellcheck disable=SC2016
-    timeout 500 sh -c 'until "$1" exec "$2" true >/dev/null 2>&1; do sleep 2; done' -- "$VM_PROVIDER" "$name"
+    timeout 500 sh -c 'until "$1" exec "$2" true >/dev/null 2>&1; do sleep 2; done' \
+      -- "$VM_PROVIDER" "$name"
   else
     log "waiting for IP"
     ssh_host="$(vm ip --wait=30 "$name")"
@@ -100,6 +121,10 @@ vm_mount() {
     warn "$VM_PROVIDER does not support host directory sharing"
     return 0
   fi
+  if [ "$guest_os" = darwin ]; then
+    log "skipping virtiofs mount (auto-mounted on macOS guests)"
+    return 0
+  fi
   local entry tag
   for entry in $dirs; do
     case "$entry" in
@@ -107,37 +132,32 @@ vm_mount() {
     *) tag="${entry##*/}" ;;
     esac
     log "mounting $tag"
-    vm exec "$name" sh -c "mp=\$HOME/.local/share/$tag && mkdir -p \"\$mp\" && mount -t virtiofs $tag \"\$mp\""
+    vm exec "$name" sh -c "mp=\$HOME/.local/share/$tag && mkdir -p \"\$mp\" && sudo modprobe virtiofs 2>/dev/null; sudo mount -t virtiofs $tag \"\$mp\""
   done
 }
 
 vm_exec() {
-  log "running command: $*"
-  # shellcheck disable=SC2016
-  local shell_cmd='cd "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi" && exec "$@"'
   if [ "$VM_PROVIDER" = tart ]; then
-    if [ -t 0 ]; then
-      vm exec -it "$name" sh -l -c "$shell_cmd" -- "$@"
-    else
-      vm exec -i "$name" sh -l -c "$shell_cmd" -- "$@"
-    fi
+    local flags=()
+    [ -t 0 ] && flags=(-it)
+    vm exec "${flags[@]}" "$name" "$@"
   else
-    if [ -t 0 ]; then
-      sshpass -padmin ssh -t \
-        -o StrictHostKeyChecking=no \
-        -o ConnectTimeout=60 \
-        -p "$ssh_port" \
-        "admin@$ssh_host" \
-        sh -l -c "$shell_cmd" -- "$@"
-    else
-      sshpass -padmin ssh \
-        -o StrictHostKeyChecking=no \
-        -o ConnectTimeout=60 \
-        -p "$ssh_port" \
-        "admin@$ssh_host" \
-        sh -l -c "$shell_cmd" -- "$@"
-    fi
+    local ssh_args=(
+      -o StrictHostKeyChecking=no
+      -o ConnectTimeout=60
+      -p "$ssh_port"
+    )
+    [ -t 0 ] && ssh_args=(-t "${ssh_args[@]}")
+    sshpass -padmin ssh "${ssh_args[@]}" "admin@$ssh_host" "$@"
   fi
+}
+
+vm_exec_cmd() {
+  log "running command: $*"
+  # cd into chezmoi root if mounted (linux: virtiofs; darwin: tart auto-mount)
+  # shellcheck disable=SC2016
+  local sh_cmd='for d in "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi" "/Volumes/My Shared Files/chezmoi"; do [ -d "$d" ] && cd "$d" && break; done; exec "$@"'
+  vm_exec sh -l -c "$sh_cmd" -- "$@"
 }
 
 vm_stop() {
@@ -145,7 +165,12 @@ vm_stop() {
   trace vm stop "$name"
 }
 
+restore_tty() {
+  [ -n "${tty_state:-}" ] && stty "$tty_state" 2>/dev/null || true
+}
+
 cleanup() {
+  restore_tty
   if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
     log "killing tmux session"
     trace tmux kill-session -t vm
@@ -153,36 +178,107 @@ cleanup() {
   vm_stop
 }
 
-main() {
-  if [ "$VM_PROVIDER" = vetu ]; then
-    ssh_host=""
-    ssh_port=22
+# Copy a host file into the VM. Tart lacks a native cp, and `tart exec -i name
+# cmd <file` crashes in 2.32.1 on Linux guests (getTerminalSize ioctl). Avoid
+# stdin redirect by base64-encoding the file into the command line for tart;
+# vetu has working SSH so sshpass+scp is fine there.
+vm_cp() {
+  local src="$1" dst="$2" b64
+  if [ "$VM_PROVIDER" = tart ]; then
+    b64="$(base64 <"$src")"
+    # shellcheck disable=SC2016
+    vm exec "$name" sh -c \
+      'printf "%s" "$1" | base64 -d >"$2" && chmod +x "$2"' \
+      -- "$b64" "$dst"
+  else
+    : "${ssh_host:=$(vm ip "$name")}"
+    sshpass -padmin scp -o StrictHostKeyChecking=no -P "$ssh_port" \
+      "$src" "admin@$ssh_host:$dst"
   fi
+}
 
-  dirs="${VM_DIRS:-}"
-  image="${VM_IMAGE:-ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04}"
-  name="${VM_NAME:-ubuntu-runner}"
-  keep="${VM_KEEP:-false}"
-  tmux="${VM_TMUX:-false}"
-  verbosity="${VM_VERBOSITY:-1}"
+# Sets BOOTSTRAP_PATH; not stdout, since `$(...)` capture turns tart exec
+# stdout into a pipe and trips tart 2.32.1's terminal-size probe.
+copy_bootstrap() {
+  local vm_home
+  case "$guest_os" in
+  darwin) vm_home=/Users/admin ;;
+  *) vm_home=/home/admin ;;
+  esac
+  BOOTSTRAP_PATH="$vm_home/.local/bin/bootstrap"
+  log "copying bootstrap script to $BOOTSTRAP_PATH"
+  vm_exec mkdir -p "${BOOTSTRAP_PATH%/*}"
+  vm_cp ./script/bootstrap "$BOOTSTRAP_PATH"
+}
 
+cmd_run() {
+  local target="$1"
+  shift
+  local image default_name guest_os mounted=false
+  if [ -n "${IMAGES[$target]:-}" ]; then
+    IFS='|' read -r image default_name guest_os <<<"${IMAGES[$target]}"
+    # tart 2.32.1 --dir reaches darwin guests only; linux guests must pass -d
+    [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ] && : "${dirs:=chezmoi:$PWD:ro}"
+  elif [[ $target == */* ]]; then
+    image="$target"
+    default_name="${target##*/}"
+    default_name="${default_name%:*}"
+    guest_os="${VM_GUEST_OS:-linux}"
+  else
+    msg "$PROG: unknown alias: $target"
+    return 1
+  fi
+  case " $dirs " in *" chezmoi:"*) mounted=true ;; esac
+  : "${name:=$default_name}"
+  ssh_host=""
+  ssh_port=22
+  local state
+  state="$(vm_state "$name")"
+  if [ -z "$state" ]; then
+    vm_clone
+  fi
+  if [ "$state" != running ]; then
+    [ "$keep" = true ] || trap cleanup EXIT
+    vm_start
+    vm_wait
+    vm_mount
+  elif [ -n "$dirs" ]; then
+    log "VM already running; --dir mounts require a fresh start"
+  fi
+  if [ "$#" -eq 0 ]; then
+    if [ "$mounted" = true ]; then
+      set -- env CI=true CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
+        ./script/bootstrap --no-tty --verbose
+    else
+      copy_bootstrap
+      set -- env CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
+        "$BOOTSTRAP_PATH" --no-tty --verbose LEI
+    fi
+  fi
+  vm_exec_cmd "$@"
+}
+
+# Parse alias-mode flags from "$@"; remaining args land in OUR_ARGS.
+# Sets: dirs, gui, keep, name, tmux, verbosity, OUR_ARGS
+parse_flags() {
+  OUR_ARGS=()
   while [ $# -gt 0 ]; do
     case "$1" in
+    -h | --help)
+      usage_help
+      exit 0
+      ;;
+    --usage)
+      usage_spec
+      exit 0
+      ;;
     -d | --dir)
       dirs="${dirs:+$dirs }$2"
       shift 2
       ;;
-    -h | --help)
-      if command -v usage >/dev/null; then
-        usage exec --help bash "$0"
-      else
-        echo "Usage: ${0##*/} [-l] [filter...]"
-      fi
-      return
-      ;;
-    -i | --image)
-      image="$2"
-      shift 2
+    -g | --gui)
+      gui=true
+      shift
       ;;
     -k | --keep)
       keep=true
@@ -200,10 +296,6 @@ main() {
       tmux=true
       shift
       ;;
-    --usage)
-      grep '^#USAGE' "$0" | sed 's/^#USAGE //'
-      return
-      ;;
     -v | --verbose)
       verbosity=2
       shift
@@ -213,11 +305,11 @@ main() {
       break
       ;;
     --*)
-      echo "${0##*/}: unknown option: $1" >&2
-      exit 1
+      msg "$PROG: unknown option: $1"
+      exit 2
       ;;
     -*)
-      opt="${1#-}"
+      local opt="${1#-}"
       shift
       while [ -n "$opt" ]; do
         case "${opt:0:1}" in
@@ -225,10 +317,7 @@ main() {
           dirs="${dirs:+$dirs }$1"
           shift
           ;;
-        i)
-          image="$1"
-          shift
-          ;;
+        g) gui=true ;;
         k) keep=true ;;
         n)
           name="$1"
@@ -238,66 +327,61 @@ main() {
         t) tmux=true ;;
         v) verbosity=2 ;;
         *)
-          echo "${0##*/}: unknown option: -${opt:0:1}" >&2
-          exit 1
+          msg "$PROG: unknown option: -${opt:0:1}"
+          exit 2
           ;;
         esac
         opt="${opt:1}"
       done
       ;;
-    *)
-      break
-      ;;
+    *) break ;;
     esac
   done
+  OUR_ARGS=("$@")
+}
 
-  if ! command -v "$VM_PROVIDER" >/dev/null; then
-    echo "${0##*/}: $VM_PROVIDER is not installed" >&2
-    exit 1
-  fi
+main() {
+  case "${1:-}" in
+  '' | -h | --help)
+    usage_help
+    return
+    ;;
+  --usage)
+    usage_spec
+    return
+    ;;
+  --list-aliases)
+    printf '%s\n' "${!IMAGES[@]}" | sort
+    return
+    ;;
+  --)
+    shift
+    exec "$VM_PROVIDER" "$@"
+    ;;
+  esac
 
-  state="$(vm_state)"
-  if [ -z "$state" ]; then
-    vm_init
-  fi
-  if [ "$state" != running ]; then
-    if [ "$keep" != true ]; then
-      trap cleanup EXIT
-    fi
-    vm_start
-    vm_wait
-    vm_mount
-  elif [ -n "$dirs" ]; then
-    log "VM already running; --dir mounts require a fresh start"
-  fi
+  tty_state=$(stty -g 2>/dev/null || true)
+  trap restore_tty EXIT
 
-  if [ "$#" -eq 0 ]; then
-    local vm_home bin_dir
-    if [ "$VM_PROVIDER" = tart ]; then
-      # shellcheck disable=SC2016
-      vm_home="$(vm exec "$name" sh -c 'echo $HOME')"
-    else
-      vm_home="/home/admin"
-    fi
-    bin_dir="$vm_home/.local/bin"
-    log "copying bootstrap script to $bin_dir"
-    vm_exec mkdir -p "$bin_dir"
-    if [ "$VM_PROVIDER" = tart ]; then
-      vm exec -i "$name" sh -c "cat > '$bin_dir/bootstrap' && chmod +x '$bin_dir/bootstrap'" <./script/bootstrap
-    else
-      sshpass -padmin scp -o StrictHostKeyChecking=no -P "$ssh_port" ./script/bootstrap "admin@$ssh_host:$bin_dir/bootstrap"
-    fi
-    set -- env CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" "$bin_dir/bootstrap" --no-tty --verbose LEI
-  fi
+  require_cmd "$VM_PROVIDER"
+  [ "$VM_PROVIDER" = tart ] || require_cmd sshpass
 
-  vm_exec "$@"
-
-  if [ "$verbosity" -ge 2 ]; then
-    trace vm list
+  if [ -n "${IMAGES[$1]:-}" ] || [[ $1 == */* ]]; then
+    local target="$1"
+    shift
+    dirs="${VM_DIRS:-}"
+    gui="${VM_GUI:-false}"
+    keep="${VM_KEEP:-false}"
+    name="${VM_NAME:-}"
+    tmux="${VM_TMUX:-false}"
+    verbosity="${VM_VERBOSITY:-1}"
+    parse_flags "$@"
+    cmd_run "$target" "${OUR_ARGS[@]}"
+  else
+    exec "$VM_PROVIDER" "$@"
   fi
 }
 
-# Allow sourcing for testing (e.g. bats)
-if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   main "$@"
 fi

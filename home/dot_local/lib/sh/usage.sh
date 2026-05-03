@@ -1,23 +1,16 @@
 # shellcheck shell=sh
 
-# Render --help via the `usage` tool, falling back to "Usage: <prog> [args...]"
+# Render --help via `usage`, with raw #USAGE spec fallback
 usage_help() {
   if ! command -v usage >/dev/null; then
-    echo "Usage: ${0##*/}${*:+ $*}"
+    echo "${0##*/}: \`usage\` not installed, showing raw spec" >&2
+    usage_spec
     return
-  fi
-  if ! grep -q '^#USAGE' "$0"; then
-    echo "${0##*/}: no #USAGE directives in $0" >&2
-    return 1
-  fi
-  if [ $# -gt 1 ]; then
-    echo "usage_help: too many arguments" >&2
-    return 2
   fi
   usage exec --help bash "$0"
 }
 
-# Print this script's #USAGE directives, stripped of the prefix
+# Print #USAGE directives without the leading prefix
 usage_spec() {
   grep '^#USAGE' "$0" | sed 's/^#USAGE //'
 }

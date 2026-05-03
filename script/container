@@ -2,9 +2,8 @@
 #MISE alias="ct"
 #MISE description="Run container pipeline for one image"
 #MISE hide=true
-#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)" {
-#USAGE   choices "alpine" "archlinux" "debian" "fedora" "opensuse" "termux" "ubuntu"
-#USAGE }
+#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)"
+#USAGE complete "image" run="./script/container --list-images"
 #USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"
 
 set -euo pipefail
@@ -12,6 +11,8 @@ set -euo pipefail
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/log.sh
 source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
 # shellcheck source=home/dot_local/lib/bash/require.sh
 source "$lib_dir/bash/require.sh"
 
@@ -25,9 +26,9 @@ readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
 container() { "$CONTAINER_PROVIDER" "$@"; }
 
-# Resolve image-specific variables from an image arg (name or name:version).
-# Sets: image_name, version, image, image_tag, container, prefix,
-#       home, exec_user, chezmoi_root
+# Init image-specific config from "<name>" or "<name>:<version>".
+# Sets: image_name, version, prefix, image, image_tag, container,
+# home, exec_user, file_owner, chezmoi_root
 resolve() {
   local arg="$1"
   local version_arg repo arch
@@ -244,15 +245,15 @@ pipeline() {
 main() {
   case "${1:-}" in
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: container [image] [cmd...]"
-    fi
+    usage_help
     return
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
+    return
+    ;;
+  --list-images)
+    list
     return
     ;;
   --)

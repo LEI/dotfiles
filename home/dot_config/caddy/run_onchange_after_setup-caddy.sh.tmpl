@@ -242,6 +242,11 @@ HERE
   pf_changed=true
 fi
 
+# Reload if the 443 redirect isn't active, even when config files are unchanged
+if ! nc -z -w 1 127.0.0.1 443 >/dev/null 2>&1; then
+  pf_changed=true
+fi
+
 if [ "$pf_changed" = true ]; then
   run sudo pfctl -e -f "$pf_conf"
 fi

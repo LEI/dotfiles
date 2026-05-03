@@ -610,6 +610,9 @@ packages:
   # ssh-list:
   #   enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
+  sshpass:
+    enabled: {{ and .features.ssh (ne .profile "minimal") (not .ephemeral) }}
+    type: {{ eq .os "darwin" | ternary "brew" nil }}
   sshs: # sshclick, ssm, fast-ssh
     enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) .gui }}
   steam:

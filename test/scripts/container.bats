@@ -1,4 +1,4 @@
-# shellcheck disable=SC2154,SC2016
+# shellcheck disable=SC2016,SC2154,SC2329
 
 setup_file() {
   # shellcheck source=test/common/setup-file.sh
@@ -142,7 +142,6 @@ source_container() {
 @test "container: main routes status aliases to status" {
   source_container
   # stub container inspect to report no containers exist
-  # shellcheck disable=SC2329
   container() { return 1; }
   for cmd in "" s st status; do
     run main $cmd
@@ -157,7 +156,6 @@ source_container() {
   resolve alpine
 
   # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
   container() {
     local args
     args=$(printf '%s\n' "$@")
@@ -179,7 +177,6 @@ source_container() {
   export CI=true
 
   # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
   container() {
     local args
     args=$(printf '%s\n' "$@")
@@ -198,7 +195,6 @@ source_container() {
   export GITHUB_TOKEN="secret-token-123"
 
   # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
   container() {
     local args
     args=$(printf '%s\n' "$@")
@@ -217,7 +213,6 @@ source_container() {
   resolve alpine
 
   # Mock container_exec to capture command
-  # shellcheck disable=SC2329
   container_exec() {
     echo "$@"
   }

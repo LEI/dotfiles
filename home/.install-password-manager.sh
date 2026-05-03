@@ -81,6 +81,7 @@ Linux)
     ;;
   debian)
     # export DEBIAN_FRONTEND=noninteractive
+    run sudo apt-get update --quiet
     # run sudo -E apt-get install --quiet --yes unzip >/dev/null
     run sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
