@@ -7,7 +7,8 @@
         "--config" (printf "%s/.config/caddy/Caddyfile" .chezmoi.homeDir))
       "env" (dict
         "HOME" .chezmoi.homeDir
-        "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
+        "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix)
+        "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default ""))
       "log" (printf "%s/Library/Logs/caddy.log" .chezmoi.homeDir)
       "workdir" .chezmoi.homeDir) -}}
 {{- end -}}

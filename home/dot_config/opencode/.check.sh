@@ -14,7 +14,9 @@ AUTH_FILE="$XDG_DATA_HOME/opencode/auth.json"
 
 # Global temp file cleanup
 TMP_FILES=""
+# shellcheck disable=SC2329
 cleanup() {
+  # shellcheck disable=SC2086
   rm -f $TMP_FILES
 }
 trap cleanup EXIT
@@ -32,13 +34,16 @@ tap_plan "$provider_count"
 check_endpoint() {
   url="$1"
   name="$2"
-  api_type="$3"
-  env_var="$4"
+  env_var="$3"
 
   # Look up auth key
   key=""
-  [ -n "$env_var" ] && key=$(printenv "$env_var" 2>/dev/null || true)
-  [ -z "$key" ] && key=$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE" 2>/dev/null)
+  if [ -n "$env_var" ]; then
+    key="$(printenv "$env_var" 2>/dev/null || true)"
+  fi
+  if [ -z "$key" ]; then
+    key="$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE" 2>/dev/null)"
+  fi
 
   if [ -z "$key" ]; then
     tap_ok "$name" "SKIP No auth key"
@@ -73,7 +78,11 @@ check_endpoint() {
   # FAIL conditions
   if [ "$status" != "200" ]; then
     tap_not_ok "$name"
-    [ "$status" = "401" ] && tap_diag "Authentication failed" || tap_diag "HTTP error"
+    if [ "$status" = "401" ]; then
+      tap_diag "Authentication failed"
+    else
+      tap_diag "HTTP error"
+    fi
 
     if [ -s "$tmpbody" ] && jq empty "$tmpbody" 2>/dev/null; then
       error_msg=$(jq -r '.error // .message // .detail // empty' "$tmpbody" 2>/dev/null)
@@ -113,7 +122,7 @@ check_endpoint() {
   if [ "$name" = "zai" ]; then
     quota=$(curl -sS -H "Authorization: Bearer $key" "https://api.z.ai/api/monitor/usage/quota/limit" 2>/dev/null || true)
     if [ -n "$quota" ] && echo "$quota" | jq empty 2>/dev/null; then
-      echo "$quota" | jq -r '.data.limits[]? | [.unit, (.percentage // 0), (.nextResetTime // 0)] | @tsv' 2>/dev/null | while IFS=$'\t' read -r unit pct reset; do
+      echo "$quota" | jq -r '.data.limits[]? | [.unit, (.percentage // 0), (.nextResetTime // 0)] | @tsv' 2>/dev/null | while IFS="$(printf '\t')" read -r unit pct reset; do
         case "$unit" in
         3) label="5 hours quota" ;;
         5) label="monthly web" ;;
@@ -146,7 +155,7 @@ get_endpoint() {
 yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | [.value.base_url, .key, .value.api, .value.env] | @tsv' "$AI_YAML" 2>/dev/null | while IFS="$(printf '\t')" read -r base_url name api env; do
   endpoint=$(get_endpoint "$api")
   url="${base_url}${endpoint}"
-  check_endpoint "$url" "$name" "$api" "$env"
+  check_endpoint "$url" "$name" "$env"
 done
 
 exit "$TAP_FAILS"

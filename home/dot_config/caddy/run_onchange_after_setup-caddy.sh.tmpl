@@ -1,4 +1,5 @@
-{{- $caddyfilePath := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
+{{- $file := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
+{{- $liveness := dict "path" "/config/" "retries" 5 "delay" 2 -}}
 {{- $testSite := "" -}}
 {{- $testPath := "/" -}}
 {{- range $name, $s := .caddy.sites -}}
@@ -9,9 +10,9 @@
 {{- end -}}
 {{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
 #!/bin/sh
-{{- if stat $caddyfilePath }}
+{{- if stat $file }}
 
-# Caddyfile: {{ include $caddyfilePath | sha256sum }}
+# Caddyfile: {{ include $file | sha256sum }}
 {{- end }}
 {{- range glob (joinPath .chezmoi.homeDir ".config/caddy/sites/*.caddy") }}
 # {{ base . }}: {{ include . | sha256sum }}
@@ -169,18 +170,25 @@ fi
   "active" true
   "system" false
   "unit" "caddy"
-  "liveness" "/config/"
+  "liveness" $liveness
   "port" .caddy.admin.port
 ) -}}
 
 {{- else if eq .chezmoi.os "darwin" }}
 
-# Stop brew-managed caddy so the user LaunchAgent owns 18080/18443
-if sudo launchctl bootout system/homebrew.mxcl.caddy 2>/dev/null; then
-  msg "stopped system-level brew caddy"
+# launchd silently fails to open log file if directory is missing
+if [ ! -d "$HOME/Library/Logs" ]; then
+  run mkdir -p "$HOME/Library/Logs"
 fi
-if launchctl bootout "gui/$(id -u)/homebrew.mxcl.caddy" 2>/dev/null; then
-  msg "stopped user-level brew caddy"
+
+# Stop brew-managed caddy so the user LaunchAgent owns 18080/18443
+if [ -f /Library/LaunchDaemons/homebrew.mxcl.caddy.plist ]; then
+  msg "Stopping system-level brew caddy (may prompt for sudo)"
+  run sudo launchctl bootout system/homebrew.mxcl.caddy 2>/dev/null || true
+fi
+if [ -f "$HOME/Library/LaunchAgents/homebrew.mxcl.caddy.plist" ]; then
+  msg "Stopping user-level brew caddy"
+  run launchctl bootout "gui/$(id -u)/homebrew.mxcl.caddy" 2>/dev/null || true
 fi
 
 # Reclaim caddy data dir from root if previously created by sudo brew caddy
@@ -202,20 +210,14 @@ if ! diff -q "$pf_dest" "$pf_src" >/dev/null 2>&1; then
 fi
 
 # /etc/pf.conf: insert caddy anchor declarations in proper position
-# (rdr-anchor must precede anchor/filter rules per pf grammar)
+# (rdr-anchor must precede anchor/filter rules per pf grammar).
 # Restore: sudo sed -i '' -e '/^rdr-anchor "caddy"$/d' -e '/^anchor "caddy"$/d' -e '/^load anchor "caddy" from /d' /etc/pf.conf
-if grep -q '^# chezmoi: caddy anchor' "$pf_conf"; then
-  pf_needs_update=true # legacy append present; rewrite to proper layout
-elif grep -q '^rdr-anchor "caddy"$' "$pf_conf" &&
-  grep -q '^anchor "caddy"$' "$pf_conf" &&
-  grep -q '^load anchor "caddy" from ' "$pf_conf"; then
-  pf_needs_update=false
-else
-  pf_needs_update=true
-fi
-if [ "$pf_needs_update" = true ]; then
-  msg "Updating $pf_conf with caddy anchor entries (proper position)"
-  pf_desired=$(sed '/^# chezmoi: caddy anchor/,/^load anchor "caddy"/d' "$pf_conf" | awk '
+pf_clean=$(sed -e '/^rdr-anchor "caddy"$/d' \
+  -e '/^anchor "caddy"$/d' \
+  -e '/^load anchor "caddy" from /d' "$pf_conf")
+if printf '%s' "$pf_clean" | grep -q '^rdr-anchor "com\.apple' &&
+  printf '%s' "$pf_clean" | grep -q '^load anchor "com\.apple"'; then
+  pf_desired=$(printf '%s\n' "$pf_clean" | awk '
 { print }
 !rdr_added && /^rdr-anchor "com\.apple/ { print "rdr-anchor \"caddy\""; rdr_added=1 }
 !anchor_added && /^load anchor "com\.apple"/ {
@@ -224,12 +226,24 @@ if [ "$pf_needs_update" = true ]; then
   anchor_added=1
 }
 ')
-  printf '%s\n' "$pf_desired" | sudo tee "$pf_conf" >/dev/null
+else
+  pf_desired=$(printf '%s\nrdr-anchor "caddy"\nanchor "caddy"\nload anchor "caddy" from "/etc/pf.anchors/caddy"\n' "$pf_clean")
+fi
+
+if ! printf '%s' "$pf_desired" | grep -q '^load anchor "caddy"'; then
+  die "pf.conf rewrite produced incomplete output; aborting before bricking pf"
+fi
+
+if ! printf '%s\n' "$pf_desired" | diff -q - "$pf_conf" >/dev/null 2>&1; then
+  msg "Updating $pf_conf with caddy anchor entries"
+  run sudo sh -c 'cat >"$1"' _ "$pf_conf" <<HERE
+$pf_desired
+HERE
   pf_changed=true
 fi
 
 if [ "$pf_changed" = true ]; then
-  run sudo pfctl -f "$pf_conf"
+  run sudo pfctl -e -f "$pf_conf"
 fi
 
 # Route .test queries to 127.0.0.1 via standalone dnsmasq
@@ -252,15 +266,11 @@ fi
   "active" true
   "bootstrap" true
   "label" "com.caddy"
-  "liveness" (dict "path" "/config/" "host" "127.0.0.1" "retries" 5 "delay" 2)
+  "liveness" (merge $liveness (dict "host" "127.0.0.1"))
   "port" .caddy.admin.port
   "reload" `caddy reload --config "$caddyfile" --address "$admin_addr"`
 ) -}}
 {{- end }}
-if ! run curl -sf "http://$admin_addr/pki/ca/local" >/dev/null 2>&1; then
-  die "Caddy CA not ready; run again after caddy initializes"
-fi
-
 # Trust CA system-wide (caddy trust handles platform-native trust store)
 if ! curl --silent --fail "http://$admin_addr/pki/ca/local/trusted" | jq --exit-status '.trusted == true' >/dev/null; then
   run caddy trust --ca local
