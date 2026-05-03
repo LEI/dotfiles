@@ -1,57 +1,4 @@
-#!/bin/sh
-# Shared preamble for chezmoi scripts
-
-lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
-# shellcheck source=home/dot_local/lib/bash/log.sh
-. "$lib_dir/bash/log.sh"
-
-# Collapsed OS identifier: id_like or id or os, android for termux
-OSID="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
-if [ "$OSID" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
-  OSID=android
-fi
-
-# Check if value is truthy (1 or true)
-truthy() {
-  case "$1" in
-  1 | true) return 0 ;;
-  *) return 1 ;;
-  esac
-}
-
-# Enable shell trace when CHEZMOI_TRACE is set (custom)
-truthy "${CHEZMOI_TRACE:-}" && set -x
-
-# Check if command exists in PATH
-has() {
-  command -v "$@" >/dev/null 2>&1
-}
-
-# Print prefixed error to stderr and exit
-die() {
-  warn "$@"
-  exit 1
-}
-
-# Log command to stderr when verbose, then execute
-# CHEZMOI_VERBOSE is set to 1 by chezmoi --verbose (native)
-run() {
-  if truthy "${CHEZMOI_VERBOSE:-}"; then
-    trace "$@"
-  else
-    "$@"
-  fi
-}
-
-# Like run but skip execution in dry run mode
-# DRY_RUN is a custom env var for test harness safety
-dry_run() {
-  if truthy "${DRY_RUN:-}"; then
-    msg "DRY-RUN: $*"
-    return 0
-  fi
-  run "$@"
-}
+# shellcheck shell=sh
 
 # Check HTTP endpoint returns expected status code
 # Usage: http_check <url> [expected_status]
@@ -82,15 +29,6 @@ retry() {
     [ "$i" -lt "$attempts" ] && sleep "$delay"
   done
   return 1
-}
-
-# Fail if mise version is older than the required minimum (YYYY.M.D format)
-require_mise_version() {
-  _min="$1"
-  _ver="$(mise version --json | jq -r '.version')"
-  if ! printf '%s\n%s\n' "$_min" "$_ver" | sort -V -C; then
-    die "mise >= $_min required (found ${_ver:-unknown})"
-  fi
 }
 
 # Resolve latest release tag from GitHub

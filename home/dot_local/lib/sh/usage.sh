@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=sh
 
 # Render --help via the `usage` tool, falling back to "Usage: <prog> [args...]"
 usage_help() {

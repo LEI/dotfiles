@@ -4,7 +4,11 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 {{- $systemPackages := get .packages .packageManager }}
 {{- if or (empty $systemPackages) (not (kindIs "map" $systemPackages)) }}
@@ -18,7 +22,7 @@ packages="{{ $packageList | join " " }}"
 # Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
 {{- end }}
 msg "Installing {{ .packageManager }} packages: $packages"
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) | trim }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) }}
 {{- if eq .osID "alpine" }}
 
 dry_run sudo apk update --quiet
@@ -139,7 +143,7 @@ dry_run winget import --disable-interactivity --import-file="$import_file"
 
 die "invalid OS: {{ .osID }}"
 {{- end }}
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) -}}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) }}
 {{- if and .codespaces (eq .osIDLike "debian") }}
 
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"

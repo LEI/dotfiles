@@ -9,9 +9,9 @@
 
 set -euo pipefail
 
-script_dir="${BASH_SOURCE[0]%/*}"
-# shellcheck source=home/dot_local/lib/bash/parallel.sh
-source "$script_dir/../home/dot_local/lib/bash/parallel.sh"
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
 
 # PATH="$PATH:$HOME/.local/bin"
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then

@@ -219,8 +219,9 @@ SKIP c # no schema"
 # parallel
 
 setup_parallel() {
-  # shellcheck source=home/dot_local/lib/bash/parallel.sh
-  source home/dot_local/lib/bash/parallel.sh
+  lib_dir=home/dot_local/lib
+  # shellcheck source=home/dot_local/lib/sh/parallel.sh
+  source "$lib_dir/sh/parallel.sh"
 }
 
 @test "clamp: clamps value to min and max bounds" {
@@ -264,13 +265,13 @@ setup_parallel() {
 # validate
 
 setup_usage() {
-  # shellcheck source=home/dot_local/lib/bash/usage.sh
-  source home/dot_local/lib/bash/usage.sh
+  # shellcheck source=home/dot_local/lib/sh/usage.sh
+  source home/dot_local/lib/sh/usage.sh
 }
 
 @test "usage_spec: extracts #USAGE lines stripped of prefix" {
   setup_usage
-  local lib="$PWD/home/dot_local/lib/bash/usage.sh"
+  local lib="$PWD/home/dot_local/lib/sh/usage.sh"
   local file="$BATS_TEST_TMPDIR/sample.sh"
   cat >"$file" <<'EOF'
 #USAGE flag "-x" help="Test"

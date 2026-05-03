@@ -105,18 +105,6 @@ run = [
 {{- end }}
 ]
 
-{{- if .features.goss }}
-
-[tasks.goss]
-alias = "go"
-description = "Validate system state with goss"
-{{- if $miseInteractive }}
-interactive = true
-{{- end }}
-# Inline sh instead of shell = "sh" so arguments pass through to the script
-run = {{ printf "sh '%s'" $checks | quote }}
-{{- end }}
-
 {{- $images := list
   "alpine"
   "archlinux"

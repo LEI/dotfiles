@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=sh
 
 # Print to stderr
 msg() {
@@ -18,11 +18,6 @@ log() {
 # Prefixed warning
 warn() {
   msg "$(log_prefix): warning: $*"
-}
-
-# Set ERR trap to log the failing line number
-err_trap() {
-  trap 'log "error at line $LINENO"' ERR
 }
 
 # Quote shell-special args (POSIX-safe)

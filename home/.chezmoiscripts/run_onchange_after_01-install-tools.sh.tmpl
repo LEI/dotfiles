@@ -3,7 +3,11 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 {{- if eq .osID "android" }}
 {{ includeTemplate "termux.sh.tmpl" . | trim }}
@@ -39,8 +43,9 @@ msg "Installing tools"
 #   mise_args="$mise_args --verbose"
 # fi
 
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.mise) }}
 dry_run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
-
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.mise) }}
 msg "Installed tools"
 
 # run mise ls "$@"

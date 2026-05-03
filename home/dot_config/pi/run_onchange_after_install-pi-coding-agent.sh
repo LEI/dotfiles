@@ -7,7 +7,11 @@ set -eu
 PI_CONFIG_DIR="${PI_CONFIG_DIR:-$XDG_CONFIG_HOME/pi}"
 PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-$XDG_CONFIG_HOME/pi-coding-agent}"
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 # Symlink agents
 if [ ! -d "$PI_CODING_AGENT_DIR/agents" ]; then

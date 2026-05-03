@@ -2,7 +2,11 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 # Vim 9.1.0016 on Ubuntu 24.04.02 (https://packages.ubuntu.com/noble/vim)
 # https://github.com/vim/vim/commit/c9df1fb35a1866901c32df37dd39c8b39dbdb64a

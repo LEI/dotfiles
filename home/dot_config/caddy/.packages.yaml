@@ -17,10 +17,10 @@ packages:
       mise: github:caddyserver/xcaddy
     type: mise
     after_script: |
-      run xcaddy build \
+      dry_run xcaddy build \
         --with github.com/tailscale/caddy-tailscale \
         --output "$HOME/.local/bin/caddy"
-      # run "$HOME/.local/bin/caddy" trust --ca local
+      # dry_run "$HOME/.local/bin/caddy" trust --ca local
   dnsmasq:
     enabled: '{{ eq .chezmoi.os "darwin" }}'
     system: true

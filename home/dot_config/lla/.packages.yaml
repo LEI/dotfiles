@@ -10,7 +10,7 @@ packages:
     # fi
     after_script: |-
       if ! [ -f ~/.config/lla/themes/tokyo_night.toml ]; then
-        cmd lla theme pull
+        dry_run lla theme pull
       fi
     # {{- if .features.rust }}
 

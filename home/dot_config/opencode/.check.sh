@@ -5,9 +5,9 @@
 
 set -eu
 
-lib_dir="$(cd "$(dirname "$0")/../../dot_local/lib" && pwd)"
-# shellcheck source=home/dot_local/lib/bash/log.sh
-. "$lib_dir/bash/log.sh"
+lib_dir="$HOME/.local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
 
 XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 AI_YAML="$XDG_DATA_HOME/chezmoi/home/.chezmoidata/ai.yaml"

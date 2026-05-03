@@ -19,16 +19,26 @@ if command -v bws >/dev/null || [ -x ~/.local/bin/bws ]; then
   exit
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+# shellcheck source=home/dot_local/lib/sh/install.sh
+. "$lib_dir/sh/install.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
 fi
 
-echo "OSID: $OSID" >&2
+os_id_like="${CHEZMOI_OS_RELEASE_ID_LIKE:-${CHEZMOI_OS_RELEASE_ID:-${CHEZMOI_OS:-}}}"
+if [ "$os_id_like" = linux ] && [ "$HOME" = /data/data/com.termux/files/home ]; then
+  os_id_like=android
+fi
+echo "os_id_like: $os_id_like" >&2
 
 if [ "$USER" = root ] && ! command -v sudo >/dev/null; then
-  case "$OSID" in
+  case "$os_id_like" in
   alpine)
     run apk update --quiet
     run apk add --quiet sudo
@@ -62,7 +72,7 @@ Linux)
     exit 0
   fi
   OS=unknown-linux-gnu
-  case "$OSID" in
+  case "$os_id_like" in
   alpine)
     run sudo apk add --quiet unzip
     ;;

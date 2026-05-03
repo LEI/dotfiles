@@ -117,11 +117,6 @@
 {{-   $accessToken = promptString "BWS accessToken (optional)" $accessToken }}
 {{- end }}
 
-{{- $caddyTailscaleOauthSecret := "" -}}
-{{- if not $headless -}}
-{{-   $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
-{{- end -}}
-
 {{- if $interactive }}
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" }}
 {{- end }}
@@ -164,7 +159,6 @@
   "osID" $osID
   "osIDLike" $osIDLike
   "osVersion" $osVersion
-  "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret))
   "passwordManager" (dict "accessToken" $accessToken)
   "profile" $profile
   "sessionType" (env "XDG_SESSION_TYPE")
@@ -180,6 +174,12 @@
 
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson }}
 {{- $_ := set $data "features" $features }}
+
+{{- $caddyTailscaleOauthSecret := "" -}}
+{{- if and (not $headless) $features.caddy $features.tailscale -}}
+{{-   $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
+{{- end -}}
+{{- $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) }}
 
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}

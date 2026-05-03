@@ -4,11 +4,16 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 PATH="${MISE_DATA_DIR:-$XDG_DATA_HOME/mise}/shims:$PATH"
 
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.pip "label" "pip") }}
 pip_packages={{ .packages.pip | keys | sortAlpha | join " " | quote }}
 if [ -n "$pip_packages" ]; then
   pip=pip
@@ -22,7 +27,8 @@ if [ -n "$pip_packages" ]; then
   # shellcheck disable=SC2086
   dry_run $pip install --user --quiet $pip_packages
 fi
-
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.pip "label" "pip") }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.pipx "label" "pipx") }}
 {{- $pipxPackages := .packages.pipx | keys | sortAlpha }}
 {{- if $pipxPackages }}
 if has pipx; then
@@ -31,6 +37,7 @@ if has pipx; then
 {{-   end }}
 fi
 {{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.pipx "label" "pipx") }}
 
 # https://github.com/astral-sh/uv/issues/13750
 # run uv tool install --quiet{{ if .upgrade }} --upgrade{{ end }} $uv_packages
@@ -45,6 +52,7 @@ fi
 # uv hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") "uv" | sha256sum }}
 {{- end }}
 
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $uvPackages "label" "uv") }}
 {{- range $key, $value := $uvPackages }}
 {{-   $command := get $value "command" | default $key
   | replaceAllRegex `\[.*\]$` ""
@@ -55,3 +63,4 @@ msg "Already installed: {{ $key }}"
 dry_run uv tool install --quiet{{ if $.upgrade }} --upgrade{{ end }} {{ $key | quote }}
 {{-   end }}
 {{- end }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $uvPackages "label" "uv") }}

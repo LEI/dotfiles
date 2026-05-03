@@ -12,14 +12,14 @@
 set -euo pipefail
 
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
-# shellcheck source=home/dot_local/lib/bash/parallel.sh
-source "$lib_dir/bash/parallel.sh"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
 # shellcheck source=home/dot_local/lib/bash/report.sh
 source "$lib_dir/bash/report.sh"
 # shellcheck source=home/dot_local/lib/bash/require.sh
 source "$lib_dir/bash/require.sh"
-# shellcheck source=home/dot_local/lib/bash/usage.sh
-source "$lib_dir/bash/usage.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
 
 require_bash 4
 
