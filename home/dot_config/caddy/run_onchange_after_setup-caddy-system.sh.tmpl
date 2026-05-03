@@ -1,5 +1,5 @@
 {{- $caddyfilePath := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
-{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
+{{- if eq .chezmoi.os "linux" -}}
 #!/bin/sh
 {{- if stat $caddyfilePath }}
 
@@ -10,11 +10,8 @@
 # {{ base . }}: {{ include . | sha256sum }}
 {{- end }}
 # dnsmasq-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
-
-{{- if eq .chezmoi.os "linux" }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
-{{- end }}
 
 set -eu
 
@@ -29,29 +26,6 @@ if ! has caddy; then
   msg "caddy not found; skipping setup"
   exit 0
 fi
-
-{{- if eq .chezmoi.os "darwin" }}
-
-# If valet is running, sync proxies via nginx instead of caddy
-valet_dir="$HOME/.config/valet"
-if pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
-  msg "Valet detected; configuring .test proxies via nginx instead of caddy"
-  {{- range $name, $site := .caddy.sites }}
-  {{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end }}
-  if ! grep -q 'proxy_pass http://localhost:{{ $site.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
-    run valet proxy {{ $name }} http://localhost:{{ $site.port }} --secure
-  fi
-  {{- end }}
-  {{- range $name, $provider := .ai.providers }}
-  {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
-  if ! grep -q 'proxy_pass http://localhost:{{ $provider.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
-    run valet proxy {{ $name }} http://localhost:{{ $provider.port }} --secure
-  fi
-  {{- end }}
-  exit 0
-fi
-
-{{- end }}
 
 caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
 pki="$HOME/.local/share/caddy/pki/authorities/local"

@@ -9,7 +9,8 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 . "$lib_dir/sh/log.sh"
 # shellcheck source=home/dot_local/lib/sh/run.sh
 . "$lib_dir/sh/run.sh"
-. "$CHEZMOI_WORKING_TREE/home/dot_local/lib/bash/pathmunge.sh"
+# shellcheck source=home/dot_local/lib/bash/pathmunge.sh
+. "$lib_dir/bash/pathmunge.sh"
 
 if [ "${DRY_RUN:-}" = true ]; then
   set -- "$@" --dry-run

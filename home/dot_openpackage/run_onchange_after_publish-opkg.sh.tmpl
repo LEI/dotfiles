@@ -43,6 +43,19 @@ opkg_installed() {
       >/dev/null 2>&1
 }
 
+# Trash install dirs left by an opkg package
+purge_install() {
+  name="$1"
+  for base in "$HOME/.claude" "$HOME/.config/opencode"; do
+    for type in rules agents skills; do
+      target="$base/$type/$name"
+      [ -L "$target" ] && continue
+      [ -d "$target" ] || continue
+      trace trash "$target"
+    done
+  done
+}
+
 install_package() {
   name="$1" path="$2"
 
@@ -61,6 +74,7 @@ install_package() {
   if opkg_installed "$name"; then
     run opkg uninstall --global --recursive "$name"
   fi
+  purge_install "$name"
 
   run opkg install --local --platforms {{ join " " .openpackage.platforms }} --global "$name"
 
@@ -86,19 +100,6 @@ install_package {{ $pkgName | quote }} {{ . | quote }}
 {{-     end }}
 {{-   end }}
 {{- end }}
-
-# Trash install dirs left by an opkg package no longer managed
-purge_install() {
-  name="$1"
-  for base in "$HOME/.claude" "$HOME/.config/opencode"; do
-    for type in rules agents skills; do
-      target="$base/$type/$name"
-      [ -L "$target" ] && continue
-      [ -d "$target" ] || continue
-      trace trash "$target"
-    done
-  done
-}
 
 # Build managed packages list (local + marketplace packages)
 managed=" local "
@@ -134,6 +135,41 @@ if [ -d "$registry_dir" ]; then
     trace trash "$entry"
   done
 fi
+
+# Symlink target to src; refuse to overwrite a real directory
+link_rules() {
+  name="$1" src="$2"
+  target="$HOME/.claude/rules/$name"
+
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    die "$target is not a symlink
+  Run: trash $target"
+  fi
+
+  run ln -sfn "$src" "$target"
+}
+
+{{- $rules := list -}}
+{{- range $mktName, $mkt := .claude.marketplaces -}}
+{{-   $path := get $mkt "path" -}}
+{{-   if not $path -}}{{- continue -}}{{- end -}}
+{{-   $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
+{{-   if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
+{{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
+{{-     $pkgName := base $pkgDir -}}
+{{-     $rulesDir := joinPath $pkgDir "rules" -}}
+{{-     if stat $rulesDir -}}
+{{-       $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- if $rules }}
+
+mkdir -p "$HOME/.claude/rules"
+{{- range $entry := $rules }}
+link_rules {{ $entry.name | quote }} {{ $entry.src | quote }}
+{{- end }}
+{{- end }}
 
 # Clean up workspace created by opkg
 workspace="$CHEZMOI_WORKING_TREE/.openpackage"

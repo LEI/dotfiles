@@ -1,0 +1,13 @@
+{{- if eq .chezmoi.os "darwin" -}}
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+      "label" "com.caddy"
+      "args" (list
+        (printf "%s/.local/bin/caddy" .chezmoi.homeDir)
+        "run"
+        "--config" (printf "%s/.config/caddy/Caddyfile" .chezmoi.homeDir))
+      "env" (dict
+        "HOME" .chezmoi.homeDir
+        "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
+      "log" (printf "%s/Library/Logs/caddy.log" .chezmoi.homeDir)
+      "workdir" .chezmoi.homeDir) -}}
+{{- end -}}

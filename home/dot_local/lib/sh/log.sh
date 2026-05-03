@@ -1,5 +1,7 @@
 # shellcheck shell=sh
 
+# case "${CHEZMOI_TRACE:-}" in 1 | true) set -x ;; esac
+
 # Print to stderr
 msg() {
   printf '%s\n' "$*" >&2

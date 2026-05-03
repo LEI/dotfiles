@@ -1,5 +1,5 @@
 {{- $milvus := or .features.ollama .features.mlx -}}
-{{- $notebook := false -}}
+{{- $notebook := true -}}
 {{- $ollama := and .features.ollama (eq .os "linux") (not .features.podman) -}}
 {{- $sandboxed := false -}}
 ---
@@ -343,7 +343,7 @@ services:
       - SURREAL_EXPERIMENTAL_GRAPHQL=true
       {{- if .features.otel }}
       - SURREAL_TELEMETRY_PROVIDER=otlp
-{{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector") | fromYaml -}}
+{{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector" "compression" "none") | fromYaml -}}
 {{- range $key, $value := $otel }}
       - {{ $key }}={{ $value }}
 {{- end }}

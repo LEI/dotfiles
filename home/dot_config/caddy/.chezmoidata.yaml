@@ -26,16 +26,16 @@ caddy:
       body: html
       port: 8025
       liveness: /
-    # open-notebook:
-    #   feature: oage
-    #   body: html
-    #   port: 8502
-    #   health: /
-    # open-notebook-api:
-    #   feature: oage
-    #   body: '{"status":"healthy"}'
-    #   port: 5055
-    #   health: /health
+    open-notebook:
+      feature: oage
+      body: html
+      port: 8502
+      health: /
+    open-notebook-api:
+      feature: oage
+      body: '{"status":"healthy"}'
+      port: 5055
+      health: /health
     open-webui:
       feature: oage
       body: '{"status":true}'
