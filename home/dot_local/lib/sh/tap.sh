@@ -51,11 +51,11 @@ tap_diag() {
 
 # YAML diagnostic block from key=value pairs
 tap_diag_kv() {
-  printf '  ---\n'
+  tap_diag "---"
   for kv in "$@"; do
-    printf '  %s\n' "$kv"
+    tap_diag "$kv"
   done
-  printf '  ...\n'
+  tap_diag "..."
 }
 
 # YAML diagnostic block from JSON (pipe jq output)

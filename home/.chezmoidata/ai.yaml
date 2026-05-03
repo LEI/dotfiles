@@ -62,10 +62,9 @@ ai:
       base_url: https://router.huggingface.co/v1
       env: HF_TOKEN
     ollama-cloud:
-      api: openai
+      api: ollama
       base_url: https://ollama.com/api
       env: OLLAMA_API_KEY
-      endpoint: /tags
     openrouter:
       api: openai
       base_url: https://openrouter.ai/api/v1
