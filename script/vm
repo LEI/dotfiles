@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 #MISE alias="vm"
-#MISE description="Run a tart (macOS) or vetu (Linux) VM by alias, or pass through to provider"
+#MISE description="Run VM by image alias (tart/vetu)"
 #USAGE flag "-d... --dir <dir>" help="Mount host directory in the VM (name:path)"
 #USAGE flag "-g --gui" help="Open native window (tart only; default headless)"
+#USAGE flag "-h --help" help="Show help"
 #USAGE flag "-k --keep" help="Keep VM running after exit"
-#USAGE flag "-n --name <name>" help="VM name (default: from image alias)"
+#USAGE flag "-l --list-images" help="List available images for current architecture"
+#USAGE flag "-n --name <name>" help="VM name (default: same as image alias)"
 #USAGE flag "-q --quiet" help="Use quiet output"
 #USAGE flag "-t --tmux" help="Run VM in a tmux session"
+#USAGE flag "-u --usage" help="Show usage specification"
 #USAGE flag "-v --verbose" help="Use verbose output"
-#USAGE arg "[target]" help="Image alias or provider subcommand (default: --help)"
-#USAGE complete "target" run="./script/vm --list-aliases"
+#USAGE arg "[image]" help="Image alias or provider subcommand (default: --help)"
+#USAGE complete "image" run="./script/vm --list-images"
 #USAGE arg "[args]..." help="Command to run in the VM (alias mode), or provider args (passthrough)"
 
 set -euo pipefail
@@ -48,16 +51,17 @@ aarch64 | arm64) ARCH=arm64 ;;
   ;;
 esac
 
-# Image aliases: alias -> "url|default-name|guest-os"
 declare -gA IMAGES=(
-  ["debian"]="ghcr.io/cirruslabs/debian:latest|debian|linux"
-  ["fedora"]="ghcr.io/cirruslabs/fedora:latest|fedora|linux"
-  ["rocky"]="ghcr.io/cirruslabs/rocky:latest|rocky|linux"
-  ["tahoe"]="ghcr.io/cirruslabs/macos-tahoe-base:latest|tahoe-base|darwin"
-  ["ubuntu"]="ghcr.io/cirruslabs/ubuntu:latest|ubuntu|linux"
   ["ubuntu-runner"]="ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04|ubuntu-runner|linux"
   ["ubuntu-runner-gpu"]="ghcr.io/cirruslabs/ubuntu-runner-amd64-gpu:latest|ubuntu-runner-gpu|linux"
 )
+if [ "$ARCH" = arm64 ]; then
+  IMAGES+=(["debian"]="ghcr.io/cirruslabs/debian:latest|debian|linux")
+  IMAGES+=(["fedora"]="ghcr.io/cirruslabs/fedora:latest|fedora|linux")
+  IMAGES+=(["rocky"]="ghcr.io/cirruslabs/rocky:latest|rocky|linux")
+  IMAGES+=(["ubuntu"]="ghcr.io/cirruslabs/ubuntu:latest|ubuntu|linux")
+  IMAGES+=(["tahoe"]="ghcr.io/cirruslabs/macos-tahoe-base:latest|tahoe-base|darwin")
+fi
 readonly IMAGES
 
 vm() { "$VM_PROVIDER" "$@"; }
@@ -154,10 +158,9 @@ vm_exec() {
 
 vm_exec_cmd() {
   log "running command: $*"
-  # cd into chezmoi root if mounted (linux: virtiofs; darwin: tart auto-mount)
-  # shellcheck disable=SC2016
-  local sh_cmd='for d in "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi" "/Volumes/My Shared Files/chezmoi"; do [ -d "$d" ] && cd "$d" && break; done; exec "$@"'
-  vm_exec sh -l -c "$sh_cmd" -- "$@"
+  local dir="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+  [ "$VM_PROVIDER" = tart ] && dir="/Volumes/My Shared Files/chezmoi"
+  vm_exec sh -l -c "cd \"$dir\" && exec \"\$@\"" -- "$@"
 }
 
 vm_stop() {
@@ -211,32 +214,38 @@ copy_bootstrap() {
   vm_cp ./script/bootstrap "$BOOTSTRAP_PATH"
 }
 
-cmd_run() {
+resolve_image() {
   local target="$1"
-  shift
-  local image default_name guest_os mounted=false
   if [ -n "${IMAGES[$target]:-}" ]; then
     IFS='|' read -r image default_name guest_os <<<"${IMAGES[$target]}"
-    # tart 2.32.1 --dir reaches darwin guests only; linux guests must pass -d
     [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ] && : "${dirs:=chezmoi:$PWD:ro}"
-  elif [[ $target == */* ]]; then
+    return 0
+  fi
+
+  if [[ $target == */* ]]; then
     image="$target"
     default_name="${target##*/}"
     default_name="${default_name%:*}"
     guest_os="${VM_GUEST_OS:-linux}"
-  else
-    msg "$PROG: unknown alias: $target"
-    return 1
+    return 0
   fi
-  case " $dirs " in *" chezmoi:"*) mounted=true ;; esac
+
+  local available
+  available="$(printf '%s\n' "${!IMAGES[@]}" | sort | tr '\n' ' ' | sed 's/ $//')"
+  msg "$PROG: unknown image: $target"
+  msg "$PROG: available images for $ARCH: $available"
+  return 1
+}
+
+ensure_vm() {
   : "${name:=$default_name}"
   ssh_host=""
   ssh_port=22
   local state
   state="$(vm_state "$name")"
-  if [ -z "$state" ]; then
-    vm_clone
-  fi
+
+  [ -z "$state" ] && vm_clone
+
   if [ "$state" != running ]; then
     [ "$keep" = true ] || trap cleanup EXIT
     vm_start
@@ -245,23 +254,45 @@ cmd_run() {
   elif [ -n "$dirs" ]; then
     log "VM already running; --dir mounts require a fresh start"
   fi
-  if [ "$#" -eq 0 ]; then
-    if [ "$mounted" = true ]; then
-      set -- env CI=true CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
-        ./script/bootstrap --no-tty --verbose
-    else
-      copy_bootstrap
-      set -- env CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
-        "$BOOTSTRAP_PATH" --no-tty --verbose LEI
-    fi
-  fi
-  vm_exec_cmd "$@"
 }
 
-# Parse alias-mode flags from "$@"; remaining args land in OUR_ARGS.
-# Sets: dirs, gui, keep, name, tmux, verbosity, OUR_ARGS
+init_repo() {
+  local vm_home
+  case "$guest_os" in
+  darwin) vm_home=/Users/admin ;;
+  *) vm_home=/home/admin ;;
+  esac
+}
+
+run_pipeline() {
+  init_repo
+  copy_bootstrap
+  vm_exec_cmd env CI=true CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
+    "$BOOTSTRAP_PATH" \
+    --no-tty \
+    --verbose \
+    LEI
+  vm_exec_cmd mise run pipeline
+}
+
+cmd_run() {
+  local target="$1"
+  shift
+
+  resolve_image "$target" || return 1
+  ensure_vm || return 1
+
+  if [ "$#" -eq 0 ]; then
+    run_pipeline
+  else
+    vm_exec_cmd "$@"
+  fi
+}
+
+# Parse flags from "$@" and store remaining args in ARGS.
+# Globals: dirs, gui, keep, name, tmux, verbosity, ARGS (modified)
 parse_flags() {
-  OUR_ARGS=()
+  ARGS=()
   while [ $# -gt 0 ]; do
     case "$1" in
     -h | --help)
@@ -337,7 +368,7 @@ parse_flags() {
     *) break ;;
     esac
   done
-  OUR_ARGS=("$@")
+  ARGS=("$@")
 }
 
 main() {
@@ -350,7 +381,7 @@ main() {
     usage_spec
     return
     ;;
-  --list-aliases)
+  --list-images)
     printf '%s\n' "${!IMAGES[@]}" | sort
     return
     ;;
@@ -376,7 +407,7 @@ main() {
     tmux="${VM_TMUX:-false}"
     verbosity="${VM_VERBOSITY:-1}"
     parse_flags "$@"
-    cmd_run "$target" "${OUR_ARGS[@]}"
+    cmd_run "$target" "${ARGS[@]}"
   else
     exec "$VM_PROVIDER" "$@"
   fi

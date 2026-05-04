@@ -26,16 +26,17 @@ disable = [
   # "chezmoi",
   "containers",
   # "git_repos",
-  "node",
+  # "node",
   {{- if eq .os "android" }}
   "pip3",
   {{- end }}
   # "pnpm", # Requires npx pnpm install --global pnpm@latest
+  "ruby_gems", # Requires sudo
+  "skills", # npx skills prompts
   # "vagrant",
   {{- if eq .os "linux" }}
   "waydroid",
   {{- end }}
-  "ruby_gems", # Requires sudo
 ]
 # Do not ask to retry failed steps (default: false)
 no_retry = true

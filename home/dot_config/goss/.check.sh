@@ -15,7 +15,11 @@ if [ "$#" -eq 0 ]; then
     "$@"
 fi
 
-set -- goss --vars=vars.yaml "$@"
+if [ -f vars.yaml ]; then
+  set -- --vars=vars.yaml "$@"
+fi
+
+set -- goss "$@"
 
 echo "$@" >&2
 "$@"

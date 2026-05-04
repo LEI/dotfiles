@@ -52,8 +52,19 @@ dry_run sudo pacman --sync --needed --noconfirm --quiet $packages
 
 {{- else if eq .osIDLike "debian" }}
 
+{{- if .container }}
+
+for lock in /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock; do
+  if [ -f "$lock" ]; then
+    dry_run sudo rm "$lock"
+  fi
+done
+
+dry_run sudo dpkg --configure -a
+
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
-# export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
+{{- end }}
 
 dry_run sudo -E apt-get update --quiet # >/dev/null
 

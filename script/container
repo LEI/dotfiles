@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #MISE alias="ct"
-#MISE description="Run container pipeline for one image"
-#MISE hide=true
+#MISE description="Run container pipeline by image"
+#USAGE flag "-h --help" help="Show help"
+#USAGE flag "-u --usage" help="Show usage specification"
 #USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)"
 #USAGE complete "image" run="./script/container --list-images"
 #USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"

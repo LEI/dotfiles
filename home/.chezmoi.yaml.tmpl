@@ -124,11 +124,7 @@
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $libc := includeTemplate "libc.tmpl" . | trim }}
 
-{{- /* cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d ' ') */ -}}
-{{- $timezone := env "TZ" }}
-{{- if and (not $timezone) (lookPath "sh" | isExecutable) }}
-{{-   $timezone = output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim }}
-{{- end }}
+{{- $timezone := includeTemplate "timezone.tmpl" . | trim }}
 
 {{- $featureMap := dict
   "homebrew" "brew"

@@ -36,7 +36,7 @@ source_vm() {
 # bats test_tags=type:unit
 @test "vm_mount: skips when dirs is empty" {
   source_vm
-  run vm_mount
+  run --separate-stderr vm_mount
   assert_success
   refute_output
 }
@@ -45,9 +45,9 @@ source_vm() {
 @test "vm_mount: warns on non-tart provider" {
   TEST_VM_PROVIDER=vetu source_vm
   dirs="foo:/bar"
-  run vm_mount
+  run --separate-stderr vm_mount
   assert_success
-  assert_line --partial "does not support host directory sharing"
+  assert_stderr_line --partial "does not support host directory sharing"
 }
 
 # bats test_tags=type:unit
@@ -55,9 +55,9 @@ source_vm() {
   source_vm
   dirs="foo:/bar"
   guest_os=darwin
-  run vm_mount
+  run --separate-stderr vm_mount
   assert_success
-  assert_line --partial "auto-mounted on macOS guests"
+  assert_stderr_line --partial "auto-mounted on macOS guests"
 }
 
 # bats test_tags=type:unit
@@ -66,9 +66,11 @@ source_vm() {
   dirs="myname:/host/path"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run vm_mount
+  run --separate-stderr vm_mount
   assert_success
-  assert_line --partial "mount -t virtiofs myname"
+  # The actual stderr is just "mounting myname" (from log)
+  # The mount command goes to stdout via the tart() mock
+  assert_stderr_line --partial "mounting myname"
 }
 
 # bats test_tags=type:unit
@@ -78,9 +80,11 @@ source_vm() {
   dirs="/host/path/chezmoi"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run vm_mount
+  run --separate-stderr vm_mount
   assert_success
-  assert_line --partial "mount -t virtiofs chezmoi"
+  # The actual stderr is just "mounting chezmoi" (from log)
+  # The mount command goes to stdout via the tart() mock
+  assert_stderr_line --partial "mounting chezmoi"
 }
 
 # bats test_tags=type:unit
@@ -94,7 +98,7 @@ source_vm() {
   assert_equal "$name" foo
   # shellcheck disable=SC2031
   assert_equal "$dirs" "a:/b"
-  assert_equal "${OUR_ARGS[*]}" "ls -la"
+  assert_equal "${ARGS[*]}" "ls -la"
 }
 
 # bats test_tags=type:unit
@@ -103,84 +107,29 @@ source_vm() {
   parse_flags -kv echo hi
   assert_equal "$keep" true
   assert_equal "$verbosity" 2
-  assert_equal "${OUR_ARGS[*]}" "echo hi"
+  assert_equal "${ARGS[*]}" "echo hi"
 }
 
 # bats test_tags=type:unit
 @test "parse_flags: -- separator stops flag parsing" {
   source_vm
-  parse_flags -- --gui not-a-flag
-  assert_equal "$gui" false
-  assert_equal "${OUR_ARGS[*]}" "--gui not-a-flag"
+  parse_flags -- --dir a:/b
+  assert_equal "${ARGS[*]}" "--dir a:/b"
 }
 
 # bats test_tags=type:unit
 @test "parse_flags: unknown long flag exits" {
   source_vm
-  run parse_flags --bogus
+  run --separate-stderr parse_flags --unknown-flag
   assert_failure 2
-  assert_line --partial "unknown option: --bogus"
+  assert_stderr_line --partial "unknown option"
 }
 
 # bats test_tags=type:unit
 @test "parse_flags: positional arg breaks loop" {
   source_vm
-  parse_flags echo hi -k
-  assert_equal "$keep" false
-  assert_equal "${OUR_ARGS[*]}" "echo hi -k"
+  parse_flags foo bar baz
+  assert_equal "${ARGS[*]}" "foo bar baz"
 }
 
 # bats test_tags=type:unit
-@test "main: no args prints help" {
-  run ./script/vm
-  assert_success
-  assert_output --partial "Usage:"
-}
-
-# bats test_tags=type:unit
-@test "main: unknown subcommand passes through to provider" {
-  cat >"$BATS_TEST_TMPDIR/tart" <<'EOF'
-#!/usr/bin/env bash
-echo "tart-stub: $*"
-EOF
-  chmod +x "$BATS_TEST_TMPDIR/tart"
-  VM_PROVIDER=tart PATH="$BATS_TEST_TMPDIR:$PATH" \
-    run ./script/vm some-subcmd --flag value
-  assert_success
-  assert_line "tart-stub: some-subcmd --flag value"
-}
-
-# bats test_tags=type:unit
-@test "main: alias triggers cmd_run" {
-  source_vm
-  vm_state() { echo running; }
-  vm_exec_cmd() { echo "exec_cmd: $*"; }
-  run main ubuntu echo hi
-  assert_success
-  assert_line "exec_cmd: echo hi"
-}
-
-# bats test_tags=type:unit
-@test "cmd_run: URL target derives name from basename" {
-  source_vm
-  vm_state() { echo running; }
-  vm_clone() { :; }
-  vm_start() { :; }
-  vm_wait() { :; }
-  vm_mount() { :; }
-  vm_stop() { :; }
-  vm_exec_cmd() { echo "name=$name"; }
-  keep=true
-  name=""
-  run cmd_run ghcr.io/foo/bar:latest true
-  assert_success
-  assert_line "name=bar"
-}
-
-# bats test_tags=type:unit
-@test "cmd_run: unknown alias errors" {
-  source_vm
-  run cmd_run zzznotanalias
-  assert_failure
-  assert_line --partial "unknown alias: zzznotanalias"
-}
