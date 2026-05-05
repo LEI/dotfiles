@@ -282,3 +282,101 @@ EOF
   assert_line 'flag "-x" help="Test"'
   assert_line 'arg "[file]"'
 }
+
+# redact
+
+setup_redact() {
+  # shellcheck source=home/dot_local/lib/sh/redact.sh
+  source home/dot_local/lib/sh/redact.sh
+}
+
+@test "redact_arg: masks TOKEN value" {
+  setup_redact
+  run redact_arg "GITHUB_TOKEN=secret123"
+  assert_success
+  assert_output "GITHUB_TOKEN=[REDACTED]"
+}
+
+@test "redact_arg: masks SECRET, PASSWORD, PASS, PRIVATE_KEY" {
+  setup_redact
+  run redact_arg "DB_SECRET=abc"
+  assert_output "DB_SECRET=[REDACTED]"
+  run redact_arg "USER_PASSWORD=hunter2"
+  assert_output "USER_PASSWORD=[REDACTED]"
+  run redact_arg "SUDO_PASS=letmein"
+  assert_output "SUDO_PASS=[REDACTED]"
+  run redact_arg "SSH_PRIVATE_KEY=-----BEGIN"
+  assert_output "SSH_PRIVATE_KEY=[REDACTED]"
+}
+
+@test "redact_arg: passes non-secret args through unchanged" {
+  setup_redact
+  run redact_arg "FOO=bar"
+  assert_output "FOO=bar"
+  run redact_arg "plain-string"
+  assert_output "plain-string"
+}
+
+@test "redact_arg: empty value is not redacted" {
+  setup_redact
+  run redact_arg "TOKEN="
+  assert_output "TOKEN="
+}
+
+# quote
+
+setup_quote() {
+  # shellcheck source=home/dot_local/lib/sh/log.sh
+  source home/dot_local/lib/sh/log.sh
+}
+
+@test "quote_arg: leaves safe chars unchanged" {
+  setup_quote
+  run quote_arg "/path/to/file.txt"
+  assert_output "/path/to/file.txt"
+  run quote_arg "abc-def_123@host.com"
+  assert_output "abc-def_123@host.com"
+}
+
+@test "quote_arg: quotes empty string" {
+  setup_quote
+  run quote_arg ""
+  assert_output "''"
+}
+
+@test "quote_arg: quotes args with spaces" {
+  setup_quote
+  run quote_arg "hello world"
+  assert_output "'hello world'"
+}
+
+@test "quote_arg: escapes embedded single quotes" {
+  setup_quote
+  run quote_arg "it's"
+  assert_output "'it'\\''s'"
+}
+
+@test "quote_arg: quotes shell metacharacters" {
+  setup_quote
+  # shellcheck disable=SC2016
+  run quote_arg 'cost is $5'
+  assert_output "'cost is \$5'"
+}
+
+@test "quote_args: joins multiple safe args with spaces" {
+  setup_quote
+  run quote_args foo bar baz
+  assert_output "foo bar baz"
+}
+
+@test "quote_args: mixes safe and unsafe args" {
+  setup_quote
+  run quote_args foo "hello world" bar
+  assert_output "foo 'hello world' bar"
+}
+
+@test "quote_args: returns empty for no args" {
+  setup_quote
+  run quote_args
+  assert_output ""
+}

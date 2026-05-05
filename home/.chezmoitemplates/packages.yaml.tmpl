@@ -594,7 +594,7 @@ packages:
     enabled: {{ and .features.shpool (not (eq .osIDLike "darwin" "windows")) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
   skill-validator:
-    enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} # .features.ai
+    enabled: '{{ and (ne .os "windows") (or .ci .container .vm (ne .profile "minimal")) }}' # .features.ai
     nameOverwrite:
       brew: agent-ecosystem/tap/skill-validator
       mise: github:agent-ecosystem/skill-validator
@@ -630,7 +630,7 @@ packages:
   strace:
     enabled: {{ and (eq .os "linux") (ne .profile "minimal") (not .ephemeral) }}
   stylua:
-    enabled: {{ and (not .features.neovim) (ne .profile "minimal") }}
+    enabled: '{{ and (not .features.neovim) (or .ci .container .vm (ne .profile "minimal")) }}'
     type: mise
   subliminal:
     enabled: {{ and (eq .osIDLike "android" "arch" "darwin" "windows") (eq .profile "personal") }}

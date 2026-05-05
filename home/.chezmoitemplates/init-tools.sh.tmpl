@@ -1,8 +1,16 @@
 {{- $shell := get . "shell" }}
 {{- $init := list "bash" "zsh" }}
-{{- $ordered := list "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
-{{- if .features.brew }}
-{{-   $ordered = prepend $ordered "homebrew" }}
+{{- $orderedRaw := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- $ordered := list }}
+{{- range $orderedRaw }}
+{{-   $feat := get $.featureMap . | default . }}
+{{-   $enabled := true }}
+{{-   if hasKey $.features $feat }}
+{{-     $enabled = get $.features $feat }}
+{{-   end }}
+{{-   if $enabled }}
+{{-     $ordered = append $ordered . }}
+{{-   end }}
 {{- end }}
 {{- if ne $shell "zsh" -}}
 # shellcheck shell=bash

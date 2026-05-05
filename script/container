@@ -83,53 +83,29 @@ resolve() {
 }
 
 container_exec() {
-  local flags log
+  local flags
   flags=(
     --env="CHEZMOI_UPGRADE=true"
     --env="HOME=$home"
     --env="MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
     --workdir="$chezmoi_root"
   )
-  if [ -n "$exec_user" ]; then
-    flags+=(--user="$exec_user")
-  fi
-  if [ -n "${CI:-}" ]; then
-    flags+=(--env="CI=$CI")
-  fi
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    flags+=(--env="GITHUB_TOKEN=$GITHUB_TOKEN")
-  fi
-  if [ -t 0 ]; then
-    flags+=(--interactive)
-  fi
-  if [ -t 1 ]; then
-    flags+=(--tty)
-  fi
-
-  # Redact GITHUB_TOKEN in logs
-  log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
-  echo "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*" >&2
-  container exec "${flags[@]}" "$container" "$@"
+  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
+  [ -n "${CI:-}" ] && flags+=(--env=CI)
+  [ -n "${CHEZMOI_PROFILE:-}" ] && flags+=(--env=CHEZMOI_PROFILE)
+  [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
+  [ -t 0 ] && flags+=(--interactive)
+  [ -t 1 ] && flags+=(--tty)
+  trace container exec "${flags[@]}" "$container" "$@"
 }
 
 container_exec_mise() {
-  local cmd
-
-  # Quote all arguments for safe shell execution
-  cmd="$(printf '%q ' "$@")"
-
   # shellcheck disable=SC2016
   container_exec bash -lc '
-    if [ "$BASH" != "$SHELL" ]; then
-      echo "container: warning: BASH ($BASH) != SHELL ($SHELL)" >&2
-      export SHELL="$BASH"
-    fi
-    source ~/.local/lib/sh/export.sh
-    source ~/.local/lib/bash/pathmunge.sh
-    export_env ~/.config/environment.d/*.conf
-    source ~/.config/sh/environment.sh
-    source ~/.config/mise/init.sh
-    '"$cmd"
+    [ "$BASH" = "$SHELL" ] || export SHELL="$BASH"
+    [ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh
+    exec "$@"
+  ' -- "$@"
 }
 
 build() {
@@ -183,9 +159,10 @@ bootstrap() {
     trace container exec "$container" \
       su system -c "$env; pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
     trace container exec "$container" \
-      su system -c "$env; cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --verbose --no-tty"
+      su system -c "$env; cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --no-tty --verbose"
   else
-    CI=true container_exec ./script/bootstrap --verbose --no-tty
+    CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
+      container_exec ./script/bootstrap --source="$chezmoi_root" --verbose --no-tty
   fi
 }
 

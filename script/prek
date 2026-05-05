@@ -38,6 +38,11 @@ if [ -f /etc/alpine-release ]; then
   skip="${skip:+$skip,}stylua-github"
 fi
 
+# Skip in-place fixers on a read-only working tree (eg tart macOS guest mount)
+if [ ! -w . ]; then
+  skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace"
+fi
+
 if [ -n "$skip" ]; then
   if [ "$verbosity" -ge 1 ]; then
     echo "${0##*/}: skipping hooks: $skip" >&2

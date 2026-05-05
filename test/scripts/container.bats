@@ -185,7 +185,7 @@ source_container() {
 
   run container_exec echo test
   assert_success
-  assert_output --partial "CI=true"
+  assert_output --partial "--env=CI"
 }
 
 # bats test_tags=type:unit
@@ -219,7 +219,7 @@ source_container() {
 
   run container_exec_mise echo test
   assert_success
-  assert_output --partial "source ~/.config/mise/init.sh"
+  assert_output --partial ". ~/.config/mise/init.sh"
 }
 
 # bats test_tags=type:unit

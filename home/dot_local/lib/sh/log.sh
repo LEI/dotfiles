@@ -1,43 +1,66 @@
 # shellcheck shell=sh
+#
+# Logging helpers using GNU-style "<prog>: [<level>: ]<message>".
 
 # case "${CHEZMOI_TRACE:-}" in 1 | true) set -x ;; esac
 
-# Print to stderr
+: "${lib_dir:=$HOME/.local/lib}"
+# shellcheck source=home/dot_local/lib/sh/redact.sh
+. "$lib_dir/sh/redact.sh"
+
+# Write a raw line to stderr.
 msg() {
   printf '%s\n' "$*" >&2
 }
 
-# Output the script name
+# Basename of the calling script, used as the log prefix.
 log_prefix() {
   printf '%s' "${0##*/}"
 }
 
-# Prefixed progress
+# Print "<prog>: <message>" to stderr.
 log() {
   msg "$(log_prefix): $*"
 }
 
-# Prefixed warning
+# Print "<prog>: warning: <message>" to stderr.
 warn() {
   msg "$(log_prefix): warning: $*"
 }
 
-# Quote shell-special args (POSIX-safe)
+# Print "<prog>: error: <message>" to stderr.
+err() {
+  msg "$(log_prefix): error: $*"
+}
+
+# Single-quote an argument for shell, only when it contains special characters.
+quote_arg() {
+  case $1 in
+  '' | *[!a-zA-Z0-9_/.@%+=:,-]*)
+    printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+    ;;
+  *)
+    printf '%s' "$1"
+    ;;
+  esac
+}
+
+# Quote each argument and join with spaces.
 quote_args() {
   _quoted=
   for _arg; do
-    case $_arg in
-    '' | *[!a-zA-Z0-9_/.@%+=:,-]*)
-      _arg="'$(printf '%s' "$_arg" | sed "s/'/'\\\\''/g")'"
-      ;;
-    esac
-    _quoted="$_quoted $_arg"
+    _quoted="$_quoted $(quote_arg "$_arg")"
   done
   printf '%s' "${_quoted# }"
 }
 
-# Echo and run
+# Print "+ <quoted args>" with secret-looking NAME=value args redacted, then run.
 trace() {
-  msg "+ $(quote_args "$@")"
+  quoted=
+  for arg; do
+    quoted="$quoted $(quote_arg "$(redact_arg "$arg")")"
+  done
+  msg "+${quoted}"
+  unset arg quoted
   "$@"
 }

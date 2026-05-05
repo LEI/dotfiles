@@ -17,7 +17,7 @@ if ! has brew; then
   die "brew not found"
 fi
 {{- if $active }}
-if ! {{ $sudo }}brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+if ! run {{ $sudo }}brew services list | grep -q "{{ $formula }}.*started"; then
   run {{ $sudo }}brew services start {{ $formula }}
 {{- if $reload }}
 else
@@ -32,7 +32,7 @@ else
 fi
 {{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" $formula) .) }}
 {{- else }}
-if {{ $sudo }}brew services list 2>/dev/null | grep -q "{{ $formula }}.*started"; then
+if run {{ $sudo }}brew services list | grep -q "{{ $formula }}.*started"; then
   msg "stopping service {{ $formula }}"
   run {{ $sudo }}brew services stop {{ $formula }}
 fi

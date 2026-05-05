@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+alf=/usr/libexec/ApplicationFirewall/socketfilterfw
+
+FIREWALL={{ env "FIREWALL" | default "true" | quote }}
+
+if truthy "$FIREWALL"; then
+  log "enabling firewall"
+  run sudo "$alf" --setglobalstate on
+else
+  log "disabling firewall"
+  run sudo "$alf" --setglobalstate off
+fi

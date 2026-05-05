@@ -2,11 +2,25 @@
 {{- $label := get . "label" -}}
 {{- $bootstrap := eq (get . "bootstrap" | toString) "true" -}}
 {{- $reload := get . "reload" -}}
+{{- $system := eq (get . "system" | toString) "true" -}}
 {{- $uid := output "id" "-u" | trim -}}
 
-{{- $plistFile := joinPath .chezmoi.homeDir "Library/LaunchAgents" (printf "%s.plist" $label) -}}
+{{- $plistFile := "" -}}
+{{- $domain := "" -}}
+{{- $target := "" -}}
+{{- $sudo := "" -}}
+{{- if $system -}}
+{{-   $plistFile = printf "/Library/LaunchDaemons/%s.plist" $label -}}
+{{-   $domain = "system" -}}
+{{-   $target = printf "system/%s" $label -}}
+{{-   $sudo = "sudo " -}}
+{{- else -}}
+{{-   $plistFile = joinPath .chezmoi.homeDir "Library/LaunchAgents" (printf "%s.plist" $label) -}}
+{{-   $domain = printf "gui/%s" $uid -}}
+{{-   $target = printf "gui/%s/%s" $uid $label -}}
+{{- end -}}
 
-{{- $state := output "sh" "-c" (printf "out=$(launchctl print gui/%s/%s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $uid $label) | trim | default "unknown" -}}
+{{- $state := output "sh" "-c" (printf "out=$(%slaunchctl print %s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $sudo $target) | trim | default "unknown" -}}
 
 # shellcheck shell=sh
 
@@ -16,47 +30,47 @@
 {{- end }}
 # status: {{ $state }}
 
-plist="$HOME/Library/LaunchAgents/{{ $label }}.plist"
+plist={{ $plistFile | quote }}
 
 {{- if $active }}
 if [ ! -f "$plist" ]; then
   die "{{ $label }}: plist not found"
 fi
 
-if ! launchctl list "{{ $label }}" >/dev/null 2>&1; then
+if ! {{ $sudo }}launchctl list "{{ $label }}" >/dev/null 2>&1; then
 {{- if $bootstrap }}
-  run launchctl enable "gui/{{ $uid }}/{{ $label }}"
-  run launchctl bootstrap "gui/{{ $uid }}" "$plist"
+  run {{ $sudo }}launchctl enable "{{ $target }}"
+  run {{ $sudo }}launchctl bootstrap "{{ $domain }}" "$plist"
 {{- else }}
-  run launchctl load "$plist"
+  run {{ $sudo }}launchctl load "$plist"
 {{- end }}
 else
 {{- if $reload }}
   if ! run {{ $reload }}; then
     msg "{{ $label }}: reload failed, restarting"
 {{-   if $bootstrap }}
-    run launchctl kickstart -k "gui/{{ $uid }}/{{ $label }}"
+    run {{ $sudo }}launchctl kickstart -k "{{ $target }}"
 {{-   else }}
-    run launchctl unload "$plist"
-    run launchctl load "$plist"
+    run {{ $sudo }}launchctl unload "$plist"
+    run {{ $sudo }}launchctl load "$plist"
 {{-   end }}
   fi
 {{- else if $bootstrap }}
-  run launchctl kickstart -k "gui/{{ $uid }}/{{ $label }}"
+  run {{ $sudo }}launchctl kickstart -k "{{ $target }}"
 {{- else }}
-  run launchctl unload "$plist"
-  run launchctl load "$plist"
+  run {{ $sudo }}launchctl unload "$plist"
+  run {{ $sudo }}launchctl load "$plist"
 {{- end }}
 fi
 {{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" $label) .) }}
 {{- else }}
-if launchctl list "{{ $label }}" >/dev/null 2>&1; then
+if {{ $sudo }}launchctl list "{{ $label }}" >/dev/null 2>&1; then
   msg "unloading service {{ $label }}"
 {{- if $bootstrap }}
-  run launchctl bootout "gui/{{ $uid }}/{{ $label }}" 2>/dev/null || true
+  run {{ $sudo }}launchctl bootout "{{ $target }}" 2>/dev/null || true
 {{- else }}
-  run launchctl kill SIGTERM "gui/{{ $uid }}/{{ $label }}" 2>/dev/null || true
-  run launchctl unload "$plist" 2>/dev/null || true
+  run {{ $sudo }}launchctl kill SIGTERM "{{ $target }}" 2>/dev/null || true
+  run {{ $sudo }}launchctl unload "$plist" 2>/dev/null || true
 {{- end }}
 fi
 {{- end }}

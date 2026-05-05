@@ -133,3 +133,32 @@ source_vm() {
 }
 
 # bats test_tags=type:unit
+@test "fmt_duration: under a minute" {
+  source_vm
+  run fmt_duration 0
+  assert_output "0s"
+  run fmt_duration 59
+  assert_output "59s"
+}
+
+# bats test_tags=type:unit
+@test "fmt_duration: minutes" {
+  source_vm
+  run fmt_duration 60
+  assert_output "1m 0s"
+  run fmt_duration 61
+  assert_output "1m 1s"
+  run fmt_duration 3599
+  assert_output "59m 59s"
+}
+
+# bats test_tags=type:unit
+@test "fmt_duration: hours" {
+  source_vm
+  run fmt_duration 3600
+  assert_output "1h 0m"
+  run fmt_duration 3661
+  assert_output "1h 1m"
+}
+
+# bats test_tags=type:unit

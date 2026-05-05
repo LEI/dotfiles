@@ -36,14 +36,16 @@ setup() {
   check_perms 600 "$HOME/.config/secrets.d"/*.conf
 }
 
-# NOTE: SSH config, config.d/*.conf and id_*.pub may be 644
 # bats test_tags=ssh,permissions
 @test "ssh: files are private" {
   check_feature ssh
   [ -d "$HOME/.ssh" ] || skip ".ssh not present"
   check_perms 700 "$HOME/.ssh"
   local -a files
-  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f -not -name '*.pub' -print0 2>/dev/null)
+  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f \
+    -not -name '*.pub' \
+    -not -name 'known_hosts*' \
+    -print0 2>/dev/null)
   check_perms 600 "${files[@]}"
 }
 

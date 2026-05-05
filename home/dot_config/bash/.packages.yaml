@@ -4,7 +4,7 @@ packages:
   bash:
     enabled: '{{ ne .os "windows" }}'
   bashate:
-    enabled: '{{ ne .profile "minimal" }}'
+    enabled: '{{ or .ci .container .vm (ne .profile "minimal") }}'
     type: '{{ .features.brew | ternary "brew" "uv" }}'
   bash-completion:
     enabled: '{{ ne .os "windows" }}'

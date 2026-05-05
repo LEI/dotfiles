@@ -1,8 +1,8 @@
 {{- $ports := dict
-  "docker-plain" 2375
-  "docker-tls" 2376
-  "telnet" 23
-  "vnc" 5900
+  "docker-plain" (dict "port" 2375)
+  "docker-tls" (dict "port" 2376)
+  "telnet" (dict "port" 23)
+  "vnc" (dict "port" 5900 "reachable" .vm)
 -}}
 
 {{- $rootImmutable := has (get .chezmoi.osRelease "variantID") (list
@@ -30,10 +30,12 @@
 ---
 addr:
 {{- range $name := keys $ports | sortAlpha }}
-  127.0.0.1:{{ index $ports $name }}:
+{{-   $item := get $ports $name }}
+{{-   $reachable := hasKey $item "reachable" | ternary (get $item "reachable") false }}
+  {{ get $item "address" | default "127.0.0.1" }}:{{ get $item "port" }}:
     title: {{ $name }}
-    reachable: false
-    timeout: 500
+    reachable: {{ $reachable }}
+    timeout: {{ get $item "timeout" | default 500 }}
 {{- end }}
 {{- if .features.ai }}
 {{-   range $name, $provider := .ai.providers }}
@@ -124,7 +126,7 @@ mount:
 
 port:
   tcp:22:
-    listening: false
+    listening: {{ .vm }}
 
 # process:
 #   chrome:

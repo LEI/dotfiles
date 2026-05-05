@@ -124,8 +124,6 @@
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $libc := includeTemplate "libc.tmpl" . | trim }}
 
-{{- $timezone := includeTemplate "timezone.tmpl" . | trim }}
-
 {{- $featureMap := dict
   "homebrew" "brew"
   "gem" "ruby"
@@ -160,8 +158,8 @@
   "sessionType" (env "XDG_SESSION_TYPE")
   "softwareVersion" $softwareVersion
   "system" $system
-  "timezone" $timezone
   "variantID" $variantID
+  "vm" $vm
   "wsl" $wsl
 
   "email" $email
@@ -184,7 +182,11 @@
 {{-   end }}
 {{- end }}
 
+{{- /* FIXME: only use data */ -}}
 {{- $context := mergeOverwrite . $data }}
+
+{{- $timezone := includeTemplate "timezone.tmpl" $context | trim }}
+{{- $_ := set $data "timezone" $timezone }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age

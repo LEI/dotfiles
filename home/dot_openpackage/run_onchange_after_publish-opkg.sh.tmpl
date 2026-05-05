@@ -136,17 +136,25 @@ if [ -d "$registry_dir" ]; then
   done
 fi
 
-# Symlink target to src; refuse to overwrite a real directory
+# Refuse to clobber a real directory at the link path
+ensure_symlink() {
+  target="$1"
+  link="$2"
+
+  if [ -e "$link" ] && [ ! -L "$link" ]; then
+    echo "ERROR: $link exists and is not a symlink. Remove it first." >&2
+    return 1
+  fi
+
+  if [ ! -L "$link" ] || [ "$(readlink "$link")" != "$target" ]; then
+    ln -sn "$target" "$link"
+  fi
+}
+
 link_rules() {
   name="$1" src="$2"
   target="$HOME/.claude/rules/$name"
-
-  if [ -e "$target" ] && [ ! -L "$target" ]; then
-    die "$target is not a symlink
-  Run: trash $target"
-  fi
-
-  run ln -sfn "$src" "$target"
+  ensure_symlink "$src" "$target"
 }
 
 {{- $rules := list -}}

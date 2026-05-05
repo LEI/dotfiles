@@ -1,1 +1,4 @@
-TS_CADDY_AUTH_KEY={{ .caddy.tailscale.oauthSecret | default "" }}
+{{- $key := .caddy.tailscale.oauthSecret | trim -}}
+{{- if $key }}
+TS_CADDY_AUTH_KEY={{ $key | quote }}
+{{ end -}}

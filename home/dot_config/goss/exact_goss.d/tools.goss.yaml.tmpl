@@ -1,10 +1,19 @@
+{{- $jqExec := "" -}}
+{{- $yqExec := "" -}}
+{{- if eq .osIDLike "debian" "fedora" -}}
+{{-   if stat (joinPath .brewPrefix "bin/jq") }}{{ $jqExec = joinPath .brewPrefix "bin/jq" }}{{ end -}}
+{{-   if stat (joinPath .brewPrefix "bin/yq") }}{{ $yqExec = joinPath .brewPrefix "bin/yq" }}{{ end -}}
+{{- else -}}
+{{-   if lookPath "jq" | isExecutable }}{{ $jqExec = "jq" }}{{ end -}}
+{{-   if lookPath "yq" | isExecutable }}{{ $yqExec = "yq" }}{{ end -}}
+{{- end -}}
 {{- $jqVersion := "" -}}
 {{- $yqVersion := "" -}}
-{{- if lookPath "jq" | isExecutable -}}
-{{-   $jqVersion = output "sh" "-c" "jq --version | cut -d'-' -f2" -}}
+{{- if $jqExec -}}
+{{-   $jqVersion = output "sh" "-c" (printf "%s --version | cut -d'-' -f2" $jqExec) -}}
 {{- end -}}
-{{- if lookPath "yq" | isExecutable -}}
-{{-   $yqVersion = output "sh" "-c" "yq --version | awk '{print $4}' | tr -d 'v'" -}}
+{{- if $yqExec -}}
+{{-   $yqVersion = output "sh" "-c" (printf "%s --version | awk '{print $4}' | tr -d 'v'" $yqExec) -}}
 {{- end -}}
 ---
 {{- if or $jqVersion $yqVersion }}
@@ -14,17 +23,15 @@ matching:
 {{- if $jqVersion }}
 
   jq:
-    # title: Check jq version matches semver constraint
     content:
       - {{ $jqVersion | trim | quote }}
     matches:
-      semver-constraint: ">= 1.8.0 < 2.0.0"
+      match-regexp: '^(1\.[7-9]|1\.[1-9][0-9]+)(\.|$)'
 {{- end }}
 
 {{- if $yqVersion }}
 
   yq:
-    # title: Check yq version matches semver constraint
     content:
       - {{ $yqVersion | trim | quote }}
     matches:
@@ -32,21 +39,17 @@ matching:
 {{- end }}
 
 command:
+{{- if $jqExec }}
 
   jq:
-    {{- if eq .osIDLike "debian" "fedora" }}
-    exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" jq --version'
-    {{- else }}
-    exec: jq --version
-    {{- end }}
+    exec: {{ $jqExec }} --version
     exit-status: 0
     timeout: 2000
+{{- end }}
+{{- if $yqExec }}
 
   yq:
-    {{- if eq .osIDLike "debian" "fedora" }}
-    exec: sh -c 'PATH="{{ .brewPrefix }}/bin:$PATH" yq --version'
-    {{- else }}
-    exec: yq --version
-    {{- end }}
+    exec: {{ $yqExec }} --version
     exit-status: 0
     timeout: 2000
+{{- end }}

@@ -58,13 +58,20 @@ run_chezmoi() {
   run_script "$TEST_TMPDIR/$script" "$@"
 }
 
+# TODO: lib/sh
 if stat --version >/dev/null 2>&1; then
   file_perms() {
     stat -c '%a' "$1"
   }
+  file_perms_fmt() {
+    stat -c '%A' "$1"
+  }
 else
   file_perms() {
     stat -f '%A' "$1"
+  }
+  file_perms_fmt() {
+    stat -f '%Sp' "$1"
   }
 fi
 
@@ -74,12 +81,13 @@ check_perms() {
   local expected="$1"
   shift
   local fix=()
-  for f in "$@"; do
-    [ -e "$f" ] || continue
+  for file in "$@"; do
+    [ -e "$file" ] || continue
     local perm
-    perm=$(file_perms "$f")
+    perm=$(file_perms "$file")
     if [ "$perm" != "$expected" ]; then
-      fix+=("chmod $expected ${f/$HOME/\~}") # actual: $perm
+      stat="$(file_perms_fmt "$file")"
+      fix+=("$stat # expected: chmod $expected ${file/$HOME/\~}")
     fi
   done
   if [ ${#fix[@]} -gt 0 ]; then

@@ -136,6 +136,10 @@ BASH_PROF
   fi
   ;;
 zsh)
+  if ! command -v zsh >/dev/null; then
+    log "zsh not installed"
+    exit 1
+  fi
   cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
 zmodload zsh/zprof
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
@@ -145,7 +149,7 @@ ZSH_PROF
 echo \$? >"$tmpdir/status"
 ZSH_RC
   export REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
-  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof' 2>/dev/null
+  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof'
   ;;
 *)
   log "invalid shell '$shell', expected bash or zsh"

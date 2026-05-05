@@ -4,7 +4,7 @@
 {{- $scripts := glob (joinPath .chezmoi.workingTree "script" "*") -}}
 {{- range $bins -}}
 {{-   if not (stat .) -}}
-{{-     warnf "usage-completions: broken link %s" (. | base) -}}
+{{-     warnf "usage-completions: broken link: %s" (. | replace $.chezmoi.homeDir "~") -}}
 {{-     continue -}}
 {{-   end -}}
 {{-   $content := include . -}}

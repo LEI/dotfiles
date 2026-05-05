@@ -50,7 +50,10 @@ fi
 {{- end }}
 
 echo "mise: installing ({{ $variant }})" >&2
-run curl --location --fail --show-error --silent "https://mise.jdx.dev/mise-latest-{{ $variant }}" --output "$MISE_BIN"
+progress=--silent
+[ -t 2 ] && progress=--progress-bar
+run curl --location --fail --show-error --max-time 300 "$progress" \
+  "https://mise.jdx.dev/mise-latest-{{ $variant }}" --output "$MISE_BIN"
 run chmod +x "$MISE_BIN"
 
 {{- if eq .osID "android" }}

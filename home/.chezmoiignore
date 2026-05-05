@@ -35,7 +35,7 @@
 .config/readline/
 .config/sh/
 .config/wget/
-{{- if not .ci }}
+{{- if and (not .ci) (not .ephemeral) }}
 .local/bin/
 {{- end }}
 {{- end }}

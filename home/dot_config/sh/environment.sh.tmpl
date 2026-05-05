@@ -19,5 +19,3 @@ if command -v dircolors >/dev/null; then
 elif command -v gdircolors >/dev/null; then
   eval "$(gdircolors -b)"
 fi
-
-{{ includeTemplate "xdg.sh.tmpl" . | trim }}

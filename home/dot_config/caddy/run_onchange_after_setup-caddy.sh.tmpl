@@ -24,8 +24,6 @@
 {{-   if .features.otel }}
 # otel: {{ includeTemplate "otel.yaml.tmpl" . | sha256sum }}
 {{-   end }}
-{{- else if eq .chezmoi.os "darwin" }}
-# pf-anchor: {{ include "dot_config/caddy/.pf.anchor" | sha256sum }}
 {{- end }}
 
 set -eu
@@ -36,21 +34,29 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/run.sh
 . "$lib_dir/sh/run.sh"
 
+cert_pem() {
+  if [ -f "$1" ]; then
+    cat "$1"
+  else
+    printf '%s' "$1"
+  fi
+}
+
 cert_fingerprint() {
-  openssl x509 -in "$1" -noout -fingerprint -sha256 2>/dev/null
+  cert_pem "$1" | openssl x509 -noout -fingerprint -sha256
 }
 
 cert_expiry() {
-  openssl x509 -in "$1" -noout -enddate 2>/dev/null | cut -d= -f2
+  cert_pem "$1" | openssl x509 -noout -enddate | cut -d= -f2
 }
 
 cert_expiring() {
-  ! openssl x509 -in "$1" -noout -checkend 2592000 >/dev/null 2>&1
+  ! cert_pem "$1" | openssl x509 -noout -checkend 2592000 >/dev/null
 }
 
 caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
 {{- if eq .chezmoi.os "darwin" }}
-caddy_data="$HOME/Library/Application Support/Caddy"
+caddy_data="${HOMEBREW_PREFIX:?}/var/lib/caddy"
 admin_addr="127.0.0.1:{{ .caddy.admin.port }}"
 {{- else }}
 caddy_data="$HOME/.local/share/caddy"
@@ -84,7 +90,11 @@ fi
 
 if ! has caddy; then
 {{- if eq .chezmoi.os "darwin" }}
+{{-   if .features.tailscale }}
   die "caddy not found; run xcaddy build first (~/.local/bin/caddy)"
+{{-   else }}
+  die "caddy not found; run 'brew install caddy' first"
+{{-   end }}
 {{- else }}
   msg "caddy not found; skipping setup"
   exit 0
@@ -176,79 +186,37 @@ fi
 
 {{- else if eq .chezmoi.os "darwin" }}
 
-# launchd silently fails to open log file if directory is missing
-if [ ! -d "$HOME/Library/Logs" ]; then
-  run mkdir -p "$HOME/Library/Logs"
+uid=$(id -u)
+
+if ! has trash; then
+  die "trash not found; install macos-trash via brew"
 fi
 
-# Stop brew-managed caddy so the user LaunchAgent owns 18080/18443
-if [ -f /Library/LaunchDaemons/homebrew.mxcl.caddy.plist ]; then
-  msg "Stopping system-level brew caddy (may prompt for sudo)"
-  run sudo launchctl bootout system/homebrew.mxcl.caddy 2>/dev/null || true
-fi
-if [ -f "$HOME/Library/LaunchAgents/homebrew.mxcl.caddy.plist" ]; then
-  msg "Stopping user-level brew caddy"
-  run launchctl bootout "gui/$(id -u)/homebrew.mxcl.caddy" 2>/dev/null || true
-fi
+# User-mode LaunchAgents must not coexist with the system LaunchDaemon
+for label in com.caddy homebrew.mxcl.caddy; do
+  plist="$HOME/Library/LaunchAgents/$label.plist"
+  if launchctl print "gui/$uid/$label" >/dev/null 2>&1; then
+    msg "removing user-mode LaunchAgent $label"
+    run launchctl bootout "gui/$uid/$label"
+  fi
+  if [ -f "$plist" ]; then
+    run trash "$plist"
+  fi
+done
 
-# Reclaim caddy data dir from root if previously created by sudo brew caddy
-if [ -d "$caddy_data" ] && [ "$(stat -f '%Su' "$caddy_data")" != "$(id -un)" ]; then
-  msg "Reclaiming ownership of $caddy_data"
-  run sudo chown -R "$(id -un):$(id -gn)" "$caddy_data"
-fi
-
-# pf rdr anchor: 80 -> 18080, 443 -> 18443 on lo0
-pf_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.pf.anchor"
-pf_dest=/etc/pf.anchors/caddy
+# Strip caddy pf rdr anchor (kernel loopback bypass made it useless on macOS)
+pf_anchor=/etc/pf.anchors/caddy
 pf_conf=/etc/pf.conf
-pf_changed=false
-
-if ! diff -q "$pf_dest" "$pf_src" >/dev/null 2>&1; then
-  msg "Updating $pf_dest"
-  run sudo cp "$pf_src" "$pf_dest"
-  pf_changed=true
-fi
-
-# /etc/pf.conf: insert caddy anchor declarations in proper position
-# (rdr-anchor must precede anchor/filter rules per pf grammar).
-# Restore: sudo sed -i '' -e '/^rdr-anchor "caddy"$/d' -e '/^anchor "caddy"$/d' -e '/^load anchor "caddy" from /d' /etc/pf.conf
-pf_clean=$(sed -e '/^rdr-anchor "caddy"$/d' \
-  -e '/^anchor "caddy"$/d' \
-  -e '/^load anchor "caddy" from /d' "$pf_conf")
-if printf '%s' "$pf_clean" | grep -q '^rdr-anchor "com\.apple' &&
-  printf '%s' "$pf_clean" | grep -q '^load anchor "com\.apple"'; then
-  pf_desired=$(printf '%s\n' "$pf_clean" | awk '
-{ print }
-!rdr_added && /^rdr-anchor "com\.apple/ { print "rdr-anchor \"caddy\""; rdr_added=1 }
-!anchor_added && /^load anchor "com\.apple"/ {
-  print "anchor \"caddy\""
-  print "load anchor \"caddy\" from \"/etc/pf.anchors/caddy\""
-  anchor_added=1
-}
-')
-else
-  pf_desired=$(printf '%s\nrdr-anchor "caddy"\nanchor "caddy"\nload anchor "caddy" from "/etc/pf.anchors/caddy"\n' "$pf_clean")
-fi
-
-if ! printf '%s' "$pf_desired" | grep -q '^load anchor "caddy"'; then
-  die "pf.conf rewrite produced incomplete output; aborting before bricking pf"
-fi
-
-if ! printf '%s\n' "$pf_desired" | diff -q - "$pf_conf" >/dev/null 2>&1; then
-  msg "Updating $pf_conf with caddy anchor entries"
-  run sudo sh -c 'cat >"$1"' _ "$pf_conf" <<HERE
-$pf_desired
-HERE
-  pf_changed=true
-fi
-
-# Reload if the 443 redirect isn't active, even when config files are unchanged
-if ! nc -z -w 1 127.0.0.1 443 >/dev/null 2>&1; then
-  pf_changed=true
-fi
-
-if [ "$pf_changed" = true ]; then
-  run sudo pfctl -e -f "$pf_conf"
+if [ -f "$pf_anchor" ] || grep -q '^[^#]*"caddy"' "$pf_conf"; then
+  msg "removing legacy caddy pf anchor"
+  cleaned=$(sed -e '/^rdr-anchor "caddy"$/d' \
+    -e '/^anchor "caddy"$/d' \
+    -e '/^load anchor "caddy" from /d' "$pf_conf")
+  printf '%s\n' "$cleaned" | run sudo tee "$pf_conf" >/dev/null
+  if [ -f "$pf_anchor" ]; then
+    run sudo rm "$pf_anchor"
+  fi
+  run sudo pfctl -f "$pf_conf"
 fi
 
 # Route .test queries to 127.0.0.1 via standalone dnsmasq
@@ -266,15 +234,96 @@ if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf
   run sudo sh -c "mkdir -p $(dirname "$resolver_conf") && printf 'nameserver 127.0.0.1\n' >$resolver_conf"
 fi
 
+{{- if .features.tailscale }}
+
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" false
+  "system" true
+  "formula" "caddy"
+) -}}
+
+brew_daemon_plist=/Library/LaunchDaemons/homebrew.mxcl.caddy.plist
+if [ -f "$brew_daemon_plist" ]; then
+  run sudo rm "$brew_daemon_plist"
+fi
+
+# Custom LaunchDaemon: xcaddy build with tailscale module, run as root
+daemon_plist=/Library/LaunchDaemons/com.caddy.plist
+desired_plist=$(cat <<'PLIST'
+{{ includeTemplate "launchd-agent.plist.tmpl" (dict
+  "label" "com.caddy"
+  "args" (list
+    (printf "%s/.local/bin/caddy" .chezmoi.homeDir)
+    "run"
+    "--config" (printf "%s/.config/caddy/Caddyfile" .chezmoi.homeDir))
+  "env" (dict
+    "HOME" (printf "%s/var/lib" .brewPrefix)
+    "XDG_DATA_HOME" (printf "%s/var/lib" .brewPrefix)
+    "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix)
+    "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default ""))
+  "log" (printf "%s/var/log/caddy.log" .brewPrefix)
+  "workdir" (printf "%s/var/lib" .brewPrefix)) }}
+PLIST
+)
+if ! printf '%s\n' "$desired_plist" | diff -q - "$daemon_plist" >/dev/null 2>&1; then
+  msg "Updating $daemon_plist"
+  printf '%s\n' "$desired_plist" | run sudo tee "$daemon_plist" >/dev/null
+  run sudo chown root:wheel "$daemon_plist"
+  run sudo chmod 644 "$daemon_plist"
+fi
+
 {{ includeTemplate "launchd-apply.sh.tmpl" (dict
   "chezmoi" .chezmoi
   "active" true
   "bootstrap" true
+  "system" true
   "label" "com.caddy"
   "liveness" (merge $liveness (dict "host" "127.0.0.1"))
   "port" .caddy.admin.port
   "reload" `caddy reload --config "$caddyfile" --address "$admin_addr"`
 ) -}}
+
+{{- else }}
+
+# Tear down custom xcaddy LaunchDaemon if present (switching to default path)
+custom_daemon=/Library/LaunchDaemons/com.caddy.plist
+if launchctl print system/com.caddy >/dev/null 2>&1; then
+  msg "stopping custom com.caddy LaunchDaemon"
+  run sudo launchctl bootout system/com.caddy
+fi
+if [ -f "$custom_daemon" ]; then
+  run sudo rm "$custom_daemon"
+fi
+
+# Brew-managed caddy as system LaunchDaemon (default macOS path)
+brew_etc="${HOMEBREW_PREFIX:?}/etc"
+for target in Caddyfile sites; do
+  link="$brew_etc/$target"
+  src="$HOME/.config/caddy/$target"
+  if [ ! -L "$link" ] || [ "$(readlink "$link")" != "$src" ]; then
+    msg "linking $link -> $src"
+    run sudo ln -sfn "$src" "$link"
+  fi
+done
+
+if [ -d "$caddy_data" ] && [ "$(stat -f '%Su' "$caddy_data")" != root ]; then
+  msg "transferring $caddy_data to root (brew daemon owner)"
+  run sudo chown -R root:wheel "$caddy_data"
+fi
+
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" true
+  "system" true
+  "formula" "caddy"
+  "liveness" (merge $liveness (dict "host" "127.0.0.1"))
+  "port" .caddy.admin.port
+  "reload" `caddy reload --config "$caddyfile" --address "$admin_addr"`
+) -}}
+
+{{- end }}
+caddy_root_pem=$(curl --silent --fail "http://$admin_addr/pki/ca/local" | jq -r .root_certificate)
+caddy_intermediate_pem=$(curl --silent --fail "http://$admin_addr/pki/ca/local" | jq -r .intermediate_certificate)
+
 {{- end }}
 # Trust CA system-wide (caddy trust handles platform-native trust store)
 if ! curl --silent --fail "http://$admin_addr/pki/ca/local/trusted" | jq --exit-status '.trusted == true' >/dev/null; then
@@ -342,23 +391,24 @@ fi
 {{- else if eq .chezmoi.os "darwin" }}
 
 # Append caddy root CA to brew openssl bundle so brew-curl trusts .test sites
-brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
-sed="$(which gsed 2>/dev/null || which sed)"
-if [ -d "$brew_openssl_dir" ]; then
-  brew_bundle="$brew_openssl_dir/cert.pem"
-  caddy_marker="# Caddy Local Authority"
-  if ! grep -qF "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-    if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-      marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
-      end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
-      run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
-    fi
-    msg "Appending caddy root CA to brew openssl bundle"
-    run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
-  fi
+brew_bundle="${HOMEBREW_PREFIX:?}/etc/openssl@3/cert.pem"
+caddy_marker="# Caddy Local Authority"
+if [ -f "$brew_bundle" ] && ! grep -qF "$caddy_marker" "$brew_bundle"; then
+  msg "appending caddy root CA to brew openssl bundle"
+  printf '%s\n%s\n' "$caddy_marker" "$caddy_root_pem" >>"$brew_bundle"
 fi
 {{- end }}
 
+{{- if eq .chezmoi.os "darwin" }}
+root_expiry=$(cert_expiry "$caddy_root_pem")
+if cert_expiring "$caddy_root_pem"; then
+  die "root CA expires soon: $root_expiry"
+fi
+intermediate_expiry=$(cert_expiry "$caddy_intermediate_pem")
+if cert_expiring "$caddy_intermediate_pem"; then
+  die "intermediate CA expires soon: $intermediate_expiry"
+fi
+{{- else }}
 root_expiry=$(cert_expiry "$root")
 if cert_expiring "$root"; then
   die "root CA expires soon: $root_expiry"
@@ -367,6 +417,7 @@ intermediate_expiry=$(cert_expiry "$intermediate")
 if cert_expiring "$intermediate"; then
   die "intermediate CA expires soon: $intermediate_expiry"
 fi
+{{- end }}
 {{- if $testSite }}
 ssl_verify_result=$(
   curl --silent --max-time 5 --write-out '%{ssl_verify_result}' --output /dev/null "https://{{ $testSite }}.test{{ $testPath }}" 2>/dev/null

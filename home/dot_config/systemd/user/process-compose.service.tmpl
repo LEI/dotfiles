@@ -16,6 +16,9 @@ Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
 {{- if $uds }}
 Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/global.sock
 {{- end }}
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=process-compose
 ExecStart=/bin/bash -lc 'exec process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled'
 Restart=on-failure
 RestartSec=5

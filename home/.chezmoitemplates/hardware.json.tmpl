@@ -38,11 +38,11 @@
 
 {{- $cpuCores := 1 }}
 {{- $cpuThreads := 1 }}
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (lookPath "sysctl" | isExecutable) }}
 {{-   $cpuStats := without (output "sysctl" "-n" "hw.physicalcpu_max" "hw.logicalcpu_max" | trim | splitList "\n") "" }}
 {{-   $cpuCores = index $cpuStats 0 | int }}
 {{-   $cpuThreads = index $cpuStats 1 | int }}
-{{- else if eq .chezmoi.os "linux" }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "lscpu" | isExecutable) }}
 {{-   $lscpuLines := without (output "sh" "-c" "lscpu --online --parse | grep -v '^#'" | trim | splitList "\n") "" }}
 {{-   $coreKeys := list }}
 {{-   range $lscpuLines }}
@@ -51,7 +51,7 @@
 {{-   end }}
 {{-   $cpuCores = $coreKeys | sortAlpha | uniq | len }}
 {{-   $cpuThreads = len $lscpuLines }}
-{{- else if eq .chezmoi.os "windows" }}
+{{- else if and (eq .chezmoi.os "windows") (lookPath "powershell" | isExecutable) }}
 {{-   $cpuStats := output "powershell" "-NoProfile" "-NonInteractive" "-Command" "$p=Get-CimInstance Win32_Processor;\"$($p.NumberOfCores) $($p.NumberOfLogicalProcessors)\"" | trim | splitList " " }}
 {{-   $cpuCores = index $cpuStats 0 | int }}
 {{-   $cpuThreads = index $cpuStats 1 | int }}

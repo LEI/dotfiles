@@ -7,10 +7,6 @@
 	admin localhost:2019
 	{{- end }}
 	metrics
-	{{- if eq .chezmoi.os "darwin" }}
-	http_port 18080
-	https_port 18443
-	{{- end }}
 	{{- if and .features.tailscale .caddy.tailscale.oauthSecret }}
 	tailscale {
 		auth_key {env.TS_CADDY_AUTH_KEY}

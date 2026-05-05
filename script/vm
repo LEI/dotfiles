@@ -29,14 +29,14 @@ source "$lib_dir/bash/require.sh"
 require_bash 4
 trap 'log "error at line $LINENO"' ERR
 
-readonly PROG="${0##*/}"
+: "${VM_HEALTH_TARGET:=github.com:443}"
 
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in
   Darwin) VM_PROVIDER=tart ;;
   Linux) VM_PROVIDER=vetu ;;
   *)
-    msg "$PROG: unsupported OS: $(uname -s)"
+    err "unsupported OS: $(uname -s)"
     exit 1
     ;;
   esac
@@ -46,7 +46,7 @@ case "$(uname -m)" in
 x86_64) ARCH=amd64 ;;
 aarch64 | arm64) ARCH=arm64 ;;
 *)
-  msg "$PROG: unsupported arch: $(uname -m)"
+  err "unsupported arch: $(uname -m)"
   exit 1
   ;;
 esac
@@ -64,7 +64,7 @@ if [ "$ARCH" = arm64 ]; then
 fi
 readonly IMAGES
 
-vm() { "$VM_PROVIDER" "$@"; }
+vm() { trace "$VM_PROVIDER" "$@"; }
 
 vm_state() {
   case "$VM_PROVIDER" in
@@ -76,7 +76,7 @@ vm_state() {
 
 vm_clone() {
   log "cloning $image as $name"
-  trace vm clone "$image" "$name"
+  vm clone "$image" "$name"
 }
 
 vm_start() {
@@ -104,19 +104,101 @@ vm_start() {
   sleep 1
 }
 
-vm_wait() {
+fmt_duration() {
+  local total=$1
+  if [ "$total" -ge 3600 ]; then
+    printf '%dh %dm' $((total / 3600)) $(((total % 3600) / 60))
+  elif [ "$total" -ge 60 ]; then
+    printf '%dm %ds' $((total / 60)) $((total % 60))
+  else
+    printf '%ds' "$total"
+  fi
+}
+
+with_timeout() {
+  if command -v gtimeout >/dev/null 2>&1; then
+    gtimeout "$1" "${@:2}"
+  elif command -v timeout >/dev/null 2>&1; then
+    timeout "$1" "${@:2}"
+  else
+    "${@:2}"
+  fi
+}
+
+wait_for() {
+  local label="$1" timeout_sec="$2"
+  shift 2
+  local out start deadline rc=0 per_attempt
+  start=$SECONDS
+  deadline=$((SECONDS + timeout_sec))
+  per_attempt=$((timeout_sec < 5 ? timeout_sec : 5))
+  out=$(mktemp)
+  log "waiting for $label (up to $(fmt_duration "$timeout_sec"))"
+  until with_timeout "$per_attempt" "$@" </dev/null >"$out" 2>&1; do
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      printf '\n' >&2
+      err "timeout waiting for $label after $(fmt_duration "$((SECONDS - start))")"
+      if [ -s "$out" ]; then
+        log "last attempt:"
+        sed 's/^/  /' "$out" >&2
+      fi
+      rc=1
+      break
+    fi
+    printf '.' >&2
+    sleep 1
+  done
+  if [ "$rc" = 0 ]; then
+    [ "$SECONDS" -gt "$start" ] && printf '\n' >&2
+    log "$label ready after $(fmt_duration "$((SECONDS - start))")"
+  fi
+  rm -f "$out"
+  return "$rc"
+}
+
+host_route_iface() {
+  case "$(uname -s)" in
+  Darwin) route -n get "$1" 2>/dev/null | awk '/interface:/ {print $2}' ;;
+  Linux) ip -o route get "$1" 2>/dev/null | awk '/dev/ {for (i=1; i<=NF; i++) if ($i == "dev") print $(i+1)}' ;;
+  esac
+}
+
+vm_wait_reachable() {
+  local timeout=120
+  [ "$guest_os" = darwin ] && timeout=500
   if [ "$VM_PROVIDER" = tart ]; then
-    log "waiting for guest agent"
-    # shellcheck disable=SC2016
-    timeout 500 sh -c 'until "$1" exec "$2" true >/dev/null 2>&1; do sleep 2; done' \
-      -- "$VM_PROVIDER" "$name"
+    wait_for "host->guest agent" "$timeout" "$VM_PROVIDER" exec "$name" true
   else
     log "waiting for IP"
     ssh_host="$(vm ip --wait=30 "$name")"
-    log "waiting for SSH on $ssh_host:$ssh_port"
-    # shellcheck disable=SC2016
-    timeout 500 sh -c 'until nc -z -w2 "$@"; do sleep 2; done' -- "$ssh_host" "$ssh_port"
+    wait_for "host->guest $ssh_host:$ssh_port" "$timeout" nc -z -w2 "$ssh_host" "$ssh_port"
   fi
+}
+
+vm_wait_network() {
+  local host="${VM_HEALTH_TARGET%:*}" port="${VM_HEALTH_TARGET#*:}"
+  local iface
+  iface="$(host_route_iface "$host")"
+  log "host route to $host: ${iface:-unknown}"
+  case "$iface" in
+  utun*)
+    err "$host is tunneled via $iface; guest cannot reach internet"
+    log "hint: split-tunnel or disconnect, then retry"
+    return 1
+    ;;
+  esac
+  local probe=()
+  if [ "$VM_PROVIDER" = tart ]; then
+    probe=("$VM_PROVIDER" exec "$name")
+  else
+    : "${ssh_host:=$(vm ip "$name")}"
+    probe=(sshpass -e ssh -o StrictHostKeyChecking=no -p "$ssh_port" "admin@$ssh_host")
+    export SSHPASS=admin
+  fi
+  if [ "$guest_os" = linux ]; then
+    wait_for "guest->net DNS $host" 10 "${probe[@]}" getent hosts "$host" || return 1
+  fi
+  wait_for "guest->net TCP $VM_HEALTH_TARGET" 10 "${probe[@]}" nc -z -w3 "$host" "$port"
 }
 
 vm_mount() {
@@ -136,14 +218,22 @@ vm_mount() {
     *) tag="${entry##*/}" ;;
     esac
     log "mounting $tag"
-    vm exec "$name" sh -c "mp=\$HOME/.local/share/$tag && mkdir -p \"\$mp\" && sudo modprobe virtiofs 2>/dev/null; sudo mount -t virtiofs $tag \"\$mp\""
+    # shellcheck disable=SC2016
+    vm_exec sh -euc '
+      mp="$HOME/.local/share/$1"
+      mkdir -p "$mp"
+      sudo modprobe virtiofs 2>/dev/null
+      sudo mount -t virtiofs "$1" "$mp"
+    ' -- "$tag"
   done
 }
+
+real_tty() { [ -t 0 ] && [ -t 1 ]; }
 
 vm_exec() {
   if [ "$VM_PROVIDER" = tart ]; then
     local flags=()
-    [ -t 0 ] && flags=(-it)
+    real_tty && flags=(-it)
     vm exec "${flags[@]}" "$name" "$@"
   else
     local ssh_args=(
@@ -151,29 +241,43 @@ vm_exec() {
       -o ConnectTimeout=60
       -p "$ssh_port"
     )
-    [ -t 0 ] && ssh_args=(-t "${ssh_args[@]}")
-    sshpass -padmin ssh "${ssh_args[@]}" "admin@$ssh_host" "$@"
+    real_tty && ssh_args=(-t "${ssh_args[@]}")
+    # shellcheck disable=SC2209
+    SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" "$@"
   fi
 }
 
 vm_exec_cmd() {
-  log "running command: $*"
-  local dir="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
-  [ "$VM_PROVIDER" = tart ] && dir="/Volumes/My Shared Files/chezmoi"
-  vm_exec sh -l -c "cd \"$dir\" && exec \"\$@\"" -- "$@"
+  local env_args=(
+    CHEZMOI_UPGRADE=true
+    "MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
+  )
+  [ -n "${CI:-}" ] && env_args+=("CI=$CI")
+  env_args+=("CHEZMOI_PROFILE=${CHEZMOI_PROFILE:-minimal}")
+  [ -n "${GITHUB_TOKEN:-}" ] && env_args+=("GITHUB_TOKEN=$GITHUB_TOKEN")
+  [ -n "${TERM:-}" ] && env_args+=("TERM=$TERM")
+  # bash -l sources ~/.profile for PATH and environment.d setup.
+  # mise activate runs only after chezmoi has installed mise.
+  # shellcheck disable=SC2016
+  vm_exec env "${env_args[@]}" bash -lc '
+    cd "$1" || exit
+    shift
+    [ "$BASH" = "$SHELL" ] || export SHELL="$BASH"
+    [ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh
+    exec "$@"
+  ' -- "$chezmoi_root" "$@"
 }
 
 vm_stop() {
   log "stopping $name"
-  trace vm stop "$name"
+  vm stop "$name"
 }
 
 restore_tty() {
-  [ -n "${tty_state:-}" ] && stty "$tty_state" 2>/dev/null || true
+  [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
 }
 
-cleanup() {
-  restore_tty
+vm_teardown() {
   if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
     log "killing tmux session"
     trace tmux kill-session -t vm
@@ -181,97 +285,160 @@ cleanup() {
   vm_stop
 }
 
-# Copy a host file into the VM. Tart lacks a native cp, and `tart exec -i name
-# cmd <file` crashes in 2.32.1 on Linux guests (getTerminalSize ioctl). Avoid
-# stdin redirect by base64-encoding the file into the command line for tart;
-# vetu has working SSH so sshpass+scp is fine there.
-vm_cp() {
+# tart 2.32.1 lacks cp and crashes on stdin redirect through tart exec -i
+# Refuse to clean any path that does not look like a chezmoi root inside a guest
+assert_safe_chezmoi_root() {
+  case "$1" in
+  /Volumes/*)
+    err "refusing to clean mount path: $1"
+    return 1
+    ;;
+  */.local/share/chezmoi) return 0 ;;
+  *)
+    err "refusing to clean unexpected path: $1"
+    return 1
+    ;;
+  esac
+}
+
+vm_copy_host_repo() {
+  local vm="$1" target_dir="$2" src_dir="${3:-$PWD}"
+  require_cmd tar
+  if [ "$VM_PROVIDER" != tart ]; then
+    err "vm_copy_host_repo: tart only"
+    return 1
+  fi
+  assert_safe_chezmoi_root "$target_dir" || return 1
+  log "copying $src_dir to $vm:$target_dir via tar stream"
+  # Strip xattrs and exclude ._* on both ends.
+  # Host tar may emit AppleDouble entries from PAX xattr records that GNU tar materializes as ._* on extract.
+  if ! trace tar --no-xattrs \
+    --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
+    -cf - -C "$src_dir" . |
+    "$VM_PROVIDER" exec -i "$vm" bash -euc "rm -rf '$target_dir' && mkdir -p '$target_dir' && tar xf - -C '$target_dir' --exclude='._*'"; then
+    err "repo copy stream failed: $src_dir to $vm:$target_dir"
+    return 1
+  fi
+}
+
+vm_cp_chmod() {
   local src="$1" dst="$2" b64
   if [ "$VM_PROVIDER" = tart ]; then
     b64="$(base64 <"$src")"
     # shellcheck disable=SC2016
-    vm exec "$name" sh -c \
+    vm_exec sh -euc \
       'printf "%s" "$1" | base64 -d >"$2" && chmod +x "$2"' \
       -- "$b64" "$dst"
   else
     : "${ssh_host:=$(vm ip "$name")}"
-    sshpass -padmin scp -o StrictHostKeyChecking=no -P "$ssh_port" \
+    # shellcheck disable=SC2209
+    SSHPASS=admin trace sshpass -e scp -o StrictHostKeyChecking=no -P "$ssh_port" \
       "$src" "admin@$ssh_host:$dst"
   fi
 }
 
-# Sets BOOTSTRAP_PATH; not stdout, since `$(...)` capture turns tart exec
-# stdout into a pipe and trips tart 2.32.1's terminal-size probe.
-copy_bootstrap() {
-  local vm_home
-  case "$guest_os" in
-  darwin) vm_home=/Users/admin ;;
-  *) vm_home=/home/admin ;;
-  esac
-  BOOTSTRAP_PATH="$vm_home/.local/bin/bootstrap"
-  log "copying bootstrap script to $BOOTSTRAP_PATH"
-  vm_exec mkdir -p "${BOOTSTRAP_PATH%/*}"
-  vm_cp ./script/bootstrap "$BOOTSTRAP_PATH"
+vm_sync() {
+  assert_safe_chezmoi_root "$chezmoi_root" || return 1
+  log "syncing chezmoi to $chezmoi_root"
+  : "${ssh_host:=$(vm ip "$name")}"
+  local ssh_args=(-o StrictHostKeyChecking=no -p "$ssh_port")
+  # shellcheck disable=SC2209
+  SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" \
+    "rm -rf '$chezmoi_root' && mkdir -p '$chezmoi_root'"
+  # shellcheck disable=SC2209
+  trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
+    .pre-commit-config.yaml mise.toml home script test |
+    SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" \
+      "tar x -C '$chezmoi_root'"
 }
 
-resolve_image() {
+resolve() {
   local target="$1"
   if [ -n "${IMAGES[$target]:-}" ]; then
     IFS='|' read -r image default_name guest_os <<<"${IMAGES[$target]}"
-    [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ] && : "${dirs:=chezmoi:$PWD:ro}"
-    return 0
-  fi
-
-  if [[ $target == */* ]]; then
+  elif [[ $target == */* ]]; then
     image="$target"
     default_name="${target##*/}"
     default_name="${default_name%:*}"
     guest_os="${VM_GUEST_OS:-linux}"
-    return 0
+  else
+    local available
+    available="$(printf '%s\n' "${!IMAGES[@]}" | sort | tr '\n' ' ' | sed 's/ $//')"
+    err "unknown image: $target"
+    log "available images for $ARCH: $available"
+    return 1
   fi
 
-  local available
-  available="$(printf '%s\n' "${!IMAGES[@]}" | sort | tr '\n' ' ' | sed 's/ $//')"
-  msg "$PROG: unknown image: $target"
-  msg "$PROG: available images for $ARCH: $available"
-  return 1
+  case "$guest_os" in
+  darwin) home=/Users/admin ;;
+  *) home=/home/admin ;;
+  esac
+
+  chezmoi_root="$home/.local/share/chezmoi"
+  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
+    chezmoi_root="/Volumes/My Shared Files/chezmoi"
+    : "${dirs:=chezmoi:$PWD:ro}"
+  fi
 }
 
 ensure_vm() {
   : "${name:=$default_name}"
   ssh_host=""
   ssh_port=22
-  local state
   state="$(vm_state "$name")"
 
   [ -z "$state" ] && vm_clone
 
   if [ "$state" != running ]; then
-    [ "$keep" = true ] || trap cleanup EXIT
     vm_start
-    vm_wait
+    vm_wait_reachable
     vm_mount
-  elif [ -n "$dirs" ]; then
-    log "VM already running; --dir mounts require a fresh start"
+  else
+    log "reusing running VM"
+    [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
+    vm_wait_reachable
   fi
+  vm_wait_network
+}
+
+# Persist mise trust so later runs skip the prompt
+trust() {
+  # shellcheck disable=SC2016
+  vm_exec sh -euc '
+    [ -f "$1" ] && command -v mise >/dev/null && mise trust --yes "$1" || true
+  ' -- "$chezmoi_root/mise.toml"
+}
+
+bootstrap() {
+  vm_exec_cmd ./script/bootstrap --no-tty --source="$chezmoi_root" --verbose
 }
 
 init_repo() {
-  local vm_home
-  case "$guest_os" in
-  darwin) vm_home=/Users/admin ;;
-  *) vm_home=/home/admin ;;
-  esac
+  # Skip if no chezmoi source yet so bootstrap can populate first.
+  # Skip if .git already present from mount or clone.
+  if ! vm_exec test -f "$chezmoi_root/.chezmoiroot"; then
+    return 0
+  fi
+  if vm_exec test -d "$chezmoi_root/.git"; then
+    return 0
+  fi
+  # shellcheck disable=SC2016
+  vm_exec sh -euc '
+    git config --global --add safe.directory "$1"
+    git -C "$1" init --quiet
+    git -C "$1" add --all
+  ' -- "$chezmoi_root"
 }
 
-run_pipeline() {
+pipeline() {
+  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = linux ]; then
+    vm_copy_host_repo "$name" "$chezmoi_root"
+  elif [ "$VM_PROVIDER" = vetu ]; then
+    vm_sync
+  fi
+  trust
+  bootstrap
   init_repo
-  copy_bootstrap
-  vm_exec_cmd env CI=true CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
-    "$BOOTSTRAP_PATH" \
-    --no-tty \
-    --verbose \
-    LEI
   vm_exec_cmd mise run pipeline
 }
 
@@ -279,18 +446,23 @@ cmd_run() {
   local target="$1"
   shift
 
-  resolve_image "$target" || return 1
-  ensure_vm || return 1
+  resolve "$target"
+  ensure_vm
 
   if [ "$#" -eq 0 ]; then
-    run_pipeline
+    pipeline
   else
     vm_exec_cmd "$@"
   fi
+
+  # Stop only if we started it and user did not pass -k
+  if [ "$state" != running ] && [ "$keep" != true ]; then
+    vm_teardown
+  fi
 }
 
-# Parse flags from "$@" and store remaining args in ARGS.
-# Globals: dirs, gui, keep, name, tmux, verbosity, ARGS (modified)
+# Parse flags from "$@" and store remaining args in ARGS
+# Globals modified: dirs, gui, keep, name, tmux, verbosity, ARGS
 parse_flags() {
   ARGS=()
   while [ $# -gt 0 ]; do
@@ -305,6 +477,7 @@ parse_flags() {
       ;;
     -d | --dir)
       dirs="${dirs:+$dirs }$2"
+      dirs_explicit=true
       shift 2
       ;;
     -g | --gui)
@@ -336,7 +509,7 @@ parse_flags() {
       break
       ;;
     --*)
-      msg "$PROG: unknown option: $1"
+      err "unknown option: $1"
       exit 2
       ;;
     -*)
@@ -346,6 +519,7 @@ parse_flags() {
         case "${opt:0:1}" in
         d)
           dirs="${dirs:+$dirs }$1"
+          dirs_explicit=true
           shift
           ;;
         g) gui=true ;;
@@ -358,7 +532,7 @@ parse_flags() {
         t) tmux=true ;;
         v) verbosity=2 ;;
         *)
-          msg "$PROG: unknown option: -${opt:0:1}"
+          err "unknown option: -${opt:0:1}"
           exit 2
           ;;
         esac
@@ -391,7 +565,7 @@ main() {
     ;;
   esac
 
-  tty_state=$(stty -g 2>/dev/null || true)
+  tty_state=$(stty -g </dev/tty 2>/dev/null || true)
   trap restore_tty EXIT
 
   require_cmd "$VM_PROVIDER"
@@ -401,6 +575,7 @@ main() {
     local target="$1"
     shift
     dirs="${VM_DIRS:-}"
+    dirs_explicit=false
     gui="${VM_GUI:-false}"
     keep="${VM_KEEP:-false}"
     name="${VM_NAME:-}"

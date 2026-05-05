@@ -1,0 +1,10 @@
+{{- $args := list
+      (joinPath .brewPrefix "sbin/logrotate")
+      "-s" (joinPath .chezmoi.homeDir ".local/state/logrotate.state")
+      (joinPath .chezmoi.homeDir ".config/logrotate/process-compose.conf") -}}
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+      "label" "com.logrotate"
+      "args" $args
+      "keepalive" false
+      "runatload" true
+      "interval" 86400) -}}

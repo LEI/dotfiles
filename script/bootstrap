@@ -9,12 +9,12 @@ set -eu
 
 PATH="$PATH:$HOME/.local/bin"
 
-if ! chezmoi="$(command -v chezmoi)"; then
+if ! chezmoi="$(command -v chezmoi)" || [ ! -s "$chezmoi" ]; then
   chezmoi="$HOME/.local/bin/chezmoi"
   if command -v curl >/dev/null; then
-    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$HOME/.local/bin"
   elif command -v wget >/dev/null; then
-    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+    sh -c "$(wget -qO- https://get.chezmoi.io)" -- -b "$HOME/.local/bin"
   else
     echo "To install chezmoi, you must have curl or wget installed." >&2
     exit 1
