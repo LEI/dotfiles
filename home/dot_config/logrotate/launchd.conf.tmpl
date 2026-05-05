@@ -1,0 +1,29 @@
+{{- $paths := list -}}
+{{- if .features.opencode -}}
+{{-   $paths = append $paths (joinPath .chezmoi.homeDir ".local/state/opencode/stdout.log") -}}
+{{-   $paths = append $paths (joinPath .chezmoi.homeDir ".local/state/opencode/stderr.log") -}}
+{{- end -}}
+{{- if .features.otel -}}
+{{-   $paths = append $paths (joinPath .chezmoi.homeDir ".local/state/webhook/stdout.log") -}}
+{{-   $paths = append $paths (joinPath .chezmoi.homeDir ".local/state/webhook/stderr.log") -}}
+{{- end -}}
+{{- if and .features.ai (hasKey (.ai.providers | default dict) "llama-server") -}}
+{{-   $paths = append $paths (joinPath .brewPrefix "var/log/llama-server.log") -}}
+{{- end -}}
+{{- if and .features.mlx (hasKey (.ai.providers | default dict) "mlx-lm") -}}
+{{-   $paths = append $paths (joinPath .brewPrefix "var/log/mlx-lm.log") -}}
+{{- end -}}
+{{- if and .features.mlx (hasKey (.ai.providers | default dict) "mlx-embed") -}}
+{{-   $paths = append $paths (joinPath .brewPrefix "var/log/mlx-embed.log") -}}
+{{- end -}}
+{{ range $paths }}{{ . }}
+{{ end -}}
+{
+    daily
+    size 100M
+    rotate 7
+    compress
+    missingok
+    notifempty
+    copytruncate
+}

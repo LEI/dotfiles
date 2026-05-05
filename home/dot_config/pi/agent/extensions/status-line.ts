@@ -56,6 +56,6 @@ export default function(pi: ExtensionAPI) {
     ctx.ui.setStatus("model", `🤖 ${model.id}`);
 
     // Log change details (visible in debug output)
-    console.log(`[model_select] ${prev} → ${next} (${source})`);
+    console.log(`[model_select] ${prev} -> ${next} (${source})`);
   }); */
 }

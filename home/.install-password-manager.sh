@@ -85,6 +85,9 @@ Linux)
     # run sudo -E apt-get install --quiet --yes unzip >/dev/null
     run sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
+  fedora)
+    run sudo dnf install --assumeyes --quiet unzip
+    ;;
   esac
   ;;
 *)

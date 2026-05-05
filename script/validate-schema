@@ -128,7 +128,8 @@ export -f extract_schema
 preflight_schema() {
   local url="$1" hash basename ext cache_file meta_file
   local headers etag last_mod current
-  hash=$(printf '%s' "$url" | shasum -a 256 | awk '{print $1}')
+  hash=$(printf '%s' "$url" | sha256sum)
+  hash=${hash%% *}
   basename="${url##*/}"
   case "$basename" in
   *.*) ext=".${basename##*.}" ;;

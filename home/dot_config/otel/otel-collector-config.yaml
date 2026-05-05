@@ -63,12 +63,12 @@ service:
                 host: 0.0.0.0
                 port: 8888 # internal collector metrics (separate from app metrics on 8889)
   pipelines:
-    # Traces: OTLP → batch → Tempo (storage + metrics_generator for RED/service-graphs)
+    # Traces: OTLP -> batch -> Tempo (storage + metrics_generator for RED/service-graphs)
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [otlp_grpc/tempo]
-    # Metrics: native SDK (OTLP) → Prometheus
+    # Metrics: native SDK (OTLP) -> Prometheus
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]

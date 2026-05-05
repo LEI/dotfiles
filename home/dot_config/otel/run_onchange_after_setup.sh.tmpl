@@ -60,7 +60,8 @@ fi
 
 otelcol_hash="{{ include $otelCollectorConfig | sha256sum }}"
 reload_if_changed otel-collector "$otelcol_hash" \
-  compose exec otel-collector kill -HUP 1
+  compose restart otel-collector
+# FIXME: compose exec otel-collector kill -HUP 1
 
 grafana_netrc=""
 grafana_reload() {

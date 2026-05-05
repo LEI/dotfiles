@@ -14,7 +14,7 @@ includes = ["{{ .chezmoi.homeDir }}/.config/mise/opkg.toml"]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
 disable_backends = ["ubi"]
-{{- else if eq .osID "darwin" }}
+{{- else if or (eq .osID "darwin") (and .vm (eq .osIDLike "debian")) }}
 # FIXME(darwin): HTTP status client error (403 rate limit exceeded)
 # https://mise.jdx.dev/troubleshooting.html#_403-forbidden-when-installing-a-tool
 disable_backends = ["aqua"]

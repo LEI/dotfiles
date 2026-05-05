@@ -1,10 +1,15 @@
+{{- $stateDir := joinPath .chezmoi.homeDir ".local/state" -}}
+{{- $configDir := joinPath .chezmoi.homeDir ".config/logrotate" -}}
 {{- $args := list
       (joinPath .brewPrefix "sbin/logrotate")
-      "-s" (joinPath .chezmoi.homeDir ".local/state/logrotate.state")
-      (joinPath .chezmoi.homeDir ".config/logrotate/process-compose.conf") -}}
+      "--verbose"
+      "-s" (joinPath $stateDir "logrotate.state")
+      (joinPath $configDir "process-compose.conf")
+      (joinPath $configDir "launchd.conf") -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
       "label" "com.logrotate"
       "args" $args
       "keepalive" false
       "runatload" true
-      "interval" 86400) -}}
+      "interval" 86400
+      "log" (joinPath $stateDir "logrotate.log")) -}}

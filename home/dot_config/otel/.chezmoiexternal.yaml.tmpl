@@ -48,11 +48,11 @@ grafana/dashboards/Application/opentelemetry-apm.json:
     args:
       - -e # Fix datasource UID
       - 's/"uid": "${DS_PROMETHEUS}"/"uid": "prometheus"/g'
-      - -e # Metric name: dashboard new format → Tempo 2.10 old format
+      - -e # Metric name: dashboard new format -> Tempo 2.10 old format
       - "s/traces_span_metrics_duration_milliseconds/traces_spanmetrics_latency/g"
       - -e
       - "s/traces_span_metrics_calls_total/traces_spanmetrics_calls_total/g"
-      - -e # Label: service_name → service in PromQL (Tempo remote_write uses service)
+      - -e # Label: service_name -> service in PromQL (Tempo remote_write uses service)
       - "s/service_name=/service=/g"
       - -e
       - "s/service_name}/service}/g"

@@ -2,6 +2,7 @@
 
 set -eu
 
+# Required for brew on debian
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi

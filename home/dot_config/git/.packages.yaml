@@ -41,6 +41,9 @@ packages:
     type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "windows") | ternary "mise" nil }}'
   prek: # pre-commit
     # type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
+    nameOverwrite:
+      mise: aqua:j178/prek
+      # mise: github:j178/prek
     type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
     # type: brew
   zizmor:

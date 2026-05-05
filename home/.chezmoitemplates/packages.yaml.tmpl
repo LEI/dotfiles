@@ -793,7 +793,7 @@ packages:
       windows: VideoLAN.VLC
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   which:
-    enabled: {{ eq .osIDLike "android" "arch" }}
+    enabled: {{ eq .osIDLike "android" "arch" "fedora" }}
   # wifitui:
   #   description: nmtui alternative
   #   enabled: {{ eq .os "linux" }}
@@ -997,8 +997,8 @@ osPackages:
         # after_script: cmd yabai --start-service
       # jackielii/tap/skhd-zig: # koekeishiya/formulae/skhd
     cask:
-      # antigravity:
-      #   enabled: {{ and .features.ai .gui }}
+      antigravity:
+        enabled: {{ and .features.ai .gui }}
       # cherry-studio:
       #   enabled: {{ and .features.ai .gui }}
       # jan:
@@ -1049,8 +1049,8 @@ osPackages:
       # pearcleaner:
       redis-insight:
         enabled: {{ .gui }}
-      # utm:
-      #   enabled: {{ .gui }}
+      utm:
+        enabled: {{ .gui }}
       # rustdesk:
       # safari-technology-preview:
       scroll-reverser:
@@ -1063,7 +1063,7 @@ osPackages:
       # xquartz:
     mas:
       Keynote:
-        id: 409183694
+        id: 361285480 # 409183694
         enabled: {{ .gui }}
       Microsoft Excel:
         id: 462058435
@@ -1075,10 +1075,10 @@ osPackages:
         id: 462054704
         enabled: {{ .gui }}
       Numbers:
-        id: 409203825
+        id: 361304891 # 409203825
         enabled: {{ .gui }}
       Pages:
-        id: 409201541
+        id: 361309726 # 409201541
         enabled: {{ .gui }}
       # Tailscale:
       #   id: 1475387142

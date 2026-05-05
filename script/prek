@@ -34,21 +34,43 @@ Darwin | Linux) ;;
 *) skip="${skip:+$skip,}validate-skill" ;;
 esac
 
-if [ -f /etc/alpine-release ]; then
-  skip="${skip:+$skip,}stylua-github"
-fi
+# if [ -f /etc/alpine-release ]; then
+#   skip="${skip:+$skip,}stylua-github"
+# fi
 
 # Skip in-place fixers when cwd is on a read-only mount.
-# test -w lies on read-only bind mounts (only checks superblock RO).
-# Linux: read mountinfo. macOS host: source is writable, branch is skipped.
+# Linux: parse mountinfo (test -w lies on bind mounts).
+# macOS: test -w reflects EROFS for fuse/virtiofs.
+ro=false
 if [ -r /proc/self/mountinfo ]; then
   ro_opts=$(awk -v p="$PWD/" '
     index(p, $5"/") == 1 && length($5) > best { best = length($5); opts = $6 }
     END { print opts }
   ' /proc/self/mountinfo)
-  case ",$ro_opts," in
-  *,ro,*) skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace" ;;
-  esac
+  case ",$ro_opts," in *,ro,*) ro=true ;; esac
+  [ "$verbosity" -ge 2 ] && echo "${0##*/}: pwd=$PWD opts=$ro_opts ro=$ro" >&2
+elif [ "$(uname -s)" = Darwin ]; then
+  # macOS: tart shares dirs as AppleVirtIOFS at /Volumes/My Shared Files.
+  # Per-tag RO is enforced by the virtiofs server, not in mount options;
+  # test -w lies. Match by mount type instead.
+  ro_opts=$(mount | awk -v p="$PWD/" '
+    match($0, / on .+ \(/) {
+      t = substr($0, RSTART+4, RLENGTH-6)
+      if ((p == t) || index(p, t"/") == 1) {
+        if (length(t) > best) {
+          best = length(t)
+          opts = substr($0, RSTART+RLENGTH)
+          sub(/\)$/, "", opts)
+          gsub(/ /, "", opts)
+        }
+      }
+    }
+    END { print opts }
+  ')
+  case ",$ro_opts," in *,AppleVirtIOFS,*) ro=true ;; esac
+fi
+if $ro; then
+  skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace"
 fi
 
 if [ -n "$skip" ]; then
@@ -58,15 +80,18 @@ if [ -n "$skip" ]; then
   export SKIP="$skip"
 fi
 
-# See ./script/test
+# Required for bashate on debian
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
-# if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
-#   eval "$(mise activate bash)"
-#   PATH="$PATH:$HOME/.local/share/mise/shims"
-# fi
 
 set -- prek run --all-files "$@"
 echo "$*" >&2
-"$@"
+# if command -v prek >/dev/null; then
+exec "$@"
+# elif command -v mise >/dev/null; then
+#   exec mise exec -- "$@"
+# else
+#   echo "${0##*/}: prek not found and mise not available" >&2
+#   exit 127
+# fi

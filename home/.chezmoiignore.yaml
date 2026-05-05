@@ -3,13 +3,11 @@
 # features: patterns ignored when the feature key is NOT enabled
 os:
   darwin:
-    - .bash_profile
     - .chezmoiscripts/darwin/**
     - .config/duti/
     - .config/hammerspoon/
     - .config/karabiner/
     - .hushlogin
-    - .local/bin/reclaim
     - .macos
     - Library/
   linux:

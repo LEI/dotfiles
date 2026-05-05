@@ -23,7 +23,7 @@ processes:
     #   --predicate 'process == "logger" AND eventMessage CONTAINS "com.process-compose"'
     #   --style compact
     #   | {{ $hlFollow }}
-    command: "tail -F ~/.local/state/process-compose/stdout.log | {{ $tspinFollow }}"
+    command: "tail -F ~/.local/state/process-compose/process-compose.log | {{ $tspinFollow }}"
     {{- else }}
     command: >-
       journalctl --user-unit=process-compose --follow --output=cat --since='5 minutes ago'

@@ -12,9 +12,9 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 
 {{- if .features.brew }}
 
-if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
+# if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
+#   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# fi
 {{- end }}
 
 run atuin --version
