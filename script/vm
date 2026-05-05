@@ -69,8 +69,10 @@ vm() { trace "$VM_PROVIDER" "$@"; }
 
 state() {
   case "$VM_PROVIDER" in
-  tart) vm list --format json |
-    jq --raw-output --arg name "$1" '.[] | select(.Name==$name) | .State' ;;
+  tart)
+    vm list --format json |
+      jq --raw-output --arg name "$1" '.[] | select(.Name==$name) | .State'
+    ;;
   *) vm list | awk -v n="$1" '$0 ~ ("\t" n " ") {print $4}' ;;
   esac
 }
@@ -136,10 +138,10 @@ detect_phys_iface() {
   [ "$(uname -s)" = Darwin ] || return 1
   local i
   for i in en0 en1 en2; do
-    ifconfig "$i" 2>/dev/null | grep -q 'status: active' && {
+    if ifconfig "$i" 2>/dev/null | grep -q 'status: active'; then
       printf '%s\n' "$i"
       return 0
-    }
+    fi
   done
   return 1
 }
@@ -149,14 +151,11 @@ auto_bridge_if_vpn() {
   [ -z "$bridged" ] || return 0
   local iface
   iface="$(host_route_iface "${VM_HEALTH_TARGET%:*}")"
-  case "$iface" in
-  utun*) ;;
-  *) return 0 ;;
-  esac
-  bridged="$(detect_phys_iface)" || {
+  case "$iface" in utun*) ;; *) return 0 ;; esac
+  if ! bridged="$(detect_phys_iface)"; then
     warn "VPN detected ($iface); no physical interface found for auto-bridge"
     return 0
-  }
+  fi
   log "VPN detected ($iface); auto-bridging to $bridged"
 }
 
@@ -166,15 +165,14 @@ wait_reachable() {
   if [ "$VM_PROVIDER" = vetu ]; then
     ssh_host="$(timed "VM IP" vm ip --wait="$timeout" "$name")"
   elif [[ "$(host_route_iface "${VM_HEALTH_TARGET%:*}")" != utun* ]]; then
-    # VM may be bridged from a prior run; cap wait so ARP-on-bridge100 fails fast.
+    # Cap wait when the VM may be bridged from a prior run, so ARP on bridge100 fails fast
     timed "VM IP" vm ip --wait=10 "$name" >/dev/null 2>&1 ||
       warn "tart ip unavailable (VM may be bridged); falling through to agent poll"
   fi
   log "waiting for host->guest (up to $(fmt_duration "$timeout"))"
-  local start=$SECONDS deadline
-  deadline=$((SECONDS + timeout))
+  local start=$SECONDS
   while ! vm_exec true </dev/null >/dev/null 2>&1; do
-    if [ "$SECONDS" -ge "$deadline" ]; then
+    if [ "$((SECONDS - start))" -ge "$timeout" ]; then
       err "host->guest unreachable after $(fmt_duration "$((SECONDS - start))")"
       vm_exec true
       return 1
@@ -184,20 +182,33 @@ wait_reachable() {
   log "host->guest after $(fmt_duration "$((SECONDS - start))")"
 }
 
-wait_network() {
+probe_guest_network() {
   local host="${VM_HEALTH_TARGET%:*}" port="${VM_HEALTH_TARGET#*:}"
+  vm_exec curl --silent --show-error --head \
+    --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"
+}
+
+# DHCP/DNS can take a few seconds after the guest agent reports ready
+wait_guest_network() {
+  local timeout=30 start=$SECONDS
+  while ! probe_guest_network 2>/dev/null; do
+    [ "$((SECONDS - start))" -lt "$timeout" ] || return 1
+    sleep 1
+  done
+}
+
+log_host_route() {
+  local host="${VM_HEALTH_TARGET%:*}"
   if [ -n "$bridged" ]; then
     log "bridged via $bridged (host VPN bypassed)"
-  else
-    local iface
-    iface="$(host_route_iface "$host")"
-    log "host route to $host: ${iface:-unknown}"
-    case "$iface" in
-    utun*) warn "$host is tunneled via $iface; guest may fail if VPN blocks NAT" ;;
-    esac
+    return
   fi
-  timed "guest->net $host:$port" vm_exec curl --silent --show-error --head \
-    --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"
+  local iface
+  iface="$(host_route_iface "$host")"
+  log "host route to $host: ${iface:-unknown}"
+  case "$iface" in
+  utun*) warn "$host is tunneled via $iface; guest may fail if VPN blocks NAT" ;;
+  esac
 }
 
 mount_dirs() {
@@ -258,14 +269,13 @@ vm_exec_cmd() {
   '' | xterm-ghostty | xterm-kitty | alacritty) env_args+=("TERM=xterm-256color") ;;
   *) env_args+=("TERM=$TERM") ;;
   esac
-  # bash -l sources ~/.profile, which sets up PATH for mise shims and linuxbrew.
-  # shellcheck disable=SC2016
-  vm_exec env "${env_args[@]}" bash -lc '
-    cd "$1" || exit
-    shift
-    [ "$BASH" = "$SHELL" ] || export SHELL="$BASH"
-    exec "$@"
-  ' -- "$chezmoi_root" "$@"
+  # bash -l sources ~/.profile to set PATH for mise shims and linuxbrew
+  if [ "$VM_PROVIDER" = tart ]; then
+    # shellcheck disable=SC2016
+    vm_exec env "${env_args[@]}" bash -lc 'cd "$1"; shift; exec "$@"' -- "$chezmoi_root" "$@"
+  else
+    vm_exec env "${env_args[@]}" bash -l -s -- "$@" <<<'exec "$@"'
+  fi
 }
 
 stop() {
@@ -286,21 +296,6 @@ teardown() {
 }
 
 # tart 2.32.1 lacks cp and crashes on stdin redirect through tart exec -i
-# Refuse to clean any path that does not look like a chezmoi root inside a guest
-assert_safe_chezmoi_root() {
-  case "$1" in
-  /Volumes/*)
-    err "refusing to clean mount_dirs path: $1"
-    return 1
-    ;;
-  */.local/share/chezmoi) return 0 ;;
-  *)
-    err "refusing to clean unexpected path: $1"
-    return 1
-    ;;
-  esac
-}
-
 cp_chmod() {
   local src="$1" dst="$2" b64
   if [ "$VM_PROVIDER" = tart ]; then
@@ -321,15 +316,15 @@ sync_source() {
   if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
     return 0
   fi
-  assert_safe_chezmoi_root "$chezmoi_root" || return 1
+  # Stale files persist until the VM is recreated
   if [ "$VM_PROVIDER" = tart ]; then
     require_cmd tar
     log "copying $PWD to $name:$chezmoi_root via tar stream"
-    # Host tar may emit AppleDouble entries; exclude ._* on both ends
+    # Exclude ._* on both ends because host tar may emit AppleDouble entries
     if ! trace tar --no-xattrs \
       --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
       -cf - -C "$PWD" . |
-      "$VM_PROVIDER" exec -i "$name" bash -euc "rm -rf '$chezmoi_root' && mkdir -p '$chezmoi_root' && tar xf - -C '$chezmoi_root' --exclude='._*'"; then
+      "$VM_PROVIDER" exec -i "$name" bash -euc "mkdir -p '$chezmoi_root' && tar xf - -C '$chezmoi_root' --exclude='._*'"; then
       err "tar stream failed: $PWD to $name:$chezmoi_root"
       return 1
     fi
@@ -340,7 +335,7 @@ sync_source() {
   local ssh_args=(-o StrictHostKeyChecking=no -p "$ssh_port")
   # shellcheck disable=SC2209
   SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" \
-    "rm -rf '$chezmoi_root' && mkdir -p '$chezmoi_root'"
+    "mkdir -p '$chezmoi_root'"
   # shellcheck disable=SC2209
   trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
     .pre-commit-config.yaml mise.toml home script test |
@@ -377,6 +372,13 @@ resolve() {
   fi
 }
 
+bring_up() {
+  start
+  wait_reachable
+  mount_dirs
+  log_host_route
+}
+
 ensure_vm() {
   : "${name:=$default_name}"
   ssh_host=""
@@ -385,25 +387,28 @@ ensure_vm() {
 
   [ -z "$state" ] && clone
 
-  if [ "$state" != running ]; then
-    auto_bridge_if_vpn
-    start
-    wait_reachable
-    mount_dirs
-  else
+  if [ "$state" = running ]; then
     log "reusing running VM"
-    [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
-    [ -n "$bridged" ] && warn "VM already running; --net-bridged ignored. Stop the VM to apply."
     wait_reachable
+    if probe_guest_network 2>/dev/null; then
+      [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
+      return 0
+    fi
+    warn "guest network unreachable; restarting VM"
+    stop
   fi
-}
 
-# Persist mise trust so later runs skip the prompt
-trust() {
-  # shellcheck disable=SC2016
-  vm_exec sh -euc '
-    [ -f "$1" ] && command -v mise >/dev/null && mise trust --yes "$1" || true
-  ' -- "$chezmoi_root/mise.toml"
+  auto_bridge_if_vpn
+  bring_up
+  timed "guest->net $VM_HEALTH_TARGET" wait_guest_network && return 0
+
+  if [ -z "$bridged" ] && bridged=$(detect_phys_iface 2>/dev/null); then
+    warn "NAT broken (likely stale DNS from prior VPN); retrying bridged via $bridged"
+    stop
+    bring_up
+    timed "guest->net $VM_HEALTH_TARGET" wait_guest_network && return 0
+  fi
+  probe_guest_network
 }
 
 bootstrap() {
@@ -411,26 +416,29 @@ bootstrap() {
 }
 
 init_repo() {
-  # Skip if no chezmoi source yet so bootstrap can populate first.
-  # Skip if .git already present from mount or clone.
+  # Skip when source missing or .git already provided by mount or clone
   if ! vm_exec test -f "$chezmoi_root/.chezmoiroot"; then
     return 0
   fi
   if vm_exec test -d "$chezmoi_root/.git"; then
     return 0
   fi
-  # shellcheck disable=SC2016
-  vm_exec sh -euc '
-    git config --global --add safe.directory "$1"
-    git -C "$1" init --quiet
-    git -C "$1" add --all
-  ' -- "$chezmoi_root"
+  if [ "$VM_PROVIDER" = tart ]; then
+    # shellcheck disable=SC2016
+    vm_exec sh -euc '
+      git config --global --add safe.directory "$1"
+      git -C "$1" init --quiet
+      git -C "$1" add --all
+    ' -- "$chezmoi_root"
+  else
+    local r
+    r=$(printf '%q' "$chezmoi_root")
+    vm_exec sh <<<"git config --global --add safe.directory $r && git -C $r init --quiet && git -C $r add --all"
+  fi
 }
 
 pipeline() {
-  wait_network
   sync_source
-  trust
   bootstrap
   init_repo
   vm_exec_cmd mise run pipeline

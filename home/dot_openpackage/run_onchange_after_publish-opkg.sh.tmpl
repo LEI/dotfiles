@@ -1,5 +1,7 @@
 {{- if and (or .features.claude .features.opencode) (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
+
+# FIXME: hash change
 # marketplace packages: {{ .claude.marketplaces | toJson | sha256sum }}
 
 {{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}

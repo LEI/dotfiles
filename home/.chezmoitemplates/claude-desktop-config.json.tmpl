@@ -1,3 +1,5 @@
+{{- $stdin := get .chezmoi "stdin" | default "{}" | fromJson -}}
+{{- $preferences := get $stdin "preferences" | default dict -}}
 {{- $stateHome := env "XDG_STATE_HOME" | default (joinPath .chezmoi.homeDir ".local" "state") -}}
 {{- $stateDir := env "CLAUDE_STATE_DIR" | default (joinPath $stateHome "claude") -}}
 {
@@ -19,6 +21,13 @@
     "dockBounceEnabled": true,
     "coworkWebSearchEnabled": true,
     "keepAwakeEnabled": false
+    {{-   if or (get $preferences "epitaxyPrefs") (eq .osIDLike "fedora") }},
+    {{-   end }}
+    {{- with get $preferences "epitaxyPrefs" }}
+    "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
+    {{-   if eq $.osIDLike "fedora" }},
+    {{-   end }}
+    {{- end }}
     {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [
       "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"

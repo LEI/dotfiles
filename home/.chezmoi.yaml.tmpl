@@ -18,9 +18,6 @@
 {{- $codespaces := env "CODESPACES" | not | not }}
 {{- $container := includeTemplate "container.tmpl" dict | trim }}
 {{- $isContainer := not (empty $container) }}
-{{- if and $isContainer .chezmoi.config.verbose }}
-{{-   warnf "container type: %s" $container }}
-{{- end }}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not }}
 
 {{- $interactive := stdinIsATTY }}
@@ -51,6 +48,13 @@
 {{- end }}
 
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}
+
+{{- if and $isContainer .chezmoi.config.verbose }}
+{{-   warnf "container type: %s" $container }}
+{{- end }}
+{{- if and $vm .chezmoi.config.verbose }}
+{{-   warnf "virual machine: %b" $vm }}
+{{- end }}
 
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os }}
 {{- $osIDLikeRaw := get .chezmoi.osRelease "idLike" | default $osID }}

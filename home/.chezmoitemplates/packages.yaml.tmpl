@@ -315,11 +315,11 @@ packages:
       windows: ipinfo.ipinfo
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   json5:
-    enabled: {{ .features.node }}
-    type: npm
+    # WARN(mise): npm may be required but was not found
+    enabled: {{ or .features.brew .features.node }} # .features.mise
     # nameOverwrite:
     #   mise: node@lts npm:json5 # github:json5/json5
-    # type: '{{ .features.node | ternary "npm" "mise" }}'
+    type: '{{ .features.brew | ternary "brew" (.features.node | ternary "npm" "mise") }}'
   jq: # sq
     nameOverwrite:
       windows: jqlang.jq
@@ -1198,8 +1198,8 @@ osPackages:
     zypper:
       awk:
       find:
-      gcc: # brew git-wt and skill-validator are built from source (clang)
-        enabled: {{ ne .profile "minimal" }}
+      gcc: # Required to build from source (git-wt, skill-validator)
+        # enabled: {{ ne .profile "minimal" }}
       time:
   windows:
     scoop:

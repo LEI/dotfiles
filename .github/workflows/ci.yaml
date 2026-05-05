@@ -60,7 +60,7 @@ jobs:
       - name: Prepare system
         if: ${{ matrix.os == 'ubuntu-latest' }}
         # run: sudo debconf-set man-db/auto-update false
-        run: sudo rm /var/lib/man-db/auto-update || true
+        run: sudo rm -f /var/lib/man-db/auto-update
 
       - name: Run bootstrap
         env:

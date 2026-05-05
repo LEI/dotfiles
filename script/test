@@ -25,6 +25,22 @@ fi
 #   USER="$(id -un)"
 # fi
 
+case "$(uname -s)" in
+Linux)
+  case "$(uname -o)" in
+  Android)
+    # Android 12+ phantom killer 32-process limit without adb/root
+    ANDROID_SDK_INT=$(getprop ro.build.version.sdk)
+    # ANDROID_RELEASE=$(getprop ro.build.version.release)
+    case "$ANDROID_SDK_INT" in
+    31 | 32) DEFAULT_JOBS=4 ;;      # Android 12/12L
+    33 | 34 | 35) DEFAULT_JOBS=4 ;; # Android 13, 14, 15
+    esac
+    ;;
+  esac
+  ;;
+esac
+
 if [ "${CI:-}" = true ] && command -v mise >/dev/null; then
   mise trust --all --quiet --yes
 fi
@@ -81,7 +97,7 @@ main() {
   fi
 
   # chezmoi.bats uses BATS_NO_PARALLELIZE_WITHIN_FILE due to chezmoi state lock
-  local jobs="${TEST_JOBS:-$(default_jobs)}"
+  local jobs="${TEST_JOBS:-${DEFAULT_JOBS:-$(default_jobs)}}"
   local has_path=false
   for arg in "$@"; do
     case "$arg" in -*) ;; *) [ -e "$arg" ] && has_path=true && break ;; esac

@@ -23,7 +23,7 @@
     }
   },
   "vector_store": {
-    "enabled": true,
+    "enabled": {{ .features.qdrant }},
     "type": "qdrant",
     "config": {
       "host": "qdrant",

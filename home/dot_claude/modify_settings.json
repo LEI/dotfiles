@@ -1,4 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- $stdin := get .chezmoi "stdin" | default "{}" | fromJson -}}
 {{- $claude := get . "claude" | default dict -}}
 
 {{- $tiers := get $claude "tiers" | default dict -}}
@@ -336,7 +337,7 @@
   {{- range $plugins -}}
   {{-   $_ := set $managedPlugins . true -}}
   {{- end }}
-  "enabledPlugins": {{ merge $managedPlugins (get (get .chezmoi "stdin" | default "{}" | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
+  "enabledPlugins": {{ merge $managedPlugins (get $stdin "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
   {{- $extraMarketplaces := dict -}}
   {{- range $name, $info := $data.marketplaces -}}
   {{-   if hasKey $info "repo" -}}

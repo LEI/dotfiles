@@ -44,7 +44,7 @@ dry_run sudo apk add --quiet $packages
 {{- if .container }}
 
 if [ -f /var/lib/pacman/db.lck ]; then
-  dry_run rm /var/lib/pacman/db.lck
+  dry_run rm -f /var/lib/pacman/db.lck
 fi
 {{- end }}
 
@@ -64,8 +64,7 @@ for lock in \
   /var/cache/apt/archives/lock \
   /var/lib/apt/lists/lock \
   /var/lib/dpkg/lock \
-  /var/lib/dpkg/lock-frontend \
-; do
+  /var/lib/dpkg/lock-frontend; do
   if [ -f "$lock" ]; then
     dry_run sudo rm "$lock"
   fi

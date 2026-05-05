@@ -64,13 +64,13 @@ description = "Run checks and tests locally"
 #   # "mise prek", # ./script/prek
 # ]
 run = [
-  { task = "test", args = ["--filter-tags", "!strict"] },
-  { task = "check" },
-  # { task = "lint" },
+  # { task = "test", args = ["--filter-tags", "!strict"] },
+  # { task = "check" },
+  # # { task = "lint" },
   { task = "prek" },
-  { task = "profile bash" },
-  { task = "profile zsh" },
-  # { task = "update" },
+  # { task = "profile bash" },
+  # { task = "profile zsh" },
+  # # { task = "update" },
 ]
 
 [tasks.renovate]

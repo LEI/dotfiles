@@ -28,9 +28,8 @@ readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
 ct() { trace "$CONTAINER_PROVIDER" "$@"; }
 
-# Init image-specific config from "<name>" or "<name>:<version>".
-# Sets: image_name, version, prefix, image, image_tag, container,
-# home, exec_user, file_owner, chezmoi_root
+# Init image-specific config from "<name>" or "<name>:<version>"
+# Globals modified: chezmoi_root, container, exec_user, file_owner, home, image, image_name, image_tag, prefix, version
 resolve() {
   local arg="$1"
   local version_arg repo arch
@@ -42,8 +41,9 @@ resolve() {
   repo="$image_name"
   version="${version_arg:-latest}"
   prefix=""
-
-  # arm64 = macOS/Darwin, aarch64 = Linux; both indicate ARM64
+  exec_user="$DEV_USER"
+  file_owner="$DEV_USER"
+  local home_subdir="home/$DEV_USER"
   arch="$(uname -m)"
 
   case "$image_name" in
@@ -64,22 +64,16 @@ resolve() {
       version="aarch64"
     fi
     prefix="/data/data/com.termux/files"
+    exec_user=""
+    file_owner="system"
+    home_subdir="home"
     ;;
   esac
 
   image="$repo:$version"
   image_tag="ct-$image_name-$version"
   container="$tag_prefix-$image_name-$version"
-  home="$prefix/home/$DEV_USER"
-  if [ "$image_name" = termux ]; then
-    home="$prefix/home"
-  fi
-  exec_user="$DEV_USER"
-  file_owner="$DEV_USER"
-  if [ "$image_name" = termux ]; then
-    exec_user=""
-    file_owner="system"
-  fi
+  home="$prefix/$home_subdir"
   chezmoi_root="$home/.local/share/chezmoi"
   if [ "$CONTAINER_SOURCE" = mount ]; then
     chezmoi_root="/src"
@@ -105,11 +99,7 @@ ct_exec() {
 
 ct_exec_mise() {
   # shellcheck disable=SC2016
-  ct_exec bash -lc '
-    [ "$BASH" = "$SHELL" ] || export SHELL="$BASH"
-    [ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh
-    exec "$@"
-  ' -- "$@"
+  ct_exec bash -lc '[ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh; exec "$@"' -- "$@"
 }
 
 build() {
@@ -120,8 +110,7 @@ build() {
   ct build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
 }
 
-# 0 if existing container's bind set matches what create_flags would produce.
-# Bypasses trace() to keep the check silent.
+# Quietly check whether the running container's bind config matches create_flags
 mount_config_matches() {
   local actual want=""
   actual="$("$CONTAINER_PROVIDER" container inspect "$container" \
@@ -157,7 +146,7 @@ start() {
     ct start "$container"
   fi
 
-  # Entrypoint creates the dev user asynchronously; wait for it
+  # Wait for the dev user that the entrypoint creates asynchronously
   if [ "$image_name" != termux ]; then
     # shellcheck disable=SC2016
     ct exec "$container" \
@@ -171,23 +160,12 @@ sync_source() {
     warn "host mount: $PWD -> $chezmoi_root (ro)"
     return
   fi
-
-  case "$chezmoi_root" in
-  */.local/share/chezmoi) ;;
-  *)
-    err "refusing rm-rf on unexpected path: $chezmoi_root"
-    return 1
-    ;;
-  esac
-
+  # Stale files persist until the container is recreated
   local item
-  # shellcheck disable=SC2016
-  ct exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
-
+  ct exec "$container" mkdir -p "$chezmoi_root"
   for item in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
     ct cp "$item" "$container:$chezmoi_root/"
   done
-
   ct exec "$container" chown -R "$file_owner:$file_owner" "$home"
 }
 
@@ -197,10 +175,9 @@ bootstrap() {
     ct exec "$container" \
       sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
     local env="export PATH=$prefix/usr/bin:/usr/bin:/bin HOME=$home CI=true CHEZMOI_UPGRADE=true MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-    ct exec "$container" \
-      su system -c "$env; pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
-    ct exec "$container" \
-      su system -c "$env; cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --no-tty --verbose"
+    termux_su() { ct exec "$container" su system -c "$env; $*"; }
+    termux_su "pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
+    termux_su "cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --no-tty --verbose"
   else
     CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
       ct_exec ./script/bootstrap --source="$chezmoi_root" --verbose --no-tty
@@ -211,25 +188,13 @@ init_repo() {
   if ct exec "$container" test -d "$chezmoi_root/.git"; then
     return 0
   fi
-  local flags=()
-  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
   # shellcheck disable=SC2016
-  ct exec "${flags[@]}" "$container" \
+  ct exec ${exec_user:+--user="$exec_user"} "$container" \
     sh -c '
       git config --global --add safe.directory "$1"
       git -C "$1" init --quiet
       git -C "$1" add --all
     ' -- "$chezmoi_root"
-}
-
-# Persists trust so later runs skip the prompt; no-op if mise not yet installed
-trust() {
-  local flags=()
-  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
-  # shellcheck disable=SC2016
-  ct exec "${flags[@]}" "$container" \
-    sh -c 'if command -v mise >/dev/null; then mise trust --yes "$@"; fi' \
-    -- "$chezmoi_root/mise.toml"
 }
 
 list() {
@@ -252,13 +217,11 @@ pipeline() {
   build
   start
   sync_source
-  trust
   bootstrap
   init_repo
-  # word-split intentional: CONTAINER_CMD may contain flags
   # shellcheck disable=SC2086
   ct_exec_mise ${CONTAINER_CMD:-mise run pipeline}
-  ct stop "$container"
+  ct stop "$container" >/dev/null
 }
 
 main() {
@@ -300,7 +263,7 @@ main() {
   fi
 }
 
-# Allow sourcing for testing (e.g. bats)
+# Allow sourcing for bats tests
 if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
   main "$@"
 fi

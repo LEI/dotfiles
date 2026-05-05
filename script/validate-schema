@@ -105,7 +105,7 @@ extract_schema() {
     if command -v json5 >/dev/null; then
       schema=$(json5 "$path" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || schema=
     else
-      schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
+      schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path" 2>/dev/null) || schema=
     fi
     ;;
   toml)
@@ -138,6 +138,11 @@ preflight_schema() {
   cache_file="$cache_dir/schemas/$hash$ext"
   meta_file="$cache_dir/schemas/$hash.meta"
   [ -f "$cache_file" ] || return 0
+  # Discard corrupt cache (empty or invalid JSON); check-jsonschema refetches
+  if [ ! -s "$cache_file" ] || ! jq empty "$cache_file" >/dev/null 2>&1; then
+    rm -f "$cache_file" "$meta_file"
+    return 0
+  fi
   if ! headers=$(curl --silent --head --location --max-time 5 "$url"); then
     return 0
   fi
@@ -177,8 +182,9 @@ validate_file() {
   jsonc | json5)
     if command -v json5 >/dev/null; then
       content=$(json5 "$path")
-    else
-      content=$(jq '.' "$path")
+    elif ! content=$(jq '.' "$path" 2>/dev/null); then
+      echo "FAIL $path schema=$schema (requires json5; file uses JSONC features)"
+      return 1
     fi
     if [ "$content" = "null" ]; then
       content='{}'

@@ -25,12 +25,13 @@ export VALIDATE_VERBOSITY="${VALIDATE_VERBOSITY:-$verbosity}"
 
 skip=""
 
-case "$(uname -o)" in
-Android) skip="${skip:+$skip,}check-compose-spec,check-github-workflows,gitleaks,stylua-github,validate-schema,zizmor" ;;
-esac
-
 case "$(uname -s)" in
-Darwin | Linux) ;;
+Darwin) ;;
+Linux)
+  case "$(uname -o)" in
+  Android) skip="${skip:+$skip,}check-compose-spec,check-github-workflows,gitleaks,stylua-github,validate-schema,zizmor" ;;
+  esac
+  ;;
 *) skip="${skip:+$skip,}validate-skill" ;;
 esac
 
@@ -70,7 +71,10 @@ elif [ "$(uname -s)" = Darwin ]; then
   case ",$ro_opts," in *,AppleVirtIOFS,*) ro=true ;; esac
 fi
 if $ro; then
-  skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace"
+  # FIXME: trim-trailing-whitespace
+  # error: Failed to init hooks
+  # caused by: Hook `trailing-whitespace` not present in repo `https://github.com/pre-commit/pre-commit-hooks@v6.0.0`
+  skip="${skip:+$skip,}end-of-file-fixer,trailing-whitespace"
 fi
 
 if [ -n "$skip" ]; then
@@ -87,11 +91,4 @@ fi
 
 set -- prek run --all-files "$@"
 echo "$*" >&2
-# if command -v prek >/dev/null; then
 exec "$@"
-# elif command -v mise >/dev/null; then
-#   exec mise exec -- "$@"
-# else
-#   echo "${0##*/}: prek not found and mise not available" >&2
-#   exit 127
-# fi

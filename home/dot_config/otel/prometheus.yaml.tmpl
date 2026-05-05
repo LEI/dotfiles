@@ -59,6 +59,7 @@ scrape_configs:
     basic_auth:
       username: admin
       password_file: /run/secrets/bifrost-admin-password
+{{- if .features.milvus }}
   - job_name: milvus
     static_configs:
       - targets: [milvus:9091]
@@ -69,3 +70,4 @@ scrape_configs:
           app_kubernetes_io_name: milvus
           app_kubernetes_io_instance: milvus
     metrics_path: /metrics
+{{- end }}
