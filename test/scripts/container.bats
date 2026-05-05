@@ -16,6 +16,7 @@ setup() {
 
 source_container() {
   export CONTAINER_PROVIDER=dummy
+  export CONTAINER_SOURCE=cp
   # shellcheck source=script/container
   source ./script/container
 }
@@ -142,7 +143,7 @@ source_container() {
 @test "container: main routes status aliases to status" {
   source_container
   # stub container inspect to report no containers exist
-  container() { return 1; }
+  ct() { return 1; }
   for cmd in "" s st status; do
     run main $cmd
     assert_success
@@ -151,18 +152,18 @@ source_container() {
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec sets correct environment variables" {
+@test "container: ct_exec sets correct environment variables" {
   source_container
   resolve alpine
 
-  # Mock container exec to capture arguments
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
   assert_output --partial "CHEZMOI_UPGRADE=true"
   assert_output --partial "MISE_TRUSTED_CONFIG_PATHS=/home/test/.local/share/chezmoi"
@@ -171,53 +172,53 @@ source_container() {
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec includes CI env var when set" {
+@test "container: ct_exec includes CI env var when set" {
   source_container
   resolve alpine
   export CI=true
 
-  # Mock container exec to capture arguments
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
   assert_output --partial "--env=CI"
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec redacts GITHUB_TOKEN in logs" {
+@test "container: ct_exec redacts GITHUB_TOKEN in logs" {
   source_container
   resolve alpine
   export GITHUB_TOKEN="secret-token-123"
 
-  # Mock container exec to capture arguments
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
   # Should not contain the actual token in output
   refute_output "secret-token-123"
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec_mise sources mise init" {
+@test "container: ct_exec_mise sources mise init" {
   source_container
   resolve alpine
 
-  # Mock container_exec to capture command
-  container_exec() {
+  # Mock ct_exec to capture command
+  ct_exec() {
     echo "$@"
   }
 
-  run container_exec_mise echo test
+  run ct_exec_mise echo test
   assert_success
   assert_output --partial ". ~/.config/mise/init.sh"
 }

@@ -88,6 +88,7 @@ report_tap() {
       esac
       ;;
     '')
+      # Ignored
       ;;
     *)
       if [ "$in_diag" = true ]; then

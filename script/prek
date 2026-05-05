@@ -38,9 +38,17 @@ if [ -f /etc/alpine-release ]; then
   skip="${skip:+$skip,}stylua-github"
 fi
 
-# Skip in-place fixers on a read-only working tree (eg tart macOS guest mount)
-if [ ! -w . ]; then
-  skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace"
+# Skip in-place fixers when cwd is on a read-only mount.
+# test -w lies on read-only bind mounts (only checks superblock RO).
+# Linux: read mountinfo. macOS host: source is writable, branch is skipped.
+if [ -r /proc/self/mountinfo ]; then
+  ro_opts=$(awk -v p="$PWD/" '
+    index(p, $5"/") == 1 && length($5) > best { best = length($5); opts = $6 }
+    END { print opts }
+  ' /proc/self/mountinfo)
+  case ",$ro_opts," in
+  *,ro,*) skip="${skip:+$skip,}end-of-file-fixer,trim-trailing-whitespace" ;;
+  esac
 fi
 
 if [ -n "$skip" ]; then

@@ -66,7 +66,7 @@ readonly IMAGES
 
 vm() { trace "$VM_PROVIDER" "$@"; }
 
-vm_state() {
+state() {
   case "$VM_PROVIDER" in
   tart) vm list --format json |
     jq --raw-output --arg name "$1" '.[] | select(.Name==$name) | .State' ;;
@@ -74,12 +74,12 @@ vm_state() {
   esac
 }
 
-vm_clone() {
+clone() {
   log "cloning $image as $name"
   vm clone "$image" "$name"
 }
 
-vm_start() {
+start() {
   log "starting $name"
   local args=()
   if [ "$VM_PROVIDER" = tart ]; then
@@ -163,7 +163,7 @@ host_route_iface() {
   esac
 }
 
-vm_wait_reachable() {
+wait_reachable() {
   local timeout=120
   [ "$guest_os" = darwin ] && timeout=500
   if [ "$VM_PROVIDER" = tart ]; then
@@ -175,7 +175,7 @@ vm_wait_reachable() {
   fi
 }
 
-vm_wait_network() {
+wait_network() {
   local host="${VM_HEALTH_TARGET%:*}" port="${VM_HEALTH_TARGET#*:}"
   local iface
   iface="$(host_route_iface "$host")"
@@ -201,7 +201,7 @@ vm_wait_network() {
   wait_for "guest->net TCP $VM_HEALTH_TARGET" 10 "${probe[@]}" nc -z -w3 "$host" "$port"
 }
 
-vm_mount() {
+mount_dirs() {
   [ -n "$dirs" ] || return 0
   if [ "$VM_PROVIDER" != tart ]; then
     warn "$VM_PROVIDER does not support host directory sharing"
@@ -268,7 +268,7 @@ vm_exec_cmd() {
   ' -- "$chezmoi_root" "$@"
 }
 
-vm_stop() {
+stop() {
   log "stopping $name"
   vm stop "$name"
 }
@@ -277,12 +277,12 @@ restore_tty() {
   [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
 }
 
-vm_teardown() {
+teardown() {
   if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
     log "killing tmux session"
     trace tmux kill-session -t vm
   fi
-  vm_stop
+  stop
 }
 
 # tart 2.32.1 lacks cp and crashes on stdin redirect through tart exec -i
@@ -290,7 +290,7 @@ vm_teardown() {
 assert_safe_chezmoi_root() {
   case "$1" in
   /Volumes/*)
-    err "refusing to clean mount path: $1"
+    err "refusing to clean mount_dirs path: $1"
     return 1
     ;;
   */.local/share/chezmoi) return 0 ;;
@@ -301,27 +301,7 @@ assert_safe_chezmoi_root() {
   esac
 }
 
-vm_copy_host_repo() {
-  local vm="$1" target_dir="$2" src_dir="${3:-$PWD}"
-  require_cmd tar
-  if [ "$VM_PROVIDER" != tart ]; then
-    err "vm_copy_host_repo: tart only"
-    return 1
-  fi
-  assert_safe_chezmoi_root "$target_dir" || return 1
-  log "copying $src_dir to $vm:$target_dir via tar stream"
-  # Strip xattrs and exclude ._* on both ends.
-  # Host tar may emit AppleDouble entries from PAX xattr records that GNU tar materializes as ._* on extract.
-  if ! trace tar --no-xattrs \
-    --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
-    -cf - -C "$src_dir" . |
-    "$VM_PROVIDER" exec -i "$vm" bash -euc "rm -rf '$target_dir' && mkdir -p '$target_dir' && tar xf - -C '$target_dir' --exclude='._*'"; then
-    err "repo copy stream failed: $src_dir to $vm:$target_dir"
-    return 1
-  fi
-}
-
-vm_cp_chmod() {
+cp_chmod() {
   local src="$1" dst="$2" b64
   if [ "$VM_PROVIDER" = tart ]; then
     b64="$(base64 <"$src")"
@@ -337,8 +317,24 @@ vm_cp_chmod() {
   fi
 }
 
-vm_sync() {
+sync_source() {
+  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
+    return 0
+  fi
   assert_safe_chezmoi_root "$chezmoi_root" || return 1
+  if [ "$VM_PROVIDER" = tart ]; then
+    require_cmd tar
+    log "copying $PWD to $name:$chezmoi_root via tar stream"
+    # Host tar may emit AppleDouble entries; exclude ._* on both ends
+    if ! trace tar --no-xattrs \
+      --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
+      -cf - -C "$PWD" . |
+      "$VM_PROVIDER" exec -i "$name" bash -euc "rm -rf '$chezmoi_root' && mkdir -p '$chezmoi_root' && tar xf - -C '$chezmoi_root' --exclude='._*'"; then
+      err "tar stream failed: $PWD to $name:$chezmoi_root"
+      return 1
+    fi
+    return 0
+  fi
   log "syncing chezmoi to $chezmoi_root"
   : "${ssh_host:=$(vm ip "$name")}"
   local ssh_args=(-o StrictHostKeyChecking=no -p "$ssh_port")
@@ -385,20 +381,20 @@ ensure_vm() {
   : "${name:=$default_name}"
   ssh_host=""
   ssh_port=22
-  state="$(vm_state "$name")"
+  state="$(state "$name")"
 
-  [ -z "$state" ] && vm_clone
+  [ -z "$state" ] && clone
 
   if [ "$state" != running ]; then
-    vm_start
-    vm_wait_reachable
-    vm_mount
+    start
+    wait_reachable
+    mount_dirs
   else
     log "reusing running VM"
     [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
-    vm_wait_reachable
+    wait_reachable
   fi
-  vm_wait_network
+  wait_network
 }
 
 # Persist mise trust so later runs skip the prompt
@@ -431,11 +427,7 @@ init_repo() {
 }
 
 pipeline() {
-  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = linux ]; then
-    vm_copy_host_repo "$name" "$chezmoi_root"
-  elif [ "$VM_PROVIDER" = vetu ]; then
-    vm_sync
-  fi
+  sync_source
   trust
   bootstrap
   init_repo
@@ -457,7 +449,7 @@ cmd_run() {
 
   # Stop only if we started it and user did not pass -k
   if [ "$state" != running ] && [ "$keep" != true ]; then
-    vm_teardown
+    teardown
   fi
 }
 

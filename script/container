@@ -22,10 +22,11 @@ trap 'log "error at line $LINENO"' ERR
 
 : "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"
+readonly CONTAINER_SOURCE="${CONTAINER_SOURCE:-mount}"
 readonly tag_prefix="${PWD##*/}"
 readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
-container() { "$CONTAINER_PROVIDER" "$@"; }
+ct() { trace "$CONTAINER_PROVIDER" "$@"; }
 
 # Init image-specific config from "<name>" or "<name>:<version>".
 # Sets: image_name, version, prefix, image, image_tag, container,
@@ -80,9 +81,12 @@ resolve() {
     file_owner="system"
   fi
   chezmoi_root="$home/.local/share/chezmoi"
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    chezmoi_root="/src"
+  fi
 }
 
-container_exec() {
+ct_exec() {
   local flags
   flags=(
     --env="CHEZMOI_UPGRADE=true"
@@ -96,12 +100,12 @@ container_exec() {
   [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
   [ -t 0 ] && flags+=(--interactive)
   [ -t 1 ] && flags+=(--tty)
-  trace container exec "${flags[@]}" "$container" "$@"
+  ct exec "${flags[@]}" "$container" "$@"
 }
 
-container_exec_mise() {
+ct_exec_mise() {
   # shellcheck disable=SC2016
-  container_exec bash -lc '
+  ct_exec bash -lc '
     [ "$BASH" = "$SHELL" ] || export SHELL="$BASH"
     [ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh
     exec "$@"
@@ -109,71 +113,108 @@ container_exec_mise() {
 }
 
 build() {
-  if container image inspect "$image_tag" >/dev/null 2>&1; then
+  if ct image inspect "$image_tag" >/dev/null 2>&1; then
     log "build $image_name: reusing $image_tag"
     return 0
   fi
-  trace container build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
+  ct build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
+}
+
+# 0 if existing container's bind set matches what create_flags would produce.
+# Bypasses trace() to keep the check silent.
+mount_config_matches() {
+  local actual want=""
+  actual="$("$CONTAINER_PROVIDER" container inspect "$container" \
+    --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}|{{.Destination}}|{{.Mode}}{{end}}{{end}}' \
+    2>/dev/null)" || return 1
+  [ "$CONTAINER_SOURCE" = mount ] && want="${PWD}|${chezmoi_root}|ro"
+  [ "$actual" = "$want" ]
 }
 
 start() {
   local status
-
-  if ! container container inspect "$container" >/dev/null 2>&1; then
-    trace container create --name="$container" --env="DEV_USER=$DEV_USER" "$image_tag"
+  local create_flags=(--name="$container" --env="DEV_USER=$DEV_USER")
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    if [ ! -f "$PWD/.chezmoiroot" ]; then
+      err "mount mode: $PWD lacks .chezmoiroot"
+      return 1
+    fi
+    create_flags+=(--volume="$PWD:$chezmoi_root:ro")
   fi
 
-  status="$(container container inspect "$container" --format '{{.State.Status}}')"
+  if ct container inspect "$container" >/dev/null 2>&1 &&
+    ! mount_config_matches; then
+    log "recreating $container: mount config out of date"
+    ct rm --force "$container" >/dev/null
+  fi
+
+  if ! ct container inspect "$container" >/dev/null 2>&1; then
+    ct create "${create_flags[@]}" "$image_tag"
+  fi
+
+  status="$(ct container inspect "$container" --format '{{.State.Status}}')"
   if [ "$status" != running ]; then
-    trace container start "$container"
+    ct start "$container"
   fi
 
   # Entrypoint creates the dev user asynchronously; wait for it
   if [ "$image_name" != termux ]; then
     # shellcheck disable=SC2016
-    trace container exec "$container" \
+    ct exec "$container" \
       sh -c 'until id -u "$1" >/dev/null 2>&1; do sleep 1; done' -- "$DEV_USER"
   fi
 
 }
 
-sync() {
-  local item
+sync_source() {
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    warn "host mount: $PWD -> $chezmoi_root (ro)"
+    return
+  fi
 
+  case "$chezmoi_root" in
+  */.local/share/chezmoi) ;;
+  *)
+    err "refusing rm-rf on unexpected path: $chezmoi_root"
+    return 1
+    ;;
+  esac
+
+  local item
   # shellcheck disable=SC2016
-  trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
+  ct exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
 
   for item in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
-    trace container cp "$item" "$container:$chezmoi_root/"
+    ct cp "$item" "$container:$chezmoi_root/"
   done
 
-  trace container exec "$container" chown -R "$file_owner:$file_owner" "$home"
+  ct exec "$container" chown -R "$file_owner:$file_owner" "$home"
 }
 
 bootstrap() {
   if [ "$image_name" = termux ]; then
     # shellcheck disable=SC2016
-    trace container exec "$container" \
+    ct exec "$container" \
       sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
     local env="export PATH=$prefix/usr/bin:/usr/bin:/bin HOME=$home CI=true CHEZMOI_UPGRADE=true MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-    trace container exec "$container" \
+    ct exec "$container" \
       su system -c "$env; pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
-    trace container exec "$container" \
+    ct exec "$container" \
       su system -c "$env; cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --no-tty --verbose"
   else
     CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
-      container_exec ./script/bootstrap --source="$chezmoi_root" --verbose --no-tty
+      ct_exec ./script/bootstrap --source="$chezmoi_root" --verbose --no-tty
   fi
 }
 
 init_repo() {
-  if container exec "$container" test -d "$chezmoi_root/.git"; then
+  if ct exec "$container" test -d "$chezmoi_root/.git"; then
     return 0
   fi
   local flags=()
   [ -n "$exec_user" ] && flags+=(--user="$exec_user")
   # shellcheck disable=SC2016
-  trace container exec "${flags[@]}" "$container" \
+  ct exec "${flags[@]}" "$container" \
     sh -c '
       git config --global --add safe.directory "$1"
       git -C "$1" init --quiet
@@ -186,7 +227,7 @@ trust() {
   local flags=()
   [ -n "$exec_user" ] && flags+=(--user="$exec_user")
   # shellcheck disable=SC2016
-  trace container exec "${flags[@]}" "$container" \
+  ct exec "${flags[@]}" "$container" \
     sh -c 'if command -v mise >/dev/null; then mise trust --yes "$@"; fi' \
     -- "$chezmoi_root/mise.toml"
 }
@@ -199,8 +240,8 @@ status() {
   for name in $images; do
     resolve "$name"
     local s="none"
-    if container container inspect "$container" >/dev/null 2>&1; then
-      s="$(container container inspect "$container" \
+    if ct container inspect "$container" >/dev/null 2>&1; then
+      s="$(ct container inspect "$container" \
         --format '{{.State.Status}}{{if and (eq .State.Status "exited") (ne .State.ExitCode 0)}} ({{.State.ExitCode}}){{end}}')"
     fi
     printf "%-12s  %-30s  %s\n" "$name" "$container" "$s"
@@ -210,14 +251,14 @@ status() {
 pipeline() {
   build
   start
-  sync
+  sync_source
   trust
   bootstrap
   init_repo
   # word-split intentional: CONTAINER_CMD may contain flags
   # shellcheck disable=SC2086
-  container_exec_mise ${CONTAINER_CMD:-mise run pipeline}
-  trace container stop "$container"
+  ct_exec_mise ${CONTAINER_CMD:-mise run pipeline}
+  ct stop "$container"
 }
 
 main() {
@@ -253,7 +294,7 @@ main() {
   resolve "$image"
   shift
   if [ $# -gt 0 ]; then
-    container_exec_mise "$@"
+    ct_exec_mise "$@"
   else
     pipeline
   fi

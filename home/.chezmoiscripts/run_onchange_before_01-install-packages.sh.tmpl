@@ -25,6 +25,12 @@ msg "Installing {{ .packageManager }} packages: $packages"
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) }}
 {{- if eq .osID "alpine" }}
 
+{{- if .container }}
+
+# ERROR: Unable to lock database: Resource temporarily unavailable
+# ERROR: Failed to open apk database: Resource temporarily unavailable
+{{- end }}
+
 dry_run sudo apk update --quiet
 {{- if .upgrade }}
 
@@ -54,17 +60,22 @@ dry_run sudo pacman --sync --needed --noconfirm --quiet $packages
 
 {{- if .container }}
 
-for lock in /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock; do
+for lock in \
+  /var/cache/apt/archives/lock \
+  /var/lib/apt/lists/lock \
+  /var/lib/dpkg/lock \
+  /var/lib/dpkg/lock-frontend \
+; do
   if [ -f "$lock" ]; then
     dry_run sudo rm "$lock"
   fi
 done
 
-dry_run sudo dpkg --configure -a
-
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive
 {{- end }}
+
+dry_run sudo dpkg --configure -a
 
 dry_run sudo -E apt-get update --quiet # >/dev/null
 

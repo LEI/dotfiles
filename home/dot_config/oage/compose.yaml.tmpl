@@ -1,4 +1,4 @@
-{{- $milvus := or .features.ollama .features.mlx -}}
+{{- $milvus := and false (or .features.ollama .features.mlx) -}}
 {{- $notebook := true -}}
 {{- $ollama := and .features.ollama (eq .os "linux") (not .features.podman) -}}
 {{- $sandboxed := false -}}
@@ -58,8 +58,10 @@ services:
 
   # Milvus: vector database for claude-context MCP
   # https://milvus.io/docs/install_standalone-docker.md
+  # Known issue: embedded etcd panics on `leader changed` under I/O pressure.
+  # See: https://github.com/milvus-io/milvus/issues/47419
   milvus:
-    image: milvusdb/milvus:v2.6.12
+    image: milvusdb/milvus:v2.6.15
     command: ["milvus", "run", "standalone"]
     restart: unless-stopped
     networks:

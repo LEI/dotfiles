@@ -36,10 +36,10 @@ list_features() {
   shift
   format="$(get_format "$output")"
   if [ -n "$format" ]; then
-    chezmoi execute "{{ .features | $format }}"
+    chezmoi execute-template "{{ .features | $format }}"
   else
     # shellcheck disable=SC2016
-    chezmoi execute '{{ range $key, $value := .features }}{{ $key }}
+    chezmoi execute-template '{{ range $key, $value := .features }}{{ $key }}
 {{ end -}}'
   fi
 }
@@ -49,10 +49,10 @@ list_enabled_features() {
   shift
   format="$(get_format "$output")"
   if [ -n "$format" ]; then
-    chezmoi execute "{{ .features | $format }}"
+    chezmoi execute-template "{{ .features | $format }}"
   else
     # shellcheck disable=SC2016
-    chezmoi execute '{{ range $key, $value := .features }}{{ if $value }}{{ $key }}
+    chezmoi execute-template '{{ range $key, $value := .features }}{{ if $value }}{{ $key }}
 {{ end }}{{ end -}}'
   fi
 }
@@ -60,7 +60,7 @@ list_enabled_features() {
 get_feature() {
   key="$1"
   # # shellcheck disable=SC2016
-  # value="$(chezmoi execute "{{ get .features \"$key\" }}")"
+  # value="$(chezmoi execute-template "{{ get .features \"$key\" }}")"
   # echo "$value"
   jq ".$key == true" "$HOME/.local/state/chezmoi/features.json"
 }
@@ -81,7 +81,7 @@ toggle_feature() {
     jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" | sponge "$features_file"
   else
     tmp=$(mktemp)
-    jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" > "$tmp" && mv "$tmp" "$features_file"
+    jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" >"$tmp" && mv "$tmp" "$features_file"
   fi
 
   # Report the new state (inverted from current_state)

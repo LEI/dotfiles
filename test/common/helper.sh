@@ -44,7 +44,7 @@ run_chezmoi() {
 
   # Skip rendering if already pre-rendered (e.g. by chezmoi-render in coverage)
   if ! [ -s "$file" ]; then
-    # Use a per-test persistent state file to avoid lock contention
+    # Shared persistent state to avoid lock contention across test files
     local persistent_state="$TEST_TMPDIR/chezmoi-state.json"
 
     # Use chezmoi cat from the target path (HOME-relative)

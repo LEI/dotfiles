@@ -98,7 +98,7 @@ list_packages() {
 {{- range \$key, \$value := .packages.$key -}}
 $line
 {{ end -}}"
-    chezmoi execute-template --refresh-externals=never <<EOF
+    chezmoi execute-template <<EOF
 $template
 EOF
     # '{{ includeTemplate "pluck.tmpl" (dict "key" "before_script" "values" .packages.'"$key"') | trim }}'
@@ -114,7 +114,7 @@ EOF
     ;;
   esac
   # echo "Executing .packages.$key | $format" >&2
-  chezmoi execute "{{ .packages.$key | $format | trim }}"
+  chezmoi execute-template "{{ .packages.$key | $format | trim }}"
 }
 
 TMPDIR="${TMPDIR:-${TMP:-/tmp}}"

@@ -113,6 +113,13 @@ fi
 
 {{- end }}
 
+cleanup() {
+  case "$(uname -s)" in
+  Darwin) find "$HOME" -xdev -name .DS_Store -type f -print -delete ;;
+  Linux) find "$HOME" -xdev \( -name .directory -o -name Thumbs.db \) -type f -print -delete ;;
+  esac
+}
+
 {{- if lookPath "lazyjournal" | isExecutable }}
 alias J=lazyjournal
 {{- end }}

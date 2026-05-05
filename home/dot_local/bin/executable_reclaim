@@ -1,0 +1,102 @@
+#!/bin/sh
+#MISE description="List reclaimable disk paths on macOS (read-only)"
+#USAGE arg "[group]..." help="Groups to list (default: all)" {
+#USAGE   choices "caches" "containers" "ios" "logs" "trash" "vms" "xcode"
+#USAGE }
+#USAGE example "reclaim | xargs du -sh" help="sizes per path"
+#USAGE example "reclaim | xargs du -shc | tail -1" help="grand total"
+#USAGE example "reclaim containers vms | xargs dust -d 0" help="visualise with dust"
+#USAGE example "reclaim caches | xargs trash" help="trash dev caches"
+
+set -eu
+
+lib_dir="$HOME/.local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+
+case "$(uname -s)" in
+Darwin) ;;
+*)
+  err "macOS only"
+  exit 1
+  ;;
+esac
+
+keep() {
+  for p; do [ -e "$p" ] && printf '%s\n' "$p"; done
+  return 0
+}
+
+emit() {
+  case "$1" in
+  caches)
+    keep \
+      ~/.bun/install/cache \
+      ~/.cache/uv \
+      ~/.cargo/registry \
+      ~/.npm/_cacache \
+      ~/.rustup/toolchains \
+      ~/Library/Caches/go-build \
+      ~/Library/Caches/pip \
+      ~/Library/pnpm/store \
+      ~/go/pkg/mod
+    ;;
+  containers)
+    keep \
+      ~/.docker \
+      ~/.local/share/containers \
+      "$HOME/Library/Containers/com.docker.docker"
+    ;;
+  ios) keep "$HOME/Library/Application Support/MobileSync/Backup" ;;
+  logs)
+    keep \
+      ~/.local/state/* \
+      ~/Library/Logs/* \
+      /opt/homebrew/var/log/* \
+      /usr/local/var/log/*
+    ;;
+  trash) keep ~/.Trash ;;
+  vms)
+    keep \
+      ~/.colima \
+      ~/.lima \
+      ~/.orbstack \
+      ~/.tart
+    ;;
+  xcode)
+    keep \
+      "$HOME/Library/Developer/CoreSimulator" \
+      "$HOME/Library/Developer/Xcode/Archives" \
+      "$HOME/Library/Developer/Xcode/DerivedData" \
+      "$HOME/Library/Developer/Xcode/iOS DeviceSupport"
+    ;;
+  *)
+    err "unknown group: $1"
+    return 1
+    ;;
+  esac
+}
+
+categories=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -h | --help)
+    usage exec --help bash "$0"
+    exit 0
+    ;;
+  -*)
+    err "unknown flag: $1"
+    exit 2
+    ;;
+  *)
+    categories="${categories:+$categories }$1"
+    shift
+    ;;
+  esac
+done
+
+: "${categories:=caches containers ios logs trash vms xcode}"
+
+for category in $categories; do
+  emit "$category" || true
+done

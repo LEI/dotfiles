@@ -34,39 +34,39 @@ source_vm() {
 # bats file_tags=script,vm
 
 # bats test_tags=type:unit
-@test "vm_mount: skips when dirs is empty" {
+@test "mount_dirs: skips when dirs is empty" {
   source_vm
-  run --separate-stderr vm_mount
+  run --separate-stderr mount_dirs
   assert_success
   refute_output
 }
 
 # bats test_tags=type:unit
-@test "vm_mount: warns on non-tart provider" {
+@test "mount_dirs: warns on non-tart provider" {
   TEST_VM_PROVIDER=vetu source_vm
   dirs="foo:/bar"
-  run --separate-stderr vm_mount
+  run --separate-stderr mount_dirs
   assert_success
   assert_stderr_line --partial "does not support host directory sharing"
 }
 
 # bats test_tags=type:unit
-@test "vm_mount: skips virtiofs on darwin guest" {
+@test "mount_dirs: skips virtiofs on darwin guest" {
   source_vm
   dirs="foo:/bar"
   guest_os=darwin
-  run --separate-stderr vm_mount
+  run --separate-stderr mount_dirs
   assert_success
   assert_stderr_line --partial "auto-mounted on macOS guests"
 }
 
 # bats test_tags=type:unit
-@test "vm_mount: name:path entry uses prefix as tag" {
+@test "mount_dirs: name:path entry uses prefix as tag" {
   source_vm
   dirs="myname:/host/path"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run --separate-stderr vm_mount
+  run --separate-stderr mount_dirs
   assert_success
   # The actual stderr is just "mounting myname" (from log)
   # The mount command goes to stdout via the tart() mock
@@ -74,13 +74,13 @@ source_vm() {
 }
 
 # bats test_tags=type:unit
-@test "vm_mount: bare path uses basename as tag" {
+@test "mount_dirs: bare path uses basename as tag" {
   source_vm
   # shellcheck disable=SC2030
   dirs="/host/path/chezmoi"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run --separate-stderr vm_mount
+  run --separate-stderr mount_dirs
   assert_success
   # The actual stderr is just "mounting chezmoi" (from log)
   # The mount command goes to stdout via the tart() mock
