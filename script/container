@@ -92,6 +92,7 @@ ct_exec() {
   [ -n "${CI:-}" ] && flags+=(--env=CI)
   [ -n "${CHEZMOI_PROFILE:-}" ] && flags+=(--env=CHEZMOI_PROFILE)
   [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
+  [ "$image_name" = termux ] && flags+=(--env=SHELL="$prefix/usr/bin/bash")
   [ -t 0 ] && flags+=(--interactive)
   [ -t 1 ] && flags+=(--tty)
   ct exec "${flags[@]}" "$container" "$@"
@@ -112,12 +113,18 @@ build() {
 
 # Quietly check whether the running container's bind config matches create_flags
 mount_config_matches() {
-  local actual want=""
-  actual="$("$CONTAINER_PROVIDER" container inspect "$container" \
-    --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}|{{.Destination}}|{{.Mode}}{{end}}{{end}}' \
-    2>/dev/null)" || return 1
-  [ "$CONTAINER_SOURCE" = mount ] && want="${PWD}|${chezmoi_root}|ro"
-  [ "$actual" = "$want" ]
+  [ "$CONTAINER_SOURCE" = mount ] || return 0
+  local src dst mode
+  {
+    read -r src
+    read -r dst
+    read -r mode
+  } < <(
+    "$CONTAINER_PROVIDER" container inspect "$container" \
+      --format $'{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}\n{{.Destination}}\n{{.Mode}}\n{{end}}{{end}}' \
+      2>/dev/null
+  )
+  [ "$src" = "$PWD" ] && [ "$dst" = "$chezmoi_root" ] && [[ "$mode" == *ro* ]]
 }
 
 start() {
@@ -185,6 +192,9 @@ bootstrap() {
 }
 
 init_repo() {
+  if [ "$image_name" != termux ]; then
+    return 0
+  fi
   if ct exec "$container" test -d "$chezmoi_root/.git"; then
     return 0
   fi

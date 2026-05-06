@@ -8,32 +8,37 @@
 # shellcheck source=home/dot_local/lib/sh/redact.sh
 . "$lib_dir/sh/redact.sh"
 
-# Write a raw line to stderr.
+# Write a raw line to stderr
 msg() {
   printf '%s\n' "$*" >&2
 }
 
-# Basename of the calling script, used as the log prefix.
+# Basename of the calling script, used as the log prefix
 log_prefix() {
   printf '%s' "${0##*/}"
 }
 
-# Print "<prog>: <message>" to stderr.
-log() {
+# Print "<prog>: <message>" to stderr
+info() {
   msg "$(log_prefix): $*"
 }
 
-# Print "<prog>: warning: <message>" to stderr.
+# Backward compatibility wrapper
+log() {
+  info "$@"
+}
+
+# Print "<prog>: warning: <message>" to stderr
 warn() {
   msg "$(log_prefix): warning: $*"
 }
 
-# Print "<prog>: error: <message>" to stderr.
+# Print "<prog>: error: <message>" to stderr
 err() {
   msg "$(log_prefix): error: $*"
 }
 
-# Single-quote an argument for shell, only when it contains special characters.
+# Single-quote an argument for shell, only when it contains special characters
 quote_arg() {
   case $1 in
   '' | *[!a-zA-Z0-9_/.@%+=:,-]*)
@@ -45,7 +50,7 @@ quote_arg() {
   esac
 }
 
-# Quote each argument and join with spaces.
+# Quote each argument and join with spaces
 quote_args() {
   _quoted=
   for _arg; do
@@ -54,7 +59,7 @@ quote_args() {
   printf '%s' "${_quoted# }"
 }
 
-# Print "+ <quoted args>" with secret-looking NAME=value args redacted, then run.
+# Print "+ <quoted args>" with secret-looking NAME=value args redacted, then run
 trace() {
   quoted=
   for arg; do

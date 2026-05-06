@@ -30,7 +30,8 @@ source "$lib_dir/bash/require.sh"
 require_bash 4
 trap 'log "error at line $LINENO"' ERR
 
-: "${VM_HEALTH_TARGET:=github.com:443}"
+: "${VM_CHECK_HOST:=github.com:443}"
+: "${VM_SSH_PORT:=22}"
 
 if [ -z "${VM_PROVIDER:-}" ]; then
   case "$(uname -s)" in
@@ -67,7 +68,7 @@ readonly IMAGES
 
 vm() { trace "$VM_PROVIDER" "$@"; }
 
-state() {
+vm_state() {
   case "$VM_PROVIDER" in
   tart)
     vm list --format json |
@@ -77,12 +78,12 @@ state() {
   esac
 }
 
-clone() {
+vm_clone() {
   log "cloning $image as $name"
   vm clone "$image" "$name"
 }
 
-start() {
+vm_start() {
   log "starting $name"
   local args=()
   if [ "$VM_PROVIDER" = tart ]; then
@@ -108,15 +109,9 @@ start() {
   sleep 1
 }
 
-fmt_duration() {
-  local total=$1
-  if [ "$total" -ge 3600 ]; then
-    printf '%dh %dm' $((total / 3600)) $(((total % 3600) / 60))
-  elif [ "$total" -ge 60 ]; then
-    printf '%dm %ds' $((total / 60)) $((total % 60))
-  else
-    printf '%ds' "$total"
-  fi
+vm_stop() {
+  log "stopping $name"
+  vm stop "$name"
 }
 
 timed() {
@@ -124,7 +119,7 @@ timed() {
   shift
   local start=$SECONDS
   "$@"
-  log "$label after $(fmt_duration $((SECONDS - start)))"
+  log "$label after $((SECONDS - start))s"
 }
 
 host_route_iface() {
@@ -146,59 +141,65 @@ detect_phys_iface() {
   return 1
 }
 
-auto_bridge_if_vpn() {
-  [ "$VM_PROVIDER" = tart ] || return 0
+detect_bridge() {
   [ -z "$bridged" ] || return 0
   local iface
-  iface="$(host_route_iface "${VM_HEALTH_TARGET%:*}")"
+  iface="$(host_route_iface "${VM_CHECK_HOST%:*}")"
   case "$iface" in utun*) ;; *) return 0 ;; esac
   if ! bridged="$(detect_phys_iface)"; then
-    warn "VPN detected ($iface); no physical interface found for auto-bridge"
     return 0
   fi
-  log "VPN detected ($iface); auto-bridging to $bridged"
+  log "bridging to $bridged"
 }
 
-wait_reachable() {
+# Get VM IP address
+get_ip() {
+  local timeout="${1:-10}"
+  vm ip --wait="$timeout" "$name"
+}
+
+# Wait for host->guest SSH connectivity
+wait_ssh() {
   local timeout=120
   [ "$guest_os" = darwin ] && timeout=500
   if [ "$VM_PROVIDER" = vetu ]; then
-    ssh_host="$(timed "VM IP" vm ip --wait="$timeout" "$name")"
-  elif [[ "$(host_route_iface "${VM_HEALTH_TARGET%:*}")" != utun* ]]; then
-    # Cap wait when the VM may be bridged from a prior run, so ARP on bridge100 fails fast
-    timed "VM IP" vm ip --wait=10 "$name" >/dev/null 2>&1 ||
-      warn "tart ip unavailable (VM may be bridged); falling through to agent poll"
+    ssh_host="$(timed "VM IP" get_ip "$timeout")"
+  elif [[ "$(host_route_iface "${VM_CHECK_HOST%:*}")" != utun* ]]; then
+    # Fast fail for bridged VMs (ARP on bridge100 may not work)
+    timed "VM IP" get_ip 10 ||
+      warn "tart ip unavailable, VM may be bridged; falling through to agent poll"
   fi
-  log "waiting for host->guest (up to $(fmt_duration "$timeout"))"
+  log "waiting for host->guest (up to ${timeout}s)"
   local start=$SECONDS
   while ! vm_exec true </dev/null >/dev/null 2>&1; do
     if [ "$((SECONDS - start))" -ge "$timeout" ]; then
-      err "host->guest unreachable after $(fmt_duration "$((SECONDS - start))")"
+      err "host->guest unreachable after $((SECONDS - start))s"
       vm_exec true
       return 1
     fi
     sleep 1
   done
-  log "host->guest after $(fmt_duration "$((SECONDS - start))")"
+  log "host->guest after $((SECONDS - start))s"
 }
 
-probe_guest_network() {
-  local host="${VM_HEALTH_TARGET%:*}" port="${VM_HEALTH_TARGET#*:}"
+# Check if guest can reach external network
+check_network() {
+  local host="${VM_CHECK_HOST%:*}" port="${VM_CHECK_HOST#*:}"
   vm_exec curl --silent --show-error --head \
     --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"
 }
 
-# DHCP/DNS can take a few seconds after the guest agent reports ready
-wait_guest_network() {
+# Wait for guest network to be ready (DHCP/DNS can take a few seconds)
+wait_network() {
   local timeout=30 start=$SECONDS
-  while ! probe_guest_network 2>/dev/null; do
+  while ! check_network 2>/dev/null; do
     [ "$((SECONDS - start))" -lt "$timeout" ] || return 1
     sleep 1
   done
 }
 
 log_host_route() {
-  local host="${VM_HEALTH_TARGET%:*}"
+  local host="${VM_CHECK_HOST%:*}"
   if [ -n "$bridged" ]; then
     log "bridged via $bridged (host VPN bypassed)"
     return
@@ -211,12 +212,68 @@ log_host_route() {
   esac
 }
 
-mount_dirs() {
-  [ -n "$dirs" ] || return 0
-  if [ "$VM_PROVIDER" != tart ]; then
-    warn "$VM_PROVIDER does not support host directory sharing"
-    return 0
+real_tty() { [ -t 0 ] && [ -t 1 ]; }
+
+vm_exec() {
+  if [ "$VM_PROVIDER" = tart ]; then
+    local tty_flags=()
+    real_tty && tty_flags=(-it)
+    vm exec "${tty_flags[@]}" "$name" "$@"
+  else
+    vm_ssh "admin@$ssh_host" "$@"
   fi
+}
+
+vm_exec_sh() {
+  local script=$1
+  shift
+  if [ "$VM_PROVIDER" = tart ]; then
+    vm_exec sh -euc "$script" -- "$@"
+  else
+    vm_exec sh -eus -- "$@" <<<"$script"
+  fi
+}
+
+vm_run() {
+  local term
+  case "${TERM-}" in
+  '' | xterm-ghostty | xterm-kitty | alacritty) term=xterm-256color ;;
+  *) term=$TERM ;;
+  esac
+
+  local env_args=(
+    "CHEZMOI_PROFILE=${CHEZMOI_PROFILE:-minimal}"
+    CHEZMOI_UPGRADE=true
+    "MISE_TRUSTED_CONFIG_PATHS=$src"
+    "TERM=$term"
+  )
+  [[ -v CI ]] && env_args+=("CI=$CI")
+  [[ -v GITHUB_TOKEN ]] && env_args+=("GITHUB_TOKEN=$GITHUB_TOKEN")
+
+  # bash -l sources ~/.profile to set PATH for brew and mise
+  # shellcheck disable=SC2016
+  local script='cd "$1" && shift && exec "$@"'
+  if [ "$VM_PROVIDER" = tart ]; then
+    vm_exec env "${env_args[@]}" bash -lc "$script" -- "$src" "$@"
+  else
+    vm_exec env "${env_args[@]}" bash -ls -- "$src" "$@" <<<"$script"
+  fi
+}
+
+restore_tty() {
+  [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
+}
+
+vm_down() {
+  if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
+    log "killing tmux session"
+    trace tmux kill-session -t vm
+  fi
+  vm_stop
+}
+
+vm_mount() {
+  [ -n "$dirs" ] || return 0
   if [ "$guest_os" = darwin ]; then
     log "skipping virtiofs mount (auto-mounted on macOS guests)"
     return 0
@@ -229,86 +286,25 @@ mount_dirs() {
     esac
     log "mounting $tag"
     # shellcheck disable=SC2016
-    vm_exec sh -euc '
+    vm_exec_sh '
       mp="$HOME/.local/share/$1"
       mkdir -p "$mp"
       sudo modprobe virtiofs 2>/dev/null
       sudo mount -t virtiofs "$1" "$mp"
-    ' -- "$tag"
+    ' "$tag"
   done
 }
 
-real_tty() { [ -t 0 ] && [ -t 1 ]; }
-
-vm_exec() {
-  if [ "$VM_PROVIDER" = tart ]; then
-    local flags=()
-    real_tty && flags=(-it)
-    vm exec "${flags[@]}" "$name" "$@"
-  else
-    local ssh_args=(
-      -o StrictHostKeyChecking=no
-      -o ConnectTimeout=60
-      -p "$ssh_port"
-    )
-    real_tty && ssh_args=(-t "${ssh_args[@]}")
-    # shellcheck disable=SC2209
-    SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" "$@"
-  fi
-}
-
-vm_exec_cmd() {
-  local env_args=(
-    CHEZMOI_UPGRADE=true
-    "MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-  )
-  [ -n "${CI:-}" ] && env_args+=("CI=$CI")
-  env_args+=("CHEZMOI_PROFILE=${CHEZMOI_PROFILE:-minimal}")
-  [ -n "${GITHUB_TOKEN:-}" ] && env_args+=("GITHUB_TOKEN=$GITHUB_TOKEN")
-  case "${TERM:-}" in
-  '' | xterm-ghostty | xterm-kitty | alacritty) env_args+=("TERM=xterm-256color") ;;
-  *) env_args+=("TERM=$TERM") ;;
-  esac
-  # bash -l sources ~/.profile to set PATH for mise shims and linuxbrew
-  if [ "$VM_PROVIDER" = tart ]; then
-    # shellcheck disable=SC2016
-    vm_exec env "${env_args[@]}" bash -lc 'cd "$1"; shift; exec "$@"' -- "$chezmoi_root" "$@"
-  else
-    vm_exec env "${env_args[@]}" bash -l -s -- "$@" <<<'exec "$@"'
-  fi
-}
-
-stop() {
-  log "stopping $name"
-  vm stop "$name"
-}
-
-restore_tty() {
-  [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
-}
-
-teardown() {
-  if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
-    log "killing tmux session"
-    trace tmux kill-session -t vm
-  fi
-  stop
-}
-
 # tart 2.32.1 lacks cp and crashes on stdin redirect through tart exec -i
-cp_chmod() {
-  local src="$1" dst="$2" b64
+vm_copy() {
+  local host_src="$1" dst="$2" b64
   if [ "$VM_PROVIDER" = tart ]; then
-    b64="$(base64 <"$src")"
+    b64="$(base64 <"$host_src")"
     # shellcheck disable=SC2016
-    vm_exec sh -euc \
-      'printf "%s" "$1" | base64 -d >"$2" && chmod +x "$2"' \
-      -- "$b64" "$dst"
+    vm_exec_sh 'printf "%s" "$1" | base64 -d >"$2" && chmod +x "$2"' "$b64" "$dst"
   else
     : "${ssh_host:=$(vm ip "$name")}"
-    # shellcheck disable=SC2209
-    SSHPASS=admin trace sshpass -e scp -o StrictHostKeyChecking=no -P "$ssh_port" \
-      "$src" "admin@$ssh_host:$dst"
+    vm_scp "$host_src" "admin@$ssh_host:$dst"
   fi
 }
 
@@ -319,28 +315,49 @@ sync_source() {
   # Stale files persist until the VM is recreated
   if [ "$VM_PROVIDER" = tart ]; then
     require_cmd tar
-    log "copying $PWD to $name:$chezmoi_root via tar stream"
+    log "copying $PWD to $name:$src via tar stream"
     # Exclude ._* on both ends because host tar may emit AppleDouble entries
+    # shellcheck disable=SC2016
     if ! trace tar --no-xattrs \
       --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
       -cf - -C "$PWD" . |
-      "$VM_PROVIDER" exec -i "$name" bash -euc "mkdir -p '$chezmoi_root' && tar xf - -C '$chezmoi_root' --exclude='._*'"; then
-      err "tar stream failed: $PWD to $name:$chezmoi_root"
+      "$VM_PROVIDER" exec -i "$name" bash -euc 'mkdir -p "$1" && tar xf - -C "$1" --exclude="._*"' -- "$src"; then
+      err "tar stream failed: $PWD to $name:$src"
       return 1
     fi
     return 0
   fi
-  log "syncing chezmoi to $chezmoi_root"
+  log "syncing chezmoi to $src"
   : "${ssh_host:=$(vm ip "$name")}"
-  local ssh_args=(-o StrictHostKeyChecking=no -p "$ssh_port")
-  # shellcheck disable=SC2209
-  SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" \
-    "mkdir -p '$chezmoi_root'"
-  # shellcheck disable=SC2209
+  vm_ssh "admin@$ssh_host" "mkdir -p \"$src\""
   trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
     .pre-commit-config.yaml mise.toml home script test |
-    SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "admin@$ssh_host" \
-      "tar x -C '$chezmoi_root'"
+    vm_ssh "admin@$ssh_host" "tar x -C \"$src\""
+}
+
+# Execute command in VM via SSH
+vm_ssh() {
+  local ssh_args=(
+    -o StrictHostKeyChecking=no
+    -o UserKnownHostsFile=/dev/null
+    -o LogLevel=ERROR
+    -o ConnectTimeout=60
+    -p "$ssh_port"
+  )
+  [ -t 0 ] && [ -t 1 ] && ssh_args+=(-t)
+  # shellcheck disable=SC2209
+  SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "$@"
+}
+
+vm_scp() {
+  local scp_args=(
+    -o StrictHostKeyChecking=no
+    -o UserKnownHostsFile=/dev/null
+    -o LogLevel=ERROR
+    -P "$ssh_port"
+  )
+  # shellcheck disable=SC2209
+  SSHPASS=admin trace sshpass -e scp "${scp_args[@]}" "$@"
 }
 
 resolve() {
@@ -360,88 +377,90 @@ resolve() {
     return 1
   fi
 
+  local home
   case "$guest_os" in
   darwin) home=/Users/admin ;;
   *) home=/home/admin ;;
   esac
 
-  chezmoi_root="$home/.local/share/chezmoi"
+  src="$home/.local/share/chezmoi"
   if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
-    chezmoi_root="/Volumes/My Shared Files/chezmoi"
+    src="/Volumes/My Shared Files/chezmoi"
     : "${dirs:=chezmoi:$PWD:ro}"
   fi
 }
 
-bring_up() {
-  start
-  wait_reachable
-  mount_dirs
+vm_boot() {
+  vm_start
+  wait_ssh
+  [ "$VM_PROVIDER" = tart ] && vm_mount
   log_host_route
 }
 
-ensure_vm() {
+# Ensure VM is online with network connectivity
+ensure_online() {
+  timed "guest to net $VM_CHECK_HOST" wait_network
+}
+
+vm_up() {
   : "${name:=$default_name}"
   ssh_host=""
-  ssh_port=22
-  state="$(state "$name")"
+  ssh_port="$VM_SSH_PORT"
+  vm_status="$(vm_state "$name")"
 
-  [ -z "$state" ] && clone
+  [ -z "$vm_status" ] && vm_clone
 
-  if [ "$state" = running ]; then
+  if [ "$vm_status" = running ]; then
     log "reusing running VM"
-    wait_reachable
-    if probe_guest_network 2>/dev/null; then
+    wait_ssh
+    if check_network; then
       [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
       return 0
     fi
     warn "guest network unreachable; restarting VM"
-    stop
+    vm_stop
   fi
 
-  auto_bridge_if_vpn
-  bring_up
-  timed "guest->net $VM_HEALTH_TARGET" wait_guest_network && return 0
+  [ "$VM_PROVIDER" = tart ] && detect_bridge
+  vm_boot
+  ensure_online && return 0
 
-  if [ -z "$bridged" ] && bridged=$(detect_phys_iface 2>/dev/null); then
+  if [ "$VM_PROVIDER" = tart ] && [ -z "$bridged" ] && bridged=$(detect_phys_iface 2>/dev/null); then
     warn "NAT broken (likely stale DNS from prior VPN); retrying bridged via $bridged"
-    stop
-    bring_up
-    timed "guest->net $VM_HEALTH_TARGET" wait_guest_network && return 0
+    vm_stop
+    vm_boot
+    ensure_online && return 0
   fi
-  probe_guest_network
+
+  vm_boot
+  [ "$VM_PROVIDER" = tart ] && check_network
 }
 
 bootstrap() {
-  vm_exec_cmd ./script/bootstrap --no-tty --source="$chezmoi_root" --verbose
+  vm_run ./script/bootstrap --no-tty --source="$src" --verbose
 }
 
 init_repo() {
-  # Skip when source missing or .git already provided by mount or clone
-  if ! vm_exec test -f "$chezmoi_root/.chezmoiroot"; then
+  if ! vm_exec test -f "$src/.chezmoiroot"; then
     return 0
   fi
-  if vm_exec test -d "$chezmoi_root/.git"; then
+  if vm_exec test -d "$src/.git"; then
     return 0
   fi
-  if [ "$VM_PROVIDER" = tart ]; then
-    # shellcheck disable=SC2016
-    vm_exec sh -euc '
-      git config --global --add safe.directory "$1"
-      git -C "$1" init --quiet
-      git -C "$1" add --all
-    ' -- "$chezmoi_root"
-  else
-    local r
-    r=$(printf '%q' "$chezmoi_root")
-    vm_exec sh <<<"git config --global --add safe.directory $r && git -C $r init --quiet && git -C $r add --all"
-  fi
+  # shellcheck disable=SC2016
+  local script='
+    git config --global --add safe.directory "$1"
+    git -C "$1" init --quiet
+    git -C "$1" add --all
+  '
+  vm_exec_sh "$script" "$src"
 }
 
 pipeline() {
   sync_source
   bootstrap
   init_repo
-  vm_exec_cmd mise run pipeline
+  vm_run mise run pipeline
 }
 
 cmd_run() {
@@ -449,17 +468,17 @@ cmd_run() {
   shift
 
   resolve "$target"
-  ensure_vm
+  vm_up
 
   if [ "$#" -eq 0 ]; then
     pipeline
   else
-    vm_exec_cmd "$@"
+    vm_run "$@"
   fi
 
   # Stop only if we started it and user did not pass -k
-  if [ "$state" != running ] && [ "$keep" != true ]; then
-    teardown
+  if [ "$vm_status" != running ] && [ "$keep" != true ]; then
+    vm_down
   fi
 }
 

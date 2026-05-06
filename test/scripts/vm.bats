@@ -34,39 +34,30 @@ source_vm() {
 # bats file_tags=script,vm
 
 # bats test_tags=type:unit
-@test "mount_dirs: skips when dirs is empty" {
+@test "mount: skips when dirs is empty" {
   source_vm
-  run --separate-stderr mount_dirs
+  run --separate-stderr vm_mount
   assert_success
   refute_output
 }
 
 # bats test_tags=type:unit
-@test "mount_dirs: warns on non-tart provider" {
-  TEST_VM_PROVIDER=vetu source_vm
-  dirs="foo:/bar"
-  run --separate-stderr mount_dirs
-  assert_success
-  assert_stderr_line --partial "does not support host directory sharing"
-}
-
-# bats test_tags=type:unit
-@test "mount_dirs: skips virtiofs on darwin guest" {
+@test "mount: skips virtiofs on darwin guest" {
   source_vm
   dirs="foo:/bar"
   guest_os=darwin
-  run --separate-stderr mount_dirs
+  run --separate-stderr vm_mount
   assert_success
   assert_stderr_line --partial "auto-mounted on macOS guests"
 }
 
 # bats test_tags=type:unit
-@test "mount_dirs: name:path entry uses prefix as tag" {
+@test "mount: name:path entry uses prefix as tag" {
   source_vm
   dirs="myname:/host/path"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run --separate-stderr mount_dirs
+  run --separate-stderr vm_mount
   assert_success
   # The actual stderr is just "mounting myname" (from log)
   # The mount command goes to stdout via the tart() mock
@@ -74,13 +65,13 @@ source_vm() {
 }
 
 # bats test_tags=type:unit
-@test "mount_dirs: bare path uses basename as tag" {
+@test "mount: bare path uses basename as tag" {
   source_vm
   # shellcheck disable=SC2030
   dirs="/host/path/chezmoi"
   # shellcheck disable=SC2329
   tart() { echo "$@"; }
-  run --separate-stderr mount_dirs
+  run --separate-stderr vm_mount
   assert_success
   # The actual stderr is just "mounting chezmoi" (from log)
   # The mount command goes to stdout via the tart() mock
@@ -130,35 +121,6 @@ source_vm() {
   source_vm
   parse_flags foo bar baz
   assert_equal "${ARGS[*]}" "foo bar baz"
-}
-
-# bats test_tags=type:unit
-@test "fmt_duration: under a minute" {
-  source_vm
-  run fmt_duration 0
-  assert_output "0s"
-  run fmt_duration 59
-  assert_output "59s"
-}
-
-# bats test_tags=type:unit
-@test "fmt_duration: minutes" {
-  source_vm
-  run fmt_duration 60
-  assert_output "1m 0s"
-  run fmt_duration 61
-  assert_output "1m 1s"
-  run fmt_duration 3599
-  assert_output "59m 59s"
-}
-
-# bats test_tags=type:unit
-@test "fmt_duration: hours" {
-  source_vm
-  run fmt_duration 3600
-  assert_output "1h 0m"
-  run fmt_duration 3661
-  assert_output "1h 1m"
 }
 
 # bats test_tags=type:unit

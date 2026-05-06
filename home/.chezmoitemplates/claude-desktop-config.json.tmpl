@@ -21,12 +21,8 @@
     "dockBounceEnabled": true,
     "coworkWebSearchEnabled": true,
     "keepAwakeEnabled": false
-    {{-   if or (get $preferences "epitaxyPrefs") (eq .osIDLike "fedora") }},
-    {{-   end }}
-    {{- with get $preferences "epitaxyPrefs" }}
+    {{- with get $preferences "epitaxyPrefs" }},
     "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
-    {{-   if eq $.osIDLike "fedora" }},
-    {{-   end }}
     {{- end }}
     {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [

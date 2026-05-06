@@ -53,7 +53,7 @@
 {{-   warnf "container type: %s" $container }}
 {{- end }}
 {{- if and $vm .chezmoi.config.verbose }}
-{{-   warnf "virual machine: %b" $vm }}
+{{-   warnf "virual machine: %s" $vm }}
 {{- end }}
 
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os }}
