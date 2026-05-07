@@ -583,6 +583,7 @@ packages:
     # enabled: {{ and (not .features.neovim) (not .features.mise) }}
     enabled: {{ not .features.neovim }}
     nameOverwrite:
+      mise: aqua:koalaman/shellcheck
       windows: koalaman.shellcheck
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shfmt:

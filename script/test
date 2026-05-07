@@ -17,9 +17,12 @@ source "$lib_dir/sh/parallel.sh"
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
-if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
-  eval "$(mise activate bash)"
-  # PATH="$PATH:$HOME/.local/share/mise/shims"
+if command -v mise >/dev/null; then
+  if [ -z "${MISE_SHELL:-}" ]; then
+    eval "$(mise activate bash)"
+  else
+    PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
+  fi
 fi
 # if [ -z "${USER:-}" ]; then
 #   USER="$(id -un)"
