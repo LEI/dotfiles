@@ -48,7 +48,7 @@ setup() {
 @test "feature: carapace" {
   check_feature carapace
   run --separate-stderr carapace --version
-  [ "$status" -ne 139 ] || skip "exit code 139" # mise reshim
+  # [ "$status" -ne 139 ] || skip "exit code 139" # mise reshim
   assert_success
   refute_stderr
   assert_output

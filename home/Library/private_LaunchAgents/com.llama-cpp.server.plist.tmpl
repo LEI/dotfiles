@@ -1,5 +1,6 @@
 {{- $provider := get .ai.providers "llama-server" -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
+      "active" (get $provider "active" | default false)
       "label" $provider.label
       "args" (list
         (printf "%s/opt/llama.cpp/bin/llama-server" .brewPrefix)

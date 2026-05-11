@@ -193,7 +193,7 @@ processes:
     command: "ssh -N -L {{ .localPort }}:{{ .remoteHost }}:{{ $remotePort }} {{ .sshTarget }}"
     availability:
       restart: on_failure
-      backoff_seconds: 5
+      backoff_seconds: 30 # 5
       max_restarts: 0 # unlimited
       exponential_backoff: true
     {{- if eq .type "postgres" }}

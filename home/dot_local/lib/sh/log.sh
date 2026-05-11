@@ -59,7 +59,7 @@ quote_args() {
   printf '%s' "${_quoted# }"
 }
 
-# Print "+ <quoted args>" with secret-looking NAME=value args redacted, then run
+# Echo "+ <quoted args>" with secret-looking NAME=value args redacted, then run
 trace() {
   quoted=
   for arg; do

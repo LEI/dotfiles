@@ -1,13 +1,11 @@
 #!/bin/sh
 #MISE description="List reclaimable disk paths (read-only)"
-#USAGE arg "[group]..." help="Groups to list (default: all)" {
-#USAGE   choices "caches" "containers" "ios" "logs" "trash" "vms" "xcode"
+#USAGE arg "[group]..." help="Groups to list (default: all except toolchain, hf, ollama)" {
+#USAGE   choices "cache" "caches" "container" "containers" "ct" "dep" "dependencies" "dependency" "deps" "hf" "huggingface" "ios" "log" "logs" "ollama" "tc" "toolchain" "toolchains" "trash" "virtual-machine" "virtual-machines" "vm" "vms" "xcode"
 #USAGE }
-#USAGE example "reclaim | xargs -0 du -sh | sort -hr" help="parents, largest first"
-#USAGE example "reclaim | xargs -0 du -sh | sort -hr | head" help="top 10 growers"
+#USAGE example "reclaim cache | xargs -0 du -sh | sort -hr" help="one group, biggest first"
 #USAGE example "reclaim | xargs -0 du -shc | tail -1" help="grand total"
-#USAGE example "reclaim caches | xargs -0 trash" help="trash dev caches"
-#USAGE example "du -d 1 -h ~/.cache | sort -hr" help="drill into one parent"
+#USAGE example "reclaim cache | xargs -0 trash" help="wipe a group"
 
 set -eu
 
@@ -29,33 +27,46 @@ keep() {
 
 emit() {
   case "$1" in
-  caches)
+  cache | caches)
+    # XDG/macOS cache roots (spec-sanctioned trashable)
+    keep \
+      ~/.cache \
+      ~/Library/Caches
+    ;;
+  dep | deps | dependency | dependencies)
+    # Package manager download caches (regeneratable via re-install/build)
     keep \
       ~/.bun/install/cache \
       ~/.bundle/cache \
-      ~/.cache \
       ~/.cargo/registry \
       ~/.cocoapods/repos \
       ~/.composer/cache \
-      ~/.deno \
-      ~/.gem \
+      ~/.gem/gems \
       ~/.gradle/caches \
       ~/.ivy2/cache \
-      ~/.lmstudio \
+      ~/.local/share/pnpm/store \
       ~/.m2/repository \
       ~/.npm/_cacache \
       ~/.nuget/packages \
-      ~/.ollama \
       ~/.pub-cache \
-      ~/.rustup/toolchains \
-      ~/.sbt \
-      ~/.swiftpm \
       ~/.yarn/cache \
-      ~/Library/Caches \
       ~/Library/pnpm/store \
       ~/go/pkg/mod
     ;;
-  containers)
+  toolchain | toolchains | tc)
+    # Installed compiler/runtime versions (reinstall via tool CLI)
+    keep ~/.rustup/toolchains
+    ;;
+  hf | huggingface)
+    # HuggingFace local cache; per-repo dirs are self-contained
+    hf_hub="${HF_HOME:-$HOME/.cache/huggingface}/hub"
+    keep "$hf_hub"/models--* "$hf_hub"/datasets--*
+    ;;
+  ollama)
+    # Ollama model store; path-rm canonical only for bulk wipe
+    keep "${OLLAMA_MODELS:-$HOME/.ollama/models}"
+    ;;
+  container | containers | ct)
     keep \
       ~/.docker \
       ~/.local/share/containers \
@@ -63,7 +74,7 @@ emit() {
       "$HOME/Library/Containers/com.docker.docker"
     ;;
   ios) keep "$HOME/Library/Application Support/MobileSync/Backup" ;;
-  logs)
+  log | logs)
     keep \
       ~/.local/state \
       ~/Library/Logs \
@@ -75,7 +86,7 @@ emit() {
       ~/.Trash \
       ~/.local/share/Trash
     ;;
-  vms)
+  vm | vms | virtual-machine | virtual-machines)
     keep \
       ~/.colima \
       ~/.lima \
@@ -119,7 +130,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-: "${groups:=caches containers ios logs trash vms xcode}"
+: "${groups:=cache dep container ios log trash vm xcode}"
 
 for group in $groups; do
   emit "$group" || true

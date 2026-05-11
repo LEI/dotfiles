@@ -12,9 +12,14 @@
 {{- end }}
   </array>
 {{- $keepalive := true -}}
-{{- if hasKey . "keepalive" }}{{ $keepalive = get . "keepalive" }}{{ end }}
+{{- if hasKey . "keepalive" }}{{ $keepalive = get . "keepalive" }}
+{{- else if hasKey . "active" }}{{ $keepalive = get . "active" }}{{ end }}
   <key>KeepAlive</key>
   <{{ $keepalive }}/>
+{{- if and (hasKey . "active") (not (get . "active")) }}
+  <key>Disabled</key>
+  <true/>
+{{- end }}
   <key>ThrottleInterval</key>
   <integer>{{ get . "throttle" | default 30 }}</integer>
   <key>ProcessType</key>
