@@ -23,9 +23,9 @@
 {{- $interactive := stdinIsATTY }}
 
 {{- $vm := false }}
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (lookPath "sysctl" | isExecutable) }}
 {{-   $vm = eq (output "sysctl" "-n" "kern.hv_vmm_present" | trim) "1" }}
-{{- else if lookPath "systemd-detect-virt" | isExecutable }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "systemd-detect-virt" | isExecutable) }}
 {{-   $vm = ne (output "sh" "-c" "systemd-detect-virt 2>/dev/null || true" | trim) "none" }}
 {{- end }}
 

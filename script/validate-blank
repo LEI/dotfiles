@@ -56,7 +56,8 @@ fi
 text_files=()
 for f in "$@"; do
   [ -f "$f" ] || continue
-  file --brief --mime-encoding "$f" | grep -q binary && continue
+  # file --brief --mime-encoding "$f" | grep -q binary && continue
+  grep -qI '' "$f" || continue
   text_files+=("$f")
 done
 set -- "${text_files[@]}"

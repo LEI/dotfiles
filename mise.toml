@@ -21,6 +21,8 @@ run = [
   { task = "pipeline" },
   # m ct:all
   { task = "container alpine" },
+  # m vm ubuntu-runner
+  { task = "vm ubuntu-runner" },
 ]
 
 [tasks.ci]

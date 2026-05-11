@@ -48,7 +48,6 @@ setup() {
 @test "feature: carapace" {
   check_feature carapace
   run --separate-stderr carapace --version
-  # [ "$status" -ne 139 ] || skip "exit code 139" # mise reshim
   assert_success
   refute_stderr
   assert_output
@@ -65,6 +64,14 @@ setup() {
 @test "feature: eza" {
   check_feature eza
   run --separate-stderr eza --version
+  assert_success
+  refute_stderr
+  assert_output
+}
+
+@test "feature: gitleaks" {
+  check_command gitleaks
+  run --separate-stderr gitleaks version
   assert_success
   refute_stderr
   assert_output
@@ -125,6 +132,14 @@ setup() {
 @test "feature: ripgrep" {
   check_feature ripgrep
   run --separate-stderr rg --version
+  assert_success
+  refute_stderr
+  assert_output
+}
+
+@test "feature: starship" {
+  check_feature starship
+  run --separate-stderr starship --version
   assert_success
   refute_stderr
   assert_output

@@ -106,9 +106,10 @@ arm64 | aarch64) ARCH=aarch64 ;;
   ;;
 esac
 
-VERSION="$(get_release bitwarden/sdk-sm)"
-VERSION="${VERSION##*-}" # dotnet-v1.0.0 -> v1.0.0
-
+# # FIXME: matches "Rust crates v2.1.0 Latest" instead of "bws CLI v2.0.0"
+# VERSION="$(get_release bitwarden/sdk-sm)"
+# VERSION="${VERSION##*-}" # dotnet-v1.0.0 -> v1.0.0
+VERSION="v2.0.0"
 NAME="bws-$ARCH-$OS-${VERSION#v}.zip"
 URL="https://github.com/bitwarden/sdk-sm/releases/download/bws-$VERSION/$NAME"
 

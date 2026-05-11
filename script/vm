@@ -89,9 +89,12 @@ vm_start() {
   if [ "$VM_PROVIDER" = tart ]; then
     [ "$gui" = true ] || args+=(--no-graphics)
     [ -n "$bridged" ] && args+=(--net-bridged="$bridged")
-    local entry
+    local entry entry_tag entry_rest
     for entry in $dirs; do
-      args+=("--dir=$entry")
+      # Drop the name prefix to avoid a wrapper subdir; tag enables direct mount on Linux
+      entry_tag="${entry%%:*}"
+      entry_rest="${entry#*:}"
+      args+=("--dir=$entry_rest,tag=$entry_tag")
     done
   elif [ "$gui" = true ]; then
     warn "$VM_PROVIDER: --gui not supported, running headless"
@@ -171,10 +174,9 @@ wait_ssh() {
   fi
   [ "$verbosity" -ge 1 ] && log "waiting for host->guest (up to ${timeout}s)"
   local start=$SECONDS
-  while ! vm_exec true </dev/null >/dev/null 2>&1; do
+  while ! vm_exec true >/dev/null; do
     if [ "$((SECONDS - start))" -ge "$timeout" ]; then
       err "host->guest unreachable after $((SECONDS - start))s"
-      vm_exec true
       return 1
     fi
     sleep 1
@@ -216,9 +218,11 @@ real_tty() { [ -t 0 ] && [ -t 1 ]; }
 
 vm_exec() {
   if [ "$VM_PROVIDER" = tart ]; then
-    local tty_flags=()
-    real_tty && tty_flags=(-it)
-    vm exec "${tty_flags[@]}" "$name" "$@"
+    if real_tty; then
+      vm exec -it "$name" "$@"
+    else
+      vm exec "$name" "$@" </dev/null
+    fi
   else
     vm_ssh "admin@$ssh_host" "$@"
   fi
@@ -278,20 +282,24 @@ vm_mount() {
     [ "$verbosity" -ge 1 ] && log "skipping virtiofs mount (auto-mounted on macOS guests)"
     return 0
   fi
-  local entry tag
+  local entry tag opts
   for entry in $dirs; do
     case "$entry" in
     *:*) tag="${entry%%:*}" ;;
     *) tag="${entry##*/}" ;;
     esac
-    [ "$verbosity" -ge 1 ] && log "mounting $tag"
+    case "$entry" in
+    *:ro) opts=ro ;;
+    *) opts=rw ;;
+    esac
+    [ "$verbosity" -ge 1 ] && log "mounting $tag ($opts)"
     # shellcheck disable=SC2016
     vm_exec_sh '
       mp="$HOME/.local/share/$1"
       mkdir -p "$mp"
       sudo modprobe virtiofs 2>/dev/null
-      sudo mount -t virtiofs "$1" "$mp"
-    ' "$tag"
+      sudo mount -t virtiofs -o "$2" "$1" "$mp"
+    ' "$tag" "$opts"
   done
 }
 
@@ -309,7 +317,8 @@ vm_copy() {
 }
 
 sync_source() {
-  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
+  # Mounted via virtiofs (tart --dir); no copy needed
+  if [ "$VM_PROVIDER" = tart ] && [ -n "$dirs" ]; then
     return 0
   fi
   # Stale files persist until the VM is recreated
@@ -384,8 +393,8 @@ resolve() {
   esac
 
   src="$home/.local/share/chezmoi"
-  if [ "$VM_PROVIDER" = tart ] && [ "$guest_os" = darwin ]; then
-    src="/Volumes/My Shared Files/chezmoi"
+  if [ "$VM_PROVIDER" = tart ]; then
+    [ "$guest_os" = darwin ] && src="/Volumes/My Shared Files/chezmoi"
     : "${dirs:=chezmoi:$PWD:ro}"
   fi
 }
@@ -412,12 +421,11 @@ vm_up() {
 
   if [ "$vm_status" = running ]; then
     [ "$verbosity" -ge 1 ] && log "reusing running VM"
-    wait_ssh
-    if check_network; then
+    if vm_exec true >/dev/null && check_network; then
       [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
       return 0
     fi
-    warn "guest network unreachable; restarting VM"
+    warn "VM unreachable; restarting"
     vm_stop
   fi
 
@@ -603,7 +611,8 @@ main() {
     ;;
   esac
 
-  tty_state=$(stty -g </dev/tty 2>/dev/null || true)
+  # Capture only when foreground; restoring from a background pgroup raises SIGTTOU
+  real_tty && tty_state=$({ stty -g </dev/tty; } 2>/dev/null || true)
   trap restore_tty EXIT
 
   require_cmd "$VM_PROVIDER"

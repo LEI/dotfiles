@@ -190,6 +190,8 @@ repos:
         name: check file permissions
         entry: >-
           sh -c '
+            # FIXME: ro mount
+            [ -f /run/.containerenv ] && return 0
             rc=0
             for f do
               if test -x "$f"; then
@@ -209,8 +211,7 @@ repos:
         entry: ./script/validate-schema
         language: system
         files: \.(json[c5]?|toml|ya?ml)$
-        # FIXME: starship.toml has unknown properties (maven); schema version mismatch?
-        exclude: ^(home/.*/modify_.*|\.config/starship/starship\.toml)$
+        exclude: ^home/\.chezmoitemplates/|(^|/)modify_
         stages:
           - pre-commit
 
@@ -243,6 +244,6 @@ repos:
         entry: ./script/lint-templates
         language: system
         files: ^home/(.*\.tmpl$|.*/modify_)
-        exclude: \.chezmoi\.yaml\.tmpl$
+        exclude: ^home/\.chezmoi\.yaml\.tmpl$
         stages:
           - pre-commit

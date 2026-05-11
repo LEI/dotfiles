@@ -13,12 +13,14 @@
 set -euo pipefail
 
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
-# shellcheck source=home/dot_local/lib/sh/parallel.sh
-source "$lib_dir/sh/parallel.sh"
 # shellcheck source=home/dot_local/lib/bash/report.sh
 source "$lib_dir/bash/report.sh"
 # shellcheck source=home/dot_local/lib/bash/require.sh
 source "$lib_dir/bash/require.sh"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
 # shellcheck source=home/dot_local/lib/sh/usage.sh
 source "$lib_dir/sh/usage.sh"
 
@@ -99,14 +101,19 @@ extract_schema() {
   esac
   case "$ext" in
   json)
-    schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
+    schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || return 1
     ;;
   jsonc | json5)
+    local parsed
     if command -v json5 >/dev/null; then
-      schema=$(json5 "$path" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || schema=
-    else
-      schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path" 2>/dev/null) || schema=
+      if ! parsed=$(json5 "$path"); then
+        echo "$path" >&2
+        return 1
+      fi
+    elif ! parsed=$(jq '.' "$path" 2>/dev/null); then
+      return 1
     fi
+    schema=$(printf '%s' "$parsed" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || return 1
     ;;
   toml)
     # shellcheck disable=SC2016
@@ -167,12 +174,12 @@ validate_file() {
     return 1
   fi
 
-  schema=$(extract_schema "$path")
-
-  if [ -z "$schema" ]; then
-    echo "SKIP $path # no \$schema"
+  case "$path" in
+  *.tmpl | *.chezmoitemplates/* | */modify_*)
+    echo "SKIP $path # chezmoi template"
     return 0
-  fi
+    ;;
+  esac
 
   case "$(basename "$path")" in
   cspell.json | devcontainer.json) ext=jsonc ;;
@@ -180,12 +187,26 @@ validate_file() {
 
   case "$ext" in
   jsonc | json5)
-    if command -v json5 >/dev/null; then
-      content=$(json5 "$path")
-    elif ! content=$(jq '.' "$path" 2>/dev/null); then
-      echo "FAIL $path schema=$schema (requires json5; file uses JSONC features)"
-      return 1
+    if ! command -v json5 >/dev/null; then
+      echo "SKIP $path # jsonc parser unavailable"
+      return 0
     fi
+    ;;
+  esac
+
+  if ! schema=$(extract_schema "$path"); then
+    echo "FAIL $path # parse error"
+    return 1
+  fi
+
+  if [ -z "$schema" ]; then
+    echo "SKIP $path # no \$schema"
+    return 0
+  fi
+
+  case "$ext" in
+  jsonc | json5)
+    content=$(json5 "$path")
     if [ "$content" = "null" ]; then
       content='{}'
     fi
@@ -301,9 +322,14 @@ if [ $# -eq 0 ]; then
 fi
 
 # Pre-flight: invalidate cached schemas whose ETag/Last-Modified shifted upstream
+# Parse failures here are non-fatal; validate_file reports them as FAIL later
 if [ "$refresh" != true ] && [ -d "$cache_dir/schemas" ]; then
   for f in "$@"; do
-    extract_schema "$f"
+    if schema=$(extract_schema "$f"); then
+      if [ -n "$schema" ]; then
+        printf '%s\n' "$schema"
+      fi
+    fi
   done | sort -u | while IFS= read -r url; do
     if [ -n "$url" ]; then
       preflight_schema "$url"

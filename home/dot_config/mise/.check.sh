@@ -7,6 +7,9 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; t
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
+# FIXME: unused shims are present, run mise reshim to remove them
+mise reshim
+
 exit_code=0
 mise doctor --json | yq --colors --prettyPrint '.errors[], .warnings[]' || exit_code=$?
 
