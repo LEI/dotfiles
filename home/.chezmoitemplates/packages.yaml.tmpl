@@ -747,8 +747,8 @@ packages:
       arch: updo-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   usage:
-    enabled: {{ .features.mise }}
-    type: {{ eq .os "darwin" | ternary "brew" "mise" | quote }}
+    enabled: {{ or .features.brew .features.mise }}
+    type: {{ or (not .features.mise) (eq .osIDLike "darwin") | ternary "brew" "mise" | quote }}
 
   # pip:
   #   enabled: {{ and .features.python (eq .osIDLike "opensuse") }}

@@ -190,11 +190,10 @@ repos:
         name: check file permissions
         entry: >-
           sh -c '
-            # FIXME: ro mount
-            [ -f /run/.containerenv ] && return 0
             rc=0
             for f do
-              if test -x "$f"; then
+              mode=$(git ls-files --stage -- "$f" 2>/dev/null | cut -d" " -f1)
+              if [ "$mode" = 100755 ]; then
                 echo "unexpected executable: $f"
                 rc=1
               fi

@@ -42,13 +42,42 @@ source_vm() {
 }
 
 # bats test_tags=type:unit
-@test "mount: skips virtiofs on darwin guest" {
+@test "mount: darwin guest invokes mount_virtiofs per tag" {
   source_vm
   dirs="foo:/bar"
   guest_os=darwin
+  vm_exec_sh() { echo "$@" >>"$BATS_TEST_TMPDIR/calls"; }
   run --separate-stderr vm_mount
   assert_success
-  assert_stderr_line --partial "auto-mounted on macOS guests"
+  assert_stderr_line --partial "mounting foo at /Volumes/My Shared Files/foo"
+  run cat "$BATS_TEST_TMPDIR/calls"
+  assert_line --partial "mount_virtiofs"
+  assert_line --partial "foo /Volumes/My Shared Files/foo"
+}
+
+# bats test_tags=type:unit
+@test "mount: darwin guest mounts each tag in dirs" {
+  source_vm
+  dirs="foo:/bar baz:/qux"
+  guest_os=darwin
+  vm_exec_sh() { echo "${@: -2:1}" >>"$BATS_TEST_TMPDIR/tags"; }
+  run --separate-stderr vm_mount
+  assert_success
+  run cat "$BATS_TEST_TMPDIR/tags"
+  assert_line --index 0 foo
+  assert_line --index 1 baz
+}
+
+# bats test_tags=type:unit
+@test "mount: darwin guest bare path uses basename as tag" {
+  source_vm
+  dirs="/host/myname"
+  guest_os=darwin
+  vm_exec_sh() { echo "${@: -2:1}" >>"$BATS_TEST_TMPDIR/tags"; }
+  run --separate-stderr vm_mount
+  assert_success
+  run cat "$BATS_TEST_TMPDIR/tags"
+  assert_line --index 0 myname
 }
 
 # bats test_tags=type:unit
@@ -121,6 +150,26 @@ source_vm() {
   source_vm
   parse_flags foo bar baz
   assert_equal "${ARGS[*]}" "foo bar baz"
+}
+
+# bats test_tags=type:unit
+@test "restore_tty: skips stty when not a real tty" {
+  source_vm
+  real_tty() { return 1; }
+  stty() { echo "stty called: $*" >>"$BATS_TEST_TMPDIR/stty"; }
+  tty_state="dummy"
+  restore_tty
+  [ ! -e "$BATS_TEST_TMPDIR/stty" ]
+}
+
+# bats test_tags=type:unit
+@test "restore_tty: noop when tty_state empty" {
+  source_vm
+  real_tty() { return 0; }
+  stty() { echo "stty called" >>"$BATS_TEST_TMPDIR/stty"; }
+  tty_state=""
+  restore_tty
+  [ ! -e "$BATS_TEST_TMPDIR/stty" ]
 }
 
 # bats test_tags=type:unit

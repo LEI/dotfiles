@@ -11,7 +11,7 @@
   },
   "experimental": {
     "batch_tool": false,
-    "codebase_search": true,
+    // TODO(codebase_search): indexing.enabled https://github.com/Kilo-Org/kilocode/pull/6966
     "disable_paste_summary": false,
     "mcp_timeout": 30000,
     "openTelemetry": false,
@@ -21,6 +21,6 @@
     "bash": "allow",
     "edit": "deny",
   },
-  "remote_control": true,
+  // "remote_control": true,
   "snapshot": true,
 }

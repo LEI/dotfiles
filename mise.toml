@@ -12,7 +12,7 @@ description = "Run CI workflow locally with act"
 run = "act --artifact-server-path=/tmp/.artifacts --matrix=os:ubuntu-latest --rm --workflows=.github/workflows/ci.yaml"
 
 [tasks.all]
-description = "Run CI workflow locally with act"
+description = "Run all tasks"
 interactive = true
 run = [
   # c a --init

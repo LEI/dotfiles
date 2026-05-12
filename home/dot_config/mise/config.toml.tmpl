@@ -105,7 +105,7 @@ run = [
 {{- end }}
 ]
 
-{{- $images := list
+{{- $ctImages := list
   "alpine"
   "archlinux"
   "debian"
@@ -114,7 +114,7 @@ run = [
   "termux"
   "ubuntu"
 }}
-{{- range $images }}
+{{- range $ctImages }}
 
 [tasks."container:{{ . }}"]
 alias = "ct:{{ . }}"
@@ -131,7 +131,7 @@ alias = "ct:all"
 description = "Build and test chezmoi in all images"
 # depends = []
 run = [
-{{- range $images }}
+{{- range $ctImages }}
   { task = {{ printf "container:%s" . | quote }} },
 {{- end }}
 ]
@@ -163,18 +163,17 @@ opkg install --local --platforms {{ join " " $platforms }} --global {{ $name }}
 
 {{- if eq .os "darwin" }}
 
-{{- $vmAliases := list
+{{- $vmImages := list
   "debian"
   "fedora"
-  "rocky"
   "tahoe"
   "ubuntu"
   "ubuntu-runner"
   "ubuntu-runner-gpu"
 }}
-{{- range $vmAliases }}
+{{- range $vmImages }}
 
-[tasks."vm:{{ . }}"]
+[tasks."virtual-machine:{{ . }}"]
 alias = "vm:{{ . }}"
 description = {{ printf "Run %s VM" . | quote }}
 hide = true
@@ -182,6 +181,19 @@ run = "script/vm {{ . }}"
 {{-   if $miseInteractive }}
 interactive = true
 {{-   end }}
+{{- end }}
+
+[tasks."virtual-machine:all"]
+alias = "vm:all"
+description = "Build and test chezmoi in all images"
+# depends = []
+run = [
+{{- range $vmImages }}
+  { task = {{ printf "vm:%s" . | quote }} },
+{{- end }}
+]
+{{- if $miseInteractive }}
+interactive = true
 {{- end }}
 
 {{- else if eq .os "linux" }}

@@ -28,7 +28,7 @@ source "$lib_dir/sh/usage.sh"
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
-trap 'log "error at line $LINENO"' ERR
+trap 'err "line $LINENO"' ERR
 
 : "${VM_CHECK_HOST:=github.com:443}"
 : "${VM_SSH_PORT:=22}"
@@ -79,12 +79,12 @@ vm_state() {
 }
 
 vm_clone() {
-  [ "$verbosity" -ge 1 ] && log "cloning $image as $name"
+  [ "$verbosity" -ge 1 ] && info "cloning $image as $name"
   vm clone "$image" "$name"
 }
 
 vm_start() {
-  [ "$verbosity" -ge 1 ] && log "starting $name"
+  [ "$verbosity" -ge 1 ] && info "starting $name"
   local args=()
   if [ "$VM_PROVIDER" = tart ]; then
     [ "$gui" = true ] || args+=(--no-graphics)
@@ -113,8 +113,8 @@ vm_start() {
 }
 
 vm_stop() {
-  [ "$verbosity" -ge 1 ] && log "stopping $name"
-  vm stop "$name"
+  [ "$verbosity" -ge 1 ] && info "stopping $name"
+  vm stop --timeout=15 "$name"
 }
 
 timed() {
@@ -122,7 +122,7 @@ timed() {
   shift
   local start=$SECONDS
   "$@"
-  [ "$verbosity" -ge 1 ] && log "$label after $((SECONDS - start))s"
+  [ "$verbosity" -ge 1 ] && info "$label after $((SECONDS - start))s"
 }
 
 host_route_iface() {
@@ -152,7 +152,7 @@ detect_bridge() {
   if ! bridged="$(detect_phys_iface)"; then
     return 0
   fi
-  [ "$verbosity" -ge 1 ] && log "bridging to $bridged"
+  [ "$verbosity" -ge 1 ] && info "bridging to $bridged"
 }
 
 # Get VM IP address
@@ -172,16 +172,23 @@ wait_ssh() {
     timed "VM IP" get_ip 10 ||
       warn "tart ip unavailable, VM may be bridged; falling through to agent poll"
   fi
-  [ "$verbosity" -ge 1 ] && log "waiting for host->guest (up to ${timeout}s)"
-  local start=$SECONDS
+  [ "$verbosity" -ge 1 ] && info "waiting for host->guest (up to ${timeout}s)"
+  local start next_log elapsed
+  start=$SECONDS
+  next_log=15
   while ! vm_exec true >/dev/null; do
-    if [ "$((SECONDS - start))" -ge "$timeout" ]; then
-      err "host->guest unreachable after $((SECONDS - start))s"
+    elapsed=$((SECONDS - start))
+    if [ "$elapsed" -ge "$timeout" ]; then
+      err "host->guest unreachable after ${elapsed}s"
       return 1
+    fi
+    if [ "$verbosity" -ge 1 ] && [ "$elapsed" -ge "$next_log" ]; then
+      info "still waiting (${elapsed}s)"
+      next_log=$((elapsed + 15))
     fi
     sleep 1
   done
-  [ "$verbosity" -ge 1 ] && log "host->guest after $((SECONDS - start))s"
+  [ "$verbosity" -ge 1 ] && info "host->guest after $((SECONDS - start))s"
 }
 
 # Check if guest can reach external network
@@ -203,12 +210,12 @@ wait_network() {
 log_host_route() {
   local host="${VM_CHECK_HOST%:*}"
   if [ -n "$bridged" ]; then
-    [ "$verbosity" -ge 1 ] && log "bridged via $bridged (host VPN bypassed)"
+    [ "$verbosity" -ge 1 ] && info "bridged via $bridged (host VPN bypassed)"
     return
   fi
   local iface
   iface="$(host_route_iface "$host")"
-  [ "$verbosity" -ge 1 ] && log "host route to $host: ${iface:-unknown}"
+  [ "$verbosity" -ge 1 ] && info "host route to $host: ${iface:-unknown}"
   case "$iface" in
   utun*) warn "$host is tunneled via $iface; guest may fail if VPN blocks NAT" ;;
   esac
@@ -265,12 +272,13 @@ vm_run() {
 }
 
 restore_tty() {
+  real_tty || return 0
   [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
 }
 
 vm_down() {
   if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
-    [ "$verbosity" -ge 1 ] && log "killing tmux session"
+    [ "$verbosity" -ge 1 ] && info "killing tmux session"
     trace tmux kill-session -t vm
   fi
   vm_stop
@@ -278,11 +286,7 @@ vm_down() {
 
 vm_mount() {
   [ -n "$dirs" ] || return 0
-  if [ "$guest_os" = darwin ]; then
-    [ "$verbosity" -ge 1 ] && log "skipping virtiofs mount (auto-mounted on macOS guests)"
-    return 0
-  fi
-  local entry tag opts
+  local entry tag opts mp
   for entry in $dirs; do
     case "$entry" in
     *:*) tag="${entry%%:*}" ;;
@@ -292,11 +296,26 @@ vm_mount() {
     *:ro) opts=ro ;;
     *) opts=rw ;;
     esac
-    [ "$verbosity" -ge 1 ] && log "mounting $tag ($opts)"
+    if [ "$guest_os" = darwin ]; then
+      mp="/Volumes/My Shared Files/$tag"
+    else
+      mp="\$HOME/.local/share/$tag"
+    fi
+    [ "$verbosity" -ge 1 ] && info "mounting $tag at $mp ($opts)"
+    if [ "$guest_os" = darwin ]; then
+      # shellcheck disable=SC2016
+      vm_exec_sh '
+        sudo mkdir -p "$2"
+        /sbin/mount | grep -q " on $2 " && exit 0
+        sudo /sbin/mount_virtiofs "$1" "$2"
+      ' "$tag" "$mp"
+      continue
+    fi
     # shellcheck disable=SC2016
     vm_exec_sh '
       mp="$HOME/.local/share/$1"
       mkdir -p "$mp"
+      mountpoint -q "$mp" && exit 0
       sudo modprobe virtiofs 2>/dev/null
       sudo mount -t virtiofs -o "$2" "$1" "$mp"
     ' "$tag" "$opts"
@@ -324,7 +343,7 @@ sync_source() {
   # Stale files persist until the VM is recreated
   if [ "$VM_PROVIDER" = tart ]; then
     require_cmd tar
-    [ "$verbosity" -ge 1 ] && log "copying $PWD to $name:$src via tar stream"
+    [ "$verbosity" -ge 1 ] && info "copying $PWD to $name:$src via tar stream"
     # Exclude ._* on both ends because host tar may emit AppleDouble entries
     # shellcheck disable=SC2016
     if ! trace tar --no-xattrs \
@@ -336,7 +355,7 @@ sync_source() {
     fi
     return 0
   fi
-  [ "$verbosity" -ge 1 ] && log "syncing chezmoi to $src"
+  [ "$verbosity" -ge 1 ] && info "syncing chezmoi to $src"
   : "${ssh_host:=$(vm ip "$name")}"
   vm_ssh "admin@$ssh_host" "mkdir -p \"$src\""
   trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
@@ -382,7 +401,7 @@ resolve() {
     local available
     available="$(printf '%s\n' "${!IMAGES[@]}" | sort | tr '\n' ' ' | sed 's/ $//')"
     err "unknown image: $target"
-    [ "$verbosity" -ge 1 ] && log "available images for $ARCH: $available"
+    [ "$verbosity" -ge 1 ] && info "available images for $ARCH: $available"
     return 1
   fi
 
@@ -420,10 +439,13 @@ vm_up() {
   [ -z "$vm_status" ] && vm_clone
 
   if [ "$vm_status" = running ]; then
-    [ "$verbosity" -ge 1 ] && log "reusing running VM"
+    [ "$verbosity" -ge 1 ] && info "reusing running VM"
     if vm_exec true >/dev/null && check_network; then
-      [ "$dirs_explicit" = true ] && warn "--dir mounts require a fresh start"
-      return 0
+      if [ "$dirs_explicit" = true ]; then
+        warn "--dir mounts require a fresh start"
+      fi
+      [ "$VM_PROVIDER" = tart ] && vm_mount
+      return
     fi
     warn "VM unreachable; restarting"
     vm_stop

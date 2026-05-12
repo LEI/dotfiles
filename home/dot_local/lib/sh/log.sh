@@ -23,7 +23,7 @@ info() {
   msg "$(log_prefix): $*"
 }
 
-# Backward compatibility wrapper
+# Deprecated: shadows macOS /usr/bin/log; prefer info()
 log() {
   info "$@"
 }

@@ -18,7 +18,7 @@ source "$lib_dir/sh/usage.sh"
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
-trap 'log "error at line $LINENO"' ERR
+trap 'err "line $LINENO"' ERR
 
 : "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"
@@ -105,7 +105,7 @@ ct_exec_mise() {
 
 build() {
   if ct image inspect "$image_tag" >/dev/null 2>&1; then
-    log "build $image_name: reusing $image_tag"
+    info "build $image_name: reusing $image_tag"
     return 0
   fi
   ct build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
@@ -140,7 +140,7 @@ start() {
 
   if ct container inspect "$container" >/dev/null 2>&1 &&
     ! mount_config_matches; then
-    log "recreating $container: mount config out of date"
+    info "recreating $container: mount config out of date"
     ct rm --force "$container" >/dev/null
   fi
 
