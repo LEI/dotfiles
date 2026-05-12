@@ -55,8 +55,10 @@ esac
 
 declare -gA IMAGES=(
   ["ubuntu-runner"]="ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04|ubuntu-runner|linux"
-  ["ubuntu-runner-gpu"]="ghcr.io/cirruslabs/ubuntu-runner-amd64-gpu:latest|ubuntu-runner-gpu|linux"
 )
+# if [ "$ARCH" = amd64 ]; then
+#   IMAGES+=(["ubuntu-runner-gpu"]="ghcr.io/cirruslabs/ubuntu-runner-amd64-gpu:latest|ubuntu-runner-gpu|linux")
+# fi
 if [ "$ARCH" = arm64 ]; then
   IMAGES+=(["debian"]="ghcr.io/cirruslabs/debian:latest|debian|linux")
   IMAGES+=(["fedora"]="ghcr.io/cirruslabs/fedora:latest|fedora|linux")
@@ -68,6 +70,7 @@ readonly IMAGES
 
 vm() { trace "$VM_PROVIDER" "$@"; }
 
+# Return the provider state for a VM name
 vm_state() {
   case "$VM_PROVIDER" in
   tart)
@@ -83,6 +86,7 @@ vm_clone() {
   vm clone "$image" "$name"
 }
 
+# Boot the VM. Only tart honors gui, bridge and dirs
 vm_start() {
   [ "$verbosity" -ge 1 ] && info "starting $name"
   local args=()
@@ -117,14 +121,16 @@ vm_stop() {
   vm stop --timeout=15 "$name"
 }
 
+# Measure how long a command takes and log the elapsed time
 timed() {
   local label="$1"
   shift
   local start=$SECONDS
   "$@"
-  [ "$verbosity" -ge 1 ] && info "$label after $((SECONDS - start))s"
+  info "$label after $((SECONDS - start))s"
 }
 
+# Name of the outgoing interface the host uses to reach a destination
 host_route_iface() {
   case "$(uname -s)" in
   Darwin) route -n get "$1" 2>/dev/null | awk '/interface:/ {print $2}' ;;
@@ -132,6 +138,7 @@ host_route_iface() {
   esac
 }
 
+# Name of the first active physical interface on Darwin
 detect_phys_iface() {
   [ "$(uname -s)" = Darwin ] || return 1
   local i
@@ -144,6 +151,7 @@ detect_phys_iface() {
   return 1
 }
 
+# Enable bridged mode when the host route to VM_CHECK_HOST goes through a VPN tunnel
 detect_bridge() {
   [ -z "$bridged" ] || return 0
   local iface
@@ -155,31 +163,31 @@ detect_bridge() {
   [ "$verbosity" -ge 1 ] && info "bridging to $bridged"
 }
 
-# Get VM IP address
+# Wait for the guest to obtain an IP, up to a timeout
 get_ip() {
   local timeout="${1:-10}"
   vm ip --wait="$timeout" "$name"
 }
 
-# Wait for host->guest SSH connectivity
-wait_ssh() {
+# Wait until the guest is ready to accept commands
+wait_guest() {
   local timeout=120
   [ "$guest_os" = darwin ] && timeout=500
   if [ "$VM_PROVIDER" = vetu ]; then
-    ssh_host="$(timed "VM IP" get_ip "$timeout")"
+    ssh_host="$(timed "guest IP" get_ip "$timeout")"
   elif [[ "$(host_route_iface "${VM_CHECK_HOST%:*}")" != utun* ]]; then
-    # Fast fail for bridged VMs (ARP on bridge100 may not work)
-    timed "VM IP" get_ip 10 ||
+    # ARP on tart bridge100 isn't reliable, so don't wait the full timeout
+    timed "guest IP" get_ip 10 ||
       warn "tart ip unavailable, VM may be bridged; falling through to agent poll"
   fi
-  [ "$verbosity" -ge 1 ] && info "waiting for host->guest (up to ${timeout}s)"
+  [ "$verbosity" -ge 1 ] && info "waiting for guest (up to ${timeout}s)"
   local start next_log elapsed
   start=$SECONDS
   next_log=15
   while ! vm_exec true >/dev/null; do
     elapsed=$((SECONDS - start))
     if [ "$elapsed" -ge "$timeout" ]; then
-      err "host->guest unreachable after ${elapsed}s"
+      err "guest unreachable after ${elapsed}s"
       return 1
     fi
     if [ "$verbosity" -ge 1 ] && [ "$elapsed" -ge "$next_log" ]; then
@@ -188,9 +196,10 @@ wait_ssh() {
     fi
     sleep 1
   done
-  [ "$verbosity" -ge 1 ] && info "host->guest after $((SECONDS - start))s"
+  [ "$verbosity" -ge 1 ] && info "guest reachable after $((SECONDS - start))s"
 }
 
+# Check if guest can reach external network
 # Check if guest can reach external network
 check_network() {
   local host="${VM_CHECK_HOST%:*}" port="${VM_CHECK_HOST#*:}"
@@ -198,15 +207,21 @@ check_network() {
     --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"
 }
 
-# Wait for guest network to be ready (DHCP/DNS can take a few seconds)
+# Tolerate transient DHCP/DNS failures during boot
 wait_network() {
-  local timeout=30 start=$SECONDS
-  while ! check_network 2>/dev/null; do
+  local timeout=60 start=$SECONDS streak=0
+  while [ "$streak" -lt 3 ]; do
+    if check_network 2>/dev/null; then
+      streak=$((streak + 1))
+    else
+      streak=0
+    fi
     [ "$((SECONDS - start))" -lt "$timeout" ] || return 1
     sleep 1
   done
 }
 
+# Log the host route to VM_CHECK_HOST and warn when it goes through a VPN tunnel
 log_host_route() {
   local host="${VM_CHECK_HOST%:*}"
   if [ -n "$bridged" ]; then
@@ -223,6 +238,7 @@ log_host_route() {
 
 real_tty() { [ -t 0 ] && [ -t 1 ]; }
 
+# Run a command in the guest
 vm_exec() {
   if [ "$VM_PROVIDER" = tart ]; then
     if real_tty; then
@@ -235,6 +251,7 @@ vm_exec() {
   fi
 }
 
+# Run an inline sh script in the guest with positional arguments
 vm_exec_sh() {
   local script=$1
   shift
@@ -245,6 +262,7 @@ vm_exec_sh() {
   fi
 }
 
+# Run a command in the guest with the bootstrap environment
 vm_run() {
   local term
   case "${TERM-}" in
@@ -271,11 +289,13 @@ vm_run() {
   fi
 }
 
+# Restore the saved terminal state when running interactively
 restore_tty() {
   real_tty || return 0
   [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
 }
 
+# Stop the VM and tear down the wrapping tmux session if any
 vm_down() {
   if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
     [ "$verbosity" -ge 1 ] && info "killing tmux session"
@@ -284,6 +304,7 @@ vm_down() {
   vm_stop
 }
 
+# Mount each shared directory inside the guest over virtiofs
 vm_mount() {
   [ -n "$dirs" ] || return 0
   local entry tag opts mp
@@ -303,10 +324,11 @@ vm_mount() {
     fi
     [ "$verbosity" -ge 1 ] && info "mounting $tag at $mp ($opts)"
     if [ "$guest_os" = darwin ]; then
+      # macOS virtio-fs caches stale metadata across host edits, so always remount
       # shellcheck disable=SC2016
       vm_exec_sh '
         sudo mkdir -p "$2"
-        /sbin/mount | grep -q " on $2 " && exit 0
+        sudo /sbin/umount "$2" 2>/dev/null || true
         sudo /sbin/mount_virtiofs "$1" "$2"
       ' "$tag" "$mp"
       continue
@@ -316,7 +338,7 @@ vm_mount() {
       mp="$HOME/.local/share/$1"
       mkdir -p "$mp"
       mountpoint -q "$mp" && exit 0
-      sudo modprobe virtiofs 2>/dev/null
+      sudo modprobe virtiofs 2>/dev/null || true
       sudo mount -t virtiofs -o "$2" "$1" "$mp"
     ' "$tag" "$opts"
   done
@@ -335,8 +357,8 @@ vm_copy() {
   fi
 }
 
+# Copy chezmoi source into the guest unless tart already mounted it via --dir
 sync_source() {
-  # Mounted via virtiofs (tart --dir); no copy needed
   if [ "$VM_PROVIDER" = tart ] && [ -n "$dirs" ]; then
     return 0
   fi
@@ -363,7 +385,7 @@ sync_source() {
     vm_ssh "admin@$ssh_host" "tar x -C \"$src\""
 }
 
-# Execute command in VM via SSH
+# SSH into the guest using sshpass with the cirruslabs admin/admin default
 vm_ssh() {
   local ssh_args=(
     -o StrictHostKeyChecking=no
@@ -377,6 +399,7 @@ vm_ssh() {
   SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "$@"
 }
 
+# scp into the guest with the same default credentials as vm_ssh
 vm_scp() {
   local scp_args=(
     -o StrictHostKeyChecking=no
@@ -388,6 +411,7 @@ vm_scp() {
   SSHPASS=admin trace sshpass -e scp "${scp_args[@]}" "$@"
 }
 
+# Resolve an image alias to the provider URL and guest metadata. Bare paths bypass IMAGES
 resolve() {
   local target="$1"
   if [ -n "${IMAGES[$target]:-}" ]; then
@@ -418,16 +442,35 @@ resolve() {
   fi
 }
 
+# Start the VM, wait for the guest, mount shared dirs, log the host route
 vm_boot() {
   vm_start
-  wait_ssh
+  wait_guest
   [ "$VM_PROVIDER" = tart ] && vm_mount
   log_host_route
 }
 
-# Ensure VM is online with network connectivity
+# Pin public resolvers in the guest to bypass an unreliable NAT DNS proxy
+override_dns() {
+  [ "$guest_os" = darwin ] && return 0
+  local servers
+  read -ra servers <<<"${VM_DNS:-1.1.1.1 8.8.8.8}"
+  [ "$verbosity" -ge 1 ] && info "using resolvers: ${servers[*]}"
+  # shellcheck disable=SC2016
+  vm_exec_sh '
+    { for ns; do echo "nameserver $ns"; done; } |
+      sudo tee /etc/resolv.conf >/dev/null
+  ' "${servers[@]}"
+}
+
+# Bring the guest online and fall back to static resolvers if the first attempt fails
 ensure_online() {
-  timed "guest to net $VM_CHECK_HOST" wait_network
+  if timed "egress to $VM_CHECK_HOST" wait_network; then
+    return 0
+  fi
+  warn "network unstable, retrying with static resolvers"
+  override_dns
+  timed "egress to $VM_CHECK_HOST" wait_network
 }
 
 vm_up() {
@@ -633,6 +676,8 @@ main() {
     ;;
   esac
 
+  : "${VM_PROVIDER:?}"
+
   # Capture only when foreground; restoring from a background pgroup raises SIGTTOU
   real_tty && tty_state=$({ stty -g </dev/tty; } 2>/dev/null || true)
   trap restore_tty EXIT
@@ -664,7 +709,7 @@ main() {
     parse_flags "$@"
     cmd_run "$target" "${ARGS[@]}"
   else
-    exec "$VM_PROVIDER" "$@"
+    resolve "$1"
   fi
 }
 

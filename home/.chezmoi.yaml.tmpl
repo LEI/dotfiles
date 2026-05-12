@@ -129,6 +129,7 @@
 {{- $libc := includeTemplate "libc.tmpl" . | trim }}
 
 {{- $featureMap := dict
+  "cargo" "rust"
   "homebrew" "brew"
   "gem" "ruby"
   "krew" "kube"
@@ -411,32 +412,8 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-
-{{-   $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
-{{ $paths | uniq | join "\n" | comment "# " | indent 2 }}
-{{-   if eq $osID "android" }}
-{{-     $paths = prepend $paths "/data/data/com.termux/files/usr/bin" }}
-{{-   else }}
-{{-     $paths = prepend $paths "/usr/bin" }}
-{{-   end }}
-{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
-{{-   if and $features.mise (not (has $miseShims $paths)) }}
-{{-     $paths = append $paths $miseShims }}
-{{-   end }}
-{{-   if or $features.brew (eq .chezmoi.os "darwin") }}
-{{-     $brewBin := joinPath $brewPrefix "bin" }}
-{{-     if not (has $brewBin $paths) }}
-{{-       $paths = prepend $paths $brewBin }}
-{{-     end }}
-{{-     $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
-{{-     if not (has $rubyBin $paths) -}}
-{{-       $paths = prepend $paths $rubyBin }}
-{{-     end -}}
-{{-   end }}
-{{-   $paths = append $paths $binDir }}
-
-  # WARN: do not alter path
-  # PATH: {{ $paths | uniq | join ":" | quote }}
+{{- $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
+{{ $paths | join "\n" | comment "# " | indent 2 }}
 {{- end }}
 
   TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}

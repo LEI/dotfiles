@@ -12,10 +12,9 @@ if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
 fi
 
-if [ -d "$HOME/.local/bin" ]; then
-  pathmunge "$HOME/.local/bin"
-fi
-
-if [ -d "$HOME/bin" ]; then
-  pathmunge "$HOME/bin"
-fi
+{{- range list "cargo" "gem" "go" "npm" "sh" }}
+{{-   $feat := get $.featureMap . | default . }}
+{{-   if get $.features $feat }}
+[ -f "$XDG_CONFIG_HOME/{{ . }}/init.sh" ] && . "$XDG_CONFIG_HOME/{{ . }}/init.sh"
+{{-   end }}
+{{- end }}

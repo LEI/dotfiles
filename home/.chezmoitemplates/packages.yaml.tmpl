@@ -589,6 +589,7 @@ packages:
   shfmt:
     enabled: {{ not .features.neovim }}
     nameOverwrite:
+      mise: aqua:mvdan/sh
       windows: mvdan.shfmt
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shpool: # abduco, dtach
@@ -632,6 +633,8 @@ packages:
     enabled: {{ and (eq .os "linux") (ne .profile "minimal") (not .ephemeral) }}
   stylua:
     enabled: '{{ and (not .features.neovim) (or .ci .container .vm (ne .profile "minimal")) }}'
+    nameOverwrite:
+      mise: aqua:JohnnyMorganz/StyLua
     type: mise
   subliminal:
     enabled: {{ and (eq .osIDLike "android" "arch" "darwin" "windows") (eq .profile "personal") }}
@@ -748,7 +751,9 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   usage:
     enabled: {{ or .features.brew .features.mise }}
-    type: {{ or (not .features.mise) (eq .osIDLike "darwin") | ternary "brew" "mise" | quote }}
+    nameOverwrite:
+      mise: aqua:jdx/usage
+    type: {{ not .features.mise | ternary "brew" "mise" | quote }}
 
   # pip:
   #   enabled: {{ and .features.python (eq .osIDLike "opensuse") }}
@@ -962,7 +967,8 @@ osPackages:
       # nmap:
       # pango:
       # patchutils:
-      # percona-toolkit:
+      percona-toolkit:
+        enabled: {{ .features.sql }}
       # pgformatter:
       pinentry-mac: # jorgelbg/tap/pinentry-touchid
         enabled: {{ .gui }}

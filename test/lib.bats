@@ -2,6 +2,11 @@ setup() {
   # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
   _common_setup
+  ORIG_PATH=$PATH
+}
+
+teardown() {
+  PATH=$ORIG_PATH
 }
 
 # bats file_tags=lib,type:unit
@@ -83,25 +88,25 @@ setup_pathmunge() {
 }
 
 @test "pathmunge: prepends directory by default" {
-  setup_pathmunge
   local dir="$BATS_TEST_TMPDIR/prepend"
   mkdir -p "$dir"
+  setup_pathmunge
   pathmunge "$dir"
   [[ "$PATH" == "$dir:"* ]]
 }
 
 @test "pathmunge: appends directory with after" {
-  setup_pathmunge
   local dir="$BATS_TEST_TMPDIR/append"
   mkdir -p "$dir"
+  setup_pathmunge
   pathmunge "$dir" after
   [[ "$PATH" == *":$dir" ]]
 }
 
 @test "pathmunge: skips duplicate directory" {
-  setup_pathmunge
   local dir="$BATS_TEST_TMPDIR/dup"
   mkdir -p "$dir"
+  setup_pathmunge
   pathmunge "$dir"
   local first_path="$PATH"
   run pathmunge "$dir"
@@ -110,9 +115,9 @@ setup_pathmunge() {
 }
 
 @test "pathmunge: replace removes and re-prepends existing entry" {
-  setup_pathmunge
   local dir="$BATS_TEST_TMPDIR/repl"
   mkdir -p "$dir"
+  setup_pathmunge
   pathmunge "$dir" after
   [[ "$PATH" == *":$dir" ]]
   pathmunge "$dir" replace

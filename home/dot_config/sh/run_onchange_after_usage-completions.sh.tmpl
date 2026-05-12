@@ -9,25 +9,27 @@
 {{-   end -}}
 {{-   $content := include . -}}
 {{-   if not (hasPrefix "#!" $content) -}}{{ continue }}{{ end -}}
-{{-   if not (contains "#USAGE " $content) -}}{{ continue }}{{ end -}}
+{{-   $usage := regexFindAll "(?m)^#USAGE.*$" $content -1 -}}
+{{-   if not $usage -}}{{ continue }}{{ end -}}
 {{-   $name := . | base -}}
 {{-   if get $dict $name -}}
 {{-     warnf "usage-completions: duplicate #USAGE for %s, skipping" $name -}}
 {{-     continue -}}
 {{-   end -}}
 {{-   $path := printf "$HOME/.local/bin/%s" $name -}}
-{{-   $dict = merge $dict (dict $name (dict "hash" ($content | sha256sum) "path" $path)) -}}
+{{-   $dict = merge $dict (dict $name (dict "hash" ($usage | join "\n" | sha256sum) "path" $path)) -}}
 {{- end -}}
 {{- range $scripts -}}
 {{-   $content := include . -}}
-{{-   if not (contains "#USAGE " $content) -}}{{ continue }}{{ end -}}
+{{-   $usage := regexFindAll "(?m)^#USAGE.*$" $content -1 -}}
+{{-   if not $usage -}}{{ continue }}{{ end -}}
 {{-   $name := . | base -}}
 {{-   if get $dict $name -}}
 {{-     warnf "usage-completions: duplicate #USAGE for %s, skipping" $name -}}
 {{-     continue -}}
 {{-   end -}}
 {{-   $path := printf "$CHEZMOI_WORKING_TREE/script/%s" $name -}}
-{{-   $dict = merge $dict (dict $name (dict "hash" ($content | sha256sum) "path" $path)) -}}
+{{-   $dict = merge $dict (dict $name (dict "hash" ($usage | join "\n" | sha256sum) "path" $path)) -}}
 {{- end -}}
 #!{{ .prefix }}/usr/bin/env bash
 

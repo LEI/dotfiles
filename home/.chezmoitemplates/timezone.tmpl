@@ -13,6 +13,6 @@
 {{-     $tz = output "sh" "-c" "readlink /etc/localtime 2>/dev/null | sed 's#.*/zoneinfo/##'" | trim -}}
 {{-   end -}}
 {{- end -}}
-{{- if not (empty $tz) -}}
-{{ $tz }}
+{{- if not (empty $tz) }}
+{{- $tz }}
 {{ end -}}

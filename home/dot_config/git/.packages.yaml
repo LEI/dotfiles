@@ -9,13 +9,16 @@ packages:
   # gcli:
   ghq:
     nameOverwrite:
+      mise: github:x-motemen/ghq
       windows: x-motemen.ghq
     type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" "opensuse" | ternary "mise" nil }}'
   git:
     nameOverwrite:
       windows: Git.Git
   git-absorb:
-    enabled: '{{ and (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
+    enabled: '{{ and
+      (and (ne .osIDLike "fedora") (not .vm))
+      (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
     nameOverwrite:
       windows: tummychow.git-absorb
   # git-cal:
@@ -30,6 +33,8 @@ packages:
     name: k1LoW/tap/git-wt
     type: brew
   gitleaks:
+    nameOverwrite:
+      mise: aqua:gitleaks/gitleaks
     type: '{{ ne .osIDLike "darwin" | ternary "mise" nil }}'
   # gitui:
   #   enabled: '{{ and (ne .osIDLike "debian") }}'
@@ -37,6 +42,7 @@ packages:
   #     windows: stephandilly.gitui
   lazygit: # tig
     nameOverwrite:
+      mise: aqua:jesseduffield/lazygit
       windows: JesseDuffield.lazygit
     type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "windows") | ternary "mise" nil }}'
   prek: # pre-commit

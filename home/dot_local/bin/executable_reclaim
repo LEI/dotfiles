@@ -28,10 +28,8 @@ keep() {
 emit() {
   case "$1" in
   cache | caches)
-    # XDG/macOS cache roots (spec-sanctioned trashable)
-    keep \
-      ~/.cache \
-      ~/Library/Caches
+    # XDG/macOS cache roots; subdirs are spec-sanctioned trashable
+    keep "${XDG_CACHE_HOME:-$HOME/.cache}"/*/ ~/Library/Caches/*/
     ;;
   dep | deps | dependency | dependencies)
     # Package manager download caches (regeneratable via re-install/build)

@@ -26,9 +26,9 @@ source_container() {
 # bats test_tags=type:unit
 @test "container: fails when CONTAINER_PROVIDER is not set" {
   unset CONTAINER_PROVIDER
-  run ./script/container
-  assert_line --partial "CONTAINER_PROVIDER: parameter null or not set"
+  run ./script/container list
   assert_failure
+  assert_output --partial "CONTAINER_PROVIDER: parameter null or not set"
 }
 
 # bats test_tags=type:unit
@@ -135,7 +135,7 @@ source_container() {
   for cmd in l ls list; do
     run main "$cmd"
     assert_success
-    assert_line "alpine"
+    assert_line --regexp ^alpine
   done
 }
 

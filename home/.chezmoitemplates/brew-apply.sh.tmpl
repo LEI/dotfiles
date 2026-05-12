@@ -4,10 +4,16 @@
 {{- $system := eq (get . "system" | toString) "true" -}}
 {{- $sudo := $system | ternary "sudo " "" -}}
 {{- $domain := $system | ternary "system" (printf "gui/%s" (output "id" "-u" | trim)) -}}
-{{- $svcName := output "sh" "-c" (printf "brew services info %s --json 2>/dev/null | jq -r '.[0].service_name // empty' || true" $formula) | trim -}}
+{{- $svcProbe := printf `brew services info %s --json 2>/dev/null |
+  jq -r '.[0].service_name // empty' ||
+  true` $formula -}}
+{{- $svcName := output "sh" "-c" $svcProbe | trim -}}
 {{- $state := "unknown" -}}
 {{- if $svcName -}}
-{{-   $state = output "sh" "-c" (printf "launchctl print %s/%s 2>/dev/null | grep -m1 'state = ' | sed 's/.*state = //' || true" $domain $svcName) | trim | default "not loaded" -}}
+{{-   $stateProbe := printf `launchctl print %s/%s 2>/dev/null |
+  grep -m1 'state = ' | sed 's/.*state = //' ||
+  true` $domain $svcName -}}
+{{-   $state = output "sh" "-c" $stateProbe | trim | default "not loaded" -}}
 {{- end -}}
 # shellcheck shell=sh
 

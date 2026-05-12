@@ -33,12 +33,14 @@ Linux)
   case "$(uname -o)" in
   Android)
     # Android 12+ phantom killer 32-process limit without adb/root
-    ANDROID_SDK_INT=$(getprop ro.build.version.sdk)
-    # ANDROID_RELEASE=$(getprop ro.build.version.release)
-    case "$ANDROID_SDK_INT" in
-    31 | 32) DEFAULT_JOBS=4 ;;      # Android 12/12L
-    33 | 34 | 35) DEFAULT_JOBS=4 ;; # Android 13, 14, 15
-    esac
+    if [ -x /system/bin/getprop ]; then
+      ANDROID_SDK_INT=$(getprop ro.build.version.sdk)
+      # ANDROID_RELEASE=$(getprop ro.build.version.release)
+      case "$ANDROID_SDK_INT" in
+      31 | 32) DEFAULT_JOBS=4 ;;      # Android 12/12L
+      33 | 34 | 35) DEFAULT_JOBS=4 ;; # Android 13, 14, 15
+      esac
+    fi
     ;;
   esac
   ;;

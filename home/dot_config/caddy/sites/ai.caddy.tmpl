@@ -3,9 +3,11 @@
 {{- $caddy := get $provider "caddy" -}}
 {{ $provider.domain }} {
 	import common
+	{{- if $.features.otel }}
 	tracing {
 		span {{ $name }}
 	}
+	{{- end }}
 	reverse_proxy localhost:{{ $provider.port }}{{ if $caddy }} {
 		{{- range $key, $value := $caddy }}
 		{{ $key }} {{ $value }}

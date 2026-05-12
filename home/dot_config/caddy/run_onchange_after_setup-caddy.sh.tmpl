@@ -21,9 +21,9 @@
 {{- if eq .chezmoi.os "linux" }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
-{{-   if .features.otel }}
+{{- end }}
+{{- if .features.otel }}
 # otel: {{ includeTemplate "otel.yaml.tmpl" . | sha256sum }}
-{{-   end }}
 {{- end }}
 
 set -eu
@@ -234,7 +234,7 @@ if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf
   run sudo sh -c "mkdir -p $(dirname "$resolver_conf") && printf 'nameserver 127.0.0.1\n' >$resolver_conf"
 fi
 
-{{- if .features.tailscale }}
+{{- if or .features.tailscale .features.otel }}
 
 {{ includeTemplate "brew-apply.sh.tmpl" (dict
   "active" false
@@ -247,20 +247,36 @@ if [ -f "$brew_daemon_plist" ]; then
   run sudo rm "$brew_daemon_plist"
 fi
 
-# Custom LaunchDaemon: xcaddy build with tailscale module, run as root
+{{- /* Tailscale needs xcaddy build for the module; otherwise brew binary */ -}}
+{{- $caddyBin := .features.tailscale | ternary
+    (printf "%s/.local/bin/caddy" .chezmoi.homeDir)
+    (printf "%s/bin/caddy" .brewPrefix) -}}
+{{- $envDict := dict
+    "HOME" (printf "%s/var/lib" .brewPrefix)
+    "XDG_DATA_HOME" (printf "%s/var/lib" .brewPrefix)
+    "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix) -}}
+{{- if .features.tailscale -}}
+{{-   $_ := set $envDict "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default "") -}}
+{{- end -}}
+{{- if .features.otel -}}
+{{-   $otelEnv := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+{{-   range $k, $v := $otelEnv -}}
+{{-     $_ := set $envDict $k (toString $v) -}}
+{{-   end -}}
+{{-   $_ := set $envDict "OTEL_SERVICE_NAME" "caddy" -}}
+{{- end }}
+
+# Custom LaunchDaemon: chezmoi-managed env (tailscale module and/or otel exporter)
 daemon_plist=/Library/LaunchDaemons/com.caddy.plist
-desired_plist=$(cat <<'PLIST'
+desired_plist=$(
+  cat <<'PLIST'
 {{ includeTemplate "launchd-agent.plist.tmpl" (dict
   "label" "com.caddy"
   "args" (list
-    (printf "%s/.local/bin/caddy" .chezmoi.homeDir)
+    $caddyBin
     "run"
     "--config" (printf "%s/.config/caddy/Caddyfile" .chezmoi.homeDir))
-  "env" (dict
-    "HOME" (printf "%s/var/lib" .brewPrefix)
-    "XDG_DATA_HOME" (printf "%s/var/lib" .brewPrefix)
-    "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix)
-    "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default ""))
+  "env" $envDict
   "log" (printf "%s/var/log/caddy.log" .brewPrefix)
   "workdir" (printf "%s/var/lib" .brewPrefix)) }}
 PLIST
@@ -302,7 +318,7 @@ for target in Caddyfile sites; do
   src="$HOME/.config/caddy/$target"
   if [ ! -L "$link" ] || [ "$(readlink "$link")" != "$src" ]; then
     msg "linking $link -> $src"
-    run sudo ln -sfn "$src" "$link"
+    run ln -sfn "$src" "$link"
   fi
 done
 

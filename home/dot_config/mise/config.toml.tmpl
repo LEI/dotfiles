@@ -105,15 +105,7 @@ run = [
 {{- end }}
 ]
 
-{{- $ctImages := list
-  "alpine"
-  "archlinux"
-  "debian"
-  "fedora"
-  "opensuse"
-  "termux"
-  "ubuntu"
-}}
+{{- $ctImages := output (joinPath .chezmoi.sourceDir ".." "script" "container") "--list-images" | trim | splitList "\n" }}
 {{- range $ctImages }}
 
 [tasks."container:{{ . }}"]
@@ -163,14 +155,7 @@ opkg install --local --platforms {{ join " " $platforms }} --global {{ $name }}
 
 {{- if eq .os "darwin" }}
 
-{{- $vmImages := list
-  "debian"
-  "fedora"
-  "tahoe"
-  "ubuntu"
-  "ubuntu-runner"
-  "ubuntu-runner-gpu"
-}}
+{{- $vmImages := output (joinPath .chezmoi.sourceDir ".." "script" "vm") "--list-images" | trim | splitList "\n" }}
 {{- range $vmImages }}
 
 [tasks."virtual-machine:{{ . }}"]

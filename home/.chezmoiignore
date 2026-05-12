@@ -28,18 +28,6 @@
 {{-   end }}
 {{- end }}
 
-# TODO: minimal/server profile, do not install bash/zsh init.sh
-{{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
-.config/curl/
-.config/readline/
-.config/sh/
-.config/wget/
-{{- if and (not .ci) (not .ephemeral) }}
-.local/bin/
-.profile
-{{- end }}
-{{- end }}
-
 {{- if not (or .features.docker .features.podman) }}
 .config/pi/
 {{- end }}

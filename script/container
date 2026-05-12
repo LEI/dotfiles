@@ -20,9 +20,10 @@ source "$lib_dir/bash/require.sh"
 require_bash 4
 trap 'err "line $LINENO"' ERR
 
-: "${CONTAINER_PROVIDER:?}"
 readonly DEV_USER="${DEV_USER:-test}"
 readonly CONTAINER_SOURCE="${CONTAINER_SOURCE:-mount}"
+readonly CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}"
+export CHEZMOI_PROFILE
 readonly tag_prefix="${PWD##*/}"
 readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
@@ -92,7 +93,10 @@ ct_exec() {
   [ -n "${CI:-}" ] && flags+=(--env=CI)
   [ -n "${CHEZMOI_PROFILE:-}" ] && flags+=(--env=CHEZMOI_PROFILE)
   [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
-  [ "$image_name" = termux ] && flags+=(--env=SHELL="$prefix/usr/bin/bash")
+  if [ "$image_name" = termux ]; then
+    flags+=(--user=system --env=PATH="$home/.local/bin:$prefix/usr/bin:/usr/bin:/bin")
+    flags+=(--env=SHELL="$prefix/usr/bin/bash")
+  fi
   [ -t 0 ] && flags+=(--interactive)
   [ -t 1 ] && flags+=(--tty)
   ct exec "${flags[@]}" "$container" "$@"
@@ -130,12 +134,18 @@ mount_config_matches() {
 start() {
   local status
   local create_flags=(--name="$container" --env="DEV_USER=$DEV_USER")
+  local create_cmd=()
   if [ "$CONTAINER_SOURCE" = mount ]; then
     if [ ! -f "$PWD/.chezmoiroot" ]; then
       err "mount mode: $PWD lacks .chezmoiroot"
       return 1
     fi
     create_flags+=(--volume="$PWD:$chezmoi_root:ro")
+  fi
+  # Termux lacks /bin/sh for the wrapper shebang
+  if [ "$image_name" = termux ]; then
+    create_flags+=(--entrypoint=/entrypoint.sh)
+    create_cmd=(tail -f /dev/null)
   fi
 
   if ct container inspect "$container" >/dev/null 2>&1 &&
@@ -145,7 +155,7 @@ start() {
   fi
 
   if ! ct container inspect "$container" >/dev/null 2>&1; then
-    ct create "${create_flags[@]}" "$image_tag"
+    ct create "${create_flags[@]}" "$image_tag" ${create_cmd[@]+"${create_cmd[@]}"}
   fi
 
   status="$(ct container inspect "$container" --format '{{.State.Status}}')"
@@ -177,18 +187,22 @@ sync_source() {
 }
 
 bootstrap() {
+  local cmd=(./script/bootstrap --source="$chezmoi_root" --no-tty --verbose)
   if [ "$image_name" = termux ]; then
-    # shellcheck disable=SC2016
-    ct exec "$container" \
-      sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
-    local env="export PATH=$prefix/usr/bin:/usr/bin:/bin HOME=$home CI=true CHEZMOI_UPGRADE=true MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-    termux_su() { ct exec "$container" su system -c "$env; $*"; }
-    termux_su "pkg update --quiet && pkg install --quiet --yes chezmoi git proot"
-    termux_su "cd $chezmoi_root && proot -b $prefix/usr/etc/resolv.conf:/etc/resolv.conf -b $prefix/usr/etc/tls:/etc/ssl ./script/bootstrap --no-tty --verbose"
-  else
-    CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}" \
-      ct_exec ./script/bootstrap --source="$chezmoi_root" --verbose --no-tty
+    # Resolve standard shebang paths and network configs to termux equivalents
+    ct exec "$container" sh -c "
+      mkdir -p /bin /usr/bin
+      ln -sf $prefix/usr/bin/sh /bin/sh
+      ln -sf $prefix/usr/bin/env /usr/bin/env
+      ln -sf $prefix/usr/bin/bash /usr/bin/bash
+      ln -sf $prefix/usr/etc/resolv.conf /etc/resolv.conf
+      ln -sf $prefix/usr/etc/tls /etc/ssl
+      ln -sf $prefix/usr/etc/termux/mirrors/default $prefix/usr/etc/termux/chosen_mirrors
+    "
+    ct_exec pkg update
+    ct_exec pkg install --yes chezmoi git
   fi
+  ct_exec "${cmd[@]}"
 }
 
 init_repo() {
@@ -253,14 +267,12 @@ main() {
     ;;
   esac
 
+  : "${CONTAINER_PROVIDER:?}"
+
   local image="${1:-}"
   case "$image" in
-  '' | s | st | status)
+  '' | l | ls | list | s | st | status)
     status
-    return
-    ;;
-  l | ls | list)
-    list
     return
     ;;
   esac
@@ -273,7 +285,6 @@ main() {
   fi
 }
 
-# Allow sourcing for bats tests
-if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   main "$@"
 fi

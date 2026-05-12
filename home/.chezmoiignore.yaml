@@ -183,6 +183,13 @@ features:
     - .config/mise/default-gems
   rust:
     - .chezmoiscripts/*install-rust.sh
+  sh:
+    - .config/curl/
+    - .config/readline/
+    - .config/sh/
+    - .config/wget/
+    - .local/bin/
+    - .profile
   sheldon:
     - .config/sheldon/
   shpool:

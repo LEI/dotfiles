@@ -1,6 +1,6 @@
 {{- $shell := get . "shell" }}
 {{- $init := list "bash" "zsh" }}
-{{- $orderedRaw := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- $orderedRaw := list "homebrew" "gem" "npm" "cargo" "go" "sh" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
 {{- $ordered := list }}
 {{- range $orderedRaw }}
 {{-   $feat := get $.featureMap . | default . }}
@@ -57,22 +57,6 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
   fi
 done
 unset _feat
-
-{{- if .features.rust }}
-
-# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   . "${CARGO_HOME:-$HOME/.cargo}/env"
-# fi
-if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
-  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
-fi
-{{- end }}
-{{- if .features.go }}
-
-if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
-  pathmunge "$GOPATH/bin" after
-fi
-{{- end }}
 
 if [ -d "$HOME/.nix-profile/bin" ]; then
   pathmunge "$HOME/.nix-profile/bin" after

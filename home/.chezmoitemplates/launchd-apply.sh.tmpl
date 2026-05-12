@@ -20,7 +20,10 @@
 {{-   $target = printf "gui/%s/%s" $uid $label -}}
 {{- end -}}
 
-{{- $state := output "sh" "-c" (printf "out=$(%slaunchctl print %s 2>/dev/null) && echo \"$out\" | grep -m1 'state = ' | sed 's/.*state = //' || echo 'not loaded'" $sudo $target) | trim | default "unknown" -}}
+{{- $stateProbe := printf `out=$(launchctl print %s 2>/dev/null) &&
+  echo "$out" | grep -m1 'state = ' | sed 's/.*state = //' ||
+  echo 'not loaded'` $target -}}
+{{- $state := output "sh" "-c" $stateProbe | trim | default "unknown" -}}
 
 # shellcheck shell=sh
 
