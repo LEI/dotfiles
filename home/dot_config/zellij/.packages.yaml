@@ -4,4 +4,6 @@ packages:
   zellij:
     # enabled: '{{ and .features.zellij (not (eq .osIDLike "debian" "fedora")) }}'
     enabled: "{{ .features.zellij }}"
+    nameOverwrite:
+      winget: Zellij.Zellij
     type: '{{ eq .osIDLike "debian" "fedora" | ternary "brew" nil }}' # or mise
