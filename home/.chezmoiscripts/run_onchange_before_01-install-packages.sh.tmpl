@@ -69,6 +69,10 @@ for lock in \
     dry_run sudo rm "$lock"
   fi
 done
+if [ -d /var/lib/apt/lists/partial ]; then
+  # Stale symlinks in partial cause EEXIST failures and leave lists inconsistent
+  dry_run sudo rm -f /var/lib/apt/lists/partial/*
+fi
 
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
 export DEBIAN_FRONTEND=noninteractive

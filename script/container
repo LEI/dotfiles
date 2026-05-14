@@ -18,7 +18,7 @@ source "$lib_dir/sh/usage.sh"
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
-trap 'err "line $LINENO"' ERR
+trap 'err "line $LINENO: $BASH_COMMAND (${FUNCNAME[*]:-main})"' ERR
 
 readonly DEV_USER="${DEV_USER:-test}"
 readonly CONTAINER_SOURCE="${CONTAINER_SOURCE:-mount}"
@@ -94,7 +94,8 @@ ct_exec() {
   [ -n "${CHEZMOI_PROFILE:-}" ] && flags+=(--env=CHEZMOI_PROFILE)
   [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
   if [ "$image_name" = termux ]; then
-    flags+=(--user=system --env=PATH="$home/.local/bin:$prefix/usr/bin:/usr/bin:/bin")
+    # Android system user (UID 1000); numeric avoids /etc/passwd lookup in non-standard container root
+    flags+=(--user=1000 --env=PATH="$home/.local/bin:$prefix/usr/bin:/usr/bin:/bin")
     flags+=(--env=SHELL="$prefix/usr/bin/bash")
   fi
   [ -t 0 ] && flags+=(--interactive)
@@ -161,6 +162,13 @@ start() {
   status="$(ct container inspect "$container" --format '{{.State.Status}}')"
   if [ "$status" != running ]; then
     ct start "$container"
+    status="$(ct container inspect "$container" --format '{{.State.Status}}')"
+    if [ "$status" != running ]; then
+      info "recreating $container: crashed on start"
+      ct rm --force "$container" >/dev/null
+      ct create "${create_flags[@]}" "$image_tag" ${create_cmd[@]+"${create_cmd[@]}"}
+      ct start "$container"
+    fi
   fi
 
   # Wait for the dev user that the entrypoint creates asynchronously
@@ -175,6 +183,9 @@ start() {
 sync_source() {
   if [ "$CONTAINER_SOURCE" = mount ]; then
     warn "host mount: $PWD -> $chezmoi_root (ro)"
+    # Mounted files are owned by the host user; trust the path system-wide so
+    # git works for all container users regardless of dotfile apply order
+    ct exec "$container" git config --system --add safe.directory "$chezmoi_root"
     return
   fi
   # Stale files persist until the container is recreated
@@ -190,15 +201,36 @@ bootstrap() {
   local cmd=(./script/bootstrap --source="$chezmoi_root" --no-tty --verbose)
   if [ "$image_name" = termux ]; then
     # Resolve standard shebang paths and network configs to termux equivalents
-    ct exec "$container" sh -c "
+    # shellcheck disable=SC2016
+    ct exec --env="p=$prefix" "$container" sh -c '
       mkdir -p /bin /usr/bin
-      ln -sf $prefix/usr/bin/sh /bin/sh
-      ln -sf $prefix/usr/bin/env /usr/bin/env
-      ln -sf $prefix/usr/bin/bash /usr/bin/bash
-      ln -sf $prefix/usr/etc/resolv.conf /etc/resolv.conf
-      ln -sf $prefix/usr/etc/tls /etc/ssl
-      ln -sf $prefix/usr/etc/termux/mirrors/default $prefix/usr/etc/termux/chosen_mirrors
-    "
+      safe_ln() {
+        # Skip if target is a symlink pointing back to link (loop)
+        case $(readlink "$1" 2>/dev/null) in "$2") return 0 ;; esac
+        # Skip if both already resolve to the same file
+        t=$(readlink -f "$1" 2>/dev/null)
+        l=$(readlink -f "$2" 2>/dev/null)
+        [ -n "$t" ] && [ "$t" = "$l" ] && return 0
+        ln -sf "$1" "$2"
+      }
+      safe_ln "$p/usr/bin/sh" /bin/sh
+      safe_ln "$p/usr/bin/env" /usr/bin/env
+      safe_ln "$p/usr/bin/bash" /usr/bin/bash
+      # resolv.conf: Docker always bind-mounts this; skip if it is a regular file
+      [ -f /etc/resolv.conf ] && ! [ -L /etc/resolv.conf ] || ln -sf "$p/usr/etc/resolv.conf" /etc/resolv.conf
+      # ssl: only create if absent
+      [ -e /etc/ssl ] || ln -sf "$p/usr/etc/tls" /etc/ssl
+      ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
+      # /etc/passwd and /etc/group are absolute symlinks to /system/etc;
+      # crun resolves absolute symlinks from the host root (RESOLVE_BENEATH), so they
+      # escape the container storage root and exec with --user fails; copy real files
+      for f in passwd group; do
+        if [ -L "/etc/$f" ]; then
+          rm -f "/etc/$f"
+          cp "/system/etc/$f" "/etc/$f"
+        fi
+      done
+    '
     ct_exec pkg update
     ct_exec pkg install --yes chezmoi git
   fi

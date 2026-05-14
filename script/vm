@@ -28,7 +28,7 @@ source "$lib_dir/sh/usage.sh"
 source "$lib_dir/bash/require.sh"
 
 require_bash 4
-trap 'err "line $LINENO"' ERR
+trap 'err "line $LINENO: $BASH_COMMAND (${FUNCNAME[*]:-main})"' ERR
 
 : "${VM_CHECK_HOST:=github.com:443}"
 : "${VM_SSH_PORT:=22}"
@@ -134,7 +134,12 @@ timed() {
 host_route_iface() {
   case "$(uname -s)" in
   Darwin) route -n get "$1" 2>/dev/null | awk '/interface:/ {print $2}' ;;
-  Linux) ip -o route get "$1" 2>/dev/null | awk '/dev/ {for (i=1; i<=NF; i++) if ($i == "dev") print $(i+1)}' ;;
+  Linux)
+    local ip
+    ip="$(getent ahostsv4 "$1" 2>/dev/null | awk '{print $1; exit}')" || return 0
+    [ -n "$ip" ] || return 0
+    ip -o route get "$ip" 2>/dev/null | awk '/dev/ {for (i=1; i<=NF; i++) if ($i == "dev") print $(i+1)}'
+    ;;
   esac
 }
 
@@ -200,11 +205,12 @@ wait_guest() {
 }
 
 # Check if guest can reach external network
-# Check if guest can reach external network
 check_network() {
   local host="${VM_CHECK_HOST%:*}" port="${VM_CHECK_HOST#*:}"
-  vm_exec curl --silent --show-error --head \
-    --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"
+  if ! vm_exec curl --silent --show-error --head \
+    --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"; then
+    return 1
+  fi
 }
 
 # Tolerate transient DHCP/DNS failures during boot
@@ -258,6 +264,7 @@ vm_exec_sh() {
   if [ "$VM_PROVIDER" = tart ]; then
     vm_exec sh -euc "$script" -- "$@"
   else
+    # stdin carries the script: SSH arg-joining would mangle shell metacharacters
     vm_exec sh -eus -- "$@" <<<"$script"
   fi
 }
@@ -285,7 +292,9 @@ vm_run() {
   if [ "$VM_PROVIDER" = tart ]; then
     vm_exec env "${env_args[@]}" bash -lc "$script" -- "$src" "$@"
   else
-    vm_exec env "${env_args[@]}" bash -ls -- "$src" "$@" <<<"$script"
+    # Pass the whole command as one pre-quoted string so stdin stays as the
+    # terminal (SSH concatenates multiple args with spaces, breaking the script)
+    vm_ssh "admin@$ssh_host" "$(quote_args env "${env_args[@]}" bash -lc "$script" -- "$src" "$@")"
   fi
 }
 
@@ -483,12 +492,17 @@ vm_up() {
 
   if [ "$vm_status" = running ]; then
     [ "$verbosity" -ge 1 ] && info "reusing running VM"
-    if vm_exec true >/dev/null && check_network; then
-      if [ "$dirs_explicit" = true ]; then
-        warn "--dir mounts require a fresh start"
+    if [ "$VM_PROVIDER" = vetu ]; then
+      ssh_host="$(get_ip)" || true
+    fi
+    if vm_exec true >/dev/null; then
+      if [ "$VM_PROVIDER" = vetu ] || check_network; then
+        if [ "$dirs_explicit" = true ]; then
+          warn "--dir mounts require a fresh start"
+        fi
+        [ "$VM_PROVIDER" = tart ] && vm_mount
+        return 0
       fi
-      [ "$VM_PROVIDER" = tart ] && vm_mount
-      return
     fi
     warn "VM unreachable; restarting"
     vm_stop
@@ -522,7 +536,7 @@ init_repo() {
   fi
   # shellcheck disable=SC2016
   local script='
-    git config --global --add safe.directory "$1"
+    git config --system --add safe.directory "$1"
     git -C "$1" init --quiet
     git -C "$1" add --all
   '

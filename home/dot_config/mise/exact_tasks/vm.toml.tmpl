@@ -1,0 +1,26 @@
+{{- if or .features.docker .features.podman -}}
+{{- $vmImages := output (joinPath .chezmoi.sourceDir ".." "script" "vm") "--list-images" | trim | splitList "\n" -}}
+
+{{- range $vmImages -}}
+["virtual-machine:{{ . }}"]
+alias = "vm:{{ . }}"
+description = {{ printf "Run %s VM" . | quote }}
+hide = true
+interactive = true
+# run = "script/vm {{ . }}"
+run = [
+  { task = "vm {{ . }}" },
+]
+
+{{ end -}}
+
+["virtual-machine:all"]
+alias = "vm:all"
+description = "Build and test chezmoi in all VMs"
+interactive = true
+run = [
+{{- range $vmImages }}
+  { task = {{ printf "vm:%s" . | quote }} },
+{{- end }}
+]
+{{ end -}}

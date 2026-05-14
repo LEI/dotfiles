@@ -1,0 +1,26 @@
+{{- if or .features.docker .features.podman -}}
+{{- $ctImages := output (joinPath .chezmoi.sourceDir ".." "script" "container") "--list-images" | trim | splitList "\n" -}}
+
+{{- range $ctImages -}}
+["container:{{ . }}"]
+alias = "ct:{{ . }}"
+description = {{ printf "Build and test chezmoi in %s" . | quote }}
+hide = true
+interactive = true
+# run = "script/container {{ . }}"
+run = [
+  { task = "container {{ . }}" },
+]
+
+{{ end -}}
+
+["container:all"]
+alias = "ct:all"
+description = "Build and test chezmoi in all images"
+interactive = true
+run = [
+{{- range $ctImages }}
+  { task = {{ printf "container:%s" . | quote }} },
+{{- end }}
+]
+{{ end -}}
