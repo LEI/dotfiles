@@ -16,7 +16,7 @@
 #USAGE complete "image" run="./script/vm --list-images"
 #USAGE arg "[args]..." help="Command to run in the VM (alias mode), or provider args (passthrough)"
 
-set -euo pipefail
+set -Eeuo pipefail
 shopt -s inherit_errexit
 
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
@@ -233,7 +233,7 @@ log_host_route() {
   local host="${VM_CHECK_HOST%:*}"
   if [ -n "$bridged" ]; then
     [ "$verbosity" -ge 1 ] && info "bridged via $bridged (host VPN bypassed)"
-    return
+    return 0
   fi
   local iface
   iface="$(host_route_iface "$host")"

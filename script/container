@@ -7,7 +7,7 @@
 #USAGE complete "image" run="./script/container --list-images"
 #USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"
 
-set -euo pipefail
+set -Eeuo pipefail
 
 lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/log.sh
