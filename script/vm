@@ -125,9 +125,10 @@ vm_stop() {
 timed() {
   local label="$1"
   shift
-  local start=$SECONDS
-  "$@"
+  local start=$SECONDS rc=0
+  "$@" || rc=$?
   info "$label after $((SECONDS - start))s"
+  return "$rc"
 }
 
 # Name of the outgoing interface the host uses to reach a destination
@@ -217,7 +218,7 @@ check_network() {
 wait_network() {
   local timeout=60 start=$SECONDS streak=0
   while [ "$streak" -lt 3 ]; do
-    if check_network 2>/dev/null; then
+    if check_network; then
       streak=$((streak + 1))
     else
       streak=0

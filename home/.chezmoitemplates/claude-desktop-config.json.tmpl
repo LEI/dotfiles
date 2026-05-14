@@ -23,7 +23,7 @@
     "keepAwakeEnabled": false
     {{- with get $preferences "epitaxyPrefs" }},
     "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
-    {{- end }}
+    {{- end }}{{/* "remoteToolsDeviceName": "mac-home", */}}
     {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [
       "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"

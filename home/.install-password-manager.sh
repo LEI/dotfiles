@@ -85,7 +85,7 @@ Linux)
     # run sudo -E apt-get install --quiet --yes unzip >/dev/null
     run sudo apt-get install --quiet --yes unzip # >/dev/null
     ;;
-  fedora)
+  fedora | rhel*)
     run sudo dnf install --assumeyes --quiet unzip
     ;;
   esac

@@ -5,12 +5,10 @@
 ["container:{{ . }}"]
 alias = "ct:{{ . }}"
 description = {{ printf "Build and test chezmoi in %s" . | quote }}
+dir = {{ joinPath $.chezmoi.sourceDir ".." | quote }}
 hide = true
 interactive = true
-# run = "script/container {{ . }}"
-run = [
-  { task = "container {{ . }}" },
-]
+run = "script/container {{ . }}"
 
 {{ end -}}
 

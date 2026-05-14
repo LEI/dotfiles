@@ -260,6 +260,7 @@ data:
   "debian" "apt"
   "fedora" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
   "opensuse" "zypper"
+  "rhel" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
   "windows" "winget"
 }}
 {{- $packageManager := get $packageManagerMap $osIDLike }}

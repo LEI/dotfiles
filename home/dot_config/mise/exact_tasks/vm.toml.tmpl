@@ -5,12 +5,10 @@
 ["virtual-machine:{{ . }}"]
 alias = "vm:{{ . }}"
 description = {{ printf "Run %s VM" . | quote }}
+dir = {{ joinPath $.chezmoi.sourceDir ".." | quote }}
 hide = true
 interactive = true
-# run = "script/vm {{ . }}"
-run = [
-  { task = "vm {{ . }}" },
-]
+run = "script/vm {{ . }}"
 
 {{ end -}}
 

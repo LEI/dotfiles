@@ -89,7 +89,7 @@ dry_run sudo -E apt-get upgrade --quiet --yes # >/dev/null
 
 # shellcheck disable=SC2086
 dry_run sudo -E apt-get install --quiet --yes $packages # >/dev/null
-{{- else if and (eq .osID "fedora") (eq .packageManager "dnf") }}
+{{- else if and (eq .osIDLike "fedora" "rhel") (eq .packageManager "dnf") }}
 
 dry_run sudo dnf update --assumeyes --quiet
 {{- if .upgrade }}
@@ -99,7 +99,7 @@ dry_run sudo dnf upgrade --assumeyes --quiet
 
 # shellcheck disable=SC2086
 dry_run sudo dnf install --assumeyes --quiet $packages
-{{- else if eq .osID "fedora" }}
+{{- else if eq .osIDLike "fedora" "rhel" }}
 
 dry_run rpm-ostree refresh-md # --quiet
 {{- if .upgrade }}

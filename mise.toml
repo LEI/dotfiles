@@ -19,8 +19,10 @@ run = [
   "chezmoi apply --init --verbose",
   # m pl
   { task = "pipeline" },
-  { task = "container:all" },
-  { task = "vm:all" },
+  # { task = "container:all" },
+  { task = "container:alpine" },
+  # { task = "vm:all" },
+  { task = "vm:ubuntu-runner" },
 ]
 
 [tasks.ci]

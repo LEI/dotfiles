@@ -89,7 +89,7 @@ mount:
     exists: true
 {{- if not $rootImmutable }}
     usage:
-      lt: {{ eq .profile "personal" | ternary 90 95 }}
+      lt: 95
 {{- end }}
 {{- if $rootImmutable }}
   {{ env "HOME" | dir }}:
