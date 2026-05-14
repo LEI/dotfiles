@@ -11,14 +11,12 @@ packages:
     nameOverwrite:
       mise: github:x-motemen/ghq
       windows: x-motemen.ghq
-    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" "opensuse" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" "opensuse" "rhel" | ternary "mise" nil }}'
   git:
     nameOverwrite:
       windows: Git.Git
   git-absorb:
-    enabled: '{{ and
-      (and (ne .osIDLike "fedora") (not .vm))
-      (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
+    enabled: '{{ and (and (ne .osIDLike "fedora") (not .vm)) (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
     nameOverwrite:
       windows: tummychow.git-absorb
   # git-cal:

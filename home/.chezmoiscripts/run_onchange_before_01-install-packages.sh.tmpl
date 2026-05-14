@@ -91,6 +91,13 @@ dry_run sudo -E apt-get upgrade --quiet --yes # >/dev/null
 dry_run sudo -E apt-get install --quiet --yes $packages # >/dev/null
 {{- else if and (eq .osIDLike "fedora" "rhel") (eq .packageManager "dnf") }}
 
+{{- if eq .osIDLike "rhel" }}
+
+# rhel-family ships a slim BaseOS/AppStream; EPEL + CRB cover the rest of the tooling
+dry_run sudo dnf install --assumeyes --quiet dnf-plugins-core epel-release
+dry_run sudo dnf config-manager --set-enabled crb
+{{- end }}
+
 dry_run sudo dnf update --assumeyes --quiet
 {{- if .upgrade }}
 

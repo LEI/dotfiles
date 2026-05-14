@@ -140,7 +140,7 @@ packages:
     enabled: {{ .features.direnv }}
     nameOverwrite:
       windows: direnv.direnv
-    # type: mise
+    type: '{{ eq .osIDLike "rhel" | ternary "mise" nil }}'
   distrobox:
     enabled: {{ and (eq .osIDLike "fedora") .gui }}
   # dog, doggo, mtr, trippy, oryx / tshark termshark
@@ -721,7 +721,7 @@ packages:
       windows: duan.tre
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   time:
-    enabled: {{ eq .osIDLike "android" "arch" "debian" "fedora" }}
+    enabled: {{ eq .osIDLike "android" "arch" "debian" "fedora" "rhel" }}
   tree:
     enabled: {{ ne .os "windows" }}
   # tuios: # vtm
@@ -765,7 +765,7 @@ packages:
       arch: python-pipx
       zypper: python314-pipx
     type: {{ and
-      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora" "opensuse")
+      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora" "opensuse" "rhel")
       (not (and (eq .osID "debian") (le (int .osVersion) 11)))
       | ternary nil "pip" }}
   uv:
@@ -776,7 +776,7 @@ packages:
       zypper: python314-uv
     # https://docs.astral.sh/uv/getting-started/installation
     # type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "fedora" "windows") | ternary "pipx" nil }}'
-    type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "debian" "rhel" | ternary "mise" nil }}'
 
   util-linux: # lsblk
     enabled: {{ eq .os "android" "linux" }}
@@ -1208,6 +1208,11 @@ osPackages:
       gcc: # Required to build from source (git-wt, skill-validator)
         # enabled: {{ ne .profile "minimal" }}
       time:
+  rhel:
+    dnf:
+      clang:
+    # brew:
+    #   gcc:
   windows:
     scoop:
       7zip:

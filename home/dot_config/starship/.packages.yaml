@@ -4,4 +4,4 @@ packages:
     nameOverwrite:
       mise: github:starship/starship # Segmentation fault with aqua backend on ARM
       windows: Starship.Starship
-    type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" "rhel" | ternary "mise" nil }}'

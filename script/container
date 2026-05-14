@@ -223,7 +223,9 @@ bootstrap() {
       [ -f /etc/resolv.conf ] && ! [ -L /etc/resolv.conf ] || ln -sf "$p/usr/etc/resolv.conf" /etc/resolv.conf
       # ssl: only create if absent
       [ -e /etc/ssl ] || ln -sf "$p/usr/etc/tls" /etc/ssl
-      ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
+      # EU group reaches grimler.se when packages-cf.termux.dev is unreachable
+      ln -sf "$p/usr/etc/termux/mirrors/eu" "$p/usr/etc/termux/chosen_mirrors"
+      # ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
       # /etc/passwd and /etc/group are absolute symlinks to /system/etc;
       # crun resolves absolute symlinks from the host root (RESOLVE_BENEATH), so they
       # escape the container storage root and exec with --user fails; copy real files
@@ -234,7 +236,14 @@ bootstrap() {
         fi
       done
     '
-    ct_exec pkg update
+    if ! ct_exec pkg update; then
+      warn "termux: EU mirrors failed, falling back to bundled default"
+      # shellcheck disable=SC2016
+      ct exec --env="p=$prefix" "$container" sh -c '
+        ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
+      '
+      ct_exec pkg update
+    fi
     ct_exec pkg install --yes chezmoi git
   fi
   ct_exec "${cmd[@]}"
