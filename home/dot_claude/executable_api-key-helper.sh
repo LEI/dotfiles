@@ -35,5 +35,25 @@ if [ -f "$AUTH_FILE" ] && command -v yq >/dev/null 2>&1; then
   fi
 fi
 
+# Claude Code OAuth token fallback
+if [ "$PROVIDER" = "anthropic" ]; then
+  if command -v security >/dev/null 2>&1; then
+    KEY=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null |
+      jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
+    if [ -n "$KEY" ] && [ "$KEY" != "null" ]; then
+      printf '%s' "$KEY"
+      exit 0
+    fi
+  fi
+  creds="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.credentials.json"
+  if [ -f "$creds" ] && command -v jq >/dev/null 2>&1; then
+    KEY=$(jq -r '.claudeAiOauth.accessToken // empty' "$creds" 2>/dev/null)
+    if [ -n "$KEY" ] && [ "$KEY" != "null" ]; then
+      printf '%s' "$KEY"
+      exit 0
+    fi
+  fi
+fi
+
 echo >&2 "${0##*/}: no key found for provider '$PROVIDER'"
 exit 1

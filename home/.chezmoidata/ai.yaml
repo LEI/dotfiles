@@ -54,6 +54,7 @@ ai:
     # Cloud
     anthropic:
       api: anthropic
+      base_url: https://api.anthropic.com/v1
       env: ANTHROPIC_API_KEY
     github-copilot:
       api: copilot
@@ -86,11 +87,11 @@ ai:
     mistral:
       api: mistral
       env: MISTRAL_API_KEY
-    # Fallback: OpenAI-compatible Mistral endpoint
-    # mistral-openai:
-    #   api: openai
-    #   base_url: https://api.mistral.ai/v1
-    #   env: MISTRAL_API_KEY
+      # Fallback: OpenAI-compatible Mistral endpoint
+      # mistral-openai:
+      #   api: openai
+      #   base_url: https://api.mistral.ai/v1
+      #   env: MISTRAL_API_KEY
 
   # Model: shared metadata and per-provider IDs
 
@@ -191,14 +192,14 @@ ai:
       reasoning: false
       tool_call: true
       mistral: labs-devstral-small-2512
-    # qwen3-coder-30b:
-    #   type: chat
-    #   context: 262144
-    #   output: 65536
-    #   reasoning: true
-    #   tool_call: true
-    #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
-    #   ollama: qwen3-coder:30b-a3b-q4_K_M
+      # qwen3-coder-30b:
+      #   type: chat
+      #   context: 262144
+      #   output: 65536
+      #   reasoning: true
+      #   tool_call: true
+      #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
+      #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
   # Profile: named set of role-to-model mappings
   # Roles: chat, coding, embedding, fast, reasoning

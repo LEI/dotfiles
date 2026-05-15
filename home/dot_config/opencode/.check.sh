@@ -39,10 +39,13 @@ check_endpoint() {
   # Look up auth key
   key=""
   if [ -n "$env_var" ]; then
-    key="$(printenv "$env_var" 2>/dev/null || true)"
+    key="$(printenv "$env_var")" || key=""
   fi
   if [ -z "$key" ]; then
     key="$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE" 2>/dev/null)"
+  fi
+  if [ -z "$key" ]; then
+    key="$("$HOME/.claude/api-key-helper.sh" "$name")" || key=""
   fi
 
   if [ -z "$key" ]; then
@@ -55,8 +58,20 @@ check_endpoint() {
   tmpbody="${tmpfile}.body"
   TMP_FILES="$TMP_FILES $tmpfile $tmpheaders $tmpbody"
 
+  case "$name" in
+  anthropic) auth_header="x-api-key: $key" ;;
+  *) auth_header="Authorization: Bearer $key" ;;
+  esac
+
   start=$(date +%s%3N)
-  curl -sS -D "$tmpheaders" -o "$tmpbody" --header "Authorization: Bearer $key" "$url" 2>&1 || true
+  if [ "$name" = "anthropic" ]; then
+    curl -sS -D "$tmpheaders" -o "$tmpbody" \
+      --header "$auth_header" \
+      --header 'anthropic-version: 2023-06-01' \
+      "$url" 2>&1 || true
+  else
+    curl -sS -D "$tmpheaders" -o "$tmpbody" --header "$auth_header" "$url" 2>&1 || true
+  fi
   status=$(head -n 1 "$tmpheaders" | awk '{print $2}')
   end=$(date +%s%3N)
   duration=$((end - start))
@@ -139,6 +154,32 @@ check_endpoint() {
 
       level=$(echo "$quota" | jq -r '.data.level // empty' 2>/dev/null || true)
       [ -n "$level" ] && tap_diag "plan: $level"
+    fi
+  fi
+
+  if [ "$name" = "anthropic" ]; then
+    quota=$(curl -sS \
+      --header "Authorization: Bearer $key" \
+      --header "anthropic-beta: oauth-2025-04-20" \
+      "https://api.anthropic.com/api/oauth/usage" 2>/dev/null || true)
+    if [ -n "$quota" ] && echo "$quota" | jq --exit-status '.five_hour' >/dev/null 2>&1; then
+      echo "$quota" | jq -r 'to_entries[] | select(.value != null and (.value.utilization | type) == "number") | [.key, .value.utilization, (.value.resets_at // "")] | @tsv' 2>/dev/null | while IFS="$(printf '\t')" read -r window pct reset; do
+        case "$window" in
+        five_hour) label="5h quota" ;;
+        seven_day) label="7d quota" ;;
+        seven_day_sonnet) label="7d sonnet" ;;
+        seven_day_opus) label="7d opus" ;;
+        *) label="$window" ;;
+        esac
+        if [ -n "$reset" ]; then
+          reset_fmt=$(date -d "$reset" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+          tap_diag "$label: ${pct}% used, reset time: $reset_fmt"
+        else
+          tap_diag "$label: ${pct}% used"
+        fi
+      done
+    elif [ -n "$quota" ]; then
+      tap_diag "quota: $(echo "$quota" | jq -r '.error.message // "unavailable"' 2>/dev/null)"
     fi
   fi
 }
