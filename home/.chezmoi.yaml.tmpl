@@ -340,6 +340,9 @@ data:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_logseq" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
 
+  kb:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/kb" "chezmoi" .chezmoi) | indent 4 }}
+
 {{- if $features.opencode }}
 
   opencode:

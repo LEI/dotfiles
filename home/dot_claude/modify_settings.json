@@ -184,6 +184,7 @@
       "Read(~/Library/DBeaverData/workspace*/General/Scripts/**)",
       {{- end }}
       "Read(~/notes/{{ .profile }}/{journal,pages}/**)",
+      "Read(~/kb/*/{pages,log,raw}/**)",
       "Skill(hookify:list)",
       "TaskCreate",
       "TaskGet",
@@ -321,7 +322,8 @@
     "defaultMode": "{{ env "CLAUDE_DEFAULT_MODE" | default "default" }}",
     "disableBypassPermissionsMode": "disable",
     {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
-    "additionalDirectories": {{ $notesDirs | toPrettyJson | indent 4 | trim }}
+    {{- $kbDirs := includeTemplate "kb.tmpl" . | fromJson }}
+    "additionalDirectories": {{ concat $notesDirs $kbDirs | toPrettyJson | indent 4 | trim }}
   },
   "enableAllProjectMcpServers": false,
   "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},

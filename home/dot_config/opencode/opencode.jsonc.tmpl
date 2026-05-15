@@ -327,7 +327,8 @@
     // Triggered when a tool touches paths outside the project working directory
     "external_directory": {
       "*": "ask",
-      "~/notes/{{ .profile }}/{journal,pages}/**": "allow"
+      "~/notes/{{ .profile }}/{journal,pages}/**": "allow",
+      "~/kb/*/{pages,log,raw}/**": "allow"
     },
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",

@@ -1,0 +1,7 @@
+{{- /* KB vault paths under ~/kb/ */ -}}
+{{- $base := joinPath .chezmoi.homeDir "kb" -}}
+{{- $dirs := list -}}
+{{- range (dig "kb" "vaults" list .) -}}
+{{-   $dirs = append $dirs (joinPath $base .name) -}}
+{{- end -}}
+{{- $dirs | toJson }}

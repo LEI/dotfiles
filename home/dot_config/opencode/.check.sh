@@ -27,8 +27,15 @@ trap cleanup EXIT
 ! command -v jq >/dev/null 2>&1 && tap_not_ok "jq not installed" && exit 1
 ! command -v yq >/dev/null 2>&1 && tap_not_ok "yq not installed" && exit 1
 
+# GNU date for %3N (millisecond truncation); BSD date lacks this
+if command -v gdate >/dev/null 2>&1; then
+  DATE="gdate"
+else
+  DATE="date"
+fi
+
 # Count providers
-provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" 2>/dev/null | wc -l)
+provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" | awk 'END { print NR }')
 tap_plan "$provider_count"
 
 check_endpoint() {
@@ -42,7 +49,7 @@ check_endpoint() {
     key="$(printenv "$env_var")" || key=""
   fi
   if [ -z "$key" ]; then
-    key="$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE" 2>/dev/null)"
+    key="$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE")"
   fi
   if [ -z "$key" ]; then
     key="$("$HOME/.claude/api-key-helper.sh" "$name")" || key=""
@@ -63,7 +70,7 @@ check_endpoint() {
   *) auth_header="Authorization: Bearer $key" ;;
   esac
 
-  start=$(date +%s%3N)
+  start=$($DATE +%s%3N)
   if [ "$name" = "anthropic" ]; then
     curl -sS -D "$tmpheaders" -o "$tmpbody" \
       --header "$auth_header" \
@@ -73,7 +80,7 @@ check_endpoint() {
     curl -sS -D "$tmpheaders" -o "$tmpbody" --header "$auth_header" "$url" 2>&1 || true
   fi
   status=$(head -n 1 "$tmpheaders" | awk '{print $2}')
-  end=$(date +%s%3N)
+  end=$($DATE +%s%3N)
   duration=$((end - start))
 
   # Count models
@@ -81,7 +88,7 @@ check_endpoint() {
   model_field=""
   if [ -s "$tmpbody" ] && jq empty "$tmpbody" 2>/dev/null; then
     for field in "data" "models" "results" "items"; do
-      count=$(jq -r ".${field} | length // 0" "$tmpbody" 2>/dev/null || echo "")
+      count=$(jq -r ".${field} | length // 0" "$tmpbody" || echo "")
       if [ "$count" != "0" ]; then
         model_count="$count"
         model_field="$field"
@@ -100,7 +107,7 @@ check_endpoint() {
     fi
 
     if [ -s "$tmpbody" ] && jq empty "$tmpbody" 2>/dev/null; then
-      error_msg=$(jq -r '.error // .message // .detail // empty' "$tmpbody" 2>/dev/null)
+      error_msg=$(jq -r '.error // .message // .detail // empty' "$tmpbody")
       [ -n "$error_msg" ] && tap_diag "API error: $error_msg"
     fi
 
@@ -127,7 +134,7 @@ check_endpoint() {
   # Only show response preview for non-200 or missing models
   if [ "$status" != "200" ] || [ -z "$model_count" ]; then
     if [ -s "$tmpbody" ] && jq empty "$tmpbody" 2>/dev/null; then
-      body_preview=$(jq -c '.' "$tmpbody" 2>/dev/null | head -c 500)
+      body_preview=$(jq -c '.' "$tmpbody" | head -c 500)
       set -- "$@" "response: $body_preview"
     fi
   fi
@@ -137,22 +144,23 @@ check_endpoint() {
   if [ "$name" = "zai" ]; then
     quota=$(curl -sS -H "Authorization: Bearer $key" "https://api.z.ai/api/monitor/usage/quota/limit" 2>/dev/null || true)
     if [ -n "$quota" ] && echo "$quota" | jq empty 2>/dev/null; then
-      echo "$quota" | jq -r '.data.limits[]? | [.unit, (.percentage // 0), (.nextResetTime // 0)] | @tsv' 2>/dev/null | while IFS="$(printf '\t')" read -r unit pct reset; do
+      echo "$quota" | jq -r '.data.limits[]? | [.unit, (.percentage // 0), (.nextResetTime // 0)] | @tsv' | while IFS="$(printf '\t')" read -r unit pct reset; do
         case "$unit" in
         3) label="5 hours quota" ;;
         5) label="monthly web" ;;
         6) label="weekly quota" ;;
         *) label="unit $unit" ;;
         esac
+        pct=$(printf '%.2f' "$pct" 2>/dev/null || echo "$pct")
         if [ "$reset" -gt 0 ] 2>/dev/null; then
-          reset_fmt=$(date -d "@$((reset / 1000))" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+          reset_fmt=$($DATE -d "@$((reset / 1000))" "+%Y-%m-%d %H:%M" || echo "unknown")
           tap_diag "$label: ${pct}% used, reset time: ${reset_fmt}"
         else
           tap_diag "$label: ${pct}% used"
         fi
       done
 
-      level=$(echo "$quota" | jq -r '.data.level // empty' 2>/dev/null || true)
+      level=$(echo "$quota" | jq -r '.data.level // empty' || true)
       [ -n "$level" ] && tap_diag "plan: $level"
     fi
   fi
@@ -163,7 +171,7 @@ check_endpoint() {
       --header "anthropic-beta: oauth-2025-04-20" \
       "https://api.anthropic.com/api/oauth/usage" 2>/dev/null || true)
     if [ -n "$quota" ] && echo "$quota" | jq --exit-status '.five_hour' >/dev/null 2>&1; then
-      echo "$quota" | jq -r 'to_entries[] | select(.value != null and (.value.utilization | type) == "number") | [.key, .value.utilization, (.value.resets_at // "")] | @tsv' 2>/dev/null | while IFS="$(printf '\t')" read -r window pct reset; do
+      echo "$quota" | jq -r 'to_entries[] | select(.value != null and (.value.utilization | type) == "number") | [.key, .value.utilization, (.value.resets_at // "")] | @tsv' | while IFS="$(printf '\t')" read -r window pct reset; do
         case "$window" in
         five_hour) label="5h quota" ;;
         seven_day) label="7d quota" ;;
@@ -171,15 +179,16 @@ check_endpoint() {
         seven_day_opus) label="7d opus" ;;
         *) label="$window" ;;
         esac
+        pct=$(printf '%.2f' "$pct" 2>/dev/null || echo "$pct")
         if [ -n "$reset" ]; then
-          reset_fmt=$(date -d "$reset" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+          reset_fmt=$($DATE -d "$reset" "+%Y-%m-%d %H:%M" || echo "unknown")
           tap_diag "$label: ${pct}% used, reset time: $reset_fmt"
         else
           tap_diag "$label: ${pct}% used"
         fi
       done
     elif [ -n "$quota" ]; then
-      tap_diag "quota: $(echo "$quota" | jq -r '.error.message // "unavailable"' 2>/dev/null)"
+      tap_diag "quota: $(echo "$quota" | jq -r '.error.message // "unavailable"')"
     fi
   fi
 }
@@ -193,7 +202,7 @@ get_endpoint() {
 }
 
 # Main loop
-yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | [.value.base_url, .key, .value.api, .value.env] | @tsv' "$AI_YAML" 2>/dev/null | while IFS="$(printf '\t')" read -r base_url name api env; do
+yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | [.value.base_url, .key, .value.api, .value.env] | @tsv' "$AI_YAML" | while IFS="$(printf '\t')" read -r base_url name api env; do
   endpoint=$(get_endpoint "$api")
   url="${base_url}${endpoint}"
   check_endpoint "$url" "$name" "$env"
