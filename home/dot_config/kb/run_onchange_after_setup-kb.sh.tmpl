@@ -43,7 +43,6 @@ setup_kb() {
     info "Initialized local kb at $target"
   fi
 }
-
 {{ range (dig "kb" "vaults" list .) }}
 setup_kb {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end }}
 {{- end }}

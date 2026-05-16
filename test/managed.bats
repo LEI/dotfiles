@@ -23,12 +23,6 @@ setup() {
 }
 
 # bats test_tags=claude
-@test "claude: no unmanaged rules" {
-  check_feature claude
-  no_unmanaged "$HOME/.claude/rules"
-}
-
-# bats test_tags=claude
 @test "claude: no unmanaged plugins" {
   check_feature claude
   no_unmanaged "$HOME/.claude/plugins/chezmoi"
@@ -38,7 +32,7 @@ setup() {
 @test "claude: opkg local package is installed" {
   check_feature claude
   check_command opkg jq mise
-  run --separate-stderr mise run opkg:tracked packages/local
+  run --separate-stderr mise run opkg:tracked local
   assert_success
 }
 
@@ -58,17 +52,65 @@ setup() {
 @test "opencode: opkg local package is installed" {
   check_feature opencode
   check_command opkg jq mise
-  run --separate-stderr mise run opkg:tracked packages/local
+  run --separate-stderr mise run opkg:tracked local
   assert_success
 }
 
 # bats test_tags=opkg
-@test "openpackage: no unmanaged files" {
-  check_command opkg jq mise
-  run --separate-stderr mise run opkg:unmanaged
-  assert_success
-  run --separate-stderr exclude_under_symlink <<<"$output"
-  assert_success
-  refute_stderr
-  refute_output
+@test "opkg: local package installs match source" {
+  local src="$HOME/.openpackage/packages/local"
+  [ -d "$src" ] || skip "no local package source"
+
+  local platforms=()
+  has_feature claude && platforms+=("$HOME/.claude")
+  has_feature opencode && platforms+=("$HOME/.config/opencode")
+  [ ${#platforms[@]} -gt 0 ] || skip "no platforms enabled"
+
+  local errs="" p kind s n entry
+  for p in "${platforms[@]}"; do
+    # No opkg auto-namespacing leftovers (e.g., ~/.claude/skills/local-sq)
+    for kind in agents skills commands; do
+      [ -d "$p/$kind" ] || continue
+      for entry in "$p/$kind"/local-* "$p/$kind"/local; do
+        [ -e "$entry" ] || [ -L "$entry" ] || continue
+        errs="${errs}stale: $entry"$'\n'
+      done
+    done
+    # Each source resource must be installed at natural path
+    for kind in agents commands; do
+      [ -d "$src/$kind" ] || continue
+      for s in "$src/$kind"/*.md; do
+        [ -e "$s" ] || continue
+        n=$(basename "$s")
+        [ -e "$p/$kind/$n" ] || errs="${errs}missing: $p/$kind/$n"$'\n'
+      done
+    done
+    if [ -d "$src/skills" ]; then
+      for s in "$src/skills"/*/; do
+        [ -d "$s" ] || continue
+        n=$(basename "$s")
+        [ -e "$p/skills/$n/SKILL.md" ] || errs="${errs}missing: $p/skills/$n/SKILL.md"$'\n'
+      done
+    fi
+  done
+
+  [ -z "$errs" ] || fail "$errs"
+}
+
+# bats test_tags=rules
+@test "rules: top-level entries are symlinks only" {
+  local dirs
+  dirs=$(discover_rule_dirs)
+  [ -n "$dirs" ] || skip "no rule dirs discovered"
+
+  local dir entry strays=""
+  while IFS= read -r dir; do
+    for entry in "$dir"/* "$dir"/.[!.]*; do
+      [ -e "$entry" ] || [ -L "$entry" ] || continue
+      [ -L "$entry" ] && continue
+      strays="${strays}${entry}"$'\n'
+    done
+  done <<<"$dirs"
+
+  [ -z "$strays" ] || fail "non-symlink entries in rule dirs:"$'\n'"$strays"
 }

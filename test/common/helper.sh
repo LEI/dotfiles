@@ -155,6 +155,14 @@ no_unmanaged() {
   refute_output
 }
 
+# Discover rule dirs by structural convention: dirs containing symlinks
+# targeting */packages/*/rules. Agnostic to tool name.
+discover_rule_dirs() {
+  find "$HOME" -maxdepth 4 -type l -lname '*/packages/*/rules' 2>/dev/null |
+    sed 's|/[^/]*$||' |
+    sort -u
+}
+
 stub_seq() {
   local name="$1"
   shift

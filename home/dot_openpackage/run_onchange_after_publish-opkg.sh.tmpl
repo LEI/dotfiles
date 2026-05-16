@@ -40,34 +40,21 @@ opkg() {
 }
 
 opkg_installed() {
-  opkg list --global --json 2>/dev/null |
-    jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
+  opkg list --global --json "$1" 2>/dev/null |
+    jq -e '[.data.resources[] | .resources[] | .name] | length > 0' \
       >/dev/null 2>&1
 }
 
-# Trash install dirs left by an opkg package
-purge_install() {
-  name="$1"
-  for base in "$HOME/.claude" "$HOME/.config/opencode"; do
-    for type in rules agents skills; do
-      target="$base/$type/$name"
-      [ -L "$target" ] && continue
-      [ -d "$target" ] || continue
-      trace trash "$target"
-    done
-  done
-}
-
-install_package() {
+publish_package() {
   name="$1" path="$2"
 
   if [ ! -d "$path" ]; then
     echo "Package not found, skipping: $path"
-    return 0
+    return 1
   fi
   if [ ! -f "$path/openpackage.yml" ]; then
     echo "No manifest at $path, skipping"
-    return 0
+    return 1
   fi
 
   cd "$path"
@@ -76,11 +63,14 @@ install_package() {
   if opkg_installed "$name"; then
     run opkg uninstall --global --recursive "$name"
   fi
-  purge_install "$name"
+}
 
-  run opkg install --local --platforms {{ join " " .openpackage.platforms }} --global "$name"
-
-  echo "Package '$name' published and installed"
+# opkg loses tracking on all but the last resource when multiple are passed at once,
+# so install each resource individually.
+install_resource() {
+  name="$1"
+  shift
+  run opkg install --local --platforms {{ join " " .openpackage.platforms }} --conflicts overwrite --force "$@" --global "$name"
 }
 
 {{- /* Collect packages opkg should install (anything with content beyond rules/). */ -}}
@@ -109,8 +99,19 @@ install_package() {
 {{-   end -}}
 {{- end }}
 
-{{ range $entry := $opkgPkgs -}}
-install_package {{ $entry.name | quote }} {{ $entry.src | quote }}
+exit_code=0
+{{ range $entry := $opkgPkgs }}
+publish_package {{ $entry.name | quote }} {{ $entry.src | quote }} || exit_code=1
+{{-   range glob (joinPath $entry.src "agents/*.md") }}
+install_resource {{ $entry.name | quote }} --agents {{ base . | trimSuffix ".md" | quote }}
+{{-   end }}
+{{-   range glob (joinPath $entry.src "skills/*") }}
+install_resource {{ $entry.name | quote }} --skills {{ base . | quote }}
+{{-   end }}
+{{-   range glob (joinPath $entry.src "commands/*.md") }}
+install_resource {{ $entry.name | quote }} --commands {{ base . | trimSuffix ".md" | quote }}
+{{-   end }}
+echo "Package {{ $entry.name }} published and installed"
 {{ end }}
 # Build managed packages list (opkg-installed packages only)
 managed="{{ range $entry := $opkgPkgs }} {{ $entry.name }}{{ end }} "
@@ -126,42 +127,29 @@ if [ -d "$registry_dir" ]; then
     if opkg_installed "$name"; then
       trace opkg uninstall --global --recursive "$name"
     fi
-    purge_install "$name"
     trace trash "$entry"
   done
 fi
 
-# Per-package symlinks own ~/.claude/rules; sweep stray files opkg dropped here
-# so each rule loads exactly once through its symlink path.
+# Per-package symlinks point rules dirs at package sources.
+# Strays (e.g. dual installs) are caught by `mise run opkg:unmanaged` in bats.
 ensure_symlink() {
   target="$1" link="$2"
   if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
     return 0
   fi
   if [ -e "$link" ] || [ -L "$link" ]; then
-    trace trash "$link"
+    msg "unmanaged: $link (expected symlink to $target; remove and re-apply)"
+    exit_code=1
+    return 0
   fi
   trace ln -sn "$target" "$link"
 }
 
-prune_rules_dir() {
-  rules_dir="$1"
-  shift
-  keep=" $* "
-  [ -d "$rules_dir" ] || return 0
-  for entry in "$rules_dir"/* "$rules_dir"/.[!.]*; do
-    [ -e "$entry" ] || [ -L "$entry" ] || continue
-    base="${entry##*/}"
-    if [ -L "$entry" ]; then
-      case "$keep" in *" $base "*) continue ;; esac
-    fi
-    trace trash "$entry"
-  done
-}
-
+{{- /* Collect rule sources: skip missing dirs and dirs with no *.md content */ -}}
 {{- $rules := list -}}
 {{- $localRulesDir := joinPath .chezmoi.homeDir ".openpackage/packages/local/rules" -}}
-{{- if stat $localRulesDir -}}
+{{- if and (stat $localRulesDir) (glob (joinPath $localRulesDir "*.md")) -}}
 {{-   $rules = append $rules (dict "name" "local" "src" $localRulesDir) -}}
 {{- end -}}
 {{- if hasKey .claude "marketplaces" -}}
@@ -174,20 +162,25 @@ prune_rules_dir() {
 {{-       $pkgName := base $pkgDir -}}
 {{-       if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
 {{-       $rulesDir := joinPath $pkgDir "rules" -}}
-{{-       if stat $rulesDir -}}
+{{-       if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) -}}
 {{-         $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
 {{-       end -}}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
-{{- if $rules }}
+{{- /* Per-platform target dirs; package name == platform gates to that platform only */ -}}
+{{- $ruleBases := list -}}
+{{- if .features.claude -}}{{- $ruleBases = append $ruleBases (dict "platform" "claude" "dir" (joinPath .chezmoi.homeDir ".claude/rules")) -}}{{- end -}}
+{{- if .features.opencode -}}{{- $ruleBases = append $ruleBases (dict "platform" "opencode" "dir" (joinPath .chezmoi.homeDir ".config/opencode/rules")) -}}{{- end -}}
+{{- if and $rules $ruleBases }}
+{{- range $base := $ruleBases }}
 
-mkdir -p "$HOME/.claude/rules"
-prune_rules_dir "$HOME/.claude/rules"
-{{- range $entry := $rules }} {{ $entry.name | quote }}
-{{- end }}
+mkdir -p {{ $base.dir | quote }}
 {{- range $entry := $rules }}
-ensure_symlink {{ $entry.src | quote }} "$HOME/.claude/rules/{{ $entry.name }}"
+{{-   if or (not (has $entry.name (list "claude" "opencode"))) (eq $entry.name $base.platform) }}
+ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base.dir $entry.name | quote }}
+{{-   end }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -196,4 +189,6 @@ workspace="$CHEZMOI_WORKING_TREE/.openpackage"
 if [ -e "$workspace" ]; then
   trace trash "$workspace"
 fi
+
+exit "$exit_code"
 {{ end -}}

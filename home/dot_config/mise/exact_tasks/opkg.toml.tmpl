@@ -39,8 +39,7 @@ alias = "om"
 description = "List tracked target paths"
 run = """
 opkg list --global --json \
-  | jq -r '.data.resources[] | select(.resourceType == "packages") | .resources[] \
-    | recurse(.children[]?) | select(.status == "tracked") \
+  | jq -r '.data.resources[] | .resources[] | select(.status == "tracked") \
     | .files[]? | select(.status == "tracked") | .target' \
   | sort -u \
   | sed "s|^|$HOME/|"
@@ -61,13 +60,12 @@ opkg list --global --json \
 
 ["opkg:tracked"]
 alias = "ot"
-description = "Check if a resource is tracked"
-usage = 'arg "<name>" help="Resource name (e.g. packages/local)"'
+description = "Check if a package has any tracked resources"
+usage = 'arg "<name>" help="Package name (e.g. local)"'
 run = """
-opkg list --global --json \
-  | jq -e --arg name "$usage_name" \
-    '[.data.resources[] | select(.resourceType == "packages") | .resources[] \
-      | recurse(.children[]?) | select(.name == $name and .status == "tracked")] \
+opkg list --global --json "$usage_name" \
+  | jq -e \
+    '[.data.resources[] | .resources[] | select(.status == "tracked" or .status == "mixed")] \
     | length > 0' \
   >/dev/null
 """
