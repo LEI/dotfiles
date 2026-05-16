@@ -323,7 +323,7 @@
     "disableBypassPermissionsMode": "disable",
     {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
     {{- $kbDirs := includeTemplate "kb.tmpl" . | fromJson }}
-    "additionalDirectories": {{ concat $notesDirs $kbDirs | toPrettyJson | indent 4 | trim }}
+    "additionalDirectories": {{ concat $notesDirs $kbDirs | default list | toPrettyJson | indent 4 | trim }}
   },
   "enableAllProjectMcpServers": false,
   "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},
