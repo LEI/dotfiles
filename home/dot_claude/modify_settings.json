@@ -326,7 +326,7 @@
     "additionalDirectories": {{ concat $notesDirs $kbDirs | default list | toPrettyJson | indent 4 | trim }}
   },
   "enableAllProjectMcpServers": false,
-  "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},
+  "hooks": {{ (get $stdin "hooks" | default dict) | toPrettyJson | indent 2 | trim }}{{/* include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim */}},
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
   {{- if stat $statusline }}
   "statusLine": {

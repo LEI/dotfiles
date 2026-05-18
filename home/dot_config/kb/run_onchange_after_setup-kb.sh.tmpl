@@ -1,7 +1,11 @@
 {{- if (dig "kb" "vaults" list .) -}}
 #!/bin/sh
 
-# Personal kb at ~/kb/<vault>. Mirrors notes graph setup; idempotent.
+# kb-state:
+{{- range $v := (dig "kb" "vaults" list .) }}
+{{-   $p := joinPath $.chezmoi.homeDir "kb" $v.name }}
+{{-   $s := lstat $p }} {{ $v.name }}={{ if $s }}{{ $s.mode }}{{ else }}absent{{ end }}
+{{- end }}
 
 set -eu
 
@@ -23,7 +27,11 @@ setup_kb() {
   target="$kb_dir/$name"
 
   [ -L "$target" ] && return 0
-  [ -d "$target" ] && return 0
+
+  if [ -d "$target" ]; then
+    [ -z "$url" ] && return 0
+    die "kb $name: $target exists, cannot link to $url"
+  fi
 
   if [ -n "$url" ]; then
     if ! has ghq; then

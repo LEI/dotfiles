@@ -11,6 +11,8 @@ return {
     -- https://github.com/stevearc/oil.nvim/issues/300
     -- event = { 'BufNew */*,.*', 'VimEnter */*,.*' },
     lazy = false,
+    ---@module 'oil'
+    ---@type oil.SetupOpts
     opts = {
       columns = {
         'icon',

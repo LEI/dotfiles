@@ -10,14 +10,6 @@ vim.api.nvim_create_autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, {
   end,
 })
 
--- Highlight on yank
--- vim.api.nvim_create_autocmd('TextYankPost', {
---   group = vim.api.nvim_create_augroup('highlight_yank', { clear = true }),
---   callback = function()
---     (vim.hl or vim.highlight).on_yank()
---   end,
--- })
-
 -- Resize splits if window got resized
 vim.api.nvim_create_autocmd({ 'VimResized' }, {
   group = vim.api.nvim_create_augroup('resize_splits', { clear = true }),

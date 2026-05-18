@@ -101,6 +101,8 @@ alias pbcopy=termux-clipboard-set
 alias pbpaste=termux-clipboard-get
 {{- end }}
 
+{{- end }}
+
 if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
   clip() {
     if [ -t 0 ]; then
@@ -110,8 +112,6 @@ if ! command -v clip >/dev/null && command -v pbcopy >/dev/null; then
     fi
   }
 fi
-
-{{- end }}
 
 cleanup() {
   case "$(uname -s)" in

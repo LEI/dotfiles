@@ -71,9 +71,6 @@ elif [ "$(uname -s)" = Darwin ]; then
   case ",$ro_opts," in *,AppleVirtIOFS,*) ro=true ;; esac
 fi
 if $ro; then
-  # FIXME: trim-trailing-whitespace
-  # error: Failed to init hooks
-  # caused by: Hook `trailing-whitespace` not present in repo `https://github.com/pre-commit/pre-commit-hooks@v6.0.0`
   skip="${skip:+$skip,}end-of-file-fixer,trailing-whitespace"
 fi
 

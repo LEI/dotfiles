@@ -26,9 +26,9 @@ set -- "$@" --yes
 
 {{- if .upgrade }}
 
-# if ! run mise self-update "$@"; then
-#   echo "mise self-update failed with exit code $?" >&2
-# fi
+if [ "$(mise doctor --json | jq .self_update_available)" = true ]; then
+  dry_run timeout 5m mise self-update --yes
+fi
 {{- end }}
 
 # TODO: check gpg-agent is running

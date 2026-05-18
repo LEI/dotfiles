@@ -82,6 +82,7 @@ packages:
       debian: chromium-browser
       # windows: Hibbiki.Chromium
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
+
   codex:
     enabled: {{ .features.ai }}
     nameOverwrite:
@@ -94,6 +95,10 @@ packages:
       npm: "@github/copilot"
       darwin: copilot-cli
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+  mistral-vibe:
+    enabled: {{ .features.ai }}
+    type: brew
+
   coreutils:
     enabled: {{ eq .os "android" "linux" }}
   # cotp:

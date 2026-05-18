@@ -138,7 +138,7 @@ return {
           -- },
 
           ['blade-nav'] = {
-            module = 'blade-nav.blink',
+            module = 'blade-nav.integrations.blink',
             opts = { close_tag_on_complete = true },
           },
           dadbod = { name = 'Dadbod', module = 'vim_dadbod_completion.blink' },
