@@ -1,6 +1,7 @@
 {{- $notebook := true -}}
 {{- $ollama := and .features.ollama (eq .os "linux") (not .features.podman) -}}
 {{- $sandboxed := false -}}
+{{- $kbPages := joinPath .chezmoi.homeDir "kb/personal/pages" -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
@@ -225,6 +226,47 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+{{- if stat $kbPages }}
+
+  # Quartz v4: SSG for ~/kb/personal/pages at http://127.0.0.1:4321
+  # https://github.com/jackyzha0/quartz
+  quartz:
+{{- if eq .arch "amd64" }}
+    image: ghcr.io/jackyzha0/quartz:sha-9031614
+{{- else }}
+    # Upstream image lacks arm64
+    build: https://github.com/jackyzha0/quartz.git#v4.5.2
+{{- end }}
+    restart: unless-stopped
+    # Two sed patches against the pinned upstream config: gate to ExplicitPublish, extend ignorePatterns with log + raw
+    command:
+      - sh
+      - -c
+      - >
+        sed -i 's/Plugin.RemoveDrafts()/Plugin.ExplicitPublish()/' quartz.config.ts &&
+        sed -i 's/".obsidian"\]/".obsidian", "log", "raw"]/' quartz.config.ts &&
+        exec npx quartz build --serve --port 8080
+    ports:
+      - "127.0.0.1:4321:8080" # Web UI
+    volumes:
+      - {{ $kbPages }}:/usr/src/app/content:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    # No curl or wget in node:22-slim, accept <500 because / is 404 until a page sets publish: true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - "-e"
+        - "require('http').get('http://127.0.0.1:8080/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+{{- end }}
 
   # OpenCode: bundled in sandboxed.sh v0.10.0
   # https://opencode.ai/docs/server

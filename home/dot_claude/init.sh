@@ -58,17 +58,6 @@ claude-teams-tmux() {
   tmux-session "$session_name" claude --teammate-mode=tmux "$@"
 }
 
-claude-plan() {
-  local name="$1"
-  shift
-  local plan=".claude/plans/$name"
-  if [ ! -f "$plan" ]; then
-    echo "claude-plan: not found: $plan" >&2
-    return 1
-  fi
-  command claude --permission-mode=default /plan "$plan" "$@"
-}
-
 # claude-print() {
 #   command claude --print "$@"
 # }

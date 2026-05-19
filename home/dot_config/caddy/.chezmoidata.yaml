@@ -58,6 +58,14 @@ caddy:
       body: Healthy
       port: 9090
       liveness: /-/healthy
+    quartz:
+      feature: oage
+      body: html
+      port: 4321
+      liveness: /
+      # rewrite:
+      #   from: /
+      #   to: /kb
     # surrealdb:
     #   feature: oage
     #   port: 8000
