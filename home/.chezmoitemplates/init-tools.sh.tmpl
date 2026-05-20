@@ -1,6 +1,6 @@
 {{- $shell := get . "shell" }}
 {{- $init := list "bash" "zsh" }}
-{{- $orderedRaw := list "homebrew" "gem" "npm" "cargo" "go" "sh" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- $orderedRaw := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
 {{- $ordered := list }}
 {{- range $orderedRaw }}
 {{-   $feat := get $.featureMap . | default . }}
@@ -57,7 +57,3 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
   fi
 done
 unset _feat
-
-if [ -d "$HOME/.nix-profile/bin" ]; then
-  pathmunge "$HOME/.nix-profile/bin" after
-fi

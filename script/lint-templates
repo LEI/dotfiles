@@ -108,6 +108,7 @@ ln -s "$repo_dir/home" "$render_dir/home"
 
 export VALIDATE_KEEP="$keep"
 export VALIDATE_VERBOSITY="$verbosity"
+export MISE_TRUSTED_CONFIG_PATHS="$render_dir${MISE_TRUSTED_CONFIG_PATHS:+:$MISE_TRUSTED_CONFIG_PATHS}"
 
 export SKIP="gitleaks,lint-templates,yamlfmt,zizmor${SKIP:+,$SKIP}"
 

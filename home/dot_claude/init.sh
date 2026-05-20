@@ -8,6 +8,8 @@ claude() {
   command claude "$@"
 }
 
+alias claudep=claude-plan
+
 alias claudes=claude-sessions
 alias claudet=claude-teams
 alias claudett=claude-teams_tmux
@@ -24,9 +26,9 @@ claude-sessions() {
     echo "cc-sessions not installed" >&2
     return 1
   fi
-  if [ $# -eq 0 ] && [ -t 0 ]; then
-    set -- --count=100 --include-forks --list --min-turns=0
-  fi
+  # if [ $# -eq 0 ] && [ -t 0 ]; then
+  #   set -- --count=100 --include-forks --list --min-turns=0
+  # fi
   local project
   project="$(basename "$PWD")"
   cc-sessions "$@" --project="$project"

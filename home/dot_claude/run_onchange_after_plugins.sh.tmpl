@@ -8,7 +8,7 @@
 {{- range $plugins }}
 {{-   $marketplace := get $marketplaces .marketplace }}
 {{-   if and $marketplace (not (hasKey $marketplace "repo")) }}
-{{-     $path := printf "%s/plugins/%s/.claude-plugin/plugin.json" $marketplace.path .name }}
+{{-     $path := joinPath $marketplace.path "plugins" .name ".claude-plugin/plugin.json" }}
 {{-     if stat $path }}
 # local:{{ .name }}@{{ .marketplace }}: {{ include $path | sha256sum }}
 {{-     end }}

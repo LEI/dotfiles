@@ -10,7 +10,7 @@ After=network.target
 Type=simple
 NoNewPrivileges=yes
 Environment=HOME=%h
-Environment=PATH=%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+Environment=PATH=%h/.local/share/mise/shims:{{ .brewPrefix }}/bin:/usr/bin:/bin
 Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
 Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
 {{- if $uds }}

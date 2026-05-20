@@ -1,0 +1,14 @@
+{{- $base := joinPath .chezmoi.homeDir "kb" -}}
+{{- $ghqRoot := env "GHQ_ROOT" | default (joinPath .chezmoi.homeDir "src") -}}
+{{- $out := list -}}
+{{- range (dig "kb" "vaults" list .) -}}
+{{-   $sym := joinPath $base .name -}}
+{{-   $real := $sym -}}
+{{-   $url := get . "url" | default "" -}}
+{{-   if $url -}}
+{{-     $p := $url | trimPrefix "git@" | trimPrefix "https://" | trimPrefix "http://" | replace ":" "/" | trimSuffix ".git" -}}
+{{-     $real = joinPath $ghqRoot $p -}}
+{{-   end -}}
+{{-   $out = append $out (dict "name" .name "sym" $sym "real" $real "url" $url) -}}
+{{- end -}}
+{{- $out | toJson }}

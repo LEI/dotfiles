@@ -40,7 +40,14 @@ lint() {
     ;;
   *.yaml | *.yml)
     if has yamllint; then
-      yamllint --strict "$FILE" >&2
+      # Run from project root so .yamllint.yml (ignore lists, rules) is discovered
+      PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+      if [ -n "$PROJECT_ROOT" ]; then
+        REL=${FILE#"$PROJECT_ROOT"/}
+        (cd "$PROJECT_ROOT" && yamllint --strict "$REL") >&2
+      else
+        yamllint --strict "$FILE" >&2
+      fi
     fi
     ;;
   esac

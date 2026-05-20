@@ -1,5 +1,9 @@
 # User completions generated from #USAGE directives
-fpath=("$HOME/.local/share/zsh/completions" $fpath)
+fpath=("$HOME/.local/share/zsh/completions" \
+{{- if .features.brew }}
+  "{{ .brewPrefix }}/share/zsh/site-functions" \
+{{- end }}
+  $fpath)
 
 # Respect LISTMAX?
 # https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Standard-Styles

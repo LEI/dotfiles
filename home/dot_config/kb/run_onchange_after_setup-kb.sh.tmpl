@@ -1,10 +1,10 @@
-{{- if (dig "kb" "vaults" list .) -}}
+{{- $kbPaths := includeTemplate "kb-paths.tmpl" . | fromJson -}}
+{{- if $kbPaths -}}
 #!/bin/sh
 
 # kb-state:
-{{- range $v := (dig "kb" "vaults" list .) }}
-{{-   $p := joinPath $.chezmoi.homeDir "kb" $v.name }}
-{{-   $s := lstat $p }} {{ $v.name }}={{ if $s }}{{ $s.mode }}{{ else }}absent{{ end }}
+{{- range $v := $kbPaths }}
+{{-   $s := lstat $v.sym }} {{ $v.name }}={{ if $s }}{{ $s.mode }}{{ else }}absent{{ end }}
 {{- end }}
 
 set -eu
@@ -23,7 +23,8 @@ fi
 
 setup_kb() {
   name="$1"
-  url="${2:-}"
+  local_path="$2"
+  url="${3:-}"
   target="$kb_dir/$name"
 
   [ -L "$target" ] && return 0
@@ -38,10 +39,8 @@ setup_kb() {
       die "ghq not found, install it to set up kb $name from $url"
     fi
     run ghq get "$url"
-    path_key=$(printf '%s' "$url" | sed -E 's|^git@||; s|^https?://||; s|:|/|; s|\.git$||')
-    local_path="$(ghq root)/$path_key"
     if [ ! -d "$local_path" ]; then
-      die "ghq could not resolve $url"
+      die "ghq did not resolve $url to $local_path"
     fi
     run ln -s "$local_path" "$target"
     info "Linked $name kb: $target -> $local_path"
@@ -51,7 +50,7 @@ setup_kb() {
     info "Initialized local kb at $target"
   fi
 }
-{{ range (dig "kb" "vaults" list .) }}
-setup_kb {{ .name | quote }}{{ if hasKey . "url" }} {{ .url | quote }}{{ end }}
+{{ range $v := $kbPaths }}
+setup_kb {{ $v.name | quote }} {{ $v.real | quote }}{{ if $v.url }} {{ $v.url | quote }}{{ end }}
 {{- end }}
 {{ end -}}

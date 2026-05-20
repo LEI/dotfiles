@@ -1,0 +1,5 @@
+{{- if .features.brew -}}
+# shellcheck shell=sh
+
+pathmunge "{{ .brewPrefix }}/opt/ruby/bin"
+{{ end -}}

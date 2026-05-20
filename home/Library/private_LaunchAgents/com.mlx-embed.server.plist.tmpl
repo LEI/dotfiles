@@ -3,12 +3,12 @@
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
       "label" $provider.label
       "args" (list
-        (printf "%s/.local/bin/%s" .chezmoi.homeDir $provider.server)
+        (joinPath .chezmoi.homeDir ".local/bin" $provider.server)
         "launch" "--model-type" "embeddings" "--model-path" $embed
         "--host" "127.0.0.1" "--port" ($provider.port | toString)
         "--no-log-file")
       "env" (dict
         "HOME" .chezmoi.homeDir
         "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
-      "log" (printf "%s/var/log/mlx-embed.log" .brewPrefix)
-      "workdir" (printf "%s/var" .brewPrefix)) -}}
+      "log" (joinPath .brewPrefix "var/log/mlx-embed.log")
+      "workdir" (joinPath .brewPrefix "var")) -}}

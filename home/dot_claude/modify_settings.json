@@ -184,7 +184,7 @@
       "Read(~/Library/DBeaverData/workspace*/General/Scripts/**)",
       {{- end }}
       "Read(~/notes/{{ .profile }}/{journal,pages}/**)",
-      "Read(~/kb/*/{pages,log,raw}/**)",
+      "Read(~/kb/*/pages/**)",
       "Skill(hookify:list)",
       "TaskCreate",
       "TaskGet",
@@ -322,7 +322,7 @@
     "defaultMode": "{{ env "CLAUDE_DEFAULT_MODE" | default "default" }}",
     "disableBypassPermissionsMode": "disable",
     {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
-    {{- $kbDirs := includeTemplate "kb.tmpl" . | fromJson }}
+    {{- $kbDirs := jq ".[] | .sym" (includeTemplate "kb-paths.tmpl" . | fromJson) }}
     "additionalDirectories": {{ concat $notesDirs $kbDirs | default list | toPrettyJson | indent 4 | trim }}
   },
   "enableAllProjectMcpServers": false,

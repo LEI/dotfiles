@@ -249,11 +249,11 @@ fi
 
 {{- /* Tailscale needs xcaddy build for the module; otherwise brew binary */ -}}
 {{- $caddyBin := .features.tailscale | ternary
-    (printf "%s/.local/bin/caddy" .chezmoi.homeDir)
-    (printf "%s/bin/caddy" .brewPrefix) -}}
+    (joinPath .chezmoi.homeDir ".local/bin/caddy")
+    (joinPath .brewPrefix "bin/caddy") -}}
 {{- $envDict := dict
-    "HOME" (printf "%s/var/lib" .brewPrefix)
-    "XDG_DATA_HOME" (printf "%s/var/lib" .brewPrefix)
+    "HOME" (joinPath .brewPrefix "var/lib")
+    "XDG_DATA_HOME" (joinPath .brewPrefix "var/lib")
     "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix) -}}
 {{- if .features.tailscale -}}
 {{-   $_ := set $envDict "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default "") -}}
@@ -275,10 +275,10 @@ desired_plist=$(
   "args" (list
     $caddyBin
     "run"
-    "--config" (printf "%s/.config/caddy/Caddyfile" .chezmoi.homeDir))
+    "--config" (joinPath .chezmoi.homeDir ".config/caddy/Caddyfile"))
   "env" $envDict
-  "log" (printf "%s/var/log/caddy.log" .brewPrefix)
-  "workdir" (printf "%s/var/lib" .brewPrefix)) }}
+  "log" (joinPath .brewPrefix "var/log/caddy.log")
+  "workdir" (joinPath .brewPrefix "var/lib")) }}
 PLIST
 )
 if ! printf '%s\n' "$desired_plist" | diff -q - "$daemon_plist" >/dev/null 2>&1; then

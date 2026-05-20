@@ -1,15 +1,15 @@
 {{- $svc := .services.webhook -}}
 {{- $site := get .caddy.sites "webhook" -}}
-{{- $stateDir := printf "%s/.local/state/webhook" .chezmoi.homeDir -}}
+{{- $stateDir := joinPath .chezmoi.homeDir ".local/state/webhook" -}}
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
       "label" $svc.label
       "args" (list
-        (printf "%s/bin/webhook" .brewPrefix)
-        "--hooks" (printf "%s/.config/webhook/hooks.yaml" .chezmoi.homeDir)
+        (joinPath .brewPrefix "bin/webhook")
+        "--hooks" (joinPath .chezmoi.homeDir ".config/webhook/hooks.yaml")
         "--port" ($site.port | toString)
         "--verbose")
       "env" (dict
         "HOME" .chezmoi.homeDir
         "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
-      "stdout" (printf "%s/stdout.log" $stateDir)
-      "stderr" (printf "%s/stderr.log" $stateDir)) -}}
+      "stdout" (joinPath $stateDir "stdout.log")
+      "stderr" (joinPath $stateDir "stderr.log")) -}}

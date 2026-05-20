@@ -7,10 +7,6 @@ if ! command -v carapace >/dev/null; then
   return
 fi
 
-if [ -d "$XDG_CONFIG_HOME/carapace/bin" ]; then
-  pathmunge "$XDG_CONFIG_HOME/carapace/bin" after
-fi
-
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
 export CARAPACE_HIDDEN=1
 

@@ -1,0 +1,10 @@
+---
+title: Knowledge base
+publish: true
+---
+
+## Vaults
+
+{{ range (dig "kb" "vaults" list .) -}}
+- [[{{ .name }}|{{ .name | title }}]]{{ if hasKey . "description" }}: {{ .description }}{{ end }}
+{{ end -}}

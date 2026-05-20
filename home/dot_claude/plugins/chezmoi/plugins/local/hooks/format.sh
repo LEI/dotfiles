@@ -45,7 +45,16 @@ case "$FILE" in
   ;;
 *.yaml | *.yml)
   if has yamlfmt; then
-    yamlfmt "$FILE" >/dev/null 2>&1
+    # Run from project root so .yamlfmt.yml is discovered. The -dstar flag
+    # makes yamlfmt honor `exclude:` for explicit file args (it would
+    # otherwise be applied only to directory walks).
+    PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+    if [ -n "$PROJECT_ROOT" ]; then
+      REL=${FILE#"$PROJECT_ROOT"/}
+      (cd "$PROJECT_ROOT" && yamlfmt -dstar "$REL") >/dev/null 2>&1
+    else
+      yamlfmt -dstar "$FILE" >/dev/null 2>&1
+    fi
   fi
   ;;
 esac

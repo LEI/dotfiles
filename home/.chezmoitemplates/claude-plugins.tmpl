@@ -6,7 +6,7 @@
 {{-   if hasKey $info "repo" -}}
 {{-     $marketplaces = set $marketplaces $name (dict "repo" $info.repo) -}}
 {{-   else -}}
-{{-     $marketplaces = set $marketplaces $name (dict "path" (printf "%s/%s" $.chezmoi.homeDir $info.path)) -}}
+{{-     $marketplaces = set $marketplaces $name (dict "path" (joinPath $.chezmoi.homeDir $info.path)) -}}
 {{-   end -}}
 {{- end -}}
 {{- $plugins := list -}}

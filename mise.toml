@@ -16,7 +16,7 @@ description = "Run all tasks"
 interactive = true
 run = [
   # c a --init
-  "chezmoi apply --init --verbose",
+  "chezmoi apply --verbose",
   # m pl
   { task = "pipeline" },
   # { task = "container:all" },
@@ -72,7 +72,7 @@ run = [
   { task = "prek" },
   { task = "profile bash" },
   { task = "profile zsh" },
-  { task = "update" },
+  # { task = "update" },
 ]
 
 [tasks.renovate]

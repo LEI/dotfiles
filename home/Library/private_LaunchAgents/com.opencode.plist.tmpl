@@ -6,7 +6,7 @@
 {{- $enabled := get $server "enabled" | default false -}}
 {{- if $enabled -}}
 
-{{- $stateDir := printf "%s/.local/state/opencode" .chezmoi.homeDir -}}
+{{- $stateDir := joinPath .chezmoi.homeDir ".local/state/opencode" -}}
 
 {{- $env := dict
   "HOME" .chezmoi.homeDir
@@ -14,9 +14,9 @@
 
 {{- includeTemplate "launchd-agent.plist.tmpl" (dict
   "label" "com.opencode"
-  "args" (list (printf "%s/.config/opencode/opencode-serve.sh" .chezmoi.homeDir))
+  "args" (list (joinPath .chezmoi.homeDir ".config/opencode/opencode-serve.sh"))
   "env" $env
-  "stdout" (printf "%s/stdout.log" $stateDir)
-  "stderr" (printf "%s/stderr.log" $stateDir))
+  "stdout" (joinPath $stateDir "stdout.log")
+  "stderr" (joinPath $stateDir "stderr.log"))
 -}}
 {{- end -}}

@@ -20,8 +20,9 @@ for _conf in completion history options; do
 done
 unset _conf
 
-{{ includeTemplate ".profile.tmpl" . | trim }}
-source "$lib_dir/bash/bench.sh"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+source "$HOME/.local/lib/bash/bench.sh"
 
 if [ -z "${USER:-}" ]; then
   USER="$(id -un)"

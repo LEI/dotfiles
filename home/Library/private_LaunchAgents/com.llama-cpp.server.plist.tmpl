@@ -3,12 +3,12 @@
       "active" (get $provider "active" | default false)
       "label" $provider.label
       "args" (list
-        (printf "%s/opt/llama.cpp/bin/llama-server" .brewPrefix)
+        (joinPath .brewPrefix "opt/llama.cpp/bin/llama-server")
         "--host" "127.0.0.1"
         "--port" ($provider.port | toString)
-        "--models-dir" (printf "%s/Library/Caches/llama.cpp" .chezmoi.homeDir))
+        "--models-dir" (joinPath .chezmoi.homeDir "Library/Caches/llama.cpp"))
       "env" (dict
         "HOME" .chezmoi.homeDir
         "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
-      "log" (printf "%s/var/log/llama-server.log" .brewPrefix)
-      "workdir" (printf "%s/var" .brewPrefix)) -}}
+      "log" (joinPath .brewPrefix "var/log/llama-server.log")
+      "workdir" (joinPath .brewPrefix "var")) -}}
