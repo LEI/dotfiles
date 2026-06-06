@@ -1,11 +1,15 @@
 {{- $compose := joinPath .chezmoi.homeDir ".config/otel/compose.yaml" -}}
 {{- if stat $compose -}}
 {{- $prometheusConfig := joinPath .chezmoi.homeDir ".config/otel/prometheus.yaml" -}}
-{{- $alertRulesDir := joinPath .chezmoi.homeDir ".config/otel/alerts" -}}
+{{- $alertRulesDir := joinPath .chezmoi.homeDir ".config/otel/exact_alerts" -}}
 {{- $otelCollectorConfig := joinPath .chezmoi.homeDir ".config/otel/otel-collector-config.yaml" -}}
-{{- $grafanaProvDir := joinPath .chezmoi.homeDir ".config/otel/grafana/provisioning" -}}
+{{- $grafanaProvDir := joinPath .chezmoi.homeDir ".config/otel/exact_grafana/exact_provisioning" -}}
 {{- $lokiConfig := joinPath .chezmoi.homeDir ".config/otel/loki.yaml" -}}
 {{- $tempoConfig := joinPath .chezmoi.homeDir ".config/otel/tempo.yaml" -}}
+{{- $alertContent := "" -}}
+{{- range glob (printf "%s/*.yaml" $alertRulesDir) -}}
+{{-   $alertContent = printf "%s%s" $alertContent (include .) -}}
+{{- end -}}
 #!/bin/sh
 set -eu
 
@@ -42,7 +46,7 @@ reload_if_changed() {
   printf '%s' "$hash" >"$hash_file"
 }
 
-prometheus_hash="{{ include $prometheusConfig | sha256sum }}{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $alertRulesDir) | sha256sum }}"
+prometheus_hash="{{ include $prometheusConfig | sha256sum }}{{ sha256sum $alertContent }}"
 reload_if_changed prometheus "$prometheus_hash" \
   retry 10 2 curl -fsS -X POST http://localhost:9090/-/reload
 
@@ -82,14 +86,23 @@ grafana_reload() {
 }
 
 {{- range list "alerting" "dashboards" "datasources" }}
-{{- $dir := joinPath $grafanaProvDir . }}
-
-grafana_{{ . }}_hash="{{ output "sh" "-c" (printf "cat %s/*.yaml 2>/dev/null" $dir) | sha256sum }}"
-reload_if_changed "grafana-{{ . }}" "$grafana_{{ . }}_hash" \
-  grafana_reload {{ . }}
+{{- $section := . }}
+{{- $dir := joinPath $grafanaProvDir $section }}
+{{- $dirContent := "" }}
+{{- range glob (printf "%s/*.yaml" $dir) }}
+{{-   $dirContent = printf "%s%s" $dirContent (include .) }}
 {{- end }}
 
-grafana_pass=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/otel/secrets/grafana-admin-password")
+grafana_{{ $section }}_hash="{{ sha256sum $dirContent }}"
+reload_if_changed "grafana-{{ $section }}" "$grafana_{{ $section }}_hash" \
+  grafana_reload {{ $section }}
+{{- end }}
+
+grafana_pass=""
+grafana_secret="${XDG_CONFIG_HOME:-$HOME/.config}/otel/secrets/grafana-admin-password"
+if [ -f "$grafana_secret" ]; then
+  grafana_pass=$(cat "$grafana_secret")
+fi
 
 create_grafana_sa() {
   sa_name="$1"
@@ -98,6 +111,9 @@ create_grafana_sa() {
   token_file="$4"
   if [ -s "$token_file" ]; then
     return 0
+  fi
+  if [ -z "$grafana_pass" ]; then
+    die "no grafana-admin-password; cannot create $sa_name service account"
   fi
   log "creating grafana MCP $sa_name service account ($sa_role)"
   sa_id=$(curl -fsS -u "admin:$grafana_pass" \
