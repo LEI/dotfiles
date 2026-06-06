@@ -70,19 +70,17 @@ return {
   -- laktak/tome
   {
     'stevearc/overseer.nvim',
-    -- enabled = false,
+    -- FIXME: mise tasks, persistence.nvim
+    -- https://github.com/stevearc/overseer.nvim/blob/master/CHANGELOG.md#200-2025-11-16
+    enabled = false,
     -- tag = 'v1.6.0',
-    version = 'v1.x',
+    version = 'v2.x',
     dependencies = { 'folke/persistence.nvim' },
     cmd = {
-      'OverseerBuild',
-      'OverseerClearCache',
       'OverseerClose',
       'OverseerDeleteBundle',
-      'OverseerInfo',
       'OverseerLoadBundle',
       'OverseerOpen',
-      'OverseerQuickAction',
       'OverseerRun',
       'OverseerRunCmd',
       'OverseerSaveBundle',
@@ -117,10 +115,7 @@ return {
       { '<leader>ow', '<cmd>OverseerToggle<cr>', desc = 'Task list' },
       { '<leader>oo', '<cmd>OverseerRun<cr>', desc = 'Run task' },
       { '<leader>oq', '<cmd>OverseerQuickAction<cr>', desc = 'Action recent task' },
-      { '<leader>oi', '<cmd>OverseerInfo<cr>', desc = 'Overseer info' },
-      { '<leader>ob', '<cmd>OverseerBuild<cr>', desc = 'Task builder' },
       { '<leader>ot', '<cmd>OverseerTaskAction<cr>', desc = 'Task action' },
-      { '<leader>oc', '<cmd>OverseerClearCache<cr>', desc = 'Clear cache' },
       { '<leader>ol', '<cmd>OverseerRestartLast<cr>', desc = 'Restart last' },
     },
     -- lazy = false,
@@ -128,7 +123,9 @@ return {
       -- Restart last task
       vim.api.nvim_create_user_command('OverseerRestartLast', function()
         local overseer = require('overseer')
-        local tasks = overseer.list_tasks({ recent_first = true })
+        local tasks = overseer.list_tasks({
+          -- recent_first = true
+        })
         if vim.tbl_isempty(tasks) then
           vim.notify('No tasks found', vim.log.levels.WARN)
         else

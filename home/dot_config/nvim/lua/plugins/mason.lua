@@ -318,24 +318,20 @@ return {
       -- https://www.lazyvim.org/plugins/lsp
       -- https://www.lazyvim.org/configuration/keymaps#lsp-keymaps
 
-      -- FIXME: lua =vim.lsp.get_clients()[1].server_capabilities.workspace
-      -- local lspconfig = require('lspconfig')
-      -- local has_blink, blink = pcall(require, 'blink.cmp')
-      -- local capabilities = vim.tbl_deep_extend(
-      --   'force',
-      --   {},
-      --   -- lspconfig.util.default_config.capabilities,
-      --   has_blink and blink.get_lsp_capabilities() or {},
-      --   {
-      --     workspace = {
-      --       fileOperations = {
-      --         didRename = true,
-      --         willRename = true,
-      --       },
-      --     },
-      --   }
-      -- )
-      -- vim.lsp.config('*', { capabilities = capabilities })
+      -- Signal LSP clients about file renames (Snacks rename, Oil)
+      -- :lua =vim.lsp.get_clients()[1].server_capabilities.workspace
+      if vim.lsp.config then
+        vim.lsp.config('*', {
+          capabilities = {
+            workspace = {
+              fileOperations = {
+                didRename = true,
+                willRename = true,
+              },
+            },
+          },
+        })
+      end
 
       -- TODO: folke/neoconf.nvim or tamago324/nlsp-settings.nvim
       if vim.lsp.config then
@@ -397,33 +393,7 @@ return {
               },
             },
           },
-          -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
-          lua_ls = {
-            settings = {
-              Lua = {
-                -- diagnostics = {
-                --   globals = { 'vim' },
-                -- },
-                runtime = {
-                  -- Tell the language server which version of Lua you're using (most
-                  -- likely LuaJIT in the case of Neovim)
-                  version = 'LuaJIT',
-                  -- Tell the language server how to find Lua modules same way as Neovim
-                  -- (see `:h lua-module-load`)
-                  path = {
-                    'lua/?.lua',
-                    'lua/?/init.lua',
-                  },
-                },
-                workspace = {
-                  checkThirdParty = false,
-                  library = {
-                    vim.env.VIMRUNTIME,
-                  },
-                },
-              },
-            },
-          },
+          -- lua_ls: see ~/.config/nvim/.luarc.json + lazydev.nvim
           tailwindcss = {
             -- filetypes = {
             --   'css',

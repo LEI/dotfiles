@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  // https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
+  "runtime.version": "LuaJIT",
+  "runtime.path": ["lua/?.lua", "lua/?/init.lua"],
+  "diagnostics.globals": ["Snacks", "vim"],
+  "workspace.checkThirdParty": false,
+  "workspace.library": ["$VIMRUNTIME", "$HOME/.local/share/nvim/lazy"],
+  "completion.callSnippet": "Replace"
+}

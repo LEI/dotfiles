@@ -11,7 +11,10 @@ vim.g.ai = {
   codecompanion = true,
   copilot = false,
   copilot_lua = true,
-  mcphub = true,
+  -- FIXME: Error loading extension mcphub:
+  -- ...mcphub.nvim/lua/mcphub/extensions/codecompanion/init.lua:27:
+  -- attempt to index field 'strategies' (a nil value)
+  mcphub = false,
   sidekick = true,
   windsurf = false,
 
@@ -37,6 +40,21 @@ local function should_attach(bufname)
     return false
   end
   local basename = vim.fs.basename(bufname)
+  -- Exclude git-related files to prevent hangs during git commits
+  local git_files = {
+    'COMMIT_EDITMSG',
+    'MERGE_MSG',
+    'SQUASH_MSG',
+    'TAG_EDITMSG',
+    'EDITMSG',
+    'NOTES_EDITMSG',
+    'PULLREQ_EDITMSG',
+  }
+  for _, git_file in ipairs(git_files) do
+    if basename == git_file then
+      return false
+    end
+  end
   return not (basename:match('local.') or basename:match('.local'))
 end
 
@@ -48,6 +66,8 @@ return {
     },
     enabled = vim.g.ai.sidekick and vim.fn.has('nvim-0.11.2'),
     version = 'v2.x',
+    ---@module 'sidekick'
+    ---@type sidekick.Config
     opts = {
       cli = {
         mux = {
@@ -299,24 +319,24 @@ return {
     version = 'v0.3.0',
     dependencies = { 'folke/snacks.nvim' },
     config = true,
+    -- Dedicated <leader>C prefix; sidekick owns <leader>a, codecompanion uses :CodeCompanionChat.
     keys = {
-      -- { '<leader>a', nil, desc = 'AI/Claude Code' },
-      { '<leader>ac', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },
-      { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'Focus Claude' },
-      { '<leader>ar', '<cmd>ClaudeCode --resume<cr>', desc = 'Resume Claude' },
-      { '<leader>aC', '<cmd>ClaudeCode --continue<cr>', desc = 'Continue Claude' },
-      { '<leader>am', '<cmd>ClaudeCodeSelectModel<cr>', desc = 'Select Claude model' },
-      { '<leader>ab', '<cmd>ClaudeCodeAdd %<cr>', desc = 'Add current buffer' },
-      { '<leader>as', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'Send to Claude' },
+      { '<leader>C', '', desc = '+claude', mode = { 'n', 'v' } },
+      { '<leader>Cc', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },
+      { '<leader>Cf', '<cmd>ClaudeCodeFocus<cr>', desc = 'Focus Claude' },
+      { '<leader>Cr', '<cmd>ClaudeCode --resume<cr>', desc = 'Resume Claude' },
+      { '<leader>Cn', '<cmd>ClaudeCode --continue<cr>', desc = 'Continue Claude' },
+      { '<leader>Cm', '<cmd>ClaudeCodeSelectModel<cr>', desc = 'Select Claude model' },
+      { '<leader>Cb', '<cmd>ClaudeCodeAdd %<cr>', desc = 'Add current buffer' },
+      { '<leader>Cs', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'Send to Claude' },
       {
-        '<leader>as',
+        '<leader>Cs',
         '<cmd>ClaudeCodeTreeAdd<cr>',
         desc = 'Add file',
         ft = { 'NvimTree', 'neo-tree', 'oil', 'minifiles', 'netrw' },
       },
-      -- -- Diff management
-      -- { '<leader>aa', '<cmd>ClaudeCodeDiffAccept<cr>', desc = 'Accept diff' },
-      -- { '<leader>ad', '<cmd>ClaudeCodeDiffDeny<cr>', desc = 'Deny diff' },
+      { '<leader>Ca', '<cmd>ClaudeCodeDiffAccept<cr>', desc = 'Accept diff' },
+      { '<leader>Cd', '<cmd>ClaudeCodeDiffDeny<cr>', desc = 'Deny diff' },
     },
   },
   -- {
@@ -348,7 +368,7 @@ return {
     'olimorris/codecompanion.nvim',
     enabled = vim.g.ai.codecompanion,
     -- tag = 'v18.3.1',
-    version = 'v18.x',
+    version = 'v19.x',
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       -- 'nvim-mini/mini.diff',
@@ -360,13 +380,7 @@ return {
     -- build = ':TSInstall markdown markdown_inline',
     cmd = { 'CodeCompanion', 'CodeCompanionActions', 'CodeCompanionChat', 'CodeCompanionCmd' },
     keys = {
-      {
-        '<leader>C',
-        '<cmd>CodeCompanionChat Toggle<cr>',
-        -- :CodeCompanion <prompt>
-        desc = 'Code Companion Chat',
-        mode = { 'n', 'v' },
-      },
+      { '<leader>ac', '<cmd>CodeCompanionChat Toggle<cr>', desc = 'CodeCompanion chat', mode = { 'n', 'v' } },
     },
     opts = {
       -- https://ravitemer.github.io/mcphub.nvim/extensions/codecompanion.html
@@ -402,19 +416,7 @@ return {
     dependencies = { 'AndreM222/copilot-lualine' },
     cmd = 'Copilot',
     event = 'VeryLazy', -- 'InsertEnter',
-    keys = {
-      -- { '<leader>c', '', desc = '+copilot' },
-      { '<leader>cp', '<cmd>Copilot panel<cr>', desc = 'Copilot panel', mode = { 'n', 'v' } },
-      { '<leader>cs', '<cmd>Copilot status<cr>', desc = 'Copilot status' },
-      { '<leader>cT', '<cmd>Copilot suggestion toggle_auto_trigger<cr>', desc = 'Copilot toggle auto-trigger' },
-      { '<leader>ct', '<cmd>Copilot toggle<cr>', desc = 'Copilot toggle' },
-    },
-    init = function()
-      local wk = require('which-key')
-      wk.add({
-        { '<leader>c', group = '+copilot' },
-      })
-    end,
+    -- LazyVim canonical: no leader keymaps; use :Copilot panel/status/toggle directly.
     config = function()
       local copilot = require('copilot')
       copilot.setup({

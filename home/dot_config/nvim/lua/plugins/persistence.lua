@@ -89,6 +89,7 @@ return {
       -- })
 
       -- https://github.com/stevearc/overseer.nvim/discussions/373
+      -- https://github.com/stevearc/overseer.nvim/issues/321#issuecomment-3120519203
       local function get_cwd_as_name()
         local dir = vim.fn.getcwd(0)
         return dir:gsub('[^A-Za-z0-9]', '_')

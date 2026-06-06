@@ -15,10 +15,8 @@ vim.diagnostic.config({
     --   [vim.diagnostic.severity.WARN] = 'WarningMsg',
     -- },
   },
-  virtual_lines = false,
-  -- virtual_lines = FIXME: vim.g.ai.sidekick and false or {
-  --   current_line = true,
-  -- },
+  -- sidekick NES uses virtual lines and conflicts with diagnostic current_line
+  virtual_lines = (vim.g.ai and vim.g.ai.sidekick) and false or { current_line = true },
   virtual_text = {
     -- FIXME: does not hide current line virtual text
     current_line = false,
@@ -207,12 +205,13 @@ return {
     -- tag = 'v3.7.1',
     version = 'v3.x',
     cmd = 'Trouble',
+    ---@module 'trouble'
+    ---@type trouble.Config
     opts = {},
     -- event = 'CursorHold',
     keys = {
       { '<leader>x', '', desc = '+diagnostics/quickfix' },
       { '<leader>X', '<cmd>Trouble<cr>', desc = 'Trouble', mode = { 'n', 'v' } },
-      { '<leader>xs', '<cmd>Trouble symbols toggle<cr>', desc = 'Symbols (Trouble)', mode = { 'n', 'v' } },
       {
         '<leader>xx',
         '<cmd>Trouble diagnostics toggle<cr>',
@@ -227,6 +226,7 @@ return {
         '<leader>xs',
         '<cmd>Trouble symbols toggle focus=false<cr>',
         desc = 'Symbols (Trouble)',
+        mode = { 'n', 'v' },
       },
       {
         '<leader>xl',
