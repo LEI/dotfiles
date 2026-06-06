@@ -5,45 +5,31 @@ version: "0.5"
 
 log_level: info
 
+log_configuration:
+  rotation:
+    max_size_mb: 100
+    max_age_days: 7
+    max_backups: 5
+    compress: true
+
 processes:
-  {{- if .features.claude }}
-  {{- range glob (joinPath .chezmoi.homeDir ".local/state/claude/*.jsonl") }}
-  {{- $name := trimSuffix ".jsonl" (base .) }}
 
-  claude-{{ $name }}-logs:
-    namespace: logs
-    description: Claude hooks log
-    command: "{{ $hlFollow }} {{ . }}"
-    availability:
-      restart: on_failure
-      max_restarts: 0
-  {{- end }}
+  {{- if .features.neovim }}
 
-  claude-task-viewer:
-    namespace: apps
-    description: Claude task viewer UI
-    command: npx claude-task-viewer
-    environment:
-      - PORT=3456
-    availability:
-      restart: on_failure
-      backoff_seconds: 10
-      max_restarts: 5
-      exponential_backoff: true
-    readiness_probe:
-      http_get:
-        host: localhost
-        port: 3456
-        scheme: http
-      initial_delay_seconds: 5
-      period_seconds: 10
-      timeout_seconds: 3
-      failure_threshold: 3
+  # nvim-logs:
+  #   namespace: logs
+  #   description: Neovim logs
+  #   # command: '{{ $tspinFollow }} "${XDG_STATE_HOME:-$HOME/.local/state}/nvim/log"'
+  #   command: "tail -f ~/.cache/nvim/{log,*.log} ~/.local/state/nvim/{log,*.log} | tspin --print"
+  #   availability:
+  #     restart: on_failure
+  #     max_restarts: 0
   {{- end }}
 
   {{- $opencodeConf := joinPath .chezmoi.homeDir ".config" "secrets.d" "opencode.conf" }}
   {{- $opencodeSettings := joinPath .chezmoi.homeDir ".config" "opencode" "opencode.jsonc" }}
-  {{- if and .features.opencode (stat $opencodeConf) }}
+  {{- if and false .features.opencode (stat $opencodeConf) }}
+  # FIXME: high I/O wait on Linux BRTFS
 
   {{- $server := .opencode.server }}
   {{- if and .features.tailscale .tailscale.tailnet }}
@@ -93,55 +79,6 @@ processes:
     #   failure_threshold: 3
   {{- end }}
 
-  {{- if .features.brew }}
-  {{- $brew := dig "processCompose" "brew" dict . }}
-  {{- range glob (joinPath .brewPrefix "var/log/**/*.log") }}
-  {{- $base := base . }}
-  {{- $dir := dir . | base }}
-  {{- $key := ternary (printf "%s/%s" $dir $base) $base (ne $dir "log") }}
-  {{- $meta := get $brew $key | default dict }}
-  {{- $tool := get $meta "tool" | default "tspin" }}
-  {{- $name := trimSuffix ".log" $base | replace "_" "-" }}
-  {{- if ne $dir "log" }}{{ $name = printf "%s-%s" $dir $name }}{{ end }}
-  {{- $desc := get $meta "description" | default (printf "%s log" $name) }}
-
-  {{ $name }}-logs:
-    namespace: logs
-    description: {{ $desc | quote }}
-    command: "{{ eq $tool "hl" | ternary $hlFollow $tspinFollow }} {{ . }}"
-    availability:
-      restart: on_failure
-      max_restarts: 0
-  {{- end }}
-  {{- end }}
-
-  {{- if and .features.brew .features.sql }}
-  {{- range glob (joinPath .brewPrefix "var/mysql/*.err") }}
-  {{- $base := base . }}
-  {{- $name := printf "mariadb-%s" (trimSuffix ".err" $base | trimSuffix ".log" | replace "_" "-" | replace "." "-") }}
-
-  {{ $name }}-logs:
-    namespace: logs
-    description: "MariaDB logs"
-    command: "{{ $tspinFollow }} {{ . }}"
-    availability:
-      restart: on_failure
-      max_restarts: 0
-  {{- end }}
-  {{- end }}
-
-  {{- if .features.otel }}
-
-  webhook-logs:
-    namespace: logs
-    description: Webhook alert receiver
-    # tspin only accepts a single file; tail -f handles the glob
-    command: "tail -f ~/.local/state/webhook/*.log | tspin --print"
-    availability:
-      restart: on_failure
-      max_restarts: 0
-  {{- end }}
-
   {{- range dig "processCompose" "sshProxies" list . }}
   {{-   $remotePort := "22" }}
   {{-   if eq .type "postgres" }}{{ $remotePort = "5432" }}{{ end }}
@@ -153,7 +90,7 @@ processes:
     command: "ssh -N -L {{ .localPort }}:{{ .remoteHost }}:{{ $remotePort }} {{ .sshTarget }}"
     availability:
       restart: on_failure
-      backoff_seconds: 5
+      backoff_seconds: 30 # 5
       max_restarts: 0 # unlimited
       exponential_backoff: true
     {{- if eq .type "postgres" }}
