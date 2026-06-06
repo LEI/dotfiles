@@ -1,12 +1,18 @@
+{{- $userBus := false }}
+{{- if eq .os "linux" }}
+{{-   $userBus = stat (printf "/run/user/%d/bus" .chezmoi.uid) }}
+{{- end }}
 {{- if and (eq .os "linux") (stat "/run/systemd/system") -}}
 ---
 command:
+{{- if $userBus }}
   systemctl-failed:
     title: No failed user services
-    exec: systemctl --user --failed --quiet --no-legend --no-pager
+    exec: systemctl --user --failed --no-legend --no-pager
     exit-status: 0
     stdout: ['!/failed/']
     timeout: 3000
+{{- end }}
 {{- range $name, $svc := get . "services" | default dict }}
 {{-   if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
 {{-   $active := get $svc "active" }}
@@ -21,6 +27,7 @@ command:
 {{- if .features.ai }}
 {{-   range $name, $provider := .ai.providers }}
 {{-     if not (hasKey $provider "unit") }}{{ continue }}{{ end }}
+{{-     if and (hasKey $.features $name) (not (get $.features $name)) }}{{ continue }}{{ end }}
 {{-     $active := get $provider "active" }}
   systemd-{{ $name }}:
     title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})

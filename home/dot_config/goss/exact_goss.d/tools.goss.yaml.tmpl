@@ -1,0 +1,55 @@
+{{- $jqExec := "" -}}
+{{- $yqExec := "" -}}
+{{- if eq .osIDLike "debian" "fedora" -}}
+{{-   if stat (joinPath .brewPrefix "bin/jq") }}{{ $jqExec = joinPath .brewPrefix "bin/jq" }}{{ end -}}
+{{-   if stat (joinPath .brewPrefix "bin/yq") }}{{ $yqExec = joinPath .brewPrefix "bin/yq" }}{{ end -}}
+{{- else -}}
+{{-   if lookPath "jq" | isExecutable }}{{ $jqExec = "jq" }}{{ end -}}
+{{-   if lookPath "yq" | isExecutable }}{{ $yqExec = "yq" }}{{ end -}}
+{{- end -}}
+{{- $jqVersion := "" -}}
+{{- $yqVersion := "" -}}
+{{- if $jqExec -}}
+{{-   $jqVersion = output "sh" "-c" (printf "%s --version | cut -d'-' -f2" $jqExec) -}}
+{{- end -}}
+{{- if $yqExec -}}
+{{-   $yqVersion = output "sh" "-c" (printf "%s --version | awk '{print $4}' | tr -d 'v'" $yqExec) -}}
+{{- end -}}
+---
+{{- if or $jqVersion $yqVersion }}
+matching:
+{{- end }}
+
+{{- if $jqVersion }}
+
+  jq:
+    content:
+      - {{ $jqVersion | trim | quote }}
+    matches:
+      match-regexp: '^(1\.[7-9]|1\.[1-9][0-9]+)(\.|$)'
+{{- end }}
+
+{{- if $yqVersion }}
+
+  yq:
+    content:
+      - {{ $yqVersion | trim | quote }}
+    matches:
+      semver-constraint: ">= 4.0.0 < 5.0.0"
+{{- end }}
+
+command:
+{{- if $jqExec }}
+
+  jq:
+    exec: {{ $jqExec }} --version
+    exit-status: 0
+    timeout: 2000
+{{- end }}
+{{- if $yqExec }}
+
+  yq:
+    exec: {{ $yqExec }} --version
+    exit-status: 0
+    timeout: 2000
+{{- end }}

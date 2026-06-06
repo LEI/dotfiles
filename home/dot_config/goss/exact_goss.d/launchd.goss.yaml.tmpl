@@ -3,16 +3,19 @@
 command:
 {{- range $name, $svc := get . "services" | default dict }}
 {{-   if not (get $.features (get $svc "feature")) }}{{ continue }}{{ end }}
+{{-   $label := get $svc "label" }}
+{{-   if not $label }}{{ continue }}{{ end }}
 {{-   $active := get $svc "active" }}
   launchd-{{ $name }}:
     title: {{ $name }} launchd agent ({{ if $active }}active{{ else }}inactive{{ end }})
-    exec: launchctl print gui/$(id -u)/{{ $svc.label }} 2>/dev/null | grep -q 'pid ='
+    exec: launchctl print gui/$(id -u)/{{ $label }} 2>/dev/null | grep -q 'pid ='
     exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{- end }}
 {{- if .features.ai }}
 {{-   range $name, $provider := .ai.providers }}
 {{-     if not (hasKey $provider "label") }}{{ continue }}{{ end }}
+{{-     if and (hasKey $.features $name) (not (get $.features $name)) }}{{ continue }}{{ end }}
 {{-     $active := get $provider "active" }}
   launchd-{{ $name }}:
     title: {{ $name }} AI provider ({{ if $active }}active{{ else }}inactive{{ end }})
@@ -20,5 +23,17 @@ command:
     exit-status: {{ if $active }}0{{ else }}{ gt: 0 }{{ end }}
     timeout: 3000
 {{-   end }}
+{{- end }}
+{{- /* Brew services with restart_service set; system flag selects launchd domain */ -}}
+{{- range $name, $pkg := .packages.brew }}
+{{-   $rs := get $pkg "restart_service" }}
+{{-   if not $rs }}{{ continue }}{{ end }}
+{{-   if eq (printf "%v" $rs) "false" }}{{ continue }}{{ end }}
+{{-   $domain := get $pkg "system" | default false | ternary "system" (printf "gui/$(id -u)") }}
+  launchd-{{ $name }}:
+    title: {{ $name }} brew service
+    exec: launchctl print {{ $domain }}/homebrew.mxcl.{{ $name }} 2>/dev/null | grep -q 'pid ='
+    exit-status: 0
+    timeout: 3000
 {{- end }}
 {{ end -}}

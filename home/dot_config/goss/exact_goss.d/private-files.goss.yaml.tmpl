@@ -1,0 +1,16 @@
+---
+file:
+{{- if .features.ssh }}
+  {{ .chezmoi.homeDir }}/.ssh:
+    exists: true
+    mode: "0700"
+    owner: {{ .chezmoi.username }}
+    filetype: directory
+{{- end }}
+{{- if .features.gpg }}
+  {{ .chezmoi.homeDir }}/.gnupg:
+    exists: true
+    mode: "0700"
+    owner: {{ .chezmoi.username }}
+    filetype: directory
+{{- end }}
