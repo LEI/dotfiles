@@ -1,0 +1,24 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
+[Unit]
+Description=OpenCode headless server
+After=network.target
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+Environment=HOME=%h
+Environment=PATH={{ .brewPrefix }}/bin:/usr/bin:/bin
+EnvironmentFile={{ joinPath .chezmoi.homeDir ".config/secrets.d/opencode.conf" }}
+ExecStartPre=/bin/sh -c 'test -n ${OPENCODE_SERVER_PASSWORD:?}'
+ExecStart=/bin/bash -lc 'exec opencode serve --hostname={{ $server.hostname }} --port={{ $server.port }}'
+StandardOutput=append:%h/.local/state/opencode/stdout.log
+StandardError=append:%h/.local/state/opencode/stderr.log
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+{{ end -}}

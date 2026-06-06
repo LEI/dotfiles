@@ -1,4 +1,6 @@
-{{- $pc := get (get .caddy.sites "processCompose") "process-compose" -}}
+{{- $caddy := get . "caddy" | default dict -}}
+{{- $sites := get $caddy "sites" | default dict -}}
+{{- $pc := get $sites "process-compose" | default dict -}}
 {{- $uds := get $pc "uds" -}}
 [Unit]
 Description=Process Compose global services
@@ -8,13 +10,16 @@ After=network.target
 Type=simple
 NoNewPrivileges=yes
 Environment=HOME=%h
-Environment=PATH=%h/.local/share/cargo/bin:%h/.local/share/mise/shims:/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin
+Environment=PATH=%h/.local/share/mise/shims:{{ .brewPrefix }}/bin:/usr/bin:/bin
 Environment=PC_CONFIG_FILES=%h/.config/process-compose/global.yaml
 Environment=PC_LOG_FILE=%h/.local/state/process-compose/process-compose.log
 {{- if $uds }}
 Environment=PC_SOCKET_PATH=%h/.local/state/process-compose/global.sock
 {{- end }}
-ExecStart=%h/.local/bin/mise exec process-compose -- process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=process-compose
+ExecStart=/bin/bash -lc 'exec process-compose up{{ if $uds }} --use-uds{{ else }} --port {{ $pc.port }}{{ end }} --tui=false --ordered-shutdown --logs-truncate --hide-disabled'
 Restart=on-failure
 RestartSec=5
 
