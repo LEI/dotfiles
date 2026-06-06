@@ -29,7 +29,7 @@ datasources:
     type: tempo
     access: proxy
     url: http://tempo:3200
-    http2: false # Disable HTTP/2; Tempo only supports HTTP/1.1 on query API
+    http2: false # Tempo 2.10.3 supports h2c upgrade but not native HTTP/2
     editable: false
     jsonData:
       tracesToLogsV2:
