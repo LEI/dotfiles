@@ -4,6 +4,5 @@ packages:
   zoxide:
     nameOverwrite:
       windows: ajeetdsouza.zoxide
-    type: '{{
-      (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
-      | ternary "mise" (eq .osIDLike "fedora" | ternary "brew" nil) }}'
+    type: '{{ and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04) | ternary "mise"
+      (eq .osIDLike "fedora" | ternary "brew" nil) }}'
