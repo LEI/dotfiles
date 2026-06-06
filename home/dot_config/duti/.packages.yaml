@@ -2,4 +2,4 @@
 packages:
   duti:
     description: Default apps, documents and URL schemes
-    enabled: "{{ .gui }}"
+    enabled: '{{ and (eq .os "darwin") .gui }}'

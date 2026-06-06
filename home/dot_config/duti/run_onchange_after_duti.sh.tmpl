@@ -3,73 +3,102 @@
 #!/bin/sh
 
 # associations: {{ $duti | toJson | sha256sum }}
+# defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers
 
 set -eu
 
-# defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers
-
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 if ! has duti; then
   die "duti not found"
 fi
 
-# TODO: remove DRY_RUN once validated
-DRY_RUN="${DRY_RUN:-true}"
-
 ok=0
 skip=0
+fail=0
+unmanaged=0
+
+report() {
+  if [ -n "$2" ]; then
+    msg "  $1: $2 -> $3"
+  else
+    msg "  $1: (unset) -> $3"
+  fi
+}
+
+apply() {
+  if dry_run duti -s "$@"; then
+    ok=$((ok + 1))
+  else
+    fail=$((fail + 1))
+  fi
+}
 
 set_uti() {
-  _bundle="$1"
-  _uti="$2"
-  _current="$(duti -d "$_uti" 2>/dev/null || true)"
-  if [ "$_current" = "$_bundle" ]; then
+  bundle="$1"
+  uti="$2"
+  current="$(duti -d "$uti" 2>/dev/null || true)"
+  if [ "$current" = "$bundle" ]; then
     skip=$((skip + 1))
     return
   fi
-  if [ -n "$_current" ]; then
-    msg "  $_uti: $_current -> $_bundle"
-  else
-    msg "  $_uti: (unset) -> $_bundle"
-  fi
-  dry_run duti -s "$_bundle" "$_uti" all
-  ok=$((ok + 1))
+  report "$uti" "$current" "$bundle"
+  apply "$bundle" "$uti" all
 }
 
 set_ext() {
-  _bundle="$1"
-  _ext="$2"
+  bundle="$1"
+  ext="$2"
   # duti -x returns three lines: App.app, /path, bundle.id
-  _current="$(duti -x "${_ext#.}" 2>/dev/null | sed -n '3p' || true)"
-  if [ "$_current" = "$_bundle" ]; then
+  current="$(duti -x "${ext#.}" 2>/dev/null | sed -n '3p' || true)"
+  if [ "$current" = "$bundle" ]; then
     skip=$((skip + 1))
     return
   fi
-  if [ -n "$_current" ]; then
-    msg "  $_ext: $_current -> $_bundle"
-  else
-    msg "  $_ext: (unset) -> $_bundle"
-  fi
-  dry_run duti -s "$_bundle" "$_ext" all
-  ok=$((ok + 1))
+  report "$ext" "$current" "$bundle"
+  apply "$bundle" "$ext" all
 }
 
 set_scheme() {
-  _bundle="$1"
-  _scheme="$2"
-  _current="$(duti -d "$_scheme" 2>/dev/null || true)"
-  if [ "$_current" = "$_bundle" ]; then
+  bundle="$1"
+  scheme="$2"
+  current="$(duti -d "$scheme" 2>/dev/null || true)"
+  if [ "$current" = "$bundle" ]; then
     skip=$((skip + 1))
     return
   fi
-  if [ -n "$_current" ]; then
-    msg "  $_scheme: $_current -> $_bundle"
-  else
-    msg "  $_scheme: (unset) -> $_bundle"
+  report "$scheme" "$current" "$bundle"
+  apply "$bundle" "$scheme"
+}
+
+verify_allowlist() {
+  plist="$HOME/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure"
+  bad=$(
+    defaults export "$plist" - 2>/dev/null |
+      plutil -convert json -o - - 2>/dev/null |
+      jq -r '.LSHandlers[]? | select(.LSHandlerContentType) | select(.LSHandlerRoleAll != null)
+               | "\(.LSHandlerContentType)\t\(.LSHandlerRoleAll | ascii_downcase)"' |
+      awk -F'\t' '
+          BEGIN {
+            {{- range $duti.allowedHandlers }}
+            ok["{{ lower . }}"] = 1
+            {{- end }}
+          }
+          !($2 in ok) { print }
+        '
+  )
+  if [ -z "$bad" ]; then
+    return
   fi
-  dry_run duti -s "$_bundle" "$_scheme"
-  ok=$((ok + 1))
+  msg "Handlers outside allowlist:"
+  printf '%s\n' "$bad" | while IFS='	' read -r ct h; do
+    msg "  $ct -> $h"
+  done
+  unmanaged=$(printf '%s\n' "$bad" | grep -c '^')
 }
 
 msg "File associations (UTIs)"
@@ -77,21 +106,22 @@ msg "File associations (UTIs)"
 {{ range $utis -}}
 set_uti "{{ $bundle }}" "{{ . }}"
 {{ end -}}
-{{ end -}}
-
+{{ end }}
 msg "File associations (extensions)"
 {{ range $bundle, $exts := $duti.extensions -}}
 {{ range $exts -}}
 set_ext "{{ $bundle }}" ".{{ . }}"
 {{ end -}}
-{{ end -}}
-
+{{ end }}
 msg "URL scheme associations"
 {{ range $bundle, $schemes := $duti.schemes -}}
 {{ range $schemes -}}
 set_scheme "{{ $bundle }}" "{{ . }}"
 {{ end -}}
-{{ end -}}
+{{ end }}
+verify_allowlist
 
-msg "Done: $ok changed, $skip already correct"
+msg "$ok changed, $skip unchanged, $fail failed, $unmanaged unmanaged"
+
+[ "$fail" -eq 0 ] && [ "$unmanaged" -eq 0 ]
 {{ end -}}
