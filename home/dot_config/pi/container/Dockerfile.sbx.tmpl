@@ -1,6 +1,7 @@
+{{- $pi := get . "pi" | default dict -}}
 FROM docker/sandbox-templates:shell
 
-ARG PI_VERSION={{ .pi.version }}
+ARG PI_VERSION={{ get $pi "version" }}
 
 USER root
 RUN apt-get update --quiet && \

@@ -1,0 +1,14 @@
+# Pi runtime state (machine-local)
+agent/.Trash-*
+agent/auth.json
+agent/bin
+agent/sessions
+agent/pi-debug.log
+
+# Pi agents and prompts: allow any (mix of chezmoi sources and tool-created links).
+# Re-include chezmoi-managed entries so they're still applied.
+agent/agents/*
+!agent/agents/explorer.md
+agent/prompts/*
+!agent/prompts/commit.md
+!agent/prompts/review.md

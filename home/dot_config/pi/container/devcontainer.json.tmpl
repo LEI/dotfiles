@@ -1,9 +1,10 @@
+{{- $pi := get . "pi" | default dict -}}
 {
   "name": "pi",
   "build": {
     "dockerfile": "Containerfile",
     "args": {
-      "PI_VERSION": "{{ .pi.version }}",
+      "PI_VERSION": {{ get $pi "version" | quote }},
       "SHPOOL_VERSION": "0.9.3",
       "WORKSPACE": "/workspace"
     }
@@ -15,7 +16,12 @@
   ],
   "remoteUser": "root",
   "containerEnv": {
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-collector:4317",
+{{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector") | fromYaml -}}
+{{- $keys := keys $otel | sortAlpha -}}
+{{- range $i, $key := $keys -}}
+{{- if $i }},{{ end }}
+    "{{ $key }}": "{{ index $otel $key }}"
+{{- end }},
     "OTEL_SERVICE_NAME": "pi-agent"
   }
 }
