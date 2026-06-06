@@ -5,4 +5,4 @@ packages:
     # nameOverwrite:
     #   mise: pipx@latest yamllint
     # type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
-    type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "uv" nil }}'
+    type: '{{ eq .osIDLike "android" "debian" "fedora" "opensuse" | ternary "uv" nil }}'
