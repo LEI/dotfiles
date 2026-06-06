@@ -1,11 +1,29 @@
 {{- $opencode := get . "opencode" | default dict -}}
 {{- $server := get $opencode "server" | default dict -}}
+{{- $kbPaths := includeTemplate "kb-paths.tmpl" . | fromJson -}}
+{{- $kbHome := .chezmoi.homeDir -}}
+{{- $kbDirs := list -}}
+{{- if $kbPaths -}}
+{{-   $kbDirs = append $kbDirs "~/kb" -}}
+{{- end -}}
+{{- range $kbPaths -}}
+{{-   $r := .real -}}
+{{-   if hasPrefix $kbHome $r -}}
+{{-     $r = printf "~%s" (trimPrefix $kbHome $r) -}}
+{{-   end -}}
+{{-   $kbDirs = append $kbDirs $r -}}
+{{- end -}}
 
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
 
-{{- $profile := env "OPENCODE_PROFILE" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
+{{- $localYaml := joinPath .chezmoi.homeDir ".config/opencode/local.yaml" -}}
+{{- $local := dict -}}
+{{- if stat $localYaml -}}
+{{-   $local = include $localYaml | fromYaml | default dict -}}
+{{- end -}}
+{{- $profile := get $local "profile" | default (env "OPENCODE_PROFILE") | default (get $opencode "profile") | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
 
 {{- $preset := get .ai.profiles $profile | default dict -}}
 {{- $model := get $preset "coding" -}}
@@ -26,10 +44,11 @@
   // https://github.com/anomalyco/opencode/pull/8562
   // https://opencode.ai/docs/config/#server
   // https://opencode.ai/docs/server
-  /* "server": {{ $server | toPrettyJson | indent 2 | trim }}, */
+  "server": {{ omit $server "enabled" | toPrettyJson | indent 2 | trim }},
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [
     // ".cursor/rules/*.md",
+    "{{ .chezmoi.homeDir }}/.config/opencode/rules/**/*.md",
     "CONTRIBUTING.md",
     // "docs/development-standards.md",
     // "docs/guidelines.md",
@@ -41,7 +60,7 @@
     "@franlol/opencode-md-table-formatter@0.0.6",
     // "@mohak34/opencode-notifier@0.1.36",
     // "@ramtinj95/opencode-tokenscope@1.5.2",
-    "@slkiser/opencode-quota@2.10.0",
+    "@slkiser/opencode-quota@3.8.7",
     // "@tarquinen/opencode-dcp@2.1.3"
 
     // bunx oh-my-opencode install --no-tui --claude=yes --gemini=yes --copilot=yes
@@ -50,7 +69,7 @@
 
     // "opencode-agent-skills@0.6.4",
     // "opencode-antigravity-auth@1.5.1",
-    "opencode-pty@0.2.1",
+    "opencode-pty@0.3.4",
     // "opencode-sessions@1.0.0",
     // "opencode-worktree@0.4.0",
   ],
@@ -108,12 +127,15 @@
       "find * -ok*": "ask",
 
       // "git *": "ask",
+      "git check-ignore *": "allow",
       "git describe *": "allow",
       "git diff *": "allow",
       "git fetch *": "allow",
       "git log *": "allow",
       "git ls-tree *": "allow",
       "git remote -v *": "allow",
+      "git rev-list *": "allow",
+      "git rev-parse *": "allow",
       "git show *": "allow",
       "git stash list *": "allow",
       "git status *": "allow",
@@ -190,6 +212,7 @@
       "{{ . }} run *": "ask",
       // "{{ . }} run --rm *": "allow",
       "{{ . }} search *": "allow",
+      "{{ . }} stats *": "allow",
       "{{ . }} system df *": "ask",
       "{{ . }} volume inspect *": "allow",
       "{{ . }} volume ls *": "allow",
@@ -198,10 +221,10 @@
 
       "jq *": "allow",
 
+      "fd *": "allow",
       "fd * --exec*": "ask",
       "fd * -X*": "ask",
       "fd * -x*": "ask",
-      "fd *": "allow",
 
       "gh *": "ask",
       "gh issue list *": "allow",
@@ -231,6 +254,7 @@
       "glab mr view *": "allow",
       "glab pipeline get *": "allow",
       "glab pipeline list *": "allow",
+      "glab repo search *": "allow",
       "glab repo view *": "allow",
 
       "sq *": "allow",
@@ -326,7 +350,9 @@
     // Triggered when a tool touches paths outside the project working directory
     "external_directory": {
       "*": "ask",
-      "~/notes/{{ .profile }}/{journal,pages}/**": "allow"
+      {{- range $kbDirs }}
+      "{{ . }}/**": "allow",
+      {{- end }}
     },
     // Triggered when the same tool call repeats 3 times with identical input
     // "doom_loop": "ask",
@@ -417,6 +443,8 @@
           {{- if .features.kube }}
           "flux": "allow",
           {{- end }}
+          "grafana": "allow",
+          "grafana-admin": "allow",
           "github": "allow",
           "gitlab": "allow",
           "qdrant": "allow",
@@ -680,6 +708,46 @@
       }
     },
 
+    "grafana": {
+      "description": "Grafana resources (read-only, Viewer token)",
+      "mode": "subagent",
+      "temperature": 0.0,
+      "prompt": "Grafana MCP tools with Viewer SA (--disable-write). Use grafana-admin for writes.",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "ask",
+        "skill": "deny",
+        "task": "deny",
+        "grafana_*": "allow"
+      }
+    },
+
+    "grafana-admin": {
+      "description": "Grafana admin operations (Admin token)",
+      "mode": "subagent",
+      "temperature": 0.0,
+      "prompt": "Grafana MCP tools with Admin SA. Writes prompt for confirmation.",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "ask",
+        "skill": "deny",
+        "task": "deny",
+        "grafana-admin_*": "ask",
+        "grafana-admin_get_*": "allow",
+        "grafana-admin_list_*": "allow",
+        "grafana-admin_search_*": "allow",
+        "grafana-admin_generate_*": "allow"
+      }
+    },
+
     "system": {
       "description": "System operations and environment management",
       "mode": "subagent",
@@ -718,6 +786,32 @@
     }
   },
   // "inputs": {{ $mcp.inputs | toJson | indent 2 | trim }},
+  // https://opencode.ai/docs/formatters
+  // prettier and shfmt are built-in; taplo and yamlfmt are not
+  "formatter": {
+    "taplo": {
+      "command": ["taplo", "format", "$FILE"],
+      "extensions": [".toml"]
+    },
+    "yamlfmt": {
+      "command": ["yamlfmt", "-dstar", "$FILE"],
+      "extensions": [".yaml", ".yml"]
+    }
+  },
+  // https://opencode.ai/docs/lsp
+  // yaml-ls is built-in (auto-installs); bash and markdown need explicit config
+  // binaries expected on PATH via ~/.local/share/nvim/mason/bin
+  "lsp": {
+    "bash": {
+      "command": ["bash-language-server", "start"],
+      "extensions": [".sh"]
+    },
+    "markdown": {
+      // marksman: navigation LSP (go-to-definition, symbols); linting stays in lint.sh hook
+      "command": ["marksman", "server"],
+      "extensions": [".md"]
+    }
+  },
   "mcp": {{ $mcpServers | toPrettyJson | indent 2 | trim }},
   // https://opencode.ai/docs/models/#recommended-models
   "provider": {
@@ -856,10 +950,34 @@
     },
     {{- end }}
     "google": {
-      "name": "Google",
       "models": {
         "antigravity-gemini-3-pro": {
           "name": "Gemini 3 Pro (Antigravity)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
+          }
+        },
+        "antigravity-gemini-3.1-pro": {
+          "name": "Gemini 3.1 Pro (Antigravity)",
           "limit": {
             "context": 1048576,
             "output": 65535
@@ -914,8 +1032,8 @@
             }
           }
         },
-        "antigravity-claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5 (Antigravity)",
+        "antigravity-claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6 (Antigravity)",
           "limit": {
             "context": 200000,
             "output": 64000
@@ -931,37 +1049,8 @@
             ]
           }
         },
-        "antigravity-claude-sonnet-4-5-thinking": {
-          "name": "Claude Sonnet 4.5 Thinking (Antigravity)",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          },
-          "variants": {
-            "low": {
-              "thinkingConfig": {
-                "thinkingBudget": 8192
-              }
-            },
-            "max": {
-              "thinkingConfig": {
-                "thinkingBudget": 32768
-              }
-            }
-          }
-        },
-        "antigravity-claude-opus-4-5-thinking": {
-          "name": "Claude Opus 4.5 Thinking (Antigravity)",
+        "antigravity-claude-opus-4-6-thinking": {
+          "name": "Claude Opus 4.6 Thinking (Antigravity)",
           "limit": {
             "context": 200000,
             "output": 64000

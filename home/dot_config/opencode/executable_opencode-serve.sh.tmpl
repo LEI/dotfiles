@@ -1,0 +1,16 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
+#!/bin/sh
+
+set -eu
+
+set -a
+. "$HOME/.config/secrets.d/opencode.conf"
+set +a
+
+: "${OPENCODE_SERVER_PASSWORD:?}"
+
+exec "{{ .brewPrefix }}/bin/opencode" serve --hostname={{ $server.hostname }} --port={{ $server.port }}
+{{ end -}}

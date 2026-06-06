@@ -1,7 +1,42 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+
+{{- $svc := get .services "opencode" -}}
+{{- $site := get .caddy.sites "opencode" | default dict -}}
+
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
 #!/bin/sh
 
-set -eux
+set -eu
 
-# Providers: {{ get (includeTemplate "dot_config/opencode/opencode.jsonc.tmpl" . | fromJsonc) "provider" | keys | sortAlpha | join ", " }}
-# opencode models --refresh --verbose
-opencode models --refresh
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+if ! has opencode; then
+  die "opencode not found"
+fi
+
+run opencode debug config >/dev/null
+
+if [ ! -d "$HOME/.local/state/opencode" ]; then
+  run mkdir -p "$HOME/.local/state/opencode"
+fi
+
+{{- if eq .os "darwin" }}
+
+{{ includeTemplate "launchd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc $site) | trim }}
+
+{{- else if eq .os "linux" }}
+
+{{ includeTemplate "systemd-apply.sh.tmpl" (merge (dict
+  "chezmoi" .chezmoi
+) $svc $site) | trim }}
+
+{{- end }}
+{{ end -}}

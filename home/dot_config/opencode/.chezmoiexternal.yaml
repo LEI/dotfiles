@@ -26,7 +26,7 @@
 
 skills/affaan-m:
   type: archive
-  url: https://github.com/affaan-m/everything-claude-code/archive/v1.4.1.tar.gz
+  url: https://github.com/affaan-m/everything-claude-code/archive/v1.10.0.tar.gz
   refreshPeriod: 720h
   exact: true
   stripComponents: 2
@@ -67,23 +67,24 @@ skills/openai:
   url: https://github.com/openai/skills/archive/main.tar.gz
   refreshPeriod: 720h
   exact: true
-  stripComponents: 2
+  # 3 strips skills-main/skills/.curated for a flat skills/openai/<skill> layout
+  stripComponents: 3
   include:
     # - "*/skills/.system/skill-creator/**"
-    # - "*/slills/.curated/doc/**"
-    # - "*/slills/.curated/figma-implement-design/**"
-    # - "*/slills/.curated/figma/**"
-    # - "*/slills/.curated/gh-address-comments/**"
-    # - "*/slills/.curated/gh-fix-ci/**"
-    # - "*/slills/.curated/linear/**"
-    # - "*/slills/.curated/openai-docs/**"
-    # - "*/slills/.curated/pdf/**"
-    # - "*/slills/.curated/screenshot/**"
-    - "*/slills/.curated/security-best-practices/**"
-    - "*/slills/.curated/security-ownership-map/**"
-    - "*/slills/.curated/security-threat-model/**"
-    # - "*/slills/.curated/spreadsheet/**"
-    # - "*/slills/.experimental/gitlab-address-comments/**"
+    # - "*/skills/.curated/doc/**"
+    # - "*/skills/.curated/figma-implement-design/**"
+    # - "*/skills/.curated/figma/**"
+    # - "*/skills/.curated/gh-address-comments/**"
+    # - "*/skills/.curated/gh-fix-ci/**"
+    # - "*/skills/.curated/linear/**"
+    # - "*/skills/.curated/openai-docs/**"
+    # - "*/skills/.curated/pdf/**"
+    # - "*/skills/.curated/screenshot/**"
+    - "*/skills/.curated/security-best-practices/**"
+    - "*/skills/.curated/security-ownership-map/**"
+    - "*/skills/.curated/security-threat-model/**"
+    # - "*/skills/.curated/spreadsheet/**"
+    # - "*/skills/.experimental/gitlab-address-comments/**"
 
 skills/supabase:
   type: archive

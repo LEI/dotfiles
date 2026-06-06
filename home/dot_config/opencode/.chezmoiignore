@@ -1,0 +1,32 @@
+# Runtime and generated files
+*.bak
+.gitignore
+antigravity-accounts.json
+bun.lock
+node_modules
+oh-my-opencode.json
+opencode-notifier-state.json
+opencode.json
+package-lock.json
+package.json
+
+{{ includeTemplate "opkg-managed.tmpl" . -}}
+rules/local
+{{- if hasKey .claude "marketplaces" }}
+{{-   range $mktName, $mkt := .claude.marketplaces }}
+{{-     $path := get $mkt "path" }}
+{{-     if not $path }}{{ continue }}{{ end }}
+{{-     $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" }}
+{{-     if not (stat $packagesRoot) }}{{ continue }}{{ end }}
+{{-     range $pkgDir := glob (joinPath $packagesRoot "*") }}
+{{-       $pkgName := base $pkgDir }}
+{{-       if eq $pkgName "local" }}{{ continue }}{{ end }}
+{{-       $rulesDir := joinPath $pkgDir "rules" }}
+{{-       if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) }}
+{{-         if or (not (has $pkgName (list "claude" "opencode"))) (eq $pkgName "opencode") }}
+rules/{{ $pkgName }}
+{{-         end }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}

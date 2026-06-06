@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+if ! has opencode; then
+  die "opencode not found"
+fi
+
+# Providers: {{ get (includeTemplate "dot_config/opencode/opencode.jsonc.tmpl" . | fromJsonc) "provider" | keys | sortAlpha | join ", " }}
+run opencode models --refresh

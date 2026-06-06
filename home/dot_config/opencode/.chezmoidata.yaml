@@ -1,0 +1,13 @@
+---
+services:
+  opencode:
+    active: true
+    feature: opencode
+    label: com.opencode
+    liveness:
+      statusCode: 401
+    readiness:
+      path: /global/health
+      auth: "${OPENCODE_SERVER_USERNAME}:${OPENCODE_SERVER_PASSWORD}"
+    port: 4096
+    unit: opencode
