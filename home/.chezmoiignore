@@ -28,16 +28,6 @@
 {{-   end }}
 {{- end }}
 
-{{- if and (not .features.bash) (not .features.nushell) (not .features.zsh) }}
-.config/curl/
-.config/readline/
-.config/sh/
-.config/wget/
-{{- if not .ci }}
-.local/bin/
-{{- end }}
-{{- end }}
-
 {{- if not (or .features.docker .features.podman) }}
 .config/pi/
 {{- end }}
@@ -47,6 +37,9 @@
 {{- end }}
 
 .Xresources
+.config/secrets.d/app/*
+# Machine-local secrets: drop any file here, ignored by this one pattern, never tracked
+.config/secrets.d/local/
 .config/tmux/install-tmux-plugins.sh
 .config/tmux/plugins/tmux-which-key/
 .hushlogin
@@ -83,6 +76,8 @@ Library/LaunchAgents/com.mlx-lm.server.plist
 # System packages are managed with brew
 .chezmoiscripts/*install-packages.sh
 {{- end }}
+
+.config/caddy/setup-caddy-system.sh
 
 {{- if and (ne .osID "windows") (not .wsl) }}
 .config/powershell/

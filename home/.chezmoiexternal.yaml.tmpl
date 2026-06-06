@@ -1,7 +1,7 @@
 ---
 # https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
 
-{{- if and (eq .os "linux") (eq .chassisVendor "Framework") }}
+{{- if and (eq .os "linux") (contains .chassisVendor "framework") }}
 
 # Framework: sudo dmidecode | grep -A1 'System Information' | tail -n1 | cut -d: -f2 | tr -d ' '
 .local/share/backgrounds/framework-dark.svg:
@@ -20,7 +20,7 @@
 # TODO: vscode extension install
 # .vscode-remote/User/globalStorage/zokugun.sync-settings/repository:
 #   type: git-repo
-#   url: {{ .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
+#   url: {{ or .ephemeral .headless | ternary "https://github.com/lei/vscode-settings.git" "git@github.com:lei/vscode-settings.git" | quote }}
 #   refreshPeriod: 168h
 {{- end }}
 
@@ -28,7 +28,7 @@
 
 .config/hammerspoon:
   type: git-repo
-  url: {{ .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
+  url: {{ or .ephemeral .headless | ternary "https://github.com/lei/dot-hammerspoon.git" "git@github.com:lei/dot-hammerspoon.git" | quote }}
   refreshPeriod: 168h
 
 .local/share/macos/defaults.sh:

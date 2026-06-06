@@ -1,9 +1,9 @@
 ---
 # os: patterns ignored on all OSes EXCEPT the key (.chezmoi.os: linux, darwin, windows)
 # features: patterns ignored when the feature key is NOT enabled
+
 os:
   darwin:
-    - .bash_profile
     - .chezmoiscripts/darwin/**
     - .config/duti/
     - .config/hammerspoon/
@@ -13,6 +13,7 @@ os:
     - Library/
   linux:
     - .chezmoiscripts/linux/**
+    - .config/Claude/ # Fedora
     - .config/systemd/
     - .hushlogin
   windows:
@@ -33,18 +34,31 @@ features:
   claude:
     - .claude/
     - .config/claude/
+    - .config/Claude/
     - .config/markdownlint/claude.yaml
     - Library/Application Support/Claude/
+  codex:
+    - .codex/
+  gemini:
+    - .gemini/
   goose:
     - .config/goose/
+  backup:
+    - .chezmoiscripts/linux/*setup-snapper.sh
+    - .config/btrfs-assistant/
+  btrfs:
+    - .chezmoiscripts/linux/*setup-btrfs-compression.sh
   opencode:
     - .config/opencode/
+    - .config/systemd/user/opencode.service
+    - Library/LaunchAgents/com.opencode.plist
+  openpackage:
     - .openpackage/
   atuin:
     - .config/atuin/
   bash:
     # - .bash_aliases
-    # - .bash_profile
+    - .bash_profile
     - .bashrc
     - .config/bash/
     - .config/blesh/
@@ -52,9 +66,10 @@ features:
     - .config/bat/
   caddy:
     - .config/caddy/
+    - .config/systemd/user/caddy.*
   zsh:
     - .config/zsh/
-    # - .zprofile
+    - .zprofile
     - .zshrc
   carapace:
     - .config/carapace/
@@ -109,6 +124,8 @@ features:
   iterm2:
     - .local/share/iterm2/
     - Library/Application Support/iTerm2/
+  kb:
+    - kb/
   kilo:
     - .config/kilo/
   logseq:
@@ -133,8 +150,8 @@ features:
     - .local/share/applications/meli.*
   mise:
     # - .chezmoiscripts/{*,*/*}mise-install.sh
+    - .chezmoiscripts/*install-mise.sh
     - .chezmoiscripts/*install-tools.sh
-    - .chezmoiscripts/*mise-install.sh
     - .config/carapace/specs/m.yaml
     - .config/mise/
   neovim:
@@ -163,9 +180,11 @@ features:
     - .local/bin/webhook-notify
     - Library/LaunchAgents/com.webhook.alert.*
   processCompose:
+    - .config/logrotate/
     - .config/process-compose/
     - .config/systemd/user/process-compose.*
     - .local/bin/pc
+    - Library/LaunchAgents/com.logrotate.*
     - Library/LaunchAgents/com.process-compose.*
   # php: []
   python:
@@ -177,6 +196,13 @@ features:
     - .config/mise/default-gems
   rust:
     - .chezmoiscripts/*install-rust.sh
+  sh:
+    - .config/curl/
+    - .config/readline/
+    - .config/sh/
+    - .config/wget/
+    - .local/bin/
+    - .profile
   sheldon:
     - .config/sheldon/
   shpool:
@@ -215,8 +241,8 @@ features:
     - .void-editor/
   vscode:
     - .config/Code/
-  # - .config/Code - OSS/
-  # - .vscode-oss/
+    # - .config/Code - OSS/
+    # - .vscode-oss/
   vscodium:
     - .config/VSCodium/
   zellij:

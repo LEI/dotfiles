@@ -1,38 +1,27 @@
 ---
 # https://models.dev/api.json
 ai:
-  # Provider: inference source identified by api protocol
-  # Local: port + health for service management, optional domain for reverse proxy
-  # Cloud: base_url + env for client config
-  # See .chezmoi.yaml.tmpl for computed active flags and service type
-  #
-  # dot_config/caddy: reverse proxy from domain + port
-  # dot_config/goss: health check via addr + port + http
-  # dot_config/opencode/opencode.jsonc: local provider blocks
-  # dot_config/oage/bifrost/config.json: mlx-lm port
-  # dot_config/oage/compose.yaml: mlx-lm and ollama port
-  # dot_config/mlx-lm/setup: mlx-lm port and label
-  # dot_config/llama-cpp/setup: llama-server port
-  # Library/LaunchAgents/*.plist: mlx-lm, mlx-embed, llama-server ports
-  # dot_ollama, .chezmoiscripts
+  # Inference sources. Local: port + health check for service management, optional
+  # reverse proxy domain. Cloud: openai-compatible base_url with per-provider env key.
+  # Services use provider key to route requests and look up model IDs (models: section).
   providers:
     # Local
     llama-server:
       api: openai
-      health: /health
+      liveness: /health
       label: com.llama-cpp.server
       port: 11437
       domain: llama-cpp.test
     mlx-embed:
       api: openai
-      health: /v1/models
+      liveness: /v1/models
       label: com.mlx-embed.server
       server: mlx-openai-server
       port: 11445
     mlx-lm:
       api: openai
       body: '{"object": "list"'
-      health: /v1/models
+      liveness: /v1/models
       label: com.mlx-lm.server
       # server: mlx_lm.server, mlx-omni-server, mlx-openai-server
       server: mlx_lm.server
@@ -42,28 +31,33 @@ ai:
       api: ollama
       port: 11434
       domain: ollama.test
-      health: /
+      liveness: /
       caddy:
         header_up: Host localhost
     vllm-mlx:
       api: openai
-      health: /v1/models
+      liveness: /v1/models
       port: 11436
       domain: vllm-mlx.test
 
     # Cloud
     anthropic:
       api: anthropic
+      base_url: https://api.anthropic.com/v1
       env: ANTHROPIC_API_KEY
     github-copilot:
       api: copilot
+    openai:
+      api: openai
+      base_url: https://api.openai.com/v1
+      env: OPENAI_API_KEY
     huggingface:
       api: openai
       base_url: https://router.huggingface.co/v1
       env: HF_TOKEN
     ollama-cloud:
-      api: openai
-      base_url: https://ollama.com/v1
+      api: ollama
+      base_url: https://ollama.com/api
       env: OLLAMA_API_KEY
     openrouter:
       api: openai
@@ -82,26 +76,47 @@ ai:
       api: openai
       base_url: https://api.z.ai/api/coding/paas/v4
       env: ZAI_API_KEY
-    # Built-in providers (no config needed, referenced in profiles only):
-    # opencode, opencode-go
+    # https://docs.mistral.ai/api
+    mistral:
+      api: mistral
+      env: MISTRAL_API_KEY
+    # mistral-openai:
+    #   api: openai
+    #   base_url: https://api.mistral.ai/v1
+    #   env: MISTRAL_API_KEY
+    # https://console.groq.com/keys
+    groq:
+      api: openai
+      base_url: https://api.groq.com/openai/v1
+      env: GROQ_API_KEY
+    # https://inference-docs.cerebras.ai
+    cerebras:
+      api: openai
+      base_url: https://api.cerebras.ai/v1
+      env: CEREBRAS_API_KEY
+    # https://api.together.ai/settings/api-keys
+    together:
+      api: openai
+      base_url: https://api.together.xyz/v1
+      env: TOGETHER_API_KEY
+    # https://console.x.ai/
+    xai:
+      api: openai
+      base_url: https://api.x.ai/v1
+      env: XAI_API_KEY
 
-  # Model: shared metadata and per-provider IDs
-  # type: chat (generation) or embedding
-  # reasoning: supports extended thinking / chain of thought
-  # tool_call: supports function calling
-  # cpu: can run on CPU without GPU acceleration
-  # Per-provider keys (mlx-lm, ollama): provider-specific model ID
-  #
-  # dot_config/opencode/opencode.jsonc: context window, provider IDs
-  # dot_logseq/settings/ollama-logseq.json: ollama ID for fast role
-  # dot_config/oage/setup-open-notebook: provider IDs for role mapping
+  # Shared model properties and per-provider IDs.
+  # Keyed by slug; profiles reference "provider/slug". Only models not already
+  # cataloged by models.dev need explicit entries here. Each entry defines
+  # shared metadata (context window, output limit, capabilities) plus a
+  # provider-keyed map to the upstream model ID.
   models:
     nomic-embed:
       type: embedding
       context: 8192
       mlx-lm: mlx-community/all-MiniLM-L6-v2-4bit
       ollama: nomic-embed-text
-    qwen3-4b:
+    qwen3.5-4b:
       type: chat
       context: 262144
       output: 65536
@@ -110,7 +125,7 @@ ai:
       cpu: true
       mlx-lm: mlx-community/Qwen3.5-4B-MLX-4bit
       ollama: qwen3.5:4b
-    qwen3-9b:
+    qwen3.5-9b:
       type: chat
       context: 262144
       output: 65536
@@ -131,6 +146,44 @@ ai:
         reasoning_tags:
           - "<|channel>thought"
           - "<channel|>"
+    # Mistral models: https://docs.mistral.ai/api
+    mistral-small:
+      type: chat
+      context: 256000
+      output: 256000
+      reasoning: false
+      tool_call: true
+      mistral: mistral-small-latest
+    mistral-medium:
+      type: chat
+      context: 262144
+      output: 262144
+      reasoning: false
+      tool_call: true
+      mistral: mistral-medium-latest
+    mistral-large:
+      type: chat
+      context: 262144
+      output: 262144
+      reasoning: false
+      tool_call: true
+      mistral: mistral-large-latest
+    # Code generation and FIM
+    codestral:
+      type: chat
+      context: 256000
+      output: 4096
+      reasoning: false
+      tool_call: true
+      mistral: codestral-latest
+    # Agentic tool use for software development
+    devstral-small:
+      type: chat
+      context: 128000
+      output: 128000
+      reasoning: false
+      tool_call: true
+      mistral: devstral-small-latest
     # qwen3-coder-30b:
     #   type: chat
     #   context: 262144
@@ -140,21 +193,110 @@ ai:
     #   mlx-lm: mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
     #   ollama: qwen3-coder:30b-a3b-q4_K_M
 
-  # Profile: named set of role-to-model mappings
-  # Roles: chat, coding, embedding, fast, reasoning
-  # Format: "provider/model-id" for cloud, bare model name for local
-  #
-  # dot_config/opencode/opencode.jsonc: coding, fast, reasoning
-  # dot_config/pi/agent/settings.json: coding (split on / for provider + model)
-  # dot_config/oage/setup-open-notebook: chat, coding, embedding
-  # dot_logseq/settings/ollama-logseq.json: fast
+    # Groq models: https://console.groq.com/docs/models
+    # Pricing: https://groq.com/pricing
+    llama-3.3-70b-versatile:
+      type: chat
+      context: 131072
+      output: 32768
+      reasoning: false
+      tool_call: true
+      # https://groq.com/pricing
+      groq: llama-3.3-70b-versatile
+      # https://inference-docs.cerebras.ai/models/overview
+      cerebras: llama-3.3-70b
+    llama-3.1-8b-instant:
+      type: chat
+      context: 131072
+      output: 131072
+      reasoning: false
+      tool_call: true
+      # https://groq.com/pricing
+      groq: llama-3.1-8b-instant
+    gpt-oss-120b:
+      type: chat
+      context: 131072
+      output: 65536
+      reasoning: true
+      tool_call: true
+      # https://groq.com/pricing
+      groq: openai/gpt-oss-120b
+
+    # Together AI models (verified from docs + pricing page, May 2026):
+    # https://docs.together.ai/docs/serverless-models
+    # https://www.together.ai/pricing
+    llama-3.3-70b-turbo:
+      type: chat
+      context: 131072
+      output: 8192
+      reasoning: false
+      tool_call: true
+      # https://www.together.ai/pricing
+      together: meta-llama/Llama-3.3-70B-Instruct-Turbo
+    qwen3-coder-480b:
+      type: chat
+      context: 262144
+      output: 8192
+      reasoning: false
+      tool_call: true
+      # https://www.together.ai/pricing
+      together: Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8
+    llama-3-8b-lite:
+      type: chat
+      context: 8192
+      output: 8192
+      reasoning: false
+      tool_call: true
+      # https://www.together.ai/pricing
+      together: meta-llama/Meta-Llama-3-8B-Instruct-Lite
+    deepseek-v4-pro:
+      type: chat
+      context: 512000
+      output: 8192
+      reasoning: true
+      tool_call: true
+      # https://www.together.ai/pricing
+      together: deepseek-ai/DeepSeek-V4-Pro
+
+    # xAI (Grok) models: https://docs.x.ai/docs/models
+    # Pricing: https://docs.x.ai/docs/models#model-pricing
+    grok-4.3:
+      type: chat
+      context: 1048576
+      output: 8192
+      reasoning: false
+      tool_call: true
+      # https://docs.x.ai/docs/models#model-pricing
+      xai: grok-4.3
+    grok-build-0.1:
+      type: chat
+      context: 262144
+      output: 8192
+      reasoning: false
+      tool_call: true
+      # https://docs.x.ai/docs/models#model-pricing
+      xai: grok-build-0.1
+    grok-4.20-reasoning:
+      type: chat
+      context: 1048576
+      output: 8192
+      reasoning: true
+      tool_call: true
+      # https://docs.x.ai/docs/models#model-pricing
+      xai: grok-4.20-0309-reasoning
+
+  # Named role-to-model mappings. One active profile selected per session.
+  # Roles: chat, coding, embedding, fast, reasoning. Values reference
+  # providers (cloud or local) and model slugs (defined in models: or via
+  # models.dev). Local profiles use bare model slugs; cloud profiles use
+  # "provider/model-slug" convention.
   profiles:
     local:
-      chat: qwen3-9b
-      coding: qwen3-9b
+      chat: qwen3.5-9b
+      coding: qwen3.5-9b
       embedding: nomic-embed
-      fast: qwen3-4b
-      reasoning: qwen3-9b
+      fast: qwen3.5-4b
+      reasoning: qwen3.5-9b
     mlx-local:
       chat: mlx-lm/mlx-community/gemma-4-e4b-it-4bit
       coding: mlx-lm/mlx-community/Qwen3.5-9B-MLX-4bit
@@ -185,10 +327,10 @@ ai:
       reasoning: github-copilot/claude-opus-4.6
 
     ollama-cloud:
-      chat: ollama-cloud/gpt-oss:120b
-      coding: ollama-cloud/qwen3-coder:480b
-      fast: ollama-cloud/gpt-oss:20b
-      reasoning: ollama-cloud/deepseek-v3.1:671b
+      chat: ollama-cloud/gpt-oss:120b-cloud
+      coding: ollama-cloud/qwen3-coder:480b-cloud
+      fast: ollama-cloud/gpt-oss:20b-cloud
+      reasoning: ollama-cloud/deepseek-v3.1:671b-cloud
 
     opencode-zen:
       chat: opencode/big-pickle
@@ -207,15 +349,23 @@ ai:
       fast: openrouter/qwen/qwen3-coder-30b-a3b-instruct
       reasoning: openrouter/deepseek/deepseek-r1-distill-llama-70b
     openrouter-auto:
-      chat: openrouter/auto
-      coding: openrouter/auto
-      fast: openrouter/auto
-      reasoning: openrouter/auto
+      chat: openrouter/openrouter/auto
+      coding: openrouter/openrouter/auto
+      fast: openrouter/openrouter/auto
+      reasoning: openrouter/openrouter/auto
+    # https://openrouter.ai/models?q=free
     openrouter-free:
-      chat: openrouter/free
-      coding: openrouter/free
-      fast: openrouter/free
-      reasoning: openrouter/free
+      chat: openrouter/google/gemma-4-26b-a4b-it:free
+      coding: openrouter/openrouter/free
+      fast: openrouter/openrouter/free
+      reasoning: openrouter/openrouter/free
+
+    # https://ai.google.dev/gemini-api/docs/models
+    google-free:
+      chat: google/gemini-3.5-flash
+      coding: google/gemini-3.5-flash
+      fast: google/gemini-3.5-flash
+      reasoning: google/gemini-3.5-flash
 
     huggingface:
       chat: huggingface/Qwen/Qwen3-Next-80B-A3B-Instruct
@@ -229,6 +379,13 @@ ai:
       fast: synthetic/glm-4.5-air
       reasoning: synthetic/glm-4.7
 
+    # https://docs.z.ai/guides/overview/pricing
+    zai-free:
+      chat: zai/glm-4.7-flash
+      coding: zai/glm-4.7-flash
+      fast: zai/glm-4.7-flash
+      reasoning: zai/glm-4.5-flash
+
     zai-coding-plan-lite:
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-4.7
@@ -237,10 +394,50 @@ ai:
     zai-coding-plan-pro:
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-5.1
-      fast: zai-coding-plan/glm-4.6
+      fast: zai-coding-plan/glm-4.5-air
       reasoning: zai-coding-plan/glm-5-turbo
     zai-coding-plan-max:
       chat: zai-coding-plan/glm-4.7
       coding: zai-coding-plan/glm-5.1
       fast: zai-coding-plan/glm-4.7
-      reasoning: zai-coding-plan/glm-5
+      reasoning: zai-coding-plan/glm-5.1
+
+    # https://groq.com/pricing
+    groq:
+      chat: groq/llama-3.3-70b-versatile
+      coding: groq/llama-3.3-70b-versatile
+      fast: groq/llama-3.1-8b-instant
+      reasoning: groq/gpt-oss-120b
+
+    # https://inference-docs.cerebras.ai
+    cerebras:
+      chat: cerebras/llama-3.3-70b
+      coding: cerebras/llama-3.3-70b
+      fast: cerebras/llama-3.3-70b
+      reasoning: cerebras/llama-3.3-70b
+
+    # https://www.together.ai/pricing
+    together:
+      chat: together/llama-3.3-70b-turbo
+      coding: together/qwen3-coder-480b
+      fast: together/llama-3-8b-lite
+      reasoning: together/deepseek-v4-pro
+
+    # https://docs.x.ai/docs/models#model-pricing
+    xai:
+      chat: xai/grok-4.3
+      coding: xai/grok-4.3
+      fast: xai/grok-build-0.1
+      reasoning: xai/grok-4.20-reasoning
+
+    # Mistral: https://mistral.ai/pricing
+    mistral:
+      chat: mistral/mistral-small-latest
+      coding: mistral/devstral-small-latest
+      fast: mistral/mistral-small-latest
+      reasoning: mistral/mistral-medium-latest
+    mistral-pro:
+      chat: mistral/mistral-large-latest
+      coding: mistral/devstral-small-latest
+      fast: mistral/mistral-small-latest
+      reasoning: mistral/mistral-large-latest

@@ -13,7 +13,7 @@ if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then
 fi
 
 exit_code=0
-output="$(chezmoi doctor --dry-run --no-network)" || exit_code=$?
+output="$(chezmoi doctor --dry-run --no-network --no-tty)" || exit_code=$?
 
 echo "$output" | grep -v '^\(info\|ok\)' || true
 

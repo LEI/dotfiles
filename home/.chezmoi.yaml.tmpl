@@ -18,16 +18,21 @@
 {{- $codespaces := env "CODESPACES" | not | not }}
 {{- $container := includeTemplate "container.tmpl" dict | trim }}
 {{- $isContainer := not (empty $container) }}
-{{- if and $isContainer .chezmoi.config.verbose }}
-{{-   warnf "container type: %s" $container }}
-{{- end }}
 {{- $devContainer := env "REMOTE_CONTAINERS" | not | not }}
 
 {{- $interactive := stdinIsATTY }}
+
+{{- $vm := false }}
+{{- if and (eq .chezmoi.os "darwin") (lookPath "sysctl" | isExecutable) }}
+{{-   $vm = eq (output "sysctl" "-n" "kern.hv_vmm_present" | trim) "1" }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "systemd-detect-virt" | isExecutable) }}
+{{-   $vm = ne (output "sh" "-c" "systemd-detect-virt 2>/dev/null || true" | trim) "none" }}
+{{- end }}
+
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
 
 {{- /* (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") */ -}}
-{{- if or $ci $codespaces $isContainer $devContainer }}
+{{- if or $ci $codespaces $isContainer $devContainer $vm }}
 {{-   $ephemeral = true }}
 {{-   $headless = true }}
 {{- else if $interactive }}
@@ -44,22 +49,27 @@
 
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v)\n" $profile $ephemeral $headless) }}
 
+{{- if and $isContainer .chezmoi.config.verbose }}
+{{-   warnf "container type: %s" $container }}
+{{- end }}
+{{- if and $vm .chezmoi.config.verbose }}
+{{-   warnf "virtual machine" }}
+{{- end }}
+
 {{- $osID := get .chezmoi.osRelease "id" | default .chezmoi.os }}
-{{- $osIDLike := get .chezmoi.osRelease "idLike" | default $osID }}
+{{- $osIDLikeRaw := get .chezmoi.osRelease "idLike" | default $osID }}
+{{- $osIDLike := $osIDLikeRaw }}
+{{- if kindIs "array" $osIDLikeRaw }}
+{{-   $osIDLike = first $osIDLikeRaw }}
+{{- else if kindIs "string" $osIDLikeRaw }}
+{{-   $osIDLike = $osIDLikeRaw | splitList " " | first }}
+{{- end }}
 {{- $osVersion := get .chezmoi.osRelease "versionID" }}
 {{- if and (eq $osID "linux") (eq (env "HOME") "/data/data/com.termux/files/home") }}
 {{-   $osID = "android" }}
 {{- end }}
 
 {{- $variantID := get (get .chezmoi "osRelease" | default dict) "variantID" }}
-
-{{- $chassisType := includeTemplate "chassis-type.tmpl" (dict "chezmoi" .chezmoi) | trim }}
-
-{{- $chassisVendor := "" }}
-{{- $chassisVendorFile := "/sys/devices/virtual/dmi/id/chassis_vendor" }}
-{{- if stat $chassisVendorFile }}
-{{-  $chassisVendor = include $chassisVendorFile | trim }}
-{{- end }}
 
 {{- $hardware := includeTemplate "hardware.json.tmpl" (dict "chezmoi" .chezmoi) | fromJson }}
 
@@ -118,22 +128,27 @@
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $libc := includeTemplate "libc.tmpl" . | trim }}
 
-{{- /* cat /etc/timezone 2>/dev/null || (sudo systemsetup -gettimezone | cut -d: -f2 | tr -d ' ') */ -}}
-{{- $timezone := env "TZ" }}
-{{- if and (not $timezone) (lookPath "sh" | isExecutable) }}
-{{-   $timezone = output "sh" "-c" "readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g'" | trim }}
-{{- end }}
+{{- $featureMap := dict
+  "cargo" "rust"
+  "homebrew" "brew"
+  "gem" "ruby"
+  "krew" "kube"
+  "npm" "node"
+  "nvim" "neovim"
+  "pi" "ai"
+-}}
 
 {{- $data := dict
   "arch" .chezmoi.arch
-  "chassisType" $chassisType
-  "chassisVendor" $chassisVendor
+  "chassisType" $hardware.system.chassisType
+  "chassisVendor" $hardware.system.vendor
   "computerName" $computerName
   "ci" $ci
   "codespaces" $codespaces
   "container" $isContainer
   "devContainer" $devContainer
   "ephemeral" $ephemeral
+  "featureMap" $featureMap
   "gui" (and (ne $profile "minimal") (not (or $ephemeral $headless)))
   "hardware" $hardware
   "headless" $headless
@@ -148,22 +163,35 @@
   "sessionType" (env "XDG_SESSION_TYPE")
   "softwareVersion" $softwareVersion
   "system" $system
-  "timezone" $timezone
   "variantID" $variantID
+  "vm" $vm
   "wsl" $wsl
 
   "email" $email
   "name" $name
 }}
+
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson }}
 {{- $_ := set $data "features" $features }}
+
+{{- $caddyTailscaleOauthSecret := "" -}}
+{{- if and (not $headless) $features.caddy $features.tailscale -}}
+{{-   $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
+{{- end -}}
+{{- $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) }}
+
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}
 {{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
 {{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
 {{-   end }}
 {{- end }}
+
+{{- /* FIXME: only use data */ -}}
 {{- $context := mergeOverwrite . $data }}
+
+{{- $timezone := includeTemplate "timezone.tmpl" $context | trim }}
+{{- $_ := set $data "timezone" $timezone }}
 
 # https://www.chezmoi.io/user-guide/encryption/age/
 # encryption: age
@@ -231,6 +259,8 @@ data:
   "darwin" "brew"
   "debian" "apt"
   "fedora" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
+  "opensuse" "zypper"
+  "rhel" (lookPath "dnf" | isExecutable | ternary "dnf" "rpm")
   "windows" "winget"
 }}
 {{- $packageManager := get $packageManagerMap $osIDLike }}
@@ -251,8 +281,8 @@ data:
 {{- if and $features.tailscale (lookPath "tailscale" | isExecutable) }}
 
   tailscale:
-    tailnet: {{ output "sh" "-c" "tailscale status --json 2>/dev/null | jq -r '.CertDomains[0]' || true" | trim | quote }}
-    ips: {{ output "sh" "-c" "tailscale status --json 2>/dev/null | jq -r '.Self.TailscaleIPs' || true" | fromJson }}
+    tailnet: {{ output "sh" "-c" "tailscale status --json 2>/dev/null | jq -r '.CertDomains[0] // empty' || true" | trim | quote }}
+    ips: {{ output "sh" "-c" "tailscale status --json 2>/dev/null | jq -r '.Self.TailscaleIPs // empty' || true" | default "[]" | fromJson }}
 {{- end }}
 
 {{- if $features.ai }}
@@ -267,7 +297,7 @@ data:
       mlx-lm:
         active: {{ $features.mlx }}
       ollama:
-        active: {{ not $features.mlx }}
+        active: {{ and $features.ollama (not $features.mlx) }}
       vllm-mlx:
         active: false
 {{- end }}
@@ -286,26 +316,68 @@ data:
 {{-   end }}
 {{- end }}
 
-{{- if $features.opencode }}
-  opencode:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
+  # TODO: remove home/.chezmoidata/apis.yaml
+  # loop over feature data map dict
+  # and allow .data.yaml.tmpl
+  apis:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
+
 {{- if $features.claude }}
+
   claude:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_claude" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
-  apis:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
+
+{{/*- if $features.i3 */}}
+
+  i3:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/i3" "chezmoi" .chezmoi) | indent 4 }}
+{{/*- end */}}
+
+{{- if $features.logseq }}
+
   logseq:
 {{ includeTemplate "data.tmpl" (dict "dir" "dot_logseq" "chezmoi" .chezmoi) | indent 4 }}
-  pi:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+
+{{- if $features.kb }}
+
+  kb:
+{{ includeTemplate "data.tmpl" (dict "dir" "kb" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+
+{{- if $features.opencode }}
+
+  opencode:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
+{{- end }}
+
+{{- if $features.openpackage }}
+{{-   $platforms := list }}
+{{-   if $features.claude }}{{- $platforms = append $platforms "claude" }}{{- end }}
+{{-   if $features.codex }}{{- $platforms = append $platforms "codex" }}{{- end }}
+{{-   if $features.opencode }}{{- $platforms = append $platforms "opencode" }}{{- end }}
+{{-   if $features.pi }}{{- $platforms = append $platforms "pimono" }}{{- end }}
+{{-   $opkgData := includeTemplate "data.tmpl" (dict "dir" "dot_openpackage" "chezmoi" .chezmoi) | fromYaml | default dict }}
+{{-   $_ := set $opkgData "platforms" $platforms }}
+
+  openpackage:
+{{ $opkgData | toYaml | indent 4 }}
+{{- end }}
+
+  # TODO: process-compose/.data.yaml
 {{- $pcLocal := joinPath .chezmoi.homeDir ".config/process-compose/local.yaml" -}}
 {{- if stat $pcLocal -}}
 {{-   range $key, $value := include $pcLocal | fromYaml }}
   {{ $key }}:
 {{ $value | toYaml | indent 4 }}
 {{-   end }}
+{{- end }}
+
+{{- if $features.pi }}
+
+  pi:
+{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
 {{- end }}
 
 diff:
@@ -349,32 +421,8 @@ scriptEnv:
 {{- end }}
 
 {{- if ne $osID "windows" }}
-
-{{-   $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
-{{ $paths | uniq | join "\n" | comment "# " | indent 2 }}
-{{-   if eq $osID "android" }}
-{{-     $paths = prepend $paths "/data/data/com.termux/files/usr/bin" }}
-{{-   else }}
-{{-     $paths = prepend $paths "/usr/bin" }}
-{{-   end }}
-{{-   $miseShims := joinPath .chezmoi.homeDir ".local/share/mise/shims" }}
-{{-   if and $features.mise (not (has $miseShims $paths)) }}
-{{-     $paths = append $paths $miseShims }}
-{{-   end }}
-{{-   if or $features.brew (eq .chezmoi.os "darwin") }}
-{{-     $brewBin := joinPath $brewPrefix "bin" }}
-{{-     if not (has $brewBin $paths) }}
-{{-       $paths = prepend $paths $brewBin }}
-{{-     end }}
-{{-     $rubyBin := joinPath $brewPrefix "opt/ruby/bin" }}
-{{-     if not (has $rubyBin $paths) -}}
-{{-       $paths = prepend $paths $rubyBin }}
-{{-     end -}}
-{{-   end }}
-{{-   $paths = append $paths $binDir }}
-
-  # WARN: do not alter path
-  # PATH: {{ $paths | uniq | join ":" | quote }}
+{{- $paths := without (env "PATH" | splitList ":") "/usr/bin" }}
+{{ $paths | join "\n" | comment "# " | indent 2 }}
 {{- end }}
 
   TMPDIR: {{ coalesce .chezmoi.config.tempDir (env "TMPDIR") (env "TMP") "/tmp" | quote }}
