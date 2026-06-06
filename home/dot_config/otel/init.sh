@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 export OTEL_CONFIG_DIR="${OTEL_CONFIG_DIR:-$HOME/.config/otel}"
 # systemctl --user start podman.socket
 

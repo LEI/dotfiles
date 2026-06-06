@@ -1,5 +1,7 @@
 {{- $linux := eq .os "linux" -}}
 {{- $podman := and .features.podman (not .features.docker) -}}
+{{- $grafanaMcpToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token" -}}
+{{- $grafanaMcp := and .features.ai (stat $grafanaMcpToken) -}}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
@@ -55,7 +57,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
       interval: 60s
@@ -64,33 +66,78 @@ services:
       start_period: 10s
 
   grafana:
-    image: grafana/grafana:12.4.1
+    image: grafana/grafana:13.0.1
+{{- if $linux }}
+    user: "0:0" # rootless: read host-owned secret
+{{- end }}
     restart: unless-stopped
     ports:
       - "127.0.0.1:3033:3000" # Web UI
+      - "::1:3033:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro,Z
       - ./grafana/provisioning:/etc/grafana/provisioning:ro,Z
+{{- if $linux }}
+      - ${XDG_CONFIG_HOME}/otel/secrets/grafana-admin-password:/run/secrets/grafana-admin-password:ro,Z
+{{- end }}
     environment:
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_AUTH_BASIC_ENABLED=true
       - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_NEWS_NEWS_FEED_ENABLED=false
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana-admin-password
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_USERS_VIEWERS_CAN_EDIT=true
+{{- if ne .os "linux" }}
     secrets:
       - grafana-admin-password
+{{- end }}
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  {{- if $grafanaMcp }}
+
+  # Grafana MCP Server: AI assistant access to Grafana
+  grafana-mcp:
+    image: docker.io/grafana/mcp-grafana:0.14.0
+{{- if $linux }}
+    user: "0:0" # rootless: read host-owned secret
+{{- end }}
+    restart: unless-stopped
+    networks:
+      - default
+    environment:
+      - GRAFANA_URL=http://grafana:3000
+      - GRAFANA_SERVICE_ACCOUNT_TOKEN__FILE=/run/secrets/grafana-mcp-token
+{{- if $linux }}
+    volumes:
+      - ${XDG_CONFIG_HOME}/otel/secrets/grafana-mcp-token:/run/secrets/grafana-mcp-token:ro,Z
+{{- else }}
+    secrets:
+      - grafana-mcp-token
+{{- end }}
+    depends_on:
+      grafana:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+  {{- end }}
 
   # # Jaeger: trace backend (replaced by Tempo)
   # jaeger:
@@ -110,13 +157,14 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3100:3100" # HTTP API
+      - "::1:3100:3100"
     volumes:
       - ./loki.yaml:/etc/loki/loki.yaml:ro,Z
       - loki-data:/loki
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
     # healthcheck: distroless image, no curl/wget
     #   test: ["CMD", "curl", "-f", "http://localhost:3100/ready"]
     #   interval: 30s
@@ -199,7 +247,9 @@ services:
       - monitoring
     ports:
       - "127.0.0.1:4317:4317" # gRPC
+      - "::1:4317:4317"
       - "127.0.0.1:4318:4318" # HTTP
+      - "::1:4318:4318"
       # - "127.0.0.1:8888:8888" # Metrics
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro,Z
@@ -216,6 +266,9 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.10.0
+{{- if eq .os "linux" }}
+    user: "0:0" # rootless: read host-owned secret
+{{- end }}
     command:
       - --config.file=/etc/prometheus/prometheus.yaml
       - --storage.tsdb.path=/prometheus
@@ -230,16 +283,21 @@ services:
       - host.docker.internal:host-gateway
     ports:
       - "127.0.0.1:9090:9090" # Web UI
+      - "::1:9090:9090"
     volumes:
       - ./alerts:/etc/prometheus/alerts:ro,Z
       - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro,Z
       - prometheus-data:/prometheus
+{{- if eq .os "linux" }}
+      - ${XDG_CONFIG_HOME}/oage/secrets/bifrost-admin-password:/run/secrets/bifrost-admin-password:ro,Z
+{{- else }}
     secrets:
       - bifrost-admin-password
+{{- end }}
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
       interval: 30s
@@ -252,15 +310,19 @@ services:
     image: grafana/tempo:2.10.3
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     restart: unless-stopped
+    depends_on:
+      prometheus:
+        condition: service_healthy
     ports:
       - "127.0.0.1:3200:3200" # HTTP API
+      - "::1:3200:3200"
     volumes:
       - ./tempo.yaml:/etc/tempo/tempo.yaml:ro,Z
       - tempo-data:/var/tempo
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
     # healthcheck: distroless image, no curl/wget
     #   test: ["CMD", "curl", "-f", "http://localhost:3200/ready"]
     #   interval: 30s
@@ -274,11 +336,18 @@ networks:
     name: monitoring
     external: true
 
+{{- if ne .os "linux" }}
+
 secrets:
   bifrost-admin-password:
     file: ${XDG_CONFIG_HOME}/oage/secrets/bifrost-admin-password
   grafana-admin-password:
     file: ${XDG_CONFIG_HOME}/otel/secrets/grafana-admin-password
+  {{- if $grafanaMcp }}
+  grafana-mcp-token:
+    file: ${XDG_CONFIG_HOME}/otel/secrets/grafana-mcp-token
+  {{- end }}
+{{- end }}
 
 volumes:
   # alertmanager-data:

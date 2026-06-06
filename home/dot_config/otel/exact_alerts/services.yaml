@@ -6,10 +6,7 @@ groups:
       # LLM gateway error rate
       - alert: BifrostHighErrorRate
         expr: >
-          rate(bifrost_error_requests_total[5m])
-          /
-          (rate(bifrost_success_requests_total[5m]) + rate(bifrost_error_requests_total[5m]))
-          > 0.1
+          rate(bifrost_error_requests_total[5m]) / (rate(bifrost_success_requests_total[5m]) + rate(bifrost_error_requests_total[5m])) > 0.1
         for: 3m
         labels:
           severity: warning
@@ -30,15 +27,15 @@ groups:
   - name: tempo
     interval: 30s
     rules:
-      # Trace ingestion stopped
+      # Trace ingestion stopped, 30m tolerates idle workstation periods
       - alert: TempoIngestionStopped
         expr: rate(tempo_distributor_spans_received_total[5m]) == 0
-        for: 10m
+        for: 30m
         labels:
           severity: warning
         annotations:
           summary: "Tempo not receiving spans"
-          description: "No spans received in 10 minutes"
+          description: "No spans received in 30 minutes"
 
       # Discarded spans
       - alert: TempoDiscardedSpans
@@ -66,10 +63,7 @@ groups:
       # Search/query request errors
       - alert: MilvusRequestErrors
         expr: >
-          sum(rate(milvus_proxy_req_count{status="fail"}[5m]))
-          /
-          sum(rate(milvus_proxy_req_count[5m]))
-          > 0.1
+          sum(rate(milvus_proxy_req_count{status="fail"}[5m])) / sum(rate(milvus_proxy_req_count[5m])) > 0.1
         for: 3m
         labels:
           severity: warning

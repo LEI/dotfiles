@@ -48,7 +48,7 @@ overrides:
 
 compactor:
   compaction:
-    block_retention: 168h # 7 days (default: 48h)
+    block_retention: 48h
 
 storage:
   trace:
