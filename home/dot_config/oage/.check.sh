@@ -2,24 +2,27 @@
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 5)); then
-  echo >&2 "bash 5+ required, found $BASH_VERSION"
-  exit 1
-fi
+lib_dir="$HOME/.local/lib"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
+# shellcheck source=home/dot_local/lib/sh/tap.sh
+source "$lib_dir/sh/tap.sh"
+# shellcheck source=home/dot_local/lib/bash/output.sh
+source "$lib_dir/bash/output.sh"
+output_init "$@"
 
-# shellcheck disable=SC1091
-. "${XDG_CONFIG_HOME:-$HOME/.config}/sh/lib/tap.sh"
+require_bash 5
 
 # Oage check
 
 if [[ "$(hostname)" == fr* ]]; then
-  tap_plan 0 "oage check"
+  output_plan 0 "oage check"
   exit 0
 fi
 
 MAX_TIME="${MAX_TIME:-60}"
 
-data="$(chezmoi data --format=json)"
+data="$(chezmoi data --format=json --no-tty)"
 
 jqr() { printf '%s' "$data" | jq --raw-output "$@"; }
 
@@ -45,25 +48,25 @@ FIELDS + {url: $url, elapsed_s: (elapsed | round2)}
 
 check() {
   local label="$1" assert="$2" fields="$3" url="$4" body="$5"
-  local response rc=0 t0 t1
+  local response exit_code=0 t0 t1
   t0=$EPOCHREALTIME
-  response="$(post "$url" "$body")" || rc=$?
+  response="$(post "$url" "$body")" || exit_code=$?
   t1=$EPOCHREALTIME
-  if [[ $rc -ne 0 ]]; then
-    tap_not_ok "$label"
-    tap_diag_kv "severity: fail" "message: curl exit $rc" "url: $url"
-    tap_bail "$url unreachable"
+  if [[ $exit_code -ne 0 ]]; then
+    output_not_ok "$label"
+    output_diag_kv "check" "severity=fail" "message=curl exit $exit_code" "url=$url"
+    output_bail "$url unreachable"
     exit 1
   fi
   if ! printf '%s' "$response" | jq --exit-status "$assert" >/dev/null 2>&1; then
-    tap_not_ok "$label"
-    tap_diag_kv "severity: fail" "message: assertion failed" "url: $url"
+    output_not_ok "$label"
+    output_diag_kv "check" "severity=fail" "message=assertion failed" "url=$url"
     return 0
   fi
-  tap_ok "$label"
+  output_ok "$label"
   printf '%s' "$response" | jq --raw-output \
     --arg t0 "$t0" --arg t1 "$t1" --arg url "$url" \
-    "${metrics_filter//FIELDS/(${fields})}" | tap_diag_json
+    "${metrics_filter//FIELDS/(${fields})}" | output_diag_json
 }
 
 chat() {
@@ -78,7 +81,7 @@ chat() {
 local_provider="$(jqr '.ai.localProvider')"
 
 if [[ -z "$local_provider" ]]; then
-  tap_plan 0 "local provider disabled"
+  output_plan 0 "local provider disabled"
   exit 0
 fi
 
@@ -97,7 +100,7 @@ embed_port="$(jqr --arg p "$embed_provider" '.ai.providers[$p].port')"
 
 # Tests
 
-tap_plan 4
+output_plan 4
 
 chat "completions" \
   '.choices[0] | has("finish_reason") and .message.role == "assistant"' \
@@ -145,8 +148,7 @@ check "embeddings" \
   "{\"model\": \"$embed_model\", \"input\": \"test\"}"
 
 # Restart hung services on failure (KeepAlive restarts them)
-# shellcheck disable=SC2154 # failures is set by tap.sh
-if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
+if [[ "$TAP_FAILS" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   gui="gui/$(id -u)"
   # shellcheck disable=SC2016
   label="$(jqr --arg p "$local_provider" '.ai.providers[$p].label')"
@@ -156,4 +158,4 @@ if [[ "$failures" -gt 0 ]] && command -v launchctl >/dev/null 2>&1; then
   fi
 fi
 
-exit "$failures"
+exit "$TAP_FAILS"

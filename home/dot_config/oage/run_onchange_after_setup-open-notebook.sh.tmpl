@@ -8,6 +8,8 @@
 {{- $key := $.features.mlx | ternary "mlx-lm" "ollama" -}}
 {{- $provider := get $.ai.providers $key -}}
 {{- $isOllama := eq $key "ollama" -}}
+{{- $credName := $isOllama | ternary $cred.name (printf "%s-local" $key) -}}
+{{- $credBaseUrl := $isOllama | ternary $cred.base_url (printf "http://host.docker.internal:%v/v1" $provider.port) -}}
 {{- $localModels := list -}}
 {{- $models := list -}}
 {{- range $role, $notebookRoles := $roleMap -}}
@@ -20,16 +22,33 @@
 {{-   $type := eq $role "embedding" | ternary "embedding" "language" -}}
 {{-   $models = append $models (dict "name" $displayName "type" $type "default" $notebookRoles) -}}
 {{- end -}}
-{{- $types := list }}{{ range $models }}{{ $types = append $types .type }}{{ end -}}
+{{- $types := list -}}
+{{- $seen := dict -}}
+{{- $uniqModels := list -}}
+{{- range $models -}}
+{{-   $types = append $types .type -}}
+{{-   if not (hasKey $seen .name) -}}
+{{-     $_ := set $seen .name true -}}
+{{-     $uniqModels = append $uniqModels . -}}
+{{-   end -}}
+{{- end -}}
 #!/bin/sh
 
 # config hash: {{ dict "credential" $cred "provider" $key "profiles" $.ai.profiles.local "models" ($localModels | uniq) | toJson | sha256sum }}
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 BASE_URL="http://127.0.0.1:5055"
+
+if ! retry 10 3 http_check "$BASE_URL/api/credentials" 200; then
+  die "open-notebook: $BASE_URL not reachable"
+fi
 
 api() {
   method="$1" path="$2"
@@ -39,49 +58,58 @@ api() {
     "$@"
 }
 
+extract_id() {
+  resp="$1" what="$2"
+  id="$(echo "$resp" | jq -r '.id')"
+  if [ -z "$id" ] || [ "$id" = "null" ]; then
+    die "open-notebook: missing id in $what response: $resp"
+  fi
+  echo "$id"
+}
+
 ensure_credential() {
   name="$1" provider="$2" modalities="$3" api_key="$4" base_url="$5"
-  existing="$(api GET /api/credentials | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
+  list="$(api GET /api/credentials)"
+  existing="$(echo "$list" | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
   if [ -n "$existing" ]; then
     msg "open-notebook: credential '$name' already exists"
     echo "$existing"
     return
   fi
-  id="$(api POST /api/credentials -d "$(
-    jq -n \
-      --arg name "$name" \
-      --arg provider "$provider" \
-      --arg api_key "$api_key" \
-      --arg base_url "$base_url" \
-      --argjson modalities "$modalities" \
-      '{name: $name, provider: $provider, modalities: $modalities, api_key: $api_key, base_url: $base_url}'
-  )" | jq -r '.id')"
+  payload="$(jq -n \
+    --arg name "$name" \
+    --arg provider "$provider" \
+    --arg api_key "$api_key" \
+    --arg base_url "$base_url" \
+    --argjson modalities "$modalities" \
+    '{name: $name, provider: $provider, modalities: $modalities, api_key: $api_key, base_url: $base_url}')"
+  resp="$(api POST /api/credentials -d "$payload")"
+  id="$(extract_id "$resp" credential)"
   msg "open-notebook: created credential '$name' ($id)"
   echo "$id"
 }
 
 ensure_model() {
   name="$1" type="$2" credential_id="$3"
-  existing="$(api GET /api/models | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
+  list="$(api GET /api/models)"
+  existing="$(echo "$list" | jq -r --arg n "$name" '.[] | select(.name == $n) | .id')"
   if [ -n "$existing" ]; then
     msg "open-notebook: model '$name' already exists"
     echo "$existing"
     return
   fi
-  id="$(api POST /api/models -d "$(
-    jq -n \
-      --arg name "$name" \
-      --arg provider "openai-compatible" \
-      --arg type "$type" \
-      --arg credential "$credential_id" \
-      '{name: $name, provider: $provider, type: $type, credential: $credential}'
-  )" | jq -r '.id')"
+  payload="$(jq -n \
+    --arg name "$name" \
+    --arg provider "openai-compatible" \
+    --arg type "$type" \
+    --arg credential "$credential_id" \
+    '{name: $name, provider: $provider, type: $type, credential: $credential}')"
+  resp="$(api POST /api/models -d "$payload")"
+  id="$(extract_id "$resp" model)"
   msg "open-notebook: registered model '$name' ($id)"
   echo "$id"
 }
 
-{{- $credName := $isOllama | ternary $cred.name (printf "%s-local" $key) }}
-{{- $credBaseUrl := $isOllama | ternary $cred.base_url (printf "http://host.docker.internal:%v/v1" $provider.port) }}
 cred_id="$(
   ensure_credential \
     "{{ $credName }}" \
@@ -90,10 +118,10 @@ cred_id="$(
     "$(cat "$XDG_CONFIG_HOME/oage/secrets/bifrost-api-key")" \
     "{{ $credBaseUrl }}"
 )"
-
-{{ range $models -}}
+{{- range $uniqModels }}
 ensure_model "{{ .name }}" "{{ .type }}" "$cred_id"
-{{ end }}
+{{- end }}
+
 # Build defaults: pass model config as JSON, look up IDs from API response
 models_json="$(api GET /api/models)"
 defaults="$(jq -n \
