@@ -1,0 +1,6 @@
+---
+enabled: "{{ .features.gemini }}"
+packages:
+  # https://aistudio.google.com/app/apikey
+  gemini-cli:
+    type: brew

@@ -1,0 +1,25 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    },
+    "environmentVariableRedaction": {
+      "enabled": false
+    }
+  },
+  "general": {
+    "vimMode": true,
+    "sessionRetention": {},
+    "preferredEditor": "neovim"
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showMemoryUsage": true,
+    "errorVerbosity": "full"
+  },
+  "experimental": {
+    "voiceMode": true
+  }
+}
