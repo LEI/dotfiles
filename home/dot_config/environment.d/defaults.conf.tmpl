@@ -2,11 +2,15 @@
 DO_NOT_TRACK=1
 
 {{- $ca := "" }}
-{{- if stat "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" }}
-{{-   $ca = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" }}
-{{- else if stat "/etc/pki/tls/certs/ca-bundle.crt" }}
-{{-   $ca = "/etc/pki/tls/certs/ca-bundle.crt" }}
+{{- $caPathNew := "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" }}
+{{- $caPathOld := "/etc/pki/tls/certs/ca-bundle.crt" }}
+
+{{- if stat $caPathNew }}
+{{-   $ca = $caPathNew }}
+{{- else if stat $caPathOld }}
+{{-   $ca = $caPathOld }}
 {{- end }}
+
 {{- if $ca }}
 
 # System CA bundle for brew curl and Python (Fedora 44 removed ca-bundle.crt)
