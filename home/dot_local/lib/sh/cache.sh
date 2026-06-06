@@ -6,7 +6,7 @@
 cache_get() {
   cache_path="$1" max_age="$2"
   [ -f "$cache_path" ] || return 1
-  cache_age=$(($(date +%s) - $(stat -c %Y "$cache_path" 2>/dev/null || echo 0)))
+  cache_age=$(($(date +%s) - $(stat -c %Y "$cache_path" 2>/dev/null || stat -f %m "$cache_path" 2>/dev/null || echo 0)))
   [ "$cache_age" -lt "$max_age" ] || return 1
   cat "$cache_path"
 }
@@ -25,7 +25,7 @@ cache_set() {
 cache_age_human() {
   cache_path="$1"
   [ -f "$cache_path" ] || return 0
-  elapsed=$(($(date +%s) - $(stat -c %Y "$cache_path" 2>/dev/null || echo 0)))
+  elapsed=$(($(date +%s) - $(stat -c %Y "$cache_path" 2>/dev/null || stat -f %m "$cache_path" 2>/dev/null || echo 0)))
   if [ "$elapsed" -lt 60 ]; then
     printf "%ds ago" "$elapsed"
   elif [ "$elapsed" -lt 3600 ]; then
