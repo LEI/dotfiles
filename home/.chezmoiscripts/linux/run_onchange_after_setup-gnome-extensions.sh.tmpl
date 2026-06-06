@@ -4,26 +4,52 @@
 
 set -eu
 
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+
 # Pin the shell version so a GNOME upgrade re-runs this
 # {{ output "sh" "-c" "gnome-shell --version 2>/dev/null || true" | trim }}
 uuids="caffeine@patapon.info"
 
+# Check for gext (gnome-extensions-cli)
 if ! command -v gext >/dev/null 2>&1; then
-  echo "gext not installed (expected the gnome-extensions-cli package)" >&2
+  err "gext not installed (expected the gnome-extensions-cli package)"
+  err "Install with: uv tool install gnome-extensions-cli"
   exit 1
 fi
 
+# Check if gext supports quiet mode
+if gext --help 2>&1 | grep -q -- "--quiet"; then
+  gext_update_quiet="--quiet"
+else
+  gext_update_quiet=""
+fi
+
 for uuid in $uuids; do
-  if [ -d "$HOME/.local/share/gnome-shell/extensions/$uuid" ]; then
-    echo "$uuid already installed"
+  extension_dir="$HOME/.local/share/gnome-shell/extensions/$uuid"
+
+  if [ -d "$extension_dir" ]; then
+    info "$uuid already installed"
     continue
   fi
+
   # --filesystem avoids DBus prompts
-  echo "Installing $uuid via gext..."
-  gext --filesystem install "$uuid"
+  info "Installing $uuid via gext..."
+  if ! run gext --filesystem install "$uuid"; then
+    err "Failed to install $uuid"
+    exit 1
+  fi
 done
 
-gext --filesystem update
+# Update all gext-managed extensions
+info "Updating GNOME extensions..."
+if ! run gext --filesystem update $gext_update_quiet; then
+  warn "Failed to update extensions"
+  exit 1
+fi
 
-echo "GNOME extensions reconciled: $uuids"
+info "GNOME extensions reconciled: $uuids"
 {{ end -}}
