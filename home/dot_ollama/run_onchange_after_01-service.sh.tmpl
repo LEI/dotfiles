@@ -7,24 +7,25 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 {{- if eq $service "brew" }}
 {{ includeTemplate "brew-apply.sh.tmpl" (dict
   "active" $active
   "formula" "ollama"
   "port" $provider.port
-  "health" $provider.health) }}
+  "liveness" $provider.liveness) }}
 {{- else if eq $service "compose" }}
 {{-   if $active }}
-
-# Compose manages its own lifecycle; health check only
-if ! run retry 10 3 curl --silent --fail --max-time 5 "http://localhost:{{ $provider.port }}{{ $provider.health }}" >/dev/null; then
-  die "ollama: unhealthy after retries"
-fi
+{{- includeTemplate "health-check.sh.tmpl" (merge (dict "name" "ollama" "active" $active) $provider) }}
 {{-   end }}
 {{- else if eq $service "quadlet" }}
-# container: {{ includeTemplate "dot_config/containers/systemd/ollama.container.tmpl" . | sha256sum }}
+{{- $containerFile := joinPath .chezmoi.homeDir ".config/containers/systemd/ollama.container" -}}
+# container: {{ include $containerFile | sha256sum }}
 # Pre-pull image to avoid systemd timeout
 {{-   $version := $ollama.version | default "0.21.0" }}
 msg "ollama: pulling image docker.io/ollama/ollama:{{ $version }}..."
@@ -34,7 +35,7 @@ run podman pull "docker.io/ollama/ollama:{{ $version }}"
   "active" $active
   "unit" "ollama.container"
   "port" $provider.port
-  "health" $provider.health
+  "liveness" $provider.liveness
 ) | trim }}
 {{ end -}}
 {{ end -}}

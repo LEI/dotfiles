@@ -2,8 +2,9 @@
 {{- $service := get $ollama "service" | default "brew" -}}
 {{- $container := get $ollama "container" -}}
 {{- $provider := eq $service "quadlet" | ternary "podman" (get . "containerProvider") -}}
+# shellcheck shell=bash
 
-{{- if $container -}}
+{{ if $container -}}
 if ! command -v ollama >/dev/null; then
   ollama() {
     set -- {{ $container }} ollama "$@"
@@ -15,7 +16,7 @@ fi
 
 {{ end -}}
 
-ollama_logs() {
+ollama-logs() {
 {{- if eq $service "brew" }}
   tail -f "${HOMEBREW_PREFIX:?}/var/log/ollama.log" "$@"
 {{- else if $container }}
@@ -25,11 +26,11 @@ ollama_logs() {
 {{- end }}
 }
 
-ollama_list() {
+ollama-list() {
   ollama list
 }
 
-ollama_rm_all() {
+ollama-rm-all() {
   # shellcheck disable=SC2046
   ollama rm $(ollama list | tail -n+2 | cut -d' ' -f1)
 }
