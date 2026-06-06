@@ -1,26 +1,38 @@
 {{- if .features.caddy -}}
-{{- $expected := dict 443 "http://127.0.0.1:80" -}}
+{{- $expected := dict -}}
 {{- $caddy := get . "caddy" | default dict -}}
-{{- range $feat, $sites := get $caddy "sites" | default dict -}}
-{{-   if not (get $.features $feat) }}{{ continue }}{{ end -}}
-{{-   range $name, $s := $sites -}}
-{{-     if or (not (hasKey $s "tailscale")) (not $s.tailscale) }}{{ continue }}{{ end -}}
-{{-     $expected = merge $expected (dict $s.port (printf "http://127.0.0.1:%d" $s.port)) -}}
-{{-   end -}}
+{{- range $name, $site := get $caddy "sites" | default dict -}}
+{{-   if not (get $.features (get $site "feature")) }}{{ continue }}{{ end -}}
+{{-   if or (not (hasKey $site "tailscale")) (not $site.tailscale) }}{{ continue }}{{ end -}}
+{{-   $expected = merge $expected (dict $site.port (printf "http://localhost:%d" $site.port)) -}}
 {{- end -}}
 #!/bin/bash
 
-# tailscale serve:
+# tailscale serve (host device):
 {{- range $port, $url := $expected }}
 # - {{ $port }}: {{ $url }}
 {{- end }}
 
 set -euo pipefail
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 if ! has tailscale; then
   msg "tailscale not found; skipping serve setup"
+  exit 0
+fi
+
+{{- if lookPath "tailscale" | isExecutable }}
+{{-   $status := output "sh" "-c" "tailscale status --json 2>/dev/null || true" | default dict | fromJson }}
+
+# status: {{ get $status "BackendState" }}
+{{- end }}
+if ! run tailscale status; then
+  msg "tailscale not running; skipping serve setup"
   exit 0
 fi
 
