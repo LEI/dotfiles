@@ -75,7 +75,7 @@ pip)
     fi
     pip="$python -m pip"
   fi
-  $pip install --user --quiet list
+  $pip list --user
   ;;
 pipx)
   pipx list | tr -d ' ' | grep '^-' | tr -d '-' | cut -d'(' -f1
