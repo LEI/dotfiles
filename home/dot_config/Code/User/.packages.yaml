@@ -9,5 +9,4 @@ packages:
       arch: code
       fedora: com.visualstudio.code
       windows: Microsoft.VisualStudioCode
-    type: '{{ eq .osIDLike "darwin" | ternary "cask"
-      (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
