@@ -8,7 +8,6 @@ packages:
     # enabled: '{{ not (eq .osIDLike "debian") }}'
     nameOverwrite:
       arch: carapace-bin
-      mise: aqua:carapace-sh/carapace-bin
+      mise: github:carapace-sh/carapace-bin # Segmentation fault with aqua backend on ARM
       windows: rsteube.Carapace
-    type: '{{ eq .osIDLike "arch" | ternary "aur"
-      (not (eq .osIDLike "android" "arch" "darwin" "windows") | ternary "mise" nil) }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (not (eq .osIDLike "android" "arch" "darwin" "windows") | ternary "mise" nil) }}'
