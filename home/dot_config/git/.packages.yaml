@@ -9,18 +9,21 @@ packages:
   # gcli:
   ghq:
     nameOverwrite:
+      mise: github:x-motemen/ghq
       windows: x-motemen.ghq
-    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "alpine" "android" "debian" "fedora" "opensuse" "rhel" | ternary "mise" nil }}'
   git:
     nameOverwrite:
       windows: Git.Git
   git-absorb:
-    enabled: '{{ and (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
+    enabled: '{{ and (not .vm) (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
     nameOverwrite:
+      mise: aqua:tummychow/git-absorb
       windows: tummychow.git-absorb
+    type: '{{ and (ge (float64 .osVersion) 44.0) (eq .osID "fedora") | ternary "mise" nil }}'
   # git-cal:
   git-extras:
-    enabled: '{{ not (eq .osIDLike "alpine" "windows") }}'
+    enabled: '{{ not (eq .osIDLike "alpine" "opensuse" "windows") }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   git-filter-repo:
     enabled: '{{ not (eq .osIDLike "android" "windows") }}'
@@ -30,6 +33,8 @@ packages:
     name: k1LoW/tap/git-wt
     type: brew
   gitleaks:
+    nameOverwrite:
+      mise: aqua:gitleaks/gitleaks
     type: '{{ ne .osIDLike "darwin" | ternary "mise" nil }}'
   # gitui:
   #   enabled: '{{ and (ne .osIDLike "debian") }}'
@@ -37,10 +42,14 @@ packages:
   #     windows: stephandilly.gitui
   lazygit: # tig
     nameOverwrite:
+      mise: aqua:jesseduffield/lazygit
       windows: JesseDuffield.lazygit
     type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "windows") | ternary "mise" nil }}'
   prek: # pre-commit
     # type: '{{ eq .osIDLike "alpine" "android" "arch" "debian" "fedora" "windows" | ternary "mise" nil }}'
+    nameOverwrite:
+      mise: github:j178/prek # Segmentation faul with aqua:j178/prek on ARM
     type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
     # type: brew
-  # zizmor:
+  zizmor:
+    type: brew

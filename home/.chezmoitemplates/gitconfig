@@ -1,4 +1,12 @@
-{{- $signingKey := get . "signingkey" | default (includeTemplate "gpg-signing-key.tmpl" (dict "email" .email)) -}}
+{{- $signingKey := "" -}}
+{{- if hasKey . "signingkey" -}}
+  {{- $signingKey = .signingkey -}}
+{{- else -}}
+  {{- $signingKey = includeTemplate "gpg-signing-key.tmpl" (dict "email" .email) | trim -}}
+  {{- if not $signingKey -}}
+    {{- warnf (printf "gitconfig: signingkey not found for %s" .email) -}}
+  {{- end -}}
+{{- end -}}
 
 [user]
 	name = {{ .name | trim | quote }}
