@@ -1,0 +1,46 @@
+{{- $stdin := get .chezmoi "stdin" | default "{}" | fromJson -}}
+{{- $preferences := get $stdin "preferences" | default dict -}}
+{{- $stateHome := env "XDG_STATE_HOME" | default (joinPath .chezmoi.homeDir ".local" "state") -}}
+{{- $stateDir := env "CLAUDE_STATE_DIR" | default (joinPath $stateHome "claude") -}}
+{
+{{- with get $stdin "coworkUserFilesPath" }}
+  "coworkUserFilesPath": {{ . | quote }},
+{{- end }}
+  "preferences": {
+    {{- if eq .os "darwin" }}
+    "quickEntryShortcut": {
+      "accelerator": "Alt+Space"
+    },
+    {{- end }}
+    "chillingSlothLocation": {
+      "customPath": {{ joinPath $stateDir "worktrees" | quote }}
+    },
+    "launchPreviewPersistSession": false,
+    "launchPreviewPersistedWorkspaces": [],
+    "dispatchCodeTasksPermissionMode": "default",
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "epitaxy",
+    {{- with get $preferences "bypassPermissionsGateByAccount" }}
+    "bypassPermissionsGateByAccount": {{ . | toPrettyJson | indent 4 | trim }},
+    {{- end }}
+    "dockBounceEnabled": true,
+    "coworkWebSearchEnabled": true,
+    "keepAwakeEnabled": false,
+    {{- with get $preferences "remoteToolsDeviceName" }}
+    "remoteToolsDeviceName": {{ . | quote }},
+    {{- end }}
+    "ccRemoteControlDefaultEnabled": false
+    {{- with get $preferences "epitaxyPrefs" }},
+    "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
+    {{- end }}
+    {{- with get $preferences "coworkModelAutoFallbackByAccount" }},
+    "coworkModelAutoFallbackByAccount": {{ . | toPrettyJson | indent 4 | trim }}
+    {{- end }}
+    {{- if eq .osIDLike "fedora" }},
+    "localAgentModeTrustedFolders": [
+      "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"
+    ]
+    {{- end }}
+  }
+}{{- /* No newline at end of file */ -}}
