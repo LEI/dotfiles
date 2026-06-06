@@ -1,0 +1,44 @@
+{{- $kbPaths := includeTemplate "kb-paths.tmpl" . | fromJson -}}
+{{- if $kbPaths -}}
+#!/bin/sh
+
+# kb-state:
+{{- range $v := $kbPaths }}
+{{-   $s := lstat $v.sym }} {{ $v.name }}={{ if $s }}{{ $s.mode }}{{ else }}absent{{ end }}
+{{- end }}
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+kb_dir="{{ .chezmoi.homeDir }}/kb"
+
+if [ ! -d "$kb_dir" ]; then
+  run mkdir -p "$kb_dir"
+fi
+
+setup_kb() {
+  name="$1"
+  url="${2:-}"
+  target="$kb_dir/$name"
+
+  [ -L "$target" ] && return 0
+  [ -d "$target" ] && [ -z "$url" ] && return 0
+  [ -d "$target" ] && die "kb $name: $target exists, cannot link to $url"
+  [ -z "$url" ] && die "kb $name: no url configured, cannot create vault on this machine"
+  has ghq || die "ghq not found, install it to set up kb $name from $url"
+
+  run ghq get "$url"
+  local_path="$(ghq list --full-path --exact "$url")"
+  [ -d "$local_path" ] || die "kb $name: ghq did not resolve $url"
+  run ln -s "$local_path" "$target"
+  info "Linked $name kb: $target -> $local_path"
+}
+{{ range $v := $kbPaths }}
+setup_kb {{ $v.name | quote }}{{ if $v.url }} {{ $v.url | quote }}{{ end }}
+{{- end }}
+{{ end -}}
