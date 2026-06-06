@@ -9,16 +9,21 @@ set -eu
 
 PATH="$PATH:$HOME/.local/bin"
 
-if ! chezmoi="$(command -v chezmoi)"; then
+if ! chezmoi="$(command -v chezmoi)" || [ ! -s "$chezmoi" ]; then
   chezmoi="$HOME/.local/bin/chezmoi"
   if command -v curl >/dev/null; then
-    sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+    installer="$(curl -fsLS https://get.chezmoi.io)"
   elif command -v wget >/dev/null; then
-    sh -c "$(wget -qO- https://git.io/chezmoi)" -- -b "$HOME/.local/bin"
+    installer="$(wget -qO- https://get.chezmoi.io)"
   else
     echo "To install chezmoi, you must have curl or wget installed." >&2
     exit 1
   fi
+  if [ -z "$installer" ]; then
+    echo "Failed to download chezmoi installer from get.chezmoi.io" >&2
+    exit 1
+  fi
+  sh -c "$installer" -- -b "$HOME/.local/bin"
 fi
 
 if [ "${CI:-${CODESPACES:-}}" = "true" ]; then

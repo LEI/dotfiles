@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 #MISE alias="cov"
 #MISE description="Run tests with kcov coverage"
+#USAGE flag "-l --list" help="List test files"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats via script/test"
-#USAGE complete "filter" run="git ls-files 'test/*.bats'"
+#USAGE complete "filter" run="./script/coverage --list"
 
 set -Eeuo pipefail
 
 COVERAGE_OUTPUT="${COVERAGE_OUTPUT:-./coverage}"
 
 coverage() {
-  local dir="$TEST_TMPDIR/.chezmoiscripts,home/dot_config/sh/lib,home/dot_local/bin,script"
+  local dir="$TEST_TMPDIR/.chezmoiscripts,home/dot_local/lib/sh,home/dot_local/bin,script"
 
   local kcov_args=(
     --clean
@@ -35,23 +36,33 @@ coverage() {
 }
 
 main() {
-  case "${1:-}" in
-  -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: coverage [filter...]"
-    fi
-    return
-    ;;
-  --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
-    return
-    ;;
-  --)
-    shift
-    ;;
-  esac
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -l | --list)
+      git ls-files 'test/*.bats'
+      return
+      ;;
+    -h | --help)
+      if command -v usage >/dev/null; then
+        usage exec --help bash "$0"
+      else
+        echo "Usage: coverage [-l] [filter...]"
+      fi
+      return
+      ;;
+    --usage)
+      grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+      return
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+    esac
+  done
 
   export TEST_JOBS=1
 

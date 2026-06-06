@@ -24,8 +24,9 @@ case "${1:-}" in
   ;;
 esac
 
-# shellcheck disable=SC1091
-. "$XDG_CONFIG_HOME/sh/lib/bench.sh"
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/bash/bench.sh
+source "$lib_dir/bash/bench.sh"
 
 shell="${1:-${SHELL##*/}}"
 
@@ -42,7 +43,7 @@ bash | zsh)
   SHELL_BENCH=true bench total "$shell" -ic exit
   ;;
 *)
-  echo "bench: invalid shell '$shell', expected bash or zsh" >&2
+  echo "${0##*/}: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac

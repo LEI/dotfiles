@@ -4,10 +4,17 @@
 #USAGE   choices "bash" "zsh"
 #USAGE }
 
-set -euo pipefail
+set -Eeuo pipefail
 
-if ((BASH_VERSINFO[0] < 5)); then
-  echo "bash 5+ required for EPOCHREALTIME, found $BASH_VERSION" >&2
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
+trap 'err "line $LINENO: $BASH_COMMAND (${FUNCNAME[*]:-main})"' ERR
+require_bash 5
+if ! command -v awk >/dev/null; then
+  err "awk is required"
   exit 1
 fi
 
@@ -60,12 +67,12 @@ detach() {
 format_table() {
   local label="$1" limit="$2"
   printf "      %10s  %5s  %5s  %s\n" "total" "pct" "calls" "$label"
-  sort -t$'\t' -k2 -rn | head -"$limit" | awk -F'\t' '{
+  sort -t$'\t' -k2 -rn | awk -F'\t' -v n="$limit" 'NR <= n {
     printf "%3d)  %8.3f ms  %5.1f%%  %4d  %s\n", NR, $2, $3, $4, $5
   }'
 }
 
-shell_exit=0
+exit_code=0
 stderrlog="$tmpdir/init-stderr.log"
 
 case "$shell" in
@@ -75,19 +82,20 @@ bash)
   cat >"$tmpdir/rcfile.sh" <<BASH_PROF
 exec 5>"$logfile"
 BASH_XTRACEFD=5
-PS4='+ \${EPOCHREALTIME} ~/\${BASH_SOURCE[0]#\${HOME}/}:\${LINENO} '
+PS4='+ \${EPOCHREALTIME} \${BASH_SOURCE[0]/#\${HOME}\//~/}:\${LINENO} '
 set -x
 [ -f "\$HOME/.bashrc" ] && source "\$HOME/.bashrc" 2>"$stderrlog"
-_rc=\$?
+exit_code=\$?
 set +x
 exec 5>&-
-echo \$_rc >"$tmpdir/exit_code"
+echo \$exit_code >"$tmpdir/status"
 BASH_PROF
 
   detach bash --rcfile "$tmpdir/rcfile.sh" -i </dev/null >/dev/null 2>/dev/null
 
   # Single pass: aggregate by command and by file, output with C/F prefix
-  awk -v home="$HOME" '
+  # MIN_MS gates noise; xtrace per-line overhead inflates very small gaps
+  awk -v home="$HOME" -v min="${MIN_MS:-0.2}" '
     /^\++ [0-9]+\.[0-9]+ / {
       ts = $2 + 0
       rest = substr($0, index($0, $3))
@@ -96,7 +104,7 @@ BASH_PROF
       split(rest, p, ":"); file = p[1]
       if (prev_ts > 0) {
         d = (ts - prev_ts) * 1000
-        if (d > 1) {
+        if (d > min) {
           total += d
           label = prev_rest
           # Commands that suppress tracing create unattributable gaps
@@ -119,38 +127,48 @@ BASH_PROF
     }
   ' "$logfile" >"$tmpdir/tables"
 
-  grep '^C' "$tmpdir/tables" | format_table "command" 20
+  if ! grep '^C' "$tmpdir/tables" | format_table "command" 20; then
+    warn "no command timing data"
+  fi
   echo
-  grep '^F' "$tmpdir/tables" | format_table "file" 15
+  if ! grep '^F' "$tmpdir/tables" | format_table "file" 15; then
+    warn "no file timing data"
+  fi
   ;;
 zsh)
+  if ! command -v zsh >/dev/null; then
+    err "zsh not installed"
+    exit 1
+  fi
   cat >"$tmpdir/.zshenv" <<'ZSH_PROF'
 zmodload zsh/zprof
 [ -f "${REAL_ZDOTDIR:-$HOME}/.zshenv" ] && source "${REAL_ZDOTDIR:-$HOME}/.zshenv"
 ZSH_PROF
   cat >"$tmpdir/.zshrc" <<ZSH_RC
 [ -f "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" ] && source "\${REAL_ZDOTDIR:-\$HOME}/.zshrc" 2>"$stderrlog"
-echo \$? >"$tmpdir/exit_code"
+echo \$? >"$tmpdir/status"
 ZSH_RC
   export REAL_ZDOTDIR="${ZDOTDIR:-$HOME}"
-  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof' 2>/dev/null
+  ZDOTDIR="$tmpdir" detach zsh -ic 'zprof'
   ;;
 *)
-  echo "profile: invalid shell '$shell', expected bash or zsh" >&2
+  err "invalid shell '$shell', expected bash or zsh"
   exit 2
   ;;
 esac
 
-if [ -f "$tmpdir/exit_code" ]; then
-  shell_exit=$(cat "$tmpdir/exit_code")
+if [ -f "$tmpdir/status" ]; then
+  exit_code=$(cat "$tmpdir/status")
 fi
 
 report_stderr() {
   while IFS= read -r line; do
-    echo >&2 "  $line"
+    echo "  $line" >&2
     # Trace back to source using the xtrace log (bash only)
     cmd="${line%%:*}"
     if [ -n "$cmd" ] && [ -f "${logfile:-}" ]; then
+      # cmd="${cmd//(/\\(}" # grep: Unmatched ( or \(
+      # -e "^  \[WARN\] - (starship::config): Error in 'StarshipRoot' at 'battery': Unknown key$"
       grep -E ":[0-9]+ ${cmd}\\b" "$logfile" |
         sed 's/^+* [0-9.]*  *//' |
         sed 's/^/    /' >&2 || true
@@ -158,20 +176,26 @@ report_stderr() {
   done <"$stderrlog"
 }
 
-if [ "$shell_exit" -ne 0 ]; then
+if [ "$exit_code" -ne 0 ]; then
   echo >&2
-  echo >&2 "profile: $shell init exited with code $shell_exit"
+  err "$shell init exited with code $exit_code"
   report_stderr
   exit 1
 fi
 
 # atuin init calls stty -g which fails without a tty
+
 grep -v \
+  -e ".starship::config.: Error in 'StarshipRoot' at 'battery': Unknown key$" \
+  -e "^ble.sh: cannot find a controlling TTY/PTY in this session\.$" \
+  -e "^stty: 'standard input': Inappropriate ioctl for device$" \
   -e "^stty: 'standard input': Not a tty$" \
+  -e "^stty: 'standard input': Not a typewriter$" \
   "$stderrlog" >"$stderrlog.filtered" 2>/dev/null || true
 
 if [ -s "$stderrlog.filtered" ]; then
   echo >&2
-  echo >&2 "profile: $shell init stderr:"
+  err "$shell init stderr:"
   stderrlog="$stderrlog.filtered" report_stderr
+  exit 1
 fi

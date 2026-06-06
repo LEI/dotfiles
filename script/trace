@@ -38,7 +38,7 @@ zsh)
     sed "s|$HOME|~|g"
   ;;
 *)
-  echo "trace: invalid shell '$shell', expected bash or zsh" >&2
+  echo "${0##*/}: invalid shell '$shell', expected bash or zsh" >&2
   exit 2
   ;;
 esac

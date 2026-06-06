@@ -1,38 +1,35 @@
 #!/usr/bin/env bash
 #MISE alias="ct"
-#MISE description="Run container pipeline for one image"
-#MISE hide=true
-#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)" {
-#USAGE   choices "alpine" "archlinux" "debian" "fedora" "opensuse" "termux" "ubuntu"
-#USAGE }
+#MISE description="Run container pipeline by image"
+#USAGE flag "-h --help" help="Show help"
+#USAGE flag "-u --usage" help="Show usage specification"
+#USAGE arg "[image]" help="Image name, :version suffix, or subcommand (default: status)"
+#USAGE complete "image" run="./script/container --list-images"
 #USAGE arg "[cmd]..." help="Command to run in the container (default: mise run pipeline)"
 
-set -euo pipefail
+set -Eeuo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "container: bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
-fi
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
 
-: "${CONTAINER_PROVIDER:?}"
+trap 'err "line $LINENO: $BASH_COMMAND (${FUNCNAME[*]:-main})"' ERR
+
 readonly DEV_USER="${DEV_USER:-test}"
+readonly CONTAINER_SOURCE="${CONTAINER_SOURCE:-mount}"
+readonly CHEZMOI_PROFILE="${CHEZMOI_PROFILE:-minimal}"
+export CHEZMOI_PROFILE
 readonly tag_prefix="${PWD##*/}"
 readonly images="alpine archlinux debian fedora opensuse termux ubuntu"
 
-container() { "$CONTAINER_PROVIDER" "$@"; }
+ct() { trace "$CONTAINER_PROVIDER" "$@"; }
 
-log() {
-  echo "container: $*" >&2
-}
-
-trace() {
-  echo "+ $*" >&2
-  "$@"
-}
-
-# Resolve image-specific variables from an image arg (name or name:version).
-# Sets: image_name, version, image, image_tag, container, prefix,
-#       home, exec_user, chezmoi_root
+# Init image-specific config from "<name>" or "<name>:<version>"
+# Globals modified: chezmoi_root, container, exec_user, file_owner, home, image, image_name, image_tag, prefix, version
 resolve() {
   local arg="$1"
   local version_arg repo arch
@@ -44,8 +41,9 @@ resolve() {
   repo="$image_name"
   version="${version_arg:-latest}"
   prefix=""
-
-  # arm64 = macOS/Darwin, aarch64 = Linux; both indicate ARM64
+  exec_user="$DEV_USER"
+  file_owner="$DEV_USER"
+  local home_subdir="home/$DEV_USER"
   arch="$(uname -m)"
 
   case "$image_name" in
@@ -66,141 +64,204 @@ resolve() {
       version="aarch64"
     fi
     prefix="/data/data/com.termux/files"
+    exec_user=""
+    file_owner="system"
+    home_subdir="home"
     ;;
   esac
 
   image="$repo:$version"
   image_tag="ct-$image_name-$version"
   container="$tag_prefix-$image_name-$version"
-  home="$prefix/home/$DEV_USER"
-  if [ "$image_name" = termux ]; then
-    home="$prefix/home"
-  fi
-  exec_user="$DEV_USER"
-  if [ "$image_name" = termux ]; then
-    exec_user="system"
-  fi
+  home="$prefix/$home_subdir"
   chezmoi_root="$home/.local/share/chezmoi"
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    chezmoi_root="/src"
+  fi
 }
 
-container_exec() {
-  local flags log
+ct_exec() {
+  local flags
   flags=(
     --env="CHEZMOI_UPGRADE=true"
+    --env="HOME=$home"
     --env="MISE_TRUSTED_CONFIG_PATHS=$chezmoi_root"
-    --user="$exec_user"
     --workdir="$chezmoi_root"
   )
-  if [ -n "${CI:-}" ]; then
-    flags+=(--env="CI=$CI")
+  [ -n "$exec_user" ] && flags+=(--user="$exec_user")
+  [ -n "${CI:-}" ] && flags+=(--env=CI)
+  [ -n "${CHEZMOI_PROFILE:-}" ] && flags+=(--env=CHEZMOI_PROFILE)
+  [ -n "${GITHUB_TOKEN:-}" ] && flags+=(--env=GITHUB_TOKEN)
+  if [ "$image_name" = termux ]; then
+    # Android system user (UID 1000); numeric avoids /etc/passwd lookup in non-standard container root
+    flags+=(--user=1000 --env=PATH="$home/.local/bin:$prefix/usr/bin:/usr/bin:/bin")
+    flags+=(--env=SHELL="$prefix/usr/bin/bash")
   fi
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    flags+=(--env="GITHUB_TOKEN=$GITHUB_TOKEN")
-  fi
-  if [ -t 0 ]; then
-    flags+=(--interactive)
-  fi
-  if [ -t 1 ]; then
-    flags+=(--tty)
-  fi
-
-  # Redact GITHUB_TOKEN in logs
-  log=("${flags[@]/GITHUB_TOKEN=*/GITHUB_TOKEN=***}")
-  echo "+ $CONTAINER_PROVIDER exec ${log[*]} $container $*" >&2
-  container exec "${flags[@]}" "$container" "$@"
+  [ -t 0 ] && flags+=(--interactive)
+  [ -t 1 ] && flags+=(--tty)
+  ct exec "${flags[@]}" "$container" "$@"
 }
 
-container_exec_mise() {
-  local cmd
-
-  # Quote all arguments for safe shell execution
-  cmd="$(printf '%q ' "$@")"
-
-  # bash -l skips environment.d in non-interactive shells; source it explicitly
-  # eval mise activate: adds shims for mise-managed tools (check tasks use task env instead)
+ct_exec_mise() {
   # shellcheck disable=SC2016
-  container_exec bash -c -l '
-    source ~/.config/sh/lib/export.sh
-    source ~/.config/sh/lib/pathmunge.sh
-    export_env ~/.config/environment.d/*.conf
-    source ~/.config/sh/environment.sh
-    source ~/.config/mise/init.sh
-    '"$cmd"
+  ct_exec bash -lc '[ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh; exec "$@"' -- "$@"
 }
 
 build() {
-  if container image inspect "$image_tag" >/dev/null 2>&1; then
-    log "build $image_name: reusing $image_tag"
+  if ct image inspect "$image_tag" >/dev/null 2>&1; then
+    info "build $image_name: reusing $image_tag"
     return 0
   fi
-  trace container build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
+  ct build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
+}
+
+# Quietly check whether the running container's bind config matches create_flags
+mount_config_matches() {
+  [ "$CONTAINER_SOURCE" = mount ] || return 0
+  local src dst mode
+  {
+    read -r src
+    read -r dst
+    read -r mode
+  } < <(
+    "$CONTAINER_PROVIDER" container inspect "$container" \
+      --format $'{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}\n{{.Destination}}\n{{.Mode}}\n{{end}}{{end}}' \
+      2>/dev/null
+  )
+  [ "$src" = "$PWD" ] && [ "$dst" = "$chezmoi_root" ] && [[ "$mode" == *ro* ]]
 }
 
 start() {
   local status
-
-  if ! container container inspect "$container" >/dev/null 2>&1; then
-    trace container create --name="$container" --env="DEV_USER=$DEV_USER" "$image_tag"
+  local create_flags=(--name="$container" --env="DEV_USER=$DEV_USER")
+  local create_cmd=()
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    if [ ! -f "$PWD/.chezmoiroot" ]; then
+      err "mount mode: $PWD lacks .chezmoiroot"
+      return 1
+    fi
+    create_flags+=(--volume="$PWD:$chezmoi_root:ro")
+  fi
+  # Termux lacks /bin/sh for the wrapper shebang
+  if [ "$image_name" = termux ]; then
+    create_flags+=(--entrypoint=/entrypoint.sh)
+    create_cmd=(tail -f /dev/null)
   fi
 
-  status="$(container container inspect "$container" --format '{{.State.Status}}')"
+  if ct container inspect "$container" >/dev/null 2>&1 &&
+    ! mount_config_matches; then
+    info "recreating $container: mount config out of date"
+    ct rm --force "$container" >/dev/null
+  fi
+
+  if ! ct container inspect "$container" >/dev/null 2>&1; then
+    ct create "${create_flags[@]}" "$image_tag" ${create_cmd[@]+"${create_cmd[@]}"}
+  fi
+
+  status="$(ct container inspect "$container" --format '{{.State.Status}}')"
   if [ "$status" != running ]; then
-    trace container start "$container"
+    ct start "$container"
+    status="$(ct container inspect "$container" --format '{{.State.Status}}')"
+    if [ "$status" != running ]; then
+      info "recreating $container: crashed on start"
+      ct rm --force "$container" >/dev/null
+      ct create "${create_flags[@]}" "$image_tag" ${create_cmd[@]+"${create_cmd[@]}"}
+      ct start "$container"
+    fi
   fi
 
-  # Entrypoint creates the dev user asynchronously; wait for it
+  # Wait for the dev user that the entrypoint creates asynchronously
   if [ "$image_name" != termux ]; then
     # shellcheck disable=SC2016
-    trace container exec "$container" \
+    ct exec "$container" \
       sh -c 'until id -u "$1" >/dev/null 2>&1; do sleep 1; done' -- "$DEV_USER"
   fi
+
 }
 
-sync() {
-  local item
-
-  # shellcheck disable=SC2016
-  trace container exec "$container" sh -c 'rm -rf "$1" && mkdir -p "$1"' -- "$chezmoi_root"
-
-  for item in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
-    trace container cp "$item" "$container:$chezmoi_root/"
-  done
-
-  trace container exec "$container" chown -R "$exec_user:$exec_user" "$home"
-
-  # Pre-commit expects a git repo
-  if ! container exec "$container" test -d "$chezmoi_root/.git"; then
-    trace container exec "$container" git config --global --add safe.directory "$chezmoi_root"
-    trace container exec "$container" git -C "$chezmoi_root" init --quiet
-    trace container exec "$container" git -C "$chezmoi_root" add --all
+sync_source() {
+  if [ "$CONTAINER_SOURCE" = mount ]; then
+    warn "host mount: $PWD -> $chezmoi_root (ro)"
+    # Mounted files are owned by the host user; trust the path system-wide so
+    # git works for all container users regardless of dotfile apply order.
+    # Termux defers this to bootstrap because git is installed there
+    if [ "$image_name" != termux ]; then
+      ct exec "$container" git config --system --add safe.directory "$chezmoi_root"
+    fi
+    return
   fi
+  # Stale files persist until the container is recreated
+  local item
+  ct exec "$container" mkdir -p "$chezmoi_root"
+  for item in .chezmoiroot .chezmoiversion .editorconfig .gitignore .pre-commit-config.yaml mise.toml home script test; do
+    ct cp "$item" "$container:$chezmoi_root/"
+  done
+  ct exec "$container" chown -R "$file_owner:$file_owner" "$home"
 }
 
 bootstrap() {
+  local cmd=(./script/bootstrap --source="$chezmoi_root" --no-tty --verbose)
   if [ "$image_name" = termux ]; then
+    # Resolve standard shebang paths and network configs to termux equivalents
     # shellcheck disable=SC2016
-    trace container exec "$container" \
-      sh -c 'ln -sf ${PREFIX}/etc/termux/mirrors/default ${PREFIX}/etc/termux/chosen_mirrors'
-    trace container exec --user="$exec_user" "$container" \
-      sh -c 'pkg update --quiet && pkg install --quiet --yes chezmoi proot'
-    CI=true container_exec proot \
-      -b "$prefix/usr/etc/resolv.conf:/etc/resolv.conf" \
-      -b "$prefix/usr/etc/tls:/etc/ssl" \
-      ./script/bootstrap --verbose --no-tty
-  else
-    CI=true container_exec ./script/bootstrap --verbose --no-tty
+    ct exec --env="p=$prefix" "$container" sh -c '
+      mkdir -p /bin /usr/bin
+      safe_ln() {
+        # Skip if target is a symlink pointing back to link (loop)
+        case $(readlink "$1" 2>/dev/null) in "$2") return 0 ;; esac
+        # Skip if both already resolve to the same file
+        t=$(readlink -f "$1" 2>/dev/null)
+        l=$(readlink -f "$2" 2>/dev/null)
+        [ -n "$t" ] && [ "$t" = "$l" ] && return 0
+        ln -sf "$1" "$2"
+      }
+      safe_ln "$p/usr/bin/sh" /bin/sh
+      safe_ln "$p/usr/bin/env" /usr/bin/env
+      safe_ln "$p/usr/bin/bash" /usr/bin/bash
+      # resolv.conf: Docker always bind-mounts this; skip if it is a regular file
+      [ -f /etc/resolv.conf ] && ! [ -L /etc/resolv.conf ] || ln -sf "$p/usr/etc/resolv.conf" /etc/resolv.conf
+      # ssl: only create if absent
+      [ -e /etc/ssl ] || ln -sf "$p/usr/etc/tls" /etc/ssl
+      # EU group reaches grimler.se when packages-cf.termux.dev is unreachable
+      ln -sf "$p/usr/etc/termux/mirrors/eu" "$p/usr/etc/termux/chosen_mirrors"
+      # ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
+      # /etc/passwd and /etc/group are absolute symlinks to /system/etc;
+      # crun resolves absolute symlinks from the host root (RESOLVE_BENEATH), so they
+      # escape the container storage root and exec with --user fails; copy real files
+      for f in passwd group; do
+        if [ -L "/etc/$f" ]; then
+          rm -f "/etc/$f"
+          cp "/system/etc/$f" "/etc/$f"
+        fi
+      done
+    '
+    if ! ct_exec pkg update; then
+      warn "termux: EU mirrors failed, falling back to bundled default"
+      # shellcheck disable=SC2016
+      ct exec --env="p=$prefix" "$container" sh -c '
+        ln -sf "$p/usr/etc/termux/mirrors/default" "$p/usr/etc/termux/chosen_mirrors"
+      '
+      ct_exec pkg update
+    fi
+    ct_exec pkg install --yes chezmoi git
   fi
+  ct_exec "${cmd[@]}"
 }
 
-# Persists trust so later runs skip the prompt; no-op if mise not yet installed
-trust() {
+init_repo() {
+  if [ "$image_name" != termux ]; then
+    return 0
+  fi
+  if ct exec "$container" test -d "$chezmoi_root/.git"; then
+    return 0
+  fi
   # shellcheck disable=SC2016
-  trace container exec --user="$exec_user" "$container" \
-    sh -c 'mise=$(command -v mise 2>/dev/null || echo "$HOME/.local/bin/mise")
-if [ -x "$mise" ]; then
-  "$mise" trust --yes "$1"
-fi' \
-    -- "$chezmoi_root/mise.toml"
+  ct exec ${exec_user:+--user="$exec_user"} "$container" \
+    sh -c '
+      git config --global --add safe.directory "$1"
+      git -C "$1" init --quiet
+      git -C "$1" add --all
+    ' -- "$chezmoi_root"
 }
 
 list() {
@@ -211,8 +272,8 @@ status() {
   for name in $images; do
     resolve "$name"
     local s="none"
-    if container container inspect "$container" >/dev/null 2>&1; then
-      s="$(container container inspect "$container" \
+    if ct container inspect "$container" >/dev/null 2>&1; then
+      s="$(ct container inspect "$container" \
         --format '{{.State.Status}}{{if and (eq .State.Status "exited") (ne .State.ExitCode 0)}} ({{.State.ExitCode}}){{end}}')"
     fi
     printf "%-12s  %-30s  %s\n" "$name" "$container" "$s"
@@ -222,27 +283,26 @@ status() {
 pipeline() {
   build
   start
-  sync
-  trust
+  sync_source
   bootstrap
-  # word-split intentional: CONTAINER_CMD may contain flags
+  init_repo
   # shellcheck disable=SC2086
-  container_exec_mise ${CONTAINER_CMD:-mise run pipeline}
-  trace container stop "$container"
+  ct_exec_mise ${CONTAINER_CMD:-mise run pipeline}
+  ct stop "$container" >/dev/null
 }
 
 main() {
   case "${1:-}" in
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: container [image] [cmd...]"
-    fi
+    usage_help
     return
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
+    return
+    ;;
+  --list-images)
+    list
     return
     ;;
   --)
@@ -250,27 +310,26 @@ main() {
     ;;
   esac
 
+  require_bash 4
+
+  : "${CONTAINER_PROVIDER:?}"
+
   local image="${1:-}"
   case "$image" in
-  '' | s | st | status)
+  '' | l | ls | list | s | st | status)
     status
-    return
-    ;;
-  l | ls | list)
-    list
     return
     ;;
   esac
   resolve "$image"
   shift
   if [ $# -gt 0 ]; then
-    container_exec_mise "$@"
+    ct_exec_mise "$@"
   else
     pipeline
   fi
 }
 
-# Allow sourcing for testing (e.g. bats)
-if [ -z "${BATS_TEST_FILENAME:-}" ] && [ "${BASH_SOURCE[0]}" = "$0" ]; then
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   main "$@"
 fi

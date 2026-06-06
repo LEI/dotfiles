@@ -2,20 +2,42 @@
 #MISE description="Validate files against their declared $schema"
 #MISE alias="vs"
 #USAGE flag "-k --keep" help="Keep temp files for debugging"
+#USAGE flag "-l --list" help="List validatable files"
 #USAGE flag "-q --quiet" help="Suppress output"
+#USAGE flag "-r --refresh" help="Wipe schema cache before validating"
+#USAGE flag "-t --tap" help="Emit TAP version 14 output"
 #USAGE flag "-v --verbose" help="Show validation details"
 #USAGE arg "[files]..." help="Files to validate (default: all tracked)"
-#USAGE complete "files" run="git ls-files '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' ':(exclude)home/.chezmoitemplates/' ':(exclude)**/modify_*'"
+#USAGE complete "files" run="./script/validate-schema --list"
 
 set -euo pipefail
 
-if ((BASH_VERSINFO[0] < 4)); then
-  echo "bash 4+ required, found $BASH_VERSION" >&2
-  exit 1
+if [ -z "${SSL_CERT_FILE:-}" ]; then
+  for _ca in /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt; do
+    [ -f "$_ca" ] && export SSL_CERT_FILE="$_ca" && break
+  done
+  unset _ca
 fi
 
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/bash/report.sh
+source "$lib_dir/bash/report.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
+
+require_bash 4
+
+prog="${0##*/}"
 keep="${VALIDATE_SCHEMA_KEEP:-${VALIDATE_KEEP:-false}}"
-verbosity=${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+refresh=false
+tap=false
+verbosity="${VALIDATE_SCHEMA_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -23,8 +45,23 @@ while [ $# -gt 0 ]; do
     keep=true
     shift
     ;;
+  -l | --list)
+    git ls-files \
+      '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
+      ':(exclude)home/.chezmoitemplates/' \
+      ':(exclude)**/modify_*'
+    exit
+    ;;
   -q | --quiet)
     verbosity=0
+    shift
+    ;;
+  -r | --refresh)
+    refresh=true
+    shift
+    ;;
+  -t | --tap)
+    tap=true
     shift
     ;;
   -v | --verbose)
@@ -32,15 +69,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: validate-schema [-k] [-q] [-v] [files...]"
-    fi
+    usage_help "[-k] [-l] [-q] [-r] [-t] [-v] [files...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   --)
@@ -48,40 +81,46 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "validate-schema: unknown option: $1" >&2
+    echo "$prog: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
   esac
 done
 
+case "$(uname -s)" in
+Darwin) cache_dir="$HOME/Library/Caches/check_jsonschema" ;;
+*) cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/check_jsonschema" ;;
+esac
+
+if [ "$refresh" = true ] && [ -d "$cache_dir" ]; then
+  find "$cache_dir" -type f -delete
+fi
+
+# Read the $schema URL from a file; empty when absent or on parse error
 # shellcheck disable=SC2329
-validate_file() {
-  local path="$1" base ext content schema tmp_dir="" schema_path content_path
+extract_schema() {
+  local path="$1" base ext schema=""
   base="$(basename "$path")"
   ext="${path##*.}"
-
-  if [ ! -e "$path" ]; then
-    echo "FAIL $path schema= (file not found)"
-    return 1
-  fi
-
   case "$base" in
-  cspell.json | devcontainer.json)
-    ext=jsonc
-    ;;
+  cspell.json | devcontainer.json) ext=jsonc ;;
   esac
-
   case "$ext" in
   json)
-    schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
+    schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || return 1
     ;;
   jsonc | json5)
+    local parsed
     if command -v json5 >/dev/null; then
-      schema=$(json5 "$path" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || schema=
-    else
-      schema=$(jq -r 'if type == "object" then ."$schema" // empty else empty end' "$path") || schema=
+      if ! parsed=$(json5 "$path"); then
+        echo "$path" >&2
+        return 1
+      fi
+    elif ! parsed=$(jq '.' "$path" 2>/dev/null); then
+      return 1
     fi
+    schema=$(printf '%s' "$parsed" | jq -r 'if type == "object" then ."$schema" // empty else empty end') || return 1
     ;;
   toml)
     # shellcheck disable=SC2016
@@ -92,23 +131,89 @@ validate_file() {
     schema=$(yq 'select(kind == "map") | ."$schema"' "$path") || schema=
     ;;
   esac
-  if [ "$schema" = "null" ]; then
-    schema=
+  [ "$schema" = "null" ] && schema=
+  printf '%s\n' "$schema"
+}
+export -f extract_schema
+
+# Invalidate the cached schema for a URL when its ETag/Last-Modified changed
+# check-jsonschema's Last-Modified-only freshness misses changes when servers
+# omit that header (e.g. bifrost, Vercel-hosted schemas); offline: keep cache
+preflight_schema() {
+  local url="$1" hash basename ext cache_file meta_file
+  local headers etag last_mod current
+  hash=$(printf '%s' "$url" | sha256sum)
+  hash=${hash%% *}
+  basename="${url##*/}"
+  case "$basename" in
+  *.*) ext=".${basename##*.}" ;;
+  *) ext="" ;;
+  esac
+  cache_file="$cache_dir/schemas/$hash$ext"
+  meta_file="$cache_dir/schemas/$hash.meta"
+  [ -f "$cache_file" ] || return 0
+  # Discard corrupt cache (empty or invalid JSON); check-jsonschema refetches
+  if [ ! -s "$cache_file" ] || ! jq empty "$cache_file" >/dev/null 2>&1; then
+    rm -f "$cache_file" "$meta_file"
+    return 0
+  fi
+  if ! headers=$(curl --silent --head --location --max-time 5 "$url"); then
+    return 0
+  fi
+  # Normalize so weak (W/"abc") and strong ("abc") forms compare equal
+  etag=$(printf '%s\n' "$headers" | awk -F': ' 'tolower($1)=="etag"{print $2; exit}' | tr -d '\r"' | sed 's|^W/||')
+  last_mod=$(printf '%s\n' "$headers" | awk -F': ' 'tolower($1)=="last-modified"{print $2; exit}' | tr -d '\r')
+  current="$etag|$last_mod"
+  if [ -f "$meta_file" ] && [ "$(cat "$meta_file")" = "$current" ]; then
+    return 0
+  fi
+  rm -f "$cache_file"
+  printf '%s\n' "$current" >"$meta_file"
+}
+
+# shellcheck disable=SC2329
+validate_file() {
+  local path="$1" ext content schema tmp_dir="" schema_path content_path
+  ext="${path##*.}"
+
+  if [ ! -e "$path" ]; then
+    echo "FAIL $path schema= (file not found)"
+    return 1
+  fi
+
+  case "$path" in
+  *.tmpl | *.chezmoitemplates/* | */modify_*)
+    echo "SKIP $path # chezmoi template"
+    return 0
+    ;;
+  esac
+
+  case "$(basename "$path")" in
+  cspell.json | devcontainer.json) ext=jsonc ;;
+  esac
+
+  case "$ext" in
+  jsonc | json5)
+    if ! command -v json5 >/dev/null; then
+      echo "SKIP $path # jsonc parser unavailable"
+      return 0
+    fi
+    ;;
+  esac
+
+  if ! schema=$(extract_schema "$path"); then
+    echo "FAIL $path # parse error"
+    return 1
   fi
 
   if [ -z "$schema" ]; then
-    echo "SKIP $path (no \$schema)"
+    echo "SKIP $path # no \$schema"
     return 0
   fi
 
-  # Convert .jsonc/.json5 to .json for validation
   case "$ext" in
   jsonc | json5)
-    if command -v json5 >/dev/null; then
-      content=$(json5 "$path")
-    else
-      content=$(jq '.' "$path")
-    fi
+    content=$(json5 "$path")
     if [ "$content" = "null" ]; then
       content='{}'
     fi
@@ -131,7 +236,7 @@ validate_file() {
     case "$(uname -s)" in
     MINGW* | MSYS* | CYGWIN* | Windows*) ;;
     *)
-      echo "SKIP $path (windows)"
+      echo "SKIP $path # windows-only schema"
       return 0
       ;;
     esac
@@ -148,18 +253,23 @@ validate_file() {
     jq 'del(.properties.WinGetVersion)' "$schema_path" >"$schema_path.tmp"
     mv "$schema_path.tmp" "$schema_path"
     if [ "$verbosity" -ge 2 ]; then
-      echo "validate-schema: downloaded and modified schema: $schema_path" >&2
+      echo "$prog: downloaded and modified schema: $schema_path" >&2
     fi
     ;;
   esac
 
   if [ "$verbosity" -ge 2 ]; then
-    echo "validate-schema: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
+    echo "$prog: validating $path${tmp_dir:+ (temp dir: $tmp_dir)}" >&2
   fi
 
   local result
   if result=$(check-jsonschema --schemafile "$schema_path" "$content_path" 2>&1); then
     echo "PASS $path schema=$schema"
+    return 0
+  elif printf '%s' "$result" | grep -qE 'Unretrievable|FailedFileLoadError'; then
+    # A remote $ref that can't be fetched or parsed (offline, flaky egress,
+    # empty body) is a network condition, not a schema violation; skip not fail
+    echo "SKIP $path schema=$schema: remote \$ref unreachable"
     return 0
   else
     echo "FAIL $path schema=$schema"
@@ -185,7 +295,6 @@ validate_schema() {
     fi
     return 1
   fi
-  # Silent exit 0 is valid when SKIP lines are suppressed in non-verbose mode
   if [ -n "$output" ] && ! echo "$output" | grep -qE '^(PASS|FAIL|SKIP) '; then
     echo "FAIL $1 schema= (unexpected output)" >&2
     return 1
@@ -207,47 +316,46 @@ if ! yq --version 2>&1 | grep -q 'mikefarah/yq'; then
 fi
 
 if [ $# -eq 0 ]; then
-  mapfile -t -d '' files < <(
-    git ls-files -z \
-      '*.json' '*.jsonc' '*.json5' '*.toml' '*.yaml' '*.yml' \
-      ':(exclude)home/.chezmoitemplates/' \
-      ':(exclude)**/modify_*'
-  )
+  mapfile -t files < <("$0" --list)
   set -- "${files[@]}"
 fi
 
-jobs=${NPROC:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}
+jobs="$(default_jobs)"
+
 if [ "$verbosity" -ge 2 ]; then
-  echo "validate-schema: validating $# files (jobs=$jobs)" >&2
+  echo "$prog: validating $# files (jobs=$jobs)" >&2
 fi
 
 if [ $# -eq 0 ]; then
   if [ "$verbosity" -ge 1 ]; then
-    echo "validate-schema: no files to validate" >&2
+    echo "$prog: no files to validate" >&2
   fi
   exit 0
 fi
 
-export verbosity keep
+# Pre-flight: invalidate cached schemas whose ETag/Last-Modified shifted upstream
+# Parse failures here are non-fatal; validate_file reports them as FAIL later
+if [ "$refresh" != true ] && [ -d "$cache_dir/schemas" ]; then
+  for f in "$@"; do
+    if schema=$(extract_schema "$f"); then
+      if [ -n "$schema" ]; then
+        printf '%s\n' "$schema"
+      fi
+    fi
+  done | sort -u | while IFS= read -r url; do
+    if [ -n "$url" ]; then
+      preflight_schema "$url"
+    fi
+  done
+fi
+
+export prog verbosity keep
 # shellcheck disable=SC2016
-results=$(printf '%s\n' "$@" | xargs -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
+results=$(printf '%s\0' "$@" | xargs -0 -P "$jobs" -n1 bash -euc 'validate_schema "$1"' _ || true)
 
-passed=$(echo "$results" | grep -c '^PASS ' || true)
-failed=$(echo "$results" | grep -c '^FAIL ' || true)
-skipped=$(echo "$results" | grep -c '^SKIP ' || true)
-
-if [ "$verbosity" -ge 2 ]; then
-  echo "$results" | grep -E '^(PASS|FAIL|SKIP) ' || true
+report_collect "$results"
+if [ "$tap" = true ]; then
+  report_tap "$prog"
 else
-  echo "$results" | grep -E '^FAIL ' || true
+  report_human "$prog" "$verbosity"
 fi
-if [ "$failed" -gt 0 ]; then
-  echo "$results" | grep -vE '^(PASS|FAIL|SKIP) ' || true
-fi
-if [ "$verbosity" -ge 1 ] && [ "$((passed + failed + skipped))" -gt 0 ]; then
-  echo "validate-schema: $passed passed, $failed failed, $skipped skipped" >&2
-fi
-if [ "$failed" -gt 0 ]; then
-  exit 1
-fi
-exit 0

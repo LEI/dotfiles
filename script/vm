@@ -1,0 +1,733 @@
+#!/usr/bin/env bash
+#MISE alias="vm"
+#MISE description="Run VM by image alias (tart/vetu)"
+#USAGE flag "-d... --dir <dir>" help="Mount host directory in the VM (name:path)"
+#USAGE flag "-g --gui" help="Open native window (tart only; default headless)"
+#USAGE flag "-h --help" help="Show help"
+#USAGE flag "-k --keep" help="Keep VM running after exit"
+#USAGE flag "-l --list-images" help="List available images for current architecture"
+#USAGE flag "-n --name <name>" help="VM name (default: same as image alias)"
+#USAGE flag "--net-bridged <iface>" help="Bridge VM to host interface (tart; bypass host VPN). Auto-detected when VPN is up."
+#USAGE flag "-q --quiet" help="Use quiet output"
+#USAGE flag "-t --tmux" help="Run VM in a tmux session"
+#USAGE flag "-u --usage" help="Show usage specification"
+#USAGE flag "-v --verbose" help="Use verbose output"
+#USAGE arg "[image]" help="Image alias or provider subcommand (default: --help)"
+#USAGE complete "image" run="./script/vm --list-images"
+#USAGE arg "[args]..." help="Command to run in the VM (alias mode), or provider args (passthrough)"
+
+set -Eeuo pipefail
+shopt -s inherit_errexit
+
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
+
+require_bash 4
+trap 'err "line $LINENO: $BASH_COMMAND (${FUNCNAME[*]:-main})"' ERR
+
+: "${VM_CHECK_HOST:=github.com:443}"
+: "${VM_SSH_PORT:=22}"
+
+if [ -z "${VM_PROVIDER:-}" ]; then
+  case "$(uname -s)" in
+  Darwin) VM_PROVIDER=tart ;;
+  Linux) VM_PROVIDER=vetu ;;
+  *)
+    err "unsupported OS: $(uname -s)"
+    exit 1
+    ;;
+  esac
+fi
+
+case "$(uname -m)" in
+x86_64) ARCH=amd64 ;;
+aarch64 | arm64) ARCH=arm64 ;;
+*)
+  err "unsupported arch: $(uname -m)"
+  exit 1
+  ;;
+esac
+
+declare -gA IMAGES=(
+  ["ubuntu-runner"]="ghcr.io/cirruslabs/ubuntu-runner-$ARCH:24.04|ubuntu-runner|linux"
+)
+# if [ "$ARCH" = amd64 ]; then
+#   IMAGES+=(["ubuntu-runner-gpu"]="ghcr.io/cirruslabs/ubuntu-runner-amd64-gpu:latest|ubuntu-runner-gpu|linux")
+# fi
+if [ "$ARCH" = arm64 ]; then
+  IMAGES+=(["debian"]="ghcr.io/cirruslabs/debian:latest|debian|linux")
+  IMAGES+=(["fedora"]="ghcr.io/cirruslabs/fedora:latest|fedora|linux")
+  IMAGES+=(["rocky"]="ghcr.io/cirruslabs/rocky:latest|rocky|linux")
+  IMAGES+=(["ubuntu"]="ghcr.io/cirruslabs/ubuntu:latest|ubuntu|linux")
+  IMAGES+=(["tahoe"]="ghcr.io/cirruslabs/macos-tahoe-base:latest|tahoe-base|darwin")
+fi
+readonly IMAGES
+
+vm() { trace "$VM_PROVIDER" "$@"; }
+
+# Return the provider state for a VM name
+vm_state() {
+  case "$VM_PROVIDER" in
+  tart)
+    vm list --format json |
+      jq --raw-output --arg name "$1" '.[] | select(.Name==$name) | .State'
+    ;;
+  *) vm list | awk -v n="$1" '$0 ~ ("\t" n " ") {print $4}' ;;
+  esac
+}
+
+vm_clone() {
+  [ "$verbosity" -ge 1 ] && info "cloning $image as $name"
+  vm clone "$image" "$name"
+}
+
+# Boot the VM. Only tart honors gui, bridge and dirs
+vm_start() {
+  [ "$verbosity" -ge 1 ] && info "starting $name"
+  local args=()
+  if [ "$VM_PROVIDER" = tart ]; then
+    [ "$gui" = true ] || args+=(--no-graphics)
+    [ -n "$bridged" ] && args+=(--net-bridged="$bridged")
+    local entry entry_tag entry_rest
+    for entry in $dirs; do
+      # Drop the name prefix to avoid a wrapper subdir; tag enables direct mount on Linux
+      entry_tag="${entry%%:*}"
+      entry_rest="${entry#*:}"
+      args+=("--dir=$entry_rest,tag=$entry_tag")
+    done
+  elif [ "$gui" = true ]; then
+    warn "$VM_PROVIDER: --gui not supported, running headless"
+  fi
+  if [ "$tmux" = true ] && ! tmux ls 2>/dev/null | grep -q '^vm: '; then
+    trace tmux new-session -d -s vm "$VM_PROVIDER run ${args[*]} $name"
+    return
+  fi
+  local vm_log="/tmp/${VM_PROVIDER}-${name}.log"
+  if [ "$verbosity" -ge 2 ]; then
+    vm run "${args[@]}" "$name" 2>&1 | tee "$vm_log" &
+  else
+    vm run "${args[@]}" "$name" 2>&1 1>/dev/null | tee "$vm_log" >&2 &
+  fi
+  sleep 1
+}
+
+vm_stop() {
+  [ "$verbosity" -ge 1 ] && info "stopping $name"
+  vm stop --timeout=15 "$name"
+}
+
+# Measure how long a command takes and log the elapsed time
+timed() {
+  local label="$1"
+  shift
+  local start=$SECONDS rc=0
+  "$@" || rc=$?
+  info "$label after $((SECONDS - start))s"
+  return "$rc"
+}
+
+# Name of the outgoing interface the host uses to reach a destination
+host_route_iface() {
+  case "$(uname -s)" in
+  Darwin) route -n get "$1" 2>/dev/null | awk '/interface:/ {print $2}' ;;
+  Linux)
+    local ip
+    ip="$(getent ahostsv4 "$1" 2>/dev/null | awk '{print $1; exit}')" || return 0
+    [ -n "$ip" ] || return 0
+    ip -o route get "$ip" 2>/dev/null | awk '/dev/ {for (i=1; i<=NF; i++) if ($i == "dev") print $(i+1)}'
+    ;;
+  esac
+}
+
+# Name of the first active physical interface on Darwin
+detect_phys_iface() {
+  [ "$(uname -s)" = Darwin ] || return 1
+  local i
+  for i in en0 en1 en2; do
+    if ifconfig "$i" 2>/dev/null | grep -q 'status: active'; then
+      printf '%s\n' "$i"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Enable bridged mode when the host route to VM_CHECK_HOST goes through a VPN tunnel
+detect_bridge() {
+  [ -z "$bridged" ] || return 0
+  local iface
+  iface="$(host_route_iface "${VM_CHECK_HOST%:*}")"
+  case "$iface" in utun*) ;; *) return 0 ;; esac
+  if ! bridged="$(detect_phys_iface)"; then
+    return 0
+  fi
+  [ "$verbosity" -ge 1 ] && info "bridging to $bridged"
+}
+
+# Wait for the guest to obtain an IP, up to a timeout
+get_ip() {
+  local timeout="${1:-10}"
+  vm ip --wait="$timeout" "$name"
+}
+
+# Wait until the guest is ready to accept commands
+wait_guest() {
+  local timeout=120
+  [ "$guest_os" = darwin ] && timeout=500
+  if [ "$VM_PROVIDER" = vetu ]; then
+    ssh_host="$(timed "guest IP" get_ip "$timeout")"
+  elif [[ "$(host_route_iface "${VM_CHECK_HOST%:*}")" != utun* ]]; then
+    # ARP on tart bridge100 isn't reliable, so don't wait the full timeout
+    timed "guest IP" get_ip 10 ||
+      warn "tart ip unavailable, VM may be bridged; falling through to agent poll"
+  fi
+  [ "$verbosity" -ge 1 ] && info "waiting for guest (up to ${timeout}s)"
+  local start next_log elapsed
+  start=$SECONDS
+  next_log=15
+  while ! vm_exec true >/dev/null; do
+    elapsed=$((SECONDS - start))
+    if [ "$elapsed" -ge "$timeout" ]; then
+      err "guest unreachable after ${elapsed}s"
+      return 1
+    fi
+    if [ "$verbosity" -ge 1 ] && [ "$elapsed" -ge "$next_log" ]; then
+      info "still waiting (${elapsed}s)"
+      next_log=$((elapsed + 15))
+    fi
+    sleep 1
+  done
+  [ "$verbosity" -ge 1 ] && info "guest reachable after $((SECONDS - start))s"
+}
+
+# Check if guest can reach external network
+check_network() {
+  local host="${VM_CHECK_HOST%:*}" port="${VM_CHECK_HOST#*:}"
+  if ! vm_exec curl --silent --show-error --head \
+    --connect-timeout 3 --max-time 5 --output /dev/null "https://$host:$port"; then
+    return 1
+  fi
+}
+
+# Tolerate transient DHCP/DNS failures during boot
+wait_network() {
+  local timeout=60 start=$SECONDS streak=0
+  while [ "$streak" -lt 3 ]; do
+    if check_network; then
+      streak=$((streak + 1))
+    else
+      streak=0
+    fi
+    [ "$((SECONDS - start))" -lt "$timeout" ] || return 1
+    sleep 1
+  done
+}
+
+# Log the host route to VM_CHECK_HOST and warn when it goes through a VPN tunnel
+log_host_route() {
+  local host="${VM_CHECK_HOST%:*}"
+  if [ -n "$bridged" ]; then
+    [ "$verbosity" -ge 1 ] && info "bridged via $bridged (host VPN bypassed)"
+    return 0
+  fi
+  local iface
+  iface="$(host_route_iface "$host")"
+  [ "$verbosity" -ge 1 ] && info "host route to $host: ${iface:-unknown}"
+  case "$iface" in
+  utun*) warn "$host is tunneled via $iface; guest may fail if VPN blocks NAT" ;;
+  esac
+}
+
+real_tty() { [ -t 0 ] && [ -t 1 ]; }
+
+# Run a command in the guest
+vm_exec() {
+  if [ "$VM_PROVIDER" = tart ]; then
+    if real_tty; then
+      vm exec -it "$name" "$@"
+    else
+      vm exec "$name" "$@" </dev/null
+    fi
+  else
+    vm_ssh "admin@$ssh_host" "$@"
+  fi
+}
+
+# Run an inline sh script in the guest with positional arguments
+vm_exec_sh() {
+  local script=$1
+  shift
+  if [ "$VM_PROVIDER" = tart ]; then
+    vm_exec sh -euc "$script" -- "$@"
+  else
+    # stdin carries the script: SSH arg-joining would mangle shell metacharacters
+    vm_exec sh -eus -- "$@" <<<"$script"
+  fi
+}
+
+# Run a command in the guest with the bootstrap environment
+vm_run() {
+  local term
+  case "${TERM-}" in
+  '' | xterm-ghostty | xterm-kitty | alacritty) term=xterm-256color ;;
+  *) term=$TERM ;;
+  esac
+
+  local env_args=(
+    "CHEZMOI_PROFILE=${CHEZMOI_PROFILE:-minimal}"
+    CHEZMOI_UPGRADE=true
+    "MISE_TRUSTED_CONFIG_PATHS=$src"
+    "TERM=$term"
+  )
+  [[ -v CI ]] && env_args+=("CI=$CI")
+  [[ -v GITHUB_TOKEN ]] && env_args+=("GITHUB_TOKEN=$GITHUB_TOKEN")
+
+  # bash -l sources ~/.profile to set PATH for brew and mise
+  # shellcheck disable=SC2016
+  local script='cd "$1" && shift && exec "$@"'
+  if [ "$VM_PROVIDER" = tart ]; then
+    vm_exec env "${env_args[@]}" bash -lc "$script" -- "$src" "$@"
+  else
+    # Pass the whole command as one pre-quoted string so stdin stays as the
+    # terminal (SSH concatenates multiple args with spaces, breaking the script)
+    vm_ssh "admin@$ssh_host" "$(quote_args env "${env_args[@]}" bash -lc "$script" -- "$src" "$@")"
+  fi
+}
+
+# Restore the saved terminal state when running interactively
+restore_tty() {
+  real_tty || return 0
+  [ -n "${tty_state:-}" ] && stty "$tty_state" </dev/tty 2>/dev/null || true
+}
+
+# Stop the VM and tear down the wrapping tmux session if any
+vm_down() {
+  if [ "$tmux" = true ] && tmux ls 2>/dev/null | grep -q '^vm: '; then
+    [ "$verbosity" -ge 1 ] && info "killing tmux session"
+    trace tmux kill-session -t vm
+  fi
+  vm_stop
+}
+
+# Mount each shared directory inside the guest over virtiofs
+vm_mount() {
+  [ -n "$dirs" ] || return 0
+  local entry tag opts mp
+  for entry in $dirs; do
+    case "$entry" in
+    *:*) tag="${entry%%:*}" ;;
+    *) tag="${entry##*/}" ;;
+    esac
+    case "$entry" in
+    *:ro) opts=ro ;;
+    *) opts=rw ;;
+    esac
+    if [ "$guest_os" = darwin ]; then
+      mp="/Volumes/My Shared Files/$tag"
+    else
+      mp="\$HOME/.local/share/$tag"
+    fi
+    [ "$verbosity" -ge 1 ] && info "mounting $tag at $mp ($opts)"
+    if [ "$guest_os" = darwin ]; then
+      # macOS virtio-fs caches stale metadata across host edits, so always remount
+      # shellcheck disable=SC2016
+      vm_exec_sh '
+        sudo mkdir -p "$2"
+        sudo /sbin/umount "$2" 2>/dev/null || true
+        sudo /sbin/mount_virtiofs "$1" "$2"
+      ' "$tag" "$mp"
+      continue
+    fi
+    # shellcheck disable=SC2016
+    vm_exec_sh '
+      mp="$HOME/.local/share/$1"
+      mkdir -p "$mp"
+      mountpoint -q "$mp" && exit 0
+      sudo modprobe virtiofs 2>/dev/null || true
+      sudo mount -t virtiofs -o "$2" "$1" "$mp"
+    ' "$tag" "$opts"
+  done
+}
+
+# tart 2.32.1 lacks cp and crashes on stdin redirect through tart exec -i
+vm_copy() {
+  local host_src="$1" dst="$2" b64
+  if [ "$VM_PROVIDER" = tart ]; then
+    b64="$(base64 <"$host_src")"
+    # shellcheck disable=SC2016
+    vm_exec_sh 'printf "%s" "$1" | base64 -d >"$2" && chmod +x "$2"' "$b64" "$dst"
+  else
+    : "${ssh_host:=$(vm ip "$name")}"
+    vm_scp "$host_src" "admin@$ssh_host:$dst"
+  fi
+}
+
+# Copy chezmoi source into the guest unless tart already mounted it via --dir
+sync_source() {
+  if [ "$VM_PROVIDER" = tart ] && [ -n "$dirs" ]; then
+    return 0
+  fi
+  # Stale files persist until the VM is recreated
+  if [ "$VM_PROVIDER" = tart ]; then
+    require_cmd tar
+    [ "$verbosity" -ge 1 ] && info "copying $PWD to $name:$src via tar stream"
+    # Exclude ._* on both ends because host tar may emit AppleDouble entries
+    # shellcheck disable=SC2016
+    if ! trace tar --no-xattrs \
+      --exclude='.DS_Store' --exclude='._*' --exclude='*/._*' \
+      -cf - -C "$PWD" . |
+      "$VM_PROVIDER" exec -i "$name" bash -euc 'mkdir -p "$1" && tar xf - -C "$1" --exclude="._*"' -- "$src"; then
+      err "tar stream failed: $PWD to $name:$src"
+      return 1
+    fi
+    return 0
+  fi
+  [ "$verbosity" -ge 1 ] && info "syncing chezmoi to $src"
+  : "${ssh_host:=$(vm ip "$name")}"
+  vm_ssh "admin@$ssh_host" "mkdir -p \"$src\""
+  trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
+    .pre-commit-config.yaml mise.toml home script test |
+    vm_ssh "admin@$ssh_host" "tar x -C \"$src\""
+}
+
+# SSH into the guest using sshpass with the cirruslabs admin/admin default
+vm_ssh() {
+  local ssh_args=(
+    -o StrictHostKeyChecking=no
+    -o UserKnownHostsFile=/dev/null
+    -o LogLevel=ERROR
+    -o ConnectTimeout=60
+    -p "$ssh_port"
+  )
+  [ -t 0 ] && [ -t 1 ] && ssh_args+=(-t)
+  # shellcheck disable=SC2209
+  SSHPASS=admin trace sshpass -e ssh "${ssh_args[@]}" "$@"
+}
+
+# scp into the guest with the same default credentials as vm_ssh
+vm_scp() {
+  local scp_args=(
+    -o StrictHostKeyChecking=no
+    -o UserKnownHostsFile=/dev/null
+    -o LogLevel=ERROR
+    -P "$ssh_port"
+  )
+  # shellcheck disable=SC2209
+  SSHPASS=admin trace sshpass -e scp "${scp_args[@]}" "$@"
+}
+
+# Resolve an image alias to the provider URL and guest metadata. Bare paths bypass IMAGES
+resolve() {
+  local target="$1"
+  if [ -n "${IMAGES[$target]:-}" ]; then
+    IFS='|' read -r image default_name guest_os <<<"${IMAGES[$target]}"
+  elif [[ $target == */* ]]; then
+    image="$target"
+    default_name="${target##*/}"
+    default_name="${default_name%:*}"
+    guest_os="${VM_GUEST_OS:-linux}"
+  else
+    local available
+    available="$(printf '%s\n' "${!IMAGES[@]}" | sort | tr '\n' ' ' | sed 's/ $//')"
+    err "unknown image: $target"
+    [ "$verbosity" -ge 1 ] && info "available images for $ARCH: $available"
+    return 1
+  fi
+
+  local home
+  case "$guest_os" in
+  darwin) home=/Users/admin ;;
+  *) home=/home/admin ;;
+  esac
+
+  src="$home/.local/share/chezmoi"
+  if [ "$VM_PROVIDER" = tart ]; then
+    [ "$guest_os" = darwin ] && src="/Volumes/My Shared Files/chezmoi"
+    : "${dirs:=chezmoi:$PWD:ro}"
+  fi
+}
+
+# Start the VM, wait for the guest, mount shared dirs, log the host route
+vm_boot() {
+  vm_start
+  wait_guest
+  [ "$VM_PROVIDER" = tart ] && vm_mount
+  log_host_route
+}
+
+# Pin public resolvers in the guest to bypass an unreliable NAT DNS proxy
+override_dns() {
+  [ "$guest_os" = darwin ] && return 0
+  local servers
+  read -ra servers <<<"${VM_DNS:-1.1.1.1 8.8.8.8}"
+  [ "$verbosity" -ge 1 ] && info "using resolvers: ${servers[*]}"
+  # shellcheck disable=SC2016
+  vm_exec_sh '
+    { for ns; do echo "nameserver $ns"; done; } |
+      sudo tee /etc/resolv.conf >/dev/null
+  ' "${servers[@]}"
+}
+
+# Bring the guest online and fall back to static resolvers if the first attempt fails
+ensure_online() {
+  if timed "egress to $VM_CHECK_HOST" wait_network; then
+    return 0
+  fi
+  warn "network unstable, retrying with static resolvers"
+  override_dns
+  timed "egress to $VM_CHECK_HOST" wait_network
+}
+
+vm_up() {
+  : "${name:=$default_name}"
+  ssh_host=""
+  ssh_port="$VM_SSH_PORT"
+  vm_status="$(vm_state "$name")"
+
+  [ -z "$vm_status" ] && vm_clone
+
+  if [ "$vm_status" = running ]; then
+    [ "$verbosity" -ge 1 ] && info "reusing running VM"
+    if [ "$VM_PROVIDER" = vetu ]; then
+      ssh_host="$(get_ip)" || true
+    fi
+    if vm_exec true >/dev/null; then
+      if [ "$VM_PROVIDER" = vetu ] || check_network; then
+        if [ "$dirs_explicit" = true ]; then
+          warn "--dir mounts require a fresh start"
+        fi
+        [ "$VM_PROVIDER" = tart ] && vm_mount
+        return 0
+      fi
+    fi
+    warn "VM unreachable; restarting"
+    vm_stop
+  fi
+
+  [ "$VM_PROVIDER" = tart ] && detect_bridge
+  vm_boot
+  ensure_online && return 0
+
+  if [ "$VM_PROVIDER" = tart ] && [ -z "$bridged" ] && bridged=$(detect_phys_iface 2>/dev/null); then
+    warn "NAT broken (likely stale DNS from prior VPN); retrying bridged via $bridged"
+    vm_stop
+    vm_boot
+    ensure_online && return 0
+  fi
+
+  vm_boot
+  [ "$VM_PROVIDER" = tart ] && check_network
+}
+
+bootstrap() {
+  vm_run ./script/bootstrap --no-tty --source="$src" --verbose
+}
+
+init_repo() {
+  if ! vm_exec test -f "$src/.chezmoiroot"; then
+    return 0
+  fi
+  if vm_exec test -d "$src/.git"; then
+    return 0
+  fi
+  # shellcheck disable=SC2016
+  local script='
+    git config --system --add safe.directory "$1"
+    git -C "$1" init --quiet
+    git -C "$1" add --all
+  '
+  vm_exec_sh "$script" "$src"
+}
+
+pipeline() {
+  sync_source
+  bootstrap
+  init_repo
+  vm_run mise run pipeline
+}
+
+cmd_run() {
+  local target="$1"
+  shift
+
+  resolve "$target"
+  vm_up
+
+  if [ "$#" -eq 0 ]; then
+    pipeline
+  else
+    vm_run "$@"
+  fi
+
+  # Stop on clean exit unless user passed -k (matches script/container)
+  if [ "$keep" != true ]; then
+    vm_down
+  fi
+}
+
+# Parse flags from "$@" and store remaining args in ARGS
+# Globals modified: bridged, dirs, gui, keep, name, tmux, verbosity, ARGS
+parse_flags() {
+  ARGS=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -h | --help)
+      usage_help
+      exit 0
+      ;;
+    --usage)
+      usage_spec
+      exit 0
+      ;;
+    -d | --dir)
+      dirs="${dirs:+$dirs }${2:?missing value for --dir}"
+      dirs_explicit=true
+      shift 2
+      ;;
+    --dir=*)
+      dirs="${dirs:+$dirs }${1#*=}"
+      dirs_explicit=true
+      shift
+      ;;
+    -g | --gui)
+      gui=true
+      shift
+      ;;
+    -k | --keep)
+      keep=true
+      shift
+      ;;
+    -n | --name)
+      name="${2:?missing value for --name}"
+      shift 2
+      ;;
+    --name=*)
+      name="${1#*=}"
+      shift
+      ;;
+    --net-bridged)
+      bridged="${2:?missing value for --net-bridged}"
+      shift 2
+      ;;
+    --net-bridged=*)
+      bridged="${1#*=}"
+      shift
+      ;;
+    -q | --quiet)
+      verbosity=0
+      shift
+      ;;
+    -t | --tmux)
+      tmux=true
+      shift
+      ;;
+    -v | --verbose)
+      verbosity=2
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    --*)
+      err "unknown option: $1"
+      exit 2
+      ;;
+    -*)
+      local opt="${1#-}"
+      shift
+      while [ -n "$opt" ]; do
+        case "${opt:0:1}" in
+        d)
+          dirs="${dirs:+$dirs }${1:?missing value for -d}"
+          dirs_explicit=true
+          shift
+          ;;
+        g) gui=true ;;
+        k) keep=true ;;
+        n)
+          name="${1:?missing value for -n}"
+          shift
+          ;;
+        q) verbosity=0 ;;
+        t) tmux=true ;;
+        v) verbosity=2 ;;
+        *)
+          err "unknown option: -${opt:0:1}"
+          exit 2
+          ;;
+        esac
+        opt="${opt:1}"
+      done
+      ;;
+    *) break ;;
+    esac
+  done
+  ARGS=("$@")
+}
+
+main() {
+  case "${1:-}" in
+  '' | -h | --help)
+    usage_help
+    return
+    ;;
+  --usage)
+    usage_spec
+    return
+    ;;
+  --list-images)
+    printf '%s\n' "${!IMAGES[@]}" | sort
+    return
+    ;;
+  --)
+    shift
+    exec "$VM_PROVIDER" "$@"
+    ;;
+  esac
+
+  : "${VM_PROVIDER:?}"
+
+  # Capture only when foreground; restoring from a background pgroup raises SIGTTOU
+  real_tty && tty_state=$({ stty -g </dev/tty; } 2>/dev/null || true)
+  trap restore_tty EXIT
+
+  require_cmd "$VM_PROVIDER"
+  [ "$VM_PROVIDER" = tart ] || require_cmd sshpass
+
+  bridged="${VM_NET_BRIDGED:-}"
+  dirs="${VM_DIRS:-}"
+  dirs_explicit=false
+  gui="${VM_GUI:-false}"
+  keep="${VM_KEEP:-false}"
+  name="${VM_NAME:-}"
+  tmux="${VM_TMUX:-false}"
+  verbosity="${VM_VERBOSITY:-1}"
+
+  # Flags may appear before or after the image; trailing -- starts the guest command
+  parse_flags "$@"
+  set -- "${ARGS[@]}"
+
+  if [ $# -eq 0 ]; then
+    usage_help
+    return
+  fi
+
+  if [ -n "${IMAGES[$1]:-}" ] || [[ $1 == */* ]]; then
+    local target="$1"
+    shift
+    parse_flags "$@"
+    cmd_run "$target" "${ARGS[@]}"
+  else
+    resolve "$1"
+  fi
+}
+
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi

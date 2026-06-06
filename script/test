@@ -1,57 +1,81 @@
 #!/usr/bin/env bash
 #MISE alias="t"
 #MISE description="Run bats test suite"
+#USAGE flag "-l --list" help="List test files"
 #USAGE arg "[filter]..." help="Extra arguments passed to bats"
-#USAGE complete "filter" run="git ls-files 'test/*.bats'"
-# TODO: --base-directory test
+#USAGE complete "filter" run="./script/test --list"
 
 # https://github.com/shunk031/dotfiles/blob/master/scripts/run_unit_test.sh
 
 set -euo pipefail
 
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
+
 # PATH="$PATH:$HOME/.local/bin"
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
-if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
+if command -v mise >/dev/null && [ -z "${MISE_SHELL:-}" ]; then
   eval "$(mise activate bash)"
-  # PATH="$PATH:$HOME/.local/share/mise/shims"
 fi
 # if [ -z "${USER:-}" ]; then
 #   USER="$(id -un)"
 # fi
 
+case "$(uname -s)" in
+Linux)
+  case "$(uname -o)" in
+  Android)
+    # Android 12+ phantom killer 32-process limit without adb/root
+    if [ -x /system/bin/getprop ]; then
+      ANDROID_SDK_INT=$(getprop ro.build.version.sdk)
+      # ANDROID_RELEASE=$(getprop ro.build.version.release)
+      case "$ANDROID_SDK_INT" in
+      31 | 32) DEFAULT_JOBS=4 ;;      # Android 12/12L
+      33 | 34 | 35) DEFAULT_JOBS=4 ;; # Android 13, 14, 15
+      esac
+    fi
+    ;;
+  esac
+  ;;
+esac
+
 if [ "${CI:-}" = true ] && command -v mise >/dev/null; then
   mise trust --all --quiet --yes
 fi
 
-# FIXME(termux): ble.sh: updating binders..../script/container: line 112:
-# 2764 Segmentation fault (core dumped) bash -i
-# export BLE_ENABLED=false
-
-# export CHEZMOI_PROFILE="$PROFILE"
-# export CHEZMOI_ROOT="$PWD"
-# export CHEZMOI_UPGRADE=true
-# export CI=true
+# FIXME(termux): ble.sh updating binders segfaults `bash -i`; if it recurs, gate `BLE_ENABLED=false` on termux detection
 
 main() {
-  case "${1:-}" in
-  -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: test [filter...]"
-    fi
-    return
-    ;;
-  --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
-    return
-    ;;
-  --)
-    shift
-    ;;
-  esac
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -l | --list)
+      git ls-files 'test/*.bats'
+      return
+      ;;
+    -h | --help)
+      if command -v usage >/dev/null; then
+        usage exec --help bash "$0"
+      else
+        echo "Usage: test [-l] [filter...]"
+      fi
+      return
+      ;;
+    --usage)
+      grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+      return
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+    esac
+  done
 
   # Set BATS_LIB_PATH: local test_helper + system libs (if available)
   # Allow override: BATS_LIB_PATH=my/custom/path bats ...
@@ -67,17 +91,12 @@ main() {
   fi
 
   # chezmoi.bats uses BATS_NO_PARALLELIZE_WITHIN_FILE due to chezmoi state lock
-  local jobs
-  if [ -n "${TEST_JOBS:-}" ]; then
-    jobs="$TEST_JOBS"
-  elif command -v nproc >/dev/null; then
-    jobs=$(nproc)
-  elif command -v sysctl >/dev/null; then
-    jobs=$(sysctl -n hw.ncpu)
-  else
-    jobs=4
-  fi
-  if [ $# -eq 0 ]; then
+  local jobs="${TEST_JOBS:-${DEFAULT_JOBS:-$(default_jobs)}}"
+  local has_path=false
+  for arg in "$@"; do
+    case "$arg" in -*) ;; *) [ -e "$arg" ] && has_path=true && break ;; esac
+  done
+  if ! $has_path; then
     set -- --recursive ./test "$@"
   fi
   set -- \
@@ -91,6 +110,19 @@ main() {
   # set -- --trace "$@"
   echo "bats $*" >&2
   bats "$@"
+  local exit_code=$?
+
+  # Fail if 0 tests were run
+  if [ $exit_code -eq 0 ]; then
+    local test_count
+    test_count=$(bats --count "$@" 2>/dev/null)
+    if [ "$test_count" = "0" ]; then
+      echo "bats error: 0 tests found ($*)" >&2
+      exit 1
+    fi
+  fi
+
+  exit $exit_code
 }
 
 main "$@"

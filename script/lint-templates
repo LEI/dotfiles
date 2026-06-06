@@ -5,16 +5,27 @@
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Show render dir and file list"
 #USAGE arg "[templates]..." help="Template paths to render (default: all)"
-#USAGE complete "templates" run="git ls-files 'home/**/*.tmpl' 'home/**/modify_*' ':(exclude)home/.chezmoi.yaml.tmpl'"
+#USAGE complete "templates" run="chezmoi-render --list"
 
 set -euo pipefail
 
+lib_dir="${BASH_SOURCE[0]%/*}/../home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+source "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/bash/require.sh
+source "$lib_dir/bash/require.sh"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
+
+require_bash 4
+
+prog="${0##*/}"
 repo_dir="$PWD"
 render_dir=$(mktemp -d)
 render_args=()
 prek_args=()
 keep="${LINT_KEEP:-false}"
-verbosity=${LINT_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}
+verbosity="${LINT_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -31,15 +42,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: lint [-k] [-q] [-v] [templates...]"
-    fi
+    usage_help "[-k] [-q] [-v] [templates...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   --)
@@ -47,7 +54,7 @@ while [ $# -gt 0 ]; do
     break
     ;;
   -*)
-    echo "lint-templates: unknown option: $1" >&2
+    echo "$prog: unknown option: $1" >&2
     exit 2
     ;;
   *) break ;;
@@ -65,10 +72,10 @@ fi
 # shellcheck disable=SC2329
 cleanup() {
   if [ "$keep" = true ]; then
-    echo "lint: render dir kept: $render_dir" >&2
+    echo "$prog: render dir kept: $render_dir" >&2
   else
     if [ "$verbosity" -ge 2 ]; then
-      echo "lint: cleanup $render_dir" >&2
+      echo "$prog: cleanup $render_dir" >&2
     fi
     rm -rf "$render_dir"
   fi
@@ -84,7 +91,7 @@ chezmoi-render --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 find "$render_dir" -type f -empty -delete
 
 if [ -z "$(find "$render_dir" -type f -print -quit)" ]; then
-  echo "lint: no rendered files" >&2
+  echo "$prog: no rendered files" >&2
   exit 0
 fi
 
@@ -101,8 +108,9 @@ ln -s "$repo_dir/home" "$render_dir/home"
 
 export VALIDATE_KEEP="$keep"
 export VALIDATE_VERBOSITY="$verbosity"
+export MISE_TRUSTED_CONFIG_PATHS="$render_dir${MISE_TRUSTED_CONFIG_PATHS:+:$MISE_TRUSTED_CONFIG_PATHS}"
 
-export SKIP="gitleaks,lint-templates,zizmor${SKIP:+,$SKIP}"
+export SKIP="gitleaks,lint-templates,yamlfmt,zizmor${SKIP:+,$SKIP}"
 
 exit_code=0
 prek run \
@@ -112,6 +120,6 @@ prek run \
   --all-files || exit_code=$?
 
 if [ "$exit_code" -ne 0 ] && [ "$verbosity" -ge 1 ]; then
-  echo "lint: failed with exit code $exit_code" >&2
+  echo "$prog: failed with exit code $exit_code" >&2
 fi
 exit "$exit_code"

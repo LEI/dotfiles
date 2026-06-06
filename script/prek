@@ -11,39 +11,97 @@
 
 set -eu
 
+verbosity="${VALIDATE_VERBOSITY:-1}"
+
 # Map flags to hook verbosity; prek flags only control prek output
 for arg in "$@"; do
   case "$arg" in
-  -v | --verbose) export VALIDATE_VERBOSITY=2 ;;
-  -q | --quiet) export VALIDATE_VERBOSITY=0 ;;
+  -v | --verbose) verbosity=2 ;;
+  -q | --quiet) verbosity=0 ;;
   esac
 done
 
+export VALIDATE_VERBOSITY="${VALIDATE_VERBOSITY:-$verbosity}"
+
 skip=""
-case "$(uname -o)" in
-Android) skip="${skip:+$skip,}check-github-workflows,check-compose-spec,validate-schema,zizmor" ;;
-esac
+
 case "$(uname -s)" in
-Darwin | Linux) ;;
+Darwin) ;;
+Linux)
+  case "$(uname -o)" in
+  Android) skip="${skip:+$skip,}check-compose-spec,check-github-workflows,gitleaks,stylua-github,validate-schema,zizmor" ;;
+  esac
+  ;;
 *) skip="${skip:+$skip,}validate-skill" ;;
 esac
-if [ -f /etc/alpine-release ]; then
-  skip="${skip:+$skip,}stylua-github"
+
+# if [ -f /etc/alpine-release ]; then
+#   skip="${skip:+$skip,}stylua-github"
+# fi
+
+# Skip in-place fixers when cwd is on a read-only mount.
+# Linux: parse mountinfo (test -w lies on bind mounts).
+# macOS: test -w reflects EROFS for fuse/virtiofs.
+ro=false
+if [ -r /proc/self/mountinfo ]; then
+  ro_opts=$(awk -v p="$PWD/" '
+    index(p, $5"/") == 1 && length($5) > best { best = length($5); opts = $6 }
+    END { print opts }
+  ' /proc/self/mountinfo)
+  case ",$ro_opts," in *,ro,*) ro=true ;; esac
+  [ "$verbosity" -ge 2 ] && echo "${0##*/}: pwd=$PWD opts=$ro_opts ro=$ro" >&2
+elif [ "$(uname -s)" = Darwin ]; then
+  # macOS: tart shares dirs as AppleVirtIOFS at /Volumes/My Shared Files.
+  # Per-tag RO is enforced by the virtiofs server, not in mount options;
+  # test -w lies. Match by mount type instead.
+  ro_opts=$(mount | awk -v p="$PWD/" '
+    match($0, / on .+ \(/) {
+      t = substr($0, RSTART+4, RLENGTH-6)
+      if ((p == t) || index(p, t"/") == 1) {
+        if (length(t) > best) {
+          best = length(t)
+          opts = substr($0, RSTART+RLENGTH)
+          sub(/\)$/, "", opts)
+          gsub(/ /, "", opts)
+        }
+      }
+    }
+    END { print opts }
+  ')
+  case ",$ro_opts," in *,AppleVirtIOFS,*) ro=true ;; esac
 fi
+if $ro; then
+  skip="${skip:+$skip,}end-of-file-fixer,trailing-whitespace"
+fi
+
 if [ -n "$skip" ]; then
-  echo "Skipping hooks: $skip" >&2
+  if [ "$verbosity" -ge 1 ]; then
+    echo "${0##*/}: skipping hooks: $skip" >&2
+  fi
   export SKIP="$skip"
 fi
 
-# See ./script/test
+# Required for bashate on debian
 if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
-# if [ -z "${MISE_SHELL:-}" ] && command -v mise >/dev/null; then
-#   eval "$(mise activate bash)"
-#   PATH="$PATH:$HOME/.local/share/mise/shims"
-# fi
 
 set -- prek run --all-files "$@"
-echo "+ $*" >&2
-"$@"
+echo "$*" >&2
+"$@" && exit 0
+status=$?
+
+# Run unpiped to keep prek's TTY colors and progress; classify failures only
+# afterward. A corrupt cache reports "not present in repo"; clean and retry once
+probe=$(prek prepare-hooks 2>&1) && exit "$status"
+case "$probe" in
+*"not present in repo"*)
+  echo "${0##*/}: corrupt prek cache, cleaning and retrying" >&2
+  prek cache clean >/dev/null 2>&1 || true
+  exec "$@"
+  ;;
+*)
+  printf '%s\n' "$probe" >&2
+  exit "$status"
+  ;;
+esac
