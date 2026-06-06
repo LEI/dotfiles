@@ -1,0 +1,29 @@
+{{- if and (eq .variantID "silverblue") .gui (not .ephemeral) -}}
+#!/bin/sh
+# Install GNOME Shell extensions via gext.
+
+set -eu
+
+# Pin the shell version so a GNOME upgrade re-runs this
+# {{ output "sh" "-c" "gnome-shell --version 2>/dev/null || true" | trim }}
+uuids="caffeine@patapon.info"
+
+if ! command -v gext >/dev/null 2>&1; then
+  echo "gext not installed (expected the gnome-extensions-cli package)" >&2
+  exit 1
+fi
+
+for uuid in $uuids; do
+  if [ -d "$HOME/.local/share/gnome-shell/extensions/$uuid" ]; then
+    echo "$uuid already installed"
+    continue
+  fi
+  # --filesystem avoids DBus prompts
+  echo "Installing $uuid via gext..."
+  gext --filesystem install "$uuid"
+done
+
+gext --filesystem update
+
+echo "GNOME extensions reconciled: $uuids"
+{{ end -}}

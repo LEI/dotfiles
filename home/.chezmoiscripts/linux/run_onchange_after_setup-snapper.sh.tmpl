@@ -1,0 +1,58 @@
+#!/bin/sh
+# Managed by chezmoi
+# Setup Snapper configuration for user home directory
+
+set -eu
+
+# Only run on Fedora Silverblue with backup feature
+{{- if not (and (eq .osIDLike "fedora") (eq .variantID "silverblue")) }}
+echo "Skipping Snapper setup (not Fedora Silverblue)"
+exit 0
+{{ end -}}
+
+# Check if btrfs-assistant is installed
+if ! command -v btrfs-assistant >/dev/null 2>&1; then
+  echo "Skipping Snapper setup (btrfs-assistant not installed)"
+  exit 0
+fi
+
+# Check if snapper is installed
+if ! command -v snapper >/dev/null 2>&1; then
+  echo "Skipping Snapper setup (snapper not installed)"
+  exit 0
+fi
+
+# Check if config already exists
+if [ -f "/etc/snapper/configs/home" ]; then
+  echo "Snapper config for home already exists"
+  exit 0
+fi
+
+# Create snapper config for /var/home
+# This requires root privileges
+if [ "$(id -u)" != "0" ]; then
+  echo "ERROR: Snapper config requires root privileges"
+  echo "Please run:"
+  echo "  sudo snapper -c home create-config /var/home"
+  exit 1
+fi
+
+# Create config
+echo "Creating Snapper config for /var/home..."
+snapper -c home create-config /var/home
+
+# Configure retention policy
+echo "Configuring snapshot retention..."
+snapper -c home set-config TIMELINE_CREATE=yes
+snapper -c home set-config TIMELINE_LIMIT_HOURLY=24
+snapper -c home set-config TIMELINE_LIMIT_DAILY=7
+snapper -c home set-config TIMELINE_LIMIT_MONTHLY=6
+
+# Enable services
+echo "Enabling Snapper services..."
+systemctl enable --now snapperd.timer
+systemctl enable --now snapper-cleanup.timer
+
+echo "Snapper configuration complete"
+echo "Use 'snapper -c home list' to view snapshots"
+echo "Use 'btrfs-assistant' for GUI management"

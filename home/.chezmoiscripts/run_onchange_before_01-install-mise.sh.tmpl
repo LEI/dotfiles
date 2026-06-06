@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# https://mise.jdx.dev/installing-mise.html
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+if command -v mise >/dev/null && version=$(mise --version | head -n1); then
+  echo "mise: already installed: {{ lookPath "mise" }}" >&2
+  echo "mise: version $version" >&2
+  exit
+fi
+
+BIN_DIR="$HOME/.local/bin"
+MISE_BIN="$BIN_DIR/mise"
+
+if [ -x "$MISE_BIN" ] && version=$("$MISE_BIN" --version | head -n1); then
+  echo "mise: already installed: $MISE_BIN" >&2
+  echo "mise: version $version" >&2
+  exit
+fi
+
+if [ ! -d "$BIN_DIR" ]; then
+  run mkdir -p "$BIN_DIR"
+fi
+
+{{- $os := .chezmoi.os }}
+{{- if eq .os "android" }}
+{{-   $os = "linux" }}
+{{- else if eq .os "darwin" }}
+{{-   $os = "macos" }}
+{{- end }}
+
+{{- $arch := .chezmoi.arch }}
+{{- if eq .chezmoi.arch "amd64" }}
+{{-   $arch = "x64" }}
+{{- else if eq .chezmoi.arch "arm" }}
+{{-   $arch = "arm64" }}
+{{- /* else armv{6,7} */ -}}
+{{- end }}
+
+{{- $variant := printf "%s-%s" $os $arch }}
+{{- if or (eq .libc "musl") (eq .os "android") }}
+{{-   $variant = printf "%s-musl" $variant }}
+{{- end }}
+
+echo "mise: installing ({{ $variant }})" >&2
+progress=--silent
+[ -t 2 ] && progress=--progress-bar
+run curl --location --fail --show-error --max-time 300 "$progress" \
+  "https://mise.jdx.dev/mise-latest-{{ $variant }}" --output "$MISE_BIN"
+run chmod +x "$MISE_BIN"
+
+{{- if eq .osID "android" }}
+
+# https://github.com/jdx/mise/issues/1969#issuecomment-2727306884
+run mkdir -p "$PREFIX/etc/tls/certs"
+run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs.pem"
+run ln -fs "$PREFIX/etc/tls/cert.pem" "$PREFIX/etc/tls/certs/ca-certificates.crt"
+{{- end }}
+
+echo "mise: installed" >&2
+"$MISE_BIN" --version | head -n1 >&2

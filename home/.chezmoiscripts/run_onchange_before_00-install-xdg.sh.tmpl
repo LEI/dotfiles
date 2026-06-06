@@ -3,7 +3,11 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 # XDG vars inlined at template render time (target may not exist yet)
 {{ includeTemplate "dot_config/environment.d/00-xdg.conf.tmpl" . | trim }}
@@ -21,8 +25,17 @@ set -eu
 #   dry_run ln -s "$CLAUDE_CONFIG_DIR" "$HOME/.claude"
 # fi
 
-if [ -d "$HOME/.pi" ] && ! [ -d "$PI_CONFIG_DIR" ]; then
+if [ -d "$HOME/.pi" ] && ! [ -L "$HOME/.pi" ]; then
+  if [ -d "$PI_CONFIG_DIR" ]; then
+    echo "ERROR: $HOME/.pi (dir) and $PI_CONFIG_DIR both exist" >&2
+    echo "Remove $HOME/.pi manually, then re-apply" >&2
+    exit 1
+  fi
   dry_run mv "$HOME/.pi" "$PI_CONFIG_DIR"
+  dry_run ln -s "$PI_CONFIG_DIR" "$HOME/.pi"
+fi
+
+if [ -d "$PI_CONFIG_DIR" ] && ! [ -L "$HOME/.pi" ]; then
   dry_run ln -s "$PI_CONFIG_DIR" "$HOME/.pi"
 fi
 {{- end }}

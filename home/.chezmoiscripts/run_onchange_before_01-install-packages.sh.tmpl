@@ -4,7 +4,11 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 {{- $systemPackages := get .packages .packageManager }}
 {{- if or (empty $systemPackages) (not (kindIs "map" $systemPackages)) }}
@@ -18,8 +22,14 @@ packages="{{ $packageList | join " " }}"
 # Installed hash: {{ output "sh" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") .packageManager | sha256sum }}
 {{- end }}
 msg "Installing {{ .packageManager }} packages: $packages"
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) | trim }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" $systemPackages) }}
 {{- if eq .osID "alpine" }}
+
+{{- if .container }}
+
+# ERROR: Unable to lock database: Resource temporarily unavailable
+# ERROR: Failed to open apk database: Resource temporarily unavailable
+{{- end }}
 
 dry_run sudo apk update --quiet
 {{- if .upgrade }}
@@ -34,7 +44,7 @@ dry_run sudo apk add --quiet $packages
 {{- if .container }}
 
 if [ -f /var/lib/pacman/db.lck ]; then
-  dry_run rm /var/lib/pacman/db.lck
+  dry_run sudo rm -f /var/lib/pacman/db.lck
 fi
 {{- end }}
 
@@ -48,8 +58,27 @@ dry_run sudo pacman --sync --needed --noconfirm --quiet $packages
 
 {{- else if eq .osIDLike "debian" }}
 
+{{- if .container }}
+
+for lock in \
+  /var/cache/apt/archives/lock \
+  /var/lib/apt/lists/lock \
+  /var/lib/dpkg/lock \
+  /var/lib/dpkg/lock-frontend; do
+  if [ -f "$lock" ]; then
+    dry_run sudo rm "$lock"
+  fi
+done
+if [ -d /var/lib/apt/lists/partial ]; then
+  # Stale symlinks in partial cause EEXIST failures and leave lists inconsistent
+  dry_run sudo rm -f /var/lib/apt/lists/partial/*
+fi
+
 # https://manpages.ubuntu.com/manpages/trusty/en/man7/debconf.7.html#frontends
-# export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
+{{- end }}
+
+dry_run sudo dpkg --configure -a
 
 dry_run sudo -E apt-get update --quiet # >/dev/null
 
@@ -60,7 +89,14 @@ dry_run sudo -E apt-get upgrade --quiet --yes # >/dev/null
 
 # shellcheck disable=SC2086
 dry_run sudo -E apt-get install --quiet --yes $packages # >/dev/null
-{{- else if and (eq .osID "fedora") (eq .packageManager "dnf") }}
+{{- else if and (eq .osIDLike "fedora" "rhel") (eq .packageManager "dnf") }}
+
+{{- if eq .osIDLike "rhel" }}
+
+# rhel-family ships a slim BaseOS/AppStream; EPEL + CRB cover the rest of the tooling
+dry_run sudo dnf install --assumeyes --quiet dnf-plugins-core epel-release
+dry_run sudo dnf config-manager --set-enabled crb
+{{- end }}
 
 dry_run sudo dnf update --assumeyes --quiet
 {{- if .upgrade }}
@@ -70,7 +106,7 @@ dry_run sudo dnf upgrade --assumeyes --quiet
 
 # shellcheck disable=SC2086
 dry_run sudo dnf install --assumeyes --quiet $packages
-{{- else if eq .osID "fedora" }}
+{{- else if eq .osIDLike "fedora" "rhel" }}
 
 dry_run rpm-ostree refresh-md # --quiet
 {{- if .upgrade }}
@@ -81,6 +117,31 @@ dry_run rpm-ostree upgrade # --quiet
 # shellcheck disable=SC2086
 dry_run rpm-ostree install --allow-inactive --assumeyes --idempotent $packages
 # --apply-live --quiet
+{{- else if eq .osIDLike "opensuse" }}
+
+{{- if .container }}
+
+if [ -s /run/zypp.pid ]; then
+  pid="$(cat /run/zypp.pid)"
+  if kill -0 "$pid" 2>/dev/null; then
+    dry_run sudo kill "$pid"
+  fi
+  dry_run sudo rm -f /run/zypp.pid
+fi
+# busybox-gawk conflicts with gawk which provides the awk virtual package
+if rpm --quiet --query busybox-gawk 2>/dev/null; then
+  dry_run sudo zypper --quiet remove --no-confirm busybox-gawk
+fi
+{{- end }}
+
+dry_run sudo zypper --quiet ref
+{{- if .upgrade }}
+
+dry_run sudo zypper --quiet update --no-confirm
+{{- end }}
+
+# shellcheck disable=SC2086
+dry_run sudo zypper --quiet install --no-confirm $packages
 {{- else if eq .osID "android" }}
 
 {{- if not .container }}
@@ -110,6 +171,7 @@ dry_run pkg update --quiet
 dry_run pkg upgrade --quiet --yes
 {{- end }}
 
+# shellcheck disable=SC2086
 dry_run pkg install --quiet --yes $packages # >/dev/null
 {{- else if eq .os "windows" }}
 {{- if .upgrade }}
@@ -128,7 +190,7 @@ dry_run winget import --disable-interactivity --import-file="$import_file"
 
 die "invalid OS: {{ .osID }}"
 {{- end }}
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) -}}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" $systemPackages) }}
 {{- if and .codespaces (eq .osIDLike "debian") }}
 
 selected_editor="$(update-alternatives --get-selections | grep editor | tr -s ' ' | cut -d' ' -f3)"

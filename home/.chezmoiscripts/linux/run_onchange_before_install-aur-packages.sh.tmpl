@@ -7,7 +7,11 @@ if [ -z "${USER:-}" ]; then
   USER="$(id -un)"
 fi
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
 # Run a command as $USER; if already that user, run directly
 as_user() {
@@ -25,11 +29,18 @@ if ! has yay && ! has paru && ! has pamac; then
   if [ -n "${CI:-}" ] && grep -q '^OPTIONS=.*[^!]debug' /etc/makepkg.conf; then
     dry_run sudo sed -e '/^OPTIONS=/ s/ debug / !debug /' -i /etc/makepkg.conf
   fi
-  if [ -n "${CI:-}" ] && [ "$(uname -m)" = "aarch64" ]; then
-    dry_run sudo sed -e 's/^#\?LocalFileSigLevel = .*/LocalFileSigLevel = Optional/' -i /etc/pacman.conf
+  # archlinuxarm containers ship without an initialized keyring
+  if grep -q '^NAME=.*Arch Linux ARM' /etc/os-release 2>/dev/null; then
+    dry_run sudo pacman-key --init
+    dry_run sudo pacman-key --populate archlinuxarm
+    dry_run sudo sed -e 's/^#\?LocalFileSigLevel = .*/LocalFileSigLevel = Never/' -i /etc/pacman.conf
   fi
   dry_run as_user sh -c "
-    [ -d '$TMPDIR/yay-bin' ] || git clone https://aur.archlinux.org/yay-bin.git '$TMPDIR/yay-bin'
+    if [ -d '$TMPDIR/yay-bin' ]; then
+      git -C '$TMPDIR/yay-bin' clean -fdx
+    else
+      git clone https://aur.archlinux.org/yay-bin.git '$TMPDIR/yay-bin'
+    fi
     cd '$TMPDIR/yay-bin'
     makepkg --install --noconfirm --syncdeps
   "
@@ -48,7 +59,7 @@ msg "Installing AUR packages"
 
 aur_packages="{{ $aurPackages | keys | sortAlpha | join " " }}"
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) | trim }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.aur) }}
 
 if has yay; then
   # run sudo chown -R "$USER:$USER" /tmp/yay
@@ -64,7 +75,7 @@ else
   die "AUR package manager not found"
 fi
 
-{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) | trim }}
+{{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.aur) }}
 
 msg "Installed AUR packages"
 {{ end -}}

@@ -1,0 +1,143 @@
+{{- if not .ephemeral -}}
+#!/bin/sh
+
+# Configure kernel command-line arguments for this machine
+# Distro-agnostic: detects the right tool for each platform
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+. "$lib_dir/sh/log.sh"
+. "$lib_dir/sh/run.sh"
+
+args_file="$(mktemp)"
+trap 'rm -f "$args_file"' EXIT
+
+# Kernel arguments to apply
+# Use i915.enable_psr=0 to avoid black screen / GPU hangs on Intel Tiger Lake
+# See https://bugzilla.redhat.com/show_bug.cgi?id=2467676
+cat >"$args_file" <<'EOF'
+i915.enable_psr=0
+EOF
+
+apply_rpm_ostree() {
+  if ! has rpm-ostree; then
+    return 1
+  fi
+  while IFS= read -r arg <&3; do
+    [ -z "$arg" ] && continue
+    if ! rpm-ostree kargs | grep -qF "$arg"; then
+      if dry_run pkexec rpm-ostree kargs --append-if-missing "$arg"; then
+        msg "kernel-arg: appended $arg via rpm-ostree (reboot required)"
+      else
+        msg "kernel-arg: failed to append $arg, run manually: pkexec rpm-ostree kargs --append-if-missing \"$arg\""
+        exit 1
+      fi
+    fi
+  done 3<"$args_file"
+}
+
+apply_grubby() {
+  if ! has grubby; then
+    return 1
+  fi
+  args="$(tr '\n' ' ' <"$args_file" | sed 's/  */ /g; s/^ *//; s/ *$//')"
+  current="$(grubby --info DEFAULT | sed -n "s/^args=\"//p" | sed 's/\"$//')"
+  missing=""
+  for arg in $args; do
+    case " $current " in
+    *" $arg "*) ;;
+    *) missing="$missing $arg" ;;
+    esac
+  done
+  if [ -n "$missing" ]; then
+    if dry_run pkexec grubby --update-kernel=DEFAULT --args="$missing"; then
+      msg "kernel-arg: appended$missing via grubby"
+    else
+      msg "kernel-arg: failed to append$missing, run manually and re-run chezmoi apply"
+      exit 1
+    fi
+  fi
+}
+
+apply_etc_default_grub() {
+  if [ ! -f /etc/default/grub ]; then
+    return 1
+  fi
+  # shellcheck source=/dev/null
+  . /etc/default/grub 2>/dev/null || true
+  changed=false
+  while IFS= read -r arg <&3; do
+    [ -z "$arg" ] && continue
+    case " ${GRUB_CMDLINE_LINUX_DEFAULT:-} " in
+    *" $arg "*) ;;
+    *)
+      if [ -z "${GRUB_CMDLINE_LINUX_DEFAULT:-}" ]; then
+        GRUB_CMDLINE_LINUX_DEFAULT="$arg"
+      else
+        GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT $arg"
+      fi
+      changed=true
+      ;;
+    esac
+  done 3<"$args_file"
+  if $changed; then
+    if dry_run pkexec sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"$GRUB_CMDLINE_LINUX_DEFAULT\"/" /etc/default/grub; then
+      msg "kernel-arg: updated /etc/default/grub"
+      if has update-grub; then
+        if ! dry_run pkexec update-grub; then
+          msg "kernel-arg: update-grub failed, run manually and re-run chezmoi apply"
+          exit 1
+        fi
+      elif has grub-mkconfig; then
+        if ! dry_run pkexec grub-mkconfig -o /boot/grub/grub.cfg; then
+          msg "kernel-arg: grub-mkconfig failed, run manually and re-run chezmoi apply"
+          exit 1
+        fi
+      fi
+    else
+      msg "kernel-arg: failed to update /etc/default/grub, do it manually and re-run chezmoi apply"
+      exit 1
+    fi
+  fi
+}
+
+apply_kernel_cmdline() {
+  if [ ! -f /etc/kernel/cmdline ] && [ ! -d /etc/kernel/cmdline.d ]; then
+    return 1
+  fi
+  current=""
+  if [ -f /etc/kernel/cmdline ]; then
+    current="$(cat /etc/kernel/cmdline)"
+  fi
+  missing=""
+  while IFS= read -r arg <&3; do
+    [ -z "$arg" ] && continue
+    case " $current " in
+    *" $arg "*) ;;
+    *) missing="$missing $arg" ;;
+    esac
+  done 3<"$args_file"
+  if [ -n "$missing" ]; then
+    if dry_run pkexec mkdir -p /etc/kernel/cmdline.d; then
+      for arg in $missing; do
+        printf '%s\n' "$arg" | dry_run pkexec tee -a /etc/kernel/cmdline.d/99-i915-psr.conf >/dev/null
+      done
+      msg "kernel-arg: appended$missing to /etc/kernel/cmdline.d/99-i915-psr.conf"
+    else
+      msg "kernel-arg: could not write /etc/kernel/cmdline.d/99-i915-psr.conf, do it manually and re-run chezmoi apply"
+      exit 1
+    fi
+  fi
+}
+
+if has rpm-ostree; then
+  apply_rpm_ostree
+elif has grubby; then
+  apply_grubby
+elif ! apply_etc_default_grub && ! apply_kernel_cmdline; then
+  msg "kernel-arg: no tool found (rpm-ostree, grubby, /etc/default/grub, /etc/kernel/cmdline)"
+  msg "kernel-arg: add args manually and re-run chezmoi apply"
+  exit 1
+fi
+{{ end -}}
