@@ -52,7 +52,7 @@ setup() {
   printf '{"name":"test"}' >"$file"
 
   run_script ./script/validate-schema --verbose "$file"
-  assert_line "SKIP $file (no \$schema)"
+  assert_line "SKIP $file # no \$schema"
   assert_stderr_line "validate-schema: 0 passed, 0 failed, 1 skipped"
   assert_success
 }
@@ -129,6 +129,7 @@ setup() {
 
 # bats test_tags=type:unit
 @test "validate-schema: handles cspell.json as jsonc" {
+  check_command json5
   local schema="$BATS_TEST_TMPDIR/schema.json"
   local file="$BATS_TEST_TMPDIR/cspell.json"
 
@@ -182,13 +183,33 @@ setup() {
 
 # bats test_tags=type:unit
 @test "validate-schema: handles no files case" {
-  local empty_dir script
-  empty_dir=$(mktemp -d)
-  script="$BATS_TEST_DIRNAME/../../script/validate-schema"
+  local empty_dir
+  empty_dir=$(mktemp -d "$BATS_TEST_TMPDIR/XXXXXX")
   cd "$empty_dir"
   git init --quiet
-  run_script "$script"
+  run_script "$BATS_TEST_DIRNAME/../../script/validate-schema"
   assert_stderr_line --regexp "^validate-schema: no files to validate$"
+  assert_success
+}
+
+# bats test_tags=type:unit
+@test "validate-schema: skips chezmoi templates" {
+  local file="$BATS_TEST_TMPDIR/config.tmpl"
+  printf 'some content' >"$file"
+  run_script ./script/validate-schema --verbose "$file"
+  assert_line "SKIP $file # chezmoi template"
+  assert_success
+}
+
+# bats test_tags=type:unit
+@test "validate-schema: handles path with spaces" {
+  local dir="$BATS_TEST_TMPDIR/path with spaces"
+  local schema="$dir/schema.json"
+  local file="$dir/valid.json"
+  mkdir -p "$dir"
+  printf '{"type":"object"}' >"$schema"
+  printf '{"$schema":"%s"}' "$schema" >"$file"
+  run_script ./script/validate-schema "$file"
   assert_success
 }
 

@@ -1,3 +1,9 @@
+setup_file() {
+  # shellcheck source=test/common/setup-file.sh
+  source test/common/setup-file.sh
+  _common_setup_file
+}
+
 setup() {
   # shellcheck source=test/common/setup.sh
   source test/common/setup.sh
@@ -14,33 +20,55 @@ setup() {
   [ -x ~/.macos ]
 }
 
-# bats test_tags=secrets,permissions
-@test "secrets.d: directory exists and is 700" {
-  if [ ! -d "$HOME/.config/secrets.d" ]; then
-    skip "secrets.d not present"
-  fi
-  check_perms 700 "$HOME/.config/secrets.d"
+# bats test_tags=secrets,permissions,strict
+@test "secrets.d: directories are 700" {
+  [ -d "$HOME/.config/secrets.d" ] || skip "secrets.d not present"
+  local -a dirs
+  mapfile -d '' -t dirs < <(find "$HOME/.config/secrets.d" -type d -print0 2>/dev/null)
+  check_perms 700 "${dirs[@]}"
 }
 
-# bats test_tags=secrets,permissions
+# bats test_tags=secrets,permissions,strict
 @test "secrets.d: files are 600" {
-  if ! compgen -G "$HOME/.config/secrets.d/*.conf" >/dev/null; then
-    skip "no conf files yet"
-  fi
-  check_perms 600 "$HOME/.config/secrets.d"/*.conf
+  [ -d "$HOME/.config/secrets.d" ] || skip "secrets.d not present"
+  local -a files
+  mapfile -d '' -t files < <(find "$HOME/.config/secrets.d" -type f -print0 2>/dev/null)
+  [ ${#files[@]} -gt 0 ] || skip "no files yet"
+  check_perms 600 "${files[@]}"
+}
+
+# bats test_tags=ssh,permissions
+@test "ssh: files are private" {
+  check_feature ssh
+  [ -d "$HOME/.ssh" ] || skip ".ssh not present"
+  check_perms 700 "$HOME/.ssh"
+  local -a files
+  mapfile -d '' -t files < <(find "$HOME/.ssh" -maxdepth 2 -type f \
+    -not -name '*.pub' \
+    -not -name 'known_hosts*' \
+    -print0 2>/dev/null)
+  check_perms 600 "${files[@]}"
 }
 
 # bats test_tags=deploy,permissions
-@test "local.yaml: files are 600" {
-  local found=false
-  for f in ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml; do
-    [ -f "$f" ] || continue
-    found=true
-  done
-  if ! $found; then
-    skip "no local.yaml files"
-  fi
-  check_perms 600 ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml
+@test "local.yaml: files are private" {
+  # local found=false
+  # for f in ~/.logseq/local.yaml ~/.config/*/local.yaml ~/.claude/local.yaml; do
+  #   [ -f "$f" ] || continue
+  #   found=true
+  # done
+  # if ! $found; then
+  #   skip "no local.yaml files"
+  # fi
+  local -a files
+  mapfile -d '' -t files < <(find "$HOME" -maxdepth 2 -type f -name local.yaml -print0 2>/dev/null)
+  [ ${#files[@]} -gt 0 ] || skip "no local.yaml files"
+  check_perms 600 "${files[@]}"
+}
+
+# bats test_tags=deploy,validation
+@test "environment.d: no unmanaged files" {
+  no_unmanaged "$HOME/.config/environment.d"
 }
 
 # Collect unique KEY= names from all .conf files in a directory

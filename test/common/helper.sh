@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-source_container() {
-  export CONTAINER_PROVIDER=dummy
-  source ./script/container
-}
-
 has_feature() {
   local name="$1"
   local feature
@@ -49,8 +44,11 @@ run_chezmoi() {
 
   # Skip rendering if already pre-rendered (e.g. by chezmoi-render in coverage)
   if ! [ -s "$file" ]; then
+    # Shared persistent state to avoid lock contention across test files
+    local persistent_state="$TEST_TMPDIR/chezmoi-state.json"
+
     # Use chezmoi cat from the target path (HOME-relative)
-    if ! chezmoi cat --no-tty --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
+    if ! chezmoi cat --no-tty --persistent-state="$persistent_state" --refresh-externals=never "$HOME/$script" >"$file" 2>&3; then
       fail "run_chezmoi: chezmoi cat failed for $script"
     elif ! [ -s "$file" ]; then
       fail "run_chezmoi: empty file: $script"
@@ -60,31 +58,42 @@ run_chezmoi() {
   run_script "$TEST_TMPDIR/$script" "$@"
 }
 
-# Get file permissions as octal (cross-platform)
-file_perms() {
-  if [ "$(uname -s)" = Darwin ]; then
-    stat -f '%A' "$1"
-  else
+# TODO: lib/sh
+if stat --version >/dev/null 2>&1; then
+  file_perms() {
     stat -c '%a' "$1"
-  fi
-}
+  }
+  file_perms_fmt() {
+    stat -c '%A' "$1"
+  }
+else
+  file_perms() {
+    stat -f '%A' "$1"
+  }
+  file_perms_fmt() {
+    stat -f '%Sp' "$1"
+  }
+fi
 
 # Assert all files matching a glob have expected permissions
 # Usage: check_perms 600 ~/.config/secrets.d/*.conf
 check_perms() {
   local expected="$1"
   shift
-  local bad=()
-  for f in "$@"; do
-    [ -e "$f" ] || continue
+  local fix=()
+  for file in "$@"; do
+    [ -e "$file" ] || continue
     local perm
-    perm=$(file_perms "$f")
+    perm=$(file_perms "$file")
     if [ "$perm" != "$expected" ]; then
-      bad+=("$f:$perm")
+      stat="$(file_perms_fmt "$file")"
+      fix+=("$stat # expected: chmod $expected ${file/$HOME/\~}")
     fi
   done
-  if [ ${#bad[@]} -gt 0 ]; then
-    fail "expected $expected: ${bad[*]}"
+  if [ ${#fix[@]} -gt 0 ]; then
+    local IFS=$'\n'
+    # fail "expected $expected:"$'\n'"${fix[*]}"
+    fail $'\n'"${fix[*]}"
   fi
 }
 
@@ -110,12 +119,48 @@ run_script() {
   if [[ "$file" = */executable_* ]]; then
     local name="${file##*/}"
     local tmp_dir
-    tmp_dir="$(mktemp -d)"
+    tmp_dir="$(mktemp -d "$BATS_TEST_TMPDIR/XXXXXX")"
     local tmp_file="$tmp_dir/${name#executable_}"
     cat >"$tmp_file" <"$file"
   fi
   set -- "${tmp_file:-$file}" "$@"
   run --separate-stderr run_src "$@"
+}
+
+exclude_under_symlink() {
+  local line d skip
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    d="$line"
+    skip=
+    while :; do
+      d="${d%/*}"
+      case "$d" in "" | "$HOME" | "/") break ;; esac
+      if [ -L "$d" ]; then
+        skip=1
+        break
+      fi
+    done
+    [ -z "$skip" ] && printf '%s\n' "$line"
+  done
+  return 0
+}
+
+no_unmanaged() {
+  local path="$1"
+  [ -d "$path" ] || skip "not present: $path"
+  run --separate-stderr chezmoi unmanaged --no-tty --refresh-externals=never \
+    --persistent-state="$BATS_TEST_TMPDIR/chezmoi-state.boltdb" "$path"
+  assert_success
+  refute_output
+}
+
+# Discover rule dirs by structural convention: dirs containing symlinks
+# targeting */packages/*/rules. Agnostic to tool name.
+discover_rule_dirs() {
+  find "$HOME" -maxdepth 4 -type l -lname '*/packages/*/rules' 2>/dev/null |
+    sed 's|/[^/]*$||' |
+    sort -u
 }
 
 stub_seq() {

@@ -1,4 +1,4 @@
-# shellcheck disable=SC2154,SC2016
+# shellcheck disable=SC2016,SC2154,SC2329
 
 setup_file() {
   # shellcheck source=test/common/setup-file.sh
@@ -14,14 +14,21 @@ setup() {
   source test/common/helper.sh
 }
 
+source_container() {
+  export CONTAINER_PROVIDER=dummy
+  export CONTAINER_SOURCE=cp
+  # shellcheck source=script/container
+  source ./script/container
+}
+
 # bats file_tags=script,container
 
 # bats test_tags=type:unit
 @test "container: fails when CONTAINER_PROVIDER is not set" {
   unset CONTAINER_PROVIDER
-  run ./script/container
-  assert_line --partial "CONTAINER_PROVIDER: parameter null or not set"
+  run ./script/container list
   assert_failure
+  assert_output --partial "CONTAINER_PROVIDER: parameter null or not set"
 }
 
 # bats test_tags=type:unit
@@ -88,7 +95,8 @@ setup() {
     assert_equal "$version" "x86_64"
     assert_equal "$image" "docker.io/termux/termux-docker:x86_64"
   fi
-  assert_equal "$exec_user" "system"
+  assert_equal "$exec_user" ""
+  assert_equal "$file_owner" "system"
   assert_equal "$home" "/data/data/com.termux/files/home"
 }
 
@@ -97,7 +105,7 @@ setup() {
   source_container
 
   run log "test message"
-  assert_output "container: test message"
+  assert_output "bats-exec-test: test message"
   assert_success
 }
 
@@ -127,7 +135,7 @@ setup() {
   for cmd in l ls list; do
     run main "$cmd"
     assert_success
-    assert_line "alpine"
+    assert_line --regexp ^alpine
   done
 }
 
@@ -135,8 +143,7 @@ setup() {
 @test "container: main routes status aliases to status" {
   source_container
   # stub container inspect to report no containers exist
-  # shellcheck disable=SC2329
-  container() { return 1; }
+  ct() { return 1; }
   for cmd in "" s st status; do
     run main $cmd
     assert_success
@@ -145,19 +152,18 @@ setup() {
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec sets correct environment variables" {
+@test "container: ct_exec sets correct environment variables" {
   source_container
   resolve alpine
 
-  # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
   assert_output --partial "CHEZMOI_UPGRADE=true"
   assert_output --partial "MISE_TRUSTED_CONFIG_PATHS=/home/test/.local/share/chezmoi"
@@ -166,58 +172,55 @@ setup() {
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec includes CI env var when set" {
+@test "container: ct_exec includes CI env var when set" {
   source_container
   resolve alpine
   export CI=true
 
-  # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
-  assert_output --partial "CI=true"
+  assert_output --partial "--env=CI"
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec redacts GITHUB_TOKEN in logs" {
+@test "container: ct_exec redacts GITHUB_TOKEN in logs" {
   source_container
   resolve alpine
   export GITHUB_TOKEN="secret-token-123"
 
-  # Mock container exec to capture arguments
-  # shellcheck disable=SC2329
-  container() {
+  # Mock ct exec to capture arguments
+  ct() {
     local args
     args=$(printf '%s\n' "$@")
     echo "$args"
   }
 
-  run container_exec echo test
+  run ct_exec echo test
   assert_success
   # Should not contain the actual token in output
   refute_output "secret-token-123"
 }
 
 # bats test_tags=type:unit
-@test "container: container_exec_mise sources mise init" {
+@test "container: ct_exec_mise sources mise init" {
   source_container
   resolve alpine
 
-  # Mock container_exec to capture command
-  # shellcheck disable=SC2329
-  container_exec() {
+  # Mock ct_exec to capture command
+  ct_exec() {
     echo "$@"
   }
 
-  run container_exec_mise echo test
+  run ct_exec_mise echo test
   assert_success
-  assert_output --partial "source ~/.config/mise/init.sh"
+  assert_output --partial ". ~/.config/mise/init.sh"
 }
 
 # bats test_tags=type:unit
@@ -230,39 +233,43 @@ setup() {
 # bats test_tags=type:unit
 @test "container: tag_prefix uses current directory name" {
   source_container
-
-  assert_equal "$tag_prefix" "chezmoi"
+  local dir_name
+  dir_name="$(basename "$PWD")" # chezmoi locally, dotfiles in CI
+  assert_equal "$tag_prefix" "$dir_name"
 }
 
 # bats test_tags=type:unit
 @test "container: resolve image matrix" {
   source_container
-  # format: "image exec_user home"
   local arch
   arch="$(uname -m)"
-  local archlinux_repo=archlinux
-  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
-    archlinux_repo=docker.io/ogarcia/archlinux
-  fi
-  local termux_version=x86_64
-  if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
-    termux_version=aarch64
-  fi
-  declare -A matrix=(
-    [alpine]="alpine:latest test /home/test"
-    [archlinux]="$archlinux_repo:latest test /home/test"
-    [debian]="debian:latest test /home/test"
-    [fedora]="fedora:latest test /home/test"
-    [opensuse]="opensuse/tumbleweed:latest test /home/test"
-    [termux]="docker.io/termux/termux-docker:$termux_version system /data/data/com.termux/files/home"
-    [ubuntu]="ubuntu:latest test /home/test"
-  )
   for name in $images; do
     resolve "$name"
-    read -r exp_image exp_exec_user exp_home <<<"${matrix[$name]}"
+    local exp_image="$name:latest" exp_exec_user=test exp_file_owner=test exp_home=/home/test
+    case "$name" in
+    archlinux)
+      local archlinux_repo=archlinux
+      if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+        archlinux_repo=docker.io/ogarcia/archlinux
+      fi
+      exp_image="$archlinux_repo:latest"
+      ;;
+    opensuse) exp_image="opensuse/tumbleweed:latest" ;;
+    termux)
+      local termux_version=x86_64
+      if [ "$arch" = arm64 ] || [ "$arch" = aarch64 ]; then
+        termux_version=aarch64
+      fi
+      exp_image="docker.io/termux/termux-docker:$termux_version"
+      exp_exec_user=""
+      exp_file_owner=system
+      exp_home=/data/data/com.termux/files/home
+      ;;
+    esac
     assert_equal "$image_name" "$name"
     assert_equal "$image" "$exp_image"
     assert_equal "$exec_user" "$exp_exec_user"
+    assert_equal "$file_owner" "$exp_file_owner"
     assert_equal "$home" "$exp_home"
     assert [ -n "$container" ]
     assert [ -n "$chezmoi_root" ]
