@@ -1,0 +1,5 @@
+# shellcheck shell=sh
+
+if [ -z "${HOMEBREW_PREFIX:-}" ] && [ -x "{{ .brewPrefix }}/bin/brew" ]; then
+  eval "$("{{ .brewPrefix }}/bin/brew" shellenv)"
+fi
