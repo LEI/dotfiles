@@ -2,14 +2,16 @@
 {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end -}}
 {{- $caddy := get $provider "caddy" -}}
 {{ $provider.domain }} {
+	import common
+	{{- if $.features.otel }}
 	tracing {
 		span {{ $name }}
 	}
+	{{- end }}
 	reverse_proxy localhost:{{ $provider.port }}{{ if $caddy }} {
 		{{- range $key, $value := $caddy }}
 		{{ $key }} {{ $value }}
 		{{- end }}
 	}{{ end }}
-	import logging
 }
 {{ end -}}

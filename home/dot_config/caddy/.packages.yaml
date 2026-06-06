@@ -2,15 +2,31 @@
 enabled: "{{ .features.caddy }}"
 packages:
   caddy:
+    enabled: false
     # native on Fedora (dnf) and Arch (pacman): system service with proper capabilities
     # brew on macOS and distros without caddy in official repos
     type: '{{ eq .osIDLike "alpine" "debian" | ternary "brew" nil }}'
-    restart_service: ":changed"
+    # system: true
+    # restart_service: ":always"
+    restart_service: false
+    # after_install:
+    #   - caddy trust --ca local
+    #   - sudo brew services start caddy
+  xcaddy:
+    nameOverwrite:
+      mise: github:caddyserver/xcaddy
+    type: mise
+    after_script: |
+      # TODO: only if tailscale feature is enabled
+      dry_run xcaddy build \
+        --with github.com/tailscale/caddy-tailscale \
+        --output "$HOME/.local/bin/caddy"
+      # dry_run "$HOME/.local/bin/caddy" trust --ca local
   dnsmasq:
     enabled: '{{ eq .chezmoi.os "darwin" }}'
+    system: true
     restart_service: ":changed"
-  # nss-tools:
-  #   # certutil: required for `caddy trust` to register CA in Firefox/Chrome NSS databases
-  #   enabled: '{{ eq .os "linux" }}'
-  #   nameOverwrite:
-  #     debian: libnss3-tools
+  nss-tools: # certutil: required for `caddy trust` to register CA in Firefox/Chrome NSS databases
+    enabled: '{{ eq .os "linux" }}'
+    nameOverwrite:
+      debian: libnss3-tools

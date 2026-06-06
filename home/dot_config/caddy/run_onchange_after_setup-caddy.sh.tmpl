@@ -1,37 +1,82 @@
-{{- $caddyfilePath := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
-#!/bin/bash
-{{- if stat $caddyfilePath }}
-# Caddyfile: {{ include $caddyfilePath | sha256sum }}
+{{- $file := joinPath .chezmoi.homeDir ".config/caddy/Caddyfile" -}}
+{{- $liveness := dict "path" "/config/" "retries" 5 "delay" 2 -}}
+{{- $testSite := "" -}}
+{{- $testPath := "/" -}}
+{{- range $name, $s := .caddy.sites -}}
+{{-   if and (not $testSite) (get $.features (get $s "feature" | default "")) -}}
+{{-     $testSite = $name -}}
+{{-     $testPath = get $s "liveness" | default "/" -}}
+{{-   end -}}
+{{- end -}}
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") -}}
+#!/bin/sh
+{{- if stat $file }}
+
+# Caddyfile: {{ include $file | sha256sum }}
 {{- end }}
-# sites:{{/* include "dot_config/caddy/.chezmoidata.yaml" | sha256sum */}}
 {{- range glob (joinPath .chezmoi.homeDir ".config/caddy/sites/*.caddy") }}
 # {{ base . }}: {{ include . | sha256sum }}
 {{- end }}
-# otel-dropin: {{ include "dot_config/caddy/.otel.conf" | sha256sum }}
+# dnsmasq-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
+{{- if eq .chezmoi.os "linux" }}
 # dns-dnsmasq: {{ include "dot_config/caddy/.dnsmasq.conf" | sha256sum }}
-# dns-test: {{ include "dot_config/caddy/.dnsmasq-test.conf" | sha256sum }}
 # dns-resolved: {{ include "dot_config/caddy/.resolved.conf" | sha256sum }}
+{{- end }}
+{{- if .features.otel }}
+# otel: {{ includeTemplate "otel.yaml.tmpl" . | sha256sum }}
+{{- end }}
 
-set -euo pipefail
+set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
-if ! has caddy; then
-  msg "caddy not found; skipping setup"
-  exit 0
-fi
-
-# On macOS, if valet is running, sync proxies via nginx instead of caddy
-valet_dir="$HOME/.config/valet"
-if [ "${CHEZMOI_OS:?}" = darwin ] && pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
-  msg "Valet detected; configuring .test proxies via nginx instead of caddy"
-  {{- range $feat, $sites := .caddy.sites }}
-  {{- if not (get $.features $feat) }}{{ continue }}{{ end }}
-  {{- range $name, $s := $sites }}
-  if ! grep -q 'proxy_pass http://localhost:{{ $s.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
-    run valet proxy {{ $name }} http://localhost:{{ $s.port }} --secure
+cert_pem() {
+  if [ -f "$1" ]; then
+    cat "$1"
+  else
+    printf '%s' "$1"
   fi
-  {{- end }}
+}
+
+cert_fingerprint() {
+  cert_pem "$1" | openssl x509 -noout -fingerprint -sha256
+}
+
+cert_expiry() {
+  cert_pem "$1" | openssl x509 -noout -enddate | cut -d= -f2
+}
+
+cert_expiring() {
+  ! cert_pem "$1" | openssl x509 -noout -checkend 2592000 >/dev/null
+}
+
+caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
+{{- if eq .chezmoi.os "darwin" }}
+caddy_data="${HOMEBREW_PREFIX:?}/var/lib/caddy"
+admin_addr="127.0.0.1:{{ .caddy.admin.port }}"
+{{- else }}
+caddy_data="$HOME/.local/share/caddy"
+admin_addr="localhost:{{ .caddy.admin.port }}"
+{{- end }}
+pki="$caddy_data/pki/authorities/local"
+root="$pki/root.crt"
+intermediate="$pki/intermediate.crt"
+
+{{- if eq .chezmoi.os "darwin" }}
+
+# Valet sometimes coexists; if its nginx is up, sync proxies via valet and bail
+valet_dir="$HOME/.config/valet"
+if pgrep -q nginx && [ -f "$valet_dir/config.json" ]; then
+  msg "Valet detected; configuring .test proxies via nginx instead of caddy"
+  {{- range $name, $site := .caddy.sites }}
+  {{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end }}
+  if ! grep -q 'proxy_pass http://localhost:{{ $site.port }}' "$valet_dir/Nginx/{{ $name }}.test" 2>/dev/null; then
+    run valet proxy {{ $name }} http://localhost:{{ $site.port }} --secure
+  fi
   {{- end }}
   {{- range $name, $provider := .ai.providers }}
   {{- if not (hasKey $provider "domain") }}{{ continue }}{{ end }}
@@ -41,169 +86,362 @@ if [ "${CHEZMOI_OS:?}" = darwin ] && pgrep -q nginx && [ -f "$valet_dir/config.j
   {{- end }}
   exit 0
 fi
+{{- end }}
 
-caddyfile="${CHEZMOI_CADDY_CONFIG:-$HOME/.config/caddy/Caddyfile}"
+if ! has caddy; then
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if .features.tailscale }}
+  die "caddy not found; run xcaddy build first (~/.local/bin/caddy)"
+{{-   else }}
+  die "caddy not found; run 'brew install caddy' first"
+{{-   end }}
+{{- else }}
+  msg "caddy not found; skipping setup"
+  exit 0
+{{- end }}
+fi
 
-# Format and show diff to catch issues early
-run caddy fmt --diff --config "$caddyfile"
+if ! has openssl; then
+  die "openssl not found; required for CA fingerprinting"
+fi
 
-run caddy validate --config "$caddyfile"
+if ! caddy fmt --config "$caddyfile" --diff >/dev/null; then
+  run caddy fmt --config "$caddyfile" --diff
+fi
 
-# Service start handled by brew bundle (restart_service: :changed)
-# Reload config if already running
-if [ "${CHEZMOI_OS:?}" = darwin ] && has brew && sudo brew services list | grep -q "^caddy.*started"; then
-  run caddy reload --config "$caddyfile"
+if ! caddy validate --config "$caddyfile" >/dev/null 2>&1; then
+  run caddy validate --config "$caddyfile"
+fi
 
-  # Route .test queries to 127.0.0.1 via standalone dnsmasq
-  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
-  dnsmasq_conf="${HOMEBREW_PREFIX:?}/etc/dnsmasq.d/test.conf"
-  resolver_conf=/etc/resolver/test
-  if ! diff -u "$dnsmasq_conf" "$dns_src/.dnsmasq-test.conf" 2>/dev/null; then
-    msg "Updating dnsmasq .test config"
-    run mkdir -p "$(dirname "$dnsmasq_conf")"
-    run cp "$dns_src/.dnsmasq-test.conf" "$dnsmasq_conf"
-    run sudo brew services restart dnsmasq
-  fi
-  if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf"; then
-    msg "Creating /etc/resolver/test"
-    run sudo mkdir -p /etc/resolver
-    run sudo sh -c 'echo "nameserver 127.0.0.1" >/etc/resolver/test'
-  fi
-elif has systemctl; then
-  # Port 2020: metrics site (SELinux http_port_t)
-  if has semanage && ! semanage port -l 2>/dev/null | grep -q "^http_port_t.*2020"; then
-    run pkexec semanage port -a -t http_port_t -p tcp 2020
-  fi
+{{- if eq .chezmoi.os "linux" }}
 
-  # System caddy reads /etc/caddy/Caddyfile; copy from user config
-  if ! diff -q /etc/caddy/Caddyfile "$caddyfile" >/dev/null 2>&1; then
-    msg "Updating /etc/caddy/Caddyfile"
-    diff -u /etc/caddy/Caddyfile "$caddyfile" || true
-    run pkexec cp "$caddyfile" /etc/caddy/Caddyfile
-  fi
+# One-time: allow binding ports 80+ without root
+sysctl_conf=/etc/sysctl.d/99-caddy-unprivileged-port.conf
+sysctl_val='net.ipv4.ip_unprivileged_port_start=80'
+if [ ! -f "$sysctl_conf" ] || ! grep -qF "$sysctl_val" "$sysctl_conf"; then
+  # shellcheck disable=SC2016
+  run pkexec \
+    env sysctl_conf="$sysctl_conf" sysctl_val="$sysctl_val" \
+    sh -euc 'printf "%s\n" "$sysctl_val" | tee "$sysctl_conf" >/dev/null && sysctl -p "$sysctl_conf"'
+fi
 
-  # OTLP tracing drop-in: caddy reads standard OTEL env vars; sends traces to
-  # otel-collector (HTTP/4318) which forwards to Tempo.
-  otel_dropin_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy/.otel.conf"
-  otel_dropin=/etc/systemd/system/caddy.service.d/otel.conf
-  if ! diff -q "$otel_dropin" "$otel_dropin_src" >/dev/null 2>&1; then
-    msg "Updating caddy OTLP drop-in"
-    diff -u "$otel_dropin" "$otel_dropin_src" || true
-    run pkexec sh -ceux "mkdir -p /etc/systemd/system/caddy.service.d && cp '$otel_dropin_src' '$otel_dropin' && systemctl daemon-reload"
-  fi
-  if systemctl is-active --quiet caddy; then
-    # Verify caddy is listening on expected ports
-    if ! ss -tlnp 2>/dev/null | grep -q '127.0.0.1:443'; then
-      msg "Caddy not listening on 127.0.0.1:443; reloading config"
-      run caddy reload --config /etc/caddy/Caddyfile
-    fi
+# Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
+dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
+nm_test_src="$dns_src/.dnsmasq-test.conf"
+resolved_src="$dns_src/.resolved.conf"
+nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
+nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
+resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
 
-    adapted="$(run caddy adapt --config "$caddyfile" | jq -S .)" || {
-      msg "caddy adapt failed; check Caddyfile"
-      exit 1
-    }
-    running="$(run curl -sf http://localhost:2019/config/ | jq -S .)" || true
-    if [ -z "${running:-}" ]; then
-      msg "WARN: caddy admin API unavailable; skipping reload check"
-    elif [ "$adapted" != "$running" ]; then
-      msg "Config changed; reloading caddy"
-      if ! run caddy reload --config /etc/caddy/Caddyfile; then
-        msg "Reload failed; restarting caddy"
-        run systemctl restart caddy
-      fi
-    else
-      msg "Config unchanged; skipping reload"
-    fi
-  fi
+nm_changed=false
+resolved_changed=false
 
-  # Route .test queries to 127.0.0.1 via NetworkManager's built-in dnsmasq
-  dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
-  nm_dnsmasq_src="$dns_src/.dnsmasq.conf"
-  nm_test_src="$dns_src/.dnsmasq-test.conf"
-  resolved_src="$dns_src/.resolved.conf"
-  nm_dnsmasq_dest=/etc/NetworkManager/conf.d/dnsmasq.conf
-  nm_test_dest=/etc/NetworkManager/dnsmasq.d/test.conf
-  resolved_dest=/etc/systemd/resolved.conf.d/resolved.conf
-  nm_changed=false
-  resolved_changed=false
-  if ! diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>/dev/null ||
-    ! diff -u "$nm_test_dest" "$nm_test_src" 2>/dev/null; then
-    nm_changed=true
-  fi
-  if ! diff -u "$resolved_dest" "$resolved_src" 2>/dev/null; then
-    resolved_changed=true
-  fi
+nm_diff=$(diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" 2>&1)
+if [ -n "$nm_diff" ]; then
+  nm_changed=true
+fi
 
-  if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
-    msg "Updating /etc/ DNS config"
-    diff -u "$nm_dnsmasq_dest" "$nm_dnsmasq_src" || true
-    diff -u "$nm_test_dest" "$nm_test_src" || true
-    diff -u "$resolved_dest" "$resolved_src" || true
-    run pkexec sh -ceux "
+resolved_diff=$(diff -u "$resolved_dest" "$resolved_src" 2>&1)
+if [ -n "$resolved_diff" ]; then
+  resolved_changed=true
+fi
+
+if [ "$nm_changed" = true ] || [ "$resolved_changed" = true ]; then
+  msg "Updating /etc/ DNS config"
+  [ -n "$nm_diff" ] && printf '%s\n' "$nm_diff"
+  [ -n "$resolved_diff" ] && printf '%s\n' "$resolved_diff"
+  # shellcheck disable=SC2016
+  run pkexec \
+    env nm_changed="$nm_changed" resolved_changed="$resolved_changed" \
+    nm_dnsmasq_src="$nm_dnsmasq_src" nm_dnsmasq_dest="$nm_dnsmasq_dest" \
+    nm_test_src="$nm_test_src" nm_test_dest="$nm_test_dest" \
+    resolved_src="$resolved_src" resolved_dest="$resolved_dest" \
+    sh -euc '
       mkdir -p /etc/NetworkManager/dnsmasq.d /etc/systemd/resolved.conf.d
-      cp '$nm_dnsmasq_src' '$nm_dnsmasq_dest'
-      cp '$nm_test_src' '$nm_test_dest'
-      cp '$resolved_src' '$resolved_dest'
-    "
-    if [ "$nm_changed" = true ]; then
-      run systemctl restart NetworkManager
-    fi
-    if [ "$resolved_changed" = true ]; then
-      run systemctl restart systemd-resolved
-    fi
+      if [ "$nm_changed" = true ]; then
+        cp "$nm_dnsmasq_src" "$nm_dnsmasq_dest"
+        cp "$nm_test_src" "$nm_test_dest"
+      fi
+      if [ "$resolved_changed" = true ]; then
+        cp "$resolved_src" "$resolved_dest"
+      fi
+    '
+  if [ "$nm_changed" = true ]; then
+    run systemctl restart NetworkManager
   fi
-
-  if ! systemctl is-active --quiet caddy; then
-    run systemctl enable --now caddy || {
-      run journalctl -u caddy -n 50 --no-pager >&2
-      exit 1
-    }
+  if [ "$resolved_changed" = true ]; then
+    run systemctl restart systemd-resolved
   fi
-elif has brew && brew services list | grep -q "^caddy.*started"; then
-  run caddy reload --config "$caddyfile"
-else
-  msg "Error: unable to setup Caddy"
-  exit 1
 fi
 
-if ! run curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
-  die "Caddy CA not ready; run again after caddy initializes"
+{{ includeTemplate "systemd-apply.sh.tmpl" (dict
+  "chezmoi" .chezmoi
+  "active" true
+  "system" false
+  "unit" "caddy"
+  "liveness" $liveness
+  "port" .caddy.admin.port
+) -}}
+
+{{- else if eq .chezmoi.os "darwin" }}
+
+uid=$(id -u)
+
+if ! has trash; then
+  die "trash not found; install macos-trash via brew"
 fi
 
-# macOS keychain (Safari, Chrome): uncomment if caddy trust alone is insufficient
-# sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain \
-#   "$(brew --prefix)/var/lib/caddy/pki/authorities/local/root.crt"
-run caddy trust --ca local # --config "$caddyfile"
+# User-mode LaunchAgents must not coexist with the system LaunchDaemon
+for label in com.caddy homebrew.mxcl.caddy; do
+  plist="$HOME/Library/LaunchAgents/$label.plist"
+  if launchctl print "gui/$uid/$label" >/dev/null 2>&1; then
+    msg "removing user-mode LaunchAgent $label"
+    run launchctl bootout "gui/$uid/$label"
+  fi
+  if [ -f "$plist" ]; then
+    run trash "$plist"
+  fi
+done
+
+# Strip caddy pf rdr anchor (kernel loopback bypass made it useless on macOS)
+pf_anchor=/etc/pf.anchors/caddy
+pf_conf=/etc/pf.conf
+if [ -f "$pf_anchor" ] || grep -q '^[^#]*"caddy"' "$pf_conf"; then
+  msg "removing legacy caddy pf anchor"
+  cleaned=$(sed -e '/^rdr-anchor "caddy"$/d' \
+    -e '/^anchor "caddy"$/d' \
+    -e '/^load anchor "caddy" from /d' "$pf_conf")
+  printf '%s\n' "$cleaned" | run sudo tee "$pf_conf" >/dev/null
+  if [ -f "$pf_anchor" ]; then
+    run sudo rm "$pf_anchor"
+  fi
+  run sudo pfctl -f "$pf_conf"
+fi
+
+# Route .test queries to 127.0.0.1 via standalone dnsmasq
+dns_src="$CHEZMOI_SOURCE_DIR/dot_config/caddy"
+dnsmasq_conf="${HOMEBREW_PREFIX:?}/etc/dnsmasq.d/test.conf"
+resolver_conf=/etc/resolver/test
+if ! diff -u "$dnsmasq_conf" "$dns_src/.dnsmasq-test.conf" 2>/dev/null; then
+  msg "Updating dnsmasq .test config"
+  run mkdir -p "$(dirname "$dnsmasq_conf")"
+  run cp "$dns_src/.dnsmasq-test.conf" "$dnsmasq_conf"
+  run sudo brew services restart dnsmasq
+fi
+if [ ! -f "$resolver_conf" ] || ! grep -q "nameserver 127.0.0.1" "$resolver_conf"; then
+  msg "Creating $resolver_conf"
+  run sudo sh -c "mkdir -p $(dirname "$resolver_conf") && printf 'nameserver 127.0.0.1\n' >$resolver_conf"
+fi
+
+{{- if or .features.tailscale .features.otel }}
+
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" false
+  "system" true
+  "formula" "caddy"
+) -}}
+
+brew_daemon_plist=/Library/LaunchDaemons/homebrew.mxcl.caddy.plist
+if [ -f "$brew_daemon_plist" ]; then
+  run sudo rm "$brew_daemon_plist"
+fi
+
+{{- /* Tailscale needs xcaddy build for the module; otherwise brew binary */ -}}
+{{- $caddyBin := .features.tailscale | ternary
+    (joinPath .chezmoi.homeDir ".local/bin/caddy")
+    (joinPath .brewPrefix "bin/caddy") -}}
+{{- $envDict := dict
+    "HOME" (joinPath .brewPrefix "var/lib")
+    "XDG_DATA_HOME" (joinPath .brewPrefix "var/lib")
+    "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix) -}}
+{{- if .features.tailscale -}}
+{{-   $_ := set $envDict "TS_CADDY_AUTH_KEY" (.caddy.tailscale.oauthSecret | default "") -}}
+{{- end -}}
+{{- if .features.otel -}}
+{{-   $otelEnv := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+{{-   range $k, $v := $otelEnv -}}
+{{-     $_ := set $envDict $k (toString $v) -}}
+{{-   end -}}
+{{-   $_ := set $envDict "OTEL_SERVICE_NAME" "caddy" -}}
+{{- end }}
+
+# Custom LaunchDaemon: chezmoi-managed env (tailscale module and/or otel exporter)
+daemon_plist=/Library/LaunchDaemons/com.caddy.plist
+desired_plist=$(
+  cat <<'PLIST'
+{{ includeTemplate "launchd-agent.plist.tmpl" (dict
+  "label" "com.caddy"
+  "args" (list
+    $caddyBin
+    "run"
+    "--config" (joinPath .chezmoi.homeDir ".config/caddy/Caddyfile"))
+  "env" $envDict
+  "log" (joinPath .brewPrefix "var/log/caddy.log")
+  "workdir" (joinPath .brewPrefix "var/lib")) }}
+PLIST
+)
+if ! printf '%s\n' "$desired_plist" | diff -q - "$daemon_plist" >/dev/null 2>&1; then
+  msg "Updating $daemon_plist"
+  printf '%s\n' "$desired_plist" | run sudo tee "$daemon_plist" >/dev/null
+  run sudo chown root:wheel "$daemon_plist"
+  run sudo chmod 644 "$daemon_plist"
+fi
+
+{{ includeTemplate "launchd-apply.sh.tmpl" (dict
+  "chezmoi" .chezmoi
+  "active" true
+  "bootstrap" true
+  "system" true
+  "label" "com.caddy"
+  "liveness" (merge $liveness (dict "host" "127.0.0.1"))
+  "port" .caddy.admin.port
+  "reload" `caddy reload --config "$caddyfile" --address "$admin_addr"`
+) -}}
+
+{{- else }}
+
+# Tear down custom xcaddy LaunchDaemon if present (switching to default path)
+custom_daemon=/Library/LaunchDaemons/com.caddy.plist
+if launchctl print system/com.caddy >/dev/null 2>&1; then
+  msg "stopping custom com.caddy LaunchDaemon"
+  run sudo launchctl bootout system/com.caddy
+fi
+if [ -f "$custom_daemon" ]; then
+  run sudo rm "$custom_daemon"
+fi
+
+# Brew-managed caddy as system LaunchDaemon (default macOS path)
+brew_etc="${HOMEBREW_PREFIX:?}/etc"
+for target in Caddyfile sites; do
+  link="$brew_etc/$target"
+  src="$HOME/.config/caddy/$target"
+  if [ ! -L "$link" ] || [ "$(readlink "$link")" != "$src" ]; then
+    msg "linking $link -> $src"
+    run ln -sfn "$src" "$link"
+  fi
+done
+
+if [ -d "$caddy_data" ] && [ "$(stat -f '%Su' "$caddy_data")" != root ]; then
+  msg "transferring $caddy_data to root (brew daemon owner)"
+  run sudo chown -R root:wheel "$caddy_data"
+fi
+
+{{ includeTemplate "brew-apply.sh.tmpl" (dict
+  "active" true
+  "system" true
+  "formula" "caddy"
+  "liveness" (merge $liveness (dict "host" "127.0.0.1"))
+  "port" .caddy.admin.port
+  "reload" `caddy reload --config "$caddyfile" --address "$admin_addr"`
+) -}}
+
+{{- end }}
+caddy_root_pem=$(curl --silent --fail "http://$admin_addr/pki/ca/local" | jq -r .root_certificate)
+caddy_intermediate_pem=$(curl --silent --fail "http://$admin_addr/pki/ca/local" | jq -r .intermediate_certificate)
+
+{{- end }}
+# Trust CA system-wide (caddy trust handles platform-native trust store)
+if ! curl --silent --fail "http://$admin_addr/pki/ca/local/trusted" | jq --exit-status '.trusted == true' >/dev/null; then
+  run caddy trust --ca local
+fi
+
+{{- if eq .chezmoi.os "linux" }}
+
+# Install CA into Firefox NSS profiles via nss-tools certutil;
+# handles profiles caddy trust misses and cert rotation
+if [ -d "$HOME/.mozilla/firefox" ] && has certutil; then
+  current_fingerprint=$(cert_fingerprint "$root")
+  for profile_dir in "$HOME/.mozilla/firefox"/*/; do
+    [ -f "${profile_dir}cert9.db" ] || continue
+    installed_fingerprint=$(certutil -L -d "$profile_dir" -n "Caddy Local Authority" -a 2>/dev/null | openssl x509 -noout -fingerprint -sha256 2>/dev/null)
+    if [ "$current_fingerprint" != "$installed_fingerprint" ]; then
+      run certutil -A -d "$profile_dir" -n "Caddy Local Authority" -t "CT,," -i "$root"
+    fi
+  done
+fi
 
 # caddy trust installs the root CA but not the intermediate; curl needs both to
 # build the chain. Install root + intermediate into the system trust store.
-pki="$HOME/.local/share/caddy/pki/authorities/local"
-root="$pki/root.crt"
-intermediate="$pki/intermediate.crt"
+ca_anchor_dir=""
+ca_update_cmd=""
 if has update-ca-trust; then
-  root_dest=/etc/pki/ca-trust/source/anchors/caddy-local-root.crt
-  intermediate_dest=/etc/pki/ca-trust/source/anchors/caddy-local-intermediate.crt
-  if ! diff -q "$root_dest" "$root" >/dev/null 2>&1 ||
-    ! diff -q "$intermediate_dest" "$intermediate" >/dev/null 2>&1; then
-    msg "Installing caddy root and intermediate CA to system trust"
-    run pkexec sh -ceux "cp '$root' '$root_dest' && cp '$intermediate' '$intermediate_dest' && update-ca-trust"
+  ca_anchor_dir=/etc/pki/ca-trust/source/anchors
+  ca_update_cmd=update-ca-trust
+elif has update-ca-certificates; then
+  ca_anchor_dir=/usr/local/share/ca-certificates
+  ca_update_cmd=update-ca-certificates
+fi
+
+if [ -n "$ca_update_cmd" ]; then
+  root_dest="$ca_anchor_dir/caddy-local-root.crt"
+  intermediate_dest="$ca_anchor_dir/caddy-local-intermediate.crt"
+  fingerprint_dir="$pki/installed-fps"
+  root_fp_file="$fingerprint_dir/root.sha256"
+  intermediate_fp_file="$fingerprint_dir/intermediate.sha256"
+  if [ ! -d "$fingerprint_dir" ]; then
+    run mkdir -p "$fingerprint_dir"
+  fi
+
+  current_root_fingerprint=$(cert_fingerprint "$root")
+  current_intermediate_fingerprint=$(cert_fingerprint "$intermediate")
+  installed_root_fingerprint=$(cat "$root_fp_file" 2>/dev/null || true)
+  installed_intermediate_fingerprint=$(cat "$intermediate_fp_file" 2>/dev/null || true)
+
+  if [ "$current_root_fingerprint" != "$installed_root_fingerprint" ] || [ "$current_intermediate_fingerprint" != "$installed_intermediate_fingerprint" ]; then
+    # shellcheck disable=SC2016
+    run pkexec \
+      env root="$root" intermediate="$intermediate" \
+      root_dest="$root_dest" intermediate_dest="$intermediate_dest" \
+      ca_update_cmd="$ca_update_cmd" \
+      sh -euc '
+        cp "$root" "$root_dest"
+        cp "$intermediate" "$intermediate_dest"
+        "$ca_update_cmd"
+      '
+    printf '%s' "$current_root_fingerprint" >"$root_fp_file"
+    printf '%s' "$current_intermediate_fingerprint" >"$intermediate_fp_file"
   fi
 fi
 
-# Brew ships its own OpenSSL CA bundle; append caddy root so brew-curl trusts .test sites.
-if has brew; then
-  brew_openssl_dir="${HOMEBREW_PREFIX:?}/etc/openssl@3"
-  sed="$(which gsed 2>/dev/null || which sed)"
-  if [ -d "$brew_openssl_dir" ]; then
-    brew_bundle="$brew_openssl_dir/cert.pem"
-    caddy_marker="# Caddy Local Authority"
-    # Remove any existing caddy entry (marker through end-of-cert) before re-appending
-    if grep -q "$caddy_marker" "$brew_bundle" 2>/dev/null; then
-      marker_line=$(grep -n "$caddy_marker" "$brew_bundle" | head -1 | cut -d: -f1)
-      end_line=$(awk "NR>=$marker_line && /-----END CERTIFICATE-----/{print NR; exit}" "$brew_bundle")
-      run "$sed" -i "${marker_line},${end_line}d" "$brew_bundle"
-    fi
-    msg "Appending caddy root CA to brew openssl bundle"
-    run sh -c "{ echo '$caddy_marker'; cat '$root'; } >>'$brew_bundle'"
-  fi
+{{- else if eq .chezmoi.os "darwin" }}
+
+# Append caddy root CA to brew openssl bundle so brew-curl trusts .test sites
+brew_bundle="${HOMEBREW_PREFIX:?}/etc/openssl@3/cert.pem"
+caddy_marker="# Caddy Local Authority"
+if [ -f "$brew_bundle" ] && ! grep -qF "$caddy_marker" "$brew_bundle"; then
+  msg "appending caddy root CA to brew openssl bundle"
+  printf '%s\n%s\n' "$caddy_marker" "$caddy_root_pem" >>"$brew_bundle"
 fi
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+root_expiry=$(cert_expiry "$caddy_root_pem")
+if cert_expiring "$caddy_root_pem"; then
+  die "root CA expires soon: $root_expiry"
+fi
+intermediate_expiry=$(cert_expiry "$caddy_intermediate_pem")
+if cert_expiring "$caddy_intermediate_pem"; then
+  die "intermediate CA expires soon: $intermediate_expiry"
+fi
+{{- else }}
+root_expiry=$(cert_expiry "$root")
+if cert_expiring "$root"; then
+  die "root CA expires soon: $root_expiry"
+fi
+intermediate_expiry=$(cert_expiry "$intermediate")
+if cert_expiring "$intermediate"; then
+  die "intermediate CA expires soon: $intermediate_expiry"
+fi
+{{- end }}
+{{- if $testSite }}
+ssl_verify_result=$(
+  curl --silent --max-time 5 --write-out '%{ssl_verify_result}' --output /dev/null "https://{{ $testSite }}.test{{ $testPath }}" 2>/dev/null
+  :
+)
+if [ "${ssl_verify_result:-0}" != "0" ]; then
+  die "CA not trusted: https://{{ $testSite }}.test (ssl_verify_result=${ssl_verify_result})"
+fi
+msg "CA trusted: https://{{ $testSite }}.test"
+{{- end }}
+{{ end -}}

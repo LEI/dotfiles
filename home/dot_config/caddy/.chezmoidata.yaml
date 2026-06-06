@@ -1,71 +1,85 @@
 ---
-# Reverse proxy sites grouped by feature
-# AI inference backends are in ai.yaml (.ai.providers)
-# health: path for liveness checks (goss, monitoring); omit if root returns 200
 caddy:
+  admin:
+    port: 2019
   sites:
-    claude:
-      claude-task-viewer:
-        body: html
-        port: 3456
-        health: /
-    oage:
-      bifrost:
-        body: html
-        port: 8180
-        health: /
-      open-notebook:
-        body: html
-        port: 8502
-        health: /
-      open-notebook-api:
-        body: '{"status":"healthy"}'
-        port: 5055
-        health: /health
-      open-webui:
-        body: '{"status":true}'
-        port: 8503
-        health: /health
-      surrealdb:
-        port: 8000
-        health: /health
+    bifrost:
+      feature: oage
+      body: html
+      port: 8180
+      liveness: /
+    # claude-task-viewer:
+    #   feature: claude
+    #   body: html
+    #   port: 3456
+    #   liveness: /
+    grafana:
+      feature: otel
+      body: '"database": "ok"'
+      port: 3033
+      liveness: /api/health
+      caddy:
+        dialTimeout: 1800s
+        responseHeaderTimeout: 1800s
+    mailpit:
+      feature: php
+      body: html
+      port: 8025
+      liveness: /
+    open-notebook:
+      feature: oage
+      body: html
+      port: 8502
+      health: /
+    open-notebook-api:
+      feature: oage
+      body: '{"status":"healthy"}'
+      port: 5055
+      health: /health
+    open-webui:
+      feature: oage
+      body: '{"status":true}'
+      port: 8503
+      liveness: /health
     opencode:
-      opencode:
-        body: Unauthorized
-        port: 4096
-        health: /
-        status: 401
-        tailscale: true
-    otel:
-      # alertmanager:
-      #   port: 9093
-      #   health: /-/healthy
-      grafana:
-        body: '"database": "ok"'
-        port: 3033
-        health: /api/health
-        caddy:
-          dialTimeout: 1800s
-          responseHeaderTimeout: 1800s
-      prometheus:
-        body: Healthy
-        port: 9090
-        health: /-/healthy
-      tempo:
-        body: ready
-        port: 3200
-        health: /ready
-      webhook:
-        body: OK
-        health: /
-        port: 9000
-    php:
-      mailpit:
-        body: html
-        port: 8025
-        health: /
-    processCompose:
-      process-compose:
-        body: '{"status":"alive"}'
-        health: /live
-        port: 8484
+      feature: opencode
+      body: "" # Unauthorized
+      port: 4096
+      liveness: /
+      statusCode: 401
+      tailscale: true
+    process-compose:
+      feature: processCompose
+      body: '{"status":"alive"}'
+      liveness: /live
+      port: 8484
+    prometheus:
+      feature: otel
+      body: Healthy
+      port: 9090
+      liveness: /-/healthy
+    quartz:
+      feature: oage
+      body: html
+      port: 4321
+      liveness: /
+      # rewrite:
+      #   from: /
+      #   to: /kb
+    # surrealdb:
+    #   feature: oage
+    #   port: 8000
+    #   health: /health
+    tempo:
+      feature: otel
+      body: ready
+      port: 3200
+      liveness: /ready
+    webhook:
+      feature: otel
+      body: OK
+      liveness: /
+      port: 9000
+  tailscale:
+    oauthSecret: ""
+    stateDir: ""

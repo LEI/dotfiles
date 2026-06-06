@@ -1,11 +1,17 @@
-{{- range $feat, $sites := .caddy.sites -}}
-{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
-{{- range $name, $s := $sites -}}
+{{- range $name, $s := .caddy.sites -}}
+{{- if not (get $.features (get $s "feature")) }}{{ continue }}{{ end -}}
 {{- $caddy := get $s "caddy" -}}
+{{- $rewrite := get $s "rewrite" -}}
 {{ $name }}.test {
+	import common
+	{{- if $.features.otel }}
 	tracing {
 		span {{ $name }}
 	}
+	{{- end }}
+	{{- if $rewrite }}
+	rewrite {{ $rewrite.from }} {{ $rewrite.to }}
+	{{- end }}
 	reverse_proxy localhost:{{ $s.port }}{{ if $caddy }} {
 		transport http {
 			{{- range $key, $value := $caddy }}
@@ -13,7 +19,5 @@
 			{{- end }}
 		}
 	}{{ end }}
-	import logging
 }
-{{ end -}}
 {{ end -}}
