@@ -11,12 +11,27 @@
     <string>{{ . }}</string>
 {{- end }}
   </array>
+{{- $keepalive := true -}}
+{{- if hasKey . "keepalive" }}{{ $keepalive = get . "keepalive" }}
+{{- else if hasKey . "active" }}{{ $keepalive = get . "active" }}{{ end }}
   <key>KeepAlive</key>
+  <{{ $keepalive }}/>
+{{- if and (hasKey . "active") (not (get . "active")) }}
+  <key>Disabled</key>
   <true/>
+{{- end }}
   <key>ThrottleInterval</key>
   <integer>{{ get . "throttle" | default 30 }}</integer>
   <key>ProcessType</key>
   <string>Background</string>
+{{- with (get . "interval") }}
+  <key>StartInterval</key>
+  <integer>{{ . }}</integer>
+{{- end }}
+{{- with (get . "runatload") }}
+  <key>RunAtLoad</key>
+  <{{ . }}/>
+{{- end }}
 {{- with (get . "env") }}
   <key>EnvironmentVariables</key>
   <dict>

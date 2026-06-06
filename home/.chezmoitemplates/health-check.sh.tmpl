@@ -1,0 +1,20 @@
+{{- $name := get . "name" -}}
+{{- $liveness := includeTemplate "probe.yaml.tmpl" (dict "probe" (get . "liveness") "port" (get . "port")) | fromYaml -}}
+{{- $readiness := includeTemplate "probe.yaml.tmpl" (dict "probe" (get . "readiness") "port" (get . "port")) | fromYaml -}}
+{{- if and (eq (get . "active" | toString) "true") (not $liveness.url) -}}
+{{-   warnf "%s: active but no health check" $name -}}
+{{- end -}}
+{{- if $liveness.url }}
+
+if ! run retry {{ $liveness.retries }} {{ $liveness.delay }} http_check {{ $liveness.url }} {{ $liveness.statusCode }}
+  {{- if hasKey $liveness "auth" }} "{{ $liveness.auth }}"{{ end }}; then
+  die "{{ $name }}: unhealthy after retries"
+fi
+{{- end }}
+{{- if $readiness.url }}
+
+if ! run retry {{ $readiness.retries }} {{ $readiness.delay }} http_check {{ $readiness.url }} {{ $readiness.statusCode }}
+  {{- if hasKey $readiness "auth" }} "{{ $readiness.auth }}"{{ end }}; then
+  die "{{ $name }}: not ready after retries"
+fi
+{{- end -}}
