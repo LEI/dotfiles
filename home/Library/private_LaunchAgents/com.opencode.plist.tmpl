@@ -1,0 +1,22 @@
+{{- $opencode := get . "opencode" | default dict -}}
+{{- $server := get $opencode "server" | default dict -}}
+
+{{- $svc := get .services "opencode" -}}
+
+{{- $enabled := get $server "enabled" | default false -}}
+{{- if $enabled -}}
+
+{{- $stateDir := joinPath .chezmoi.homeDir ".local/state/opencode" -}}
+
+{{- $env := dict
+  "HOME" .chezmoi.homeDir
+-}}
+
+{{- includeTemplate "launchd-agent.plist.tmpl" (dict
+  "label" "com.opencode"
+  "args" (list (joinPath .chezmoi.homeDir ".config/opencode/opencode-serve.sh"))
+  "env" $env
+  "stdout" (joinPath $stateDir "stdout.log")
+  "stderr" (joinPath $stateDir "stderr.log"))
+-}}
+{{- end -}}

@@ -1,23 +1,23 @@
 {{- $provider := get .ai.providers "mlx-lm" -}}
 {{- $server := get $provider "server" | default "mlx_lm.server" -}}
 {{- if eq $server "mlx_lm.server" -}}
-{{-   $bin := printf "%s/opt/mlx-lm/bin/mlx_lm.server" .brewPrefix -}}
+{{-   $bin := joinPath .brewPrefix "opt/mlx-lm/bin/mlx_lm.server" -}}
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
         "label" $provider.label
         "args" (list $bin "--host" "127.0.0.1" "--port" ($provider.port | toString) "--chat-template-args" `{"enable_thinking":true}`)
         "env" (dict
           "HOME" .chezmoi.homeDir
           "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
-        "log" (printf "%s/var/log/mlx-lm.log" .brewPrefix)
-        "workdir" (printf "%s/var" .brewPrefix)) }}
+        "log" (joinPath .brewPrefix "var/log/mlx-lm.log")
+        "workdir" (joinPath .brewPrefix "var")) }}
 {{- else -}}
-{{-   $bin := printf "%s/.local/bin/%s" .chezmoi.homeDir $server -}}
+{{-   $bin := joinPath .chezmoi.homeDir ".local/bin" $server -}}
 {{-   includeTemplate "launchd-agent.plist.tmpl" (dict
         "label" $provider.label
         "args" (list $bin "--host" "127.0.0.1" "--port" ($provider.port | toString))
         "env" (dict
           "HOME" .chezmoi.homeDir
           "PATH" (printf "%s/.local/bin:%s/bin:%s/sbin:/usr/bin:/bin:/usr/sbin:/sbin" .chezmoi.homeDir .brewPrefix .brewPrefix))
-        "log" (printf "%s/var/log/mlx-lm.log" .brewPrefix)
-        "workdir" (printf "%s/var" .brewPrefix)) }}
+        "log" (joinPath .brewPrefix "var/log/mlx-lm.log")
+        "workdir" (joinPath .brewPrefix "var")) }}
 {{- end -}}
