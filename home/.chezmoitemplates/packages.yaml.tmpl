@@ -26,6 +26,11 @@ packages:
       (not (eq .osIDLike "android" "debian" "fedora" "windows"))
       (ne .profile "minimal")
       (not (or .ephemeral .headless)) }}
+  # bash-language-server: # managed by mason.nvim (npm)
+  bitwarden-secrets-manager:
+    enabled: {{ not (empty (get .passwordManager "accessToken")) }}
+    type: mise
+    # version: 2.1.0
   bitwarden-cli:
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
   bitwarden:
@@ -36,7 +41,7 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
   bkt:
     enabled: {{ and
-      (not (eq .osIDLike "android" "alpine" "debian" "fedora" "windows"))
+      (not (eq .osIDLike "android" "alpine" "debian" "fedora" "opensuse" "windows"))
       (not (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64")))
       (ne .profile "minimal") }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
@@ -78,18 +83,17 @@ packages:
       debian: chromium-browser
       # windows: Hibbiki.Chromium
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
-  codex:
-    enabled: {{ .features.ai }}
-    nameOverwrite:
-      arch: openai-codex-bin
-      npm: "@openai/codex"
-    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" (eq .os "windows" | ternary "npm" nil)) }}'
+
   copilot:
     enabled: {{ and .features.ai (eq .osIDLike "arch" "darwin" "windows") }}
     nameOverwrite:
       npm: "@github/copilot"
       darwin: copilot-cli
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" | ternary "cask" "npm") }}'
+  mistral-vibe:
+    enabled: {{ .features.ai }}
+    type: brew
+
   coreutils:
     enabled: {{ eq .os "android" "linux" }}
   # cotp:
@@ -136,7 +140,7 @@ packages:
     enabled: {{ .features.direnv }}
     nameOverwrite:
       windows: direnv.direnv
-    # type: mise
+    type: '{{ eq .osIDLike "rhel" | ternary "mise" nil }}'
   distrobox:
     enabled: {{ and (eq .osIDLike "fedora") .gui }}
   # dog, doggo, mtr, trippy, oryx / tshark termshark
@@ -176,6 +180,22 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   # foot:
   #   enabled: {{ and .features.sway (not (eq .osIDLike "darwin" "debian" "windows")) (not .headless) }}
+
+  # alias framework_tool="sudo $(brew --prefix)/bin/framework_tool"
+  framework-tool:
+    enabled: {{ and (eq .hardware.system.vendor "framework") (not .container) }}
+    nameOverwrite:
+      arch: framework-system
+      # cargo: framework_tool # --locked
+      cask: ublue-os/homebrew-tap/framework-tool
+      debian: rust-framework-tool
+      # dnf: framework-system
+      # emerge: framework_tool
+      # mise: github:FrameworkComputer/framework-system # FIXME: downloads .deb
+      # nix: framework-tool
+      zypper: framework_tool
+    type: '{{ eq .osIDLike "fedora" | ternary "cask" nil }}'
+
   envx:
     enabled: {{ and (eq .osIDLike "arch") (not (or .ephemeral .headless)) }}
     nameOverwrite:
@@ -186,11 +206,6 @@ packages:
     enabled: {{ and .features.ai .features.python (ne .os "android") (ne .profile "minimal") }}
     type: uv
   # gdu, ncdu
-
-  # https://aistudio.google.com/app/apikey
-  gemini-cli:
-    enabled: {{ .features.ai }}
-    type: brew
 
   gimp:
     enabled: {{ and (eq .osIDLike "darwin" "fedora") .gui }}
@@ -213,6 +228,11 @@ packages:
     enabled: {{ and (not (eq .osIDLike "alpine" "debian")) (ne .profile "minimal") }}
     nameOverwrite:
       windows: charmbracelet.glow
+  gnome-extensions-cli:
+    command: gext
+    description: GNOME Shell extensions CLI (gext); manages user-space extensions unattended
+    enabled: {{ and (eq .variantID "silverblue") .gui }}
+    type: uv
   gnuplot:
     enabled: {{ and (eq .os "darwin" "linux") (ne .profile "minimal") }}
   go-mise:
@@ -295,11 +315,11 @@ packages:
       windows: ipinfo.ipinfo
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   json5:
-    enabled: {{ .features.node }}
-    type: npm
+    # WARN(mise): npm may be required but was not found
+    enabled: {{ or .features.brew .features.node }} # .features.mise
     # nameOverwrite:
     #   mise: node@lts npm:json5 # github:json5/json5
-    # type: '{{ .features.node | ternary "npm" "mise" }}'
+    type: '{{ .features.brew | ternary "brew" (.features.node | ternary "npm" "mise") }}'
   jq: # sq
     nameOverwrite:
       windows: jqlang.jq
@@ -307,7 +327,7 @@ packages:
     type: '{{ eq .osIDLike "debian" | ternary "brew" nil }}'
     # type: mise
   kmon: # systeroid:
-    enabled: {{ and (eq .os "linux") (not (eq .osID "fedora")) (not (or
+    enabled: {{ and (eq .os "linux") (not (eq .osIDLike "fedora" "opensuse")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 22.04))
     )) (ne .profile "minimal") }}
@@ -357,13 +377,13 @@ packages:
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
   macchina:
     enabled: {{ ne .profile "minimal" }}
-    type: '{{ eq .osIDLike "alpine" "debian" "fedora" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" "opensuse" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
 
   # https://github.com/ml-explore/mlx-lm (v0.31.2)
   mlx-lm:
     enabled: {{ and .features.ai .features.mlx }}
     # brew services start mlx-lm
-    restart_service: ":changed"
+    restart_service: false # ":changed"
     # FIXME(brew): RuntimeError: [metal::Device] Unable to load kernel
     # affine_qmm_t_nax_float16_t_gs_64_b_4_bm64_bn64_bk64_wm2_wn2_alN_true_batch_0
     # command: mlx_lm.server
@@ -417,16 +437,12 @@ packages:
     nameOverwrite:
       arch: mailpit-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
+  # marksman: # managed by mason.nvim (markdown LSP: navigation, not linting)
   mcp-hub: # @4.2.0
     enabled: {{ .features.ai }}
     nameOverwrite:
       arch: nodejs-mcp-hub
     type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
-  mise:
-    # FIXME(alpine): mise 2025.8.20 does not support named tasks
-    enabled: {{ and .features.mise (eq .osIDLike "arch" "darwin" "windows") }}
-    nameOverwrite:
-      windows: jdx.mise
   # mitmproxy: # mitmweb tproxy
   #   enabled: {{ ne .os "windows" }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" (not (eq .osIDLike "arch" "debian") | ternary "python" nil) }}'
@@ -443,7 +459,7 @@ packages:
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "alpine" "debian")) (not .headless) }}
   ollama:
     enabled: {{ and .features.ollama (eq .osIDLike "darwin") }}
-    restart_service: ":changed"
+    restart_service: false # ":changed"
   # ollama-app:
   #   enabled: {{ and .features.ollama (eq .osIDLike "darwin") .gui }}
   #   type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
@@ -460,7 +476,7 @@ packages:
     nameOverwrite:
       debian: openssh-client
   openvpn-connect: # tunnelblick
-    enabled: {{ and (eq .osIDLike "darwin" "windows") (not .headless) }}
+    enabled: {{ and (eq .osIDLike "darwin" "windows") (eq .profile "work") (not .headless) }}
     nameOverwrite:
       windows: OpenVPNTechnologies.OpenVPN
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
@@ -468,6 +484,7 @@ packages:
   #   enabled: {{ not (empty .passwordManager.accessToken) }}
   parallel: # Conflicts with moreutils on darwin
     enabled: {{ ne .os "windows" }}
+    type: {{ eq .osIDLike "opensuse" | ternary "brew" nil }}
   pastel: # termpicker
     enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
@@ -484,14 +501,6 @@ packages:
   #   # version: "8.3"
   #   # type: brew
 
-  pipx:
-    enabled: {{ .features.python }}
-    nameOverwrite:
-      arch: python-pipx
-    type: {{ and
-      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora")
-      (not (and (eq .osID "debian") (le (int .osVersion) 11)))
-      | ternary nil "pip" }}
   pik:
     enabled: {{ eq .osIDLike "arch" }}
     nameOverwrite:
@@ -575,18 +584,20 @@ packages:
     # enabled: {{ and (not .features.neovim) (not .features.mise) }}
     enabled: {{ not .features.neovim }}
     nameOverwrite:
+      mise: aqua:koalaman/shellcheck
       windows: koalaman.shellcheck
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shfmt:
     enabled: {{ not .features.neovim }}
     nameOverwrite:
+      mise: aqua:mvdan/sh
       windows: mvdan.shfmt
     type: '{{ ne .osID "alpine" | ternary "mise" nil }}'
   shpool: # abduco, dtach
     enabled: {{ and .features.shpool (not (eq .osIDLike "darwin" "windows")) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
   skill-validator:
-    enabled: {{ and (ne .os "windows") (ne .profile "minimal") }} # .features.ai
+    enabled: '{{ and (ne .os "windows") (or .ci .container .vm (ne .profile "minimal")) }}' # .features.ai
     nameOverwrite:
       brew: agent-ecosystem/tap/skill-validator
       mise: github:agent-ecosystem/skill-validator
@@ -597,11 +608,17 @@ packages:
     nameOverwrite:
       darwin: sk
     type: '{{ eq .osIDLike "debian" | ternary "cargo" nil }}' # .features.rust
-  snapper:
-    enabled: {{ and (eq .osIDLike "fedora") (eq .profile "personal") (not .ephemeral) }}
+  # snapper:
+  #   enabled: {{ and (eq .osIDLike "fedora") (eq .profile "personal") (not .ephemeral) }}
+  btrfs-assistant:
+    enabled: {{ .features.backup }}
+    description: GUI and CLI btrfs snapshot management (with Snapper integration)
   # ssh-list:
   #   enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" "cargo" }}'
+  sshpass:
+    enabled: {{ and .features.ssh (ne .profile "minimal") (not .ephemeral) }}
+    type: {{ eq .os "darwin" | ternary "brew" nil }}
   sshs: # sshclick, ssm, fast-ssh
     enabled: {{ and .features.ssh (not (eq .osIDLike "alpine" "debian" "fedora" "windows")) .gui }}
   steam:
@@ -616,8 +633,12 @@ packages:
       fedora: com.valvesoftware.SteamLink
       windows: Valve.SteamLink
     type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
+  strace:
+    enabled: {{ and (eq .os "linux") (ne .profile "minimal") (not .ephemeral) }}
   stylua:
-    enabled: {{ and (not .features.neovim) (ne .profile "minimal") }}
+    enabled: '{{ and (not .features.neovim) (or .ci .container .vm (ne .profile "minimal")) }}'
+    nameOverwrite:
+      mise: aqua:JohnnyMorganz/StyLua
     type: mise
   subliminal:
     enabled: {{ and (eq .osIDLike "android" "arch" "darwin" "windows") (eq .profile "personal") }}
@@ -642,6 +663,26 @@ packages:
     #   arch: taplo-cli
     #   cargo: install taplo-cli --locked --features lsp --quiet
     type: '{{ ne .osIDLike "alpine" | ternary "brew" nil }}'
+
+  cirruslabs/cli/tart:
+    description: macOS and Linux VMs on Apple Silicon
+    enabled: {{ and (eq .os "darwin") (eq .arch "arm64") (ne .profile "minimal") .gui }}
+    type: brew
+    # after_install: |
+    #   # https://tart.run/faq/#changing-the-default-dhcp-lease-time
+    #   run sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.InternetSharing.default.plist bootpd -dict DHCPLeaseTimeSecs -int 600
+  # https://github.com/cirruslabs/vetu/blob/main/INSTALL.md
+  vetu:
+    enabled: {{ and (eq .os "linux") (ne .profile "minimal") .gui }}
+    # vetu clone ghcr.io/cirruslabs/ubuntu:latest ubuntu
+    # vetu run ubuntu
+    # ssh admin@$(vetu ip ubuntu)
+    nameOverwrite:
+      mise: github:cirruslabs/vetu
+    type: mise
+    # after_install: |
+    #   run sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which vetu)
+
   termscp: # aim, zrok
     enabled: {{ and (eq .osIDLike "arch" "darwin") .gui }}
   # tidy:
@@ -674,7 +715,7 @@ packages:
     link: true
 
   tre-command:
-    enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora")) (not (or
+    enabled: {{ and (not (eq .osIDLike "alpine" "android" "fedora" "opensuse")) (not (or
       (and (eq .osIDLike "arch") (eq .chezmoi.arch "arm64"))
       (and (eq .osID "debian") (le (int .osVersion) 11))
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 20.04))
@@ -684,7 +725,7 @@ packages:
       windows: duan.tre
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   time:
-    enabled: {{ eq .osIDLike "android" "arch" "debian" "fedora" }}
+    enabled: {{ eq .osIDLike "android" "arch" "debian" "fedora" "rhel" }}
   tree:
     enabled: {{ ne .os "windows" }}
   # tuios: # vtm
@@ -713,16 +754,35 @@ packages:
       arch: updo-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   usage:
-    enabled: {{ .features.mise }}
-    type: {{ eq .os "darwin" | ternary "brew" "mise" | quote }}
+    enabled: {{ or .features.brew .features.mise }}
+    nameOverwrite:
+      mise: github:jdx/usage # TODO: aqua?
+    type: {{ not .features.mise | ternary "brew" "mise" | quote }}
+
+  # pip:
+  #   enabled: {{ and .features.python (eq .osIDLike "opensuse") }}
+  #   nameOverwrite:
+  #     zypper: python314-pip
+  pipx:
+    enabled: {{ .features.python }}
+    nameOverwrite:
+      arch: python-pipx
+      zypper: python314-pipx
+    type: {{ and
+      (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora" "opensuse" "rhel")
+      (not (and (eq .osID "debian") (le (int .osVersion) 11)))
+      | ternary nil "pip" }}
   uv:
     enabled: {{ .features.python }}
     nameOverwrite:
+      mise: github:astral-sh/uv
       # pipx: uv uvx
       windows: astral-sh.uv
+      zypper: python314-uv
     # https://docs.astral.sh/uv/getting-started/installation
     # type: '{{ not (eq .osIDLike "alpine" "android" "arch" "darwin" "fedora" "windows") | ternary "pipx" nil }}'
-    type: '{{ eq .osIDLike "debian" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "debian" "rhel" | ternary "mise" nil }}'
+
   util-linux: # lsblk
     enabled: {{ eq .os "android" "linux" }}
   viddy: # watch
@@ -744,7 +804,7 @@ packages:
       windows: VideoLAN.VLC
     type: '{{ eq .osIDLike "darwin" | ternary "cask" nil }}'
   which:
-    enabled: {{ eq .osIDLike "android" "arch" }}
+    enabled: {{ eq .osIDLike "android" "arch" "fedora" }}
   # wifitui:
   #   description: nmtui alternative
   #   enabled: {{ eq .os "linux" }}
@@ -759,6 +819,7 @@ packages:
     enabled: {{ and (not (eq .osIDLike "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
       windows: ducaale.xh
+  # yaml-language-server: # managed by mason.nvim (npm); also opencode built-in yaml-ls
   yazi:
     enabled: {{ and (not (eq .osIDLike "alpine" "debian" "fedora")) (ne .profile "minimal") }}
     nameOverwrite:
@@ -766,8 +827,6 @@ packages:
       # debian: 7zip ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick
       # fedora: # dnf copr enable lihaohong/yazi
       windows: sxyazi.yazi oschwartz10612.Poppler ImageMagick.ImageMagick
-  # FIXME: "extra/yq" installs "kislyuk/yq" on arch instead of "mikefarah/yq"
-  # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
   zen:
     enabled: {{ and (eq .osIDLike "arch" "darwin") (not (or .ephemeral .headless)) }}
     nameOverwrite:
@@ -847,7 +906,6 @@ osPackages:
       # automake:
       # bison:
       # bzip2:
-      # caddy:
       # catimg:
       # cdrtools:
       # cheat:
@@ -857,6 +915,7 @@ osPackages:
       coreutils: # timeout
       # cpanminus:
       cronboard:
+        enabled: {{ not (or .ephemeral .headless) }}
       # daemonize:
       # dbus:
       # diffutils:
@@ -893,6 +952,7 @@ osPackages:
       # jpeg:
       # k6:
       kind:
+        enabled: {{ .features.kube }}
       # kustomize:
       # git-cc: { enabled: {{ .features.git }} }
       # libedit: # readline, rlwrap
@@ -904,6 +964,7 @@ osPackages:
       markdownlint-cli: # NOTE: also installed via mason.nvim
       mas:
       clevercloud/misc/mdr:
+        enabled: {{ and .features.ai .gui }}
       # mercurial:
       # mosh:
       # msgpack:
@@ -912,7 +973,8 @@ osPackages:
       # nmap:
       # pango:
       # patchutils:
-      # percona-toolkit:
+      percona-toolkit:
+        enabled: {{ .features.sql }}
       # pgformatter:
       pinentry-mac: # jorgelbg/tap/pinentry-touchid
         enabled: {{ .gui }}
@@ -927,7 +989,7 @@ osPackages:
       # sops:
       # sponge: # Extracted from moreutils
       supervisor:
-        enabled: {{ .features.php }}
+        enabled: {{ and .features.php (eq .profile "work") }}
         restart_service: ":changed"
       gromgit/brewtils/taproom:
         enabled: {{ .gui }}
@@ -1014,7 +1076,7 @@ osPackages:
       # xquartz:
     mas:
       Keynote:
-        id: 409183694
+        id: 361285480 # 409183694
         enabled: {{ .gui }}
       Microsoft Excel:
         id: 462058435
@@ -1026,10 +1088,10 @@ osPackages:
         id: 462054704
         enabled: {{ .gui }}
       Numbers:
-        id: 409203825
+        id: 361304891 # 409203825
         enabled: {{ .gui }}
       Pages:
-        id: 409201541
+        id: 361309726 # 409201541
         enabled: {{ .gui }}
       # Tailscale:
       #   id: 1475387142
@@ -1064,12 +1126,15 @@ osPackages:
       clang: # or run "brew install gcc", required to install bats-assert, file and mock
     rpm:
       beep:
+      btop:
       chezmoi:
       clang:
       dconf-editor:
         enabled: {{ not (or .ephemeral .headless) }}
       espeak:
         enabled: {{ not (or .ephemeral .headless) }}
+      iotop:
+      sysstat:
       # https://extensions.gnome.org/extension/4651/notification-banner-reloaded/
       # https://extensions.gnome.org/extension/4691/pip-on-top/
       # https://extensions.gnome.org/extension/5446/quick-settings-tweaker/
@@ -1078,8 +1143,7 @@ osPackages:
         enabled: {{ and (eq .variantID "silverblue") .gui }}
       # gnome-shell-extension-blur-my-shell:
       #   enabled: {{ and (eq .variantID "silverblue") .gui }}
-      gnome-shell-extension-caffeine:
-        enabled: {{ and (eq .variantID "silverblue") .gui }}
+      # gnome-shell-extension-caffeine: managed via gext, not rpm
       gnome-shell-extension-dash-to-dock:
         enabled: {{ and (eq .variantID "silverblue") .gui }}
       # gnome-shell-extension-frippery-move-clock:
@@ -1145,6 +1209,18 @@ osPackages:
       page.tesk.Refine:
         description: GNOME tweaks
         enabled: {{ and (eq .variantID "silverblue") (not (or .ephemeral .headless)) }}
+  opensuse:
+    zypper:
+      awk:
+      find:
+      gcc: # Required to build from source (git-wt, skill-validator)
+        # enabled: {{ ne .profile "minimal" }}
+      time:
+  rhel:
+    dnf:
+      clang:
+    # brew:
+    #   gcc:
   windows:
     scoop:
       7zip:

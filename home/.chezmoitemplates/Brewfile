@@ -27,7 +27,7 @@
 -}}
 {{- /* if OS.linux? or OS.mac? */ -}}
 {{- /* cask "java" unless system "/usr/libexec/java_home", "--failfast" */ -}}
-, {{ $key }}: {{ $value | toJson }}
+, {{ $key }}: {{ if and (kindIs "string" $value) (hasPrefix ":" $value) }}{{ $value }}{{ else }}{{ $value | toJson }}{{ end }}
 {{-     end }}
 {{-     if get $pkg "options" -}}
 , {{ $pkg.options }}
