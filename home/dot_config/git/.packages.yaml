@@ -20,7 +20,7 @@ packages:
     nameOverwrite:
       mise: aqua:tummychow/git-absorb
       windows: tummychow.git-absorb
-    type: '{{ and (ge (float64 .osVersion) 44.0) (eq .osID "fedora") | ternary "mise" nil }}'
+    type: '{{ and (ge (int .osVersion) 44) (eq .osID "fedora") | ternary "mise" nil }}'
   # git-cal:
   git-extras:
     enabled: '{{ not (eq .osIDLike "alpine" "opensuse" "windows") }}'
