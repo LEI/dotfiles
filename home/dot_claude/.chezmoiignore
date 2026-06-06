@@ -1,0 +1,72 @@
+# Claude Code runtime state (machine-local, auto-generated)
+.claude.json
+.credentials.json
+.last-cleanup
+backups
+cache
+chrome
+config
+daemon*
+debug
+file-history
+history.jsonl
+ide
+image-cache
+jobs
+mcp-needs-auth-cache.json
+metrics
+paste-cache
+policy-limits.json
+projects
+security_warnings_state_*.json
+session-data
+session-env
+sessions
+shell-snapshots
+stats-cache.json
+statsig
+tasks
+teams
+telemetry
+todos
+transcripts
+CLAUDE.local.md
+
+# User scripts (machine-local)
+scripts
+
+# Plugin system runtime (Claude Code plugin manager)
+plugins/.install-manifests
+plugins/blocklist.json
+plugins/cache
+plugins/claude-dashboard
+plugins/data
+plugins/install-counts-cache.json
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/marketplaces
+plugins/plugin-catalog-cache.json
+
+# Runtime-generated (chezmoi marketplace's local plugin extracts skills here)
+plugins/chezmoi/plugins/local/skills
+
+{{ includeTemplate "opkg-managed.tmpl" . -}}
+rules/local
+{{- if hasKey .claude "marketplaces" }}
+{{-   range $mktName, $mkt := .claude.marketplaces }}
+{{-     $path := get $mkt "path" }}
+{{-     if not $path }}{{ continue }}{{ end }}
+{{-     $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" }}
+{{-     if not (stat $packagesRoot) }}{{ continue }}{{ end }}
+{{-     range $pkgDir := glob (joinPath $packagesRoot "*") }}
+{{-       $pkgName := base $pkgDir }}
+{{-       if eq $pkgName "local" }}{{ continue }}{{ end }}
+{{-       $rulesDir := joinPath $pkgDir "rules" }}
+{{-       if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) }}
+{{-         if or (not (has $pkgName (list "claude" "opencode"))) (eq $pkgName "claude") }}
+rules/{{ $pkgName }}
+{{-         end }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}

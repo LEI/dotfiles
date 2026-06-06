@@ -27,21 +27,43 @@
       },
     },
 
-    // requires: ollama pull nomic-embed-text
-    // requires: milvus lite running locally (localhost:19530), file path not supported by SDK
+    {{- $hasMilvus := or .features.milvus (env "MILVUS_TOKEN") }}
+    {{- $hasEmbedding := or .features.ollama .features.mlx (env "OPENROUTER_API_KEY") (env "OPENAI_API_KEY") (env "GEMINI_API_KEY") (env "VOYAGEAI_API_KEY") }}
+    {{- if and $hasMilvus $hasEmbedding }}
+    // Package: @zilliz/claude-context-mcp (not "claude-context" which is a different tool)
     "claude-context": {
-      // Offline: Ollama embeddings + local Milvus
-      // Embeddings only at index time; zero API calls at query time
-      // Package: @zilliz/claude-context-mcp (not "claude-context" which is a different tool)
       "command": "npx",
       "args": ["--yes", "@zilliz/claude-context-mcp"],
       "env": {
         "PATH": "${HOME}/.local/share/mise/installs/node/24/bin:${PATH}",
+        {{- if .features.milvus }}
+        "MILVUS_ADDRESS": "127.0.0.1:19530",
+        {{- else }}
+        "MILVUS_TOKEN": "${MILVUS_TOKEN}",
+        {{- end }}
+        {{- if .features.ollama }}
         "EMBEDDING_PROVIDER": "Ollama",
         "EMBEDDING_MODEL": "nomic-embed-text",
-        "MILVUS_ADDRESS": "127.0.0.1:19530",
+        {{- else if .features.mlx }}
+        // MLX LM serves OpenAI-compatible endpoint; requires an embedding-capable model loaded
+        "EMBEDDING_PROVIDER": "OpenAI",
+        "OPENAI_BASE_URL": "https://mlx-lm.test/v1",
+        {{- else if env "OPENROUTER_API_KEY" }}
+        "EMBEDDING_PROVIDER": "OpenRouter",
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+        {{- else if env "OPENAI_API_KEY" }}
+        "EMBEDDING_PROVIDER": "OpenAI",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        {{- else if env "GEMINI_API_KEY" }}
+        "EMBEDDING_PROVIDER": "Gemini",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+        {{- else if env "VOYAGEAI_API_KEY" }}
+        "EMBEDDING_PROVIDER": "VoyageAI",
+        "VOYAGEAI_API_KEY": "${VOYAGEAI_API_KEY}",
+        {{- end }}
       },
     },
+    {{- end }}
 
     "context7": {
       // "enabled": {{ ne $client "opencode" }},
@@ -77,6 +99,7 @@
     {{- end }}
 
     "filesystem": {
+      "enabled": false,
       "command": "npx",
       "args": ["--yes", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"],
       "env": {
@@ -124,6 +147,7 @@
 
     {{- if .features.git }}
     "git": {
+      "enabled": false,
       "command": "uvx",
       "args": ["mcp-server-git"],
     },
@@ -140,6 +164,7 @@
       },
     },
     "github-read-only": {
+      "enabled": false,
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "oauth": false,
@@ -169,6 +194,29 @@
     },
     {{- end }}
 
+    {{- $grafanaToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token" }}
+    {{- $grafanaAdminToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token-admin" }}
+    {{- if and .features.otel (stat $grafanaToken) }}
+    "grafana": {
+      "command": "uvx",
+      "args": ["mcp-grafana", "--disable-write"],
+      "env": {
+        "GRAFANA_URL": "https://grafana.test",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": {{ include $grafanaToken | trim | quote }},
+      },
+    },
+    {{- end }}
+    {{- if and .features.otel (stat $grafanaAdminToken) }}
+    "grafana-admin": {
+      "command": "uvx",
+      "args": ["mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "https://grafana.test",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": {{ include $grafanaAdminToken | trim | quote }},
+      },
+    },
+    {{- end }}
+
     "grep_app": {
       // "enabled": {{ ne $client "opencode" }},
       "type": "http",
@@ -176,6 +224,7 @@
     },
 
     "memory": {
+      "enabled": false,
       "command": "npx",
       "args": ["--yes", "@modelcontextprotocol/server-memory"],
       "env": {
@@ -214,9 +263,6 @@
     {{-   else if eq .os "darwin" -}}
     {{-     $chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" -}}
     {{-   end -}}
-    {{-   if not $chromePath }}
-    {{      warnf "chrome-devtools: no browser found, using stable channel" }}
-    {{    end -}}
     "chrome-devtools": {
       "command": "npx",
       "args": [
@@ -236,6 +282,7 @@
     {{- end }}
 
     "qdrant-memory": {
+      "enabled": false,
       // Cloud mode when QDRANT_API_KEY is set, local embedded mode otherwise
       // fastembed supports Python 3.14 as of 0.7.x
       "command": "uvx",

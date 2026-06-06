@@ -20,27 +20,43 @@ has() {
 }
 
 case "$FILE" in
-*.md | *.json | *.jsonc | *.yaml | *.yml)
-  IGNORE_PATH=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+*.json | *.jsonc | *.md)
+  PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
   IGNORE_ARGS=""
   LOCAL_IGNORE="$(dirname "$FILE")/.prettierignore"
   if [ -f "$LOCAL_IGNORE" ]; then
-    IGNORE_ARGS="--ignore-path $LOCAL_IGNORE"
+    IGNORE_ARGS="$IGNORE_ARGS --ignore-path $LOCAL_IGNORE"
   fi
-  if [ -n "$IGNORE_PATH" ] && [ -f "$IGNORE_PATH/.prettierignore" ]; then
-    IGNORE_ARGS="$IGNORE_ARGS --ignore-path $IGNORE_PATH/.prettierignore"
+  if [ -n "$PROJECT_ROOT" ] && [ -f "$PROJECT_ROOT/.prettierignore" ]; then
+    IGNORE_ARGS="$IGNORE_ARGS --ignore-path $PROJECT_ROOT/.prettierignore"
   fi
   if has prettier; then
     # shellcheck disable=SC2086
     prettier $IGNORE_ARGS --write "$FILE" >/dev/null
-  elif has npx; then
-    # shellcheck disable=SC2086
-    npx --yes prettier $IGNORE_ARGS --write "$FILE" >/dev/null
   fi
   ;;
 *.sh)
   if has shfmt; then
     shfmt --write "$FILE"
+  fi
+  ;;
+*.toml)
+  if has taplo; then
+    taplo format "$FILE" >/dev/null
+  fi
+  ;;
+*.yaml | *.yml)
+  if has yamlfmt; then
+    # Run from project root so .yamlfmt.yml is discovered. The -dstar flag
+    # makes yamlfmt honor `exclude:` for explicit file args (it would
+    # otherwise be applied only to directory walks).
+    PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+    if [ -n "$PROJECT_ROOT" ]; then
+      REL=${FILE#"$PROJECT_ROOT"/}
+      (cd "$PROJECT_ROOT" && yamlfmt -dstar "$REL") >/dev/null 2>&1
+    else
+      yamlfmt -dstar "$FILE" >/dev/null 2>&1
+    fi
   fi
   ;;
 esac

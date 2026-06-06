@@ -1,23 +1,52 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- $claude := get . "claude" | default dict -}}
-{{- $claudeTiers := get $claude "tiers" | default dict -}}
-{{- $sandboxEnabled := false -}}
-{{- $tierName := env "CLAUDE_TIER" | default (eq .profile "work" | ternary "max" "pro") -}}
-{{- $tier := get $claudeTiers $tierName | default dict -}}
-{{- $model := get $tier "model" -}}
-{{- $subagent := get $tier "subagent" -}}
-{{- $effort := get $tier "effort" -}}
-{{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
-{{- $plugins := list -}}
-{{- range $data.plugins -}}
-{{-   $plugins = append $plugins (printf "%s@%s" .name .marketplace) -}}
+{{- $stdin := get .chezmoi "stdin" | default "{}" | fromJson -}}
+{{- $kbPaths := includeTemplate "kb-paths.tmpl" . | fromJson -}}
+{{- $kbHome := .chezmoi.homeDir -}}
+{{- $kbDirs := list -}}
+{{- if $kbPaths -}}
+{{-   $kbDirs = append $kbDirs "~/kb" -}}
 {{- end -}}
+{{- range $kbPaths -}}
+{{-   $r := .real -}}
+{{-   if hasPrefix $kbHome $r -}}
+{{-     $r = printf "~%s" (trimPrefix $kbHome $r) -}}
+{{-   end -}}
+{{-   $kbDirs = append $kbDirs $r -}}
+{{- end -}}
+{{- $claude := get . "claude" | default dict -}}
+
+{{- $tiers := get $claude "tiers" | default dict -}}
+
+{{- $localYaml := joinPath .chezmoi.homeDir ".claude/local.yaml" -}}
+{{- $local := dict -}}
+{{- if stat $localYaml -}}
+{{-   $local = include $localYaml | fromYaml | default dict -}}
+{{- end -}}
+
+{{- $providers := get $claude "providers" | default dict -}}
+{{- $provider := get $local "provider" | default (env "CLAUDE_PROVIDER") -}}
+{{- $prefix := $provider | splitList "-" | first -}}
+{{- $endpoint := get $providers $prefix | default dict -}}
+
+{{- $sandboxEnabled := false -}}
+
+{{- $tier := get $local "tier" | default (env "CLAUDE_TIER") | default (eq .profile "work" | ternary "max" "pro") -}}
+{{- $settings := get $tiers $tier | default dict -}}
+
+{{- $model := get $settings "model" -}}
+{{- $subagent := get $settings "subagent" -}}
+{{- /* effortLevel: per-machine, prefer the live stdin value, tier fallback, omit if unset */ -}}
+{{- $effort := get $stdin "effortLevel" | default (get $settings "effort") -}}
+
+{{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
+
+{{- $plugins := list -}}
+{{- range $data.plugins }}
+{{-   $plugins = append $plugins (printf "%s@%s" .name .marketplace) }}
+{{- end }}
 {{- $plugins = sortAlpha $plugins -}}
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  {{- if not (empty $model) }}
-  "model": {{ $model | quote }},
-  {{- end }}
   "cleanupPeriodDays": 365,
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
@@ -25,21 +54,51 @@
     {{- if not (empty $subagent) }}
     "CLAUDE_CODE_SUBAGENT_MODEL": {{ $subagent | quote }},
     {{- end }}
+    {{- if $endpoint }}
+    "ANTHROPIC_AUTH_TOKEN": ""{{/* Force apiKeyHelper in /status */}},
+    "ANTHROPIC_BASE_URL": {{ get $endpoint "url" | quote }},
+    {{- if hasKey $endpoint "models" }}
+    {{-   $models := get $endpoint "models" }}
+    {{-   if get $models "opus" }}
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": {{ get $models "opus" | quote }},
+    {{-   end }}
+    {{-   if get $models "sonnet" }}
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": {{ get $models "sonnet" | quote }},
+    {{-   end }}
+    {{-   if get $models "haiku" }}
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": {{ get $models "haiku" | quote }},
+    {{-   end }}
+    {{- end }}
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    {{- end }}
     "DISABLE_AUTOUPDATER": "1",
+    {{- if has "everything-claude-code@everything-claude-code" $plugins }}
     "ECC_HOOK_PROFILE": "minimal",
+    {{- end }}
     "ENABLE_TOOL_SEARCH": "true",
     "MAX_THINKING_TOKENS": "8000",
     "MCP_CONNECTION_NONBLOCKING": "true",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
-    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+{{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
+{{- $keys := keys $otel | sortAlpha -}}
+{{- range $i, $key := $keys -}}
+{{- if $i }},{{ end }}
+    "{{ $key }}": "{{ index $otel $key }}"
+{{- end }},
     "OTEL_LOG_TOOL_DETAILS": "1",
     "OTEL_LOG_USER_PROMPTS": "1",
-    "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_METRICS_EXPORTER": "otlp",
-    "XDG_CACHE_HOME": "{{ .chezmoi.homeDir }}/.cache",
-    "XDG_CONFIG_HOME": "{{ .chezmoi.homeDir }}/.config",
-    "XDG_DATA_HOME": "{{ .chezmoi.homeDir }}/.local/share",
-    "XDG_STATE_HOME": "{{ .chezmoi.homeDir }}/.local/state"
+    "XDG_CACHE_HOME": {{ joinPath .chezmoi.homeDir ".cache" | quote }},
+    "XDG_CONFIG_HOME": {{ joinPath .chezmoi.homeDir ".config" | quote }},
+    "XDG_DATA_HOME": {{ joinPath .chezmoi.homeDir ".local/share" | quote }},
+    "XDG_STATE_HOME": {{ joinPath .chezmoi.homeDir ".local/state" | quote }}
+  },
+  {{- $scriptPath := joinPath .chezmoi.homeDir ".claude/api-key-helper.sh" }}
+  {{- if and $provider (stat $scriptPath) }}
+  "apiKeyHelper": {{ printf "%s %s" $scriptPath $provider | quote }},
+  {{- end }}
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "includeGitInstructions": true,
   "permissions": {
@@ -78,6 +137,7 @@
       "Bash(gh run list *)",
       "Bash(gh run view *)",
       "Bash(gh search *)",
+      "Bash(git check-ignore *)",
       "Bash(git describe *)",
       "Bash(git diff *)",
       "Bash(git diff)",
@@ -88,6 +148,8 @@
       "Bash(git ls-tree *)",
       "Bash(git remote -v *)",
       "Bash(git remote -v)",
+      "Bash(git rev-list *)",
+      "Bash(git rev-parse *)",
       "Bash(git show *)",
       "Bash(git stash list *)",
       "Bash(git stash list)",
@@ -105,6 +167,7 @@
       "Bash(glab pipeline get *)",
       "Bash(glab pipeline list *)",
       "Bash(glab repo view *)",
+      "Bash(glab repo search *)",
       "Bash(grep *)",
       "Bash(head *)",
       "Bash(jq *)",
@@ -145,8 +208,9 @@
       {{- if and .features.sql (eq .os "darwin") }}
       "Read(~/Library/DBeaverData/workspace*/General/Scripts/**)",
       {{- end }}
-      "Read(~/notes/{{ .profile }}/{journal,pages}/**)",
-      "Skill(hookify:list)",
+      {{- range $kbDirs }}
+      "Read({{ . }}/**)",
+      {{- end }}
       "TaskCreate",
       "TaskGet",
       "TaskList",
@@ -165,6 +229,11 @@
       "mcp__claude-context__*",
       "mcp__context7__*",
       "mcp__deep-wiki__*",
+      "mcp__grafana__*",
+      "mcp__grafana-admin__get_*",
+      "mcp__grafana-admin__list_*",
+      "mcp__grafana-admin__search_*",
+      "mcp__grafana-admin__generate_*",
       "mcp__grep_app__*",
       "mcp__open-notebook__*"
     ],
@@ -236,7 +305,6 @@
       "Bash(yq * -i *)",
       "Bash(yq --inplace*)",
       "Bash(yq -i*)",
-      "Edit",
       "Edit(**/.env)",
       "Edit(**/.env.*)",
       "Edit(~/.aws/**)",
@@ -280,23 +348,20 @@
       "ExitPlanMode",
       "NotebookEdit"
     ],
-    "defaultMode": "{{ true | ternary "plan" "default" }}",
+    "defaultMode": "{{ env "CLAUDE_DEFAULT_MODE" | default "default" }}",
     "disableBypassPermissionsMode": "disable",
-    {{- $notesDirs := includeTemplate "notes.tmpl" . | fromJson }}
-    "additionalDirectories": {{ $notesDirs | toPrettyJson | indent 4 | trim }}
+    "additionalDirectories": {{ $kbDirs | default list | toPrettyJson | indent 4 | trim }}
   },
-  "enableAllProjectMcpServers": false,
-  "hooks": {{ include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim }},
-  {{- $node := lookPath "node" }}
-  {{- if .features.mise }}
-  {{-   $node = "mise exec node@lts --" }}
+  {{- if not (empty $model) }}
+  "model": {{ $model | quote }},
   {{- end }}
-  {{- $dashboard := glob (print .chezmoi.homeDir "/.claude/plugins/cache/claude-dashboard/claude-dashboard/*/dist/index.js") | sortAlpha | last }}
+  "enableAllProjectMcpServers": false,
+  "hooks": {{ (get $stdin "hooks" | default dict) | toPrettyJson | indent 2 | trim }}{{/* include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim */}},
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
-  {{- if and $node $dashboard }}
+  {{- if stat $statusline }}
   "statusLine": {
     "type": "command",
-    "command": {{ printf "%s %s %s" $statusline $node $dashboard | toJson }},
+    "command": {{ $statusline | toJson }},
     "padding": 0
   },
   {{- end }}
@@ -304,7 +369,7 @@
   {{- range $plugins -}}
   {{-   $_ := set $managedPlugins . true -}}
   {{- end }}
-  "enabledPlugins": {{ merge $managedPlugins (get (get .chezmoi "stdin" | default "{}" | fromJson) "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
+  "enabledPlugins": {{ merge $managedPlugins (get $stdin "enabledPlugins" | default dict) | toPrettyJson | indent 2 | trim }},
   {{- $extraMarketplaces := dict -}}
   {{- range $name, $info := $data.marketplaces -}}
   {{-   if hasKey $info "repo" -}}
@@ -329,102 +394,22 @@
       ]
     }
   },
-  "tui": "fullscreen",
-  {{- if not (empty $effort) }}
-  "effortLevel": {{ $effort | quote }},
-  {{- end }}
   "alwaysThinkingEnabled": false,
+  {{- with $effort }}
+  "effortLevel": {{ . | quote }},
+  {{- end }}
+  "awaySummaryEnabled": false,
   "showClearContextOnPlanAccept": true{{/* https://github.com/anthropics/claude-code/issues/37688 */}},
   "plansDirectory": "./.claude/plans",
-  "voiceEnabled": true,
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
   "autoMemoryEnabled": true,
   "showThinkingSummaries": true,
-  "autoUpdates": false,
-  "skills": {
-    "audit": true,
-    "claude-automation-recommender": true,
-    "claude-dashboard:check-usage": true,
-    "claude-dashboard:setup": true,
-    "claude-dashboard:update": true,
-    "claude-md-improver": true,
-    "claude-md-management:revise-claude-md": true,
-    "cleanup": true,
-    "code-review:code-review": true,
-    "code-simplifier:code-simplifier": true,
-    "commit-commands:clean_gone": true,
-    "commit-commands:commit": true,
-    "commit-commands:commit-push-pr": true,
-    "everything-claude-code:agentic-engineering": true,
-    "everything-claude-code:agent-harness-construction": true,
-    "everything-claude-code:ai-first-engineering": true,
-    "everything-claude-code:api-design": true,
-    "everything-claude-code:article-writing": true,
-    "everything-claude-code:autonomous-loops": true,
-    "everything-claude-code:backend-patterns": true,
-    "everything-claude-code:claw": true,
-    "everything-claude-code:coding-standards": true,
-    "everything-claude-code:configure-ecc": true,
-    "everything-claude-code:content-hash-cache-pattern": true,
-    "everything-claude-code:continuous-agent-loop": true,
-    "everything-claude-code:continuous-learning": true,
-    "everything-claude-code:continuous-learning-v2": true,
-    "everything-claude-code:cost-aware-llm-pipeline": true,
-    "everything-claude-code:database-migrations": true,
-    "everything-claude-code:deployment-patterns": true,
-    "everything-claude-code:docker-patterns": true,
-    "everything-claude-code:e2e": true,
-    "everything-claude-code:e2e-testing": true,
-    "everything-claude-code:eval-harness": true,
-    "everything-claude-code:evolve": true,
-    "everything-claude-code:frontend-patterns": true,
-    "everything-claude-code:frontend-slides": true,
-    "everything-claude-code:go-build": true,
-    "everything-claude-code:go-review": true,
-    "everything-claude-code:go-test": true,
-    "everything-claude-code:golang-patterns": true,
-    "everything-claude-code:golang-testing": true,
-    "everything-claude-code:instinct-export": true,
-    "everything-claude-code:instinct-import": true,
-    "everything-claude-code:instinct-status": true,
-    "everything-claude-code:iterative-retrieval": true,
-    "everything-claude-code:learn-eval": true,
-    "everything-claude-code:nanoclaw-repl": true,
-    "everything-claude-code:plan": true,
-    "everything-claude-code:postgres-patterns": true,
-    "everything-claude-code:projects": true,
-    "everything-claude-code:promote": true,
-    "everything-claude-code:python-patterns": true,
-    "everything-claude-code:python-review": true,
-    "everything-claude-code:python-testing": true,
-    "everything-claude-code:regex-vs-llm-structured-text": true,
-    "everything-claude-code:search-first": true,
-    "everything-claude-code:security-review": true,
-    "everything-claude-code:security-scan": true,
-    "everything-claude-code:skill-create": true,
-    "everything-claude-code:skill-stocktake": true,
-    "everything-claude-code:strategic-compact": true,
-    "everything-claude-code:tdd": true,
-    "everything-claude-code:tdd-workflow": true,
-    "everything-claude-code:verification-loop": true,
-    "feature-dev:feature-dev": true,
-    "frontend-design": true,
-    "hookify:configure": true,
-    "hookify:help": true,
-    "hookify:hookify": true,
-    "hookify:list": true,
-    "hookify:writing-rules": true,
-    "journal": true,
-    "keybindings-help": true,
-    "local:sq": true,
-{{- range get $claude "disabledSkills" | default list }}
-    {{ . | quote }}: false,
-{{- end }}
-    "local:quality": true,
-    "reflect": true,
-    "standup": true
-  }
+  "skipWorkflowUsageWarning": true,
+  "editorMode": "vim",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "autoUpdates": false
 }

@@ -1,18 +1,18 @@
 {{- $_ := . | setValueAtPath "client" "claude" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
-{{- $servers := dict -}}
-{{- /*
-  "code-mode"
-  "open-notebook"
-  "utcp"
-*/ -}}
-{{- range $key, $value := pick $mcp.servers
+{{- $managed := list
   "claude-context"
   "context7"
   "deep-wiki"
+  "grafana"
+  "grafana-admin"
   "grep_app"
 -}}
-{{-   $_ := $servers | setValueAtPath $key $value -}}
+{{- $servers := dict -}}
+{{- range $managed -}}
+{{-   if hasKey $mcp.servers . -}}
+{{-     $_ := $servers | setValueAtPath . (index $mcp.servers .) -}}
+{{-   end -}}
 {{- end -}}
 #!/bin/bash
 
@@ -44,19 +44,20 @@ mcp_sync() {
 mcp_sync {{ . | squote }} {{ index $servers . | toJson | squote }}
 {{- end }}
 
-{{- $omitted := list -}}
-{{- range $key := keys $mcp.servers -}}
-{{-   if not (hasKey $servers $key) -}}
-{{-     $omitted = append $omitted $key -}}
+{{- $stale := list -}}
+{{- range $managed -}}
+{{-   if not (hasKey $servers .) -}}
+{{-     $stale = append $stale . -}}
 {{-   end -}}
 {{- end -}}
-{{- if $omitted }}
+{{- if $stale }}
 
-# Remove servers defined in mcp.jsonc but not picked above
-for name in {{ $omitted | sortAlpha | join " " }}; do
+# Remove managed servers disabled on this machine
+# shellcheck disable=SC2043
+for name in {{ $stale | sortAlpha | join " " }}; do
   if claude mcp get "$name" >/dev/null 2>&1; then
-    echo "WARN: MCP server not picked: $name" >&2
-    # claude mcp remove "$name"
+    echo "Removing disabled MCP server: $name" >&2
+    claude mcp remove "$name"
   fi
 done
 {{- end }}

@@ -2,118 +2,118 @@
 {
   "Notification": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "PermissionDenied": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "PermissionRequest": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "timeout": 86400,
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "PostCompact": [
     {
+      "matcher": "auto",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "auto"
+      ]
     },
     {
+      "matcher": "manual",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "manual"
+      ]
     }
   ],
   "PostToolUse": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "PostToolUseFailure": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "PreCompact": [
     {
+      "matcher": "",
       "hooks": [
         {
           "command": "echo 'Summarize each active task: what was done, what remains, and the concrete next step. Persist key discoveries.'",
           "type": "command"
         }
-      ],
-      "matcher": ""
+      ]
     },
     {
+      "matcher": "auto",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "auto"
+      ]
     },
     {
+      "matcher": "manual",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "manual"
+      ]
     }
   ],
   "PreToolUse": [
     {
+      "matcher": "*",
       "hooks": [
         {
           "command": "python3 '{{ $claudeDir }}/hooks/claude-island-state.py'",
           "type": "command"
         }
-      ],
-      "matcher": "*"
+      ]
     }
   ],
   "SessionEnd": [
