@@ -8,9 +8,9 @@ packages:
       {{- if eq .osIDLike "fedora" }}
       ghostty_repo=/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
       if ! [ -f "$ghostty_repo" ]; then
-        cmd . /etc/os-release
+        dry_run . /etc/os-release
         url="https://copr.fedorainfracloud.org/coprs/scottames/ghostty/repo/fedora-${VERSION_ID}/scottames-ghostty-fedora-${VERSION_ID}.repo"
-        cmd curl -fsSL "$url" | cmd sudo tee "$ghostty_repo" >/dev/null
+        dry_run curl -fsSL "$url" | dry_run sudo tee "$ghostty_repo" >/dev/null
       fi
       # cmd rpm-ostree refresh-md
       # cmd rpm-ostree install --allow-inactive --assumeyes --idempotent ghostty
