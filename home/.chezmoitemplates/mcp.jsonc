@@ -198,21 +198,19 @@
     {{- $grafanaAdminToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token-admin" }}
     {{- if and .features.otel (stat $grafanaToken) }}
     "grafana": {
-      "command": "uvx",
-      "args": ["mcp-grafana", "--disable-write"],
+      "command": "sh",
+      "args": ["-c", "GRAFANA_SERVICE_ACCOUNT_TOKEN=$(cat '{{ $grafanaToken }}') exec uvx mcp-grafana --disable-write"],
       "env": {
         "GRAFANA_URL": "https://grafana.test",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN": {{ include $grafanaToken | trim | quote }},
       },
     },
     {{- end }}
     {{- if and .features.otel (stat $grafanaAdminToken) }}
     "grafana-admin": {
-      "command": "uvx",
-      "args": ["mcp-grafana"],
+      "command": "sh",
+      "args": ["-c", "GRAFANA_SERVICE_ACCOUNT_TOKEN=$(cat '{{ $grafanaAdminToken }}') exec uvx mcp-grafana"],
       "env": {
         "GRAFANA_URL": "https://grafana.test",
-        "GRAFANA_SERVICE_ACCOUNT_TOKEN": {{ include $grafanaAdminToken | trim | quote }},
       },
     },
     {{- end }}
