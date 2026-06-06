@@ -1,0 +1,74 @@
+---
+# Managed by chezmoi
+# BTRFS Assistant configuration (XDG-compliant user config)
+# Location: $HOME/.config/btrfs-assistant/
+# Loaded by BTRFS Assistant GUI and CLI
+
+# Backup partition configuration (optional)
+backup_partition:
+  # Device UUID (optional, for external backup partition)
+  # Get from: lsblk -f /dev/nvme0n1p4
+  # Format partition first: sudo mkfs.ext4 -L backup /dev/nvme0n1p4
+  device_uuid: ""
+
+  # Device path
+  device: "/dev/nvme0n1p4"
+
+  # Mount point
+  mount_point: "/backup"
+
+  # Filesystem type
+  filesystem: "ext4"
+
+  # Mount options
+  mount_options: "defaults,noatime"
+
+# Snapshot configuration
+snapshots:
+  # Timeline snapshots (automatic hourly/daily/weekly/monthly)
+  timeline:
+    enabled: true
+
+    # Retention policy
+    keep:
+      hourly: 24
+      daily: 7
+      weekly: 4
+      monthly: 6
+      yearly: 0
+
+    # Cleanup policy
+    cleanup:
+      enabled: true
+      min_age_hours: 1
+
+  # Pre/post snapshots (before/after changes)
+  pre_post:
+    enabled: true
+    keep: 5
+
+  # Snapshot location
+  # NOTE: Only snapshot /var/home since system is handled by rpm-ostree
+  subvolumes:
+    - path: "/var/home"
+      name: "home"
+      description: "User home directory"
+
+# Space management
+space_management:
+  # Maximum space to use for snapshots (percentage of filesystem)
+  space_limit: 0.5
+
+  # Minimum free space to maintain (percentage of filesystem)
+  free_limit: 0.2
+
+# GUI preferences
+gui:
+  # Show system notifications
+  notifications: true
+
+  # Start minimized to tray
+  start_minimized: false
+
+  # Default view
+  default_view: "snapshots"

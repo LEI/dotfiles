@@ -1,0 +1,26 @@
+---
+# Managed by chezmoi
+# Machine-specific backup data
+# Loaded by .config/btrfs-assistant/config.yaml via .chezmoitemplates/data.tmpl
+# Format: $HOME/.config/btrfs-assistant/.data.yaml
+
+# Override backup partition details for this machine
+backup_partition:
+  # Get from: lsblk -f /dev/nvme0n1p4
+  device_uuid: "a7c24bbb-ed4d-488a-b432-cdf3d90405d3"
+  device: "/dev/nvme0n1p4"
+  mount_point: "/backup"
+  filesystem: "ext4"
+  mount_options: "defaults,noatime"
+
+# Machine-specific snapshot retention
+snapshots:
+  timeline:
+    keep:
+      hourly: 24
+      daily: 7
+      weekly: 4
+      monthly: 6
+
+# Machine identifier
+hostname: "{{ .hostname }}"
