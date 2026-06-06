@@ -1,0 +1,25 @@
+# Runtime state (machine-local, auto-generated)
+.codex-global-state.json*
+.personality_migration
+.tmp/
+auth.json
+cache
+computer-use/
+goals_*.sqlite*
+history.jsonl
+installation_id
+log/
+logs_*.sqlite*
+memories/
+memories_*.sqlite*
+models_cache.json
+session_index.jsonl
+sessions
+shell_snapshots/
+sqlite/
+state_*.sqlite*
+tmp/
+version.json
+
+# Tool-managed (learned skills, no opkg)
+skills

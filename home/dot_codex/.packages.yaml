@@ -1,0 +1,11 @@
+---
+enabled: "{{ .features.codex }}"
+packages:
+  codex-app:
+    enabled: '{{ and (eq .os "darwin" "windows") .gui }}'
+    type: cask
+  codex:
+    nameOverwrite:
+      arch: openai-codex-bin
+      npm: "@openai/codex"
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osIDLike "darwin" "fedora" | ternary "cask" (eq .os "windows" | ternary "npm" nil)) }}'

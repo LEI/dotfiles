@@ -1,0 +1,11 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $config := .chezmoi.stdin | default "" | fromToml | default dict -}}
+{{- $projects := get $config "projects" | default dict -}}
+{{- $projects = mergeOverwrite $projects (dict (dir .chezmoi.sourceDir) (dict "trust_level" "trusted")) -}}
+{{- $config = mergeOverwrite $config (dict
+  "personality" "pragmatic"
+  "approval_policy" "on-request"
+  "approvals_reviewer" "user"
+  "projects" $projects
+) -}}
+{{- $config | toToml -}}
