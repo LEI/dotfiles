@@ -69,7 +69,7 @@ repo_checks() {
   snapshot=$(mktemp) || return 0
   cp "$FILE" "$snapshot"
 
-  (cd "$root" && "$prek" run --files "$rel") >&2
+  (cd "$root" && "$prek" run --files "$rel" --quiet) >&2
   rc=$?
 
   if ! cmp -s "$FILE" "$snapshot"; then
