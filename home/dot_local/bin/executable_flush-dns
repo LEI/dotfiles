@@ -24,12 +24,12 @@ Linux)
   elif command -v unbound-control >/dev/null; then
     sudo unbound-control flush_zone .
   else
-    echo "flush-dns: no supported resolver found" >&2
+    echo "${0##*/}: no supported resolver found" >&2
     exit 1
   fi
   ;;
 *)
-  echo "flush-dns: unsupported OS" >&2
+  echo "${0##*/}: unsupported OS" >&2
   exit 1
   ;;
 esac

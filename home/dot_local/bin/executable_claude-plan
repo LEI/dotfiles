@@ -1,0 +1,29 @@
+#!/bin/sh
+#MISE description="Run a plan from .claude/plans/"
+#USAGE arg "[plan]" help="Plan file in .claude/plans/ (omit to list)"
+#USAGE complete "plan" run="claude-plan"
+#USAGE arg "[args]..." help="Extra context appended to the prompt"
+
+set -eu
+
+dir=".claude/plans"
+
+if [ $# -eq 0 ]; then
+  for f in "$dir"/*.md; do
+    [ -f "$f" ] && printf '%s\n' "${f##*/}"
+  done
+  exit
+fi
+
+plan="$dir/$1"
+shift
+
+if [ ! -f "$plan" ]; then
+  echo "claude-plan: not found: $plan" >&2
+  exit 1
+fi
+
+slug="${plan##*/}"
+slug="${slug%.md}"
+
+exec claude -n "$slug" "Execute @$plan $*"

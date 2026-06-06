@@ -1,7 +1,0 @@
-#!/bin/sh
-# Execute chezmoi template expressions
-#USAGE arg "<expr>..." help="Template expressions to evaluate"
-
-set -eu
-
-chezmoi execute-template --refresh-externals=never -- "$@"

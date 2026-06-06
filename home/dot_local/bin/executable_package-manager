@@ -22,6 +22,8 @@ all | '')
     manager=rpm
   elif command -v winget >/dev/null; then
     manager=winget
+  elif command -v zypper >/dev/null; then
+    manager=zypper
   else
     echo "unknown package manager" >&2
     exit 1
@@ -53,7 +55,7 @@ python | uv) manager="uv" ;;
 ruby | gem) manager="gem" ;;
 rust | cargo) manager="cargo" ;;
 *)
-  echo "package-manager: invalid argument: $1" >&2
+  echo "${0##*/}: invalid argument: $1" >&2
   exit 1
   ;;
 esac
