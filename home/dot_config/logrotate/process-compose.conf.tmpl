@@ -1,0 +1,11 @@
+{{ .chezmoi.homeDir }}/.local/state/process-compose/stdout.log
+{{ .chezmoi.homeDir }}/.local/state/process-compose/stderr.log
+{
+    daily
+    size 100M
+    rotate 7
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
