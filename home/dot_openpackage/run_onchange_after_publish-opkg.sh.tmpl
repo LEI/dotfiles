@@ -1,59 +1,182 @@
-{{- if and .features.opencode (lookPath "node" | isExecutable) (not .ephemeral) -}}
+{{- if and .features.openpackage (lookPath "node" | isExecutable) (not .ephemeral) -}}
 #!/bin/sh
 
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/commands/*.md") }}
-# commands/{{ base . }}: {{ include . | sha256sum }}
+{{- /* Trigger hashes: a change to any rendered comment value below re-runs this */ -}}
+{{- /* script on apply. Cover local package source, marketplace package sources */ -}}
+{{- /* (so skill/command edits re-fire, not just rules), and installed rules/agents. */ -}}
+{{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
+{{- $hashes := list -}}
+{{- range glob (joinPath $pkg "**/*.md") -}}
+{{- $hashes = append $hashes (include . | sha256sum) -}}
 {{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/rules/*.md") }}
-# rules/{{ base . }}: {{ include . | sha256sum }}
+# local: {{ join "\n" $hashes | sha256sum }}
+
+{{- $mktHashes := list -}}
+{{- range $entry := includeTemplate "opkg-marketplace-packages.tmpl" . | fromJson -}}
+{{- range glob (joinPath $entry.src "**/*.md") -}}
+{{- $mktHashes = append $mktHashes (include . | sha256sum) -}}
+{{- end -}}
 {{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/agents/*.md") }}
-# agents/{{ base . }}: {{ include . | sha256sum }}
+# marketplace sources: {{ join "\n" $mktHashes | sha256sum }}
+
+{{- $installed := list -}}
+{{- if .features.claude -}}
+{{- range glob (joinPath .chezmoi.homeDir ".claude/rules/**/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- range glob (joinPath .chezmoi.homeDir ".claude/agents/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
+{{- end -}}
+{{- if .features.opencode -}}
+{{- range glob (joinPath .chezmoi.homeDir ".config/opencode/agents/*.md") -}}
+{{- $installed = append $installed (include . | sha256sum) -}}
+{{- end -}}
 {{- end }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_openpackage/packages/**/SKILL.md") }}
-# skills/{{ dir . | base }}: {{ include . | sha256sum }}
-{{- end }}
+# installed: {{ join "\n" $installed | sha256sum }}
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
-LOCAL_PACKAGE_PATH="{{ .chezmoi.homeDir }}/.openpackage/packages/local"
-PACKAGE_NAME="local"
+opkg() {
+  command opkg "$@" | cat
+}
 
-# Returns true if the package is already installed globally
 opkg_installed() {
-  opkg list --global --json 2>/dev/null |
-    jq -e "[.data.resources[] | .resources[] | select(.name == \"packages/$1\" and .status == \"tracked\")] | length > 0" \
+  opkg list --global --json "$1" 2>/dev/null |
+    jq -e '[.data.resources[] | .resources[] | .name] | length > 0' \
       >/dev/null 2>&1
 }
 
-if [ ! -d "$LOCAL_PACKAGE_PATH" ]; then
-  die "Package directory not found: $LOCAL_PACKAGE_PATH"
+publish_package() {
+  name="$1" path="$2"
+
+  if [ ! -d "$path" ]; then
+    echo "Package not found, skipping: $path"
+    return 1
+  fi
+  if [ ! -f "$path/openpackage.yml" ]; then
+    echo "No manifest at $path, skipping"
+    return 1
+  fi
+
+  cd "$path"
+  run opkg publish --local --force "$name"
+
+  if opkg_installed "$name"; then
+    run opkg uninstall --global --recursive "$name"
+  fi
+}
+
+# Install one resource at a time: passing the whole package auto-namespaces
+# resources with the package name (e.g. ~/.claude/agents/local-search.md),
+# but per-resource install lands files at their natural paths.
+install_resource() {
+  name="$1"
+  shift
+  run opkg install --local --platforms {{ join " " .openpackage.platforms }} --conflicts overwrite --force "$@" --global "$name"
+}
+
+{{- /* opkg packages: local (installed copy) plus marketplace packages from the shared */ -}}
+{{- /* discovery partial. Rules-only packages are symlinked below, never opkg-installed. */ -}}
+{{- $opkgPkgs := list (dict "name" "local" "src" (joinPath .chezmoi.homeDir ".openpackage/packages/local")) -}}
+{{- $opkgPkgs = concat $opkgPkgs (includeTemplate "opkg-marketplace-packages.tmpl" . | fromJson) }}
+
+exit_code=0
+{{ range $entry := $opkgPkgs }}
+publish_package {{ $entry.name | quote }} {{ $entry.src | quote }} || exit_code=1
+{{-   range glob (joinPath $entry.src "agents/*.md") }}
+install_resource {{ $entry.name | quote }} --agents {{ base . | trimSuffix ".md" | quote }}
+{{-   end }}
+{{-   range glob (joinPath $entry.src "skills/*") }}
+install_resource {{ $entry.name | quote }} --skills {{ base . | quote }}
+{{-   end }}
+{{-   range glob (joinPath $entry.src "commands/*.md") }}
+install_resource {{ $entry.name | quote }} --commands {{ base . | trimSuffix ".md" | quote }}
+{{-   end }}
+echo "Package {{ $entry.name }} published and installed"
+{{ end }}
+# Build managed packages list (opkg-installed packages only)
+managed="{{ range $entry := $opkgPkgs }} {{ $entry.name }}{{ end }} "
+
+# Repo owns global opkg install: anything in registry not in managed list is stale
+registry_dir="$HOME/.openpackage/registry"
+if [ -d "$registry_dir" ]; then
+  for entry in "$registry_dir"/*; do
+    [ -d "$entry" ] || continue
+    name="${entry##*/}"
+    case "$managed" in *" $name "*) continue ;; esac
+    msg "Removing stale opkg registry: $name"
+    if opkg_installed "$name"; then
+      trace opkg uninstall --global --recursive "$name"
+    fi
+    trace trash "$entry"
+  done
 fi
 
-if [ ! -f "$LOCAL_PACKAGE_PATH/openpackage.yml" ]; then
-  die "Package manifest not found: $LOCAL_PACKAGE_PATH/openpackage.yml"
-fi
+# Per-package symlinks point rules dirs at package sources.
+# Strays (e.g. dual installs) are caught by `mise run opkg:unmanaged` in bats.
+ensure_symlink() {
+  target="$1" link="$2"
+  if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
+    return 0
+  fi
+  if [ -e "$link" ] || [ -L "$link" ]; then
+    msg "unmanaged: $link (expected symlink to $target; remove and re-apply)"
+    exit_code=1
+    return 0
+  fi
+  trace ln -sn "$target" "$link"
+}
 
-# Publish local opkg package to registry
-# TODO: replace cd with: mise run opkg -- publish --local --force "$PACKAGE_NAME"
-# eventually pin opkg to a specific version via mise (npm:opkg@<version>)
-cd "$LOCAL_PACKAGE_PATH"
-run opkg publish --local --force "$PACKAGE_NAME"
+{{- /* Collect rule sources: skip missing dirs and dirs with no *.md content */ -}}
+{{- $rules := list -}}
+{{- $localRulesDir := joinPath .chezmoi.homeDir ".openpackage/packages/local/rules" -}}
+{{- if and (stat $localRulesDir) (glob (joinPath $localRulesDir "*.md")) -}}
+{{-   $rules = append $rules (dict "name" "local" "src" $localRulesDir) -}}
+{{- end -}}
+{{- if hasKey .claude "marketplaces" -}}
+{{-   range $mktName, $mkt := .claude.marketplaces -}}
+{{-     $path := get $mkt "path" -}}
+{{-     if not $path -}}{{- continue -}}{{- end -}}
+{{-     $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
+{{-     if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
+{{-     range $pkgDir := glob (joinPath $packagesRoot "*") -}}
+{{-       $pkgName := base $pkgDir -}}
+{{-       if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
+{{-       $rulesDir := joinPath $pkgDir "rules" -}}
+{{-       if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) -}}
+{{-         $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- /* Per-platform target dirs; package name == platform gates to that platform only */ -}}
+{{- $ruleBases := list -}}
+{{- if .features.claude -}}{{- $ruleBases = append $ruleBases (dict "platform" "claude" "dir" (joinPath .chezmoi.homeDir ".claude/rules")) -}}{{- end -}}
+{{- if .features.opencode -}}{{- $ruleBases = append $ruleBases (dict "platform" "opencode" "dir" (joinPath .chezmoi.homeDir ".config/opencode/rules")) -}}{{- end -}}
+{{- if and $rules $ruleBases }}
+{{- range $base := $ruleBases }}
 
-# Uninstall first so renamed or deleted resources are removed
-if opkg_installed "$PACKAGE_NAME"; then
-  run opkg uninstall --global --recursive "$PACKAGE_NAME"
-fi
-
-# Install to platforms enabled in features
-run opkg install --local --platforms
-{{- if .features.opencode }} opencode{{ end }}
-{{- if .features.claude }} claude{{ end }} --global "$PACKAGE_NAME"
+mkdir -p {{ $base.dir | quote }}
+{{- range $entry := $rules }}
+{{-   if or (not (has $entry.name (list "claude" "opencode"))) (eq $entry.name $base.platform) }}
+ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base.dir $entry.name | quote }}
+{{-   end }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 # Clean up workspace created by opkg
-trash "$CHEZMOI_WORKING_TREE/.openpackage" 2>/dev/null || true
+workspace="$CHEZMOI_WORKING_TREE/.openpackage"
+if [ -e "$workspace" ]; then
+  trace trash "$workspace"
+fi
 
-echo "Package '$PACKAGE_NAME' published and installed"
+exit "$exit_code"
 {{ end -}}

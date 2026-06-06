@@ -1,0 +1,23 @@
+{{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
+{{- range glob (joinPath $pkg "agents/*.md") -}}
+agents/{{ base . }}
+{{ end -}}
+{{- range glob (joinPath $pkg "commands/*.md") -}}
+commands/{{ base . }}
+{{ end -}}
+{{- range glob (joinPath $pkg "skills/*") -}}
+skills/{{ base . | trimPrefix "exact_" }}
+{{ end -}}
+{{- /* Marketplace packages: shared discovery */ -}}
+{{- range includeTemplate "opkg-marketplace-packages.tmpl" . | fromJson -}}
+{{-   $src := .src -}}
+{{-   range glob (joinPath $src "agents/*.md") -}}
+agents/{{ base . }}
+{{ end -}}
+{{-   range glob (joinPath $src "commands/*.md") -}}
+commands/{{ base . }}
+{{ end -}}
+{{-   range glob (joinPath $src "skills/*") -}}
+skills/{{ base . }}
+{{ end -}}
+{{- end -}}

@@ -1,0 +1,19 @@
+{{- /* opkg marketplace packages (path-based, content beyond rules/), shared by publish-opkg and opkg-managed. Returns JSON [{name, src}]. */ -}}
+{{- $pkgs := list -}}
+{{- range $mktName, $mkt := dig "claude" "marketplaces" (dict) . -}}
+{{-   $path := get $mkt "path" -}}
+{{-   if not $path -}}{{- continue -}}{{- end -}}
+{{-   $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
+{{-   if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
+{{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
+{{-     $pkgName := base $pkgDir -}}
+{{-     if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
+{{-     $nonRule := false -}}
+{{-     range $entry := glob (joinPath $pkgDir "*") -}}
+{{-       $e := base $entry -}}
+{{-       if and (ne $e "openpackage.yml") (ne $e "rules") }}{{ $nonRule = true }}{{ end -}}
+{{-     end -}}
+{{-     if $nonRule }}{{ $pkgs = append $pkgs (dict "name" $pkgName "src" $pkgDir) }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- $pkgs | toJson }}

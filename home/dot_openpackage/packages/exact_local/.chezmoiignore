@@ -1,7 +1,3 @@
-{{- if not .features.oage }}
-skills/open-webui/
-{{- end }}
-
 {{- if not .features.sql }}
 skills/sq/
 {{- end }}

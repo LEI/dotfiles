@@ -91,7 +91,7 @@ Copy rows between sources without intermediate files:
 
 ```bash
 sq --insert=@dest.table '@src.table | .col1, .col2'
-sq --insert=@db.users '@csv.users | .name, .email'   # CSV → database
+sq --insert=@db.users '@csv.users | .name, .email'   # CSV -> database
 ```
 
 ## Typical workflow

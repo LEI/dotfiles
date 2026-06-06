@@ -1,0 +1,28 @@
+{
+  "defaults": {
+    "license": "MIT"
+  },
+  "platforms": {
+    "opencode": {
+      "enabled": {{ .features.opencode | toJson }}
+    },
+    "claude": {
+      "enabled": {{ .features.claude | toJson }}
+    },
+    "claude-plugin": {
+      "enabled": false
+    },
+    "cursor": {
+      "enabled": false
+    },
+    "agents": {
+      "enabled": false
+    },
+    "factory": {
+      "enabled": false
+    },
+    "augment": {
+      "enabled": false
+    }
+  }
+}
