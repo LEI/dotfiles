@@ -1,8 +1,10 @@
+# shellcheck shell=bash
+
 pathmunge() {
   if [ -z "$1" ] || [ ! -d "$1" ]; then
     return 1
   fi
-  # Skip if already in PATH (unless replacing)
+  # Match Fedora /etc/profile: silent no-op when already in PATH
   # Not required with ZSH typeset -U path
   case ":$PATH:" in
   *:"$1":*)
@@ -10,7 +12,7 @@ pathmunge() {
       PATH="${PATH//:$1/}"
       PATH="${PATH//$1:/}"
     else
-      return 2
+      return 0
     fi
     ;;
   esac

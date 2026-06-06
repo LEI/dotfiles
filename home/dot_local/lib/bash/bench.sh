@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # Named component timing for shell init
 # Requires wrapping individual source/eval calls
 # For per-line profiling, use script/profile instead
@@ -21,15 +23,17 @@ bench() {
   fi
   local start="${EPOCHREALTIME:-}"
   "$@"
-  local ret=$?
+  local return_code=$?
   local end="${EPOCHREALTIME:-}"
   if [ -n "$start" ] && [ -n "$end" ]; then
     local elapsed
     elapsed=$(awk "BEGIN {printf \"%.3f\", $end - $start}")
     echo "bench: $label: ${elapsed}s" >&2
   fi
-  return $ret
+  return $return_code
 }
+
+BENCH_HOME_REAL="$(realpath "$HOME")"
 
 bench_source() {
   local file="$1"
@@ -38,8 +42,7 @@ bench_source() {
     echo "bench_source: file not found: $file" >&2
     return 1
   fi
-  local name
-  name="${file#"$(realpath "$HOME")/"}"
-  # shellcheck disable=SC1090
+  local name="${file#"$BENCH_HOME_REAL/"}"
+  # shellcheck source=/dev/null
   bench "$name" source "$file" "$@"
 }
