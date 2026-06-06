@@ -1,15 +1,22 @@
+# shellcheck shell=sh
+
 # Env vars (MISE_*_DEFAULT_PACKAGES_FILE) set via environment.d/mise.conf
 if ! command -v mise >/dev/null; then
   echo "init: command not found: mise" >&2
   return
 fi
 
+{{- if eq .osID "android" }}
+{{ includeTemplate "termux.sh.tmpl" . | trim }}
+{{- end }}
+
 # Must be sourced early: tools become available after activation
+{{- if eq .osID "android" }}
+# shellcheck disable=SC2218
+{{- end }}
 eval "$(mise activate "${SHELL##*/}")"
 
 {{- if eq .osID "android" }}
-{{ includeTemplate "termux.sh.tmpl" . | trim }}
-
 mise() {
   termux_prefix "$MISE_BIN" "$@"
 }

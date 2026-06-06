@@ -1,12 +1,27 @@
 {{- $miseInteractive := false -}}
 {{- with lookPath "mise" -}}
-{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version" .) | splitList " " | first -}}
+{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version || true" .) | splitList " " | first -}}
 {{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
 {{- end -}}
+
+[task_config]
+includes = [
+{{- $ctx := . }}
+{{- range $file := glob (joinPath .chezmoi.sourceDir "dot_config" "mise" "exact_tasks" "*") }}
+{{-   $contents := includeTemplate $file $ctx }}
+{{-   if $contents }}
+  "{{ $.chezmoi.homeDir }}/.config/mise/tasks/{{ base $file | trimSuffix ".tmpl" }}",
+{{-   end }}
+{{- end }}
+]
+
 [settings]
 {{- if eq .osID "alpine" }}
 # FIXME(alpine): platform error (failed to install with ubi)
 disable_backends = ["ubi"]
+{{- else if and .vm (eq .osIDLike "debian") }}
+# FIXME(vm): asdf plugins write tarballs to CWD which is the read-only virtiofs mount
+disable_backends = ["asdf"]
 {{- else if eq .osID "darwin" }}
 # FIXME(darwin): HTTP status client error (403 rate limit exceeded)
 # https://mise.jdx.dev/troubleshooting.html#_403-forbidden-when-installing-a-tool
@@ -28,26 +43,24 @@ idiomatic_version_file_enable_tools = [
 env_shell_expand = true
 lockfile = true
 
-{{- $featMap := dict
-  "homebrew" "brew"
-  "nvim" "neovim"
-}}
 {{- $checkDirs := list }}
-{{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
+{{- $checks := glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
+{{- range $checks }}
 {{-   $name := . | dir | base }}
-{{-   $feat := get $featMap $name | default $name }}
-{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
-{{-     $checkDirs = append $checkDirs $name }}
+{{-   $feat := get $.featureMap $name | default $name }}
+{{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
+{{-     continue }}
+{{-   end }}
+{{-   $checkDirs = append $checkDirs $name }}
 
 [tasks."check:{{ $name }}"]
+alias = "c:{{ $name }}"
 description = {{ printf "Check %s" $feat | quote }}
 # file = {{ . | quote }}
 dir = {{ . | dir | quote }}
-run = {{ . | base | quote }}
-shell = "bash"
-{{- if $miseInteractive }}
+run = {{ printf "bash ./%s \"$@\"" (. | base) | quote }}
+{{-   if $miseInteractive }}
 interactive = true
-{{- end }}
 {{-   end }}
 {{- end }}
 
@@ -58,85 +71,57 @@ interactive = true
 [tasks.check]
 alias = "c"
 description = "Run all checks"
-run = [
-{{- range $checkDirs }}
-  # { task = {{ printf "check:%s" . | quote }} },
-{{- end }}
-]
 depends = [
 {{- range $checkDirs }}
-  {{ printf "check:%s" . | quote }},
+  # {{ printf "check:%s" . | quote }},
+{{- end }}
+]
+run = [
+{{- range $checkDirs }}
+  { task = {{ printf "check:%s" . | quote }} },
 {{- end }}
 ]
 
 {{- $updateDirs := list }}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config" "*/.update.sh") }}
 {{-   $name := . | dir | base }}
-{{-   $feat := get $featMap $name | default $name }}
-{{-   if or (not (hasKey $.features $feat)) (get $.features $feat) }}
-{{-     $updateDirs = append $updateDirs $name }}
+{{-   $feat := get $.featureMap $name | default $name }}
+{{-   if not (or (not (hasKey $.features $feat)) (get $.features $feat)) }}
+{{-     continue }}
+{{-   end }}
+{{-   $updateDirs = append $updateDirs $name }}
 
 [tasks."update:{{ $name }}"]
+# alias = "upd:{{ $name }}"
 description = {{ printf "Update %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
 shell = "sh"
+{{-   if $miseInteractive }}
+interactive = true
 {{-   end }}
 {{- end }}
 
 [tasks.update]
-alias = "u"
+# alias = "U"
 description = "Run all updates"
-depends = [
+# depends = []
+run = [
 {{- range $updateDirs }}
-  {{ printf "update:%s" . | quote }},
+  { task = {{ printf "update:%s" . | quote }} },
 {{- end }}
 ]
-
-{{- if .features.goss }}
-
-[tasks.goss]
-description = "Validate system state with goss"
-{{- if $miseInteractive }}
-interactive = true
-{{- end }}
-# Inline sh instead of shell = "sh" so arguments pass through to the script
-run = {{ printf "sh '%s'" (joinPath $.chezmoi.sourceDir "dot_config/goss/.check.sh") | quote }}
-{{- end }}
-
-{{- $images := list "alpine" "archlinux" "debian" "fedora" "ubuntu" }}
-{{- range $images }}
-
-[tasks."container:{{ . }}"]
-description = {{ printf "Build and test chezmoi in %s" . | quote }}
-hide = true
-run = "script/container {{ . }}"
-{{- end }}
-
-[tasks."container:all"]
-alias = "ct:all"
-description = "Build and test chezmoi in all images"
-depends = [
-{{- range $images }}
-  {{ printf "container:%s" . | quote }},
-{{- end }}
-]
-
-{{- if .features.opencode }}
-
-[tasks.opkg]
-description = "Run opkg from the local openpackage directory"
-dir = "~/.openpackage/packages/local"
-run = "opkg"
-{{- end }}
 
 {{- if eq .os "linux" }}
 
 [tasks.timep]
+# alias = "tp"
 description = "Profile bash init with timep (call-stack tree)"
-run = "bash -c 'source ~/.local/share/timep.bash && timep +F -c \"source ~/.bashrc\"'"
 # shell = "bash"
 # run = 'source ~/.local/share/timep.bash && timep +F -c "source ~/.bashrc"'
+run = """
+bash -c 'source ~/.local/share/timep.bash && timep +F -c "source ~/.bashrc"'
+"""
 {{- end }}
 
 {{ includeTemplate "dot_config/mise/tools.toml.tmpl" . -}}
