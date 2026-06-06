@@ -1,5 +1,9 @@
 {{- if or .features.docker .features.podman -}}
-{{- $ctImages := output (joinPath .chezmoi.sourceDir ".." "script" "container") "--list-images" | trim | splitList "\n" -}}
+{{- $script := joinPath .chezmoi.sourceDir ".." "script" "container" -}}
+{{- $ctImages := list -}}
+{{- if stat $script -}}
+{{-   $ctImages = output $script "--list-images" | trim | splitList "\n" -}}
+{{- end -}}
 
 {{- range $ctImages -}}
 ["container:{{ . }}"]

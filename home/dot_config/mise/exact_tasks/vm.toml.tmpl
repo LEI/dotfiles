@@ -1,5 +1,9 @@
 {{- if or .features.docker .features.podman -}}
-{{- $vmImages := output (joinPath .chezmoi.sourceDir ".." "script" "vm") "--list-images" | trim | splitList "\n" -}}
+{{- $script := joinPath .chezmoi.sourceDir ".." "script" "vm" -}}
+{{- $vmImages := list -}}
+{{- if stat $script -}}
+{{-   $vmImages = output $script "--list-images" | trim | splitList "\n" -}}
+{{- end -}}
 
 {{- range $vmImages -}}
 ["virtual-machine:{{ . }}"]
