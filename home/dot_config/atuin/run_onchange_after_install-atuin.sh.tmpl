@@ -4,24 +4,20 @@
 
 set -eu
 
-. "$CHEZMOI_WORKING_TREE/home/.chezmoitemplates/helpers.sh"
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
 
-# ble.sh or bash-preexec is required for atuin in bash
-# https://docs.atuin.sh/guide/installation/
+{{- if .features.brew }}
 
-{{- if eq .osID "alpine" }}
-
-# if [ ! -f ~/.local/share/bash-preexec.sh ]; then
-#   curl -LSsfo ~/.local/share/bash-preexec.sh \
-#     https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+# if [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && ! command -v brew >/dev/null; then
+#   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 # fi
 {{- end }}
 
-# if command -v atuin; then
-#   echo "Already installed" >&2
 run atuin --version
-#   exit
-# fi
 
 {{- if not (empty (get (get .packages .packageManager) "atuin")) }}
 
