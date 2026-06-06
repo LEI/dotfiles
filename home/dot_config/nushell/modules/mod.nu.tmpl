@@ -1,8 +1,8 @@
 # Configuration modules
-{{ $dir := printf "%s/%s" .chezmoi.sourceDir .chezmoi.sourceFile | dir -}}
+{{ $dir := joinPath .chezmoi.sourceDir .chezmoi.sourceFile | dir -}}
 {{- /* $out := output "find" $dir "-name" "*.nu" "-print" | trim | splitList "\n" */ -}}
-{{ $files := glob (printf "%s/%s" $dir "*.nu") -}}
-{{ $templates := glob (printf "%s/%s" $dir "*.nu.tmpl") -}}
+{{ $files := glob (joinPath $dir "*.nu") -}}
+{{ $templates := glob (joinPath $dir "*.nu.tmpl") -}}
 {{ $modules := concat $files $templates | sortAlpha -}}
 {{ range $modules -}}
 {{ $name := . | base | replaceAllRegex "\\.tmpl$" "" -}}
