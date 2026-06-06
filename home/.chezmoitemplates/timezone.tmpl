@@ -1,0 +1,18 @@
+{{- $tz := env "TZ" -}}
+{{- if and (not $tz) (lookPath "sh" | isExecutable) -}}
+{{-   if and (eq .os "linux") (stat "/etc/timezone") -}}
+{{-     $tz = output "sh" "-c" "cat /etc/timezone" | trim -}}
+{{-   end -}}
+{{-   if and (not $tz) (eq .os "freebsd") (stat "/var/db/zoneinfo") -}}
+{{-     $tz = output "sh" "-c" "cat /var/db/zoneinfo" | trim -}}
+{{-   end -}}
+{{-   if and (not $tz) (lookPath "getprop" | isExecutable) -}}
+{{-     $tz = output "getprop" "persist.sys.timezone" | trim -}}
+{{-   end -}}
+{{-   if not $tz -}}
+{{-     $tz = output "sh" "-c" "readlink /etc/localtime 2>/dev/null | sed 's#.*/zoneinfo/##'" | trim -}}
+{{-   end -}}
+{{- end -}}
+{{- if not (empty $tz) }}
+{{- $tz }}
+{{ end -}}

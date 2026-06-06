@@ -1,17 +1,20 @@
 {{- $shell := get . "shell" }}
 {{- $init := list "bash" "zsh" }}
-{{- $ordered := list "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
-{{- if .features.brew }}
-{{-   $ordered = prepend $ordered "homebrew" }}
+{{- $orderedRaw := list "homebrew" "mise" "carapace" "direnv" "starship" "zoxide" "atuin" }}
+{{- $ordered := list }}
+{{- range $orderedRaw }}
+{{-   $feat := get $.featureMap . | default . }}
+{{-   $enabled := true }}
+{{-   if hasKey $.features $feat }}
+{{-     $enabled = get $.features $feat }}
+{{-   end }}
+{{-   if $enabled }}
+{{-     $ordered = append $ordered . }}
+{{-   end }}
 {{- end }}
-{{- $featureMap := dict
-  "claude" "ai"
-  "gem" "ruby"
-  "krew" "kube"
-  "npm" "node"
-  "nvim" "neovim"
-  "pi" "ai"
--}}
+{{- if ne $shell "zsh" -}}
+# shellcheck shell=bash
+{{ end -}}
 
 # Order matters: mise first, carapace before completions, starship before atuin
 for _tool in {{ $ordered | join " " }}; do
@@ -32,7 +35,7 @@ unset _tool
   {{- if has $name $exclude }}
   {{-   continue }}
   {{- end }}
-  {{- if not (get $.features (get $featureMap $name | default $name)) }}
+  {{- if not (get $.features (get $.featureMap $name | default $name)) }}
   {{-   continue }}
   {{- end }}
   {{- $files = append $files ($path | trimSuffix ".tmpl"
@@ -46,31 +49,11 @@ for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
     continue
   fi
   if hash bench_source 2>/dev/null; then
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     bench_source "$_feat"
   else
-    # shellcheck disable=SC1090
+    # shellcheck source=/dev/null
     source "$_feat"
   fi
 done
 unset _feat
-
-{{- if .features.rust }}
-
-# if [ -f "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
-#   . "${CARGO_HOME:-$HOME/.cargo}/env"
-# fi
-if [ -d "${CARGO_HOME:-$HOME/.cargo}/bin" ]; then
-  pathmunge "${CARGO_HOME:-$HOME/.cargo}/bin" after
-fi
-{{- end }}
-{{- if .features.go }}
-
-if [ -n "$GOPATH" ] && [ -d "$GOPATH/bin" ]; then
-  pathmunge "$GOPATH/bin" after
-fi
-{{- end }}
-
-if [ -d "$HOME/.nix-profile/bin" ]; then
-  pathmunge "$HOME/.nix-profile/bin" after
-fi

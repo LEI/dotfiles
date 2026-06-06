@@ -1,6 +1,6 @@
 {{- $contents := get . "contents" -}}
 {{- $stdin := get .chezmoi "stdin" -}}
-{{- $suffix := printf "%s/%s" (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile -}}
+{{- $suffix := joinPath (.chezmoi.sourceDir | replace .chezmoi.homeDir "~") .chezmoi.sourceFile -}}
 {{- $commentString := get . "commentString" | default "#" -}}
 {{- $prefix := printf "%[1]s%[1]s%[1]s" $commentString -}}
 {{- $before := $stdin | replaceAllRegex (printf "(?s)(\r?\n?)%[1]s START .*%[1]s END .*" $prefix) "${1}" -}}

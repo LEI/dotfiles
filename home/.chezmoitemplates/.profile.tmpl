@@ -1,7 +1,8 @@
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
-. "$XDG_CONFIG_HOME/sh/lib/export.sh"
-. "$XDG_CONFIG_HOME/sh/lib/pathmunge.sh"
+. "$HOME/.local/lib/sh/export.sh"
+. "$HOME/.local/lib/bash/pathmunge.sh"
 
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
@@ -9,12 +10,21 @@ fi
 
 if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
+  # local/: machine-local secrets, ignored by chezmoi; sourced last so they override
+  export_env "$XDG_CONFIG_HOME/secrets.d/local/"*.conf
 fi
 
-if [ -d "$HOME/.local/bin" ]; then
-  pathmunge "$HOME/.local/bin"
-fi
+# Order matters: homebrew first (brew shellenv hoists /opt/homebrew/bin above
+# /usr/bin); later prepends sit above; append-only tools come last.
+{{- range list "homebrew" "gem" "go" "cargo" "npm" "sh" "carapace" "krew" "nvim" }}
+{{-   $feat := get $.featureMap . | default . }}
+{{-   $enabled := true }}
+{{-   if hasKey $.features $feat }}
+{{-     $enabled = get $.features $feat }}
+{{-   end }}
+{{-   if $enabled }}
+[ -f "$XDG_CONFIG_HOME/{{ . }}/path.sh" ] && . "$XDG_CONFIG_HOME/{{ . }}/path.sh"
+{{-   end }}
+{{- end }}
 
-if [ -d "$HOME/bin" ]; then
-  pathmunge "$HOME/bin"
-fi
+export PATH
