@@ -1,6 +1,4 @@
-{{- if .name -}}
-NAME={{ .name | quote }}
-{{ end -}}
-{{- if .email -}}
-EMAIL={{ .email | quote }}
-{{ end -}}
+{{ includeTemplate "env-conf.tmpl" (dict "env" (dict
+  "NAME" .name
+  "EMAIL" .email
+)) | trim }}

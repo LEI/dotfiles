@@ -1,11 +1,15 @@
 # https://consented.io/do-not-track
 DO_NOT_TRACK=1
 
-{{- if and (eq .osIDLike "arch" "fedora") }}
-
-# Point curl (and brew openssl) at the system CA bundle so caddy .test certs are trusted
-{{- $caBundle := "/etc/pki/tls/certs/ca-bundle.crt" }}
-{{- if stat $caBundle }}
-CURL_CA_BUNDLE={{ $caBundle }}
+{{- $ca := "" }}
+{{- if stat "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" }}
+{{-   $ca = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" }}
+{{- else if stat "/etc/pki/tls/certs/ca-bundle.crt" }}
+{{-   $ca = "/etc/pki/tls/certs/ca-bundle.crt" }}
 {{- end }}
+{{- if $ca }}
+
+# System CA bundle for brew curl and Python (Fedora 44 removed ca-bundle.crt)
+CURL_CA_BUNDLE={{ $ca }}
+SSL_CERT_FILE={{ $ca }}
 {{- end }}
