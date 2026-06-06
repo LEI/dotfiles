@@ -28,7 +28,7 @@ if [ -f "$SECRETS_FILE" ]; then
 fi
 
 if [ -f "$AUTH_FILE" ] && command -v yq >/dev/null 2>&1; then
-  KEY=$(yq -r ".[\"${PLAN:-PROVIDER}\"].key" "$AUTH_FILE" 2>/dev/null)
+  KEY=$(yq -r ".[\"${PLAN:-$PROVIDER}\"].key" "$AUTH_FILE" 2>/dev/null)
   if [ "$KEY" != "null" ] && [ -n "$KEY" ]; then
     printf '%s' "$KEY"
     exit 0
