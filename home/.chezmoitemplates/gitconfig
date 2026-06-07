@@ -4,7 +4,7 @@
 {{- else -}}
   {{- $signingKey = includeTemplate "gpg-signing-key.tmpl" (dict "email" .email) | trim -}}
   {{- if not $signingKey -}}
-    {{- warnf (printf "gitconfig: signingkey not found for %s" .email) -}}
+    {{- fail (printf "gitconfig: signingkey not found for %s" .email) -}}
   {{- end -}}
 {{- end -}}
 

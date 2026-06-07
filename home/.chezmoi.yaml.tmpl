@@ -128,6 +128,23 @@
 # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
 {{- $libc := includeTemplate "libc.tmpl" . | trim }}
 
+{{- $mise := dict "interactive" false "version" "" -}}
+{{- with lookPath "mise" -}}
+{{-   $version := output "sh" "-c" (printf "MISE_QUIET=1 %q --version || true" .) | splitList " " | first -}}
+{{-   if $version -}}
+{{-     $_ := set $mise "version" $version -}}
+{{-     $_ := set $mise "interactive" (semverCompare ">=2026.3.4" $version) -}}
+{{-   end -}}
+{{- end -}}
+
+{{- $usage := dict "version" "" -}}
+{{- with lookPath "usage" -}}
+{{-   $version := output "usage" "--version" | trim -}}
+{{-   if $version -}}
+{{-     $_ := set $usage "version" $version -}}
+{{-   end -}}
+{{- end -}}
+
 {{- $featureMap := dict
   "cargo" "rust"
   "homebrew" "brew"
@@ -154,6 +171,7 @@
   "headless" $headless
   "hostname" $hostname
   "libc" $libc
+  "mise" $mise
   "os" .chezmoi.os
   "osID" $osID
   "osIDLike" $osIDLike
@@ -163,6 +181,7 @@
   "sessionType" (env "XDG_SESSION_TYPE")
   "softwareVersion" $softwareVersion
   "system" $system
+  "usage" $usage
   "variantID" $variantID
   "vm" $vm
   "wsl" $wsl

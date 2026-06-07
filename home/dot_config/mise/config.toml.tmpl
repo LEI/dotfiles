@@ -1,9 +1,3 @@
-{{- $miseInteractive := false -}}
-{{- with lookPath "mise" -}}
-{{-   $ver := output "sh" "-c" (printf "MISE_QUIET=1 %q --version || true" .) | splitList " " | first -}}
-{{-   if $ver }}{{ $miseInteractive = semverCompare ">=2026.3.4" $ver }}{{ end -}}
-{{- end -}}
-
 [task_config]
 includes = [
 {{- $ctx := . }}
@@ -25,7 +19,7 @@ disable_backends = ["asdf"]
 {{- else if eq .osID "darwin" }}
 # FIXME(darwin): HTTP status client error (403 rate limit exceeded)
 # https://mise.jdx.dev/troubleshooting.html#_403-forbidden-when-installing-a-tool
-disable_backends = ["aqua"]
+# disable_backends = ["aqua"]
 {{- end }}
 idiomatic_version_file_enable_tools = [
   # "bun",
@@ -59,7 +53,7 @@ description = {{ printf "Check %s" $feat | quote }}
 # file = {{ . | quote }}
 dir = {{ . | dir | quote }}
 run = {{ printf "bash ./%s \"$@\"" (. | base) | quote }}
-{{-   if $miseInteractive }}
+{{-   if $.mise.interactive }}
 interactive = true
 {{-   end }}
 {{- end }}
@@ -97,7 +91,7 @@ description = {{ printf "Update %s" $feat | quote }}
 dir = {{ . | dir | quote }}
 run = {{ . | base | quote }}
 shell = "sh"
-{{-   if $miseInteractive }}
+{{-   if $.mise.interactive }}
 interactive = true
 {{-   end }}
 {{- end }}

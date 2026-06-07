@@ -7,31 +7,31 @@
 {{- $pkg := joinPath .chezmoi.sourceDir "dot_openpackage/packages/exact_local" -}}
 {{- $hashes := list -}}
 {{- range glob (joinPath $pkg "**/*.md") -}}
-{{- $hashes = append $hashes (include . | sha256sum) -}}
+{{-   $hashes = append $hashes (include . | sha256sum) -}}
 {{- end }}
 # local: {{ join "\n" $hashes | sha256sum }}
 
 {{- $mktHashes := list -}}
 {{- range $entry := includeTemplate "opkg-marketplace-packages.tmpl" . | fromJson -}}
-{{- range glob (joinPath $entry.src "**/*.md") -}}
-{{- $mktHashes = append $mktHashes (include . | sha256sum) -}}
-{{- end -}}
+{{-   range glob (joinPath $entry.src "**/*.md") -}}
+{{-     $mktHashes = append $mktHashes (include . | sha256sum) -}}
+{{-   end -}}
 {{- end }}
 # marketplace sources: {{ join "\n" $mktHashes | sha256sum }}
 
 {{- $installed := list -}}
 {{- if .features.claude -}}
-{{- range glob (joinPath .chezmoi.homeDir ".claude/rules/**/*.md") -}}
-{{- $installed = append $installed (include . | sha256sum) -}}
-{{- end -}}
-{{- range glob (joinPath .chezmoi.homeDir ".claude/agents/*.md") -}}
-{{- $installed = append $installed (include . | sha256sum) -}}
-{{- end -}}
+{{-   range glob (joinPath .chezmoi.homeDir ".claude/rules/**/*.md") -}}
+{{-     $installed = append $installed (include . | sha256sum) -}}
+{{-   end -}}
+{{-   range glob (joinPath .chezmoi.homeDir ".claude/agents/*.md") -}}
+{{-     $installed = append $installed (include . | sha256sum) -}}
+{{-   end -}}
 {{- end -}}
 {{- if .features.opencode -}}
-{{- range glob (joinPath .chezmoi.homeDir ".config/opencode/agents/*.md") -}}
-{{- $installed = append $installed (include . | sha256sum) -}}
-{{- end -}}
+{{-   range glob (joinPath .chezmoi.homeDir ".config/opencode/agents/*.md") -}}
+{{-     $installed = append $installed (include . | sha256sum) -}}
+{{-   end -}}
 {{- end }}
 # installed: {{ join "\n" $installed | sha256sum }}
 

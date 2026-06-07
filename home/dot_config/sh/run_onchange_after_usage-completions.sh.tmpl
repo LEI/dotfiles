@@ -34,7 +34,13 @@
 #!{{ .prefix }}/usr/bin/env bash
 
 # Generate shell completions for scripts with #USAGE directives
-# hash: {{ $dict | toJson | sha256sum }} usage={{ output "usage" "--version" | trim }} mise={{ output "mise" "version" | trim | splitList " " | first }}
+# hash: {{ $dict | toJson | sha256sum }}
+{{- with .mise.version }}
+# mise: {{ . }}
+{{- end }}
+{{- with .usage.version }}
+# usage: {{ . }}
+{{- end }}
 
 set -euo pipefail
 
