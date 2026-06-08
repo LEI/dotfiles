@@ -20,8 +20,8 @@ has() {
 }
 
 lint() {
-  # Templates: markdownlint and shellcheck cannot parse chezmoi template syntax.
-  # The repo's lint-templates hook covers them instead, via repo_checks below.
+  # Templates: markdownlint and shellcheck cannot parse chezmoi template syntax;
+  # the commit-time hooks cover them instead.
   case "$FILE" in
   *.chezmoitemplates/* | */modify_* | *.tmpl) return 0 ;;
   esac
@@ -57,35 +57,9 @@ lint() {
   esac
 }
 
-# Run the file's own repo hooks (prek, else pre-commit) to catch checks the
-# baseline misses. --files scopes hooks to this one file; snapshot and revert it
-# so a fixer hook cannot make lint mutate the file.
-repo_checks() {
-  prek=$(command -v prek || command -v pre-commit) || return 0
-  root=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null) || return 0
-  [ -f "$root/.pre-commit-config.yaml" ] || return 0
-
-  rel=${FILE#"$root"/}
-  snapshot=$(mktemp) || return 0
-  cp "$FILE" "$snapshot"
-
-  (cd "$root" && "$prek" run --files "$rel" --quiet) >&2
-  rc=$?
-
-  if ! cmp -s "$FILE" "$snapshot"; then
-    cp "$snapshot" "$FILE"
-  fi
-  rm -f "$snapshot"
-  return "$rc"
-}
-
-lint
-lint_rc=$?
-repo_checks
-repo_rc=$?
-exit_code=$lint_rc
-[ "$repo_rc" -ne 0 ] && exit_code=$repo_rc
-if [ "$exit_code" -ne 0 ]; then
-  echo "lint: $(basename "$FILE") failed (exit $exit_code)" >&2
+# prek has no read-only mode, so repo hooks are not run here; the commit-time
+# hook run is the gate for them. This pass only reports, never modifies.
+if ! lint; then
+  echo "lint: $(basename "$FILE") failed" >&2
   exit 2
 fi

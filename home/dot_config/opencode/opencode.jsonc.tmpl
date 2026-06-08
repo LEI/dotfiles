@@ -125,6 +125,10 @@
       "find * -exec*": "ask",
       "find * -fprint*": "ask",
       "find * -ok*": "ask",
+      "find -delete*": "ask",
+      "find -exec*": "ask",
+      "find -fprint*": "ask",
+      "find -ok*": "ask",
 
       // "git *": "ask",
       "git check-ignore *": "allow",
@@ -158,13 +162,12 @@
       "rm *": "ask",
 
       "sed *": "allow",
-      {{- if true }}
       "sed * -i*": "ask",
       "sed -i*": "ask",
-      {{- else }}
       "sed * -I*": "ask",
       "sed -I*": "ask",
-      {{- end }}
+      "sed * --in-place*": "ask",
+      "sed --in-place*": "ask",
 
       "sha256sum *": "allow",
       "sleep *": "allow",
@@ -172,6 +175,8 @@
       "sort *": "allow",
       "sort * -o*": "ask",
       "sort * --output*": "ask",
+      "sort -o*": "ask",
+      "sort --output*": "ask",
 
       "ss *": "allow",
       "stat *": "allow",
@@ -220,11 +225,20 @@
       {{- end }}
 
       "jq *": "allow",
+      "jq * --null-input*": "ask",
+      "jq * -n*": "ask",
+      "jq --null-input*": "ask",
+      "jq -n*": "ask",
+      "jq 'env*'": "ask",
+      "jq env*": "ask",
 
       "fd *": "allow",
       "fd * --exec*": "ask",
       "fd * -X*": "ask",
       "fd * -x*": "ask",
+      "fd --exec*": "ask",
+      "fd -X*": "ask",
+      "fd -x*": "ask",
 
       "gh *": "ask",
       "gh issue list *": "allow",
@@ -258,12 +272,18 @@
       "glab repo view *": "allow",
 
       "sq *": "allow",
-      "sq * -o*": "ask",
-      "sq * --output*": "ask",
+      {{- $tails := list "-o*" "--output*" "--insert*" "tbl *" }}
+      {{- range $verb := list "ALTER" "CREATE" "DELETE" "DROP" "INSERT" "TRUNCATE" "UPDATE" }}{{ $tails = append $tails (printf "sql *%s*" $verb) }}{{ end }}
+      {{- range $tail := $tails }}
+      "sq {{ $tail }}": "ask",
+      "sq * {{ $tail }}": "ask",
+      {{- end }}
 
       "yq *": "allow",
       "yq * -i*": "ask",
-      "yq * --inplace*": "ask"
+      "yq * --inplace*": "ask",
+      "yq -i*": "ask",
+      "yq --inplace*": "ask"
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",

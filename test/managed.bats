@@ -36,6 +36,33 @@ setup() {
   assert_success
 }
 
+# bats test_tags=claude
+@test "claude: no MCP servers undefined in chezmoi" {
+  check_feature claude
+  check_command jq chezmoi
+  [ -f "$HOME/.claude.json" ] || skip "no .claude.json"
+
+  local defined name
+  local orphans=()
+  defined=$(chezmoi execute-template --no-tty \
+    '{{ (includeTemplate "mcp.jsonc" . | fromJsonc).servers | keys | toJson }}') ||
+    fail "failed to render mcp.jsonc"
+
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    [ "$(jq --arg n "$name" 'index($n) != null' <<<"$defined")" = true ] ||
+      orphans+=("$name")
+  done < <(jq -r '.mcpServers // {} | keys[]' "$HOME/.claude.json")
+
+  [ ${#orphans[@]} -eq 0 ] && return 0
+
+  local cmds=""
+  for name in "${orphans[@]}"; do
+    cmds="${cmds}claude mcp remove \"$name\""$'\n'
+  done
+  fail "MCP servers not in mcp.jsonc:"$'\n'"$cmds"
+}
+
 # bats test_tags=neovim
 @test "nvim: no unmanaged files" {
   check_feature neovim

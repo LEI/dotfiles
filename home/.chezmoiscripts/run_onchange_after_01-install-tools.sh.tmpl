@@ -26,7 +26,7 @@ set -- "$@" --yes
 
 {{- if .upgrade }}
 
-if [ "$(mise doctor --json | jq .self_update_available)" = true ]; then
+if has jq && [ "$(mise doctor --json | jq .self_update_available)" = true ]; then
   dry_run timeout 5m mise self-update --yes
 fi
 {{- end }}
@@ -44,7 +44,7 @@ msg "Installing tools"
 # fi
 
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "before_script" "values" .packages.mise) }}
-dry_run timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
+dry_run retry 3 10 timeout 5m mise {{ if .upgrade }}upgrade{{ else }}install{{ end }} "$@"
 {{- includeTemplate "package-hooks.tmpl" (dict "key" "after_script" "values" .packages.mise) }}
 msg "Installed tools"
 
