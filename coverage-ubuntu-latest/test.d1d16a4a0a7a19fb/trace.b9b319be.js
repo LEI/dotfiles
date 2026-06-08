@@ -39,11 +39,11 @@ var data = {lines:[
 {"lineNum":"   38","line":"    sed \"s|$HOME|~|g\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   39","line":"  ;;"},
 {"lineNum":"   40","line":"*)"},
-{"lineNum":"   41","line":"  echo \"trace: invalid shell \'$shell\', expected bash or zsh\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   41","line":"  echo \"${0##*/}: invalid shell \'$shell\', expected bash or zsh\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   42","line":"  exit 2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   43","line":"  ;;"},
 {"lineNum":"   44","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-21 05:14:04", "instrumented" : 18, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-06-08 18:58:52", "instrumented" : 18, "covered" : 0,};
 var merged_data = [];

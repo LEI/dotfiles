@@ -25,16 +25,16 @@ var data = {lines:[
 {"lineNum":"   24","line":"  elif command -v unbound-control >/dev/null; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   25","line":"    sudo unbound-control flush_zone .","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   26","line":"  else"},
-{"lineNum":"   27","line":"    echo \"flush-dns: no supported resolver found\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   27","line":"    echo \"${0##*/}: no supported resolver found\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   28","line":"    exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   29","line":"  fi"},
 {"lineNum":"   30","line":"  ;;"},
 {"lineNum":"   31","line":"*)"},
-{"lineNum":"   32","line":"  echo \"flush-dns: unsupported OS\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   32","line":"  echo \"${0##*/}: unsupported OS\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   33","line":"  exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   34","line":"  ;;"},
 {"lineNum":"   35","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-21 05:17:05", "instrumented" : 18, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-06-08 18:59:40", "instrumented" : 18, "covered" : 0,};
 var merged_data = [];

@@ -7,7 +7,7 @@ var data = {lines:[
 {"lineNum":"    6","line":""},
 {"lineNum":"    7","line":"set -eu","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    8","line":""},
-{"lineNum":"    9","line":"msg() { echo \"webhook-notify: $*\" >&2; }"},
+{"lineNum":"    9","line":"msg() { echo \"${0##*/}: $*\" >&2; }"},
 {"lineNum":"   10","line":""},
 {"lineNum":"   11","line":"notify() {"},
 {"lineNum":"   12","line":"  _title=\"$1\" _subtitle=\"$2\" _message=\"$3\" _url=\"${4:-}\" _sound=\"${5:-Ping}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -99,5 +99,5 @@ var data = {lines:[
 {"lineNum":"   98","line":"notify \"$title\" \"$subtitle\" \"$message\" \"$url\" \"$sound\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-04-21 05:17:05", "instrumented" : 56, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-06-08 18:59:40", "instrumented" : 56, "covered" : 0,};
 var merged_data = [];
