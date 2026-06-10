@@ -26,6 +26,9 @@
     {{- end }}
     "dockBounceEnabled": true,
     "coworkWebSearchEnabled": true,
+    {{- with get $preferences "coworkModelAutoFallbackByAccount" }}
+    "coworkModelAutoFallbackByAccount": {{ . | toPrettyJson | indent 4 | trim }},
+    {{- end }}
     "keepAwakeEnabled": false,
     {{- with get $preferences "remoteToolsDeviceName" }}
     "remoteToolsDeviceName": {{ . | quote }},
@@ -33,9 +36,6 @@
     "ccRemoteControlDefaultEnabled": false
     {{- with get $preferences "epitaxyPrefs" }},
     "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
-    {{- end }}
-    {{- with get $preferences "coworkModelAutoFallbackByAccount" }},
-    "coworkModelAutoFallbackByAccount": {{ . | toPrettyJson | indent 4 | trim }}
     {{- end }}
     {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [

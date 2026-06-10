@@ -18,6 +18,7 @@ metrics
 paste-cache
 policy-limits.json
 projects
+remote-settings.json
 security_warnings_state_*.json
 session-data
 session-env
@@ -37,6 +38,7 @@ scripts
 
 # Plugin system runtime (Claude Code plugin manager)
 plugins/.install-manifests
+plugins/.last_inuse_sweep
 plugins/blocklist.json
 plugins/cache
 plugins/claude-dashboard
