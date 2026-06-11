@@ -255,7 +255,9 @@ services:
       - -c
       - >
         sed -i 's|ignorePatterns: \[|ignorePatterns: [".git", "**/*.tmp*", |' quartz.config.ts &&
-        exec npx quartz build --serve --port 8080
+        npx quartz build &&
+        exec npx serve /usr/src/app/public --listen 8080 --single
+        # exec npx quartz build --serve --port 8080
     ports:
       - "127.0.0.1:4321:8080" # Web UI
       - "::1:4321:8080"
