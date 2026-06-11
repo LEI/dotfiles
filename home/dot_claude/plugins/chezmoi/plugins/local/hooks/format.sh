@@ -53,24 +53,10 @@ case "$FILE" in
     PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
     if [ -n "$PROJECT_ROOT" ]; then
       REL=${FILE#"$PROJECT_ROOT"/}
-      (cd "$PROJECT_ROOT" && yamlfmt -dstar "$REL") >/dev/null 2>&1
+      (cd "$PROJECT_ROOT" && yamlfmt -dstar "$REL") >/dev/null
     else
-      yamlfmt -dstar "$FILE" >/dev/null 2>&1
+      yamlfmt -dstar "$FILE" >/dev/null
     fi
   fi
   ;;
 esac
-
-# Run the repo's hooks for this file so fixers reformat in place. Output and the
-# non-zero exit on modified files are dropped, since reformatting is the goal
-# (prek only).
-repo_hooks() {
-  prek=$(command -v prek) || return 0
-  root=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null) || return 0
-  [ -f "$root/.pre-commit-config.yaml" ] || return 0
-
-  rel=${FILE#"$root"/}
-  (cd "$root" && "$prek" run --files "$rel" --quiet) >/dev/null 2>&1 || true
-}
-
-repo_hooks
