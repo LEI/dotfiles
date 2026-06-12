@@ -42,7 +42,13 @@
 {{-     $name = printf "%s@%s" $name $version -}}
 {{-   end -}}
 
-{{-   $type := get $pkg "type"  | trim }}
+{{-   $managers := get $pkg "managers" -}}
+{{-   $type := "" -}}
+{{-   if $managers -}}
+{{-     $type = coalesce (get $managers $.osIDLike) (get $managers $.osID) (get $managers "_default") | default "" -}}
+{{-   else -}}
+{{-     $type = get $pkg "type" | trim -}}
+{{-   end -}}
 {{-   if or (empty $type) (eq $type "nil" "null" "<no value>") }}
 {{-     $type = $defaultType }}
 {{-   end }}
@@ -81,7 +87,7 @@
 {{-         warnf "filter-packages: %s package part diff %s: %s -> %s" $packageType $part $existing $pkg -}}
 {{-       end */ -}}
 {{-     end -}}
-{{-     $_ := set $output $part (omit $pkg "enabled" "name" "nameOverwrite" "type") }}
+{{-     $_ := set $output $part (omit $pkg "enabled" "managers" "name" "nameOverwrite" "type") }}
 {{-   end }}
 
 {{- end }}
