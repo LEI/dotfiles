@@ -1,26 +1,27 @@
 #!/bin/sh
 
-# Edit-time gate so a real check failure blocks now, not at commit
-# Disable with CLAUDE_HOOK_CHECK_DISABLED=1
+# Gate the repo's own pre-commit checks at edit time, before commit
 [ "${CLAUDE_HOOK_CHECK_DISABLED:-0}" = "1" ] && exit 0
-
-# Sandboxed child processes may fail to resolve cwd
-cd "$(dirname "$0")" 2>/dev/null || cd /tmp || exit 0
 
 FILE=$(jq -r '.tool_input.file_path // empty')
 [ -n "$FILE" ] || exit 0
 [ -f "$FILE" ] || exit 0
 
-runner=$(command -v prek || command -v pre-commit) || exit 0
 root=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null) || exit 0
 [ -f "$root/.pre-commit-config.yaml" ] || exit 0
+
+# prek matches files relative to the repo root
+if ! cd "$root" 2>/dev/null; then
+  echo "check: cannot enter repo root $root" >&2
+  exit 1
+fi
+runner=$(command -v prek || command -v pre-commit) || exit 0
 rel=${FILE#"$root"/}
 
-# A fixer rewrite and a real failure both exit non-zero, so block only when the
-# run left the file unchanged; a rewrite means it was auto-fixed, not failing
+# Both exit non-zero; only an unchanged file is a real failure, a rewrite was auto-fixed
 snapshot=$(mktemp) || exit 0
 cp "$FILE" "$snapshot"
-out=$(cd "$root" && "$runner" run --files "$rel" 2>&1)
+out=$("$runner" run --files "$rel" 2>&1)
 status=$?
 
 if [ "$status" -eq 0 ]; then

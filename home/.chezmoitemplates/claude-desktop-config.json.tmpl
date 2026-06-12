@@ -19,6 +19,7 @@
     "launchPreviewPersistedWorkspaces": [],
     "dispatchCodeTasksPermissionMode": "default",
     "coworkScheduledTasksEnabled": true,
+    "coworkHipaaRestricted": false,
     "ccdScheduledTasksEnabled": true,
     "sidebarMode": "epitaxy",
     {{- with get $preferences "bypassPermissionsGateByAccount" }}
@@ -33,11 +34,10 @@
     {{- with get $preferences "remoteToolsDeviceName" }}
     "remoteToolsDeviceName": {{ . | quote }},
     {{- end }}
-    "ccRemoteControlDefaultEnabled": false,
-    {{- with get $preferences "epitaxyPrefs" }}
-    "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }},
+    "ccRemoteControlDefaultEnabled": false
+    {{- with get $preferences "epitaxyPrefs" }},
+    "epitaxyPrefs": {{ . | toPrettyJson | indent 4 | trim }}
     {{- end }}
-    "coworkHipaaRestricted": false
     {{- if eq .osIDLike "fedora" }},
     "localAgentModeTrustedFolders": [
       "/usr/lib/claude-desktop/node_modules/electron/dist/resources/app.asar"

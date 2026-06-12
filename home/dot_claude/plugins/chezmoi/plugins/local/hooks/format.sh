@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# Sandboxed child processes may fail to resolve cwd
-if ! cd "$(dirname "$0")" 2>/dev/null; then
-  echo "format: cwd fallback to /tmp" >&2
-  cd /tmp || exit
-fi
-
 FILE=$(jq -r '.tool_input.file_path // empty')
 if [ -z "$FILE" ] || ! [ -f "$FILE" ]; then
   exit 0
@@ -14,6 +8,12 @@ fi
 case "$FILE" in
 *.chezmoitemplates/* | */modify_* | *.tmpl) exit 0 ;;
 esac
+
+# Repo root for repo-pinned tooling; abs paths let /tmp serve as fallback
+root=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+if ! cd "${root:-$(dirname "$FILE")}" 2>/dev/null; then
+  cd /tmp || exit 1
+fi
 
 has() {
   command -v "$1" >/dev/null

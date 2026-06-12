@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# Sandboxed child processes may fail to resolve cwd
-if ! cd "$(dirname "$0")" 2>/dev/null; then
-  echo "lint: cwd fallback to /tmp" >&2
-  cd /tmp || exit
-fi
-
 FILE=$(jq -r '.tool_input.file_path // empty')
 if [ -z "$FILE" ]; then
   exit 0
@@ -13,6 +7,12 @@ fi
 if ! [ -f "$FILE" ]; then
   echo "lint: file not found: $FILE" >&2
   exit 2
+fi
+
+# Repo root for repo-pinned tooling; abs paths let /tmp serve as fallback
+root=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+if ! cd "${root:-$(dirname "$FILE")}" 2>/dev/null; then
+  cd /tmp || exit 1
 fi
 
 has() {
