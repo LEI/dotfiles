@@ -9,11 +9,12 @@ packages:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" "windows" }}'
     nameOverwrite:
       mise: npm:@anthropic-ai/claude-code
+      npm: "@anthropic-ai/claude-code"
       winget: Anthropic.ClaudeCode
     managers:
       arch: aur
       windows: winget
-      _default: mise
+      _default: '{{ .features.mise | ternary "mise" "npm" }}'
 
   claude-desktop:
     enabled: '{{ and .gui (eq .osIDLike "darwin" "fedora" "windows") }}'

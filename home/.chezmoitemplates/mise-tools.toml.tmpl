@@ -1,0 +1,17 @@
+[tools]
+{{- range $name, $pkg := .packages.mise }}
+{{-   $segments := $name | splitList "@" }}
+{{-   $lastSeg := $segments | last }}
+{{-   $hasVersionSuffix := and (contains "@" $name) (not (contains "/" $lastSeg)) }}
+{{-   $parts := $hasVersionSuffix | ternary
+  (list ($segments | initial | join "@") $lastSeg)
+  (list $name (get $pkg "version" | default "latest")) }}
+{{-   $name = index $parts 0 }}
+{{-   $version := index $parts 1 }}
+{{-   $key := contains ":" $name | ternary ($name | quote) $name }}
+{{-   if hasPrefix "npm:" $name }}
+{{   $key }} = { version = {{ $version | quote }}, npm_args = "--ignore-scripts=false" }
+{{-   else }}
+{{   $key }} = {{ $version | quote }}
+{{-   end }}
+{{- end }}

@@ -18,7 +18,7 @@ packages:
   git-absorb:
     enabled: '{{ and (not .vm) (not (and (eq .osID "android" "ubuntu") (le (float64 .osVersion) 20.04))) }}'
     nameOverwrite:
-      mise: aqua:tummychow/git-absorb
+      mise: github:tummychow/git-absorb
       windows: tummychow.git-absorb
     type: '{{ and (ge (int .osVersion) 44) (eq .osID "fedora") | ternary "mise" nil }}'
   # git-cal:
