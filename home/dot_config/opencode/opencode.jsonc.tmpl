@@ -1,15 +1,14 @@
 {{- $opencode := get . "opencode" | default dict -}}
 {{- $server := get $opencode "server" | default dict -}}
 {{- $kbPaths := includeTemplate "kb-paths.tmpl" . | fromJson -}}
-{{- $kbHome := .chezmoi.homeDir -}}
 {{- $kbDirs := list -}}
 {{- if $kbPaths -}}
 {{-   $kbDirs = append $kbDirs "~/kb" -}}
 {{- end -}}
 {{- range $kbPaths -}}
 {{-   $r := .real -}}
-{{-   if hasPrefix $kbHome $r -}}
-{{-     $r = printf "~%s" (trimPrefix $kbHome $r) -}}
+{{-   if hasPrefix $.chezmoi.homeDir $r -}}
+{{-     $r = printf "~%s" (trimPrefix $.chezmoi.homeDir $r) -}}
 {{-   end -}}
 {{-   $kbDirs = append $kbDirs $r -}}
 {{- end -}}
@@ -37,7 +36,7 @@
 {{- end -}}
 {
   "$schema": "https://opencode.ai/config.json",
-  "autoupdate": "notify", // false,
+  "autoupdate": false, // "notify",
   "model": {{ $model | quote }},
   "small_model": {{ $smallModel | quote }},
   "default_agent": "plan",
@@ -48,11 +47,12 @@
   // https://opencode.ai/docs/rules/#using-opencodejson
   "instructions": [
     // ".cursor/rules/*.md",
-    "{{ .chezmoi.homeDir }}/.config/opencode/rules/**/*.md",
-    "CONTRIBUTING.md",
+    "~/.config/opencode/AGENTS.md",
+    "~/.config/opencode/rules/**/*.md",
+    // "CONTRIBUTING.md",
     // "docs/development-standards.md",
     // "docs/guidelines.md",
-    "packages/*/AGENTS.md"
+    // "packages/*/AGENTS.md"
     // "test/testing-guidelines.md",
   ],
   // Plugin manager: https://github.com/kdcokenny/ocx
@@ -125,6 +125,10 @@
       "find * -exec*": "ask",
       "find * -fprint*": "ask",
       "find * -ok*": "ask",
+      "find -delete*": "ask",
+      "find -exec*": "ask",
+      "find -fprint*": "ask",
+      "find -ok*": "ask",
 
       // "git *": "ask",
       "git check-ignore *": "allow",
@@ -158,13 +162,12 @@
       "rm *": "ask",
 
       "sed *": "allow",
-      {{- if true }}
       "sed * -i*": "ask",
       "sed -i*": "ask",
-      {{- else }}
       "sed * -I*": "ask",
       "sed -I*": "ask",
-      {{- end }}
+      "sed * --in-place*": "ask",
+      "sed --in-place*": "ask",
 
       "sha256sum *": "allow",
       "sleep *": "allow",
@@ -172,6 +175,8 @@
       "sort *": "allow",
       "sort * -o*": "ask",
       "sort * --output*": "ask",
+      "sort -o*": "ask",
+      "sort --output*": "ask",
 
       "ss *": "allow",
       "stat *": "allow",
@@ -220,11 +225,20 @@
       {{- end }}
 
       "jq *": "allow",
+      "jq * --null-input*": "ask",
+      "jq * -n*": "ask",
+      "jq --null-input*": "ask",
+      "jq -n*": "ask",
+      "jq 'env*'": "ask",
+      "jq env*": "ask",
 
       "fd *": "allow",
       "fd * --exec*": "ask",
       "fd * -X*": "ask",
       "fd * -x*": "ask",
+      "fd --exec*": "ask",
+      "fd -X*": "ask",
+      "fd -x*": "ask",
 
       "gh *": "ask",
       "gh issue list *": "allow",
@@ -238,6 +252,7 @@
       "gh pr view *": "allow",
       "gh release list *": "allow",
       "gh release view *": "allow",
+      "gh repo list *": "allow",
       "gh repo view *": "allow",
       "gh run list *": "allow",
       "gh run view *": "allow",
@@ -254,16 +269,23 @@
       "glab mr view *": "allow",
       "glab pipeline get *": "allow",
       "glab pipeline list *": "allow",
+      "glab repo list *": "allow",
       "glab repo search *": "allow",
       "glab repo view *": "allow",
 
       "sq *": "allow",
-      "sq * -o*": "ask",
-      "sq * --output*": "ask",
+      {{- $tails := list "-o*" "--output*" "--insert*" "tbl *" }}
+      {{- range $verb := list "ALTER" "CREATE" "DELETE" "DROP" "INSERT" "TRUNCATE" "UPDATE" }}{{ $tails = append $tails (printf "sql *%s*" $verb) }}{{ end }}
+      {{- range $tail := $tails }}
+      "sq {{ $tail }}": "ask",
+      "sq * {{ $tail }}": "ask",
+      {{- end }}
 
       "yq *": "allow",
       "yq * -i*": "ask",
-      "yq * --inplace*": "ask"
+      "yq * --inplace*": "ask",
+      "yq -i*": "ask",
+      "yq --inplace*": "ask"
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",
