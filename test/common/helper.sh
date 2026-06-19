@@ -115,12 +115,13 @@ run_src() {
 # Run a script with stderr separation
 run_script() {
   local file="$1"
+  local tmp_file=""
   shift
   if [[ "$file" = */executable_* ]]; then
     local name="${file##*/}"
     local tmp_dir
     tmp_dir="$(mktemp -d "$BATS_TEST_TMPDIR/XXXXXX")"
-    local tmp_file="$tmp_dir/${name#executable_}"
+    tmp_file="$tmp_dir/${name#executable_}"
     cat >"$tmp_file" <"$file"
   fi
   set -- "${tmp_file:-$file}" "$@"
@@ -154,6 +155,61 @@ no_unmanaged() {
   assert_success
   refute_output
 }
+
+# Assert each directory plugin's install cache matches its deployed source.
+# Plugins deployed at <base>/<mkt>/plugins/<plugin>/ are copied to
+# <base>/cache/<mkt>/<plugin>/<version>/ at install time. chezmoi apply does not
+# refresh that cache, so a renamed or edited file keeps running stale until the
+# plugin is reinstalled. Mirrors no_unmanaged: pass a base, it asserts.
+assert_plugin_cache_fresh() {
+  local base="$1"
+  [ -d "$base/cache" ] || skip "no plugin cache: $base/cache"
+  run plugin_cache_drift "$base"
+  assert_success
+  refute_output
+}
+
+# Print cache-vs-source drift for every directory plugin under a plugins base.
+# No output means every cache copy matches its deployed source. Per stale plugin:
+# a copy-pastable refresh command, then one labelled line per file (changed, missing
+# from the cache, or orphaned in the cache), each relative to the plugin dir.
+# Subshell body keeps nullglob local to the call.
+plugin_cache_drift() (
+  local base="$1" src cache mkt plugin id line name rel label report
+  shopt -s nullglob
+  for src in "$base"/*/plugins/*/; do
+    src="${src%/}"
+    [ -d "$src/.claude-plugin" ] || continue
+    plugin="${src##*/}"
+    mkt="${src%/plugins/*}" mkt="${mkt##*/}"
+    id="$plugin@$mkt"
+    for cache in "$base/cache/$mkt/$plugin"/*/; do
+      cache="${cache%/}"
+      report=""
+      while IFS= read -r line; do
+        case "$line" in
+        "Files $src/"*)
+          rel="${line#Files "$src"/}"
+          report+="  changed: ${rel% and *}"$'\n'
+          ;;
+        "Only in $src"* | "Only in $cache"*)
+          rel="${line#Only in }" name="${line##*: }" rel="${rel%: *}"
+          case "$rel" in
+          "$src"*) label=missing rel="${rel#"$src"}" ;;
+          *) label=orphan rel="${rel#"$cache"}" ;;
+          esac
+          rel="${rel#/}"
+          report+="  $label: ${rel:+$rel/}$name"$'\n'
+          ;;
+        esac
+      done < <(diff --brief --recursive --exclude=.in_use --exclude=.DS_Store "$src" "$cache")
+      [ -n "$report" ] || continue
+      printf '%s: cache out of sync with deployed source, refresh with:\n' "$id"
+      printf 'claude plugin uninstall %s && claude plugin install %s\n' "$id" "$id"
+      printf '%s' "$report"
+    done
+  done
+)
 
 # Discover rule dirs by structural convention: dirs containing symlinks
 # targeting */packages/*/rules. Agnostic to tool name.

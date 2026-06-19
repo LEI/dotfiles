@@ -99,3 +99,21 @@ setup() {
   assert_output --partial "total"
   assert_success
 }
+
+# bats test_tags=type:unit
+@test "profile: bounds and surfaces init stderr without flooding the trace" {
+  check_command bash
+  local fakehome="$BATS_TEST_TMPDIR/fakehome"
+  mkdir -p "$fakehome"
+  # Repro: a "|" line in init stderr must not be read as a regex and dump the trace
+  cat >"$fakehome/.bashrc" <<'RC'
+for _ in $(seq 1 300); do :; done
+printf 'WARN failed to parse manifest:\n  |\nmissing field short\n' >&2
+RC
+
+  HOME="$fakehome" run_script ./script/profile bash
+
+  assert_failure
+  assert_stderr --partial "missing field short"
+  [ "${#stderr_lines[@]}" -lt 60 ] || fail "init stderr not bounded: ${#stderr_lines[@]} lines"
+}
