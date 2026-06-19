@@ -49,7 +49,9 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "cleanupPeriodDays": 365,
   "env": {
+    {{- if .features.otel }}
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    {{- end }}
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     {{- if not (empty $subagent) }}
     "CLAUDE_CODE_SUBAGENT_MODEL": {{ $subagent | quote }},
@@ -79,6 +81,7 @@
     "ENABLE_TOOL_SEARCH": "true",
     "MAX_THINKING_TOKENS": "8000",
     "MCP_CONNECTION_NONBLOCKING": "true",
+{{- if .features.otel }}
 {{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
 {{- $keys := keys $otel | sortAlpha -}}
 {{- range $i, $key := $keys -}}
@@ -87,6 +90,7 @@
 {{- end }},
     "OTEL_LOG_TOOL_DETAILS": "1",
     "OTEL_LOG_USER_PROMPTS": "1",
+{{- end }}
     "XDG_CACHE_HOME": {{ joinPath .chezmoi.homeDir ".cache" | quote }},
     "XDG_CONFIG_HOME": {{ joinPath .chezmoi.homeDir ".config" | quote }},
     "XDG_DATA_HOME": {{ joinPath .chezmoi.homeDir ".local/share" | quote }},
@@ -133,6 +137,7 @@
       "Bash(gh pr view *)",
       "Bash(gh release list *)",
       "Bash(gh release view *)",
+      "Bash(gh repo list *)",
       "Bash(gh repo view *)",
       "Bash(gh run list *)",
       "Bash(gh run view *)",
@@ -166,8 +171,9 @@
       "Bash(glab mr view *)",
       "Bash(glab pipeline get *)",
       "Bash(glab pipeline list *)",
-      "Bash(glab repo view *)",
+      "Bash(glab repo list *)",
       "Bash(glab repo search *)",
+      "Bash(glab repo view *)",
       "Bash(grep *)",
       "Bash(head *)",
       "Bash(jq *)",
@@ -230,10 +236,7 @@
       "mcp__context7__*",
       "mcp__deep-wiki__*",
       "mcp__grafana__*",
-      "mcp__grafana-admin__get_*",
-      "mcp__grafana-admin__list_*",
-      "mcp__grafana-admin__search_*",
-      "mcp__grafana-admin__generate_*",
+      "mcp__grafana-admin__*",
       "mcp__grep_app__*",
       "mcp__open-notebook__*"
     ],
@@ -281,25 +284,32 @@
       "Bash(find -exec*)",
       "Bash(find -fprint*)",
       "Bash(find -ok*)",
+      "Bash(jq * --null-input*)",
+      "Bash(jq * -n*)",
+      "Bash(jq --null-input*)",
+      "Bash(jq -n*)",
+      "Bash(jq 'env*')",
+      "Bash(jq env*)",
       "Bash(netstat *)",
       "Bash(printenv)",
       "Bash(printenv *)",
       "Bash(rm *)",
+      "Bash(sed * --in-place*)",
       "Bash(sed * -I*)",
       "Bash(sed * -i*)",
+      "Bash(sed --in-place*)",
       "Bash(sed -I*)",
       "Bash(sed -i*)",
       "Bash(sort * --output *)",
       "Bash(sort * -o *)",
       "Bash(sort --output*)",
       "Bash(sort -o*)",
-      "Bash(sq * --output*)",
-      "Bash(sq * -o*)",
-      "Bash(sq --output*)",
-      "Bash(sq -o*)",
-      "Bash(sq sql *CREATE*)",
-      "Bash(sq sql *DELETE*)",
-      "Bash(sq sql *UPDATE*)",
+      {{- $tails := list "-o*" "--output*" "--insert*" "tbl *" }}
+      {{- range $verb := list "ALTER" "CREATE" "DELETE" "DROP" "INSERT" "TRUNCATE" "UPDATE" }}{{ $tails = append $tails (printf "sql *%s*" $verb) }}{{ end }}
+      {{- range $tail := $tails }}
+      "Bash(sq {{ $tail }})",
+      "Bash(sq * {{ $tail }})",
+      {{- end }}
       "Bash(trash *)",
       "Bash(yq * --inplace *)",
       "Bash(yq * -i *)",
@@ -345,6 +355,12 @@
       "Write(~/.netrc)",
       "Write(~/.npmrc)",
       "Write(~/.pypirc)",
+      "mcp__grafana-admin__add_*",
+      "mcp__grafana-admin__alerting_manage_*",
+      "mcp__grafana-admin__create_*",
+      "mcp__grafana-admin__grafana_api_request",
+      "mcp__grafana-admin__install_*",
+      "mcp__grafana-admin__update_*",
       "ExitPlanMode",
       "NotebookEdit"
     ],
@@ -357,6 +373,7 @@
   {{- end }}
   "enableAllProjectMcpServers": false,
   "hooks": {{ (get $stdin "hooks" | default dict) | toPrettyJson | indent 2 | trim }}{{/* include "dot_claude/.hooks.json" | fromJson | toPrettyJson | indent 2 | trim */}},
+  "enableWorkflows": true,
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
   {{- if stat $statusline }}
   "statusLine": {

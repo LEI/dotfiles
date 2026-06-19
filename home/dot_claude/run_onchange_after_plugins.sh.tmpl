@@ -19,6 +19,16 @@
 
 set -euo pipefail
 
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq required but not found" >&2
+  exit 1
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+  echo "claude not found, skipping plugin sync" >&2
+  exit 0
+fi
+
 plugin_file=~/.claude/plugins/installed_plugins.json
 marketplace_file=~/.claude/plugins/known_marketplaces.json
 {{- range (keys $marketplaces | sortAlpha) }}

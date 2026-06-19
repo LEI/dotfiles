@@ -8,6 +8,14 @@
   "grafana-admin"
   "grep_app"
 -}}
+
+{{- if and .features.kube (eq .profile "personal") -}}
+{{   $managed = concat $managed (list
+  "flux-operator"
+  "kubernetes"
+) -}}
+{{- end -}}
+
 {{- $servers := dict -}}
 {{- range $managed -}}
 {{-   if hasKey $mcp.servers . -}}
@@ -21,6 +29,11 @@ set -euo pipefail
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq required but not found" >&2
   exit 1
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+  echo "claude not found, skipping MCP sync" >&2
+  exit 0
 fi
 
 mcp_sync() {

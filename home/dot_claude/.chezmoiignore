@@ -2,6 +2,7 @@
 .claude.json
 .credentials.json
 .last-cleanup
+.last-update-result.json
 backups
 cache
 chrome
@@ -18,6 +19,7 @@ metrics
 paste-cache
 policy-limits.json
 projects
+remote-settings.json
 security_warnings_state_*.json
 session-data
 session-env
@@ -30,6 +32,8 @@ teams
 telemetry
 todos
 transcripts
+usage-data
+
 CLAUDE.local.md
 
 # User scripts (machine-local)
@@ -37,6 +41,7 @@ scripts
 
 # Plugin system runtime (Claude Code plugin manager)
 plugins/.install-manifests
+plugins/.last_inuse_sweep
 plugins/blocklist.json
 plugins/cache
 plugins/claude-dashboard
