@@ -95,7 +95,6 @@ features:
     - .config/carapace/specs/g.yaml
     - .config/git/
     - .config/lazygit/
-    # FIXME: mod.nu.tmpl loops on source directory
     - .config/nushell/modules/git.nu
   go:
     - .config/mise/default-go-packages

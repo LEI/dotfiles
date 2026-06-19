@@ -77,6 +77,18 @@ dry_run brew upgrade --quiet "$@" # --dry-run
 # {{ $type }} hash: {{ output "sh" "-c" (printf "%s %s || true" (joinPath .chezmoi.sourceDir "dot_local/bin/executable_list-package") $type) | sha256sum }}
 {{- end }}
 {{- end }}
+{{- $trustTaps := list }}
+{{- if hasKey .packages "tap" }}
+{{-   range $name, $_ := .packages.tap }}
+{{-     if not (hasPrefix "homebrew/" $name) }}{{ $trustTaps = append $trustTaps $name }}{{ end }}
+{{-   end }}
+{{- end }}
+{{- if $trustTaps }}
+# brew 6.0 tap trust: Brewfile trusted: misses transitive deps (Homebrew/brew#22631)
+if brew trust --help >/dev/null 2>&1; then
+  dry_run brew trust{{ range $trustTaps }} {{ . | quote }}{{ end }}
+fi
+{{- end }}
 dry_run brew bundle --file=/dev/stdin{{ if not .upgrade }} --no-upgrade{{ end }} "$@" <<EOF
 {{ includeTemplate "Brewfile" . | trim }}
 EOF
