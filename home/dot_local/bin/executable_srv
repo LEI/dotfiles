@@ -8,6 +8,10 @@
 
 set -euo pipefail
 
+lib_dir="$HOME/.local/lib"
+# shellcheck source=home/dot_local/lib/sh/usage.sh
+source "$lib_dir/sh/usage.sh"
+
 CONF="${XDG_CONFIG_HOME:-$HOME/.config}/srv/hosts.yaml"
 
 die() {
@@ -35,15 +39,11 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    if command -v usage >/dev/null; then
-      usage exec --help bash "$0"
-    else
-      echo "Usage: srv [-d] [name] [logs|command...]"
-    fi
+    usage_help "[-d] [name] [logs|command...]"
     exit
     ;;
   --usage)
-    grep '^#USAGE' "$0" | sed 's/^#USAGE //'
+    usage_spec
     exit
     ;;
   *) break ;;

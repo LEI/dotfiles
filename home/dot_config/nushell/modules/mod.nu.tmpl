@@ -6,7 +6,7 @@
 {{ $modules := concat $files $templates | sortAlpha -}}
 {{ range $modules -}}
 {{ $name := . | base | replaceAllRegex "\\.tmpl$" "" -}}
-{{ if ne $name "mod.nu" -}}
+{{ if and (ne $name "mod.nu") (or (ne $name "git.nu") $.features.git) -}}
 export use ./{{ $name }} *
 {{ end -}}
 {{ end -}}
