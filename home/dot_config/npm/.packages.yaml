@@ -30,10 +30,14 @@ packages:
   yarn:
     type: npm
   runme:
-    type: npm
+    nameOverwrite:
+      mise: npm:runme
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   "@fission-ai/openspec":
     enabled: "{{ .features.ai }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:@fission-ai/openspec
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   # "@qodo/command": # uv tool install pr-agent
   #   enabled: "{{ .features.ai }}"
   #   type: npm
@@ -42,23 +46,37 @@ packages:
   #   type: npm
   bash-language-server:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:bash-language-server
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   prettier:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:prettier
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   sql-language-server:
     enabled: "{{ and .features.sql (not .features.neovim) }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:sql-language-server
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   typescript:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:typescript
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   typescript-language-server:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:typescript-language-server
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   # https://github.com/hrsh7th/vscode-langservers-extracted/pull/11
   vscode-langservers-extracted@4.8:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:vscode-langservers-extracted@4.8
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   yaml-language-server@next:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:yaml-language-server@next
+    type: '{{ .features.mise | ternary "mise" "npm" }}'

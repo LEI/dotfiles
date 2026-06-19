@@ -3,6 +3,6 @@
 {{- $scripts := includeTemplate "pluck.tmpl" (dict "key" $key "values" $values) | trim -}}
 {{- if $scripts }}
 
-# {{ if eq .key "before_script" }}Before{{ else }}After{{ end }} script{{ with get . "label" }} ({{ . }}){{ end }}:
+# {{ if eq $key "before_script" }}Before{{ else }}After{{ end }} script{{ with get . "label" }} ({{ . }}){{ end }}:
 {{ $scripts | trim }}
 {{- end -}}

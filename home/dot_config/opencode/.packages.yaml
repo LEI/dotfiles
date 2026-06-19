@@ -10,7 +10,9 @@ packages:
   # https://openpackage.dev/docs
   openpackage:
     name: opkg # opkg install gh@anthropics/claude-plugins-official
-    type: npm
+    nameOverwrite:
+      mise: npm:opkg
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   # https://openworklabs.com/download
   openwork:
     enabled: "{{ .gui }}"
@@ -18,5 +20,6 @@ packages:
     # type: mise
     nameOverwrite:
       aur: openwork
+      mise: npm:openwork-orchestrator
       npm: openwork-orchestrator
-    type: '{{ eq .osIDLike "arch" | ternary "aur" "npm" }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (.features.mise | ternary "mise" "npm") }}'

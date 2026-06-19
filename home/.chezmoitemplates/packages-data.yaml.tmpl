@@ -60,7 +60,7 @@ aur: {{ $aurPackages | toJson }}
 {{- $taps := dict }}
 {{- range $name, $pkg := $allBrewPackages }}
 {{-   if contains "/" $name }}
-{{-     $str := $name | replaceAllRegex "/[\\w@-]+$" "" }}
+{{-     $str := $name | replaceAllRegex "/[\\w@-]+$" "" | lower }}
 {{-     $_ := $taps | setValueAtPath $str dict }}
 {{-   end }}
 {{- end }}

@@ -7,8 +7,9 @@ packages:
   mmdc:
     # enabled: "{{ .features.node }}"
     nameOverwrite:
+      mise: npm:@mermaid-js/mermaid-cli
       npm: "@mermaid-js/mermaid-cli"
-    type: npm
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   # FIXME: fedora nvim v0.11.6
   # NOTE: latest nvim requires GLIBC_2.42
   neovim:

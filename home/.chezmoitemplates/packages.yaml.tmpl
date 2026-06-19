@@ -360,8 +360,9 @@ packages:
   logseq-cli:
     enabled: {{ .features.logseq }}
     nameOverwrite:
+      mise: npm:@logseq/cli
       npm: "@logseq/cli"
-    type: npm
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   logseq: # obsidian
     enabled: {{ .features.logseq }}
     nameOverwrite:
@@ -756,7 +757,7 @@ packages:
   usage:
     enabled: {{ or .features.brew .features.mise }}
     nameOverwrite:
-      mise: github:jdx/usage # TODO: aqua?
+      mise: aqua:jdx/usage
     type: {{ not .features.mise | ternary "brew" "mise" | quote }}
 
   # pip:
@@ -961,7 +962,9 @@ osPackages:
       # luacheck:
       # luarocks:
       # lynx:
-      markdownlint-cli: # NOTE: also installed via mason.nvim
+      # markdownlint-cli: also managed by mason.nvim when neovim is enabled
+      markdownlint-cli:
+        enabled: "{{ not .features.neovim }}"
       mas:
       clevercloud/misc/mdr:
         enabled: {{ and .features.ai .gui }}

@@ -3,5 +3,6 @@ enabled: "{{ .features.kilo }}"
 packages:
   kilo:
     nameOverwrite:
+      mise: npm:@kilocode/cli
       npm: "@kilocode/cli"
-    type: npm
+    type: '{{ .features.mise | ternary "mise" "npm" }}'

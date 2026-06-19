@@ -2,7 +2,9 @@
 packages:
   cspell:
     enabled: "{{ not .features.neovim }}"
-    type: npm
+    nameOverwrite:
+      mise: npm:cspell
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
   # cspell-dict-fr:
   #   nameOverwrite:
   #     npm: "@cspell/dict-fr-fr"
