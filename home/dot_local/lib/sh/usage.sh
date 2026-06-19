@@ -2,12 +2,12 @@
 
 # Render --help via `usage`, with raw #USAGE spec fallback
 usage_help() {
-  if ! command -v usage >/dev/null; then
-    echo "${0##*/}: \`usage\` not installed, showing raw spec" >&2
-    usage_spec
-    return
+  if command -v usage >/dev/null && rendered="$(usage exec --help bash "$0")" && [ -n "$rendered" ]; then
+    printf '%s\n' "$rendered"
+  else
+    printf 'Usage: %s %s\n' "${0##*/}" "${1:-}"
   fi
-  usage exec --help bash "$0"
+  unset rendered
 }
 
 # Print #USAGE directives without the leading prefix

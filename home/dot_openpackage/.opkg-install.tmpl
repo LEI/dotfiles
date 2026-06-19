@@ -1,0 +1,54 @@
+{{- $packages := list (dict "name" "local" "src" (joinPath .chezmoi.homeDir ".openpackage/packages/local")) -}}
+{{- $packages = concat $packages (includeTemplate "opkg-marketplace-packages.tmpl" . | fromJson) -}}
+{{- /* dig keeps this renderable without the openpackage feature (e.g. in containers) */ -}}
+{{- $platformArgs := "" -}}
+{{- with dig "openpackage" "platforms" list . -}}
+{{-   $platformArgs = printf " --platforms %s" (join " " .) -}}
+{{- end -}}
+opkg() {
+  command opkg "$@" | cat
+}
+
+opkg_installed() {
+  opkg list --global --json "$1" 2>/dev/null |
+    jq -e '[.data.resources[] | .resources[] | .name] | length > 0' \
+      >/dev/null 2>&1
+}
+
+publish_package() {
+  name="$1" path="$2"
+  if [ ! -f "$path/openpackage.yml" ]; then
+    echo "No manifest at $path, skipping"
+    return 1
+  fi
+  cd "$path" || return 1
+  opkg publish --local --force "$name"
+  if opkg_installed "$name"; then
+    opkg uninstall --global --recursive "$name" || true
+  fi
+}
+
+# Per-resource install: a whole-package install auto-namespaces resources
+# (e.g. ~/.claude/agents/local-search.md); per-resource keeps natural paths.
+install_resource() {
+  name="$1"
+  shift
+  opkg install --local{{ $platformArgs }} \
+    --conflicts overwrite --force "$@" --global "$name"
+}
+
+exit_code=0
+{{ range $entry := $packages }}
+publish_package {{ $entry.name | quote }} {{ $entry.src | quote }} || exit_code=1
+{{- range glob (joinPath $entry.src "agents/*.md") }}
+install_resource {{ $entry.name | quote }} --agents {{ base . | trimSuffix ".md" | quote }} || exit_code=1
+{{- end }}
+{{- range glob (joinPath $entry.src "skills/*") }}
+install_resource {{ $entry.name | quote }} --skills {{ base . | quote }} || exit_code=1
+{{- end }}
+{{- range glob (joinPath $entry.src "commands/*.md") }}
+install_resource {{ $entry.name | quote }} --commands {{ base . | trimSuffix ".md" | quote }} || exit_code=1
+{{- end }}
+echo "Package {{ $entry.name }} published and installed"
+{{ end }}
+managed="{{ range $entry := $packages }} {{ $entry.name }}{{ end }} "

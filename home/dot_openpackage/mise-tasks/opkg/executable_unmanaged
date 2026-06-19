@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE alias="ou"
+#MISE description="List untracked target paths"
+opkg list --global --json |
+  jq -r '
+    .data.resources[]
+    | .resources[]
+    | select(.status == "untracked")
+    | .files[]?
+    | select(.status == "untracked")
+    | .target
+    | select(. != ".claude.json" and (startswith(".pi/") | not))
+  ' |
+  sort -u |
+  sed "s|^|$HOME/|"

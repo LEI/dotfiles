@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE alias="oi"
+#MISE description="Publish and install all opkg packages globally"
+{{ includeTemplate "dot_openpackage/.opkg-install.tmpl" . }}
+exit "$exit_code"

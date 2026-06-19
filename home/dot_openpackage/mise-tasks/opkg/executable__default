@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE alias="op"
+#MISE description="Run opkg in the local package"
+cd "$HOME/.openpackage/packages/local" || exit 1
+opkg "$@"

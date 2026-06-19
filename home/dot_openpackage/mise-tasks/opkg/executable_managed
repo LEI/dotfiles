@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE alias="om"
+#MISE description="List tracked target paths"
+opkg list --global --json |
+  jq -r '
+    .data.resources[]
+    | .resources[]
+    | select(.status == "tracked")
+    | .files[]?
+    | select(.status == "tracked")
+    | .target
+  ' |
+  sort -u |
+  sed "s|^|$HOME/|"

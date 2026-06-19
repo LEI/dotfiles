@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE alias="ot"
+#MISE description="Check if a package has any tracked resources"
+#USAGE arg "<name>" help="Package name (e.g. local)"
+# shellcheck disable=SC2154 # usage_name is injected by the USAGE arg spec
+opkg list --global --json "$usage_name" |
+  jq -e '
+    [.data.resources[] | .resources[] | select(.status == "tracked" or .status == "mixed")]
+    | length > 0
+  ' >/dev/null
