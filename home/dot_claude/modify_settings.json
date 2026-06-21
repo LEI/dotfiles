@@ -263,10 +263,11 @@
       "Write(~/.ssh/**)"
     ],
     "ask": [
-      "Bash(awk * --in-place*)",
-      "Bash(awk * -i*)",
-      "Bash(awk --in-place*)",
-      "Bash(awk -i*)",
+      "Bash(awk *> \"*)",
+      "Bash(awk *|*getline*)",
+      "Bash(awk *inplace*)",
+      "Bash(awk *system*)",
+      "Bash(awk *| \"*)",
       "Bash(env)",
       "Bash(env *)",
       "Bash(export *)",
