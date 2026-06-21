@@ -107,6 +107,7 @@
   "includeGitInstructions": true,
   "permissions": {
     "allow": [
+      "Bash(awk *)",
       "Bash(basename *)",
       "Bash(claude mcp get *)",
       "Bash(claude mcp list)",
@@ -262,7 +263,10 @@
       "Write(~/.ssh/**)"
     ],
     "ask": [
-      "Bash(awk *)",
+      "Bash(awk * --in-place*)",
+      "Bash(awk * -i*)",
+      "Bash(awk --in-place*)",
+      "Bash(awk -i*)",
       "Bash(env)",
       "Bash(env *)",
       "Bash(export *)",
