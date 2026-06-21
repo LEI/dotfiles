@@ -75,32 +75,10 @@ ensure_symlink() {
   trace ln -sn "$target" "$link"
 }
 
-{{- /* Collect rule sources: skip missing dirs and dirs with no *.md content */ -}}
-{{- $rules := list -}}
-{{- $localRulesDir := joinPath .chezmoi.homeDir ".openpackage/packages/local/rules" -}}
-{{- if and (stat $localRulesDir) (glob (joinPath $localRulesDir "*.md")) -}}
-{{-   $rules = append $rules (dict "name" "local" "src" $localRulesDir) -}}
-{{- end -}}
-{{- if hasKey .claude "marketplaces" -}}
-{{-   range $mktName, $mkt := .claude.marketplaces -}}
-{{-     $path := get $mkt "path" -}}
-{{-     if not $path -}}{{- continue -}}{{- end -}}
-{{-     $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
-{{-     if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
-{{-     range $pkgDir := glob (joinPath $packagesRoot "*") -}}
-{{-       $pkgName := base $pkgDir -}}
-{{-       if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
-{{-       $rulesDir := joinPath $pkgDir "rules" -}}
-{{-       if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) -}}
-{{-         $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
-{{-       end -}}
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
-{{- /* Per-platform target dirs; package name == platform gates to that platform only */ -}}
+{{- /* Rule sources [{name, src}]; opencode reads realpaths in opencode.jsonc, so only claude symlinks */ -}}
+{{- $rules := includeTemplate "opkg-rule-paths.tmpl" . | fromJson -}}
 {{- $ruleBases := list -}}
 {{- if .features.claude -}}{{- $ruleBases = append $ruleBases (dict "platform" "claude" "dir" (joinPath .chezmoi.homeDir ".claude/rules")) -}}{{- end -}}
-{{- if .features.opencode -}}{{- $ruleBases = append $ruleBases (dict "platform" "opencode" "dir" (joinPath .chezmoi.homeDir ".config/opencode/rules")) -}}{{- end -}}
 {{- if and $rules $ruleBases }}
 {{- range $base := $ruleBases }}
 

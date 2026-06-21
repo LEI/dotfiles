@@ -13,6 +13,16 @@
 {{-   $kbDirs = append $kbDirs $r -}}
 {{- end -}}
 
+{{- /* opencode's instruction glob does not follow symlinks; resolve realpaths */ -}}
+{{- $ocRules := list -}}
+{{- range includeTemplate "opkg-rule-paths.tmpl" . | fromJson -}}
+{{-   if ne .name "claude" -}}
+{{-     $src := .src -}}
+{{-     if hasPrefix $.chezmoi.homeDir $src -}}{{- $src = printf "~%s" (trimPrefix $.chezmoi.homeDir $src) -}}{{- end -}}
+{{-     $ocRules = append $ocRules (printf "%s/**/*.md" $src) -}}
+{{-   end -}}
+{{- end -}}
+
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
@@ -48,7 +58,9 @@
   "instructions": [
     // ".cursor/rules/*.md",
     "~/.config/opencode/AGENTS.md",
-    "~/.config/opencode/rules/**/*.md",
+    {{- range $ocRules }}
+    {{ . | quote }},
+    {{- end }}
     // "CONTRIBUTING.md",
     // "docs/development-standards.md",
     // "docs/guidelines.md",

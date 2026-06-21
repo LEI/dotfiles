@@ -1,0 +1,21 @@
+{{- /* Rule sources [{name, src}], shared by publish-opkg and opencode.jsonc. */ -}}
+{{- $rules := list -}}
+{{- $localRulesDir := joinPath .chezmoi.homeDir ".openpackage/packages/local/rules" -}}
+{{- if and (stat $localRulesDir) (glob (joinPath $localRulesDir "*.md")) -}}
+{{-   $rules = append $rules (dict "name" "local" "src" $localRulesDir) -}}
+{{- end -}}
+{{- range $mktName, $mkt := dig "claude" "marketplaces" (dict) . -}}
+{{-   $path := get $mkt "path" -}}
+{{-   if not $path -}}{{- continue -}}{{- end -}}
+{{-   $packagesRoot := joinPath $.chezmoi.homeDir $path "packages" -}}
+{{-   if not (stat $packagesRoot) -}}{{- continue -}}{{- end -}}
+{{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
+{{-     $pkgName := base $pkgDir -}}
+{{-     if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
+{{-     $rulesDir := joinPath $pkgDir "rules" -}}
+{{-     if and (stat $rulesDir) (glob (joinPath $rulesDir "*.md")) -}}
+{{-       $rules = append $rules (dict "name" $pkgName "src" $rulesDir) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $rules | toJson }}
