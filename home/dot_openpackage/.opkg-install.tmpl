@@ -6,7 +6,9 @@
 {{-   $platformArgs = printf " --platforms %s" (join " " .) -}}
 {{- end -}}
 opkg() {
-  command opkg "$@"
+  # CI=true forces non-interactive mode so opkg emits full output
+  # instead of the truncated clack spinner when run on a TTY
+  CI=true command opkg "$@"
 }
 
 opkg_installed() {
