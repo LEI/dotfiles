@@ -6,7 +6,7 @@
 {{-   $platformArgs = printf " --platforms %s" (join " " .) -}}
 {{- end -}}
 opkg() {
-  command opkg "$@" | cat
+  command opkg "$@"
 }
 
 opkg_installed() {
@@ -22,7 +22,7 @@ publish_package() {
     return 1
   fi
   cd "$path" || return 1
-  opkg publish --local --force "$name"
+  opkg publish --local --force || return 1
   if opkg_installed "$name"; then
     opkg uninstall --global --recursive "$name" || true
   fi
