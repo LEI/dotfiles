@@ -140,7 +140,7 @@ packages:
     enabled: {{ .features.direnv }}
     nameOverwrite:
       windows: direnv.direnv
-    type: '{{ eq .osIDLike "rhel" | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "fedora" "rhel" | ternary "mise" nil }}'
   distrobox:
     enabled: {{ and (eq .osIDLike "fedora") .gui }}
   # dog, doggo, mtr, trippy, oryx / tshark termshark
