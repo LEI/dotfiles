@@ -1,0 +1,7 @@
+---
+extends:
+  - "@commitlint/config-conventional"
+# level: 0 off, 1 warn, 2 error
+rules:
+  header-max-length: [2, always, 72]
+  body-max-line-length: [1, always, 72]
