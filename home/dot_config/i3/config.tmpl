@@ -8,14 +8,14 @@ set $config_dir ~/.config/i3
 
 # set $font_family DejaVu Sans
 # set $font_family HackNerd
-set $font_family {{ .i3.fontFamily }}
+set $font_family {{ dig "i3" "fontFamily" "monospace" . }}
 # set $font_family Roboto
-set $font_size {{ .i3.fontSize }}
+set $font_size {{ dig "i3" "fontSize" 0 . }}
 
 # Use "normal" to keep title bars and "pixel" to hide them
 # NOTE: this hides next split direction indicator too
 set $border_style normal
-set $border_width {{ .i3.borderWidth }}
+set $border_width {{ dig "i3" "borderWidth" 0 . }}
 
 set $alt Mod1
 set $mod Mod4
@@ -312,7 +312,7 @@ bindsym $mod+Shift+c exec "i3-msg reload && notify-send 'i3 configuration reload
 # Restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r exec "i3-msg restart && notify-send 'i3 restarted'"
 # Exit i3 (logs you out of your X session)
-set $nagbar i3-nagbar -f 'pango:monospace {{ sub .i3.fontSize 1 }}'
+set $nagbar i3-nagbar -f 'pango:monospace {{ sub (dig "i3" "fontSize" 0 .) 1 }}'
 bindsym $mod+Shift+e exec "$nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # Resize window (you can also use the mouse for that)
@@ -376,7 +376,7 @@ bar {
     # hidden_state hide
     # modifier $mod
 
-    font {{ .i3.barFont }}
+    font {{ dig "i3" "barFont" "monospace" . }}
     # font pango:$font_family, FontAwesome $font_size
 
     # NOTE: cause all tray icons to have a transparent background

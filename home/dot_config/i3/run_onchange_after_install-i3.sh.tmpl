@@ -22,7 +22,7 @@ if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
 fi
 {{- end }}
 
-{{- range $key, $value := .i3.environment }}
+{{- range $key, $value := dig "i3" "environment" dict . }}
 
 # if ! grep -q '^{{ $key }}=' /etc/environment; then
 #   echo '{{ $key }}={{ $value | quote }}' | sudo tee --append /etc/environment
@@ -31,11 +31,11 @@ fi
 
 if [ -f ~/.config/qt5ct/qt5ct.conf ]; then
   sed \
-    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }} Mono,{{ .i3.fontSize }},/' \
-    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }},{{ .i3.fontSize }},/' \
+    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ dig "i3" "fontFamily" "" . }} Mono,{{ dig "i3" "fontSize" 0 . }},/' \
+    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ dig "i3" "fontFamily" "" . }},{{ dig "i3" "fontSize" 0 . }},/' \
     -i ~/.config/qt5ct/qt5ct.conf
   sed \
-    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }} Mono,{{ .i3.fontSize }},/' \
-    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ .i3.fontFamily }},{{ .i3.fontSize }},/' \
+    -e 's/\(fixed="\)\([^,]\+\),\([0-9]\+\),/\1{{ dig "i3" "fontFamily" "" . }} Mono,{{ dig "i3" "fontSize" 0 . }},/' \
+    -e 's/\(general="\)\([^,]\+\),\([0-9]\+\),/\1{{ dig "i3" "fontFamily" "" . }},{{ dig "i3" "fontSize" 0 . }},/' \
     -i ~/.config/qt6ct/qt6ct.conf
 fi

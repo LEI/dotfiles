@@ -1,7 +1,7 @@
 ---
 # https://github.com/i3/i3/discussions/5896
 # NOTE: do not use ini to preserve value types
-gtk-theme-name: {{ .i3.themeName | quote }}
-gtk-icon-theme-name: {{ .i3.iconThemeName | quote }}
+gtk-theme-name: {{ dig "i3" "themeName" "" . | quote }}
+gtk-icon-theme-name: {{ dig "i3" "iconThemeName" "" . | quote }}
 # GTK 2.0
-# gtk-application-prefer-dark-theme: {{ .i3.darkMode | ternary 1 0 }}
+# gtk-application-prefer-dark-theme: {{ dig "i3" "darkMode" false . | ternary 1 0 }}

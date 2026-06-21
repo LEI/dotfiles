@@ -15,12 +15,12 @@ if [ -z "${DISPLAY:-}" ]; then
   exit 0
 fi
 
-theme_name="{{ .i3.themeName }}"
-font_name="{{ .i3.fontFamily }} {{ .i3.fontSize }}"
-monospace_font_name="{{ .i3.fontFamily }} Mono {{ .i3.fontSize }}"
-icon_theme_name="{{ .i3.iconThemeName }}" # Arc-Dark
-dark_mode="{{ .i3.darkMode }}"
-pm_tray="{{ .i3.pmTray }}"
+theme_name="{{ dig "i3" "themeName" "" . }}"
+font_name="{{ dig "i3" "fontFamily" "" . }} {{ dig "i3" "fontSize" 0 . }}"
+monospace_font_name="{{ dig "i3" "fontFamily" "" . }} Mono {{ dig "i3" "fontSize" 0 . }}"
+icon_theme_name="{{ dig "i3" "iconThemeName" "" . }}" # Arc-Dark
+dark_mode="{{ dig "i3" "darkMode" false . }}"
+pm_tray="{{ dig "i3" "pmTray" false . }}"
 
 {{- if lookPath "xfce4-settings-manager" | isExecutable }}
 
@@ -68,7 +68,7 @@ fi
 
 {{- if lookPath "xfce4-notifyd-config" | isExecutable }}
 
-notify_opacity={{ .i3.opacity }}
+notify_opacity={{ dig "i3" "opacity" 0 . }}
 current_notify_opacity="$(run xfconf-query --channel xfce4-notifyd --property /initial-opacity || echo "")"
 if [ "$current_notify_opacity" != "$notify_opacity" ]; then
   run xfconf-query --channel xfce4-notifyd --property /initial-opacity --set "$notify_opacity" --type double || true # --create

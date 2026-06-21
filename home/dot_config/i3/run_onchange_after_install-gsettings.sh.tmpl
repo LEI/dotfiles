@@ -8,9 +8,9 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/run.sh
 . "$lib_dir/sh/run.sh"
 
-color_scheme="{{ .i3.darkMode | ternary "prefer-dark" "default" }}"
-gtk_theme={{ .i3.themeName | quote }}
-icon_theme={{ .i3.iconThemeName | quote }}
+color_scheme="{{ dig "i3" "darkMode" false . | ternary "prefer-dark" "default" }}"
+gtk_theme={{ dig "i3" "themeName" "" . | quote }}
+icon_theme={{ dig "i3" "iconThemeName" "" . | quote }}
 
 current_color_scheme="$(run gsettings get org.gnome.desktop.interface color-scheme || echo "")"
 if [ "$current_color_scheme" != "'$color_scheme'" ]; then

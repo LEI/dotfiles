@@ -5,7 +5,7 @@ popover.menu contents {
   /* background-color: #252936; */
   /* base01 */
   /* border: 1px solid #1f222d; */
-  border-radius: {{ .i3.borderRadius }};
+  border-radius: {{ dig "i3" "borderRadius" 0 . }};
   box-shadow: none;
 }
 
