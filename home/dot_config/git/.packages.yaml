@@ -27,6 +27,7 @@ packages:
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
   git-filter-repo:
     enabled: '{{ not (eq .osIDLike "android" "windows") }}'
+    type: '{{ eq .osID "fedora" | ternary "brew" nil }}'
   # git-lfs:
   # git-sizer:
   git-wt:
