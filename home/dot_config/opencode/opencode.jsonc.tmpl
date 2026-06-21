@@ -534,6 +534,30 @@
         "memory_read_node": "allow"
       }
     },
+    // Headless one-shot delegate: read-only, no subagent spawning, no bash.
+    // Primary so `opencode run --agent delegate` is invocable directly. Unlike `plan`
+    // it cannot fan out via task subagents (the documented 20-40min trap) and cannot
+    // hit the plan-file-via-bash auto-reject, so a bounded foreground run ends cleanly.
+    "delegate": {
+      "color": "primary",
+      "description": "Read-only headless delegate (no subagents, no bash) for scoped review and research",
+      "mode": "primary",
+      "model": {{ $reasoning | quote }},
+      "temperature": 0.1,
+      "steps": 25,
+      "prompt": "You are a one-shot read-only delegate invoked headlessly. Do the requested review or research and answer inline as your final message. Do not spawn subagents, do not write or edit files, do not run shell commands. For scoped reviews, use only the attached files.",
+      "permission": {
+        "edit": "deny",
+        "write": "deny",
+        "bash": "deny",
+        "task": "deny",
+        "skill": "deny",
+        "todoread": "deny",
+        "todowrite": "deny",
+        "webfetch": "allow",
+        "websearch": "allow"
+      }
+    },
     // Built-in subagents: explore, general, readonly
     // Custom subagents (also see ./agent/ for markdown-based agents):
     "analyze": {
