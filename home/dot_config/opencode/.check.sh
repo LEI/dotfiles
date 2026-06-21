@@ -63,6 +63,10 @@ else
   DATE="date"
 fi
 
+# Max age to serve a stale cache when the live fetch fails; older is treated as
+# no data so a long outage stops masquerading as a fresh reading
+STALE_MAX=3600
+
 provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" 2>/dev/null | wc -l)
 output_plan "$provider_count"
 
@@ -96,12 +100,17 @@ cached_fetch() {
     printf '%s' "$data"
     return
   fi
-  stale=""
-  if [ -f "$cache_path" ]; then
-    stale=$(cat "$cache_path")
-  fi
+  # Fall back to a stale cache only within STALE_MAX; older is dropped so a
+  # prolonged fetch outage is not shown as if it were a recent reading
+  stale=$(cache_get "$cache_path" "$STALE_MAX") || stale=""
   tmp=$(mktemp)
-  curl -sS --max-time 10 -o "$tmp" "$@" 2>/dev/null || true
+  curl_err=$(mktemp)
+  rc=0
+  curl --silent --show-error --max-time 10 --output "$tmp" "$@" 2>"$curl_err" || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    warn "$provider_name fetch failed (curl exit $rc): $(tr '\n' ' ' <"$curl_err")"
+  fi
+  rm -f "$curl_err"
   if jq --exit-status "$jq_test" "$tmp" >/dev/null 2>&1; then
     mkdir -p "$(dirname "$cache_path")"
     mv "$tmp" "$cache_path"
@@ -212,16 +221,22 @@ check_endpoint() {
     duration=0
   else
     start=$($DATE +%s%3N)
+    curl_err=$(mktemp)
+    rc=0
     if [ "$name" = "anthropic" ]; then
-      curl -sS --max-time 10 -D "$headers" -o "$body" \
+      curl --silent --show-error --max-time 10 --dump-header "$headers" --output "$body" \
         --header "Authorization: Bearer $key" \
         --header 'anthropic-version: 2023-06-01' \
-        "$url" 2>&1 || true
+        "$url" 2>"$curl_err" || rc=$?
     else
-      curl -sS --max-time 10 -D "$headers" -o "$body" \
+      curl --silent --show-error --max-time 10 --dump-header "$headers" --output "$body" \
         --header "Authorization: Bearer $key" \
-        "$url" 2>&1 || true
+        "$url" 2>"$curl_err" || rc=$?
     fi
+    if [ "$rc" -ne 0 ]; then
+      warn "$name models fetch failed (curl exit $rc): $(tr '\n' ' ' <"$curl_err")"
+    fi
+    rm -f "$curl_err"
     status=$(head -n 1 "$headers" | awk '{print $2}')
     end=$($DATE +%s%3N)
     duration=$((end - start))
