@@ -11,7 +11,7 @@
 {{-   range $key, $localValue := $local -}}
 {{-     $dataValue := get $data $key -}}
 {{-     if and (kindIs "map" $dataValue) (kindIs "map" $localValue) -}}
-{{-       $data = set $data $key (merge $dataValue $localValue) -}}
+{{-       $data = set $data $key (merge $localValue $dataValue) -}}
 {{-     else -}}
 {{-       $data = set $data $key $localValue -}}
 {{-     end -}}

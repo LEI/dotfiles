@@ -333,63 +333,43 @@ data:
 {{-   end }}
 {{- end }}
 
-  # TODO: loop over feature data map dict and allow .data.yaml.tmpl
-  apis:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/apis" "chezmoi" .chezmoi) | indent 4 }}
-
-{{- if $features.claude }}
-
-  claude:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_claude" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
-
-{{/*- if $features.i3 */}}
-
-  i3:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/i3" "chezmoi" .chezmoi) | indent 4 }}
-{{/*- end */}}
-
-{{- if $features.logseq }}
-
-  logseq:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_logseq" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
-
-{{- if $features.kb }}
-
-  kb:
-{{ includeTemplate "data.tmpl" (dict "dir" "kb" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
-
-{{- if $features.opencode }}
-
-  opencode:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/opencode" "chezmoi" .chezmoi) | indent 4 }}
-{{- end }}
-
-{{- if $features.openpackage }}
-{{-   $platforms := list }}
-{{-   if $features.claude }}{{- $platforms = append $platforms "claude" }}{{- end }}
-{{-   if $features.codex }}{{- $platforms = append $platforms "codex" }}{{- end }}
-{{-   if $features.opencode }}{{- $platforms = append $platforms "opencode" }}{{- end }}
-{{-   if $features.pi }}{{- $platforms = append $platforms "pimono" }}{{- end }}
-{{-   $opkgData := includeTemplate "data.tmpl" (dict "dir" "dot_openpackage" "chezmoi" .chezmoi) | fromYaml | default dict }}
-{{-   $_ := set $opkgData "platforms" $platforms }}
+{{- /* Discover data dirs: union of dirs containing .data.yaml or create_*local.yaml */ -}}
+{{- $dataDirSet := dict -}}
+{{- range glob (joinPath .chezmoi.sourceDir "**" ".data.yaml") -}}
+{{-   $rel := . | dir | trimPrefix (printf "%s/" $.chezmoi.sourceDir) -}}
+{{-   $_ := set $dataDirSet $rel "" -}}
+{{- end -}}
+{{- range glob (joinPath .chezmoi.sourceDir "**" "create_*local.yaml*") -}}
+{{-   $rel := . | dir | trimPrefix (printf "%s/" $.chezmoi.sourceDir) -}}
+{{-   $_ := set $dataDirSet $rel "" -}}
+{{- end -}}
+{{- $always := list "apis" "process-compose" -}}
+{{- $splice := list "process-compose" -}}
+{{- range $dir := keys $dataDirSet | sortAlpha -}}
+{{-   $key := base $dir | trimPrefix "dot_" -}}
+{{-   if or (has $key $always) (get $features $key) -}}
+{{-     if has $key $splice -}}
+{{-       $pcData := includeTemplate "data.tmpl" (dict "dir" $dir "chezmoi" $.chezmoi) | trim -}}
+{{-       if and $pcData (ne $pcData "{}") }}
+{{ $pcData | indent 2 }}
+{{-       end -}}
+{{-     else if eq $key "openpackage" -}}
+{{-       $platforms := list -}}
+{{-       if $features.claude }}{{- $platforms = append $platforms "claude" -}}{{- end -}}
+{{-       if $features.codex }}{{- $platforms = append $platforms "codex" -}}{{- end -}}
+{{-       if $features.opencode }}{{- $platforms = append $platforms "opencode" -}}{{- end -}}
+{{-       if $features.pi }}{{- $platforms = append $platforms "pimono" -}}{{- end -}}
+{{-       $opkgData := includeTemplate "data.tmpl" (dict "dir" $dir "chezmoi" $.chezmoi) | fromYaml | default dict -}}
+{{-       $_ := set $opkgData "platforms" $platforms }}
 
   openpackage:
-{{ $opkgData | toYaml | indent 4 }}
-{{- end }}
+{{ $opkgData | toYaml | indent 4 -}}
+{{-     else }}
 
-  # process-compose local.yaml is already top-level keyed (processCompose), so splice it
-{{- $pcData := includeTemplate "data.tmpl" (dict "dir" "dot_config/process-compose" "chezmoi" .chezmoi) | trim -}}
-{{- if and $pcData (ne $pcData "{}") }}
-{{ $pcData | indent 2 }}
-{{- end }}
-
-{{- if $features.pi }}
-
-  pi:
-{{ includeTemplate "data.tmpl" (dict "dir" "dot_config/pi" "chezmoi" .chezmoi) | indent 4 }}
+  {{ $key }}:
+{{ includeTemplate "data.tmpl" (dict "dir" $dir "chezmoi" $.chezmoi) | indent 4 -}}
+{{-     end -}}
+{{-   end -}}
 {{- end }}
 
 diff:
