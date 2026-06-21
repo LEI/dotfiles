@@ -1,58 +1,31 @@
+{{- if eq .variantID "silverblue" -}}
 #!/bin/sh
 # Managed by chezmoi
-# Setup Snapper configuration for user home directory
+# Provision snapper for /var/home on Fedora atomic
 
 set -eu
 
-# Only run on Fedora Silverblue with backup feature
-{{- if not (and (eq .osIDLike "fedora") (eq .variantID "silverblue")) }}
-echo "Skipping Snapper setup (not Fedora Silverblue)"
-exit 0
-{{ end -}}
-
-# Check if btrfs-assistant is installed
-if ! command -v btrfs-assistant >/dev/null 2>&1; then
-  echo "Skipping Snapper setup (btrfs-assistant not installed)"
-  exit 0
-fi
-
-# Check if snapper is installed
 if ! command -v snapper >/dev/null 2>&1; then
-  echo "Skipping Snapper setup (snapper not installed)"
+  echo "Skipping snapper setup (snapper not installed)"
   exit 0
 fi
 
-# Check if config already exists
-if [ -f "/etc/snapper/configs/home" ]; then
-  echo "Snapper config for home already exists"
+# Idempotent: nothing to do once the config exists
+[ -f /etc/snapper/configs/home ] && exit 0
+
+# Provisioning needs root, but apply runs as the user
+if [ "$(id -u)" != 0 ]; then
+  echo "snapper: provision as root: sudo snapper -c home create-config /var/home" >&2
   exit 0
 fi
 
-# Create snapper config for /var/home
-# This requires root privileges
-if [ "$(id -u)" != "0" ]; then
-  echo "ERROR: Snapper config requires root privileges"
-  echo "Please run:"
-  echo "  sudo snapper -c home create-config /var/home"
-  exit 1
-fi
-
-# Create config
-echo "Creating Snapper config for /var/home..."
 snapper -c home create-config /var/home
-
-# Configure retention policy
-echo "Configuring snapshot retention..."
-snapper -c home set-config TIMELINE_CREATE=yes
-snapper -c home set-config TIMELINE_LIMIT_HOURLY=24
-snapper -c home set-config TIMELINE_LIMIT_DAILY=7
-snapper -c home set-config TIMELINE_LIMIT_MONTHLY=6
-
-# Enable services
-echo "Enabling Snapper services..."
-systemctl enable --now snapperd.timer
-systemctl enable --now snapper-cleanup.timer
-
-echo "Snapper configuration complete"
-echo "Use 'snapper -c home list' to view snapshots"
-echo "Use 'btrfs-assistant' for GUI management"
+snapper -c home set-config \
+  TIMELINE_CREATE=yes \
+  TIMELINE_LIMIT_HOURLY=24 \
+  TIMELINE_LIMIT_DAILY=7 \
+  TIMELINE_LIMIT_WEEKLY=0 \
+  TIMELINE_LIMIT_MONTHLY=0 \
+  TIMELINE_LIMIT_YEARLY=0
+systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
+{{ end -}}
