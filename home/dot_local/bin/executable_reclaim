@@ -6,6 +6,7 @@
 #USAGE     "cache" \
 #USAGE     "claudevm" \
 #USAGE     "dep" \
+#USAGE     "flatpak" \
 #USAGE     "hf" \
 #USAGE     "ios" \
 #USAGE     "log" \
@@ -83,8 +84,12 @@ emit() {
     keep "$hf_hub"/models--* "$hf_hub"/datasets--*
     ;;
   ollama)
-    # Ollama model store; path-rm canonical only for bulk wipe
-    keep "${OLLAMA_MODELS:-$HOME/.ollama/models}"
+    # Ollama model store; macOS default and Linux XDG data path
+    keep "${OLLAMA_MODELS:-$HOME/.ollama/models}" "$HOME/.local/share/ollama/models"
+    ;;
+  flatpak)
+    # Flatpak per-app caches (XDG cache inside the sandbox); regenerated on launch
+    keep ~/.var/app/*/cache
     ;;
   claudevm)
     # Claude Desktop local-agent sandbox VM image (re-downloaded on demand)
@@ -110,6 +115,7 @@ emit() {
       ~/.lima \
       ~/.tart \
       ~/.vagrant.d \
+      ~/.vetu \
       "$HOME/VirtualBox VMs"
     ;;
   xcode)
@@ -146,7 +152,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-: "${groups:=app cache dep ios log trash vm xcode}"
+: "${groups:=app cache dep flatpak ios log trash vm xcode}"
 
 for group in $groups; do
   emit "$group" || true
