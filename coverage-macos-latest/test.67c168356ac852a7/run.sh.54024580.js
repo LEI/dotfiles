@@ -3,8 +3,8 @@ var data = {lines:[
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"# Check if value is truthy (1 or true)"},
 {"lineNum":"    4","line":"truthy() {"},
-{"lineNum":"    5","line":"  case \"$1\" in","class":"lineCov","hits":"6","order":"89","possible_hits":"0",},
-{"lineNum":"    6","line":"  1 | true) return 0 ;;","class":"lineCov","hits":"6","order":"90","possible_hits":"0",},
+{"lineNum":"    5","line":"  case \"$1\" in","class":"lineCov","hits":"7","order":"89","possible_hits":"0",},
+{"lineNum":"    6","line":"  1 | true) return 0 ;;","class":"lineCov","hits":"7","order":"90","possible_hits":"0",},
 {"lineNum":"    7","line":"  *) return 1 ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    8","line":"  esac"},
 {"lineNum":"    9","line":"}"},
@@ -31,9 +31,9 @@ var data = {lines:[
 {"lineNum":"   30","line":""},
 {"lineNum":"   31","line":"# Like run but skip execution in dry run mode"},
 {"lineNum":"   32","line":"dry_run() {"},
-{"lineNum":"   33","line":"  if truthy \"${DRY_RUN:-}\"; then","class":"lineCov","hits":"6","order":"88","possible_hits":"0",},
-{"lineNum":"   34","line":"    msg \"DRY-RUN: $*\"","class":"lineCov","hits":"6","order":"91","possible_hits":"0",},
-{"lineNum":"   35","line":"    return 0","class":"lineCov","hits":"6","order":"93","possible_hits":"0",},
+{"lineNum":"   33","line":"  if truthy \"${DRY_RUN:-}\"; then","class":"lineCov","hits":"7","order":"88","possible_hits":"0",},
+{"lineNum":"   34","line":"    msg \"DRY-RUN: $*\"","class":"lineCov","hits":"7","order":"91","possible_hits":"0",},
+{"lineNum":"   35","line":"    return 0","class":"lineCov","hits":"7","order":"93","possible_hits":"0",},
 {"lineNum":"   36","line":"  fi"},
 {"lineNum":"   37","line":"  run \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   38","line":"}"},
@@ -70,5 +70,5 @@ var data = {lines:[
 {"lineNum":"   69","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-08 18:59:40", "instrumented" : 31, "covered" : 6,};
+var header = { "command" : "test", "date" : "2026-06-22 06:17:17", "instrumented" : 31, "covered" : 6,};
 var merged_data = [];

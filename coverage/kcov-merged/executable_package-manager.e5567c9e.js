@@ -3,12 +3,12 @@ var data = {lines:[
 {"lineNum":"    2","line":"# Detect the system package manager"},
 {"lineNum":"    3","line":"#USAGE arg \"[query]\" help=\"Query type: all, check, or package manager name\""},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"5",},
+{"lineNum":"    5","line":"set -eu","class":"lineCov","hits":"1","order":"403",},
 {"lineNum":"    6","line":""},
-{"lineNum":"    7","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"2",},
+{"lineNum":"    7","line":"case \"${1:-}\" in","class":"lineCov","hits":"1","order":"400",},
 {"lineNum":"    8","line":"all | \'\')"},
-{"lineNum":"    9","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"1","order":"1",},
-{"lineNum":"   10","line":"    manager=brew","class":"lineCov","hits":"1","order":"3",},
+{"lineNum":"    9","line":"  if [ \"$(uname -s)\" = Darwin ]; then","class":"lineCov","hits":"1","order":"399",},
+{"lineNum":"   10","line":"    manager=brew","class":"lineCov","hits":"1","order":"401",},
 {"lineNum":"   11","line":"  elif [ \"$HOME\" = /data/data/com.termux/files/home ]; then","class":"lineNoCov","hits":"0",},
 {"lineNum":"   12","line":"    manager=termux","class":"lineNoCov","hits":"0",},
 {"lineNum":"   13","line":"  elif command -v apk >/dev/null; then","class":"lineNoCov","hits":"0",},
@@ -61,8 +61,8 @@ var data = {lines:[
 {"lineNum":"   60","line":"  ;;"},
 {"lineNum":"   61","line":"esac"},
 {"lineNum":"   62","line":""},
-{"lineNum":"   63","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"4",},
+{"lineNum":"   63","line":"echo \"$manager\"","class":"lineCov","hits":"1","order":"402",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-06-08 19:00:10", "instrumented" : 31, "covered" : 5,};
+var header = { "command" : "", "date" : "2026-06-22 06:17:40", "instrumented" : 31, "covered" : 5,};
 var merged_data = [];

@@ -3,7 +3,7 @@ var data = {files:[
 {"link":"validate-schema.bd691d74.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"linePartCov","covered":"28.1","covered_lines":"55","uncovered_lines":"141","total_lines" : "196"},
 {"link":"02-install-python.sh.3af64202.html","title":"02-install-python.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-python.sh","covered_class":"linePartCov","covered":"61.1","covered_lines":"11","uncovered_lines":"7","total_lines" : "18"},
 {"link":"lint-templates.acc6da7e.html","title":"lint-templates","summary_name":"[...]/dotfiles/script/lint-templates","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"61","total_lines" : "61"},
-{"link":"profile.b0656395.html","title":"profile","summary_name":"[...]/dotfiles/script/profile","covered_class":"linePartCov","covered":"45.6","covered_lines":"47","uncovered_lines":"56","total_lines" : "103"},
+{"link":"profile.b0656395.html","title":"profile","summary_name":"[...]/dotfiles/script/profile","covered_class":"linePartCov","covered":"54.6","covered_lines":"59","uncovered_lines":"49","total_lines" : "108"},
 {"link":"bootstrap.38b56fc6.html","title":"bootstrap","summary_name":"[...]/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"37.9","covered_lines":"11","uncovered_lines":"18","total_lines" : "29"},
 {"link":"prek.14fb0e9a.html","title":"prek","summary_name":"[...]/dotfiles/script/prek","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"51","total_lines" : "51"},
 {"link":"validate-usage.37e06bb7.html","title":"validate-usage","summary_name":"[...]/dotfiles/script/validate-usage","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"84","total_lines" : "84"},
@@ -20,7 +20,7 @@ var data = {files:[
 {"link":"executable_chezmoi-render.9e93a289.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"118","total_lines" : "118"},
 {"link":"container.aeb4c5ad.html","title":"container","summary_name":"[...]/dotfiles/script/container","covered_class":"linePartCov","covered":"36.6","covered_lines":"67","uncovered_lines":"116","total_lines" : "183"},
 {"link":"test.1360941a.html","title":"test","summary_name":"[...]/dotfiles/script/test","covered_class":"lineNoCov","covered":"21.1","covered_lines":"12","uncovered_lines":"45","total_lines" : "57"},
-{"link":"executable_reclaim.9bb4b306.html","title":"executable_reclaim","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_reclaim","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"33","total_lines" : "33"},
+{"link":"executable_reclaim.9bb4b306.html","title":"executable_reclaim","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_reclaim","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"36","total_lines" : "36"},
 {"link":"executable_chezmoi-package.e7611b6c.html","title":"executable_chezmoi-package","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-package","covered_class":"linePartCov","covered":"34.8","covered_lines":"31","uncovered_lines":"58","total_lines" : "89"},
 {"link":"executable_repeat-last-command.15cf1b08.html","title":"executable_repeat-last-command","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_repeat-last-command","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"5","total_lines" : "5"},
 {"link":"executable_trash.tmpl.25dd5a02.html","title":"executable_trash.tmpl","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_trash.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
@@ -41,12 +41,12 @@ var data = {files:[
 {"link":"executable_t.c3e69d89.html","title":"executable_t","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_t","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"14","total_lines" : "14"},
 {"link":"executable_compose-project.tmpl.b5170680.html","title":"executable_compose-project.tmpl","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_compose-project.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"12","total_lines" : "12"},
 {"link":"redact.sh.54361966.html","title":"redact.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/redact.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"3","uncovered_lines":"0","total_lines" : "3"},
-{"link":"02-install-brew-packages.sh.cfde33aa.html","title":"02-install-brew-packages.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"47.4","covered_lines":"9","uncovered_lines":"10","total_lines" : "19"},
+{"link":"02-install-brew-packages.sh.cfde33aa.html","title":"02-install-brew-packages.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-brew-packages.sh","covered_class":"linePartCov","covered":"52.4","covered_lines":"11","uncovered_lines":"10","total_lines" : "21"},
 {"link":"clamp.sh.f1678e8e.html","title":"clamp.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/clamp.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"8","uncovered_lines":"0","total_lines" : "8"},
 {"link":"run.sh.54024580.html","title":"run.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/run.sh","covered_class":"lineNoCov","covered":"19.4","covered_lines":"6","uncovered_lines":"25","total_lines" : "31"},
 {"link":"executable_chezmoi-feature.26de099f.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"31.7","covered_lines":"26","uncovered_lines":"56","total_lines" : "82"},
 {"link":"executable_package-manager.f0c50c5f.html","title":"executable_package-manager","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_package-manager","covered_class":"lineNoCov","covered":"16.1","covered_lines":"5","uncovered_lines":"26","total_lines" : "31"},
-{"link":"usage.sh.f752e509.html","title":"usage.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/usage.sh","covered_class":"linePartCov","covered":"50.0","covered_lines":"3","uncovered_lines":"3","total_lines" : "6"},
+{"link":"usage.sh.f752e509.html","title":"usage.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/usage.sh","covered_class":"lineCov","covered":"80.0","covered_lines":"4","uncovered_lines":"1","total_lines" : "5"},
 {"link":"startup.d5bc996c.html","title":"startup","summary_name":"[...]/dotfiles/script/startup","covered_class":"linePartCov","covered":"72.7","covered_lines":"40","uncovered_lines":"15","total_lines" : "55"},
 {"link":"validate-blank.awk.45431670.html","title":"validate-blank.awk","summary_name":"[...]/dotfiles/script/validate-blank.awk","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"32","total_lines" : "32"},
 {"link":"install.sh.ca7a008d.html","title":"install.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/install.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"36","total_lines" : "36"},
@@ -59,5 +59,5 @@ var data = {files:[
 {"link":"duration.sh.419fe920.html","title":"duration.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"26","total_lines" : "26"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-08 18:59:40", "instrumented" : 2505, "covered" : 541,};
+var header = { "command" : "test", "date" : "2026-06-22 06:17:17", "instrumented" : 2514, "covered" : 556,};
 var merged_data = [];
