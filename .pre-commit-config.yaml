@@ -20,6 +20,8 @@ repos:
     rev: v9.9.0
     hooks:
       - id: commitlint
+        args:
+          - --strict
         stages:
           - commit-msg
         additional_dependencies:
