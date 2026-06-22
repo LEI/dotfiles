@@ -7,7 +7,8 @@
 # Override backup partition details for this machine
 backup_partition:
   # Get from: lsblk -f /dev/nvme0n1p4
-  device_uuid: "a7c24bbb-ed4d-488a-b432-cdf3d90405d3"
+  # Value is prompted once and stored per-machine in ~/.config/chezmoi/chezmoi.yaml
+  device_uuid: {{ dig "btrfs" "backup" "deviceUuid" "" . | quote }}
   device: "/dev/nvme0n1p4"
   mount_point: "/backup"
   filesystem: "ext4"

@@ -199,6 +199,12 @@
 {{- end -}}
 {{- $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) }}
 
+{{- $btrfsBackupUuid := "" -}}
+{{- if and (not $headless) $features.btrfs -}}
+{{-   $btrfsBackupUuid = promptStringOnce . "btrfs.backup.deviceUuid" "btrfs backup partition UUID (leave empty to skip)" -}}
+{{- end -}}
+{{- $_ := set $data "btrfs" (dict "backup" (dict "deviceUuid" $btrfsBackupUuid)) }}
+
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}
 {{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
