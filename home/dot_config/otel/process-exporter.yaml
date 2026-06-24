@@ -1,6 +1,6 @@
 ---
-# Optimized for local dev laptop: comprehensive monitoring with smart exclusions
-# Reduces CPU usage by ~60% while maintaining visibility into all processes
+# Process grouping for a local dev laptop: a catch-all group plus named
+# groups for common system daemons
 
 process_names:
   # Main monitoring: All processes but exclude known harmless short-lived ones
