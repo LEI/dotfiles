@@ -26,6 +26,7 @@
 {{- $_ := . | setValueAtPath "client" "opencode" -}}
 {{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
 {{- $mcpServers := includeTemplate "dot_config/opencode/.mcp.json.tmpl" . | fromJson -}}
+{{- $ocSkills := includeTemplate "opkg-skill-paths.tmpl" . | fromJson -}}
 
 {{- $localYaml := joinPath .chezmoi.homeDir ".config/opencode/local.yaml" -}}
 {{- $local := dict -}}
@@ -371,9 +372,11 @@
       "nodejs-backend-patterns": "allow",
       "typescript-advanced-types": "allow",
 
-      // Custom skills
-      "flux-operator": "deny",
-      "sq": "allow"
+      // Custom skills: own opkg skills auto-allowed (see opkg-skill-paths.tmpl)
+      {{- range $ocSkills }}
+      "{{ . }}": "allow",
+      {{- end }}
+      "flux-operator": "deny"
     },
     // Running LSP queries (currently non-granular)
     // OPENCODE_EXPERIMENTAL_LSP_TOOL=true or OPENCODE_EXPERIMENTAL=true
