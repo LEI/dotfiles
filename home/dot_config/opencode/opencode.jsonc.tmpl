@@ -32,7 +32,7 @@
 {{- if stat $localYaml -}}
 {{-   $local = include $localYaml | fromYaml | default dict -}}
 {{- end -}}
-{{- $profile := get $local "profile" | default (env "OPENCODE_PROFILE") | default (get $opencode "profile") | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
+{{- $profile := get $local "profile" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
 
 {{- $preset := get .ai.profiles $profile | default dict -}}
 {{- $model := get $preset "coding" -}}

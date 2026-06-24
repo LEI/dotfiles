@@ -24,13 +24,13 @@
 {{- end -}}
 
 {{- $providers := get $claude "providers" | default dict -}}
-{{- $provider := get $local "provider" | default (env "CLAUDE_PROVIDER") -}}
+{{- $provider := get $local "provider" -}}
 {{- $prefix := $provider | splitList "-" | first -}}
 {{- $endpoint := get $providers $prefix | default dict -}}
 
 {{- $sandboxEnabled := false -}}
 
-{{- $tier := get $local "tier" | default (env "CLAUDE_TIER") | default (eq .profile "work" | ternary "max" "pro") -}}
+{{- $tier := get $local "tier" | default (eq .profile "work" | ternary "max" "pro") -}}
 {{- $settings := get $tiers $tier | default dict -}}
 
 {{- $model := get $settings "model" -}}
