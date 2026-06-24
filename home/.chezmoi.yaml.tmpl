@@ -193,11 +193,13 @@
 {{- $features := includeTemplate "features.json.tmpl" $data | fromJson }}
 {{- $_ := set $data "features" $features }}
 
-{{- $caddyTailscaleOauthSecret := "" -}}
-{{- if and (not $headless) $features.caddy $features.tailscale -}}
-{{-   $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
+{{- if and $features.caddy $features.tailscale -}}
+{{-   $caddyTailscaleOauthSecret := "" -}}
+{{-   if not $headless -}}
+{{-     $caddyTailscaleOauthSecret = promptStringOnce . "caddy.tailscale.oauthSecret" "Caddy Tailscale OAuth client secret (leave empty to skip; run chezmoi edit-config to set later)" -}}
+{{-   end -}}
+{{-   $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) -}}
 {{- end -}}
-{{- $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) }}
 
 {{- if $features.btrfs -}}
 {{-   $btrfsBackupUuid := "" -}}
