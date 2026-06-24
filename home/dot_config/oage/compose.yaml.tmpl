@@ -255,6 +255,7 @@ services:
       - sh
       - -c
       - >
+        grep -q 'ignorePatterns: \[' quartz.config.ts || echo "quartz.config.ts: ignorePatterns marker missing, ignore-rule patch skipped" >&2;
         sed -i 's|ignorePatterns: \[|ignorePatterns: [".git", "**/*.tmp*", |' quartz.config.ts &&
         npx quartz build &&
         exec npx serve /usr/src/app/public --listen 8080
