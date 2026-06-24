@@ -124,63 +124,171 @@ cached_fetch() {
   fi
 }
 
-check_endpoint() {
-  url="$1"
-  name="$2"
-  env_var="$3"
-  quota_file=$(mktemp)
-  TMP_FILES="$TMP_FILES $quota_file"
+# Per-provider quota handlers called from inside the { } >"$quota_diag" group
+# in check_endpoint; bash dynamic scope lets them read name, key, quota_file,
+# from_cache, cache_path, QUOTA_WARN, and OUTPUT_BARS from the caller
 
-  # openai: quota check via codex auth, no models endpoint
-  if [ "$name" = "openai" ]; then
-    auth_file="$HOME/.codex/auth.json"
-    if [ ! -f "$auth_file" ]; then
-      output_ok "openai" "SKIP no auth file"
-      return
-    fi
-    token=$(jq -r '.tokens.access_token // empty' "$auth_file" 2>/dev/null || true)
-    if [ -z "$token" ]; then
-      output_ok "openai" "SKIP no access token"
-      return
-    fi
-    cached_fetch openai 60 true \
-      --header "Authorization: Bearer $token" \
-      "https://chatgpt.com/backend-api/wham/usage" >"$quota_file"
-    quota=$(cat "$quota_file")
-    if [ -z "$quota" ]; then
-      output_not_ok "openai"
-      return
-    fi
-    plan=$(echo "$quota" | jq -r '.plan_type // empty' 2>/dev/null)
-    pct=$(echo "$quota" | jq -r '.rate_limit.primary_window.used_percent // empty' 2>/dev/null)
-    reset=$(echo "$quota" | jq -r '.rate_limit.primary_window.reset_at // empty' 2>/dev/null)
-    QUOTA_WARN=""
-    openai_diag=$(mktemp)
-    TMP_FILES="$TMP_FILES $openai_diag"
-    {
-      if [ -n "$pct" ]; then
-        if [ -n "$reset" ]; then
-          show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "@$reset")
-        else
-          show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
-        fi
-        if [ "$from_cache" = "1" ]; then
-          output_diag "(cached $(cache_age_human "$cache_path"))"
-        fi
-      fi
-    } >"$openai_diag"
-    if [ -n "$QUOTA_WARN" ]; then
-      output_not_ok "openai" "${plan:+plan: $plan}"
-    else
-      output_ok "openai" "${plan:+plan: $plan}"
-    fi
-    cat "$openai_diag"
-    if [ -n "$DEBUG" ] && [ -f "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/${name}-quota.json" ]; then
-      output_diag_json_file "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/${name}-quota.json"
-    fi
+quota_anthropic() {
+  local quota
+  cached_fetch anthropic 300 '.five_hour' \
+    --header "Authorization: Bearer $key" \
+    --header "anthropic-beta: oauth-2025-04-20" \
+    "https://api.anthropic.com/api/oauth/usage" >"$quota_file"
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ] || ! echo "$quota" | jq --exit-status '.five_hour' >/dev/null 2>&1; then
+    output_diag "quota: unavailable"
     return
   fi
+  show_quota < <(echo "$quota" | jq -r 'to_entries[] |
+  select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
+  [
+    (if .key == "five_hour" then "5h quota"
+     elif .key == "seven_day" then "7d all models"
+     elif .key == "seven_day_sonnet" then "7d sonnet"
+     elif .key == "seven_day_opus" then "7d opus"
+     elif .key == "seven_day_omelette" then "7d design"
+     elif .key == "seven_day_oauth_apps" then "7d oauth apps"
+     elif .key == "seven_day_cowork" then "7d cowork"
+     elif .key == "omelette_promotional" then "design promo"
+     else .key end),
+    (.value.utilization | round),
+    (.value.resets_at // "")
+  ] | @tsv' 2>/dev/null)
+  if [ "$from_cache" = "1" ]; then
+    output_diag "(cached $(cache_age_human "$cache_path"))"
+  fi
+  echo "$quota" | jq -r '
+  .extra_usage |
+  if . == null then empty
+  elif .is_enabled and (.utilization | type) == "number" then
+    ["on", (.utilization | round), ((.used_credits // 0) / 100), ((.monthly_limit // 0) / 100), (.currency // ""), (.resets_at // "")] | @tsv
+  else
+    ["off", (.disabled_reason // "unknown"), "", "", "", ""] | @tsv
+  end' 2>/dev/null | while IFS="$(printf '\t')" read -r state val a b currency reset; do
+    local_cache=""
+    if [ "$from_cache" = "1" ]; then
+      local_cache="(cached $(cache_age_human "$cache_path"))"
+    fi
+    if [ "$state" = "off" ]; then
+      output_diag "extra usage: off ($val)${local_cache:+ $local_cache}"
+    else
+      line="extra usage: ${val}% used, ${a}/${b} ${currency}"
+      if [ -n "$reset" ]; then
+        line="$line, $(format_reset "$reset")"
+      fi
+      if [ "$OUTPUT_BARS" = "1" ]; then
+        line="$(output_bar "$val") $line"
+      fi
+      output_diag "$line${local_cache:+ $local_cache}"
+    fi
+  done
+}
 
+quota_synthetic() {
+  local quota limit requests reset pct
+  cached_fetch synthetic 60 true \
+    --header "Authorization: Bearer $key" \
+    "https://api.synthetic.new/v2/quotas" >"$quota_file"
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ] || ! echo "$quota" | jq empty >/dev/null 2>&1; then
+    return
+  fi
+  limit=$(echo "$quota" | jq -r '.subscription.limit // 0' 2>/dev/null || echo 0)
+  requests=$(echo "$quota" | jq -r '.subscription.requests // 0' 2>/dev/null || echo 0)
+  reset=$(echo "$quota" | jq -r '.subscription.renewsAt // ""' 2>/dev/null || true)
+  if [ "$limit" -gt 0 ]; then
+    pct=$((requests * 100 / limit))
+    show_quota < <(printf '%s\t%s\t%s\n' "subscription" "$pct" "$reset")
+  elif [ "$quota" != "{}" ]; then
+    output_diag "subscription: unlimited"
+  fi
+  if [ "$from_cache" = "1" ]; then
+    output_diag "(cached $(cache_age_human "$cache_path"))"
+  fi
+}
+
+quota_openrouter() {
+  local quota data limit remaining pct
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ] || ! echo "$quota" | jq empty >/dev/null 2>&1; then
+    return
+  fi
+  data=$(echo "$quota" | jq -r '.data // empty' 2>/dev/null || true)
+  if [ -n "$data" ]; then
+    limit=$(echo "$quota" | jq -r '.data.limit // "null"' 2>/dev/null || true)
+    remaining=$(echo "$quota" | jq -r '.data.limit_remaining // "null"' 2>/dev/null || true)
+    if [ "$limit" != "null" ] && [ "$remaining" != "null" ]; then
+      pct=$(echo "$quota" | jq -r '(((.data.limit // 0) - (.data.limit_remaining // 0)) / (.data.limit // 1) * 100 | floor)' 2>/dev/null || echo 0)
+      show_quota < <(printf '%s\t%s\t%s\n' "credits" "$pct" "")
+    fi
+    echo "$quota" | jq -r '
+    .data |
+    if .label then "label: \(.label)" else empty end,
+    if .rate_limit then "rate_limit: \(.rate_limit.requests) req/\(.rate_limit.interval)" else empty end,
+    "usage: total=\(.usage // 0) daily=\(.usage_daily // 0) weekly=\(.usage_weekly // 0) monthly=\(.usage_monthly // 0)",
+    "byok: total=\(.byok_usage // 0) daily=\(.byok_usage_daily // 0) weekly=\(.byok_usage_weekly // 0) monthly=\(.byok_usage_monthly // 0)"
+  ' 2>/dev/null | while IFS= read -r line; do
+      output_diag "$line"
+    done
+  fi
+  if [ "$from_cache" = "1" ]; then
+    output_diag "(cached $(cache_age_human "$cache_path"))"
+  fi
+}
+
+# openai: quota check via codex auth, no models endpoint
+quota_openai() {
+  local auth_file token quota plan pct reset openai_diag QUOTA_WARN
+  auth_file="$HOME/.codex/auth.json"
+  if [ ! -f "$auth_file" ]; then
+    output_ok "openai" "SKIP no auth file"
+    return
+  fi
+  token=$(jq -r '.tokens.access_token // empty' "$auth_file" 2>/dev/null || true)
+  if [ -z "$token" ]; then
+    output_ok "openai" "SKIP no access token"
+    return
+  fi
+  cached_fetch openai 60 true \
+    --header "Authorization: Bearer $token" \
+    "https://chatgpt.com/backend-api/wham/usage" >"$quota_file"
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ]; then
+    output_not_ok "openai"
+    return
+  fi
+  plan=$(echo "$quota" | jq -r '.plan_type // empty' 2>/dev/null)
+  pct=$(echo "$quota" | jq -r '.rate_limit.primary_window.used_percent // empty' 2>/dev/null)
+  reset=$(echo "$quota" | jq -r '.rate_limit.primary_window.reset_at // empty' 2>/dev/null)
+  QUOTA_WARN=""
+  openai_diag=$(mktemp)
+  TMP_FILES="$TMP_FILES $openai_diag"
+  {
+    if [ -n "$pct" ]; then
+      if [ -n "$reset" ]; then
+        show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "@$reset")
+      else
+        show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
+      fi
+      if [ "$from_cache" = "1" ]; then
+        output_diag "(cached $(cache_age_human "$cache_path"))"
+      fi
+    fi
+  } >"$openai_diag"
+  if [ -n "$QUOTA_WARN" ]; then
+    output_not_ok "openai" "${plan:+plan: $plan}"
+  else
+    output_ok "openai" "${plan:+plan: $plan}"
+  fi
+  cat "$openai_diag"
+  if [ -n "$DEBUG" ] && [ -f "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/openai-quota.json" ]; then
+    output_diag_json_file "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/openai-quota.json"
+  fi
+}
+
+# Resolve an API key into the caller-scope `key` from env, secrets.d, the
+# opencode auth file, then the claude helper, in that order
+resolve_key() {
   key=""
   if [ -n "$env_var" ]; then
     key="$(printenv "$env_var")" || key=""
@@ -198,12 +306,12 @@ check_endpoint() {
   if [ -z "$key" ]; then
     key="$("$HOME/.claude/api-key-helper.sh" "$name" 2>/dev/null)" || key=""
   fi
+}
 
-  if [ -z "$key" ]; then
-    output_ok "$name" "SKIP No auth key"
-    return
-  fi
-
+# Fetch the models endpoint into caller-scope `body`, setting `status`,
+# `duration`, `from_models_cache`, and `models_cache`; serves a fresh cache hit
+# without a network call
+fetch_models() {
   tmp=$(mktemp)
   headers="${tmp}.headers"
   body="${tmp}.body"
@@ -241,6 +349,27 @@ check_endpoint() {
     end=$($DATE +%s%3N)
     duration=$((end - start))
   fi
+}
+
+check_endpoint() {
+  url="$1"
+  name="$2"
+  env_var="$3"
+  quota_file=$(mktemp)
+  TMP_FILES="$TMP_FILES $quota_file"
+
+  if [ "$name" = "openai" ]; then
+    quota_openai
+    return
+  fi
+
+  resolve_key
+  if [ -z "$key" ]; then
+    output_ok "$name" "SKIP No auth key"
+    return
+  fi
+
+  fetch_models
 
   model_count=""
   model_field=""
@@ -346,106 +475,11 @@ check_endpoint() {
       fi
     fi
 
-    if [ "$name" = "anthropic" ]; then
-      cached_fetch anthropic 300 '.five_hour' \
-        --header "Authorization: Bearer $key" \
-        --header "anthropic-beta: oauth-2025-04-20" \
-        "https://api.anthropic.com/api/oauth/usage" >"$quota_file"
-      quota=$(cat "$quota_file")
-      if [ -n "$quota" ] && echo "$quota" | jq --exit-status '.five_hour' >/dev/null 2>&1; then
-        show_quota < <(echo "$quota" | jq -r 'to_entries[] |
-        select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
-        [
-          (if .key == "five_hour" then "5h quota"
-       elif .key == "seven_day" then "7d all models"
-       elif .key == "seven_day_sonnet" then "7d sonnet"
-       elif .key == "seven_day_opus" then "7d opus"
-       elif .key == "seven_day_omelette" then "7d design"
-       elif .key == "seven_day_oauth_apps" then "7d oauth apps"
-       elif .key == "seven_day_cowork" then "7d cowork"
-       elif .key == "omelette_promotional" then "design promo"
-       else .key end),
-        (.value.utilization | round),
-        (.value.resets_at // "")
-      ] | @tsv' 2>/dev/null)
-        if [ "$from_cache" = "1" ]; then
-          output_diag "(cached $(cache_age_human "$cache_path"))"
-        fi
-        echo "$quota" | jq -r '
-      .extra_usage |
-      if . == null then empty
-      elif .is_enabled and (.utilization | type) == "number" then
-        ["on", (.utilization | round), ((.used_credits // 0) / 100), ((.monthly_limit // 0) / 100), (.currency // ""), (.resets_at // "")] | @tsv
-      else
-        ["off", (.disabled_reason // "unknown"), "", "", "", ""] | @tsv
-      end' 2>/dev/null | while IFS="$(printf '\t')" read -r state val a b currency reset; do
-          local_cache=""
-          if [ "$from_cache" = "1" ]; then
-            local_cache="(cached $(cache_age_human "$cache_path"))"
-          fi
-          if [ "$state" = "off" ]; then
-            output_diag "extra usage: off ($val)${local_cache:+ $local_cache}"
-          else
-            line="extra usage: ${val}% used, ${a}/${b} ${currency}"
-            if [ -n "$reset" ]; then
-              line="$line, $(format_reset "$reset")"
-            fi
-            if [ "$OUTPUT_BARS" = "1" ]; then
-              line="$(output_bar "$val") $line"
-            fi
-            output_diag "$line${local_cache:+ $local_cache}"
-          fi
-        done
-      fi
-    fi
-
-    if [ "$name" = "synthetic" ]; then
-      cached_fetch synthetic 60 true \
-        --header "Authorization: Bearer $key" \
-        "https://api.synthetic.new/v2/quotas" >"$quota_file"
-      quota=$(cat "$quota_file")
-      if [ -n "$quota" ] && echo "$quota" | jq empty >/dev/null 2>&1; then
-        limit=$(echo "$quota" | jq -r '.subscription.limit // 0' 2>/dev/null || echo 0)
-        requests=$(echo "$quota" | jq -r '.subscription.requests // 0' 2>/dev/null || echo 0)
-        reset=$(echo "$quota" | jq -r '.subscription.renewsAt // ""' 2>/dev/null || true)
-        if [ "$limit" -gt 0 ]; then
-          pct=$((requests * 100 / limit))
-          show_quota < <(printf '%s\t%s\t%s\n' "subscription" "$pct" "$reset")
-        elif [ "$quota" != "{}" ]; then
-          output_diag "subscription: unlimited"
-        fi
-        if [ "$from_cache" = "1" ]; then
-          output_diag "(cached $(cache_age_human "$cache_path"))"
-        fi
-      fi
-    fi
-
-    if [ "$name" = "openrouter" ]; then
-      quota=$(cat "$quota_file")
-      if [ -n "$quota" ] && echo "$quota" | jq empty >/dev/null 2>&1; then
-        data=$(echo "$quota" | jq -r '.data // empty' 2>/dev/null || true)
-        if [ -n "$data" ]; then
-          limit=$(echo "$quota" | jq -r '.data.limit // "null"' 2>/dev/null || true)
-          remaining=$(echo "$quota" | jq -r '.data.limit_remaining // "null"' 2>/dev/null || true)
-          if [ "$limit" != "null" ] && [ "$remaining" != "null" ]; then
-            pct=$(echo "$quota" | jq -r '(((.data.limit // 0) - (.data.limit_remaining // 0)) / (.data.limit // 1) * 100 | floor)' 2>/dev/null || echo 0)
-            show_quota < <(printf '%s\t%s\t%s\n' "credits" "$pct" "")
-          fi
-          echo "$quota" | jq -r '
-          .data |
-          if .label then "label: \(.label)" else empty end,
-          if .rate_limit then "rate_limit: \(.rate_limit.requests) req/\(.rate_limit.interval)" else empty end,
-          "usage: total=\(.usage // 0) daily=\(.usage_daily // 0) weekly=\(.usage_weekly // 0) monthly=\(.usage_monthly // 0)",
-          "byok: total=\(.byok_usage // 0) daily=\(.byok_usage_daily // 0) weekly=\(.byok_usage_weekly // 0) monthly=\(.byok_usage_monthly // 0)"
-        ' 2>/dev/null | while IFS= read -r line; do
-            output_diag "$line"
-          done
-        fi
-        if [ "$from_cache" = "1" ]; then
-          output_diag "(cached $(cache_age_human "$cache_path"))"
-        fi
-      fi
-    fi
+    case "$name" in
+    anthropic) quota_anthropic ;;
+    synthetic) quota_synthetic ;;
+    openrouter) quota_openrouter ;;
+    esac
 
   } >"$quota_diag"
 

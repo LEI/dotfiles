@@ -165,6 +165,9 @@ packages:
   # fancy-cat:
   #   enabled: {{ eq .osIDLike "arch" "darwin" }}
   #   type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  fastfetch:
+    enabled: {{ ne .profile "minimal" }}
+    type: '{{ eq .osIDLike "alpine" "debian" "fedora" "opensuse" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
   ffmpeg:
     enabled: {{ ne .profile "minimal" }}
     nameOverwrite:
@@ -354,6 +357,10 @@ packages:
     nameOverwrite:
       arch: lazyssh-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  lizard:
+    description: Multi-language cyclomatic complexity analyzer
+    enabled: {{ ne .profile "minimal" }}
+    type: uv
   llama.cpp:
     enabled: {{ and .features.ai .features.mlx (not (or .ephemeral .headless)) }}
 
@@ -376,9 +383,6 @@ packages:
       arch: lua51
     version: {{ ne .osIDLike "arch" | ternary "5.1" "" | quote }}
     type: '{{ ne .osIDLike "arch" | ternary "mise" nil }}'
-  macchina:
-    enabled: {{ ne .profile "minimal" }}
-    type: '{{ eq .osIDLike "alpine" "debian" "fedora" "opensuse" | ternary "brew" (eq .osIDLike "windows" | ternary "scoop" nil) }}'
 
   # https://github.com/ml-explore/mlx-lm (v0.31.2)
   mlx-lm:
@@ -736,6 +740,10 @@ packages:
       (and (eq .osID "ubuntu") (le (float64 .osVersion) 24.04))
     )) }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "uv" }}'
+  typst:
+    description: Markup-based typesetting system
+    enabled: {{ ne .profile "minimal" }}
+    type: brew
   # tz: # tzupdate
   #   enabled: {{ and (eq .osIDLike "arch" "darwin") (ne .profile "minimal") }}
   #   # nameOverwrite:

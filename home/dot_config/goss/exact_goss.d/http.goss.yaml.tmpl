@@ -1,7 +1,13 @@
 {{- $checks := dict -}}
+{{- $autostart := dict
+  "otel" (env "OTEL_APPLY_AUTOSTART")
+  "oage" (env "OAGE_APPLY_AUTOSTART") -}}
 {{- if and (hasKey . "caddy") (hasKey .caddy "sites") -}}
 {{- range $name, $site := .caddy.sites -}}
-{{- if not (get $.features (get $site "feature")) }}{{ continue }}{{ end -}}
+{{- $feat := get $site "feature" -}}
+{{- if not (get $.features $feat) }}{{ continue }}{{ end -}}
+{{- /* skip liveness for stacks an apply leaves stopped */ -}}
+{{- if and (hasKey $autostart $feat) (ne (get $autostart $feat) "true") }}{{ continue }}{{ end -}}
 {{- if hasKey $site "enabled" }}{{ if not (get $site "enabled") }}{{ continue }}{{ end }}{{ end -}}
 {{- $health := get $site "liveness" -}}
 {{- if not $health }}{{ continue }}{{ end -}}

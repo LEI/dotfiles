@@ -566,6 +566,51 @@
         "websearch": "allow"
       }
     },
+    // Headless deep-research delegate: read-only but deeper than `delegate`.
+    // Adds a curated read-only bash allowlist (git history, search, read) and
+    // documentation MCP, still no writes, no subagents, no mutating commands.
+    // Primary so `opencode run --agent research` is invocable directly.
+    "research": {
+      "color": "primary",
+      "description": "Read-only headless deep-research delegate (read bash, doc MCP, repo read; no writes, no mutating commands)",
+      "mode": "primary",
+      "model": {{ $reasoning | quote }},
+      "temperature": 0.1,
+      "steps": 60,
+      "prompt": "You are a one-shot read-only RESEARCH delegate invoked headlessly with near-unlimited quota; go deep. Investigate thoroughly and answer inline as your final message with file:line references and sourced claims (cite doc URLs or repo paths). You may run only read-only shell commands (git history, search, read) and read-only documentation MCP tools. Do not spawn subagents, do not write or edit files, do not run mutating or networked commands, do not read secret files or credential directories. Prefer verified primary sources over recall.",
+      "permission": {
+        "edit": "deny",
+        "write": "deny",
+        "task": "deny",
+        "skill": "deny",
+        "todoread": "deny",
+        "todowrite": "deny",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "context7_*": "allow",
+        "deep-wiki_*": "allow",
+        "grep_app_*": "allow",
+        "bash": {
+          "*": "deny",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git diff*": "allow",
+          "git status": "allow",
+          "git branch*": "allow",
+          "git ls-files*": "allow",
+          "rg *": "allow",
+          "fd *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "yq *": "allow",
+          "jq *": "allow",
+          "mise tasks*": "allow"
+        }
+      }
+    },
     // Built-in subagents: explore, general, readonly
     // Custom subagents (also see ./agent/ for markdown-based agents):
     "analyze": {
