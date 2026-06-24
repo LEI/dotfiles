@@ -199,11 +199,13 @@
 {{- end -}}
 {{- $_ := set $data "caddy" (dict "tailscale" (dict "oauthSecret" $caddyTailscaleOauthSecret)) }}
 
-{{- $btrfsBackupUuid := "" -}}
-{{- if and (not $headless) $features.btrfs -}}
-{{-   $btrfsBackupUuid = promptStringOnce . "btrfs.backup.deviceUuid" "btrfs backup partition UUID (leave empty to skip)" -}}
+{{- if $features.btrfs -}}
+{{-   $btrfsBackupUuid := "" -}}
+{{-   if not $headless -}}
+{{-     $btrfsBackupUuid = promptStringOnce . "btrfs.backup.deviceUuid" "btrfs backup partition UUID (leave empty to skip)" -}}
+{{-   end -}}
+{{-   $_ := set $data "btrfs" (dict "backup" (dict "deviceUuid" $btrfsBackupUuid)) -}}
 {{- end -}}
-{{- $_ := set $data "btrfs" (dict "backup" (dict "deviceUuid" $btrfsBackupUuid)) }}
 
 {{- $containerProvider := env "CONTAINER_PROVIDER" }}
 {{- if not $containerProvider }}
