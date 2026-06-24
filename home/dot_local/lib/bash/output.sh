@@ -16,14 +16,6 @@
 #
 # Usage:
 #   . tap.sh && . output.sh && output_init "$@"
-#
-# Bar selection:
-#   1. $CHECK_BARS env var (auto|always|never)
-#   2. --bars / --no-bars in script args (consumed by output_init)
-#   3. Auto: bars when stdout is a terminal
-#
-# Usage:
-#   . tap.sh && . output.sh && output_init "$@"
 #   output_plan <count> [skip_msg]
 #   output_ok <name> [directive]
 #   output_not_ok <name> [directive]
