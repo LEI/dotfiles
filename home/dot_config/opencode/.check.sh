@@ -297,11 +297,13 @@ check_endpoint() {
       set -- "$@" "(cached $cache_note)"
     fi
   fi
-  # Pre-fetch zai plan so it can be on the provider line
+  # Pre-fetch the coding-plan quota so the tier can be on the provider line.
+  # The monitor/usage endpoint reports the coding-plan subscription, so it
+  # belongs on zai-coding-plan, not the standard paas/v4 zai provider
   zai_plan=""
   zai_quota=""
-  if [ "$name" = "zai" ] && [ -n "$key" ]; then
-    cached_fetch zai 60 '.data' \
+  if [ "$name" = "zai-coding-plan" ] && [ -n "$key" ]; then
+    cached_fetch zai-coding-plan 60 '.data' \
       --header "Authorization: Bearer $key" \
       "https://api.z.ai/api/monitor/usage/quota/limit" >"$quota_file"
     zai_quota=$(cat "$quota_file")
@@ -330,7 +332,7 @@ check_endpoint() {
   TMP_FILES="$TMP_FILES $quota_diag"
   {
 
-    if [ "$name" = "zai" ] && [ -n "$zai_quota" ]; then
+    if [ "$name" = "zai-coding-plan" ] && [ -n "$zai_quota" ]; then
       show_quota < <(echo "$zai_quota" | jq -r '.data.limits[]? | [
       (if .unit == 3 then "5h quota"
        elif .unit == 5 then "monthly"
