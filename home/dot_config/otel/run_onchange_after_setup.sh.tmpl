@@ -1,5 +1,5 @@
 {{- $compose := joinPath .chezmoi.homeDir ".config/otel/compose.yaml" -}}
-{{- if stat $compose -}}
+{{- if and (stat $compose) (eq (env "OTEL_APPLY_AUTOSTART") "true") -}}
 {{- $prometheusConfig := joinPath .chezmoi.homeDir ".config/otel/prometheus.yaml" -}}
 {{- $alertRulesDir := joinPath .chezmoi.homeDir ".config/otel/exact_alerts" -}}
 {{- $otelCollectorConfig := joinPath .chezmoi.homeDir ".config/otel/otel-collector-config.yaml" -}}
@@ -31,6 +31,8 @@ compose() {
 }
 
 # compose hash: "{{ include $compose | fromYaml | toJson | sha256sum }}"
+# manual stack: `otel up` starts it. autostart is template-gated above on
+# OTEL_APPLY_AUTOSTART so run_onchange re-triggers when the flag flips
 compose up --detach --remove-orphans
 
 reload_if_changed() {
