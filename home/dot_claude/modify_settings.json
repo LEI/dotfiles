@@ -26,11 +26,21 @@
 {{- $providers := get $claude "providers" | default dict -}}
 {{- $provider := get $local "provider" -}}
 {{- $prefix := $provider | splitList "-" | first -}}
+{{- if and $provider (not (hasKey $providers $prefix)) -}}
+{{-   warnf "claude: provider %q not in providers, ignoring" $provider -}}
+{{-   $provider = "" -}}
+{{-   $prefix = "" -}}
+{{- end -}}
 {{- $endpoint := get $providers $prefix | default dict -}}
 
 {{- $sandboxEnabled := false -}}
 
-{{- $tier := get $local "tier" | default (eq .profile "work" | ternary "max" "pro") -}}
+{{- $tierDefault := eq .profile "work" | ternary "max" "pro" -}}
+{{- $tier := get $local "tier" | default $tierDefault -}}
+{{- if not (hasKey $tiers $tier) -}}
+{{-   warnf "claude: tier %q not in tiers, using %q" $tier $tierDefault -}}
+{{-   $tier = $tierDefault -}}
+{{- end -}}
 {{- $settings := get $tiers $tier | default dict -}}
 
 {{- $model := get $settings "model" -}}

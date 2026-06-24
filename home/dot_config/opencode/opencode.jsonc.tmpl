@@ -32,7 +32,12 @@
 {{- if stat $localYaml -}}
 {{-   $local = include $localYaml | fromYaml | default dict -}}
 {{- end -}}
-{{- $profile := get $local "profile" | default (eq .profile "work" | ternary "copilot-pro" "opencode-zen") -}}
+{{- $default := eq .profile "work" | ternary "copilot-pro" "opencode-zen" -}}
+{{- $profile := get $local "profile" | default $default -}}
+{{- if not (hasKey .ai.profiles $profile) -}}
+{{-   warnf "opencode: profile %q not in ai.profiles, using %q" $profile $default -}}
+{{-   $profile = $default -}}
+{{- end -}}
 
 {{- $preset := get .ai.profiles $profile | default dict -}}
 {{- $model := get $preset "coding" -}}

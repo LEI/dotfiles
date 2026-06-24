@@ -1,5 +1,11 @@
 {{- $pi := get . "pi" | default dict -}}
-{{- $profile := get .ai.profiles (get $pi "profile") | default dict -}}
+{{- $default := eq .profile "work" | ternary "copilot-pro" "opencode-zen" -}}
+{{- $profileName := get $pi "profile" | default $default -}}
+{{- if not (hasKey .ai.profiles $profileName) -}}
+{{-   warnf "pi: profile %q not in ai.profiles, using %q" $profileName $default -}}
+{{-   $profileName = $default -}}
+{{- end -}}
+{{- $profile := get .ai.profiles $profileName | default dict -}}
 {{- $parts := splitList "/" (get $profile "coding") -}}
 {{- $provider := first $parts -}}
 {{- $model := join "/" (rest $parts) -}}
