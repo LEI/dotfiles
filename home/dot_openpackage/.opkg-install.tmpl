@@ -12,6 +12,7 @@ opkg() {
 }
 
 opkg_installed() {
+  # probe: a missing package makes opkg list error, treat that as not installed
   opkg list --global --json "$1" 2>/dev/null |
     jq -e '[.data.resources[] | .resources[] | .name] | length > 0' \
       >/dev/null 2>&1
@@ -26,7 +27,7 @@ publish_package() {
   cd "$path" || return 1
   opkg publish --local --force || return 1
   if opkg_installed "$name"; then
-    opkg uninstall --global --recursive "$name" || true
+    opkg uninstall --global --recursive "$name" || exit_code=$?
   fi
 }
 
