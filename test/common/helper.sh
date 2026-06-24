@@ -202,7 +202,7 @@ plugin_cache_drift() (
           report+="  $label: ${rel:+$rel/}$name"$'\n'
           ;;
         esac
-      done < <(diff --brief --recursive --exclude=.in_use --exclude=.DS_Store "$src" "$cache")
+      done < <(diff -q -r -x .in_use -x .DS_Store "$src" "$cache") # short flags for BSD/macOS diff
       [ -n "$report" ] || continue
       printf '%s: cache out of sync with deployed source, refresh with:\n' "$id"
       printf 'claude plugin uninstall %s && claude plugin install %s\n' "$id" "$id"
