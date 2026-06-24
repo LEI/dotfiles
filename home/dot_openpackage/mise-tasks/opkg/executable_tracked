@@ -2,8 +2,13 @@
 #MISE alias="ot"
 #MISE description="Check if a package has any tracked resources"
 #USAGE arg "<name>" help="Package name (e.g. local)"
-# shellcheck disable=SC2154 # usage_name is injected by the USAGE arg spec
-opkg list --global --json "$usage_name" |
+# shellcheck disable=SC2154 # usage_name injected by USAGE spec; $1 fallback for direct runs
+name="${usage_name:-${1:-}}"
+if [ -z "$name" ]; then
+  echo "tracked: package name required (e.g. tracked local)" >&2
+  exit 2
+fi
+opkg list --global --json "$name" |
   jq -e '
     [.data.resources[] | .resources[] | select(.status == "tracked" or .status == "mixed")]
     | length > 0
