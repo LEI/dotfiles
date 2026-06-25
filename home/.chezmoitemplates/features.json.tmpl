@@ -37,17 +37,17 @@
     (not (eq .os "android" "windows"))
     .gui)
   "git" true
-  "go" false
+  "go" (and (ne .profile "minimal") (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "goose" $ai
   "goss" (ne .profile "minimal")
-  "gpg" false
+  "gpg" (and (ne .profile "minimal") (eq .osIDLike "arch" "darwin"))
   "helix" (and
     (not (and (eq .osIDLike "debian") (eq .libc "gnu")))
     (not (or .ephemeral .headless)))
   "i3" (and (eq .osIDLike "arch") .gui)
   "iterm2" (eq .os "darwin")
   "kb" (and (ne .profile "minimal") (eq .osIDLike "arch" "darwin" "fedora") (not (or .ephemeral .headless)))
-  "kube" false
+  "kube" (and (eq .profile "personal") (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "kilo" $ai
   "lla" false
   "logseq" (and (ne .profile "minimal") .gui (eq .osIDLike "arch" "darwin" "fedora") (not (or .ephemeral .headless)))
@@ -60,7 +60,7 @@
     (or (not (or .ephemeral .headless)) .wsl))
   "node" (and
     (not (eq .osIDLike "alpine"))
-    (not (or .ephemeral .headless)))
+    (or (eq .os "android") (not (or .ephemeral .headless))))
   "nushell" .gui
   "oage" (and $ai (or $docker $podman))
   "ollama" $ollama
@@ -75,8 +75,8 @@
   "qdrant" (or $mlx $ollama)
   "rest" false
   "ripgrep" true
-  "ruby" false
-  "rust" false
+  "ruby" (and (ne .profile "minimal") (not (eq .os "windows")) (not (or .ephemeral .headless)))
+  "rust" (and (ne .profile "minimal") (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "sh" (or .ci .ephemeral (ne .profile "minimal"))
   "sheldon" (ne .os "windows")
   "shpool" false
@@ -87,7 +87,7 @@
   "sway" false
   "tailscale" (and (ne .os "android") (eq .profile "personal") (not (or .ephemeral .headless)))
   "tmux" (eq .osIDLike "alpine" "android" "arch" "darwin" "debian" "fedora")
-  "tofu" false
+  "tofu" (and (ne .profile "minimal") (eq .osIDLike "arch" "darwin"))
   "toolbox" (eq .osIDLike "fedora")
   "topgrade" (and .gui (or (eq .os "android") (ne .libc "musl")))
   "vim" (and
@@ -103,24 +103,14 @@
   "btrfs" (and (eq .osIDLike "fedora") (ne .variantID "") (not .ephemeral) (lookPath "btrfs" | isExecutable))
 ) -}}
 {{- /* "node" (eq .osIDLike "android" "arch" "darwin" "debian" "fedora" "windows")*/ -}}
-
-{{- if ne .profile "minimal" }}
-{{- $features = mergeOverwrite $features (dict
-  "go" (and (eq .osIDLike "alpine" "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
-  "gpg" (eq .osIDLike "arch" "darwin")
-  "kube" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
-  "ruby" (and (not (eq .os "windows")) (not (or .ephemeral .headless)))
-  "rust" (and (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
-  "tofu" (eq .osIDLike "arch" "darwin")
-) -}}
 {{- /* "lla" (eq .osID "arch" "darwin") */ -}}
-{{- end }}
 
 {{- if eq .osID "alpine" }}
 {{- $features = mergeOverwrite $features (dict
 ) -}}
 {{- else if eq .osID "android" }}
 {{- $features = mergeOverwrite $features (dict
+  "claude" true
 ) -}}
 {{- else if eq .osIDLike "arch" }}
 {{- $features = mergeOverwrite $features (dict

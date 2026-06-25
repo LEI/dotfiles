@@ -143,13 +143,15 @@ repos:
 
   # https://docs.zizmor.sh/integrations/#pre-commit
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.23.1
+    rev: v1.26.1
     hooks:
       - id: zizmor
+        language: system
         args:
           - --persona=auditor
           - --min-severity=medium
           - --no-progress
+          - --no-online-audits
         files: ^.github/workflows/.*\.ya?ml$
 
   # Project-specific

@@ -4,7 +4,7 @@ packages:
   mise:
     # FIXME(alpine): mise 2025.8.20 does not support named tasks
     # enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" "windows" }}'
-    enabled: '{{ not (eq .osIDLike "alpine" "android" "debian") }}'
+    enabled: '{{ not (eq .osIDLike "alpine" "debian") }}'
     nameOverwrite:
       windows: jdx.mise
     type: '{{ eq .osIDLike "fedora" "opensuse" "rhel" | ternary "brew" nil }}'

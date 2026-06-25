@@ -24,5 +24,10 @@ setopt HIST_VERIFY
 # Append history on shell exit instead of overwriting
 setopt APPEND_HISTORY
 
+{{- if .features.atuin }}
+# atuin owns history search, skip the per-prompt re-read
+setopt NO_SHARE_HISTORY
+{{- else }}
 # Share history between concurrent sessions
 setopt SHARE_HISTORY
+{{- end }}

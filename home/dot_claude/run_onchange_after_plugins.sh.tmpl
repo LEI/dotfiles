@@ -1,7 +1,7 @@
 {{- $data := includeTemplate "claude-plugins.tmpl" . | fromJson -}}
 {{- $marketplaces := $data.marketplaces -}}
 {{- $plugins := $data.plugins -}}
-#!/bin/bash
+#!{{ .prefix }}/usr/bin/env bash
 
 # marketplaces: {{ $marketplaces | toJson | sha256sum }}
 # plugins: {{ $plugins | toJson | sha256sum }}

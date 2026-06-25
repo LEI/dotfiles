@@ -119,7 +119,7 @@
     },
     {{- end }}
 
-    {{- if lookPath "flux-operator-mcp" | isExecutable }}
+    {{- if and .features.kube (lookPath "flux-operator-mcp" | isExecutable) }}
     "flux-operator": {
       "command": "flux-operator-mcp",
       "args": ["serve"],

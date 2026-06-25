@@ -9,7 +9,7 @@
   "grep_app"
 -}}
 
-{{- if and .features.kube (eq .profile "personal") -}}
+{{- if .features.kube -}}
 {{   $managed = concat $managed (list
   "flux-operator"
   "kubernetes"
@@ -22,7 +22,7 @@
 {{-     $_ := $servers | setValueAtPath . (index $mcp.servers .) -}}
 {{-   end -}}
 {{- end -}}
-#!/bin/bash
+#!{{ .prefix }}/usr/bin/env bash
 
 set -euo pipefail
 

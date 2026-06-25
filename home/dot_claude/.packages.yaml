@@ -1,12 +1,12 @@
 ---
-enabled: "{{ .features.ai }}"
+enabled: "{{ .features.claude }}"
 packages:
   # TODO: only if installed via brew
   # if [ "$(claude config set --global autoUpdates false)" = true ]; then
   #   claude config set --global autoUpdates false
   # fi
   claude-code:
-    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" "windows" }}'
+    enabled: '{{ eq .osIDLike "android" "arch" "darwin" "fedora" "windows" }}'
     nameOverwrite:
       mise: npm:@anthropic-ai/claude-code
       npm: "@anthropic-ai/claude-code"
@@ -33,8 +33,9 @@ packages:
     #
     #     # run mise use -g rpm:aaddrick/claude-desktop-debian
     #   fi
-    # WARN: requires recent node and no custom config location
+  # WARN: requires recent node and no custom config location
   claude-monitor:
+    enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" "windows" }}'
     type: uv
   cc-sessions:
     enabled: '{{ eq .osIDLike "arch" "darwin" "fedora" }}'

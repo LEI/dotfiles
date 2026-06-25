@@ -21,6 +21,8 @@ packages:
       mise: github:tummychow/git-absorb
       windows: tummychow.git-absorb
     type: '{{ and (ge (int .osVersion) 44) (eq .osID "fedora") | ternary "mise" nil }}'
+  git-bug:
+    type: brew
   # git-cal:
   git-extras:
     enabled: '{{ not (eq .osIDLike "alpine" "opensuse" "windows") }}'
@@ -53,4 +55,9 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
     # type: brew
   zizmor:
-    type: brew
+    # zizmor has no musl build, so alpine falls through to apk instead of mise
+    # android has no compatible asset, so skip it entirely
+    enabled: '{{ ne .osID "android" }}'
+    nameOverwrite:
+      mise: aqua:zizmorcore/zizmor
+    type: '{{ not (eq .osIDLike "darwin" "alpine") | ternary "mise" nil }}'

@@ -317,6 +317,12 @@ packages:
       arch: ipinfo-cli-bin
       windows: ipinfo.ipinfo
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+  it2ctl:
+    description: iTerm2 control CLI; private git+ssh, drives iTerm2
+    enabled: {{ and .features.iterm2 (ne .profile "minimal") (not (or .ephemeral .headless)) }}
+    nameOverwrite:
+      mise: pipx:git+ssh://git@github.com/LEI/it2ctl.git
+    type: mise
   json5:
     # WARN(mise): npm may be required but was not found
     enabled: {{ or .features.brew .features.node }} # .features.mise

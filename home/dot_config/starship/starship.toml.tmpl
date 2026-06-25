@@ -1,6 +1,7 @@
 {{- $config := includeTemplate "dot_config/starship/.starship.yaml" . | fromYaml -}}
 
 {{- if lookPath "starship" | isExecutable -}}
+{{/*- FIXME: (starship::config): Error in 'StarshipRoot' at 'battery': Unknown key -*/}}
 {{- $preset := get (dict
   "font" "nerd-font-symbols"
   "text" "no-nerd-font"

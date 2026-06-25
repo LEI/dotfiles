@@ -18,6 +18,7 @@
 
 {{- $gossDir := joinPath .chezmoi.homeDir ".config/goss" -}}
 {{- $src := joinPath .chezmoi.sourceDir "dot_config" -}}
+{{- $diskUsageMax := 99 -}}
 {{- $gossDirFiles := glob (joinPath $gossDir "goss.d/*.goss.yaml") -}}
 {{- $featureFiles := list -}}
 {{- range glob (joinPath $src "*/.goss.yaml") -}}
@@ -89,7 +90,12 @@ mount:
     exists: true
 {{- if not $rootImmutable }}
     usage:
-      lt: 95
+      lt: {{ $diskUsageMax }}
+{{- end }}
+{{- /* macOS Data volume shares the / APFS free-space pool, so check existence only, not a redundant usage matcher */ -}}
+{{- if eq .os "darwin" }}
+  /System/Volumes/Data:
+    exists: true
 {{- end }}
 {{- if $rootImmutable }}
   {{ env "HOME" | dir }}:
@@ -98,7 +104,7 @@ mount:
     opts:
       - rw
     usage:
-      lt: 95
+      lt: {{ $diskUsageMax }}
 {{- end }}
 
 # package:

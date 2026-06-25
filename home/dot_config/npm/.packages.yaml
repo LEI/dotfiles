@@ -11,7 +11,7 @@ packages:
     version: lts # {{ `{{ env['NODE_VERSION'] | default(value='lts') }}` }}
     type: mise
   nodejs:
-    enabled: '{{ eq .osIDLike "alpine" "windows" }}'
+    enabled: '{{ eq .osIDLike "alpine" "android" "windows" }}'
     nameOverwrite:
       alpine: node
       # android: nodejs # -lts

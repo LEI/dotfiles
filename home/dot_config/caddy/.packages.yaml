@@ -13,11 +13,12 @@ packages:
     #   - caddy trust --ca local
     #   - sudo brew services start caddy
   xcaddy:
+    # Custom build only for the tailscale module, else brew caddy
+    enabled: '{{ .features.tailscale }}'
     nameOverwrite:
       mise: github:caddyserver/xcaddy
     type: mise
     after_script: |
-      # TODO: only if tailscale feature is enabled
       dry_run xcaddy build \
         --with github.com/tailscale/caddy-tailscale \
         --output "$HOME/.local/bin/caddy"

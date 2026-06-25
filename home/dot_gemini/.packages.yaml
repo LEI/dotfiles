@@ -3,4 +3,7 @@ enabled: "{{ .features.gemini }}"
 packages:
   # https://aistudio.google.com/app/apikey
   gemini-cli:
-    type: brew
+    nameOverwrite:
+      mise: npm:@google/gemini-cli
+      npm: "@google/gemini-cli"
+    type: '{{ .features.mise | ternary "mise" "npm" }}'
