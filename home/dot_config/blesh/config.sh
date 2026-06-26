@@ -52,7 +52,8 @@ bleopt exec_exit_mark=
 # bleopt edit_marker=
 # bleopt edit_marker_error=
 
-# bleopt history_erasedups_limit=100
+# empty: dedupe against full history, not just the current session
+bleopt history_erasedups_limit=
 bleopt history_share=1
 
 # {{- if lookPath "fzf" | isExecutable }}
