@@ -5,7 +5,7 @@ packages:
     description: Interpreter for PostScript and PDF
     type: brew
   mmdc:
-    # enabled: "{{ .features.node }}"
+    enabled: '{{ ne .os "android" }}' # FIXME(pupeteer): current platform not supported
     nameOverwrite:
       mise: npm:@mermaid-js/mermaid-cli
       npm: "@mermaid-js/mermaid-cli"

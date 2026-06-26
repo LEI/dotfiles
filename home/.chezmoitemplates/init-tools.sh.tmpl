@@ -43,7 +43,8 @@ unset _tool
     | replace (joinPath $.chezmoi.sourceDir "dot_config") "$XDG_CONFIG_HOME"
     | replace (joinPath $.chezmoi.sourceDir) "$HOME") -}}
 {{- end }}
-for _feat in {{ $files | sortAlpha | join " \\\n  " }}; do
+for _feat in \
+  {{ $files | sortAlpha | join " \\\n  " }}; do
   if ! [ -f "$_feat" ]; then
     echo "warning: init file not found: $_feat" >&2
     continue
