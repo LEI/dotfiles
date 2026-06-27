@@ -256,6 +256,27 @@ validate_file() {
       echo "$prog: downloaded and modified schema: $schema_path" >&2
     fi
     ;;
+  https://opencode.ai/config.json)
+    # opencode's schema pins model fields to the models.dev enum, a closed
+    # catalog that lags real availability, so valid model ids fail until it
+    # catches up. Strip only that $ref so model strings validate as plain strings
+    if [ -z "${tmp_dir:-}" ]; then
+      tmp_dir=$(mktemp -d)
+      # shellcheck disable=SC2064
+      trap "rm -rf '$tmp_dir'" EXIT
+    fi
+    schema_path="$tmp_dir/schema.json"
+    if ! curl -fsSL "$schema" -o "$schema_path"; then
+      echo "FAIL $path schema=$schema: failed to download schema"
+      return 1
+    fi
+    jq 'walk(if type == "object" and .["$ref"] == "https://models.dev/model-schema.json#/$defs/Model" then {"type": "string"} else . end)' \
+      "$schema_path" >"$schema_path.tmp"
+    mv "$schema_path.tmp" "$schema_path"
+    if [ "$verbosity" -ge 2 ]; then
+      echo "$prog: downloaded and modified schema: $schema_path" >&2
+    fi
+    ;;
   esac
 
   if [ "$verbosity" -ge 2 ]; then
