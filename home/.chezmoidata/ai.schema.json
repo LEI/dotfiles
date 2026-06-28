@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["ai"],
+  "properties": {
+    "ai": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["deny", "ask"],
+          "properties": {
+            "deny": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "ask": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
