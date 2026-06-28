@@ -224,7 +224,6 @@ quota_openrouter() {
     echo "$quota" | jq -r '
     .data |
     if .label then "label: \(.label)" else empty end,
-    if .rate_limit then "rate_limit: \(.rate_limit.requests) req/\(.rate_limit.interval)" else empty end,
     "usage: total=\(.usage // 0) daily=\(.usage_daily // 0) weekly=\(.usage_weekly // 0) monthly=\(.usage_monthly // 0)",
     "byok: total=\(.byok_usage // 0) daily=\(.byok_usage_daily // 0) weekly=\(.byok_usage_weekly // 0) monthly=\(.byok_usage_monthly // 0)"
   ' 2>/dev/null | while IFS= read -r line; do
