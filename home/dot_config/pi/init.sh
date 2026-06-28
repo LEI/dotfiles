@@ -74,9 +74,9 @@ pi-run() {
     pi "${@:---continue}"
 }
 
-# Built-in sandox extension: isolates tool calls in Alpine, Pi runs on host
-# Requires: sandox extension enabled, sandbox container pre-created
-pi-sandox() {
+# Built-in sandbox extension: isolates tool calls in Alpine, Pi runs on host
+# Requires: sandbox extension enabled, sandbox container pre-created
+pi-sandbox() {
   pi-local --sandbox=docker:pi-sandbox "${@:---continue}"
 }
 
