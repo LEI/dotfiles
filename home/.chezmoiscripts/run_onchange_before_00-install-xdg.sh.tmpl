@@ -54,6 +54,14 @@ if [ -d ~/go ] && ! [ -d "$GOPATH" ]; then
 fi
 {{- end }}
 
+{{- if .features.nix }}
+
+# Shared single-user nix store, bind-mounted to /nix in each distrobox
+if [ ! -d "$XDG_DATA_HOME/nix" ]; then
+  dry_run mkdir -p "$XDG_DATA_HOME/nix"
+fi
+{{- end }}
+
 {{- if .features.node }}
 
 # if [ -d ~/.node_modules ] && ! [ -d "$npm_config_prefix" ]; then
