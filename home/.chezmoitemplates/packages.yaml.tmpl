@@ -719,7 +719,7 @@ packages:
     type: aur
   trash-cli: # trash-put/list/restore/empty; native on Fedora/Debian/Alpine
     description: freedesktop.org trash CLI for non-Arch Linux
-    enabled: {{ and (eq .os "linux") (ne .osIDLike "arch") (not (or .ephemeral .headless)) (ne .profile "minimal") }}
+    enabled: {{ and (eq .os "linux") (ne .osIDLike "arch") (or .vm (and (not (or .ephemeral .headless)) (ne .profile "minimal"))) }}
   macos-trash:
     description: macOS native trash with Finder Put Back
     enabled: {{ eq .os "darwin" }}
