@@ -8,6 +8,21 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "providers": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        },
+        "models": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        },
         "permissions": {
           "type": "object",
           "additionalProperties": false,
