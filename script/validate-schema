@@ -207,8 +207,20 @@ validate_file() {
   fi
 
   if [ -z "$schema" ]; then
-    echo "SKIP $path # no \$schema"
-    return 0
+    # No inline $schema: fall back to a colocated <stem>.schema.json sibling.
+    # Lets pure-data files (e.g. .chezmoidata) validate without carrying a
+    # $schema key, and the convention travels with the file if it moves.
+    local dir stem sibling
+    dir="${path%/*}"
+    [ "$dir" = "$path" ] && dir="."
+    stem="$(basename "$path" ".$ext")"
+    sibling="$dir/$stem.schema.json"
+    if [ "$sibling" != "$path" ] && [ -f "$sibling" ]; then
+      schema="$sibling"
+    else
+      echo "SKIP $path # no \$schema"
+      return 0
+    fi
   fi
 
   case "$ext" in
