@@ -58,6 +58,7 @@
   "neovim" (and
     (not (eq .osIDLike "alpine"))
     (or (not (or .ephemeral .headless)) .wsl))
+  "nix" (and (not .ephemeral) (ne .profile "minimal"))
   "node" (and
     (not (eq .osIDLike "alpine"))
     (or (eq .os "android") (not (or .ephemeral .headless))))
