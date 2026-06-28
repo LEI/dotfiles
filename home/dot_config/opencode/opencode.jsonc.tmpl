@@ -102,19 +102,36 @@
       "*": "allow",
       "*.env": "deny",
       "*.env.*": "deny",
-      "*.env.example": "allow"
+      "*.env.example": "allow",
+{{- range $.ai.permissions.deny }}
+      "{{ . }}": "deny",
+{{- end }}
+{{- range $.ai.permissions.ask }}
+      "{{ . }}": "ask",
+{{- end }}
     },
     // All file modifications (covers edit, write, patch, multiedit)
     "edit": {
       "*": "ask",
       "*.env": "deny",
       "*.env.*": "deny",
-      "*.env.example": "allow"
+      "*.env.example": "allow",
+{{- range $.ai.permissions.deny }}
+      "{{ . }}": "deny",
+{{- end }}
     },
     // File globbing (matches the glob pattern)
     "glob": "allow",
     // Content search (matches the regex pattern)
-    "grep": "allow",
+    "grep": {
+      "*": "allow",
+{{- range $.ai.permissions.deny }}
+      "{{ . }}": "deny",
+{{- end }}
+{{- range $.ai.permissions.ask }}
+      "{{ . }}": "ask",
+{{- end }}
+    },
     // Listing files in a directory (matches the directory path)
     "list": "allow",
     // Running shell commands (matches parsed commands like git status --porcelain)

@@ -441,3 +441,28 @@ ai:
       coding: mistral/devstral-small-latest
       fast: mistral/mistral-small-latest
       reasoning: mistral/mistral-large-latest
+
+  # Shared secret-path access policy for coding agents. Each harness permission
+  # template renders these lists into its own native syntax (Claude Code
+  # settings, opencode permission block). Scope is limited to secret paths on
+  # purpose; the rest of each harness permission system stays harness-specific.
+  # Validated by the colocated ai.schema.json (deny/ask only, strict block).
+  permissions:
+    # Raw key material: deny in every mode, the agent never needs to read it.
+    deny:
+      - "~/.ssh/**"
+      - "~/.gnupg/**"
+      - "**/*.key"
+      - "**/*.pem"
+      - "**/*.pfx"
+    # Token stores and encrypted files: ask every time. Ask is honored in all
+    # modes including bypassPermissions, so the agent reaches them only on
+    # approval. Match the secret container anywhere instead of hardcoding
+    # ~/.config/<tool>.
+    # TODO relocate these badly placed secrets into a secrets.d or sops form so
+    # the generic globs below cover them: ~/.config/oage/secrets (compose
+    # stack), ~/.config/otel and ~/.config/environment.d/otel.conf (OTLP tokens)
+    ask:
+      - "**/*.sops.*"
+      - "**/secrets/**"
+      - "**/secrets.d/**"

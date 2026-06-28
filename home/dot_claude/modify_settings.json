@@ -298,25 +298,15 @@
       "mcp__open-notebook__*"
     ],
     "deny": [
-      "Edit(**/*.key)",
-      "Edit(**/*.pem)",
-      "Edit(**/*.pfx)",
-      "Edit(./secrets/**)",
-      "Edit(~/.gnupg/**)",
-      "Edit(~/.ssh/**)",
-      "Read(**/*.key)",
-      "Read(**/*.pem)",
-      "Read(**/*.pfx)",
+{{- range $.ai.permissions.deny }}
+      "Read({{ . }})",
+      "Edit({{ . }})",
+      "Write({{ . }})",
+{{- end }}
       "Read(./secrets/**)",
-      "Read(~/.gnupg/**)",
-      "Read(~/.ssh/**)",
-      "TodoWrite",
-      "Write(**/*.key)",
-      "Write(**/*.pem)",
-      "Write(**/*.pfx)",
+      "Edit(./secrets/**)",
       "Write(./secrets/**)",
-      "Write(~/.gnupg/**)",
-      "Write(~/.ssh/**)"
+      "TodoWrite"
     ],
     "ask": [
       "Bash(awk *> \"*)",
@@ -419,6 +409,11 @@
       "Write(~/.netrc)",
       "Write(~/.npmrc)",
       "Write(~/.pypirc)",
+{{- range $.ai.permissions.ask }}
+      "Read({{ . }})",
+      "Edit({{ . }})",
+      "Write({{ . }})",
+{{- end }}
       "mcp__grafana-admin__add_*",
       "mcp__grafana-admin__alerting_manage_*",
       "mcp__grafana-admin__create_*",
