@@ -390,9 +390,12 @@ sync_source() {
   [ "$verbosity" -ge 1 ] && info "syncing chezmoi to $src"
   : "${ssh_host:=$(vm ip "$name")}"
   vm_ssh "admin@$ssh_host" "mkdir -p \"$src\""
-  trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
+  if ! trace tar c .chezmoiroot .chezmoiversion .editorconfig .gitignore \
     .pre-commit-config.yaml mise.toml home script test |
-    vm_ssh "admin@$ssh_host" "tar x -C \"$src\""
+    vm_ssh "admin@$ssh_host" "tar x -C \"$src\""; then
+    err "tar sync to $src failed"
+    return 1
+  fi
 }
 
 # SSH into the guest using sshpass with the cirruslabs admin/admin default
