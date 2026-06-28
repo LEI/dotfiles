@@ -459,9 +459,8 @@ ai:
     # modes including bypassPermissions, so the agent reaches them only on
     # approval. Match the secret container anywhere instead of hardcoding
     # ~/.config/<tool>.
-    # TODO relocate these badly placed secrets into a secrets.d or sops form so
-    # the generic globs below cover them: ~/.config/oage/secrets (compose
-    # stack), ~/.config/otel and ~/.config/environment.d/otel.conf (OTLP tokens)
+    # TODO relocate machine-specific secret paths into a secrets.d or sops
+    # form so the generic globs below cover them
     ask:
       - "**/*.sops.*"
       - "**/secrets/**"

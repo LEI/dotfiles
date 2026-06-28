@@ -303,9 +303,6 @@
       "Edit({{ . }})",
       "Write({{ . }})",
 {{- end }}
-      "Read(./secrets/**)",
-      "Edit(./secrets/**)",
-      "Write(./secrets/**)",
       "TodoWrite"
     ],
     "ask": [
