@@ -27,16 +27,18 @@ humanize_secs() {
   fi
 }
 
-# format_reset <timestamp> [<now_epoch>]
-# Output: "until YYYY-MM-DD HH:MM (human_duration)"
+# format_reset <timestamp>
+# Output: "Resets <local date/time>" eg "Resets Jul 5, 4:59am"
+# Accepts ISO 8601 strings or bare Unix epoch integers
 # Set DATE env var (eg "gdate") for BSD compat
 format_reset() {
   ts="$1"
   [ -z "$ts" ] && return 1
-  now="${2:-$(date +%s)}"
+  # Bare epoch integers (9+ digits) need an @ prefix for GNU date
+  case "$ts" in
+  [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*) ts="@$ts" ;;
+  esac
   reset_epoch=$(${DATE:-date} -d "$ts" +%s 2>/dev/null) || return 1
-  reset_fmt=$(${DATE:-date} -d "$ts" "+%Y-%m-%d %H:%M" 2>/dev/null) || return 1
-  diff=$((reset_epoch - now))
-  [ "$diff" -lt 0 ] && diff=0
-  echo "until $reset_fmt ($(humanize_secs $diff))"
+  reset_fmt=$(${DATE:-date} -d "@$reset_epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
+  echo "Resets $reset_fmt"
 }

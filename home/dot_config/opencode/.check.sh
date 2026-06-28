@@ -155,7 +155,7 @@ quota_anthropic() {
     (.value.resets_at // "")
   ] | @tsv' 2>/dev/null)
   if [ "$from_cache" = "1" ]; then
-    output_diag "(cached $(cache_age_human "$cache_path"))"
+    output_diag "(quota cached $(cache_age_human "$cache_path"))"
   fi
   echo "$quota" | jq -r '
   .extra_usage |
@@ -203,7 +203,7 @@ quota_synthetic() {
     output_diag "subscription: unlimited"
   fi
   if [ "$from_cache" = "1" ]; then
-    output_diag "(cached $(cache_age_human "$cache_path"))"
+    output_diag "(quota cached $(cache_age_human "$cache_path"))"
   fi
 }
 
@@ -232,7 +232,7 @@ quota_openrouter() {
     done
   fi
   if [ "$from_cache" = "1" ]; then
-    output_diag "(cached $(cache_age_human "$cache_path"))"
+    output_diag "(quota cached $(cache_age_human "$cache_path"))"
   fi
 }
 
@@ -271,7 +271,7 @@ quota_openai() {
         show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
       fi
       if [ "$from_cache" = "1" ]; then
-        output_diag "(cached $(cache_age_human "$cache_path"))"
+        output_diag "(quota cached $(cache_age_human "$cache_path"))"
       fi
     fi
   } >"$openai_diag"
@@ -412,8 +412,12 @@ check_endpoint() {
     cache_set "$models_cache" <"$body"
   fi
 
-  # Models diagnostic (before pre-fetch so cache_path stays valid for display blocks)
-  set -- "status=$status" "duration=${duration}ms"
+  # Models diagnostic; omit status and duration when served from cache
+  if [ "$from_models_cache" = "1" ]; then
+    set --
+  else
+    set -- "status=$status" "duration=${duration}ms"
+  fi
   if [ -n "$model_count" ]; then
     set -- "$@" "models=$model_count"
   fi
@@ -471,7 +475,7 @@ check_endpoint() {
       (if .nextResetTime > 0 then (.nextResetTime / 1000 | floor | strftime("%Y-%m-%dT%H:%M:%SZ")) else "" end)
     ] | @tsv' 2>/dev/null)
       if [ "$from_cache" = "1" ]; then
-        output_diag "(cached $(cache_age_human "$cache_path"))"
+        output_diag "(quota cached $(cache_age_human "$cache_path"))"
       fi
     fi
 
