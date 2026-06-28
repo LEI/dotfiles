@@ -459,8 +459,6 @@ ai:
     # modes including bypassPermissions, so the agent reaches them only on
     # approval. Match the secret container anywhere instead of hardcoding
     # ~/.config/<tool>.
-    # TODO relocate machine-specific secret paths into a secrets.d or sops
-    # form so the generic globs below cover them
     ask:
       - "**/*.sops.*"
       - "**/secrets/**"
