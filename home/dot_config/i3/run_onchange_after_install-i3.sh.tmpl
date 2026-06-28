@@ -15,13 +15,6 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 {{- end }}
 run i3 -C -c ~/.config/i3/config
 
-{{- if lookPath "thunar" | isExecutable }}
-explorer=thunar.desktop
-if [ "$(xdg-mime query default inode/directory)" != "$explorer" ]; then
-  run xdg-mime default "$explorer" inode/directory
-fi
-{{- end }}
-
 {{- range $key, $value := dig "i3" "environment" dict . }}
 
 # if ! grep -q '^{{ $key }}=' /etc/environment; then

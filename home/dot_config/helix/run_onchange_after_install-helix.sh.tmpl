@@ -50,10 +50,3 @@ fi
 
 # run hx --grammar fetch
 # run timeout 5m hx --grammar build
-
-{{- if lookPath "xdg-mime" | isExecutable }}
-
-if [ "$(xdg-mime query default text/plain)" != "Helix.desktop" ]; then
-  run xdg-mime default Helix.desktop text/plain
-fi
-{{- end }}

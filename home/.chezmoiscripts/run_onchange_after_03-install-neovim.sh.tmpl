@@ -18,10 +18,3 @@ if [ "$(nvim --headless -u NONE "+echo has('nvim-0.8')" +qa 2>&1)" = 1 ]; then
   run timeout 5m nvim --headless -c 'lua local ok = pcall(vim.cmd, "LazyInstall!"); os.exit(ok and 0 or 1)'
   echo
 fi
-
-{{- if and (not .features.helix) (lookPath "xdg-mime" | isExecutable) }}
-
-if [ "$(xdg-mime query default text/plain)" != "nvim.desktop" ]; then
-  run xdg-mime default nvim.desktop text/plain
-fi
-{{- end }}

@@ -1,0 +1,20 @@
+---
+mimeapps:
+  # Handlers permitted to appear in mimeapps.list; any other handler fails the run
+  allowedHandlers:
+    - claude-code-url-handler.desktop
+    - com.mitchellh.ghostty.desktop
+    - Helix.desktop
+    - nvim-terminal.desktop
+    - org.inkscape.Inkscape.desktop
+  # MIME type to handler map; rendered as [Default Applications] entries
+  # Keys are sorted alphabetically for deterministic file output
+  mime:
+    image/svg+xml: org.inkscape.Inkscape.desktop
+    text/markdown: nvim-terminal.desktop
+    text/plain: Helix.desktop
+    text/x-typst: nvim-terminal.desktop
+  # URL scheme to handler map; each key is rendered as x-scheme-handler/<key>
+  schemes:
+    claude-cli: claude-code-url-handler.desktop
+    terminal: com.mitchellh.ghostty.desktop

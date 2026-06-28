@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["mimeapps"],
+  "properties": {
+    "mimeapps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowedHandlers", "mime", "schemes"],
+      "properties": {
+        "allowedHandlers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Handlers permitted in mimeapps.list; any other handler fails the run"
+        },
+        "mime": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "MIME type to .desktop handler map for [Default Applications]"
+        },
+        "schemes": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "URL scheme to .desktop handler map; rendered as x-scheme-handler/<scheme>"
+        },
+        "added": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Optional [Added Associations] entries; same key format as mime"
+        }
+      }
+    }
+  }
+}

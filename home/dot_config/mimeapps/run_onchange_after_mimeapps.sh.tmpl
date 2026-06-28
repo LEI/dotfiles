@@ -1,0 +1,90 @@
+{{- if and .gui (eq .os "linux") -}}
+{{- $mimeapps := .mimeapps -}}
+#!/bin/sh
+
+# associations: {{ $mimeapps | toJson | sha256sum }}
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+out="$HOME/.config/mimeapps.list"
+
+changed=0
+unchanged=0
+fail=0
+unmanaged=0
+
+# Count changed vs unchanged by checking each desired entry in the current file.
+# Entries are expanded by the template; no runtime string-building needed.
+if [ -f "$out" ]; then
+  {{- range ($mimeapps.mime | keys | sortAlpha) }}
+  if grep -qF '{{ . }}={{ index $mimeapps.mime . }}' "$out"; then
+    unchanged=$((unchanged + 1))
+  else
+    changed=$((changed + 1))
+  fi
+  {{- end }}
+  {{- range ($mimeapps.schemes | keys | sortAlpha) }}
+  if grep -qF 'x-scheme-handler/{{ . }}={{ index $mimeapps.schemes . }}' "$out"; then
+    unchanged=$((unchanged + 1))
+  else
+    changed=$((changed + 1))
+  fi
+  {{- end }}
+else
+  changed={{ add (len $mimeapps.mime) (len $mimeapps.schemes) }}
+fi
+
+# Regenerate mimeapps.list from scratch; stale entries are pruned by omission
+{
+  printf '[Default Applications]\n'
+  {{- range ($mimeapps.mime | keys | sortAlpha) }}
+  printf '%s=%s\n' '{{ . }}' '{{ index $mimeapps.mime . }}'
+  {{- end }}
+  {{- range ($mimeapps.schemes | keys | sortAlpha) }}
+  printf 'x-scheme-handler/%s=%s\n' '{{ . }}' '{{ index $mimeapps.schemes . }}'
+  {{- end }}
+  {{- if index $mimeapps "added" }}
+  printf '\n[Added Associations]\n'
+  {{- range (index $mimeapps "added" | keys | sortAlpha) }}
+  printf '%s=%s\n' '{{ . }}' '{{ index $mimeapps.added . }}'
+  {{- end }}
+  {{- end }}
+} >"$out"
+
+# Allowlist guard: any handler not declared in allowedHandlers is unmanaged.
+# This catches rogue app installs (e.g. Flatpaks) that write to mimeapps.list directly.
+# Unlike the duti script, URL scheme handlers are included in the check.
+bad=$(
+  grep -v '^\[' "$out" |
+    grep -v '^$' |
+    sed 's/^[^=]*=//' |
+    tr ';' '\n' |
+    grep -v '^$' |
+    awk '
+      BEGIN {
+        {{- range $mimeapps.allowedHandlers }}
+        ok["{{ . }}"] = 1
+        {{- end }}
+      }
+      !($0 in ok) { print }
+    '
+)
+
+if [ -n "$bad" ]; then
+  msg "Handlers outside allowlist:"
+  printf '%s\n' "$bad" | while IFS= read -r h; do
+    msg "  $h"
+  done
+  unmanaged=$(printf '%s\n' "$bad" | grep -c '.')
+fi
+
+msg "$changed changed, $unchanged unchanged, $fail failed, $unmanaged unmanaged"
+
+[ "$fail" -eq 0 ] && [ "$unmanaged" -eq 0 ]
+{{ end -}}
