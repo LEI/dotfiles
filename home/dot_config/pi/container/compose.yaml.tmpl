@@ -40,12 +40,14 @@ services:
 
       # https://www.npmjs.com/package/pi-telemetry-otel
       # - OTEL_EXPORTER_OTLP_HEADERS
+      {{- if .features.otel }}
       - OTEL_SERVICE_NAME=${PI_AGENT_CHAIN:-pi-agent}
-      {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector") | fromYaml -}}
+      {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector") | fromYaml }}
       {{- range $key, $value := $otel }}
       - {{ $key }}={{ $value }}
       {{- end }}
       - OTEL_RESOURCE_ATTRIBUTES=user=coder,workspace=${WORKSPACE:?}
+      {{- end }}
       # - PI_AGENT_TRACE_ID
       # - PI_AGENT_SPAN_ID
 

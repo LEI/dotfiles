@@ -16,6 +16,7 @@
   ],
   "remoteUser": "root",
   "containerEnv": {
+{{- if .features.otel -}}
 {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "endpoint" "otel-collector") | fromYaml -}}
 {{- $keys := keys $otel | sortAlpha -}}
 {{- range $i, $key := $keys -}}
@@ -23,5 +24,6 @@
     "{{ $key }}": "{{ index $otel $key }}"
 {{- end }},
     "OTEL_SERVICE_NAME": "pi-agent"
+{{- end }}
   }
 }

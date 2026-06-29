@@ -1,11 +1,13 @@
-{{- $otel := includeTemplate "otel.yaml.tmpl" (dict "protocol" "http/protobuf") | fromYaml -}}
 # shellcheck shell=sh
 
 goose() {
   # FIXME(134): set -m  # Enable job control
+  {{- if .features.otel }}
   export OTEL_SERVICE_NAME=goose
+  {{- $otel := includeTemplate "otel.yaml.tmpl" (dict "protocol" "http/protobuf") | fromYaml }}
   {{- range $key, $value := $otel }}
   export {{ $key }}={{ $value }}
+  {{- end }}
   {{- end }}
   if [ $# -eq 0 ]; then
     set -- session --resume

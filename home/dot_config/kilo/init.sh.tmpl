@@ -1,13 +1,15 @@
-{{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
 # shellcheck shell=sh
 
 kilo() {
   if [ $# -eq 0 ]; then
     set -- --continue
   fi
+  {{- if .features.otel }}
   export OTEL_SERVICE_NAME=kilo
+  {{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml }}
   {{- range $key, $value := $otel }}
   export {{ $key }}={{ $value }}
+  {{- end }}
   {{- end }}
   command kilo "$@"
 }
