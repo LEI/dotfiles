@@ -76,11 +76,26 @@ else
   fi
 
   RUSTUP_INIT="$BIN_DIR/rustup-init"
+  RUSTUP_DIST="https://static.rust-lang.org/rustup/dist/$NAME"
 
   # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
   #   | sh -s -- --component rust-analyzer --quiet -y
 
-  dry_run curl -LSfs "https://static.rust-lang.org/rustup/dist/$NAME/rustup-init" -o "$RUSTUP_INIT"
+  dry_run curl -LSfs "$RUSTUP_DIST/rustup-init" -o "$RUSTUP_INIT"
+
+  # Verify the installer against the published checksum before making it executable
+  if ! truthy "${DRY_RUN:-}"; then
+    expected_sha="$(curl -LSfs "$RUSTUP_DIST/rustup-init.sha256" | cut -d' ' -f1)"
+    if has sha256sum; then
+      actual_sha="$(sha256sum "$RUSTUP_INIT" | cut -d' ' -f1)"
+    else
+      actual_sha="$(shasum -a 256 "$RUSTUP_INIT" | cut -d' ' -f1)"
+    fi
+    if [ -z "$expected_sha" ] || [ "$expected_sha" != "$actual_sha" ]; then
+      die "rustup-init checksum mismatch: expected ${expected_sha:-none}, got ${actual_sha:-none}"
+    fi
+  fi
+
   dry_run chmod +x "$RUSTUP_INIT"
   {{- if .features.neovim }}
   RUSTUP_INIT_ARGS=""
