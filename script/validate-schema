@@ -207,10 +207,10 @@ validate_file() {
   fi
 
   if [ -z "$schema" ]; then
-    # No inline $schema: fall back to a <stem>.schema.json sibling, first
-    # colocated, then under the repo-root schema/ tree mirroring the source
-    # path. Chezmoi data files (.chezmoidata) keep their schema in schema/ so
-    # chezmoi does not ingest it as template data, see schema/README.md.
+    # No inline $schema: try a <stem>.schema.json sibling, then the repo-root
+    # schema/ mirror. A schema for a file inside a .chezmoidata/ dir must stay
+    # under schema/ because chezmoi ingests that dir as data and a colocated
+    # sibling would leak into the namespace
     local dir stem sibling central
     dir="${path%/*}"
     [ "$dir" = "$path" ] && dir="."

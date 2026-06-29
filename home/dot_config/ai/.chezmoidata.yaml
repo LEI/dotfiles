@@ -446,7 +446,6 @@ ai:
   # template renders these lists into its own native syntax (Claude Code
   # settings, opencode permission block). Scope is limited to secret paths on
   # purpose; the rest of each harness permission system stays harness-specific.
-  # Validated by schema/home/.chezmoidata/ai.schema.json (deny/ask only).
   permissions:
     # Raw key material: deny in every mode, the agent never needs to read it.
     deny:
