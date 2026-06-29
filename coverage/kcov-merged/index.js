@@ -7,13 +7,13 @@ var data = {files:[
 {"link":"require.sh.9d229963.html","title":"require.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/require.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"5","total_lines" : "5"},
 {"link":"validate-blank.4434e4e6.html","title":"validate-blank","summary_name":"[...]/dotfiles/dotfiles/script/validate-blank","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"32","total_lines" : "32"},
 {"link":"executable_flush-dns.476221cb.html","title":"executable_flush-dns","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_flush-dns","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"18","total_lines" : "18"},
-{"link":"vm.2b185fd4.html","title":"vm","summary_name":"[...]/dotfiles/dotfiles/script/vm","covered_class":"lineNoCov","covered":"18.9","covered_lines":"75","uncovered_lines":"321","total_lines" : "396"},
+{"link":"vm.2b185fd4.html","title":"vm","summary_name":"[...]/dotfiles/dotfiles/script/vm","covered_class":"lineNoCov","covered":"18.8","covered_lines":"75","uncovered_lines":"324","total_lines" : "399"},
 {"link":"test.a83973ba.html","title":"test","summary_name":"[...]/dotfiles/dotfiles/script/test","covered_class":"lineNoCov","covered":"21.1","covered_lines":"12","uncovered_lines":"45","total_lines" : "57"},
 {"link":"executable_chezmoi-profile.adcda637.html","title":"executable_chezmoi-profile","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-profile","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"85","total_lines" : "85"},
 {"link":"bootstrap.6766eb9d.html","title":"bootstrap","summary_name":"[...]/dotfiles/dotfiles/script/bootstrap","covered_class":"linePartCov","covered":"37.9","covered_lines":"11","uncovered_lines":"18","total_lines" : "29"},
 {"link":"startup.f4c48cc.html","title":"startup","summary_name":"[...]/dotfiles/dotfiles/script/startup","covered_class":"linePartCov","covered":"72.7","covered_lines":"40","uncovered_lines":"15","total_lines" : "55"},
 {"link":"run.sh.c71e4772.html","title":"run.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/run.sh","covered_class":"lineNoCov","covered":"19.4","covered_lines":"6","uncovered_lines":"25","total_lines" : "31"},
-{"link":"validate-schema.cc478ce8.html","title":"validate-schema","summary_name":"[...]/dotfiles/dotfiles/script/validate-schema","covered_class":"linePartCov","covered":"28.1","covered_lines":"55","uncovered_lines":"141","total_lines" : "196"},
+{"link":"validate-schema.cc478ce8.html","title":"validate-schema","summary_name":"[...]/dotfiles/dotfiles/script/validate-schema","covered_class":"linePartCov","covered":"25.3","covered_lines":"55","uncovered_lines":"162","total_lines" : "217"},
 {"link":"clamp.sh.39e3ff81.html","title":"clamp.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/clamp.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"8","uncovered_lines":"0","total_lines" : "8"},
 {"link":"validate-blank.awk.5c6e101.html","title":"validate-blank.awk","summary_name":"[...]/dotfiles/dotfiles/script/validate-blank.awk","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"32","total_lines" : "32"},
 {"link":"executable_changelog.74449061.html","title":"executable_changelog","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_changelog","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
@@ -21,7 +21,7 @@ var data = {files:[
 {"link":"executable_k.de99099c.html","title":"executable_k","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_k","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"8","total_lines" : "8"},
 {"link":"executable_chezmoi-feature.334d795e.html","title":"executable_chezmoi-feature","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-feature","covered_class":"linePartCov","covered":"31.7","covered_lines":"26","uncovered_lines":"56","total_lines" : "82"},
 {"link":"lint-templates.33d2cf3a.html","title":"lint-templates","summary_name":"[...]/dotfiles/dotfiles/script/lint-templates","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"61","total_lines" : "61"},
-{"link":"duration.sh.9632a15b.html","title":"duration.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"26","total_lines" : "26"},
+{"link":"duration.sh.9632a15b.html","title":"duration.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"25","total_lines" : "25"},
 {"link":"container.f16741f6.html","title":"container","summary_name":"[...]/dotfiles/dotfiles/script/container","covered_class":"linePartCov","covered":"36.6","covered_lines":"67","uncovered_lines":"116","total_lines" : "183"},
 {"link":"executable_chezmoi-render.d7ce2ad4.html","title":"executable_chezmoi-render","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_chezmoi-render","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"118","total_lines" : "118"},
 {"link":"executable_compose-project.tmpl.c2bd87ca.html","title":"executable_compose-project.tmpl","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_compose-project.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"12","total_lines" : "12"},
@@ -55,5 +55,5 @@ var data = {files:[
 {"link":"log.sh.a99ae430.html","title":"log.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/log.sh","covered_class":"lineCov","covered":"95.0","covered_lines":"19","uncovered_lines":"1","total_lines" : "20"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-06-22 06:17:40", "instrumented" : 2446, "covered" : 505,};
+var header = { "command" : "", "date" : "2026-06-29 00:38:42", "instrumented" : 2469, "covered" : 505,};
 var merged_data = [];

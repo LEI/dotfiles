@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782109046368,
+  "lastUpdate": 1782693501664,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -441,6 +441,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.13,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "5a5ca897cd5d3b56258c0d6876f6055f634f26d1",
+          "message": "fix(chezmoi): clear doctor suspicious-entries and enforce in check",
+          "timestamp": "2026-06-29T02:10:35+02:00",
+          "tree_id": "3f750d17c93d9781a8d856f4402ebb89a0ca49d1",
+          "url": "https://github.com/LEI/dotfiles/commit/5a5ca897cd5d3b56258c0d6876f6055f634f26d1"
+        },
+        "date": 1782693500038,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.138,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.22,
             "unit": "Second"
           }
         ]

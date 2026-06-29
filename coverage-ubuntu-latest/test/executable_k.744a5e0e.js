@@ -20,5 +20,5 @@ var data = {lines:[
 {"lineNum":"   19","line":"$KUBECTL_COMMAND \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:00", "instrumented" : 8, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:14", "instrumented" : 8, "covered" : 0,};
 var merged_data = [];

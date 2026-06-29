@@ -1,6 +1,6 @@
 var data = {files:[
 {"link":"00-install-xdg.sh.d9c46f8d.html","title":"00-install-xdg.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/00-install-xdg.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"15","uncovered_lines":"0","total_lines" : "15"},
-{"link":"validate-schema.bd691d74.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"linePartCov","covered":"28.1","covered_lines":"55","uncovered_lines":"141","total_lines" : "196"},
+{"link":"validate-schema.bd691d74.html","title":"validate-schema","summary_name":"[...]/dotfiles/script/validate-schema","covered_class":"linePartCov","covered":"25.3","covered_lines":"55","uncovered_lines":"162","total_lines" : "217"},
 {"link":"02-install-python.sh.3af64202.html","title":"02-install-python.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/02-install-python.sh","covered_class":"linePartCov","covered":"61.1","covered_lines":"11","uncovered_lines":"7","total_lines" : "18"},
 {"link":"lint-templates.acc6da7e.html","title":"lint-templates","summary_name":"[...]/dotfiles/script/lint-templates","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"61","total_lines" : "61"},
 {"link":"profile.b0656395.html","title":"profile","summary_name":"[...]/dotfiles/script/profile","covered_class":"linePartCov","covered":"54.6","covered_lines":"59","uncovered_lines":"49","total_lines" : "108"},
@@ -52,12 +52,12 @@ var data = {files:[
 {"link":"install.sh.ca7a008d.html","title":"install.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/install.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"36","total_lines" : "36"},
 {"link":"require.sh.3db80c82.html","title":"require.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/require.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"5","total_lines" : "5"},
 {"link":"log.sh.3a86e6c2.html","title":"log.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/log.sh","covered_class":"lineCov","covered":"95.0","covered_lines":"19","uncovered_lines":"1","total_lines" : "20"},
-{"link":"vm.e359dc67.html","title":"vm","summary_name":"[...]/dotfiles/script/vm","covered_class":"lineNoCov","covered":"18.9","covered_lines":"75","uncovered_lines":"321","total_lines" : "396"},
+{"link":"vm.e359dc67.html","title":"vm","summary_name":"[...]/dotfiles/script/vm","covered_class":"lineNoCov","covered":"18.8","covered_lines":"75","uncovered_lines":"324","total_lines" : "399"},
 {"link":"executable_nvim-sh.f54330bd.html","title":"executable_nvim-sh","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_nvim-sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"19","total_lines" : "19"},
 {"link":"executable_claude-plan.7b3be04a.html","title":"executable_claude-plan","summary_name":"[...]/dotfiles/home/dot_local/bin/executable_claude-plan","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"14","total_lines" : "14"},
 {"link":"parallel.sh.95b0eccb.html","title":"parallel.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/parallel.sh","covered_class":"lineCov","covered":"80.0","covered_lines":"16","uncovered_lines":"4","total_lines" : "20"},
-{"link":"duration.sh.419fe920.html","title":"duration.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"26","total_lines" : "26"},
+{"link":"duration.sh.419fe920.html","title":"duration.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"25","total_lines" : "25"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:17", "instrumented" : 2514, "covered" : 556,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:09", "instrumented" : 2537, "covered" : 556,};
 var merged_data = [];

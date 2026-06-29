@@ -126,5 +126,5 @@ var data = {lines:[
 {"lineNum":"  125","line":"main \"$@\"","class":"lineCov","hits":"1","order":"243","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:00", "instrumented" : 55, "covered" : 40,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:14", "instrumented" : 55, "covered" : 40,};
 var merged_data = [];

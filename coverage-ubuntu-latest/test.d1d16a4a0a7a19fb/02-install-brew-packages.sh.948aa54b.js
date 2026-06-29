@@ -52,16 +52,16 @@ var data = {lines:[
 {"lineNum":"   51","line":"brew \"agent-ecosystem/tap/skill-validator\""},
 {"lineNum":"   52","line":"brew \"bashate\""},
 {"lineNum":"   53","line":"brew \"bats-core\""},
-{"lineNum":"   54","line":"brew \"jq\""},
-{"lineNum":"   55","line":"brew \"json5\""},
-{"lineNum":"   56","line":"brew \"k1LoW/tap/git-wt\""},
-{"lineNum":"   57","line":"brew \"kcov\""},
-{"lineNum":"   58","line":"brew \"sheldon\""},
-{"lineNum":"   59","line":"brew \"yq\""},
-{"lineNum":"   60","line":"brew \"zizmor\""},
+{"lineNum":"   54","line":"brew \"git-bug\""},
+{"lineNum":"   55","line":"brew \"jq\""},
+{"lineNum":"   56","line":"brew \"json5\""},
+{"lineNum":"   57","line":"brew \"k1LoW/tap/git-wt\""},
+{"lineNum":"   58","line":"brew \"kcov\""},
+{"lineNum":"   59","line":"brew \"sheldon\""},
+{"lineNum":"   60","line":"brew \"yq\""},
 {"lineNum":"   61","line":"# ENV[\"SOME_ENV_VAR\"] = \"some_value\""},
 {"lineNum":"   62","line":"EOF"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:00", "instrumented" : 25, "covered" : 11,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:14", "instrumented" : 25, "covered" : 11,};
 var merged_data = [];

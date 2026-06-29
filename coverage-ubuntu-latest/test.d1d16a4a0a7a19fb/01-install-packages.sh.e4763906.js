@@ -11,7 +11,7 @@ var data = {lines:[
 {"lineNum":"   10","line":"# shellcheck source=home/dot_local/lib/sh/run.sh"},
 {"lineNum":"   11","line":". \"$lib_dir/sh/run.sh\"","class":"lineCov","hits":"1","order":"119","possible_hits":"0",},
 {"lineNum":"   12","line":""},
-{"lineNum":"   13","line":"packages=\"apt-utils bash bash-completion build-essential ca-certificates coreutils curl direnv git git-extras git-filter-repo libssl-dev openssh-client parallel pipx pkg-config procps python3 python3-venv ripgrep time tree unzip util-linux wget zoxide zsh\"","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
+{"lineNum":"   13","line":"packages=\"apt-utils bash bash-completion build-essential ca-certificates coreutils curl direnv git git-extras git-filter-repo libssl-dev openssh-client parallel pipx pkg-config procps python3 python3-venv ripgrep time trash-cli tree unzip util-linux wget zoxide zsh\"","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
 {"lineNum":"   14","line":"msg \"Installing apt packages: $packages\"","class":"lineCov","hits":"1","order":"121","possible_hits":"0",},
 {"lineNum":"   15","line":""},
 {"lineNum":"   16","line":"dry_run sudo dpkg --configure -a","class":"lineCov","hits":"1","order":"123","possible_hits":"0",},
@@ -24,5 +24,5 @@ var data = {lines:[
 {"lineNum":"   23","line":"msg \"Installed apt packages\"","class":"lineCov","hits":"1","order":"131","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:00", "instrumented" : 10, "covered" : 10,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:14", "instrumented" : 10, "covered" : 10,};
 var merged_data = [];

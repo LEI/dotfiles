@@ -24,20 +24,20 @@ var data = {lines:[
 {"lineNum":"   23","line":"  # yay -? --aur"},
 {"lineNum":"   24","line":"  ;;"},
 {"lineNum":"   25","line":"brew)"},
-{"lineNum":"   26","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"75","possible_hits":"0",},
+{"lineNum":"   26","line":"  export HOMEBREW_NO_AUTO_UPDATE=1","class":"lineCov","hits":"2","order":"75","possible_hits":"0",},
 {"lineNum":"   27","line":"  # brew bundle dump --file=-"},
 {"lineNum":"   28","line":"  brew list --formula --installed-on-request","class":"lineCov","hits":"1","order":"76","possible_hits":"0",},
 {"lineNum":"   29","line":"  ;;"},
 {"lineNum":"   30","line":"cask)"},
-{"lineNum":"   31","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   31","line":"  export HOMEBREW_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   32","line":"  brew list --cask","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   33","line":"  ;;"},
 {"lineNum":"   34","line":"mas)"},
-{"lineNum":"   35","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   35","line":"  export HOMEBREW_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   36","line":"  brew bundle dump --file=- --mas | cut -d\' \' -f2- | cut -d, -f1 | tr -d \'\"\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   37","line":"  ;;"},
 {"lineNum":"   38","line":"vscode)"},
-{"lineNum":"   39","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   39","line":"  export HOMEBREW_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   40","line":"  brew bundle dump --file=- --vscode | cut -d\' \' -f2- | tr -d \'\"\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   41","line":"  ;;"},
 {"lineNum":"   42","line":"dnf)"},
@@ -97,7 +97,7 @@ var data = {lines:[
 {"lineNum":"   96","line":"  scoop list | tail -n+2 | cut -d\' \' -f1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   97","line":"  ;;"},
 {"lineNum":"   98","line":"tap)"},
-{"lineNum":"   99","line":"  export HOMEBRE_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   99","line":"  export HOMEBREW_NO_AUTO_UPDATE=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  100","line":"  brew tap","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  101","line":"  ;;"},
 {"lineNum":"  102","line":"winget)"},
@@ -121,5 +121,5 @@ var data = {lines:[
 {"lineNum":"  120","line":"esac"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-22 06:17:17", "instrumented" : 44, "covered" : 6,};
+var header = { "command" : "test", "date" : "2026-06-29 00:38:09", "instrumented" : 44, "covered" : 6,};
 var merged_data = [];
