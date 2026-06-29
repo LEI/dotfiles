@@ -12,13 +12,15 @@ if [ -n "${PREFIX:-}" ] && [ -z "${SHELL:-}" ]; then
   export SHELL="$PREFIX/bin/bash"
 fi
 
-exit_code=0
-output="$(chezmoi doctor --dry-run --no-network --no-tty)" || exit_code=$?
+output="$(chezmoi doctor --dry-run --no-network --no-tty)" || true
 
 echo "$output" | grep -v '^\(info\|ok\)' || true
 
-if [ "$exit_code" -ne 0 ]; then
-  # echo "ERROR: chezmoi doctor exited with code $exit_code" >&2
-  # exit "$exit_code"
-  echo "WARN: chezmoi doctor exited with code $exit_code" >&2
+# EXDEV only fires when temp and source are on different filesystems
+# (e.g. tmpfs /tmp), where chezmoi falls back to copy; any other error stays.
+errors="$(echo "$output" | grep '^error' | grep -v 'hardlink.*invalid cross-device link' || true)"
+
+if [ -n "$errors" ]; then
+  echo "ERROR: chezmoi doctor reported errors" >&2
+  exit 1
 fi

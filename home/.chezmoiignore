@@ -12,7 +12,7 @@
 .personal-file
 {{- end }}
 
-{{- $ignore := include ".chezmoiignore.yaml" | fromYaml -}}
+{{- $ignore := include ".chezmoitemplates/chezmoiignore.yaml" | fromYaml -}}
 {{- range $feature, $patterns := $ignore.features }}
 {{-   if not (get $.features $feature) }}
 {{-     range $patterns }}
