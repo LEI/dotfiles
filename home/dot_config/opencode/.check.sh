@@ -40,7 +40,7 @@ output_diag_json_file() {
 }
 
 XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
-AI_YAML="$XDG_DATA_HOME/chezmoi/home/.chezmoidata/ai.yaml"
+AI_YAML="$XDG_DATA_HOME/chezmoi/home/dot_config/ai/.chezmoidata.yaml"
 AUTH_FILE="$XDG_DATA_HOME/opencode/auth.json"
 
 TMP_FILES=""
@@ -51,19 +51,19 @@ cleanup() {
 }
 trap cleanup EXIT
 
-[ ! -f "$AI_YAML" ] && output_not_ok "ai.yaml not found" && exit 1
+[ ! -f "$AI_YAML" ] && output_not_ok "ai data not found" && exit 1
 [ ! -f "$AUTH_FILE" ] && output_not_ok "auth file not found" && exit 1
 ! command -v jq >/dev/null 2>&1 && output_not_ok "jq not installed" && exit 1
 ! command -v yq >/dev/null 2>&1 && output_not_ok "yq not installed" && exit 1
 
-# GNU date for %3N (millisecond truncation); BSD date lacks this
+# GNU date supports %3N for millisecond precision, BSD date does not
 if command -v gdate >/dev/null 2>&1; then
   DATE="gdate"
 else
   DATE="date"
 fi
 
-# Max age to serve a stale cache when the live fetch fails; older is treated as
+# Max age to serve a stale cache when the live fetch fails. Older is treated as
 # no data so a long outage stops masquerading as a fresh reading
 STALE_MAX=3600
 
@@ -100,7 +100,7 @@ cached_fetch() {
     printf '%s' "$data"
     return
   fi
-  # Fall back to a stale cache only within STALE_MAX; older is dropped so a
+  # Fall back to a stale cache only within STALE_MAX. Older is dropped so a
   # prolonged fetch outage is not shown as if it were a recent reading
   stale=$(cache_get "$cache_path" "$STALE_MAX") || stale=""
   tmp=$(mktemp)
@@ -125,7 +125,7 @@ cached_fetch() {
 }
 
 # Per-provider quota handlers called from inside the { } >"$quota_diag" group
-# in check_endpoint; bash dynamic scope lets them read name, key, quota_file,
+# in check_endpoint. Bash dynamic scope lets them read name, key, quota_file,
 # from_cache, cache_path, QUOTA_WARN, and OUTPUT_BARS from the caller
 
 quota_anthropic() {
@@ -308,7 +308,7 @@ resolve_key() {
 }
 
 # Fetch the models endpoint into caller-scope `body`, setting `status`,
-# `duration`, `from_models_cache`, and `models_cache`; serves a fresh cache hit
+# `duration`, `from_models_cache`, and `models_cache`. Serves a fresh cache hit
 # without a network call
 fetch_models() {
   tmp=$(mktemp)
@@ -411,7 +411,7 @@ check_endpoint() {
     cache_set "$models_cache" <"$body"
   fi
 
-  # Models diagnostic; omit status and duration when served from cache
+  # Models diagnostic, omit status and duration when served from cache
   if [ "$from_models_cache" = "1" ]; then
     set --
   else
@@ -456,7 +456,7 @@ check_endpoint() {
     fi
   fi
 
-  # Combine directives (only one provider matches per call)
+  # Combine directives, only one provider matches per call
   directive="${zai_plan:+plan: $zai_plan}"
   [ -z "$directive" ] && directive="${or_plan:+plan: $or_plan}"
   QUOTA_WARN=""
