@@ -7,6 +7,7 @@ packages:
   # fi
   claude-code:
     enabled: '{{ eq .osIDLike "android" "arch" "darwin" "fedora" "windows" }}'
+    version: '{{ eq .osIDLike "android" | ternary "2.1.112" "" }}'
     nameOverwrite:
       mise: npm:@anthropic-ai/claude-code
       npm: "@anthropic-ai/claude-code"

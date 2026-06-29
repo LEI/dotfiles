@@ -158,4 +158,53 @@ run_block_in_file() {
   assert_output ""
 }
 
+# filter-packages
+
+@test "filter-packages: allowlist type appends version to name" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "npm" "defaultType" "npm" "input" (dict "foo" (dict "version" "1.2.3"))) -}}'
+  assert_success
+  assert_output --partial '"foo@1.2.3"'
+  refute_output --partial '"foo":'
+  refute_stderr
+}
+
+@test "filter-packages: non-allowlist type keeps original name and warns" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "cask" "defaultType" "cask" "input" (dict "foo" (dict "version" "1.2.3"))) -}}'
+  assert_success
+  assert_output --partial '"foo"'
+  refute_output --partial '"foo@'
+  assert_stderr_line --partial 'cask ignores version pin'
+}
+
+@test "filter-packages: mise type retains version in dict without appending" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "mise" "defaultType" "mise" "input" (dict "foo" (dict "version" "1.2.3"))) -}}'
+  assert_success
+  assert_output --partial '"foo"'
+  assert_output --partial '"version":"1.2.3"'
+  refute_output --partial '"foo@'
+  refute_stderr
+}
+
+@test "filter-packages: empty version never appends trailing @" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "npm" "defaultType" "npm" "input" (dict "foo" (dict "version" ""))) -}}'
+  assert_success
+  refute_output --partial '"foo@'
+  assert_output --partial '"foo"'
+  refute_stderr
+}
+
+# mise-tools
+
+@test "mise-tools: tool with version lts renders lts" {
+  run_template '{{- includeTemplate "mise-tools.toml.tmpl" (dict "packages" (dict "mise" (dict "node" (dict "version" "lts")))) -}}'
+  assert_success
+  assert_output --partial 'node = "lts"'
+}
+
+@test "mise-tools: tool with embedded @version in name takes precedence" {
+  run_template '{{- includeTemplate "mise-tools.toml.tmpl" (dict "packages" (dict "mise" (dict "npm:@anthropic-ai/claude-code@2.1.112" (dict)))) -}}'
+  assert_success
+  assert_output --partial '"npm:@anthropic-ai/claude-code" = { version = "2.1.112"'
+}
+
 # cpu-cores / cpu-threads

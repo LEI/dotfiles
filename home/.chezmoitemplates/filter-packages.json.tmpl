@@ -38,8 +38,11 @@
 {{-   end -}}
 
 {{-   $version := get $pkg "version" -}}
-{{-   if and $version (ne $packageType "mise") (ne $packageType "winget") -}}
+{{-   $versionInName := list "brew" "cargo" "go" "npm" "uv" -}}
+{{-   if and $version (has $packageType $versionInName) -}}
 {{-     $name = printf "%s@%s" $name $version -}}
+{{-   else if and $version (not (eq $packageType "mise" "winget")) -}}
+{{-     warnf "filter-packages: %s: %s ignores version pin %q" $name $packageType $version -}}
 {{-   end -}}
 
 {{-   $managers := get $pkg "managers" -}}
