@@ -103,6 +103,7 @@
       "*.env": "deny",
       "*.env.*": "deny",
       "*.env.example": "allow",
+      "*.example.env": "allow",
 {{- range $.ai.permissions.deny }}
       "{{ . }}": "deny",
 {{- end }}
@@ -116,6 +117,7 @@
       "*.env": "deny",
       "*.env.*": "deny",
       "*.env.example": "allow",
+      "*.example.env": "allow",
 {{- range $.ai.permissions.deny }}
       "{{ . }}": "deny",
 {{- end }}

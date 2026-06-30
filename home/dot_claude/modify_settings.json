@@ -33,6 +33,7 @@
 {{- end -}}
 {{- $endpoint := get $providers $prefix | default dict -}}
 
+{{- $remoteControl := true -}}
 {{- $sandboxEnabled := false -}}
 
 {{- $tierDefault := eq .profile "work" | ternary "max" "pro" -}}
@@ -85,6 +86,7 @@
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     {{- end }}
     "DISABLE_AUTOUPDATER": "1",
+    "DO_NOT_TRACK": "{{ $remoteControl | ternary "0" "1" }}",
     {{- if has "everything-claude-code@everything-claude-code" $plugins }}
     "ECC_HOOK_PROFILE": "minimal",
     {{- end }}
@@ -270,6 +272,7 @@
       "LSP",
       "Read",
       "Read(**/.env.example)",
+      "Read(**/example.env)",
       {{- if and .features.sql (eq .os "darwin") }}
       "Read(~/Library/DBeaverData/workspace*/General/Scripts/**)",
       {{- end }}
@@ -487,5 +490,6 @@
   "verbose": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoUpdates": false
+  "autoUpdates": false,
+  "tui": "fullscreen"
 }

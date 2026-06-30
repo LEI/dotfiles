@@ -51,10 +51,22 @@ cleanup() {
 }
 trap cleanup EXIT
 
-[ ! -f "$AI_YAML" ] && output_not_ok "ai data not found" && exit 1
-[ ! -f "$AUTH_FILE" ] && output_not_ok "auth file not found" && exit 1
-! command -v jq >/dev/null 2>&1 && output_not_ok "jq not installed" && exit 1
-! command -v yq >/dev/null 2>&1 && output_not_ok "yq not installed" && exit 1
+if [ ! -f "$AI_YAML" ]; then
+  output_not_ok "ai data not found"
+  exit 1
+fi
+if [ ! -f "$AUTH_FILE" ]; then
+  output_not_ok "auth file not found"
+  exit 1
+fi
+if ! command -v jq >/dev/null 2>&1; then
+  output_not_ok "jq not installed"
+  exit 1
+fi
+if ! command -v yq >/dev/null 2>&1; then
+  output_not_ok "yq not installed"
+  exit 1
+fi
 
 # GNU date supports %3N for millisecond precision, BSD date does not
 if command -v gdate >/dev/null 2>&1; then
@@ -62,10 +74,6 @@ if command -v gdate >/dev/null 2>&1; then
 else
   DATE="date"
 fi
-
-# Max age to serve a stale cache when the live fetch fails. Older is treated as
-# no data so a long outage stops masquerading as a fresh reading
-STALE_MAX=3600
 
 provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" 2>/dev/null | wc -l)
 output_plan "$provider_count"
@@ -82,61 +90,98 @@ show_quota() {
     if [ "$OUTPUT_BARS" = "1" ]; then
       line="$(output_bar "$pct") $line"
     fi
-    [ "$pct" -ge 100 ] 2>/dev/null && QUOTA_WARN=1
+    if [ "$pct" -ge 100 ]; then
+      QUOTA_WARN=1
+    fi
     output_diag "$line"
   done
 }
 
 # cached_fetch <name> <ttl> <jq_test> <curl_args...>
-# Writes data to stdout, sets cache_path and from_cache in caller scope
-# Use: cached_fetch ... > file; var=$(cat file)
+# Writes the response body to stdout and reports the outcome in caller scope:
+#   fetch_source  cache | live | stale | none
+#   fetch_age     human cache age for cache and stale, empty otherwise
+#   fetch_reason  failure reason for stale and none (eg "HTTP 429"), empty on success
+# A fresh cache hit skips the network. On any failure the most recent cache is
+# still served, labelled stale, so a real reading is never dropped for a bare
+# "unavailable". Use: cached_fetch ... > file; var=$(cat file)
 cached_fetch() {
   provider_name="$1" ttl="$2" jq_test="$3"
   shift 3
   cache_path="${XDG_CACHE_HOME:-$HOME/.cache}/opencode/${provider_name}-quota.json"
-  from_cache=0
+  fetch_source="" fetch_age="" fetch_reason=""
+
   if data=$(cache_get "$cache_path" "$ttl"); then
-    from_cache=1
+    fetch_source="cache"
+    fetch_age=$(cache_age_human "$cache_path")
     printf '%s' "$data"
     return
   fi
-  # Fall back to a stale cache only within STALE_MAX. Older is dropped so a
-  # prolonged fetch outage is not shown as if it were a recent reading
-  stale=$(cache_get "$cache_path" "$STALE_MAX") || stale=""
+
   tmp=$(mktemp)
   curl_err=$(mktemp)
   rc=0
-  curl --silent --show-error --max-time 10 --output "$tmp" "$@" 2>"$curl_err" || rc=$?
+  http_code=$(curl --silent --show-error --max-time 10 --write-out '%{http_code}' \
+    --output "$tmp" "$@" 2>"$curl_err") || rc=$?
+
   if [ "$rc" -ne 0 ]; then
-    warn "$provider_name fetch failed (curl exit $rc): $(tr '\n' ' ' <"$curl_err")"
+    fetch_reason="curl exit $rc: $(tr '\n' ' ' <"$curl_err")"
+  elif [ -n "$http_code" ] && [ "${http_code#2}" = "$http_code" ]; then
+    fetch_reason="HTTP $http_code"
+    err_msg=$(jq -r '.error.message // .error // .message // .detail // empty' "$tmp" 2>/dev/null | head -c 100) || err_msg=""
+    if [ -n "$err_msg" ]; then
+      fetch_reason="HTTP $http_code: $err_msg"
+    fi
+  elif ! jq --exit-status "$jq_test" "$tmp" >/dev/null 2>&1; then
+    fetch_reason="unexpected response"
   fi
   rm -f "$curl_err"
-  if jq --exit-status "$jq_test" "$tmp" >/dev/null 2>&1; then
+
+  if [ -z "$fetch_reason" ]; then
     mkdir -p "$(dirname "$cache_path")"
     mv "$tmp" "$cache_path"
+    fetch_source="live"
+    cat "$cache_path"
+    return
+  fi
+
+  warn "$provider_name quota fetch failed: $fetch_reason"
+  rm -f "$tmp"
+  if [ -f "$cache_path" ]; then
+    fetch_source="stale"
+    fetch_age=$(cache_age_human "$cache_path")
     cat "$cache_path"
   else
-    rm -f "$tmp"
-    if [ -n "$stale" ]; then
-      from_cache=1
-      printf '%s' "$stale"
-    fi
+    fetch_source="none"
   fi
+}
+
+# quota_note: a parenthetical freshness or failure note for the last cached_fetch
+# Reads fetch_source/fetch_age/fetch_reason from caller scope, empty when live
+quota_note() {
+  case "$fetch_source" in
+  cache)
+    if [ -n "$fetch_age" ]; then
+      printf '(cached %s)' "$fetch_age"
+    fi
+    ;;
+  stale) printf '(cached %s, live failed: %s)' "${fetch_age:-unknown age}" "${fetch_reason:-unknown}" ;;
+  esac
 }
 
 # Per-provider quota handlers called from inside the { } >"$quota_diag" group
 # in check_endpoint. Bash dynamic scope lets them read name, key, quota_file,
-# from_cache, cache_path, QUOTA_WARN, and OUTPUT_BARS from the caller
+# fetch_source, fetch_age, fetch_reason, QUOTA_WARN, and OUTPUT_BARS from the caller
 
 quota_anthropic() {
-  local quota
+  local quota note
   cached_fetch anthropic 300 '.five_hour' \
     --header "Authorization: Bearer $key" \
     --header "anthropic-beta: oauth-2025-04-20" \
     "https://api.anthropic.com/api/oauth/usage" >"$quota_file"
   quota=$(cat "$quota_file")
   if [ -z "$quota" ] || ! echo "$quota" | jq --exit-status '.five_hour' >/dev/null 2>&1; then
-    output_diag "quota: unavailable"
+    output_diag "quota: unavailable${fetch_reason:+ ($fetch_reason)}"
     return
   fi
   show_quota < <(echo "$quota" | jq -r 'to_entries[] |
@@ -154,9 +199,6 @@ quota_anthropic() {
     (.value.utilization | round),
     (.value.resets_at // "")
   ] | @tsv' 2>/dev/null)
-  if [ "$from_cache" = "1" ]; then
-    output_diag "(quota cached $(cache_age_human "$cache_path"))"
-  fi
   echo "$quota" | jq -r '
   .extra_usage |
   if . == null then empty
@@ -165,12 +207,8 @@ quota_anthropic() {
   else
     ["off", (.disabled_reason // "unknown"), "", "", "", ""] | @tsv
   end' 2>/dev/null | while IFS="$(printf '\t')" read -r state val a b currency reset; do
-    local_cache=""
-    if [ "$from_cache" = "1" ]; then
-      local_cache="(cached $(cache_age_human "$cache_path"))"
-    fi
     if [ "$state" = "off" ]; then
-      output_diag "extra usage: off ($val)${local_cache:+ $local_cache}"
+      output_diag "extra usage: off ($val)"
     else
       line="extra usage: ${val}% used, ${a}/${b} ${currency}"
       if [ -n "$reset" ]; then
@@ -179,18 +217,25 @@ quota_anthropic() {
       if [ "$OUTPUT_BARS" = "1" ]; then
         line="$(output_bar "$val") $line"
       fi
-      output_diag "$line${local_cache:+ $local_cache}"
+      output_diag "$line"
     fi
   done
+  note=$(quota_note)
+  if [ -n "$note" ]; then
+    output_diag "$note"
+  fi
 }
 
 quota_synthetic() {
-  local quota limit requests reset pct
+  local quota limit requests reset pct note
   cached_fetch synthetic 60 true \
     --header "Authorization: Bearer $key" \
     "https://api.synthetic.new/v2/quotas" >"$quota_file"
   quota=$(cat "$quota_file")
   if [ -z "$quota" ] || ! echo "$quota" | jq empty >/dev/null 2>&1; then
+    if [ -n "$fetch_reason" ]; then
+      output_diag "quota: unavailable ($fetch_reason)"
+    fi
     return
   fi
   limit=$(echo "$quota" | jq -r '.subscription.limit // 0' 2>/dev/null || echo 0)
@@ -202,15 +247,19 @@ quota_synthetic() {
   elif [ "$quota" != "{}" ]; then
     output_diag "subscription: unlimited"
   fi
-  if [ "$from_cache" = "1" ]; then
-    output_diag "(quota cached $(cache_age_human "$cache_path"))"
+  note=$(quota_note)
+  if [ -n "$note" ]; then
+    output_diag "$note"
   fi
 }
 
 quota_openrouter() {
-  local quota data limit remaining pct
+  local quota data limit remaining pct note
   quota=$(cat "$quota_file")
   if [ -z "$quota" ] || ! echo "$quota" | jq empty >/dev/null 2>&1; then
+    if [ -n "$fetch_reason" ]; then
+      output_diag "quota: unavailable ($fetch_reason)"
+    fi
     return
   fi
   data=$(echo "$quota" | jq -r '.data // empty' 2>/dev/null || true)
@@ -230,14 +279,15 @@ quota_openrouter() {
       output_diag "$line"
     done
   fi
-  if [ "$from_cache" = "1" ]; then
-    output_diag "(quota cached $(cache_age_human "$cache_path"))"
+  note=$(quota_note)
+  if [ -n "$note" ]; then
+    output_diag "$note"
   fi
 }
 
 # openai: quota check via codex auth, no models endpoint
 quota_openai() {
-  local auth_file token quota plan pct reset openai_diag QUOTA_WARN
+  local auth_file token quota plan pct reset openai_diag note QUOTA_WARN
   auth_file="$HOME/.codex/auth.json"
   if [ ! -f "$auth_file" ]; then
     output_ok "openai" "SKIP no auth file"
@@ -253,7 +303,7 @@ quota_openai() {
     "https://chatgpt.com/backend-api/wham/usage" >"$quota_file"
   quota=$(cat "$quota_file")
   if [ -z "$quota" ]; then
-    output_not_ok "openai"
+    output_not_ok "openai" "$fetch_reason"
     return
   fi
   plan=$(echo "$quota" | jq -r '.plan_type // empty' 2>/dev/null)
@@ -269,8 +319,9 @@ quota_openai() {
       else
         show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
       fi
-      if [ "$from_cache" = "1" ]; then
-        output_diag "(quota cached $(cache_age_human "$cache_path"))"
+      note=$(quota_note)
+      if [ -n "$note" ]; then
+        output_diag "$note"
       fi
     fi
   } >"$openai_diag"
@@ -296,7 +347,9 @@ resolve_key() {
     # shellcheck source=/dev/null
     . "$HOME/.config/secrets.d/${name}.conf"
     # shellcheck disable=SC2163
-    [ -n "$env_var" ] && export "$env_var"
+    if [ -n "$env_var" ]; then
+      export "$env_var"
+    fi
     key="$(printenv "$env_var")" || key=""
   fi
   if [ -z "$key" ]; then
@@ -452,13 +505,17 @@ check_endpoint() {
       "https://openrouter.ai/api/v1/key" >"$quota_file"
     if [ -s "$quota_file" ]; then
       is_free=$(jq -r '.data.is_free_tier // ""' "$quota_file" 2>/dev/null)
-      [ "$is_free" = "true" ] && or_plan="free"
+      if [ "$is_free" = "true" ]; then
+        or_plan="free"
+      fi
     fi
   fi
 
   # Combine directives, only one provider matches per call
   directive="${zai_plan:+plan: $zai_plan}"
-  [ -z "$directive" ] && directive="${or_plan:+plan: $or_plan}"
+  if [ -z "$directive" ]; then
+    directive="${or_plan:+plan: $or_plan}"
+  fi
   QUOTA_WARN=""
   quota_diag=$(mktemp)
   TMP_FILES="$TMP_FILES $quota_diag"
@@ -473,8 +530,9 @@ check_endpoint() {
       (.percentage // 0),
       (if .nextResetTime > 0 then (.nextResetTime / 1000 | floor | strftime("%Y-%m-%dT%H:%M:%SZ")) else "" end)
     ] | @tsv' 2>/dev/null)
-      if [ "$from_cache" = "1" ]; then
-        output_diag "(quota cached $(cache_age_human "$cache_path"))"
+      note=$(quota_note)
+      if [ -n "$note" ]; then
+        output_diag "$note"
       fi
     fi
 
