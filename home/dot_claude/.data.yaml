@@ -30,7 +30,7 @@ tiers:
     subagent: # claude-haiku-4-5
     effort: # medium
 
-# Non-standard marketplaces (claude-plugins-official is built-in)
+# Managed marketplaces, all registered by run_onchange_after_plugins.sh
 # repo: git-hosted (passed as-is to `claude plugin marketplace add`)
 # path: local path relative to homeDir
 marketplaces:
@@ -38,6 +38,8 @@ marketplaces:
     path: ".claude/plugins/chezmoi"
   claude-dashboard:
     repo: uppinote20/claude-dashboard
+  claude-plugins-official:
+    repo: anthropics/claude-plugins-official
     # everything-claude-code:
     #   repo: affaan-m/everything-claude-code
 

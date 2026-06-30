@@ -48,7 +48,7 @@ fi
 {{- end }}
 {{- range $plugins }}
 {{- $marketplace := get $marketplaces .marketplace }}
-{{- if or (eq .marketplace "claude-plugins-official") $marketplace }}
+{{- if $marketplace }}
 
 if jq -e '.plugins["{{ .name }}@{{ .marketplace }}"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
   echo "Plugin already installed: {{ .name }}@{{ .marketplace }}" >&2
