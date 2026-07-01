@@ -31,7 +31,7 @@ tiers:
     effort: # medium
 
 # Managed marketplaces, all registered by run_onchange_after_plugins.sh
-# repo: git-hosted (passed as-is to `claude plugin marketplace add`)
+# repo: git-hosted, passed as-is to `claude plugin marketplace add`
 # path: local path relative to homeDir
 marketplaces:
   chezmoi:
@@ -40,11 +40,11 @@ marketplaces:
     repo: uppinote20/claude-dashboard
   claude-plugins-official:
     repo: anthropics/claude-plugins-official
-    # everything-claude-code:
-    #   repo: affaan-m/everything-claude-code
+  # everything-claude-code:
+  #   repo: affaan-m/everything-claude-code
 
 # Managed plugins: all handled identically by run_onchange_after_plugins.sh
-# claude-plugins-official: no version pin (latest is fine)
+# claude-plugins-official: no version pin, latest is fine
 # other: optional version pin via {name, version} dict item
 #
 # Not installed (use CLI to re-add if needed):

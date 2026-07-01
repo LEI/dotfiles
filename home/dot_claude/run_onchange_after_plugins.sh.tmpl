@@ -50,13 +50,13 @@ fi
 {{- $marketplace := get $marketplaces .marketplace }}
 {{- if $marketplace }}
 
-if jq -e '.plugins["{{ .name }}@{{ .marketplace }}"] | length > 0' "$plugin_file" >/dev/null 2>&1; then
+if jq -e '(.plugins["{{ .name }}@{{ .marketplace }}"] // []) | map(select(.scope == "user")) | length > 0' "$plugin_file" >/dev/null 2>&1; then
   echo "Plugin already installed: {{ .name }}@{{ .marketplace }}" >&2
 else
   echo "Installing plugin: {{ .name }}@{{ .marketplace }}" >&2
   claude plugin install --scope=user "{{ .name }}@{{ .marketplace }}"
 fi
-{{- if and $marketplace (not (hasKey $marketplace "repo")) }}
+{{- if not (hasKey $marketplace "repo") }}
 
 echo "Updating plugin: {{ .name }}@{{ .marketplace }}" >&2
 claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"
@@ -74,6 +74,10 @@ claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"
 {{- end }}
 
 # Remove user-scoped plugins not in managed or keep set
+if [ ! -f "$plugin_file" ]; then
+  echo "No plugin state file, nothing to prune" >&2
+  exit 0
+fi
 stale_found=false
 while IFS= read -r key; do
   [ -n "$key" ] || continue
