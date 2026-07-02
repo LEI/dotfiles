@@ -434,10 +434,7 @@
   "model": {{ $model | quote }},
   {{- end }}
   "enableAllProjectMcpServers": false,
-  {{- /* Prepend mise shims to PATH for each Bash command so Claude resolves project pinned tools, Claude scoped not the global shell. CLAUDE_ENV_FILE is sourced before every command. */}}
-  {{- $pathHook := `echo 'export PATH="$HOME/.local/share/mise/shims:$PATH"' > "$CLAUDE_ENV_FILE"` }}
-  {{- $baseHooks := dict "SessionStart" (list (dict "hooks" (list (dict "type" "command" "command" $pathHook)))) }}
-  "hooks": {{ merge (get $stdin "hooks" | default dict) $baseHooks | toPrettyJson | indent 2 | trim }},
+  "hooks": {{ (get $stdin "hooks" | default dict) | toPrettyJson | indent 2 | trim }},
   "enableWorkflows": true,
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
   {{- if stat $statusline }}

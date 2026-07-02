@@ -38,7 +38,7 @@ format_date() {
   case "$ts" in
   [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*) ts="@$ts" ;;
   esac
-  reset_epoch=$(${DATE:-date} -d "$ts" +%s 2>/dev/null) || return 1
-  reset_fmt=$(${DATE:-date} -d "@$reset_epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
-  echo "$reset_fmt"
+  date_epoch=$(${DATE:-date} -d "$ts" +%s 2>/dev/null) || return 1
+  date_fmt=$(${DATE:-date} -d "@$date_epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
+  echo "$date_fmt"
 }

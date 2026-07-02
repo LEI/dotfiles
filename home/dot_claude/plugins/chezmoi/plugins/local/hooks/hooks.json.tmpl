@@ -1,6 +1,19 @@
 {
-  "description": "Format, lint, and context warning hooks",
+  "description": "Format, lint, context warning, and session PATH hooks",
   "hooks": {
+    {{- if .features.mise }}
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/mise-path.sh"
+          }
+        ]
+      }
+    ],
+    {{- end }}
     "PreToolUse": [
       {
         "matcher": "Agent|Bash|Edit|Write|NotebookEdit",
