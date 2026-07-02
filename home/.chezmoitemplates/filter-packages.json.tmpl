@@ -37,14 +37,6 @@
 {{-     warnf "filter-packages: %s: empty name: %s" $key $pkg -}}
 {{-   end -}}
 
-{{-   $version := get $pkg "version" -}}
-{{-   $versionInName := list "brew" "cargo" "go" "npm" "uv" -}}
-{{-   if and $version (has $packageType $versionInName) -}}
-{{-     $name = printf "%s@%s" $name $version -}}
-{{-   else if and $version (not (eq $packageType "mise" "winget")) -}}
-{{-     warnf "filter-packages: %s: %s ignores version pin %q" $name $packageType $version -}}
-{{-   end -}}
-
 {{-   $managers := get $pkg "managers" -}}
 {{-   $type := "" -}}
 {{-   if $managers -}}
@@ -79,6 +71,14 @@
 {{- end */ -}}
 {{-     continue }}
 {{-   end }}
+
+{{-   $version := get $pkg "version" -}}
+{{-   $versionInName := list "brew" "cargo" "go" "npm" "uv" -}}
+{{-   if and $version (has $packageType $versionInName) -}}
+{{-     $name = printf "%s@%s" $name $version -}}
+{{-   else if and $version (not (eq $packageType "mise" "winget")) -}}
+{{-     warnf "filter-packages: %s: %s ignores version pin %q" $name $packageType $version -}}
+{{-   end -}}
 
 {{-   if ne $key $name -}}
 {{-     $_ := set $pkg "key" $key -}}

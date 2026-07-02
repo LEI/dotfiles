@@ -27,11 +27,11 @@ humanize_secs() {
   fi
 }
 
-# format_reset <timestamp>
-# Output: "Resets <local date/time>" eg "Resets Jul 5, 4:59am"
+# format_date <timestamp>
+# Output: "<local date/time>" eg "Jul 5, 4:59am"
 # Accepts ISO 8601 strings or bare Unix epoch integers
 # Set DATE env var (eg "gdate") for BSD compat
-format_reset() {
+format_date() {
   ts="$1"
   [ -z "$ts" ] && return 1
   # Bare epoch integers (9+ digits) need an @ prefix for GNU date
@@ -40,5 +40,5 @@ format_reset() {
   esac
   reset_epoch=$(${DATE:-date} -d "$ts" +%s 2>/dev/null) || return 1
   reset_fmt=$(${DATE:-date} -d "@$reset_epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
-  echo "Resets $reset_fmt"
+  echo "$reset_fmt"
 }

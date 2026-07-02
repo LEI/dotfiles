@@ -176,6 +176,20 @@ run_block_in_file() {
   assert_stderr_line --partial 'cask ignores version pin'
 }
 
+@test "filter-packages: version pin on excluded type does not warn" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "cask" "defaultType" "cask" "input" (dict "foo" (dict "version" "1.2.3" "type" "mise"))) -}}'
+  assert_success
+  refute_output --partial '"foo"'
+  refute_stderr
+}
+
+@test "filter-packages: version pin on disabled package does not warn" {
+  run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "cask" "defaultType" "cask" "input" (dict "foo" (dict "version" "1.2.3" "enabled" "false"))) -}}'
+  assert_success
+  refute_output --partial '"foo"'
+  refute_stderr
+}
+
 @test "filter-packages: mise type retains version in dict without appending" {
   run_template '{{- includeTemplate "filter-packages.json.tmpl" (dict "packageType" "mise" "defaultType" "mise" "input" (dict "foo" (dict "version" "1.2.3"))) -}}'
   assert_success
@@ -202,9 +216,18 @@ run_block_in_file() {
 }
 
 @test "mise-tools: tool with embedded @version in name takes precedence" {
-  run_template '{{- includeTemplate "mise-tools.toml.tmpl" (dict "packages" (dict "mise" (dict "npm:@anthropic-ai/claude-code@2.1.112" (dict)))) -}}'
+  run_template '{{- includeTemplate "mise-tools.toml.tmpl" (dict "packages" (dict "mise" (dict "npm:@foo/bar@1.2.3" (dict)))) -}}'
   assert_success
-  assert_output --partial '"npm:@anthropic-ai/claude-code" = { version = "2.1.112"'
+  assert_output --partial '"npm:@foo/bar" = {'
+  assert_output --partial 'version = "1.2.3"'
+}
+
+@test "mise-tools: minimum_release_age renders as tool option" {
+  run_template '{{- includeTemplate "mise-tools.toml.tmpl" (dict "packages" (dict "mise" (dict "cargo:foo" (dict "minimum_release_age" "0d")))) -}}'
+  assert_success
+  assert_output --partial '"cargo:foo" = {'
+  assert_output --partial 'minimum_release_age = "0d"'
+  assert_output --partial 'version = "latest"'
 }
 
 # cpu-cores / cpu-threads

@@ -9,8 +9,19 @@
 {{-   $name = index $parts 0 }}
 {{-   $version := index $parts 1 }}
 {{-   $key := contains ":" $name | ternary ($name | quote) $name }}
+{{-   $opts := dict "version" $version }}
 {{-   if hasPrefix "npm:" $name }}
-{{   $key }} = { version = {{ $version | quote }}, npm_args = "--ignore-scripts=false" }
+{{-     $_ := set $opts "npm_args" (get $pkg "npm_args" | default "--ignore-scripts=false") }}
+{{-   end }}
+{{-   with get $pkg "minimum_release_age" }}
+{{-     $_ := set $opts "minimum_release_age" . }}
+{{-   end }}
+{{-   if gt (len $opts) 1 }}
+{{-     $pairs := list }}
+{{-     range $k := (keys $opts | sortAlpha) }}
+{{-       $pairs = append $pairs (printf "%s = %s" $k (get $opts $k | quote)) }}
+{{-     end }}
+{{   $key }} = { {{ $pairs | join ", " }} }
 {{-   else }}
 {{   $key }} = {{ $version | quote }}
 {{-   end }}
