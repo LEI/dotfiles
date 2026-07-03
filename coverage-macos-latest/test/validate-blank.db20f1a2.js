@@ -71,5 +71,5 @@ var data = {lines:[
 {"lineNum":"   70","line":"awk -f \"$script_dir/validate-blank.awk\" \"$@\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-29 00:38:09", "instrumented" : 32, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-07-03 05:18:58", "instrumented" : 32, "covered" : 0,};
 var merged_data = [];

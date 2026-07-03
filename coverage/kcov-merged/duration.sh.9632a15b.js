@@ -28,22 +28,22 @@ var data = {lines:[
 {"lineNum":"   27","line":"  fi"},
 {"lineNum":"   28","line":"}"},
 {"lineNum":"   29","line":""},
-{"lineNum":"   30","line":"# format_reset <timestamp>"},
-{"lineNum":"   31","line":"# Output: \"Resets <local date/time>\" eg \"Resets Jul 5, 4:59am\""},
+{"lineNum":"   30","line":"# format_date <timestamp>"},
+{"lineNum":"   31","line":"# Output: \"<local date/time>\" eg \"Jul 5, 4:59am\""},
 {"lineNum":"   32","line":"# Accepts ISO 8601 strings or bare Unix epoch integers"},
 {"lineNum":"   33","line":"# Set DATE env var (eg \"gdate\") for BSD compat"},
-{"lineNum":"   34","line":"format_reset() {"},
+{"lineNum":"   34","line":"format_date() {"},
 {"lineNum":"   35","line":"  ts=\"$1\"","class":"lineNoCov","hits":"0",},
 {"lineNum":"   36","line":"  [ -z \"$ts\" ] && return 1","class":"lineNoCov","hits":"0",},
 {"lineNum":"   37","line":"  # Bare epoch integers (9+ digits) need an @ prefix for GNU date"},
 {"lineNum":"   38","line":"  case \"$ts\" in","class":"lineNoCov","hits":"0",},
 {"lineNum":"   39","line":"  [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*) ts=\"@$ts\" ;;","class":"lineNoCov","hits":"0",},
 {"lineNum":"   40","line":"  esac"},
-{"lineNum":"   41","line":"  reset_epoch=$(${DATE:-date} -d \"$ts\" +%s 2>/dev/null) || return 1","class":"lineNoCov","hits":"0",},
-{"lineNum":"   42","line":"  reset_fmt=$(${DATE:-date} -d \"@$reset_epoch\" \"+%b %-d, %-I:%M%P\" 2>/dev/null) || return 1","class":"lineNoCov","hits":"0",},
-{"lineNum":"   43","line":"  echo \"Resets $reset_fmt\"","class":"lineNoCov","hits":"0",},
+{"lineNum":"   41","line":"  date_epoch=$(${DATE:-date} -d \"$ts\" +%s 2>/dev/null) || return 1","class":"lineNoCov","hits":"0",},
+{"lineNum":"   42","line":"  date_fmt=$(${DATE:-date} -d \"@$date_epoch\" \"+%b %-d, %-I:%M%P\" 2>/dev/null) || return 1","class":"lineNoCov","hits":"0",},
+{"lineNum":"   43","line":"  echo \"$date_fmt\"","class":"lineNoCov","hits":"0",},
 {"lineNum":"   44","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-06-29 00:38:42", "instrumented" : 25, "covered" : 0,};
+var header = { "command" : "", "date" : "2026-07-03 05:19:31", "instrumented" : 25, "covered" : 0,};
 var merged_data = [];

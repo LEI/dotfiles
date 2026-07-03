@@ -55,5 +55,5 @@ var data = {files:[
 {"link":"log.sh.a99ae430.html","title":"log.sh","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/lib/sh/log.sh","covered_class":"lineCov","covered":"95.0","covered_lines":"19","uncovered_lines":"1","total_lines" : "20"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-06-29 00:38:42", "instrumented" : 2469, "covered" : 505,};
+var header = { "command" : "", "date" : "2026-07-03 05:19:31", "instrumented" : 2469, "covered" : 505,};
 var merged_data = [];

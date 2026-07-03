@@ -208,10 +208,10 @@ var data = {lines:[
 {"lineNum":"  207","line":"  fi"},
 {"lineNum":"  208","line":""},
 {"lineNum":"  209","line":"  if [ -z \"$schema\" ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"  210","line":"    # No inline $schema: fall back to a <stem>.schema.json sibling, first"},
-{"lineNum":"  211","line":"    # colocated, then under the repo-root schema/ tree mirroring the source"},
-{"lineNum":"  212","line":"    # path. Chezmoi data files (.chezmoidata) keep their schema in schema/ so"},
-{"lineNum":"  213","line":"    # chezmoi does not ingest it as template data, see schema/README.md."},
+{"lineNum":"  210","line":"    # No inline $schema: try a <stem>.schema.json sibling, then the repo-root"},
+{"lineNum":"  211","line":"    # schema/ mirror. A schema for a file inside a .chezmoidata/ dir must stay"},
+{"lineNum":"  212","line":"    # under schema/ because chezmoi ingests that dir as data and a colocated"},
+{"lineNum":"  213","line":"    # sibling would leak into the namespace"},
 {"lineNum":"  214","line":"    local dir stem sibling central","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  215","line":"    dir=\"${path%/*}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  216","line":"    [ \"$dir\" = \"$path\" ] && dir=\".\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -399,5 +399,5 @@ var data = {lines:[
 {"lineNum":"  398","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-06-29 00:38:14", "instrumented" : 217, "covered" : 55,};
+var header = { "command" : "test", "date" : "2026-07-03 05:18:02", "instrumented" : 217, "covered" : 55,};
 var merged_data = [];

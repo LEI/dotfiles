@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782693502838,
+  "lastUpdate": 1783055889503,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (ubuntu-latest)": [
@@ -475,6 +475,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.09,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "80362973bd00d9464b6d0e5913f37d17c1b3addc",
+          "message": "fix(claude): move mise PATH hook to the local plugin",
+          "timestamp": "2026-07-03T07:09:13+02:00",
+          "tree_id": "7dcb2e7eac9321c2a6e3a2db83f76ea5f52566c7",
+          "url": "https://github.com/LEI/dotfiles/commit/80362973bd00d9464b6d0e5913f37d17c1b3addc"
+        },
+        "date": 1783055888876,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.081,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.08,
             "unit": "Second"
           }
         ]
