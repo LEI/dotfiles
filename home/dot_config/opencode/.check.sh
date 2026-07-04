@@ -563,10 +563,10 @@ get_endpoint() {
   esac
 }
 
-yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | [.value.base_url, .key, .value.api, .value.env] | @tsv' "$AI_YAML" 2>/dev/null | while IFS="$(printf '\t')" read -r base_url name api env; do
+while IFS="$(printf '\t')" read -r base_url name api env; do
   endpoint=$(get_endpoint "$api")
   url="${base_url}${endpoint}"
   check_endpoint "$url" "$name" "$env"
-done
+done < <(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | [.value.base_url, .key, .value.api, .value.env] | @tsv' "$AI_YAML" 2>/dev/null)
 
 exit "$TAP_FAILS"
