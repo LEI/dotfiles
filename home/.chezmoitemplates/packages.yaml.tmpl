@@ -345,6 +345,11 @@ packages:
     # debian/ubuntu apt has jq 1.7, jq-1.8.1 required
     type: '{{ eq .osIDLike "debian" | ternary "brew" nil }}'
     # type: mise
+  keepassxc:
+    enabled: {{ .features.keepass }}
+    nameOverwrite:
+      fedora: org.keepassxc.KeePassXC
+    type: '{{ eq .osIDLike "darwin" | ternary "cask" (eq .osIDLike "fedora" | ternary "flatpak" nil) }}'
   kmon: # systeroid:
     enabled: {{ and (eq .os "linux") (not (eq .osIDLike "fedora" "opensuse")) (not (or
       (and (eq .osID "debian") (le (int .osVersion) 11))

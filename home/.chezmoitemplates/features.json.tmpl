@@ -47,6 +47,7 @@
   "i3" (and (eq .osIDLike "arch") .gui)
   "iterm2" (eq .os "darwin")
   "kb" (and (ne .profile "minimal") (eq .osIDLike "arch" "darwin" "fedora") (not (or .ephemeral .headless)))
+  "keepass" (and (ne .profile "minimal") .gui (eq .osIDLike "arch" "darwin" "fedora") (not (or .ephemeral .headless)))
   "kube" (and (eq .profile "personal") (eq .osIDLike "arch" "darwin" "debian" "fedora") (not (or .ephemeral .headless)))
   "kilo" $ai
   "lla" false
