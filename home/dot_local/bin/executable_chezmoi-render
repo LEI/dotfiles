@@ -124,7 +124,7 @@ if [ ${#templates[@]} -eq 0 ]; then
   cd "$source_dir"
   mapfile -t templates < <(
     find . \( -name '*.tmpl' -o -name 'modify_*' \) -type f |
-      grep -v '^./.chezmoi.yaml.tmpl$' |
+      grep -v '\.chezmoi\.yaml\.tmpl$' |
       sort -u
   )
 fi

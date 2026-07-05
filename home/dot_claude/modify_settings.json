@@ -93,7 +93,7 @@
     {{- end }}
     "ENABLE_TOOL_SEARCH": "true",
     "MAX_THINKING_TOKENS": "8000",
-    "MCP_CONNECTION_NONBLOCKING": "true",
+    "MCP_CONNECTION_NONBLOCKING": "1",
 {{- if .features.otel }}
 {{- $otel := includeTemplate "otel.yaml.tmpl" . | fromYaml -}}
 {{- $keys := keys $otel | sortAlpha -}}
