@@ -2,6 +2,7 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
 . "$HOME/.local/lib/sh/export.sh"
+. "$HOME/.local/lib/sh/keystore.sh"
 . "$HOME/.local/lib/bash/pathmunge.sh"
 
 if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
