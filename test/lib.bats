@@ -398,6 +398,59 @@ setup_cache() {
   assert_failure
 }
 
+# duration
+
+setup_duration() {
+  # shellcheck source=home/dot_local/lib/sh/duration.sh
+  source home/dot_local/lib/sh/duration.sh
+}
+
+@test "humanize_secs: formats various durations" {
+  setup_duration
+  assert_equal "$(humanize_secs 45)" "45s"
+  assert_equal "$(humanize_secs 90)" "1m"
+  assert_equal "$(humanize_secs 3661)" "1h 1m"
+  assert_equal "$(humanize_secs 90000)" "1d 1h"
+}
+
+@test "parse_epoch: round-trips a bare epoch integer" {
+  setup_duration
+  assert_equal "$(parse_epoch 1700000000)" "1700000000"
+}
+
+@test "parse_epoch: parses an ISO 8601 timestamp" {
+  setup_duration
+  assert_equal "$(TZ=UTC parse_epoch "2023-11-14T22:13:20Z")" "1700000000"
+}
+
+@test "parse_epoch: fails on unparseable input" {
+  setup_duration
+  run parse_epoch "not-a-date"
+  assert_failure
+}
+
+@test "format_date: formats a known epoch" {
+  setup_duration
+  assert_equal "$(TZ=UTC format_date 1700000000)" "Nov 14, 10:13pm"
+}
+
+@test "format_date_relative: future timestamp shows relative duration, no ago suffix" {
+  setup_duration
+  future=$(($(date +%s) + 7200))
+  run format_date_relative "$future"
+  assert_success
+  [[ "$output" == *"("*")" ]]
+  [[ "$output" != *" ago)" ]]
+}
+
+@test "format_date_relative: past timestamp appends ago suffix" {
+  setup_duration
+  past=$(($(date +%s) - 7200))
+  run format_date_relative "$past"
+  assert_success
+  [[ "$output" == *" ago)" ]]
+}
+
 # quote
 
 setup_quote() {

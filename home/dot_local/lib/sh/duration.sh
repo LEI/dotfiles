@@ -27,18 +27,37 @@ humanize_secs() {
   fi
 }
 
-# format_date <timestamp>
-# Output: "<local date/time>" eg "Jul 5, 4:59am"
+# parse_epoch <timestamp>
+# Output: Unix epoch seconds
 # Accepts ISO 8601 strings or bare Unix epoch integers
 # Set DATE env var (eg "gdate") for BSD compat
-format_date() {
+parse_epoch() {
   ts="$1"
   [ -z "$ts" ] && return 1
   # Bare epoch integers (9+ digits) need an @ prefix for GNU date
   case "$ts" in
   [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*) ts="@$ts" ;;
   esac
-  date_epoch=$(${DATE:-date} -d "$ts" +%s 2>/dev/null) || return 1
-  date_fmt=$(${DATE:-date} -d "@$date_epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
-  echo "$date_fmt"
+  ${DATE:-date} -d "$ts" +%s 2>/dev/null
+}
+
+# format_date <timestamp>
+# Output: "<local date/time>" eg "Jul 5, 4:59am"
+format_date() {
+  epoch=$(parse_epoch "$1") || return 1
+  ${DATE:-date} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null
+}
+
+# format_date_relative <timestamp>
+# Output: "<local date/time> (<relative duration>)" eg "Jul 5, 4:59am (2h50m)"
+# Future timestamps count down; past timestamps get an " ago" suffix
+format_date_relative() {
+  epoch=$(parse_epoch "$1") || return 1
+  abs=$(${DATE:-date} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
+  diff=$((epoch - $(date +%s)))
+  if [ "$diff" -ge 0 ]; then
+    printf '%s (%s)' "$abs" "$(humanize_secs "$diff")"
+  else
+    printf '%s (%s ago)' "$abs" "$(humanize_secs $((-diff)))"
+  fi
 }

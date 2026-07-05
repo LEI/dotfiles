@@ -84,7 +84,7 @@ show_quota() {
   while IFS="$(printf '\t')" read -r label pct reset; do
     line="$label: ${pct}% used"
     if [ -n "$reset" ]; then
-      note=$(format_date "$reset")
+      note=$(format_date_relative "$reset")
       if [ -n "$note" ]; then
         case "$note" in *" (0s)") ;; *) line="$line, resets $note" ;; esac
       fi
@@ -224,7 +224,7 @@ quota_anthropic() {
     else
       line="extra usage: ${val}% used, ${a}/${b} ${currency}"
       if [ -n "$reset" ]; then
-        line="$line, resets $(format_date "$reset")"
+        line="$line, resets $(format_date_relative "$reset")"
       fi
       if [ "$OUTPUT_BARS" = "1" ]; then
         line="$(output_bar "$val") $line"
