@@ -18,4 +18,4 @@ packages:
     enabled: '{{ not (eq .osIDLike "debian") }}'
     nameOverwrite:
       arch: podman-tui-bin
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osID "fedora" | ternary "brew" nil) }}'

@@ -6,6 +6,7 @@ packages:
       alpine: helix helix-tree-sitter-vendor # tree-sitter-grammars
       android: helix helix-grammars
       windows: Helix.Helix
+    type: '{{ eq .osID "fedora" | ternary "brew" nil }}'
   helixbinhx:
     enabled: '{{ and .features.helix (eq .osID "manjaro") }}'
     type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'

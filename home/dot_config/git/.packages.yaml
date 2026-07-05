@@ -26,7 +26,7 @@ packages:
   # git-cal:
   git-extras:
     enabled: '{{ not (eq .osIDLike "alpine" "opensuse" "windows") }}'
-    type: '{{ eq .osIDLike "arch" | ternary "aur" nil }}'
+    type: '{{ eq .osIDLike "arch" | ternary "aur" (eq .osID "fedora" | ternary "brew" nil) }}'
   git-filter-repo:
     enabled: '{{ not (eq .osIDLike "android" "windows") }}'
     type: '{{ eq .osID "fedora" | ternary "brew" nil }}'

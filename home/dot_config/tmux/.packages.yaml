@@ -3,6 +3,7 @@ packages:
   tmux:
     # FIXME(windows): ".config/tmux" should be ignored
     enabled: '{{ ne .os "windows" }}'
+    type: '{{ eq .osID "fedora" | ternary "brew" nil }}'
   nowplaying-cli:
     enabled: '{{ and .features.tmux (eq .osID "darwin") }}'
   pam-reattach:

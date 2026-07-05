@@ -52,6 +52,9 @@ packages:
     nameOverwrite:
       windows: Clement.bottom
     type: '{{ eq .osIDLike "android" "debian" "fedora" | ternary "mise" nil }}'
+  btop:
+    enabled: {{ ne .profile "minimal" }}
+    type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
   bvi:
     enabled: {{ .gui }}
     type: '{{ eq .osIDLike "arch" | ternary "aur" "brew" }}'
@@ -1158,7 +1161,6 @@ osPackages:
       clang: # or run "brew install gcc", required to install bats-assert, file and mock
     rpm:
       beep:
-      btop:
       chezmoi:
       clang:
       dconf-editor:
