@@ -12,7 +12,7 @@ if [ $# -eq 0 ]; then
   elif tmux has-session 2>/dev/null; then
     set -- attach
   else
-    set -- new-session \; run-shell '#{@resurrect-restore-script-path}'
+    set -- new-session
   fi
 fi
 

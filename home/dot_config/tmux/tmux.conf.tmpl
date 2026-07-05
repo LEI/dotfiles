@@ -184,10 +184,11 @@ set -g @continuum-boot-options iterm # ,fullscreen
 {{- else }}
 set -g @continuum-boot-options ghostty
 {{- end }}
-# set -g @continuum-restore on
+set -g @continuum-restore on
 set -g @resurrect-hook-post-save-all '\
-  last="$XDG_DATA_HOME/tmux/resurrect/last"; \
-  f="$(readlink "$last")"; \
+  dir="$XDG_DATA_HOME/tmux/resurrect"; \
+  last="$dir/last"; \
+  f="$dir/$(readlink "$last")"; \
   if [ -n "$f" ] && [ ! -s "$f" ]; then \
     rm "$f" "$last"; \
     tmux display-message "Resurrect: removed empty save file"; \
