@@ -370,6 +370,34 @@ setup_anthropic() {
   assert_equal "$(anthropic_scope_prefix monthly)" "monthly"
 }
 
+# cache
+
+setup_cache() {
+  # shellcheck source=home/dot_local/lib/sh/cache.sh
+  source home/dot_local/lib/sh/cache.sh
+}
+
+@test "cache_backoff_active: no failure recorded returns false" {
+  setup_cache
+  run cache_backoff_active "$BATS_TEST_TMPDIR/quota.json" 60
+  assert_failure
+}
+
+@test "cache_backoff_active: recent failure returns true within backoff window" {
+  setup_cache
+  cache_mark_failed "$BATS_TEST_TMPDIR/quota.json"
+  run cache_backoff_active "$BATS_TEST_TMPDIR/quota.json" 60
+  assert_success
+}
+
+@test "cache_clear_failed: removes a recorded failure" {
+  setup_cache
+  cache_mark_failed "$BATS_TEST_TMPDIR/quota.json"
+  cache_clear_failed "$BATS_TEST_TMPDIR/quota.json"
+  run cache_backoff_active "$BATS_TEST_TMPDIR/quota.json" 60
+  assert_failure
+}
+
 # quote
 
 setup_quote() {

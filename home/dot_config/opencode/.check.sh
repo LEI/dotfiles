@@ -120,6 +120,18 @@ cached_fetch() {
     return
   fi
 
+  if cache_backoff_active "$cache_path" "$((ttl * 3))"; then
+    fetch_reason="backing off after recent failure"
+    if [ -f "$cache_path" ]; then
+      fetch_source="stale"
+      fetch_age=$(cache_age_human "$cache_path")
+      cat "$cache_path"
+    else
+      fetch_source="none"
+    fi
+    return
+  fi
+
   tmp=$(mktemp)
   curl_err=$(mktemp)
   rc=0
@@ -143,10 +155,12 @@ cached_fetch() {
     mkdir -p "$(dirname "$cache_path")"
     mv "$tmp" "$cache_path"
     fetch_source="live"
+    cache_clear_failed "$cache_path"
     cat "$cache_path"
     return
   fi
 
+  cache_mark_failed "$cache_path"
   warn "$provider_name quota fetch failed: $fetch_reason"
   rm -f "$tmp"
   if [ -f "$cache_path" ]; then
