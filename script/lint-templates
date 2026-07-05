@@ -17,6 +17,9 @@ source "$lib_dir/bash/require.sh"
 # shellcheck source=home/dot_local/lib/sh/usage.sh
 source "$lib_dir/sh/usage.sh"
 
+# Use this tree's copy, not the applied one
+chezmoi_render="${BASH_SOURCE[0]%/*}/../home/dot_local/bin/executable_chezmoi-render"
+
 require_bash 4
 
 prog="${0##*/}"
@@ -85,7 +88,7 @@ trap cleanup EXIT
 cp "$repo_dir/.editorconfig" "$render_dir/.editorconfig"
 printf 'disable=SC1090,SC1091,SC2034,SC2317\n' >"$render_dir/.shellcheckrc"
 
-chezmoi-render --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
+bash "$chezmoi_render" --output "$render_dir" "${render_args[@]}" "${templates[@]}" >&2
 
 # Remove templates that rendered to empty files
 find "$render_dir" -type f -empty -delete

@@ -91,7 +91,10 @@ validate_skill() {
   fi
 
   # Resolve effective name via chezmoi: strips exact_, dot_, etc.
-  if ! target_path="$(chezmoi target-path --no-tty "$skill_dir")"; then
+  # Source root comes from the file's own location, not this script's copy.
+  local source_root
+  source_root=$(git -C "$skill_dir" rev-parse --show-toplevel)
+  if ! target_path="$(chezmoi target-path --no-tty --source "$source_root" "$skill_dir")"; then
     echo "FAIL $display_path (chezmoi target-path failed)"
     return 1
   fi

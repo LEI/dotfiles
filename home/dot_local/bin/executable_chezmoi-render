@@ -91,7 +91,7 @@ persistent_state_dir="$(mktemp -d)"
 persistent_state="$persistent_state_dir/chezmoi-state.json"
 trap 'rm -rf "$persistent_state_dir"' EXIT
 
-source_dir="$(chezmoi source-path --no-tty --persistent-state="$persistent_state")"
+source_dir="$(git rev-parse --show-toplevel)"
 if [ -z "$source_dir" ]; then
   printf 'error: could not determine source directory\n' >&2
   exit 1
@@ -140,7 +140,7 @@ for t in "${templates[@]}"; do
   sources+=("$source_dir/$t")
 done
 printf '%s\0' "${sources[@]}" |
-  xargs -0 chezmoi target-path --no-tty --persistent-state="$persistent_state" |
+  xargs -0 chezmoi target-path --no-tty --source "$source_dir" --persistent-state="$persistent_state" |
   mapfile -t targets
 if [ "${PIPESTATUS[1]}" -ne 0 ]; then
   echo "error: chezmoi target-path failed for:" >&2
@@ -175,6 +175,7 @@ render() {
 
   local cmd=(
     chezmoi execute-template
+    --source "$source_dir"
     --persistent-state="$persistent_state"
     ${chezmoi_args[@]+"${chezmoi_args[@]}"}
     --file "$source_dir/$src"
