@@ -247,6 +247,9 @@ output_bar() {
     [ "$pct_int" -le 0 ] && pct_int=0
     [ "$pct_int" -ge 100 ] && pct_int=100
     filled=$((pct_int * w / 100))
+    if [ "$pct_int" -gt 0 ] && [ "$filled" -eq 0 ]; then
+      filled=1
+    fi
     i=0
     while [ "$i" -lt "$filled" ]; do
       printf '█'
