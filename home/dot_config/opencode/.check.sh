@@ -112,11 +112,20 @@ show_quota() {
   done
 }
 
+# set_fetch_retry <seconds> <kind>
+# Sets fetch_retry/fetch_retry_kind in caller scope, humanizing seconds
+set_fetch_retry() {
+  fetch_retry=$(humanize_secs "$1")
+  fetch_retry_kind="$2"
+}
+
 # cached_fetch <name> <ttl> <jq_test> <curl_args...>
 # Writes the response body to stdout and reports the outcome in caller scope:
-#   fetch_source  cache | live | stale | none
-#   fetch_age     human cache age for cache and stale, empty otherwise
-#   fetch_reason  failure reason for stale and none (eg "HTTP 429"), empty on success
+#   fetch_age        human cache age for cache and stale, empty otherwise
+#   fetch_reason     failure reason for stale and none (eg "HTTP 429"), empty on success
+#   fetch_retry      humanized time until the next live attempt
+#   fetch_retry_kind "retry_after" (server-stated) or "backoff" (our estimate)
+#   fetch_source     cache | live | stale | none
 # A fresh cache hit skips the network. On any failure the most recent cache is
 # still served, labelled stale, so a real reading is never dropped for a bare
 # "unavailable". Use: cached_fetch ... > file; var=$(cat file)
@@ -124,7 +133,8 @@ cached_fetch() {
   provider_name="$1" ttl="$2" jq_test="$3"
   shift 3
   cache_path="${XDG_CACHE_HOME:-$HOME/.cache}/opencode/${provider_name}-quota.json"
-  fetch_source="" fetch_age="" fetch_reason=""
+  backoff=$((ttl * 3))
+  fetch_source="" fetch_age="" fetch_reason="" fetch_retry="" fetch_retry_kind=""
 
   if data=$(cache_get "$cache_path" "$ttl"); then
     fetch_source="cache"
@@ -133,8 +143,12 @@ cached_fetch() {
     return
   fi
 
-  if cache_backoff_active "$cache_path" "$((ttl * 3))"; then
+  if cache_backoff_active "$cache_path" "$backoff"; then
     fetch_reason="backing off after recent failure"
+    remaining=$(cache_backoff_remaining "$cache_path" "$backoff")
+    if [ -n "$remaining" ]; then
+      set_fetch_retry "$remaining" backoff
+    fi
     if [ -f "$cache_path" ]; then
       fetch_source="stale"
       fetch_age=$(cache_age_human "$cache_path")
@@ -146,10 +160,11 @@ cached_fetch() {
   fi
 
   tmp=$(mktemp)
+  headers=$(mktemp)
   curl_err=$(mktemp)
   rc=0
   http_code=$(curl --silent --show-error --max-time 10 --write-out '%{http_code}' \
-    --output "$tmp" "$@" 2>"$curl_err") || rc=$?
+    --dump-header "$headers" --output "$tmp" "$@" 2>"$curl_err") || rc=$?
 
   if [ "$rc" -ne 0 ]; then
     fetch_reason="curl exit $rc: $(tr '\n' ' ' <"$curl_err")"
@@ -169,12 +184,39 @@ cached_fetch() {
     mv "$tmp" "$cache_path"
     fetch_source="live"
     cache_clear_failed "$cache_path"
+    rm -f "$headers"
     cat "$cache_path"
     return
   fi
 
   cache_mark_failed "$cache_path"
   warn "$provider_name quota fetch failed: $fetch_reason"
+  # Retry-After (RFC 9110) is either a seconds count or an HTTP-date; prefer it
+  # over our own backoff-cooldown estimate when the server states one
+  retry_after=$(grep -i '^retry-after:' "$headers" 2>/dev/null | tail -1 | sed 's/^[^:]*: *//; s/\r$//')
+  rm -f "$headers"
+  case "$retry_after" in
+  '') ;;
+  *[!0-9]*)
+    if retry_epoch=$(parse_epoch "$retry_after"); then
+      retry_diff=$((retry_epoch - $(date +%s)))
+      if [ "$retry_diff" -gt 0 ]; then
+        set_fetch_retry "$retry_diff" retry_after
+      fi
+    fi
+    ;;
+  *)
+    if [ "$retry_after" -gt 0 ]; then
+      set_fetch_retry "$retry_after" retry_after
+    fi
+    ;;
+  esac
+  if [ -z "$fetch_retry" ]; then
+    remaining=$(cache_backoff_remaining "$cache_path" "$backoff")
+    if [ -n "$remaining" ]; then
+      set_fetch_retry "$remaining" backoff
+    fi
+  fi
   rm -f "$tmp"
   if [ -f "$cache_path" ]; then
     fetch_source="stale"
@@ -186,7 +228,7 @@ cached_fetch() {
 }
 
 # quota_note: a parenthetical freshness or failure note for the last cached_fetch
-# Reads fetch_source/fetch_age/fetch_reason from caller scope, empty when live
+# Reads fetch_source/fetch_age/fetch_reason/fetch_retry/fetch_retry_kind, empty when live
 quota_note() {
   case "$fetch_source" in
   cache)
@@ -194,7 +236,15 @@ quota_note() {
       printf '(cached %s)' "$fetch_age"
     fi
     ;;
-  stale) printf '(cached %s, live failed: %s)' "${fetch_age:-unknown age}" "${fetch_reason:-unknown}" ;;
+  stale)
+    if [ "$fetch_retry_kind" = "retry_after" ]; then
+      printf '(cached %s, retry in %s)' "${fetch_age:-unknown age}" "$fetch_retry"
+    elif [ -n "$fetch_retry" ]; then
+      printf '(cached %s, backoff %s)' "${fetch_age:-unknown age}" "$fetch_retry"
+    else
+      printf '(cached %s, live failed: %s)' "${fetch_age:-unknown age}" "${fetch_reason:-unknown}"
+    fi
+    ;;
   esac
 }
 

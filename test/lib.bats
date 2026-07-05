@@ -398,6 +398,21 @@ setup_cache() {
   assert_failure
 }
 
+@test "cache_backoff_remaining: no failure recorded prints nothing" {
+  setup_cache
+  run cache_backoff_remaining "$BATS_TEST_TMPDIR/quota.json" 60
+  assert_success
+  assert_output ""
+}
+
+@test "cache_backoff_remaining: recent failure prints seconds left" {
+  setup_cache
+  cache_mark_failed "$BATS_TEST_TMPDIR/quota.json"
+  run cache_backoff_remaining "$BATS_TEST_TMPDIR/quota.json" 60
+  assert_success
+  [ "$output" -gt 0 ] && [ "$output" -le 60 ]
+}
+
 # duration
 
 setup_duration() {

@@ -59,3 +59,15 @@ cache_backoff_active() {
   fail_age=$(($(date +%s) - $(stat -c %Y "$fail_path" 2>/dev/null || stat -f %m "$fail_path" 2>/dev/null || echo 0)))
   [ "$fail_age" -lt "$backoff" ]
 }
+
+# cache_backoff_remaining <path> <backoff_seconds>
+# Prints seconds left until backoff clears; empty if no failure recorded
+cache_backoff_remaining() {
+  fail_path="$1.failed" backoff="$2"
+  [ -f "$fail_path" ] || return 0
+  fail_age=$(($(date +%s) - $(stat -c %Y "$fail_path" 2>/dev/null || stat -f %m "$fail_path" 2>/dev/null || echo 0)))
+  remaining=$((backoff - fail_age))
+  if [ "$remaining" -gt 0 ]; then
+    echo "$remaining"
+  fi
+}
