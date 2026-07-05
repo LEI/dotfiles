@@ -272,6 +272,11 @@ packages:
   gpg-tui:
     enabled: {{ and .features.gpg (not (eq .osIDLike "android" "darwin" "debian" "fedora" "windows")) (eq .profile "minimal") }}
   gzip: { enabled: {{ eq .osIDLike "alpine" }} }
+  hcloud:
+    description: Hetzner Cloud CLI
+    enabled: {{ and (eq .osIDLike "darwin" "debian") (ne .profile "minimal") }}
+    nameOverwrite:
+      debian: hcloud-cli
   # hostctl:
   #   nameOverwrite:
   #     arch: hostctl-bin
