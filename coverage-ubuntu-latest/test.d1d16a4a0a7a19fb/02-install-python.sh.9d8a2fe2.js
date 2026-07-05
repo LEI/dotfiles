@@ -34,5 +34,5 @@ var data = {lines:[
 {"lineNum":"   33","line":"dry_run uv tool install --quiet \"yamllint\"","class":"lineCov","hits":"1","order":"168","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-03 05:18:02", "instrumented" : 18, "covered" : 11,};
+var header = { "command" : "test", "date" : "2026-07-05 00:38:13", "instrumented" : 18, "covered" : 11,};
 var merged_data = [];

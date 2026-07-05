@@ -59,5 +59,5 @@ var data = {files:[
 {"link":"duration.sh.419fe920.html","title":"duration.sh","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/duration.sh","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"25","total_lines" : "25"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-03 05:18:58", "instrumented" : 2537, "covered" : 556,};
+var header = { "command" : "test", "date" : "2026-07-05 00:38:19", "instrumented" : 2537, "covered" : 556,};
 var merged_data = [];

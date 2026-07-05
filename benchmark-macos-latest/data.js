@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783055951014,
+  "lastUpdate": 1783211910316,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -509,6 +509,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.22,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "e9ac8af3a8eb17e7f7a723ceef39b6a5b1404812",
+          "message": "fix(opencode): stop check.sh from always exiting 0\n\nThe provider loop piped yq into `while read; done`, which bash runs\nin a subshell. TAP_FAILS increments never reached the parent shell,\nso `exit \"$TAP_FAILS\"` always read 0 regardless of real failures.\nFeed the loop via process substitution instead, keeping it in the\ncurrent shell.",
+          "timestamp": "2026-07-05T00:34:27+02:00",
+          "tree_id": "af48e76837967b25d01b4701d6cf0f12834a1e20",
+          "url": "https://github.com/LEI/dotfiles/commit/e9ac8af3a8eb17e7f7a723ceef39b6a5b1404812"
+        },
+        "date": 1783211908822,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.126,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.14,
             "unit": "Second"
           }
         ]
