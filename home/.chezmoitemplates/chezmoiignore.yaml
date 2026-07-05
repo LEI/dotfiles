@@ -165,6 +165,8 @@ features:
     - .config/nvim/
     - .local/bin/nvim-*
     - .local/share/nvim
+  nix:
+    - .config/distrobox/
   node:
     - .config/mise/default-npm-packages
     - .config/npm/
