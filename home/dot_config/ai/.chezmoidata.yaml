@@ -55,6 +55,11 @@ ai:
       api: openai
       base_url: https://router.huggingface.co/v1
       env: HF_TOKEN
+    # https://platform.kimi.ai/docs/api/overview
+    kimi:
+      api: openai
+      base_url: https://api.moonshot.ai/v1
+      env: MOONSHOT_API_KEY
     ollama-cloud:
       api: ollama
       base_url: https://ollama.com/api

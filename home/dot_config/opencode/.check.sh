@@ -251,6 +251,28 @@ quota_synthetic() {
   fi
 }
 
+quota_kimi() {
+  local quota balance note
+  cached_fetch kimi 300 '.data' \
+    --header "Authorization: Bearer $key" \
+    "https://api.moonshot.ai/v1/users/me/balance" >"$quota_file"
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ] || ! echo "$quota" | jq --exit-status '.data' >/dev/null 2>&1; then
+    if [ -n "$fetch_reason" ]; then
+      output_diag "quota: unavailable ($fetch_reason)"
+    fi
+    return
+  fi
+  balance=$(echo "$quota" | jq -r '.data.available_balance // empty' 2>/dev/null)
+  if [ -n "$balance" ]; then
+    output_diag "$(printf 'balance: $%.2f' "$balance")"
+  fi
+  note=$(quota_note)
+  if [ -n "$note" ]; then
+    output_diag "$note"
+  fi
+}
+
 quota_openrouter() {
   local quota data limit remaining pct note
   quota=$(cat "$quota_file")
@@ -536,6 +558,7 @@ check_endpoint() {
 
     case "$name" in
     anthropic) quota_anthropic ;;
+    kimi) quota_kimi ;;
     synthetic) quota_synthetic ;;
     openrouter) quota_openrouter ;;
     esac
