@@ -357,6 +357,19 @@ setup_anthropic() {
   assert_equal "$(anthropic_quota_label mystery_field)" "mystery_field"
 }
 
+# anthropic_scope_prefix
+
+@test "anthropic_scope_prefix: known groups map to duration prefixes" {
+  setup_anthropic
+  assert_equal "$(anthropic_scope_prefix session)" "5h"
+  assert_equal "$(anthropic_scope_prefix weekly)" "7d"
+}
+
+@test "anthropic_scope_prefix: unknown group passes through" {
+  setup_anthropic
+  assert_equal "$(anthropic_scope_prefix monthly)" "monthly"
+}
+
 # quote
 
 setup_quote() {

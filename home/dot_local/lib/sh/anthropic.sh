@@ -17,3 +17,14 @@ anthropic_quota_label() {
   *) printf '%s' "$1" ;;
   esac
 }
+
+# anthropic_scope_prefix <group>
+# Maps a limits[] entry's group field to a duration prefix for per-model
+# quota rows: session -> 5h, weekly -> 7d; unknown groups pass through as-is
+anthropic_scope_prefix() {
+  case "$1" in
+  session) printf '5h' ;;
+  weekly) printf '7d' ;;
+  *) printf '%s' "$1" ;;
+  esac
+}

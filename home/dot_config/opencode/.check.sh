@@ -192,6 +192,11 @@ quota_anthropic() {
     while IFS="$(printf '\t')" read -r entry_key pct reset; do
       printf '%s\t%s\t%s\n' "$(anthropic_quota_label "$entry_key")" "$pct" "$reset"
     done)
+  show_quota < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
+  [.group, .scope.model.display_name, (.percent // 0 | round), (.resets_at // "")] | @tsv' 2>/dev/null |
+    while IFS="$(printf '\t')" read -r scope_group scope_name pct reset; do
+      printf '%s %s\t%s\t%s\n' "$(anthropic_scope_prefix "$scope_group")" "$scope_name" "$pct" "$reset"
+    done)
   echo "$quota" | jq -r '
   .extra_usage |
   if . == null then empty
