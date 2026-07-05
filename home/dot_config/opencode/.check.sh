@@ -5,6 +5,10 @@ set -eu
 DEBUG=""
 for arg in "$@"; do
   case "$arg" in
+  -h | --help)
+    echo "Usage: $0 [--debug] [--format=default|tap|json] [--bars|--no-bars]"
+    exit 0
+    ;;
   --debug) DEBUG=1 ;;
   --format=* | --bars | --no-bars) ;; # consumed by output_init
   *)
@@ -264,13 +268,13 @@ quota_anthropic() {
     return
   fi
   note=$(quota_note)
-  show_quota "" < <(echo "$quota" | jq -r 'to_entries[] |
+  show_quota "$note" < <(echo "$quota" | jq -r 'to_entries[] |
   select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
   [.key, (.value.utilization | round), (.value.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r entry_key pct reset; do
       printf '%s\t%s\t%s\n' "$(anthropic_quota_label "$entry_key")" "$pct" "$reset"
     done)
-  show_quota "" < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
+  show_quota "$note" < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
   [.group, .scope.model.display_name, (.percent // 0 | round), (.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r scope_group scope_name pct reset; do
       printf '%s %s\t%s\t%s\n' "$(anthropic_scope_prefix "$scope_group")" "$scope_name" "$pct" "$reset"
