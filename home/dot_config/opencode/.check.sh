@@ -80,13 +80,18 @@ fi
 provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" 2>/dev/null | wc -l)
 output_plan "$provider_count"
 
+# show_quota [freshness_note] < tsv(label, pct, reset)
+# Renders one diag line per row; freshness_note (from quota_note) attaches to
+# the last row so it reads as part of that fetch's report, not a stray line
 show_quota() {
+  local quota_note_arg="${1:-}"
+  local rows=() label pct reset line formatted
   while IFS="$(printf '\t')" read -r label pct reset; do
     line="$label: ${pct}% used"
     if [ -n "$reset" ]; then
-      note=$(format_date_relative "$reset")
-      if [ -n "$note" ]; then
-        case "$note" in *" (0s)") ;; *) line="$line, resets $note" ;; esac
+      formatted=$(format_date_relative "$reset")
+      if [ -n "$formatted" ]; then
+        case "$formatted" in *" (0s)") ;; *) line="$line, resets $formatted" ;; esac
       fi
     fi
     if [ "$OUTPUT_BARS" = "1" ]; then
@@ -94,6 +99,14 @@ show_quota() {
     fi
     if [ "$pct" -ge 100 ]; then
       QUOTA_WARN=1
+    fi
+    rows+=("$line")
+  done
+  local n=${#rows[@]} i=0
+  for line in "${rows[@]}"; do
+    i=$((i + 1))
+    if [ "$i" -eq "$n" ] && [ -n "$quota_note_arg" ]; then
+      line="$line $quota_note_arg"
     fi
     output_diag "$line"
   done
@@ -200,13 +213,14 @@ quota_anthropic() {
     output_diag "quota: unavailable${fetch_reason:+ ($fetch_reason)}"
     return
   fi
-  show_quota < <(echo "$quota" | jq -r 'to_entries[] |
+  note=$(quota_note)
+  show_quota "" < <(echo "$quota" | jq -r 'to_entries[] |
   select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
   [.key, (.value.utilization | round), (.value.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r entry_key pct reset; do
       printf '%s\t%s\t%s\n' "$(anthropic_quota_label "$entry_key")" "$pct" "$reset"
     done)
-  show_quota < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
+  show_quota "" < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
   [.group, .scope.model.display_name, (.percent // 0 | round), (.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r scope_group scope_name pct reset; do
       printf '%s %s\t%s\t%s\n' "$(anthropic_scope_prefix "$scope_group")" "$scope_name" "$pct" "$reset"
@@ -220,7 +234,7 @@ quota_anthropic() {
     ["off", (.disabled_reason // "unknown"), "", "", "", ""] | @tsv
   end' 2>/dev/null | while IFS="$(printf '\t')" read -r state val a b currency reset; do
     if [ "$state" = "off" ]; then
-      output_diag "extra usage: off ($val)"
+      line="extra usage: off ($val)"
     else
       line="extra usage: ${val}% used, ${a}/${b} ${currency}"
       if [ -n "$reset" ]; then
@@ -229,13 +243,12 @@ quota_anthropic() {
       if [ "$OUTPUT_BARS" = "1" ]; then
         line="$(output_bar "$val") $line"
       fi
-      output_diag "$line"
     fi
+    if [ -n "$note" ]; then
+      line="$line $note"
+    fi
+    output_diag "$line"
   done
-  note=$(quota_note)
-  if [ -n "$note" ]; then
-    output_diag "$note"
-  fi
 }
 
 quota_synthetic() {
@@ -250,18 +263,19 @@ quota_synthetic() {
     fi
     return
   fi
+  note=$(quota_note)
   limit=$(echo "$quota" | jq -r '.subscription.limit // 0' 2>/dev/null || echo 0)
   requests=$(echo "$quota" | jq -r '.subscription.requests // 0' 2>/dev/null || echo 0)
   reset=$(echo "$quota" | jq -r '.subscription.renewsAt // ""' 2>/dev/null || true)
   if [ "$limit" -gt 0 ]; then
     pct=$((requests * 100 / limit))
-    show_quota < <(printf '%s\t%s\t%s\n' "subscription" "$pct" "$reset")
+    show_quota "$note" < <(printf '%s\t%s\t%s\n' "subscription" "$pct" "$reset")
   elif [ "$quota" != "{}" ]; then
-    output_diag "subscription: unlimited"
-  fi
-  note=$(quota_note)
-  if [ -n "$note" ]; then
-    output_diag "$note"
+    line="subscription: unlimited"
+    if [ -n "$note" ]; then
+      line="$line $note"
+    fi
+    output_diag "$line"
   fi
 }
 
@@ -277,13 +291,14 @@ quota_kimi() {
     fi
     return
   fi
+  note=$(quota_note)
   balance=$(echo "$quota" | jq -r '.data.available_balance // empty' 2>/dev/null)
   if [ -n "$balance" ]; then
-    output_diag "$(printf 'balance: $%.2f' "$balance")"
-  fi
-  note=$(quota_note)
-  if [ -n "$note" ]; then
-    output_diag "$note"
+    line=$(printf 'balance: $%.2f' "$balance")
+    if [ -n "$note" ]; then
+      line="$line $note"
+    fi
+    output_diag "$line"
   fi
 }
 
@@ -296,13 +311,14 @@ quota_openrouter() {
     fi
     return
   fi
+  note=$(quota_note)
   data=$(echo "$quota" | jq -r '.data // empty' 2>/dev/null || true)
   if [ -n "$data" ]; then
     limit=$(echo "$quota" | jq -r '.data.limit // "null"' 2>/dev/null || true)
     remaining=$(echo "$quota" | jq -r '.data.limit_remaining // "null"' 2>/dev/null || true)
     if [ "$limit" != "null" ] && [ "$remaining" != "null" ]; then
       pct=$(echo "$quota" | jq -r '(((.data.limit // 0) - (.data.limit_remaining // 0)) / (.data.limit // 1) * 100 | floor)' 2>/dev/null || echo 0)
-      show_quota < <(printf '%s\t%s\t%s\n' "credits" "$pct" "")
+      show_quota "" < <(printf '%s\t%s\t%s\n' "credits" "$pct" "")
     fi
     echo "$quota" | jq -r '
     .data |
@@ -310,12 +326,11 @@ quota_openrouter() {
     "usage: total=\(.usage // 0) daily=\(.usage_daily // 0) weekly=\(.usage_weekly // 0) monthly=\(.usage_monthly // 0)",
     "byok: total=\(.byok_usage // 0) daily=\(.byok_usage_daily // 0) weekly=\(.byok_usage_weekly // 0) monthly=\(.byok_usage_monthly // 0)"
   ' 2>/dev/null | while IFS= read -r line; do
+      case "$line" in
+      byok:*) [ -n "$note" ] && line="$line $note" ;;
+      esac
       output_diag "$line"
     done
-  fi
-  note=$(quota_note)
-  if [ -n "$note" ]; then
-    output_diag "$note"
   fi
 }
 
@@ -348,14 +363,11 @@ quota_openai() {
   TMP_FILES="$TMP_FILES $openai_diag"
   {
     if [ -n "$pct" ]; then
-      if [ -n "$reset" ]; then
-        show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "@$reset")
-      else
-        show_quota < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
-      fi
       note=$(quota_note)
-      if [ -n "$note" ]; then
-        output_diag "$note"
+      if [ -n "$reset" ]; then
+        show_quota "$note" < <(printf '%s\t%s\t%s\n' "quota" "$pct" "@$reset")
+      else
+        show_quota "$note" < <(printf '%s\t%s\t%s\n' "quota" "$pct" "")
       fi
     fi
   } >"$openai_diag"
@@ -556,7 +568,7 @@ check_endpoint() {
   {
 
     if [ "$name" = "zai-coding-plan" ] && [ -n "$zai_quota" ]; then
-      show_quota < <(echo "$zai_quota" | jq -r '.data.limits[]? | [
+      show_quota "$(quota_note)" < <(echo "$zai_quota" | jq -r '.data.limits[]? | [
       (if .unit == 3 then "5h quota"
        elif .unit == 5 then "monthly"
        elif .unit == 6 then "7d quota"
@@ -564,10 +576,6 @@ check_endpoint() {
       (.percentage // 0),
       (if .nextResetTime > 0 then (.nextResetTime / 1000 | floor | strftime("%Y-%m-%dT%H:%M:%SZ")) else "" end)
     ] | @tsv' 2>/dev/null)
-      note=$(quota_note)
-      if [ -n "$note" ]; then
-        output_diag "$note"
-      fi
     fi
 
     case "$name" in
