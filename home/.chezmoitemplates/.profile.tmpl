@@ -11,7 +11,10 @@ fi
 
 if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
-  # local/: machine-local secrets, ignored by chezmoi; sourced last so they override
+fi
+
+# local/: machine-local secrets, ignored by chezmoi; sourced last so they override
+if [ -d "$XDG_CONFIG_HOME/secrets.d/local" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/local/"*.conf
 fi
 
