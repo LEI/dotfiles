@@ -27,6 +27,8 @@ fi
 . "$lib_dir/sh/log.sh"
 # shellcheck source=home/dot_local/lib/sh/tap.sh
 . "$lib_dir/sh/tap.sh"
+# shellcheck source=home/dot_local/lib/sh/anthropic.sh
+. "$lib_dir/sh/anthropic.sh"
 # shellcheck source=home/dot_local/lib/bash/output.sh
 . "$lib_dir/bash/output.sh"
 output_init "$@"
@@ -186,19 +188,10 @@ quota_anthropic() {
   fi
   show_quota < <(echo "$quota" | jq -r 'to_entries[] |
   select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
-  [
-    (if .key == "five_hour" then "5h quota"
-     elif .key == "seven_day" then "7d all models"
-     elif .key == "seven_day_sonnet" then "7d sonnet"
-     elif .key == "seven_day_opus" then "7d opus"
-     elif .key == "seven_day_omelette" then "7d design"
-     elif .key == "seven_day_oauth_apps" then "7d oauth apps"
-     elif .key == "seven_day_cowork" then "7d cowork"
-     elif .key == "omelette_promotional" then "design promo"
-     else .key end),
-    (.value.utilization | round),
-    (.value.resets_at // "")
-  ] | @tsv' 2>/dev/null)
+  [.key, (.value.utilization | round), (.value.resets_at // "")] | @tsv' 2>/dev/null |
+    while IFS="$(printf '\t')" read -r entry_key pct reset; do
+      printf '%s\t%s\t%s\n' "$(anthropic_quota_label "$entry_key")" "$pct" "$reset"
+    done)
   echo "$quota" | jq -r '
   .extra_usage |
   if . == null then empty

@@ -328,6 +328,35 @@ setup_redact() {
   assert_output "TOKEN="
 }
 
+# anthropic_quota_label
+
+setup_anthropic() {
+  # shellcheck source=home/dot_local/lib/sh/anthropic.sh
+  source home/dot_local/lib/sh/anthropic.sh
+}
+
+@test "anthropic_quota_label: known keys render byte-identical to today's labels" {
+  setup_anthropic
+  assert_equal "$(anthropic_quota_label five_hour)" "5h quota"
+  assert_equal "$(anthropic_quota_label seven_day)" "7d all models"
+  assert_equal "$(anthropic_quota_label seven_day_sonnet)" "7d sonnet"
+  assert_equal "$(anthropic_quota_label seven_day_opus)" "7d opus"
+  assert_equal "$(anthropic_quota_label seven_day_omelette)" "7d design"
+  assert_equal "$(anthropic_quota_label seven_day_oauth_apps)" "7d oauth apps"
+  assert_equal "$(anthropic_quota_label seven_day_cowork)" "7d cowork"
+  assert_equal "$(anthropic_quota_label omelette_promotional)" "design promo"
+}
+
+@test "anthropic_quota_label: unmapped seven_day_ key renders as 7d <name>" {
+  setup_anthropic
+  assert_equal "$(anthropic_quota_label seven_day_fable)" "7d fable"
+}
+
+@test "anthropic_quota_label: unknown non seven_day_ key passes through" {
+  setup_anthropic
+  assert_equal "$(anthropic_quota_label mystery_field)" "mystery_field"
+}
+
 # quote
 
 setup_quote() {
