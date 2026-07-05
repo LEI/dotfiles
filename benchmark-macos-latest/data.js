@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783211910316,
+  "lastUpdate": 1783212805847,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (macos-latest)": [
@@ -543,6 +543,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.14,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "f5286de28ceca615fe2ee1edfd8a899fb05ec3b1",
+          "message": "fix(secrets): source context7 API key from OS keystore",
+          "timestamp": "2026-07-05T02:49:39+02:00",
+          "tree_id": "1461f34d4c8a1038c25d2dc5698cda790c58612a",
+          "url": "https://github.com/LEI/dotfiles/commit/f5286de28ceca615fe2ee1edfd8a899fb05ec3b1"
+        },
+        "date": 1783212804407,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.132,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.17,
             "unit": "Second"
           }
         ]
