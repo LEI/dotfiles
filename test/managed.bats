@@ -37,20 +37,20 @@ setup() {
 }
 
 # bats test_tags=claude
-@test "claude: no MCP servers undefined in chezmoi" {
+@test "claude: no MCP servers outside .mcp.json" {
   check_feature claude
   check_command jq chezmoi
   [ -f "$HOME/.claude.json" ] || skip "no .claude.json"
 
-  local defined name
+  local mcp name
   local orphans=()
-  defined=$(chezmoi execute-template --no-tty \
-    '{{ (includeTemplate "mcp.jsonc" . | fromJsonc).servers | keys | toJson }}') ||
-    fail "failed to render mcp.jsonc"
+  mcp=$(chezmoi execute-template --no-tty \
+    '{{ includeTemplate "dot_claude/.mcp.json.tmpl" . }}') ||
+    fail "failed to render .mcp.json.tmpl"
 
   while IFS= read -r name; do
     [ -n "$name" ] || continue
-    [ "$(jq --arg n "$name" 'index($n) != null' <<<"$defined")" = true ] ||
+    [ "$(jq --arg n "$name" 'index($n) != null' <<<"$mcp")" = true ] ||
       orphans+=("$name")
   done < <(jq -r '.mcpServers // {} | keys[]' "$HOME/.claude.json")
 
@@ -60,7 +60,7 @@ setup() {
   for name in "${orphans[@]}"; do
     cmds="${cmds}claude mcp remove \"$name\""$'\n'
   done
-  fail "MCP servers not in mcp.jsonc:"$'\n'"$cmds"
+  fail "MCP servers not in .mcp.json:"$'\n'"$cmds"
 }
 
 # bats test_tags=claude,plugins

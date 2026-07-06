@@ -43,7 +43,7 @@ return {
   {
     'nvim-mini/mini.icons',
     -- tag = 'v0.16.0',
-    version = 'v0.17.x',
+    version = 'v0.18.x',
     lazy = true,
     opts = {
       file = {

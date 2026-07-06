@@ -489,6 +489,7 @@
   "showThinkingSummaries": true,
   "skipWorkflowUsageWarning": true,
   "editorMode": "vim",
+  "hideVimModeIndicator": {{ has "claude-dashboard@claude-dashboard" $plugins }},
   "verbose": true,
   "switchModelsOnFlag": false,
   "remoteControlAtStartup": false,

@@ -1,5 +1,14 @@
 # shellcheck shell=sh
 
+# Resolve a GNU-compatible date command once at source time
+# BSD date (macOS) lacks GNU -d, so prefer gdate when it is installed
+# Exported for callers that need GNU date directly, eg +%s%3N
+if command -v gdate >/dev/null; then
+  GNU_DATE='gdate'
+else
+  GNU_DATE='date'
+fi
+
 # humanize_secs <seconds>
 # Output: "Xd Yh Zm" | "Xd Yh" | "Xh Zm" | "Xm" | "Xs"
 # One-letter units (d/h/m/s) follow GNU timeout, systemd, Kubernetes conventions
@@ -30,7 +39,7 @@ humanize_secs() {
 # parse_epoch <timestamp>
 # Output: Unix epoch seconds
 # Accepts ISO 8601 strings or bare Unix epoch integers
-# Set DATE env var (eg "gdate") for BSD compat
+# Override the resolved date command with the DATE env var if needed
 parse_epoch() {
   ts="$1"
   [ -z "$ts" ] && return 1
@@ -38,14 +47,14 @@ parse_epoch() {
   case "$ts" in
   [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*) ts="@$ts" ;;
   esac
-  ${DATE:-date} -d "$ts" +%s 2>/dev/null
+  ${DATE:-$GNU_DATE} -d "$ts" +%s 2>/dev/null
 }
 
 # format_date <timestamp>
 # Output: "<local date/time>" eg "Jul 5, 4:59am"
 format_date() {
   epoch=$(parse_epoch "$1") || return 1
-  ${DATE:-date} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null
+  ${DATE:-$GNU_DATE} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null
 }
 
 # format_date_relative <timestamp>
@@ -53,7 +62,7 @@ format_date() {
 # Future timestamps count down; past timestamps get an " ago" suffix
 format_date_relative() {
   epoch=$(parse_epoch "$1") || return 1
-  abs=$(${DATE:-date} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
+  abs=$(${DATE:-$GNU_DATE} -d "@$epoch" "+%b %-d, %-I:%M%P" 2>/dev/null) || return 1
   diff=$((epoch - $(date +%s)))
   if [ "$diff" -ge 0 ]; then
     printf '%s (%s)' "$abs" "$(humanize_secs "$diff")"

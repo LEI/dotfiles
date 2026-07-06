@@ -89,7 +89,7 @@ return {
   {
     'nvim-mini/mini.ai',
     -- tag = 'v0.16.0',
-    version = 'v0.17.x',
+    version = 'v0.18.x',
     event = 'VeryLazy',
     opts = function()
       local ai = require('mini.ai')
@@ -118,7 +118,7 @@ return {
   {
     'nvim-mini/mini.move',
     -- tag = 'v0.16.0',
-    version = 'v0.17.x',
+    version = 'v0.18.x',
     event = 'VeryLazy',
   },
 
@@ -137,7 +137,7 @@ return {
     -- Alternative: windwp/nvim-autopairs
     'nvim-mini/mini.pairs',
     -- tag = 'v0.16.0',
-    version = 'v0.17.x',
+    version = 'v0.18.x',
     event = 'VeryLazy',
     opts = {
       modes = { insert = true, command = false, terminal = false },

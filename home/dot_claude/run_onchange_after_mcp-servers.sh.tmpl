@@ -1,25 +1,11 @@
 {{- $_ := . | setValueAtPath "client" "claude" -}}
-{{- $mcp := includeTemplate "mcp.jsonc" . | fromJsonc -}}
-{{- $managed := list
-  "claude-context"
-  "context7"
-  "deep-wiki"
-  "grafana"
-  "grafana-admin"
-  "grep_app"
--}}
-
-{{- if .features.kube -}}
-{{   $managed = concat $managed (list
-  "flux-operator"
-  "kubernetes"
-) -}}
-{{- end -}}
+{{- $defs := includeTemplate "mcp.jsonc" . | fromJsonc -}}
+{{- $mcp := includeTemplate "dot_claude/.mcp.json.tmpl" . | fromJson -}}
 
 {{- $servers := dict -}}
-{{- range $managed -}}
-{{-   if hasKey $mcp.servers . -}}
-{{-     $_ := $servers | setValueAtPath . (index $mcp.servers .) -}}
+{{- range $mcp -}}
+{{-   if hasKey $defs.servers . -}}
+{{-     $_ := $servers | setValueAtPath . (index $defs.servers .) -}}
 {{-   end -}}
 {{- end -}}
 #!{{ .prefix }}/usr/bin/env bash
@@ -58,14 +44,14 @@ mcp_sync {{ . | squote }} {{ index $servers . | toJson | squote }}
 {{- end }}
 
 {{- $stale := list -}}
-{{- range $managed -}}
+{{- range $mcp -}}
 {{-   if not (hasKey $servers .) -}}
 {{-     $stale = append $stale . -}}
 {{-   end -}}
 {{- end -}}
 {{- if $stale }}
 
-# Remove managed servers disabled on this machine
+# Remove servers disabled on this machine
 # shellcheck disable=SC2043
 for name in {{ $stale | sortAlpha | join " " }}; do
   if claude mcp get "$name" >/dev/null 2>&1; then

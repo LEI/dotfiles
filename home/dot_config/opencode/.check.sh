@@ -74,13 +74,6 @@ if ! command -v yq >/dev/null 2>&1; then
   exit 1
 fi
 
-# GNU date supports %3N for millisecond precision, BSD date does not
-if command -v gdate >/dev/null 2>&1; then
-  DATE="gdate"
-else
-  DATE="date"
-fi
-
 provider_count=$(yq '.ai.providers | to_entries | .[] | select(.value.base_url != null) | .key' "$AI_YAML" 2>/dev/null | wc -l)
 output_plan "$provider_count"
 
@@ -480,7 +473,8 @@ fetch_models() {
     status=200
     duration=0
   else
-    start=$($DATE +%s%3N)
+    # GNU %3N millisecond precision, unsupported by BSD date
+    start=$($GNU_DATE +%s%3N)
     curl_err=$(mktemp)
     rc=0
     if [ "$name" = "anthropic" ]; then
@@ -498,7 +492,7 @@ fetch_models() {
     fi
     rm -f "$curl_err"
     status=$(head -n 1 "$headers" | awk '{print $2}')
-    end=$($DATE +%s%3N)
+    end=$($GNU_DATE +%s%3N)
     duration=$((end - start))
   fi
 }

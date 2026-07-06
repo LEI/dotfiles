@@ -3,7 +3,7 @@ return {
   {
     'nvim-mini/mini.hipatterns',
     -- tag = 'v0.16.0',
-    version = 'v0.17.x',
+    version = 'v0.18.x',
     event = 'VeryLazy',
     opts = function()
       local hi = require('mini.hipatterns')

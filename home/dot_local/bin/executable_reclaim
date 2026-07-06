@@ -41,8 +41,14 @@ keep() {
 emit() {
   case "$1" in
   cache)
-    # XDG/macOS cache roots; subdirs are spec-sanctioned trashable
-    keep "${XDG_CACHE_HOME:-$HOME/.cache}"/*/ ~/Library/Caches/*/
+    # XDG/macOS cache roots; subdirs are spec-sanctioned trashable.
+    # Skip the huggingface hub, it lives under XDG cache but is kept in the
+    # hf group so a default run never wipes models that are costly to refetch
+    hf_cache="${HF_HOME:-$HOME/.cache/huggingface}"
+    for p in "${XDG_CACHE_HOME:-$HOME/.cache}"/*/ ~/Library/Caches/*/; do
+      [ "${p%/}" = "${hf_cache%/}" ] && continue
+      keep "$p"
+    done
     ;;
   app)
     # Chromium/Electron caches under app data; regenerated on launch

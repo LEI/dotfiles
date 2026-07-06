@@ -1,0 +1,11 @@
+{{- $sync := list
+  "claude-context"
+  "context7"
+  "deep-wiki"
+  "grafana"
+  "grep_app"
+-}}
+{{- if .features.kube -}}
+{{-   $sync = concat $sync (list "flux-operator" "kubernetes") -}}
+{{- end -}}
+{{- $sync | sortAlpha | toJson }}
