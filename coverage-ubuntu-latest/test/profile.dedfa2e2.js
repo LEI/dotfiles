@@ -206,5 +206,5 @@ var data = {lines:[
 {"lineNum":"  205","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-05 00:53:52", "instrumented" : 108, "covered" : 58,};
+var header = { "command" : "test", "date" : "2026-07-06 06:09:19", "instrumented" : 108, "covered" : 58,};
 var merged_data = [];

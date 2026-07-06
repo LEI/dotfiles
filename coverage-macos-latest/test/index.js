@@ -60,5 +60,5 @@ var data = {files:[
 {"link":"keystore.sh.tmpl.eb7a73b5.html","title":"keystore.sh.tmpl","summary_name":"[...]/dotfiles/home/dot_local/lib/sh/keystore.sh.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-05 00:53:14", "instrumented" : 2554, "covered" : 556,};
+var header = { "command" : "test", "date" : "2026-07-06 06:08:28", "instrumented" : 2554, "covered" : 556,};
 var merged_data = [];

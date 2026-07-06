@@ -61,5 +61,5 @@ var data = {files:[
 {"link":"01-install-tools.sh.4e449c2d.html","title":"01-install-tools.sh","summary_name":"[...]/dotfiles/tmp/.chezmoiscripts/01-install-tools.sh","covered_class":"lineCov","covered":"100.0","covered_lines":"14","uncovered_lines":"0","total_lines" : "14"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-05 00:53:52", "instrumented" : 2568, "covered" : 595,};
+var header = { "command" : "test", "date" : "2026-07-06 06:09:19", "instrumented" : 2568, "covered" : 595,};
 var merged_data = [];

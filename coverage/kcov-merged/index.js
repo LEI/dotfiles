@@ -56,5 +56,5 @@ var data = {files:[
 {"link":"executable_trash.tmpl.1b8d8cd5.html","title":"executable_trash.tmpl","summary_name":"[...]/dotfiles/dotfiles/home/dot_local/bin/executable_trash.tmpl","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"13","total_lines" : "13"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-07-05 00:54:19", "instrumented" : 2486, "covered" : 505,};
+var header = { "command" : "", "date" : "2026-07-06 06:09:40", "instrumented" : 2486, "covered" : 505,};
 var merged_data = [];
