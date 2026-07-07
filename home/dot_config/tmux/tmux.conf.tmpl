@@ -49,8 +49,14 @@ if "tmux show-option -s terminal-features | grep -vq ':extkeys$'" {
 }
 
 if "tmux show-option -s terminal-overrides | grep -vq ':Tc$'" {
-    set -as terminal-overrides ",*-256color:Tc"
+    set -as terminal-overrides ",*:Tc"
 }
+
+{{- if .features.claude }}
+
+# Unofficial workaround for washed-out Claude Code colors under tmux
+set-environment -g CLAUDE_CODE_TMUX_TRUECOLOR 1
+{{- end }}
 
 # Change the default prefix binding to Ctrl-a only when not connected via SSH
 if-shell 'test -z "$SSH_TTY"' 'set -g prefix C-a; bind C-a send-prefix; unbind C-b'
