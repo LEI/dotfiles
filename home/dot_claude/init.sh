@@ -64,9 +64,50 @@ claude-teams-tmux() {
   tmux-session "$session_name" claude --teammate-mode=tmux "$@"
 }
 
-# claude-print() {
-#   command claude --print "$@"
-# }
+# Active claude provider from CLAUDE_PROVIDER or ~/.claude/local.yaml, empty for native
+claude-provider() {
+  if [ -n "${CLAUDE_PROVIDER:-}" ]; then
+    printf '%s\n' "$CLAUDE_PROVIDER"
+    return
+  fi
+  local local_yaml="${HOME}/.claude/local.yaml"
+  [ -f "$local_yaml" ] && yq -r '.provider // ""' "$local_yaml"
+}
+
+# Base URL for a provider, read from the chezmoi source data file
+claude-provider-url() {
+  local data
+  data="$(chezmoi source-path)/dot_claude/.data.yaml"
+  yq -r ".providers[\"$1\"].url // \"\"" "$data"
+}
+
+# Run a command under a provider's ANTHROPIC_* env, native when provider is empty
+# Usage: claude-provider-exec PROVIDER CMD...
+claude-provider-exec() {
+  local provider="$1"
+  shift
+  if [ -n "$provider" ]; then
+    local base_url key
+    base_url=$(claude-provider-url "$provider")
+    if [ -z "$base_url" ]; then
+      echo "claude provider: no URL for '$provider'" >&2
+      return 1
+    fi
+    key=$("${CLAUDE_CONFIG_DIR:-$HOME/.claude}/api-key-helper.sh" "$provider")
+    if [ -z "$key" ]; then
+      echo "claude provider: no API key for '$provider'" >&2
+      return 1
+    fi
+    ANTHROPIC_BASE_URL="$base_url" ANTHROPIC_AUTH_TOKEN="$key" "$@"
+    return
+  fi
+  "$@"
+}
+
+# Run claude --print under the active provider
+claude-print() {
+  claude-provider-exec "$(claude-provider)" command claude --print "$@"
+}
 
 check-ai() {
   local dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/cache/claude-dashboard/claude-dashboard"
@@ -83,35 +124,7 @@ check-ai() {
     set -- node "$script" "$@"
   fi
 
-  local claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-  local cdata
-  cdata=$(chezmoi data --no-tty)
-  local local_yaml="${HOME}/.claude/local.yaml"
-  local provider="${CLAUDE_PROVIDER:-}"
-  if [ -z "$provider" ] && [ -f "$local_yaml" ]; then
-    provider=$(yq -r '.provider // ""' "$local_yaml")
-  fi
-  # Empty provider falls through to Anthropic native (no base_url override)
-  # local name="${provider%%-*}" # yq -r '.claude.providers | keys | .[0]' <<<"$cdata"
-  if [ -n "$provider" ]; then
-    local base_url key
-    base_url=$(yq -r ".claude.providers[\"$provider\"].url" <<<"$cdata")
-    if [ "$base_url" == "null" ]; then
-      base_url=
-    fi
-    if [ -z "$base_url" ]; then
-      echo "check-ai: no URL found for provider '$provider'" >&2
-      return 1
-    fi
-    key=$("$claude_dir/api-key-helper.sh" "$provider")
-    if [ -z "$key" ]; then
-      echo "check-ai: no API key found for provider '$provider'" >&2
-      return 1
-    fi
-    set -- env ANTHROPIC_BASE_URL="$base_url" ANTHROPIC_AUTH_TOKEN="$key" "$@"
-  fi
-  # echo "$@" >&2
-  "$@"
+  claude-provider-exec "$(claude-provider)" "$@"
 }
 
 # # Pop Kitty keyboard protocol if an app exited without cleanup
