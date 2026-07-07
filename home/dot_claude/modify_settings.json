@@ -435,6 +435,9 @@
   {{- end }}
   "enableAllProjectMcpServers": false,
   "hooks": {{ (get $stdin "hooks" | default dict) | toPrettyJson | indent 2 | trim }},
+  "worktree": {
+    "bgIsolation": "none"
+  },
   "enableWorkflows": true,
   {{- $statusline := print .chezmoi.homeDir "/.claude/statusline.sh" }}
   {{- if stat $statusline }}
@@ -489,14 +492,11 @@
   "showThinkingSummaries": true,
   "skipWorkflowUsageWarning": true,
   "editorMode": "vim",
-  "hideVimModeIndicator": {{ has "claude-dashboard@claude-dashboard" $plugins }},
   "verbose": true,
   "switchModelsOnFlag": false,
   "remoteControlAtStartup": false,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "worktree": {
-    "bgIsolation": "none"
-  },
+  "hideVimModeIndicator": {{ has "claude-dashboard@claude-dashboard" $plugins }},
   "autoUpdates": false
 }
