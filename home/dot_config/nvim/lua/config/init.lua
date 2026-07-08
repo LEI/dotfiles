@@ -137,6 +137,12 @@ if vim.fn.filereadable(features_json_file) == 1 then
   end
 end
 
+-- python3 host from the dedicated uv venv, provisioned by run_onchange_after_install-python-host
+local py_host = vim.fn.expand('~/.local/share/nvim/py-host/bin/python3')
+if vim.fn.executable(py_host) == 1 then
+  vim.g.python3_host_prog = py_host
+end
+
 -- vim.g.profile = vim.env.CHEZMOI_PROFILE or nil
 
 -- vim.o.winborder = vim.g.config.border

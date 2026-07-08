@@ -21,7 +21,7 @@ packages:
       mise
       {{- end }}
     # version: 0.12.1
-  # TODO: replace [python3-]neovim in ../mise/system-python-packages.tmpl
+  # darwin python3 host, linux uses run_onchange_after_install-python-host.sh
   pynvim:
     enabled: '{{ and .features.python (eq .osIDLike "darwin") }}'
     type: uv

@@ -1,1 +1,5 @@
 lazy-lock.json
+
+{{- if ne .chezmoi.os "linux" }}
+run_onchange_after_install-python-host.sh
+{{- end }}

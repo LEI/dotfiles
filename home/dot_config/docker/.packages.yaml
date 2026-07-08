@@ -11,7 +11,7 @@ packages:
       windows: wagoodman.dive # scoop: main/dive
   docker: # python-docker
     nameOverwrite:
-      rpm: docker-cli
+      rpm: moby-engine # engine, pulls docker-cli and containerd
 
   # TODO: https://docs.docker.com/ai/model-runner/
   # https://github.com/docker/docker-agent/blob/main/examples/README.md
@@ -33,6 +33,8 @@ packages:
     nameOverwrite:
       arch: lazydocker-bin
     type: '{{ eq .osIDLike "arch" | ternary "aur" (ne .os "darwin" | ternary "mise" nil) }}'
+  runc: # OCI runtime, not pulled transitively by moby-engine on fedora
+    enabled: '{{ eq .osIDLike "fedora" }}'
   # sbx login
   # sbx run claude|opencode
   # https://docs.docker.com/ai/sandboxes/get-started/#install-and-sign-in

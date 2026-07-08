@@ -7,14 +7,6 @@
 # pipenv
 # pipx
 
-{{- if .features.neovim -}}
-{{- if eq .osIDLike "fedora" }}
-neovim
-{{- else if ne .osID "darwin" }}
-pynvim
-{{- end }}
-{{- end }}
-
 {{- if not (eq .osIDLike "android" "arch" "darwin" "debian" "opensuse" "rhel") }}
 uv
 {{- end }}

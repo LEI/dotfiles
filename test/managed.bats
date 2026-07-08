@@ -22,6 +22,14 @@ setup() {
   no_unmanaged "$HOME/.config/secrets.d"
 }
 
+# bats test_tags=secrets
+@test "secrets.d: no plaintext secret literals" {
+  check_command keystore
+  run keystore audit
+  assert_success
+  refute_output
+}
+
 # bats test_tags=claude
 @test "claude: no unmanaged files" {
   check_feature claude
