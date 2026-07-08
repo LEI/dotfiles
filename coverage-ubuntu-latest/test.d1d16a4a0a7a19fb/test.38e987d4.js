@@ -114,20 +114,20 @@ var data = {lines:[
 {"lineNum":"  113","line":"  local exit_code=$?","class":"lineCov","hits":"2","order":"14","possible_hits":"0",},
 {"lineNum":"  114","line":""},
 {"lineNum":"  115","line":"  # Fail if 0 tests were run"},
-{"lineNum":"  116","line":"  if [ $exit_code -eq 0 ]; then","class":"lineCov","hits":"1","order":"591","possible_hits":"0",},
-{"lineNum":"  117","line":"    local test_count","class":"lineCov","hits":"1","order":"592","possible_hits":"0",},
-{"lineNum":"  118","line":"    test_count=$(bats --count \"$@\" 2>/dev/null)","class":"lineCov","hits":"2","order":"593","possible_hits":"0",},
-{"lineNum":"  119","line":"    if [ \"$test_count\" = \"0\" ]; then","class":"lineCov","hits":"1","order":"594","possible_hits":"0",},
+{"lineNum":"  116","line":"  if [ $exit_code -eq 0 ]; then","class":"lineCov","hits":"1","order":"650","possible_hits":"0",},
+{"lineNum":"  117","line":"    local test_count","class":"lineCov","hits":"1","order":"651","possible_hits":"0",},
+{"lineNum":"  118","line":"    test_count=$(bats --count \"$@\" 2>/dev/null)","class":"lineCov","hits":"2","order":"652","possible_hits":"0",},
+{"lineNum":"  119","line":"    if [ \"$test_count\" = \"0\" ]; then","class":"lineCov","hits":"1","order":"653","possible_hits":"0",},
 {"lineNum":"  120","line":"      echo \"bats error: 0 tests found ($*)\" >&2","class":"lineCov","hits":"1","order":"15","possible_hits":"0",},
 {"lineNum":"  121","line":"      exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  122","line":"    fi"},
 {"lineNum":"  123","line":"  fi"},
 {"lineNum":"  124","line":""},
-{"lineNum":"  125","line":"  exit $exit_code","class":"lineCov","hits":"1","order":"595","possible_hits":"0",},
+{"lineNum":"  125","line":"  exit $exit_code","class":"lineCov","hits":"1","order":"654","possible_hits":"0",},
 {"lineNum":"  126","line":"}"},
 {"lineNum":"  127","line":""},
 {"lineNum":"  128","line":"main \"$@\"","class":"lineCov","hits":"3","order":"21","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-06 06:09:19", "instrumented" : 57, "covered" : 45,};
+var header = { "command" : "test", "date" : "2026-07-08 06:32:16", "instrumented" : 57, "covered" : 45,};
 var merged_data = [];

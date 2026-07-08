@@ -125,7 +125,7 @@ var data = {lines:[
 {"lineNum":"  124","line":"  cd \"$source_dir\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  125","line":"  mapfile -t templates < <(","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  126","line":"    find . \\( -name \'*.tmpl\' -o -name \'modify_*\' \\) -type f |","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"  127","line":"      grep -v \'^./.chezmoi.yaml.tmpl$\' |","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  127","line":"      grep -v \'\\.chezmoi\\.yaml\\.tmpl$\' |","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  128","line":"      sort -u","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  129","line":"  )"},
 {"lineNum":"  130","line":"fi"},
@@ -213,5 +213,5 @@ var data = {lines:[
 {"lineNum":"  212","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-06 06:08:28", "instrumented" : 119, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-07-08 06:31:56", "instrumented" : 119, "covered" : 0,};
 var merged_data = [];

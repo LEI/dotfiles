@@ -111,23 +111,23 @@ var data = {lines:[
 {"lineNum":"  110","line":"  # set -- --trace \"$@\""},
 {"lineNum":"  111","line":"  echo \"bats $*\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  112","line":"  bats \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"  113","line":"  local exit_code=$?","class":"lineCov","hits":"1","order":"551","possible_hits":"0",},
+{"lineNum":"  113","line":"  local exit_code=$?","class":"lineCov","hits":"1","order":"610","possible_hits":"0",},
 {"lineNum":"  114","line":""},
 {"lineNum":"  115","line":"  # Fail if 0 tests were run"},
-{"lineNum":"  116","line":"  if [ $exit_code -eq 0 ]; then","class":"lineCov","hits":"1","order":"552","possible_hits":"0",},
-{"lineNum":"  117","line":"    local test_count","class":"lineCov","hits":"1","order":"553","possible_hits":"0",},
-{"lineNum":"  118","line":"    test_count=$(bats --count \"$@\" 2>/dev/null)","class":"lineCov","hits":"2","order":"554","possible_hits":"0",},
-{"lineNum":"  119","line":"    if [ \"$test_count\" = \"0\" ]; then","class":"lineCov","hits":"1","order":"555","possible_hits":"0",},
+{"lineNum":"  116","line":"  if [ $exit_code -eq 0 ]; then","class":"lineCov","hits":"1","order":"611","possible_hits":"0",},
+{"lineNum":"  117","line":"    local test_count","class":"lineCov","hits":"1","order":"612","possible_hits":"0",},
+{"lineNum":"  118","line":"    test_count=$(bats --count \"$@\" 2>/dev/null)","class":"lineCov","hits":"2","order":"613","possible_hits":"0",},
+{"lineNum":"  119","line":"    if [ \"$test_count\" = \"0\" ]; then","class":"lineCov","hits":"1","order":"614","possible_hits":"0",},
 {"lineNum":"  120","line":"      echo \"bats error: 0 tests found ($*)\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  121","line":"      exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  122","line":"    fi"},
 {"lineNum":"  123","line":"  fi"},
 {"lineNum":"  124","line":""},
-{"lineNum":"  125","line":"  exit $exit_code","class":"lineCov","hits":"1","order":"556","possible_hits":"0",},
+{"lineNum":"  125","line":"  exit $exit_code","class":"lineCov","hits":"1","order":"615","possible_hits":"0",},
 {"lineNum":"  126","line":"}"},
 {"lineNum":"  127","line":""},
 {"lineNum":"  128","line":"main \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-06 06:08:28", "instrumented" : 57, "covered" : 12,};
+var header = { "command" : "test", "date" : "2026-07-08 06:31:56", "instrumented" : 57, "covered" : 12,};
 var merged_data = [];

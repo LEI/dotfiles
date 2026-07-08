@@ -13,7 +13,7 @@ var data = {lines:[
 {"lineNum":"   12","line":"  elif tmux has-session 2>/dev/null; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   13","line":"    set -- attach","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   14","line":"  else"},
-{"lineNum":"   15","line":"    set -- new-session \\; run-shell \'#{@resurrect-restore-script-path}\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   15","line":"    set -- new-session","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   16","line":"  fi"},
 {"lineNum":"   17","line":"fi"},
 {"lineNum":"   18","line":""},
@@ -29,5 +29,5 @@ var data = {lines:[
 {"lineNum":"   28","line":"exec tmux -- \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "test", "date" : "2026-07-06 06:09:19", "instrumented" : 14, "covered" : 0,};
+var header = { "command" : "test", "date" : "2026-07-08 06:32:16", "instrumented" : 14, "covered" : 0,};
 var merged_data = [];

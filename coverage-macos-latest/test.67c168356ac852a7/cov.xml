@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.218" lines-covered="556" lines-valid="2554" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1783318108">
+<coverage line-rate="0.231" lines-covered="615" lines-valid="2660" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1783492316">
 	<sources>
 		<source>/Users/runner/work/dotfiles/dotfiles/</source>
 	</sources>
 	<packages>
-		<package name="test" line-rate="0.218" lines-covered="556" lines-valid="2554" branch-rate="1.0" complexity="1.0">
+		<package name="test" line-rate="0.231" lines-covered="615" lines-valid="2660" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="00_install_xdg_sh__527" filename="tmp/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="00_install_xdg_sh__606" filename="tmp/.chezmoiscripts/00-install-xdg.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="4" hits="1"/>
 						<line number="6" hits="1"/>
@@ -26,7 +26,7 @@
 						<line number="26" hits="1"/>
 					</lines>
 				</class>
-				<class name="validate_schema__528" filename="script/validate-schema" branch-rate="1.0" complexity="1.0" line-rate="0.253">
+				<class name="validate_schema__607" filename="script/validate-schema" branch-rate="1.0" complexity="1.0" line-rate="0.253">
 					<lines>
 						<line number="13" hits="20"/>
 						<line number="15" hits="20"/>
@@ -247,7 +247,7 @@
 						<line number="397" hits="14"/>
 					</lines>
 				</class>
-				<class name="02_install_python_sh__529" filename="tmp/.chezmoiscripts/02-install-python.sh" branch-rate="1.0" complexity="1.0" line-rate="0.611">
+				<class name="02_install_python_sh__608" filename="tmp/.chezmoiscripts/02-install-python.sh" branch-rate="1.0" complexity="1.0" line-rate="0.611">
 					<lines>
 						<line number="5" hits="1"/>
 						<line number="7" hits="1"/>
@@ -269,7 +269,7 @@
 						<line number="33" hits="1"/>
 					</lines>
 				</class>
-				<class name="lint_templates__530" filename="script/lint-templates" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="lint_templates__609" filename="script/lint-templates" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="10" hits="0"/>
 						<line number="12" hits="0"/>
@@ -335,7 +335,7 @@
 						<line number="128" hits="0"/>
 					</lines>
 				</class>
-				<class name="profile__531" filename="script/profile" branch-rate="1.0" complexity="1.0" line-rate="0.546">
+				<class name="profile__610" filename="script/profile" branch-rate="1.0" complexity="1.0" line-rate="0.546">
 					<lines>
 						<line number="7" hits="8"/>
 						<line number="9" hits="8"/>
@@ -447,7 +447,7 @@
 						<line number="204" hits="1"/>
 					</lines>
 				</class>
-				<class name="vm__532" filename="script/vm" branch-rate="1.0" complexity="1.0" line-rate="0.188">
+				<class name="vm__611" filename="script/vm" branch-rate="1.0" complexity="1.0" line-rate="0.188">
 					<lines>
 						<line number="19" hits="26"/>
 						<line number="20" hits="26"/>
@@ -850,62 +850,7 @@
 						<line number="740" hits="0"/>
 					</lines>
 				</class>
-				<class name="prek__533" filename="script/prek" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="12" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="24" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="29" hits="0"/>
-						<line number="31" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="35" hits="0"/>
-						<line number="45" hits="0"/>
-						<line number="46" hits="0"/>
-						<line number="47" hits="0"/>
-						<line number="48" hits="0"/>
-						<line number="49" hits="0"/>
-						<line number="51" hits="0"/>
-						<line number="52" hits="0"/>
-						<line number="53" hits="0"/>
-						<line number="57" hits="0"/>
-						<line number="58" hits="0"/>
-						<line number="59" hits="0"/>
-						<line number="60" hits="0"/>
-						<line number="61" hits="0"/>
-						<line number="62" hits="0"/>
-						<line number="63" hits="0"/>
-						<line number="64" hits="0"/>
-						<line number="65" hits="0"/>
-						<line number="69" hits="0"/>
-						<line number="71" hits="0"/>
-						<line number="73" hits="0"/>
-						<line number="74" hits="0"/>
-						<line number="77" hits="0"/>
-						<line number="78" hits="0"/>
-						<line number="79" hits="0"/>
-						<line number="81" hits="0"/>
-						<line number="85" hits="0"/>
-						<line number="86" hits="0"/>
-						<line number="89" hits="0"/>
-						<line number="90" hits="0"/>
-						<line number="91" hits="0"/>
-						<line number="92" hits="0"/>
-						<line number="96" hits="0"/>
-						<line number="97" hits="0"/>
-						<line number="99" hits="0"/>
-						<line number="100" hits="0"/>
-						<line number="101" hits="0"/>
-						<line number="104" hits="0"/>
-						<line number="105" hits="0"/>
-					</lines>
-				</class>
-				<class name="validate_usage__534" filename="script/validate-usage" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_usage__612" filename="script/validate-usage" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="10" hits="0"/>
 						<line number="12" hits="0"/>
@@ -993,7 +938,62 @@
 						<line number="156" hits="0"/>
 					</lines>
 				</class>
-				<class name="trace__535" filename="script/trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="prek__613" filename="script/prek" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="12" hits="0"/>
+						<line number="14" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="24" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="35" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+						<line number="47" hits="0"/>
+						<line number="48" hits="0"/>
+						<line number="49" hits="0"/>
+						<line number="51" hits="0"/>
+						<line number="52" hits="0"/>
+						<line number="53" hits="0"/>
+						<line number="57" hits="0"/>
+						<line number="58" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="60" hits="0"/>
+						<line number="61" hits="0"/>
+						<line number="62" hits="0"/>
+						<line number="63" hits="0"/>
+						<line number="64" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="69" hits="0"/>
+						<line number="71" hits="0"/>
+						<line number="73" hits="0"/>
+						<line number="74" hits="0"/>
+						<line number="77" hits="0"/>
+						<line number="78" hits="0"/>
+						<line number="79" hits="0"/>
+						<line number="81" hits="0"/>
+						<line number="85" hits="0"/>
+						<line number="86" hits="0"/>
+						<line number="89" hits="0"/>
+						<line number="90" hits="0"/>
+						<line number="91" hits="0"/>
+						<line number="92" hits="0"/>
+						<line number="96" hits="0"/>
+						<line number="97" hits="0"/>
+						<line number="99" hits="0"/>
+						<line number="100" hits="0"/>
+						<line number="101" hits="0"/>
+						<line number="104" hits="0"/>
+						<line number="105" hits="0"/>
+					</lines>
+				</class>
+				<class name="trace__614" filename="script/trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -1015,7 +1015,7 @@
 						<line number="42" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_validate__536" filename="home/dot_local/bin/executable_chezmoi-validate" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_validate__615" filename="home/dot_local/bin/executable_chezmoi-validate" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="8" hits="0"/>
@@ -1034,7 +1034,7 @@
 						<line number="40" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_changelog__537" filename="home/dot_local/bin/executable_changelog" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_changelog__616" filename="home/dot_local/bin/executable_changelog" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -1046,7 +1046,7 @@
 						<line number="15" hits="0"/>
 					</lines>
 				</class>
-				<class name="01_install_tools_sh__538" filename="tmp/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="01_install_tools_sh__617" filename="tmp/.chezmoiscripts/01-install-tools.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="4" hits="1"/>
 						<line number="6" hits="1"/>
@@ -1064,7 +1064,7 @@
 						<line number="36" hits="1"/>
 					</lines>
 				</class>
-				<class name="bench__539" filename="script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="bench__618" filename="script/bench" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
@@ -1090,7 +1090,7 @@
 						<line number="47" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_profile__540" filename="home/dot_local/bin/executable_chezmoi-profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_profile__619" filename="home/dot_local/bin/executable_chezmoi-profile" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="7" hits="0"/>
@@ -1179,7 +1179,7 @@
 						<line number="121" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_flush_dns__541" filename="home/dot_local/bin/executable_flush-dns" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_flush_dns__620" filename="home/dot_local/bin/executable_flush-dns" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="8" hits="0"/>
 						<line number="10" hits="0"/>
@@ -1201,7 +1201,7 @@
 						<line number="33" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_shpool_a__542" filename="home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_shpool_a__621" filename="home/dot_local/bin/executable_shpool-a" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -1215,7 +1215,7 @@
 						<line number="28" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_iperf3_plot__543" filename="home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_iperf3_plot__622" filename="home/dot_local/bin/executable_iperf3-plot" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="12" hits="0"/>
@@ -1242,14 +1242,14 @@
 						<line number="79" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_trace__544" filename="home/dot_local/bin/executable_chezmoi-trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_trace__623" filename="home/dot_local/bin/executable_chezmoi-trace" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
 						<line number="9" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_render__545" filename="home/dot_local/bin/executable_chezmoi-render" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_chezmoi_render__624" filename="home/dot_local/bin/executable_chezmoi-render" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="10" hits="0"/>
 						<line number="11" hits="0"/>
@@ -1372,7 +1372,7 @@
 						<line number="211" hits="0"/>
 					</lines>
 				</class>
-				<class name="container__546" filename="script/container" branch-rate="1.0" complexity="1.0" line-rate="0.366">
+				<class name="container__625" filename="script/container" branch-rate="1.0" complexity="1.0" line-rate="0.366">
 					<lines>
 						<line number="10" hits="36"/>
 						<line number="12" hits="36"/>
@@ -1559,7 +1559,7 @@
 						<line number="334" hits="0"/>
 					</lines>
 				</class>
-				<class name="test__547" filename="script/test" branch-rate="1.0" complexity="1.0" line-rate="0.211">
+				<class name="test__626" filename="script/test" branch-rate="1.0" complexity="1.0" line-rate="0.211">
 					<lines>
 						<line number="10" hits="1"/>
 						<line number="12" hits="1"/>
@@ -1620,7 +1620,7 @@
 						<line number="128" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_reclaim__548" filename="home/dot_local/bin/executable_reclaim" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_reclaim__627" filename="home/dot_local/bin/executable_reclaim" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="23" hits="0"/>
 						<line number="25" hits="0"/>
@@ -1629,38 +1629,41 @@
 						<line number="37" hits="0"/>
 						<line number="38" hits="0"/>
 						<line number="42" hits="0"/>
-						<line number="45" hits="0"/>
+						<line number="47" hits="0"/>
+						<line number="48" hits="0"/>
 						<line number="49" hits="0"/>
 						<line number="50" hits="0"/>
-						<line number="59" hits="0"/>
-						<line number="79" hits="0"/>
-						<line number="83" hits="0"/>
-						<line number="84" hits="0"/>
-						<line number="88" hits="0"/>
-						<line number="92" hits="0"/>
-						<line number="96" hits="0"/>
+						<line number="55" hits="0"/>
+						<line number="56" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="85" hits="0"/>
+						<line number="89" hits="0"/>
+						<line number="90" hits="0"/>
+						<line number="94" hits="0"/>
 						<line number="98" hits="0"/>
-						<line number="100" hits="0"/>
-						<line number="107" hits="0"/>
+						<line number="102" hits="0"/>
+						<line number="104" hits="0"/>
+						<line number="106" hits="0"/>
 						<line number="113" hits="0"/>
-						<line number="122" hits="0"/>
-						<line number="131" hits="0"/>
-						<line number="132" hits="0"/>
+						<line number="119" hits="0"/>
+						<line number="128" hits="0"/>
 						<line number="137" hits="0"/>
 						<line number="138" hits="0"/>
-						<line number="139" hits="0"/>
-						<line number="141" hits="0"/>
-						<line number="142" hits="0"/>
+						<line number="143" hits="0"/>
+						<line number="144" hits="0"/>
 						<line number="145" hits="0"/>
-						<line number="146" hits="0"/>
-						<line number="149" hits="0"/>
-						<line number="150" hits="0"/>
+						<line number="147" hits="0"/>
+						<line number="148" hits="0"/>
+						<line number="151" hits="0"/>
+						<line number="152" hits="0"/>
 						<line number="155" hits="0"/>
-						<line number="157" hits="0"/>
-						<line number="158" hits="0"/>
+						<line number="156" hits="0"/>
+						<line number="161" hits="0"/>
+						<line number="163" hits="0"/>
+						<line number="164" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_chezmoi_package__549" filename="home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.348">
+				<class name="executable_chezmoi_package__628" filename="home/dot_local/bin/executable_chezmoi-package" branch-rate="1.0" complexity="1.0" line-rate="0.348">
 					<lines>
 						<line number="11" hits="1"/>
 						<line number="13" hits="2"/>
@@ -1753,7 +1756,7 @@
 						<line number="194" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_repeat_last_command__550" filename="home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_repeat_last_command__629" filename="home/dot_local/bin/executable_repeat-last-command" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -1762,7 +1765,7 @@
 						<line number="12" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_trash_tmpl__551" filename="home/dot_local/bin/executable_trash.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_trash_tmpl__630" filename="home/dot_local/bin/executable_trash.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="6" hits="0"/>
@@ -1779,7 +1782,7 @@
 						<line number="17" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_ssh_cd__552" filename="home/dot_local/bin/executable_ssh-cd" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_ssh_cd__631" filename="home/dot_local/bin/executable_ssh-cd" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="8" hits="0"/>
 						<line number="9" hits="0"/>
@@ -1790,7 +1793,7 @@
 						<line number="15" hits="0"/>
 					</lines>
 				</class>
-				<class name="validate_blank__553" filename="script/validate-blank" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_blank__632" filename="script/validate-blank" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="8" hits="0"/>
 						<line number="10" hits="0"/>
@@ -1826,7 +1829,7 @@
 						<line number="70" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_webhook_notify__554" filename="home/dot_local/bin/executable_webhook-notify" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_webhook_notify__633" filename="home/dot_local/bin/executable_webhook-notify" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="7" hits="0"/>
 						<line number="12" hits="0"/>
@@ -1886,13 +1889,13 @@
 						<line number="98" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_git_P__555" filename="home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_git_P__634" filename="home/dot_local/bin/executable_git-P" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_srv__556" filename="home/dot_local/bin/executable_srv" branch-rate="1.0" complexity="1.0" line-rate="0.927">
+				<class name="executable_srv__635" filename="home/dot_local/bin/executable_srv" branch-rate="1.0" complexity="1.0" line-rate="0.927">
 					<lines>
 						<line number="9" hits="15"/>
 						<line number="11" hits="15"/>
@@ -1951,206 +1954,7 @@
 						<line number="111" hits="5"/>
 					</lines>
 				</class>
-				<class name="executable_list_package__557" filename="home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.136">
-					<lines>
-						<line number="5" hits="1"/>
-						<line number="7" hits="1"/>
-						<line number="8" hits="2"/>
-						<line number="11" hits="1"/>
-						<line number="13" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="26" hits="2"/>
-						<line number="28" hits="1"/>
-						<line number="31" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="35" hits="0"/>
-						<line number="36" hits="0"/>
-						<line number="39" hits="0"/>
-						<line number="40" hits="0"/>
-						<line number="44" hits="0"/>
-						<line number="48" hits="0"/>
-						<line number="51" hits="0"/>
-						<line number="55" hits="0"/>
-						<line number="58" hits="0"/>
-						<line number="61" hits="0"/>
-						<line number="64" hits="0"/>
-						<line number="65" hits="0"/>
-						<line number="67" hits="0"/>
-						<line number="70" hits="0"/>
-						<line number="71" hits="0"/>
-						<line number="72" hits="0"/>
-						<line number="73" hits="0"/>
-						<line number="74" hits="0"/>
-						<line number="76" hits="0"/>
-						<line number="78" hits="0"/>
-						<line number="81" hits="0"/>
-						<line number="84" hits="0"/>
-						<line number="90" hits="0"/>
-						<line number="93" hits="0"/>
-						<line number="96" hits="0"/>
-						<line number="99" hits="0"/>
-						<line number="100" hits="0"/>
-						<line number="105" hits="0"/>
-						<line number="106" hits="0"/>
-						<line number="108" hits="0"/>
-						<line number="111" hits="0"/>
-						<line number="117" hits="0"/>
-						<line number="118" hits="0"/>
-					</lines>
-				</class>
-				<class name="executable_shpool_select__558" filename="home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="5" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="23" hits="0"/>
-					</lines>
-				</class>
-				<class name="tap_sh__559" filename="home/dot_local/lib/sh/tap.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="30" hits="0"/>
-						<line number="31" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="34" hits="0"/>
-						<line number="39" hits="0"/>
-						<line number="40" hits="0"/>
-						<line number="41" hits="0"/>
-						<line number="42" hits="0"/>
-						<line number="44" hits="0"/>
-						<line number="49" hits="0"/>
-						<line number="55" hits="0"/>
-						<line number="56" hits="0"/>
-						<line number="57" hits="0"/>
-						<line number="59" hits="0"/>
-						<line number="64" hits="0"/>
-						<line number="65" hits="0"/>
-						<line number="66" hits="0"/>
-						<line number="67" hits="0"/>
-						<line number="68" hits="0"/>
-						<line number="69" hits="0"/>
-					</lines>
-				</class>
-				<class name="executable_e__560" filename="home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="5" hits="0"/>
-						<line number="7" hits="0"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="19" hits="0"/>
-					</lines>
-				</class>
-				<class name="cache_sh__561" filename="home/dot_local/lib/sh/cache.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="7" hits="0"/>
-						<line number="8" hits="0"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="27" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="29" hits="0"/>
-						<line number="30" hits="0"/>
-						<line number="31" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="33" hits="0"/>
-						<line number="34" hits="0"/>
-						<line number="36" hits="0"/>
-					</lines>
-				</class>
-				<class name="entrypoint__562" filename="script/entrypoint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="5" hits="0"/>
-						<line number="7" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="29" hits="0"/>
-						<line number="30" hits="0"/>
-						<line number="35" hits="0"/>
-						<line number="36" hits="0"/>
-						<line number="38" hits="0"/>
-						<line number="43" hits="0"/>
-						<line number="44" hits="0"/>
-						<line number="45" hits="0"/>
-						<line number="46" hits="0"/>
-						<line number="47" hits="0"/>
-						<line number="51" hits="0"/>
-						<line number="52" hits="0"/>
-						<line number="53" hits="0"/>
-						<line number="54" hits="0"/>
-						<line number="55" hits="0"/>
-						<line number="56" hits="0"/>
-						<line number="58" hits="0"/>
-						<line number="59" hits="0"/>
-						<line number="60" hits="0"/>
-						<line number="61" hits="0"/>
-						<line number="62" hits="0"/>
-						<line number="63" hits="0"/>
-						<line number="65" hits="0"/>
-						<line number="66" hits="0"/>
-						<line number="71" hits="0"/>
-						<line number="72" hits="0"/>
-						<line number="75" hits="0"/>
-						<line number="76" hits="0"/>
-						<line number="77" hits="0"/>
-						<line number="80" hits="0"/>
-						<line number="86" hits="0"/>
-						<line number="87" hits="0"/>
-						<line number="91" hits="0"/>
-						<line number="92" hits="0"/>
-						<line number="93" hits="0"/>
-						<line number="95" hits="0"/>
-						<line number="96" hits="0"/>
-						<line number="97" hits="0"/>
-						<line number="101" hits="0"/>
-						<line number="102" hits="0"/>
-						<line number="103" hits="0"/>
-						<line number="104" hits="0"/>
-						<line number="105" hits="0"/>
-						<line number="106" hits="0"/>
-						<line number="107" hits="0"/>
-					</lines>
-				</class>
-				<class name="export_sh__563" filename="home/dot_local/lib/sh/export.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="9" hits="4"/>
-						<line number="10" hits="1"/>
-						<line number="12" hits="3"/>
-						<line number="13" hits="3"/>
-						<line number="14" hits="3"/>
-						<line number="15" hits="3"/>
-						<line number="16" hits="3"/>
-						<line number="18" hits="2"/>
-						<line number="21" hits="3"/>
-						<line number="22" hits="3"/>
-						<line number="23" hits="3"/>
-					</lines>
-				</class>
-				<class name="executable_chezmoi_feature__564" filename="home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.317">
+				<class name="executable_chezmoi_feature__636" filename="home/dot_local/bin/executable_chezmoi-feature" branch-rate="1.0" complexity="1.0" line-rate="0.317">
 					<lines>
 						<line number="11" hits="2"/>
 						<line number="14" hits="0"/>
@@ -2236,7 +2040,346 @@
 						<line number="167" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_package_manager__565" filename="home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.161">
+				<class name="02_install_brew_packages_sh__637" filename="tmp/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.524">
+					<lines>
+						<line number="3" hits="1"/>
+						<line number="5" hits="1"/>
+						<line number="7" hits="1"/>
+						<line number="9" hits="1"/>
+						<line number="11" hits="1"/>
+						<line number="12" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="16" hits="1"/>
+						<line number="17" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="22" hits="0"/>
+						<line number="24" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="30" hits="2"/>
+						<line number="32" hits="1"/>
+						<line number="38" hits="1"/>
+						<line number="39" hits="1"/>
+						<line number="41" hits="1"/>
+					</lines>
+				</class>
+				<class name="run_sh__638" filename="home/dot_local/lib/sh/run.sh" branch-rate="1.0" complexity="1.0" line-rate="0.194">
+					<lines>
+						<line number="5" hits="7"/>
+						<line number="6" hits="7"/>
+						<line number="7" hits="0"/>
+						<line number="13" hits="1"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="24" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="33" hits="7"/>
+						<line number="34" hits="7"/>
+						<line number="35" hits="7"/>
+						<line number="37" hits="0"/>
+						<line number="43" hits="0"/>
+						<line number="44" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+						<line number="48" hits="0"/>
+						<line number="49" hits="0"/>
+						<line number="50" hits="0"/>
+						<line number="52" hits="0"/>
+						<line number="53" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="60" hits="0"/>
+						<line number="61" hits="0"/>
+						<line number="62" hits="0"/>
+						<line number="63" hits="0"/>
+						<line number="64" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="66" hits="0"/>
+						<line number="68" hits="0"/>
+					</lines>
+				</class>
+				<class name="clamp_sh__639" filename="home/dot_local/lib/sh/clamp.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="5" hits="37"/>
+						<line number="6" hits="37"/>
+						<line number="7" hits="37"/>
+						<line number="9" hits="37"/>
+						<line number="10" hits="2"/>
+						<line number="11" hits="35"/>
+						<line number="12" hits="10"/>
+						<line number="14" hits="25"/>
+					</lines>
+				</class>
+				<class name="usage_sh__640" filename="home/dot_local/lib/sh/usage.sh" branch-rate="1.0" complexity="1.0" line-rate="0.800">
+					<lines>
+						<line number="5" hits="14"/>
+						<line number="6" hits="2"/>
+						<line number="8" hits="0"/>
+						<line number="10" hits="2"/>
+						<line number="15" hits="6"/>
+					</lines>
+				</class>
+				<class name="executable_keystore__641" filename="home/dot_local/bin/executable_keystore" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="7" hits="0"/>
+						<line number="9" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="37" hits="0"/>
+						<line number="38" hits="0"/>
+						<line number="40" hits="0"/>
+						<line number="41" hits="0"/>
+						<line number="42" hits="0"/>
+						<line number="43" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+						<line number="47" hits="0"/>
+						<line number="48" hits="0"/>
+						<line number="49" hits="0"/>
+						<line number="51" hits="0"/>
+						<line number="52" hits="0"/>
+						<line number="53" hits="0"/>
+						<line number="54" hits="0"/>
+						<line number="56" hits="0"/>
+						<line number="57" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="61" hits="0"/>
+						<line number="66" hits="0"/>
+						<line number="67" hits="0"/>
+						<line number="68" hits="0"/>
+						<line number="70" hits="0"/>
+						<line number="76" hits="0"/>
+						<line number="79" hits="0"/>
+						<line number="80" hits="0"/>
+						<line number="81" hits="0"/>
+						<line number="82" hits="0"/>
+						<line number="83" hits="0"/>
+						<line number="84" hits="0"/>
+						<line number="85" hits="0"/>
+						<line number="86" hits="0"/>
+						<line number="88" hits="0"/>
+						<line number="89" hits="0"/>
+						<line number="90" hits="0"/>
+					</lines>
+				</class>
+				<class name="executable_shpool_select__642" filename="home/dot_local/bin/executable_shpool-select" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="5" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="14" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="16" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="23" hits="0"/>
+					</lines>
+				</class>
+				<class name="tap_sh__643" filename="home/dot_local/lib/sh/tap.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="14" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="34" hits="0"/>
+						<line number="39" hits="0"/>
+						<line number="40" hits="0"/>
+						<line number="41" hits="0"/>
+						<line number="42" hits="0"/>
+						<line number="44" hits="0"/>
+						<line number="49" hits="0"/>
+						<line number="55" hits="0"/>
+						<line number="56" hits="0"/>
+						<line number="57" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="64" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="66" hits="0"/>
+						<line number="67" hits="0"/>
+						<line number="68" hits="0"/>
+						<line number="69" hits="0"/>
+					</lines>
+				</class>
+				<class name="executable_e__644" filename="home/dot_local/bin/executable_e" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="5" hits="0"/>
+						<line number="7" hits="0"/>
+						<line number="9" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="14" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="16" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="19" hits="0"/>
+					</lines>
+				</class>
+				<class name="cache_sh__645" filename="home/dot_local/lib/sh/cache.sh" branch-rate="1.0" complexity="1.0" line-rate="0.438">
+					<lines>
+						<line number="7" hits="0"/>
+						<line number="8" hits="0"/>
+						<line number="9" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="33" hits="0"/>
+						<line number="34" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="43" hits="6"/>
+						<line number="44" hits="12"/>
+						<line number="45" hits="6"/>
+						<line number="51" hits="2"/>
+						<line number="57" hits="6"/>
+						<line number="58" hits="5"/>
+						<line number="59" hits="4"/>
+						<line number="60" hits="1"/>
+						<line number="66" hits="4"/>
+						<line number="67" hits="3"/>
+						<line number="68" hits="4"/>
+						<line number="69" hits="1"/>
+						<line number="70" hits="1"/>
+						<line number="71" hits="1"/>
+					</lines>
+				</class>
+				<class name="entrypoint__646" filename="script/entrypoint" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="5" hits="0"/>
+						<line number="7" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="14" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="22" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="35" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="38" hits="0"/>
+						<line number="43" hits="0"/>
+						<line number="44" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+						<line number="47" hits="0"/>
+						<line number="51" hits="0"/>
+						<line number="52" hits="0"/>
+						<line number="53" hits="0"/>
+						<line number="54" hits="0"/>
+						<line number="55" hits="0"/>
+						<line number="56" hits="0"/>
+						<line number="58" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="60" hits="0"/>
+						<line number="61" hits="0"/>
+						<line number="62" hits="0"/>
+						<line number="63" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="66" hits="0"/>
+						<line number="71" hits="0"/>
+						<line number="72" hits="0"/>
+						<line number="75" hits="0"/>
+						<line number="76" hits="0"/>
+						<line number="77" hits="0"/>
+						<line number="80" hits="0"/>
+						<line number="86" hits="0"/>
+						<line number="87" hits="0"/>
+						<line number="91" hits="0"/>
+						<line number="92" hits="0"/>
+						<line number="93" hits="0"/>
+						<line number="95" hits="0"/>
+						<line number="96" hits="0"/>
+						<line number="97" hits="0"/>
+						<line number="101" hits="0"/>
+						<line number="102" hits="0"/>
+						<line number="103" hits="0"/>
+						<line number="104" hits="0"/>
+						<line number="105" hits="0"/>
+						<line number="106" hits="0"/>
+						<line number="107" hits="0"/>
+					</lines>
+				</class>
+				<class name="export_sh__647" filename="home/dot_local/lib/sh/export.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="9" hits="4"/>
+						<line number="10" hits="1"/>
+						<line number="12" hits="3"/>
+						<line number="13" hits="3"/>
+						<line number="14" hits="3"/>
+						<line number="15" hits="3"/>
+						<line number="16" hits="3"/>
+						<line number="18" hits="2"/>
+						<line number="21" hits="3"/>
+						<line number="22" hits="3"/>
+						<line number="23" hits="3"/>
+					</lines>
+				</class>
+				<class name="duration_sh__648" filename="home/dot_local/lib/sh/duration.sh" branch-rate="1.0" complexity="1.0" line-rate="0.971">
+					<lines>
+						<line number="6" hits="14"/>
+						<line number="7" hits="14"/>
+						<line number="9" hits="0"/>
+						<line number="17" hits="10"/>
+						<line number="18" hits="10"/>
+						<line number="19" hits="2"/>
+						<line number="20" hits="2"/>
+						<line number="21" hits="2"/>
+						<line number="22" hits="2"/>
+						<line number="23" hits="4"/>
+						<line number="24" hits="2"/>
+						<line number="25" hits="2"/>
+						<line number="26" hits="8"/>
+						<line number="27" hits="4"/>
+						<line number="28" hits="4"/>
+						<line number="29" hits="4"/>
+						<line number="30" hits="6"/>
+						<line number="31" hits="4"/>
+						<line number="32" hits="4"/>
+						<line number="33" hits="2"/>
+						<line number="35" hits="2"/>
+						<line number="44" hits="9"/>
+						<line number="45" hits="9"/>
+						<line number="47" hits="9"/>
+						<line number="48" hits="6"/>
+						<line number="50" hits="9"/>
+						<line number="56" hits="4"/>
+						<line number="57" hits="2"/>
+						<line number="64" hits="4"/>
+						<line number="65" hits="4"/>
+						<line number="66" hits="4"/>
+						<line number="67" hits="2"/>
+						<line number="68" hits="2"/>
+						<line number="70" hits="2"/>
+					</lines>
+				</class>
+				<class name="executable_package_manager__649" filename="home/dot_local/bin/executable_package-manager" branch-rate="1.0" complexity="1.0" line-rate="0.161">
 					<lines>
 						<line number="5" hits="1"/>
 						<line number="7" hits="2"/>
@@ -2271,16 +2414,7 @@
 						<line number="63" hits="1"/>
 					</lines>
 				</class>
-				<class name="usage_sh__566" filename="home/dot_local/lib/sh/usage.sh" branch-rate="1.0" complexity="1.0" line-rate="0.800">
-					<lines>
-						<line number="5" hits="14"/>
-						<line number="6" hits="2"/>
-						<line number="8" hits="0"/>
-						<line number="10" hits="2"/>
-						<line number="15" hits="6"/>
-					</lines>
-				</class>
-				<class name="startup__567" filename="script/startup" branch-rate="1.0" complexity="1.0" line-rate="0.727">
+				<class name="startup__650" filename="script/startup" branch-rate="1.0" complexity="1.0" line-rate="0.727">
 					<lines>
 						<line number="9" hits="1"/>
 						<line number="11" hits="2"/>
@@ -2339,7 +2473,7 @@
 						<line number="125" hits="1"/>
 					</lines>
 				</class>
-				<class name="validate_blank_awk__568" filename="script/validate-blank.awk" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_blank_awk__651" filename="script/validate-blank.awk" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="3" hits="0"/>
@@ -2375,7 +2509,7 @@
 						<line number="52" hits="0"/>
 					</lines>
 				</class>
-				<class name="install_sh__569" filename="home/dot_local/lib/sh/install.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="install_sh__652" filename="home/dot_local/lib/sh/install.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="6" hits="0"/>
@@ -2415,7 +2549,7 @@
 						<line number="56" hits="0"/>
 					</lines>
 				</class>
-				<class name="require_sh__570" filename="home/dot_local/lib/sh/require.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="require_sh__653" filename="home/dot_local/lib/sh/require.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="6" hits="0"/>
@@ -2424,7 +2558,48 @@
 						<line number="10" hits="0"/>
 					</lines>
 				</class>
-				<class name="log_sh__571" filename="home/dot_local/lib/sh/log.sh" branch-rate="1.0" complexity="1.0" line-rate="0.950">
+				<class name="executable_claude_plan__654" filename="home/dot_local/bin/executable_claude-plan" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="7" hits="0"/>
+						<line number="9" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="12" hits="0"/>
+						<line number="13" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="22" hits="0"/>
+						<line number="23" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="29" hits="0"/>
+					</lines>
+				</class>
+				<class name="executable_nvim_sh__655" filename="home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+					<lines>
+						<line number="6" hits="0"/>
+						<line number="8" hits="0"/>
+						<line number="9" hits="0"/>
+						<line number="10" hits="0"/>
+						<line number="11" hits="0"/>
+						<line number="14" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="23" hits="0"/>
+						<line number="24" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="33" hits="0"/>
+						<line number="35" hits="0"/>
+					</lines>
+				</class>
+				<class name="log_sh__656" filename="home/dot_local/lib/sh/log.sh" branch-rate="1.0" complexity="1.0" line-rate="0.950">
 					<lines>
 						<line number="7" hits="110"/>
 						<line number="9" hits="110"/>
@@ -2448,180 +2623,14 @@
 						<line number="69" hits="22"/>
 					</lines>
 				</class>
-				<class name="02_install_brew_packages_sh__572" filename="tmp/.chezmoiscripts/02-install-brew-packages.sh" branch-rate="1.0" complexity="1.0" line-rate="0.524">
-					<lines>
-						<line number="3" hits="1"/>
-						<line number="5" hits="1"/>
-						<line number="7" hits="1"/>
-						<line number="9" hits="1"/>
-						<line number="11" hits="1"/>
-						<line number="12" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="16" hits="1"/>
-						<line number="17" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="24" hits="0"/>
-						<line number="25" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="30" hits="2"/>
-						<line number="32" hits="1"/>
-						<line number="38" hits="1"/>
-						<line number="39" hits="1"/>
-						<line number="41" hits="1"/>
-					</lines>
-				</class>
-				<class name="run_sh__573" filename="home/dot_local/lib/sh/run.sh" branch-rate="1.0" complexity="1.0" line-rate="0.194">
-					<lines>
-						<line number="5" hits="7"/>
-						<line number="6" hits="7"/>
-						<line number="7" hits="0"/>
-						<line number="13" hits="1"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="24" hits="0"/>
-						<line number="25" hits="0"/>
-						<line number="27" hits="0"/>
-						<line number="33" hits="7"/>
-						<line number="34" hits="7"/>
-						<line number="35" hits="7"/>
-						<line number="37" hits="0"/>
-						<line number="43" hits="0"/>
-						<line number="44" hits="0"/>
-						<line number="45" hits="0"/>
-						<line number="46" hits="0"/>
-						<line number="48" hits="0"/>
-						<line number="49" hits="0"/>
-						<line number="50" hits="0"/>
-						<line number="52" hits="0"/>
-						<line number="53" hits="0"/>
-						<line number="59" hits="0"/>
-						<line number="60" hits="0"/>
-						<line number="61" hits="0"/>
-						<line number="62" hits="0"/>
-						<line number="63" hits="0"/>
-						<line number="64" hits="0"/>
-						<line number="65" hits="0"/>
-						<line number="66" hits="0"/>
-						<line number="68" hits="0"/>
-					</lines>
-				</class>
-				<class name="clamp_sh__574" filename="home/dot_local/lib/sh/clamp.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="5" hits="37"/>
-						<line number="6" hits="37"/>
-						<line number="7" hits="37"/>
-						<line number="9" hits="37"/>
-						<line number="10" hits="2"/>
-						<line number="11" hits="35"/>
-						<line number="12" hits="10"/>
-						<line number="14" hits="25"/>
-					</lines>
-				</class>
-				<class name="executable_nvim_sh__575" filename="home/dot_local/bin/executable_nvim-sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="6" hits="0"/>
-						<line number="8" hits="0"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="23" hits="0"/>
-						<line number="24" hits="0"/>
-						<line number="25" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="31" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="33" hits="0"/>
-						<line number="35" hits="0"/>
-					</lines>
-				</class>
-				<class name="executable_claude_plan__576" filename="home/dot_local/bin/executable_claude-plan" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="7" hits="0"/>
-						<line number="9" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="12" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="23" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="27" hits="0"/>
-						<line number="29" hits="0"/>
-					</lines>
-				</class>
-				<class name="parallel_sh__577" filename="home/dot_local/lib/sh/parallel.sh" branch-rate="1.0" complexity="1.0" line-rate="0.800">
-					<lines>
-						<line number="3" hits="29"/>
-						<line number="5" hits="29"/>
-						<line number="9" hits="34"/>
-						<line number="10" hits="34"/>
-						<line number="11" hits="14"/>
-						<line number="12" hits="20"/>
-						<line number="13" hits="40"/>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="20" hits="34"/>
-						<line number="22" hits="4"/>
-						<line number="25" hits="30"/>
-						<line number="26" hits="26"/>
-						<line number="28" hits="4"/>
-						<line number="32" hits="34"/>
-						<line number="37" hits="50"/>
-						<line number="38" hits="25"/>
-						<line number="39" hits="25"/>
-					</lines>
-				</class>
-				<class name="duration_sh__578" filename="home/dot_local/lib/sh/duration.sh" branch-rate="1.0" complexity="1.0" line-rate="0.000">
-					<lines>
-						<line number="8" hits="0"/>
-						<line number="9" hits="0"/>
-						<line number="10" hits="0"/>
-						<line number="11" hits="0"/>
-						<line number="12" hits="0"/>
-						<line number="13" hits="0"/>
-						<line number="14" hits="0"/>
-						<line number="15" hits="0"/>
-						<line number="16" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="23" hits="0"/>
-						<line number="24" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="35" hits="0"/>
-						<line number="36" hits="0"/>
-						<line number="38" hits="0"/>
-						<line number="39" hits="0"/>
-						<line number="41" hits="0"/>
-						<line number="42" hits="0"/>
-						<line number="43" hits="0"/>
-					</lines>
-				</class>
-				<class name="redact_sh__579" filename="home/dot_local/lib/sh/redact.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+				<class name="redact_sh__657" filename="home/dot_local/lib/sh/redact.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
 					<lines>
 						<line number="5" hits="106"/>
 						<line number="7" hits="5"/>
 						<line number="10" hits="101"/>
 					</lines>
 				</class>
-				<class name="validate_skill__580" filename="script/validate-skill" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="validate_skill__658" filename="script/validate-skill" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="12" hits="0"/>
 						<line number="14" hits="0"/>
@@ -2701,7 +2710,7 @@
 						<line number="145" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_t__581" filename="home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_t__659" filename="home/dot_local/bin/executable_t" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -2719,7 +2728,7 @@
 						<line number="28" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_compose_project_tmpl__582" filename="home/dot_local/bin/executable_compose-project.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_compose_project_tmpl__660" filename="home/dot_local/bin/executable_compose-project.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="1" hits="0"/>
 						<line number="7" hits="0"/>
@@ -2735,7 +2744,7 @@
 						<line number="26" hits="0"/>
 					</lines>
 				</class>
-				<class name="executable_k__583" filename="home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="executable_k__661" filename="home/dot_local/bin/executable_k" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="5" hits="0"/>
 						<line number="7" hits="0"/>
@@ -2747,7 +2756,7 @@
 						<line number="19" hits="0"/>
 					</lines>
 				</class>
-				<class name="bootstrap__584" filename="script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.379">
+				<class name="bootstrap__662" filename="script/bootstrap" branch-rate="1.0" complexity="1.0" line-rate="0.379">
 					<lines>
 						<line number="8" hits="1"/>
 						<line number="10" hits="1"/>
@@ -2780,7 +2789,7 @@
 						<line number="53" hits="0"/>
 					</lines>
 				</class>
-				<class name="keystore_sh_tmpl__585" filename="home/dot_local/lib/sh/keystore.sh.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
+				<class name="keystore_sh_tmpl__663" filename="home/dot_local/lib/sh/keystore.sh.tmpl" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="6" hits="0"/>
 						<line number="7" hits="0"/>
@@ -2795,6 +2804,111 @@
 						<line number="17" hits="0"/>
 						<line number="19" hits="0"/>
 						<line number="20" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="35" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="37" hits="0"/>
+						<line number="38" hits="0"/>
+						<line number="39" hits="0"/>
+						<line number="40" hits="0"/>
+						<line number="41" hits="0"/>
+						<line number="42" hits="0"/>
+						<line number="43" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+					</lines>
+				</class>
+				<class name="executable_list_package__664" filename="home/dot_local/bin/executable_list-package" branch-rate="1.0" complexity="1.0" line-rate="0.136">
+					<lines>
+						<line number="5" hits="1"/>
+						<line number="7" hits="1"/>
+						<line number="8" hits="2"/>
+						<line number="11" hits="1"/>
+						<line number="13" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="26" hits="2"/>
+						<line number="28" hits="1"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="35" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="39" hits="0"/>
+						<line number="40" hits="0"/>
+						<line number="44" hits="0"/>
+						<line number="48" hits="0"/>
+						<line number="51" hits="0"/>
+						<line number="55" hits="0"/>
+						<line number="58" hits="0"/>
+						<line number="61" hits="0"/>
+						<line number="64" hits="0"/>
+						<line number="65" hits="0"/>
+						<line number="67" hits="0"/>
+						<line number="70" hits="0"/>
+						<line number="71" hits="0"/>
+						<line number="72" hits="0"/>
+						<line number="73" hits="0"/>
+						<line number="74" hits="0"/>
+						<line number="76" hits="0"/>
+						<line number="78" hits="0"/>
+						<line number="81" hits="0"/>
+						<line number="84" hits="0"/>
+						<line number="90" hits="0"/>
+						<line number="93" hits="0"/>
+						<line number="96" hits="0"/>
+						<line number="99" hits="0"/>
+						<line number="100" hits="0"/>
+						<line number="105" hits="0"/>
+						<line number="106" hits="0"/>
+						<line number="108" hits="0"/>
+						<line number="111" hits="0"/>
+						<line number="117" hits="0"/>
+						<line number="118" hits="0"/>
+					</lines>
+				</class>
+				<class name="anthropic_sh__665" filename="home/dot_local/lib/sh/anthropic.sh" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="8" hits="20"/>
+						<line number="9" hits="2"/>
+						<line number="10" hits="2"/>
+						<line number="11" hits="2"/>
+						<line number="12" hits="2"/>
+						<line number="14" hits="10"/>
+						<line number="15" hits="30"/>
+						<line number="17" hits="2"/>
+						<line number="25" hits="6"/>
+						<line number="26" hits="2"/>
+						<line number="27" hits="2"/>
+						<line number="28" hits="2"/>
+					</lines>
+				</class>
+				<class name="parallel_sh__666" filename="home/dot_local/lib/sh/parallel.sh" branch-rate="1.0" complexity="1.0" line-rate="0.800">
+					<lines>
+						<line number="3" hits="29"/>
+						<line number="5" hits="29"/>
+						<line number="9" hits="34"/>
+						<line number="10" hits="34"/>
+						<line number="11" hits="14"/>
+						<line number="12" hits="20"/>
+						<line number="13" hits="40"/>
+						<line number="14" hits="0"/>
+						<line number="15" hits="0"/>
+						<line number="16" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="20" hits="34"/>
+						<line number="22" hits="4"/>
+						<line number="25" hits="30"/>
+						<line number="26" hits="26"/>
+						<line number="28" hits="4"/>
+						<line number="32" hits="34"/>
+						<line number="37" hits="50"/>
+						<line number="38" hits="25"/>
+						<line number="39" hits="25"/>
 					</lines>
 				</class>
 			</classes>

@@ -3,15 +3,15 @@ var data = {lines:[
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"# Check if value is truthy (1 or true)"},
 {"lineNum":"    4","line":"truthy() {"},
-{"lineNum":"    5","line":"  case \"$1\" in","class":"lineCov","hits":"1","order":"292",},
-{"lineNum":"    6","line":"  1 | true) return 0 ;;","class":"lineCov","hits":"1","order":"290",},
+{"lineNum":"    5","line":"  case \"$1\" in","class":"lineCov","hits":"1","order":"318",},
+{"lineNum":"    6","line":"  1 | true) return 0 ;;","class":"lineCov","hits":"1","order":"316",},
 {"lineNum":"    7","line":"  *) return 1 ;;","class":"lineNoCov","hits":"0",},
 {"lineNum":"    8","line":"  esac"},
 {"lineNum":"    9","line":"}"},
 {"lineNum":"   10","line":""},
 {"lineNum":"   11","line":"# Check if command exists in PATH"},
 {"lineNum":"   12","line":"has() {"},
-{"lineNum":"   13","line":"  command -v \"$@\" >/dev/null 2>&1","class":"lineCov","hits":"1","order":"291",},
+{"lineNum":"   13","line":"  command -v \"$@\" >/dev/null 2>&1","class":"lineCov","hits":"1","order":"317",},
 {"lineNum":"   14","line":"}"},
 {"lineNum":"   15","line":""},
 {"lineNum":"   16","line":"# Print prefixed error to stderr and exit"},
@@ -31,9 +31,9 @@ var data = {lines:[
 {"lineNum":"   30","line":""},
 {"lineNum":"   31","line":"# Like run but skip execution in dry run mode"},
 {"lineNum":"   32","line":"dry_run() {"},
-{"lineNum":"   33","line":"  if truthy \"${DRY_RUN:-}\"; then","class":"lineCov","hits":"1","order":"289",},
-{"lineNum":"   34","line":"    msg \"DRY-RUN: $*\"","class":"lineCov","hits":"1","order":"288",},
-{"lineNum":"   35","line":"    return 0","class":"lineCov","hits":"1","order":"287",},
+{"lineNum":"   33","line":"  if truthy \"${DRY_RUN:-}\"; then","class":"lineCov","hits":"1","order":"315",},
+{"lineNum":"   34","line":"    msg \"DRY-RUN: $*\"","class":"lineCov","hits":"1","order":"314",},
+{"lineNum":"   35","line":"    return 0","class":"lineCov","hits":"1","order":"313",},
 {"lineNum":"   36","line":"  fi"},
 {"lineNum":"   37","line":"  run \"$@\"","class":"lineNoCov","hits":"0",},
 {"lineNum":"   38","line":"}"},
@@ -70,5 +70,5 @@ var data = {lines:[
 {"lineNum":"   69","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "", "date" : "2026-07-06 06:09:40", "instrumented" : 31, "covered" : 6,};
+var header = { "command" : "", "date" : "2026-07-08 06:32:38", "instrumented" : 31, "covered" : 6,};
 var merged_data = [];

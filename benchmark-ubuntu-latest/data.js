@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783318165639,
+  "lastUpdate": 1783492344420,
   "repoUrl": "https://github.com/LEI/dotfiles",
   "entries": {
     "Bash benchmark (ubuntu-latest)": [
@@ -611,6 +611,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "bash initial startup time",
             "value": 0.09,
+            "unit": "Second"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "committer": {
+            "email": "4112243+LEI@users.noreply.github.com",
+            "name": "Guillaume",
+            "username": "LEI"
+          },
+          "distinct": true,
+          "id": "b9944bc11057a9ad23b32ff4dc29bb959f270167",
+          "message": "feat(secrets): read openrouter key via keystore_get",
+          "timestamp": "2026-07-08T01:40:02+02:00",
+          "tree_id": "4618a1beae9ac28564b2576068650257fca09ac3",
+          "url": "https://github.com/LEI/dotfiles/commit/b9944bc11057a9ad23b32ff4dc29bb959f270167"
+        },
+        "date": 1783492343464,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "bash average startup time",
+            "value": 0.076,
+            "unit": "Second"
+          },
+          {
+            "name": "bash initial startup time",
+            "value": 0.08,
             "unit": "Second"
           }
         ]
