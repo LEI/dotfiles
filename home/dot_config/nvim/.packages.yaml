@@ -10,14 +10,16 @@ packages:
       mise: npm:@mermaid-js/mermaid-cli
       npm: "@mermaid-js/mermaid-cli"
     type: '{{ .features.mise | ternary "mise" "npm" }}'
-  # FIXME: fedora nvim v0.11.6
-  # NOTE: latest nvim requires GLIBC_2.42
   neovim:
     # enabled: '{{ or (ne .osIDLike "debian") (eq .libc "gnu") }}'
     nameOverwrite:
       windows: '{{ eq .packageType "winget" | ternary "Neovim.Neovim" nil }}'
-    type: '{{ and (eq .osIDLike "debian") (ne .libc "gnu") | ternary "mise"
-        (eq .packageType "npm" "gem" | ternary .packageType nil) }}'
+    type: |-
+      {{ if eq .packageType "npm" "gem" -}}
+      {{ .packageType }}
+      {{- else if or (and (eq .osIDLike "debian") (ne .libc "gnu")) (eq .osIDLike "fedora") -}}
+      mise
+      {{- end }}
     # version: 0.12.1
   # TODO: replace [python3-]neovim in ../mise/system-python-packages.tmpl
   pynvim:
