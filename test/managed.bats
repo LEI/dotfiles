@@ -30,6 +30,19 @@ setup() {
   refute_output
 }
 
+# bats test_tags=secrets
+@test "secrets.d: opencode.conf stays a systemd-literal EnvironmentFile" {
+  check_feature opencode
+  check_command chezmoi
+
+  run chezmoi cat "$HOME/.config/secrets.d/opencode.conf"
+  assert_success
+  refute_output --partial '$'
+  refute_output --partial 'keystore_export'
+  refute_output --partial 'export_nonempty'
+  refute_output --partial 'keystore_get'
+}
+
 # bats test_tags=claude
 @test "claude: no unmanaged files" {
   check_feature claude

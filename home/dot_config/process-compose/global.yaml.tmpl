@@ -26,58 +26,7 @@ processes:
   #     max_restarts: 0
   {{- end }}
 
-  {{- $opencodeConf := joinPath .chezmoi.homeDir ".config" "secrets.d" "opencode.conf" }}
   {{- $opencodeSettings := joinPath .chezmoi.homeDir ".config" "opencode" "opencode.jsonc" }}
-  {{- if and false .features.opencode (stat $opencodeConf) }}
-  # FIXME: high I/O wait on Linux BRTFS
-
-  {{- $server := .opencode.server }}
-  {{- if and .features.tailscale .tailscale.tailnet }}
-  {{-   $cors := append $server.cors (printf "https://%s" .tailscale.tailnet) }}
-  {{-   $server = mergeOverwrite $server (dict "cors" $cors) }}
-  {{- end }}
-
-  # opencode attach http://127.0.0.1:4096
-  opencode-server:
-    namespace: apps
-    description: OpenCode server
-    # https://github.com/anomalyco/opencode/issues/19078
-    command: >-
-      test -n "$OPENCODE_SERVER_PASSWORD" &&
-      opencode serve
-      {{- range $key, $value := $server }}
-      {{-   if kindIs "slice" $value }}
-      {{-   range $value }}
-      --{{ $key }}={{ . | quote }}
-      {{-   end }}
-      {{-   else }}
-      {{-   $isInt := or (kindIs "int64" $value) (kindIs "uint64" $value) }}
-      --{{ $key }}={{ $isInt | ternary $value ($value | quote) }}
-      {{-   end }}
-      {{- end }}
-      --print-logs
-    environment:
-      {{- range include $opencodeConf | trim | splitList "\n" }}
-      - {{ . }}
-      {{- end }}
-    availability:
-      restart: on_failure
-      backoff_seconds: 10
-      max_restarts: 5
-      exponential_backoff: true
-    # readiness_probe:
-    #   http_get:
-    #     host: {{ $server.hostname }}
-    #     port: {{ $server.port }}
-    #     scheme: http
-    #     # headers: {}
-    #     # FIXME: Error: readiness check fail - Received status code '401' does not match expected status code '200'   ║│
-    #     status_code: 401
-    #   initial_delay_seconds: 5
-    #   period_seconds: 10
-    #   timeout_seconds: 3
-    #   failure_threshold: 3
-  {{- end }}
 
   {{- range dig "processCompose" "sshProxies" list . }}
   {{-   $remotePort := "22" }}

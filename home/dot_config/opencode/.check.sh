@@ -31,6 +31,8 @@ fi
 . "$lib_dir/sh/log.sh"
 # shellcheck source=home/dot_local/lib/sh/tap.sh
 . "$lib_dir/sh/tap.sh"
+# shellcheck source=/dev/null
+. "$lib_dir/sh/keystore.sh"
 # shellcheck source=home/dot_local/lib/sh/anthropic.sh
 . "$lib_dir/sh/anthropic.sh"
 # shellcheck source=home/dot_local/lib/bash/output.sh
