@@ -1,6 +1,6 @@
 #!/bin/sh
 # Usage: api-key-helper.sh <provider>
-# Reads from: ~/.config/private_secrets.d/cloud/{provider}.conf
+# Reads from: ~/.config/secrets.d/cloud/{provider}.conf
 # Falls back to: ~/.local/share/opencode/auth.json
 
 if [ "$#" -ne 1 ]; then
@@ -9,7 +9,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 PROVIDER="$1"
-SECRETS_FILE="$HOME/.config/private_secrets.d/cloud/$PROVIDER.conf"
+SECRETS_FILE="$HOME/.config/secrets.d/cloud/$PROVIDER.conf"
 AUTH_FILE="$HOME/.local/share/opencode/auth.json"
 
 case "$PROVIDER" in
@@ -18,7 +18,7 @@ esac
 
 if [ -f "$SECRETS_FILE" ]; then
   # shellcheck source=/dev/null
-  . "$SECRETS_FILE" 2>/dev/null || true
+  . "$SECRETS_FILE" || echo "${0##*/}: failed to source $SECRETS_FILE" >&2
   KEY_VAR=$(printf '%s_API_KEY' "$PROVIDER" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
   eval "KEY_VALUE=\"\${$KEY_VAR:-}\""
   if [ -n "$KEY_VALUE" ]; then

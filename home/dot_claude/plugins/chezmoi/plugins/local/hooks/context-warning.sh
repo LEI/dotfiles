@@ -16,7 +16,7 @@ eval "$(jq -r '
     + .cache_creation_input_tokens + .cache_read_input_tokens) as $tokens |
   "PCT=\($cw.used_percentage // 0)",
   "USAGE=\($tokens | format_tokens)/\($cw.context_window_size | format_window)",
-  "COST=\($c.total_cost_usd // \"?\")"
+  "COST=\($c.total_cost_usd // "?")"
 ' "$FILE" 2>/dev/null)"
 
 [ -n "$PCT" ] || exit 0

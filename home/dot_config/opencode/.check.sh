@@ -452,16 +452,16 @@ quota_github_copilot() {
     select(.value != null and .value.unlimited != true) |
     [
       .key,
-      ((.value.percent_remaining // 0) as $pct_rem |
-       if $pct_rem > 0 then (100 - ($pct_rem | round)) else
-         (if (.value.entitlement // 0) > 0 and (.value.remaining // 0) > 0 then
-           (((.value.remaining // 0) / (.value.entitlement // 1) * 100) | round)
+      ( (.value.percent_remaining) as $pct_rem |
+       if $pct_rem != null then (100 - ($pct_rem | round)) else
+         (if (.value.entitlement // 0) > 0 then
+           ( (100 - ((.value.remaining // 0) / (.value.entitlement // 1) * 100)) | round)
          else 0 end)
        end)
-    ] | @tsv' 2>/dev/null)
+    ] | @tsv' 2>/dev/null || true)
   unlimited_qs=$(echo "$quota" | jq -r '.quota_snapshots | to_entries[] |
     select(.value != null and .value.unlimited == true) |
-    .key' 2>/dev/null)
+    .key' 2>/dev/null || true)
   if [ -n "$metered" ] && echo "$metered" | awk '{if($2 >= 100) exit 0} END {exit 1}'; then
     QUOTA_WARN=1
   fi
@@ -485,7 +485,7 @@ quota_github_copilot() {
       [ -z "$quota_key" ] && continue
       idx=$((idx + 1))
       line="$quota_key: unlimited"
-      if [ $idx -eq $count ] && [ -n "$note" ]; then
+      if [ "$idx" -eq "$count" ] && [ -n "$note" ]; then
         line="$line $note"
       fi
       output_diag "$line"
@@ -552,14 +552,18 @@ resolve_key() {
   if [ -n "$env_var" ]; then
     key="$(printenv "$env_var")" || key=""
   fi
-  if [ -z "$key" ] && [ -f "$HOME/.config/secrets.d/${name}.conf" ]; then
-    # shellcheck source=/dev/null
-    . "$HOME/.config/secrets.d/${name}.conf"
-    # shellcheck disable=SC2163
-    if [ -n "$env_var" ]; then
-      export "$env_var"
+  if [ -z "$key" ]; then
+    secrets_file="$HOME/.config/secrets.d/${name}.conf"
+    [ -f "$secrets_file" ] || secrets_file="$HOME/.config/secrets.d/cloud/${name}.conf"
+    if [ -f "$secrets_file" ]; then
+      # shellcheck source=/dev/null
+      . "$secrets_file"
+      # shellcheck disable=SC2163
+      if [ -n "$env_var" ]; then
+        export "$env_var"
+      fi
+      key="$(printenv "$env_var")" || key=""
     fi
-    key="$(printenv "$env_var")" || key=""
   fi
   if [ -z "$key" ]; then
     key="$(jq -r --arg name "$name" '.[$name].key // empty' "$AUTH_FILE" 2>/dev/null)"
