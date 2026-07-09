@@ -9,15 +9,6 @@ if [ -d "$XDG_CONFIG_HOME/environment.d" ]; then
   export_env "$XDG_CONFIG_HOME/environment.d/"*.conf
 fi
 
-if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
-  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
-fi
-
-# local/: machine-local secrets, ignored by chezmoi; sourced last so they override
-if [ -d "$XDG_CONFIG_HOME/secrets.d/local" ]; then
-  export_env "$XDG_CONFIG_HOME/secrets.d/local/"*.conf
-fi
-
 # Order matters: homebrew first (brew shellenv hoists /opt/homebrew/bin above
 # /usr/bin); later prepends sit above; append-only tools come last.
 {{- range list "homebrew" "gem" "go" "cargo" "npm" "sh" "carapace" "krew" "nvim" }}
@@ -32,3 +23,14 @@ fi
 {{- end }}
 
 export PATH
+
+# PATH is assembled above so secrets.d confs can resolve CLI tools they call
+# (e.g. secret-tool, gh) on brew-only machines where they aren't yet on PATH.
+if [ -d "$XDG_CONFIG_HOME/secrets.d" ]; then
+  export_env "$XDG_CONFIG_HOME/secrets.d/"*.conf
+fi
+
+# local/: machine-local secrets, ignored by chezmoi; sourced last so they override
+if [ -d "$XDG_CONFIG_HOME/secrets.d/local" ]; then
+  export_env "$XDG_CONFIG_HOME/secrets.d/local/"*.conf
+fi
