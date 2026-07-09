@@ -1,10 +1,9 @@
 {{- $mlx := false -}}{{- /* disabled: config_store corrupts custom providers (v1.4.14 bug) */ -}}
-{{- $openrouterKey := "" -}}
+{{- /* gate on the conf declaring the key, the value is injected via env at runtime */ -}}
+{{- $openrouterEnabled := false -}}
 {{- $openrouterConf := joinPath .chezmoi.homeDir ".config/secrets.d/openrouter.conf" -}}
 {{- if stat $openrouterConf -}}
-{{-   $openrouterKey = include $openrouterConf
-      | regexFind "(?m)^OPENROUTER_API_KEY=(.+)$"
-      | trimPrefix "OPENROUTER_API_KEY=" -}}
+{{-   $openrouterEnabled = include $openrouterConf | regexMatch "(?m)^OPENROUTER_API_KEY=" -}}
 {{- end -}}
 {
   "$schema":"https://www.getbifrost.ai/schema",
@@ -81,7 +80,7 @@
   ],
   "providers": {
 {{- $sep := "" }}
-{{- if $openrouterKey }}
+{{- if $openrouterEnabled }}
 {{- $sep = "," }}
     "openrouter": {
       "keys": [
