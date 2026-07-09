@@ -14,12 +14,12 @@ packages:
     # enabled: '{{ or (ne .osIDLike "debian") (eq .libc "gnu") }}'
     nameOverwrite:
       windows: '{{ eq .packageType "winget" | ternary "Neovim.Neovim" nil }}'
-    type: |-
-      {{ if eq .packageType "npm" "gem" -}}
+    type: '{{ if eq .packageType "npm" "gem" -}}
       {{ .packageType }}
       {{- else if or (and (eq .osIDLike "debian") (ne .libc "gnu")) (eq .osIDLike "fedora") -}}
       mise
-      {{- end }}
+      {{- else }}
+      {{- end }}'
     # version: 0.12.1
   # darwin python3 host, linux uses run_onchange_after_install-python-host.sh
   pynvim:
