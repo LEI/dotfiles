@@ -78,6 +78,49 @@ teardown() {
   assert_success
 }
 
+# keystore
+
+setup_keystore() {
+  local rendered="$BATS_TEST_TMPDIR/keystore.sh"
+  chezmoi cat --no-tty --refresh-externals=never "$HOME/.local/lib/sh/keystore.sh" >"$rendered"
+  # shellcheck source=/dev/null
+  source "$rendered"
+}
+
+# bats test_tags=secrets,type:unit
+@test "export_nonempty: exports var when value is non-empty" {
+  setup_keystore
+  export_nonempty FOO bar
+  assert_equal "bar" "$FOO"
+}
+
+# bats test_tags=secrets,type:unit
+@test "export_nonempty: leaves var unset when value is empty" {
+  setup_keystore
+  unset FOO
+  export_nonempty FOO ""
+  [ -z "${FOO+x}" ]
+}
+
+# bats test_tags=secrets,type:unit
+@test "keystore_export: exports var when keystore_get succeeds" {
+  setup_keystore
+  # shellcheck disable=SC2329
+  keystore_get() { echo secret-value; }
+  keystore_export FOO svc acct
+  assert_equal "secret-value" "$FOO"
+}
+
+# bats test_tags=secrets,type:unit
+@test "keystore_export: leaves var unset when keystore_get fails" {
+  setup_keystore
+  unset FOO
+  # shellcheck disable=SC2329
+  keystore_get() { return 1; }
+  keystore_export FOO svc acct
+  [ -z "${FOO+x}" ]
+}
+
 # pathmunge
 
 setup_pathmunge() {
