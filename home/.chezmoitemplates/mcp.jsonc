@@ -197,7 +197,7 @@
 
     {{- $grafanaToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token" }}
     {{- $grafanaAdminToken := joinPath .chezmoi.homeDir ".config/otel/secrets/grafana-mcp-token-admin" }}
-    {{- if and .features.otel (stat $grafanaToken) }}
+    {{- if and (eq .profile "personal") .features.otel (stat $grafanaToken) }}
     "grafana": {
       "command": "sh",
       "args": ["-c", "GRAFANA_SERVICE_ACCOUNT_TOKEN=$(cat '{{ $grafanaToken }}') exec uvx mcp-grafana --disable-write"],
@@ -206,13 +206,21 @@
       },
     },
     {{- end }}
-    {{- if and .features.otel (stat $grafanaAdminToken) }}
+    {{- if and (eq .profile "personal") .features.otel (stat $grafanaAdminToken) }}
     "grafana-admin": {
       "command": "sh",
       "args": ["-c", "GRAFANA_SERVICE_ACCOUNT_TOKEN=$(cat '{{ $grafanaAdminToken }}') exec uvx mcp-grafana"],
       "env": {
         "GRAFANA_URL": "https://grafana.test",
       },
+    },
+    {{- end }}
+
+    {{- $grafanaConf := joinPath .chezmoi.homeDir ".config/secrets.d/app/grafana.conf" }}
+    {{- if and (eq .profile "work") (stat $grafanaConf) }}
+    "grafana-app": {
+      "command": "sh",
+      "args": ["-c", ". '{{ $grafanaConf }}'; GRAFANA_URL=$WORK_GRAFANA_URL GRAFANA_SERVICE_ACCOUNT_TOKEN=$WORK_GRAFANA_API_TOKEN exec uvx mcp-grafana --disable-write"],
     },
     {{- end }}
 

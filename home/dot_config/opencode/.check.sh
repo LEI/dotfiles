@@ -226,7 +226,8 @@ cached_fetch() {
   fi
 }
 
-# quota_note: a parenthetical freshness or failure note for the last cached_fetch
+# quota_note: a freshness or failure note for the last cached_fetch
+# Returns with parentheses for inline use (e.g., "text (cached 1m ago)")
 # Reads fetch_source/fetch_age/fetch_reason/fetch_retry/fetch_retry_kind, empty when live
 quota_note() {
   case "$fetch_source" in
@@ -262,14 +263,30 @@ quota_anthropic() {
     output_diag "quota: unavailable${fetch_reason:+ ($fetch_reason)}"
     return
   fi
-  note=$(quota_note)
-  show_quota "$note" < <(echo "$quota" | jq -r 'to_entries[] |
+  note=""
+  case "$fetch_source" in
+  cache)
+    if [ -n "$fetch_age" ]; then
+      note="(cached $fetch_age)"
+    fi
+    ;;
+  stale)
+    if [ "$fetch_retry_kind" = "retry_after" ]; then
+      note="(cached $fetch_age, retry in $fetch_retry)"
+    elif [ -n "$fetch_retry" ]; then
+      note="(cached $fetch_age, backoff $fetch_retry)"
+    else
+      note="(cached $fetch_age, live failed: ${fetch_reason:-unknown})"
+    fi
+    ;;
+  esac
+  show_quota "" < <(echo "$quota" | jq -r 'to_entries[] |
   select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
   [.key, (.value.utilization | round), (.value.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r entry_key pct reset; do
       printf '%s\t%s\t%s\n' "$(anthropic_quota_label "$entry_key")" "$pct" "$reset"
     done)
-  show_quota "$note" < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
+  show_quota "" < <(echo "$quota" | jq -r '.limits[]? | select(.scope.model != null) |
   [.group, .scope.model.display_name, (.percent // 0 | round), (.resets_at // "")] | @tsv' 2>/dev/null |
     while IFS="$(printf '\t')" read -r scope_group scope_name pct reset; do
       printf '%s %s\t%s\t%s\n' "$(anthropic_scope_prefix "$scope_group")" "$scope_name" "$pct" "$reset"
@@ -295,6 +312,7 @@ quota_anthropic() {
     fi
     if [ -n "$note" ]; then
       line="$line $note"
+      note=""
     fi
     output_diag "$line"
   done
@@ -380,6 +398,102 @@ quota_openrouter() {
       esac
       output_diag "$line"
     done
+  fi
+}
+
+# github-copilot: quota check via GitHub REST API
+# Note: no models endpoint exposed for health check (uses internal copilot_internal/user only)
+quota_github_copilot() {
+  local quota note QUOTA_WARN copilot_plan reset metered unlimited_qs
+  key=""
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    key="$GITHUB_TOKEN"
+  elif [ -f "$HOME/.config/gh/hosts.yml" ]; then
+    key=$(yq -r '.github.com.oauth_token // empty' "$HOME/.config/gh/hosts.yml" 2>/dev/null || true)
+  fi
+  if [ -z "$key" ]; then
+    output_ok "github-copilot" "SKIP no GitHub token"
+    return
+  fi
+  cached_fetch github-copilot 300 '.' \
+    --header "Authorization: Bearer $key" \
+    --header "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/copilot_internal/user" >"$quota_file"
+  quota=$(cat "$quota_file")
+  if [ -z "$quota" ] || ! echo "$quota" | jq empty >/dev/null 2>&1; then
+    if [ -n "$fetch_reason" ]; then
+      output_not_ok "github-copilot" "$fetch_reason"
+    else
+      output_not_ok "github-copilot"
+    fi
+    return
+  fi
+  copilot_plan=$(echo "$quota" | jq -r '.copilot_plan // empty' 2>/dev/null || true)
+  reset=$(echo "$quota" | jq -r '.quota_reset_date_utc // empty' 2>/dev/null || true)
+  QUOTA_WARN=""
+  note=""
+  case "$fetch_source" in
+  cache)
+    if [ -n "$fetch_age" ]; then
+      note="(cached $fetch_age)"
+    fi
+    ;;
+  stale)
+    if [ "$fetch_retry_kind" = "retry_after" ]; then
+      note="(cached $fetch_age, retry in $fetch_retry)"
+    elif [ -n "$fetch_retry" ]; then
+      note="(cached $fetch_age, backoff $fetch_retry)"
+    else
+      note="(cached $fetch_age, live failed: ${fetch_reason:-unknown})"
+    fi
+    ;;
+  esac
+  metered=$(echo "$quota" | jq -r '.quota_snapshots | to_entries[] |
+    select(.value != null and .value.unlimited != true) |
+    [
+      .key,
+      ((.value.percent_remaining // 0) as $pct_rem |
+       if $pct_rem > 0 then (100 - ($pct_rem | round)) else
+         (if (.value.entitlement // 0) > 0 and (.value.remaining // 0) > 0 then
+           (((.value.remaining // 0) / (.value.entitlement // 1) * 100) | round)
+         else 0 end)
+       end)
+    ] | @tsv' 2>/dev/null)
+  unlimited_qs=$(echo "$quota" | jq -r '.quota_snapshots | to_entries[] |
+    select(.value != null and .value.unlimited == true) |
+    .key' 2>/dev/null)
+  if [ -n "$metered" ] && echo "$metered" | awk '{if($2 >= 100) exit 0} END {exit 1}'; then
+    QUOTA_WARN=1
+  fi
+
+  if [ -n "$QUOTA_WARN" ]; then
+    output_not_ok "github-copilot" "${copilot_plan:+plan: $copilot_plan}"
+  else
+    output_ok "github-copilot" "${copilot_plan:+plan: $copilot_plan}"
+  fi
+
+  if [ -n "$metered" ]; then
+    show_quota "" < <(echo "$metered" | while IFS="$(printf '\t')" read -r quota_key pct; do
+      printf '%s\t%s\t%s\n' "$quota_key" "$pct" "$reset"
+    done)
+  fi
+
+  if [ -n "$unlimited_qs" ]; then
+    count=$(echo "$unlimited_qs" | wc -l)
+    idx=0
+    while IFS= read -r quota_key; do
+      [ -z "$quota_key" ] && continue
+      idx=$((idx + 1))
+      line="$quota_key: unlimited"
+      if [ $idx -eq $count ] && [ -n "$note" ]; then
+        line="$line $note"
+      fi
+      output_diag "$line"
+    done <<<"$unlimited_qs"
+  fi
+
+  if [ -n "$DEBUG" ] && [ -f "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/github-copilot-quota.json" ]; then
+    output_diag_json_file "${XDG_CACHE_HOME:-$HOME/.cache}/opencode/github-copilot-quota.json"
   fi
 }
 
@@ -511,6 +625,11 @@ check_endpoint() {
     return
   fi
 
+  if [ "$name" = "github-copilot" ]; then
+    quota_github_copilot
+    return
+  fi
+
   resolve_key
   if [ -z "$key" ]; then
     output_ok "$name" "SKIP No auth key"
@@ -563,8 +682,10 @@ check_endpoint() {
   # Models diagnostic, omit status and duration when served from cache
   if [ "$from_models_cache" = "1" ]; then
     set --
+    cache_note=$(cache_age_human "$models_cache")
   else
     set -- "status=$status" "duration=${duration}ms"
+    cache_note=""
   fi
   if [ -n "$model_count" ]; then
     set -- "$@" "models=$model_count"
@@ -572,11 +693,8 @@ check_endpoint() {
   if [ -n "$model_field" ]; then
     set -- "$@" "source=$model_field"
   fi
-  if [ "$from_models_cache" = "1" ]; then
-    cache_note=$(cache_age_human "$models_cache")
-    if [ -n "$cache_note" ]; then
-      set -- "$@" "(cached $cache_note)"
-    fi
+  if [ -n "$cache_note" ]; then
+    set -- "$@" "(cached $cache_note)"
   fi
   # Pre-fetch the coding-plan quota so the tier can be on the provider line.
   # The monitor/usage endpoint reports the coding-plan subscription, so it

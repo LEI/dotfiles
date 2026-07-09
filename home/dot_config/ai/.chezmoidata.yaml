@@ -47,6 +47,8 @@ ai:
       env: ANTHROPIC_API_KEY
     github-copilot:
       api: copilot
+      base_url: https://api.github.com
+      env: GITHUB_TOKEN
     openai:
       api: openai
       base_url: https://api.openai.com/v1
