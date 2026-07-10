@@ -256,7 +256,7 @@ repos:
         name: lint templates
         entry: ./script/lint-templates
         language: system
-        files: ^home/(.*\.tmpl$|.*/modify_)
+        files: ^home/((.*/)?modify_|.*\.tmpl$)
         exclude: ^home/\.chezmoi\.yaml\.tmpl$
         stages:
           - pre-commit
