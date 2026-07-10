@@ -15,7 +15,7 @@ has() {
 
 # Print prefixed error to stderr and exit
 die() {
-  warn "$@"
+  err "$@"
   exit 1
 }
 
