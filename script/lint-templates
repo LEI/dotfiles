@@ -113,7 +113,9 @@ export VALIDATE_KEEP="$keep"
 export VALIDATE_VERBOSITY="$verbosity"
 export MISE_TRUSTED_CONFIG_PATHS="$render_dir${MISE_TRUSTED_CONFIG_PATHS:+:$MISE_TRUSTED_CONFIG_PATHS}"
 
-export SKIP="gitleaks,lint-templates,yamlfmt,zizmor${SKIP:+,$SKIP}"
+# check-scripts-executable only sees the verbatim script/ copy, already checked
+# at top level, so it adds no coverage on rendered output
+export SKIP="check-scripts-executable,gitleaks,lint-templates,yamlfmt,zizmor${SKIP:+,$SKIP}"
 
 exit_code=0
 prek run \

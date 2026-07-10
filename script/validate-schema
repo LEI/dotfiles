@@ -373,13 +373,10 @@ fi
 # Pre-flight: invalidate cached schemas whose ETag/Last-Modified shifted upstream
 # Parse failures here are non-fatal; validate_file reports them as FAIL later
 if [ "$refresh" != true ] && [ -d "$cache_dir/schemas" ]; then
-  for f in "$@"; do
-    if schema=$(extract_schema "$f"); then
-      if [ -n "$schema" ]; then
-        printf '%s\n' "$schema"
-      fi
-    fi
-  done | sort -u | while IFS= read -r url; do
+  # shellcheck disable=SC2016
+  printf '%s\0' "$@" |
+    xargs -0 -P "$jobs" -n1 bash -uc 'extract_schema "$1" || true' _ |
+    sort -u | while IFS= read -r url; do
     if [ -n "$url" ]; then
       preflight_schema "$url"
     fi
