@@ -34,3 +34,6 @@ fi
 if [ -d "$XDG_CONFIG_HOME/secrets.d/local" ]; then
   export_env "$XDG_CONFIG_HOME/secrets.d/local/"*.conf
 fi
+
+# Sentinel: login env loaded
+export PROFILE_SOURCED=1
