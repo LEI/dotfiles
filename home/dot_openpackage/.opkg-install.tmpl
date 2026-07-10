@@ -46,9 +46,6 @@ publish_package {{ $entry.name | quote }} {{ $entry.src | quote }} || exit_code=
 {{- range glob (joinPath $entry.src "agents/*.md") }}
 install_resource {{ $entry.name | quote }} --agents {{ base . | trimSuffix ".md" | quote }} || exit_code=1
 {{- end }}
-{{- range glob (joinPath $entry.src "skills/*") }}
-install_resource {{ $entry.name | quote }} --skills {{ base . | quote }} || exit_code=1
-{{- end }}
 {{- range glob (joinPath $entry.src "commands/*.md") }}
 install_resource {{ $entry.name | quote }} --commands {{ base . | trimSuffix ".md" | quote }} || exit_code=1
 {{- end }}

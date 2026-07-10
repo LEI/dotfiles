@@ -263,23 +263,7 @@ quota_anthropic() {
     output_diag "quota: unavailable${fetch_reason:+ ($fetch_reason)}"
     return
   fi
-  note=""
-  case "$fetch_source" in
-  cache)
-    if [ -n "$fetch_age" ]; then
-      note="(cached $fetch_age)"
-    fi
-    ;;
-  stale)
-    if [ "$fetch_retry_kind" = "retry_after" ]; then
-      note="(cached $fetch_age, retry in $fetch_retry)"
-    elif [ -n "$fetch_retry" ]; then
-      note="(cached $fetch_age, backoff $fetch_retry)"
-    else
-      note="(cached $fetch_age, live failed: ${fetch_reason:-unknown})"
-    fi
-    ;;
-  esac
+  note=$(quota_note)
   show_quota "" < <(echo "$quota" | jq -r 'to_entries[] |
   select(.key != "extra_usage" and .value != null and (.value.utilization | type) == "number") |
   [.key, (.value.utilization | round), (.value.resets_at // "")] | @tsv' 2>/dev/null |
@@ -431,23 +415,7 @@ quota_github_copilot() {
   copilot_plan=$(echo "$quota" | jq -r '.copilot_plan // empty' 2>/dev/null || true)
   reset=$(echo "$quota" | jq -r '.quota_reset_date_utc // empty' 2>/dev/null || true)
   QUOTA_WARN=""
-  note=""
-  case "$fetch_source" in
-  cache)
-    if [ -n "$fetch_age" ]; then
-      note="(cached $fetch_age)"
-    fi
-    ;;
-  stale)
-    if [ "$fetch_retry_kind" = "retry_after" ]; then
-      note="(cached $fetch_age, retry in $fetch_retry)"
-    elif [ -n "$fetch_retry" ]; then
-      note="(cached $fetch_age, backoff $fetch_retry)"
-    else
-      note="(cached $fetch_age, live failed: ${fetch_reason:-unknown})"
-    fi
-    ;;
-  esac
+  note=$(quota_note)
   metered=$(echo "$quota" | jq -r '.quota_snapshots | to_entries[] |
     select(.value != null and .value.unlimited != true) |
     [

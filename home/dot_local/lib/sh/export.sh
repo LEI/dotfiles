@@ -28,6 +28,7 @@ export_env() {
     fi
   done
   set +a
-  unset file rc
-  return "$return_code"
+  final_rc=$return_code
+  unset file rc return_code
+  return "$final_rc"
 }

@@ -91,6 +91,21 @@ ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base.dir $entry.name 
 {{- end }}
 {{- end }}
 
+{{- /* Skill sources [{name, src}]; symlinked into the standard SKILL.md discovery dirs (claude reads ~/.claude/skills, goose/pi read ~/.agents/skills, opencode reads both). */ -}}
+{{- $skills := includeTemplate "opkg-skill-paths.tmpl" . | fromJson -}}
+{{- $skillBases := list -}}
+{{- if .features.claude -}}{{- $skillBases = append $skillBases (joinPath .chezmoi.homeDir ".claude/skills") -}}{{- end -}}
+{{- $skillBases = append $skillBases (joinPath .chezmoi.homeDir ".agents/skills") -}}
+{{- if and $skills $skillBases }}
+{{- range $base := $skillBases }}
+
+mkdir -p {{ $base | quote }}
+{{- range $entry := $skills }}
+ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base $entry.name | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 # Clean up workspace created by opkg
 workspace="$CHEZMOI_WORKING_TREE/.openpackage"
 if [ -e "$workspace" ]; then

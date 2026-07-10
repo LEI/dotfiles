@@ -167,13 +167,6 @@ setup() {
         [ -e "$p/$kind/$n" ] || errs="${errs}missing: $p/$kind/$n"$'\n'
       done
     done
-    if [ -d "$src/skills" ]; then
-      for s in "$src/skills"/*/; do
-        [ -d "$s" ] || continue
-        n=$(basename "$s")
-        [ -e "$p/skills/$n/SKILL.md" ] || errs="${errs}missing: $p/skills/$n/SKILL.md"$'\n'
-      done
-    fi
   done
 
   [ -z "$errs" ] || fail "$errs"
@@ -195,4 +188,22 @@ setup() {
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in rule dirs:"$'\n'"$strays"
+}
+
+# bats test_tags=skills
+@test "skills: top-level entries are symlinks only" {
+  local dirs
+  dirs=$(discover_skill_dirs)
+  [ -n "$dirs" ] || skip "no skill dirs discovered"
+
+  local dir entry strays=""
+  while IFS= read -r dir; do
+    for entry in "$dir"/* "$dir"/.[!.]*; do
+      [ -e "$entry" ] || [ -L "$entry" ] || continue
+      [ -L "$entry" ] && continue
+      strays="${strays}${entry}"$'\n'
+    done
+  done <<<"$dirs"
+
+  [ -z "$strays" ] || fail "non-symlink entries in skill dirs:"$'\n'"$strays"
 }

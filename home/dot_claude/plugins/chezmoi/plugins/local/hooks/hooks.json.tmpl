@@ -1,5 +1,5 @@
 {
-  "description": "Format, lint, context warning, and session PATH hooks",
+  "description": "Format, lint, and session PATH hooks",
   "hooks": {
     {{- if .features.mise }}
     "SessionStart": [
@@ -14,18 +14,6 @@
       }
     ],
     {{- end }}
-    "PreToolUse": [
-      {
-        "matcher": "Agent|Bash|Edit|Write|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/context-warning.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",

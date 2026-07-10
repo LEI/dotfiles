@@ -437,7 +437,7 @@
 
       // Custom skills: own opkg skills auto-allowed (see opkg-skill-paths.tmpl)
       {{- range $ocSkills }}
-      "{{ . }}": "allow",
+      "{{ .name }}": "allow",
       {{- end }}
 
       // TODO: .features.kube and trailing comma

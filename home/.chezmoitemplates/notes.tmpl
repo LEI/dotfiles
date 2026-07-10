@@ -1,7 +1,0 @@
-{{- /* Notes graph symlink paths under ~/notes/ */ -}}
-{{- $base := joinPath .chezmoi.homeDir "notes" -}}
-{{- $dirs := list -}}
-{{- range (dig "logseq" "graphs" list .) -}}
-{{-   $dirs = append $dirs (joinPath $base .name) -}}
-{{- end -}}
-{{- $dirs | toJson }}

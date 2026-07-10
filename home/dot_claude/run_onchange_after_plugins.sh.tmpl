@@ -49,6 +49,7 @@ fi
 {{- range $plugins }}
 {{- $marketplace := get $marketplaces .marketplace }}
 {{- if $marketplace }}
+{{- if hasKey $marketplace "repo" }}
 
 if jq -e '(.plugins["{{ .name }}@{{ .marketplace }}"] // []) | map(select(.scope == "user")) | length > 0' "$plugin_file" >/dev/null 2>&1; then
   echo "Plugin already installed: {{ .name }}@{{ .marketplace }}" >&2
@@ -56,10 +57,12 @@ else
   echo "Installing plugin: {{ .name }}@{{ .marketplace }}" >&2
   claude plugin install --scope=user "{{ .name }}@{{ .marketplace }}"
 fi
-{{- if not (hasKey $marketplace "repo") }}
+{{- else }}
 
-echo "Updating plugin: {{ .name }}@{{ .marketplace }}" >&2
-claude plugin update --scope=user "{{ .name }}@{{ .marketplace }}"
+# directory-source caches do not refresh on a same-version update, force a reinstall
+echo "Reinstalling plugin to refresh cache: {{ .name }}@{{ .marketplace }}" >&2
+claude plugin uninstall --scope=user "{{ .name }}@{{ .marketplace }}" || true
+claude plugin install --scope=user "{{ .name }}@{{ .marketplace }}"
 {{- end }}
 {{- end }}
 {{- end }}

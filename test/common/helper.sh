@@ -219,6 +219,12 @@ discover_rule_dirs() {
     sort -u
 }
 
+discover_skill_dirs() {
+  find "$HOME" -maxdepth 4 -type l -lname '*/skills/*' 2>/dev/null |
+    sed 's|/[^/]*$||' |
+    sort -u
+}
+
 stub_seq() {
   local name="$1"
   shift

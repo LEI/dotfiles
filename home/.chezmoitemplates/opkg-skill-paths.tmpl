@@ -1,10 +1,10 @@
-{{- /* Skill names from installed opkg packages, for the opencode.jsonc skill allowlist. Mirrors opkg-rule-paths.tmpl. */ -}}
+{{- /* Skill sources [{name, src}] (per-skill dir), shared by publish-opkg symlinks and the opencode.jsonc allowlist. Mirrors opkg-rule-paths.tmpl. */ -}}
 {{- $skills := list -}}
 {{- $localSkillsDir := joinPath .chezmoi.homeDir ".openpackage/packages/local/skills" -}}
 {{- if stat $localSkillsDir -}}
 {{-   range $skillDir := glob (joinPath $localSkillsDir "*") -}}
 {{-     if stat (joinPath $skillDir "SKILL.md") -}}
-{{-       $skills = append $skills (base $skillDir) -}}
+{{-       $skills = append $skills (dict "name" (base $skillDir) "src" $skillDir) -}}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
@@ -19,9 +19,9 @@
 {{-     if not (stat $skillsDir) -}}{{- continue -}}{{- end -}}
 {{-     range $skillDir := glob (joinPath $skillsDir "*") -}}
 {{-       if stat (joinPath $skillDir "SKILL.md") -}}
-{{-         $skills = append $skills (base $skillDir) -}}
+{{-         $skills = append $skills (dict "name" (base $skillDir) "src" $skillDir) -}}
 {{-       end -}}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
-{{- $skills | uniq | sortAlpha | toJson }}
+{{- $skills | toJson }}
