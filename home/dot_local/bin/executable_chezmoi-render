@@ -13,6 +13,8 @@ shopt -s lastpipe
 lib_dir="$HOME/.local/lib"
 # shellcheck source=home/dot_local/lib/bash/require.sh
 source "$lib_dir/bash/require.sh"
+# shellcheck source=home/dot_local/lib/sh/parallel.sh
+source "$lib_dir/sh/parallel.sh"
 
 require_bash 4
 
@@ -88,6 +90,8 @@ if [ "$verbosity" -ge 1 ]; then
 fi
 
 persistent_state_dir="$(mktemp -d)"
+# Serial pre-pass (target-path) uses this shared file; parallel render workers
+# each get their own, see render()
 persistent_state="$persistent_state_dir/chezmoi-state.json"
 trap 'rm -rf "$persistent_state_dir"' EXIT
 
@@ -173,11 +177,21 @@ render() {
 
   mkdir -p "${out%/*}"
 
+  # Per-render throwaway state, parallel workers must not share one file
+  local state
+  state="$(mktemp -p "$persistent_state_dir")"
+
+  # Reconstruct caller flags, bash cannot export arrays to worker subshells
+  local -a cargs=()
+  if [ -s "$args_file" ]; then
+    mapfile -d '' cargs <"$args_file"
+  fi
+
   local cmd=(
     chezmoi execute-template
     --source "$source_dir"
-    --persistent-state="$persistent_state"
-    ${chezmoi_args[@]+"${chezmoi_args[@]}"}
+    --persistent-state="$state"
+    ${cargs[@]+"${cargs[@]}"}
     --file "$source_dir/$src"
   )
   local input="/dev/null"
@@ -198,12 +212,28 @@ render() {
 
 total=${#templates[@]}
 
-failed=0
+# Serialize caller flags for worker subshells, bash cannot export arrays
+args_file="$persistent_state_dir/chezmoi-args"
+: >"$args_file"
+if [ "${#chezmoi_args[@]}" -gt 0 ]; then
+  printf '%s\0' "${chezmoi_args[@]}" >"$args_file"
+fi
+
+export dest source_dir verbosity persistent_state_dir args_file
+export -f render
+
+# Render in parallel, one execute-template per worker (was a serial loop)
+pairs=()
 for i in "${!templates[@]}"; do
-  render "${templates[$i]}" "${targets[$i]}" || ((++failed))
+  pairs+=("${templates[$i]}" "${targets[$i]}")
 done
-if [ "$failed" -gt 0 ]; then
-  printf 'error: %d template(s) failed to render\n' "$failed" >&2
+
+render_rc=0
+# shellcheck disable=SC2016
+printf '%s\0' "${pairs[@]}" |
+  xargs -0 -n2 -P "$(default_jobs)" bash -c 'render "$1" "$2"' _ || render_rc=$?
+if [ "$render_rc" -ne 0 ]; then
+  printf 'error: one or more templates failed to render\n' >&2
   exit 1
 fi
 
