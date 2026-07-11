@@ -310,7 +310,7 @@
       "mcp__open-notebook__*"
     ],
     "deny": [
-{{- range $.ai.permissions.deny }}
+{{- range $.permissions.deny }}
       "Read({{ . }})",
       "Edit({{ . }})",
       "Write({{ . }})",
@@ -418,7 +418,7 @@
       "Write(~/.netrc)",
       "Write(~/.npmrc)",
       "Write(~/.pypirc)",
-{{- range $.ai.permissions.ask }}
+{{- range $.permissions.ask }}
       "Read({{ . }})",
       "Edit({{ . }})",
       "Write({{ . }})",

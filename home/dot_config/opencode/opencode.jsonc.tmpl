@@ -104,10 +104,10 @@
       "*.env.*": "deny",
       "*.env.example": "allow",
       "*.example.env": "allow",
-{{- range $.ai.permissions.deny }}
+{{- range $.permissions.deny }}
       "{{ . }}": "deny",
 {{- end }}
-{{- range $.ai.permissions.ask }}
+{{- range $.permissions.ask }}
       "{{ . }}": "ask",
 {{- end }}
     },
@@ -118,7 +118,7 @@
       "*.env.*": "deny",
       "*.env.example": "allow",
       "*.example.env": "allow",
-{{- range $.ai.permissions.deny }}
+{{- range $.permissions.deny }}
       "{{ . }}": "deny",
 {{- end }}
     },
@@ -127,10 +127,10 @@
     // Content search (matches the regex pattern)
     "grep": {
       "*": "allow",
-{{- range $.ai.permissions.deny }}
+{{- range $.permissions.deny }}
       "{{ . }}": "deny",
 {{- end }}
-{{- range $.ai.permissions.ask }}
+{{- range $.permissions.ask }}
       "{{ . }}": "ask",
 {{- end }}
     },

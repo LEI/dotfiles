@@ -1,0 +1,20 @@
+---
+# Shared secret-path access policy for coding agents. Each harness permission
+# template renders these lists into its own native syntax (Claude Code
+# settings, opencode permission block), scoped to secret paths; other
+# permissions stay harness-specific.
+permissions:
+  # Raw key material: deny in every mode
+  deny:
+    - "~/.ssh/**"
+    - "~/.gnupg/**"
+    - "**/*.key"
+    - "**/*.pem"
+    - "**/*.pfx"
+  # Token stores and encrypted files: ask every time. Ask is honored even under
+  # bypassPermissions, so these are reached only on approval. Globs match the
+  # secret container anywhere, not a hardcoded ~/.config/<tool>.
+  ask:
+    - "**/*.sops.*"
+    - "**/secrets/**"
+    - "**/secrets.d/**"

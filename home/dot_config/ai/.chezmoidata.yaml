@@ -448,24 +448,3 @@ ai:
       coding: mistral/devstral-small-latest
       fast: mistral/mistral-small-latest
       reasoning: mistral/mistral-large-latest
-
-  # Shared secret-path access policy for coding agents. Each harness permission
-  # template renders these lists into its own native syntax (Claude Code
-  # settings, opencode permission block). Scope is limited to secret paths on
-  # purpose; the rest of each harness permission system stays harness-specific.
-  permissions:
-    # Raw key material: deny in every mode, the agent never needs to read it.
-    deny:
-      - "~/.ssh/**"
-      - "~/.gnupg/**"
-      - "**/*.key"
-      - "**/*.pem"
-      - "**/*.pfx"
-    # Token stores and encrypted files: ask every time. Ask is honored in all
-    # modes including bypassPermissions, so the agent reaches them only on
-    # approval. Match the secret container anywhere instead of hardcoding
-    # ~/.config/<tool>.
-    ask:
-      - "**/*.sops.*"
-      - "**/secrets/**"
-      - "**/secrets.d/**"
