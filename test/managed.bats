@@ -53,7 +53,9 @@ setup() {
 @test "claude: opkg local package is installed" {
   check_feature claude
   check_command opkg jq mise
-  run --separate-stderr mise --cd "$HOME/.openpackage" run opkg:tracked local
+  # skills left opkg (deployed as symlinks); local's opkg resources are its
+  # agents/commands, which register under namespaced sub-package keys
+  run --separate-stderr mise --cd "$HOME/.openpackage" run opkg:tracked local/agents/readonly.md
   assert_success
 }
 
@@ -112,7 +114,9 @@ setup() {
 @test "opencode: opkg local package is installed" {
   check_feature opencode
   check_command opkg jq mise
-  run --separate-stderr mise --cd "$HOME/.openpackage" run opkg:tracked local
+  # skills left opkg (deployed as symlinks); local's opkg resources are its
+  # agents/commands, which register under namespaced sub-package keys
+  run --separate-stderr mise --cd "$HOME/.openpackage" run opkg:tracked local/agents/readonly.md
   assert_success
 }
 
