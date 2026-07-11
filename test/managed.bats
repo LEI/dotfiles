@@ -182,16 +182,20 @@ setup() {
   dirs=$(discover_rule_dirs)
   [ -n "$dirs" ] || skip "no rule dirs discovered"
 
-  local dir entry strays=""
+  local dir entry strays="" dangling=""
   while IFS= read -r dir; do
     for entry in "$dir"/* "$dir"/.[!.]*; do
       [ -e "$entry" ] || [ -L "$entry" ] || continue
       [ -L "$entry" ] && continue
       strays="${strays}${entry}"$'\n'
     done
+    while IFS= read -r entry; do
+      dangling="${dangling}${entry}"$'\n'
+    done < <(find "$dir" -xtype l 2>/dev/null)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in rule dirs:"$'\n'"$strays"
+  [ -z "$dangling" ] || fail "dangling symlinks in rule dirs (deleted source):"$'\n'"$dangling"
 }
 
 # bats test_tags=skills
@@ -200,14 +204,18 @@ setup() {
   dirs=$(discover_skill_dirs)
   [ -n "$dirs" ] || skip "no skill dirs discovered"
 
-  local dir entry strays=""
+  local dir entry strays="" dangling=""
   while IFS= read -r dir; do
     for entry in "$dir"/* "$dir"/.[!.]*; do
       [ -e "$entry" ] || [ -L "$entry" ] || continue
       [ -L "$entry" ] && continue
       strays="${strays}${entry}"$'\n'
     done
+    while IFS= read -r entry; do
+      dangling="${dangling}${entry}"$'\n'
+    done < <(find "$dir" -xtype l 2>/dev/null)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in skill dirs:"$'\n'"$strays"
+  [ -z "$dangling" ] || fail "dangling symlinks in skill dirs (deleted source):"$'\n'"$dangling"
 }
