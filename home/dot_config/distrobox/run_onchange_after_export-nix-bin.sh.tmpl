@@ -13,7 +13,23 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 # shellcheck source=home/dot_local/lib/sh/run.sh
 . "$lib_dir/sh/run.sh"
 
+# Recreating the box drops per-box glue (box /etc is not the shared home): the
+# nix bins on PATH and the login activation. Heal both idempotently before the
+# export so a recreate needs no manual rebuild. The glob and $HOME expand in the
+# box, where /nix resolves and /usr/local/bin is writable; profile.d keeps $HOME
+# literal for login-time evaluation. Experimental-features live in the shared
+# ~/.config/nix/nix.conf, so the box /etc/nix/nix.conf is not healed here.
 # stdin from /dev/null keeps distrobox enter off the tty (SIGTTOU)
+# SC2016: $HOME and the glob are meant to expand in the box, not here
+# shellcheck disable=SC2016
+run distrobox enter nix-dev -- \
+  sh -c 'sudo ln -sf "$HOME"/.nix-profile/bin/* /usr/local/bin/' </dev/null
+
+# SC2016: $HOME must stay literal for login-time evaluation in the file
+# shellcheck disable=SC2016
+printf '%s\n' 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' |
+  run distrobox enter nix-dev -- sudo tee /etc/profile.d/nix-distrobox.sh >/dev/null
+
 run distrobox enter nix-dev -- \
   distrobox-export --bin /usr/local/bin/nix \
   --export-path "{{ joinPath .chezmoi.homeDir ".local/bin" }}" </dev/null

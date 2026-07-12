@@ -29,6 +29,13 @@ diag_path() {
 
 @test "path: mise shims or install dirs reachable" {
   check_feature mise
+  # An active nix devShell wins over mise shims by design, so the shims may be
+  # demoted or absent; the devShell provides the pinned tools instead
+  case ":$PATH:" in
+  *:/nix/store/*)
+    [ -n "${IN_NIX_SHELL:-}" ] && skip "active nix devShell provides pinned tools"
+    ;;
+  esac
   if ! command -v mise >/dev/null; then
     diag_path
     fail "mise binary not in PATH"
