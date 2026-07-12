@@ -229,9 +229,13 @@ for i in "${!templates[@]}"; do
 done
 
 render_rc=0
-# shellcheck disable=SC2016
-printf '%s\0' "${pairs[@]}" |
-  xargs -0 -n2 -P "$(default_jobs)" bash -c 'render "$1" "$2"' _ || render_rc=$?
+# Empty pairs would make printf emit one empty NUL record and xargs run render
+# with two empty args, a false failure
+if [ "${#pairs[@]}" -gt 0 ]; then
+  # shellcheck disable=SC2016
+  printf '%s\0' "${pairs[@]}" |
+    xargs -0 -n2 -P "$(default_jobs)" bash -c 'render "$1" "$2"' _ || render_rc=$?
+fi
 if [ "$render_rc" -ne 0 ]; then
   printf 'error: one or more templates failed to render\n' >&2
   exit 1
