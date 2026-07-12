@@ -103,8 +103,16 @@ ct_exec() {
 }
 
 ct_exec_mise() {
-  # shellcheck disable=SC2016
-  ct_exec bash -lc '[ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh; exec "$@"' -- "$@"
+  # init.sh only activates an already-installed mise, so put its bindir on
+  # PATH first; pathmunge is idempotent so it won't duplicate the entry
+  # shellcheck disable=SC2016  # inner shell expands $HOME and $@, not this one
+  local prog='
+. ~/.local/lib/bash/pathmunge.sh
+pathmunge "$HOME/.local/bin"
+[ -f ~/.config/mise/init.sh ] && . ~/.config/mise/init.sh
+exec "$@"
+'
+  ct_exec bash -lc "$prog" -- "$@"
 }
 
 build() {
