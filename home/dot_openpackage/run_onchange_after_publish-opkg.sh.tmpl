@@ -88,6 +88,28 @@ mkdir -p {{ $base.dir | quote }}
 ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base.dir $entry.name | quote }}
 {{-   end }}
 {{- end }}
+
+# Prune orphans: trash a symlink whose source is gone or no longer in the rule set
+{{-   $desiredRules := list }}
+{{-   range $entry := $rules }}
+{{-     if or (not (has $entry.name (list "claude" "opencode"))) (eq $entry.name $base.platform) }}
+{{-       $desiredRules = append $desiredRules $entry.name }}
+{{-     end }}
+{{-   end }}
+desired=" {{ join " " $desiredRules }} "
+for link in {{ $base.dir | quote }}/*; do
+  [ -L "$link" ] || continue
+  name="${link##*/}"
+  case "$desired" in
+  *" $name "*)
+    if [ -e "$link" ]; then
+      continue
+    fi
+    ;;
+  esac
+  msg "Removing orphaned opkg rule symlink: $name"
+  trace trash "$link"
+done
 {{- end }}
 {{- end }}
 
@@ -103,6 +125,26 @@ mkdir -p {{ $base | quote }}
 {{- range $entry := $skills }}
 ensure_symlink {{ $entry.src | quote }} {{ printf "%s/%s" $base $entry.name | quote }}
 {{- end }}
+
+# Prune orphans: trash a symlink whose source is gone or no longer in the skill set
+{{-   $desiredSkills := list }}
+{{-   range $entry := $skills }}
+{{-     $desiredSkills = append $desiredSkills $entry.name }}
+{{-   end }}
+desired=" {{ join " " $desiredSkills }} "
+for link in {{ $base | quote }}/*; do
+  [ -L "$link" ] || continue
+  name="${link##*/}"
+  case "$desired" in
+  *" $name "*)
+    if [ -e "$link" ]; then
+      continue
+    fi
+    ;;
+  esac
+  msg "Removing orphaned opkg skill symlink: $name"
+  trace trash "$link"
+done
 {{- end }}
 {{- end }}
 
