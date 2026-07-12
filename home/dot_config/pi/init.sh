@@ -76,8 +76,9 @@ pi-run() {
 
 # Built-in sandbox extension: isolates tool calls in Alpine, Pi runs on host
 # Requires: sandbox extension enabled, sandbox container pre-created
+# pi's --sandbox accepts docker:<name>; podman is a supported sandbox runtime upstream
 pi-sandbox() {
-  pi-local --sandbox=docker:pi-sandbox "${@:---continue}"
+  pi-local --sandbox="${CONTAINER_PROVIDER:?}:pi-sandbox" "${@:---continue}"
 }
 
 # devcontainer CLI (MIT): open spec, podman support via --docker-path
@@ -91,7 +92,7 @@ pi-devcontainer() {
 # sbx (BSL): full isolation, macOS-first; x86_64 Linux needs rpm extraction
 # Build: pi-sbx-build; push to a registry before first run
 pi-sbx-build() {
-  docker build \
+  "${CONTAINER_PROVIDER:?}" build \
     --file "$HOME/.config/pi/container/Dockerfile.sbx" \
     --tag ghcr.io/lei/pi:latest \
     "$HOME/.config/pi/container"
