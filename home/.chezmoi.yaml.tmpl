@@ -209,12 +209,7 @@
 {{-   $_ := set $data "btrfs" (dict "backup" (dict "deviceUuid" $btrfsBackupUuid)) -}}
 {{- end -}}
 
-{{- $containerProvider := env "CONTAINER_PROVIDER" }}
-{{- if not $containerProvider }}
-{{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
-{{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
-{{-   end }}
-{{- end }}
+{{- $containerProvider := includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi) | trim }}
 
 {{- $timezone := includeTemplate "timezone.tmpl" $data | trim }}
 {{- $_ := set $data "timezone" $timezone }}

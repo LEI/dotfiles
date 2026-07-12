@@ -1,17 +1,15 @@
-{{- if or .features.docker .features.podman -}}
 {{- $active := .containerProvider -}}
+{{- /* Assert only the main engine is live: docker and podman can run side by side,
+       so asserting the non-main one is down would false-fail when both are up.
+       The server version sits under different info fields per engine; the inner
+       {{ "..." }} escapes past goss's own templating so the engine receives a
+       literal --format '{{.<field>}}' */ -}}
+{{- $versionField := ternary "ServerVersion" "Version.Version" (eq $active "docker") -}}
+{{- if or (and (eq $active "docker") .features.docker) (and (eq $active "podman") .features.podman) -}}
 ---
 command:
-{{- if .features.docker }}
-  docker-engine:
-    exec: docker info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
-    exit-status: {{ eq $active "docker" | ternary 0 "{ gt: 0 }" }}
+  {{ $active }}-engine:
+    exec: {{ $active }} info --format '{{ printf `{{ "{{.%s}}" }}` $versionField }}'
+    exit-status: 0
     timeout: 5000
-{{- end }}
-{{- if .features.podman }}
-  podman-engine:
-    exec: podman info --format '{{ `{{ "{{.ServerVersion}}" }}` }}'
-    exit-status: {{ eq $active "podman" | ternary 0 "{ gt: 0 }" }}
-    timeout: 5000
-{{- end }}
 {{ end -}}

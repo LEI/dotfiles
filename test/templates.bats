@@ -207,6 +207,36 @@ run_block_in_file() {
   refute_stderr
 }
 
+# container-provider
+
+# Stub podman and docker as present in PATH (BATS_MOCK_BINDIR is already
+# prepended to PATH by _common_setup); order matters for the podman-first check.
+stub_container_engines() {
+  install -Dm755 /dev/null "$BATS_MOCK_BINDIR/podman"
+  install -Dm755 /dev/null "$BATS_MOCK_BINDIR/docker"
+}
+
+@test "container-provider: CONTAINER_PROVIDER env is not read back, breaking the export/reread loop" {
+  stub_container_engines
+  mkdir -p "$BATS_TEST_TMPDIR/home"
+  CONTAINER_PROVIDER=docker HOME="$BATS_TEST_TMPDIR/home" \
+    run_template '{{- includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi) -}}'
+  assert_success
+  # autodetect wins even though the env var (as re-exported by
+  # containers.conf.tmpl) says docker: podman is checked first
+  assert_output "podman"
+}
+
+@test "container-provider: per-machine local.yaml override wins over autodetect" {
+  stub_container_engines
+  mkdir -p "$BATS_TEST_TMPDIR/home"
+  printf 'containerProvider: docker\n' >"$BATS_TEST_TMPDIR/home/local.yaml"
+  HOME="$BATS_TEST_TMPDIR/home" \
+    run_template '{{- includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi) -}}'
+  assert_success
+  assert_output "docker"
+}
+
 # mise-tools
 
 @test "mise-tools: tool with version lts renders lts" {

@@ -1,0 +1,13 @@
+{{- /* resolves the container provider: a per-machine local.yaml override wins,
+  else autodetect podman first, then docker. Never reads CONTAINER_PROVIDER
+  from the environment, that var is only an export target (see
+  home/dot_config/environment.d/containers.conf.tmpl), reading it back here
+  would just re-freeze whatever was last exported */ -}}
+{{- $local := includeTemplate "data.tmpl" (dict "dir" "" "chezmoi" .chezmoi) | fromYaml -}}
+{{- $containerProvider := get $local "containerProvider" -}}
+{{- if not $containerProvider -}}
+{{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
+{{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
+{{-   end -}}
+{{- end -}}
+{{- $containerProvider }}
