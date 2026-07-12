@@ -191,7 +191,7 @@ setup() {
     done
     while IFS= read -r entry; do
       dangling="${dangling}${entry}"$'\n'
-    done < <(find "$dir" -xtype l 2>/dev/null)
+    done < <(find "$dir" -xtype l)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in rule dirs:"$'\n'"$strays"
@@ -213,9 +213,23 @@ setup() {
     done
     while IFS= read -r entry; do
       dangling="${dangling}${entry}"$'\n'
-    done < <(find "$dir" -xtype l 2>/dev/null)
+    done < <(find "$dir" -xtype l)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in skill dirs:"$'\n'"$strays"
   [ -z "$dangling" ] || fail "dangling symlinks in skill dirs (deleted source):"$'\n'"$dangling"
+}
+
+# bats test_tags=rules,skills
+@test "dangling symlink scan detects a broken link" {
+  local dir="$BATS_TEST_TMPDIR/scan-fixture"
+  mkdir -p "$dir"
+  ln -s "$dir/deleted-source" "$dir/dangling"
+
+  local entry dangling=""
+  while IFS= read -r entry; do
+    dangling="${dangling}${entry}"$'\n'
+  done < <(find "$dir" -xtype l)
+
+  [ -n "$dangling" ] || fail "scan did not detect dangling symlink in $dir"
 }
