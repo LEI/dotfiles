@@ -7,7 +7,8 @@ packages:
   # fi
   claude-code:
     enabled: '{{ eq .osIDLike "android" "arch" "darwin" "fedora" "windows" }}'
-    version: '{{ eq .osIDLike "android" | ternary "2.1.112" "" }}'
+    # stable dist-tag on npm backends: latest trips a mise minimum_release_age install bug
+    version: '{{ if eq .osIDLike "android" }}2.1.112{{ else if eq .osIDLike "arch" "windows" }}{{ else }}stable{{ end }}'
     minimum_release_age: "0d"
     nameOverwrite:
       mise: npm:@anthropic-ai/claude-code
