@@ -24,4 +24,11 @@
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
-{{- $skills | toJson }}
+{{- /* Dedup by name, first occurrence wins so the local dir keeps precedence, then stable sort */ -}}
+{{- $byName := dict -}}
+{{- range $s := $skills -}}
+{{-   if not (hasKey $byName $s.name) -}}{{- $byName = set $byName $s.name $s -}}{{- end -}}
+{{- end -}}
+{{- $sorted := list -}}
+{{- range $n := (keys $byName | sortAlpha) -}}{{- $sorted = append $sorted (index $byName $n) -}}{{- end -}}
+{{- $sorted | toJson }}
