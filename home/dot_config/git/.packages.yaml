@@ -55,9 +55,7 @@ packages:
     type: '{{ eq .osIDLike "darwin" | ternary "brew" "mise" }}'
     # type: brew
   zizmor:
-    # zizmor has no musl build, so alpine falls through to apk instead of mise
-    # android has no compatible asset, so skip it entirely
-    enabled: '{{ ne .osID "android" }}'
+    enabled: '{{ and (ne .osID "android") (ne .osIDLike "alpine") }}'
     nameOverwrite:
       mise: aqua:zizmorcore/zizmor
-    type: '{{ not (eq .osIDLike "darwin" "alpine") | ternary "mise" nil }}'
+    type: '{{ eq .osIDLike "darwin" | ternary nil "mise" }}'

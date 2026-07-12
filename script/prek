@@ -35,9 +35,9 @@ Linux)
 *) skip="${skip:+$skip,}validate-skill" ;;
 esac
 
-# if [ -f /etc/alpine-release ]; then
-#   skip="${skip:+$skip,}stylua-github"
-# fi
+if [ -f /etc/alpine-release ]; then
+  skip="${skip:+$skip,}commitlint,stylua-github,zizmor"
+fi
 
 # Skip in-place fixers when cwd is on a read-only mount.
 # Linux: parse mountinfo (test -w lies on bind mounts).
