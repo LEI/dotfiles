@@ -233,3 +233,38 @@ setup() {
 
   [ -n "$dangling" ] || fail "scan did not detect dangling symlink in $dir"
 }
+
+# bats test_tags=rules,skills,opkg
+@test "opkg: orphan prune removes symlinks gone from the desired set or with a missing source" {
+  local dir="$BATS_TEST_TMPDIR/prune-fixture"
+  mkdir -p "$dir"
+  : >"$dir/target"
+
+  # keep-valid: in the desired set with a live source, kept
+  ln -s "$dir/target" "$dir/keep-valid"
+  # stale-source: in the desired set but its source is gone, pruned
+  ln -s "$dir/deleted-source" "$dir/stale-source"
+  # dropped-name: source is live but the name left the desired set, pruned
+  ln -s "$dir/target" "$dir/dropped-name"
+
+  # Mirror the prune loop from run_onchange_after_publish-opkg.sh.tmpl,
+  # rm stands in for trash since the fixture is throwaway
+  local desired=" keep-valid stale-source "
+  local link name
+  for link in "$dir"/*; do
+    [ -L "$link" ] || continue
+    name="${link##*/}"
+    case "$desired" in
+    *" $name "*)
+      if [ -e "$link" ]; then
+        continue
+      fi
+      ;;
+    esac
+    rm "$link"
+  done
+
+  [ -L "$dir/keep-valid" ] || fail "prune removed a valid in-set symlink"
+  [ ! -L "$dir/stale-source" ] || fail "prune kept a symlink whose source is gone"
+  [ ! -L "$dir/dropped-name" ] || fail "prune kept a symlink no longer in the desired set"
+}
