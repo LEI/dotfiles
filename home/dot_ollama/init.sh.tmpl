@@ -1,7 +1,7 @@
 {{- $ollama := get . "ollama" | default dict -}}
 {{- $service := get $ollama "service" | default "brew" -}}
 {{- $container := get $ollama "container" -}}
-{{- $provider := eq $service "quadlet" | ternary "podman" (get . "containerProvider") -}}
+{{- $provider := eq $service "quadlet" | ternary "podman" "\"$CONTAINER_PROVIDER\"" -}}
 # shellcheck shell=bash
 
 {{ if $container -}}

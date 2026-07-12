@@ -81,6 +81,17 @@ _conf_keys() {
 }
 
 # bats test_tags=deploy,validation
+@test "environment.d: CONTAINER_PROVIDER is shell-only, not in env.d" {
+  # Hot-swapped, shell-only var lives in the per-shell layer (sh/environment.sh)
+  # so a new tab reads a fresh value without relogin
+  local keys
+  keys=$(_conf_keys "$HOME/.config/environment.d")
+  if echo "$keys" | grep -qx CONTAINER_PROVIDER; then
+    fail "CONTAINER_PROVIDER must not be a key under environment.d"
+  fi
+}
+
+# bats test_tags=deploy,validation
 @test "environment.d: no duplicate keys" {
   local dupes
   dupes=$(_conf_keys "$HOME/.config/environment.d" | uniq -d) || true
