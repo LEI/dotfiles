@@ -15,6 +15,7 @@ packages:
   xcaddy:
     # Custom build only for the tailscale module, else brew caddy
     enabled: '{{ .features.tailscale }}'
+    version: "0.4.5"
     nameOverwrite:
       mise: github:caddyserver/xcaddy
     type: mise
