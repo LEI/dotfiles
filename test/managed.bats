@@ -300,3 +300,68 @@ setup() {
   run copy_is_subset "$src/SKILL.md" "$src"
   [ "$status" -ne 0 ] || fail "non-directory wrongly deemed a recoverable copy"
 }
+
+# bats test_tags=rules,skills,opkg
+@test "opkg: apply cycle autofixes recoverable copies and prunes orphans in one pass" {
+  local target="$BATS_TEST_TMPDIR/target"
+  mkdir -p "$target/src-a" "$target/src-b"
+  : >"$target/src-a/SKILL.md"
+
+  local dir="$BATS_TEST_TMPDIR/apply-fixture"
+  mkdir -p "$dir"
+
+  # Mirror ensure_symlink from run_onchange_after_publish-opkg.sh.tmpl,
+  # rm stands in for trash since the fixture is throwaway
+  ensure_symlink() {
+    local target="$1" link="$2" extra
+    if [ -L "$link" ]; then
+      [ "$(readlink "$link")" = "$target" ] && return 0
+      ln -sfn "$target" "$link"
+      return 0
+    fi
+    if [ -e "$link" ]; then
+      extra=$(cd "$link" && find . \( -type f -o -type l \) | while IFS= read -r f; do
+        [ -e "$target/$f" ] || echo "$f"
+      done)
+      if [ -z "$extra" ]; then
+        rm -r "$link"
+        ln -sn "$target" "$link"
+      else
+        return 1
+      fi
+      return 0
+    fi
+    ln -sn "$target" "$link"
+  }
+
+  # stale-copy: a real directory, subset of src-a, autofixed to a symlink
+  mkdir -p "$dir/stale-copy"
+  : >"$dir/stale-copy/SKILL.md"
+  # dropped-name: a live symlink whose name is leaving the desired set, pruned
+  ln -s "$target/src-b" "$dir/dropped-name"
+  # stale-source: a live symlink in the desired set whose source is gone, pruned
+  ln -s "$target/deleted-source" "$dir/stale-source"
+
+  # Apply pass: ensure_symlink for each desired entry, then prune orphans
+  ensure_symlink "$target/src-a" "$dir/stale-copy"
+  ensure_symlink "$target/deleted-source" "$dir/stale-source"
+
+  local desired=" stale-copy stale-source "
+  local link name
+  for link in "$dir"/*; do
+    [ -L "$link" ] || continue
+    name="${link##*/}"
+    case "$desired" in
+    *" $name "*)
+      [ -e "$link" ] && continue
+      ;;
+    esac
+    rm "$link"
+  done
+
+  [ -L "$dir/stale-copy" ] || fail "apply cycle did not autofix the recoverable stale copy"
+  [ "$(readlink "$dir/stale-copy")" = "$target/src-a" ] ||
+    fail "autofixed symlink points at the wrong target"
+  [ ! -e "$dir/stale-source" ] || fail "apply cycle kept a symlink whose source is gone"
+  [ ! -e "$dir/dropped-name" ] || fail "apply cycle kept a symlink no longer in the desired set"
+}
