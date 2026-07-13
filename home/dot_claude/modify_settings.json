@@ -186,6 +186,7 @@
       {{- end }}
       "Bash(du *)",
       "Bash(echo *)",
+      "Bash(env)",
       "Bash(fd *)",
       "Bash(file *)",
       "Bash(find *)",
@@ -321,7 +322,6 @@
       "Bash(awk -f*)",
       "Bash(awk * -e*)",
       "Bash(awk * -f*)",
-      "Bash(env)",
       "Bash(env *)",
       "Bash(export *)",
       "Bash(unset *)",
