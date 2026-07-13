@@ -22,21 +22,6 @@
             "type": "object",
             "additionalProperties": { "type": "string" }
           }
-        },
-        "permissions": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["deny", "ask"],
-          "properties": {
-            "deny": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "ask": {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          }
         }
       }
     }

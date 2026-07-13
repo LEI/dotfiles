@@ -361,6 +361,10 @@
       "sq {{ $tail }}": "ask",
       "sq * {{ $tail }}": "ask",
       {{- end }}
+      {{- range $sub := list "add" "cache" "config" "driver" "mv" "rm" }}
+      "sq {{ $sub }}": "ask",
+      "sq {{ $sub }} *": "ask",
+      {{- end }}
 
       "yq *": "allow",
       "yq * -i*": "ask",

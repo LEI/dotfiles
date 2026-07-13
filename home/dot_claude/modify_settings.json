@@ -368,6 +368,10 @@
       "Bash(sq {{ $tail }})",
       "Bash(sq * {{ $tail }})",
       {{- end }}
+      {{- range $sub := list "add" "cache" "config" "driver" "mv" "rm" }}
+      "Bash(sq {{ $sub }})",
+      "Bash(sq {{ $sub }} *)",
+      {{- end }}
       "Bash(trash *)",
       "Bash(yq * --inplace *)",
       "Bash(yq * -i *)",
@@ -420,8 +424,10 @@
       "mcp__grafana-admin__add_*",
       "mcp__grafana-admin__alerting_manage_*",
       "mcp__grafana-admin__create_*",
+      "mcp__grafana-admin__delete_*",
       "mcp__grafana-admin__grafana_api_request",
       "mcp__grafana-admin__install_*",
+      "mcp__grafana-admin__remove_*",
       "mcp__grafana-admin__update_*",
       "ExitPlanMode",
       "NotebookEdit"
