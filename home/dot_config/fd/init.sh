@@ -1,13 +1,8 @@
 # shellcheck shell=sh
 
-# FIXME: config file, environment variable or bin wrapper for non-interactive shells
+# fd has no config file, so defaults live in this wrapper (interactive only)
 # https://github.com/sharkdp/fd/issues/362
 fd() {
-  # local exclude_args=()
-  # while IFS= read -r line; do
-  #   exclude_args+=(--exclude="$line")
-  # done < <(git ls-files --exclude-standard --directory --others)
-
   command fd \
     --exclude=.git \
     --exclude=node_modules \
