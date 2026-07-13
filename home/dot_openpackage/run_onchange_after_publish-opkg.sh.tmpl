@@ -60,16 +60,35 @@ if [ -d "$registry_dir" ]; then
   done
 fi
 
-# Per-package symlinks point rules dirs at package sources.
-# Strays (e.g. dual installs) are caught by `mise --cd ~/.openpackage run opkg:unmanaged` in bats.
+# Recoverable: every file in the copy also lives at the git-tracked target
+copy_is_subset() {
+  [ -d "$1" ] || return 1
+  extra=$(cd "$1" && find . \( -type f -o -type l \) | while IFS= read -r f; do
+    [ -e "$2/$f" ] || echo "$f"
+  done)
+  [ -z "$extra" ]
+}
+
+# Per-package symlinks point rules/skill dirs at package sources.
 ensure_symlink() {
   target="$1" link="$2"
-  if [ -L "$link" ] && [ "$(readlink "$link")" = "$target" ]; then
+  if [ -L "$link" ]; then
+    if [ "$(readlink "$link")" = "$target" ]; then
+      return 0
+    fi
+    msg "Repointing $link -> $target"
+    trace ln -sfn "$target" "$link"
     return 0
   fi
-  if [ -e "$link" ] || [ -L "$link" ]; then
-    msg "unmanaged: $link (expected symlink to $target; remove and re-apply)"
-    exit_code=1
+  if [ -e "$link" ]; then
+    if copy_is_subset "$link" "$target"; then
+      msg "Replacing stale copy $link -> $target"
+      trace trash "$link"
+      trace ln -sn "$target" "$link"
+    else
+      msg "unmanaged: $link has files not in $target, remove manually then re-apply"
+      exit_code=1
+    fi
     return 0
   fi
   trace ln -sn "$target" "$link"

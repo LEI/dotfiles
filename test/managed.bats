@@ -268,3 +268,35 @@ setup() {
   [ ! -L "$dir/stale-source" ] || fail "prune kept a symlink whose source is gone"
   [ ! -L "$dir/dropped-name" ] || fail "prune kept a symlink no longer in the desired set"
 }
+
+# bats test_tags=skills,opkg
+@test "opkg: copy_is_subset gates autofix on recoverable content" {
+  local src="$BATS_TEST_TMPDIR/src"
+  mkdir -p "$src"
+  : >"$src/SKILL.md"
+
+  # Mirror copy_is_subset from run_onchange_after_publish-opkg.sh.tmpl
+  copy_is_subset() {
+    [ -d "$1" ] || return 1
+    local extra
+    extra=$(cd "$1" && find . \( -type f -o -type l \) | while IFS= read -r f; do
+      [ -e "$2/$f" ] || echo "$f"
+    done)
+    [ -z "$extra" ]
+  }
+
+  local stale="$BATS_TEST_TMPDIR/stale"
+  mkdir -p "$stale"
+  : >"$stale/SKILL.md"
+  run copy_is_subset "$stale" "$src"
+  [ "$status" -eq 0 ] || fail "subset copy not deemed recoverable"
+
+  local unique="$BATS_TEST_TMPDIR/unique"
+  mkdir -p "$unique"
+  : >"$unique/EXTRA.md"
+  run copy_is_subset "$unique" "$src"
+  [ "$status" -ne 0 ] || fail "copy with unique file wrongly deemed recoverable"
+
+  run copy_is_subset "$src/SKILL.md" "$src"
+  [ "$status" -ne 0 ] || fail "non-directory wrongly deemed a recoverable copy"
+}
