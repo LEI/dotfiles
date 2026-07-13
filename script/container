@@ -126,17 +126,17 @@ build() {
 # Quietly check whether the running container's bind config matches create_flags
 mount_config_matches() {
   [ "$CONTAINER_SOURCE" = mount ] || return 0
-  local src dst mode
+  local src dst rw
   {
     read -r src
     read -r dst
-    read -r mode
+    read -r rw
   } < <(
     "$CONTAINER_PROVIDER" container inspect "$container" \
-      --format $'{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}\n{{.Destination}}\n{{.Mode}}\n{{end}}{{end}}' \
+      --format $'{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}\n{{.Destination}}\n{{.RW}}\n{{end}}{{end}}' \
       2>/dev/null
   )
-  [ "$src" = "$PWD" ] && [ "$dst" = "$chezmoi_root" ] && [[ "$mode" == *ro* ]]
+  [ "$src" = "$PWD" ] && [ "$dst" = "$chezmoi_root" ] && [ "$rw" = false ]
 }
 
 start() {
