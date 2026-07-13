@@ -191,7 +191,7 @@ setup() {
     done
     while IFS= read -r entry; do
       dangling="${dangling}${entry}"$'\n'
-    done < <(find "$dir" -xtype l)
+    done < <(find "$dir" -type l ! -exec test -e {} \; -print)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in rule dirs:"$'\n'"$strays"
@@ -213,7 +213,7 @@ setup() {
     done
     while IFS= read -r entry; do
       dangling="${dangling}${entry}"$'\n'
-    done < <(find "$dir" -xtype l)
+    done < <(find "$dir" -type l ! -exec test -e {} \; -print)
   done <<<"$dirs"
 
   [ -z "$strays" ] || fail "non-symlink entries in skill dirs:"$'\n'"$strays"
@@ -229,7 +229,7 @@ setup() {
   local entry dangling=""
   while IFS= read -r entry; do
     dangling="${dangling}${entry}"$'\n'
-  done < <(find "$dir" -xtype l)
+  done < <(find "$dir" -type l ! -exec test -e {} \; -print)
 
   [ -n "$dangling" ] || fail "scan did not detect dangling symlink in $dir"
 }

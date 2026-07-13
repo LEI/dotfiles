@@ -10,6 +10,8 @@ _common_setup() {
   # instead of BATS_TMPDIR (shared per file) so stubs are parallel-safe
   BATS_MOCK_TMPDIR="$BATS_TEST_TMPDIR"
   BATS_MOCK_BINDIR="$BATS_MOCK_TMPDIR/bin"
+  # bats-mock creates this lazily in stub(); direct-write tests need it up front
+  mkdir -p "$BATS_MOCK_BINDIR"
   PATH="$BATS_MOCK_BINDIR:$PATH"
 
   # Prevent non-interactive bash subprocesses from sourcing .bashrc,
