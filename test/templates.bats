@@ -260,4 +260,14 @@ stub_container_engines() {
   assert_output --partial 'version = "latest"'
 }
 
+# process-compose data
+
+@test "process-compose: .data.yaml exposes services and processCompose at root" {
+  run_template '{{- includeTemplate "data.tmpl" (dict "dir" "dot_config/process-compose" "chezmoi" .chezmoi) -}}'
+  assert_success
+  assert_line --regexp '^processCompose:'
+  assert_line --regexp '^services:'
+  assert_line --partial 'label: com.process-compose'
+}
+
 # cpu-cores / cpu-threads
