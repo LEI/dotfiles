@@ -25,6 +25,11 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 run distrobox enter nix-dev -- \
   sh -c 'sudo ln -sf "$HOME"/.nix-profile/bin/* /usr/local/bin/' </dev/null
 
+# nix-direnv is a profile package the direnvrc guard sources for gc-rooted
+# `use flake`. A recreate drops it, so install idempotently into the profile.
+run distrobox enter nix-dev -- \
+  sh -c 'nix profile list | grep -q nix-direnv || nix profile install nixpkgs#nix-direnv' </dev/null
+
 # SC2016: $HOME must stay literal for login-time evaluation in the file
 # shellcheck disable=SC2016
 printf '%s\n' 'if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then . "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi' |

@@ -1,0 +1,15 @@
+# shellcheck shell=bash
+
+# Route `use flake` through nix-direnv so the devShell is gc-rooted: without a
+# gc-root, nix-collect-garbage strips the pre-commit hook interpreter and every
+# commit then needs a `nix develop -c` prefix.
+#
+# nix runs in the nix-dev distrobox, which shares $HOME, so ~/.nix-profile
+# resolves inside the box where /nix exists. On the bare host the symlink is
+# broken, so skip sourcing and let direnv fall back to the builtin `use flake`.
+# The nix-direnv profile package is installed by the box-glue hook.
+nix_direnv_rc="${HOME}/.nix-profile/share/nix-direnv/direnvrc"
+if [ -e "${nix_direnv_rc}" ]; then
+  # shellcheck source=/dev/null
+  source "${nix_direnv_rc}"
+fi
