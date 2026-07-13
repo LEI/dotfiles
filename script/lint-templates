@@ -25,7 +25,8 @@ require_bash 4
 prog="${0##*/}"
 repo_dir="$PWD"
 render_dir=$(mktemp -d)
-render_args=()
+# --lint feeds modify_ templates empty stdin for a host-independent render
+render_args=(--lint)
 prek_args=()
 keep="${LINT_KEEP:-false}"
 verbosity="${LINT_VERBOSITY:-${VALIDATE_VERBOSITY:-1}}"

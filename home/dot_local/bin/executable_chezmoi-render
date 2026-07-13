@@ -4,6 +4,7 @@
 #USAGE flag "-o --output <directory>" help="Output directory (default: mktemp -d)"
 #USAGE flag "-q --quiet" help="Suppress output"
 #USAGE flag "-v --verbose" help="Print each file as it is rendered"
+#USAGE flag "--lint" help="Render modify_ templates with empty stdin, host-independent"
 #USAGE arg "[templates]..." help="Templates to render (use -- to pass flags to chezmoi execute-template)"
 #USAGE complete "templates" run="chezmoi-render --list"
 
@@ -50,6 +51,7 @@ esac
 dest=""
 templates=()
 chezmoi_args=()
+lint=0
 verbosity="${CHEZMOI_RENDER_VERBOSITY:-1}"
 
 while [ $# -gt 0 ]; do
@@ -64,6 +66,10 @@ while [ $# -gt 0 ]; do
     ;;
   -v | --verbose)
     verbosity=2
+    shift
+    ;;
+  --lint)
+    lint=1
     shift
     ;;
   --)
@@ -198,7 +204,8 @@ render() {
 
   if [[ "$base" == modify_* ]]; then
     cmd+=(--with-stdin)
-    if [ -f "$target" ]; then
+    # Lint mode uses empty stdin so the host's own file cannot skew the render
+    if [ "$lint" -eq 0 ] && [ -f "$target" ]; then
       input="$target"
     fi
   fi
@@ -219,7 +226,7 @@ if [ "${#chezmoi_args[@]}" -gt 0 ]; then
   printf '%s\0' "${chezmoi_args[@]}" >"$args_file"
 fi
 
-export dest source_dir verbosity persistent_state_dir args_file
+export dest source_dir verbosity lint persistent_state_dir args_file
 export -f render
 
 # Render in parallel, one execute-template per worker (was a serial loop)
