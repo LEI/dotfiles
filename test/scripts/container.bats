@@ -1,4 +1,4 @@
-# shellcheck disable=SC2016,SC2154,SC2329
+# shellcheck disable=SC2016,SC2030,SC2031,SC2154,SC2329
 
 setup_file() {
   # shellcheck source=test/common/setup-file.sh
@@ -149,6 +149,27 @@ source_container() {
     assert_success
     assert_line --regexp "^alpine"
   done
+}
+
+# bats test_tags=type:unit
+@test "container: mount_config_matches accepts podman read-only bind" {
+  # CONTAINER_SOURCE is made readonly on source, so set mount mode up front
+  export CONTAINER_PROVIDER=dummy
+  export CONTAINER_SOURCE=mount
+  # shellcheck source=script/container
+  source ./script/container
+  container=test-ctr
+  chezmoi_root=/src
+
+  # podman leaves .Mode empty and encodes read-only in .RW=false
+  dummy() { printf '%s\n' "$PWD" /src false; }
+  run mount_config_matches
+  assert_success
+
+  # a read-write (or moved) mount is stale and must be recreated
+  dummy() { printf '%s\n' "$PWD" /src true; }
+  run mount_config_matches
+  assert_failure
 }
 
 # bats test_tags=type:unit

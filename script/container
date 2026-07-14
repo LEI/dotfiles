@@ -123,7 +123,9 @@ build() {
   ct build . --file=Containerfile --build-arg="IMAGE=$image" --tag="$image_tag"
 }
 
-# Quietly check whether the running container's bind config matches create_flags
+# Quietly check whether the running container's bind config matches create_flags.
+# podman reports .Mode empty for bind mounts and encodes read-only via .RW=false;
+# .RW is present under Docker too, so compare it rather than the mode string
 mount_config_matches() {
   [ "$CONTAINER_SOURCE" = mount ] || return 0
   local src dst rw
