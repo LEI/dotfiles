@@ -194,9 +194,14 @@ sync_source() {
     warn "host mount: $PWD -> $chezmoi_root (ro)"
     # Mounted files are owned by the host user; trust the path system-wide so
     # git works for all container users regardless of dotfile apply order.
+    # Also set it per-user: Homebrew ships its own git with its own system
+    # config location, so --system alone misses it once brew's git shadows
+    # the distro one on PATH; --global is per-HOME and binary-agnostic.
     # Termux defers this to bootstrap because git is installed there
     if [ "$image_name" != termux ]; then
       ct exec "$container" git config --system --add safe.directory "$chezmoi_root"
+      ct exec ${exec_user:+--user="$exec_user"} "$container" \
+        git config --global --add safe.directory "$chezmoi_root"
     fi
     return
   fi
