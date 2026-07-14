@@ -6,16 +6,9 @@
 # export LANG=en_US.UTF-8
 # export LC_ALL=en_US.UTF-8
 
-# Container runtime provider, detected per-shell so a new terminal follows the
-# installed runtime with no relogin or re-apply. Always recomputed, an inherited
-# stale value cannot win. CONTAINER_PROVIDER_FORCE pins an explicit choice.
-if [ -n "${CONTAINER_PROVIDER_FORCE:-}" ]; then
-  export CONTAINER_PROVIDER="$CONTAINER_PROVIDER_FORCE"
-elif command -v podman >/dev/null 2>&1; then
-  export CONTAINER_PROVIDER=podman
-elif command -v docker >/dev/null 2>&1; then
-  export CONTAINER_PROVIDER=docker
-fi
+{{ if or .features.docker .features.podman -}}
+export CONTAINER_PROVIDER="{{ .containerProvider }}"
+{{ end -}}
 
 # File type colors for completions, fd, tree, etc.
 if command -v dircolors >/dev/null; then

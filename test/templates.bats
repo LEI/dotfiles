@@ -209,26 +209,25 @@ run_block_in_file() {
 
 # container-provider
 
-# Stub podman and docker as present in PATH (BATS_MOCK_BINDIR is already
-# prepended to PATH by _common_setup); order matters for the podman-first check.
-stub_container_engines() {
-  install -Dm755 /dev/null "$BATS_MOCK_BINDIR/podman"
-  install -Dm755 /dev/null "$BATS_MOCK_BINDIR/docker"
-}
-
-@test "container-provider: CONTAINER_PROVIDER env is not read back, breaking the export/reread loop" {
-  stub_container_engines
+@test "container-provider: falls back to the OS-aware default when no override is set" {
   mkdir -p "$BATS_TEST_TMPDIR/home"
-  CONTAINER_PROVIDER=docker HOME="$BATS_TEST_TMPDIR/home" \
+  local expected
+  [ "$UNAME" = Darwin ] && expected=docker || expected=podman
+  HOME="$BATS_TEST_TMPDIR/home" \
     run_template '{{- includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi) -}}'
   assert_success
-  # autodetect wins even though the env var (as re-exported by
-  # containers.conf.tmpl) says docker: podman is checked first
-  assert_output "podman"
+  assert_output "$expected"
 }
 
-@test "container-provider: per-machine local.yaml override wins over autodetect" {
-  stub_container_engines
+@test "container-provider: empty inside a container, no engine is nested" {
+  mkdir -p "$BATS_TEST_TMPDIR/home"
+  HOME="$BATS_TEST_TMPDIR/home" \
+    run_template '{{- includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi "container" true) -}}'
+  assert_success
+  assert_output ""
+}
+
+@test "container-provider: per-machine local.yaml override wins over the OS default" {
   mkdir -p "$BATS_TEST_TMPDIR/home"
   printf 'containerProvider: docker\n' >"$BATS_TEST_TMPDIR/home/local.yaml"
   HOME="$BATS_TEST_TMPDIR/home" \

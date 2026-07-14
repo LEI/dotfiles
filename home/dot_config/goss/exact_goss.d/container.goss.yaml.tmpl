@@ -1,15 +1,10 @@
-{{- $active := .containerProvider -}}
-{{- /* Assert only the main engine is live: docker and podman can run side by side,
-       so asserting the non-main one is down would false-fail when both are up.
-       The server version sits under different info fields per engine; the inner
-       {{ "..." }} escapes past goss's own templating so the engine receives a
-       literal --format '{{.<field>}}' */ -}}
-{{- $versionField := ternary "ServerVersion" "Version.Version" (eq $active "docker") -}}
-{{- if or (and (eq $active "docker") .features.docker) (and (eq $active "podman") .features.podman) -}}
+{{- /* Check the configured engine, not an auto-picked live one: the provider is
+       a pure config value now, so the check verifies that engine responds */ -}}
+{{- if or .features.podman .features.docker -}}
 ---
 command:
-  {{ $active }}-engine:
-    exec: {{ $active }} info --format '{{ printf `{{ "{{.%s}}" }}` $versionField }}'
+  container-engine:
+    exec: {{ .containerProvider }} version
     exit-status: 0
     timeout: 5000
 {{ end -}}

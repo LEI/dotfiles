@@ -211,18 +211,23 @@ plugin_cache_drift() (
   done
 )
 
-# Discover rule dirs by structural convention: dirs containing symlinks
-# targeting */packages/*/rules. Agnostic to tool name.
-discover_rule_dirs() {
-  find "$HOME" -maxdepth 4 -type l -lname '*/packages/*/rules' 2>/dev/null |
+# Rule/skill dirs found by structural convention, symlink targets matching
+# */packages/*/rules or */skills/*, agnostic to tool name. Trash is excluded
+# so a Finder-trashed deploy symlink can't masquerade as a managed dir
+discover_symlink_dirs() {
+  find "$HOME" -maxdepth 4 -type l "$@" \
+    ! -path "$HOME/.Trash/*" ! -path "$HOME/.local/share/Trash/*" \
+    2>/dev/null |
     sed 's|/[^/]*$||' |
     sort -u
 }
 
+discover_rule_dirs() {
+  discover_symlink_dirs -lname '*/packages/*/rules'
+}
+
 discover_skill_dirs() {
-  find "$HOME" -maxdepth 4 -type l -lname '*/skills/*' 2>/dev/null |
-    sed 's|/[^/]*$||' |
-    sort -u
+  discover_symlink_dirs -lname '*/skills/*'
 }
 
 stub_seq() {

@@ -1,14 +1,12 @@
-{{- /* apply-time provider snapshot for deploy-time consumers only (goss engine
-  check, ollama service selection): a per-machine local.yaml override wins, else
-  autodetect podman first, then docker. The live shell value CONTAINER_PROVIDER
-  is detected independently per-shell in home/dot_config/sh/environment.sh.tmpl,
-  never read back here (that would re-freeze a stale value) */ -}}
+{{- /* config-only value, no detection: a per-machine local.yaml override wins,
+  else empty inside a container, no engine is nested in a throwaway container,
+  else an OS-aware default (docker on darwin, podman elsewhere). Never read
+  back CONTAINER_PROVIDER from the environment here, that would re-freeze a
+  stale value */ -}}
 {{- $local := includeTemplate "data.tmpl" (dict "dir" "" "chezmoi" .chezmoi) | fromYaml -}}
 {{- $containerProvider := get $local "containerProvider" -}}
-{{- if not $containerProvider -}}
-{{-   if lookPath "podman" | isExecutable }}{{ $containerProvider = "podman" }}
-{{-   else if lookPath "docker" | isExecutable }}{{ $containerProvider = "docker" }}
-{{-   end -}}
+{{- if and (not $containerProvider) (not (get . "container")) -}}
+{{-   $containerProvider = eq .chezmoi.os "darwin" | ternary "docker" "podman" -}}
 {{- end -}}
 {{- with $containerProvider }}{{ . }}
 {{ end -}}

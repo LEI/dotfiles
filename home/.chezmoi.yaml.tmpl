@@ -4,7 +4,6 @@
 {{- $headless := env "CHEZMOI_HEADLESS" | not | not }}
 {{- $preset := env "CHEZMOI_PRESET" | default (ne .chezmoi.os "windows" | ternary "font" "text") }}
 {{- $profile := env "CHEZMOI_PROFILE" }}
-{{- $system := env "CHEZMOI_SYSTEM" | default ($headless | ternary "server" "client") }}
 {{- $upgrade := eq (env "CHEZMOI_UPGRADE") "true" }}
 
 {{- $homeDir := .chezmoi.homeDir | default (env "HOME") }}
@@ -39,6 +38,9 @@
 {{-   $ephemeral = promptBoolOnce . "ephemeral" "ephemeral" }}
 {{-   $headless = promptBoolOnce . "headless" "headless" }}
 {{- end }}
+
+{{- /* below the flag-promotion block on purpose: uses the finalized $headless */ -}}
+{{- $system := env "CHEZMOI_SYSTEM" | default ($headless | ternary "server" "client") }}
 
 {{- $profileChoices := list "minimal" "personal" "work" }}
 {{- if and $interactive (not $profile) }}
@@ -209,7 +211,7 @@
 {{-   $_ := set $data "btrfs" (dict "backup" (dict "deviceUuid" $btrfsBackupUuid)) -}}
 {{- end -}}
 
-{{- $containerProvider := includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi) | trim }}
+{{- $containerProvider := includeTemplate "container-provider.tmpl" (dict "chezmoi" .chezmoi "container" $isContainer) | trim }}
 
 {{- $timezone := includeTemplate "timezone.tmpl" $data | trim }}
 {{- $_ := set $data "timezone" $timezone }}
