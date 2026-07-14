@@ -38,6 +38,12 @@ env_shell_expand = true
 lockfile = true
 minimum_release_age = "7d"
 
+{{- if .vm }}
+# FIXME(vm): github attestation TSA check fails, SLSA provenance still verifies
+[settings.github]
+github_attestations = false
+{{- end }}
+
 {{- $checkDirs := list }}
 {{- $checks := glob (joinPath .chezmoi.sourceDir "dot_config" "*/.check.sh") }}
 {{- range $checks }}
