@@ -151,6 +151,14 @@ start() {
       return 1
     fi
     create_flags+=(--volume="$PWD:$chezmoi_root:ro")
+    # Trust the host-owned mount for every git binary and user without writing a
+    # config file: a --global write lands in the chezmoi-managed ~/.config/git/config
+    # and drifts on every apply. GIT_CONFIG_* is inherited by all exec sessions.
+    create_flags+=(
+      --env=GIT_CONFIG_COUNT=1
+      --env=GIT_CONFIG_KEY_0=safe.directory
+      --env=GIT_CONFIG_VALUE_0="$chezmoi_root"
+    )
   fi
   # Termux lacks /bin/sh for the wrapper shebang
   if [ "$image_name" = termux ]; then
@@ -192,17 +200,6 @@ start() {
 sync_source() {
   if [ "$CONTAINER_SOURCE" = mount ]; then
     warn "host mount: $PWD -> $chezmoi_root (ro)"
-    # Mounted files are owned by the host user; trust the path system-wide so
-    # git works for all container users regardless of dotfile apply order.
-    # Also set it per-user: Homebrew ships its own git with its own system
-    # config location, so --system alone misses it once brew's git shadows
-    # the distro one on PATH; --global is per-HOME and binary-agnostic.
-    # Termux defers this to bootstrap because git is installed there
-    if [ "$image_name" != termux ]; then
-      ct exec "$container" git config --system --add safe.directory "$chezmoi_root"
-      ct exec ${exec_user:+--user="$exec_user"} "$container" \
-        git config --global --add safe.directory "$chezmoi_root"
-    fi
     return
   fi
   # Stale files persist until the container is recreated
@@ -273,7 +270,6 @@ init_repo() {
   # shellcheck disable=SC2016
   ct exec ${exec_user:+--user="$exec_user"} "$container" \
     sh -c '
-      git config --global --add safe.directory "$1"
       git -C "$1" init --quiet
       git -C "$1" add --all
     ' -- "$chezmoi_root"
