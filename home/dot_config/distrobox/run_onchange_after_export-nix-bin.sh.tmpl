@@ -25,6 +25,18 @@ lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
 run distrobox enter nix-dev -- \
   sh -c 'sudo ln -sf "$HOME"/.nix-profile/bin/* /usr/local/bin/' </dev/null
 
+# These host tools are absent from the box filesystem: chezmoi lives in the host
+# /usr/bin, the rest under linuxbrew, neither shared into the box, so their
+# inherited PATH entries dangle. Route each to the host binary via host-exec, the
+# distrobox-recommended guest-to-host pattern. chezmoi and dstask must be the host
+# binary to act on host state, zoxide/atuin/sheldon/zellij share the host history
+# and shell init. fd is deliberately excluded: no shared host state, so the box
+# uses a native fd or rg instead of paying a per-call host round-trip.
+# SC2016: $t is meant to expand in the box loop, not here
+# shellcheck disable=SC2016
+run distrobox enter nix-dev -- \
+  sh -c 'for t in atuin chezmoi dstask sheldon zellij zoxide; do sudo ln -sf /usr/bin/distrobox-host-exec /usr/local/bin/"$t"; done' </dev/null
+
 # nix-direnv is a profile package the direnvrc guard sources for gc-rooted
 # `use flake`. A recreate drops it, so install idempotently into the profile.
 run distrobox enter nix-dev -- \
