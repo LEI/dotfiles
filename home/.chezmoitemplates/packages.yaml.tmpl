@@ -151,6 +151,10 @@ packages:
     description: MySQL monitoring TUI
     enabled: {{ and .features.sql (ne .profile "minimal") }}
     type: '{{ ne .osIDLike "darwin" | ternary "uv" nil }}'
+  dstask:
+    description: git-backed terminal task manager
+    enabled: {{ and (not (or .ephemeral .headless)) (ne .profile "minimal") }}
+    type: '{{ eq .osIDLike "fedora" "debian" | ternary "brew" nil }}'
   # dua, dug
   # duf: # dysk
   #   description: df alternative
