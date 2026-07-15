@@ -32,10 +32,13 @@ verify_arguments() {
 }
 
 keep_running() {
+  # sleep infinity idles as PID 1 across GNU, busybox, and uutils coreutils;
+  # tail -f /dev/null dies with EPERM under uutils (Ubuntu 26.04) which cannot
+  # inotify-watch /dev/null, killing the container mid-exec
   if [ -f /entrypoint.sh ]; then
-    exec /entrypoint.sh tail -f /dev/null
+    exec /entrypoint.sh sleep infinity
   else
-    exec tail -f /dev/null
+    exec sleep infinity
   fi
 }
 
