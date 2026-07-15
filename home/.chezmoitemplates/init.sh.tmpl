@@ -6,7 +6,7 @@
 {{- if and $shell (lookPath $shell | isExecutable) -}}
 SHELL={{ lookPath $shell | quote }}
 {{ end -}}
-shell="${SHELL##*/}"
+shell={{ $shell | quote }}
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
@@ -68,12 +68,11 @@ fi
 
 {{- if and .features.sheldon (lookPath "sheldon" | isExecutable) }}
 # https://github.com/rossmacarthur/sheldon#loading-plugins
-if [ "$shell" = bash ]; then
-  export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/bash.toml"
-  export SHELDON_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/bash"
-fi
+# Config/data via flags: distrobox host-exec drops env vars
+export SHELDON_CONFIG_FILE="$XDG_CONFIG_HOME/sheldon/{{ if eq $shell "bash" }}bash.toml{{ else }}plugins.toml{{ end }}"
+export SHELDON_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon{{ if eq $shell "bash" }}/bash{{ end }}"
 if command -v sheldon >/dev/null; then
-  bench sheldon eval "$(sheldon ${SHELDON_QUIET:+--quiet} source)"
+  bench sheldon eval "$(sheldon --config-file "$SHELDON_CONFIG_FILE" --data-dir "$SHELDON_DATA_DIR" ${SHELDON_QUIET:+--quiet} source)"
 else
   echo "init: command not found: sheldon" >&2
 fi
