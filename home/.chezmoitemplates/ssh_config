@@ -1,4 +1,9 @@
 Host *
+  {{- if eq .osIDLike "fedora" }}
+  # Fedora crypto-policies inject GSSAPIKexAlgorithms via Match final, a keyword
+  # nix openssh lacks and rejects, so mark it ignorable before ssh reads it
+  IgnoreUnknown GSSAPIKexAlgorithms
+  {{- end }}
   # ForwardAgent yes
   Include config.d/* # ssh -V >= 7.3p1
   # LocalCommand if [[ $TERM == screen* ]]; then printf "\033k%h\033\\"; fi
