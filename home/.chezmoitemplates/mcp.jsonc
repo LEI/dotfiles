@@ -154,43 +154,26 @@
     },
     {{- end }}
 
-    {{- if env "GITHUB_TOKEN" }}
+    // read PAT only, server omitted when GITHUB_TOKEN_READONLY is unset
+    {{- if env "GITHUB_TOKEN_READONLY" }}
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "oauth": false, // {}
       "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}",
-        // "Authorization": "Bearer ${input:github_mcp_pat}",
-      },
-    },
-    "github-read-only": {
-      "enabled": false,
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}",
+        "Authorization": "Bearer ${GITHUB_TOKEN_READONLY}",
         "X-MCP-Readonly": "true",
       },
     },
     {{- end }}
 
-    // GitLab native MCP (beta, 18.6+)
-    {{- if and (env "GITLAB_HOST") (env "GITLAB_TOKEN") }}
+    // GitLab native MCP (beta, 18.6+), read_api scope token only
+    {{- if and (env "GITLAB_HOST") (env "GITLAB_TOKEN_READONLY") }}
     "gitlab": {
       "type": "http",
       "url": "https://${GITLAB_HOST}/api/v4/mcp",
       "headers": {
-        "Authorization": "Bearer ${GITLAB_TOKEN}",
-      },
-    },
-    // GITLAB_TOKEN_READONLY: read_api scope token for safe browsing
-    "gitlab-read-only": {
-      "type": "http",
-      "url": "https://${GITLAB_HOST}/api/v4/mcp",
-      "headers": {
-        "Authorization": "Bearer ${GITLAB_TOKEN_READONLY:-${GITLAB_TOKEN}}",
+        "Authorization": "Bearer ${GITLAB_TOKEN_READONLY}",
       },
     },
     {{- end }}

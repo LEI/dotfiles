@@ -1,3 +1,6 @@
 {{- if and .features.git (hasKey . "git") (hasKey .git "github") -}}
 command -v gh >/dev/null && export_nonempty GITHUB_TOKEN "$(gh auth token)"
+{{ if .features.keystore -}}
+keystore_export GITHUB_TOKEN_READONLY github readonly
+{{ end -}}
 {{ end -}}

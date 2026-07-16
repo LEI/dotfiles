@@ -1,4 +1,7 @@
 {{- if and .features.git (hasKey . "git") (hasKey .git "gitlab") -}}
-# GITLAB_HOST=gitlab.com
-# GITLAB_TOKEN="$(glab auth status --hostname=$GITLAB_HOST --show-token 2>&1 | grep 'Token found' | sed -e 's/.*Token found: //')"
+export GITLAB_HOST="${GITLAB_HOST:-gitlab.com}"
+# store read_api token once: glab auth status --hostname=$GITLAB_HOST --show-token 2>&1 | grep 'Token found' | sed -e 's/.*Token found: //' | keystore_set gitlab readonly
+{{ if .features.keystore -}}
+keystore_export GITLAB_TOKEN_READONLY gitlab readonly
+{{ end -}}
 {{ end -}}
