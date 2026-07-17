@@ -81,7 +81,11 @@ toggle_feature() {
     jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" | sponge "$features_file"
   else
     tmp=$(mktemp)
-    jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" >"$tmp" && mv "$tmp" "$features_file"
+    if jq ".\"$key\" = (if .\"$key\" then false else true end)" "$features_file" >"$tmp"; then
+      mv "$tmp" "$features_file"
+    else
+      rm -f "$tmp"
+    fi
   fi
 
   # Report the new state (inverted from current_state)
