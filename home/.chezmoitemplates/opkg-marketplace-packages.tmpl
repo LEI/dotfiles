@@ -1,4 +1,4 @@
-{{- /* opkg marketplace packages (path-based, content beyond rules/), shared by publish-opkg and opkg-managed. Returns JSON [{name, src}]. */ -}}
+{{- /* opkg marketplace packages, shared by publish-opkg and opkg-managed. Returns JSON [{name, src}]. Every package publishes so it registers in the opkg closure, letting dependents resolve it; rule files still deploy via symlink (opkg-rule-paths.tmpl), not this list. */ -}}
 {{- $pkgs := list -}}
 {{- range $mktName, $mkt := dig "claude" "marketplaces" (dict) . -}}
 {{-   $path := get $mkt "path" -}}
@@ -8,12 +8,7 @@
 {{-   range $pkgDir := glob (joinPath $packagesRoot "*") -}}
 {{-     $pkgName := base $pkgDir -}}
 {{-     if eq $pkgName "local" -}}{{- continue -}}{{- end -}}
-{{-     $nonRule := false -}}
-{{-     range $entry := glob (joinPath $pkgDir "*") -}}
-{{-       $e := base $entry -}}
-{{-       if and (ne $e "openpackage.yml") (ne $e "rules") }}{{ $nonRule = true }}{{ end -}}
-{{-     end -}}
-{{-     if $nonRule }}{{ $pkgs = append $pkgs (dict "name" $pkgName "src" $pkgDir) }}{{ end -}}
+{{-     $pkgs = append $pkgs (dict "name" $pkgName "src" $pkgDir) -}}
 {{-   end -}}
 {{- end -}}
 {{- $pkgs | toJson }}
