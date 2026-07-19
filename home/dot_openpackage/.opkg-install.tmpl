@@ -24,8 +24,19 @@ publish_package() {
     echo "No manifest at $path, skipping"
     return 1
   fi
-  cd "$path" || return 1
-  opkg publish --local --force || return 1
+  # Publish from a copy: opkg publish can move a package's resources into the
+  # registry, and the source path is the live marketplace tree, so publishing
+  # in place would empty it. Stage a copy and publish from there instead.
+  stage=$(mktemp -d) || return 1
+  cp -R "$path" "$stage/$name" || {
+    rm -rf "$stage"
+    return 1
+  }
+  (cd "$stage/$name" && opkg publish --local --force) || {
+    rm -rf "$stage"
+    return 1
+  }
+  rm -rf "$stage"
   if opkg_installed "$name"; then
     opkg uninstall --global --recursive "$name" || exit_code=$?
   fi
@@ -41,8 +52,13 @@ install_resource() {
 }
 
 exit_code=0
+# Publish all packages before installing any, so a dependent resolves its
+# dependency (e.g. claude and private depend on kb) from the registry
+# regardless of alphabetical publish order.
 {{ range $entry := $packages }}
 publish_package {{ $entry.name | quote }} {{ $entry.src | quote }} || exit_code=1
+{{- end }}
+{{ range $entry := $packages }}
 {{- range glob (joinPath $entry.src "agents/*.md") }}
 install_resource {{ $entry.name | quote }} --agents {{ base . | trimSuffix ".md" | quote }} || exit_code=1
 {{- end }}
