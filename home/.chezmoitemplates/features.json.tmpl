@@ -28,6 +28,7 @@
   "codex" $ai
   "direnv" true
   "docker" $docker
+  "dstask" (and (not (or .ephemeral .headless)) (ne .profile "minimal"))
   "eza" (ne .profile "minimal")
   "fd" (ne .profile "minimal")
   "gemini" $ai

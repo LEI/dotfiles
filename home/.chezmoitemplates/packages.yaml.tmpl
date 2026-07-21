@@ -153,8 +153,12 @@ packages:
     type: '{{ ne .osIDLike "darwin" | ternary "uv" nil }}'
   dstask:
     description: git-backed terminal task manager
-    enabled: {{ and (not (or .ephemeral .headless)) (ne .profile "minimal") }}
-    type: '{{ eq .osIDLike "fedora" "debian" | ternary "brew" nil }}'
+    enabled: {{ .features.dstask }}
+    nameOverwrite:
+      mise: go:github.com/naggie/dstask/cmd/dstask
+    # Pinned to 25b29be: non-TTY note-append fix, unreleased so built from source
+    version: 25b29be
+    type: mise
   # dua, dug
   # duf: # dysk
   #   description: df alternative

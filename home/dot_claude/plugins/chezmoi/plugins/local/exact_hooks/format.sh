@@ -5,8 +5,10 @@ if [ -z "$FILE" ] || ! [ -f "$FILE" ]; then
   exit 0
 fi
 
+# Skip the dstask store: dstask owns its yml serialization, do not reflow it
+dstask_root="${DSTASK_GIT_REPO:-$HOME/.dstask}"
 case "$FILE" in
-*.chezmoitemplates/* | */modify_* | *.tmpl) exit 0 ;;
+*.chezmoitemplates/* | */modify_* | *.tmpl | "$dstask_root"/*) exit 0 ;;
 esac
 
 # Repo root for repo-pinned tooling; abs paths let /tmp serve as fallback

@@ -22,8 +22,10 @@ has() {
 lint() {
   # Templates: markdownlint and shellcheck cannot parse chezmoi template syntax;
   # the commit-time hooks cover them instead.
+  # Skip the dstask store: dstask owns its yml serialization, do not lint it
+  dstask_root="${DSTASK_GIT_REPO:-$HOME/.dstask}"
   case "$FILE" in
-  *.chezmoitemplates/* | */modify_* | *.tmpl) return 0 ;;
+  *.chezmoitemplates/* | */modify_* | *.tmpl | "$dstask_root"/*) return 0 ;;
   esac
   case "$FILE" in
   *.md)
