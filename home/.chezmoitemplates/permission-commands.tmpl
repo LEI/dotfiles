@@ -1,0 +1,13 @@
+{{- /* Per-command carve-outs -> {"allow": ["<cmd> *"], "ask": twins}. Each flag
+token yields "<cmd> <token>" and "<cmd> * <token>". */ -}}
+{{- $commands := get . "commands" | default dict -}}
+{{- $allow := list -}}
+{{- $ask := list -}}
+{{- range $cmd, $tokens := $commands -}}
+{{-   $allow = append $allow (printf "%s *" $cmd) -}}
+{{-   range $tokens -}}
+{{-     $ask = append $ask (printf "%s %s" $cmd .) -}}
+{{-     $ask = append $ask (printf "%s * %s" $cmd .) -}}
+{{-   end -}}
+{{- end -}}
+{{ dict "allow" ($allow | sortAlpha) "ask" ($ask | sortAlpha) | toJson }}

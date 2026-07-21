@@ -169,19 +169,7 @@
       "echo *": "allow",
       "env": "allow",
       "env *": "ask",
-      "export *": "ask",
-      "unset *": "ask",
       "file *": "allow",
-
-      "find *": "allow",
-      "find * -delete*": "ask",
-      "find * -exec*": "ask",
-      "find * -fprint*": "ask",
-      "find * -ok*": "ask",
-      "find -delete*": "ask",
-      "find -exec*": "ask",
-      "find -fprint*": "ask",
-      "find -ok*": "ask",
 
       // "git *": "ask",
       "git check-ignore *": "allow",
@@ -223,22 +211,8 @@
       "rg *": "allow",
       "rm *": "ask",
 
-      "sed *": "allow",
-      "sed * -i*": "ask",
-      "sed -i*": "ask",
-      "sed * -I*": "ask",
-      "sed -I*": "ask",
-      "sed * --in-place*": "ask",
-      "sed --in-place*": "ask",
-
       "sha256sum *": "allow",
       "sleep *": "allow",
-
-      "sort *": "allow",
-      "sort * -o*": "ask",
-      "sort * --output*": "ask",
-      "sort -o*": "ask",
-      "sort --output*": "ask",
 
       "ss *": "allow",
       "stat *": "allow",
@@ -305,19 +279,24 @@
 
       {{- end }}
 
-      "fd *": "allow",
-      "fd * --exec*": "ask",
-      "fd * -X*": "ask",
-      "fd * -x*": "ask",
-      "fd --exec*": "ask",
-      "fd -X*": "ask",
-      "fd -x*": "ask",
+      {{- if .features.dstask }}
+
+      "dstask": "allow",
+      "dstask *": "ask",
+      "dstask help": "allow",
+      "dstask help *": "allow",
+      "dstask next": "allow",
+      "dstask next *": "allow",
+      "dstask show-*": "allow",
+      "dstask show-* *": "allow",
+      "dstask version": "allow",
+      {{- end }}
 
       "jq *": "allow",
-      "jq * --null-input*": "ask",
-      "jq * -n*": "ask",
-      "jq --null-input*": "ask",
-      "jq -n*": "ask",
+      "jq * --null-input*env*": "ask",
+      "jq * -n*env*": "ask",
+      "jq --null-input*env*": "ask",
+      "jq -n*env*": "ask",
       "jq 'env*'": "ask",
       "jq env*": "ask",
 
@@ -367,11 +346,14 @@
       "sq {{ $sub }} *": "ask",
       {{- end }}
 
-      "yq *": "allow",
-      "yq * -i*": "ask",
-      "yq * --inplace*": "ask",
-      "yq -i*": "ask",
-      "yq --inplace*": "ask"
+      // allow before ask: opencode permission matching is last-match-wins
+      {{- $perms := includeTemplate "permission-commands.tmpl" (dict "commands" $.permissions.commands) | fromJson }}
+      {{- range $perms.allow }}
+      "{{ . }}": "allow",
+      {{- end }}
+      {{- range $perms.ask }}
+      "{{ . }}": "ask",
+      {{- end }}
     },
     // Launching subagents (matches the subagent type)
     // "task": "ask",

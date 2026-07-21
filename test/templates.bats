@@ -269,4 +269,58 @@ run_block_in_file() {
   assert_line --partial 'label: com.process-compose'
 }
 
+# permission-commands
+
+# Extract the JSON array the partial emits, one pattern per line via jq.
+run_perm_commands() {
+  run_template "{{- includeTemplate \"permission-commands.tmpl\" (dict \"commands\" $1) -}}"
+}
+
+@test "permission-commands: allows the broad command form" {
+  run_perm_commands '(dict "fd" (list "-x*"))'
+  assert_success
+  jq -e '.allow == ["fd *"]' <<<"$output"
+}
+
+@test "permission-commands: emits leading and non-leading ask twins per token" {
+  run_perm_commands '(dict "fd" (list "-x*"))'
+  assert_success
+  local pats
+  pats="$(jq -r '.ask[]' <<<"$output")"
+  grep -qxF 'fd -x*' <<<"$pats"
+  grep -qxF 'fd * -x*' <<<"$pats"
+}
+
+@test "permission-commands: canonical no-space form (regression: trailing-space drift)" {
+  run_perm_commands '(dict "fd" (list "-x*") "yq" (list "--inplace*"))'
+  assert_success
+  # The drifted Claude forms carried a trailing space before the glob
+  refute_output --partial 'fd * -x *'
+  refute_output --partial 'yq * --inplace *'
+}
+
+@test "permission-commands: single trailing wildcard subsumes sub-flags" {
+  run_perm_commands '(dict "fd" (list "--exec*"))'
+  assert_success
+  # --exec* already matches --exec-batch, so no separate entry is generated
+  refute_output --partial 'exec-batch'
+  jq -e '.ask | index("fd --exec*") != null' <<<"$output"
+}
+
+@test "permission-commands: sorts patterns alphabetically" {
+  run_perm_commands '(dict "sort" (list "-o*") "fd" (list "-x*"))'
+  assert_success
+  local -a pats
+  mapfile -t pats < <(jq -r '.ask[]' <<<"$output")
+  local sorted
+  sorted="$(printf '%s\n' "${pats[@]}" | LC_ALL=C sort)"
+  [ "$(printf '%s\n' "${pats[@]}")" = "$sorted" ]
+}
+
+@test "permission-commands: empty commands yields empty allow and ask" {
+  run_perm_commands '(dict)'
+  assert_success
+  jq -e '.allow == [] and .ask == []' <<<"$output"
+}
+
 # cpu-cores / cpu-threads

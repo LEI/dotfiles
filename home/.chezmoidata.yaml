@@ -1,20 +1,41 @@
 ---
-# Shared secret-path access policy for coding agents. Each harness permission
-# template renders these lists into its own native syntax (Claude Code
-# settings, opencode permission block), scoped to secret paths; other
-# permissions stay harness-specific.
+# Shared secret-path policy, rendered into each harness's native permission syntax
 permissions:
-  # Raw key material: deny in every mode
+  # Raw key material: deny in all modes
   deny:
     - "~/.ssh/**"
     - "~/.gnupg/**"
     - "**/*.key"
     - "**/*.pem"
     - "**/*.pfx"
-  # Token stores and encrypted files: ask every time. Ask is honored even under
-  # bypassPermissions, so these are reached only on approval. Globs match the
-  # secret container anywhere, not a hardcoded ~/.config/<tool>.
+  # Token stores and encrypted files: ask in all modes
+  # Globs match the secret container anywhere, not a fixed ~/.config/<tool> path
   ask:
     - "**/*.sops.*"
     - "**/secrets/**"
     - "**/secrets.d/**"
+  # Per-command: allow `<cmd> *`, ask on these dangerous flags
+  # permission-commands.tmpl handles the leading and non-leading forms
+  commands:
+    fd:
+      - "--exec*"
+      - "-X*"
+      - "-x*"
+    find:
+      - "-delete*"
+      - "-exec*"
+      - "-fls*"
+      - "-fprint*"
+      - "-ok*"
+    sed:
+      - "--in-place*"
+      - "-I*"
+      - "-i*"
+    sort:
+      - "--output*"
+      - "-o*"
+    yq:
+      - "--inplace*"
+      - "-i*"
+  # Whole-command ask instead, handled by the classifier: export, unset, env
+  # Bespoke inline rules elsewhere: awk, sq
