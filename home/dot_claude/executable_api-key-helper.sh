@@ -16,6 +16,12 @@ case "$PROVIDER" in
 zai) PLAN=zai-coding-plan ;;
 esac
 
+KEYSTORE_LIB="$HOME/.local/lib/sh/keystore.sh"
+if [ -f "$KEYSTORE_LIB" ]; then
+  # shellcheck source=/dev/null
+  . "$KEYSTORE_LIB"
+fi
+
 if [ -f "$SECRETS_FILE" ]; then
   # shellcheck source=/dev/null
   . "$SECRETS_FILE" || echo "${0##*/}: failed to source $SECRETS_FILE" >&2
