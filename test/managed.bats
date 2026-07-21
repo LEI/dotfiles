@@ -198,6 +198,33 @@ setup() {
   [ -z "$dangling" ] || fail "dangling symlinks in rule dirs (deleted source):"$'\n'"$dangling"
 }
 
+# bats test_tags=rules
+@test "rules: each symlink resolves to its package source" {
+  local dirs
+  dirs=$(discover_rule_dirs)
+  [ -n "$dirs" ] || skip "no rule dirs discovered"
+
+  local dir entry target name mismatched=""
+  while IFS= read -r dir; do
+    for entry in "$dir"/*; do
+      [ -L "$entry" ] || continue
+      name=$(basename "$entry")
+      target=$(readlink -f "$entry")
+      # Each ~/.claude/rules/<pkg> must resolve to packages/<pkg>/rules
+      case "$target" in
+      */packages/"$name"/rules)
+        [ -d "$target" ] || mismatched="${mismatched}${entry} -> ${target} (missing)"$'\n'
+        ;;
+      *)
+        mismatched="${mismatched}${entry} -> ${target} (expected .../packages/${name}/rules)"$'\n'
+        ;;
+      esac
+    done
+  done <<<"$dirs"
+
+  [ -z "$mismatched" ] || fail "rule symlinks not resolving to their package source:"$'\n'"$mismatched"
+}
+
 # bats test_tags=skills
 @test "skills: top-level entries are symlinks only" {
   local dirs
