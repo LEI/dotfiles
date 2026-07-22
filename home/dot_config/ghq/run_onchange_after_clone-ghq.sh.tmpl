@@ -1,0 +1,35 @@
+{{- if lookPath "ghq" | isExecutable -}}
+#!/bin/sh
+
+set -eu
+
+lib_dir="$CHEZMOI_WORKING_TREE/home/dot_local/lib"
+# shellcheck source=home/dot_local/lib/sh/log.sh
+. "$lib_dir/sh/log.sh"
+# shellcheck source=home/dot_local/lib/sh/run.sh
+. "$lib_dir/sh/run.sh"
+
+# repos.yaml hash: {{ include "dot_config/ghq/repos.yaml" | sha256sum }}
+# local.yaml hash: {{ include "dot_config/ghq/create_private_local.yaml" | sha256sum }}
+
+repos_file="$HOME/.config/ghq/repos.yaml"
+local_file="$HOME/.config/ghq/local.yaml"
+
+has yq || die "yq not found, install it to resolve ghq repo entries"
+
+clone_entries() {
+  file="$1"
+  [ -f "$file" ] || return 0
+  yq -r '.repos[]' "$file"
+}
+
+{
+  clone_entries "$repos_file"
+  clone_entries "$local_file"
+} | while IFS= read -r entry; do
+  case "$entry" in
+  '' | \#*) continue ;;
+  esac
+  run ghq get -p -u "$entry"
+done
+{{- end }}

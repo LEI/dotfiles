@@ -1,5 +1,7 @@
 {{- if and (hasKey . "git") (hasKey .git "github") -}}
-{{- includeTemplate "gitconfig" (merge .git.github (dict "name" .name)) -}}
+{{- includeTemplate "gitconfig" (merge .git.github (dict "name" .name "signingkey" "~/.ssh/id_ed25519.pub")) -}}
+[gpg]
+	format = ssh
 
 {{- if get .git.github "user" }}
 # TODO: override per profile config
