@@ -7,6 +7,7 @@
     {{- fail (printf "gitconfig: signingkey not found for %s" .email) -}}
   {{- end -}}
 {{- end -}}
+{{- $sshFormat := or (hasPrefix "ssh-" $signingKey) (hasSuffix ".pub" $signingKey) (contains "/" $signingKey) -}}
 
 [user]
 	name = {{ .name | trim | quote }}
@@ -15,6 +16,7 @@
 
 [commit]
 	gpgsign = {{ $signingKey | not | not }}
-
+{{ if $sshFormat -}}
 [gpg]
 	format = ssh
+{{ end -}}
